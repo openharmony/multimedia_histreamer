@@ -1,0 +1,13 @@
+{
+    "subsystem": "multimedia",
+    "parts": {
+        "multimedia_histreamer": {
+            "variants": [
+                "phone"
+            ],
+            "module_list": [
+                "//foundation/multimedia/histreamer:histreamer_packages"
+            ]
+        }
+    }
+}
