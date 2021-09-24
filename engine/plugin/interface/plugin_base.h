@@ -1,0 +1,217 @@
+/*
+ * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef HISTREAMER_PLUGIN_INTF_PLUGIN_BASE_H
+#define HISTREAMER_PLUGIN_INTF_PLUGIN_BASE_H
+
+#include <memory>
+#include "common/plugin_tags.h"
+#include "common/plugin_types.h"
+#include "common/plugin_buffer.h"
+
+namespace OHOS {
+namespace Media {
+namespace Plugin {
+/**
+ * @brief Plugin status callback interface.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+struct Callback {
+    /// Destructor
+    virtual ~Callback() = default;
+
+    /**
+     * @brief When asynchronous time occurs during plugin running,
+     * the plugin implementer invokes this interface to notify the plugin user.
+     *
+     * @note Reserved Interface, Not used yet.
+     *
+     * @param event Event ID.
+     */
+    virtual void onEvent(int32_t event) = 0;
+
+    /**
+     * @brief When an error occurs during plugin running,
+     * the plugin implementer invokes this interface to notify the plugin user.
+     *
+     * @param errorType Error type, For details, @see Status
+     */
+    virtual void onError(Status errorType) = 0;
+};
+
+/**
+ * @brief Base class of a plugin. All plugins of different types inherit this interface.
+ *
+ * @details The base class contains only common operation methods and defines basic operation processes.
+ * Different operations are valid only in the corresponding states. Some operations also change the plugin status.
+ * For details, see the description of each function.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+struct PluginBase {
+    /// Destructor
+    virtual ~PluginBase() = default;
+
+    /**
+     * @brief Plugin initialization, which is used to load external resources or plugin common resources.
+     *
+     * The function is valid only in the CREATED state. If the initialization is successful,
+     * the plugin enters the INITIALIZED state.
+     *
+     * @return  Execution status return
+     *  @retval OK: Plugin initialization succeeded.
+     *  @retval ERROR_NO_MEMORY: Memory allocation or external resource loading error caused by insufficient memory.
+     *  @retval ERROR_WRONG_STATE: Call this function in non CREATED state
+     */
+    virtual Status Init() = 0;
+
+    /**
+     * @brief Plugin deinitialize to release resources.
+     *
+     * This function can be invoked in any state.
+     * After the function is invoked, the plugin will no longer be available.
+     *
+     * @return Execution status return
+     *  @retval OK: Plugin deinitialize succeeded.
+     */
+    virtual Status Deinit() = 0;
+
+    /**
+     * @brief Preparing parameters required or allocate the memory for plugin running.
+     *
+     * The function is valid only in the INITIALIZED state. If the prepare is successful,
+     * the plugin enters the PREPARED state.
+     *
+     * @return Execution status return
+     *  @retval OK: Plugin deinitialize succeeded.
+     *  @retval ERROR_NO_MEMORY: Memory allocation error caused by insufficient memory.
+     *  @retval ERROR_WRONG_STATE: Call this function in non INITIALIZED state
+     */
+    virtual Status Prepare() = 0;
+
+    /**
+     * @brief Reset the plugin, reset the plugin running status and parameters before Prepare.
+     *
+     * The function is valid only in the PREPARED/RUNNING/PAUSED state. If the reset is successful,
+     * the plugin enters the INITIALIZED state.
+     *
+     * @return Execution status return
+     *  @retval OK: Plugin reset succeeded.
+     *  @retval ERROR_WRONG_STATE: Call this function in wrong state
+     *  @retval ERROR_UNIMPLEMENTED: This method is not implemented and cannot respond to reset.
+     */
+    virtual Status Reset() = 0;
+
+    /**
+     * @brief The plugin enters the running state and can process data.
+     *
+     * The function is valid only in the PREPARED state. If the start is successful,
+     * the plugin enters the RUNNING state. If an error occurs during the running,
+     * the plu-in status can be changed through asynchronous callback.
+     *
+     * @return Execution status return
+     *  @retval OK: Plugin reset succeeded.
+     *  @retval ERROR_WRONG_STATE: Call this function in non PREPARED state
+     */
+    virtual Status Start() = 0;
+
+    /**
+     * @brief The plugin enters the stopped state and stops processing data.
+     *
+     * The function is valid only in the RUNNING state. If the stop is successful,
+     * the plugin enters the PREPARED state. Temporary data generated during the operation will be cleared.
+     *
+     * @return Execution status return
+     *  @retval OK: Plugin reset succeeded.
+     *  @retval ERROR_WRONG_STATE: Call this function in non RUNNING state
+     */
+    virtual Status Stop() = 0;
+
+    /**
+     * @brief Determines whether the current plugin supports the specified parameter.
+     *
+     * This function can be called in any state except DESTROYED and INVALID.
+     *
+     * @param tag   Plugin parameter type, which is described by tag.
+     * @return  true is supported, otherwise, false.
+     */
+    virtual bool IsParameterSupported(Tag tag) = 0;
+
+    /**
+     * @brief Get the value of a specified parameter.
+     *
+     * This function can be called in any state except DESTROYED and INVALID.
+     *
+     * @param tag   Plugin parameter type, which is described by tag.
+     * @param value Plugin parameter value. which is described by Any type. Need check the real type in tag.
+     * @return Execution status return
+     *  @retval OK: Plugin reset succeeded.
+     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state.
+     *  @retval ERROR_INVALID_PARAMETER: The plugin does not support this parameter.
+     */
+    virtual Status GetParameter(Tag tag, ValueType &value) = 0;
+
+    /**
+     * @brief Set the specified parameter. The value must be within the valid range of the parameter.
+     *
+     * This function can be called in any state except DESTROYED and INVALID.
+     *
+     * @param tag   Plugin parameter type, which is described by tag.
+     * @param value Plugin parameter value. which is described by Any type. Need check the real type in tag.
+     * @return Execution status return
+     *  @retval OK: Plugin reset succeeded.
+     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state.
+     *  @retval ERROR_INVALID_PARAMETER: The plugin does not support this parameter.
+     *  @retval ERROR_INVALID_DATA: The value is not in the valid range.
+     *  @retval ERROR_MISMATCHED_TYPE: The data type is mismatched.
+     */
+    virtual Status SetParameter(Tag tag, const ValueType &value) = 0;
+
+    /**
+     * @brief Get the plugin running state.
+     *
+     * @param state Plugin running state.
+     * @return Execution status return
+     *  @retval OK: Plugin reset succeeded.
+     */
+    virtual Status GetState(State &state) = 0;
+
+    /**
+     * @brief Get the allocator specified by the plugin.
+     * The allocator can allocate memory types that meet the plugin requirements.
+     *
+     * @return Obtains the allocator object or NULL if the plugin does not have requirements for memory.
+     */
+    virtual std::shared_ptr<Allocator> GetAllocator() = 0;
+
+    /**
+     * @brief Sets the plugin callback message to notify the plugin user.
+     *
+     * This function can be called in any state except DESTROYED and INVALID.
+     *
+     * @param cb   Message callback, NULL callback listening is canceled.
+     * @return Execution status return
+     *  @retval OK: Plugin reset succeeded.
+     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state.
+     */
+    virtual Status SetCallback(const std::shared_ptr<Callback> &cb) = 0;
+};
+} // namespace Plugin
+} // namespace Media
+} // namespace OHOS
+#endif // HISTREAMER_PLUGIN_INTF_PLUGIN_BASE_H
