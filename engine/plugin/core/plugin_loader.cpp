@@ -93,7 +93,7 @@ void PluginLoader::UnLoadPluginFile()
 {
     if (handler_) {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
-        ::FreeLibrary((HMODULE)handler);
+        ::FreeLibrary((HMODULE)handler_);
 #else
         ::dlclose(const_cast<void*>(handler_));
 #endif

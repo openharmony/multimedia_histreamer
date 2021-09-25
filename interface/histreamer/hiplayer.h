@@ -52,8 +52,8 @@ public:
     int32_t DeInit() override;
     int32_t SetParameter(const Media::Format& params) override;
 
-private:
     class HiPlayerImpl;
+private:
     std::shared_ptr<HiPlayerImpl> player_;
     Media::PlayerStates curState_;
     bool isInited_;
