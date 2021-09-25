@@ -1,5 +1,8 @@
 
-include(${TOP_DIR}/engine/CMakeLists.txt)
+include(${TOP_DIR}/histreamer/engine/CMakeLists.txt)
+
+set(GTEST_DIRS ${TOP_DIR}/3rdparty/gtest)
+set(MOCKCPP_DIR ${TOP_DIR}/3rdparty/mockcpp)
 
 include_directories(
         ${GTEST_DIRS}/include
@@ -8,18 +11,21 @@ include_directories(
 
 
 if (MINGW)
+set(ffmpeg_lib_path ${TOP_DIR}/3rdparty/ffmpeg/windows/lib)
+set(ffmpeg_inc_path ${TOP_DIR}/3rdparty/ffmpeg/windows/include)
+set(sdl_lib_path ${TOP_DIR}/3rdparty/SDL2.0/windows/lib/x64)
+set(sdl_inc_path ${TOP_DIR}/3rdparty/SDL2.0/include)
+else()
+endif()
+
 include_directories(
-        ${TOP_DIR}/engine/demo/windows/ffmpeg/include
-        ${TOP_DIR}/engine/demo/windows/SDL2.0/include
+        ${ffmpeg_inc_path}
+        ${sdl_inc_path}
 )
 link_directories(
-        ${TOP_DIR}/engine/demo/windows/ffmpeg/lib
-        ${TOP_DIR}/engine/demo/windows/SDL2.0/lib/x64
+        ${ffmpeg_lib_path}
+        ${sdl_lib_path}
 )
-else()
-include_directories(
-)
-endif()
 
 file(GLOB UT_TEST_SRCS ./*.cpp)
 
@@ -29,28 +35,26 @@ set(SRC
         ../main.cpp
         )
 
-add_executable(MediaPlayerUtTests ${SRC})
+add_executable(HiStreamerUtTests ${SRC})
 
 link_directories(
         ${GTEST_DIRS}/lib/
         ${MOCKCPP_DIR}/lib/
         /usr/local/lib
-        ${TOP_DIR}/engine/demo/linux/ffmpeg/lib
-        ${TOP_DIR}/engine/demo/linux/SDL2.0/lib
 )
 
-target_compile_definitions(MediaPlayerUtTests PRIVATE UNIT_TEST)
+target_compile_definitions(HiStreamerUtTests PRIVATE UNIT_TEST)
 
 if (MSVC)
-    target_link_libraries(MediaPlayerUtTests
+    target_link_libraries(HiStreamerUtTests
             ${GTEST_DIRS}/lib/gtestd.lib
             ${MOCKCPP_DIR}/lib/mockcpp.lib
             pthreadVC2.lib
             )
 elseif (MINGW)
-    set(ffmpeg_path ${TOP_DIR}/engine/demo/windows/ffmpeg)
-    set(sdl_path ${TOP_DIR}/engine/demo/windows/SDL2.0)
-    target_link_libraries(MediaPlayerUtTests
+    set(ffmpeg_path ${TOP_DIR}/3rdparty/ffmpeg/windows)
+    set(sdl_path ${TOP_DIR}/3rdparty/SDL2.0/windows)
+    target_link_libraries(HiStreamerUtTests
             # dl
             ${sdl_path}/lib/x64/SDL2.lib
             ${ffmpeg_path}/lib/avcodec.lib
@@ -69,9 +73,9 @@ elseif (MINGW)
     file(COPY ${ffmpeg_shared_libraries} DESTINATION ${CMAKE_BINARY_DIR}/tests/ut)
     file(COPY ${sdl_shared_libraries} DESTINATION ${CMAKE_BINARY_DIR}/tests/ut)
 else ()
-    set(ffmpeg_path ${TOP_DIR}/engine/demo/linux/ffmpeg)
-    set(sdl_path ${TOP_DIR}/engine/demo/linux/SDL2.0)
-    target_link_libraries(MediaPlayerUtTests
+    set(ffmpeg_path ${TOP_DIR}/3rdparty/ffmpeg/linux)
+    set(sdl_path ${TOP_DIR}/3rdparty/SDL2.0/linux)
+    target_link_libraries(HiStreamerUtTests
             dl
             ${ffmpeg_path}/lib/libavformat.a
             ${ffmpeg_path}/lib/libavcodec.a
@@ -89,5 +93,5 @@ else ()
             ${MOCKCPP_DIR}/lib/libmockcpp.a
             )
 endif ()
-add_test(Test MediaPlayerUtTests)
+add_test(Test HiStreamerUtTests)
 enable_testing()
