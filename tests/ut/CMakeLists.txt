@@ -9,13 +9,17 @@ include_directories(
         ${MOCKCPP_DIR}/include
 )
 
+set(ffmpeg_inc_path ${TOP_DIR}/3rdparty/ffmpeg/windows/include)
+set(sdl_inc_path ${TOP_DIR}/3rdparty/SDL2.0/include)
 
 if (MINGW)
 set(ffmpeg_lib_path ${TOP_DIR}/3rdparty/ffmpeg/windows/lib)
-set(ffmpeg_inc_path ${TOP_DIR}/3rdparty/ffmpeg/windows/include)
 set(sdl_lib_path ${TOP_DIR}/3rdparty/SDL2.0/windows/lib/x64)
-set(sdl_inc_path ${TOP_DIR}/3rdparty/SDL2.0/include)
+set(gtest_lib_path ${GTEST_DIRS}/mingw64/lib/)
 else()
+set(ffmpeg_lib_path ${TOP_DIR}/3rdparty/ffmpeg/linux/lib)
+set(sdl_lib_path ${TOP_DIR}/3rdparty/SDL2.0/linux/lib)
+set(gtest_lib_path ${GTEST_DIRS}/linux/lib/)
 endif()
 
 include_directories(
@@ -25,6 +29,7 @@ include_directories(
 link_directories(
         ${ffmpeg_lib_path}
         ${sdl_lib_path}
+        ${gtest_lib_path}
 )
 
 file(GLOB UT_TEST_SRCS ./*.cpp)
@@ -32,13 +37,13 @@ file(GLOB UT_TEST_SRCS ./*.cpp)
 set(SRC
         ${HISTREAMER_SRCS}
         ${UT_TEST_SRCS}
+        ${3RDPARTY_SRCS}
         ../main.cpp
         )
 
 add_executable(HiStreamerUtTests ${SRC})
 
 link_directories(
-        ${GTEST_DIRS}/lib/
         ${MOCKCPP_DIR}/lib/
         /usr/local/lib
 )
@@ -64,7 +69,7 @@ elseif (MINGW)
             ${ffmpeg_path}/lib/avdevice.lib
             ${ffmpeg_path}/lib/avfilter.lib
             ${ffmpeg_path}/lib/swscale.lib
-            ${GTEST_DIRS}/lib/libgtest.a
+            gtest
             ${MOCKCPP_DIR}/lib/libmockcpp_mingw8.a
             )
     message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
@@ -86,9 +91,10 @@ else ()
             ${ffmpeg_path}/lib/libswresample.a
             ${ffmpeg_path}/lib/liblzma.a
             m
-            z
+            #z
+            /lib/x86_64-linux-gnu/libz.so.1
             ${sdl_path}/lib/libSDL2.a
-            ${GTEST_DIRS}/lib/libgtest.a
+            gtest
             pthread
             ${MOCKCPP_DIR}/lib/libmockcpp.a
             )
