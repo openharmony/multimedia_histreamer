@@ -4,8 +4,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.13...3.20)
 project(plugin_filesource)
 
 include_directories(
-        ${TOP_DIR}/histreamer/engine
-        ${TOP_DIR}/histreamer/engine/plugin
+        ${TOP_DIR}/engine
+        ${TOP_DIR}/engine/plugin
 )
 
 set(BUILD_PLUGIN_FILE_SOURCE_SHARED ON)

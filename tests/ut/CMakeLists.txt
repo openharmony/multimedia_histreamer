@@ -1,25 +1,25 @@
 
-include(${TOP_DIR}/histreamer/engine/CMakeLists.txt)
+include(${TOP_DIR}/engine/CMakeLists.txt)
 
-set(GTEST_DIRS ${TOP_DIR}/3rdparty/gtest)
-set(MOCKCPP_DIR ${TOP_DIR}/3rdparty/mockcpp)
+set(GTEST_DIRS ${THIRD_PARTY_DIR}/gtest)
+set(MOCKCPP_DIR ${THIRD_PARTY_DIR}/mockcpp)
 
 include_directories(
-        ${GTEST_DIRS}/include
+        ${GTEST_ROOT_DIR}/include
         ${MOCKCPP_DIR}/include
 )
 
-set(ffmpeg_inc_path ${TOP_DIR}/3rdparty/ffmpeg/windows/include)
-set(sdl_inc_path ${TOP_DIR}/3rdparty/SDL2.0/include)
+set(ffmpeg_inc_path ${THIRD_PARTY_DIR}/ffmpeg/windows/include)
+set(sdl_inc_path ${THIRD_PARTY_DIR}/SDL2.0/include)
 
 if (MINGW)
-set(ffmpeg_lib_path ${TOP_DIR}/3rdparty/ffmpeg/windows/lib)
-set(sdl_lib_path ${TOP_DIR}/3rdparty/SDL2.0/windows/lib/x64)
-set(gtest_lib_path ${GTEST_DIRS}/mingw64/lib/)
+set(ffmpeg_lib_path ${THIRD_PARTY_DIR}/ffmpeg/windows/lib)
+set(sdl_lib_path ${THIRD_PARTY_DIR}/SDL2.0/windows/lib/x64)
+set(gtest_lib_path ${GTEST_ROOT_DIR}/mingw64/lib/)
 else()
-set(ffmpeg_lib_path ${TOP_DIR}/3rdparty/ffmpeg/linux/lib)
-set(sdl_lib_path ${TOP_DIR}/3rdparty/SDL2.0/linux/lib)
-set(gtest_lib_path ${GTEST_DIRS}/linux/lib/)
+set(ffmpeg_lib_path ${THIRD_PARTY_DIR}/ffmpeg/linux/lib)
+set(sdl_lib_path ${THIRD_PARTY_DIR}/SDL2.0/linux/lib)
+set(gtest_lib_path ${GTEST_ROOT_DIR}/linux/lib/)
 endif()
 
 include_directories(
@@ -52,13 +52,13 @@ target_compile_definitions(HiStreamerUtTests PRIVATE UNIT_TEST)
 
 if (MSVC)
     target_link_libraries(HiStreamerUtTests
-            ${GTEST_DIRS}/lib/gtestd.lib
+            ${GTEST_ROOT_DIR}/lib/gtestd.lib
             ${MOCKCPP_DIR}/lib/mockcpp.lib
             pthreadVC2.lib
             )
 elseif (MINGW)
-    set(ffmpeg_path ${TOP_DIR}/3rdparty/ffmpeg/windows)
-    set(sdl_path ${TOP_DIR}/3rdparty/SDL2.0/windows)
+    set(ffmpeg_path ${THIRD_PARTY_DIR}/ffmpeg/windows)
+    set(sdl_path ${THIRD_PARTY_DIR}/SDL2.0/windows)
     target_link_libraries(HiStreamerUtTests
             # dl
             ${sdl_path}/lib/x64/SDL2.lib
@@ -78,8 +78,8 @@ elseif (MINGW)
     file(COPY ${ffmpeg_shared_libraries} DESTINATION ${CMAKE_BINARY_DIR}/tests/ut)
     file(COPY ${sdl_shared_libraries} DESTINATION ${CMAKE_BINARY_DIR}/tests/ut)
 else ()
-    set(ffmpeg_path ${TOP_DIR}/3rdparty/ffmpeg/linux)
-    set(sdl_path ${TOP_DIR}/3rdparty/SDL2.0/linux)
+    set(ffmpeg_path ${THIRD_PARTY_DIR}/ffmpeg/linux)
+    set(sdl_path ${THIRD_PARTY_DIR}/SDL2.0/linux)
     target_link_libraries(HiStreamerUtTests
             dl
             ${ffmpeg_path}/lib/libavformat.a
@@ -91,10 +91,11 @@ else ()
             ${ffmpeg_path}/lib/libswresample.a
             ${ffmpeg_path}/lib/liblzma.a
             m
-            #z
-            /lib/x86_64-linux-gnu/libz.so.1
+            z
+#            /lib/x86_64-linux-gnu/libz.so.1
             ${sdl_path}/lib/libSDL2.a
             gtest
+            gtest_main
             pthread
             ${MOCKCPP_DIR}/lib/libmockcpp.a
             )
