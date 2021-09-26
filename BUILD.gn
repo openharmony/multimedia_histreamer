@@ -13,7 +13,7 @@
 #
 
 declare_args() {
-    compile_histreamer = false
+    compile_histreamer = true
 }
 
 if (compile_histreamer) {
@@ -114,7 +114,6 @@ if (compile_histreamer) {
         ldflags += [ "-lavcodec" ]
         ldflags += [ "-lavutil" ]
         ldflags += [ "-lhdi_videodisplayer" ]
-        ldflags += [ "-lmedia_common" ]
 
         deps = [
             "//foundation/graphic/surface:lite_surface",
@@ -122,7 +121,7 @@ if (compile_histreamer) {
             "//device/hisilicon/modules/middleware:middleware_source_sdk",
         ]
         public_deps = [
-        #"//foundation/multimedia/utils/lite:media_common",
+        "//foundation/multimedia/utils/lite:media_common",
         #"//kernel/liteos_m/kal/posix:posix",
             "//third_party/bounds_checking_function:libsec_shared",
         ]
