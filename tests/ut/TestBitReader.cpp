@@ -42,7 +42,7 @@ TEST_F(TestBitReader, test_read_bits)
 {
     const uint8_t data[] = {0xff, 0x11, 0x22, 0x33};
     bitReader.Reset(data, sizeof(data));
-    int val = 0;
+    uint32_t val = 0;
     EXPECT_EQ(bitReader.ReadBits(4, val), true);
     EXPECT_EQ(val, 0xf);
 
@@ -60,7 +60,7 @@ TEST_F(TestBitReader, test_skip_bits)
 {
     const uint8_t data[] = {0xff, 0x11, 0x22, 0x33};
     bitReader.Reset(data, sizeof(data));
-    int val = 0;
+    uint32_t val = 0;
     EXPECT_EQ(bitReader.ReadBits(4, val), true);
     EXPECT_EQ(val, 0xf);
     bitReader.SkipBits(4);
@@ -75,13 +75,13 @@ TEST_F(TestBitReader, test_show_bits)
 {
     const uint8_t data[] = {0xff, 0x11, 0x22, 0x33};
     bitReader.Reset(data, sizeof(data));
-    int val = 0;
+    uint32_t val = 0;
     EXPECT_EQ(bitReader.ReadBits(4, val), true);
     EXPECT_EQ(val, 0xf);
-    EXPECT_EQ(bitReader.PeekBits<int>(4, val), true);
+    EXPECT_EQ(bitReader.PeekBits(4, val), true);
     EXPECT_EQ(val, 0xf);
     bitReader.SkipBits(4);
-    EXPECT_EQ(bitReader.PeekBits<int>(8, val), true);
+    EXPECT_EQ(bitReader.PeekBits(8, val), true);
     EXPECT_EQ(val, 0x11);
     EXPECT_EQ(bitReader.ReadBits(8, val), true);
     EXPECT_EQ(val, 0x11);
@@ -91,7 +91,7 @@ TEST_F(TestBitReader, test_seek_bits)
 {
     const uint8_t data[] = {0xff, 0x11, 0x22, 0x33};
     bitReader.Reset(data, sizeof(data));
-    int val = 0;
+    uint32_t val = 0;
     EXPECT_EQ(bitReader.ReadBits(4, val), true);
     EXPECT_EQ(val, 0xf);
     bitReader.SkipBits(20);

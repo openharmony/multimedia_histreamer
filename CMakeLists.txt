@@ -11,11 +11,12 @@ endif ()
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(TOP_DIR ${CMAKE_SOURCE_DIR})
+set(TOP_DIR ${PROJECT_SOURCE_DIR})
 
 add_definitions(-DOSAL_OHOS) # add -DVIDEO_SUPPORT to enable video play
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 add_subdirectory(engine/plugin/plugins/source/file_source)
+add_subdirectory(engine)
 add_subdirectory(tests)
