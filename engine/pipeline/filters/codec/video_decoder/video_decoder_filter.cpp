@@ -36,7 +36,7 @@ static uint32_t VIDEO_ALIGN_SIZE = 16;
 template <typename T, typename U>
 static constexpr T AlignUp(T num, U alignment)
 {
-    return alignment > 0 ? ((num + static_cast<T>(alignment) - 1) & (~(static_cast<T>(alignment) - 1))) : num;
+    return (alignment > 0) ? ((num + static_cast<T>(alignment) - 1) & (~(static_cast<T>(alignment) - 1))) : num;
 }
 
 static AutoRegisterFilter<VideoDecoderFilter> g_registerFilterHelper("builtin.player.videodecoder");
@@ -116,7 +116,7 @@ ErrorCode VideoDecoderFilter::Prepare()
     }
     if (!outBufQue_) {
         outBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("decoderFilterOutBufQue",
-                                                                  DEFAULT_IN_BUFFER_POOL_SIZE);
+                                                                  DEFAULT_OUT_BUFFER_POOL_SIZE);
     } else {
         outBufQue_->SetActive(true);
     }
@@ -126,7 +126,7 @@ ErrorCode VideoDecoderFilter::Prepare()
     }
     if (!inBufQue_) {
         inBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("decoderFilterInBufQue",
-                                                                 DEFAULT_OUT_BUFFER_POOL_SIZE);
+                                                                 DEFAULT_IN_BUFFER_POOL_SIZE);
     } else {
         inBufQue_->SetActive(true);
     }
@@ -160,7 +160,7 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort, const std::shared_
     }
     if (Configure(inMeta) != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("decoder configure error");
-        Event event{
+        Event event {
                 .type = EVENT_ERROR,
                 .param = err,
         };
@@ -196,7 +196,7 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
                         AlignUp(vdecFormat_.height, VIDEO_ALIGN_SIZE) * VIDEO_PIX_DEPTH);
         MEDIA_LOG_D("Output buffer size: %u", bufferSize);
     } else {
-        // TODO: need to check video sink support and calc buffer size
+        // need to check video sink support and calc buffer size
         MEDIA_LOG_E("Unsupported video pixel format: %d", vdecFormat_.format);
         return ErrorCode::UNIMPLEMENT;
     }
@@ -319,7 +319,7 @@ ErrorCode VideoDecoderFilter::Configure(const std::shared_ptr<const Meta>& meta)
     pushTask_->Start();
 
     state_ = FilterState::READY;
-    Event event{
+    Event event {
         .type = EVENT_READY,
     };
     OnEvent(event);
