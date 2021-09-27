@@ -42,6 +42,7 @@ constexpr int32_t HI_ERR_VI_BUF_FULL = 0xA016800F;
 constexpr int32_t RANK100 = 100;
 constexpr int32_t HALF = 2;
 constexpr int32_t SEC_TO_MILLS = 1000;
+constexpr float MAX_VOLUME = 300.f;
 
 
 Status LoadAndInitAdapter(AudioManager *proxyManager, AudioAdapterDescriptor *descriptor, AudioAdapter **adapter)
@@ -487,6 +488,7 @@ Status HdiSink::GetVolume(float &volume)
         MEDIA_LOG_E("get volume failed");
         return Status::ERROR_UNKNOWN;
     }
+    volume /= MAX_VOLUME;
     return Status::OK;
 }
 
@@ -497,10 +499,12 @@ Status HdiSink::SetVolume(float volume)
         MEDIA_LOG_W("no render available, set volume must be called after prepare");
         return Status::ERROR_WRONG_STATE;
     }
+    volume *= MAX_VOLUME;
     if (audioRender_->volume.SetVolume(audioRender_, volume) != 0) {
         MEDIA_LOG_E("set volume failed");
         return Status::ERROR_UNKNOWN;
     }
+    MEDIA_LOG_W("set volume to %.3f", volume);
     return Status::OK;
 }
 

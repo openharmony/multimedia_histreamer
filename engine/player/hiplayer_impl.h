@@ -86,11 +86,11 @@ public:
     ErrorCode GetStreamCnt(size_t& cnt) const;
     ErrorCode GetStreamMeta(size_t index, std::shared_ptr<const Meta>& meta) const;
 
-    ErrorCode SetVolume(float leftVolume, float rightVolume);
+    ErrorCode SetVolume(float volume);
 
-    ErrorCode SetCallback(const shared_ptr<PlayerCallback>& callback);
+    ErrorCode SetCallback(const std::shared_ptr<PlayerCallback>& callback);
 
-    ErrorCode SetCallback(const shared_ptr<PlayerCallbackInner>& callback);
+    ErrorCode SetCallback(const std::shared_ptr<PlayerCallbackInner>& callback);
 
     void OnStateChanged(std::string state) override;
 

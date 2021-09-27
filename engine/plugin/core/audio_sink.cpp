@@ -43,3 +43,8 @@ Status AudioSink::Write(const std::shared_ptr<Buffer>& input)
 {
     return audioSink->Write(input);
 }
+
+Status AudioSink::SetVolume(float volume)
+{
+    return audioSink->SetVolume(volume);
+}

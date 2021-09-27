@@ -43,6 +43,8 @@ public:
 
     Status Write(const std::shared_ptr<Buffer> &input);
 
+    Status SetVolume(float volume);
+
 private:
     friend class PluginManager;
 

@@ -285,6 +285,16 @@ void AudioSinkFilter::FlushEnd()
     MEDIA_LOG_D("FlushEnd entered");
     isFlushing = false;
 }
+
+ErrorCode AudioSinkFilter::SetVolume(float volume)
+{
+    if (state_ != FilterState::READY && state_ != FilterState::RUNNING && state_ != FilterState::PAUSED) {
+        MEDIA_LOG_E("audio sink filter cannot set volume in state %d", state_.load());
+        return ERROR_STATE;
+    }
+    MEDIA_LOG_W("set volume %.3f", volume);
+    return TranslatePluginStatus(plugin_->SetVolume(volume));
+}
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

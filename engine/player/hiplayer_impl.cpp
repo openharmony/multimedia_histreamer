@@ -285,17 +285,21 @@ ErrorCode HiPlayer::HiPlayerImpl::GetDuration(size_t& time) const
     return NOT_FOUND;
 }
 
-ErrorCode HiPlayer::HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
+ErrorCode HiPlayer::HiPlayerImpl::SetVolume(float volume)
 {
-    return UNIMPLEMENT;
+    if (audioSink != nullptr) {
+        return audioSink->SetVolume(volume);
+    }
+    MEDIA_LOG_W("cannot set volume while audio sink filter is null");
+    return NULL_POINTER_ERROR;
 }
 
-ErrorCode HiPlayer::HiPlayerImpl::SetCallback(const shared_ptr<PlayerCallback>& callback)
+ErrorCode HiPlayer::HiPlayerImpl::SetCallback(const std::shared_ptr<PlayerCallback>& callback)
 {
     return SUCCESS;
 }
 
-ErrorCode HiPlayer::HiPlayerImpl::SetCallback(const shared_ptr<PlayerCallbackInner>& callback)
+ErrorCode HiPlayer::HiPlayerImpl::SetCallback(const std::shared_ptr<PlayerCallbackInner>& callback)
 {
     // todo this interface should be protected by mutex in case of multi-thread runtime
     callback_ = callback;

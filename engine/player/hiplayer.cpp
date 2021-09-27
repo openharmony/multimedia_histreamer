@@ -20,6 +20,10 @@
 #include <memory>
 #include "hiplayer_impl.h"
 
+namespace {
+const float MAX_MEDIA_VOLUME = 300.0f;
+}
+
 namespace OHOS {
 namespace Media {
 HiPlayer::HiPlayer()
@@ -114,7 +118,30 @@ int32_t HiPlayer::Rewind(int64_t mSeconds, int32_t mode)
 
 int32_t HiPlayer::SetVolume(float leftVolume, float rightVolume)
 {
-    return 0;
+    if ((curState_ != Media::PlayerStates::PLAYER_STARTED) && (curState_ != Media::PlayerStates::PLAYER_PAUSED) &&
+        (curState_ != Media::PlayerStates::PLAYER_PREPARED)) {
+        MEDIA_LOG_E("cannot set volume in state %d", curState_);
+        return -1;
+    }
+    if (leftVolume < 0 || leftVolume > MAX_MEDIA_VOLUME || rightVolume < 0 || rightVolume > MAX_MEDIA_VOLUME) {
+        MEDIA_LOG_E("volume not valid, should be in range [0,300]");
+        return -1;
+    }
+    float volume = 0.f;
+    if (leftVolume < 1e-6 && rightVolume >= 1e-6) { // 1e-6
+        volume = rightVolume;
+    } else if (rightVolume < 1e-6 && leftVolume >= 1e-6) { // 1e-6
+        volume = leftVolume;
+    } else {
+        volume = (leftVolume + rightVolume) / 2; // 2
+    }
+    volume /= MAX_MEDIA_VOLUME; // normalize to 0~1
+    int ret = -1; // -1
+    MEDIA_LOG_W("set volume %.3f", volume);
+    if (player_ && player_->SetVolume(volume) == SUCCESS) {
+        ret = 0;
+    }
+    return ret;
 }
 
 int32_t HiPlayer::SetSurface(Surface* surface)
