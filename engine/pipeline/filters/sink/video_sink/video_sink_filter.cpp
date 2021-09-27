@@ -106,7 +106,7 @@ bool VideoSinkFilter::Negotiate(const std::string &inPort, const std::shared_ptr
     err = ConfigureLocked(inMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("sink configure error");
-        Event event{
+        Event event {
             .type = EventType::EVENT_ERROR,
             .param = err,
         };
@@ -207,7 +207,7 @@ ErrorCode VideoSinkFilter::PushData(const std::string &inPort, AVBufferPtr buffe
     }
 
     if (buffer->GetMemory()->GetSize() == 0) {
-        Event event{
+        Event event {
             .type = EVENT_COMPLETE,
         };
         MEDIA_LOG_D("video sink push data send event_complete");
