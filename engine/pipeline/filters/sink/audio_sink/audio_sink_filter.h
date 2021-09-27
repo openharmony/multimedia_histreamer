@@ -56,6 +56,8 @@ public:
 
     ErrorCode GetCurrentTime(int64_t& time) const;
 
+    ErrorCode SetVolume(float volume);
+
 private:
     ErrorCode SetPluginParameter(Tag tag, const Plugin::ValueType& value);
     ErrorCode ConfigureToPreparePlugin(const std::shared_ptr<const OHOS::Media::Meta>& meta);

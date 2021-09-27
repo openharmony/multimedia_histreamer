@@ -87,13 +87,13 @@ if (compile_histreamer) {
             "engine/pipeline/core",
             "engine/plugin",
             "${gcc_arm_path}/../arm-none-eabi/include",
+            "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits",
             "//foundation/multimedia/media_lite/interfaces",
             "//foundation/multimedia/drivers/audio/include",
             "//foundation/multimedia/drivers/codec/include",
             "//foundation/multimedia/drivers/format/include",
             "//foundation/multimedia/utils/lite/interfaces/kits",
             "//foundation/multimedia/media_lite/interfaces/kits/player_lite",
-            "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog",
             "//kernel/liteos_m/kal/posix/include/",
             "//kernel/liteos_m/kernel/include",
             "//kernel/liteos_m/kernel/arch/include",
@@ -121,6 +121,7 @@ if (compile_histreamer) {
             "//device/hisilicon/modules/middleware:middleware_source_sdk",
         ]
         public_deps = [
+        "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
         "//foundation/multimedia/utils/lite:media_common",
         #"//kernel/liteos_m/kal/posix:posix",
             "//third_party/bounds_checking_function:libsec_shared",
