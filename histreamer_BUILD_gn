@@ -142,6 +142,9 @@ if (compile_histreamer) {
         ]
     }
 
+    declare_args() {
+        plugin_dynamic_register = false
+    }
 
     # lib plugin core
     shared_library("histreamer_plugin_core") {
@@ -151,13 +154,18 @@ if (compile_histreamer) {
             "engine/plugin/core/video_sink.cpp",
             "engine/plugin/core/codec.cpp",
             "engine/plugin/core/demuxer.cpp",
-            "engine/plugin/core/plugin_loader.cpp",
+            "engine/plugin/core/plugin_register.cpp",
             "engine/plugin/core/plugin_wrapper.cpp",
             "engine/plugin/core/plugin_manager.cpp",
-            "engine/plugin/core/plugin_register.cpp",
             "engine/plugin/core/source.cpp",
         ]
         defines = [ "HI3516DV300" ]
+        if (plugin_dynamic_register) {
+            sources += [
+                "engine/plugin/core/plugin_loader.cpp",
+            ]
+            defines += [ "DYNAMIC_PLUGINS" ]
+        }
         include_dirs = [
             "engine",
             "engine/foundation",
