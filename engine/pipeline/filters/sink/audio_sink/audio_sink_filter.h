@@ -53,9 +53,6 @@ public:
 
     void FlushStart() override;
     void FlushEnd() override;
-
-    ErrorCode GetCurrentTime(int64_t& time) const;
-
     ErrorCode SetVolume(float volume);
 
 private:
@@ -69,7 +66,6 @@ private:
     bool isFlushing {false};
     OSAL::ConditionVariable startWorkingCondition_ {};
     OSAL::Mutex mutex_ {};
-    std::atomic<int64_t> curPos_;
 
     std::shared_ptr<Plugin::AudioSink> plugin_ {nullptr};
     std::shared_ptr<Plugin::PluginInfo> targetPluginInfo_ {};

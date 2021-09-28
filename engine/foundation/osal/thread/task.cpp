@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Media {
 namespace OSAL {
 Task::Task(std::string name)
-    : name_(std::move(name)), loop_([this] { Run(); }), runningState_(PAUSED), pauseDone_(false), workInProgress_(false)
+    : name_(std::move(name)), runningState_(PAUSED), loop_([this] { Run(); }), pauseDone_(false), workInProgress_(false)
 {
     MEDIA_LOG_D("task %s ctor called", name_.c_str());
     loop_.SetName(name_);
