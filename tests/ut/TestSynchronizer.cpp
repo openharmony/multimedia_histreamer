@@ -61,7 +61,6 @@ TEST_F(TestSynchronizer, test_waitfor_fail)
 {
     int syncId = 0;
     task1->RegisterHandler([this, syncId] { synchronizer.Notify(syncId, 1234); });
-    //    task1->Start();
     int timeoutMs = 100;
     auto start = std::chrono::high_resolution_clock::now();
     auto rtv = synchronizer.WaitFor(syncId, timeoutMs);
