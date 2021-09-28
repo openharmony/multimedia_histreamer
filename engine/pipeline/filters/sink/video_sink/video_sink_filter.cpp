@@ -30,7 +30,7 @@ static AutoRegisterFilter<VideoSinkFilter> g_registerFilterHelper("builtin.playe
 
 const uint32_t VSINK_DEFAULT_BUFFER_NUM = 8;
 
-VideoSinkFilter::VideoSinkFilter(const std::string &name) : FilterBase(name), curPos_(0)
+VideoSinkFilter::VideoSinkFilter(const std::string &name) : FilterBase(name)
 {
     MEDIA_LOG_I("VideoSinkFilter ctor called...");
 }
@@ -114,12 +114,6 @@ bool VideoSinkFilter::Negotiate(const std::string &inPort, const std::shared_ptr
         return false;
     }
     return true;
-}
-
-ErrorCode VideoSinkFilter::GetCurrentTime(uint64_t &time) const
-{
-    time = curPos_;
-    return ErrorCode::SUCCESS;
 }
 
 ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Meta> &meta)
@@ -215,7 +209,6 @@ ErrorCode VideoSinkFilter::PushData(const std::string &inPort, AVBufferPtr buffe
         MEDIA_LOG_D("video sink push data end");
         return ErrorCode::SUCCESS;
     }
-    curPos_ = buffer->pts;
     inBufQueue_->Push(buffer);
     MEDIA_LOG_D("video sink push data end");
     return ErrorCode::SUCCESS;

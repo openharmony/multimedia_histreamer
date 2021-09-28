@@ -24,6 +24,7 @@
 #include "foundation/meta.h"
 #include "foundation/type_define.h"
 #include "foundation/utils.h"
+#include "foundation/osal/thread/mutex.h"
 #include "plugin/core/demuxer.h"
 #include "thread/task.h"
 #include "type_finder.h"
@@ -114,6 +115,8 @@ private:
 
     void DemuxerLoop();
 
+    void SetCurrentTime(int64_t timestampUsec);
+
     std::string uriSuffix_;
     uint64_t mediaDataSize_;
     std::shared_ptr<OSAL::Task> task_;
@@ -131,7 +134,8 @@ private:
     std::function<bool(uint64_t, size_t, AVBufferPtr&)> peekRange_;
     std::function<bool(uint64_t, size_t, AVBufferPtr&)> getRange_;
 
-    std::atomic<int64_t> curTimeUs_;
+    mutable OSAL::Mutex timeMutex_;
+    int64_t curTimeUs_;
 };
 } // namespace Pipeline
 } // namespace Media

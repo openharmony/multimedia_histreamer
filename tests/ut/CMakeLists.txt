@@ -17,9 +17,12 @@ set(ffmpeg_lib_path ${THIRD_PARTY_DIR}/ffmpeg/windows/lib)
 set(sdl_lib_path ${THIRD_PARTY_DIR}/SDL2.0/windows/lib/x64)
 set(gtest_lib_path ${GTEST_ROOT_DIR}/mingw64/lib/)
 else()
-set(ffmpeg_lib_path ${THIRD_PARTY_DIR}/ffmpeg/linux/lib)
-set(sdl_lib_path ${THIRD_PARTY_DIR}/SDL2.0/linux/lib)
-set(gtest_lib_path ${GTEST_ROOT_DIR}/linux/lib/)
+    set(ffmpeg_lib_path ${THIRD_PARTY_DIR}/ffmpeg/linux/lib)
+    set(ffmpeg_inc_path ${THIRD_PARTY_DIR}/ffmpeg/linux/include)
+    set(sdl_lib_path ${THIRD_PARTY_DIR}/SDL2.0/linux/lib)
+    set(sdl_inc_path ${THIRD_PARTY_DIR}/SDL2.0/linux/include)
+    set(gtest_lib_path ${THIRD_PARTY_DIR}/gtest/linux/lib)
+    message(STATUS "ut ${ffmpeg_lib_path}")
 endif()
 
 include_directories(
@@ -78,22 +81,19 @@ elseif (MINGW)
     file(COPY ${ffmpeg_shared_libraries} DESTINATION ${CMAKE_BINARY_DIR}/_deps/histreamer-build/tests/ut)
     file(COPY ${sdl_shared_libraries} DESTINATION ${CMAKE_BINARY_DIR}/_deps/histreamer-build/tests/ut)
 else ()
-    set(ffmpeg_path ${THIRD_PARTY_DIR}/ffmpeg/linux)
-    set(sdl_path ${THIRD_PARTY_DIR}/SDL2.0/linux)
     target_link_libraries(HiStreamerUtTests
             dl
-            ${ffmpeg_path}/lib/libavformat.a
-            ${ffmpeg_path}/lib/libavcodec.a
-            ${ffmpeg_path}/lib/libavdevice.a
-            ${ffmpeg_path}/lib/libavfilter.a
-            ${ffmpeg_path}/lib/libavutil.a
-            ${ffmpeg_path}/lib/libswscale.a
-            ${ffmpeg_path}/lib/libswresample.a
-            ${ffmpeg_path}/lib/liblzma.a
+            ${ffmpeg_lib_path}/libavformat.a
+            ${ffmpeg_lib_path}/libavcodec.a
+            ${ffmpeg_lib_path}/libavdevice.a
+            ${ffmpeg_lib_path}/libavfilter.a
+            ${ffmpeg_lib_path}/libavutil.a
+            ${ffmpeg_lib_path}/libswscale.a
+            ${ffmpeg_lib_path}/libswresample.a
+            ${ffmpeg_lib_path}/liblzma.a
             m
             z
-#            /lib/x86_64-linux-gnu/libz.so.1
-            ${sdl_path}/lib/libSDL2.a
+            ${sdl_lib_path}/libSDL2.a
             gtest
             gtest_main
             pthread

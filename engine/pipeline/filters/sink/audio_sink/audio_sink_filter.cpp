@@ -25,7 +25,7 @@ namespace Media {
 namespace Pipeline {
 static AutoRegisterFilter<AudioSinkFilter> g_registerFilterHelper("builtin.player.audiosink");
 
-AudioSinkFilter::AudioSinkFilter(const std::string& name) : FilterBase(name), curPos_(0)
+AudioSinkFilter::AudioSinkFilter(const std::string& name) : FilterBase(name)
 {
     MEDIA_LOG_I("AudioSinkFilter ctor");
 }
@@ -115,11 +115,6 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
     return true;
 }
 
-ErrorCode AudioSinkFilter::GetCurrentTime(int64_t& time) const
-{
-    time = curPos_;
-    return SUCCESS;
-}
 ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Meta>& meta)
 {
     uint32_t channels;
@@ -203,7 +198,6 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
         MEDIA_LOG_D("audio sink push data end");
         return SUCCESS;
     }
-    curPos_ = buffer->pts;
     auto err = TranslatePluginStatus(plugin_->Write(buffer));
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "audio sink write failed");
     MEDIA_LOG_D("audio sink push data end");

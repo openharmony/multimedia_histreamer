@@ -60,9 +60,9 @@ private:
     void Run();
 
     const std::string name_;
-    OSAL::Thread loop_;
     std::atomic<int> runningState_ {PAUSED};
     std::function<void()> handler_ = [this] { DoTask(); };
+    OSAL::Thread loop_;
 
     OSAL::Mutex stateMutex_ {};
     OSAL::Mutex cvMutex_ {};

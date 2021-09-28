@@ -58,8 +58,6 @@ public:
     void FlushStart() override;
     void FlushEnd() override;
 
-    ErrorCode GetCurrentTime(uint64_t &time) const;
-
 private:
     ErrorCode ConfigurePluginParams(const std::shared_ptr<const Meta> &meta);
     ErrorCode ConfigureLocked(const std::shared_ptr<const OHOS::Media::Meta> &meta);
@@ -73,7 +71,6 @@ private:
     bool isFlushing_ {false};
     OSAL::ConditionVariable startWorkingCondition_ {};
     OSAL::Mutex mutex_;
-    std::atomic<uint64_t> curPos_;
 
     std::shared_ptr<Plugin::VideoSink> plugin_ {nullptr};
     std::shared_ptr<Plugin::PluginInfo> pluginInfo_ {nullptr};
