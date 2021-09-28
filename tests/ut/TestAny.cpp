@@ -167,14 +167,12 @@ public:
 TEST(AnyTest, testAnyEmplace)
 {
     Any celestial;
-    // (1) emplace( Args&&... args );
     celestial.Emplace<Star>("Procyon", 2943);
     Star star1("Procyon", 2943);
     const auto* star = AnyCast<Star>(&celestial);
     ASSERT_TRUE(star1 == (*star));
 
     Any av;
-    // (2) emplace( std::initializer_list<U> il, Args&&... args );
     av.Emplace<std::vector<char>>({'C', '+', '+', '1', '7'});
     const auto* va = AnyCast<std::vector<char>>(&av);
     std::vector<char> vector1({'C', '+', '+', '1', '7'});
