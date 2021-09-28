@@ -20,7 +20,7 @@
 #include <cstdint>
 #include <set>
 #include <vector>
-#include "common/any.h"
+#include "any.h"
 
 namespace OHOS {
 namespace Media {
