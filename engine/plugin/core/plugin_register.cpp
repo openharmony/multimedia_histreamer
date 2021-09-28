@@ -275,15 +275,12 @@ void PluginRegister::RegisterStaticPlugins()
 
 void PluginRegister::RegisterDynamicPlugins()
 {
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
-    RegisterPluginsFromPath(".");
-    RegisterPluginsFromPath(".\\plugins");
-    RegisterPluginsFromPath("..\\src\\plugin\\plugins\\source\\file_source");
-#endif
+    RegisterPluginsFromPath("/usr/lib/plugins");
 }
 
 void PluginRegister::RegisterPluginsFromPath(const char* libDirPath)
 {
+#ifdef DYNAMIC_PLUGINS
     DIR* libDir = opendir(libDirPath);
     if (libDir) {
         struct dirent* lib = nullptr;
@@ -308,16 +305,19 @@ void PluginRegister::RegisterPluginsFromPath(const char* libDirPath)
         }
         closedir(libDir);
     }
+#endif
 }
 
 void PluginRegister::UnregisterAllPlugins()
 {
     UnregisterPluginStatic();
+#ifdef DYNAMIC_PLUGINS
     for (auto& loader : registeredLoaders) {
         EraseRegisteredPlugins(loader);
         loader->FetchUnregisterFunction()();
         loader.reset();
     }
+#endif
     registeredLoaders.clear();
 }
 
