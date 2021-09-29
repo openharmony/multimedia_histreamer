@@ -319,9 +319,8 @@ ErrorCode HiPlayer::HiPlayerImpl::OnCallback(const FilterCallbackType& type, Fil
     ErrorCode ret = ErrorCode::SUCCESS;
     switch (type) {
         case FilterCallbackType::PORT_ADDED:
-#ifndef VIDEO_SUPPORT
             ret = NewAudioPortFound(filter, parameter);
-#else
+#ifdef VIDEO_SUPPORT
             ret = NewVideoPortFound(filter, parameter);
 #endif
             break;
@@ -366,7 +365,6 @@ ErrorCode HiPlayer::HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin
         MEDIA_LOG_I("new port found on demuxer %lu", param.ports.size());
         for (const auto& portDesc : param.ports) {
             if (!StringStartsWith(portDesc.name, "audio")) {
-                MEDIA_LOG_W("NewAudioPortFound, discard non-audio port: %s", portDesc.name.c_str());
                 continue;
             }
             MEDIA_LOG_I("port name %s", portDesc.name.c_str());
@@ -397,11 +395,10 @@ ErrorCode HiPlayer::HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin
     if (filter != demuxer.get() || param.type != PortType::OUT) {
         return PORT_UNEXPECTED;
     }
-    MEDIA_LOG_I("new port found on demuxer %lu", param.ports.size());
     std::vector<Filter*> newFilters;
     for (const auto& portDesc : param.ports) {
-        MEDIA_LOG_I("port name %s", portDesc.name.c_str());
         if (StringStartsWith(portDesc.name, "video")) {
+            MEDIA_LOG_I("port name %s", portDesc.name.c_str());
             videoDecoder = FilterFactory::Instance().CreateFilterWithType<VideoDecoderFilter>(
                 "builtin.player.videodecoder", "videodecoder-" + portDesc.name);
             if (pipeline->AddFilters({videoDecoder.get()}) != ALREADY_EXISTS) {

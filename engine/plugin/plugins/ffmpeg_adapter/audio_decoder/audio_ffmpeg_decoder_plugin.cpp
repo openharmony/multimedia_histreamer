@@ -176,7 +176,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 AudioFfmpegDecoderPlugin::AudioFfmpegDecoderPlugin(std::string name)
-    : name_(std::move(name)), outBufferQ_("decoderPluginQueue", BUFFER_QUEUE_SIZE)
+    : name_(std::move(name)), outBufferQ_("adecPluginQueue", BUFFER_QUEUE_SIZE)
 {
 }
 

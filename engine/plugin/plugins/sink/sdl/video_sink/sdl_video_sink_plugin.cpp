@@ -385,7 +385,7 @@ Status SdlVideoSinkPlugin::VideoImageDisaplay(const std::shared_ptr<Buffer>& inp
     SDL_RenderClear(renderer_.get());
     SDL_RenderCopy(renderer_.get(), texture_.get(), NULL, &textureRect_);
     SDL_RenderPresent(renderer_.get());
-    SDL_Delay(40); // 40ms
+    SDL_Delay(16); // 16ms
     return (ret != 0) ? Status::ERROR_UNKNOWN : Status::OK;
 }
 

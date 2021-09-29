@@ -113,6 +113,8 @@ private:
 
     void HandleFrame(const AVBufferPtr& buffer, uint32_t streamIndex);
 
+    void NegotiateDownstream();
+
     void DemuxerLoop();
 
     void SetCurrentTime(int64_t timestampUsec);
