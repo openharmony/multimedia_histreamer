@@ -58,8 +58,6 @@ public:
     Media::Plugin::Status
     SetParameter(Media::Plugin::Tag tag, const Media::Plugin::ValueType &value) override;
 
-    Media::Plugin::Status GetState(Media::Plugin::State &state) override;
-
     std::shared_ptr<OHOS::Media::Plugin::Allocator> GetAllocator() override;
 
     Media::Plugin::Status SetCallback(const std::shared_ptr<OHOS::Media::Plugin::Callback> &cb) override;

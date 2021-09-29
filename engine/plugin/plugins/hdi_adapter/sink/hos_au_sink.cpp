@@ -431,12 +431,6 @@ bool HdiSink::IsParameterSupported(Tag tag)
     return false;
 }
 
-Status HdiSink::GetState(State &state)
-{
-    state = pluginState_;
-    return Status::OK;
-}
-
 std::shared_ptr<Allocator> HdiSink::GetAllocator()
 {
     return nullptr;

@@ -68,6 +68,8 @@ protected:
     const uint32_t apiVersion;
 
     std::shared_ptr<PluginBase> plugin;
+
+    State pluginState_ {State::CREATED};
 };
 } // namespace Plugin
 } // namespace Media

@@ -50,7 +50,6 @@ public:
     bool IsParameterSupported(Tag tag) override;
     Status GetParameter(Tag tag, ValueType& value) override;
     Status SetParameter(Tag tag, const ValueType& value) override;
-    Status GetState(State& state) override;
     std::shared_ptr<Allocator> GetAllocator() override;
     Status SetCallback(const std::shared_ptr<Callback>& cb) override;
 
