@@ -24,14 +24,12 @@ namespace OSAL {
 Thread::Thread() noexcept : id_(), name_(), state_()
 {
 }
+
 Thread::Thread(Thread&& other) noexcept
 {
     *this = std::move(other);
 }
-Thread::Thread(const std::function<void()> &func)
-{
-    CreateThread(func);
-}
+
 Thread& Thread::operator=(Thread&& other) noexcept
 {
     if (this != &other) {
@@ -41,24 +39,25 @@ Thread& Thread::operator=(Thread&& other) noexcept
     }
     return *this;
 }
+
 Thread::~Thread() noexcept
 {
     if (state_) {
         pthread_join(id_, nullptr);
     }
 }
+
+Thread::operator bool() const noexcept
+{
+    return state_ != nullptr;
+}
+
 void Thread::SetName(const std::string& name)
 {
-#ifndef OSAL_OHOS
-    constexpr size_t threadNameMaxSize = 15;
-    name_ = (name.size() > threadNameMaxSize) ? name.substr(0, threadNameMaxSize).c_str() : name;
-    if (name.size() > threadNameMaxSize) {
-        MEDIA_LOG_W("task name %s exceed max size: %d", name.c_str(), threadNameMaxSize);
-    }
-    pthread_setname_np(id_, name_.c_str());
-#endif
+    name_ = name;
 }
-void Thread::CreateThread(const std::function<void()>& func)
+
+bool Thread::CreateThread(const std::function<void()>& func)
 {
     state_ = std::unique_ptr<State>(new State);
     state_->func_ = func;
@@ -68,11 +67,28 @@ void Thread::CreateThread(const std::function<void()>& func)
     int rtv = pthread_create(&id_, &attr, Thread::Run, state_.get());
     if (rtv == 0) {
         MEDIA_LOG_I("thread create succ");
+        SetNameInternal();
     } else {
         state_.reset();
         MEDIA_LOG_E("thread create failed");
     }
+    return rtv == 0;
 }
+
+void Thread::SetNameInternal()
+{
+#ifndef OSAL_OHOS
+    if (state_ && !name_.empty()) {
+        constexpr size_t threadNameMaxSize = 15;
+        if (name_.size() > threadNameMaxSize) {
+            MEDIA_LOG_W("task name %s exceed max size: %d", name_.c_str(), threadNameMaxSize);
+            name_ = name_.substr(0, threadNameMaxSize);
+        }
+        pthread_setname_np(id_, name_.c_str());
+    }
+#endif
+}
+
 void* Thread::Run(void* arg)
 {
     auto state = static_cast<State*>(arg);

@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Media {
 namespace OSAL {
 Task::Task(std::string name)
-    : name_(std::move(name)), runningState_(PAUSED), loop_([this] { Run(); }), pauseDone_(false), workInProgress_(false)
+    : name_(std::move(name)), runningState_(PAUSED), loop_(), pauseDone_(false), workInProgress_(false)
 {
     MEDIA_LOG_D("task %s ctor called", name_.c_str());
     loop_.SetName(name_);
@@ -48,7 +48,11 @@ void Task::Start()
 #ifndef START_FAKE_TASK
     OSAL::ScopedLock lock(stateMutex_);
     runningState_ = STARTED;
-    cv_.NotifyOne();
+    if (!loop_ && !loop_.CreateThread([this] { Run(); })) {
+        MEDIA_LOG_E("task %s create failed", name_.c_str());
+    } else {
+        cv_.NotifyOne();
+    }
     MEDIA_LOG_D("task %s start called", name_.c_str());
 #endif
 }
