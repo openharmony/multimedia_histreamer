@@ -235,11 +235,6 @@ Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
     return Status::OK;
 }
 
-Status SdlAudioSinkPlugin::GetState(State& state)
-{
-    return Status::ERROR_ALREADY_EXISTS;
-}
-
 std::shared_ptr<Allocator> SdlAudioSinkPlugin::GetAllocator()
 {
     return nullptr;

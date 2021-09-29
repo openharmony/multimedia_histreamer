@@ -297,11 +297,6 @@ Status SdlVideoSinkPlugin::SetParameter(Tag tag, const ValueType& value)
     return Status::OK;
 }
 
-Status SdlVideoSinkPlugin::GetState(State& state)
-{
-    return Status::ERROR_ALREADY_EXISTS;
-}
-
 std::shared_ptr<Allocator> SdlVideoSinkPlugin::GetAllocator()
 {
     return nullptr;

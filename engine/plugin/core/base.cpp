@@ -70,7 +70,8 @@ Status Base::SetParameter(Tag tag, const ValueType& value)
 
 Status Base::GetState(State &state)
 {
-    return plugin->GetState(state);
+    state = pluginState_;
+    return Status::OK;
 }
 
 std::shared_ptr<Allocator> Base::GetAllocator()

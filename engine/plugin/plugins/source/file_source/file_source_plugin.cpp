@@ -134,13 +134,6 @@ Status FileSourcePlugin::SetParameter(Tag tag, const ValueType &value)
     return Status::OK;
 }
 
-Status FileSourcePlugin::GetState(State &state)
-{
-    MEDIA_LOG_D("IN");
-    state = state_;
-    return Status::OK;
-}
-
 std::shared_ptr<Allocator> FileSourcePlugin::GetAllocator()
 {
     MEDIA_LOG_D("IN");

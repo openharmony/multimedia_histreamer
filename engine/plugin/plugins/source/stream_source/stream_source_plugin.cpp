@@ -158,13 +158,6 @@ Status StreamSourcePlugin::SetParameter(Tag tag, const ValueType& value)
     return Status::OK;
 }
 
-Status StreamSourcePlugin::GetState(State& state)
-{
-    MEDIA_LOG_D("IN");
-    state = state_;
-    return Status::OK;
-}
-
 std::shared_ptr<Allocator> StreamSourcePlugin::GetAllocator()
 {
     MEDIA_LOG_D("IN");

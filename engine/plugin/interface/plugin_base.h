@@ -78,7 +78,10 @@ struct PluginBase {
      *  @retval ERROR_NO_MEMORY: Memory allocation or external resource loading error caused by insufficient memory.
      *  @retval ERROR_WRONG_STATE: Call this function in non CREATED state
      */
-    virtual Status Init() = 0;
+    virtual Status Init()
+    {
+        return Status::OK;
+    }
 
     /**
      * @brief Plugin deinitialize to release resources.
@@ -89,7 +92,10 @@ struct PluginBase {
      * @return Execution status return
      *  @retval OK: Plugin deinitialize succeeded.
      */
-    virtual Status Deinit() = 0;
+    virtual Status Deinit()
+    {
+        return Status::OK;
+    }
 
     /**
      * @brief Preparing parameters required or allocate the memory for plugin running.
@@ -102,7 +108,10 @@ struct PluginBase {
      *  @retval ERROR_NO_MEMORY: Memory allocation error caused by insufficient memory.
      *  @retval ERROR_WRONG_STATE: Call this function in non INITIALIZED state
      */
-    virtual Status Prepare() = 0;
+    virtual Status Prepare()
+    {
+        return Status::OK;
+    }
 
     /**
      * @brief Reset the plugin, reset the plugin running status and parameters before Prepare.
@@ -115,7 +124,10 @@ struct PluginBase {
      *  @retval ERROR_WRONG_STATE: Call this function in wrong state
      *  @retval ERROR_UNIMPLEMENTED: This method is not implemented and cannot respond to reset.
      */
-    virtual Status Reset() = 0;
+    virtual Status Reset()
+    {
+        return Status::OK;
+    }
 
     /**
      * @brief The plugin enters the running state and can process data.
@@ -128,7 +140,10 @@ struct PluginBase {
      *  @retval OK: Plugin reset succeeded.
      *  @retval ERROR_WRONG_STATE: Call this function in non PREPARED state
      */
-    virtual Status Start() = 0;
+    virtual Status Start()
+    {
+        return Status::OK;
+    }
 
     /**
      * @brief The plugin enters the stopped state and stops processing data.
@@ -140,7 +155,10 @@ struct PluginBase {
      *  @retval OK: Plugin reset succeeded.
      *  @retval ERROR_WRONG_STATE: Call this function in non RUNNING state
      */
-    virtual Status Stop() = 0;
+    virtual Status Stop()
+    {
+        return Status::OK;
+    }
 
     /**
      * @brief Determines whether the current plugin supports the specified parameter.
@@ -150,7 +168,10 @@ struct PluginBase {
      * @param tag   Plugin parameter type, which is described by tag.
      * @return  true is supported, otherwise, false.
      */
-    virtual bool IsParameterSupported(Tag tag) = 0;
+    virtual bool IsParameterSupported(Tag tag)
+    {
+        return false;
+    }
 
     /**
      * @brief Get the value of a specified parameter.
@@ -164,7 +185,10 @@ struct PluginBase {
      *  @retval ERROR_WRONG_STATE: Call this function in non wrong state.
      *  @retval ERROR_INVALID_PARAMETER: The plugin does not support this parameter.
      */
-    virtual Status GetParameter(Tag tag, ValueType &value) = 0;
+    virtual Status GetParameter(Tag tag, ValueType &value)
+    {
+        return Status::ERROR_UNIMPLEMENTED;
+    }
 
     /**
      * @brief Set the specified parameter. The value must be within the valid range of the parameter.
@@ -180,16 +204,10 @@ struct PluginBase {
      *  @retval ERROR_INVALID_DATA: The value is not in the valid range.
      *  @retval ERROR_MISMATCHED_TYPE: The data type is mismatched.
      */
-    virtual Status SetParameter(Tag tag, const ValueType &value) = 0;
-
-    /**
-     * @brief Get the plugin running state.
-     *
-     * @param state Plugin running state.
-     * @return Execution status return
-     *  @retval OK: Plugin reset succeeded.
-     */
-    virtual Status GetState(State &state) = 0;
+    virtual Status SetParameter(Tag tag, const ValueType &value)
+    {
+        return Status::ERROR_UNIMPLEMENTED;
+    }
 
     /**
      * @brief Get the allocator specified by the plugin.

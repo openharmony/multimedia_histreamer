@@ -162,11 +162,6 @@ Status FFmpegDemuxerPlugin::SetParameter(Tag, const ValueType&)
     return Status::ERROR_UNIMPLEMENTED;
 }
 
-Status FFmpegDemuxerPlugin::GetState(State&)
-{
-    return Status::ERROR_UNIMPLEMENTED;
-}
-
 std::shared_ptr<Allocator> FFmpegDemuxerPlugin::GetAllocator()
 {
     return allocator_;
