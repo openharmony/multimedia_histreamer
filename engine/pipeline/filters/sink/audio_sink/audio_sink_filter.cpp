@@ -27,11 +27,11 @@ static AutoRegisterFilter<AudioSinkFilter> g_registerFilterHelper("builtin.playe
 
 AudioSinkFilter::AudioSinkFilter(const std::string& name) : FilterBase(name)
 {
-    MEDIA_LOG_I("AudioSinkFilter ctor");
+    MEDIA_LOG_I("audio sink ctor called");
 }
 AudioSinkFilter::~AudioSinkFilter()
 {
-    MEDIA_LOG_I("AudioSinkFilter deCtor.");
+    MEDIA_LOG_I("audio sink dtor called");
     if (plugin_) {
         plugin_->Stop();
         plugin_->Deinit();
@@ -91,12 +91,7 @@ ErrorCode AudioSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
 bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Meta>& inMeta,
                                 CapabilitySet& outCaps)
 {
-    MEDIA_LOG_D("sink negotiate started");
-    if (state_ != FilterState::PREPARING) {
-        MEDIA_LOG_W("sink filter is not in preparing when negotiate");
-        return false;
-    }
-
+    MEDIA_LOG_D("audio sink negotiate started");
     auto creator = [](const std::string& pluginName) {
         return Plugin::PluginManager::Instance().CreateAudioSinkPlugin(pluginName);
     };
@@ -112,6 +107,9 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
         OnEvent({EVENT_ERROR, err});
         return false;
     }
+    state_ = FilterState::READY;
+    OnEvent({EVENT_READY});
+    MEDIA_LOG_I("audio sink send EVENT_READY");
     return true;
 }
 
@@ -167,11 +165,6 @@ ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const 
 ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
 {
     MEDIA_LOG_D("audio sink push data started, state: %d", state_.load());
-    if (state_ == FilterState::PREPARING) {
-        state_ = FilterState::READY;
-        OnEvent({EVENT_READY});
-    }
-
     if (isFlushing || state_.load() == FilterState::INITIALIZED) {
         MEDIA_LOG_I("audio sink is flushing ignore this buffer");
         return SUCCESS;
@@ -226,13 +219,13 @@ ErrorCode AudioSinkFilter::Start()
 
 ErrorCode AudioSinkFilter::Stop()
 {
-    MEDIA_LOG_I("AudioSinkFilter stop called.");
+    MEDIA_LOG_I("audio sink stop start");
     FilterBase::Stop();
     plugin_->Stop();
     if (pushThreadIsBlocking.load()) {
         startWorkingCondition_.NotifyOne();
     }
-    MEDIA_LOG_I("AudioSinkFilter stop finished.");
+    MEDIA_LOG_I("audio sink stop finish");
     return SUCCESS;
 }
 
@@ -266,7 +259,7 @@ ErrorCode AudioSinkFilter::Resume()
 
 void AudioSinkFilter::FlushStart()
 {
-    MEDIA_LOG_D("FlushStart entered");
+    MEDIA_LOG_D("audio sink flush start entered");
     isFlushing = true;
     if (pushThreadIsBlocking) {
         startWorkingCondition_.NotifyOne();
@@ -276,7 +269,7 @@ void AudioSinkFilter::FlushStart()
 
 void AudioSinkFilter::FlushEnd()
 {
-    MEDIA_LOG_D("FlushEnd entered");
+    MEDIA_LOG_D("audio sink flush end entered");
     isFlushing = false;
 }
 

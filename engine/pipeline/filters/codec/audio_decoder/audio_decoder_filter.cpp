@@ -112,11 +112,12 @@ private:
 AudioDecoderFilter::AudioDecoderFilter(const std::string &name): DecoderFilterBase(name),
     dataCallback_(std::make_shared<DataCallbackImpl>(*this))
 {
+    MEDIA_LOG_D("audio decoder ctor called");
 }
 
 AudioDecoderFilter::~AudioDecoderFilter()
 {
-    MEDIA_LOG_I("AudioDecoderFilter dtor called...");
+    MEDIA_LOG_D("audio decoder dtor called");
     Release();
     if (inBufferQ_) {
         inBufferQ_->SetActive(false);
@@ -145,7 +146,7 @@ ErrorCode AudioDecoderFilter::QueueAllBufferInPoolToPluginLocked()
 
 ErrorCode AudioDecoderFilter::Start()
 {
-    MEDIA_LOG_D("Start called");
+    MEDIA_LOG_D("audio decoder start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
         MEDIA_LOG_W("call decoder start() when state is not ready or working");
         return ERROR_STATE;
@@ -160,23 +161,24 @@ ErrorCode AudioDecoderFilter::Prepare()
         return ERROR_STATE;
     }
     if (!outBufferQ_) {
-        outBufferQ_ = std::make_shared<BlockingQueue<AVBufferPtr>>("decoderOutBuffQueue", DEFAULT_OUT_BUFFER_POOL_SIZE);
+        outBufferQ_ = std::make_shared<BlockingQueue<AVBufferPtr>>("adecOutBuffQueue",
+                            DEFAULT_OUT_BUFFER_POOL_SIZE);
     } else {
         outBufferQ_->SetActive(true);
     }
     if (!pushTask_) {
-        pushTask_ = std::make_shared<OHOS::Media::OSAL::Task>("decPushThread");
+        pushTask_ = std::make_shared<OHOS::Media::OSAL::Task>("adecPushThread");
         pushTask_->RegisterHandler([this] { FinishFrame(); });
     }
     if (drivingMode_ == ThreadDrivingMode::ASYNC) {
         if (!inBufferQ_) {
-            inBufferQ_ = std::make_shared<BlockingQueue<AVBufferPtr>>("decoderFilterInBufQue",
+            inBufferQ_ = std::make_shared<BlockingQueue<AVBufferPtr>>("adecFilterInBufQue",
                 DEFAULT_IN_BUFFER_POOL_SIZE);
         } else {
             inBufferQ_->SetActive(true);
         }
         if (!handleFrameTask_) {
-            handleFrameTask_ = std::make_shared<OHOS::Media::OSAL::Task>("decHandleFrameThread");
+            handleFrameTask_ = std::make_shared<OHOS::Media::OSAL::Task>("adecHandleFrameThread");
             handleFrameTask_->RegisterHandler([this] { HandleFrame(); });
         }
     } else {
@@ -237,6 +239,7 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort, const std::shared_
     pushTask_->Start();
     state_ = FilterState::READY;
     OnEvent({EVENT_READY});
+    MEDIA_LOG_I("audio decoder send EVENT_READY");
     return true;
 }
 

@@ -130,7 +130,7 @@ VideoPixelFormat TranslatePixelFormat(int32_t pixelFormat)
 } // namespace
 
 VideoFfmpegDecoderPlugin::VideoFfmpegDecoderPlugin(std::string name)
-    : name_(std::move(name)), outBufferQ_("decoderPluginQueue", BUFFER_QUEUE_SIZE)
+    : name_(std::move(name)), outBufferQ_("vdecPluginQueue", BUFFER_QUEUE_SIZE)
 {
 }
 

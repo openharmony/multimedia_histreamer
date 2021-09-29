@@ -429,8 +429,17 @@ void DemuxerFilter::HandleFrame(const AVBufferPtr& bufferPtr, uint32_t streamInd
         if (stream.streamIdx != streamIndex) {
             continue;
         }
+        stream.port->PushData(bufferPtr);
+        break;
+    }
+}
+
+void DemuxerFilter::NegotiateDownstream()
+{
+    for (auto& stream : mediaMetaData_.trackInfos) {
         if (stream.needNegoCaps) {
             CapabilitySet caps;
+            MEDIA_LOG_I("demuxer negotiate with streamIdx: %u", stream.streamIdx);
             if (stream.port->Negotiate(GetStreamMeta(stream.streamIdx), caps)) {
                 stream.needNegoCaps = false;
             } else {
@@ -438,8 +447,6 @@ void DemuxerFilter::HandleFrame(const AVBufferPtr& bufferPtr, uint32_t streamInd
                 OnEvent({EVENT_ERROR, PLUGIN_NOT_FOUND});
             }
         }
-        stream.port->PushData(bufferPtr);
-        break;
     }
 }
 
@@ -461,6 +468,7 @@ void DemuxerFilter::DemuxerLoop()
     } else {
         Plugin::MediaInfoHelper mediaInfo;
         if (plugin_->GetMediaInfo(mediaInfo) == Plugin::Status::OK && PrepareStreams(mediaInfo)) {
+            NegotiateDownstream();
             pluginState_ = DEMUXER_STATE_PARSE_FRAME;
             state_ = FilterState::READY;
             OnEvent({EVENT_READY, {}});

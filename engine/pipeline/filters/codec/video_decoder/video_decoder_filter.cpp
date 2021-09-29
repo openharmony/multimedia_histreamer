@@ -18,7 +18,7 @@
 #define LOG_TAG "VideoDecoderFilter"
 
 #include "video_decoder_filter.h"
-#include <osal/utils/util.h>
+#include "utils/util.h"
 #include "foundation/constants.h"
 #include "factory/filter_factory.h"
 #include "plugin/common/plugin_video_tags.h"
@@ -28,7 +28,7 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-const uint32_t DEFAULT_IN_BUFFER_POOL_SIZE = 8;
+const uint32_t DEFAULT_IN_BUFFER_POOL_SIZE = 200;
 const uint32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 8;
 const float VIDEO_PIX_DEPTH = 1.5;
 static uint32_t VIDEO_ALIGN_SIZE = 16;
@@ -66,7 +66,7 @@ private:
 VideoDecoderFilter::VideoDecoderFilter(const std::string &name): DecoderFilterBase(name),
     dataCallback_(std::make_shared<DataCallbackImpl>(*this))
 {
-    MEDIA_LOG_I("VideoDecoderFilter ctor called...");
+    MEDIA_LOG_I("video decoder ctor called");
     vdecFormat_.width = 0;
     vdecFormat_.height = 0;
     vdecFormat_.bitRate = -1;
@@ -74,24 +74,24 @@ VideoDecoderFilter::VideoDecoderFilter(const std::string &name): DecoderFilterBa
 
 VideoDecoderFilter::~VideoDecoderFilter()
 {
-    MEDIA_LOG_I("VideoDecoderFilter dtor called...");
+    MEDIA_LOG_I("video decoder dtor called");
     if (plugin_) {
         plugin_->Stop();
         plugin_->Deinit();
     }
-    if (drivingMode_ == ThreadDrivingMode::ASYNC && handleFrameTask_ != nullptr) {
+    if (drivingMode_ == ThreadDrivingMode::ASYNC && handleFrameTask_) {
         handleFrameTask_->Stop();
         handleFrameTask_.reset();
     }
-    if (inBufQue_ != nullptr) {
+    if (inBufQue_) {
         inBufQue_->SetActive(false);
         inBufQue_.reset();
     }
-    if (pushTask_ != nullptr) {
+    if (pushTask_) {
         pushTask_->Stop();
         pushTask_.reset();
     }
-    if (outBufQue_ != nullptr) {
+    if (outBufQue_) {
         outBufQue_->SetActive(false);
         outBufQue_.reset();
     }
@@ -99,7 +99,7 @@ VideoDecoderFilter::~VideoDecoderFilter()
 
 ErrorCode VideoDecoderFilter::Start()
 {
-    MEDIA_LOG_D("Start called");
+    MEDIA_LOG_D("video decoder start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
         MEDIA_LOG_W("call decoder start() when state_ is not ready or working");
         return ERROR_STATE;
@@ -109,28 +109,28 @@ ErrorCode VideoDecoderFilter::Start()
 
 ErrorCode VideoDecoderFilter::Prepare()
 {
-    MEDIA_LOG_D("Prepare called");
+    MEDIA_LOG_D("video decoder prepare called");
     if (state_ != FilterState::INITIALIZED) {
         MEDIA_LOG_W("decoder filter is not in init state_");
         return ERROR_STATE;
     }
     if (!outBufQue_) {
-        outBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("decoderFilterOutBufQue",
+        outBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("vdecFilterOutBufQue",
                                                                   DEFAULT_OUT_BUFFER_POOL_SIZE);
     } else {
         outBufQue_->SetActive(true);
     }
     if (!pushTask_) {
-        pushTask_ = std::make_shared<OHOS::Media::OSAL::Task>("decPushThread");
+        pushTask_ = std::make_shared<OHOS::Media::OSAL::Task>("vdecPushThread");
         pushTask_->RegisterHandler([this] { FinishFrame(); });
     }
     if (!inBufQue_) {
-        inBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("decoderFilterInBufQue",
+        inBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("vdecFilterInBufQue",
                                                                  DEFAULT_IN_BUFFER_POOL_SIZE);
     } else {
         inBufQue_->SetActive(true);
     }
-    if (!handleFrameTask_) {
+    if (drivingMode_ == ThreadDrivingMode::ASYNC && !handleFrameTask_) {
         handleFrameTask_ = std::make_shared<OHOS::Media::OSAL::Task>("decHandleFrameThread");
         handleFrameTask_->RegisterHandler([this] { HandleFrame(); });
     }
@@ -145,7 +145,7 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort, const std::shared_
         return false;
     }
 
-    MEDIA_LOG_D("Negotiate called");
+    MEDIA_LOG_D("video decoder negotiate called");
     auto creator = [] (const std::string& pluginName) {
         return Plugin::PluginManager::Instance().CreateCodecPlugin(pluginName);
     };
@@ -161,8 +161,8 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort, const std::shared_
     if (Configure(inMeta) != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("decoder configure error");
         Event event {
-                .type = EVENT_ERROR,
-                .param = err,
+            .type = EVENT_ERROR,
+            .param = err,
         };
         OnEvent(event);
         return false;
@@ -308,21 +308,23 @@ ErrorCode VideoDecoderFilter::ConfigurePlugin()
 
 ErrorCode VideoDecoderFilter::Configure(const std::shared_ptr<const Meta>& meta)
 {
-    MEDIA_LOG_D("Configure called");
+    MEDIA_LOG_D("video decoder configure called");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(InitPlugin(), "Init plugin fail");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(SetVideoDecoderFormat(meta), "Set video decoder format fail");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(AllocateOutputBuffers(), "Alloc output buffers fail");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePlugin(), "Config plugin fail");
-    if (handleFrameTask_ != nullptr) {
+    if (drivingMode_ == ThreadDrivingMode::ASYNC && handleFrameTask_) {
         handleFrameTask_->Start();
     }
-    pushTask_->Start();
-
+    if (pushTask_) {
+        pushTask_->Start();
+    }
     state_ = FilterState::READY;
     Event event {
         .type = EVENT_READY,
     };
     OnEvent(event);
+    MEDIA_LOG_I("video decoder send EVENT_READY");
     return ErrorCode::SUCCESS;
 }
 
@@ -336,7 +338,11 @@ ErrorCode VideoDecoderFilter::PushData(const std::string& inPort, AVBufferPtr bu
         MEDIA_LOG_I("decoder is flushing, discarding this data from port %s", inPort.c_str());
         return ErrorCode::SUCCESS;
     }
-    inBufQue_->Push(buffer);
+    if (drivingMode_ == ThreadDrivingMode::ASYNC) {
+        inBufQue_->Push(buffer);
+        return ErrorCode::SUCCESS;
+    }
+    HandleOneFrame(buffer);
     return ErrorCode::SUCCESS;
 }
 
@@ -347,11 +353,15 @@ void VideoDecoderFilter::FlushStart()
     if (inBufQue_) {
         inBufQue_->SetActive(false);
     }
-    handleFrameTask_->PauseAsync();
+    if (drivingMode_ == ThreadDrivingMode::ASYNC && handleFrameTask_) {
+        handleFrameTask_->PauseAsync();
+    }
     if (outBufQue_) {
         outBufQue_->SetActive(false);
     }
-    pushTask_->PauseAsync();
+    if (pushTask_) {
+        pushTask_->PauseAsync();
+    }
     if (plugin_ != nullptr) {
         auto err = TranslatePluginStatus(plugin_->Flush());
         if (err != SUCCESS) {
@@ -367,12 +377,16 @@ void VideoDecoderFilter::FlushEnd()
     if (inBufQue_) {
         inBufQue_->SetActive(true);
     }
-    handleFrameTask_->Start();
+    if (drivingMode_ == ThreadDrivingMode::ASYNC && handleFrameTask_) {
+        handleFrameTask_->Start();
+    }
     if (outBufQue_) {
         outBufQue_->SetActive(true);
     }
-    pushTask_->Start();
-    if (plugin_ != nullptr) {
+    if (pushTask_) {
+        pushTask_->Start();
+    }
+    if (plugin_) {
         ConfigurePluginOutputBuffers();
     }
 }
@@ -384,7 +398,9 @@ ErrorCode VideoDecoderFilter::Stop()
     outBufQue_->SetActive(false);
     pushTask_->Pause();
     inBufQue_->SetActive(false);
-    handleFrameTask_->Pause();
+    if (drivingMode_ == ThreadDrivingMode::ASYNC && handleFrameTask_) {
+        handleFrameTask_->Pause();
+    }
     outBufPool_.reset();
     MEDIA_LOG_I("Stop success");
     return FilterBase::Stop();
@@ -404,10 +420,15 @@ void VideoDecoderFilter::HandleFrame()
 void VideoDecoderFilter::HandleOneFrame(const std::shared_ptr<AVBuffer>& data)
 {
     MEDIA_LOG_D("HandleOneFrame called");
-    auto ret = plugin_->QueueInputBuffer(data, -1);
-    if (ret != Plugin::Status::OK) {
-        MEDIA_LOG_W("Send data to plugin error: %d", ret);
-    }
+    Plugin::Status ret;
+    do {
+        ret = plugin_->QueueInputBuffer(data, -1);
+        if (ret == Plugin::Status::OK) {
+            break;
+        }
+        MEDIA_LOG_D("Send data to plugin error: %d", ret);
+        OSAL::SleepFor(10);
+    } while (1);
 }
 
 void VideoDecoderFilter::FinishFrame()
