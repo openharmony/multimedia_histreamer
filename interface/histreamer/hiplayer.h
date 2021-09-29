@@ -61,6 +61,9 @@ private:
     int audioStreamType_;
 };
 
+#if defined(WIN32)
+__declspec(dllexport) 
+#endif
 std::shared_ptr<Media::PlayerInterface> CreateHiPlayer();
 } // namespace Media
 } // namespace OHOS

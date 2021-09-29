@@ -67,4 +67,23 @@ file(GLOB_RECURSE PLUGINS_STATIC_BUILD_SRCS
 
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
-add_library(${PROJECT_NAME} SHARED ${HISTREAMER_SRCS} ${PLUGINS_STATIC_BUILD_SRCS})
+link_directories(
+        ${ffmpeg_lib_path}
+        ${sdl_lib_path}
+)
+
+if (WIN32)
+    link_libraries(
+            pthread
+            m
+            avcodec
+            avformat
+            avutil
+            avfilter
+            swresample
+            SDL2
+    )
+endif ()
+
+add_library(${PROJECT_NAME} SHARED ${HISTREAMER_SRCS} ${PLUGINS_STATIC_BUILD_SRCS} 
+       ${3RDPARTY_SRCS})
