@@ -37,13 +37,15 @@ public:
 
     Thread(Thread&& other) noexcept;
 
-    explicit Thread(const std::function<void()>& func);
-
     Thread& operator=(Thread&& other) noexcept;
 
     virtual ~Thread() noexcept;
 
+    explicit operator bool() const noexcept;
+
     void SetName(const std::string& name);
+
+    bool CreateThread(const std::function<void()>& func);
 
 private:
     struct State {
@@ -51,8 +53,7 @@ private:
         std::function<void()> func_ {};
     };
 
-    void CreateThread(const std::function<void()>& func);
-
+    void SetNameInternal();
     static void* Run(void* arg);
 
     pthread_t id_ {};
