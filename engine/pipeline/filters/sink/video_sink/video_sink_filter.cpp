@@ -113,6 +113,12 @@ bool VideoSinkFilter::Negotiate(const std::string &inPort, const std::shared_ptr
         OnEvent(event);
         return false;
     }
+    state_ = FilterState::READY;
+    Event event {
+        .type = EVENT_READY,
+    };
+    OnEvent(event);
+    MEDIA_LOG_I("video sink send EVENT_READY");
     return true;
 }
 
@@ -174,14 +180,6 @@ void VideoSinkFilter::RenderFrame()
 ErrorCode VideoSinkFilter::PushData(const std::string &inPort, AVBufferPtr buffer)
 {
     MEDIA_LOG_D("video sink push data started, state_: %d", state_.load());
-    if (state_ == FilterState::PREPARING) {
-        state_ = FilterState::READY;
-        Event event {
-            .type = EVENT_READY,
-        };
-        OnEvent(event);
-    }
-
     if (isFlushing_ || state_.load() == FilterState::INITIALIZED) {
         MEDIA_LOG_I("video sink is flushing ignore this buffer");
         return ErrorCode::SUCCESS;
