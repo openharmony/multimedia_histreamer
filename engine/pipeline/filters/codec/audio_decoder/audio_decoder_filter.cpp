@@ -32,6 +32,8 @@ constexpr int32_t AF_64BIT_BYTES = 8;
 constexpr int32_t AF_32BIT_BYTES = 4;
 constexpr int32_t AF_16BIT_BYTES = 2;
 constexpr int32_t AF_8BIT_BYTES = 1;
+constexpr int32_t RETRY_TIMES = 3;
+constexpr int32_t RETRY_DELAY = 10; //ms
 
 int32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Meta> &meta)
 {
@@ -441,9 +443,22 @@ void AudioDecoderFilter::HandleOneFrame(const std::shared_ptr<AVBuffer>& data)
 {
     MEDIA_LOG_D("HandleOneFrame called");
     Plugin::Status status = Plugin::Status::OK;
-    status = plugin_->QueueInputBuffer(data, -1);
+    int32_t retryCnt = 0;
+    do {
+        status = plugin_->QueueInputBuffer(data, 0);
+        if (status != Plugin::Status::ERROR_TIMED_OUT) {
+            break;
+        }
+        MEDIA_LOG_I("queue input buffer timeout, will retry");
+        retryCnt++;
+        if (retryCnt <= RETRY_TIMES) {
+            OSAL::SleepFor(RETRY_DELAY);
+        } else {
+            break;
+        }
+    } while (true);
     if (status != Plugin::Status::OK) {
-        MEDIA_LOG_W("send data to plugin error");
+        MEDIA_LOG_W("queue input buffer with error %d, ignore this buffer", status);
     }
     MEDIA_LOG_D("HandleOneFrame finished");
 }
