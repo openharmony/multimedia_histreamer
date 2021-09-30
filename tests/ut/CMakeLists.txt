@@ -92,7 +92,7 @@ else ()
             ${ffmpeg_lib_path}/libswresample.a
             ${ffmpeg_lib_path}/liblzma.a
             m
-            z
+            /usr/lib/x86_64-linux-gnu/libz.so.1
             ${sdl_lib_path}/libSDL2.a
             gtest
             gtest_main
