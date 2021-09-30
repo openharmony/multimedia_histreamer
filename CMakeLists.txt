@@ -17,6 +17,6 @@ add_definitions(-DOSAL_OHOS) # add -DVIDEO_SUPPORT to enable video play
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-add_subdirectory(engine/plugin/plugins/source/file_source)
-add_subdirectory(engine)
-add_subdirectory(tests)
+add_subdirectory(${DEV_TOP_DIR}/histreamer/engine/plugin/plugins/source/file_source file_source.out)
+add_subdirectory(${DEV_TOP_DIR}/histreamer/engine engine.out)
+add_subdirectory(${DEV_TOP_DIR}/histreamer/tests tests.out)
