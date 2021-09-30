@@ -137,7 +137,7 @@ private:
     size_t capacity;
 
     /// The alignment of the memory.
-    __attribute__((unused)) size_t alignment;
+    size_t alignment;
 
     /// Offset of the buffer address to make sure access acording to alignment.
     size_t offset {0};
