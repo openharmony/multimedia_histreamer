@@ -1,0 +1,80 @@
+# Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+
+if (defined(ohos_lite)) {
+    import("//build/lite/config/component/lite_component.gni")
+    if (ohos_kernel_type == "liteos_m") {
+        print("static_library")
+    } else {
+        # build shared library
+        
+        declare_args() {
+            plugin_dynamic_register = false
+        }
+        
+        # lib plugin interface
+        shared_library("histreamer_plugin_intf") {
+            sources = [
+                "common/plugin_buffer.cpp",
+            ]
+            cflags = [ "-O2", "-fPIC", "-Wall" ]
+            cflags_cc = cflags
+            outdir = rebase_path("$root_out_dir")
+            ldflags = [ "-L$outdir" ]
+            public_deps = [
+                "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+                "//third_party/bounds_checking_function:libsec_shared",
+            ]
+        }
+
+        # lib plugin core
+        shared_library("histreamer_plugin_core") {
+            sources = [
+                "core/base.cpp",
+                "core/audio_sink.cpp",
+                "core/video_sink.cpp",
+                "core/codec.cpp",
+                "core/demuxer.cpp",
+                "core/plugin_register.cpp",
+                "core/plugin_wrapper.cpp",
+                "core/plugin_manager.cpp",
+                "core/source.cpp",
+            ]
+            defines = [ "HI3516DV300" ]
+            if (plugin_dynamic_register) {
+                sources += [
+                    "engine/plugin/core/plugin_loader.cpp",
+                ]
+                defines += [ "DYNAMIC_PLUGINS" ]
+            }
+            include_dirs = [
+                ".",
+                "../",
+            ]
+            cflags = [ "-O2", "-fPIC", "-Wall" ]
+            cflags_cc = cflags
+            outdir = rebase_path("$root_out_dir")
+            ldflags = [ "-L$outdir" ]
+            deps = [
+                ":histreamer_plugin_intf",
+            ]
+            public_deps = [
+                "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+                "//third_party/bounds_checking_function:libsec_shared",
+            ]
+        }
+    }
+}
+
