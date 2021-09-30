@@ -82,7 +82,6 @@ if (WIN32)
             swresample
             SDL2
     )
-elseif (UNIX)
 else ()
     link_libraries(
             log
