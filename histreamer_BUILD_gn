@@ -108,8 +108,8 @@ if (compile_histreamer) {
             "//foundation/graphic/surface:lite_surface",
             "//device/hisilicon/hardware:hardware_media_sdk",
             "//device/hisilicon/modules/middleware:middleware_source_sdk",
-            ":histreamer_plugin_intf",
-            ":histreamer_plugin_core",
+            "engine/plugin:histreamer_plugin_intf",
+            "engine/plugin:histreamer_plugin_core",
         ]
         public_deps = [
         "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
@@ -127,68 +127,13 @@ if (compile_histreamer) {
         outputs = ["$root_out_dir/data/{{source_file_part}}"]
     }
 
-    # lib plugin interface
-    shared_library("histreamer_plugin_intf") {
-        sources = [
-            "engine/plugin/common/plugin_buffer.cpp",
-        ]
-        cflags = [ "-O2", "-fPIC", "-Wall" ]
-        cflags_cc = cflags
-        outdir = rebase_path("$root_out_dir")
-        ldflags = [ "-L$outdir" ]
-        public_deps = [
-            "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-            "//third_party/bounds_checking_function:libsec_shared",
-        ]
+    lite_component("media_histreamer") {
+        features = [
+            ":histreamer",
+            "engine/plugin:histreamer_plugin_intf",
+            "engine/plugin:histreamer_plugin_core",
+       ]
     }
-
-    declare_args() {
-        plugin_dynamic_register = false
-    }
-
-    # lib plugin core
-    shared_library("histreamer_plugin_core") {
-        sources = [
-            "engine/plugin/core/base.cpp",
-            "engine/plugin/core/audio_sink.cpp",
-            "engine/plugin/core/video_sink.cpp",
-            "engine/plugin/core/codec.cpp",
-            "engine/plugin/core/demuxer.cpp",
-            "engine/plugin/core/plugin_register.cpp",
-            "engine/plugin/core/plugin_wrapper.cpp",
-            "engine/plugin/core/plugin_manager.cpp",
-            "engine/plugin/core/source.cpp",
-        ]
-        defines = [ "HI3516DV300" ]
-        if (plugin_dynamic_register) {
-            sources += [
-                "engine/plugin/core/plugin_loader.cpp",
-            ]
-            defines += [ "DYNAMIC_PLUGINS" ]
-        }
-        include_dirs = [
-            "engine",
-            "engine/foundation",
-            "engine/foundation/osal",
-            "engine/pipeline",
-            "engine/player",
-            "engine/pipeline/filters",
-            "engine/pipeline/core",
-            "engine/plugin",
-        ]
-        cflags = [ "-O2", "-fPIC", "-Wall" ]
-        cflags_cc = cflags
-        outdir = rebase_path("$root_out_dir")
-        ldflags = [ "-L$outdir" ]
-        deps = [
-            ":histreamer_plugin_intf",
-        ]
-        public_deps = [
-            "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-            "//third_party/bounds_checking_function:libsec_shared",
-        ]
-    }
-
 } else {
     import("//build/ohos.gni")
 
