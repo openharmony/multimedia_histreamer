@@ -41,7 +41,6 @@ include_directories(
         ${TOP_DIR}/engine/pipeline/filters
         ${TOP_DIR}/engine/pipeline/filters/player
         ${TOP_DIR}/engine/plugin
-        ${TOP_DIR}/engine/3rdparty/curl/include
 )
 
 ######################################################
@@ -81,6 +80,13 @@ if (WIN32)
             avutil
             avfilter
             swresample
+            SDL2
+    )
+elseif (UNIX)
+else ()
+    link_libraries(
+            log
+            FFmpeg
             SDL2
     )
 endif ()
