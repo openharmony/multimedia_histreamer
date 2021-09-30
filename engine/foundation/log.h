@@ -69,12 +69,7 @@ inline std::string MediaGetFileName(std::string file)
 #define MEDIA_LOG_D(msg, ...) MEDIA_DEBUG_LOG(msg, ##__VA_ARGS__)
 #endif
 #else
-#define MEDIA_LOG_E(msg, ...) MEDIA_LOG_MESSAGE("ERROR", msg, ##__VA_ARGS__)
-#define MEDIA_LOG_W(msg, ...) MEDIA_LOG_MESSAGE("WARN", msg, ##__VA_ARGS__)
-#if !LOG_NDEBUG
-#define MEDIA_LOG_I(msg, ...) MEDIA_LOG_MESSAGE("INFO", msg, ##__VA_ARGS__)
-#define MEDIA_LOG_D(msg, ...) MEDIA_LOG_MESSAGE("DEBUG", msg, ##__VA_ARGS__)
-#endif
+#include "log_adapter.h"
 #endif
 
 #ifndef FAIL_RETURN
