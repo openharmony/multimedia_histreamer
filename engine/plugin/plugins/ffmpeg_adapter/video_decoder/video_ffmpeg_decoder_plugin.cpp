@@ -144,8 +144,12 @@ Status VideoFfmpegDecoderPlugin::Init()
     }
     avCodec_ = iter->second;
     cachedFrame_ = std::shared_ptr<AVFrame>(av_frame_alloc(), [](AVFrame* fp) { av_frame_free(&fp); });
-    state_ = State::INITIALIZED;
     videoDecParams_[Tag::REQUIRED_OUT_BUFFER_CNT] = (uint32_t)BUFFER_QUEUE_SIZE;
+    if (!decodeTask_) {
+        decodeTask_ = std::make_shared<OHOS::Media::OSAL::Task>("videoFfmpegDecThread");
+        decodeTask_->RegisterHandler([this] { ReceiveBuffer(); });
+    }
+    state_ = State::INITIALIZED;
     MEDIA_LOG_I("Init success");
     return Status::OK;
 }
@@ -156,6 +160,10 @@ Status VideoFfmpegDecoderPlugin::Deinit()
     avCodec_.reset();
     cachedFrame_.reset();
     ResetLocked();
+    if (decodeTask_) {
+        decodeTask_->Stop();
+        decodeTask_.reset();
+    }
     state_ = State::DESTROYED;
     return Status::OK;
 }
@@ -370,6 +378,7 @@ Status VideoFfmpegDecoderPlugin::Start()
         state_ = State::RUNNING;
     }
     outBufferQ_.SetActive(true);
+    decodeTask_->Start();
     MEDIA_LOG_I("Start success");
     return Status::OK;
 }
@@ -386,6 +395,8 @@ Status VideoFfmpegDecoderPlugin::Stop()
         state_ = State::INITIALIZED;
     }
     outBufferQ_.SetActive(false);
+    decodeTask_->Stop();
+    MEDIA_LOG_I("Stop success");
     return ret;
 }
 
@@ -400,7 +411,7 @@ Status VideoFfmpegDecoderPlugin::Flush()
 {
     OSAL::ScopedLock l(lock_);
     if (avCodecContext_ != nullptr) {
-        avcodec_flush_buffers(avCodecContext_.get());
+        // flush avcodec buffers
     }
     return Status::OK;
 }
@@ -408,18 +419,17 @@ Status VideoFfmpegDecoderPlugin::Flush()
 Status VideoFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
 {
     MEDIA_LOG_D("queue input buffer");
-    Status status = SendBuffer(inputBuffer);
-    if (status != Status::OK) {
-        return status;
+    if (inputBuffer->IsEmpty() && !(inputBuffer->flag & BUFFER_FLAG_EOS)) {
+        MEDIA_LOG_E("decoder does not support fd buffer");
+        return Status::ERROR_INVALID_DATA;
     }
-    bool receiveOneFrame = false;
-    do {
-        receiveOneFrame = ReceiveBuffer(status);
-        if (status != Status::OK) {
-            break;
-        }
-    } while (receiveOneFrame);
-    return status;
+    Status ret = Status::OK;
+    {
+        OSAL::ScopedLock l(lock_);
+        ret = SendBufferLocked(inputBuffer);
+    }
+    NotifyInputBufferDone(inputBuffer);
+    return ret;
 }
 
 Status VideoFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer)
@@ -463,23 +473,9 @@ Status VideoFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
     auto ret = avcodec_send_packet(avCodecContext_.get(), packetPtr);
     if (ret < 0) {
         MEDIA_LOG_E("send buffer error %s", AVStrError(ret).c_str());
+        return Status::ERROR_NO_MEMORY;
     }
     return Status::OK;
-}
-
-Status VideoFfmpegDecoderPlugin::SendBuffer(const std::shared_ptr<Buffer>& inputBuffer)
-{
-    if (inputBuffer->IsEmpty() && !(inputBuffer->flag & BUFFER_FLAG_EOS)) {
-        MEDIA_LOG_E("decoder does not support fd buffer");
-        return Status::ERROR_INVALID_DATA;
-    }
-    Status ret = Status::OK;
-    {
-        OSAL::ScopedLock l(lock_);
-        ret = SendBufferLocked(inputBuffer);
-    }
-    NotifyInputBufferDone(inputBuffer);
-    return ret;
 }
 
 void VideoFfmpegDecoderPlugin::CheckResolutionChange()
@@ -528,8 +524,7 @@ void VideoFfmpegDecoderPlugin::CalculateFrameSizes(size_t& ySize, size_t& uvSize
     }
 }
 
-Status VideoFfmpegDecoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& frameBuffer, bool& receiveOneFrame,
-                                                 bool& notifyBufferDone)
+Status VideoFfmpegDecoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& frameBuffer)
 {
     MEDIA_LOG_D("receive one frame: %d, picture type: %d, pixel format: %d, packet size: %d", cachedFrame_->key_frame,
                 static_cast<int32_t>(cachedFrame_->pict_type), static_cast<int32_t>(cachedFrame_->format),
@@ -562,8 +557,6 @@ Status VideoFfmpegDecoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& 
     auto frameBufferMem = frameBuffer->GetMemory();
     if (frameBufferMem->GetCapacity() < frameSize) {
         MEDIA_LOG_W("output buffer size is not enough: real[%zu], need[%zu]", frameBufferMem->GetCapacity(), frameSize);
-        receiveOneFrame = false;
-        notifyBufferDone = false;
         return Status::ERROR_NO_MEMORY;
     }
     if (cachedFrame_->format == AV_PIX_FMT_YUV420P) {
@@ -575,61 +568,50 @@ Status VideoFfmpegDecoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& 
         frameBufferMem->Write(cachedFrame_->data[1], uvSize);
     }
     frameBuffer->pts = static_cast<uint64_t>(cachedFrame_->pts);
-    notifyBufferDone = true;
-    receiveOneFrame = true;
     return Status::OK;
 }
 
-void VideoFfmpegDecoderPlugin::ReceiveBufferLocked(Status& status, const std::shared_ptr<Buffer>& frameBuffer,
-                                                   bool& receiveOneFrame, bool& notifyBufferDone)
+Status void VideoFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffer>& frameBuffer)
 {
     if (state_ != State::RUNNING) {
         MEDIA_LOG_W("queue input buffer in wrong state");
-        status = Status::ERROR_WRONG_STATE;
-        receiveOneFrame = false;
-        notifyBufferDone = false;
-        return;
+        return Status::ERROR_WRONG_STATE;
     }
+    Status status;
     auto ret = avcodec_receive_frame(avCodecContext_.get(), cachedFrame_.get());
     if (ret >= 0) {
-        status = FillFrameBuffer(frameBuffer, receiveOneFrame, notifyBufferDone);
+        status = FillFrameBuffer(frameBuffer);
     } else if (ret == AVERROR_EOF) {
         MEDIA_LOG_I("eos received");
         frameBuffer->GetMemory()->Reset();
-        notifyBufferDone = true;
-        receiveOneFrame = false;
+        avcodec_flush_buffers(avCodecContext_.get());
         status = Status::END_OF_STREAM;
     } else {
         MEDIA_LOG_I("video decoder receive error: %s", AVStrError(ret).c_str());
-        notifyBufferDone = false;
-        receiveOneFrame = false;
-        status = Status::OK;
+        status = Status::ERROR_UNKNOWN;
     }
     av_frame_unref(cachedFrame_.get());
+    return status;
 }
 
-bool VideoFfmpegDecoderPlugin::ReceiveBuffer(Status& status)
+void VideoFfmpegDecoderPlugin::ReceiveBuffer()
 {
-    bool notifyBufferDone = false;
-    bool receiveOneFrame = false;
     std::shared_ptr<Buffer> frameBuffer = outBufferQ_.Pop();
-    if (frameBuffer == nullptr || frameBuffer->IsEmpty()) {
+    if (frameBuffer == nullptr || frameBuffer->IsEmpty() ||
+        frameBuffer->GetBufferMeta()->GetType() != BufferMetaType::VIDEO) {
         MEDIA_LOG_W("cannot fetch valid buffer to output");
         return false;
     }
-    if (frameBuffer->GetBufferMeta()->GetType() != BufferMetaType::VIDEO) {
-        MEDIA_LOG_W("Cannot handle non-video buffer");
-        receiveOneFrame = false;
-    } else {
+    Status status;
+    {
         OSAL::ScopedLock l(lock_);
-        ReceiveBufferLocked(status, frameBuffer, receiveOneFrame, notifyBufferDone);
+        status = ReceiveBufferLocked(frameBuffer);
     }
-    if (notifyBufferDone) {
+    if (status == Status::OK || status == Status::END_OF_STREAM) {
         NotifyOutputBufferDone(frameBuffer);
     } else {
         outBufferQ_.Push(frameBuffer);
     }
-    return receiveOneFrame;
 }
 
 void VideoFfmpegDecoderPlugin::NotifyInputBufferDone(const std::shared_ptr<Buffer>& input)

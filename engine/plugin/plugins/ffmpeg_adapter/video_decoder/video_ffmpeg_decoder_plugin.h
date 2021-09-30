@@ -20,6 +20,7 @@
 
 #include <functional>
 #include <map>
+#include "osal/thread/task.h"
 #include "foundation/blocking_queue.h"
 #include "plugin/interface/codec_plugin.h"
 
@@ -92,23 +93,22 @@ private:
     template<typename T>
     void FindInParameterMapThenAssignLocked(Tag tag, T &assign);
 
-    Status SendBuffer(const std::shared_ptr<Buffer> &inputBuffer);
     Status SendBufferLocked(const std::shared_ptr<Buffer> &inputBuffer);
 
     void CalculateFrameSizes(size_t &ySize, size_t &uvSize, size_t &frameSize);
-    Status FillFrameBuffer(const std::shared_ptr<Buffer> &frameBuffer, bool &receiveOneFrame, bool &notifyBufferDone);
-    bool ReceiveBuffer(Status &err);
-    void ReceiveBufferLocked(Status &status, const std::shared_ptr<Buffer> &ioInfo,
-                             bool &receiveOneFrame, bool &notifyBufferDone);
+
+    Status FillFrameBuffer(const std::shared_ptr<Buffer> &frameBuffer);
+
+    Status ReceiveBufferLocked(const std::shared_ptr<Buffer> &frameBuffer);
 
     void CheckResolutionChange();
+
+    void ReceiveBuffer();
 
 #ifdef DUMP_RAW_DATA
     std::ofstream dumpData_;
     void DumpVideoRawOutData();
 #endif
-
-    void CopyYUV2NativeBuffer(const std::shared_ptr<Buffer> &ioInfo, const uint32_t frameSize);
 
     void NotifyInputBufferDone(const std::shared_ptr<Buffer> &input);
     void NotifyOutputBufferDone(const std::shared_ptr<Buffer> &output);
@@ -129,6 +129,7 @@ private:
     State state_ {State::CREATED};
     std::shared_ptr<AVCodecContext> avCodecContext_ {};
     OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufferQ_;
+    std::shared_ptr<OHOS::Media::OSAL::Task> decodeTask_;
 };
 }
 }
