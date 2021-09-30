@@ -15,11 +15,10 @@
 
 #define LOG_TAG "FileSourcePlugin"
 
+#include "file_source_plugin.h"
 #include "foundation/log.h"
-
 #include "plugin/common/plugin_types.h"
 #include "plugin/core/plugin_manager.h"
-#include "file_source_plugin.h"
 #include "plugin/common/plugin_buffer.h"
 
 namespace OHOS {

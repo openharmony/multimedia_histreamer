@@ -18,12 +18,6 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-template <typename T, typename U>
-static constexpr T AlignUp(T num, U alignment)
-{
-    return (alignment > 0) ? ((num + static_cast<T>(alignment) - 1) & (~(static_cast<T>(alignment) - 1))) : num;
-}
-
 Memory::Memory(size_t capacity, std::shared_ptr<uint8_t> bufData, size_t align)
     : capacity(capacity), alignment(align), offset(0), size(0), allocator(nullptr), addr(std::move(bufData))
 {

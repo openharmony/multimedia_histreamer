@@ -165,6 +165,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
         return ErrorCode::PLUGIN_NOT_FOUND;
     }
     ErrorCode err;
+    auto readSize = size;
     if (isSeekable_) {
         size_t totalSize = 0;
         if ((plugin_->GetSize(totalSize) == Status::OK) && (totalSize != 0)) {
@@ -172,12 +173,12 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
                 MEDIA_LOG_W("offset: %zu is larger than totalSize: %zu", offset, totalSize);
                 return ErrorCode::END_OF_STREAM;
             }
-            if ((offset + size) > totalSize) {
-                size = totalSize - offset;
+            if ((offset + readSize) > totalSize) {
+                readSize = totalSize - offset;
             }
             auto realSize = data->GetMemory()->GetCapacity();
-            if (size > realSize) {
-                size = realSize;
+            if (readSize > realSize) {
+                readSize = realSize;
             }
             MEDIA_LOG_D("totalSize_: %zu", totalSize);
         }
@@ -193,7 +194,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
     if (data == nullptr) {
         data = std::make_shared<AVBuffer>();
     }
-    err = TranslateError(plugin_->Read(data, size));
+    err = TranslateError(plugin_->Read(data, readSize));
     if (err == ErrorCode::SUCCESS) {
         position_ += data->GetMemory()->GetSize();
     }

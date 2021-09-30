@@ -22,6 +22,7 @@
 #include "foundation/constants.h"
 #include "factory/filter_factory.h"
 #include "plugin/common/plugin_video_tags.h"
+#include "plugin/common/plugin_buffer.h"
 #include "foundation/memory_helper.h"
 #include "foundation/log.h"
 
@@ -32,12 +33,6 @@ const uint32_t DEFAULT_IN_BUFFER_POOL_SIZE = 200;
 const uint32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 8;
 const float VIDEO_PIX_DEPTH = 1.5;
 static uint32_t VIDEO_ALIGN_SIZE = 16;
-
-template <typename T, typename U>
-static constexpr T AlignUp(T num, U alignment)
-{
-    return (alignment > 0) ? ((num + static_cast<T>(alignment) - 1) & (~(static_cast<T>(alignment) - 1))) : num;
-}
 
 static AutoRegisterFilter<VideoDecoderFilter> g_registerFilterHelper("builtin.player.videodecoder");
 
