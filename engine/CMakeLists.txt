@@ -82,6 +82,7 @@ if (WIN32)
             swresample
             SDL2
     )
+elseif (CMAKE_HOST_UNIX)
 else ()
     link_libraries(
             log
