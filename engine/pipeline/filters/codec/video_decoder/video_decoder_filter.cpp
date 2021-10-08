@@ -182,12 +182,12 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
     outBufPool_ = std::make_shared<BufferPool<AVBuffer>>(bufferCnt);
     // YUV420: size = stride * height * 1.5
     uint32_t bufferSize = 0;
-    uint32_t stride = AlignUp(vdecFormat_.width, VIDEO_ALIGN_SIZE);
+    uint32_t stride = Plugin::AlignUp(vdecFormat_.width, VIDEO_ALIGN_SIZE);
     if ((vdecFormat_.format == static_cast<uint32_t>(Plugin::VideoPixelFormat::YUV420P)) ||
         (vdecFormat_.format == static_cast<uint32_t>(Plugin::VideoPixelFormat::NV21)) ||
         (vdecFormat_.format == static_cast<uint32_t>(Plugin::VideoPixelFormat::NV12))) {
-        bufferSize = static_cast<uint32_t>(AlignUp(stride, VIDEO_ALIGN_SIZE) *
-                                           AlignUp(vdecFormat_.height, VIDEO_ALIGN_SIZE) * VIDEO_PIX_DEPTH);
+        bufferSize = static_cast<uint32_t>(Plugin::AlignUp(stride, VIDEO_ALIGN_SIZE) *
+                                           Plugin::AlignUp(vdecFormat_.height, VIDEO_ALIGN_SIZE) * VIDEO_PIX_DEPTH);
         MEDIA_LOG_D("Output buffer size: %u", bufferSize);
     } else {
         // need to check video sink support and calc buffer size
