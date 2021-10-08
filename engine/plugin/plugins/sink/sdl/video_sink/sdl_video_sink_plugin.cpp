@@ -93,8 +93,6 @@ static uint32_t TranslatePixelFormat(const VideoPixelFormat pixelFormat)
     return sdlFormat;
 }
 
-#define ALIGN_UP_16(value) (((value) + 15) & (~15))
-
 SdlVideoSinkPlugin::SdlVideoSinkPlugin(std::string name)
     : VideoSinkPlugin(std::move(name)), windowWidth_(DEFAULT_WINDOW_WIDTH), windowHeight_(DEFAULT_WINDOW_HEIGHT)
 {
@@ -264,34 +262,31 @@ Status SdlVideoSinkPlugin::GetParameter(Tag tag, ValueType& value)
 
 Status SdlVideoSinkPlugin::SetParameter(Tag tag, const ValueType& value)
 {
-#define RETURN_ERROR_IF_CHECK_ERROR(typenames)                                                                         \
-    if (value.Type() != typeid(typenames)) {                                                                           \
-        return Status::ERROR_INVALID_PARAMETER;                                                                        \
-        return Status::ERROR_INVALID_PARAMETER;                                                                        \
-    }
-
     switch (tag) {
         case Tag::VIDEO_WIDTH: {
-            RETURN_ERROR_IF_CHECK_ERROR(uint32_t);
-            pixelWidth_ = Plugin::AnyCast<uint32_t>(value);
-            MEDIA_LOG_D("pixelWidth_: %u", pixelWidth_);
+            if (value.Type() == typeid(uint32_t)) {
+                pixelWidth_ = Plugin::AnyCast<uint32_t>(value);
+                MEDIA_LOG_D("pixelWidth_: %u", pixelWidth_);
+            }
             break;
         }
         case Tag::VIDEO_HEIGHT: {
-            RETURN_ERROR_IF_CHECK_ERROR(uint32_t);
-            pixelHeight_ = Plugin::AnyCast<uint32_t>(value);
-            MEDIA_LOG_D("pixelHeight_: %u", pixelHeight_);
+            if (value.Type() == typeid(uint32_t)) {
+                pixelHeight_ = Plugin::AnyCast<uint32_t>(value);
+                MEDIA_LOG_D("pixelHeight_: %u", pixelHeight_);
+            }
             break;
         }
         case Tag::VIDEO_PIXEL_FORMAT: {
-            RETURN_ERROR_IF_CHECK_ERROR(uint32_t);
-            uint32_t format = Plugin::AnyCast<uint32_t>(value);
-            pixelFormat_ = TranslatePixelFormat(static_cast<VideoPixelFormat>(format));
-            MEDIA_LOG_D("SDL pixelFormat: %u", pixelFormat_);
+            if (value.Type() == typeid(uint32_t)) {
+                uint32_t format = Plugin::AnyCast<uint32_t>(value);
+                pixelFormat_ = TranslatePixelFormat(static_cast<VideoPixelFormat>(format));
+                MEDIA_LOG_D("SDL pixelFormat: %u", pixelFormat_);
+            }
             break;
         }
         default:
-            MEDIA_LOG_I("receive one parameter with unconcern key");
+            MEDIA_LOG_I("Unknown key");
             break;
     }
     return Status::OK;
@@ -342,8 +337,8 @@ bool SdlVideoSinkPlugin::IsFormatRGB()
 Status SdlVideoSinkPlugin::VideoImageDisaplay(const std::shared_ptr<Buffer>& inputInfo)
 {
     int32_t ret = -1;
-    const uint8_t* data[4] = {nullptr};
-    int32_t lineSize[4] = {0};
+    const uint8_t* data[4] = {nullptr}; // 4
+    int32_t lineSize[4] = {0}; // 4
     auto bufferMeta = inputInfo->GetBufferMeta();
     if (bufferMeta == nullptr || bufferMeta->GetType() != BufferMetaType::VIDEO) {
         MEDIA_LOG_E("Invalid video buffer");
@@ -395,7 +390,7 @@ int32_t SdlVideoSinkPlugin::UpdateNVTexture(const uint8_t** data, int32_t* lineS
 {
     int32_t ret;
     lineSize[1] = static_cast<int32_t>(videoMeta->stride[1]);
-    ySize = lineSize[0] * static_cast<int32_t>(ALIGN_UP_16(pixelHeight_));
+    ySize = lineSize[0] * static_cast<int32_t>(AlignUp(pixelHeight_, 16)); // 16
     MEDIA_LOG_D("lineSize[0]: %d, lineSize[1]: %d, ySize: %d", lineSize[0], lineSize[1], ySize);
     data[1] = ptr + ySize;
 #ifdef DUMP_RAW_DATA
@@ -417,8 +412,8 @@ int32_t SdlVideoSinkPlugin::UpdateYUVTexture(const uint8_t** data, int32_t* line
     int32_t ret;
     lineSize[1] = static_cast<int32_t>(videoMeta->stride[1]);
     lineSize[2] = static_cast<int32_t>(videoMeta->stride[2]); // 2
-    ySize = lineSize[0] * static_cast<int32_t>(ALIGN_UP_16(pixelHeight_));
-    uvSize = lineSize[1] * static_cast<int32_t>(ALIGN_UP_16(pixelHeight_)) / 2; // 2
+    ySize = lineSize[0] * static_cast<int32_t>(AlignUp(pixelHeight_, 16)); // 16
+    uvSize = lineSize[1] * static_cast<int32_t>(AlignUp(pixelHeight_, 16)) / 2; // 2, 16
     data[1] = data[0] + ySize;
     data[2] = data[1] + uvSize; // 2
 #ifdef DUMP_RAW_DATA

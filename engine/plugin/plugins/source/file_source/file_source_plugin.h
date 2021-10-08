@@ -48,8 +48,7 @@ public:
     Status SetParameter(Tag tag, const ValueType &value) override;
     std::shared_ptr<Allocator> GetAllocator() override;
     Status SetCallback(const std::shared_ptr<Callback> &cb) override;
-    Status SetSource(
-                std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params) override;
+    Status SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params = nullptr) override;
     Status Read(std::shared_ptr<Buffer> &buffer, size_t expectedLen) override;
     Status GetSize(size_t& size) override;
     bool IsSeekable() override;

@@ -33,6 +33,7 @@ const uint32_t DEFAULT_IN_BUFFER_POOL_SIZE = 200;
 const uint32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 8;
 const float VIDEO_PIX_DEPTH = 1.5;
 static uint32_t VIDEO_ALIGN_SIZE = 16;
+static uint32_t DEFAULT_TRY_DECODE_TIME = 10;
 
 static AutoRegisterFilter<VideoDecoderFilter> g_registerFilterHelper("builtin.player.videodecoder");
 
@@ -422,7 +423,7 @@ void VideoDecoderFilter::HandleOneFrame(const std::shared_ptr<AVBuffer>& data)
             break;
         }
         MEDIA_LOG_D("Send data to plugin error: %d", ret);
-        OSAL::SleepFor(10); // 10 ms
+        OSAL::SleepFor(DEFAULT_TRY_DECODE_TIME);
     } while (1);
 }
 

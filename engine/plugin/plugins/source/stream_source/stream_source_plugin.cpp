@@ -51,7 +51,7 @@ void* StreamSourceAllocator::Alloc(size_t size)
 void StreamSourceAllocator::Free(void* ptr)
 {
     if (ptr != nullptr) {
-        delete[] (uint8_t*) ptr;
+        delete[] (uint8_t*)ptr;
     }
 }
 
