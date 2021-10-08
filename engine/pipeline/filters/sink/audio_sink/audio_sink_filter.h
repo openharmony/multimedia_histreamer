@@ -34,7 +34,7 @@ public:
     explicit AudioSinkFilter(const std::string& name);
     ~AudioSinkFilter() override;
 
-    void Init(EventReceiver*, FilterCallback* callback) override;
+    void Init(EventReceiver* receiver, FilterCallback* callback) override;
 
     ErrorCode SetParameter(int32_t key, const Plugin::Any& value) override;
 

@@ -422,7 +422,7 @@ void VideoDecoderFilter::HandleOneFrame(const std::shared_ptr<AVBuffer>& data)
             break;
         }
         MEDIA_LOG_D("Send data to plugin error: %d", ret);
-        OSAL::SleepFor(10);
+        OSAL::SleepFor(10); // 10 ms
     } while (1);
 }
 
