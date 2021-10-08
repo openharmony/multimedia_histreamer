@@ -23,10 +23,11 @@ namespace Media {
 State::State(PlayExecutor& executor, std::string name) : executor_(executor), name_(std::move(name))
 {
 }
-std::tuple<ErrorCode, Action> State::Enter(Intent)
+std::tuple<ErrorCode, Action> State::Enter(Intent intent)
 {
+    (void)intent;
     MEDIA_LOG_D("Enter state: %s", name_.c_str());
-    return {SUCCESS, ACTION_BUTT};
+    return {SUCCESS, Action::ACTION_BUTT};
 }
 void State::Exit()
 {
@@ -40,37 +41,39 @@ const std::string& State::GetName()
 {
     return name_;
 }
-std::tuple<ErrorCode, Action> State::SetSource(const Plugin::Any&)
+std::tuple<ErrorCode, Action> State::SetSource(const Plugin::Any& source)
 {
-    return {INVALID_OPERATION, ACTION_BUTT};
+    (void)source;
+    return {INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::Play()
 {
-    return {INVALID_OPERATION, ACTION_BUTT};
+    return {INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::Stop()
 {
-    return {INVALID_OPERATION, ACTION_BUTT};
+    return {INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::Pause()
 {
-    return {INVALID_OPERATION, ACTION_BUTT};
+    return {INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::Resume()
 {
-    return {INVALID_OPERATION, ACTION_BUTT};
+    return {INVALID_OPERATION, Action::ACTION_BUTT};
 }
-std::tuple<ErrorCode, Action> State::Seek(const Plugin::Any&)
+std::tuple<ErrorCode, Action> State::Seek(const Plugin::Any& param)
 {
-    return {INVALID_OPERATION, ACTION_BUTT};
+    (void)param;
+    return {INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::SetAttribute()
 {
-    return {INVALID_OPERATION, ACTION_BUTT};
+    return {INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::OnReady()
 {
-    return {INVALID_OPERATION, ACTION_BUTT};
+    return {INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::OnError(const Plugin::Any& param)
 {
@@ -79,45 +82,45 @@ std::tuple<ErrorCode, Action> State::OnError(const Plugin::Any& param)
         errorCode = Plugin::AnyCast<ErrorCode>(param);
     }
     executor_.DoOnError(errorCode);
-    return {SUCCESS, TRANS_TO_INIT};
+    return {SUCCESS, Action::TRANS_TO_INIT};
 }
 std::tuple<ErrorCode, Action> State::OnComplete()
 {
-    return {SUCCESS, ACTION_BUTT};
+    return {SUCCESS, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin::Any& param)
 {
     ErrorCode rtv = SUCCESS;
-    Action nextAction = ACTION_BUTT;
+    Action nextAction = Action::ACTION_BUTT;
     switch (intent) {
-        case SET_SOURCE:
+        case Intent::SET_SOURCE:
             std::tie(rtv, nextAction) = SetSource(param);
             break;
-        case SEEK:
+        case Intent::SEEK:
             std::tie(rtv, nextAction) = Seek(param);
             break;
-        case PLAY:
+        case Intent::PLAY:
             std::tie(rtv, nextAction) = Play();
             break;
-        case PAUSE:
+        case Intent::PAUSE:
             std::tie(rtv, nextAction) = Pause();
             break;
-        case RESUME:
+        case Intent::RESUME:
             std::tie(rtv, nextAction) = Resume();
             break;
-        case STOP:
+        case Intent::STOP:
             std::tie(rtv, nextAction) = Stop();
             break;
-        case SET_ATTRIBUTE:
+        case Intent::SET_ATTRIBUTE:
             std::tie(rtv, nextAction) = SetAttribute();
             break;
-        case NOTIFY_READY:
+        case Intent::NOTIFY_READY:
             std::tie(rtv, nextAction) = OnReady();
             break;
-        case NOTIFY_COMPLETE:
+        case Intent::NOTIFY_COMPLETE:
             std::tie(rtv, nextAction) = OnComplete();
             break;
-        case NOTIFY_ERROR:
+        case Intent::NOTIFY_ERROR:
             std::tie(rtv, nextAction) = OnError(param);
             break;
         default:

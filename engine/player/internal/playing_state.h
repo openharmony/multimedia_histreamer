@@ -38,44 +38,44 @@ public:
     {
         MEDIA_LOG_D("Enter state: %s", name_.c_str());
         ErrorCode ret;
-        if (intent == RESUME) {
+        if (intent == Intent::RESUME) {
             ret = executor_.DoResume();
         } else {
             ret = executor_.DoPlay();
         }
-        return {ret, ACTION_BUTT};
+        return {ret, Action::ACTION_BUTT};
     }
 
     std::tuple<ErrorCode, Action> Play() override
     {
-        return {SUCCESS, ACTION_BUTT};
+        return {SUCCESS, Action::ACTION_BUTT};
     }
 
     std::tuple<ErrorCode, Action> Seek(const Plugin::Any& param) override
     {
         MEDIA_LOG_D("Seek in playing state.");
         if (param.Type() != typeid(int64_t)) {
-            return {INVALID_PARAM_VALUE, ACTION_BUTT};
+            return {INVALID_PARAM_VALUE, Action::ACTION_BUTT};
         }
         auto timeMs = Plugin::AnyCast<int64_t>(param);
         auto ret = executor_.DoSeek(timeMs);
-        return {ret, ACTION_BUTT};
+        return {ret, Action::ACTION_BUTT};
     }
 
     std::tuple<ErrorCode, Action> Pause() override
     {
-        return {SUCCESS, TRANS_TO_PAUSE};
+        return {SUCCESS, Action::TRANS_TO_PAUSE};
     }
 
     std::tuple<ErrorCode, Action> Stop() override
     {
-        return {SUCCESS, TRANS_TO_INIT};
+        return {SUCCESS, Action::TRANS_TO_INIT};
     }
 
     std::tuple<ErrorCode, Action> OnComplete() override
     {
         auto ret = executor_.DoOnComplete();
-        return {ret, ACTION_BUTT};
+        return {ret, Action::ACTION_BUTT};
     }
 };
 } // namespace Media

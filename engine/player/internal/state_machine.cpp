@@ -81,13 +81,13 @@ Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
     OSAL::ScopedLock lock(mutex_);
     lastIntent = intent;
     ErrorCode rtv = SUCCESS;
-    Action nextAction = ACTION_BUTT;
+    Action nextAction = Action::ACTION_BUTT;
     std::tie(rtv, nextAction) = curState_->Execute(intent, param);
     if (rtv == SUCCESS) {
         rtv = ProcAction(nextAction);
     }
     OnIntentExecuted(intent, nextAction, rtv);
-    return (rtv == SUCCESS) ? nextAction : ACTION_BUTT;
+    return (rtv == SUCCESS) ? nextAction : Action::ACTION_BUTT;
 }
 
 void StateMachine::DoTask()
@@ -99,25 +99,25 @@ void StateMachine::DoTask()
     }
     auto action = job();
     switch (action) {
-        case ACTION_PENDING:
+        case Action::ACTION_PENDING:
             pendingJobs_.push(job);
             break;
-        case TRANS_TO_INIT:
-        case TRANS_TO_READY:
-        case TRANS_TO_PREPARING:
-        case TRANS_TO_PLAYING:
-        case TRANS_TO_PAUSE: {
+        case Action::TRANS_TO_INIT:
+        case Action::TRANS_TO_READY:
+        case Action::TRANS_TO_PREPARING:
+        case Action::TRANS_TO_PLAYING:
+        case Action::TRANS_TO_PAUSE: {
             if (!pendingJobs_.empty()) {
                 job = pendingJobs_.front();
                 pendingJobs_.pop();
                 action = job();
-                if (action == ACTION_PENDING) {
+                if (action == Action::ACTION_PENDING) {
                     pendingJobs_.push(job);
                 }
             }
             break;
         }
-        case ACTION_BUTT:
+        case Action::ACTION_BUTT:
             // fall through
         default:
             break;
@@ -133,19 +133,19 @@ ErrorCode StateMachine::ProcAction(Action nextAction)
 {
     std::shared_ptr<State> nextState = nullptr;
     switch (nextAction) {
-        case TRANS_TO_INIT:
+        case Action::TRANS_TO_INIT:
             nextState = states_["InitState"];
             break;
-        case TRANS_TO_PREPARING:
+        case Action::TRANS_TO_PREPARING:
             nextState = states_["PreparingState"];
             break;
-        case TRANS_TO_READY:
+        case Action::TRANS_TO_READY:
             nextState = states_["ReadyState"];
             break;
-        case TRANS_TO_PLAYING:
+        case Action::TRANS_TO_PLAYING:
             nextState = states_["PlayingState"];
             break;
-        case TRANS_TO_PAUSE:
+        case Action::TRANS_TO_PAUSE:
             nextState = states_["PauseState"];
             break;
         default:
@@ -184,16 +184,16 @@ void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode resu
 {
     MEDIA_LOG_D("OnIntentExecuted, curState: %s, intent: %d, action: %d, result: %d", curState_->GetName().c_str(),
                 static_cast<int>(intent), static_cast<int>(action), static_cast<int>(result));
-    if (action == ACTION_PENDING) {
+    if (action == Action::ACTION_PENDING) {
         return;
     }
-    if (intent == PLAY) {
-        if (action == TRANS_TO_PLAYING) {
-            intentSync_.Notify(PLAY, result);
+    if (intent == Intent::PLAY) {
+        if (action == Action::TRANS_TO_PLAYING) {
+            intentSync_.Notify(Intent::PLAY, result);
         }
     } else {
-        if (intent == NOTIFY_READY && action == TRANS_TO_PLAYING) {
-            intentSync_.Notify(PLAY, result);
+        if (intent == Intent::NOTIFY_READY && action == Action::TRANS_TO_PLAYING) {
+            intentSync_.Notify(Intent::PLAY, result);
         } else {
             intentSync_.Notify(intent, result);
         }

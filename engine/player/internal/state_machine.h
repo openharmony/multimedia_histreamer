@@ -34,7 +34,7 @@
 #include "init_state.h"
 #include "pause_state.h"
 #include "playing_state.h"
-#include "prepare_state.h"
+#include "preparing_state.h"
 #include "ready_state.h"
 
 namespace OHOS {
@@ -80,14 +80,14 @@ private:
 
     void OnIntentExecuted(Intent intent, Action action, ErrorCode result);
 
-    mutable OSAL::Mutex mutex_ {};
+    mutable OSAL::Mutex mutex_{};
     mutable OSAL::Synchronizer<Intent, ErrorCode> intentSync_;
-    mutable std::shared_ptr<State> curState_ {nullptr};
-    mutable Intent lastIntent {INTENT_BUTT};
-    std::map<std::string, std::shared_ptr<State>> states_ {};
+    mutable std::shared_ptr<State> curState_{nullptr};
+    mutable Intent lastIntent{Intent::INTENT_BUTT};
+    std::map<std::string, std::shared_ptr<State>> states_{};
     Media::BlockingQueue<Job> jobs_;
-    std::queue<Job> pendingJobs_ {};
-    StateChangeCallback* callback_ {nullptr};
+    std::queue<Job> pendingJobs_{};
+    StateChangeCallback* callback_{nullptr};
 };
 } // namespace Media
 } // namespace OHOS

@@ -34,33 +34,34 @@ public:
 
     ~ReadyState() override = default;
 
-    std::tuple<ErrorCode, Action> Enter(Intent) override
+    std::tuple<ErrorCode, Action> Enter(Intent intent) override
     {
+        (void)intent;
         auto rtv = executor_.DoOnReady();
-        return {rtv, ACTION_BUTT};
+        return {rtv, Action::ACTION_BUTT};
     }
 
     std::tuple<ErrorCode, Action> Seek(const Plugin::Any& param) override
     {
         MEDIA_LOG_D("Seek in ready state.");
         if (param.Type() != typeid(int64_t)) {
-            return {INVALID_PARAM_VALUE, ACTION_BUTT};
+            return {INVALID_PARAM_VALUE, Action::ACTION_BUTT};
         }
         auto timeMs = Plugin::AnyCast<int64_t>(param);
         auto ret = executor_.DoSeek(timeMs);
-        return {ret, ACTION_BUTT};
+        return {ret, Action::ACTION_BUTT};
     }
 
     std::tuple<ErrorCode, Action> Play() override
     {
         MEDIA_LOG_D("Play in ready state.");
-        return {SUCCESS, TRANS_TO_PLAYING};
+        return {SUCCESS, Action::TRANS_TO_PLAYING};
     }
 
     std::tuple<ErrorCode, Action> Stop() override
     {
         MEDIA_LOG_D("Stop in ready state.");
-        return {SUCCESS, TRANS_TO_INIT};
+        return {SUCCESS, Action::TRANS_TO_INIT};
     }
 };
 } // namespace Media
