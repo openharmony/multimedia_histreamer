@@ -22,13 +22,6 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-namespace {
-const uint32_t SAMPLE_RATES[] = {
-    96000, 88200, 64000, 48000, 44100, 32000, 24000,
-    22050, 16000, 12000, 11025, 8000,  7350
-};
-}
-
 AACAudioConfigParser::AACAudioConfigParser(const uint8_t* audioConfig, size_t len)
     : bitReader_(audioConfig, len), isConfigValid_(false)
 {
@@ -93,8 +86,10 @@ bool AACAudioConfigParser::ParseSampleRate()
             return false;
         }
     } else {
-        if (sampleFreqIndex < sizeof(SAMPLE_RATES) / sizeof(uint32_t)) {
-            sampleRate = SAMPLE_RATES[sampleFreqIndex];
+        const uint32_t sampleRates[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000,
+                                        22050, 16000, 12000, 11025, 8000,  7350};
+        if (sampleFreqIndex < sizeof(sampleRates) / sizeof(uint32_t)) {
+            sampleRate = sampleRates[sampleFreqIndex];
         } else {
             return false;
         }
@@ -201,17 +196,17 @@ bool AACAudioConfigParser::ExtractReferencePRCU(int& refPcu, int& refRcu)
         case 0: /* NULL */
             MEDIA_LOG_W("profile 0 is not a valid profile");
             return false;
-        case 2:          // 2, LC
-            refPcu = 3;  // 3
-            refRcu = 3;  // 3
+        case 2:         // 2, LC
+            refPcu = 3; // 3
+            refRcu = 3; // 3
             break;
-        case 3:           // 3, SSR
-            refPcu = 4;   // 4
-            refRcu = 3;   // 3
+        case 3:         // 3, SSR
+            refPcu = 4; // 4
+            refRcu = 3; // 3
             break;
-        case 4:           // 4, LTP
-            refPcu = 4;   // 4
-            refRcu = 4;   // 4
+        case 4:         // 4, LTP
+            refPcu = 4; // 4
+            refRcu = 4; // 4
             break;
         case 1: /* Main */
         default:
@@ -232,24 +227,24 @@ bool AACAudioConfigParser::ExtractReferencePRCU(int& refPcu, int& refRcu)
  */
 bool AACAudioConfigParser::CalculateProfile(int channelCnt, int pcu, int rcu)
 {
-#define AAC_PROFILE_VALUE_RANGE(maxChannelCnt, maxSampleRate, maxPcu, maxRcu) \
+#define AAC_PROFILE_VALUE_RANGE(maxChannelCnt, maxSampleRate, maxPcu, maxRcu)                                          \
     channelCnt <= (maxChannelCnt) && audioConfig_.sampleRate <= (maxSampleRate) && pcu <= (maxPcu) && rcu <= (maxRcu)
 
     int ret = -1;                            // -1
     if (audioConfig_.audioObjectType == 2) { // 2
         /* AAC LC => return the level as per the 'AAC Profile' */
-        if (AAC_PROFILE_VALUE_RANGE(2, 24000, 3, 5)) { // 2 24000 3 5
-            ret = 1;                                                                                // 1
+        if (AAC_PROFILE_VALUE_RANGE(2, 24000, 3, 5)) {          // 2 24000 3 5
+            ret = 1;                                            // 1
         } else if (AAC_PROFILE_VALUE_RANGE(2, 48000, 6, 5)) {   // 2 48000 6 5
-            ret = 2;                                                                                // 2
+            ret = 2;                                            // 2
         } else if (AAC_PROFILE_VALUE_RANGE(5, 48000, 19, 15)) { // 5 48000 19 15
-            ret = 4;                                                                                // 4
+            ret = 4;                                            // 4
         } else if (AAC_PROFILE_VALUE_RANGE(5, 96000, 38, 15)) { // 5 96000 38 15
-            ret = 5;                                                                                // 5
+            ret = 5;                                            // 5
         } else if (AAC_PROFILE_VALUE_RANGE(7, 48000, 25, 19)) { // 7 48000 25 19
-            ret = 6;                                                                                // 6
+            ret = 6;                                            // 6
         } else if (AAC_PROFILE_VALUE_RANGE(7, 96000, 50, 19)) { // 7 96000 50 19
-            ret = 7;                                                                                // 7
+            ret = 7;                                            // 7
         }
     } else {
         /* Return the level as per the 'Main Profile' */
@@ -301,8 +296,8 @@ bool AACAudioConfigParser::ParseLevel()
     if (!ExtractReferencePRCU(refPcu, refRcu)) {
         return false;
     }
-    int tmp = (static_cast<float>(audioConfig_.sampleRate) / 48000) * refPcu; // 48000
-    int pcu = tmp * ((2 * cpeCnt) + sceCnt + lfeCnt + indepCce + (0.3 * depCce));    // 48000 2 0.3
+    int tmp = (static_cast<float>(audioConfig_.sampleRate) / 48000) * refPcu;     // 48000
+    int pcu = tmp * ((2 * cpeCnt) + sceCnt + lfeCnt + indepCce + (0.3 * depCce)); // 48000 2 0.3
     int rcu = (static_cast<float>(refRcu)) * (sceCnt + (0.5 * lfeCnt) + (0.5 * indepCce) + (0.4 * depCce)); // 0.5 0.4
     if (cpeCnt < 2) {                                                                                       // 2
         rcu += (refRcu + (refRcu - 1)) * cpeCnt;

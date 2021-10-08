@@ -19,15 +19,15 @@
 #define MEDIA_PIPELINE_VIDEO_SINK_FILTER_H
 
 #include <atomic>
-#include "osal/thread/task.h"
-#include "foundation/utils.h"
-#include "foundation/error_code.h"
-#include "pipeline/core/filter_base.h"
 #include "foundation/blocking_queue.h"
-#include "osal/thread/mutex.h"
+#include "foundation/error_code.h"
+#include "foundation/utils.h"
 #include "osal/thread/condition_variable.h"
-#include "plugin/core/video_sink.h"
+#include "osal/thread/mutex.h"
+#include "osal/thread/task.h"
+#include "pipeline/core/filter_base.h"
 #include "plugin/core/plugin_info.h"
+#include "plugin/core/video_sink.h"
 
 namespace OHOS {
 namespace Media {
@@ -44,10 +44,10 @@ public:
 
     ErrorCode GetParameter(int32_t key, Plugin::Any& value) override;
 
-    bool Negotiate(const std::string &inPort, const std::shared_ptr<const OHOS::Media::Meta> &inMeta,
-                   CapabilitySet &outCaps) override;
+    bool Negotiate(const std::string& inPort, const std::shared_ptr<const OHOS::Media::Meta>& inMeta,
+                   CapabilitySet& outCaps) override;
 
-    ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer) override;
+    ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) override;
 
     ErrorCode Start() override;
     ErrorCode Stop() override;
@@ -59,25 +59,25 @@ public:
     void FlushEnd() override;
 
 private:
-    ErrorCode ConfigurePluginParams(const std::shared_ptr<const Meta> &meta);
-    ErrorCode ConfigureLocked(const std::shared_ptr<const OHOS::Media::Meta> &meta);
+    ErrorCode ConfigurePluginParams(const std::shared_ptr<const Meta>& meta);
+    ErrorCode ConfigureLocked(const std::shared_ptr<const OHOS::Media::Meta>& meta);
     void RenderFrame();
     bool DoSync();
 
     std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQueue_;
     std::shared_ptr<OHOS::Media::OSAL::Task> renderTask_;
     std::shared_ptr<VideoSinkAdapter> adapter_;
-    std::atomic<bool> pushThreadIsBlocking_ {false};
-    bool isFlushing_ {false};
-    OSAL::ConditionVariable startWorkingCondition_ {};
+    std::atomic<bool> pushThreadIsBlocking_{false};
+    bool isFlushing_{false};
+    OSAL::ConditionVariable startWorkingCondition_{};
     OSAL::Mutex mutex_;
 
-    std::shared_ptr<Plugin::VideoSink> plugin_ {nullptr};
-    std::shared_ptr<Plugin::PluginInfo> pluginInfo_ {nullptr};
+    std::shared_ptr<Plugin::VideoSink> plugin_{nullptr};
+    std::shared_ptr<Plugin::PluginInfo> pluginInfo_{nullptr};
 };
-}
-}
-}
+} // namespace Pipeline
+} // namespace Media
+} // namespace OHOS
 
 #endif // MEDIA_PIPELINE_VIDEO_SINK_FILTER_H
 

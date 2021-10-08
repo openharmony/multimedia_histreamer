@@ -224,18 +224,18 @@ bool TypeFinder::GetPlugins()
     return !plugins_.empty();
 }
 
-void TypeFinder::SortPlugins(const std::string& suffix)
+void TypeFinder::SortPlugins(const std::string& uriSuffix)
 {
-    if (suffix.empty()) {
+    if (uriSuffix.empty()) {
         return;
     }
     std::stable_sort(
         plugins_.begin(), plugins_.end(),
-        [&suffix](const std::shared_ptr<Plugin::PluginInfo>& lhs, const std::shared_ptr<Plugin::PluginInfo>& rhs) {
-            if (IsPluginSupportedExtension(*lhs, suffix)) {
-                return (lhs->rank >= rhs->rank) || !IsPluginSupportedExtension(*rhs, suffix);
+        [&uriSuffix](const std::shared_ptr<Plugin::PluginInfo>& lhs, const std::shared_ptr<Plugin::PluginInfo>& rhs) {
+            if (IsPluginSupportedExtension(*lhs, uriSuffix)) {
+                return (lhs->rank >= rhs->rank) || !IsPluginSupportedExtension(*rhs, uriSuffix);
             } else {
-                return (lhs->rank >= rhs->rank) && !IsPluginSupportedExtension(*rhs, suffix);
+                return (lhs->rank >= rhs->rank) && !IsPluginSupportedExtension(*rhs, uriSuffix);
             }
         });
 }

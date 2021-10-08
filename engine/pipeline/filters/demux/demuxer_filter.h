@@ -22,9 +22,9 @@
 #include "core/filter_base.h"
 #include "data_packer.h"
 #include "foundation/meta.h"
+#include "foundation/osal/thread/mutex.h"
 #include "foundation/type_define.h"
 #include "foundation/utils.h"
-#include "foundation/osal/thread/mutex.h"
 #include "plugin/core/demuxer.h"
 #include "thread/task.h"
 #include "type_finder.h"
@@ -68,7 +68,7 @@ public:
 private:
     class DataSourceImpl;
 
-    enum DemuxerState { DEMUXER_STATE_NULL, DEMUXER_STATE_PARSE_HEADER, DEMUXER_STATE_PARSE_FRAME };
+    enum class DemuxerState { DEMUXER_STATE_NULL, DEMUXER_STATE_PARSE_HEADER, DEMUXER_STATE_PARSE_FRAME };
 
     struct StreamTrackInfo {
         uint32_t streamIdx = 0;

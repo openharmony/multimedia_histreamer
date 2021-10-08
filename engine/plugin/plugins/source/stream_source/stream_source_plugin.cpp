@@ -51,7 +51,7 @@ void* StreamSourceAllocator::Alloc(size_t size)
 void StreamSourceAllocator::Free(void* ptr)
 {
     if (ptr != nullptr) {
-        delete[] (uint8_t*)ptr;
+        delete[](uint8_t*) ptr;
     }
 }
 
@@ -76,8 +76,12 @@ void StreamSourceCallback::QueueBuffer(size_t index, size_t offset, size_t size,
 }
 
 StreamSourcePlugin::StreamSourcePlugin(std::string name)
-    : SourcePlugin(std::move(name)), bufferPool_(0), state_(State::CREATED), isSeekable_(false),
-    waitBuffers_(), bufferQueue_("SourceBuffQue")
+    : SourcePlugin(std::move(name)),
+      bufferPool_(0),
+      state_(State::CREATED),
+      isSeekable_(false),
+      waitBuffers_(),
+      bufferQueue_("SourceBuffQue")
 {
     MEDIA_LOG_D("ctor called");
 }

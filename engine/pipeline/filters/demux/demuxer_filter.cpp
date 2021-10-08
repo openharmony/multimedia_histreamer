@@ -58,17 +58,17 @@ Plugin::Status DemuxerFilter::DataSourceImpl::ReadAt(int64_t offset, std::shared
     }
     Plugin::Status rtv = Plugin::Status::OK;
     switch (filter.pluginState_.load()) {
-        case DEMUXER_STATE_NULL:
+        case DemuxerState::DEMUXER_STATE_NULL:
             rtv = Plugin::Status::ERROR_WRONG_STATE;
             MEDIA_LOG_E("ReadAt error due to DEMUXER_STATE_NULL");
             break;
-        case DEMUXER_STATE_PARSE_HEADER: {
+        case DemuxerState::DEMUXER_STATE_PARSE_HEADER: {
             if (!filter.peekRange_(static_cast<uint64_t>(offset), expectedLen, buffer)) {
                 rtv = Plugin::Status::ERROR_NOT_ENOUGH_DATA;
             }
             break;
         }
-        case DEMUXER_STATE_PARSE_FRAME: {
+        case DemuxerState::DEMUXER_STATE_PARSE_FRAME: {
             if (!filter.getRange_(static_cast<uint64_t>(offset), expectedLen, buffer)) {
                 rtv = Plugin::Status::END_OF_STREAM;
             }
@@ -95,7 +95,7 @@ DemuxerFilter::DemuxerFilter(std::string name)
       dataPacker_(nullptr),
       pluginName_(),
       plugin_(nullptr),
-      pluginState_(DEMUXER_STATE_NULL),
+      pluginState_(DemuxerState::DEMUXER_STATE_NULL),
       pluginAllocator_(nullptr),
       dataSource_(std::make_shared<DataSourceImpl>(*this)),
       mediaMetaData_(),
@@ -179,7 +179,7 @@ void DemuxerFilter::FlushEnd()
 ErrorCode DemuxerFilter::Prepare()
 {
     MEDIA_LOG_D("Prepare called");
-    pluginState_ = DEMUXER_STATE_NULL;
+    pluginState_ = DemuxerState::DEMUXER_STATE_NULL;
     Pipeline::WorkMode mode;
     GetInPort(PORT_NAME_DEFAULT)->Activate({Pipeline::WorkMode::PULL, Pipeline::WorkMode::PUSH}, mode);
     if (mode == Pipeline::WorkMode::PULL) {
@@ -201,8 +201,11 @@ ErrorCode DemuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
     return SUCCESS;
 }
 
-bool DemuxerFilter::Negotiate(const std::string&, const std::shared_ptr<const Meta>& inMeta, CapabilitySet&)
+bool DemuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Meta>& inMeta,
+                              CapabilitySet& outCaps)
 {
+    (void)inPort;
+    (void)outCaps;
     return inMeta->GetString(Media::Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_) &&
            inMeta->GetUint64(Media::Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
 }
@@ -277,7 +280,7 @@ bool DemuxerFilter::InitPlugin(std::string pluginName)
     }
     MEDIA_LOG_W("InitPlugin, %s used.", pluginName_.c_str());
     plugin_->SetDataSource(std::dynamic_pointer_cast<Plugin::DataSourceHelper>(dataSource_));
-    pluginState_ = DEMUXER_STATE_PARSE_HEADER;
+    pluginState_ = DemuxerState::DEMUXER_STATE_PARSE_HEADER;
     plugin_->Prepare();
     return true;
 }
@@ -452,7 +455,7 @@ void DemuxerFilter::NegotiateDownstream()
 
 void DemuxerFilter::DemuxerLoop()
 {
-    if (pluginState_.load() == DEMUXER_STATE_PARSE_FRAME) {
+    if (pluginState_.load() == DemuxerState::DEMUXER_STATE_PARSE_FRAME) {
         AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
         uint32_t streamIndex = 0;
         auto rtv = ReadFrame(*bufferPtr, streamIndex);
@@ -469,7 +472,7 @@ void DemuxerFilter::DemuxerLoop()
         Plugin::MediaInfoHelper mediaInfo;
         if (plugin_->GetMediaInfo(mediaInfo) == Plugin::Status::OK && PrepareStreams(mediaInfo)) {
             NegotiateDownstream();
-            pluginState_ = DEMUXER_STATE_PARSE_FRAME;
+            pluginState_ = DemuxerState::DEMUXER_STATE_PARSE_FRAME;
             state_ = FilterState::READY;
             OnEvent({EVENT_READY, {}});
         } else {

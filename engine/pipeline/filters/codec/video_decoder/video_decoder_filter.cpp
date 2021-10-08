@@ -18,13 +18,13 @@
 #define LOG_TAG "VideoDecoderFilter"
 
 #include "video_decoder_filter.h"
-#include "utils/util.h"
-#include "foundation/constants.h"
 #include "factory/filter_factory.h"
-#include "plugin/common/plugin_video_tags.h"
-#include "plugin/common/plugin_buffer.h"
-#include "foundation/memory_helper.h"
+#include "foundation/constants.h"
 #include "foundation/log.h"
+#include "foundation/memory_helper.h"
+#include "plugin/common/plugin_buffer.h"
+#include "plugin/common/plugin_video_tags.h"
+#include "utils/util.h"
 
 namespace OHOS {
 namespace Media {
@@ -39,18 +39,18 @@ static AutoRegisterFilter<VideoDecoderFilter> g_registerFilterHelper("builtin.pl
 
 class VideoDecoderFilter::DataCallbackImpl : public Plugin::DataCallbackHelper {
 public:
-    explicit DataCallbackImpl(VideoDecoderFilter& filter): decFilter_(filter)
+    explicit DataCallbackImpl(VideoDecoderFilter& filter) : decFilter_(filter)
     {
     }
 
     ~DataCallbackImpl() override = default;
 
-    void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer> &input) override
+    void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input) override
     {
         decFilter_.OnInputBufferDone(input);
     }
 
-    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer> &output) override
+    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override
     {
         decFilter_.OnOutputBufferDone(output);
     }
@@ -59,8 +59,8 @@ private:
     VideoDecoderFilter& decFilter_;
 };
 
-VideoDecoderFilter::VideoDecoderFilter(const std::string &name): DecoderFilterBase(name),
-    dataCallback_(std::make_shared<DataCallbackImpl>(*this))
+VideoDecoderFilter::VideoDecoderFilter(const std::string& name)
+    : DecoderFilterBase(name), dataCallback_(std::make_shared<DataCallbackImpl>(*this))
 {
     MEDIA_LOG_I("video decoder ctor called");
     vdecFormat_.width = 0;
@@ -111,8 +111,7 @@ ErrorCode VideoDecoderFilter::Prepare()
         return ERROR_STATE;
     }
     if (!outBufQue_) {
-        outBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("vdecFilterOutBufQue",
-                                                                  DEFAULT_OUT_BUFFER_POOL_SIZE);
+        outBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("vdecFilterOutBufQue", DEFAULT_OUT_BUFFER_POOL_SIZE);
     } else {
         outBufQue_->SetActive(true);
     }
@@ -121,8 +120,7 @@ ErrorCode VideoDecoderFilter::Prepare()
         pushTask_->RegisterHandler([this] { FinishFrame(); });
     }
     if (!inBufQue_) {
-        inBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("vdecFilterInBufQue",
-                                                                 DEFAULT_IN_BUFFER_POOL_SIZE);
+        inBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("vdecFilterInBufQue", DEFAULT_IN_BUFFER_POOL_SIZE);
     } else {
         inBufQue_->SetActive(true);
     }
@@ -133,7 +131,7 @@ ErrorCode VideoDecoderFilter::Prepare()
     return FilterBase::Prepare();
 }
 
-bool VideoDecoderFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Meta> &inMeta,
+bool VideoDecoderFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Meta>& inMeta,
                                    CapabilitySet& outCaps)
 {
     if (state_ != FilterState::PREPARING) {
@@ -142,11 +140,11 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort, const std::shared_
     }
 
     MEDIA_LOG_D("video decoder negotiate called");
-    auto creator = [] (const std::string& pluginName) {
+    auto creator = [](const std::string& pluginName) {
         return Plugin::PluginManager::Instance().CreateCodecPlugin(pluginName);
     };
-    ErrorCode err = FindPluginAndUpdate<Plugin::Codec>(inMeta, Plugin::PluginType::CODEC, plugin_,
-                                                       targetPluginInfo_, creator);
+    ErrorCode err =
+        FindPluginAndUpdate<Plugin::Codec>(inMeta, Plugin::PluginType::CODEC, plugin_, targetPluginInfo_, creator);
     RETURN_TARGET_ERR_MESSAGE_LOG_IF_FAIL(err, false, "cannot find matched plugin");
     outCaps = targetPluginInfo_->inCaps;
     auto targetOutPort = GetRouteOutPort(inPort);
@@ -156,7 +154,7 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort, const std::shared_
     }
     if (Configure(inMeta) != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("decoder configure error");
-        Event event {
+        Event event{
             .type = EVENT_ERROR,
             .param = err,
         };
@@ -189,7 +187,7 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
         (vdecFormat_.format == static_cast<uint32_t>(Plugin::VideoPixelFormat::NV21)) ||
         (vdecFormat_.format == static_cast<uint32_t>(Plugin::VideoPixelFormat::NV12))) {
         bufferSize = static_cast<uint32_t>(AlignUp(stride, VIDEO_ALIGN_SIZE) *
-                        AlignUp(vdecFormat_.height, VIDEO_ALIGN_SIZE) * VIDEO_PIX_DEPTH);
+                                           AlignUp(vdecFormat_.height, VIDEO_ALIGN_SIZE) * VIDEO_PIX_DEPTH);
         MEDIA_LOG_D("Output buffer size: %u", bufferSize);
     } else {
         // need to check video sink support and calc buffer size
@@ -316,7 +314,7 @@ ErrorCode VideoDecoderFilter::Configure(const std::shared_ptr<const Meta>& meta)
         pushTask_->Start();
     }
     state_ = FilterState::READY;
-    Event event {
+    Event event{
         .type = EVENT_READY,
     };
     OnEvent(event);
@@ -448,16 +446,16 @@ void VideoDecoderFilter::FinishFrame()
     MEDIA_LOG_D("end finish frame");
 }
 
-void VideoDecoderFilter::OnInputBufferDone(const std::shared_ptr<AVBuffer> &buffer)
+void VideoDecoderFilter::OnInputBufferDone(const std::shared_ptr<AVBuffer>& buffer)
 {
     // do nothing since we has no input buffer pool
 }
 
-void VideoDecoderFilter::OnOutputBufferDone(const std::shared_ptr<AVBuffer> &buffer)
+void VideoDecoderFilter::OnOutputBufferDone(const std::shared_ptr<AVBuffer>& buffer)
 {
     outBufQue_->Push(buffer);
 }
-}
-}
-}
+} // namespace Pipeline
+} // namespace Media
+} // namespace OHOS
 #endif
