@@ -52,7 +52,7 @@ if (defined(ohos_lite)) {
                 "core/plugin_manager.cpp",
                 "core/source.cpp",
             ]
-            defines = [ "HI3516DV300" ]
+            defines = [ "HI3516DV300", "OSAL_OHOS" ]
             if (plugin_dynamic_register) {
                 sources += [
                     "engine/plugin/core/plugin_loader.cpp",
@@ -62,6 +62,10 @@ if (defined(ohos_lite)) {
             include_dirs = [
                 ".",
                 "../",
+                "../foundation",
+                "../foundation/osal",
+                "//foundation/multimedia/utils/lite/interfaces/kits",
+                "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits",
             ]
             cflags = [ "-O2", "-fPIC", "-Wall" ]
             cflags_cc = cflags

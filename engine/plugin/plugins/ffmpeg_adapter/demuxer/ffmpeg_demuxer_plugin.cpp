@@ -74,7 +74,7 @@ void FFmpegDemuxerPlugin::DemuxerPluginAllocator::Free(void* ptr)
 }
 
 FFmpegDemuxerPlugin::FFmpegDemuxerPlugin(std::string name)
-    : name_(std::move(name)),
+    : DemuxerPlugin(std::move(name)),
       ioContext_(),
       callback_(nullptr),
       pluginImpl_(nullptr),
@@ -83,7 +83,7 @@ FFmpegDemuxerPlugin::FFmpegDemuxerPlugin(std::string name)
       mediaInfo_(nullptr),
       selectedTrackIds_()
 {
-    MEDIA_LOG_I("ctor called, plugin name: %s", name_.c_str());
+    MEDIA_LOG_I("ctor called, plugin name: %s", pluginName_.c_str());
 }
 
 FFmpegDemuxerPlugin::~FFmpegDemuxerPlugin()
@@ -96,7 +96,7 @@ Status FFmpegDemuxerPlugin::Init()
 {
     MEDIA_LOG_I("Init called.");
     Reset();
-    pluginImpl_ = g_pluginInputFormat[name_];
+    pluginImpl_ = g_pluginInputFormat[pluginName_];
 
     return pluginImpl_ ? Status::OK : Status::ERROR_UNSUPPORTED_FORMAT;
 }

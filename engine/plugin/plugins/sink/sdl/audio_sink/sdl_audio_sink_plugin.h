@@ -92,7 +92,6 @@ public:
 private:
     void AudioCallback(void* userdata, uint8_t* stream, int len);
 
-    std::string aliasName_ {};
     std::vector<uint8_t> transformCache_ {};
     std::vector<uint8_t> mixCache_ {};
     std::unique_ptr<RingBuffer> rb {};

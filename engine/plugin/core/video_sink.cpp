@@ -13,9 +13,14 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "PluginCoreViSink"
+
 #include "video_sink.h"
 
+#include "foundation/log.h"
+#include "foundation/osal/thread/scoped_lock.h"
 #include "interface/video_sink_plugin.h"
+#include "utils.h"
 
 using namespace OHOS::Media::Plugin;
 
@@ -26,12 +31,38 @@ VideoSink::VideoSink(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<VideoSink
 
 Status VideoSink::Pause()
 {
-    return videoSink->Pause();
+    MEDIA_LOG_I("%s Enter.", __FUNCTION__);
+    OSAL::ScopedLock lock(stateChangeMutex_);
+    if (pluginState_ != State::RUNNING) {
+        MEDIA_LOG_I("plugin %s pause in status %s, ignore pause", plugin_->GetName().c_str(),
+                    GetStateString(pluginState_.load()));
+        return Status::OK;
+    }
+    auto ret = videoSink->Pause();
+    LOG_WARN_IF_NOT_OK(plugin_, ret);
+    if (ret == Status::OK) {
+        pluginState_ = State::PAUSED;
+    }
+    MEDIA_LOG_I("%s Exit.", __FUNCTION__);
+    return ret;
 }
 
 Status VideoSink::Resume()
 {
-    return videoSink->Resume();
+    MEDIA_LOG_I("%s Enter.", __FUNCTION__);
+    OSAL::ScopedLock lock(stateChangeMutex_);
+    if (pluginState_ != State::PAUSED) {
+        MEDIA_LOG_I("plugin %s resume in status %s, ignore pause", plugin_->GetName().c_str(),
+                    GetStateString(pluginState_.load()));
+        return Status::OK;
+    }
+    auto ret = videoSink->Resume();
+    LOG_WARN_IF_NOT_OK(plugin_, ret);
+    if (ret == Status::OK) {
+        pluginState_ = State::RUNNING;
+    }
+    MEDIA_LOG_I("%s Exit.", __FUNCTION__);
+    return ret;
 }
 
 Status VideoSink::Flush()

@@ -57,8 +57,8 @@ void FileSourceAllocator::Free(void* ptr)
     }
 }
 
-FileSourcePlugin::FileSourcePlugin(const std::string &name)
-    : name_(name), state_(State::CREATED), fileSize_(0), isSeekable_(true), position_(0)
+FileSourcePlugin::FileSourcePlugin(std::string name)
+    : SourcePlugin(std::move(name)), state_(State::CREATED), fileSize_(0), isSeekable_(true), position_(0)
 {
     MEDIA_LOG_D("IN");
     state_ = State::CREATED;

@@ -13,25 +13,54 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "PluginCoreAuSink"
+
 #include "audio_sink.h"
 
+#include "foundation/log.h"
+#include "foundation/osal/thread/scoped_lock.h"
 #include "interface/audio_sink_plugin.h"
+#include "utils.h"
 
 using namespace OHOS::Media::Plugin;
 
 AudioSink::AudioSink(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<AudioSinkPlugin> plugin)
-    : Base(pkgVer, apiVer, plugin), audioSink(std::move(plugin))
-{
-}
+    : Base(pkgVer, apiVer, plugin), audioSink(std::move(plugin)) {}
 
 Status AudioSink::Pause()
 {
-    return audioSink->Pause();
+    MEDIA_LOG_I("%s Enter.", __FUNCTION__);
+    OSAL::ScopedLock lock(stateChangeMutex_);
+    if (pluginState_ != State::RUNNING) {
+        MEDIA_LOG_I("plugin %s pause in status %s, ignore pause", plugin_->GetName().c_str(),
+            GetStateString(pluginState_.load()));
+        return Status::OK;
+    }
+    auto ret = audioSink->Pause();
+    LOG_WARN_IF_NOT_OK(plugin_, ret);
+    if (ret == Status::OK) {
+        pluginState_ = State::PAUSED;
+    }
+    MEDIA_LOG_I("%s Exit.", __FUNCTION__);
+    return ret;
 }
 
 Status AudioSink::Resume()
 {
-    return audioSink->Resume();
+    MEDIA_LOG_I("%s Enter.", __FUNCTION__);
+    OSAL::ScopedLock lock(stateChangeMutex_);
+    if (pluginState_ != State::PAUSED) {
+        MEDIA_LOG_I("plugin %s resume in status %s, ignore pause", plugin_->GetName().c_str(),
+            GetStateString(pluginState_.load()));
+        return Status::OK;
+    }
+    auto ret = audioSink->Resume();
+    LOG_WARN_IF_NOT_OK(plugin_, ret);
+    if (ret == Status::OK) {
+        pluginState_ = State::RUNNING;
+    }
+    MEDIA_LOG_I("%s Exit.", __FUNCTION__);
+    return ret;
 }
 
 Status AudioSink::Flush()

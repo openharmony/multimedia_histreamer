@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_PLUGIN_CORE_PLUGIN_H
-#define HISTREAMER_PLUGIN_CORE_PLUGIN_H
+#ifndef HISTREAMER_PLUGIN_CORE_BASE_H
+#define HISTREAMER_PLUGIN_CORE_BASE_H
 
+#include <atomic>
 #include <memory>
 
 #include "common/plugin_types.h"
 #include "common/plugin_tags.h"
 #include "common/plugin_buffer.h"
+#include "foundation/osal/thread/mutex.h"
 
 namespace OHOS {
 namespace Media {
@@ -63,15 +65,16 @@ protected:
     Base(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<PluginBase> plugin);
 
 protected:
-    const uint32_t pkgVersion;
+    const uint32_t pkgVersion_;
 
-    const uint32_t apiVersion;
+    const uint32_t apiVersion_;
 
-    std::shared_ptr<PluginBase> plugin;
+    std::shared_ptr<PluginBase> plugin_;
 
-    State pluginState_ {State::CREATED};
+    OHOS::Media::OSAL::Mutex stateChangeMutex_ {};
+    std::atomic<State> pluginState_ {State::CREATED};
 };
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-#endif // HISTREAMER_PLUGIN_CORE_PLUGIN_H
+#endif // HISTREAMER_PLUGIN_CORE_BASE_H

@@ -94,8 +94,6 @@ private:
     void DoRender();
 
 private:
-    const std::string adapterName_;
-
     std::atomic<OHOS::Media::Plugin::State> pluginState_ {OHOS::Media::Plugin::State::CREATED};
 
     OHOS::Media::OSAL::Mutex renderMutex_ {};

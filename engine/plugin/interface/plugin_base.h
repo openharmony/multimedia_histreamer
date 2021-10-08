@@ -64,8 +64,21 @@ struct Callback {
  * @version 1.0
  */
 struct PluginBase {
+    /// Constructor
+    explicit PluginBase(std::string name): pluginName_(std::move(name)) {}
+
     /// Destructor
     virtual ~PluginBase() = default;
+
+    /**
+     * @brief Get plugin name
+     *
+     * @return plugin name
+     */
+    std::string GetName() const
+    {
+        return pluginName_;
+    }
 
     /**
      * @brief Plugin initialization, which is used to load external resources or plugin common resources.
@@ -228,6 +241,9 @@ struct PluginBase {
      *  @retval ERROR_WRONG_STATE: Call this function in non wrong state.
      */
     virtual Status SetCallback(const std::shared_ptr<Callback> &cb) = 0;
+
+protected:
+    const std::string pluginName_;
 };
 } // namespace Plugin
 } // namespace Media

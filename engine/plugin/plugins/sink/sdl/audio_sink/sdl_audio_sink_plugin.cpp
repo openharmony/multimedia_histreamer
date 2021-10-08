@@ -96,7 +96,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 SdlAudioSinkPlugin::SdlAudioSinkPlugin(std::string name)
-    : aliasName_(std::move(name)),
+    : AudioSinkPlugin(std::move(name)),
       transformCache_((MAX_AUDIO_FRAME_SIZE * 3) / 2), // 3, 2
       mixCache_((MAX_AUDIO_FRAME_SIZE * 3) / 2)        // 3, 2
 {
@@ -277,12 +277,14 @@ Status SdlAudioSinkPlugin::SetSpeed(float speed)
 
 Status SdlAudioSinkPlugin::Pause()
 {
+    MEDIA_LOG_I("Paused");
     SDL_PauseAudio(1);
     return Status::OK;
 }
 
 Status SdlAudioSinkPlugin::Resume()
 {
+    MEDIA_LOG_I("Resume");
     SDL_PauseAudio(0);
     return Status::OK;
 }
