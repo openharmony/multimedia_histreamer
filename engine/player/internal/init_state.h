@@ -41,22 +41,22 @@ public:
         std::shared_ptr<MediaSource> source;
         if (param.Type() != typeid(std::shared_ptr<MediaSource>) ||
             !(source = Plugin::AnyCast<std::shared_ptr<MediaSource>>(param))) {
-            return {INVALID_SOURCE, ACTION_BUTT};
+            return {INVALID_SOURCE, Action::ACTION_BUTT};
         }
         auto ret = executor_.DoSetSource(source);
-        return {ret, TRANS_TO_PREPARING};
+        return {ret, Action::TRANS_TO_PREPARING};
     }
 
     std::tuple<ErrorCode, Action> Stop() override
     {
-        return {SUCCESS, TRANS_TO_INIT};
+        return {SUCCESS, Action::TRANS_TO_INIT};
     }
 
     std::tuple<ErrorCode, Action> Enter(Intent) override
     {
         OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoStop();
-        return {ret, ACTION_BUTT};
+        return {ret, Action::ACTION_BUTT};
     }
 
 private:

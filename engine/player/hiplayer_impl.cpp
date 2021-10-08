@@ -105,32 +105,32 @@ ErrorCode HiPlayer::HiPlayerImpl::Prepare()
 
 ErrorCode HiPlayer::HiPlayerImpl::Play()
 {
-    return fsm_.SendEvent(PLAY);
+    return fsm_.SendEvent(Intent::PLAY);
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::Pause()
 {
-    return fsm_.SendEvent(PAUSE);
+    return fsm_.SendEvent(Intent::PAUSE);
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::Resume()
 {
-    return fsm_.SendEvent(RESUME);
+    return fsm_.SendEvent(Intent::RESUME);
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::Stop()
 {
-    return fsm_.SendEvent(STOP);
+    return fsm_.SendEvent(Intent::STOP);
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::StopAsync()
 {
-    return fsm_.SendEventAsync(STOP);
+    return fsm_.SendEventAsync(Intent::STOP);
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::SetSource(std::shared_ptr<MediaSource> source)
 {
-    return fsm_.SendEvent(SET_SOURCE, source);
+    return fsm_.SendEvent(Intent::SET_SOURCE, source);
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::SetBufferSize(size_t size)
@@ -143,14 +143,14 @@ void HiPlayer::HiPlayerImpl::OnEvent(Event event)
     MEDIA_LOG_D("[HiStreamer] OnEvent (%d)", event.type);
     switch (event.type) {
         case EVENT_ERROR: {
-            fsm_.SendEventAsync(NOTIFY_ERROR, event.param);
+            fsm_.SendEventAsync(Intent::NOTIFY_ERROR, event.param);
             break;
         }
         case EVENT_READY:
-            fsm_.SendEventAsync(NOTIFY_READY);
+            fsm_.SendEventAsync(Intent::NOTIFY_READY);
             break;
         case EVENT_COMPLETE:
-            fsm_.SendEventAsync(NOTIFY_COMPLETE);
+            fsm_.SendEventAsync(Intent::NOTIFY_COMPLETE);
             break;
         default:
             MEDIA_LOG_E("Unknown event(%d)", event.type);
@@ -165,7 +165,7 @@ ErrorCode HiPlayer::HiPlayerImpl::SetSingleLoop(bool loop)
 
 ErrorCode HiPlayer::HiPlayerImpl::Seek(size_t time, size_t& position)
 {
-    auto rtv = fsm_.SendEvent(SEEK, static_cast<int64_t>(time));
+    auto rtv = fsm_.SendEvent(Intent::SEEK, static_cast<int64_t>(time));
     if (rtv == SUCCESS) {
         int64_t pos = 0;
         rtv = GetCurrentTime(pos);
@@ -227,7 +227,7 @@ ErrorCode HiPlayer::HiPlayerImpl::DoOnComplete()
     if (!singleLoop) {
         StopAsync();
     } else {
-        fsm_.SendEventAsync(SEEK, static_cast<int64_t>(0));
+        fsm_.SendEventAsync(Intent::SEEK, static_cast<int64_t>(0));
     }
     auto ptr = callback_.lock();
     if (ptr != nullptr) {

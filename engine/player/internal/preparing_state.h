@@ -34,13 +34,14 @@ public:
 
     ~PreparingState() override = default;
 
-    std::tuple<ErrorCode, Action> Enter(Intent) override
+    std::tuple<ErrorCode, Action> Enter(Intent intent) override
     {
         MEDIA_LOG_D("Enter state: %s", name_.c_str());
-        Action nextAction = ACTION_BUTT;
+        (void)intent;
+        Action nextAction = Action::ACTION_BUTT;
         auto rtv = executor_.PrepareFilters();
         if (rtv != SUCCESS) {
-            nextAction = TRANS_TO_INIT;
+            nextAction = Action::TRANS_TO_INIT;
         }
         return {rtv, nextAction};
     }
@@ -48,28 +49,28 @@ public:
     std::tuple<ErrorCode, Action> Play() override
     {
         MEDIA_LOG_W("Play received in preparing state.");
-        return {SUCCESS, ACTION_PENDING};
+        return {SUCCESS, Action::ACTION_PENDING};
     }
 
     std::tuple<ErrorCode, Action> Seek(const Plugin::Any& param) override
     {
         MEDIA_LOG_D("Seek in preparing state.");
         if (param.Type() != typeid(int64_t)) {
-            return {INVALID_PARAM_VALUE, ACTION_BUTT};
+            return {INVALID_PARAM_VALUE, Action::ACTION_BUTT};
         }
         auto timeMs = Plugin::AnyCast<int64_t>(param);
         auto ret = executor_.DoSeek(timeMs);
-        return {ret, ACTION_BUTT};
+        return {ret, Action::ACTION_BUTT};
     }
 
     std::tuple<ErrorCode, Action> Stop() override
     {
-        return {SUCCESS, TRANS_TO_INIT};
+        return {SUCCESS, Action::TRANS_TO_INIT};
     }
 
     std::tuple<ErrorCode, Action> OnReady() override
     {
-        return {SUCCESS, TRANS_TO_READY};
+        return {SUCCESS, Action::TRANS_TO_READY};
     }
 };
 } // namespace Media

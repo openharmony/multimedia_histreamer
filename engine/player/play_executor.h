@@ -35,8 +35,9 @@ public:
         return SUCCESS;
     }
 
-    virtual ErrorCode DoSetSource(const std::shared_ptr<MediaSource>&) const
+    virtual ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source) const
     {
+        (void)source;
         return SUCCESS;
     }
 
@@ -76,8 +77,9 @@ public:
         return SUCCESS;
     }
 
-    virtual ErrorCode DoOnError(ErrorCode)
+    virtual ErrorCode DoOnError(ErrorCode errorCode)
     {
+        (void)errorCode;
         return SUCCESS;
     }
 };
