@@ -62,10 +62,14 @@ public:
     }
     ErrorCode SetParameter(int32_t key, const Plugin::Any& value) override
     {
+        UNUSED_VARIABLE(key);
+        UNUSED_VARIABLE(value);
         return UNIMPLEMENT;
     }
     ErrorCode GetParameter(int32_t key, Plugin::Any& value) override
     {
+        UNUSED_VARIABLE(key);
+        UNUSED_VARIABLE(value);
         return UNIMPLEMENT;
     }
 
