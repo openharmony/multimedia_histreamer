@@ -80,6 +80,9 @@ template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::
 template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta>&, Plugin::PluginType,
                                        std::shared_ptr<Plugin::AudioSink>&, std::shared_ptr<Plugin::PluginInfo>&,
                                        std::function<std::shared_ptr<Plugin::AudioSink>(const std::string&)>);
+template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta>&, Plugin::PluginType,
+                                       std::shared_ptr<Plugin::VideoSink>&, std::shared_ptr<Plugin::PluginInfo>&,
+                                       std::function<std::shared_ptr<Plugin::VideoSink>(const std::string&)>);
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

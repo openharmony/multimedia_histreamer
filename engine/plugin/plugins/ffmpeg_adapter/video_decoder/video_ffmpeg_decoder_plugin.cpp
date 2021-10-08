@@ -571,7 +571,7 @@ Status VideoFfmpegDecoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& 
     return Status::OK;
 }
 
-Status void VideoFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffer>& frameBuffer)
+Status VideoFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffer>& frameBuffer)
 {
     if (state_ != State::RUNNING) {
         MEDIA_LOG_W("queue input buffer in wrong state");
@@ -600,7 +600,7 @@ void VideoFfmpegDecoderPlugin::ReceiveBuffer()
     if (frameBuffer == nullptr || frameBuffer->IsEmpty() ||
         frameBuffer->GetBufferMeta()->GetType() != BufferMetaType::VIDEO) {
         MEDIA_LOG_W("cannot fetch valid buffer to output");
-        return false;
+        return;
     }
     Status status;
     {
