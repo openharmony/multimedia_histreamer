@@ -180,6 +180,7 @@ Status SdlAudioSinkPlugin::Start()
 
 Status SdlAudioSinkPlugin::Stop()
 {
+    rb->SetActive(false);
     SDL_PauseAudio(1);
     Flush();
     SDL_CloseAudio();
