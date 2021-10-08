@@ -18,7 +18,7 @@
 
 #ifdef OSAL_OHOS
 #include "platform/ohos/ohos_config.h"
-#elif OSAL_LINUX
+#elif defined OSAL_LINUX
 #error "OSAL not support linux."
 #else
 #error "unknown OSAL platform"

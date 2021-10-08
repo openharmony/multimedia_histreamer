@@ -27,15 +27,15 @@ namespace OHOS {
 namespace Media {
 class Meta {
 public:
-    explicit Meta()= default;
+    explicit Meta() = default;
     ~Meta();
     bool Empty() const;
-    bool SetString(Plugin::MetaID, const std::string &);
-    bool SetInt32(Plugin::MetaID, int32_t);
-    bool SetUint32(Plugin::MetaID, uint32_t);
-    bool SetInt64(Plugin::MetaID, int64_t);
-    bool SetUint64(Plugin::MetaID, uint64_t);
-    bool SetFloat(Plugin::MetaID, float);
+    bool SetString(Plugin::MetaID id, const std::string& value);
+    bool SetInt32(Plugin::MetaID id, int32_t value);
+    bool SetUint32(Plugin::MetaID id, uint32_t value);
+    bool SetInt64(Plugin::MetaID id, int64_t value);
+    bool SetUint64(Plugin::MetaID id, uint64_t value);
+    bool SetFloat(Plugin::MetaID id, float value);
 
     /**
      * this function will copy from ptr with size.
@@ -45,12 +45,12 @@ public:
      */
     bool SetPointer(Plugin::MetaID, const void* ptr, size_t size);
 
-    bool GetString(Plugin::MetaID, std::string &) const;
-    bool GetInt32(Plugin::MetaID, int32_t &) const;
-    bool GetUint32(Plugin::MetaID, uint32_t &) const;
-    bool GetInt64(Plugin::MetaID, int64_t &) const;
-    bool GetUint64(Plugin::MetaID, uint64_t &) const;
-    bool GetFloat(Plugin::MetaID, float &) const;
+    bool GetString(Plugin::MetaID id, std::string& value) const;
+    bool GetInt32(Plugin::MetaID id, int32_t& value) const;
+    bool GetUint32(Plugin::MetaID id, uint32_t& value) const;
+    bool GetInt64(Plugin::MetaID id, int64_t& value) const;
+    bool GetUint64(Plugin::MetaID id, uint64_t& value) const;
+    bool GetFloat(Plugin::MetaID id, float& value) const;
 
     /**
      * this function will copy from inner storage with size if exists. The user should delete the memory when it's not
@@ -59,10 +59,10 @@ public:
      * @param size size
      * @return
      */
-    bool GetPointer(Plugin::MetaID, void **ptr, size_t &size) const;
+    bool GetPointer(Plugin::MetaID, void** ptr, size_t& size) const;
 
-    template<typename T>
-    bool GetData(Plugin::MetaID id, T &value) const
+    template <typename T>
+    bool GetData(Plugin::MetaID id, T& value) const
     {
         auto ite = items_.find(id);
         if (ite == items_.end() || typeid(T) != ite->second.Type()) {
@@ -93,16 +93,16 @@ public:
      * @param value
      * @return
      */
-    template<typename T>
-    bool SetData(Plugin::MetaID id, const T &value)
+    template <typename T>
+    bool SetData(Plugin::MetaID id, const T& value)
     {
         items_[id] = value;
         return true;
     }
 
 private:
-    std::map<Plugin::MetaID, Plugin::ValueType> items_ {};
+    std::map<Plugin::MetaID, Plugin::ValueType> items_{};
 };
-}
-}
+} // namespace Media
+} // namespace OHOS
 #endif // HISTREAMER_FOUNDATION_META_H

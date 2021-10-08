@@ -135,6 +135,9 @@ void Meta::Update(const Meta& meta)
 
 bool Meta::SetPointer(Plugin::MetaID id, const void* ptr, size_t size)
 {
+    if (size == 0) {
+        return false;
+    }
     auto tmp = new (std::nothrow) uint8_t[size];
     if (tmp == nullptr) {
         return false;
@@ -152,6 +155,9 @@ bool Meta::GetPointer(Plugin::MetaID id, void** ptr, size_t& size) const
     std::pair<std::shared_ptr<uint8_t>, size_t> item;
     if (GetData<std::pair<std::shared_ptr<uint8_t>, size_t>>(id, item)) {
         size = item.second;
+        if (size == 0) {
+            return false;
+        }
         auto tmp = new (std::nothrow) uint8_t[size];
         if (tmp == nullptr) {
             return false;

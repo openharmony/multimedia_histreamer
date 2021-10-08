@@ -51,7 +51,7 @@ public:
     void RegisterHandler(std::function<void()> handler);
 
 private:
-    enum RunningState {
+    enum class RunningState {
         STARTED,
         PAUSED,
         STOPPED,
@@ -60,15 +60,15 @@ private:
     void Run();
 
     const std::string name_;
-    std::atomic<int> runningState_ {PAUSED};
+    std::atomic<RunningState> runningState_{RunningState::PAUSED};
     std::function<void()> handler_ = [this] { DoTask(); };
     OSAL::Thread loop_;
 
-    OSAL::Mutex stateMutex_ {};
-    OSAL::Mutex cvMutex_ {};
-    OSAL::ConditionVariable cv_ {};
-    std::atomic<bool> pauseDone_ {};
-    std::atomic<bool> workInProgress_ {};
+    OSAL::Mutex stateMutex_{};
+    OSAL::Mutex cvMutex_{};
+    OSAL::ConditionVariable cv_{};
+    std::atomic<bool> pauseDone_{};
+    std::atomic<bool> workInProgress_{};
 };
 } // namespace OSAL
 } // namespace Media
