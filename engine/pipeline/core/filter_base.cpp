@@ -113,11 +113,17 @@ std::vector<Filter*> FilterBase::GetNextFilters()
 
 ErrorCode FilterBase::PushData(const std::string& inPort, AVBufferPtr buffer)
 {
+    UNUSED_VARIABLE(inPort);
+    UNUSED_VARIABLE(buffer);
     return SUCCESS;
 }
 
 ErrorCode FilterBase::PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data)
 {
+    UNUSED_VARIABLE(outPort);
+    UNUSED_VARIABLE(offset);
+    UNUSED_VARIABLE(size);
+    UNUSED_VARIABLE(data);
     return SUCCESS;
 }
 

@@ -100,10 +100,16 @@ public:
     }
     ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) override
     {
+        UNUSED_VARIABLE(inPort);
+        UNUSED_VARIABLE(buffer);
         return UNIMPLEMENT;
     }
     ErrorCode PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data) override
     {
+        UNUSED_VARIABLE(outPort);
+        UNUSED_VARIABLE(offset);
+        UNUSED_VARIABLE(size);
+        UNUSED_VARIABLE(data);
         return UNIMPLEMENT;
     }
     std::vector<WorkMode> GetWorkModes() override
@@ -113,19 +119,25 @@ public:
 
     PInPort GetInPort(const std::string& name) override
     {
+        UNUSED_VARIABLE(name);
         return nullptr;
     }
     POutPort GetOutPort(const std::string& name) override
     {
+        UNUSED_VARIABLE(name);
         return nullptr;
     }
 
     ErrorCode SetParameter(int32_t key, const Plugin::Any& value) override
     {
+        UNUSED_VARIABLE(key);
+        UNUSED_VARIABLE(value);
         return UNIMPLEMENT;
     }
     ErrorCode GetParameter(int32_t key, Plugin::Any& value) override
     {
+        UNUSED_VARIABLE(key);
+        UNUSED_VARIABLE(value);
         return UNIMPLEMENT;
     }
 

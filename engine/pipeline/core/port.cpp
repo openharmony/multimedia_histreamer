@@ -165,50 +165,68 @@ ErrorCode OutPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
 
 ErrorCode EmptyInPort::Connect(std::shared_ptr<Port> port)
 {
+    UNUSED_VARIABLE(port);
     MEDIA_LOG_E("Connect in EmptyInPort");
     return SUCCESS;
 }
 ErrorCode EmptyInPort::Activate(const std::vector<WorkMode>& modes, WorkMode& outMode)
 {
+    UNUSED_VARIABLE(modes);
+    UNUSED_VARIABLE(outMode);
     MEDIA_LOG_E("Activate in EmptyInPort");
     return SUCCESS;
 }
 bool EmptyInPort::Negotiate(const std::shared_ptr<const Meta>& inMeta, CapabilitySet& outCaps)
 {
+    UNUSED_VARIABLE(inMeta);
+    UNUSED_VARIABLE(outCaps);
     MEDIA_LOG_E("Negotiate in EmptyInPort");
     return false;
 }
 void EmptyInPort::PushData(AVBufferPtr buffer)
 {
+    UNUSED_VARIABLE(buffer);
     MEDIA_LOG_E("PushData in EmptyInPort");
 }
 ErrorCode EmptyInPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
 {
+    UNUSED_VARIABLE(offset);
+    UNUSED_VARIABLE(size);
+    UNUSED_VARIABLE(data);
     MEDIA_LOG_E("PullData in EmptyInPort");
     return UNIMPLEMENT;
 }
 
 ErrorCode EmptyOutPort::Connect(std::shared_ptr<Port> port)
 {
+    UNUSED_VARIABLE(port);
     MEDIA_LOG_E("Connect in EmptyOutPort");
     return SUCCESS;
 }
 ErrorCode EmptyOutPort::Activate(const std::vector<WorkMode>& modes, WorkMode& outMode)
 {
+    UNUSED_VARIABLE(modes);
+    UNUSED_VARIABLE(outMode);
     MEDIA_LOG_E("Activate in EmptyOutPort");
     return SUCCESS;
 }
 bool EmptyOutPort::Negotiate(const std::shared_ptr<const Meta>& inMeta, CapabilitySet& outCaps)
 {
+    UNUSED_VARIABLE(inMeta);
+    UNUSED_VARIABLE(outCaps);
     MEDIA_LOG_E("Negotiate in EmptyOutPort");
     return false;
 }
 void EmptyOutPort::PushData(AVBufferPtr buffer)
 {
+    UNUSED_VARIABLE(buffer);
     MEDIA_LOG_E("PushData in EmptyOutPort");
 }
 ErrorCode EmptyOutPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
 {
+    UNUSED_VARIABLE(offset);
+    UNUSED_VARIABLE(size);
+    UNUSED_VARIABLE(data);
     MEDIA_LOG_E("PullData in EmptyOutPort");
     return UNIMPLEMENT;
 }
