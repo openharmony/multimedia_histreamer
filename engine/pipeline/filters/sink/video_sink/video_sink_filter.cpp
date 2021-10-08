@@ -89,8 +89,8 @@ ErrorCode VideoSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
     return TranslatePluginStatus(plugin_->GetParameter(tag, value));
 }
 
-bool VideoSinkFilter::Negotiate(const std::string &inPort, const std::shared_ptr<const Meta> &inMeta,
-    CapabilitySet &outCaps)
+bool VideoSinkFilter::Negotiate(
+    const std::string &inPort, const std::shared_ptr<const Meta> &inMeta, CapabilitySet &outCaps)
 {
     MEDIA_LOG_D("video sink negotiate started");
     if (state_ != FilterState::PREPARING) {

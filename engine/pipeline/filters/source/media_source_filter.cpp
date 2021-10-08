@@ -160,7 +160,7 @@ ErrorCode MediaSourceFilter::Start()
 
 ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data)
 {
-    MEDIA_LOG_D("IN, offset: %zu, size: %zu", offset, size);
+    MEDIA_LOG_D("IN, offset: %zu, size: %zu, outPort: %s", offset, size, outPort.c_str());
     if (!plugin_) {
         return ErrorCode::PLUGIN_NOT_FOUND;
     }
