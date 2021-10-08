@@ -27,6 +27,12 @@
 
 #define UNUSED_VARIABLE(v) ((void)(v))
 
+#if (defined(__GNUC__) || defined(__clang__)) && (!defined(WIN32))
+#define MEDIA_UNUSED __attribute__((unused))
+#else
+#define MEDIA_UNUSED
+#endif
+
 namespace OHOS {
 namespace Media {
 inline bool StringStartsWith(const std::string& input, const std::string& prefix)
