@@ -50,12 +50,13 @@ public:
             return false;
         }
         val = 0;
-        for (uint8_t toRead; bits; bits -= toRead) {
+        uint8_t remainBits = bits;
+        for (uint8_t toRead; remainBits; remainBits -= toRead) {
             if (availBits_ == 0) {
                 ++cur_;
                 availBits_ = 8; // 8
             }
-            toRead = std::min(bits, availBits_);
+            toRead = std::min(remainBits, availBits_);
             uint8_t shift = availBits_ - toRead;
             uint64_t mask = 0xFF >> (0x08 - toRead);
             val = static_cast<T>((val << toRead) | static_cast<T>(((*cur_) >> shift) & mask));
@@ -66,7 +67,7 @@ public:
 
     size_t GetAvailableBits() const;
 
-    const uint8_t *GetCurrentPtr() const;
+    const uint8_t* GetCurrentPtr() const;
 
     void SkipBits(size_t bits);
 
@@ -97,7 +98,7 @@ private:
     const uint8_t* begin_;
     const uint8_t* cur_;
     const uint8_t* end_;
-    uint8_t availBits_ {8};
+    uint8_t availBits_{8};
 };
 } // namespace Plugin
 } // namespace Media

@@ -73,7 +73,6 @@ void ConvertToMediaInfoHelper(uint32_t pkgVersion, const MediaInfo& src, MediaIn
         }
     }
 }
-}
-}
-}
-
+} // namespace Plugin
+} // namespace Media
+} // namespace OHOS

@@ -227,7 +227,8 @@ AVBufferPtr DataPacker::GetRange(uint64_t offset, uint32_t size)
                              "failed to memmove");
             dataPtr = AudioBufferWritableData(bufferPtr, size);
             LOG_WARN_IF_FAIL(memcpy_s(dataPtr + remainBytes, size - remainBytes, AudioBufferReadOnlyData(que_.front()),
-                             size - remainBytes), "failed to memcpy");
+                                      size - remainBytes),
+                             "failed to memcpy");
             bufferOffset_ = size - remainBytes;
             dts_ = que_.front()->dts;
             pts_ = que_.front()->pts;
@@ -260,6 +261,7 @@ AVBufferPtr DataPacker::MakeAliasBuffer(AVBufferPtr bufferPtr, uint32_t offset, 
 AVBufferPtr DataPacker::WrapAssemblerBuffer(uint64_t offset)
 {
     MEDIA_LOG_D("DataPacker WrapAssemblerBuffer, offset = %" PRIu64, offset);
+    (void)offset;
     auto bufferPtr = std::make_shared<AVBuffer>();
     auto dataPtr = std::shared_ptr<uint8_t>(assembler_.data(), [this](void* ptr) { assembler_.resize(0); });
     auto bufferData = bufferPtr->WrapMemoryPtr(dataPtr, assembler_.size(), assembler_.size());

@@ -366,6 +366,7 @@ Status AudioFfmpegDecoderPlugin::Stop()
 Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs)
 {
     MEDIA_LOG_I("queue out put");
+    (void)timeoutMs;
     outBufferQ_.Push(outputBuffer);
     return Status::OK;
 }
@@ -384,6 +385,7 @@ Status AudioFfmpegDecoderPlugin::Flush()
 Status AudioFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
 {
     MEDIA_LOG_D("queue input buffer");
+    (void)timeoutMs;
     Status status = SendBuffer(inputBuffer);
     if (status != Status::OK) {
         return status;

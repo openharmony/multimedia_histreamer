@@ -30,7 +30,7 @@ OHOS::Media::ErrorCode TranslatePluginStatus(Plugin::Status pluginError)
     }
     return OHOS::Media::ErrorCode::SUCCESS;
 }
-bool TranslateIntoParameter(const int &key, OHOS::Media::Plugin::Tag &tag)
+bool TranslateIntoParameter(const int& key, OHOS::Media::Plugin::Tag& tag)
 {
     if (key < static_cast<int32_t>(OHOS::Media::Plugin::Tag::INVALID)) {
         return false;
@@ -40,14 +40,14 @@ bool TranslateIntoParameter(const int &key, OHOS::Media::Plugin::Tag &tag)
 }
 
 template <typename T>
-ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta> &inMeta,
-    Plugin::PluginType pluginType, std::shared_ptr<T>& plugin, std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
-    std::function<std::shared_ptr<T>(const std::string&)> pluginCreator)
+ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta>& inMeta, Plugin::PluginType pluginType,
+                              std::shared_ptr<T>& plugin, std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
+                              std::function<std::shared_ptr<T>(const std::string&)> pluginCreator)
 {
     uint32_t maxRank = 0;
     std::shared_ptr<Plugin::PluginInfo> info;
     auto pluginNames = Plugin::PluginManager::Instance().ListPlugins(pluginType);
-    for (const auto &name:pluginNames) {
+    for (const auto& name : pluginNames) {
         auto tmpInfo = Plugin::PluginManager::Instance().GetPluginInfo(pluginType, name);
         if (CompatibleWith(tmpInfo->inCaps, *inMeta) && tmpInfo->rank > maxRank) {
             info = tmpInfo;
@@ -74,14 +74,12 @@ ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta> &in
     return SUCCESS;
 }
 
-template
-ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta>&, Plugin::PluginType,
-    std::shared_ptr<Plugin::Codec>&, std::shared_ptr<Plugin::PluginInfo>&,
-    std::function<std::shared_ptr<Plugin::Codec>(const std::string&)>);
-template
-ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta>&, Plugin::PluginType,
-    std::shared_ptr<Plugin::AudioSink>&, std::shared_ptr<Plugin::PluginInfo>&,
-    std::function<std::shared_ptr<Plugin::AudioSink>(const std::string&)>);
-}
-}
-}
+template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta>&, Plugin::PluginType,
+                                       std::shared_ptr<Plugin::Codec>&, std::shared_ptr<Plugin::PluginInfo>&,
+                                       std::function<std::shared_ptr<Plugin::Codec>(const std::string&)>);
+template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta>&, Plugin::PluginType,
+                                       std::shared_ptr<Plugin::AudioSink>&, std::shared_ptr<Plugin::PluginInfo>&,
+                                       std::function<std::shared_ptr<Plugin::AudioSink>(const std::string&)>);
+} // namespace Pipeline
+} // namespace Media
+} // namespace OHOS

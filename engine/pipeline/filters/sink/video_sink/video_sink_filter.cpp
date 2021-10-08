@@ -19,8 +19,8 @@
 
 #include "video_sink_filter.h"
 
-#include "factory/filter_factory.h"
 #include "common/plugin_utils.h"
+#include "factory/filter_factory.h"
 #include "foundation/log.h"
 
 namespace OHOS {
@@ -30,7 +30,7 @@ static AutoRegisterFilter<VideoSinkFilter> g_registerFilterHelper("builtin.playe
 
 const uint32_t VSINK_DEFAULT_BUFFER_NUM = 8;
 
-VideoSinkFilter::VideoSinkFilter(const std::string &name) : FilterBase(name)
+VideoSinkFilter::VideoSinkFilter(const std::string& name) : FilterBase(name)
 {
     MEDIA_LOG_I("VideoSinkFilter ctor called...");
 }
@@ -89,8 +89,8 @@ ErrorCode VideoSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
     return TranslatePluginStatus(plugin_->GetParameter(tag, value));
 }
 
-bool VideoSinkFilter::Negotiate(
-    const std::string &inPort, const std::shared_ptr<const Meta> &inMeta, CapabilitySet &outCaps)
+bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Meta>& inMeta,
+                                CapabilitySet& outCaps)
 {
     MEDIA_LOG_D("video sink negotiate started");
     if (state_ != FilterState::PREPARING) {
@@ -100,14 +100,14 @@ bool VideoSinkFilter::Negotiate(
     auto creator = [](const std::string& pluginName) {
         return Plugin::PluginManager::Instance().CreateVideoSinkPlugin(pluginName);
     };
-    auto err = FindPluginAndUpdate<Plugin::VideoSink>(inMeta, Plugin::PluginType::VIDEO_SINK, plugin_,
-                                                      pluginInfo_, creator);
+    auto err =
+        FindPluginAndUpdate<Plugin::VideoSink>(inMeta, Plugin::PluginType::VIDEO_SINK, plugin_, pluginInfo_, creator);
     RETURN_TARGET_ERR_MESSAGE_LOG_IF_FAIL(err, false, "cannot find matched video sink plugin");
     outCaps = pluginInfo_->inCaps;
     err = ConfigureLocked(inMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("sink configure error");
-        Event event {
+        Event event{
             .type = EventType::EVENT_ERROR,
             .param = err,
         };
@@ -115,7 +115,7 @@ bool VideoSinkFilter::Negotiate(
         return false;
     }
     state_ = FilterState::READY;
-    Event event {
+    Event event{
         .type = EVENT_READY,
     };
     OnEvent(event);
@@ -123,7 +123,7 @@ bool VideoSinkFilter::Negotiate(
     return true;
 }
 
-ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Meta> &meta)
+ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Meta>& meta)
 {
     auto err = ErrorCode::SUCCESS;
     uint32_t width;
@@ -145,7 +145,7 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Met
     return err;
 }
 
-ErrorCode VideoSinkFilter::ConfigureLocked(const std::shared_ptr<const Meta> &meta)
+ErrorCode VideoSinkFilter::ConfigureLocked(const std::shared_ptr<const Meta>& meta)
 {
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Init()), "Init plugin error");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePluginParams(meta), "Configure plugin params fail");
@@ -178,7 +178,7 @@ void VideoSinkFilter::RenderFrame()
     }
 }
 
-ErrorCode VideoSinkFilter::PushData(const std::string &inPort, AVBufferPtr buffer)
+ErrorCode VideoSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
 {
     MEDIA_LOG_D("video sink push data started, state_: %d", state_.load());
     if (isFlushing_ || state_.load() == FilterState::INITIALIZED) {
@@ -194,13 +194,13 @@ ErrorCode VideoSinkFilter::PushData(const std::string &inPort, AVBufferPtr buffe
         pushThreadIsBlocking_ = false;
     }
     if (isFlushing_ || state_.load() == FilterState::INITIALIZED) {
-        MEDIA_LOG_I("PushData return due to: isFlushing_ = %d, state_ = %d",
-                    isFlushing_, static_cast<int>(state_.load()));
+        MEDIA_LOG_I("PushData return due to: isFlushing_ = %d, state_ = %d", isFlushing_,
+                    static_cast<int>(state_.load()));
         return ErrorCode::SUCCESS;
     }
 
     if (buffer->GetMemory()->GetSize() == 0) {
-        Event event {
+        Event event{
             .type = EVENT_COMPLETE,
         };
         MEDIA_LOG_D("video sink push data send event_complete");
@@ -305,7 +305,7 @@ void VideoSinkFilter::FlushEnd()
         inBufQueue_->SetActive(true);
     }
 }
-}
-}
-}
+} // namespace Pipeline
+} // namespace Media
+} // namespace OHOS
 #endif

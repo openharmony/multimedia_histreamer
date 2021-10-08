@@ -62,6 +62,9 @@ int ConvertSeekModeToFFmpeg(SeekMode mode);
 
 void* FFmpegDemuxerPlugin::DemuxerPluginAllocator::Alloc(size_t size)
 {
+    if (size == 0) {
+        return nullptr;
+    }
     return static_cast<void*>(new (std::nothrow) uint8_t[size]);
 }
 
@@ -139,8 +142,9 @@ Status FFmpegDemuxerPlugin::Stop()
  * IsParameterSupported no need supported by demuxer
  * @return return false always.
  */
-bool FFmpegDemuxerPlugin::IsParameterSupported(Tag)
+bool FFmpegDemuxerPlugin::IsParameterSupported(Tag tag)
 {
+    (void)tag;
     return false;
 }
 
@@ -148,8 +152,10 @@ bool FFmpegDemuxerPlugin::IsParameterSupported(Tag)
  * GetParameter no need supported by demuxer
  * @return return ERROR_UNIMPLEMENTED always.
  */
-Status FFmpegDemuxerPlugin::GetParameter(Tag, ValueType&)
+Status FFmpegDemuxerPlugin::GetParameter(Tag tag, ValueType& value)
 {
+    (void)tag;
+    (void)value;
     return Status::ERROR_UNIMPLEMENTED;
 }
 
@@ -157,8 +163,10 @@ Status FFmpegDemuxerPlugin::GetParameter(Tag, ValueType&)
  * SetParameter no need supported by demuxer
  * @return return ERROR_UNIMPLEMENTED always.
  */
-Status FFmpegDemuxerPlugin::SetParameter(Tag, const ValueType&)
+Status FFmpegDemuxerPlugin::SetParameter(Tag tag, const ValueType& value)
 {
+    (void)tag;
+    (void)value;
     return Status::ERROR_UNIMPLEMENTED;
 }
 
@@ -481,8 +489,11 @@ int FFmpegDemuxerPlugin::AVReadPacket(void* opaque, uint8_t* buf, int bufSize)
  * write packet unimplemented.
  * @return 0
  */
-int FFmpegDemuxerPlugin::AVWritePacket(void*, uint8_t*, int)
+int FFmpegDemuxerPlugin::AVWritePacket(void* opaque, uint8_t* buf, int bufSize)
 {
+    (void)opaque;
+    (void)buf;
+    (void)bufSize;
     return 0;
 }
 

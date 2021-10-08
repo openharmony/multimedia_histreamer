@@ -20,8 +20,8 @@
 #include "sdl_video_sink_plugin.h"
 #include <functional>
 #include "SDL_events.h"
-#include "foundation/log.h"
 #include "foundation/constants.h"
+#include "foundation/log.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
@@ -151,7 +151,7 @@ void SdlVideoSinkPlugin::UpdateTextureRect()
         windowHeight_ = textureRect_.h;
     }
 
-    textureRect_.x = (static_cast<int32_t>(windowWidth_) - textureRect_.w) / 2; // 2
+    textureRect_.x = (static_cast<int32_t>(windowWidth_) - textureRect_.w) / 2;  // 2
     textureRect_.y = (static_cast<int32_t>(windowHeight_) - textureRect_.h) / 2; // 2
     MEDIA_LOG_D("pixelWH[%u, %u], windowWH[%u, %u], textureWH[%u, %u], textureXY[%u, %u]", pixelWidth_, pixelHeight_,
                 windowWidth_, windowHeight_, textureRect_.w, textureRect_.h, textureRect_.x, textureRect_.y);
@@ -338,7 +338,7 @@ Status SdlVideoSinkPlugin::VideoImageDisaplay(const std::shared_ptr<Buffer>& inp
 {
     int32_t ret = -1;
     const uint8_t* data[4] = {nullptr}; // 4
-    int32_t lineSize[4] = {0}; // 4
+    int32_t lineSize[4] = {0};          // 4
     auto bufferMeta = inputInfo->GetBufferMeta();
     if (bufferMeta == nullptr || bufferMeta->GetType() != BufferMetaType::VIDEO) {
         MEDIA_LOG_E("Invalid video buffer");
@@ -411,8 +411,8 @@ int32_t SdlVideoSinkPlugin::UpdateYUVTexture(const uint8_t** data, int32_t* line
 {
     int32_t ret;
     lineSize[1] = static_cast<int32_t>(videoMeta->stride[1]);
-    lineSize[2] = static_cast<int32_t>(videoMeta->stride[2]); // 2
-    ySize = lineSize[0] * static_cast<int32_t>(AlignUp(pixelHeight_, 16)); // 16
+    lineSize[2] = static_cast<int32_t>(videoMeta->stride[2]);                   // 2
+    ySize = lineSize[0] * static_cast<int32_t>(AlignUp(pixelHeight_, 16));      // 16
     uvSize = lineSize[1] * static_cast<int32_t>(AlignUp(pixelHeight_, 16)) / 2; // 2, 16
     data[1] = data[0] + ySize;
     data[2] = data[1] + uvSize; // 2
@@ -428,7 +428,7 @@ int32_t SdlVideoSinkPlugin::UpdateYUVTexture(const uint8_t** data, int32_t* line
     }
 #endif
     ret = SDL_UpdateYUVTexture(texture_.get(), NULL, data[0], lineSize[0], data[1], lineSize[1], data[2], // 2
-                               lineSize[2]); // 2
+                               lineSize[2]);                                                              // 2
     return ret;
 }
 

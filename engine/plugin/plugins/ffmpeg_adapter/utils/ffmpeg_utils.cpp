@@ -141,6 +141,11 @@ int64_t ConvertTimeToFFmpeg(int64_t timestampUs, AVRational base)
 
 int FillAVPicture(AVFrame* picture, uint8_t* ptr, enum AVPixelFormat pixFmt, int width, int height)
 {
+    (void)picture;
+    (void)ptr;
+    (void)pixFmt;
+    (void)width;
+    (void)height;
     return 0;
 }
 

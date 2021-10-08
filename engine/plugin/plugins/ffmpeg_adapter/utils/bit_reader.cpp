@@ -35,12 +35,12 @@ BitReader::~BitReader()
     begin_ = nullptr;
     cur_ = nullptr;
     end_ = nullptr;
-    availBits_ = 8;  // 8
+    availBits_ = 8; // 8
 }
 
 size_t BitReader::GetAvailableBits() const
 {
-    return (cur_ != end_) ? static_cast<std::size_t>(((end_ - cur_ - 1) * 8) + availBits_) : 0;  // 8
+    return (cur_ != end_) ? static_cast<std::size_t>(((end_ - cur_ - 1) * 8) + availBits_) : 0; // 8
 }
 
 const uint8_t* BitReader::GetCurrentPtr() const
@@ -54,24 +54,25 @@ void BitReader::SkipBits(size_t bits)
         availBits_ -= static_cast<uint8_t>(bits);
         return;
     }
-    cur_ += (1 + (bits -= availBits_) / 8);  // 8
+    auto skipBits = bits;
+    cur_ += (1 + (skipBits -= availBits_) / 8); // 8
     if (cur_ >= end_) {
         cur_ = end_;
         availBits_ = 0;
     } else {
-        availBits_ = 8 - bits % 8;  // 8
+        availBits_ = 8 - skipBits % 8; // 8
     }
 }
 
 bool BitReader::SeekTo(size_t bitPos)
 {
-    size_t bytePos = bitPos / 8;  // 8
+    size_t bytePos = bitPos / 8; // 8
     if (begin_ + bytePos >= end_) {
         return false;
     }
     cur_ = begin_ + bytePos;
-    uint8_t skipBits = bitPos % 8;  // 8
-    availBits_ = 8 - skipBits;  // 8
+    uint8_t skipBits = bitPos % 8; // 8
+    availBits_ = 8 - skipBits;     // 8
     SkipBits(skipBits);
     return true;
 }
