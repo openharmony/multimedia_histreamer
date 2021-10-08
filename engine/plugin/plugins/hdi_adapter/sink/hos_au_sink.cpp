@@ -161,7 +161,7 @@ namespace Media {
 namespace HosLitePlugin {
 using namespace OHOS::Media::Plugin;
 
-HdiSink::HdiSink(std::string name) : adapterName_(std::move(name)), audioManager_(nullptr)
+HdiSink::HdiSink(std::string name) : Plugin::AudioSinkPlugin(std::move(name)), audioManager_(nullptr)
 {
     // default is media
     sampleAttributes_.type = AUDIO_IN_MEDIA;
@@ -192,7 +192,7 @@ Status HdiSink::Init()
     }
     for (int32_t index = 0; index < adapterSize; index++) {
         const auto &desc = descriptors[index];
-        if (adapterName_ != desc.adapterName) {
+        if (pluginName_ != desc.adapterName) {
             continue;
         }
 
@@ -202,7 +202,7 @@ Status HdiSink::Init()
         adapterDescriptor_ = descriptors[index];
     }
     if (audioAdapter_ == nullptr) {
-        MEDIA_LOG_E("cannot find adapter with name %s", adapterName_.c_str());
+        MEDIA_LOG_E("cannot find adapter with name %s", pluginName_.c_str());
         return Status::ERROR_UNKNOWN;
     }
     if (!renderThread_) {

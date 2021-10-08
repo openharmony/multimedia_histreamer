@@ -71,6 +71,6 @@ private:
 
 Status Codec::SetDataCallback(const std::weak_ptr<DataCallbackHelper>& helper)
 {
-    dataCallback_ = std::make_shared<DataCallbackWrapper>(pkgVersion, helper);
+    dataCallback_ = std::make_shared<DataCallbackWrapper>(pkgVersion_, helper);
     return codec_->SetDataCallback(dataCallback_);
 }

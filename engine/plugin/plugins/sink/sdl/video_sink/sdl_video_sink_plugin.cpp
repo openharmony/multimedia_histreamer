@@ -96,7 +96,7 @@ static uint32_t TranslatePixelFormat(const VideoPixelFormat pixelFormat)
 #define ALIGN_UP_16(value) (((value) + 15) & (~15))
 
 SdlVideoSinkPlugin::SdlVideoSinkPlugin(std::string name)
-    : windowWidth_(DEFAULT_WINDOW_WIDTH), windowHeight_(DEFAULT_WINDOW_HEIGHT)
+    : VideoSinkPlugin(std::move(name)), windowWidth_(DEFAULT_WINDOW_WIDTH), windowHeight_(DEFAULT_WINDOW_HEIGHT)
 {
 }
 

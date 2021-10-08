@@ -75,13 +75,9 @@ void StreamSourceCallback::QueueBuffer(size_t index, size_t offset, size_t size,
     dataSource_->EnqueBuffer(bufferPtr);
 }
 
-StreamSourcePlugin::StreamSourcePlugin(const std::string& name)
-    : bufferPool_(0),
-      name_(name),
-      state_(State::CREATED),
-      isSeekable_(false),
-      waitBuffers_(),
-      bufferQueue_("SourceBuffQue")
+StreamSourcePlugin::StreamSourcePlugin(std::string name)
+    : SourcePlugin(std::move(name)), bufferPool_(0), state_(State::CREATED), isSeekable_(false),
+    waitBuffers_(), bufferQueue_("SourceBuffQue")
 {
     MEDIA_LOG_D("ctor called");
 }

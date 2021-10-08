@@ -130,16 +130,16 @@ VideoPixelFormat TranslatePixelFormat(int32_t pixelFormat)
 } // namespace
 
 VideoFfmpegDecoderPlugin::VideoFfmpegDecoderPlugin(std::string name)
-    : name_(std::move(name)), outBufferQ_("vdecPluginQueue", BUFFER_QUEUE_SIZE)
+    : CodecPlugin(std::move(name)), outBufferQ_("vdecPluginQueue", BUFFER_QUEUE_SIZE)
 {
 }
 
 Status VideoFfmpegDecoderPlugin::Init()
 {
     OSAL::ScopedLock l(lock_);
-    auto iter = codecMap.find(name_);
+    auto iter = codecMap.find(pluginName_);
     if (iter == codecMap.end()) {
-        MEDIA_LOG_W("cannot find codec with name %s", name_.c_str());
+        MEDIA_LOG_W("cannot find codec with name %s", pluginName_.c_str());
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     avCodec_ = iter->second;

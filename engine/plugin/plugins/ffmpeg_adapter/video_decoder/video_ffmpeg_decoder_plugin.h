@@ -113,7 +113,6 @@ private:
     void NotifyInputBufferDone(const std::shared_ptr<Buffer> &input);
     void NotifyOutputBufferDone(const std::shared_ptr<Buffer> &output);
 
-    std::string name_;
     std::shared_ptr<const AVCodec> avCodec_;
     std::map<Tag, ValueType> videoDecParams_ {};
     std::vector<uint8_t> paddedBuffer_;

@@ -176,16 +176,16 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 AudioFfmpegDecoderPlugin::AudioFfmpegDecoderPlugin(std::string name)
-    : name_(std::move(name)), outBufferQ_("adecPluginQueue", BUFFER_QUEUE_SIZE)
+    : CodecPlugin(std::move(name)), outBufferQ_("adecPluginQueue", BUFFER_QUEUE_SIZE)
 {
 }
 
 Status AudioFfmpegDecoderPlugin::Init()
 {
     OSAL::ScopedLock l(lock_);
-    auto ite = codecMap.find(name_);
+    auto ite = codecMap.find(pluginName_);
     if (ite == codecMap.end()) {
-        MEDIA_LOG_W("cannot find codec with name %s", name_.c_str());
+        MEDIA_LOG_W("cannot find codec with name %s", pluginName_.c_str());
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     avCodec_ = ite->second;

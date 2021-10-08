@@ -61,6 +61,8 @@ struct DataCallback {
  * @version 1.0
  */
 struct CodecPlugin : public PluginBase {
+    /// constructor
+    explicit CodecPlugin(std::string name): PluginBase(std::forward<std::string>(name)) {}
     /**
      * @brief Queues input data
      *

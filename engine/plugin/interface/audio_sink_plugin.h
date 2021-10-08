@@ -33,6 +33,8 @@ namespace Plugin {
  * @version 1.0
  */
 struct AudioSinkPlugin : public PluginBase {
+    /// constructor
+    explicit AudioSinkPlugin(std::string name): PluginBase(std::forward<std::string>(name)){}
     /**
      * @brief Get the mute operation set for the audio.
      *

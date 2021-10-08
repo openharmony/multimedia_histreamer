@@ -33,14 +33,14 @@ Status Demuxer::SeekTo(int32_t trackId, int64_t timeStampUs, SeekMode mode)
 
 Status Demuxer::SetDataSource(const std::shared_ptr<DataSourceHelper>& source)
 {
-    return demuxer_->SetDataSource(std::make_shared<DataSourceWrapper>(pkgVersion, source));
+    return demuxer_->SetDataSource(std::make_shared<DataSourceWrapper>(pkgVersion_, source));
 }
 
 Status Demuxer::GetMediaInfo(MediaInfoHelper& mediaInfo)
 {
     MediaInfo info;
     demuxer_->GetMediaInfo(info);
-    ConvertToMediaInfoHelper(pkgVersion, info, mediaInfo);
+    ConvertToMediaInfoHelper(pkgVersion_, info, mediaInfo);
     return Status::OK;
 }
 

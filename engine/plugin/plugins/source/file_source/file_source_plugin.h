@@ -26,7 +26,7 @@ namespace Plugin {
 class FileSourceAllocator : public Allocator {
 public:
     FileSourceAllocator() = default;
-    ~FileSourceAllocator() = default;
+    ~FileSourceAllocator() override= default;
 
     void* Alloc(size_t size) override;
     void Free(void* ptr) override;
@@ -34,8 +34,8 @@ public:
 
 class FileSourcePlugin : public SourcePlugin {
 public:
-    explicit FileSourcePlugin(const std::string &name);
-    ~FileSourcePlugin();
+    explicit FileSourcePlugin(std::string name);
+    ~FileSourcePlugin() override;
 
     Status Init() override;
     Status Deinit() override;
@@ -56,7 +56,6 @@ public:
     Status SeekTo(uint64_t offset) override;
 
 private:
-    std::string name_;
     State state_;
     std::string fileName_ {};
     std::ifstream fin_;

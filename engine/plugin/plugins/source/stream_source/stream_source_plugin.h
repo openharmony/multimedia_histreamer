@@ -63,7 +63,7 @@ private:
 
 class StreamSourcePlugin : public SourcePlugin, std::enable_shared_from_this<StreamSourcePlugin> {
 public:
-    explicit StreamSourcePlugin(const std::string& name);
+    explicit StreamSourcePlugin(std::string name);
     ~StreamSourcePlugin();
 
     Status Init() override;
@@ -92,7 +92,6 @@ protected:
     AVBufferPool bufferPool_;
 
 private:
-    std::string name_;
     State state_;
     bool isSeekable_;
     OSAL::Mutex mutex_ {};

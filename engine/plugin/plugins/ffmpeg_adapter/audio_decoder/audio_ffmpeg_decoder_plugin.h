@@ -101,7 +101,6 @@ private:
 
     void NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output);
 
-    std::string name_;
     std::shared_ptr<const AVCodec> avCodec_ {};
     std::map<Tag, ValueType> audioParameter_ {};
     std::vector<uint8_t> paddedBuffer_ {};
