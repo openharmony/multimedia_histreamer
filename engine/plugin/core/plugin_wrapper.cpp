@@ -56,6 +56,7 @@ namespace Media {
 namespace Plugin {
 void ConvertToMediaInfoHelper(uint32_t pkgVersion, const MediaInfo& src, MediaInfoHelper& dest)
 {
+    (void)(pkgVersion);
     for (auto const& global : src.general) {
         dest.globalMeta.SetData(MetaID(global.first), global.second);
     }

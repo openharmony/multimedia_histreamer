@@ -23,7 +23,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-enum TagSection : uint8_t {
+enum struct TagSection : uint8_t {
     REGULAR = 1,
     MEDIA = 2,
     AUDIO_UNIVERSAL = 3,
@@ -33,16 +33,16 @@ enum TagSection : uint8_t {
     MAX_SECTION = 64
 };
 
-enum AudioFormat : uint8_t {
+enum struct AudioFormat : uint8_t {
     MPEG = 1,
     AAC,
 };
 
-enum VideoFormat : uint8_t {
+enum struct VideoFormat : uint8_t {
     H264 = 1,
 };
 
-#define MAKE_AUDIO_SPECIFIC_START(format) (SECTION_AUDIO_SPECIFIC_START | ((format) << 8U))
+#define MAKE_AUDIO_SPECIFIC_START(format) (SECTION_AUDIO_SPECIFIC_START | (static_cast<uint8_t>(format) << 8U))
 
 /**
  * @brief Tag is a key-value pair used to settings or transfer information.
@@ -68,12 +68,12 @@ enum VideoFormat : uint8_t {
  */
 enum struct Tag : uint32_t {
     INVALID = 0,
-    SECTION_REGULAR_START = TagSection::REGULAR << 16U,                 // regular tag
-    SECTION_MEDIA_START = TagSection::MEDIA << 16U,                     // media tag
-    SECTION_AUDIO_UNIVERSAL_START = TagSection::AUDIO_UNIVERSAL << 16U, // audio universal tag
-    SECTION_AUDIO_SPECIFIC_START = TagSection::AUDIO_SPECIFIC << 16U,   // audio specific tag
-    SECTION_VIDEO_UNIVERSAL_START = TagSection::VIDEO_UNIVERSAL << 16U, // video universal tag
-    SECTION_VIDEO_SPECIFIC_START = TagSection::VIDEO_SPECIFIC << 16U,   // video specific tag
+    SECTION_REGULAR_START = static_cast<uint8_t>(TagSection::REGULAR) << 16U,                 // regular tag
+    SECTION_MEDIA_START = static_cast<uint8_t>(TagSection::MEDIA) << 16U,                     // media tag
+    SECTION_AUDIO_UNIVERSAL_START = static_cast<uint8_t>(TagSection::AUDIO_UNIVERSAL) << 16U, // audio universal tag
+    SECTION_AUDIO_SPECIFIC_START = static_cast<uint8_t>(TagSection::AUDIO_SPECIFIC) << 16U,   // audio specific tag
+    SECTION_VIDEO_UNIVERSAL_START = static_cast<uint8_t>(TagSection::VIDEO_UNIVERSAL) << 16U, // video universal tag
+    SECTION_VIDEO_SPECIFIC_START = static_cast<uint8_t>(TagSection::VIDEO_SPECIFIC) << 16U,   // video specific tag
 
     /* -------------------- regular tag -------------------- */
     MIME = SECTION_REGULAR_START + 1, // string
