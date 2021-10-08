@@ -24,6 +24,9 @@
         } else {                                                  \
             MEDIA_LOG_E("Call weakPtr " #func " error." );        \
         }
+
+#define UNUSED_VARIABLE(v) ((void)(v))
+
 namespace OHOS {
 namespace Media {
 inline bool StringStartsWith(const std::string& input, const std::string& prefix)

@@ -47,39 +47,9 @@ ErrorCode TranslatePluginStatus(Plugin::Status pluginError);
 bool TranslateIntoParameter(const int &key, OHOS::Media::Plugin::Tag &tag);
 
 template <typename T>
-inline ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta> &inMeta,
+ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta> &inMeta,
     Plugin::PluginType pluginType, std::shared_ptr<T>& plugin, std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
-    std::function<std::shared_ptr<T>(const std::string&)> pluginCreator)
-{
-    uint32_t maxRank = 0;
-    std::shared_ptr<Plugin::PluginInfo> info;
-    auto pluginNames = Plugin::PluginManager::Instance().ListPlugins(pluginType);
-    for (const auto &name:pluginNames) {
-        auto tmpInfo = Plugin::PluginManager::Instance().GetPluginInfo(pluginType, name);
-        if (CompatibleWith(tmpInfo->inCaps, *inMeta) && tmpInfo->rank > maxRank) {
-            info = tmpInfo;
-        }
-    }
-    if (info == nullptr) {
-        return PLUGIN_NOT_FOUND;
-    }
-
-    // try to reuse the plugin if their name are the same
-    if (plugin != nullptr && pluginInfo != nullptr) {
-        if (info->name == pluginInfo->name) {
-            if (TranslatePluginStatus(plugin->Reset()) == SUCCESS) {
-                return SUCCESS;
-            }
-        }
-        plugin->Deinit();
-    }
-    plugin = pluginCreator(info->name);
-    if (plugin == nullptr) {
-        return PLUGIN_NOT_FOUND;
-    }
-    pluginInfo = info;
-    return SUCCESS;
-}
+    std::function<std::shared_ptr<T>(const std::string&)> pluginCreator);
 }
 }
 }

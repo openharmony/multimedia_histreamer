@@ -33,7 +33,7 @@ constexpr int32_t AF_32BIT_BYTES = 4;
 constexpr int32_t AF_16BIT_BYTES = 2;
 constexpr int32_t AF_8BIT_BYTES = 1;
 constexpr int32_t RETRY_TIMES = 3;
-constexpr int32_t RETRY_DELAY = 10; //ms
+constexpr int32_t RETRY_DELAY = 10; // 10ms
 
 int32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Meta> &meta)
 {

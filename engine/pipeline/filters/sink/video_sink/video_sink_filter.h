@@ -35,10 +35,10 @@ namespace Pipeline {
 class VideoSinkAdapter;
 class VideoSinkFilter : public FilterBase {
 public:
-    explicit VideoSinkFilter(const std::string &name);
+    explicit VideoSinkFilter(const std::string& name);
     ~VideoSinkFilter() override;
 
-    void Init(EventReceiver*, FilterCallback* callback) override;
+    void Init(EventReceiver* receiver, FilterCallback* callback) override;
 
     ErrorCode SetParameter(int32_t key, const Plugin::Any& value) override;
 

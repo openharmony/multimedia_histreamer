@@ -16,9 +16,12 @@
 #define LOG_TAG "SdlAudioSinkPlugin"
 
 #include "sdl_audio_sink_plugin.h"
+
 #include <functional>
+
 #include "foundation/constants.h"
 #include "foundation/log.h"
+#include "foundation/utils.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
@@ -186,12 +189,15 @@ Status SdlAudioSinkPlugin::Stop()
 
 bool SdlAudioSinkPlugin::IsParameterSupported(Tag tag)
 {
+    UNUSED_VARIABLE(tag);
     return false;
 }
 
 Status SdlAudioSinkPlugin::GetParameter(Tag tag, ValueType& value)
 {
-    return Status::ERROR_ALREADY_EXISTS;
+    UNUSED_VARIABLE(tag);
+    UNUSED_VARIABLE(value);
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
@@ -242,37 +248,44 @@ std::shared_ptr<Allocator> SdlAudioSinkPlugin::GetAllocator()
 
 Status SdlAudioSinkPlugin::SetCallback(const std::shared_ptr<Callback>& cb)
 {
-    return Status::ERROR_ALREADY_EXISTS;
+    UNUSED_VARIABLE(cb);
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status SdlAudioSinkPlugin::GetMute(bool& mute)
 {
-    return Status::ERROR_ALREADY_EXISTS;
+    UNUSED_VARIABLE(mute);
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status SdlAudioSinkPlugin::SetMute(bool mute)
 {
-    return Status::ERROR_ALREADY_EXISTS;
+    UNUSED_VARIABLE(mute);
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status SdlAudioSinkPlugin::GetVolume(float& volume)
 {
+    UNUSED_VARIABLE(volume);
     return Status::ERROR_ALREADY_EXISTS;
 }
 
 Status SdlAudioSinkPlugin::SetVolume(float volume)
 {
-    return Status::ERROR_ALREADY_EXISTS;
+    UNUSED_VARIABLE(volume);
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status SdlAudioSinkPlugin::GetSpeed(float& speed)
 {
-    return Status::ERROR_ALREADY_EXISTS;
+    UNUSED_VARIABLE(speed);
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status SdlAudioSinkPlugin::SetSpeed(float speed)
 {
-    return Status::ERROR_ALREADY_EXISTS;
+    UNUSED_VARIABLE(speed);
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status SdlAudioSinkPlugin::Pause()
@@ -291,17 +304,20 @@ Status SdlAudioSinkPlugin::Resume()
 
 Status SdlAudioSinkPlugin::GetLatency(uint64_t& ms)
 {
-    return Status::ERROR_ALREADY_EXISTS;
+    UNUSED_VARIABLE(ms);
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status SdlAudioSinkPlugin::GetFrameSize(size_t& size)
 {
-    return Status::ERROR_ALREADY_EXISTS;
+    UNUSED_VARIABLE(size);
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status SdlAudioSinkPlugin::GetFrameCount(uint32_t& count)
 {
-    return Status::ERROR_ALREADY_EXISTS;
+    UNUSED_VARIABLE(count);
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status SdlAudioSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
@@ -335,6 +351,7 @@ Status SdlAudioSinkPlugin::Flush()
 
 void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len)
 {
+    UNUSED_VARIABLE(userdata);
     MEDIA_LOG_D("sdl audio callback begin");
     auto realLen = rb->ReadBuffer(mixCache_.data(), len);
     if (realLen == 0) {

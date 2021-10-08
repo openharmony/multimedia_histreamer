@@ -27,6 +27,7 @@
 
 #include "foundation/constants.h"
 #include "foundation/log.h"
+#include "foundation/utils.h"
 #include "foundation/osal/thread/scoped_lock.h"
 #include "foundation/osal/utils/util.h"
 #include "plugin/common/plugin_audio_tags.h"
@@ -296,6 +297,8 @@ Status HdiSink::SetParameter(Tag tag, const ValueType &value)
 
 Status HdiSink::GetParameter(Tag tag, ValueType &value)
 {
+    UNUSED_VARIABLE(tag);
+    UNUSED_VARIABLE(value);
     return Status::ERROR_UNIMPLEMENTED;
 }
 
@@ -428,6 +431,7 @@ Status HdiSink::Stop()
 
 bool HdiSink::IsParameterSupported(Tag tag)
 {
+    UNUSED_VARIABLE(tag);
     return false;
 }
 
@@ -493,8 +497,8 @@ Status HdiSink::SetVolume(float volume)
         MEDIA_LOG_W("no render available, set volume must be called after prepare");
         return Status::ERROR_WRONG_STATE;
     }
-    volume *= MAX_VOLUME;
-    if (audioRender_->volume.SetVolume(audioRender_, volume) != 0) {
+    auto relVolume = volume * MAX_VOLUME;
+    if (audioRender_->volume.SetVolume(audioRender_, relVolume) != 0) {
         MEDIA_LOG_E("set volume failed");
         return Status::ERROR_UNKNOWN;
     }
@@ -587,11 +591,13 @@ Status HdiSink::GetLatency(uint64_t &ms)
 
 Status HdiSink::GetFrameSize(size_t &size)
 {
+    UNUSED_VARIABLE(size);
     return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status HdiSink::GetFrameCount(uint32_t &count)
 {
+    UNUSED_VARIABLE(count);
     return Status::ERROR_UNIMPLEMENTED;
 }
 
