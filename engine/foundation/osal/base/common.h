@@ -24,7 +24,7 @@ namespace Media {
 namespace OSAL {
 inline void Assert(const char* file, int line)
 {
-    fprintf(stderr, "assertion failed for: %s, at line: %d", file, line);
+    (void)fprintf(stderr, "assertion failed for: %s, at line: %d", file, line);
     abort();
 }
 } // namespace OSAL
