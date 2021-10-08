@@ -62,6 +62,9 @@ public:
     void WriteBuffer(void* ptr, size_t writeSize)
     {
         std::unique_lock<std::mutex> lck(writeMutex_);
+        if (!isActive_) {
+            return;
+        }
         while (writeSize + tail_ > head_ + bufferSize_) {
             writeCondition_.wait(lck);
             if (!isActive_) {
