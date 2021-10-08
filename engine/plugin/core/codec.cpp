@@ -17,6 +17,7 @@
 
 #include <utility>
 #include "interface/codec_plugin.h"
+#include "foundation/utils.h"
 
 using namespace OHOS::Media::Plugin;
 
@@ -65,7 +66,7 @@ struct DataCallbackWrapper : DataCallback {
     }
 
 private:
-    __attribute__((unused)) uint32_t version;
+    MEDIA_UNUSED uint32_t version;
     std::weak_ptr<DataCallbackHelper> helper;
 };
 

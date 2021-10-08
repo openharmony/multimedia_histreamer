@@ -22,6 +22,7 @@
 #include <map>
 
 #include "foundation/log.h"
+#include "foundation/utils.h"
 #include "plugin/common/plugin_audio_tags.h"
 
 namespace OHOS {
@@ -46,7 +47,7 @@ static inline bool IsDiscreteAllowed(uint8_t flags)
     return ALLOW_DISCRETE & flags;
 }
 
-__attribute__((unused)) static bool StringCapabilityCheck(const std::pair<CapabilityID, Plugin::ValueType>& tagEntry,
+MEDIA_UNUSED static bool StringCapabilityCheck(const std::pair<CapabilityID, Plugin::ValueType>& tagEntry,
                                                           const Meta& meta, uint8_t flags);
 template <typename T>
 bool NumericalCapabilityCheck(const std::pair<CapabilityID, Plugin::ValueType>& tagEntry, const Meta& meta,

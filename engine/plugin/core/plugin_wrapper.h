@@ -19,6 +19,7 @@
 #include "demuxer.h"
 #include "interface/demuxer_plugin.h"
 #include "interface/plugin_base.h"
+#include "foundation/utils.h"
 
 namespace OHOS {
 namespace Media {
@@ -42,7 +43,7 @@ struct DataSourceWrapper : DataSource {
     }
 
 private:
-    __attribute__((unused)) uint32_t version;
+    MEDIA_UNUSED uint32_t version;
     std::shared_ptr<DataSourceHelper> helper;
 };
 
@@ -63,7 +64,7 @@ struct AllocatorHelperWrapper : AllocatorHelper {
     }
 
 private:
-    __attribute__((unused)) uint32_t version_;
+    MEDIA_UNUSED uint32_t version_;
     std::shared_ptr<Allocator> allocator_;
 };
 
