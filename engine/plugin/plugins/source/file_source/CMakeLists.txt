@@ -5,6 +5,7 @@ project(plugin_filesource)
 
 include_directories(
         ${TOP_DIR}/engine
+        ${TOP_DIR}/engine/foundation
         ${TOP_DIR}/engine/plugin
 )
 
