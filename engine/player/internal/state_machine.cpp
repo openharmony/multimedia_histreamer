@@ -20,14 +20,16 @@
 namespace OHOS {
 namespace Media {
 StateMachine::StateMachine(PlayExecutor& executor)
-    : Task("StateMachine"), intentSync_("fsmSync"),
-    curState_ (std::make_shared<InitState>(executor, "InitState")), jobs_("StateMachineJobQue")
+    : Task("StateMachine"),
+      intentSync_("fsmSync"),
+      curState_(std::make_shared<InitState>(StateId::INIT, executor)),
+      jobs_("StateMachineJobQue")
 {
     AddState(curState_);
-    AddState(std::make_shared<PreparingState>(executor, "PreparingState"));
-    AddState(std::make_shared<ReadyState>(executor, "ReadyState"));
-    AddState(std::make_shared<PlayingState>(executor, "PlayingState"));
-    AddState(std::make_shared<PauseState>(executor, "PauseState"));
+    AddState(std::make_shared<PreparingState>(StateId::PREPARING, executor));
+    AddState(std::make_shared<ReadyState>(StateId::READY, executor));
+    AddState(std::make_shared<PlayingState>(StateId::PLAYING, executor));
+    AddState(std::make_shared<PauseState>(StateId::PAUSE, executor));
 }
 
 void StateMachine::Stop()
@@ -45,6 +47,11 @@ void StateMachine::SetStateCallback(StateChangeCallback* callback)
 const std::string& StateMachine::GetCurrentState() const
 {
     return curState_->GetName();
+}
+
+StateId StateMachine::GetCurrentStateId() const
+{
+    return curState_->GetStateId();
 }
 
 ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param) const
@@ -126,7 +133,7 @@ void StateMachine::DoTask()
 
 void StateMachine::AddState(const std::shared_ptr<State>& state)
 {
-    states_[state->GetName()] = state;
+    states_[state->GetStateId()] = state;
 }
 
 ErrorCode StateMachine::ProcAction(Action nextAction)
@@ -134,19 +141,19 @@ ErrorCode StateMachine::ProcAction(Action nextAction)
     std::shared_ptr<State> nextState = nullptr;
     switch (nextAction) {
         case Action::TRANS_TO_INIT:
-            nextState = states_["InitState"];
+            nextState = states_[StateId::INIT];
             break;
         case Action::TRANS_TO_PREPARING:
-            nextState = states_["PreparingState"];
+            nextState = states_[StateId::PREPARING];
             break;
         case Action::TRANS_TO_READY:
-            nextState = states_["ReadyState"];
+            nextState = states_[StateId::READY];
             break;
         case Action::TRANS_TO_PLAYING:
-            nextState = states_["PlayingState"];
+            nextState = states_[StateId::PLAYING];
             break;
         case Action::TRANS_TO_PAUSE:
-            nextState = states_["PauseState"];
+            nextState = states_[StateId::PAUSE];
             break;
         default:
             break;
@@ -174,7 +181,7 @@ ErrorCode StateMachine::TransitionTo(const std::shared_ptr<State>& state)
             rtv = ProcAction(nextAction);
         }
         if (callback_) {
-            callback_->OnStateChanged(curState_->GetName());
+            callback_->OnStateChanged(curState_->GetStateId());
         }
     }
     return rtv;

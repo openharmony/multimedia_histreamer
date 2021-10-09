@@ -21,12 +21,14 @@
 
 #include "common/any.h"
 #ifdef VIDEO_SUPPORT
-#include "filters/sink/video_sink/video_sink_filter.h"
 #include "filters/codec/video_decoder/video_decoder_filter.h"
+#include "filters/sink/video_sink/video_sink_filter.h"
 #endif
 #include "filters/demux/demuxer_filter.h"
 #include "filters/source/media_source_filter.h"
 #include "foundation/error_code.h"
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
 #include "foundation/utils.h"
 #include "histreamer/hiplayer.h"
 #include "internal/state_machine.h"
@@ -39,14 +41,6 @@
 
 namespace OHOS {
 namespace Media {
-class PlayerCallbackInner {
-public:
-    virtual void OnCompleted() = 0;
-    virtual void OnError(ErrorCode errorCode) = 0;
-    virtual void OnSeekCompleted(int32_t position) = 0;
-    virtual void OnStateChanged(std::string state) = 0;
-};
-
 class HiPlayer::HiPlayerImpl : public Pipeline::EventReceiver,
                                public PlayExecutor,
                                public StateChangeCallback,
@@ -90,9 +84,7 @@ public:
 
     ErrorCode SetCallback(const std::shared_ptr<PlayerCallback>& callback);
 
-    ErrorCode SetCallback(const std::shared_ptr<PlayerCallbackInner>& callback);
-
-    void OnStateChanged(std::string state) override;
+    void OnStateChanged(StateId state) override;
 
     ErrorCode OnCallback(const Pipeline::FilterCallbackType& type, Pipeline::Filter* filter,
                          const Plugin::Any& parameter) override;
@@ -127,6 +119,8 @@ private:
     void ActiveFilters(const std::vector<Pipeline::Filter*>& filters);
 
 private:
+    OSAL::Mutex mutex_;
+    OSAL::ConditionVariable cond_;
     StateMachine fsm_;
     std::shared_ptr<Pipeline::PipelineCore> pipeline;
 
@@ -143,11 +137,9 @@ private:
 
     std::weak_ptr<Meta> sourceMeta_;
     std::vector<std::weak_ptr<Meta>> streamMeta_;
-
-    std::atomic<bool> singleLoop {false};
+    std::atomic<bool> singleLoop{false};
     bool initialized = false;
-
-    std::weak_ptr<PlayerCallbackInner> callback_;
+    std::weak_ptr<PlayerCallback> callback_;
 };
 } // namespace Media
 } // namespace OHOS

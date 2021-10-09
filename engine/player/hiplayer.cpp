@@ -59,8 +59,12 @@ int32_t HiPlayer::SetSource(const Media::Source& source)
 int32_t HiPlayer::Prepare()
 {
     MEDIA_LOG_I("Prepare entered.");
-    curState_ = Media::PlayerStates::PLAYER_PREPARED;
-    return 0;
+    int ret = -1;
+    if (player_ && player_->Prepare() == SUCCESS) {
+        curState_ = Media::PlayerStates::PLAYER_PREPARED;
+        ret = 0;
+    }
+    return ret;
 }
 
 int32_t HiPlayer::Play()
@@ -136,7 +140,7 @@ int32_t HiPlayer::SetVolume(float leftVolume, float rightVolume)
         volume = (leftVolume + rightVolume) / 2; // 2
     }
     volume /= MAX_MEDIA_VOLUME; // normalize to 0~1
-    int ret = -1; // -1
+    int ret = -1;               // -1
     MEDIA_LOG_W("set volume %.3f", volume);
     if (player_ && player_->SetVolume(volume) == SUCCESS) {
         ret = 0;

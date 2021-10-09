@@ -28,7 +28,7 @@ namespace OHOS {
 namespace Media {
 class PauseState : public State {
 public:
-    explicit PauseState(PlayExecutor& executor, const std::string& name = "PauseState") : State(executor, name)
+    explicit PauseState(StateId stateId, PlayExecutor& executor) : State(stateId, "PauseState", executor)
     {
     }
 

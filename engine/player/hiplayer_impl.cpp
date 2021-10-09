@@ -99,8 +99,14 @@ PFilter HiPlayer::HiPlayerImpl::CreateAudioDecoder(const std::string& desc)
 
 ErrorCode HiPlayer::HiPlayerImpl::Prepare()
 {
-    // Do nothing, because after SetSource, it enters PreparingState, will call filters.Prepare()
-    return SUCCESS;
+    MEDIA_LOG_D("Prepare entered, current state: %s.", fsm_.GetCurrentState().c_str());
+    OSAL::ScopedLock lock(mutex_);
+    cond_.Wait(lock, [this] {
+        auto state = fsm_.GetCurrentStateId();
+        return state == StateId::READY || state == StateId::INIT;
+    });
+    MEDIA_LOG_D("Prepare finished, current state: %s.", fsm_.GetCurrentState().c_str());
+    return fsm_.GetCurrentStateId() == StateId::READY ? SUCCESS : UNKNOWN_ERROR;
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::Play()
@@ -231,7 +237,7 @@ ErrorCode HiPlayer::HiPlayerImpl::DoOnComplete()
     }
     auto ptr = callback_.lock();
     if (ptr != nullptr) {
-        ptr->OnCompleted();
+        ptr->OnPlaybackComplete();
     }
     return SUCCESS;
 }
@@ -241,7 +247,7 @@ ErrorCode HiPlayer::HiPlayerImpl::DoOnError(ErrorCode errorCode)
     // fixme do we need to callback here to notify registered callback
     auto ptr = callback_.lock();
     if (ptr != nullptr) {
-        ptr->OnError(errorCode);
+        ptr->OnError(PlayerCallback::PLAYER_ERROR_UNKNOWN, errorCode);
     }
     return SUCCESS;
 }
@@ -296,21 +302,14 @@ ErrorCode HiPlayer::HiPlayerImpl::SetVolume(float volume)
 
 ErrorCode HiPlayer::HiPlayerImpl::SetCallback(const std::shared_ptr<PlayerCallback>& callback)
 {
-    return SUCCESS;
-}
-
-ErrorCode HiPlayer::HiPlayerImpl::SetCallback(const std::shared_ptr<PlayerCallbackInner>& callback)
-{
     // todo this interface should be protected by mutex in case of multi-thread runtime
     callback_ = callback;
     return NULL_POINTER_ERROR;
 }
 
-void HiPlayer::HiPlayerImpl::OnStateChanged(std::string state)
+void HiPlayer::HiPlayerImpl::OnStateChanged(StateId state)
 {
-    if (auto callback = callback_.lock()) {
-        callback->OnStateChanged(state);
-    }
+    cond_.NotifyOne();
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::OnCallback(const FilterCallbackType& type, Filter* filter,

@@ -28,7 +28,7 @@ namespace OHOS {
 namespace Media {
 class ReadyState : public State {
 public:
-    explicit ReadyState(PlayExecutor& executor, const std::string& name = "ReadyState") : State(executor, name)
+    explicit ReadyState(StateId stateId, PlayExecutor& executor) : State(stateId, "ReadyState", executor)
     {
     }
 
