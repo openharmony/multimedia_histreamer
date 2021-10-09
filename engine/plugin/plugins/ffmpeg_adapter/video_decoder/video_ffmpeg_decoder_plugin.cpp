@@ -21,8 +21,8 @@
 #include <cstring>
 #include <map>
 #include <set>
-#include "foundation/log.h"
 #include "foundation/constants.h"
+#include "foundation/log.h"
 #include "foundation/memory_helper.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
@@ -45,7 +45,7 @@ std::shared_ptr<CodecPlugin> VideoFfmpegDecoderCreator(const std::string& name)
     return std::make_shared<VideoFfmpegDecoderPlugin>(name);
 }
 
-Status RegisterVideoDecoderPlugins(const std::shared_ptr<Register> &reg)
+Status RegisterVideoDecoderPlugins(const std::shared_ptr<Register>& reg)
 {
     const AVCodec* codec = nullptr;
     void* iter = nullptr;

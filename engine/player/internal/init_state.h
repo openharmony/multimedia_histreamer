@@ -29,7 +29,7 @@ namespace OHOS {
 namespace Media {
 class InitState : public State {
 public:
-    explicit InitState(PlayExecutor& executor, const std::string& name = "InitState") : State(executor, name)
+    explicit InitState(StateId stateId, PlayExecutor& executor) : State(stateId, "InitState", executor)
     {
     }
 
@@ -60,7 +60,7 @@ public:
     }
 
 private:
-    OSAL::Mutex mutex_ {};
+    OSAL::Mutex mutex_{};
 };
 } // namespace Media
 } // namespace OHOS

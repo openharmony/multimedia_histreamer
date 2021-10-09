@@ -28,6 +28,15 @@
 
 namespace OHOS {
 namespace Media {
+enum class StateId {
+    INIT,
+    PREPARING,
+    READY,
+    PAUSE,
+    PLAYING,
+    BUTT,
+};
+
 enum class Intent {
     SET_SOURCE,
     SEEK,
@@ -54,12 +63,13 @@ enum class Action {
 
 class State {
 public:
-    State(PlayExecutor& executor, std::string name);
+    State(StateId stateId, std::string name, PlayExecutor& executor);
     virtual ~State() = default;
     virtual std::tuple<ErrorCode, Action> Enter(Intent intent);
     virtual void Exit();
     std::tuple<ErrorCode, Action> Execute(Intent intent, const Plugin::Any& param);
     const std::string& GetName();
+    StateId GetStateId();
     virtual std::tuple<ErrorCode, Action> SetSource(const Plugin::Any& param);
     virtual std::tuple<ErrorCode, Action> Play();
     virtual std::tuple<ErrorCode, Action> Stop();
@@ -74,30 +84,25 @@ public:
 protected:
     std::tuple<ErrorCode, Action> DispatchIntent(Intent intent, const Plugin::Any& param);
 
-    PlayExecutor& executor_;
+    const StateId stateId_;
     const std::string name_;
-    const std::map<Intent, std::string> intentDesc_ = {
-        { Intent::SET_SOURCE, "SET_SOURCE" },
-        { Intent::SEEK, "SEEK" },
-        { Intent::PLAY, "PLAY" },
-        { Intent::PAUSE, "PAUSE" },
-        { Intent::RESUME, "RESUME" },
-        { Intent::STOP, "STOP" },
-        { Intent::SET_ATTRIBUTE, "SET_ATTRIBUTE" },
-        { Intent::NOTIFY_READY, "NOTIFY_READY" },
-        { Intent::NOTIFY_COMPLETE, "NOTIFY_COMPLETE" },
-        { Intent::NOTIFY_ERROR, "NOTIFY_ERROR" },
-        { Intent::INTENT_BUTT, "INTENT_BUTT" }
-    };
+    PlayExecutor& executor_;
+    const std::map<Intent, std::string> intentDesc_ = {{Intent::SET_SOURCE, "SET_SOURCE"},
+                                                       {Intent::SEEK, "SEEK"},
+                                                       {Intent::PLAY, "PLAY"},
+                                                       {Intent::PAUSE, "PAUSE"},
+                                                       {Intent::RESUME, "RESUME"},
+                                                       {Intent::STOP, "STOP"},
+                                                       {Intent::SET_ATTRIBUTE, "SET_ATTRIBUTE"},
+                                                       {Intent::NOTIFY_READY, "NOTIFY_READY"},
+                                                       {Intent::NOTIFY_COMPLETE, "NOTIFY_COMPLETE"},
+                                                       {Intent::NOTIFY_ERROR, "NOTIFY_ERROR"},
+                                                       {Intent::INTENT_BUTT, "INTENT_BUTT"}};
     const std::map<Action, std::string> actionDesc_ = {
-        { Action::TRANS_TO_INIT, "TRANS_TO_INIT" },
-        { Action::TRANS_TO_PREPARING, "TRANS_TO_PREPARING" },
-        { Action::TRANS_TO_READY, "TRANS_TO_READY" },
-        { Action::TRANS_TO_PLAYING, "TRANS_TO_PLAYING" },
-        { Action::TRANS_TO_PAUSE, "TRANS_TO_PAUSE" },
-        { Action::ACTION_PENDING, "ACTION_PENDING" },
-        { Action::ACTION_BUTT, "ACTION_BUTT" }
-    };
+        {Action::TRANS_TO_INIT, "TRANS_TO_INIT"},   {Action::TRANS_TO_PREPARING, "TRANS_TO_PREPARING"},
+        {Action::TRANS_TO_READY, "TRANS_TO_READY"}, {Action::TRANS_TO_PLAYING, "TRANS_TO_PLAYING"},
+        {Action::TRANS_TO_PAUSE, "TRANS_TO_PAUSE"}, {Action::ACTION_PENDING, "ACTION_PENDING"},
+        {Action::ACTION_BUTT, "ACTION_BUTT"}};
 };
 } // namespace Media
 } // namespace OHOS

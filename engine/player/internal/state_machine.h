@@ -25,14 +25,12 @@
 #include "foundation/blocking_queue.h"
 #include "foundation/error_code.h"
 #include "foundation/log.h"
+#include "init_state.h"
 #include "osal/base/synchronizer.h"
 #include "osal/thread/mutex.h"
 #include "osal/thread/task.h"
-
-#include "play_executor.h"
-
-#include "init_state.h"
 #include "pause_state.h"
+#include "play_executor.h"
 #include "playing_state.h"
 #include "preparing_state.h"
 #include "ready_state.h"
@@ -42,7 +40,7 @@ namespace Media {
 class StateChangeCallback {
 public:
     virtual ~StateChangeCallback() = default;
-    virtual void OnStateChanged(std::string state) = 0;
+    virtual void OnStateChanged(StateId state) = 0;
 };
 
 class StateMachine final : public OSAL::Task {
@@ -56,6 +54,8 @@ public:
     void SetStateCallback(StateChangeCallback* callback);
 
     const std::string& GetCurrentState() const;
+
+    StateId GetCurrentStateId() const;
 
     ErrorCode SendEvent(Intent intent, const Plugin::Any& param = {});
 
@@ -84,7 +84,7 @@ private:
     mutable OSAL::Synchronizer<Intent, ErrorCode> intentSync_;
     mutable std::shared_ptr<State> curState_{nullptr};
     mutable Intent lastIntent{Intent::INTENT_BUTT};
-    std::map<std::string, std::shared_ptr<State>> states_{};
+    std::map<StateId, std::shared_ptr<State>> states_{};
     Media::BlockingQueue<Job> jobs_;
     std::queue<Job> pendingJobs_{};
     StateChangeCallback* callback_{nullptr};

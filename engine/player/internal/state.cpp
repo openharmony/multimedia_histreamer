@@ -20,7 +20,8 @@
 
 namespace OHOS {
 namespace Media {
-State::State(PlayExecutor& executor, std::string name) : executor_(executor), name_(std::move(name))
+State::State(StateId stateId, std::string name, PlayExecutor& executor)
+    : stateId_(stateId), name_(std::move(name)), executor_(executor)
 {
 }
 std::tuple<ErrorCode, Action> State::Enter(Intent intent)
@@ -40,6 +41,10 @@ std::tuple<ErrorCode, Action> State::Execute(Intent intent, const Plugin::Any& p
 const std::string& State::GetName()
 {
     return name_;
+}
+StateId State::GetStateId()
+{
+    return stateId_;
 }
 std::tuple<ErrorCode, Action> State::SetSource(const Plugin::Any& source)
 {
