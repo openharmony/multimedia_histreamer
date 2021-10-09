@@ -108,8 +108,7 @@ if (compile_histreamer) {
             "//foundation/graphic/surface:lite_surface",
             "//device/hisilicon/hardware:hardware_media_sdk",
             "//device/hisilicon/modules/middleware:middleware_source_sdk",
-            "engine/plugin:histreamer_plugin_intf",
-            "engine/plugin:histreamer_plugin_core",
+            "engine/plugin:histreamer_plugin",
         ]
         public_deps = [
         "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
@@ -125,14 +124,6 @@ if (compile_histreamer) {
             "//foundation/multimedia/histreamer/tests/resource/dream_it_possible.mp3",
         ]
         outputs = ["$root_out_dir/data/{{source_file_part}}"]
-    }
-
-    lite_component("media_histreamer") {
-        features = [
-            ":histreamer",
-            "engine/plugin:histreamer_plugin_intf",
-            "engine/plugin:histreamer_plugin_core",
-       ]
     }
 } else {
     import("//build/ohos.gni")
