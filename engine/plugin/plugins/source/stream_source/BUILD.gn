@@ -12,41 +12,31 @@
 # limitations under the License.
 #
 
-
 if (defined(ohos_lite)) {
-    import("//build/lite/config/component/lite_component.gni")
-    
-    print("enable plugin_stream_source")
+  import("//build/lite/config/component/lite_component.gni")
 
-    group("plugin_stream_source") {
-        deps = [
-            ":histreamer_plugin_StreamSource"
-        ]
+  print("enable plugin_stream_source")
+
+  group("plugin_stream_source") {
+    deps = [ ":histreamer_plugin_StreamSource" ]
+  }
+
+  plugin_stream_source_src = [ "stream_source_plugin.cpp" ]
+
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("histreamer_plugin_StreamSource") {
+      sources = plugin_stream_source_src
+      public_deps = [ "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf_static" ]
     }
-    
-    plugin_stream_source_src = [
-        "stream_source_plugin.cpp",
-    ]
-    
-    if (ohos_kernel_type == "liteos_m") {
-        static_library("histreamer_plugin_StreamSource") {
-            sources = plugin_stream_source_src
-            public_deps = [
-                "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf_static"
-            ]
-        }
-    } else {
-        shared_library("histreamer_plugin_StreamSource") {
-            sources = plugin_stream_source_src
-            include_dirs = [
-                "//foundation/multimedia/utils/lite/interfaces/kits",
-            ]
-            public_deps = [
-                "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-                "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-                "//foundation/multimedia/utils/lite:media_common",
-            ]
-        }
+  } else {
+    shared_library("histreamer_plugin_StreamSource") {
+      sources = plugin_stream_source_src
+      include_dirs = [ "//foundation/multimedia/utils/lite/interfaces/kits" ]
+      public_deps = [
+        "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+        "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+        "//foundation/multimedia/utils/lite:media_common",
+      ]
     }
+  }
 }
-
