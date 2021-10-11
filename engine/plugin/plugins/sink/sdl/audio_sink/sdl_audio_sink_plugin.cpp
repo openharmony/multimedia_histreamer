@@ -43,6 +43,10 @@ void SDLAudioCallback(void* userdata, uint8_t* stream, int len)
 AVSampleFormat TranslateFormat(AudioSampleFormat format)
 {
     switch (format) {
+        case AudioSampleFormat::U8:
+            return AV_SAMPLE_FMT_U8;
+        case AudioSampleFormat::U8P:
+            return AV_SAMPLE_FMT_U8P;
         case AudioSampleFormat::F32:
             return AV_SAMPLE_FMT_FLT;
         case AudioSampleFormat::F32P:
@@ -148,7 +152,8 @@ Status SdlAudioSinkPlugin::Prepare()
         return Status::ERROR_NO_MEMORY;
     }
     AVSampleFormat sampleFormat = TranslateFormat(audioFormat_);
-    MEDIA_LOG_I("configure swr with outChannelLayout 0x%x, outSampleFmt %d, outSampleRate %d inChannelLayout 0x%x, "
+    MEDIA_LOG_I("configure swr with outChannelLayout 0x%x, outSampleFmt %d, "
+                "outSampleRate %d inChannelLayout 0x%x, "
                 "inSampleFormat %d, inSampleRate %d",
                 outChannelLayout, outSampleFmt, sampleRate_, channelMask_, sampleFormat, sampleRate_);
     swrContext = swr_alloc_set_opts(swrContext, outChannelLayout, outSampleFmt, sampleRate_, channelMask_, sampleFormat,
