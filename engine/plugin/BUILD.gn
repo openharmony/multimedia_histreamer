@@ -24,6 +24,7 @@ if (defined(ohos_lite)) {
         deps = [
             ":histreamer_plugin_intf",
             ":histreamer_plugin_core",
+            "plugins:histreamer_plugin_store",
         ]
     }
     
