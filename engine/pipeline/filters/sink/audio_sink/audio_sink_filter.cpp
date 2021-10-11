@@ -182,8 +182,8 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
         return SUCCESS;
     }
 
-    if (buffer->GetMemory()->GetSize() == 0) {
-        Event event {
+    if ((buffer->flag & BUFFER_FLAG_EOS) != 0) {
+        Event event{
             .type = EVENT_COMPLETE,
         };
         MEDIA_LOG_D("audio sink push data send event_complete");

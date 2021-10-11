@@ -504,6 +504,7 @@ void AudioFfmpegDecoderPlugin::ReceiveBufferLocked(Status& status, const std::sh
     } else if (ret == AVERROR_EOF) {
         MEDIA_LOG_I("eos received");
         ioInfo->GetMemory()->Reset();
+        ioInfo->flag = BUFFER_FLAG_EOS;
         notifyBufferDone = true;
         receiveOneFrame = false;
         status = Status::END_OF_STREAM;
