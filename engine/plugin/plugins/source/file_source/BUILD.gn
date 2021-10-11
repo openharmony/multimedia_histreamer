@@ -12,37 +12,29 @@
 # limitations under the License.
 #
 
-
 if (defined(ohos_lite)) {
-    import("//build/lite/config/component/lite_component.gni")
-    
-    print("enable plugin_file_source")
+  import("//build/lite/config/component/lite_component.gni")
 
-    group("plugin_file_source") {
-        deps = [
-            ":histreamer_plugin_FileSource"
-        ]
+  print("enable plugin_file_source")
+
+  group("plugin_file_source") {
+    deps = [ ":histreamer_plugin_FileSource" ]
+  }
+
+  plugin_file_source_src = [ "file_source_plugin.cpp" ]
+
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("histreamer_plugin_FileSource") {
+      sources = plugin_file_source_src
+      public_deps = [ "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf_static" ]
     }
-    
-    plugin_file_source_src = [
-        "file_source_plugin.cpp",
-    ]
-    
-    if (ohos_kernel_type == "liteos_m") {
-        static_library("histreamer_plugin_FileSource") {
-            sources = plugin_file_source_src
-            public_deps = [
-                "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf_static"
-            ]
-        }
-    } else {
-        shared_library("histreamer_plugin_FileSource") {
-            sources = plugin_file_source_src
-            public_deps = [
-                "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-                "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf"
-            ]
-        }
+  } else {
+    shared_library("histreamer_plugin_FileSource") {
+      sources = plugin_file_source_src
+      public_deps = [
+        "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+        "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+      ]
     }
+  }
 }
-

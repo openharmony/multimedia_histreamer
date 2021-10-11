@@ -15,39 +15,45 @@
 import("//build/lite/config/component/lite_component.gni")
 
 histreamer_foundation_src = [
-    "osal/thread/task.cpp",
-    "osal/thread/condition_variable.cpp",
-    "osal/thread/mutex.cpp",
-    "osal/thread/scoped_lock.cpp",
-    "osal/thread/thread.cpp",
-    "osal/utils/util.cpp",
-    "meta.cpp",
-    "constants.cpp",
+  "osal/thread/task.cpp",
+  "osal/thread/condition_variable.cpp",
+  "osal/thread/mutex.cpp",
+  "osal/thread/scoped_lock.cpp",
+  "osal/thread/thread.cpp",
+  "osal/utils/util.cpp",
+  "meta.cpp",
+  "constants.cpp",
 ]
 
 config("histreamer_foundation_config") {
-    include_dirs = [
-        "//foundation/multimedia/histreamer/engine",
-        "//foundation/multimedia/histreamer/engine/foundation",
-        "//foundation/multimedia/histreamer/engine/foundation/osal",
-        "//foundation/multimedia/histreamer/engine/plugin",
-        "//foundation/multimedia/utils/lite/interfaces/kits",
-        "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits",
-        "//third_party/bounds_checking_function/include",
-    ]
-    defines = [ "OSAL_OHOS", "HI3516DV300" ]
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine",
+    "//foundation/multimedia/histreamer/engine/foundation",
+    "//foundation/multimedia/histreamer/engine/foundation/osal",
+    "//foundation/multimedia/histreamer/engine/plugin",
+    "//foundation/multimedia/utils/lite/interfaces/kits",
+    "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits",
+    "//third_party/bounds_checking_function/include",
+  ]
+  defines = [
+    "OSAL_OHOS",
+    "HI3516DV300",
+  ]
 }
 
 lite_library("histreamer_foundation") {
-    target_type = "shared_library"
-    sources = histreamer_foundation_src
-    public_configs = [":histreamer_foundation_config"]
-    public_deps = [
-        "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-        "//third_party/bounds_checking_function:libsec_shared",
-        "//foundation/multimedia/utils/lite:media_common",
-    ]
-    cflags = [ "-O2", "-fPIC", "-Wall" ]
-    cflags_cc = cflags
+  target_type = "shared_library"
+  sources = histreamer_foundation_src
+  public_configs = [ ":histreamer_foundation_config" ]
+  public_deps = [
+    "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+    "//foundation/multimedia/utils/lite:media_common",
+    "//third_party/bounds_checking_function:libsec_shared",
+  ]
+  cflags = [
+    "-O2",
+    "-fPIC",
+    "-Wall",
+  ]
+  cflags_cc = cflags
 }
-
