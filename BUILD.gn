@@ -14,13 +14,5 @@
 import("//build/ohos.gni")
 
 group("histreamer_packages") {
-  deps = [
-    "//third_party/glib:glib_packages",
-    "//third_party/gstreamer/gst_libav:gst_libav_packages",
-    "//third_party/gstreamer/gstplugins_bad:gstplugins_bad_packages",
-    "//third_party/gstreamer/gstplugins_base:gstplugins_base_packages",
-    "//third_party/gstreamer/gstplugins_good:gstplugins_good_packages",
-    "//third_party/gstreamer/gstreamer:gstreamer_packages",
-    "//third_party/libffi:ffi",
-  ]
+  deps = []
 }
