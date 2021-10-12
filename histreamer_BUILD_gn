@@ -105,14 +105,6 @@ if (compile_histreamer) {
             "//third_party/bounds_checking_function:libsec_shared",
         ]
     }
-
-    # for test only.
-    copy("music_files") {
-        sources = [
-            "//foundation/multimedia/histreamer/tests/resource/dream_it_possible.mp3",
-        ]
-        outputs = ["$root_out_dir/data/{{source_file_part}}"]
-    }
 } else {
     import("//build/ohos.gni")
 
