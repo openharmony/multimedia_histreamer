@@ -15,13 +15,8 @@
 
 #include "util.h"
 
-#ifdef OSAL_OHOS
 #if !defined(_MSC_VER) && !defined(__clang__)
 #include <unistd.h>
-#endif
-#else
-#include <chrono>
-#include <thread>
 #endif
 
 #ifdef _MSC_VER
@@ -47,11 +42,7 @@ namespace OSAL {
 void SleepFor(unsigned ms)
 {
     constexpr int factor = 1000;
-#ifdef OSAL_OHOS
     usleep(ms * factor);
-#else
-    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-#endif
 }
 } // namespace OSAL
 } // namespace Media

@@ -16,7 +16,8 @@
 #ifndef HISTREAMER_FOUNDATION_OSAL_MUTEX_H
 #define HISTREAMER_FOUNDATION_OSAL_MUTEX_H
 
-#include "osal/osal_config.h"
+#include <pthread.h>
+#include <semaphore.h>
 
 namespace OHOS {
 namespace Media {

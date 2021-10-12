@@ -77,7 +77,7 @@ bool Thread::CreateThread(const std::function<void()>& func)
 
 void Thread::SetNameInternal()
 {
-#ifndef OSAL_OHOS
+#ifdef SUPPORT_PTHREAD_NAME
     if (state_ && !name_.empty()) {
         constexpr size_t threadNameMaxSize = 15;
         if (name_.size() > threadNameMaxSize) {

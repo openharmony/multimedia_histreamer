@@ -35,10 +35,7 @@ config("histreamer_foundation_config") {
     "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits",
     "//third_party/bounds_checking_function/include",
   ]
-  defines = [
-    "OSAL_OHOS",
-    "HI3516DV300",
-  ]
+  defines = [ "MEDIA_OHOS" ]
 }
 
 lite_library("histreamer_foundation") {

@@ -22,8 +22,6 @@
 #include <string>
 #include <tuple>
 
-#include "osal/osal_config.h"
-
 namespace OHOS {
 namespace Media {
 namespace OSAL {

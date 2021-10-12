@@ -52,7 +52,7 @@ if (compile_histreamer) {
             "engine/plugin/plugins/hdi_adapter/sink/ring_buffer.cpp",
             "engine/plugin/plugins/hdi_adapter/utils/hdi_au_utils.cpp",
         ]
-        defines = [ "__NEED_wint_t", "OSAL_OHOS", "__STDC_FORMAT_MACROS", "__HOS_LITE_SINK__", "HI3516DV300" ]
+        defines = [ "__NEED_wint_t", "__STDC_FORMAT_MACROS", "MEDIA_OHOS" ]
         cflags = [ "-O2", "-fPIC", "-Wall" ]
         cflags_cc = cflags
         include_dirs = [

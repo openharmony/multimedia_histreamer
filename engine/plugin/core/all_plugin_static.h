@@ -33,7 +33,7 @@ PLUGIN_REGISTER_STATIC_DECLARE(FFmpegAudioDecoders);
 #ifdef VIDEO_SUPPORT
 PLUGIN_REGISTER_STATIC_DECLARE(FFmpegVideoDecoders);
 #endif
-#ifdef HI3516DV300
+#ifdef MEDIA_OHOS
 PLUGIN_REGISTER_STATIC_DECLARE(HdiAuSink);
 #else
 PLUGIN_REGISTER_STATIC_DECLARE(SdlAudioSink);
@@ -52,7 +52,7 @@ void RegisterPluginStatic(std::shared_ptr<OHOS::Media::Plugin::Register> reg)
 #ifdef VIDEO_SUPPORT
     REGISTER_STATIC(FFmpegVideoDecoders, reg);
 #endif
-#ifdef HI3516DV300
+#ifdef MEDIA_OHOS
     REGISTER_STATIC(HdiAuSink, reg);
 #else
     REGISTER_STATIC(SdlAudioSink, reg);
@@ -70,7 +70,7 @@ void UnregisterPluginStatic()
     UNREGISTER_STATIC(StreamSource);
     UNREGISTER_STATIC(FFmpegDemuxer);
     UNREGISTER_STATIC(FFmpegAudioDecoders);
-#ifdef HI3516DV300
+#ifdef MEDIA_OHOS
     UNREGISTER_STATIC(HdiAuSink);
 #else
     UNREGISTER_STATIC(SdlAudioSink);
