@@ -249,6 +249,11 @@ int32_t HiPlayer::SetLoop(bool loop)
 
 void HiPlayer::SetPlayerCallback(const std::shared_ptr<Media::PlayerCallback>& cb)
 {
+    if (player_ && player_->SetCallback(cb) == SUCCESS) {
+        MEDIA_LOG_I("SetPlayerCallback succ.");
+    } else {
+        MEDIA_LOG_E("SetPlayerCallback failed.");
+    }
 }
 
 int32_t HiPlayer::Init()
