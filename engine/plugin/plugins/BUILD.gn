@@ -17,10 +17,10 @@ if (defined(ohos_lite)) {
 
   group("histreamer_plugin_store") {
     deps = [
+      "ffmpeg_adapter:plugin_ffmpeg_adapter",
       "source/file_source:plugin_file_source",
       "source/stream_source:plugin_stream_source",
 
-      #"ffmpeg_adapter:plugin_ffmpeg_adapter",
       #"hdi_adapter:plugin_hdi_adapter"
     ]
   }
