@@ -22,6 +22,7 @@
 #include <cstring>
 #include "bit_reader.h"
 #include "foundation/log.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace Media {
