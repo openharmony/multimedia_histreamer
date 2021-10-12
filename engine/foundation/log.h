@@ -23,7 +23,7 @@
 
 #include "error_code.h"
 
-#ifdef HI3516DV300
+#ifdef MEDIA_OHOS
 #include "hilog/log.h"
 #include "media_log.h"
 #endif
@@ -61,7 +61,7 @@ inline std::string MediaGetFileName(std::string file)
 #endif
 
 
-#ifdef HI3516DV300
+#ifdef MEDIA_OHOS
 #define MEDIA_LOG_E(msg, ...) MEDIA_ERR_LOG(msg, ##__VA_ARGS__)
 #define MEDIA_LOG_W(msg, ...) MEDIA_WARNING_LOG(msg, ##__VA_ARGS__)
 #if !LOG_NDEBUG

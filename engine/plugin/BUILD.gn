@@ -83,10 +83,7 @@ if (defined(ohos_lite)) {
 
   lite_library("histreamer_plugin_core") {
     target_type = "shared_library"
-    defines = [
-      "HI3516DV300",
-      "OSAL_OHOS",
-    ]
+    defines = [ "MEDIA_OHOS" ]
     sources = hst_plugin_core_src
     if (plugin_dynamic_register) {
       sources += [ "engine/plugin/core/plugin_loader.cpp" ]

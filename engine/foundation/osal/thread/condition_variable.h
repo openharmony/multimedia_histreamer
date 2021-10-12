@@ -16,8 +16,8 @@
 #ifndef HISTREAMER_FOUNDATION_OSAL_CONDITION_VARIABLE_H
 #define HISTREAMER_FOUNDATION_OSAL_CONDITION_VARIABLE_H
 
+#include <errno.h>
 #include <ctime>
-
 #include "scoped_lock.h"
 
 namespace OHOS {
@@ -61,12 +61,12 @@ public:
 #else
         clock_gettime(CLOCK_MONOTONIC, &timeout);
 #endif
-        timeout.tv_sec += timeoutMs / 1000; // 1000
+        timeout.tv_sec += timeoutMs / 1000;              // 1000
         timeout.tv_nsec += (timeoutMs % 1000) * 1000000; // 1000 1000000
         int status = 0;
         while (!pred() && (status == 0)) {
             status = pthread_cond_timedwait(&cond_, const_cast<pthread_mutex_t*>(lock.GetMutex()->GetNativeHandle()),
-                &timeout);
+                                            &timeout);
             if (status == ETIMEDOUT) {
                 return pred();
             }
@@ -76,7 +76,7 @@ public:
 
 private:
     bool condInited_;
-    pthread_cond_t cond_ {};
+    pthread_cond_t cond_{};
 };
 } // namespace OSAL
 } // namespace Media
