@@ -94,7 +94,10 @@ static uint32_t TranslatePixelFormat(const VideoPixelFormat pixelFormat)
 }
 
 SdlVideoSinkPlugin::SdlVideoSinkPlugin(std::string name)
-    : VideoSinkPlugin(std::move(name)), windowWidth_(DEFAULT_WINDOW_WIDTH), windowHeight_(DEFAULT_WINDOW_HEIGHT)
+    : VideoSinkPlugin(std::move(name)),
+      windowWidth_(DEFAULT_WINDOW_WIDTH),
+      windowHeight_(DEFAULT_WINDOW_HEIGHT),
+      curPts_(0)
 {
 }
 
@@ -380,7 +383,6 @@ Status SdlVideoSinkPlugin::VideoImageDisaplay(const std::shared_ptr<Buffer>& inp
     SDL_RenderClear(renderer_.get());
     SDL_RenderCopy(renderer_.get(), texture_.get(), NULL, &textureRect_);
     SDL_RenderPresent(renderer_.get());
-    SDL_Delay(16); // 16ms
     return (ret != 0) ? Status::ERROR_UNKNOWN : Status::OK;
 }
 
@@ -469,6 +471,12 @@ Status SdlVideoSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
     if (HandleSdlEvent() == true) {
         MEDIA_LOG_W("SDL_QUIT, write nothing");
         return Status::ERROR_NOT_ENOUGH_DATA;
+    }
+    if ((curPts_ != 0) && (curPts_ != inputInfo->pts)) {
+        uint64_t refreshTime = (curPts_ > inputInfo->pts) ? (curPts_ - inputInfo->pts) : (inputInfo->pts - curPts_);
+        if (refreshTime < 70) { // 70 ms
+            SDL_Delay(refreshTime);
+        }
     }
     return VideoImageDisaplay(inputInfo);
 }

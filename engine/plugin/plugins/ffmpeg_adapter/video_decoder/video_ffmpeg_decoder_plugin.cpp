@@ -472,7 +472,7 @@ Status VideoFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
     }
     auto ret = avcodec_send_packet(avCodecContext_.get(), packetPtr);
     if (ret < 0) {
-        MEDIA_LOG_E("send buffer error %s", AVStrError(ret).c_str());
+        MEDIA_LOG_D("send buffer error %s", AVStrError(ret).c_str());
         return Status::ERROR_NO_MEMORY;
     }
     return Status::OK;

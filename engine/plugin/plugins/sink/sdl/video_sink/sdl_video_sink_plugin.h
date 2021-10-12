@@ -79,6 +79,7 @@ private:
     SDL_RendererInfo rendererInfo_ = {0};
     std::shared_ptr<SDL_Texture> texture_ {nullptr};
     SDL_Rect textureRect_ = {0};
+    uint64_t curPts_ = {0};
 
 #ifdef DUMP_RAW_DATA
     std::ofstream dumpData_;
