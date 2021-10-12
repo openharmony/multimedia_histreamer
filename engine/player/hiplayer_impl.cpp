@@ -302,9 +302,8 @@ ErrorCode HiPlayer::HiPlayerImpl::SetVolume(float volume)
 
 ErrorCode HiPlayer::HiPlayerImpl::SetCallback(const std::shared_ptr<PlayerCallback>& callback)
 {
-    // todo this interface should be protected by mutex in case of multi-thread runtime
     callback_ = callback;
-    return NULL_POINTER_ERROR;
+    return ErrorCode::SUCCESS;
 }
 
 void HiPlayer::HiPlayerImpl::OnStateChanged(StateId state)
