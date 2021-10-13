@@ -20,19 +20,6 @@ gcc_arm_path = getenv("GCCARM")
 print("gcc_arm_path: ", gcc_arm_path)
 shared_library("histreamer") {
   sources = [
-    "engine/pipeline/core/compatible_check.cpp",
-    "engine/pipeline/core/filter_base.cpp",
-    "engine/pipeline/core/pipeline_core.cpp",
-    "engine/pipeline/core/port.cpp",
-    "engine/pipeline/factory/filter_factory.cpp",
-    "engine/pipeline/filters/codec/audio_decoder/audio_decoder_filter.cpp",
-    "engine/pipeline/filters/codec/decoder_filter_base.cpp",
-    "engine/pipeline/filters/common/plugin_utils.cpp",
-    "engine/pipeline/filters/demux/data_packer.cpp",
-    "engine/pipeline/filters/demux/demuxer_filter.cpp",
-    "engine/pipeline/filters/demux/type_finder.cpp",
-    "engine/pipeline/filters/sink/audio_sink/audio_sink_filter.cpp",
-    "engine/pipeline/filters/source/media_source_filter.cpp",
     "engine/player/hiplayer.cpp",
     "engine/player/hiplayer_impl.cpp",
     "engine/player/internal/state.cpp",
@@ -60,7 +47,7 @@ shared_library("histreamer") {
     "engine/pipeline/core",
     "engine/plugin",
     "${gcc_arm_path}/../arm-none-eabi/include",
-    "//foundation/multimedia/media_lite/interfaces/innerkits",
+    "//foundation/multimedia/media_lite/interfaces",
     "//foundation/multimedia/drivers/audio/include",
     "//foundation/multimedia/drivers/codec/include",
     "//foundation/multimedia/drivers/format/include",
@@ -89,6 +76,7 @@ shared_library("histreamer") {
 
   deps = [
     "engine/foundation:histreamer_foundation",
+    "engine/pipeline:histreamer_pipeline",
     "engine/plugin:histreamer_plugin",
     "//device/hisilicon/hardware:hardware_media_sdk",
     "//device/hisilicon/modules/middleware:middleware_source_sdk",
