@@ -60,7 +60,7 @@ shared_library("histreamer") {
     "engine/pipeline/core",
     "engine/plugin",
     "${gcc_arm_path}/../arm-none-eabi/include",
-    "//foundation/multimedia/media_lite/interfaces",
+    "//foundation/multimedia/media_lite/interfaces/innerkits",
     "//foundation/multimedia/drivers/audio/include",
     "//foundation/multimedia/drivers/codec/include",
     "//foundation/multimedia/drivers/format/include",
