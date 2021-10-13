@@ -15,7 +15,12 @@
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
-  shared_library("histreamer") {
+  lite_library("histreamer") {
+    if (ohos_kernel_type == "liteos_m") {
+      target_type = "static_library"
+    } else {
+      target_type = "shared_library"
+    }
     sources = []
     deps = [
       "engine/foundation:histreamer_foundation",

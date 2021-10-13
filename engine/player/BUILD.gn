@@ -32,7 +32,11 @@ if (defined(ohos_lite)) {
   }
 
   lite_library("histreamer_player") {
-    target_type = "shared_library"
+    if (ohos_kernel_type == "liteos_m") {
+      target_type = "static_library"
+    } else {
+      target_type = "shared_library"
+    }
     sources = histreamer_player_src
     public_configs = [ ":histreamer_player_config" ]
     public_deps = [
