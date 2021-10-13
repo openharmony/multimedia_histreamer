@@ -12,80 +12,16 @@
 # limitations under the License.
 #
 
-import("//build/lite/config/component/lite_component.gni")
-import("//build/lite/ndk/ndk.gni")
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
 
-gcc_arm_path = getenv("GCCARM")
-
-print("gcc_arm_path: ", gcc_arm_path)
-shared_library("histreamer") {
-  sources = [
-    "engine/player/hiplayer.cpp",
-    "engine/player/hiplayer_impl.cpp",
-    "engine/player/internal/state.cpp",
-    "engine/player/internal/state_machine.cpp",
-  ]
-  defines = [
-    "__NEED_wint_t",
-    "__STDC_FORMAT_MACROS",
-    "MEDIA_OHOS",
-  ]
-  cflags = [
-    "-O2",
-    "-fPIC",
-    "-Wall",
-  ]
-  cflags_cc = cflags
-  include_dirs = [
-    "interface",
-    "engine",
-    "engine/foundation",
-    "engine/foundation/osal",
-    "engine/pipeline",
-    "engine/player",
-    "engine/pipeline/filters",
-    "engine/pipeline/core",
-    "engine/plugin",
-    "${gcc_arm_path}/../arm-none-eabi/include",
-    "//foundation/multimedia/media_lite/interfaces",
-    "//foundation/multimedia/drivers/audio/include",
-    "//foundation/multimedia/drivers/codec/include",
-    "//foundation/multimedia/drivers/format/include",
-    "//foundation/multimedia/utils/lite/interfaces/kits",
-    "//foundation/multimedia/media_lite/interfaces/kits/player_lite",
-    "//kernel/liteos_m/kal/posix/include",
-    "//kernel/liteos_m/kernel/include",
-    "//kernel/liteos_m/kernel/arch/include",
-    "//drivers/peripheral/audio/interfaces/include",
-    "//drivers/peripheral/base",
-    "//drivers/peripheral/audio/hal/hdi_binder/proxy/include",
-    "//drivers/peripheral/audio/interfaces/include",
-    "//third_party/ffmpeg",
-    "//third_party/bounds_checking_function/include",
-  ]
-  outdir = rebase_path("$root_out_dir")
-
-  #public_configs = [ ":player_external_library_config" ]
-  ldflags = [ "-L$outdir" ]
-  ldflags += [ "-laudio_hw" ]
-  ldflags += [ "-lcodec" ]
-  ldflags += [ "-lavformat" ]
-  ldflags += [ "-lavcodec" ]
-  ldflags += [ "-lavutil" ]
-  ldflags += [ "-lhdi_videodisplayer" ]
-
-  deps = [
-    "engine/foundation:histreamer_foundation",
-    "engine/pipeline:histreamer_pipeline",
-    "engine/plugin:histreamer_plugin",
-    "//device/hisilicon/hardware:hardware_media_sdk",
-    "//device/hisilicon/modules/middleware:middleware_source_sdk",
-    "//foundation/graphic/surface:lite_surface",
-  ]
-  public_deps = [
-    "//foundation/multimedia/utils/lite:media_common",
-
-    #"//kernel/liteos_m/kal/posix:posix",
-    "//third_party/bounds_checking_function:libsec_shared",
-  ]
+  shared_library("histreamer") {
+    sources = []
+    deps = [
+      "engine/foundation:histreamer_foundation",
+      "engine/pipeline:histreamer_pipeline",
+      "engine/player:histreamer_player",
+      "engine/plugin:histreamer_plugin",
+    ]
+  }
 }

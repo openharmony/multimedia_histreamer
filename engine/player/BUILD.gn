@@ -1,0 +1,46 @@
+# Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+
+  histreamer_player_src = [
+    "hiplayer.cpp",
+    "hiplayer_impl.cpp",
+    "internal/state.cpp",
+    "internal/state_machine.cpp",
+  ]
+
+  config("histreamer_player_config") {
+    include_dirs = [
+      "//foundation/multimedia/histreamer/engine/player",
+      "//foundation/multimedia/histreamer/interface",
+      "//foundation/multimedia/media_lite/interfaces",
+      "//foundation/multimedia/media_lite/interfaces/kits/player_lite",
+    ]
+  }
+
+  lite_library("histreamer_player") {
+    target_type = "shared_library"
+    sources = histreamer_player_src
+    public_configs = [ ":histreamer_player_config" ]
+    public_deps = [
+      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline",
+      "//foundation/multimedia/utils/lite:media_common",
+    ]
+    cflags = [ "-Wall" ]
+    cflags_cc = cflags
+  }
+}
