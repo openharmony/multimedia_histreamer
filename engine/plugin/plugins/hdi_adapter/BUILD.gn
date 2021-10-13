@@ -33,23 +33,17 @@ if (defined(ohos_lite)) {
     ldflags = [ "-lhdi_videodisplayer" ]
   }
 
-  if (ohos_kernel_type == "liteos_m") {
-    static_library("histreamer_plugin_HdiAuSink") {
-      sources = plugin_hdi_adapter_src
-      public_configs = [ ":plugin_hdi_adapter_config" ]
-      public_deps = [
-        "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-        "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-      ]
+  lite_library("histreamer_plugin_HdiAuSink") {
+    if (ohos_kernel_type == "liteos_m") {
+      target_type = "static_library"
+    } else {
+      target_type = "shared_library"
     }
-  } else {
-    shared_library("histreamer_plugin_HdiAuSink") {
-      sources = plugin_hdi_adapter_src
-      public_configs = [ ":plugin_hdi_adapter_config" ]
-      public_deps = [
-        "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-        "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-      ]
-    }
+    sources = plugin_hdi_adapter_src
+    public_configs = [ ":plugin_hdi_adapter_config" ]
+    public_deps = [
+      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    ]
   }
 }

@@ -36,23 +36,15 @@ if (defined(ohos_lite)) {
   }
 
   lite_library("histreamer_plugin_intf") {
-    target_type = "shared_library"
+    if (ohos_kernel_type == "liteos_m") {
+      target_type = "static_library"
+    } else {
+      target_type = "shared_library"
+    }
     sources = hst_plugin_intf_src
     public_configs = [ ":hst_plugin_intf_config" ]
     public_deps = [
       "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-      "//third_party/bounds_checking_function:libsec_shared",
-    ]
-    cflags = [ "-Wall" ]
-    cflags_cc = cflags
-  }
-
-  lite_library("histreamer_plugin_intf_static") {
-    target_type = "static_library"
-    sources = hst_plugin_intf_src
-    public_configs = [ ":hst_plugin_intf_config" ]
-    public_deps = [
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//third_party/bounds_checking_function:libsec_shared",
     ]
     cflags = [ "-Wall" ]
@@ -84,7 +76,11 @@ if (defined(ohos_lite)) {
   }
 
   lite_library("histreamer_plugin_core") {
-    target_type = "shared_library"
+    if (ohos_kernel_type == "liteos_m") {
+      target_type = "static_library"
+    } else {
+      target_type = "shared_library"
+    }
     defines = [ "MEDIA_OHOS" ]
     sources = hst_plugin_core_src
     if (plugin_dynamic_register) {

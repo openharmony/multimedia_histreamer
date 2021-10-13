@@ -39,7 +39,11 @@ config("histreamer_foundation_config") {
 }
 
 lite_library("histreamer_foundation") {
-  target_type = "shared_library"
+  if (ohos_kernel_type == "liteos_m") {
+    target_type = "static_library"
+  } else {
+    target_type = "shared_library"
+  }
   sources = histreamer_foundation_src
   public_configs = [ ":histreamer_foundation_config" ]
   public_deps = [
