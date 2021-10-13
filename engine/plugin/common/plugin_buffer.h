@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <map>
+#include <vector>
 
 #include "plugin_tags.h"
 #include "plugin_types.h"

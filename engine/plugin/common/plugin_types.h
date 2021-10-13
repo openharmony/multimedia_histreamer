@@ -16,11 +16,7 @@
 #ifndef HISTREAMER_PLUGIN_TYPES_H
 #define HISTREAMER_PLUGIN_TYPES_H
 
-#include <cstddef>
 #include <cstdint>
-#include <set>
-#include <vector>
-#include "any.h"
 
 namespace OHOS {
 namespace Media {

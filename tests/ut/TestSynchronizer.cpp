@@ -25,7 +25,6 @@
 #include <memory>
 #include "osal/base/synchronizer.h"
 #include "osal/thread/task.h"
-#include "osal/utils/util.h"
 
 namespace OHOS {
 namespace Media {

@@ -242,7 +242,7 @@ std::shared_ptr<Meta> DemuxerFilter::GetGlobalMetaInfo() const
 ErrorCode DemuxerFilter::GetCurrentTime(int64_t& time) const
 {
     OSAL::ScopedLock lock(timeMutex_);
-    time = curTimeUs_ / 1000; // time in milliseconds
+    time = curTimeUs_ / 1000; // 1000, time in milliseconds
     return SUCCESS;
 }
 
