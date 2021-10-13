@@ -6,7 +6,6 @@
                 "phone"
             ],
             "module_list": [
-                "//foundation/multimedia/histreamer:histreamer_packages"
             ]
         }
     }
