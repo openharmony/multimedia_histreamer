@@ -26,55 +26,19 @@
 #define REGISTER_STATIC(name, reg) PLUGIN_PASTE(register_, name)(reg)
 #define UNREGISTER_STATIC(name) PLUGIN_PASTE(unregister_, name)()
 
-PLUGIN_REGISTER_STATIC_DECLARE(FileSource);
-PLUGIN_REGISTER_STATIC_DECLARE(StreamSource);
-PLUGIN_REGISTER_STATIC_DECLARE(FFmpegDemuxer)
-PLUGIN_REGISTER_STATIC_DECLARE(FFmpegAudioDecoders);
-#ifdef VIDEO_SUPPORT
-PLUGIN_REGISTER_STATIC_DECLARE(FFmpegVideoDecoders);
-#endif
-#ifdef MEDIA_OHOS
-PLUGIN_REGISTER_STATIC_DECLARE(HdiAuSink);
-#else
-PLUGIN_REGISTER_STATIC_DECLARE(SdlAudioSink);
-#ifdef VIDEO_SUPPORT
-PLUGIN_REGISTER_STATIC_DECLARE(SdlVideoSink);
-#endif
-#endif
+
+@HISTREAMER_PLUGIN_STATIC_DECLARE@
+
 
 void RegisterPluginStatic(std::shared_ptr<OHOS::Media::Plugin::Register> reg)
 {
-    REGISTER_STATIC(FileSource, reg);
-#ifndef UNIT_TEST
-    REGISTER_STATIC(StreamSource, reg);
-    REGISTER_STATIC(FFmpegDemuxer, reg);
-    REGISTER_STATIC(FFmpegAudioDecoders, reg);
-#ifdef VIDEO_SUPPORT
-    REGISTER_STATIC(FFmpegVideoDecoders, reg);
-#endif
-#ifdef MEDIA_OHOS
-    REGISTER_STATIC(HdiAuSink, reg);
-#else
-    REGISTER_STATIC(SdlAudioSink, reg);
-#ifdef VIDEO_SUPPORT
-    REGISTER_STATIC(SdlVideoSink, reg);
-#endif
-#endif
-#endif
+    @HISTREAMER_PLUGIN_REGISTER_STATIC@
+    
 }
 
 void UnregisterPluginStatic()
 {
-    UNREGISTER_STATIC(FileSource);
-#ifndef UNIT_TEST
-    UNREGISTER_STATIC(StreamSource);
-    UNREGISTER_STATIC(FFmpegDemuxer);
-    UNREGISTER_STATIC(FFmpegAudioDecoders);
-#ifdef MEDIA_OHOS
-    UNREGISTER_STATIC(HdiAuSink);
-#else
-    UNREGISTER_STATIC(SdlAudioSink);
-#endif
-#endif
+    @HISTREAMER_PLUGIN_UNREGISTER_STATIC@
+    
 }
 #endif // HISTREAMER_PLUGIN_ALL_PLUGIN_STATIC_H
