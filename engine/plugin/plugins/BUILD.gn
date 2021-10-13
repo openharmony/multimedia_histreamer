@@ -23,4 +23,23 @@ if (defined(ohos_lite)) {
       "source/stream_source:plugin_stream_source",
     ]
   }
+
+  action("gen_plungin_static_header") {
+    script = "//foundation/multimedia/histreamer/engine/plugin/plugins/plugin_config.py"
+
+    args = [
+      rebase_path("//foundation/multimedia/histreamer/engine/plugin/plugins",
+                  root_build_dir),
+      rebase_path("${target_gen_dir}/include/", root_build_dir),
+    ]
+    args += [
+      "FileSource",
+      "StreamSource",
+      "FFmpegDemuxer",
+      "FFmpegAudioDecoders",
+      "HdiAuSink",
+    ]
+
+    outputs = [ "${target_gen_dir}/include/all_plugin_static.h" ]
+  }
 }

@@ -23,6 +23,7 @@ if (defined(ohos_lite)) {
     deps = [
       ":histreamer_plugin_core",
       ":histreamer_plugin_intf",
+      "plugins:gen_plungin_static_header",
       "plugins:histreamer_plugin_store",
     ]
   }
@@ -78,6 +79,7 @@ if (defined(ohos_lite)) {
       "//foundation/multimedia/histreamer/engine/foundation",
       "//foundation/multimedia/histreamer/engine/foundation/osal",
       "//foundation/multimedia/utils/lite/interfaces/kits",
+      "${target_gen_dir}/plugins/include/",
     ]
   }
 
