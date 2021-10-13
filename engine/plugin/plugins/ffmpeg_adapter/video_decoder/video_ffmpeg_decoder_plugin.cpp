@@ -136,7 +136,7 @@ VideoFfmpegDecoderPlugin::VideoFfmpegDecoderPlugin(std::string name)
 
 Status VideoFfmpegDecoderPlugin::Init()
 {
-    OSAL::ScopedLock l(lock_);
+    OSAL::ScopedLock l(avMutex_);
     auto iter = codecMap.find(pluginName_);
     if (iter == codecMap.end()) {
         MEDIA_LOG_W("cannot find codec with name %s", pluginName_.c_str());
@@ -156,7 +156,7 @@ Status VideoFfmpegDecoderPlugin::Init()
 
 Status VideoFfmpegDecoderPlugin::Deinit()
 {
-    OSAL::ScopedLock l(lock_);
+    OSAL::ScopedLock l(avMutex_);
     avCodec_.reset();
     cachedFrame_.reset();
     ResetLocked();
@@ -170,14 +170,14 @@ Status VideoFfmpegDecoderPlugin::Deinit()
 
 Status VideoFfmpegDecoderPlugin::SetParameter(Tag tag, const ValueType& value)
 {
-    OSAL::ScopedLock l(lock_);
+    OSAL::ScopedLock l(avMutex_);
     videoDecParams_.insert(std::make_pair(tag, value));
     return Status::OK;
 }
 
 Status VideoFfmpegDecoderPlugin::GetParameter(Tag tag, ValueType& value)
 {
-    OSAL::ScopedLock l(lock_);
+    OSAL::ScopedLock l(avMutex_);
     auto res = videoDecParams_.find(tag);
     if (res != videoDecParams_.end()) {
         value = res->second;
@@ -327,7 +327,7 @@ Status VideoFfmpegDecoderPlugin::CloseCodecContext()
 Status VideoFfmpegDecoderPlugin::Prepare()
 {
     {
-        OSAL::ScopedLock l(lock_);
+        OSAL::ScopedLock l(avMutex_);
         if (state_ != State::INITIALIZED && state_ != State::PREPARED) {
             return Status::ERROR_WRONG_STATE;
         }
@@ -360,14 +360,14 @@ Status VideoFfmpegDecoderPlugin::ResetLocked()
 
 Status VideoFfmpegDecoderPlugin::Reset()
 {
-    OSAL::ScopedLock l(lock_);
+    OSAL::ScopedLock l(avMutex_);
     return ResetLocked();
 }
 
 Status VideoFfmpegDecoderPlugin::Start()
 {
     {
-        OSAL::ScopedLock l(lock_);
+        OSAL::ScopedLock l(avMutex_);
         if (state_ != State::PREPARED) {
             return Status::ERROR_WRONG_STATE;
         }
@@ -387,7 +387,7 @@ Status VideoFfmpegDecoderPlugin::Stop()
 {
     Status ret = Status::OK;
     {
-        OSAL::ScopedLock l(lock_);
+        OSAL::ScopedLock l(avMutex_);
         ret = CloseCodecContext();
 #ifdef DUMP_RAW_DATA
         dumpData_.close();
@@ -409,7 +409,7 @@ Status VideoFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>
 
 Status VideoFfmpegDecoderPlugin::Flush()
 {
-    OSAL::ScopedLock l(lock_);
+    OSAL::ScopedLock l(avMutex_);
     if (avCodecContext_ != nullptr) {
         // flush avcodec buffers
     }
@@ -425,7 +425,7 @@ Status VideoFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
     }
     Status ret = Status::OK;
     {
-        OSAL::ScopedLock l(lock_);
+        OSAL::ScopedLock l(avMutex_);
         ret = SendBufferLocked(inputBuffer);
     }
     NotifyInputBufferDone(inputBuffer);
@@ -604,7 +604,7 @@ void VideoFfmpegDecoderPlugin::ReceiveBuffer()
     }
     Status status;
     {
-        OSAL::ScopedLock l(lock_);
+        OSAL::ScopedLock l(avMutex_);
         status = ReceiveBufferLocked(frameBuffer);
     }
     if (status == Status::OK || status == Status::END_OF_STREAM) {

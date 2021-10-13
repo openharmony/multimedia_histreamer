@@ -43,7 +43,7 @@ Status Codec::Flush()
 
 struct DataCallbackWrapper : DataCallback {
     DataCallbackWrapper(uint32_t pkgVersion, std::weak_ptr<DataCallbackHelper> dataCallback)
-        : version(pkgVersion), helper(dataCallback)
+        : version(pkgVersion), helper(std::move(dataCallback))
     {
     }
 

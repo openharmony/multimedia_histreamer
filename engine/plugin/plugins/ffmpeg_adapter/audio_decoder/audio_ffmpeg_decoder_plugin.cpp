@@ -176,45 +176,54 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 AudioFfmpegDecoderPlugin::AudioFfmpegDecoderPlugin(std::string name)
-    : CodecPlugin(std::move(name)), outBufferQ_("adecPluginQueue", BUFFER_QUEUE_SIZE)
-{
-}
+    : CodecPlugin(std::move(name)), outBufferQ_("adecPluginQueue", BUFFER_QUEUE_SIZE) {}
 
+AudioFfmpegDecoderPlugin::~AudioFfmpegDecoderPlugin()
+{
+    OSAL::ScopedLock lock(avMutex_);
+    OSAL::ScopedLock lock1(parameterMutex_);
+    DeInitLocked();
+}
 Status AudioFfmpegDecoderPlugin::Init()
 {
-    OSAL::ScopedLock l(lock_);
     auto ite = codecMap.find(pluginName_);
     if (ite == codecMap.end()) {
         MEDIA_LOG_W("cannot find codec with name %s", pluginName_.c_str());
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
+    OSAL::ScopedLock lock(avMutex_);
     avCodec_ = ite->second;
     cachedFrame_ = std::shared_ptr<AVFrame>(av_frame_alloc(), [](AVFrame* fp) { av_frame_free(&fp); });
-    state_ = State::INITIALIZED;
+    OSAL::ScopedLock lock1(parameterMutex_);
     audioParameter_[Tag::REQUIRED_OUT_BUFFER_CNT] = (uint32_t)BUFFER_QUEUE_SIZE;
     return Status::OK;
 }
 
 Status AudioFfmpegDecoderPlugin::Deinit()
 {
-    OSAL::ScopedLock l(lock_);
+    OSAL::ScopedLock lock(avMutex_);
+    OSAL::ScopedLock lock1(parameterMutex_);
+    return DeInitLocked();
+}
+
+Status AudioFfmpegDecoderPlugin::DeInitLocked()
+{
     avCodec_.reset();
     cachedFrame_.reset();
     ResetLocked();
-    state_ = State::DESTROYED;
     return Status::OK;
 }
 
 Status AudioFfmpegDecoderPlugin::SetParameter(Tag tag, const ValueType& value)
 {
-    OSAL::ScopedLock l(lock_);
+    OSAL::ScopedLock lock(parameterMutex_);
     audioParameter_.insert(std::make_pair(tag, value));
     return Status::OK;
 }
 
 Status AudioFfmpegDecoderPlugin::GetParameter(Tag tag, ValueType& value)
 {
-    OSAL::ScopedLock l(lock_);
+    OSAL::ScopedLock lock(parameterMutex_);
     auto res = audioParameter_.find(tag);
     if (res != audioParameter_.end()) {
         value = res->second;
@@ -239,8 +248,8 @@ bool AudioFfmpegDecoderPlugin::FindInParameterMapThenAssignLocked(Tag tag, T& as
 Status AudioFfmpegDecoderPlugin::Prepare()
 {
     {
-        OSAL::ScopedLock l(lock_);
-        if (state_ != State::INITIALIZED && state_ != State::PREPARED) {
+        OSAL::ScopedLock lock(avMutex_);
+        if (avCodec_ == nullptr) {
             return Status::ERROR_WRONG_STATE;
         }
         auto context = avcodec_alloc_context3(avCodec_.get());
@@ -258,37 +267,37 @@ Status AudioFfmpegDecoderPlugin::Prepare()
             }
         });
         uint32_t tmp = 0;
-        if (FindInParameterMapThenAssignLocked<uint32_t>(Tag::AUDIO_CHANNELS, tmp)) {
-            avCodecContext_->channels = tmp;
-        }
-        if (FindInParameterMapThenAssignLocked<uint32_t>(Tag::AUDIO_SAMPLE_RATE, tmp)) {
-            avCodecContext_->sample_rate = tmp;
-        }
-        int64_t bitRate = 0;
-        if (FindInParameterMapThenAssignLocked<int64_t>(Tag::MEDIA_BITRATE, bitRate)) {
-            avCodecContext_->bit_rate = bitRate;
-        }
-        AudioSampleFormat audioSampleFormat = AudioSampleFormat::S8;
-        if (FindInParameterMapThenAssignLocked(Tag::AUDIO_SAMPLE_FORMAT, audioSampleFormat)) {
-            auto ite = g_reverseFormatMap.find(audioSampleFormat);
-            if (ite != g_reverseFormatMap.end()) {
-                avCodecContext_->sample_fmt = ite->second;
+        {
+            OSAL::ScopedLock lock1(parameterMutex_);
+            if (FindInParameterMapThenAssignLocked<uint32_t>(Tag::AUDIO_CHANNELS, tmp)) {
+                avCodecContext_->channels = tmp;
             }
+            if (FindInParameterMapThenAssignLocked<uint32_t>(Tag::AUDIO_SAMPLE_RATE, tmp)) {
+                avCodecContext_->sample_rate = tmp;
+            }
+            int64_t bitRate = 0;
+            if (FindInParameterMapThenAssignLocked<int64_t>(Tag::MEDIA_BITRATE, bitRate)) {
+                avCodecContext_->bit_rate = bitRate;
+            }
+            AudioSampleFormat audioSampleFormat = AudioSampleFormat::S8;
+            if (FindInParameterMapThenAssignLocked(Tag::AUDIO_SAMPLE_FORMAT, audioSampleFormat)) {
+                auto ite = g_reverseFormatMap.find(audioSampleFormat);
+                if (ite != g_reverseFormatMap.end()) {
+                    avCodecContext_->sample_fmt = ite->second;
+                }
+            }
+            InitCodecContextExtraDataLocked();
         }
-
-        InitCodecContextExtraData();
 
         avCodecContext_->workaround_bugs =
             static_cast<uint32_t>(avCodecContext_->workaround_bugs) | static_cast<uint32_t>(FF_BUG_AUTODETECT);
         avCodecContext_->err_recognition = 1;
-
-        state_ = State::PREPARED;
     }
     outBufferQ_.SetActive(true);
     return Status::OK;
 }
 
-void AudioFfmpegDecoderPlugin::InitCodecContextExtraData()
+void AudioFfmpegDecoderPlugin::InitCodecContextExtraDataLocked()
 {
     if (!avCodecContext_) {
         return;
@@ -316,21 +325,21 @@ Status AudioFfmpegDecoderPlugin::ResetLocked()
     audioParameter_.clear();
     avCodecContext_.reset();
     outBufferQ_.Clear();
-    state_ = State::INITIALIZED;
     return Status::OK;
 }
 
 Status AudioFfmpegDecoderPlugin::Reset()
 {
-    OSAL::ScopedLock l(lock_);
+    OSAL::ScopedLock lock(avMutex_);
+    OSAL::ScopedLock lock1(parameterMutex_);
     return ResetLocked();
 }
 
 Status AudioFfmpegDecoderPlugin::Start()
 {
     {
-        OSAL::ScopedLock l(lock_);
-        if (state_ != State::PREPARED) {
+        OSAL::ScopedLock lock(avMutex_);
+        if (avCodecContext_.get() == nullptr) {
             return Status::ERROR_WRONG_STATE;
         }
         auto res = avcodec_open2(avCodecContext_.get(), avCodec_.get(), nullptr);
@@ -338,7 +347,6 @@ Status AudioFfmpegDecoderPlugin::Start()
             MEDIA_LOG_E("avcodec open error %s when start decoder ", AVStrError(res).c_str());
             return Status::ERROR_UNKNOWN;
         }
-        state_ = State::RUNNING;
     }
     outBufferQ_.SetActive(true);
     return Status::OK;
@@ -348,7 +356,7 @@ Status AudioFfmpegDecoderPlugin::Stop()
 {
     Status ret = Status::OK;
     {
-        OSAL::ScopedLock l(lock_);
+        OSAL::ScopedLock lock(avMutex_);
         if (avCodecContext_ != nullptr) {
             auto res = avcodec_close(avCodecContext_.get());
             if (res != 0) {
@@ -357,7 +365,6 @@ Status AudioFfmpegDecoderPlugin::Stop()
             }
             avCodecContext_.reset();
         }
-        state_ = State::INITIALIZED;
     }
     outBufferQ_.SetActive(false);
     return ret;
@@ -374,7 +381,7 @@ Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>
 Status AudioFfmpegDecoderPlugin::Flush()
 {
     MEDIA_LOG_I("Flush entered.");
-    OSAL::ScopedLock l(lock_);
+    OSAL::ScopedLock lock(avMutex_);
     if (avCodecContext_ != nullptr) {
         avcodec_flush_buffers(avCodecContext_.get());
     }
@@ -402,10 +409,6 @@ Status AudioFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
 
 Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer)
 {
-    if (state_ != State::RUNNING) {
-        MEDIA_LOG_W("queue input buffer in wrong state");
-        return Status::ERROR_WRONG_STATE;
-    }
     AVPacket packet;
     size_t bufferLength = 0;
     bool eos = false;
@@ -451,7 +454,10 @@ Status AudioFfmpegDecoderPlugin::SendBuffer(const std::shared_ptr<Buffer>& input
     }
     Status ret = Status::OK;
     {
-        OSAL::ScopedLock l(lock_);
+        OSAL::ScopedLock lock(avMutex_);
+        if (avCodecContext_ == nullptr) {
+            return Status::ERROR_WRONG_STATE;
+        }
         ret = SendBufferLocked(inputBuffer);
     }
     NotifyInputBufferDone(inputBuffer);
@@ -490,13 +496,6 @@ void AudioFfmpegDecoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>& i
 void AudioFfmpegDecoderPlugin::ReceiveBufferLocked(Status& status, const std::shared_ptr<Buffer>& ioInfo,
                                                    bool& receiveOneFrame, bool& notifyBufferDone)
 {
-    if (state_ != State::RUNNING) {
-        MEDIA_LOG_W("queue input buffer in wrong state");
-        status = Status::ERROR_WRONG_STATE;
-        receiveOneFrame = false;
-        notifyBufferDone = false;
-        return;
-    }
     auto ret = avcodec_receive_frame(avCodecContext_.get(), cachedFrame_.get());
     if (ret >= 0) {
         MEDIA_LOG_D("receive one frame");
@@ -529,7 +528,10 @@ bool AudioFfmpegDecoderPlugin::ReceiveBuffer(Status& status)
         MEDIA_LOG_W("cannot process with non-audio buffer");
         receiveOneFrame = false;
     } else {
-        OSAL::ScopedLock l(lock_);
+        OSAL::ScopedLock l(avMutex_);
+        if (avCodecContext_ == nullptr) {
+            return false;
+        }
         ReceiveBufferLocked(status, ioInfo, receiveOneFrame, notifyBufferDone);
     }
     if (notifyBufferDone) {
