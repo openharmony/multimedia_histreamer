@@ -124,7 +124,7 @@ private:
     uint32_t height_;
     VideoPixelFormat pixelFormat_;
 
-    mutable OSAL::Mutex lock_ {};
+    mutable OSAL::Mutex avMutex_ {};
     State state_ {State::CREATED};
     std::shared_ptr<AVCodecContext> avCodecContext_ {};
     OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufferQ_;

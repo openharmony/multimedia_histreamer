@@ -36,7 +36,7 @@ class AudioFfmpegDecoderPlugin : public CodecPlugin {
 public:
     explicit AudioFfmpegDecoderPlugin(std::string name);
 
-    ~AudioFfmpegDecoderPlugin() override = default;
+    ~AudioFfmpegDecoderPlugin() override;
 
     Status Init() override;
 
@@ -52,7 +52,10 @@ public:
 
     bool IsParameterSupported(Tag tag) override
     {
-        return true;
+        if (tag == Tag::REQUIRED_OUT_BUFFER_CNT) {
+            return true;
+        }
+        return false;
     }
 
     Status GetParameter(Tag tag, ValueType& value) override;
@@ -79,9 +82,11 @@ public:
     }
 
 private:
-    void InitCodecContextExtraData();
+    void InitCodecContextExtraDataLocked();
 
     Status ResetLocked();
+
+    Status DeInitLocked();
 
     template <typename T>
     bool FindInParameterMapThenAssignLocked(Tag tag, T& assign);
@@ -101,16 +106,18 @@ private:
 
     void NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output);
 
-    std::shared_ptr<const AVCodec> avCodec_ {};
+    mutable OSAL::Mutex parameterMutex_ {};
     std::map<Tag, ValueType> audioParameter_ {};
-    std::vector<uint8_t> paddedBuffer_ {};
-    size_t paddedBufferSize_ {0};
-    std::shared_ptr<AVFrame> cachedFrame_ {};
+
     std::weak_ptr<DataCallback> dataCb_ {};
 
-    mutable OSAL::Mutex lock_ {};
-    State state_ {State::CREATED};
+    mutable OSAL::Mutex avMutex_ {};
+    std::shared_ptr<const AVCodec> avCodec_ {};
     std::shared_ptr<AVCodecContext> avCodecContext_ {};
+    std::shared_ptr<AVFrame> cachedFrame_ {};
+
+    std::vector<uint8_t> paddedBuffer_ {};
+    size_t paddedBufferSize_ {0};
 
     // outBufferQ有自己的锁保护 不要和lock_同时混用 否则可能导致死锁
     OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufferQ_;
