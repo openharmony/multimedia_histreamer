@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_FOUNDATION_OSAL_CONDITION_VARIABLE_H
 #define HISTREAMER_FOUNDATION_OSAL_CONDITION_VARIABLE_H
 
-#include <errno.h>
+#include <cerrno>
 #include <ctime>
 #include "scoped_lock.h"
 

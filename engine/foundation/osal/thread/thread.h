@@ -20,7 +20,6 @@
 #include <memory>
 #include <pthread.h>
 #include <string>
-#include <tuple>
 
 namespace OHOS {
 namespace Media {
