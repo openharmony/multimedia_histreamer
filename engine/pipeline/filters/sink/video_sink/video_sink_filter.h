@@ -23,7 +23,7 @@
 #include "osal/thread/mutex.h"
 #include "osal/thread/task.h"
 #include "utils/blocking_queue.h"
-#include "utils/error_code.h"
+#include "foundation/error_code.h"
 #include "utils/utils.h"
 #include "pipeline/core/filter_base.h"
 #include "plugin/core/plugin_info.h"

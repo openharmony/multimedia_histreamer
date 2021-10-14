@@ -38,6 +38,7 @@ include_directories(
         ${TOP_DIR}/engine/pipeline/core
         ${TOP_DIR}/engine/foundation
         ${TOP_DIR}/engine/foundation/osal
+        ${TOP_DIR}/engine/utils
         ${TOP_DIR}/engine/pipeline/filters
         ${TOP_DIR}/engine/pipeline/filters/player
         ${TOP_DIR}/engine/plugin
@@ -57,6 +58,7 @@ file(GLOB_RECURSE HISTREAMER_SRCS
         ${TOP_DIR}/engine/plugin/types/*.cpp
         ${TOP_DIR}/engine/player/*.cpp
         ${TOP_DIR}/engine/foundation/*.cpp
+        ${TOP_DIR}/engine/utils/*.cpp
         ${TOP_DIR}/engine/external/*.cpp
         )
 

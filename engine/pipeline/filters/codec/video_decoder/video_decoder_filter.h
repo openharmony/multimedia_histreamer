@@ -18,7 +18,7 @@
 #ifndef MEDIA_PIPELINE_VIDEO_DECODER_FILTER_H
 #define MEDIA_PIPELINE_VIDEO_DECODER_FILTER_H
 
-#include "type_define.h"
+#include "utils/type_define.h"
 #include "filters/codec/decoder_filter_base.h"
 
 namespace OHOS {
