@@ -28,6 +28,7 @@ if (defined(ohos_lite)) {
       "//foundation/multimedia/histreamer/engine/player",
       "//foundation/multimedia/histreamer/interface",
       "//foundation/multimedia/media_lite/interfaces",
+      "//foundation/multimedia/media_lite/interfaces/innerkits",
       "//foundation/multimedia/media_lite/interfaces/kits/player_lite",
     ]
   }
