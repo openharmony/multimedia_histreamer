@@ -19,7 +19,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <memory>
-#include "foundation/memory_helper.h"
+#include "utils/memory_helper.h"
 
 namespace OHOS {
 namespace Media {

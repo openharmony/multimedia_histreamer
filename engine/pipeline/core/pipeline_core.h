@@ -26,11 +26,11 @@
 
 #include "filter_base.h"
 #include "foundation/error_code.h"
-#include "foundation/meta.h"
-#include "foundation/utils.h"
-#include "pipeline.h"
+#include "osal/thread/mutex.h"
+#include "utils/utils.h"
 #include "plugin/common/plugin_types.h"
-#include "thread/mutex.h"
+#include "plugin/core/plugin_meta.h"
+#include "pipeline.h"
 
 namespace OHOS {
 namespace Media {
@@ -39,20 +39,20 @@ class MetaBundle {
 public:
     MetaBundle() = default;
     ~MetaBundle() = default;
-    std::shared_ptr<const Meta> GetGlobalMeta()
+    std::shared_ptr<const Plugin::Meta> GetGlobalMeta()
     {
         return globalMeta_;
     }
 
-    std::shared_ptr<const Meta> GetStreamMeta(int32_t streamIndex);
+    std::shared_ptr<const Plugin::Meta> GetStreamMeta(int32_t streamIndex);
 
-    void UpdateGlobalMeta(const Meta& meta);
+    void UpdateGlobalMeta(const Plugin::Meta& meta);
 
-    void UpdateStreamMeta(const Meta& meta);
+    void UpdateStreamMeta(const Plugin::Meta& meta);
 
 private:
-    std::shared_ptr<Meta> globalMeta_;
-    std::vector<std::shared_ptr<Meta>> streamMeta_;
+    std::shared_ptr<Plugin::Meta> globalMeta_;
+    std::vector<std::shared_ptr<Plugin::Meta>> streamMeta_;
 };
 
 class PipelineCore : public Pipeline {

@@ -17,7 +17,7 @@
 
 #include <utility>
 #include "interface/codec_plugin.h"
-#include "foundation/utils.h"
+#include "utils/utils.h"
 
 using namespace OHOS::Media::Plugin;
 

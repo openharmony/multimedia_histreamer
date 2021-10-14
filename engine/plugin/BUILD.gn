@@ -44,7 +44,7 @@ if (defined(ohos_lite)) {
     sources = hst_plugin_intf_src
     public_configs = [ ":hst_plugin_intf_config" ]
     public_deps = [
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//third_party/bounds_checking_function:libsec_shared",
     ]
     cflags = [ "-Wall" ]
@@ -58,10 +58,11 @@ if (defined(ohos_lite)) {
     "core/video_sink.cpp",
     "core/codec.cpp",
     "core/demuxer.cpp",
+    "core/source.cpp",
     "core/plugin_register.cpp",
     "core/plugin_wrapper.cpp",
     "core/plugin_manager.cpp",
-    "core/source.cpp",
+    "core/plugin_meta.cpp",
   ]
 
   config("hst_plugin_core_config") {
@@ -69,7 +70,7 @@ if (defined(ohos_lite)) {
       "//foundation/multimedia/histreamer/engine/",
       "//foundation/multimedia/histreamer/engine/plugin",
       "//foundation/multimedia/histreamer/engine/foundation",
-      "//foundation/multimedia/histreamer/engine/foundation/osal",
+      "//foundation/multimedia/histreamer/engine/utils",
       "//foundation/multimedia/utils/lite/interfaces/kits",
       "${target_gen_dir}/plugins/include/",
     ]
@@ -91,6 +92,7 @@ if (defined(ohos_lite)) {
     public_deps = [
       ":histreamer_plugin_intf",
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
       "//third_party/bounds_checking_function:libsec_shared",
     ]
     cflags = [ "-Wall" ]

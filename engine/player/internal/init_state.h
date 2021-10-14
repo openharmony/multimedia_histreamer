@@ -17,12 +17,10 @@
 #define HISTREAMER_HIPLAYER_INIT_STATE_H
 
 #include <memory>
-
 #include "foundation/error_code.h"
+#include "osal/thread/mutex.h"
 #include "foundation/log.h"
 #include "play_executor.h"
-#include "thread/mutex.h"
-
 #include "state.h"
 
 namespace OHOS {

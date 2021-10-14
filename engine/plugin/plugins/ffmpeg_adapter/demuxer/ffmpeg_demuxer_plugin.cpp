@@ -20,10 +20,10 @@
 #include <cstdio>
 #include <cstring>
 #include <new>
-#include "core/plugin_manager.h"
+#include "plugin/core/plugin_manager.h"
 #include "ffmpeg_track_meta.h"
 #include "foundation/log.h"
-#include "foundation/memory_helper.h"
+#include "utils/memory_helper.h"
 #include "osal/thread/scoped_lock.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"

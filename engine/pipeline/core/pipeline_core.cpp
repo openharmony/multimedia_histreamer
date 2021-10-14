@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-std::shared_ptr<const Meta> OHOS::Media::Pipeline::MetaBundle::GetStreamMeta(int32_t streamIndex)
+std::shared_ptr<const Plugin::Meta> OHOS::Media::Pipeline::MetaBundle::GetStreamMeta(int32_t streamIndex)
 {
     for (auto& ptr : streamMeta_) {
         uint32_t found = 0;
@@ -32,15 +32,15 @@ std::shared_ptr<const Meta> OHOS::Media::Pipeline::MetaBundle::GetStreamMeta(int
     return nullptr;
 }
 
-void MetaBundle::UpdateGlobalMeta(const Meta& meta)
+void MetaBundle::UpdateGlobalMeta(const Plugin::Meta& meta)
 {
     if (globalMeta_ == nullptr) {
-        globalMeta_ = std::make_shared<Meta>();
+        globalMeta_ = std::make_shared<Plugin::Meta>();
     }
     globalMeta_->Update(meta);
 }
 
-void MetaBundle::UpdateStreamMeta(const Meta& meta)
+void MetaBundle::UpdateStreamMeta(const Plugin::Meta& meta)
 {
     uint32_t streamIndex = 0;
     if (!meta.GetUint32(Plugin::MetaID::STREAM_INDEX, streamIndex)) {
@@ -54,7 +54,7 @@ void MetaBundle::UpdateStreamMeta(const Meta& meta)
             return;
         }
     }
-    auto ptr = std::make_shared<Meta>();
+    auto ptr = std::make_shared<Plugin::Meta>();
     ptr->Update(meta);
     streamMeta_.emplace_back(ptr);
 }

@@ -16,19 +16,15 @@
 #define LOG_TAG "HdiSink"
 
 #include "hos_au_sink.h"
-
 #include <dlfcn.h>
 #include <memory>
-
 #include "securec.h"
-
 #include "audio_proxy_manager.h"
 #include "audio_adapter.h"
-
-#include "foundation/constants.h"
 #include "foundation/log.h"
-#include "foundation/utils.h"
 #include "foundation/osal/thread/scoped_lock.h"
+#include "utils/constants.h"
+#include "utils/utils.h"
 #include "foundation/osal/utils/util.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugins/hdi_adapter/utils/hdi_au_utils.h"

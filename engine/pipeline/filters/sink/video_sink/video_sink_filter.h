@@ -19,12 +19,12 @@
 #define MEDIA_PIPELINE_VIDEO_SINK_FILTER_H
 
 #include <atomic>
-#include "foundation/blocking_queue.h"
-#include "foundation/error_code.h"
-#include "foundation/utils.h"
 #include "osal/thread/condition_variable.h"
 #include "osal/thread/mutex.h"
 #include "osal/thread/task.h"
+#include "utils/blocking_queue.h"
+#include "utils/error_code.h"
+#include "utils/utils.h"
 #include "pipeline/core/filter_base.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/video_sink.h"
@@ -44,7 +44,7 @@ public:
 
     ErrorCode GetParameter(int32_t key, Plugin::Any& value) override;
 
-    bool Negotiate(const std::string& inPort, const std::shared_ptr<const OHOS::Media::Meta>& inMeta,
+    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
                    CapabilitySet& outCaps) override;
 
     ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) override;
@@ -59,8 +59,8 @@ public:
     void FlushEnd() override;
 
 private:
-    ErrorCode ConfigurePluginParams(const std::shared_ptr<const Meta>& meta);
-    ErrorCode ConfigureLocked(const std::shared_ptr<const OHOS::Media::Meta>& meta);
+    ErrorCode ConfigurePluginParams(const std::shared_ptr<const Plugin::Meta>& meta);
+    ErrorCode ConfigureLocked(const std::shared_ptr<const Plugin::Meta>& meta);
     void RenderFrame();
     bool DoSync();
 

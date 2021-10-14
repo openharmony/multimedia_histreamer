@@ -69,7 +69,7 @@ std::shared_ptr<Port> InPort::GetPeerPort()
     return prevPort.lock();
 }
 
-bool InPort::Negotiate(const std::shared_ptr<const Meta>& inMeta, CapabilitySet& outCaps)
+bool InPort::Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps)
 {
     return filter && filter->Negotiate(name, inMeta, outCaps);
 }
@@ -144,7 +144,7 @@ std::shared_ptr<Port> OutPort::GetPeerPort()
     return nextPort;
 }
 
-bool OutPort::Negotiate(const std::shared_ptr<const Meta>& inMeta, CapabilitySet& outCaps)
+bool OutPort::Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps)
 {
     return nextPort->Negotiate(inMeta, outCaps);
 }
@@ -176,7 +176,7 @@ ErrorCode EmptyInPort::Activate(const std::vector<WorkMode>& modes, WorkMode& ou
     MEDIA_LOG_E("Activate in EmptyInPort");
     return SUCCESS;
 }
-bool EmptyInPort::Negotiate(const std::shared_ptr<const Meta>& inMeta, CapabilitySet& outCaps)
+bool EmptyInPort::Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps)
 {
     UNUSED_VARIABLE(inMeta);
     UNUSED_VARIABLE(outCaps);
@@ -210,7 +210,7 @@ ErrorCode EmptyOutPort::Activate(const std::vector<WorkMode>& modes, WorkMode& o
     MEDIA_LOG_E("Activate in EmptyOutPort");
     return SUCCESS;
 }
-bool EmptyOutPort::Negotiate(const std::shared_ptr<const Meta>& inMeta, CapabilitySet& outCaps)
+bool EmptyOutPort::Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps)
 {
     UNUSED_VARIABLE(inMeta);
     UNUSED_VARIABLE(outCaps);

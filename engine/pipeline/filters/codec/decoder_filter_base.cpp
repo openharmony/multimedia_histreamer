@@ -16,12 +16,11 @@
 #define LOG_TAG "AudioDecoderFilter"
 
 #include "decoder_filter_base.h"
-
-#include "common/plugin_utils.h"
-#include "factory/filter_factory.h"
-#include "foundation/constants.h"
-#include "foundation/memory_helper.h"
+#include "utils/constants.h"
+#include "utils/memory_helper.h"
 #include "osal/utils/util.h"
+#include "factory/filter_factory.h"
+#include "common/plugin_utils.h"
 #include "plugin/common/plugin_audio_tags.h"
 
 namespace OHOS {

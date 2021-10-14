@@ -20,17 +20,16 @@
 #include <memory>
 
 #include "filter_callback.h"
-#include "foundation/constants.h"
 #include "foundation/error_code.h"
-#include "foundation/event.h"
-#include "foundation/utils.h"
+#include "utils/constants.h"
+#include "utils/event.h"
+#include "utils/utils.h"
 #include "parameter.h"
 #include "port.h"
+#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {
-class Meta;
-
 namespace Pipeline {
 class Filter;
 
@@ -67,7 +66,8 @@ public:
     virtual std::vector<WorkMode> GetWorkModes() = 0; // OutPort调用
 
     // InPort调用此接口确定是否要继续往后协商
-    virtual bool Negotiate(const std::string& inPort, const std::shared_ptr<const Meta>& inMeta, CapabilitySet& outCaps)
+    virtual bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
+        CapabilitySet& outCaps)
     {
         return false;
     }

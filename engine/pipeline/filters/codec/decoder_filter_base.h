@@ -18,15 +18,16 @@
 
 #include <string>
 
-#include "foundation/blocking_queue.h"
-#include "foundation/buffer_pool.h"
-#include "foundation/type_define.h"
-#include "foundation/utils.h"
-#include "osal/thread/task.h"
+#include "utils/blocking_queue.h"
+#include "utils/buffer_pool.h"
+#include "utils/type_define.h"
+#include "utils/utils.h"
+#include "foundation/osal/thread/task.h"
+#include "pipeline/core/filter_base.h"
 #include "plugin/common/plugin_tags.h"
 #include "plugin/core/codec.h"
-#include "pipeline/core/filter_base.h"
 #include "plugin/core/plugin_info.h"
+#include "plugin/core/plugin_meta.h"
 #include "common/plugin_utils.h"
 
 namespace OHOS {

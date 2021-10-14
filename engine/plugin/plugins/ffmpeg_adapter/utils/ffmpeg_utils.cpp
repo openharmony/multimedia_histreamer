@@ -15,7 +15,7 @@
 
 #include "ffmpeg_utils.h"
 #include <algorithm>
-#include "common/plugin_audio_tags.h"
+#include "plugin/common/plugin_audio_tags.h"
 #include "foundation/log.h"
 #include "libavutil/channel_layout.h"
 

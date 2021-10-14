@@ -20,9 +20,9 @@
 #include <deque>
 #include <vector>
 
-#include "thread/mutex.h"
-#include "thread/scoped_lock.h"
-#include "foundation/type_define.h"
+#include "osal/thread/mutex.h"
+#include "osal/thread/scoped_lock.h"
+#include "utils/type_define.h"
 
 namespace OHOS {
 namespace Media {

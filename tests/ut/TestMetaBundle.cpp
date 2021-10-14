@@ -14,13 +14,14 @@
  */
 
 #include <gtest/gtest.h>
-#include "foundation/utils.h"
+#include "utils/utils.h"
 
 #define private public
 #define protected public
 #define UNIT_TEST 1
 
 #include "pipeline/core/pipeline_core.h"
+#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {

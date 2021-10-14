@@ -88,7 +88,7 @@ ErrorCode AudioSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
     return TranslatePluginStatus(plugin_->GetParameter(tag, value));
 }
 
-bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Meta>& inMeta,
+bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
                                 CapabilitySet& outCaps)
 {
     MEDIA_LOG_D("audio sink negotiate started");
@@ -113,41 +113,41 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
     return true;
 }
 
-ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Meta>& meta)
+ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     uint32_t channels;
-    if (meta->GetUint32(MetaID::AUDIO_CHANNELS, channels)) {
+    if (meta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels)) {
         MEDIA_LOG_D("found audio channel meta");
         SetPluginParameter(Tag::AUDIO_CHANNELS, channels);
     }
     uint32_t sampleRate;
-    if (meta->GetUint32(MetaID::AUDIO_SAMPLE_RATE, sampleRate)) {
+    if (meta->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_RATE, sampleRate)) {
         MEDIA_LOG_D("found audio sample rate meta");
         SetPluginParameter(Tag::AUDIO_SAMPLE_RATE, sampleRate);
     }
     int64_t bitRate;
-    if (meta->GetInt64(MetaID::MEDIA_BITRATE, bitRate)) {
+    if (meta->GetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate)) {
         MEDIA_LOG_D("found audio bit rate meta");
         SetPluginParameter(Tag::MEDIA_BITRATE, bitRate);
     }
 
     auto audioFormat = Plugin::AudioSampleFormat::U8;
-    if (meta->GetData<Plugin::AudioSampleFormat>(MetaID::AUDIO_SAMPLE_FORMAT, audioFormat)) {
+    if (meta->GetData<Plugin::AudioSampleFormat>(Plugin::MetaID::AUDIO_SAMPLE_FORMAT, audioFormat)) {
         SetPluginParameter(Tag::AUDIO_SAMPLE_FORMAT, audioFormat);
     }
 
     auto audioChannelLayout = Plugin::AudioChannelLayout::STEREO;
-    if (meta->GetData<Plugin::AudioChannelLayout>(MetaID::AUDIO_CHANNEL_LAYOUT, audioChannelLayout)) {
+    if (meta->GetData<Plugin::AudioChannelLayout>(Plugin::MetaID::AUDIO_CHANNEL_LAYOUT, audioChannelLayout)) {
         SetPluginParameter(Tag::AUDIO_CHANNEL_LAYOUT, audioChannelLayout);
     }
 
     uint32_t samplePerFrame = 0;
-    if (meta->GetUint32(MetaID::AUDIO_SAMPLE_PRE_FRAME, samplePerFrame)) {
+    if (meta->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_PRE_FRAME, samplePerFrame)) {
         SetPluginParameter(Tag::AUDIO_SAMPLE_PRE_FRAME, samplePerFrame);
     }
     return SUCCESS;
 }
-ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const Meta>& meta)
+ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     auto err = TranslatePluginStatus(plugin_->Init());
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "sink plugin init error.");

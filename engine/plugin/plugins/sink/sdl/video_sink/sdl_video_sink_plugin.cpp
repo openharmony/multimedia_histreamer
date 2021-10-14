@@ -20,8 +20,8 @@
 #include "sdl_video_sink_plugin.h"
 #include <functional>
 #include "SDL_events.h"
-#include "foundation/constants.h"
 #include "foundation/log.h"
+#include "utils/constants.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"

@@ -21,14 +21,12 @@
 #include "buffer_pool.h"
 #include "plugin/common/plugin_caps.h"
 #include "plugin/common/plugin_tags.h"
-#include "plugin/core/plugin_meta.h"
 #include "plugin/common/plugin_buffer.h"
 
 namespace OHOS {
 namespace Media {
 using Capability = Plugin::Capability;
 using CapabilitySet = Plugin::CapabilitySet;
-using MetaID = Plugin::MetaID;
 using CapabilityID = Plugin::Capability::Key;
 using Tag = Plugin::Tag;
 using Allocator = Plugin::Allocator;

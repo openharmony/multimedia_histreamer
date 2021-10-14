@@ -21,10 +21,10 @@
 #include <memory>
 
 #include "filter.h"
-#include "foundation/constants.h"
 #include "foundation/error_code.h"
-#include "foundation/event.h"
-#include "foundation/utils.h"
+#include "utils/constants.h"
+#include "utils/event.h"
+#include "utils/utils.h"
 #include "port.h"
 
 namespace OHOS {

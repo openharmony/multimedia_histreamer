@@ -89,7 +89,7 @@ ErrorCode VideoSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
     return TranslatePluginStatus(plugin_->GetParameter(tag, value));
 }
 
-bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Meta>& inMeta,
+bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
                                 CapabilitySet& outCaps)
 {
     MEDIA_LOG_D("video sink negotiate started");
@@ -123,21 +123,21 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
     return true;
 }
 
-ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Meta>& meta)
+ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     auto err = ErrorCode::SUCCESS;
     uint32_t width;
-    if (meta->GetUint32(MetaID::VIDEO_WIDTH, width)) {
+    if (meta->GetUint32(Plugin::MetaID::VIDEO_WIDTH, width)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_WIDTH, width));
         RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Set plugin width fail");
     }
     uint32_t height;
-    if (meta->GetUint32(MetaID::VIDEO_HEIGHT, height)) {
+    if (meta->GetUint32(Plugin::MetaID::VIDEO_HEIGHT, height)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_HEIGHT, height));
         RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Set plugin height fail");
     }
     uint32_t pixelFormat;
-    if (meta->GetUint32(MetaID::VIDEO_PIXEL_FORMAT, pixelFormat)) {
+    if (meta->GetUint32(Plugin::MetaID::VIDEO_PIXEL_FORMAT, pixelFormat)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_PIXEL_FORMAT, pixelFormat));
         RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Set plugin pixel format fail");
     }
@@ -145,7 +145,7 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Met
     return err;
 }
 
-ErrorCode VideoSinkFilter::ConfigureLocked(const std::shared_ptr<const Meta>& meta)
+ErrorCode VideoSinkFilter::ConfigureLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Init()), "Init plugin error");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePluginParams(meta), "Configure plugin params fail");

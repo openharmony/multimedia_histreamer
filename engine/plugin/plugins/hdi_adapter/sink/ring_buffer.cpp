@@ -16,9 +16,8 @@
 #define LOG_TAG "HdiRingBuffer"
 
 #include "ring_buffer.h"
-
 #include "foundation/log.h"
-#include "foundation/memory_helper.h"
+#include "utils/memory_helper.h"
 #include "plugin/common/plugin_buffer.h"
 
 namespace OHOS {

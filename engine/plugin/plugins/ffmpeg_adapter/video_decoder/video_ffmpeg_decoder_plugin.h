@@ -21,7 +21,7 @@
 #include <functional>
 #include <map>
 #include "osal/thread/task.h"
-#include "foundation/blocking_queue.h"
+#include "utils/blocking_queue.h"
 #include "plugin/interface/codec_plugin.h"
 
 #ifdef __cplusplus

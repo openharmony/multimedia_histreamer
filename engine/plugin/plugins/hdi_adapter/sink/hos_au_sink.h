@@ -17,12 +17,11 @@
 #define HISTREAMER_HDI_SINK_H
 
 #include <atomic>
-
 #include "audio_types.h"
 #include "foundation/osal/thread/mutex.h"
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/task.h"
-#include "interface/audio_sink_plugin.h"
+#include "plugin/interface/audio_sink_plugin.h"
 #include "audio_manager.h"
 
 struct AudioAdapter;

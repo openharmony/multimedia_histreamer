@@ -19,7 +19,7 @@
 #define protected public
 #define UNIT_TEST 1
 
-#include "foundation/constants.h"
+#include "utils/constants.h"
 
 namespace OHOS {
 namespace Media {

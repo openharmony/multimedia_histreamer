@@ -21,9 +21,9 @@
 #include <cstring>
 #include <map>
 #include <set>
-#include "foundation/constants.h"
 #include "foundation/log.h"
-#include "foundation/memory_helper.h"
+#include "utils/constants.h"
+#include "utils/memory_helper.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
 #include "plugin/interface/codec_plugin.h"

@@ -22,7 +22,7 @@
 #include <map>
 
 #include "foundation/log.h"
-#include "foundation/utils.h"
+#include "utils/utils.h"
 #include "plugin/common/plugin_audio_tags.h"
 
 namespace OHOS {
@@ -92,7 +92,7 @@ bool CompatibleWith(const Capability& capability, const Meta& meta)
 {
     // first check mime
     std::string mimeInMeta;
-    if (!meta.GetString(MetaID::MIME, mimeInMeta)) {
+    if (!meta.GetString(Plugin::MetaID::MIME, mimeInMeta)) {
         MEDIA_LOG_E("mime is not found in meta when check compatible");
         return false;
     }
@@ -153,7 +153,7 @@ static bool StringCapabilityCheck(const std::pair<CapabilityID, Plugin::ValueTyp
                                   uint8_t flags)
 {
     std::string metaValue;
-    if (!meta.GetString(static_cast<MetaID>(tagEntry.first), metaValue) || IsIntervalAllowed(flags)) {
+    if (!meta.GetString(static_cast<Plugin::MetaID>(tagEntry.first), metaValue) || IsIntervalAllowed(flags)) {
         return false;
     }
     if (IsFixedAllowed(flags)) {
@@ -191,7 +191,7 @@ bool NumericalCapabilityCheck(const std::pair<CapabilityID, Plugin::ValueType>& 
                               uint8_t flags, std::function<int(T, T)> compareFunc)
 {
     T metaValue;
-    if (!meta.GetData<T>(static_cast<MetaID>(tagEntry.first), metaValue)) {
+    if (!meta.GetData<T>(static_cast<Plugin::MetaID>(tagEntry.first), metaValue)) {
         return false;
     }
     if (IsFixedAllowed(flags) && tagEntry.second.Type() == typeid(T)) {
