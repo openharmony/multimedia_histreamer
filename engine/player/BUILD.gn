@@ -43,8 +43,8 @@ if (defined(ohos_lite)) {
     public_configs = [ ":histreamer_player_config" ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
       "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline",
+      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
       "//foundation/multimedia/utils/lite:media_common",
     ]
     cflags = [ "-Wall" ]

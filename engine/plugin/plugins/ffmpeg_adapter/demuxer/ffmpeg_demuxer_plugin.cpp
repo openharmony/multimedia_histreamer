@@ -256,14 +256,13 @@ bool FFmpegDemuxerPlugin::ConvertAVPacketToFrameInfo(const AVStream& avStream, c
     if (avStream.codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
         frameSize = pkt.size;
     } else if (avStream.codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-#ifdef VIDEO_SUPPORT
+        if (avStream.codecpar->codec_id == AV_CODEC_ID_RAWVIDEO) {
+            MEDIA_LOG_W("unsupport raw video");
+            return false;
+        }
         frameSize = pkt.size;
-#else
-        MEDIA_LOG_W("video unsupported...");
-        return false;
-#endif
     } else {
-        MEDIA_LOG_W("unsupported codec...");
+        MEDIA_LOG_W("unsupported codec type: %d", static_cast<int32_t>(avStream.codecpar->codec_type));
         return false;
     }
     auto data = frameInfo.AllocMemory(allocator_, frameSize);
