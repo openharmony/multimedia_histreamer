@@ -24,10 +24,10 @@ if (defined(ohos_lite)) {
     sources = []
     deps = [
       "engine/foundation:histreamer_foundation",
-      "engine/utils:histreamer_utils",
       "engine/pipeline:histreamer_pipeline",
       "engine/player:histreamer_player",
       "engine/plugin:histreamer_plugin",
+      "engine/utils:histreamer_utils",
     ]
   }
 }

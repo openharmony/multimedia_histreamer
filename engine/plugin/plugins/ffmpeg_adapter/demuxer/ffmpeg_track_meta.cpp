@@ -185,7 +185,7 @@ void ConvertAVStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<A
             return;
         }
     }
-    MEDIA_LOG_E("unsupported codec type: %d", codecId);
+    MEDIA_LOG_E("unsupported codec id: %d", codecId);
 }
 } // namespace Plugin
 } // namespace Media
