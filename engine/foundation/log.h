@@ -41,9 +41,10 @@ inline std::string MediaGetFileName(std::string file)
 #define LOG_TAG "NULL"
 #endif
 
-// control of logd and logi. If these to function is need, use #define LOG_NDEBUG 0 at header of file
-#ifndef LOG_NDEBUG
-#define LOG_NDEBUG 1
+// Control the logd and logi.
+// If logd and logi are needed, #define MEDIA_LOG_DEBUG 1 at the beginning of the cpp file.
+#ifndef MEDIA_LOG_DEBUG
+#define MEDIA_LOG_DEBUG 0
 #endif
 
 #define MEDIA_LOG_MESSAGE(level, msg, ...)                                                                             \
@@ -55,21 +56,20 @@ inline std::string MediaGetFileName(std::string file)
         fflush(stdout);                                                                                                \
     } while (0)
 
-#if LOG_NDEBUG
-#define MEDIA_LOG_I(msg, ...) ((void)0)
-#define MEDIA_LOG_D(msg, ...) ((void)0)
-#endif
-
-
 #ifdef MEDIA_OHOS
 #define MEDIA_LOG_E(msg, ...) MEDIA_ERR_LOG(msg, ##__VA_ARGS__)
 #define MEDIA_LOG_W(msg, ...) MEDIA_WARNING_LOG(msg, ##__VA_ARGS__)
-#if !LOG_NDEBUG
 #define MEDIA_LOG_I(msg, ...) MEDIA_INFO_LOG(msg, ##__VA_ARGS__)
 #define MEDIA_LOG_D(msg, ...) MEDIA_DEBUG_LOG(msg, ##__VA_ARGS__)
-#endif
 #else
 #include "log_adapter.h"
+#endif
+
+#if !MEDIA_LOG_DEBUG
+#undef MEDIA_LOG_I
+#undef MEDIA_LOG_D
+#define MEDIA_LOG_I(msg, ...) ((void)0)
+#define MEDIA_LOG_D(msg, ...) ((void)0)
 #endif
 
 #ifndef FAIL_RETURN
