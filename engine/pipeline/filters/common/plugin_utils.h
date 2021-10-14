@@ -19,15 +19,15 @@
 #include <functional>
 #include <memory>
 
-#include "foundation/meta.h"
-#include "foundation/type_define.h"
 #include "foundation/error_code.h"
+#include "utils/type_define.h"
 #include "pipeline/core/compatible_check.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/common/plugin_tags.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/plugin_manager.h"
+#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {
@@ -47,7 +47,7 @@ ErrorCode TranslatePluginStatus(Plugin::Status pluginError);
 bool TranslateIntoParameter(const int &key, OHOS::Media::Plugin::Tag &tag);
 
 template <typename T>
-ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta> &inMeta,
+ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta> &inMeta,
     Plugin::PluginType pluginType, std::shared_ptr<T>& plugin, std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
     std::function<std::shared_ptr<T>(const std::string&)> pluginCreator);
 }

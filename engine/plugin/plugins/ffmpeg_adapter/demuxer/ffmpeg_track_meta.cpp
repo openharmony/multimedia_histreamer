@@ -14,9 +14,9 @@
  */
 
 #include "ffmpeg_track_meta.h"
-#include "foundation/constants.h"
 #include "foundation/log.h"
-#include "foundation/type_define.h"
+#include "utils/constants.h"
+#include "utils/type_define.h"
 #include "plugins/ffmpeg_adapter/utils/aac_audio_config_parser.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #ifdef VIDEO_SUPPORT

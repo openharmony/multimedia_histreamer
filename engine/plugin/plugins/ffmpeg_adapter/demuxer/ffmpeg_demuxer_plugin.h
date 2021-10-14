@@ -19,11 +19,10 @@
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "foundation/type_define.h"
-#include "core/plugin_register.h"
-#include "interface/demuxer_plugin.h"
-#include "thread/mutex.h"
+#include "osal/thread/mutex.h"
+#include "utils/type_define.h"
+#include "plugin/core/plugin_register.h"
+#include "plugin/interface/demuxer_plugin.h"
 
 #ifdef __cplusplus
 extern "C" {

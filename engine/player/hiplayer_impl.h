@@ -26,10 +26,10 @@
 #endif
 #include "filters/demux/demuxer_filter.h"
 #include "filters/source/media_source_filter.h"
+#include "osal/thread/condition_variable.h"
+#include "osal/thread/mutex.h"
 #include "foundation/error_code.h"
-#include "foundation/osal/thread/condition_variable.h"
-#include "foundation/osal/thread/mutex.h"
-#include "foundation/utils.h"
+#include "utils/utils.h"
 #include "histreamer/hiplayer.h"
 #include "internal/state_machine.h"
 #include "pipeline/core/filter_callback.h"
@@ -76,9 +76,9 @@ public:
      */
     ErrorCode GetDuration(size_t& time) const;
     ErrorCode GetCurrentTime(int64_t& time) const;
-    ErrorCode GetSourceMeta(std::shared_ptr<const Meta>& meta) const;
+    ErrorCode GetSourceMeta(std::shared_ptr<const Plugin::Meta>& meta) const;
     ErrorCode GetStreamCnt(size_t& cnt) const;
-    ErrorCode GetStreamMeta(size_t index, std::shared_ptr<const Meta>& meta) const;
+    ErrorCode GetStreamMeta(size_t index, std::shared_ptr<const Plugin::Meta>& meta) const;
 
     ErrorCode SetVolume(float volume);
 
@@ -135,8 +135,8 @@ private:
 
     std::unordered_map<std::string, std::shared_ptr<Pipeline::AudioDecoderFilter>> audioDecoderMap;
 
-    std::weak_ptr<Meta> sourceMeta_;
-    std::vector<std::weak_ptr<Meta>> streamMeta_;
+    std::weak_ptr<Plugin::Meta> sourceMeta_;
+    std::vector<std::weak_ptr<Plugin::Meta>> streamMeta_;
     std::atomic<bool> singleLoop{false};
     bool initialized = false;
     std::weak_ptr<PlayerCallback> callback_;

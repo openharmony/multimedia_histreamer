@@ -18,7 +18,7 @@
 
 #include <atomic>
 #include "SDL.h"
-#include "interface/audio_sink_plugin.h"
+#include "plugin/interface/audio_sink_plugin.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/plugins/sink/sdl/ring_buffer.h"
 

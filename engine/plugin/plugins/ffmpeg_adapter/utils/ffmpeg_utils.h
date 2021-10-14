@@ -18,7 +18,7 @@
 
 #include <string>
 #include <type_traits>
-#include "foundation/type_define.h"
+#include "utils/type_define.h"
 #include "plugin/common/plugin_audio_tags.h"
 
 #ifdef __cplusplus

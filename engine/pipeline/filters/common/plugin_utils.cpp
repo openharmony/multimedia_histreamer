@@ -40,7 +40,7 @@ bool TranslateIntoParameter(const int& key, OHOS::Media::Plugin::Tag& tag)
 }
 
 template <typename T>
-ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta>& inMeta, Plugin::PluginType pluginType,
+ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta>& inMeta, Plugin::PluginType pluginType,
                               std::shared_ptr<T>& plugin, std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
                               std::function<std::shared_ptr<T>(const std::string&)> pluginCreator)
 {
@@ -74,13 +74,13 @@ ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta>& in
     return SUCCESS;
 }
 
-template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta>&, Plugin::PluginType,
+template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta>&, Plugin::PluginType,
                                        std::shared_ptr<Plugin::Codec>&, std::shared_ptr<Plugin::PluginInfo>&,
                                        std::function<std::shared_ptr<Plugin::Codec>(const std::string&)>);
-template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta>&, Plugin::PluginType,
+template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta>&, Plugin::PluginType,
                                        std::shared_ptr<Plugin::AudioSink>&, std::shared_ptr<Plugin::PluginInfo>&,
                                        std::function<std::shared_ptr<Plugin::AudioSink>(const std::string&)>);
-template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const OHOS::Media::Meta>&, Plugin::PluginType,
+template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta>&, Plugin::PluginType,
                                        std::shared_ptr<Plugin::VideoSink>&, std::shared_ptr<Plugin::PluginInfo>&,
                                        std::function<std::shared_ptr<Plugin::VideoSink>(const std::string&)>);
 } // namespace Pipeline

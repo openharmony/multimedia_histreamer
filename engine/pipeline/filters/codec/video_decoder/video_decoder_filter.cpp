@@ -18,13 +18,13 @@
 #define LOG_TAG "VideoDecoderFilter"
 
 #include "video_decoder_filter.h"
-#include "factory/filter_factory.h"
-#include "foundation/constants.h"
 #include "foundation/log.h"
-#include "foundation/memory_helper.h"
+#include "osal/utils/util.h"
+#include "utils/constants.h"
+#include "utils/memory_helper.h"
+#include "factory/filter_factory.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
-#include "utils/util.h"
 
 namespace OHOS {
 namespace Media {
@@ -131,7 +131,7 @@ ErrorCode VideoDecoderFilter::Prepare()
     return FilterBase::Prepare();
 }
 
-bool VideoDecoderFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Meta>& inMeta,
+bool VideoDecoderFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
                                    CapabilitySet& outCaps)
 {
     if (state_ != FilterState::PREPARING) {
@@ -161,10 +161,10 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort, const std::shared_
         OnEvent(event);
         return false;
     }
-    std::shared_ptr<Meta> videoMeta = std::make_shared<Meta>();
+    std::shared_ptr<Plugin::Meta> videoMeta = std::make_shared<Plugin::Meta>();
     videoMeta->Update(*inMeta);
-    videoMeta->SetString(Media::Plugin::MetaID::MIME, MEDIA_MIME_VIDEO_RAW);
-    videoMeta->SetUint32(Media::Plugin::MetaID::VIDEO_PIXEL_FORMAT, vdecFormat_.format);
+    videoMeta->SetString(Plugin::MetaID::MIME, MEDIA_MIME_VIDEO_RAW);
+    videoMeta->SetUint32(Plugin::MetaID::VIDEO_PIXEL_FORMAT, vdecFormat_.format);
     CapabilitySet sinkCaps;
     if (!targetOutPort->Negotiate(videoMeta, sinkCaps)) {
         MEDIA_LOG_E("negotiate with sink failed");
@@ -209,23 +209,23 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode VideoDecoderFilter::SetVideoDecoderFormat(const std::shared_ptr<const Meta>& meta)
+ErrorCode VideoDecoderFilter::SetVideoDecoderFormat(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     vdecFormat_.format = static_cast<uint32_t>(Plugin::VideoPixelFormat::NV12);
-    if (!meta->GetString(MetaID::MIME, vdecFormat_.mime)) {
+    if (!meta->GetString(Plugin::MetaID::MIME, vdecFormat_.mime)) {
         return ErrorCode::INVALID_PARAM_VALUE;
     }
-    if (!meta->GetUint32(MetaID::VIDEO_WIDTH, vdecFormat_.width)) {
+    if (!meta->GetUint32(Plugin::MetaID::VIDEO_WIDTH, vdecFormat_.width)) {
         return ErrorCode::INVALID_PARAM_VALUE;
     }
-    if (!meta->GetUint32(MetaID::VIDEO_HEIGHT, vdecFormat_.height)) {
+    if (!meta->GetUint32(Plugin::MetaID::VIDEO_HEIGHT, vdecFormat_.height)) {
         return ErrorCode::INVALID_PARAM_VALUE;
     }
-    if (!meta->GetInt64(MetaID::MEDIA_BITRATE, vdecFormat_.bitRate)) {
+    if (!meta->GetInt64(Plugin::MetaID::MEDIA_BITRATE, vdecFormat_.bitRate)) {
         MEDIA_LOG_D("Do not have codec bit rate");
     }
     // Optional: codec extra data
-    if (!meta->GetData<std::vector<uint8_t>>(MetaID::MEDIA_CODEC_CONFIG, vdecFormat_.codecConfig)) {
+    if (!meta->GetData<std::vector<uint8_t>>(Plugin::MetaID::MEDIA_CODEC_CONFIG, vdecFormat_.codecConfig)) {
         MEDIA_LOG_D("Do not have codec extra data");
     }
     return ErrorCode::SUCCESS;
@@ -300,7 +300,7 @@ ErrorCode VideoDecoderFilter::ConfigurePlugin()
     return TranslatePluginStatus(plugin_->Start());
 }
 
-ErrorCode VideoDecoderFilter::Configure(const std::shared_ptr<const Meta>& meta)
+ErrorCode VideoDecoderFilter::Configure(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     MEDIA_LOG_D("video decoder configure called");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(InitPlugin(), "Init plugin fail");

@@ -19,9 +19,9 @@
 #include <string>
 #include <vector>
 
-#include "common/any.h"
+#include "plugin/common/any.h"
 #include "foundation/error_code.h"
-#include "foundation/utils.h"
+#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {

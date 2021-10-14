@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#include "meta.h"
+#include "plugin_meta.h"
 
 #include <cstring>
 #include <memory>
 
 namespace OHOS {
 namespace Media {
+namespace Plugin {
 using PointerPair = std::pair<std::shared_ptr<uint8_t>, size_t>;
 Meta::~Meta()
 {
@@ -172,5 +173,6 @@ bool Meta::GetPointer(Plugin::MetaID id, void** ptr, size_t& size) const
         return false;
     }
 }
+} // namespace Plugin
 } // namespace Media
 } // namespace OHOS

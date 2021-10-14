@@ -18,8 +18,8 @@
 #include "hiplayer_impl.h"
 #include <utility>
 #include "foundation/log.h"
-#include "foundation/meta.h"
-#include "foundation/utils.h"
+#include "utils/utils.h"
+#include "plugin/core/plugin_meta.h"
 #include "pipeline/factory/filter_factory.h"
 
 namespace OHOS {
@@ -337,13 +337,13 @@ ErrorCode HiPlayer::HiPlayerImpl::GetStreamCnt(size_t& cnt) const
     return SUCCESS;
 }
 
-ErrorCode HiPlayer::HiPlayerImpl::GetSourceMeta(shared_ptr<const Meta>& meta) const
+ErrorCode HiPlayer::HiPlayerImpl::GetSourceMeta(shared_ptr<const Plugin::Meta>& meta) const
 {
     meta = sourceMeta_.lock();
     return meta ? SUCCESS : NOT_FOUND;
 }
 
-ErrorCode HiPlayer::HiPlayerImpl::GetStreamMeta(size_t index, shared_ptr<const Meta>& meta) const
+ErrorCode HiPlayer::HiPlayerImpl::GetStreamMeta(size_t index, shared_ptr<const Plugin::Meta>& meta) const
 {
     if (index > streamMeta_.size() || index < 0) {
         return INVALID_PARAM_VALUE;

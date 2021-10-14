@@ -32,7 +32,7 @@ public:
 
     ErrorCode Prepare() override;
 
-    bool Negotiate(const std::string &inPort, const std::shared_ptr<const OHOS::Media::Meta> &inMeta,
+    bool Negotiate(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &inMeta,
                    CapabilitySet &outCaps) override;
 
     ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer) override;
@@ -44,9 +44,9 @@ public:
 private:
     class DataCallbackImpl;
 
-    ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const OHOS::Media::Meta> &meta);
+    ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta> &meta);
 
-    ErrorCode ConfigureWithMetaLocked(const std::shared_ptr<const OHOS::Media::Meta> &meta);
+    ErrorCode ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta> &meta);
 
     void HandleFrame();
 

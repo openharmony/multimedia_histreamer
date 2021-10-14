@@ -19,7 +19,7 @@
 #include <atomic>
 #include <list>
 #include <memory>
-#include "foundation/constants.h"
+#include "constants.h"
 #include "osal/thread/condition_variable.h"
 #include "osal/thread/mutex.h"
 #include "osal/thread/scoped_lock.h"

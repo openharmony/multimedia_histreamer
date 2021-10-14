@@ -16,13 +16,15 @@
 #ifndef HISTREAMER_PIPELINE_CORE_COMPATIBLE_CHECK_H
 #define HISTREAMER_PIPELINE_CORE_COMPATIBLE_CHECK_H
 
-#include "common/plugin_caps.h"
-#include "foundation/meta.h"
-#include "foundation/type_define.h"
+#include "utils/type_define.h"
+#include "plugin/common/plugin_caps.h"
+#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
+using Meta = Plugin::Meta;
+
 bool CompatibleWith(const Capability &capability, const Meta& meta);
 bool CompatibleWith(const CapabilitySet &capability, const Meta& meta);
 }

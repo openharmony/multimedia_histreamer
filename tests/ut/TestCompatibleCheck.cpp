@@ -22,8 +22,9 @@
 #define UNIT_TEST 1
 
 #include "core/compatible_check.h"
-#include "foundation/constants.h"
+#include "utils/constants.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "plugin/core/plugin_meta.h"
 
 using namespace std;
 using namespace OHOS::Media::Plugin;

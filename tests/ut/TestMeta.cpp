@@ -19,8 +19,8 @@
 #define protected public
 #define UNIT_TEST 1
 
-#include "foundation/meta.h"
-#include "foundation/utils.h"
+#include "utils/utils.h"
+#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {

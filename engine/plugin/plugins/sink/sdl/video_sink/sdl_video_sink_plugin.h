@@ -21,7 +21,7 @@
 #include <atomic>
 #include <memory>
 #include "SDL.h"
-#include "interface/video_sink_plugin.h"
+#include "plugin/interface/video_sink_plugin.h"
 #include "plugin/common/plugin_video_tags.h"
 
 #ifdef DUMP_RAW_DATA

@@ -17,9 +17,9 @@
 
 #include "demuxer_filter.h"
 #include <algorithm>
-#include "factory/filter_factory.h"
-#include "foundation/constants.h"
 #include "foundation/log.h"
+#include "utils/constants.h"
+#include "factory/filter_factory.h"
 
 namespace OHOS {
 namespace Media {
@@ -52,7 +52,7 @@ Plugin::Status DemuxerFilter::DataSourceImpl::ReadAt(int64_t offset, std::shared
                                                      size_t expectedLen)
 {
     if (!buffer || buffer->IsEmpty() || expectedLen == 0 || !filter.IsOffsetValid(offset)) {
-        MEDIA_LOG_E("ReadAt failed, buffer empty: %d, expectedLen: %d, offset: %ld", !buffer,
+        MEDIA_LOG_E("ReadAt failed, buffer empty: %d, expectedLen: %d, offset: %lld", !buffer,
                     static_cast<int>(expectedLen), offset);
         return Plugin::Status::ERROR_UNKNOWN;
     }
@@ -201,13 +201,13 @@ ErrorCode DemuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
     return SUCCESS;
 }
 
-bool DemuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Meta>& inMeta,
+bool DemuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
                               CapabilitySet& outCaps)
 {
     (void)inPort;
     (void)outCaps;
-    return inMeta->GetString(Media::Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_) &&
-           inMeta->GetUint64(Media::Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
+    return inMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_) &&
+           inMeta->GetUint64(Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
 }
 
 ErrorCode DemuxerFilter::SeekTo(int64_t msec)
@@ -229,12 +229,12 @@ ErrorCode DemuxerFilter::SeekTo(int64_t msec)
     return rtv;
 }
 
-std::vector<std::shared_ptr<Meta>> DemuxerFilter::GetStreamMetaInfo() const
+std::vector<std::shared_ptr<Plugin::Meta>> DemuxerFilter::GetStreamMetaInfo() const
 {
     return mediaMetaData_.trackMetas;
 }
 
-std::shared_ptr<Meta> DemuxerFilter::GetGlobalMetaInfo() const
+std::shared_ptr<Plugin::Meta> DemuxerFilter::GetGlobalMetaInfo() const
 {
     return mediaMetaData_.globalMeta;
 }
@@ -333,11 +333,11 @@ void DemuxerFilter::MediaTypeFound(std::string pluginName)
 
 void DemuxerFilter::InitMediaMetaData(const Plugin::MediaInfoHelper& mediaInfo)
 {
-    mediaMetaData_.globalMeta = std::make_shared<Meta>(mediaInfo.globalMeta);
+    mediaMetaData_.globalMeta = std::make_shared<Plugin::Meta>(mediaInfo.globalMeta);
     mediaMetaData_.trackMetas.clear();
     int trackCnt = 0;
     for (auto& trackMeta : mediaInfo.streamMeta) {
-        mediaMetaData_.trackMetas.push_back(std::make_shared<Meta>(trackMeta));
+        mediaMetaData_.trackMetas.push_back(std::make_shared<Plugin::Meta>(trackMeta));
         if (!trackMeta.Empty()) {
             ++trackCnt;
         }
@@ -367,8 +367,8 @@ bool DemuxerFilter::PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo)
         }
         std::string mime;
         uint32_t streamIdx = 0;
-        if (!mediaInfo.streamMeta[i].GetString(MetaID::MIME, mime) ||
-            !mediaInfo.streamMeta[i].GetUint32(MetaID::STREAM_INDEX, streamIdx)) {
+        if (!mediaInfo.streamMeta[i].GetString(Plugin::MetaID::MIME, mime) ||
+            !mediaInfo.streamMeta[i].GetUint32(Plugin::MetaID::STREAM_INDEX, streamIdx)) {
             MEDIA_LOG_E("PrepareStreams failed to extract mime or streamIdx.");
             continue;
         }
@@ -411,7 +411,7 @@ int DemuxerFilter::ReadFrame(AVBuffer& buffer, uint32_t& streamIndex)
     return (rtv != Plugin::Status::END_OF_STREAM) ? result : END_OF_STREAM;
 }
 
-std::shared_ptr<Meta> DemuxerFilter::GetStreamMeta(uint32_t streamIndex)
+std::shared_ptr<Plugin::Meta> DemuxerFilter::GetStreamMeta(uint32_t streamIndex)
 {
     return (streamIndex < mediaMetaData_.trackMetas.size()) ? mediaMetaData_.trackMetas[streamIndex] : nullptr;
 }

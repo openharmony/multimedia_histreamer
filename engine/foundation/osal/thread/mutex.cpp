@@ -16,7 +16,6 @@
 #define LOG_TAG "Mutex"
 
 #include "mutex.h"
-
 #include "foundation/log.h"
 
 namespace OHOS {

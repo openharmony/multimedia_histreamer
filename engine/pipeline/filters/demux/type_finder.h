@@ -20,10 +20,10 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include "core/plugin_manager.h"
-#include "foundation/type_define.h"
-#include "interface/plugin_base.h"
-#include "thread/task.h"
+#include "osal/thread/task.h"
+#include "utils/type_define.h"
+#include "plugin/interface/plugin_base.h"
+#include "plugin/core/plugin_manager.h"
 
 namespace OHOS {
 namespace Media {

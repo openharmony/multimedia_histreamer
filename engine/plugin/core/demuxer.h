@@ -19,8 +19,8 @@
 #include <memory>
 
 #include "base.h"
-#include "foundation/meta.h"
 #include "common/plugin_buffer.h"
+#include "core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {

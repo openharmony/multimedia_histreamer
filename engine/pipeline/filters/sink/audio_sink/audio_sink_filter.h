@@ -19,9 +19,9 @@
 #include <atomic>
 
 #include "foundation/error_code.h"
-#include "foundation/utils.h"
 #include "osal/thread/condition_variable.h"
 #include "osal/thread/mutex.h"
+#include "utils/utils.h"
 #include "pipeline/core/filter_base.h"
 #include "plugin/core/audio_sink.h"
 #include "plugin/core/plugin_info.h"
@@ -40,7 +40,7 @@ public:
 
     ErrorCode GetParameter(int32_t key, Plugin::Any& value) override;
 
-    bool Negotiate(const std::string& inPort, const std::shared_ptr<const OHOS::Media::Meta>& inMeta,
+    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
                    CapabilitySet& outCaps) override;
 
     ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) override;
@@ -57,8 +57,8 @@ public:
 
 private:
     ErrorCode SetPluginParameter(Tag tag, const Plugin::ValueType& value);
-    ErrorCode ConfigureToPreparePlugin(const std::shared_ptr<const OHOS::Media::Meta>& meta);
-    ErrorCode ConfigureWithMeta(const std::shared_ptr<const Meta>& meta);
+    ErrorCode ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta);
+    ErrorCode ConfigureWithMeta(const std::shared_ptr<const Plugin::Meta>& meta);
     template <typename T>
     ErrorCode GetPluginParameter(Tag tag, T& value);
 

@@ -17,12 +17,12 @@
 #define HISTREAMER_STREAM_SOURCE_PLUGIN_H
 
 #include "source.h"
-#include "foundation/blocking_queue.h"
-#include "foundation/buffer_pool.h"
-#include "foundation/constants.h"
 #include "foundation/error_code.h"
-#include "foundation/type_define.h"
-#include "osal/thread/task.h"
+#include "foundation/osal/thread/task.h"
+#include "utils/blocking_queue.h"
+#include "utils/buffer_pool.h"
+#include "utils/constants.h"
+#include "utils/type_define.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
 

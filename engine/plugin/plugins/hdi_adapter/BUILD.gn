@@ -43,6 +43,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":plugin_hdi_adapter_config" ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     ]
   }

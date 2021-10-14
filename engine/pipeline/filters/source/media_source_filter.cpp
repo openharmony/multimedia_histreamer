@@ -16,10 +16,10 @@
 #define LOG_TAG "MediaSourceFilter"
 
 #include "media_source_filter.h"
+#include "utils/type_define.h"
 #include "factory/filter_factory.h"
-#include "foundation/meta.h"
-#include "foundation/type_define.h"
 #include "plugin/interface/source_plugin.h"
+#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {
@@ -250,7 +250,7 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
     if (sourceType == SourceType::SOURCE_TYPE_URI) {
         std::string suffix = GetUriSuffix(source->GetSourceUri());
         if (!suffix.empty()) {
-            std::shared_ptr<OHOS::Media::Meta> suffixMeta = std::make_shared<OHOS::Media::Meta>();
+            std::shared_ptr<Plugin::Meta> suffixMeta = std::make_shared<Plugin::Meta>();
             suffixMeta->SetString(Media::Plugin::MetaID::MEDIA_FILE_EXTENSION, suffix);
             size_t fileSize = 0;
             if ((plugin_->GetSize(fileSize) == Status::OK) && (fileSize != 0)) {

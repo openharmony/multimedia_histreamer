@@ -18,7 +18,7 @@
 #include "type_finder.h"
 #include <algorithm>
 #include "foundation/log.h"
-#include "utils/util.h"
+#include "osal/utils/util.h"
 
 namespace OHOS {
 namespace Media {

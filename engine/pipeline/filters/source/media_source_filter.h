@@ -20,13 +20,12 @@
 #include <string>
 
 #include "source.h"
-
-#include "foundation/blocking_queue.h"
-#include "foundation/constants.h"
 #include "foundation/error_code.h"
-#include "foundation/type_define.h"
-#include "foundation/utils.h"
 #include "osal/thread/task.h"
+#include "utils/blocking_queue.h"
+#include "utils/constants.h"
+#include "utils/type_define.h"
+#include "utils/utils.h"
 #include "pipeline/core/filter_base.h"
 #include "plugin/core/plugin_manager.h"
 #include "plugin/interface/source_plugin.h"

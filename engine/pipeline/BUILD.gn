@@ -51,6 +51,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":histreamer_pipeline_config" ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_core",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     ]

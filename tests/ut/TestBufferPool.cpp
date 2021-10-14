@@ -21,9 +21,9 @@
 
 #include <vector>
 
-#include "foundation/buffer_pool.h"
-#include "foundation/constants.h"
-#include "foundation/type_define.h"
+#include "utils/buffer_pool.h"
+#include "utils/constants.h"
+#include "utils/type_define.h"
 
 namespace OHOS::Media::Test {
 class BufferPoolTest : public ::testing::Test {

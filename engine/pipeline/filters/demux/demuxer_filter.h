@@ -18,16 +18,16 @@
 
 #include <atomic>
 #include <string>
-#include "common/plugin_types.h"
-#include "core/filter_base.h"
-#include "data_packer.h"
-#include "foundation/meta.h"
-#include "foundation/osal/thread/mutex.h"
-#include "foundation/type_define.h"
-#include "foundation/utils.h"
+#include "osal/thread/mutex.h"
+#include "osal/thread/task.h"
+#include "utils/type_define.h"
+#include "utils/utils.h"
+#include "plugin/common/plugin_types.h"
+#include "plugin/core/plugin_meta.h"
 #include "plugin/core/demuxer.h"
-#include "thread/task.h"
 #include "type_finder.h"
+#include "data_packer.h"
+#include "core/filter_base.h"
 
 namespace OHOS {
 namespace Media {
@@ -54,14 +54,14 @@ public:
 
     ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) override;
 
-    bool Negotiate(const std::string& inPort, const std::shared_ptr<const OHOS::Media::Meta>& inMeta,
+    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
                    CapabilitySet& peerCaps) override;
 
     ErrorCode SeekTo(int64_t msec);
 
-    std::vector<std::shared_ptr<Meta>> GetStreamMetaInfo() const;
+    std::vector<std::shared_ptr<Plugin::Meta>> GetStreamMetaInfo() const;
 
-    std::shared_ptr<Meta> GetGlobalMetaInfo() const;
+    std::shared_ptr<Plugin::Meta> GetGlobalMetaInfo() const;
 
     ErrorCode GetCurrentTime(int64_t& time) const;
 
@@ -83,8 +83,8 @@ private:
 
     struct MediaMetaData {
         std::vector<StreamTrackInfo> trackInfos;
-        std::vector<std::shared_ptr<Meta>> trackMetas;
-        std::shared_ptr<Meta> globalMeta;
+        std::vector<std::shared_ptr<Plugin::Meta>> trackMetas;
+        std::shared_ptr<Plugin::Meta> globalMeta;
     };
 
     void Reset();
@@ -107,7 +107,7 @@ private:
 
     int ReadFrame(AVBuffer& buffer, uint32_t& streamIndex);
 
-    std::shared_ptr<OHOS::Media::Meta> GetStreamMeta(uint32_t streamIndex);
+    std::shared_ptr<Plugin::Meta> GetStreamMeta(uint32_t streamIndex);
 
     void SendEventEos();
 

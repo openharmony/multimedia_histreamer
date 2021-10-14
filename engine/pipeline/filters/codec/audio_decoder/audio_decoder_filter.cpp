@@ -16,12 +16,11 @@
 #define LOG_TAG "AudioDecoderFilter"
 
 #include "audio_decoder_filter.h"
-
-#include "common/plugin_utils.h"
-#include "factory/filter_factory.h"
-#include "foundation/constants.h"
-#include "foundation/memory_helper.h"
 #include "osal/utils/util.h"
+#include "utils/constants.h"
+#include "utils/memory_helper.h"
+#include "factory/filter_factory.h"
+#include "common/plugin_utils.h"
 #include "plugin/common/plugin_audio_tags.h"
 
 namespace {
@@ -35,20 +34,20 @@ constexpr int32_t AF_8BIT_BYTES = 1;
 constexpr int32_t RETRY_TIMES = 3;
 constexpr int32_t RETRY_DELAY = 10; // 10ms
 
-int32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Meta> &meta)
+int32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta)
 {
     using namespace OHOS::Media;
     int32_t samplesPerFrame;
-    if (!meta->GetInt32(MetaID::AUDIO_SAMPLE_PRE_FRAME, samplesPerFrame)) {
+    if (!meta->GetInt32(Plugin::MetaID::AUDIO_SAMPLE_PRE_FRAME, samplesPerFrame)) {
         return 0;
     }
     int32_t channels;
-    if (!meta->GetInt32(MetaID::AUDIO_CHANNELS, channels)) {
+    if (!meta->GetInt32(Plugin::MetaID::AUDIO_CHANNELS, channels)) {
         return 0;
     }
     int32_t bytesPerSample = 0;
     Plugin::AudioSampleFormat format;
-    if (!meta->GetData<Plugin::AudioSampleFormat>(MetaID::AUDIO_SAMPLE_FORMAT, format)) {
+    if (!meta->GetData<Plugin::AudioSampleFormat>(Plugin::MetaID::AUDIO_SAMPLE_FORMAT, format)) {
         return 0;
     }
     switch (format) {
@@ -198,7 +197,7 @@ ErrorCode AudioDecoderFilter::Prepare()
     return SUCCESS;
 }
 
-bool AudioDecoderFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Meta> &inMeta,
+bool AudioDecoderFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta> &inMeta,
                                    CapabilitySet& outCaps)
 {
     if (state_ != FilterState::PREPARING) {
@@ -219,10 +218,10 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort, const std::shared_
         return false;
     }
     // todo how to decide pcm caps
-    std::shared_ptr<Meta> pcmMeta = std::make_shared<Meta>();
+    std::shared_ptr<Plugin::Meta> pcmMeta = std::make_shared<Plugin::Meta>();
     // shall we avoid copy
     pcmMeta->Update(*inMeta);
-    pcmMeta->SetString(Media::Plugin::MetaID::MIME, MEDIA_MIME_AUDIO_RAW);
+    pcmMeta->SetString(Plugin::MetaID::MIME, MEDIA_MIME_AUDIO_RAW);
     CapabilitySet sinkCaps;
     if (!targetOutPort->Negotiate(pcmMeta, sinkCaps)) {
         MEDIA_LOG_E("negotiate with sink failed");
@@ -245,35 +244,35 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort, const std::shared_
     return true;
 }
 
-ErrorCode AudioDecoderFilter::ConfigureWithMetaLocked(const std::shared_ptr<const OHOS::Media::Meta> &meta)
+ErrorCode AudioDecoderFilter::ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta> &meta)
 {
     uint32_t channels;
-    if (meta->GetUint32(MetaID::AUDIO_CHANNELS, channels)) {
+    if (meta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels)) {
         MEDIA_LOG_D("found audio channel meta");
         SetPluginParameterLocked(Tag::AUDIO_CHANNELS, channels);
     }
     uint32_t sampleRate;
-    if (meta->GetUint32(MetaID::AUDIO_SAMPLE_RATE, sampleRate)) {
+    if (meta->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_RATE, sampleRate)) {
         MEDIA_LOG_D("found audio sample rate meta");
         SetPluginParameterLocked(Tag::AUDIO_SAMPLE_RATE, sampleRate);
     }
     int64_t bitRate;
-    if (meta->GetInt64(MetaID::MEDIA_BITRATE, bitRate)) {
+    if (meta->GetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate)) {
         MEDIA_LOG_D("found audio bit rate meta");
         SetPluginParameterLocked(Tag::MEDIA_BITRATE, bitRate);
     }
     auto audioFormat = Plugin::AudioSampleFormat::U8;
-    if (meta->GetData<Plugin::AudioSampleFormat>(MetaID::AUDIO_SAMPLE_FORMAT, audioFormat)) {
+    if (meta->GetData<Plugin::AudioSampleFormat>(Plugin::MetaID::AUDIO_SAMPLE_FORMAT, audioFormat)) {
         SetPluginParameterLocked(Tag::AUDIO_SAMPLE_FORMAT, audioFormat);
     }
     std::vector<uint8_t> codecConfig;
-    if (meta->GetData<std::vector<uint8_t>>(MetaID::MEDIA_CODEC_CONFIG, codecConfig)) {
+    if (meta->GetData<std::vector<uint8_t>>(Plugin::MetaID::MEDIA_CODEC_CONFIG, codecConfig)) {
         SetPluginParameterLocked(Tag::MEDIA_CODEC_CONFIG, std::move(codecConfig));
     }
     return SUCCESS;
 }
 
-ErrorCode AudioDecoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr<const Meta>& meta)
+ErrorCode AudioDecoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     auto err = TranslatePluginStatus(plugin_->SetDataCallback(dataCallback_));
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "set decoder plugin callback failed");

@@ -39,7 +39,7 @@ public:
 
     void FlushEnd() override;
 
-    bool Negotiate(const std::string &inPort, const std::shared_ptr<const OHOS::Media::Meta> &inMeta,
+    bool Negotiate(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &inMeta,
                    CapabilitySet &outCaps) override;
 
     ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer) override;
@@ -60,7 +60,7 @@ private:
         std::vector<uint8_t> codecConfig;
     };
 
-    ErrorCode SetVideoDecoderFormat(const std::shared_ptr<const Meta>& meta);
+    ErrorCode SetVideoDecoderFormat(const std::shared_ptr<const Plugin::Meta>& meta);
 
     ErrorCode AllocateOutputBuffers();
 
@@ -72,7 +72,7 @@ private:
 
     ErrorCode ConfigurePlugin();
 
-    ErrorCode Configure(const std::shared_ptr<const OHOS::Media::Meta> &meta);
+    ErrorCode Configure(const std::shared_ptr<const Plugin::Meta> &meta);
 
     void HandleFrame();
 

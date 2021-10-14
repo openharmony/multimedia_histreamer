@@ -20,7 +20,6 @@
 #include <memory>
 #include <string>
 #include <tuple>
-
 #include "common/any.h"
 #include "foundation/error_code.h"
 #include "foundation/log.h"

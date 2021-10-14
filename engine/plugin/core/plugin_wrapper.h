@@ -19,7 +19,7 @@
 #include "demuxer.h"
 #include "interface/demuxer_plugin.h"
 #include "interface/plugin_base.h"
-#include "foundation/utils.h"
+#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
