@@ -90,7 +90,7 @@ public:
     Status Flush() override;
 
 private:
-    void AudioCallback(void* userdata, uint8_t* stream, int len);
+    void AudioCallback(void* userdata, uint8_t* stream, int len); // NOLINT: void*
 
     std::vector<uint8_t> transformCache_ {};
     std::vector<uint8_t> mixCache_ {};

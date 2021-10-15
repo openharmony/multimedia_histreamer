@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifdef VIDEO_SUPPORT
-
 #ifndef MEDIA_PIPELINE_VIDEO_SINK_FILTER_H
 #define MEDIA_PIPELINE_VIDEO_SINK_FILTER_H
+
+#ifdef VIDEO_SUPPORT
 
 #include <atomic>
 #include "osal/thread/condition_variable.h"
@@ -79,6 +79,5 @@ private:
 } // namespace Media
 } // namespace OHOS
 
-#endif // MEDIA_PIPELINE_VIDEO_SINK_FILTER_H
-
 #endif
+#endif // MEDIA_PIPELINE_VIDEO_SINK_FILTER_H

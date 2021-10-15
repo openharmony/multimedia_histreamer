@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_PLUGIN_TYPES_H
 #define HISTREAMER_PLUGIN_TYPES_H
 
-#include <cstdint>
+#include <cstdint> // NOLINT: using int32_t in this file
 
 namespace OHOS {
 namespace Media {

@@ -68,7 +68,7 @@ void* FFmpegDemuxerPlugin::DemuxerPluginAllocator::Alloc(size_t size)
     return static_cast<void*>(new (std::nothrow) uint8_t[size]);
 }
 
-void FFmpegDemuxerPlugin::DemuxerPluginAllocator::Free(void* ptr)
+void FFmpegDemuxerPlugin::DemuxerPluginAllocator::Free(void* ptr) // NOLINT: void*
 {
     if (ptr) {
         auto data = static_cast<uint8_t*>(ptr);
@@ -488,7 +488,7 @@ int FFmpegDemuxerPlugin::AVReadPacket(void* opaque, uint8_t* buf, int bufSize)
  * write packet unimplemented.
  * @return 0
  */
-int FFmpegDemuxerPlugin::AVWritePacket(void* opaque, uint8_t* buf, int bufSize)
+int FFmpegDemuxerPlugin::AVWritePacket(void* opaque, uint8_t* buf, int bufSize) // NOLINT: intentionally using void*
 {
     (void)opaque;
     (void)buf;

@@ -21,8 +21,8 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-//  Parameter用于扩展不常用功能，下面的定义仅仅只是一些例子，不会真正使用
 
+// NOLINTBEGIN: global variable
 const int32_t KEY_PARAMETER_START = 0x00000000;
 // source parameter start from 0x00010000
 const int32_t KEY_SOURCE_PARAMETER_START = 0x00010000;
@@ -35,6 +35,7 @@ const int32_t KEY_CODEC_PARAMETER_START = 0x00030000;
 const int32_t KEY_SINK_PARAMETER_START = 0x00040000;
 
 const int32_t KEY_CODEC_DRIVE_MODE = KEY_CODEC_PARAMETER_START + 2; // ThreadDrivingMode
+// NOLINTEND
 
 enum class ThreadDrivingMode {
     SYNC,

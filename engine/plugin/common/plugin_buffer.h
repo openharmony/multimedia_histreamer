@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "plugin_tags.h"
-#include "plugin_types.h"
 #include "plugin_audio_tags.h"
 #include "plugin_video_tags.h"
 
@@ -65,7 +64,7 @@ struct Allocator {
      *
      * @param ptr   Pointer of the allocated buffer.
      */
-    virtual void Free(void* ptr) = 0;
+    virtual void Free(void* ptr) = 0; // NOLINT: intentionally using void* here
 };
 
 /**
@@ -113,9 +112,9 @@ public:
 
     uint8_t *GetWritableData(size_t size, size_t position = 0);
 
-    size_t Write(const uint8_t* in, size_t size, size_t position = std::string::npos);
+    size_t Write(const uint8_t* in, size_t writeSize, size_t position = std::string::npos);
 
-    size_t Read(uint8_t* out, size_t size, size_t position = std::string::npos);
+    size_t Read(uint8_t* out, size_t readSize, size_t position = std::string::npos);
 
     void Reset();
 

@@ -20,8 +20,8 @@
 #undef UNIT_TEST
 
 #include <atomic>
-#include <chrono>
-#include <iostream>
+#include <chrono> // NOLINT: used it
+#include <iostream> // NOLINT: used it
 #include <memory>
 #include "osal/base/synchronizer.h"
 #include "osal/thread/task.h"

@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifdef VIDEO_SUPPORT
-
 #ifndef MEDIA_PIPELINE_VIDEO_DECODER_FILTER_H
 #define MEDIA_PIPELINE_VIDEO_DECODER_FILTER_H
+
+#ifdef VIDEO_SUPPORT
 
 #include "utils/type_define.h"
 #include "filters/codec/decoder_filter_base.h"
@@ -93,5 +93,5 @@ private:
 }
 }
 }
-#endif // MEDIA_PIPELINE_VIDEO_DECODER_FILTER_H
 #endif
+#endif // MEDIA_PIPELINE_VIDEO_DECODER_FILTER_H

@@ -48,7 +48,7 @@ void* StreamSourceAllocator::Alloc(size_t size)
     return reinterpret_cast<void*>(new (std::nothrow) uint8_t[size]);
 }
 
-void StreamSourceAllocator::Free(void* ptr)
+void StreamSourceAllocator::Free(void* ptr) // NOLINT: void*
 {
     if (ptr != nullptr) {
         delete[](uint8_t*) ptr;

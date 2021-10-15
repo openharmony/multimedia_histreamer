@@ -14,9 +14,9 @@
  */
 
 #include <cstdlib>
-#include "gtest/gtest.h"
 #include <memory>
 #include <string>
+#include "gtest/gtest.h"
 #define private public
 #define protected public
 #include "common/any.h"

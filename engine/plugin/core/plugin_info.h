@@ -49,6 +49,7 @@ struct PluginInfo {
     std::map<std::string, ValueType> extra;
 };
 
+// NOLINTBEGIN: macro constant
 /**
  * Extra information about the plugin.
  * Describes the protocol types supported by the Source plugin.
@@ -68,6 +69,7 @@ struct PluginInfo {
  * ValueType: enum Plugin::CodecType
  */
 #define PLUGIN_INFO_EXTRA_CODEC_TYPE        "codec_type"
+// NOLINTEND
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

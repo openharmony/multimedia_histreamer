@@ -137,6 +137,7 @@ bool PluginRegister::RegisterImpl::VersionMatched(const PluginDefBase& definitio
     return (major == coreMajor) && (minor <= coreMinor);
 }
 
+// NOLINTNEXTLINE: should be static or anonymous namespace
 bool PluginRegister::RegisterImpl::MoreAcceptable(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def)
 {
     return false;

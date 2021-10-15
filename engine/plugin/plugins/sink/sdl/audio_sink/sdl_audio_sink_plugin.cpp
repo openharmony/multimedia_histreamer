@@ -353,7 +353,7 @@ Status SdlAudioSinkPlugin::Flush()
     return Status::OK;
 }
 
-void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len)
+void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len) // NOLINT: void*
 {
     UNUSED_VARIABLE(userdata);
     MEDIA_LOG_D("sdl audio callback begin");

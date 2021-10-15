@@ -118,7 +118,7 @@ public:
     template <typename ValueType, enable_if_t<!std::is_same<decay_t<ValueType>, Any>::value &&
                                                   std::is_copy_constructible<decay_t<ValueType>>::value,
                                               bool> = true>
-    Any(ValueType&& value)
+    Any(ValueType&& value) // NOLINT: explicit
     {
         DoEmplace<decay_t<ValueType>>(std::forward<ValueType>(value));
     }
@@ -316,11 +316,13 @@ private:
 
         static void Copy(Storage& dest, const Storage& source) noexcept
         {
+            // NOLINTNEXTLINE: reinterpret_cast
             new (reinterpret_cast<T*>(GetPtr(dest))) T(*reinterpret_cast<const T*>(GetConstPtr(source)));
         }
 
         static void Move(Storage& dest, Storage& source) noexcept
         {
+            // NOLINTNEXTLINE: reinterpret_cast
             new (reinterpret_cast<T*>(GetPtr(dest))) T(std::move(*reinterpret_cast<T*>(GetPtr(source))));
             Destroy(source);
         }
