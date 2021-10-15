@@ -15,24 +15,29 @@
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
-  lite_library("histreamer") {
+  group("plugin_stream_source") {
+    if (ohos_kernel_type == "liteos_m") {
+      deps = [ ":histreamer_plugin_StreamSource" ]
+    } else {
+      deps = []
+    }
+  }
+
+  plugin_stream_source_src = [ "stream_source_plugin.cpp" ]
+
+  lite_library("histreamer_plugin_StreamSource") {
     if (ohos_kernel_type == "liteos_m") {
       target_type = "static_library"
     } else {
       target_type = "shared_library"
     }
-    sources = []
-    deps = [
-      "engine/foundation:histreamer_foundation",
-      "engine/pipeline:histreamer_pipeline",
-      "engine/player:histreamer_player",
-      "engine/plugin:histreamer_plugin",
-      "engine/utils:histreamer_utils",
+    sources = plugin_stream_source_src
+    include_dirs = [ "//foundation/multimedia/utils/lite/interfaces/kits" ]
+    public_deps = [
+      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+      "//foundation/multimedia/utils/lite:media_common",
     ]
-    public_deps = [ "//foundation/multimedia/utils/lite:media_common" ]
-    public_configs = [ ":hiplayer_external_library_config" ]
-  }
-  config("hiplayer_external_library_config") {
-    include_dirs = [ "//foundation/multimedia/histreamer/interface" ]
   }
 }
