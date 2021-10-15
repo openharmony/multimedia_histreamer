@@ -48,11 +48,11 @@ public:
 class StreamSourceCallback : public StreamCallback {
 public:
     StreamSourceCallback(std::shared_ptr<StreamSourcePlugin> dataSource, std::shared_ptr<StreamSource>& stream);
-    ~StreamSourceCallback() = default;
+    virtual ~StreamSourceCallback() = default;
 
-    uint8_t* GetBuffer(size_t index);
-    void QueueBuffer(size_t index, size_t offset, size_t size, int64_t timestampUs, uint32_t flags);
-    void SetParameters(const Media::Format& params)
+    uint8_t* GetBuffer(size_t index) override;
+    void QueueBuffer(size_t index, size_t offset, size_t size, int64_t timestampUs, uint32_t flags) override;
+    void SetParameters(const Media::Format& params) override
     {
     }
 
