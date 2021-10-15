@@ -134,7 +134,7 @@ void Meta::Update(const Meta& meta)
     }
 }
 
-bool Meta::SetPointer(Plugin::MetaID id, const void* ptr, size_t size)
+bool Meta::SetPointer(Plugin::MetaID id, const void* ptr, size_t size) // NOLINT:void*
 {
     if (size == 0) {
         return false;

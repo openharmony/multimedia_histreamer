@@ -17,7 +17,7 @@
 #define HISTREAMER_BIT_READER_H
 
 #include <algorithm>
-#include <cstdint>
+#include <cstdint> // NOLINT
 
 namespace OHOS {
 namespace Media {

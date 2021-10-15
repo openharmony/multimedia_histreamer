@@ -17,8 +17,8 @@
 #define HISTREAMER_FOUNDATION_OSAL_THREAD_H
 
 #include <functional>
-#include <memory> // NOLINTN
-#include <pthread.h>
+#include <memory> // NOLINT
+#include <pthread.h> // NOLINT
 #include <string>
 
 namespace OHOS {
@@ -51,7 +51,7 @@ private:
     };
 
     void SetNameInternal();
-    static void* Run(void* arg);
+    static void* Run(void* arg); // NOLINT: void*
 
     pthread_t id_ {};
     std::string name_;

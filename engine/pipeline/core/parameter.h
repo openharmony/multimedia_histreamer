@@ -22,20 +22,19 @@ namespace OHOS {
 namespace Media {
 namespace Pipeline {
 
-// NOLINTBEGIN: global variable
-const int32_t KEY_PARAMETER_START = 0x00000000;
+const int32_t KEY_PARAMETER_START = 0x00000000; // NOLINT: global variable
 // source parameter start from 0x00010000
-const int32_t KEY_SOURCE_PARAMETER_START = 0x00010000;
+const int32_t KEY_SOURCE_PARAMETER_START = 0x00010000; // NOLINT: global variable
 // demuxer parameter start from 0x00020000
-const int32_t KEY_DEMUXER_PARAMETER_START = 0x00020000;
+const int32_t KEY_DEMUXER_PARAMETER_START = 0x00020000; // NOLINT: global variable
 // codec parameter start from 0x000300000
-const int32_t KEY_CODEC_PARAMETER_START = 0x00030000;
+const int32_t KEY_CODEC_PARAMETER_START = 0x00030000; // NOLINT: global variable
 
 // sink parameter start from 0x00400000
-const int32_t KEY_SINK_PARAMETER_START = 0x00040000;
+const int32_t KEY_SINK_PARAMETER_START = 0x00040000; // NOLINT: global variable
 
-const int32_t KEY_CODEC_DRIVE_MODE = KEY_CODEC_PARAMETER_START + 2; // ThreadDrivingMode
-// NOLINTEND
+// ThreadDrivingMode
+const int32_t KEY_CODEC_DRIVE_MODE = KEY_CODEC_PARAMETER_START + 2; // NOLINT: global var
 
 enum class ThreadDrivingMode {
     SYNC,

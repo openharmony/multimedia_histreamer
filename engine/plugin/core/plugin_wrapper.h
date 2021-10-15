@@ -58,7 +58,7 @@ struct AllocatorHelperWrapper : AllocatorHelper {
         return allocator_->Alloc(size);
     }
 
-    void Free(void* ptr) override
+    void Free(void* ptr) override // NOLINT: void*
     {
         allocator_->Free(ptr);
     }

@@ -26,7 +26,7 @@ namespace Media {
 namespace Test {
 class PlayExecutorStub : public PlayExecutor {
 public:
-    PlayExecutorStub() : isLooping_(false), stateMachine_(nullptr)
+    PlayExecutorStub() noexcept : isLooping_(false), stateMachine_(nullptr)
     {
     }
     void SetLooping(bool looping)

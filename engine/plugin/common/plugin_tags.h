@@ -16,9 +16,9 @@
 #ifndef HISTREAMER_PLUGIN_COMMON_TAGS_H
 #define HISTREAMER_PLUGIN_COMMON_TAGS_H
 
-#include <map>
+#include <map> // NOLINT
 #include <string>
-#include "any.h" // NOLINT: using Any in this file
+#include "any.h" // NOLINT
 
 namespace OHOS {
 namespace Media {

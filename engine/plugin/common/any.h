@@ -311,7 +311,7 @@ private:
 
         static void Destroy(Storage& storage) noexcept
         {
-            reinterpret_cast<T*>(GetPtr(storage))->~T();
+            reinterpret_cast<T*>(GetPtr(storage))->~T(); // NOLINT: cast
         }
 
         static void Copy(Storage& dest, const Storage& source) noexcept
@@ -347,12 +347,12 @@ private:
 
         static void Destroy(Storage& storage) noexcept
         {
-            delete reinterpret_cast<T*>(storage.heap_);
+            delete reinterpret_cast<T*>(storage.heap_); // NOLINT: cast
             storage.heap_ = nullptr;
         }
         static void Copy(Storage& dest, const Storage& source) noexcept
         {
-            dest.heap_ = new T(*reinterpret_cast<T*>(source.heap_));
+            dest.heap_ = new T(*reinterpret_cast<T*>(source.heap_)); // NOLINT: cast
         }
         static void Move(Storage& dest, Storage& source) noexcept
         {

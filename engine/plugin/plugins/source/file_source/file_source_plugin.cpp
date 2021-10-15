@@ -47,7 +47,7 @@ void* FileSourceAllocator::Alloc(size_t size)
     if (size == 0) {
         return nullptr;
     }
-    return reinterpret_cast<void *>(new (std::nothrow) uint8_t[size]);
+    return reinterpret_cast<void *>(new (std::nothrow) uint8_t[size]); // NOLINT: cast
 }
 
 void FileSourceAllocator::Free(void* ptr) // NOLINT: void*
