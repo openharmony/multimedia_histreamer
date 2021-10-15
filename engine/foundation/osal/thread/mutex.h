@@ -32,8 +32,6 @@ public:
 
     Mutex operator=(const Mutex&) = delete;
 
-    const pthread_mutex_t* GetNativeHandle() const;
-
     void Lock();
 
     bool TryLock();
@@ -43,6 +41,8 @@ public:
 private:
     pthread_mutex_t nativeHandle_ {};
     bool created_;
+
+    friend class ConditionVariable;
 };
 } // namespace OSAL
 } // namespace Media
