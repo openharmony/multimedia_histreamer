@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_PLUGIN_COMMON_AUDIO_TAGS_H
 #define HISTREAMER_PLUGIN_COMMON_AUDIO_TAGS_H
 
-#include <cstdint>
+#include <cstdint>  // NOLINT: used it
 
 namespace OHOS {
 namespace Media {

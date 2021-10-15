@@ -41,7 +41,7 @@ private:
 
     static void* LoadPluginFile(const std::string &path);
 
-    static std::shared_ptr<PluginLoader> CheckSymbol(void* handler, const std::string &name);
+    static std::shared_ptr<PluginLoader> CheckSymbol(void* handler, const std::string &name); // NOLINT: void*
 
     void UnLoadPluginFile();
 
