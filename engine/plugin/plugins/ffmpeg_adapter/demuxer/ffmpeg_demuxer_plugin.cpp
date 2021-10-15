@@ -20,13 +20,13 @@
 #include <cstdio>
 #include <cstring>
 #include <new>
-#include "plugin/core/plugin_manager.h"
 #include "ffmpeg_track_meta.h"
 #include "foundation/log.h"
-#include "utils/memory_helper.h"
 #include "osal/thread/scoped_lock.h"
 #include "plugin/common/plugin_buffer.h"
+#include "plugin/core/plugin_manager.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
+#include "utils/memory_helper.h"
 
 #if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 78, 0) and LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(58, 64, 100)
 #include "libavformat/internal.h"
@@ -398,14 +398,8 @@ AVIOContext* FFmpegDemuxerPlugin::AllocAVIOContext(int flags)
 
 bool FFmpegDemuxerPlugin::IsSelectedTrack(int32_t trackId)
 {
-    bool rtv = false;
-    for (const auto& id : selectedTrackIds_) {
-        if (id == trackId) {
-            rtv = true;
-            break;
-        }
-    }
-    return rtv;
+    return std::any_of(selectedTrackIds_.begin(), selectedTrackIds_.end(),
+                       [trackId](int32_t id) { return id == trackId; });
 }
 
 void FFmpegDemuxerPlugin::SaveFileInfoToMetaInfo(TagMap& meta)
