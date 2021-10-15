@@ -42,7 +42,7 @@ public:
     ~StreamSourceAllocator() = default;
 
     void* Alloc(size_t size) override;
-    void Free(void* ptr) override;
+    void Free(void* ptr) override; // NOLINT: void*
 };
 
 class StreamSourceCallback : public StreamCallback {

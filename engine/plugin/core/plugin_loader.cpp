@@ -25,6 +25,7 @@
 
 using namespace OHOS::Media::Plugin;
 
+// NOLINTNEXTLINE: void*
 PluginLoader::PluginLoader(void* handler, std::string name) : handler_(handler), name_(std::move(name))
 {
 }

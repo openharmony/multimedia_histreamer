@@ -48,7 +48,7 @@ bool UseStorage()
 
 class NonTrivialCopyable {
 public:
-    NonTrivialCopyable(uint8_t a) : a_(a)
+   explicit NonTrivialCopyable(uint8_t a) : a_(a)
     {
     }
     NonTrivialCopyable(const NonTrivialCopyable& a) : a_(a.a_)

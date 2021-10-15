@@ -462,7 +462,7 @@ bool FFmpegDemuxerPlugin::ParseMediaData()
 }
 
 // ffmpeg provide buf, we write data
-int FFmpegDemuxerPlugin::AVReadPacket(void* opaque, uint8_t* buf, int bufSize)
+int FFmpegDemuxerPlugin::AVReadPacket(void* opaque, uint8_t* buf, int bufSize) // NOLINT
 {
     int rtv = -1;
     auto ioContext = static_cast<IOContext*>(opaque);
@@ -496,7 +496,7 @@ int FFmpegDemuxerPlugin::AVWritePacket(void* opaque, uint8_t* buf, int bufSize) 
     return 0;
 }
 
-int64_t FFmpegDemuxerPlugin::AVSeek(void* opaque, int64_t offset, int whence)
+int64_t FFmpegDemuxerPlugin::AVSeek(void* opaque, int64_t offset, int whence) // NOLINT: void*
 {
     auto ioContext = static_cast<IOContext*>(opaque);
     uint64_t newPos = 0;

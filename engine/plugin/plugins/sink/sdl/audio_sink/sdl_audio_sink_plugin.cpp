@@ -34,7 +34,7 @@ void RegisterAudioCallback(std::function<void(void*, uint8_t*, int)> callback)
 {
     g_audioCallback = std::move(callback);
 }
-void SDLAudioCallback(void* userdata, uint8_t* stream, int len)
+void SDLAudioCallback(void* userdata, uint8_t* stream, int len) // NOLINT: void*
 {
     g_audioCallback(userdata, stream, len);
 }

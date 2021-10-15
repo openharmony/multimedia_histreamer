@@ -68,7 +68,7 @@ private:
         DemuxerPluginAllocator() = default;
         ~DemuxerPluginAllocator() override = default;
         void* Alloc(size_t size) override;
-        void Free(void* ptr) override;
+        void Free(void* ptr) override; // NOLINT: void*
     };
 
     struct IOContext {
@@ -93,9 +93,9 @@ private:
 
     static int AVReadPacket(void* opaque, uint8_t* buf, int bufSize); // NOLINT: void*
 
-    static int AVWritePacket(void* opaque, uint8_t* buf, int bufSize);
+    static int AVWritePacket(void* opaque, uint8_t* buf, int bufSize); // NOLINT: void*
 
-    static int64_t AVSeek(void* opaque, int64_t offset, int whence);
+    static int64_t AVSeek(void* opaque, int64_t offset, int whence); // NOLINT: void*
 
     IOContext ioContext_;
     std::shared_ptr<Callback> callback_ {};

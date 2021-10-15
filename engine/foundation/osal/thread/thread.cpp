@@ -89,7 +89,7 @@ void Thread::SetNameInternal()
 #endif
 }
 
-void* Thread::Run(void* arg)
+void* Thread::Run(void* arg) // NOLINT: void*
 {
     auto state = static_cast<State*>(arg);
     if (state && state->func_) {
