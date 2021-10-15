@@ -46,7 +46,7 @@ using remove_cv_t = typename std::remove_cv<T>::type;
 
 template <typename T>
 using remove_reference_t = typename std::remove_reference<T>::type;
-constexpr size_t STACK_STORAGE_SIZE = 2 * sizeof(void*);
+constexpr size_t STACK_STORAGE_SIZE = 2 * sizeof(void*); // NOLINT: global var
 
 template <typename T>
 struct IsTrivialStackStorable {

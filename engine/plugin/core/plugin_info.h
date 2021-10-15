@@ -49,18 +49,17 @@ struct PluginInfo {
     std::map<std::string, ValueType> extra;
 };
 
-// NOLINTBEGIN: macro constant
 /**
  * Extra information about the plugin.
  * Describes the protocol types supported by the Source plugin.
  */
-#define PLUGIN_INFO_EXTRA_PROTOCOL          "protocol"
+#define PLUGIN_INFO_EXTRA_PROTOCOL          "protocol"  // NOLINT: macro constant
 
 /**
  * Extra information about the plugin.
  * Describes the extensions supported by the Demuxer plugin.
  */
-#define PLUGIN_INFO_EXTRA_EXTENSIONS        "extensions"
+#define PLUGIN_INFO_EXTRA_EXTENSIONS        "extensions" // NOLINT: macro constant
 
 /**
  * Extra information about the plugin.
@@ -68,8 +67,8 @@ struct PluginInfo {
  *
  * ValueType: enum Plugin::CodecType
  */
-#define PLUGIN_INFO_EXTRA_CODEC_TYPE        "codec_type"
-// NOLINTEND
+#define PLUGIN_INFO_EXTRA_CODEC_TYPE        "codec_type" // NOLINT: macro constant
+
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

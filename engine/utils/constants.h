@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace Media {
-// NOLINTBEGIN: global variable
+
 constexpr size_t DEFAULT_QUEUE_SIZE = 10;
 constexpr int DEFAULT_FRAME_SIZE = 2 * 1024; // 2kb
 constexpr size_t DEFAULT_POOL_SIZE = 10;
@@ -50,7 +50,6 @@ extern const char* const MEDIA_MIME_AUDIO_AMR_WB;
 // video mime
 extern const char* const MEDIA_MIME_VIDEO_RAW;
 extern const char* const MEDIA_MIME_VIDEO_AVC;
-// NOLINTEND
 
 bool IsAudioMime(const std::string& mime);
 bool IsVideoMime(const std::string& mime);

@@ -17,7 +17,7 @@
 #define HISTREAMER_FOUNDATION_OSAL_THREAD_H
 
 #include <functional>
-#include <memory>
+#include <memory> // NOLINTN
 #include <pthread.h>
 #include <string>
 

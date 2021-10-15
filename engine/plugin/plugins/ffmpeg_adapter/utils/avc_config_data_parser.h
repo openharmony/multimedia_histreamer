@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifdef VIDEO_SUPPORT
-
 #ifndef HISTREAMER_AVC_CONFIG_DATA_PARSER_H
 #define HISTREAMER_AVC_CONFIG_DATA_PARSER_H
+
+#ifdef VIDEO_SUPPORT
 
 #include <cstdint>
 #include <string>
@@ -77,5 +77,5 @@ private:
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-#endif // HISTREAMER_AVC_CONFIG_DATA_PARSER_H
 #endif
+#endif // HISTREAMER_AVC_CONFIG_DATA_PARSER_H

@@ -110,7 +110,7 @@ public:
 
     const uint8_t* GetReadOnlyData(size_t position = 0);
 
-    uint8_t *GetWritableData(size_t size, size_t position = 0);
+    uint8_t *GetWritableData(size_t writeSize, size_t position = 0);
 
     size_t Write(const uint8_t* in, size_t writeSize, size_t position = std::string::npos);
 
