@@ -148,10 +148,12 @@ int32_t HiPlayer::SetVolume(float leftVolume, float rightVolume)
     return ret;
 }
 
+#ifndef SURFACE_DISABLED
 int32_t HiPlayer::SetSurface(Surface* surface)
 {
     return 0;
 }
+#endif
 
 bool HiPlayer::IsSingleLooping()
 {

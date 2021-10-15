@@ -33,7 +33,9 @@ public:
     int32_t Stop() override;
     int32_t Rewind(int64_t mSeconds, int32_t mode) override;
     int32_t SetVolume(float leftVolume, float rightVolume) override;
+#ifndef SURFACE_DISABLED
     int32_t SetSurface(Surface* surface) override;
+#endif
     bool IsSingleLooping() override;
     int32_t GetPlayerState(int32_t& state) override;
     int32_t GetCurrentPosition(int64_t& currentPosition) override;
@@ -62,7 +64,7 @@ private:
 };
 
 #if defined(WIN32)
-__declspec(dllexport) 
+__declspec(dllexport)
 #endif
 std::shared_ptr<Media::PlayerInterface> CreateHiPlayer();
 } // namespace Media
