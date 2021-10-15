@@ -29,5 +29,10 @@ if (defined(ohos_lite)) {
       "engine/plugin:histreamer_plugin",
       "engine/utils:histreamer_utils",
     ]
+    public_deps = [ "//foundation/multimedia/utils/lite:media_common" ]
+    public_configs = [ ":hiplayer_external_library_config" ]
+  }
+  config("hiplayer_external_library_config") {
+    include_dirs = [ "//foundation/multimedia/histreamer/interface" ]
   }
 }
