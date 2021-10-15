@@ -16,7 +16,11 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   declare_args() {
-    plugin_dynamic_register = false
+    if (ohos_kernel_type == "liteos_m") {
+      plugin_dynamic_register = false
+    } else {
+      plugin_dynamic_register = true
+    }
   }
 
   group("histreamer_plugin") {
@@ -85,7 +89,7 @@ if (defined(ohos_lite)) {
     defines = [ "MEDIA_OHOS" ]
     sources = hst_plugin_core_src
     if (plugin_dynamic_register) {
-      sources += [ "engine/plugin/core/plugin_loader.cpp" ]
+      sources += [ "core/plugin_loader.cpp" ]
       defines += [ "DYNAMIC_PLUGINS" ]
     }
     public_configs = [ ":hst_plugin_core_config" ]
