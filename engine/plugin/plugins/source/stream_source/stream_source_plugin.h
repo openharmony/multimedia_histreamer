@@ -48,7 +48,7 @@ public:
 class StreamSourceCallback : public StreamCallback {
 public:
     StreamSourceCallback(std::shared_ptr<StreamSourcePlugin> dataSource, std::shared_ptr<StreamSource>& stream);
-    ~StreamSourceCallback() override = default;
+    ~StreamSourceCallback() = default;
 
     uint8_t* GetBuffer(size_t index);
     void QueueBuffer(size_t index, size_t offset, size_t size, int64_t timestampUs, uint32_t flags);
