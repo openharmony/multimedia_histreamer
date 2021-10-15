@@ -47,10 +47,7 @@ if (defined(ohos_lite)) {
     }
     sources = hst_plugin_intf_src
     public_configs = [ ":hst_plugin_intf_config" ]
-    public_deps = [
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//third_party/bounds_checking_function:libsec_shared",
-    ]
+    public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     cflags = [ "-Wall" ]
     cflags_cc = cflags
   }
