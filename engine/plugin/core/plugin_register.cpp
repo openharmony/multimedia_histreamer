@@ -34,7 +34,7 @@ static std::map<PluginType, int> g_apiVersionMap = {
     {PluginType::VIDEO_SINK, VIDEO_SINK_API_VERSION},
 };
 
-static std::string g_libFileHead = "libplugin_";
+static std::string g_libFileHead = "libhistreamer_plugin_";
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 static std::string g_libFileTail = ".dll";
@@ -275,7 +275,7 @@ void PluginRegister::RegisterStaticPlugins()
 
 void PluginRegister::RegisterDynamicPlugins()
 {
-    RegisterPluginsFromPath("/usr/lib/plugins");
+    RegisterPluginsFromPath("/usr/lib");
 }
 
 void PluginRegister::RegisterPluginsFromPath(const char* libDirPath)

@@ -14,19 +14,12 @@
 
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
+  group("plugin_ffmpeg_adapter") {
+    deps = []
+  }
   if (ohos_kernel_type == "liteos_m") {
-    group("plugin_ffmpeg_adapter") {
-      deps = []
-    }
     print("unsupport static library")
   } else {
-    group("plugin_ffmpeg_adapter") {
-      deps = [
-        ":histreamer_plugin_FFmpegAudioDecoders",
-        ":histreamer_plugin_FFmpegDemuxer",
-      ]
-    }
-
     config("plugin_ffmpeg_adapter_config") {
       include_dirs = [ "//third_party/ffmpeg" ]
       ldflags = [

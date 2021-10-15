@@ -15,10 +15,12 @@
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
-  print("enable plugin_file_source")
-
   group("plugin_file_source") {
-    deps = [ ":histreamer_plugin_FileSource" ]
+    if (ohos_kernel_type == "liteos_m") {
+      deps = [ ":histreamer_plugin_FileSource" ]
+    } else {
+      deps = []
+    }
   }
 
   plugin_file_source_src = [ "file_source_plugin.cpp" ]

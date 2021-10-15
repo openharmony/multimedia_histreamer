@@ -32,13 +32,16 @@ if (defined(ohos_lite)) {
                   root_build_dir),
       rebase_path("${target_gen_dir}/include/", root_build_dir),
     ]
-    args += [
-      "FileSource",
-      "StreamSource",
-      "FFmpegDemuxer",
-      "FFmpegAudioDecoders",
-      "HdiAuSink",
-    ]
+
+    if (ohos_kernel_type == "liteos_m") {
+      args += [
+        "FileSource",
+        "StreamSource",
+        "FFmpegDemuxer",
+        "FFmpegAudioDecoders",
+        "HdiAuSink",
+      ]
+    }
 
     outputs = [ "${target_gen_dir}/include/all_plugin_static.h" ]
   }
