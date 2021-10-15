@@ -1,12 +1,13 @@
 # HiStreamer<a name="EN-US_TOPIC_0000001148809513"></a>
 
--   [Introduction](#section1158716411637)
--   [Directory Structure](#section161941989596)
--   [Repositories Involved](#section1533973044317)
+- [HiStreamer<a name="EN-US_TOPIC_0000001148809513"></a>](#histreamer)
+  - [Introduction<a name="section1158716411637"></a>](#introduction)
+  - [Directory Structure<a name="section161941989596"></a>](#directory-structure)
+  - [Repositories Involved<a name="section1533973044317"></a>](#repositories-involved)
 
 ## Introduction<a name="section1158716411637"></a>
 
-HiStreamer, based on the open-source GStreamer, is the foundation module of the multimedia subsystem. It provides a processing pipeline and plug-ins required by the media framework, such as the file source, codecs, muxer and demuxer, and audio and video data processor.
+HiStreamer is the foundation module of the multimedia subsystem. It provides a processing pipeline and plug-ins required by the media framework, such as the file source, codecs, muxer and demuxer, and audio and video data processor.
 
 ## Directory Structure<a name="section161941989596"></a>
 
