@@ -39,10 +39,9 @@ public:
 
     void Unlock();
 
-    const Mutex* GetMutex() const;
-
 private:
     Mutex* mutex_;
+    friend class ConditionVariable;
 };
 } // namespace OSAL
 } // namespace Media

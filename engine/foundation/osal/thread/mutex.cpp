@@ -37,11 +37,6 @@ Mutex::~Mutex()
     }
 }
 
-const pthread_mutex_t* Mutex::GetNativeHandle() const
-{
-    return &nativeHandle_;
-}
-
 void Mutex::Lock()
 {
     if (!created_) {

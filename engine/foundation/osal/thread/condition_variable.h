@@ -65,7 +65,7 @@ public:
         timeout.tv_nsec += (timeoutMs % 1000) * 1000000; // 1000 1000000
         int status = 0;
         while (!pred() && (status == 0)) {
-            status = pthread_cond_timedwait(&cond_, const_cast<pthread_mutex_t*>(lock.GetMutex()->GetNativeHandle()),
+            status = pthread_cond_timedwait(&cond_, &(lock.mutex_->nativeHandle_),
                                             &timeout);
             if (status == ETIMEDOUT) {
                 return pred();

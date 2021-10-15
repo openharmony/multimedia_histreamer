@@ -61,7 +61,7 @@ void ConditionVariable::NotifyAll() noexcept
 
 void ConditionVariable::Wait(ScopedLock& lock) noexcept
 {
-    pthread_cond_wait(&cond_, const_cast<pthread_mutex_t*>(lock.GetMutex()->GetNativeHandle()));
+    pthread_cond_wait(&cond_, &(lock.mutex_->nativeHandle_));
 }
 
 bool ConditionVariable::WaitFor(ScopedLock& lock, int timeoutMs)
@@ -78,7 +78,7 @@ bool ConditionVariable::WaitFor(ScopedLock& lock, int timeoutMs)
 #endif
     timeout.tv_sec += timeoutMs / TIME_SCALE;
     timeout.tv_nsec += (timeoutMs % TIME_SCALE) * TIME_SCALE * TIME_SCALE;
-    return pthread_cond_timedwait(&cond_, const_cast<pthread_mutex_t*>(lock.GetMutex()->GetNativeHandle()),
+    return pthread_cond_timedwait(&cond_, &(lock.mutex_->nativeHandle_),
         &timeout) == 0;
 }
 } // namespace OSAL

@@ -80,11 +80,6 @@ void ScopedLock::Unlock()
         mutex_->Unlock();
     }
 }
-
-const Mutex* ScopedLock::GetMutex() const
-{
-    return mutex_;
-}
 } // namespace OSAL
 } // namespace Media
 } // namespace OHOS
