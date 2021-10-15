@@ -91,7 +91,7 @@ private:
 
     bool ConvertAVPacketToFrameInfo(const AVStream& avStream, const AVPacket& pkt, Buffer& frameInfo);
 
-    static int AVReadPacket(void* opaque, uint8_t* buf, int bufSize);
+    static int AVReadPacket(void* opaque, uint8_t* buf, int bufSize); // NOLINT: void*
 
     static int AVWritePacket(void* opaque, uint8_t* buf, int bufSize);
 

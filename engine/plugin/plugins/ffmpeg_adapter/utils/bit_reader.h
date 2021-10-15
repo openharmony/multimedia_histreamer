@@ -37,7 +37,7 @@ public:
 
     template <typename T>
     BitReader(const T* begin, const T* end)
-        : BitReader(reinterpret_cast<const uint8_t*>(begin), reinterpret_cast<const uint8_t*>(end))
+        : BitReader(reinterpret_cast<const uint8_t*>(begin), reinterpret_cast<const uint8_t*>(end)) // NOLINT: cast
     {
     }
 
@@ -89,7 +89,7 @@ public:
     template <typename T>
     void Reset(const T* begin, const T* end)
     {
-        Reset(reinterpret_cast<const uint8_t*>(begin), reinterpret_cast<const uint8_t*>(end));
+        Reset(reinterpret_cast<const uint8_t*>(begin), reinterpret_cast<const uint8_t*>(end)); // NOLINT: cast
     }
 
 private:

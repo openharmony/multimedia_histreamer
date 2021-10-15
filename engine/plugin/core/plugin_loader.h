@@ -37,7 +37,7 @@ public:
     UnregisterFunc FetchUnregisterFunction();
 
 private:
-    PluginLoader(void* handler, std::string name);
+    PluginLoader(void* handler, std::string name); // NOLINT: void*
 
     static void* LoadPluginFile(const std::string &path);
 

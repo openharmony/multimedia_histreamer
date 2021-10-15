@@ -151,7 +151,7 @@ bool Meta::SetPointer(Plugin::MetaID id, const void* ptr, size_t size)
     return SetData<std::pair<std::shared_ptr<uint8_t>, size_t>>(id, std::make_pair(savePtr, size));
 }
 
-bool Meta::GetPointer(Plugin::MetaID id, void** ptr, size_t& size) const
+bool Meta::GetPointer(Plugin::MetaID id, void** ptr, size_t& size) const // NOLINT: void*
 {
     std::pair<std::shared_ptr<uint8_t>, size_t> item;
     if (GetData<std::pair<std::shared_ptr<uint8_t>, size_t>>(id, item)) {

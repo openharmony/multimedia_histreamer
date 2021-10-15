@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_PLUGIN_COMMON_VIDEO_TAGS_H
 #define HISTREAMER_PLUGIN_COMMON_VIDEO_TAGS_H
 
-#include <cstdint>
+#include <cstdint> // NOLINT: using uint32_t
 
 namespace OHOS {
 namespace Media {

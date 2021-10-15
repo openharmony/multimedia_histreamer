@@ -29,7 +29,7 @@ public:
     ~FileSourceAllocator() override= default;
 
     void* Alloc(size_t size) override;
-    void Free(void* ptr) override;
+    void Free(void* ptr) override; // NOLINT: void*
 };
 
 class FileSourcePlugin : public SourcePlugin {

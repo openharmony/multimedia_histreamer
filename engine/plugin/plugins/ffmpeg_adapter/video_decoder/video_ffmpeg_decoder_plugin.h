@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifdef VIDEO_SUPPORT
-
 #ifndef HISTREAMER_VIDEO_FFMPEG_DECODER_PLUGIN_H
 #define HISTREAMER_VIDEO_FFMPEG_DECODER_PLUGIN_H
+
+#ifdef VIDEO_SUPPORT
 
 #include <functional>
 #include <map>
@@ -133,5 +133,5 @@ private:
 }
 }
 }
-#endif // HISTREAMER_VIDEO_FFMPEG_DECODER_PLUGIN_H
 #endif
+#endif // HISTREAMER_VIDEO_FFMPEG_DECODER_PLUGIN_H

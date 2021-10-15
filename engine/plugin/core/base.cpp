@@ -23,8 +23,8 @@
 
 using namespace OHOS::Media::Plugin;
 
-Base::Base(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<PluginBase> base)
-    : pkgVersion_(pkgVer), apiVersion_(apiVer), plugin_(std::move(base)) {}
+Base::Base(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<PluginBase> plugin)
+    : pkgVersion_(pkgVer), apiVersion_(apiVer), plugin_(std::move(plugin)) {}
 
 Status Base::Init()
 {

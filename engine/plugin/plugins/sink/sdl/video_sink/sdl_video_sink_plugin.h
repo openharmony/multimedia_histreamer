@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifdef VIDEO_SUPPORT
-
 #ifndef HISTREAMER_SDL_VIDEO_SINK_PLUGIN_H
 #define HISTREAMER_SDL_VIDEO_SINK_PLUGIN_H
+
+#ifdef VIDEO_SUPPORT
 
 #include <atomic>
 #include <memory>
@@ -104,6 +104,6 @@ private:
 }
 }
 
-#endif // MEDIA_PIPELINE_SDL_VIDEO_SINK_PLUGIN_H
-
 #endif
+
+#endif // MEDIA_PIPELINE_SDL_VIDEO_SINK_PLUGIN_H

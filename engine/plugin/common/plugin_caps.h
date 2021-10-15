@@ -17,7 +17,7 @@
 #define HISTREAMER_PLUGIN_COMMON_CAPS_H
 
 #include <utility>
-#include <vector>
+#include <vector> // NOLINT: used it
 #include "plugin_tags.h"
 
 namespace OHOS {

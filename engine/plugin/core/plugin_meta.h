@@ -91,7 +91,7 @@ public:
      * @param size size
      * @return
      */
-    bool SetPointer(Plugin::MetaID, const void* ptr, size_t size);
+    bool SetPointer(Plugin::MetaID, const void* ptr, size_t size); // NOLINT: void*
 
     bool GetString(Plugin::MetaID id, std::string& value) const;
     bool GetInt32(Plugin::MetaID id, int32_t& value) const;
@@ -107,7 +107,7 @@ public:
      * @param size size
      * @return
      */
-    bool GetPointer(Plugin::MetaID, void** ptr, size_t& size) const;
+    bool GetPointer(Plugin::MetaID, void** ptr, size_t& size) const; // NOLINT: void*
 
     template <typename T>
     bool GetData(Plugin::MetaID id, T& value) const

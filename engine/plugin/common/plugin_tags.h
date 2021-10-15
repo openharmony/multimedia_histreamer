@@ -18,7 +18,7 @@
 
 #include <map>
 #include <string>
-#include "any.h"
+#include "any.h" // NOLINT: using Any in this file
 
 namespace OHOS {
 namespace Media {
