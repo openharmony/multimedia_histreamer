@@ -30,7 +30,6 @@ extern const char* const PORT_NAME_DEFAULT;
 
 // audio mime
 extern const char* const MEDIA_MIME_AUDIO_MPEG;
-extern const char* const MEDIA_MIME_AUDIO_MP3;
 extern const char* const MEDIA_MIME_AUDIO_FLAC;
 extern const char* const MEDIA_MIME_AUDIO_RAW;
 extern const char* const MEDIA_MIME_AUDIO_APE;

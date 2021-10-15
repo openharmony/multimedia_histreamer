@@ -21,7 +21,6 @@ namespace Media {
 const char* const PORT_NAME_DEFAULT = "default";
 
 const char* const MEDIA_MIME_AUDIO_MPEG = "audio/mpeg";
-const char* const MEDIA_MIME_AUDIO_MP3 = "audio/mp3";
 const char* const MEDIA_MIME_AUDIO_FLAC = "audio/flac";
 const char* const MEDIA_MIME_AUDIO_RAW = "audio/raw";
 const char* const MEDIA_MIME_AUDIO_APE = "audio/ape";
