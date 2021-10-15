@@ -14,10 +14,13 @@
  */
 
 #include "ffmpeg_utils.h"
+
 #include <algorithm>
-#include "plugin/common/plugin_audio_tags.h"
+
 #include "foundation/log.h"
 #include "libavutil/channel_layout.h"
+#include "plugin/common/plugin_audio_tags.h"
+#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
@@ -279,7 +282,7 @@ AudioChannelLayout ConvertChannelLayoutFromFFmpeg(int channels, uint64_t ffChann
         if (it != g_fromFFMPEGChannelLayout.end()) {
             channelLayout |= static_cast<uint64_t>(it->second);
         } else {
-            MEDIA_LOG_W("unsupported audio channel layout: %lu", mask);
+            MEDIA_LOG_W("unsupported audio channel layout: %" PRIu64, mask);
         }
     }
     auto ret = static_cast<AudioChannelLayout>(channelLayout);
@@ -298,8 +301,8 @@ uint64_t ConvertChannelLayoutToFFmpeg(AudioChannelLayout channelLayout)
 {
     auto it = g_toFFMPEGChannelLayout.find(channelLayout);
     if (it == g_toFFMPEGChannelLayout.end()) {
-        MEDIA_LOG_E("ConvertChannelLayoutToFFmpeg, unexpected audio channel layout: %lu",
-                    static_cast<AudioChannelLayout>(channelLayout));
+        MEDIA_LOG_E("ConvertChannelLayoutToFFmpeg, unexpected audio channel layout: %" PRIu64,
+                    OHOS::Media::to_underlying(channelLayout));
         return 0;
     }
     return it->second;

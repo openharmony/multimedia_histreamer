@@ -145,7 +145,7 @@ ErrorCode PipelineCore::Stop()
     filtersToRemove_.reserve(filters_.size());
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
         if (*it == nullptr) {
-            MEDIA_LOG_E("PipelineCore error: %ld", filters_.size());
+            MEDIA_LOG_E("PipelineCore error: %zu", filters_.size());
             continue;
         }
         auto filterName = (*it)->GetName();
@@ -155,7 +155,7 @@ ErrorCode PipelineCore::Stop()
     for (const auto& filter : filtersToRemove_) {
         RemoveFilter(filter);
     }
-    MEDIA_LOG_I("Stop finished, filter number: %lu", filters_.size());
+    MEDIA_LOG_I("Stop finished, filter number: %zu", filters_.size());
     return SUCCESS;
 }
 
@@ -263,7 +263,7 @@ void PipelineCore::OnEvent(Event event)
     }
 
     readyEventCnt_++;
-    MEDIA_LOG_I("OnEvent readyCnt: %lu / %lu", readyEventCnt_, filters_.size());
+    MEDIA_LOG_I("OnEvent readyCnt: %zu / %zu", readyEventCnt_, filters_.size());
     if (readyEventCnt_ == filters_.size()) {
         CALL_PTR_FUNC(eventReceiver_, OnEvent, event);
         readyEventCnt_ = 0;
