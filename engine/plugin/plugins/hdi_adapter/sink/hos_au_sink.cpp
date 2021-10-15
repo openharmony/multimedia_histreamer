@@ -339,7 +339,7 @@ Status HdiSink::Prepare()
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
         auto ret = audioAdapter_->CreateRender(audioAdapter_, &deviceDescriptor_, &sampleAttributes_, &audioRender_);
         if (ret != 0) {
-            MEDIA_LOG_E("cannot create render with error code %lx", ret);
+            MEDIA_LOG_E("cannot create render with error code %" PRIu64 "x", static_cast<uint64_t>(ret));
             audioRender_ = nullptr;
             return Status::ERROR_UNKNOWN;
         }
@@ -656,14 +656,14 @@ void HdiSink::DoRender()
         if (ret == HI_ERR_VI_BUF_FULL) {
             MEDIA_LOG_I("renderFrame buffer full");
             uint32_t latency = sampleAttributes_.period * SEC_TO_MILLS / sampleAttributes_.sampleRate;
-            MEDIA_LOG_D("latency origin %u ms", latency);
+            MEDIA_LOG_D("latency origin %" PRIu32 "ms", latency);
             OHOS::Media::OSAL::SleepFor(latency / HALF);
         } else {
-            MEDIA_LOG_E("renderFrame error with code %lx", ret);
+            MEDIA_LOG_E("renderFrame error with code %" PRIu64 "x", static_cast<uint64_t>(ret));
         }
         return;
     } else {
-        MEDIA_LOG_D("render frame %d", renderSize);
+        MEDIA_LOG_D("render frame %" PRIu64, renderSize);
     }
 
     if (renderSize != 0) {

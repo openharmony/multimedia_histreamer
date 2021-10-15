@@ -110,7 +110,7 @@ bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size)
 // 在调用当前接口前需要先调用IsDataAvailable()
 bool DataPacker::PeekRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr)
 {
-    MEDIA_LOG_D("DataPacker PeekRange(offset, size) = (%" PRIu64 ", %ul)...", offset, size);
+    MEDIA_LOG_D("DataPacker PeekRange(offset, size) = (%" PRIu64 ", %" PRIu32 ")...", offset, size);
     OSAL::ScopedLock lock(mutex_);
     uint8_t* dstPtr = nullptr;
     if (bufferPtr && AudioBufferCapacity(bufferPtr) < size) {
@@ -193,7 +193,7 @@ bool DataPacker::RepackBuffers(uint64_t offset, uint32_t size, AVBufferPtr& buff
 // 在调用当前接口前需要先调用IsDataAvailable()
 AVBufferPtr DataPacker::GetRange(uint64_t offset, uint32_t size)
 {
-    MEDIA_LOG_D("DataPacker GetRange(offset, size) = (%" PRIu64 ", %ul)...", offset, size);
+    MEDIA_LOG_D("DataPacker GetRange(offset, size) = (%" PRIu64 ", %" PRIu32 ")...", offset, size);
     OSAL::ScopedLock lock(mutex_);
     AVBufferPtr bufferPtr = nullptr;
     if (AudioBufferCapacity(que_[0]) < size) {

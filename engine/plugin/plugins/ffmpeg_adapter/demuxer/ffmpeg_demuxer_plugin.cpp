@@ -312,7 +312,7 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t timeStampUs, SeekMod
     int64_t ffTime = ConvertTimeToFFmpeg(timeStampUs, avStream->time_base);
     if (avStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
         int keyFrameIdx = av_index_search_timestamp(avStream, ffTime, ConvertSeekModeToFFmpeg(mode));
-        MEDIA_LOG_I("SeekTo %ld, ffTime: %ld, key frame index: %d", timeStampUs, ffTime, keyFrameIdx);
+        MEDIA_LOG_I("SeekTo %" PRId64 ", ffTime: %" PRId64 ", key frame index: %d", timeStampUs, ffTime, keyFrameIdx);
         if (keyFrameIdx >= 0) {
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(58, 78, 0)
             ffTime = avformat_index_get_entry(avStream, keyFrameIdx)->timestamp;
@@ -324,7 +324,7 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t timeStampUs, SeekMod
         }
     }
     auto newTime = ConvertTimeFromFFmpeg(ffTime, avStream->time_base);
-    MEDIA_LOG_W("SeekTo %lu / %ld, ffTime: %ld", newTime, timeStampUs, ffTime);
+    MEDIA_LOG_W("SeekTo %" PRIu64 " / %" PRId64 ", ffTime: %" PRId64, newTime, timeStampUs, ffTime);
     auto rtv = av_seek_frame(formatContext_.get(), trackId, ffTime, ConvertSeekModeToFFmpeg(mode));
     if (rtv < 0) {
         MEDIA_LOG_E("seek failed, return value: %d", rtv);
@@ -504,18 +504,18 @@ int64_t FFmpegDemuxerPlugin::AVSeek(void* opaque, int64_t offset, int whence)
         case SEEK_SET:
             newPos = static_cast<uint64_t>(offset);
             ioContext->offset = newPos;
-            MEDIA_LOG_I("AVSeek whence: %d, pos = %ld, newPos = %ld", whence, offset, newPos);
+            MEDIA_LOG_I("AVSeek whence: %d, pos = %" PRId64 ", newPos = %" PRIu64, whence, offset, newPos);
             break;
         case SEEK_CUR:
             newPos = ioContext->offset + offset;
-            MEDIA_LOG_I("AVSeek whence: %d, pos = %ld, newPos = %ld", whence, offset, newPos);
+            MEDIA_LOG_I("AVSeek whence: %d, pos = %" PRId64 ", newPos = %" PRIu64, whence, offset, newPos);
             break;
         case SEEK_END:
         case AVSEEK_SIZE: {
             size_t mediaDataSize = 0;
             if (ioContext->dataSource->GetSize(mediaDataSize) == Status::OK) {
                 newPos = mediaDataSize + offset;
-                MEDIA_LOG_I("AVSeek seek end whence: %d, pos = %ld", whence, offset);
+                MEDIA_LOG_I("AVSeek seek end whence: %d, pos = %" PRId64, whence, offset);
             }
             break;
         }
@@ -526,7 +526,7 @@ int64_t FFmpegDemuxerPlugin::AVSeek(void* opaque, int64_t offset, int whence)
     if (whence != AVSEEK_SIZE) {
         ioContext->offset = newPos;
     }
-    MEDIA_LOG_I("current offset: %ld, new pos: %ld", ioContext->offset, newPos);
+    MEDIA_LOG_I("current offset: %" PRId64 ", new pos: %" PRIu64, ioContext->offset, newPos);
     return newPos;
 }
 

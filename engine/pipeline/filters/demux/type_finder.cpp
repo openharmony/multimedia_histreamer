@@ -134,7 +134,7 @@ void TypeFinder::FindMediaTypeAsync(std::function<void(std::string)> typeFound)
 Plugin::Status TypeFinder::ReadAt(int64_t offset, std::shared_ptr<Plugin::Buffer>& buffer, size_t expectedLen)
 {
     if (!buffer || expectedLen == 0 || !IsOffsetValid(offset)) {
-        MEDIA_LOG_E("ReadAt failed, buffer empty: %d, expectedLen: %zu, offset: %ld", !buffer, expectedLen, offset);
+        MEDIA_LOG_E("ReadAt failed, buffer empty: %d, expectedLen: %zu, offset: %" PRId64, !buffer, expectedLen, offset);
         return Plugin::Status::ERROR_INVALID_PARAMETER;
     }
     const int maxTryTimes = 3;

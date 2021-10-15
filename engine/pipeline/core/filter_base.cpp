@@ -99,7 +99,7 @@ std::vector<Filter*> FilterBase::GetNextFilters()
     for (auto&& outPort : outPorts_) {
         auto peerPort = outPort->GetPeerPort();
         if (!peerPort) {
-            MEDIA_LOG_E("Filter %s outport %s has no peer port (%lu).", name_.c_str(), outPort->GetName().c_str(),
+            MEDIA_LOG_E("Filter %s outport %s has no peer port (%zu).", name_.c_str(), outPort->GetName().c_str(),
                         outPorts_.size());
             continue;
         }

@@ -150,6 +150,9 @@ private:
     size_t capacity;
 
     /// The alignment of the memory.
+#if (defined(__GNUC__) || defined(__clang__)) && (!defined(WIN32))
+__attribute__((unused))
+#endif
     size_t alignment;
 
     /// Offset of the buffer address to make sure access acording to alignment.

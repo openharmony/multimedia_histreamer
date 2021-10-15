@@ -360,7 +360,7 @@ ErrorCode HiPlayer::HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin
     ErrorCode rtv = PORT_UNEXPECTED;
     auto param = Plugin::AnyCast<PortInfo>(parameter);
     if (filter == demuxer.get() && param.type == PortType::OUT) {
-        MEDIA_LOG_I("new port found on demuxer %lu", param.ports.size());
+        MEDIA_LOG_I("new port found on demuxer %zu", param.ports.size());
         for (const auto& portDesc : param.ports) {
             if (!StringStartsWith(portDesc.name, "audio")) {
                 continue;
