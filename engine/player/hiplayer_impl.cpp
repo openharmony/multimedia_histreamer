@@ -18,9 +18,9 @@
 #include "hiplayer_impl.h"
 #include <utility>
 #include "foundation/log.h"
-#include "utils/utils.h"
-#include "plugin/core/plugin_meta.h"
 #include "pipeline/factory/filter_factory.h"
+#include "plugin/core/plugin_meta.h"
+#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
@@ -169,15 +169,9 @@ ErrorCode HiPlayer::HiPlayerImpl::SetSingleLoop(bool loop)
     return SUCCESS;
 }
 
-ErrorCode HiPlayer::HiPlayerImpl::Seek(size_t time, size_t& position)
+ErrorCode HiPlayer::HiPlayerImpl::Seek(int64_t time, int32_t mode)
 {
-    auto rtv = fsm_.SendEvent(Intent::SEEK, static_cast<int64_t>(time));
-    if (rtv == SUCCESS) {
-        int64_t pos = 0;
-        rtv = GetCurrentTime(pos);
-        position = static_cast<size_t>(pos);
-    }
-    return rtv;
+    return fsm_.SendEventAsync(Intent::SEEK, time);
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::DoSetSource(const std::shared_ptr<MediaSource>& source) const
@@ -214,7 +208,12 @@ ErrorCode HiPlayer::HiPlayerImpl::DoSeek(int64_t msec)
 {
     pipeline->FlushStart();
     pipeline->FlushEnd();
-    return demuxer->SeekTo(msec);
+    auto rtv = demuxer->SeekTo(msec);
+    auto ptr = callback_.lock();
+    if (ptr != nullptr) {
+        ptr->OnRewindToComplete();
+    }
+    return rtv;
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::DoOnReady()

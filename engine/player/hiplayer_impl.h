@@ -64,7 +64,7 @@ public:
     // interface from MediaSource
     ErrorCode SetSource(std::shared_ptr<MediaSource> source);
     ErrorCode SetBufferSize(size_t size);
-    ErrorCode Seek(size_t time, size_t& position);
+    ErrorCode Seek(int64_t mSeconds, int32_t mode);
     ErrorCode SetSingleLoop(bool loop);
     bool IsSingleLooping();
 
