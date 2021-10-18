@@ -59,7 +59,8 @@ Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
         definition.name = "audecoder_" + std::string(codec->name);
         definition.codecType = CodecType::AUDIO_DECODER;
         definition.rank = 100; // 100
-        definition.creator = AuFfmpegDecoderCreator, UpdatePluginDefinition(codec, definition);
+        definition.creator = AuFfmpegDecoderCreator;
+        UpdatePluginDefinition(codec, definition);
         // do not delete the codec in the deleter
         codecMap[definition.name] = std::shared_ptr<AVCodec>(const_cast<AVCodec*>(codec), [](void* ptr) {});
         if (reg->AddPlugin(definition) != Status::OK) {
