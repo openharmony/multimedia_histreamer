@@ -34,10 +34,6 @@ lite_library("histreamer_utils") {
   sources = histreamer_utils_src
   public_configs = [ ":histreamer_utils_config" ]
   public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
-  cflags = [
-    "-O2",
-    "-fPIC",
-    "-Wall",
-  ]
+  cflags = [ "-O2" ]
   cflags_cc = cflags
 }
