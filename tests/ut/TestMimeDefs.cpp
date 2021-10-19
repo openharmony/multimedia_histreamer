@@ -26,7 +26,7 @@ namespace Media {
 namespace Test {
 TEST(TestDefs, check_mime_defs)
 {
-    ASSERT_STREQ(MEDIA_MIME_AUDIO_MP3, "audio/mp3");
+    ASSERT_STREQ(MEDIA_MIME_AUDIO_MPEG, "audio/mpeg");
     ASSERT_STREQ(MEDIA_MIME_AUDIO_FLAC, "audio/flac");
     ASSERT_STREQ(MEDIA_MIME_AUDIO_RAW, "audio/raw");
     ASSERT_STREQ(MEDIA_MIME_AUDIO_APE, "audio/ape");
