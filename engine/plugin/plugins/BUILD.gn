@@ -16,17 +16,36 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   import("//build/lite/config/subsystem/multimedia/config.gni")
 
-  config("gen_include") {
-    include_dirs = [ get_path_info(get_path_info("${target_gen_dir}/include/all_plugin_static.h", "dir"), "abspath") ]
-  }
+  print("histreamer plugin config:enable_histreamer_plugin_ffmpeg_adapter =",
+        enable_histreamer_plugin_ffmpeg_adapter)
+  print("histreamer plugin config:enable_histreamer_plugin_hdi_adapter =",
+        enable_histreamer_plugin_hdi_adapter)
+  print("histreamer plugin config:enable_histreamer_plugin_file_source =",
+        enable_histreamer_plugin_file_source)
+  print("histreamer plugin config:enable_histreamer_plugin_stream_source =",
+        enable_histreamer_plugin_stream_source)
 
   group("histreamer_plugin_store") {
-    deps = [
-      "ffmpeg_adapter:plugin_ffmpeg_adapter",
-      "hdi_adapter:plugin_hdi_adapter",
-      "source/file_source:plugin_file_source",
-      "source/stream_source:plugin_stream_source",
-    ]
+    deps = []
+    if (enable_histreamer_plugin_ffmpeg_adapter) {
+      deps += [ "ffmpeg_adapter:plugin_ffmpeg_adapter" ]
+    }
+
+    if (enable_histreamer_plugin_file_source) {
+      deps += [ "source/file_source:plugin_file_source" ]
+    }
+
+    if (enable_histreamer_plugin_hdi_adapter) {
+      deps += [ "hdi_adapter:plugin_hdi_adapter" ]
+    }
+
+    if (enable_histreamer_plugin_stream_source) {
+      deps += [ "source/stream_source:plugin_stream_source" ]
+    }
+  }
+
+  config("gen_plugin_static_header_config") {
+    include_dirs = [ "${target_gen_dir}/include/" ]
   }
 
   action("gen_plugin_static_header") {
@@ -47,26 +66,20 @@ if (defined(ohos_lite)) {
       }
 
       if (enable_histreamer_plugin_file_source) {
-        args += [
-          "FileSource",
-        ]
+        args += [ "FileSource" ]
       }
 
       if (enable_histreamer_plugin_hdi_adapter) {
-        args += [
-          "HdiAuSink",
-        ]
+        args += [ "HdiAuSink" ]
       }
 
       if (enable_histreamer_plugin_stream_source) {
-        args += [
-          "StreamSource",
-        ]
+        args += [ "StreamSource" ]
       }
     }
 
     outputs = [ "${target_gen_dir}/include/all_plugin_static.h" ]
 
-    public_configs = [ ":gen_include" ]
+    public_configs = [ ":gen_plugin_static_header_config" ]
   }
 }

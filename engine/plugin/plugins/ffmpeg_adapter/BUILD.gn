@@ -19,8 +19,7 @@ if (defined(ohos_lite)) {
     deps = []
   }
   if (ohos_kernel_type == "liteos_m") {
-    if (enable_histreamer_plugin_ffmpeg_adapter) {
-    }
+    # make static build if needed. current is not supported
   } else {
     config("plugin_ffmpeg_adapter_config") {
       include_dirs = [ "//third_party/ffmpeg" ]
