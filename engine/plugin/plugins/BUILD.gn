@@ -14,6 +14,11 @@
 
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
+  import("//build/lite/config/subsystem/multimedia/config.gni")
+
+  config("gen_include") {
+    include_dirs = [ get_path_info(get_path_info("${target_gen_dir}/include/all_plugin_static.h", "dir"), "abspath") ]
+  }
 
   group("histreamer_plugin_store") {
     deps = [
@@ -24,7 +29,7 @@ if (defined(ohos_lite)) {
     ]
   }
 
-  action("gen_plungin_static_header") {
+  action("gen_plugin_static_header") {
     script = "//foundation/multimedia/histreamer/engine/plugin/plugins/plugin_config.py"
 
     args = [
@@ -34,15 +39,34 @@ if (defined(ohos_lite)) {
     ]
 
     if (ohos_kernel_type == "liteos_m") {
-      args += [
-        "FileSource",
-        "StreamSource",
-        "FFmpegDemuxer",
-        "FFmpegAudioDecoders",
-        "HdiAuSink",
-      ]
+      if (enable_histreamer_plugin_ffmpeg_adapter) {
+        args += [
+          "FFmpegDemuxer",
+          "FFmpegAudioDecoders",
+        ]
+      }
+
+      if (enable_histreamer_plugin_file_source) {
+        args += [
+          "FileSource",
+        ]
+      }
+
+      if (enable_histreamer_plugin_hdi_adapter) {
+        args += [
+          "HdiAuSink",
+        ]
+      }
+
+      if (enable_histreamer_plugin_stream_source) {
+        args += [
+          "StreamSource",
+        ]
+      }
     }
 
     outputs = [ "${target_gen_dir}/include/all_plugin_static.h" ]
+
+    public_configs = [ ":gen_include" ]
   }
 }
