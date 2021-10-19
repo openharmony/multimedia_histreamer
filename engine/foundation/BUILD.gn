@@ -46,8 +46,18 @@ lite_library("histreamer_foundation") {
   public_deps = [
     "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
     "//foundation/multimedia/utils/lite:media_common",
-    "//third_party/bounds_checking_function:libsec_shared",
   ]
+  if (ohos_kernel_type == "liteos_m") {
+    public_deps += [
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_static",
+      "//third_party/bounds_checking_function:libsec_static",
+    ]
+  } else {
+    public_deps += [
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "//third_party/bounds_checking_function:libsec_shared",
+    ]
+  }
   cflags = [
     "-O2",
     "-fPIC",
