@@ -58,10 +58,6 @@ lite_library("histreamer_foundation") {
       "//third_party/bounds_checking_function:libsec_shared",
     ]
   }
-  cflags = [
-    "-O2",
-    "-fPIC",
-    "-Wall",
-  ]
+  cflags = [ "-O2" ]
   cflags_cc = cflags
 }
