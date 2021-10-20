@@ -19,10 +19,10 @@
 
 #undef UNIT_TEST
 
-#include <atomic> // NOLINT
-#include <chrono> // NOLINT
+#include <atomic>   // NOLINT
+#include <chrono>   // NOLINT
 #include <iostream> // NOLINT
-#include <memory> // NOLINT
+#include <memory>   // NOLINT
 #include "osal/base/synchronizer.h"
 #include "osal/thread/task.h"
 
@@ -62,7 +62,8 @@ TEST_F(TestSynchronizer, test_waitfor_fail)
     task1->RegisterHandler([this, syncId] { synchronizer.Notify(syncId, 1234); });
     int timeoutMs = 100;
     auto start = std::chrono::high_resolution_clock::now();
-    auto rtv = synchronizer.WaitFor(syncId, timeoutMs);
+    auto rtv = synchronizer.WaitFor(
+        syncId, [] {}, timeoutMs);
     auto end = std::chrono::high_resolution_clock::now();
     auto diff = static_cast<std::chrono::duration<double>>(end - start).count() * 1000;
     EXPECT_EQ(false, rtv);
@@ -76,7 +77,8 @@ TEST_F(TestSynchronizer, test_waitfor_succ)
     task1->RegisterHandler([this, syncId] { synchronizer.Notify(syncId, 1234); });
     task1->Start();
     int timeoutMs = 1000;
-    auto rtv = synchronizer.WaitFor(syncId, timeoutMs);
+    auto rtv = synchronizer.WaitFor(
+        syncId, [] {}, timeoutMs);
     EXPECT_EQ(true, rtv);
 }
 
@@ -88,7 +90,8 @@ TEST_F(TestSynchronizer, test_waitfor_with_result_succ)
     task1->Start();
     int timeoutMs = 1000;
     int result = 0;
-    auto rtv = synchronizer.WaitFor(syncId, timeoutMs, result);
+    auto rtv = synchronizer.WaitFor(
+        syncId, [] {}, timeoutMs, result);
     EXPECT_EQ(true, rtv);
     EXPECT_EQ(expect, result);
 }
@@ -100,7 +103,8 @@ TEST_F(TestSynchronizer, test_wait_succ)
     int expect = 1234;
     task1->RegisterHandler([this, syncId, &result] {
         if (!isDataRcved.load()) {
-            synchronizer.Wait(syncId, result);
+            synchronizer.Wait(
+                syncId, [] {}, result);
             isDataRcved = true;
         }
     });

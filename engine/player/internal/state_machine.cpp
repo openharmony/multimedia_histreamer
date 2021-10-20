@@ -61,10 +61,10 @@ ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param) const
 
 ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param)
 {
-    SendEventAsync(intent, param);
     constexpr int timeoutMs = 5000;
     ErrorCode errorCode = ERROR_TIMEOUT;
-    if (!intentSync_.WaitFor(intent, timeoutMs, errorCode)) {
+    if (!intentSync_.WaitFor(
+            intent, [this, intent, param] { SendEventAsync(intent, param); }, timeoutMs, errorCode)) {
         MEDIA_LOG_E("SendEvent timeout, intent: %d", static_cast<int>(intent));
     }
     return errorCode;
@@ -99,7 +99,7 @@ Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
 
 void StateMachine::DoTask()
 {
-    constexpr int timeoutMs = 100;
+    constexpr int timeoutMs = 500;
     auto job = jobs_.Pop(timeoutMs);
     if (!job) {
         return;
