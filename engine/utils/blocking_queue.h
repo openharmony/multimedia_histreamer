@@ -118,7 +118,6 @@ public:
             return {};
         }
         if (que_.empty()) {
-            MEDIA_LOG_D("blocking queue %s is empty, waiting for push", name_.c_str());
             cvEmpty_.WaitFor(lock, timeoutMs, [this] { return !isActive || !que_.empty(); });
         }
         if (!isActive || que_.empty()) {
