@@ -16,7 +16,7 @@
 #ifndef MEDIA_PIPELINE_FILE_SOURCE_PLUGIN_H
 #define MEDIA_PIPELINE_FILE_SOURCE_PLUGIN_H
 
-#include <fstream>
+#include <cstdio>
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
 
@@ -26,7 +26,7 @@ namespace Plugin {
 class FileSourceAllocator : public Allocator {
 public:
     FileSourceAllocator() = default;
-    ~FileSourceAllocator() override= default;
+    ~FileSourceAllocator() override = default;
 
     void* Alloc(size_t size) override;
     void Free(void* ptr) override; // NOLINT: void*
@@ -44,31 +44,31 @@ public:
     Status Start() override;
     Status Stop() override;
     bool IsParameterSupported(Tag tag) override;
-    Status GetParameter(Tag tag, ValueType &value) override;
-    Status SetParameter(Tag tag, const ValueType &value) override;
+    Status GetParameter(Tag tag, ValueType& value) override;
+    Status SetParameter(Tag tag, const ValueType& value) override;
     std::shared_ptr<Allocator> GetAllocator() override;
-    Status SetCallback(const std::shared_ptr<Callback> &cb) override;
+    Status SetCallback(const std::shared_ptr<Callback>& cb) override;
     Status SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params = nullptr) override;
-    Status Read(std::shared_ptr<Buffer> &buffer, size_t expectedLen) override;
+    Status Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen) override;
     Status GetSize(size_t& size) override;
     bool IsSeekable() override;
     Status SeekTo(uint64_t offset) override;
 
 private:
     State state_;
-    std::string fileName_ {};
-    std::ifstream fin_;
+    std::string fileName_{};
+    std::FILE* fp_;
     size_t fileSize_;
     bool isSeekable_;
     uint64_t position_;
-    std::shared_ptr<FileSourceAllocator> mAllocator_ {nullptr};
+    std::shared_ptr<FileSourceAllocator> mAllocator_{nullptr};
 
     Status ParseFileName(std::string& uri);
     Status OpenFile();
     void CloseFile();
 };
-}
-}
-}
+} // namespace Plugin
+} // namespace Media
+} // namespace OHOS
 
 #endif // MEDIA_PIPELINE_FILE_SOURCE_PLUGIN_H
