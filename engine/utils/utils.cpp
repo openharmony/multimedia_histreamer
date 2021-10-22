@@ -13,15 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_FOUNDATION_OSAL_UTILS_UTIL_H
-#define HISTREAMER_FOUNDATION_OSAL_UTILS_UTIL_H
+#include "utils.h"
+#include <sys/stat.h>
 
 namespace OHOS {
 namespace Media {
-namespace OSAL {
-void SleepFor(unsigned ms);
-} // namespace OSAL
+
+size_t GetFileSize(const char* fileName)
+{
+    size_t fileSize = 0;
+    if (fileName != nullptr) {
+        struct stat fileStatus {};
+        if (stat(fileName, &fileStatus) == 0) {
+            fileSize = static_cast<size_t>(fileStatus.st_size);
+        }
+    }
+    return fileSize;
+}
+
 } // namespace Media
 } // namespace OHOS
-
-#endif // HISTREAMER_FOUNDATION_OSAL_UTILS_UTIL_H

@@ -17,9 +17,9 @@
 
 #include "demuxer_filter.h"
 #include <algorithm>
+#include "factory/filter_factory.h"
 #include "foundation/log.h"
 #include "utils/constants.h"
-#include "factory/filter_factory.h"
 
 namespace OHOS {
 namespace Media {
@@ -206,8 +206,8 @@ bool DemuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<c
 {
     (void)inPort;
     (void)outCaps;
-    return inMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_) &&
-           inMeta->GetUint64(Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
+    (void)inMeta->GetUint64(Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
+    return inMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_);
 }
 
 ErrorCode DemuxerFilter::SeekTo(int64_t msec)

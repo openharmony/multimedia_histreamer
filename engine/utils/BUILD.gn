@@ -14,7 +14,10 @@
 
 import("//build/lite/config/component/lite_component.gni")
 
-histreamer_utils_src = [ "constants.cpp" ]
+histreamer_utils_src = [
+  "constants.cpp",
+  "utils.cpp",
+]
 
 config("histreamer_utils_config") {
   include_dirs = [
