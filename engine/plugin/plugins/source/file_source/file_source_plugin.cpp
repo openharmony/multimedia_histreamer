@@ -59,7 +59,7 @@ void FileSourceAllocator::Free(void* ptr) // NOLINT: void*
 }
 
 FileSourcePlugin::FileSourcePlugin(std::string name)
-    : SourcePlugin(std::move(name)), state_(State::CREATED), fileSize_(0), isSeekable_(true), position_(0)
+    : SourcePlugin(std::move(name)), fp_(nullptr), state_(State::CREATED), fileSize_(0), isSeekable_(true), position_(0)
 {
     MEDIA_LOG_D("IN");
     state_ = State::CREATED;
@@ -69,6 +69,10 @@ FileSourcePlugin::~FileSourcePlugin()
 {
     MEDIA_LOG_D("IN");
     state_ = State::DESTROYED;
+    if (fp_) {
+        std::fclose(fp_);
+        fp_ = nullptr;
+    }
 }
 
 Status FileSourcePlugin::Init()
@@ -163,7 +167,7 @@ Status FileSourcePlugin::SetSource(std::string& uri, std::shared_ptr<std::map<st
 
 Status FileSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
 {
-    if (fin_.eof() == true) {
+    if (std::feof(fp_)) {
         MEDIA_LOG_W("It is the end of file!");
         return Status::END_OF_STREAM;
     }
@@ -179,11 +183,9 @@ Status FileSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLe
     expectedLen = std::min(static_cast<size_t>(fileSize_ - position_), expectedLen);
     expectedLen = std::min(bufData->GetCapacity(), expectedLen);
 
-    auto ptr = bufData->GetWritableData(expectedLen);
-    size_t offset = 0;
-    MEDIA_LOG_I("buffer addr %p offset %zu", ptr, offset);
-    fin_.read((char*)(ptr + offset), expectedLen);
-    bufData->GetWritableData(fin_.gcount());
+    MEDIA_LOG_I("buffer position %zu, expectedLen %zu", position_, expectedLen);
+    auto size = std::fread(bufData->GetWritableData(expectedLen), sizeof(char), expectedLen, fp_);
+    bufData->GetWritableData(size);
     position_ += bufData->GetSize();
     MEDIA_LOG_D("position_: %" PRIu64 ", readSize: %zu", position_, bufData->GetSize());
     return Status::OK;
@@ -192,7 +194,7 @@ Status FileSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLe
 Status FileSourcePlugin::GetSize(size_t& size)
 {
     MEDIA_LOG_D("IN");
-    if (!fin_.is_open()) {
+    if (!fp_) {
         MEDIA_LOG_E("Need call SetSource() to open file first");
         return Status::ERROR_WRONG_STATE;
     }
@@ -209,20 +211,19 @@ bool FileSourcePlugin::IsSeekable()
 
 Status FileSourcePlugin::SeekTo(uint64_t offset)
 {
-    if (!fin_.is_open() || (offset > fileSize_) || (position_ == offset)) {
+    if (!fp_ || (offset > fileSize_) || (position_ == offset)) {
         MEDIA_LOG_E("Invalid operation");
         return Status::ERROR_WRONG_STATE;
     }
-    fin_.clear();
-    fin_.seekg(offset, std::ios::beg);
-    if (!fin_.good() || (fin_.tellg() != offset)) {
-        fin_.clear();
-        fin_.seekg(position_, std::ios::beg);
+    std::clearerr(fp_);
+    if (std::fseek(fp_, static_cast<long int>(offset), SEEK_SET) != 0) {
+        std::clearerr(fp_);
+        (void)std::fseek(fp_, static_cast<long int>(position_), SEEK_SET);
         MEDIA_LOG_E("Seek to %" PRIu64, offset);
         return Status::ERROR_UNKNOWN;
     }
     position_ = offset;
-    if (fin_.eof()) {
+    if (std::feof(fp_)) {
         MEDIA_LOG_I("It is the end of file!");
     }
     MEDIA_LOG_D("seek to position_: %" PRIu64 " success", position_);
@@ -270,8 +271,8 @@ Status FileSourcePlugin::OpenFile()
 {
     MEDIA_LOG_D("IN");
     CloseFile();
-    fin_.open(fileName_.c_str(), std::ios::in | std::ios::binary);
-    if (!fin_.is_open()) {
+    fp_ = std::fopen(fileName_.c_str(), "rb");
+    if (fp_ == nullptr) {
         MEDIA_LOG_E("Fail to load file from %s", fileName_.c_str());
         return Status::ERROR_UNKNOWN;
     }
@@ -282,9 +283,10 @@ Status FileSourcePlugin::OpenFile()
 
 void FileSourcePlugin::CloseFile()
 {
-    if (fin_.is_open()) {
+    if (fp_) {
         MEDIA_LOG_I("close file");
-        fin_.close();
+        std::fclose(fp_);
+        fp_ = nullptr;
     }
 }
 } // namespace Plugin
