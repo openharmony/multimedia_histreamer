@@ -17,14 +17,15 @@
 
 #include "file_source_plugin.h"
 #include "foundation/log.h"
+#include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/core/plugin_manager.h"
-#include "plugin/common/plugin_buffer.h"
+#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-std::shared_ptr<SourcePlugin> FileSourcePluginCreater(const std::string &name)
+std::shared_ptr<SourcePlugin> FileSourcePluginCreater(const std::string& name)
 {
     return std::make_shared<FileSourcePlugin>(name);
 }
@@ -40,20 +41,20 @@ const Status FileSourceRegister(const std::shared_ptr<Register>& reg)
     return reg->AddPlugin(definition);
 }
 
-PLUGIN_DEFINITION(FileSource, LicenseType::APACHE_V2, FileSourceRegister, []{});
+PLUGIN_DEFINITION(FileSource, LicenseType::APACHE_V2, FileSourceRegister, [] {});
 
 void* FileSourceAllocator::Alloc(size_t size)
 {
     if (size == 0) {
         return nullptr;
     }
-    return reinterpret_cast<void *>(new (std::nothrow) uint8_t[size]); // NOLINT: cast
+    return reinterpret_cast<void*>(new (std::nothrow) uint8_t[size]); // NOLINT: cast
 }
 
 void FileSourceAllocator::Free(void* ptr) // NOLINT: void*
 {
     if (ptr != nullptr) {
-        delete[] (uint8_t *)ptr;
+        delete[](uint8_t*) ptr;
     }
 }
 
@@ -121,13 +122,13 @@ bool FileSourcePlugin::IsParameterSupported(Tag tag)
     return true;
 }
 
-Status FileSourcePlugin::GetParameter(Tag tag, ValueType &value)
+Status FileSourcePlugin::GetParameter(Tag tag, ValueType& value)
 {
     MEDIA_LOG_D("IN");
     return Status::OK;
 }
 
-Status FileSourcePlugin::SetParameter(Tag tag, const ValueType &value)
+Status FileSourcePlugin::SetParameter(Tag tag, const ValueType& value)
 {
     MEDIA_LOG_D("IN");
     return Status::OK;
@@ -139,7 +140,7 @@ std::shared_ptr<Allocator> FileSourcePlugin::GetAllocator()
     return mAllocator_;
 }
 
-Status FileSourcePlugin::SetCallback(const std::shared_ptr<Callback> &cb)
+Status FileSourcePlugin::SetCallback(const std::shared_ptr<Callback>& cb)
 {
     MEDIA_LOG_D("IN");
     return Status::OK;
@@ -160,7 +161,7 @@ Status FileSourcePlugin::SetSource(std::string& uri, std::shared_ptr<std::map<st
     return OpenFile();
 }
 
-Status FileSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLen)
+Status FileSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
 {
     if (fin_.eof() == true) {
         MEDIA_LOG_W("It is the end of file!");
@@ -181,7 +182,7 @@ Status FileSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
     auto ptr = bufData->GetWritableData(expectedLen);
     size_t offset = 0;
     MEDIA_LOG_I("buffer addr %p offset %zu", ptr, offset);
-    fin_.read((char *)(ptr + offset), expectedLen);
+    fin_.read((char*)(ptr + offset), expectedLen);
     bufData->GetWritableData(fin_.gcount());
     position_ += bufData->GetSize();
     MEDIA_LOG_D("position_: %" PRIu64 ", readSize: %zu", position_, bufData->GetSize());
@@ -249,7 +250,7 @@ Status FileSourcePlugin::ParseFileName(std::string& uri)
         if (uri.find("///", pos) != std::string::npos) {
             pos += 3; // 3: offset
         } else if (uri.find("//", pos) != std::string::npos) {
-            pos += 2; // 2: offset
+            pos += 2;                 // 2: offset
             pos = uri.find('/', pos); // skip host name
             if (pos == std::string::npos) {
                 MEDIA_LOG_E("Invalid file uri format: %s", uri.c_str());
@@ -274,18 +275,8 @@ Status FileSourcePlugin::OpenFile()
         MEDIA_LOG_E("Fail to load file from %s", fileName_.c_str());
         return Status::ERROR_UNKNOWN;
     }
-    fin_.seekg(0, fin_.end);
-    if (!fin_.good()) {
-        isSeekable_ = false;
-        MEDIA_LOG_E("Seek to end fail");
-        return Status::ERROR_UNKNOWN;
-    }
-    fileSize_ = fin_.tellg();
-    if (fileSize_ <= 0) {
-        isSeekable_ = false;
-    }
+    fileSize_ = GetFileSize(fileName_.c_str());
     MEDIA_LOG_D("fileName_: %s, fileSize_: %zu", fileName_.c_str(), fileSize_);
-    fin_.seekg(0, fin_.beg);
     return Status::OK;
 }
 
@@ -296,6 +287,6 @@ void FileSourcePlugin::CloseFile()
         fin_.close();
     }
 }
-}
-}
-}
+} // namespace Plugin
+} // namespace Media
+} // namespace OHOS
