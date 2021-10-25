@@ -89,7 +89,7 @@ TEST_F(TestStateMachine, test_init_state)
 TEST_F(TestStateMachine, test_set_invalid_source)
 {
     EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
-    EXPECT_EQ(ERROR_INVALID_SOURCE, stateMachine.SendEvent(Intent::SET_SOURCE));
+    EXPECT_EQ(ErrorCode::ERROR_INVALID_SOURCE, stateMachine.SendEvent(Intent::SET_SOURCE));
     EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
 }
 
