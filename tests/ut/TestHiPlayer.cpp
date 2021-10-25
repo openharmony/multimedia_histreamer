@@ -46,20 +46,20 @@ public:
         MOCK_METHOD(audioDecoder, Init).defaults();
         MOCK_METHOD(audioSink, Init).defaults();
 
-        MOCK_METHOD(audioSource, Prepare).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(demuxer, Prepare).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(audioDecoder, Prepare).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(audioSink, Prepare).defaults().will(returnValue(SUCCESS));
+        MOCK_METHOD(audioSource, Prepare).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(demuxer, Prepare).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(audioDecoder, Prepare).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(audioSink, Prepare).defaults().will(returnValue(ErrorCode::SUCCESS));
 
-        MOCK_METHOD(audioSource, Start).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(demuxer, Start).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(audioDecoder, Start).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(audioSink, Start).defaults().will(returnValue(SUCCESS));
+        MOCK_METHOD(audioSource, Start).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(demuxer, Start).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(audioDecoder, Start).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(audioSink, Start).defaults().will(returnValue(ErrorCode::SUCCESS));
 
-        MOCK_METHOD(audioSource, Stop).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(demuxer, Stop).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(audioDecoder, Stop).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(audioSink, Stop).defaults().will(returnValue(SUCCESS));
+        MOCK_METHOD(audioSource, Stop).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(demuxer, Stop).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(audioDecoder, Stop).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(audioSink, Stop).defaults().will(returnValue(ErrorCode::SUCCESS));
 
         MOCK_METHOD(audioSource, GetInPort).defaults().will(returnValue(emptyInPort));
         MOCK_METHOD(demuxer, GetInPort).defaults().will(returnValue(emptyInPort));
@@ -76,8 +76,8 @@ public:
         player->audioDecoder.reset<AudioDecoderFilter>(audioDecoder);
         player->audioSink.reset<AudioSinkFilter>(audioSink);
 
-        MOCK_METHOD(audioSource, SetSource).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(audioSource, SetBufferSize).defaults().will(returnValue(SUCCESS));
+        MOCK_METHOD(audioSource, SetSource).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(audioSource, SetBufferSize).defaults().will(returnValue(ErrorCode::SUCCESS));
 
         player->Init();
     }
@@ -100,8 +100,8 @@ TEST_F(UtTestHiPlayer, Can_SetSource)
     MOCK_METHOD(audioSource, SetSource)
         .expects(once())
         .with(source)
-        .will(returnValue(SUCCESS));
-    ASSERT_EQ(SUCCESS, player->SetSource(source));
+        .will(returnValue(ErrorCode::SUCCESS));
+    ASSERT_EQ(ErrorCode::SUCCESS, player->SetSource(source));
     player->fsm_.DoTask();
     ASSERT_EQ("PreparingState", player->fsm_.curState_->GetName());
 }
@@ -112,8 +112,8 @@ TEST_F(UtTestHiPlayer, Can_SetBufferSize)
     MOCK_METHOD(audioSource, SetBufferSize)
         .expects(once())
         .with(eq(size))
-        .will(returnValue(SUCCESS));
-    ASSERT_EQ(SUCCESS, player->SetBufferSize(size));
+        .will(returnValue(ErrorCode::SUCCESS));
+    ASSERT_EQ(ErrorCode::SUCCESS, player->SetBufferSize(size));
 }
 }
 
