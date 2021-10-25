@@ -106,7 +106,7 @@ ErrorCode HiPlayer::HiPlayerImpl::Prepare()
         return state == StateId::READY || state == StateId::INIT;
     });
     MEDIA_LOG_D("Prepare finished, current state: %s.", fsm_.GetCurrentState().c_str());
-    return fsm_.GetCurrentStateId() == StateId::READY ? SUCCESS : UNKNOWN_ERROR;
+    return fsm_.GetCurrentStateId() == StateId::READY ? ErrorCode::SUCCESS : ErrorCode::ERROR_UNKNOWN;
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::Play()
@@ -166,7 +166,7 @@ void HiPlayer::HiPlayerImpl::OnEvent(Event event)
 ErrorCode HiPlayer::HiPlayerImpl::SetSingleLoop(bool loop)
 {
     singleLoop = loop;
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::Seek(int64_t time, int32_t mode)
@@ -223,7 +223,7 @@ ErrorCode HiPlayer::HiPlayerImpl::DoOnReady()
     for (auto& streamMeta : demuxer->GetStreamMetaInfo()) {
         streamMeta_.push_back(streamMeta);
     }
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::DoOnComplete()
@@ -238,7 +238,7 @@ ErrorCode HiPlayer::HiPlayerImpl::DoOnComplete()
     if (ptr != nullptr) {
         ptr->OnPlaybackComplete();
     }
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::DoOnError(ErrorCode errorCode)
@@ -246,9 +246,9 @@ ErrorCode HiPlayer::HiPlayerImpl::DoOnError(ErrorCode errorCode)
     // fixme do we need to callback here to notify registered callback
     auto ptr = callback_.lock();
     if (ptr != nullptr) {
-        ptr->OnError(PlayerCallback::PLAYER_ERROR_UNKNOWN, errorCode);
+        ptr->OnError(PlayerCallback::PLAYER_ERROR_UNKNOWN, static_cast<int32_t>(errorCode));
     }
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 bool HiPlayer::HiPlayerImpl::IsSingleLooping()
@@ -267,11 +267,11 @@ ErrorCode HiPlayer::HiPlayerImpl::GetDuration(size_t& time) const
     auto sourceMeta = sourceMeta_.lock();
     if (sourceMeta == nullptr) {
         time = 0;
-        return NOT_FOUND;
+        return ErrorCode::ERROR_NOT_FOUND;
     }
     if (sourceMeta->GetUint64(Media::Plugin::MetaID::MEDIA_DURATION, duration)) {
         time = duration;
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
     // use max stream duration as whole source duration if source meta does not contains the duration meta
     uint64_t tmp = 0;
@@ -285,9 +285,9 @@ ErrorCode HiPlayer::HiPlayerImpl::GetDuration(size_t& time) const
     }
     if (found) {
         time = duration;
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
-    return NOT_FOUND;
+    return ErrorCode::ERROR_NOT_FOUND;
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::SetVolume(float volume)
@@ -296,7 +296,7 @@ ErrorCode HiPlayer::HiPlayerImpl::SetVolume(float volume)
         return audioSink->SetVolume(volume);
     }
     MEDIA_LOG_W("cannot set volume while audio sink filter is null");
-    return NULL_POINTER_ERROR;
+    return ErrorCode::ERROR_NULL_POINTER;
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::SetCallback(const std::shared_ptr<PlayerCallback>& callback)
@@ -333,30 +333,30 @@ ErrorCode HiPlayer::HiPlayerImpl::OnCallback(const FilterCallbackType& type, Fil
 ErrorCode HiPlayer::HiPlayerImpl::GetStreamCnt(size_t& cnt) const
 {
     cnt = streamMeta_.size();
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::GetSourceMeta(shared_ptr<const Plugin::Meta>& meta) const
 {
     meta = sourceMeta_.lock();
-    return meta ? SUCCESS : NOT_FOUND;
+    return meta ? ErrorCode::SUCCESS : ErrorCode::ERROR_NOT_FOUND;
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::GetStreamMeta(size_t index, shared_ptr<const Plugin::Meta>& meta) const
 {
     if (index > streamMeta_.size() || index < 0) {
-        return INVALID_PARAM_VALUE;
+        return ErrorCode::ERROR_INVALID_PARAM_VALUE;
     }
     meta = streamMeta_[index].lock();
     if (meta == nullptr) {
-        return NOT_FOUND;
+        return ErrorCode::ERROR_NOT_FOUND;
     }
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode HiPlayer::HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& parameter)
 {
-    ErrorCode rtv = PORT_UNEXPECTED;
+    ErrorCode rtv = ErrorCode::ERROR_PORT_UNEXPECTED;
     auto param = Plugin::AnyCast<PortInfo>(parameter);
     if (filter == demuxer.get() && param.type == PortType::OUT) {
         MEDIA_LOG_I("new port found on demuxer %zu", param.ports.size());
@@ -378,7 +378,7 @@ ErrorCode HiPlayer::HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin
                                              audioSink->GetInPort(PORT_NAME_DEFAULT)));
                 ActiveFilters({newAudioDecoder.get(), audioSink.get()});
             }
-            rtv = SUCCESS;
+            rtv = ErrorCode::SUCCESS;
             break;
         }
     }
@@ -390,7 +390,7 @@ ErrorCode HiPlayer::HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin
 {
     auto param = Plugin::AnyCast<PortInfo>(parameter);
     if (filter != demuxer.get() || param.type != PortType::OUT) {
-        return PORT_UNEXPECTED;
+        return ErrorCode::ERROR_PORT_UNEXPECTED;
     }
     std::vector<Filter*> newFilters;
     for (const auto& portDesc : param.ports) {
@@ -398,7 +398,7 @@ ErrorCode HiPlayer::HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin
             MEDIA_LOG_I("port name %s", portDesc.name.c_str());
             videoDecoder = FilterFactory::Instance().CreateFilterWithType<VideoDecoderFilter>(
                 "builtin.player.videodecoder", "videodecoder-" + portDesc.name);
-            if (pipeline->AddFilters({videoDecoder.get()}) != ALREADY_EXISTS) {
+            if (pipeline->AddFilters({videoDecoder.get()}) != ErrorCode::ERROR_ALREADY_EXISTS) {
                 // link demuxer and video decoder
                 auto fromPort = filter->GetOutPort(portDesc.name);
                 auto toPort = videoDecoder->GetInPort(PORT_NAME_DEFAULT);
@@ -406,7 +406,7 @@ ErrorCode HiPlayer::HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin
                 newFilters.emplace_back(videoDecoder.get());
 
                 // link video decoder and video sink
-                if (pipeline->AddFilters({videoSink.get()}) != ALREADY_EXISTS) {
+                if (pipeline->AddFilters({videoSink.get()}) != ErrorCode::ERROR_ALREADY_EXISTS) {
                     fromPort = videoDecoder->GetOutPort(PORT_NAME_DEFAULT);
                     toPort = videoSink->GetInPort(PORT_NAME_DEFAULT);
                     FAIL_LOG(pipeline->LinkPorts(fromPort, toPort)); // link ports
@@ -419,13 +419,13 @@ ErrorCode HiPlayer::HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin
     if (!newFilters.empty()) {
         ActiveFilters(newFilters);
     }
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 #endif
 
 ErrorCode HiPlayer::HiPlayerImpl::RemoveFilterChains(Filter* filter, const Plugin::Any& parameter)
 {
-    ErrorCode ret = SUCCESS;
+    ErrorCode ret = ErrorCode::SUCCESS;
     auto param = Plugin::AnyCast<PortInfo>(parameter);
     if (filter != demuxer.get() || param.type != PortType::OUT) {
         return ret;

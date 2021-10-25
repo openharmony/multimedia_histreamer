@@ -98,7 +98,7 @@ ErrorCode VideoDecoderFilter::Start()
     MEDIA_LOG_D("video decoder start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
         MEDIA_LOG_W("call decoder start() when state_ is not ready or working");
-        return ERROR_STATE;
+        return ErrorCode::ERROR_STATE;
     }
     return FilterBase::Start();
 }
@@ -108,7 +108,7 @@ ErrorCode VideoDecoderFilter::Prepare()
     MEDIA_LOG_D("video decoder prepare called");
     if (state_ != FilterState::INITIALIZED) {
         MEDIA_LOG_W("decoder filter is not in init state_");
-        return ERROR_STATE;
+        return ErrorCode::ERROR_STATE;
     }
     if (!outBufQue_) {
         outBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("vdecFilterOutBufQue", DEFAULT_OUT_BUFFER_POOL_SIZE);
@@ -192,7 +192,7 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
     } else {
         // need to check video sink support and calc buffer size
         MEDIA_LOG_E("Unsupported video pixel format: %d", vdecFormat_.format);
-        return ErrorCode::UNIMPLEMENT;
+        return ErrorCode::ERROR_UNIMPLEMENTED;
     }
     auto outAllocator = plugin_->GetAllocator(); // zero copy need change to use sink allocator
     if (outAllocator == nullptr) {
@@ -213,13 +213,13 @@ ErrorCode VideoDecoderFilter::SetVideoDecoderFormat(const std::shared_ptr<const 
 {
     vdecFormat_.format = static_cast<uint32_t>(Plugin::VideoPixelFormat::NV12);
     if (!meta->GetString(Plugin::MetaID::MIME, vdecFormat_.mime)) {
-        return ErrorCode::INVALID_PARAM_VALUE;
+        return ErrorCode::ERROR_INVALID_PARAM_VALUE;
     }
     if (!meta->GetUint32(Plugin::MetaID::VIDEO_WIDTH, vdecFormat_.width)) {
-        return ErrorCode::INVALID_PARAM_VALUE;
+        return ErrorCode::ERROR_INVALID_PARAM_VALUE;
     }
     if (!meta->GetUint32(Plugin::MetaID::VIDEO_HEIGHT, vdecFormat_.height)) {
-        return ErrorCode::INVALID_PARAM_VALUE;
+        return ErrorCode::ERROR_INVALID_PARAM_VALUE;
     }
     if (!meta->GetInt64(Plugin::MetaID::MEDIA_BITRATE, vdecFormat_.bitRate)) {
         MEDIA_LOG_D("Do not have codec bit rate");
@@ -235,19 +235,19 @@ ErrorCode VideoDecoderFilter::ConfigurePluginParams()
 {
     if (SetPluginParameterLocked(Tag::MIME, vdecFormat_.mime) != ErrorCode::SUCCESS) {
         MEDIA_LOG_W("Set mime to plugin fail");
-        return ErrorCode::UNKNOWN_ERROR;
+        return ErrorCode::ERROR_UNKNOWN;
     }
     if (SetPluginParameterLocked(Tag::VIDEO_WIDTH, vdecFormat_.width) != ErrorCode::SUCCESS) {
         MEDIA_LOG_W("Set width to plugin fail");
-        return ErrorCode::UNKNOWN_ERROR;
+        return ErrorCode::ERROR_UNKNOWN;
     }
     if (SetPluginParameterLocked(Tag::VIDEO_HEIGHT, vdecFormat_.height) != ErrorCode::SUCCESS) {
         MEDIA_LOG_W("Set height to plugin fail");
-        return ErrorCode::UNKNOWN_ERROR;
+        return ErrorCode::ERROR_UNKNOWN;
     }
     if (SetPluginParameterLocked(Tag::VIDEO_PIXEL_FORMAT, vdecFormat_.format) != ErrorCode::SUCCESS) {
         MEDIA_LOG_W("Set pixel format to plugin fail");
-        return ErrorCode::UNKNOWN_ERROR;
+        return ErrorCode::ERROR_UNKNOWN;
     }
     if (vdecFormat_.bitRate != -1) {
         if (SetPluginParameterLocked(Tag::MEDIA_BITRATE, vdecFormat_.bitRate) != ErrorCode::SUCCESS) {
@@ -358,7 +358,7 @@ void VideoDecoderFilter::FlushStart()
     }
     if (plugin_ != nullptr) {
         auto err = TranslatePluginStatus(plugin_->Flush());
-        if (err != SUCCESS) {
+        if (err != ErrorCode::SUCCESS) {
             MEDIA_LOG_E("decoder plugin flush error");
         }
     }

@@ -105,7 +105,7 @@ private:
 
     bool PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo);
 
-    int ReadFrame(AVBuffer& buffer, uint32_t& streamIndex);
+    ErrorCode ReadFrame(AVBuffer& buffer, uint32_t& streamIndex);
 
     std::shared_ptr<Plugin::Meta> GetStreamMeta(uint32_t streamIndex);
 

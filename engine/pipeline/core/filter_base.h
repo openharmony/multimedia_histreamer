@@ -64,13 +64,13 @@ public:
     {
         UNUSED_VARIABLE(key);
         UNUSED_VARIABLE(value);
-        return UNIMPLEMENT;
+        return ErrorCode::ERROR_UNIMPLEMENTED;
     }
     ErrorCode GetParameter(int32_t key, Plugin::Any& value) override
     {
         UNUSED_VARIABLE(key);
         UNUSED_VARIABLE(value);
-        return UNIMPLEMENT;
+        return ErrorCode::ERROR_UNIMPLEMENTED;
     }
 
     void UnlinkPrevFilters() override;

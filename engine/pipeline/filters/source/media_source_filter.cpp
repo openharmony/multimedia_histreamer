@@ -31,13 +31,13 @@ AutoRegisterFilter<MediaSourceFilter> g_registerFilterHelper("builtin.player.med
 
 ErrorCode TranslateError(Status err)
 {
-    ErrorCode ret = UNKNOWN_ERROR;
+    ErrorCode ret = ErrorCode::ERROR_UNKNOWN;
     switch (err) {
         case Status::OK:
-            ret = SUCCESS;
+            ret = ErrorCode::SUCCESS;
             break;
         case Status::END_OF_STREAM:
-            ret = END_OF_STREAM;
+            ret = ErrorCode::END_OF_STREAM;
         default:
             break;
     }
@@ -76,7 +76,7 @@ ErrorCode MediaSourceFilter::SetSource(std::shared_ptr<MediaSource> source)
     MEDIA_LOG_D("IN");
     if (source == nullptr) {
         MEDIA_LOG_E("Invalid source");
-        return ErrorCode::INVALID_SOURCE;
+        return ErrorCode::ERROR_INVALID_SOURCE;
     }
     ErrorCode err = FindPlugin(source);
     if (err != ErrorCode::SUCCESS) {
@@ -139,7 +139,7 @@ ErrorCode MediaSourceFilter::Prepare()
 {
     MEDIA_LOG_D("IN");
     if (plugin_ == nullptr) {
-        return ErrorCode::PLUGIN_NOT_FOUND;
+        return ErrorCode::ERROR_PLUGIN_NOT_FOUND;
     }
     auto err = TranslateError(plugin_->Prepare());
     if (err == ErrorCode::SUCCESS) {
@@ -155,14 +155,14 @@ ErrorCode MediaSourceFilter::Start()
     if (taskPtr_) {
         taskPtr_->Start();
     }
-    return plugin_ ? TranslateError(plugin_->Start()) : PLUGIN_NOT_FOUND;
+    return plugin_ ? TranslateError(plugin_->Start()) : ErrorCode::ERROR_PLUGIN_NOT_FOUND;
 }
 
 ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data)
 {
     MEDIA_LOG_D("IN, offset: %llu, size: %zu, outPort: %s", offset, size, outPort.c_str());
     if (!plugin_) {
-        return ErrorCode::PLUGIN_NOT_FOUND;
+        return ErrorCode::ERROR_PLUGIN_NOT_FOUND;
     }
     ErrorCode err;
     auto readSize = size;
@@ -209,7 +209,7 @@ ErrorCode MediaSourceFilter::Stop()
     }
     protocol_.clear();
     uri_.clear();
-    ErrorCode ret = PLUGIN_NOT_FOUND;
+    ErrorCode ret = ErrorCode::ERROR_PLUGIN_NOT_FOUND;
     if (plugin_) {
         ret = TranslateError(plugin_->Stop());
     }
@@ -259,7 +259,7 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
             CapabilitySet peerCaps;
             if (!GetOutPort(PORT_NAME_DEFAULT)->Negotiate(suffixMeta, peerCaps)) {
                 MEDIA_LOG_E("Negotiate fail!");
-                return ErrorCode::INVALID_PARAM_VALUE;
+                return ErrorCode::ERROR_INVALID_PARAM_VALUE;
             }
         }
     }
@@ -282,7 +282,7 @@ void MediaSourceFilter::ReadLoop()
     MEDIA_LOG_D("IN");
     AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
     ErrorCode ret = TranslateError(plugin_->Read(bufferPtr, 4096)); // 4096: default push data size
-    if (ret == END_OF_STREAM) {
+    if (ret == ErrorCode::END_OF_STREAM) {
         Stop();
         OnEvent({EVENT_COMPLETE, {}});
         return;
@@ -328,7 +328,7 @@ ErrorCode MediaSourceFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& inf
     plugin_ = manager.CreateSourcePlugin(name);
     if (plugin_ == nullptr) {
         MEDIA_LOG_E("PluginManager CreatePlugin %s fail", name.c_str());
-        return ErrorCode::UNKNOWN_ERROR;
+        return ErrorCode::ERROR_UNKNOWN;
     }
     pluginInfo_ = info;
     MEDIA_LOG_I("Create new plugin: \"%s\" success", pluginInfo_->name.c_str());
@@ -340,7 +340,7 @@ ErrorCode MediaSourceFilter::FindPlugin(const std::shared_ptr<MediaSource>& sour
     ParseProtocol(source);
     if (protocol_.empty()) {
         MEDIA_LOG_E("protocol_ is empty");
-        return ErrorCode::NULL_POINTER_ERROR;
+        return ErrorCode::ERROR_NULL_POINTER;
     }
     PluginManager& pluginManager = PluginManager::Instance();
     std::set<std::string> nameList = pluginManager.ListPlugins(PluginType::SOURCE);
@@ -358,7 +358,7 @@ ErrorCode MediaSourceFilter::FindPlugin(const std::shared_ptr<MediaSource>& sour
         }
     }
     MEDIA_LOG_I("Cannot find any plugin");
-    return ErrorCode::PLUGIN_NOT_FOUND;
+    return ErrorCode::ERROR_PLUGIN_NOT_FOUND;
 }
 } // namespace Pipeline
 } // namespace Media

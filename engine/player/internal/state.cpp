@@ -28,7 +28,7 @@ std::tuple<ErrorCode, Action> State::Enter(Intent intent)
 {
     (void)intent;
     MEDIA_LOG_D("Enter state: %s", name_.c_str());
-    return {SUCCESS, Action::ACTION_BUTT};
+    return {ErrorCode::SUCCESS, Action::ACTION_BUTT};
 }
 void State::Exit()
 {
@@ -49,53 +49,53 @@ StateId State::GetStateId()
 std::tuple<ErrorCode, Action> State::SetSource(const Plugin::Any& source)
 {
     (void)source;
-    return {INVALID_OPERATION, Action::ACTION_BUTT};
+    return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::Play()
 {
-    return {INVALID_OPERATION, Action::ACTION_BUTT};
+    return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::Stop()
 {
-    return {INVALID_OPERATION, Action::ACTION_BUTT};
+    return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::Pause()
 {
-    return {INVALID_OPERATION, Action::ACTION_BUTT};
+    return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::Resume()
 {
-    return {INVALID_OPERATION, Action::ACTION_BUTT};
+    return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::Seek(const Plugin::Any& param)
 {
     (void)param;
-    return {INVALID_OPERATION, Action::ACTION_BUTT};
+    return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::SetAttribute()
 {
-    return {INVALID_OPERATION, Action::ACTION_BUTT};
+    return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::OnReady()
 {
-    return {INVALID_OPERATION, Action::ACTION_BUTT};
+    return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::OnError(const Plugin::Any& param)
 {
-    ErrorCode errorCode = UNKNOWN_ERROR;
+    ErrorCode errorCode = ErrorCode::ERROR_UNKNOWN;
     if (param.Type() == typeid(ErrorCode)) {
         errorCode = Plugin::AnyCast<ErrorCode>(param);
     }
     executor_.DoOnError(errorCode);
-    return {SUCCESS, Action::TRANS_TO_INIT};
+    return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
 }
 std::tuple<ErrorCode, Action> State::OnComplete()
 {
-    return {SUCCESS, Action::ACTION_BUTT};
+    return {ErrorCode::SUCCESS, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin::Any& param)
 {
-    ErrorCode rtv = SUCCESS;
+    ErrorCode rtv = ErrorCode::SUCCESS;
     Action nextAction = Action::ACTION_BUTT;
     switch (intent) {
         case Intent::SET_SOURCE:

@@ -34,7 +34,7 @@ namespace Media {
 namespace Pipeline {
 #define RETURN_PLUGIN_NOT_FOUND_IF_NULL(plugin)                                                                        \
     if ((plugin) == nullptr) {                                                                                         \
-        return PLUGIN_NOT_FOUND;                                                                                       \
+        return ErrorCode::ERROR_PLUGIN_NOT_FOUND;                                                                                       \
     }
 
 /**
