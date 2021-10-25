@@ -43,7 +43,7 @@ public:
     {
         MEDIA_LOG_D("Seek in ready state.");
         if (param.Type() != typeid(int64_t)) {
-            return {INVALID_PARAM_VALUE, Action::ACTION_BUTT};
+            return {ErrorCode::ERROR_INVALID_PARAM_VALUE, Action::ACTION_BUTT};
         }
         auto timeMs = Plugin::AnyCast<int64_t>(param);
         auto ret = executor_.DoSeek(timeMs);
@@ -53,13 +53,13 @@ public:
     std::tuple<ErrorCode, Action> Play() override
     {
         MEDIA_LOG_D("Play in ready state.");
-        return {SUCCESS, Action::TRANS_TO_PLAYING};
+        return {ErrorCode::SUCCESS, Action::TRANS_TO_PLAYING};
     }
 
     std::tuple<ErrorCode, Action> Stop() override
     {
         MEDIA_LOG_D("Stop in ready state.");
-        return {SUCCESS, Action::TRANS_TO_INIT};
+        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
     }
 };
 } // namespace Media

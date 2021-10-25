@@ -38,25 +38,25 @@ ErrorCode DecoderFilterBase::SetPluginParameterLocked(Tag tag, const Plugin::Val
 ErrorCode DecoderFilterBase::SetParameter(int32_t key, const Plugin::Any& value)
 {
     if (state_.load() == FilterState::CREATED) {
-        return ERROR_STATE;
+        return ErrorCode::ERROR_STATE;
     }
     switch (key) {
         case KEY_CODEC_DRIVE_MODE: {
             if (state_ == FilterState::READY || state_ == FilterState::RUNNING || state_ == FilterState::PAUSED) {
                 MEDIA_LOG_W("decoder cannot set parameter KEY_CODEC_DRIVE_MODE in this state");
-                return ERROR_STATE;
+                return ErrorCode::ERROR_STATE;
             }
             if (value.Type() != typeid(ThreadDrivingMode)) {
-                return INVALID_PARAM_TYPE;
+                return ErrorCode::ERROR_INVALID_PARAM_TYPE;
             }
             drivingMode_ = Plugin::AnyCast<ThreadDrivingMode>(value);
-            return SUCCESS;
+            return ErrorCode::SUCCESS;
         }
         default: {
             Tag tag = Tag::INVALID;
             if (!TranslateIntoParameter(key, tag)) {
                 MEDIA_LOG_I("SetParameter key %d is out of boundary", key);
-                return INVALID_PARAM_VALUE;
+                return ErrorCode::ERROR_INVALID_PARAM_VALUE;
             }
             RETURN_PLUGIN_NOT_FOUND_IF_NULL(plugin_);
             return SetPluginParameterLocked(tag, value);
@@ -67,17 +67,17 @@ ErrorCode DecoderFilterBase::SetParameter(int32_t key, const Plugin::Any& value)
 ErrorCode DecoderFilterBase::GetParameter(int32_t key, Plugin::Any& value)
 {
     if (state_.load() == FilterState::CREATED) {
-        return ERROR_STATE;
+        return ErrorCode::ERROR_STATE;
     }
     switch (key) {
         case KEY_CODEC_DRIVE_MODE:
             value = drivingMode_;
-            return SUCCESS;
+            return ErrorCode::SUCCESS;
         default: {
             Tag tag = Tag::INVALID;
             if (!TranslateIntoParameter(key, tag)) {
                 MEDIA_LOG_I("GetParameter key %d is out of boundary", key);
-                return INVALID_PARAM_VALUE;
+                return ErrorCode::ERROR_INVALID_PARAM_VALUE;
             }
             RETURN_PLUGIN_NOT_FOUND_IF_NULL(plugin_);
             return TranslatePluginStatus(plugin_->GetParameter(tag, value));

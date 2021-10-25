@@ -50,7 +50,7 @@ protected:
     {
         Plugin::Any tmp;
         auto err = TranslatePluginStatus(plugin_->GetParameter(tag, tmp));
-        if (err == SUCCESS && tmp.Type() == typeid(T)) {
+        if (err == ErrorCode::SUCCESS && tmp.Type() == typeid(T)) {
             value = Plugin::AnyCast<T>(tmp);
         }
         return err;

@@ -38,7 +38,7 @@ public:
         (void)intent;
         Action nextAction = Action::ACTION_BUTT;
         auto rtv = executor_.PrepareFilters();
-        if (rtv != SUCCESS) {
+        if (rtv != ErrorCode::SUCCESS) {
             nextAction = Action::TRANS_TO_INIT;
         }
         return {rtv, nextAction};
@@ -47,14 +47,14 @@ public:
     std::tuple<ErrorCode, Action> Play() override
     {
         MEDIA_LOG_W("Play received in preparing state.");
-        return {SUCCESS, Action::ACTION_PENDING};
+        return {ErrorCode::SUCCESS, Action::ACTION_PENDING};
     }
 
     std::tuple<ErrorCode, Action> Seek(const Plugin::Any& param) override
     {
         MEDIA_LOG_D("Seek in preparing state.");
         if (param.Type() != typeid(int64_t)) {
-            return {INVALID_PARAM_VALUE, Action::ACTION_BUTT};
+            return {ErrorCode::ERROR_INVALID_PARAM_VALUE, Action::ACTION_BUTT};
         }
         auto timeMs = Plugin::AnyCast<int64_t>(param);
         auto ret = executor_.DoSeek(timeMs);
@@ -63,12 +63,12 @@ public:
 
     std::tuple<ErrorCode, Action> Stop() override
     {
-        return {SUCCESS, Action::TRANS_TO_INIT};
+        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
     }
 
     std::tuple<ErrorCode, Action> OnReady() override
     {
-        return {SUCCESS, Action::TRANS_TO_READY};
+        return {ErrorCode::SUCCESS, Action::TRANS_TO_READY};
     }
 };
 } // namespace Media

@@ -50,7 +50,7 @@ int32_t HiPlayer::SetSource(const Media::Source& source)
     Init();
     auto src = std::make_shared<Media::Source>(source);
     int ret = -1;
-    if (player_ && player_->SetSource(src) == SUCCESS) {
+    if (player_ && player_->SetSource(src) == ErrorCode::SUCCESS) {
         ret = 0;
     }
     return ret;
@@ -60,7 +60,7 @@ int32_t HiPlayer::Prepare()
 {
     MEDIA_LOG_I("Prepare entered.");
     int ret = -1;
-    if (player_ && player_->Prepare() == SUCCESS) {
+    if (player_ && player_->Prepare() == ErrorCode::SUCCESS) {
         curState_ = Media::PlayerStates::PLAYER_PREPARED;
         ret = 0;
     }
@@ -72,10 +72,10 @@ int32_t HiPlayer::Play()
     MEDIA_LOG_I("Play entered.");
     int ret = -1;
     if (curState_ == Media::PlayerStates::PLAYER_PAUSED) {
-        if (player_ && player_->Resume() == SUCCESS) {
+        if (player_ && player_->Resume() == ErrorCode::SUCCESS) {
             ret = 0;
         }
-    } else if (player_ && player_->Play() == SUCCESS) {
+    } else if (player_ && player_->Play() == ErrorCode::SUCCESS) {
         curState_ = Media::PlayerStates::PLAYER_STARTED;
         ret = 0;
     }
@@ -91,7 +91,7 @@ int32_t HiPlayer::Pause()
 {
     MEDIA_LOG_I("Pause entered.");
     int ret = -1;
-    if (player_ && player_->Pause() == SUCCESS) {
+    if (player_ && player_->Pause() == ErrorCode::SUCCESS) {
         curState_ = Media::PlayerStates::PLAYER_PAUSED;
         ret = 0;
     }
@@ -102,7 +102,7 @@ int32_t HiPlayer::Stop()
 {
     MEDIA_LOG_I("Stop entered.");
     int ret = -1;
-    if (player_ && player_->Stop() == SUCCESS) {
+    if (player_ && player_->Stop() == ErrorCode::SUCCESS) {
         curState_ = Media::PlayerStates::PLAYER_STOPPED;
         ret = 0;
     }
@@ -114,7 +114,7 @@ int32_t HiPlayer::Rewind(int64_t mSeconds, int32_t mode)
     MEDIA_LOG_I("Rewind entered.");
     int ret = -1;
     size_t pos = 0;
-    if (player_ && player_->Seek(mSeconds, pos) == SUCCESS) {
+    if (player_ && player_->Seek(mSeconds, pos) == ErrorCode::SUCCESS) {
         ret = 0;
     }
     return ret;
@@ -142,7 +142,7 @@ int32_t HiPlayer::SetVolume(float leftVolume, float rightVolume)
     volume /= MAX_MEDIA_VOLUME; // normalize to 0~1
     int ret = -1;               // -1
     MEDIA_LOG_W("set volume %.3f", volume);
-    if (player_ && player_->SetVolume(volume) == SUCCESS) {
+    if (player_ && player_->SetVolume(volume) == ErrorCode::SUCCESS) {
         ret = 0;
     }
     return ret;
@@ -172,7 +172,7 @@ int32_t HiPlayer::GetPlayerState(int32_t& state)
 int32_t HiPlayer::GetCurrentPosition(int64_t& currentPosition)
 {
     int ret = -1;
-    if (player_ && player_->GetCurrentTime(currentPosition) == SUCCESS) {
+    if (player_ && player_->GetCurrentTime(currentPosition) == ErrorCode::SUCCESS) {
         ret = 0;
     }
     return ret;
@@ -182,7 +182,7 @@ int32_t HiPlayer::GetDuration(int64_t& duration)
 {
     int ret = -1;
     size_t durationTime = 0;
-    if (player_ && player_->GetDuration(durationTime) == SUCCESS) {
+    if (player_ && player_->GetDuration(durationTime) == ErrorCode::SUCCESS) {
         duration = static_cast<int64_t>(durationTime);
         ret = 0;
     }
@@ -227,7 +227,7 @@ void HiPlayer::GetAudioStreamType(int32_t& type)
 int32_t HiPlayer::Reset()
 {
     int ret = -1;
-    if (player_ && player_->Stop() == SUCCESS) {
+    if (player_ && player_->Stop() == ErrorCode::SUCCESS) {
         ret = 0;
     }
     return ret;
@@ -242,7 +242,7 @@ int32_t HiPlayer::SetLoop(bool loop)
 {
     MEDIA_LOG_I("SetLoop entered.");
     int ret = -1;
-    if (player_ && player_->SetSingleLoop(loop) == SUCCESS) {
+    if (player_ && player_->SetSingleLoop(loop) == ErrorCode::SUCCESS) {
         isSingleLoop_ = loop;
         ret = 0;
     }
@@ -251,7 +251,7 @@ int32_t HiPlayer::SetLoop(bool loop)
 
 void HiPlayer::SetPlayerCallback(const std::shared_ptr<Media::PlayerCallback>& cb)
 {
-    if (player_ && player_->SetCallback(cb) == SUCCESS) {
+    if (player_ && player_->SetCallback(cb) == ErrorCode::SUCCESS) {
         MEDIA_LOG_I("SetPlayerCallback succ.");
     } else {
         MEDIA_LOG_E("SetPlayerCallback failed.");

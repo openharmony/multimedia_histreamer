@@ -26,7 +26,7 @@ namespace Pipeline {
 OHOS::Media::ErrorCode TranslatePluginStatus(Plugin::Status pluginError)
 {
     if (pluginError != OHOS::Media::Plugin::Status::OK) {
-        return OHOS::Media::ErrorCode::UNKNOWN_ERROR;
+        return OHOS::Media::ErrorCode::ERROR_UNKNOWN;
     }
     return OHOS::Media::ErrorCode::SUCCESS;
 }
@@ -54,24 +54,24 @@ ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta>& inMeta,
         }
     }
     if (info == nullptr) {
-        return PLUGIN_NOT_FOUND;
+        return ErrorCode::ERROR_PLUGIN_NOT_FOUND;
     }
 
     // try to reuse the plugin if their name are the same
     if (plugin != nullptr && pluginInfo != nullptr) {
         if (info->name == pluginInfo->name) {
-            if (TranslatePluginStatus(plugin->Reset()) == SUCCESS) {
-                return SUCCESS;
+            if (TranslatePluginStatus(plugin->Reset()) == ErrorCode::SUCCESS) {
+                return ErrorCode::SUCCESS;
             }
         }
         plugin->Deinit();
     }
     plugin = pluginCreator(info->name);
     if (plugin == nullptr) {
-        return PLUGIN_NOT_FOUND;
+        return ErrorCode::ERROR_PLUGIN_NOT_FOUND;
     }
     pluginInfo = info;
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta>&, Plugin::PluginType,

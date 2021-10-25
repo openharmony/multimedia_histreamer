@@ -65,20 +65,20 @@ ErrorCode FilterBase::Prepare()
 ErrorCode FilterBase::Start()
 {
     state_ = FilterState::RUNNING;
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode FilterBase::Pause()
 {
     state_ = FilterState::PAUSED;
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode FilterBase::Stop()
 {
     state_ = FilterState::INITIALIZED;
     mediaTypeCntMap_.clear();
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 void FilterBase::UnlinkPrevFilters()
@@ -115,7 +115,7 @@ ErrorCode FilterBase::PushData(const std::string& inPort, AVBufferPtr buffer)
 {
     UNUSED_VARIABLE(inPort);
     UNUSED_VARIABLE(buffer);
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode FilterBase::PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data)
@@ -124,7 +124,7 @@ ErrorCode FilterBase::PullData(const std::string& outPort, uint64_t offset, size
     UNUSED_VARIABLE(offset);
     UNUSED_VARIABLE(size);
     UNUSED_VARIABLE(data);
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 void FilterBase::OnEvent(Event event)
