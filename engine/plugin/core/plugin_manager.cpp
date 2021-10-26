@@ -51,6 +51,9 @@ std::shared_ptr<PluginInfo> PluginManager::GetPluginInfo(PluginType type, const 
 
 int32_t PluginManager::Sniffer(const std::string& name, std::shared_ptr<DataSourceHelper> source)
 {
+    if (source == nullptr) {
+        return 0;
+    }
     std::shared_ptr<PluginRegInfo> regInfo = pluginRegister->GetPluginRegInfo(PluginType::DEMUXER, name);
     if (!regInfo) {
         return 0;
