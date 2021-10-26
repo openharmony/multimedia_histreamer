@@ -71,10 +71,10 @@ public:
         MOCK_METHOD(audioDecoder, GetOutPort).defaults().will(returnValue(emptyOutPort));
         MOCK_METHOD(audioSink, GetOutPort).defaults().will(returnValue(emptyOutPort));
 
-        player->audioSource.reset<MediaSourceFilter>(audioSource);
-        player->demuxer.reset<DemuxerFilter>(demuxer);
-        player->audioDecoder.reset<AudioDecoderFilter>(audioDecoder);
-        player->audioSink.reset<AudioSinkFilter>(audioSink);
+        player->audioSource_.reset<MediaSourceFilter>(audioSource);
+        player->demuxer_.reset<DemuxerFilter>(demuxer);
+        player->audioDecoder_.reset<AudioDecoderFilter>(audioDecoder);
+        player->audioSink_.reset<AudioSinkFilter>(audioSink);
 
         MOCK_METHOD(audioSource, SetSource).defaults().will(returnValue(ErrorCode::SUCCESS));
         MOCK_METHOD(audioSource, SetBufferSize).defaults().will(returnValue(ErrorCode::SUCCESS));
