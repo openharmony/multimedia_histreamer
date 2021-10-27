@@ -61,7 +61,8 @@ lite_library("histreamer_foundation") {
   }
   cflags = [ "-O2" ]
   cflags_cc = cflags
-  if (config_ohos_multimedia_histreamer_stack_size > 0) {
+  if (defined(config_ohos_multimedia_histreamer_stack_size) &&
+      config_ohos_multimedia_histreamer_stack_size > 0) {
     defines =
         [ "THREAD_STACK_SIZE=$config_ohos_multimedia_histreamer_stack_size" ]
   }
