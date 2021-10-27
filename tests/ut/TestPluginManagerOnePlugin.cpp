@@ -29,7 +29,7 @@ namespace Media {
 namespace Test {
 using namespace OHOS::Media::Plugin;
 
-TEST(TestPluginManagerOnePlugin, ListPlugins_case1)
+TEST(TestPluginManagerOnePlugin, ListPlugins_case2)
 {
     UtSourceTest1::available = true;
     UtSourceTest2::available = false;
