@@ -249,11 +249,10 @@ Status HdiSink::SetParameter(Tag tag, const ValueType &value)
                 return Status::OK;
             } else {
                 MEDIA_LOG_E("audioSampleFormat mismatch");
-                ret = Status::ERROR_MISMATCHED_TYPE;
-                break;
+                return Status::ERROR_MISMATCHED_TYPE;
             }
         }
-        case Tag::AUDIO_SAMPLE_PRE_FRAME:
+        case Tag::AUDIO_SAMPLE_PER_FRAME:
             return AssignIfCastSuccess<uint32_t>(sampleAttributes_.period, value, "samples per frame");
         case Tag::AUDIO_CHANNEL_LAYOUT: {
             AudioChannelLayout layout;

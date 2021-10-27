@@ -105,7 +105,7 @@ enum struct Tag : uint32_t {
     AUDIO_CHANNEL_LAYOUT,                               // AudioChannelLayout
     AUDIO_SAMPLE_RATE,                                  // uint32_t
     AUDIO_SAMPLE_FORMAT,                                // AudioSampleFormat
-    AUDIO_SAMPLE_PRE_FRAME,                             // uint32_t
+    AUDIO_SAMPLE_PER_FRAME,                             // uint32_t
 
     /* -------------------- audio specific tag -------------------- */
     AUDIO_SPECIFIC_MPEG_START = MAKE_AUDIO_SPECIFIC_START(AudioFormat::MPEG),

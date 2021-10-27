@@ -38,7 +38,7 @@ int32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Met
 {
     using namespace OHOS::Media;
     int32_t samplesPerFrame;
-    if (!meta->GetInt32(Plugin::MetaID::AUDIO_SAMPLE_PRE_FRAME, samplesPerFrame)) {
+    if (!meta->GetInt32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame)) {
         return 0;
     }
     int32_t channels;
@@ -246,29 +246,21 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort, const std::shared_
 
 ErrorCode AudioDecoderFilter::ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta> &meta)
 {
-    uint32_t channels;
-    if (meta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels)) {
-        MEDIA_LOG_D("found audio channel meta");
-        SetPluginParameterLocked(Tag::AUDIO_CHANNELS, channels);
-    }
-    uint32_t sampleRate;
-    if (meta->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_RATE, sampleRate)) {
-        MEDIA_LOG_D("found audio sample rate meta");
-        SetPluginParameterLocked(Tag::AUDIO_SAMPLE_RATE, sampleRate);
-    }
-    int64_t bitRate;
-    if (meta->GetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate)) {
-        MEDIA_LOG_D("found audio bit rate meta");
-        SetPluginParameterLocked(Tag::MEDIA_BITRATE, bitRate);
-    }
-    auto audioFormat = Plugin::AudioSampleFormat::U8;
-    if (meta->GetData<Plugin::AudioSampleFormat>(Plugin::MetaID::AUDIO_SAMPLE_FORMAT, audioFormat)) {
-        SetPluginParameterLocked(Tag::AUDIO_SAMPLE_FORMAT, audioFormat);
-    }
-    std::vector<uint8_t> codecConfig;
-    if (meta->GetData<std::vector<uint8_t>>(Plugin::MetaID::MEDIA_CODEC_CONFIG, codecConfig)) {
-        SetPluginParameterLocked(Tag::MEDIA_CODEC_CONFIG, std::move(codecConfig));
-    }
+#define SET_TAG_AND_LOG(T, metaId, tagId) \
+do { \
+    ret = SetTagFromMetaLocked<T>(meta, metaId, tagId); \
+    if (ret != ErrorCode::SUCCESS) { \
+        MEDIA_LOG_W("set plugin audio " #tagId " error with code %d", ret); \
+    } \
+} while (0)
+
+    ErrorCode ret;
+    SET_TAG_AND_LOG(uint32_t, Plugin::MetaID::AUDIO_CHANNELS, Tag::AUDIO_CHANNELS);
+    SET_TAG_AND_LOG(uint32_t, Plugin::MetaID::AUDIO_SAMPLE_RATE, Tag::AUDIO_SAMPLE_RATE);
+    SET_TAG_AND_LOG(int64_t, Plugin::MetaID::MEDIA_BITRATE, Tag::MEDIA_BITRATE);
+    SET_TAG_AND_LOG(Plugin::AudioSampleFormat, Plugin::MetaID::AUDIO_SAMPLE_FORMAT, Tag::AUDIO_SAMPLE_FORMAT);
+    SET_TAG_AND_LOG(uint32_t, Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, Tag::AUDIO_SAMPLE_PER_FRAME);
+    SET_TAG_AND_LOG(std::vector<uint8_t>, Plugin::MetaID::MEDIA_CODEC_CONFIG, Tag::MEDIA_CODEC_CONFIG);
     return ErrorCode::SUCCESS;
 }
 

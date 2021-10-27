@@ -42,7 +42,7 @@ enum struct MetaID : uint32_t {
     AUDIO_CHANNELS = to_underlying(Tag::AUDIO_CHANNELS),
     AUDIO_SAMPLE_RATE = to_underlying(Tag::AUDIO_SAMPLE_RATE),
     AUDIO_SAMPLE_FORMAT = to_underlying(Tag::AUDIO_SAMPLE_FORMAT),
-    AUDIO_SAMPLE_PRE_FRAME = to_underlying(Tag::AUDIO_SAMPLE_PRE_FRAME),
+    AUDIO_SAMPLE_PER_FRAME = to_underlying(Tag::AUDIO_SAMPLE_PER_FRAME),
     AUDIO_CHANNEL_LAYOUT = to_underlying(Tag::AUDIO_CHANNEL_LAYOUT),
 
     MEDIA_TITLE = to_underlying(Tag::MEDIA_TITLE),
