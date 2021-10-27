@@ -167,14 +167,6 @@ HdiSink::HdiSink(std::string name) : Plugin::AudioSinkPlugin(std::move(name)), a
 Status HdiSink::Init()
 {
     MEDIA_LOG_D("Init entered.");
-    if (pluginState_ == State::DESTROYED) {
-        MEDIA_LOG_E("plugin has been already destroyed, cannot init any more");
-        return Status::ERROR_WRONG_STATE;
-    }
-    if (pluginState_ != State::CREATED) {
-        MEDIA_LOG_I("plugin has been already inited");
-        return Status::OK;
-    }
     audioManager_ = GetAudioManagerFuncs();
     if (audioManager_ == nullptr) {
         MEDIA_LOG_E("Init error due to audioManager nullptr");
@@ -206,7 +198,6 @@ Status HdiSink::Init()
         renderThread_ = std::make_shared<OHOS::Media::OSAL::Task>("auRenderThread");
         renderThread_->RegisterHandler([this] { DoRender(); });
     }
-    pluginState_ = State::INITIALIZED;
     return Status::OK;
 }
 
@@ -225,10 +216,7 @@ Media::Plugin::Status HdiSink::ReleaseRender()
 Status HdiSink::Deinit()
 {
     MEDIA_LOG_E("Deinit entered.");
-    if (pluginState_ == State::DESTROYED || pluginState_ == State::CREATED) {
-        MEDIA_LOG_I("no need to destroy");
-        return Status::OK;
-    }
+    shouldRenderFrame_ = false;
     if (renderThread_ != nullptr) {
         renderThread_->Stop();
     }
@@ -241,16 +229,11 @@ Status HdiSink::Deinit()
         }
         audioManager_ = nullptr;
     }
-    pluginState_ = State::DESTROYED;
     return Status::OK;
 }
 
 Status HdiSink::SetParameter(Tag tag, const ValueType &value)
 {
-    if (pluginState_ == State::DESTROYED || pluginState_ == State::CREATED) {
-        MEDIA_LOG_E("cannot set parameter in state %d", pluginState_.load());
-        return Status::ERROR_WRONG_STATE;
-    }
     switch (tag) {
         case Tag::AUDIO_CHANNELS:
             return AssignIfCastSuccess<uint32_t>(sampleAttributes_.channelCount, value, "channel");
@@ -300,14 +283,6 @@ Status HdiSink::GetParameter(Tag tag, ValueType &value)
 
 Status HdiSink::Prepare()
 {
-    if (pluginState_ != State::PREPARED && pluginState_ != State::INITIALIZED) {
-        MEDIA_LOG_E("cannot prepare in state %d", pluginState_.load());
-        return Status::ERROR_WRONG_STATE;
-    }
-    if (pluginState_ == State::PREPARED) {
-        return Status::OK;
-    }
-
     sampleAttributes_.frameSize = GetPcmBytes(sampleAttributes_.format) * sampleAttributes_.channelCount;
     sampleAttributes_.startThreshold = sampleAttributes_.period / sampleAttributes_.frameSize;
     sampleAttributes_.stopThreshold = INT32_MAX;
@@ -350,18 +325,12 @@ Status HdiSink::Prepare()
         MEDIA_LOG_E("cannot allocate enough buffer for ring buffer cache");
         return Status::ERROR_NO_MEMORY;
     }
-
-    pluginState_ = State::PREPARED;
     return Status::OK;
 }
 
 Status HdiSink::Reset()
 {
     MEDIA_LOG_D("Reset entered.");
-    if (pluginState_ != State::PREPARED && pluginState_ != State::RUNNING && pluginState_ != State::PAUSED) {
-        MEDIA_LOG_I("cannot reset in state %d", pluginState_.load());
-        return Status::ERROR_WRONG_STATE;
-    }
     ReleaseRender();
     (void)memset_s(&audioPort_, sizeof(audioPort_), 0, sizeof(audioPort_));
     (void)memset_s(&sampleAttributes_, sizeof(sampleAttributes_), 0, sizeof(sampleAttributes_));
@@ -374,14 +343,6 @@ Status HdiSink::Reset()
 Status HdiSink::Start()
 {
     MEDIA_LOG_D("Start entered.");
-    if (pluginState_ != State::PREPARED && pluginState_ != State::RUNNING && pluginState_ != State::PAUSED) {
-        MEDIA_LOG_E("cannot Start in state %d", pluginState_.load());
-        return Status::ERROR_WRONG_STATE;
-    }
-    if (pluginState_ == State::RUNNING) {
-        MEDIA_LOG_I("already in running state, ignore start");
-        return Status::OK;
-    }
     {
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
         if (audioRender_ == nullptr) {
@@ -395,21 +356,17 @@ Status HdiSink::Start()
         }
     }
     ringBuffer_->SetActive(true);
+    shouldRenderFrame_ = true;
     renderThread_->Start();
-    pluginState_ = State::RUNNING;
     return Status::OK;
 }
 
 Status HdiSink::Stop()
 {
     MEDIA_LOG_D("Stop Entered");
-    if (pluginState_ != State::RUNNING && pluginState_ != State::PAUSED) {
-        MEDIA_LOG_W("Stop is called when not running or paused, ignore it");
-        return Status::OK;
-    }
+    shouldRenderFrame_ = false;
     ringBuffer_->SetActive(false);
     renderThread_->Pause();
-    pluginState_ = State::PREPARED;
     {
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
         if (audioRender_ == nullptr) {
@@ -533,12 +490,8 @@ Status HdiSink::SetSpeed(float speed)
 Status HdiSink::Pause()
 {
     MEDIA_LOG_D("Pause Entered");
-    if (pluginState_ != State::RUNNING) {
-        MEDIA_LOG_I("pause in status %d, ignore pause", pluginState_.load());
-        return Status::OK;
-    }
+    shouldRenderFrame_ = false;
     renderThread_->Pause();
-
     {
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
         if (audioRender_ != nullptr && audioRender_->control.Pause(audioRender_) != 0) {
@@ -546,17 +499,12 @@ Status HdiSink::Pause()
             return Status::ERROR_UNKNOWN;
         }
     }
-    pluginState_ = State::PAUSED;
     return Status::OK;
 }
 
 Status HdiSink::Resume()
 {
     MEDIA_LOG_D("Resume Entered");
-    if (pluginState_ != State::PAUSED) {
-        MEDIA_LOG_I("resume in status %d, ignore pause", pluginState_.load());
-        return Status::OK;
-    }
     {
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
         if (audioRender_ != nullptr && audioRender_->control.Resume(audioRender_) != 0) {
@@ -564,8 +512,8 @@ Status HdiSink::Resume()
             return Status::ERROR_UNKNOWN;
         }
     }
+    shouldRenderFrame_ = true;
     renderThread_->Start();
-    pluginState_ = State::RUNNING;
     return Status::OK;
 }
 
@@ -600,10 +548,6 @@ Status HdiSink::GetFrameCount(uint32_t &count)
 Status HdiSink::Write(const std::shared_ptr<Buffer> &input)
 {
     MEDIA_LOG_D("Write begin.");
-    if (pluginState_ != State::RUNNING) {
-        MEDIA_LOG_E("cannot write buffer until enter running state");
-        return Status::ERROR_WRONG_STATE;
-    }
     if (input != nullptr && !input->IsEmpty()) {
         ringBuffer_->WriteBuffer(input);
         MEDIA_LOG_D("write to ring buffer");
@@ -635,10 +579,9 @@ Status HdiSink::Flush()
 void HdiSink::DoRender()
 {
     MEDIA_LOG_D("DoRender started");
-    if (pluginState_ != State::RUNNING) {
+    if (!shouldRenderFrame_.load()) {
         return;
     }
-
     size_t outSize = 0;
     auto outFramePtr = ringBuffer_->ReadBufferWithoutAdvance(CalculateBufferSize(sampleAttributes_), outSize);
     if (outFramePtr == nullptr || outSize == 0) {

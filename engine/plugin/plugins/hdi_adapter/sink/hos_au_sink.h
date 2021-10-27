@@ -93,9 +93,9 @@ private:
     void DoRender();
 
 private:
-    std::atomic<OHOS::Media::Plugin::State> pluginState_ {OHOS::Media::Plugin::State::CREATED};
-
     OHOS::Media::OSAL::Mutex renderMutex_ {};
+
+    std::atomic<bool> shouldRenderFrame_ {false};
 
     AudioManager* audioManager_ {nullptr};
     AudioAdapterDescriptor adapterDescriptor_ {};
