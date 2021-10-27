@@ -38,7 +38,7 @@ HiPlayerImpl::HiPlayerImpl() : fsm_(*this), pipelineStates_(PlayerStates::PLAYER
         FilterFactory::Instance().CreateFilterWithType<MediaSourceFilter>("builtin.player.mediasource", "mediaSource");
 
 #ifdef UNIT_TEST
-    demuxer = FilterFactory::Instance().CreateFilterWithType<DemuxerFilter>("builtin.player.demuxer", "demuxer");
+    demuxer_ = FilterFactory::Instance().CreateFilterWithType<DemuxerFilter>("builtin.player.demuxer", "demuxer");
     audioDecoder_ = FilterFactory::Instance().CreateFilterWithType<AudioDecoderFilter>("builtin.player.audiodecoder",
                                                                                       "audiodecoder");
     audioSink_ =

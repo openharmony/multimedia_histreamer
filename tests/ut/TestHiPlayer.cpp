@@ -34,8 +34,8 @@ public:
     MockObject<AudioDecoderFilter> audioDecoder {};
     MockObject<AudioSinkFilter> audioSink {};
 
-    std::shared_ptr<HiPlayer::HiPlayerImpl> player = HiPlayer::HiPlayerImpl::CreateHiPlayerImpl();
-    std::shared_ptr<MediaSource> source = std::make_shared<MediaSource>("./test.mp3");
+    std::shared_ptr<HiPlayerImpl> player = HiPlayerImpl::CreateHiPlayerImpl();
+    static OHOS::Media::Source source;
     PInPort emptyInPort = EmptyInPort::GetInstance();
     POutPort emptyOutPort = EmptyOutPort::GetInstance();
 
@@ -95,13 +95,15 @@ public:
     }
 };
 
+OHOS::Media::Source UtTestHiPlayer::source("./test.mp3");
+
 TEST_F(UtTestHiPlayer, Can_SetSource)
 {
     MOCK_METHOD(audioSource, SetSource)
         .expects(once())
         .with(source)
         .will(returnValue(ErrorCode::SUCCESS));
-    ASSERT_EQ(ErrorCode::SUCCESS, player->SetSource(source));
+    ASSERT_EQ(static_cast<int>(ErrorCode::SUCCESS), player->SetSource(source));
     player->fsm_.DoTask();
     ASSERT_EQ("PreparingState", player->fsm_.curState_->GetName());
 }
