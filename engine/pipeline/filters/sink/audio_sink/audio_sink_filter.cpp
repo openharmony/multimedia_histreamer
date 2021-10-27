@@ -142,8 +142,8 @@ ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Plugin:
     }
 
     uint32_t samplePerFrame = 0;
-    if (meta->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_PRE_FRAME, samplePerFrame)) {
-        SetPluginParameter(Tag::AUDIO_SAMPLE_PRE_FRAME, samplePerFrame);
+    if (meta->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplePerFrame)) {
+        SetPluginParameter(Tag::AUDIO_SAMPLE_PER_FRAME, samplePerFrame);
     }
     return ErrorCode::SUCCESS;
 }
