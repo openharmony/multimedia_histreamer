@@ -64,9 +64,13 @@ bool Thread::CreateThread(const std::function<void()>& func)
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+#if defined(THREAD_STACK_SIZE) and THREAD_STACK_SIZE > 0
+    pthread_attr_setstacksize(&attr, THREAD_STACK_SIZE);
+    MEDIA_LOG_I("thread stack size set to %d", THREAD_STACK_SIZE);
+#endif
     int rtv = pthread_create(&id_, &attr, Thread::Run, state_.get());
     if (rtv == 0) {
-        MEDIA_LOG_I("thread create succ");
+        MEDIA_LOG_I("thread %s, id %d create succ", pthread_self(), name_.c_str());
         SetNameInternal();
     } else {
         state_.reset();
@@ -79,7 +83,7 @@ void Thread::SetNameInternal()
 {
 #ifdef SUPPORT_PTHREAD_NAME
     if (state_ && !name_.empty()) {
-        constexpr size_t threadNameMaxSize = 15;
+        constexpr int threadNameMaxSize = 15;
         if (name_.size() > threadNameMaxSize) {
             MEDIA_LOG_W("task name %s exceed max size: %d", name_.c_str(), threadNameMaxSize);
             name_ = name_.substr(0, threadNameMaxSize);

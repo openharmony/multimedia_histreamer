@@ -13,6 +13,7 @@
 #
 
 import("//build/lite/config/component/lite_component.gni")
+import("//build/lite/config/subsystem/multimedia/config.gni")
 
 histreamer_foundation_src = [
   "osal/thread/task.cpp",
@@ -60,4 +61,8 @@ lite_library("histreamer_foundation") {
   }
   cflags = [ "-O2" ]
   cflags_cc = cflags
+  if (config_ohos_multimedia_histreamer_stack_size > 0) {
+    defines =
+        [ "THREAD_STACK_SIZE=$config_ohos_multimedia_histreamer_stack_size" ]
+  }
 }
