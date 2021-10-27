@@ -55,7 +55,6 @@ public:
     Status SeekTo(uint64_t offset) override;
 
 private:
-    State state_;
     std::string fileName_{};
     std::FILE* fp_;
     size_t fileSize_;
