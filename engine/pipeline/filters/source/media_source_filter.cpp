@@ -71,13 +71,14 @@ MediaSourceFilter::~MediaSourceFilter()
     }
 }
 
-ErrorCode MediaSourceFilter::SetSource(std::shared_ptr<MediaSource> source)
+ErrorCode MediaSourceFilter::SetSource(const std::shared_ptr<MediaSource>& source)
 {
     MEDIA_LOG_D("IN");
     if (source == nullptr) {
         MEDIA_LOG_E("Invalid source");
         return ErrorCode::ERROR_INVALID_SOURCE;
     }
+    protocol_.clear();
     ErrorCode err = FindPlugin(source);
     if (err != ErrorCode::SUCCESS) {
         return err;
@@ -90,7 +91,7 @@ ErrorCode MediaSourceFilter::SetSource(std::shared_ptr<MediaSource> source)
     return DoNegotiate(source);
 }
 
-ErrorCode MediaSourceFilter::InitPlugin(std::shared_ptr<MediaSource> source)
+ErrorCode MediaSourceFilter::InitPlugin(const std::shared_ptr<MediaSource>& source)
 {
     MEDIA_LOG_D("IN");
     ErrorCode err = TranslateError(plugin_->Init());

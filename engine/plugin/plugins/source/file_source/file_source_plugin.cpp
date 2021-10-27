@@ -59,16 +59,14 @@ void FileSourceAllocator::Free(void* ptr) // NOLINT: void*
 }
 
 FileSourcePlugin::FileSourcePlugin(std::string name)
-    : SourcePlugin(std::move(name)), fp_(nullptr), state_(State::CREATED), fileSize_(0), isSeekable_(true), position_(0)
+    : SourcePlugin(std::move(name)), fp_(nullptr), fileSize_(0), isSeekable_(true), position_(0)
 {
     MEDIA_LOG_D("IN");
-    state_ = State::CREATED;
 }
 
 FileSourcePlugin::~FileSourcePlugin()
 {
     MEDIA_LOG_D("IN");
-    state_ = State::DESTROYED;
     if (fp_) {
         std::fclose(fp_);
         fp_ = nullptr;
@@ -79,7 +77,6 @@ Status FileSourcePlugin::Init()
 {
     MEDIA_LOG_D("IN");
     mAllocator_ = std::make_shared<FileSourceAllocator>();
-    state_ = State::INITIALIZED;
     return Status::OK;
 }
 
@@ -87,14 +84,12 @@ Status FileSourcePlugin::Deinit()
 {
     MEDIA_LOG_D("IN");
     CloseFile();
-    state_ = State::DESTROYED;
     return Status::OK;
 }
 
 Status FileSourcePlugin::Prepare()
 {
     MEDIA_LOG_D("IN");
-    state_ = State::PREPARED;
     return Status::OK;
 }
 
@@ -102,40 +97,37 @@ Status FileSourcePlugin::Reset()
 {
     MEDIA_LOG_D("IN");
     CloseFile();
-    state_ = State::INITIALIZED;
     return Status::OK;
 }
 
 Status FileSourcePlugin::Start()
 {
     MEDIA_LOG_D("IN");
-    state_ = State::RUNNING;
     return Status::OK;
 }
 
 Status FileSourcePlugin::Stop()
 {
     MEDIA_LOG_D("IN");
-    state_ = State::PREPARED;
     return Status::OK;
 }
 
 bool FileSourcePlugin::IsParameterSupported(Tag tag)
 {
     MEDIA_LOG_D("IN");
-    return true;
+    return false;
 }
 
 Status FileSourcePlugin::GetParameter(Tag tag, ValueType& value)
 {
     MEDIA_LOG_D("IN");
-    return Status::OK;
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status FileSourcePlugin::SetParameter(Tag tag, const ValueType& value)
 {
     MEDIA_LOG_D("IN");
-    return Status::OK;
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 std::shared_ptr<Allocator> FileSourcePlugin::GetAllocator()
@@ -147,16 +139,12 @@ std::shared_ptr<Allocator> FileSourcePlugin::GetAllocator()
 Status FileSourcePlugin::SetCallback(const std::shared_ptr<Callback>& cb)
 {
     MEDIA_LOG_D("IN");
-    return Status::OK;
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status FileSourcePlugin::SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params)
 {
     MEDIA_LOG_D("IN");
-    if (state_ != State::INITIALIZED) {
-        MEDIA_LOG_W("Wrong state: %d", state_);
-        return Status::ERROR_WRONG_STATE;
-    }
     auto err = ParseFileName(uri);
     if (err != Status::OK) {
         MEDIA_LOG_E("Parse file name from uri fail, uri: %s", uri.c_str());
