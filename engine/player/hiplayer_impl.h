@@ -66,7 +66,9 @@ public:
     int32_t Release() override;
     int32_t Rewind(int64_t mSeconds, int32_t mode) override;
     int32_t SetVolume(float leftVolume, float rightVolume) override;
+#ifndef SURFACE_DISABLED
     int32_t SetSurface(Surface* surface) override;
+#endif
     bool IsSingleLooping() override;
     int32_t SetLoop(bool loop) override;
     void SetPlayerCallback(const std::shared_ptr<PlayerCallback> &cb) override;

@@ -197,11 +197,12 @@ int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
     }
     return to_underlying(ErrorCode::ERROR_UNKNOWN);
 }
+#ifndef SURFACE_DISABLED
 int32_t HiPlayerImpl::SetSurface(Surface* surface)
 {
     return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
 }
-
+#endif
 ErrorCode HiPlayerImpl::SetBufferSize(size_t size)
 {
     return audioSource_->SetBufferSize(size);
