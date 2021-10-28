@@ -271,12 +271,17 @@ bool DemuxerFilter::InitPlugin(std::string pluginName)
             plugin_->Deinit();
         }
         plugin_ = Plugin::PluginManager::Instance().CreateDemuxerPlugin(pluginName);
+        if (!plugin_ || plugin_->Init() != Plugin::Status::OK) {
+            MEDIA_LOG_E("InitPlugin for %s failed.", pluginName.c_str());
+            return false;
+        }
         pluginAllocator_ = plugin_->GetAllocator();
         pluginName_.swap(pluginName);
-    }
-    if (plugin_->Init() != Plugin::Status::OK) {
-        MEDIA_LOG_E("InitPlugin for %s failed due to plugin not found.", pluginName.c_str());
-        return false;
+    } else {
+        if (plugin_->Reset() != Plugin::Status::OK) {
+            MEDIA_LOG_E("plugin %s failed to reset.", pluginName.c_str());
+            return false;
+        }
     }
     MEDIA_LOG_W("InitPlugin, %s used.", pluginName_.c_str());
     plugin_->SetDataSource(std::dynamic_pointer_cast<Plugin::DataSourceHelper>(dataSource_));
