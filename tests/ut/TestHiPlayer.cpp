@@ -99,9 +99,10 @@ OHOS::Media::Source UtTestHiPlayer::source("./test.mp3");
 
 TEST_F(UtTestHiPlayer, Can_SetSource)
 {
+    // 因为player内部根据source参数创建shared_ptr，最终调用 audioSource.SetSource. 这里没法检查该指针参数了。
     MOCK_METHOD(audioSource, SetSource)
         .expects(once())
-        .with(source)
+        .with(any())
         .will(returnValue(ErrorCode::SUCCESS));
     ASSERT_EQ(static_cast<int>(ErrorCode::SUCCESS), player->SetSource(source));
     player->fsm_.DoTask();
