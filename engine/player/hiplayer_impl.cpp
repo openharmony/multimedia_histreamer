@@ -22,14 +22,14 @@
 #include "utils/utils.h"
 
 namespace {
-    const float MAX_MEDIA_VOLUME = 300.0f;
+const float MAX_MEDIA_VOLUME = 100.0f;
 }
 
 namespace OHOS {
 namespace Media {
 using namespace Pipeline;
 
-HiPlayerImpl::HiPlayerImpl() : fsm_(*this), pipelineStates_(PlayerStates::PLAYER_IDLE)
+HiPlayerImpl::HiPlayerImpl() : fsm_(*this), pipelineStates_(PlayerStates::PLAYER_IDLE), volume_(-1.0f)
 {
     MEDIA_LOG_I("hiPlayerImpl ctor");
     FilterFactory::Instance().Init();
@@ -40,7 +40,7 @@ HiPlayerImpl::HiPlayerImpl() : fsm_(*this), pipelineStates_(PlayerStates::PLAYER
 #ifdef UNIT_TEST
     demuxer_ = FilterFactory::Instance().CreateFilterWithType<DemuxerFilter>("builtin.player.demuxer", "demuxer");
     audioDecoder_ = FilterFactory::Instance().CreateFilterWithType<AudioDecoderFilter>("builtin.player.audiodecoder",
-                                                                                      "audiodecoder");
+                                                                                       "audiodecoder");
     audioSink_ =
         FilterFactory::Instance().CreateFilterWithType<AudioSinkFilter>("builtin.player.audiosink", "audiosink");
 #else
@@ -94,7 +94,7 @@ int32_t HiPlayerImpl::Init()
     }
     return to_underlying(ret);
 }
-int32_t HiPlayerImpl::SetSource(const Source &source)
+int32_t HiPlayerImpl::SetSource(const Source& source)
 {
     auto ret = Init();
     if (ret != to_underlying(ErrorCode::SUCCESS)) {
@@ -172,31 +172,25 @@ int32_t HiPlayerImpl::Rewind(int64_t mSeconds, int32_t mode)
 
 int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
 {
-    PlayerStates states = pipelineStates_.load();
-    if ((states != Media::PlayerStates::PLAYER_STARTED) && (states != Media::PlayerStates::PLAYER_PAUSED) &&
-        (states != Media::PlayerStates::PLAYER_PREPARED)) {
-        MEDIA_LOG_E("cannot set volume in state %d", states);
-        return to_underlying(ErrorCode::ERROR_STATE);
-    }
     if (leftVolume < 0 || leftVolume > MAX_MEDIA_VOLUME || rightVolume < 0 || rightVolume > MAX_MEDIA_VOLUME) {
-        MEDIA_LOG_E("volume not valid, should be in range [0,300]");
+        MEDIA_LOG_E("volume not valid, should be in range [0,100]");
         return to_underlying(ErrorCode::ERROR_INVALID_PARAM_VALUE);
     }
-    float volume = 0.f;
     if (leftVolume < 1e-6 && rightVolume >= 1e-6) { // 1e-6
-        volume = rightVolume;
+        volume_ = rightVolume;
     } else if (rightVolume < 1e-6 && leftVolume >= 1e-6) { // 1e-6
-        volume = leftVolume;
+        volume_ = leftVolume;
     } else {
-        volume = (leftVolume + rightVolume) / 2; // 2
+        volume_ = (leftVolume + rightVolume) / 2; // 2
     }
-    volume /= MAX_MEDIA_VOLUME; // normalize to 0~1
-    MEDIA_LOG_I("set volume %.3f", volume);
-    if (audioSink_ != nullptr) {
-        return to_underlying(audioSink_->SetVolume(volume));
+    volume_ /= MAX_MEDIA_VOLUME; // normalize to 0~1
+    PlayerStates states = pipelineStates_.load();
+    if (states != Media::PlayerStates::PLAYER_STARTED) {
+        return to_underlying(ErrorCode::SUCCESS);
     }
-    return to_underlying(ErrorCode::ERROR_UNKNOWN);
+    return to_underlying(SetVolume(volume_));
 }
+
 #ifndef SURFACE_DISABLED
 int32_t HiPlayerImpl::SetSurface(Surface* surface)
 {
@@ -243,6 +237,7 @@ ErrorCode HiPlayerImpl::PrepareFilters()
 
 ErrorCode HiPlayerImpl::DoPlay()
 {
+    (void)SetVolume(volume_);
     auto ret = pipeline_->Start();
     if (ret == ErrorCode::SUCCESS) {
         pipelineStates_ = PlayerStates::PLAYER_STARTED;
@@ -261,6 +256,7 @@ ErrorCode HiPlayerImpl::DoPause()
 
 ErrorCode HiPlayerImpl::DoResume()
 {
+    (void)SetVolume(volume_);
     auto ret = pipeline_->Resume();
     if (ret == ErrorCode::SUCCESS) {
         pipelineStates_ = PlayerStates::PLAYER_STARTED;
@@ -339,7 +335,7 @@ int32_t HiPlayerImpl::SetLoop(bool loop)
     return to_underlying(ErrorCode::SUCCESS);
 }
 
-void HiPlayerImpl::SetPlayerCallback(const std::shared_ptr<PlayerCallback> &cb)
+void HiPlayerImpl::SetPlayerCallback(const std::shared_ptr<PlayerCallback>& cb)
 {
     callback_ = cb;
 }
@@ -404,11 +400,19 @@ int32_t HiPlayerImpl::GetDuration(int64_t& outDurationMs)
 
 ErrorCode HiPlayerImpl::SetVolume(float volume)
 {
-    if (audioSink_ != nullptr) {
-        return audioSink_->SetVolume(volume);
+    if (audioSink_ == nullptr) {
+        MEDIA_LOG_W("cannot set volume while audio sink filter is null");
+        return ErrorCode::ERROR_NULL_POINTER;
     }
-    MEDIA_LOG_W("cannot set volume while audio sink filter is null");
-    return ErrorCode::ERROR_NULL_POINTER;
+    ErrorCode ret = ErrorCode::SUCCESS;
+    if (volume > 0) {
+        MEDIA_LOG_I("set volume %.3f", volume);
+        ret = audioSink_->SetVolume(volume);
+    }
+    if (ret != ErrorCode::SUCCESS) {
+        MEDIA_LOG_E("SetVolume failed with error %d", static_cast<int>(ret));
+    }
+    return ret;
 }
 
 void HiPlayerImpl::OnStateChanged(StateId state)
@@ -416,8 +420,7 @@ void HiPlayerImpl::OnStateChanged(StateId state)
     cond_.NotifyOne();
 }
 
-ErrorCode HiPlayerImpl::OnCallback(const FilterCallbackType& type, Filter* filter,
-                                             const Plugin::Any& parameter)
+ErrorCode HiPlayerImpl::OnCallback(const FilterCallbackType& type, Filter* filter, const Plugin::Any& parameter)
 {
     ErrorCode ret = ErrorCode::SUCCESS;
     switch (type) {
@@ -536,11 +539,11 @@ ErrorCode HiPlayerImpl::RemoveFilterChains(Filter* filter, const Plugin::Any& pa
     if (filter != demuxer_.get() || param.type != PortType::OUT) {
         return ret;
     }
-    for (const auto &portDesc: param.ports) {
+    for (const auto& portDesc : param.ports) {
         MEDIA_LOG_I("remove filter chain for port: %s", portDesc.name.c_str());
         auto peerPort = filter->GetOutPort(portDesc.name)->GetPeerPort();
         if (peerPort) {
-            auto nextFilter = const_cast<Filter *>(dynamic_cast<const Filter *>(peerPort->GetOwnerFilter()));
+            auto nextFilter = const_cast<Filter*>(dynamic_cast<const Filter*>(peerPort->GetOwnerFilter()));
             if (nextFilter) {
                 pipeline_->RemoveFilterChain(nextFilter);
             }
