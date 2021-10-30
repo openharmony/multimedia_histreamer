@@ -177,7 +177,7 @@ private:
     std::atomic<bool> singleLoop_{false};
 
     std::weak_ptr<PlayerCallback> callback_;
-
+    float volume_;
 };
 } // namespace Media
 } // namespace OHOS

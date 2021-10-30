@@ -36,7 +36,11 @@ public:
     {
         (void)intent;
         auto rtv = executor_.DoOnReady();
-        return {rtv, Action::ACTION_BUTT};
+        if (rtv == ErrorCode::SUCCESS) {
+            return {rtv, Action::ACTION_BUTT};
+        } else {
+            return {rtv, Action::TRANS_TO_INIT};
+        }
     }
 
     std::tuple<ErrorCode, Action> Seek(const Plugin::Any& param) override
