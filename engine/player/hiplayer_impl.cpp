@@ -29,7 +29,12 @@ namespace OHOS {
 namespace Media {
 using namespace Pipeline;
 
-HiPlayerImpl::HiPlayerImpl() : fsm_(*this), pipelineStates_(PlayerStates::PLAYER_IDLE), volume_(-1.0f)
+HiPlayerImpl::HiPlayerImpl()
+    : fsm_(*this),
+      curFsmState_(StateId::INIT),
+      pipelineStates_(PlayerStates::PLAYER_IDLE),
+      volume_(-1.0f),
+      errorCode_(ErrorCode::SUCCESS)
 {
     MEDIA_LOG_I("hiPlayerImpl ctor");
     FilterFactory::Instance().Init();
@@ -73,6 +78,7 @@ std::shared_ptr<HiPlayerImpl> HiPlayerImpl::CreateHiPlayerImpl()
 
 int32_t HiPlayerImpl::Init()
 {
+    errorCode_ = ErrorCode::SUCCESS;
     if (initialized_.load()) {
         return to_underlying(ErrorCode::SUCCESS);
     }
@@ -106,16 +112,18 @@ int32_t HiPlayerImpl::SetSource(const Source& source)
 int32_t HiPlayerImpl::Prepare()
 {
     MEDIA_LOG_D("Prepare entered, current fsm state: %s.", fsm_.GetCurrentState().c_str());
-    OSAL::ScopedLock lock(prepareBlockMutex_);
-    cond_.Wait(lock, [this] {
-        auto state = fsm_.GetCurrentStateId();
-        return state == StateId::READY || state == StateId::INIT;
-    });
+    OSAL::ScopedLock lock(stateMutex_);
+    if (curFsmState_ == StateId::PREPARING) {
+        errorCode_ = ErrorCode::SUCCESS;
+        cond_.Wait(lock, [this] { return curFsmState_ == StateId::READY || curFsmState_ == StateId::INIT; });
+    }
     MEDIA_LOG_D("Prepare finished, current fsm state: %s.", fsm_.GetCurrentState().c_str());
-    if (fsm_.GetCurrentStateId() == StateId::READY) {
+    if (curFsmState_ == StateId::READY) {
         return to_underlying(ErrorCode::SUCCESS);
+    } else if (curFsmState_ == StateId::INIT) {
+        return to_underlying(errorCode_.load());
     } else {
-        return to_underlying(ErrorCode::ERROR_UNKNOWN);
+        return to_underlying(ErrorCode::ERROR_STATE);
     }
 }
 
@@ -315,7 +323,7 @@ ErrorCode HiPlayerImpl::DoOnComplete()
 
 ErrorCode HiPlayerImpl::DoOnError(ErrorCode errorCode)
 {
-    // fixme do we need to callback here to notify registered callback
+    errorCode_ = errorCode;
     auto ptr = callback_.lock();
     if (ptr != nullptr) {
         ptr->OnError(PlayerCallback::PLAYER_ERROR_UNKNOWN, static_cast<int32_t>(errorCode));
@@ -417,6 +425,8 @@ ErrorCode HiPlayerImpl::SetVolume(float volume)
 
 void HiPlayerImpl::OnStateChanged(StateId state)
 {
+    OSAL::ScopedLock lock(stateMutex_);
+    curFsmState_ = state;
     cond_.NotifyOne();
 }
 
