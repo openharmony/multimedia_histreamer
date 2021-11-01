@@ -70,7 +70,7 @@ bool Thread::CreateThread(const std::function<void()>& func)
 #endif
     int rtv = pthread_create(&id_, &attr, Thread::Run, state_.get());
     if (rtv == 0) {
-        MEDIA_LOG_I("thread %s, id %d create succ", pthread_self(), name_.c_str());
+        MEDIA_LOG_I("thread %d, id %s create succ", pthread_self(), name_.c_str());
         SetNameInternal();
     } else {
         state_.reset();
