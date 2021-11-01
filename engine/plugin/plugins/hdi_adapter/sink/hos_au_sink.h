@@ -90,6 +90,14 @@ public:
 private:
     Media::Plugin::Status ReleaseRender();
 
+    void Deinterleave8(uint8_t* inData, uint8_t* outData, int32_t frameCnt);
+
+    void Deinterleave16(uint8_t* inData, uint8_t* outData, int32_t frameCnt);
+
+    void Deinterleave32(uint8_t* inData, uint8_t* outData, int32_t frameCnt);
+
+    bool HandleInterleaveData(uint8_t* origData, int32_t frameCnt);
+
     void DoRender();
 
 private:
@@ -110,6 +118,7 @@ private:
 
     std::shared_ptr<RingBuffer> ringBuffer_ {};
     std::shared_ptr<OHOS::Media::OSAL::Task> renderThread_ {};
+    uint8_t* cacheData_ {nullptr};
 };
 }
 }
