@@ -26,26 +26,26 @@
 #endif
 #include "filters/demux/demuxer_filter.h"
 #include "filters/source/media_source_filter.h"
-#include "osal/thread/condition_variable.h"
-#include "osal/thread/mutex.h"
 #include "foundation/error_code.h"
-#include "utils/utils.h"
 #include "histreamer/hiplayer.h"
 #include "internal/state_machine.h"
+#include "osal/thread/condition_variable.h"
+#include "osal/thread/mutex.h"
 #include "pipeline/core/filter_callback.h"
 #include "pipeline/core/pipeline.h"
 #include "pipeline/core/pipeline_core.h"
 #include "pipeline/filters/codec/audio_decoder/audio_decoder_filter.h"
 #include "pipeline/filters/sink/audio_sink/audio_sink_filter.h"
 #include "play_executor.h"
+#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
 class HiPlayerImpl : public Pipeline::EventReceiver,
-                               public PlayExecutor,
-                               public StateChangeCallback,
-                               public Pipeline::FilterCallback,
-                               public PlayerInterface {
+                     public PlayExecutor,
+                     public StateChangeCallback,
+                     public Pipeline::FilterCallback,
+                     public PlayerInterface {
     friend class StateMachine;
 
 public:
@@ -53,7 +53,7 @@ public:
 
     static std::shared_ptr<HiPlayerImpl> CreateHiPlayerImpl();
 
-    //interface from PlayerInterface
+    // interface from PlayerInterface
     int32_t Init() override;
     int32_t DeInit() override;
     int32_t SetSource(const Source& source) override;
@@ -71,15 +71,15 @@ public:
 #endif
     bool IsSingleLooping() override;
     int32_t SetLoop(bool loop) override;
-    void SetPlayerCallback(const std::shared_ptr<PlayerCallback> &cb) override;
+    void SetPlayerCallback(const std::shared_ptr<PlayerCallback>& cb) override;
     int32_t GetPlayerState(int32_t& state) override;
     int32_t GetCurrentPosition(int64_t& currentPositionMs) override;
     int32_t GetDuration(int64_t& outDurationMs) override;
-    int32_t GetVideoWidth(int32_t &videoWidth) override
+    int32_t GetVideoWidth(int32_t& videoWidth) override
     {
         return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
     }
-    int32_t GetVideoHeight(int32_t &videoHeight) override
+    int32_t GetVideoHeight(int32_t& videoHeight) override
     {
         return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
     }
@@ -87,7 +87,7 @@ public:
     {
         return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
     }
-    int32_t GetPlaybackSpeed(float &speed) override
+    int32_t GetPlaybackSpeed(float& speed) override
     {
         return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
     }
@@ -95,12 +95,12 @@ public:
     {
         return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
     }
-    void GetAudioStreamType(int32_t &type) override
+    void GetAudioStreamType(int32_t& type) override
     {
         type = -1;
     }
 
-    int32_t SetParameter(const Format &params) override
+    int32_t SetParameter(const Format& params) override
     {
         return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
     }
@@ -152,13 +152,14 @@ private:
     void ActiveFilters(const std::vector<Pipeline::Filter*>& filters);
 
 private:
-    OSAL::Mutex prepareBlockMutex_;
+    OSAL::Mutex stateMutex_;
     OSAL::ConditionVariable cond_;
     StateMachine fsm_;
+    std::atomic<StateId> curFsmState_;
 
     std::shared_ptr<Pipeline::PipelineCore> pipeline_;
     std::atomic<PlayerStates> pipelineStates_;
-    std::atomic<bool> initialized_ {false};
+    std::atomic<bool> initialized_{false};
 
     std::shared_ptr<Pipeline::MediaSourceFilter> audioSource_;
 
@@ -178,6 +179,7 @@ private:
 
     std::weak_ptr<PlayerCallback> callback_;
     float volume_;
+    std::atomic<ErrorCode> errorCode_;
 };
 } // namespace Media
 } // namespace OHOS
