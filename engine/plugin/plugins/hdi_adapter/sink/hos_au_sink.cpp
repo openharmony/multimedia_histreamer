@@ -39,6 +39,7 @@ constexpr int32_t HI_ERR_VI_BUF_FULL = 0xA016800F;
 constexpr int32_t RANK100 = 100;
 constexpr int32_t HALF = 2;
 constexpr int32_t SEC_TO_MILLS = 1000;
+constexpr int32_t PCM_CHAN_CNT = 2;
 
 Status LoadAndInitAdapter(AudioManager *proxyManager, AudioAdapterDescriptor *descriptor, AudioAdapter **adapter)
 {
@@ -156,7 +157,8 @@ namespace Media {
 namespace HosLitePlugin {
 using namespace OHOS::Media::Plugin;
 
-HdiSink::HdiSink(std::string name) : Plugin::AudioSinkPlugin(std::move(name)), audioManager_(nullptr)
+HdiSink::HdiSink(std::string name) :
+    Plugin::AudioSinkPlugin(std::move(name)), audioManager_(nullptr), cacheData_(nullptr)
 {
     // default is media
     sampleAttributes_.type = AUDIO_IN_MEDIA;
@@ -226,6 +228,10 @@ Status HdiSink::Deinit()
             audioAdapter_ = nullptr;
         }
         audioManager_ = nullptr;
+    }
+    if (cacheData_ != nullptr) {
+        delete[](uint8_t*) cacheData_;
+        cacheData_ = nullptr;
     }
     return Status::OK;
 }
@@ -300,8 +306,8 @@ Status HdiSink::Prepare()
     deviceDescriptor_.pins = PIN_OUT_SPEAKER;
     deviceDescriptor_.desc = nullptr;
 
-    MEDIA_LOG_I("create render on adapter: %s,  port: %d, with parameters: category %s, channels %d, sampleRate %d,"
-        " audioChannelMask %x, format %d, isSignedData %d, interleaved %d, period %u, frameSize %u",
+    MEDIA_LOG_I("create render: %s, port: %d:\ncategory %s,\nchannels %d, sampleRate %d,\n"
+        " audioChannelMask %x, format %d,\nisSignedData %d, interleaved %d,\nperiod %u, frameSize %u",
         adapterDescriptor_.adapterName, deviceDescriptor_.portId,
         (sampleAttributes_.type == AUDIO_IN_MEDIA) ? "media" : "communication", sampleAttributes_.channelCount,
         sampleAttributes_.sampleRate, channelMask_, sampleAttributes_.format, sampleAttributes_.isSignedData,
@@ -317,10 +323,18 @@ Status HdiSink::Prepare()
         }
     }
     MEDIA_LOG_I("create audio render successfully");
-    ringBuffer_ = std::make_shared<RingBuffer>(DEFAULT_BUFFER_POOL_SIZE * CalculateBufferSize(sampleAttributes_));
+    auto bufferSize = DEFAULT_BUFFER_POOL_SIZE * CalculateBufferSize(sampleAttributes_);
+    ringBuffer_ = std::make_shared<RingBuffer>(bufferSize);
     if (!ringBuffer_->Init()) {
         MEDIA_LOG_E("cannot allocate enough buffer for ring buffer cache");
         return Status::ERROR_NO_MEMORY;
+    }
+    if ((sampleAttributes_.interleaved == false) && (sampleAttributes_.channelCount == PCM_CHAN_CNT)) {
+        cacheData_ = new (std::nothrow) uint8_t[bufferSize];
+        if (cacheData_ == nullptr) {
+            MEDIA_LOG_E("cannot allocate enough buffer for cacheData");
+            return Status::ERROR_NO_MEMORY;
+        }
     }
     return Status::OK;
 }
@@ -573,6 +587,68 @@ Status HdiSink::Flush()
     return Status::OK;
 }
 
+template <typename T>
+static void Deinterleave(T inData, T outData, int32_t frameCnt)
+{
+    int32_t frameSize = frameCnt / PCM_CHAN_CNT;
+    for (int i = 0; i < PCM_CHAN_CNT; i++) {
+        for (int j = 0; j < frameSize; j++) {
+            outData[i * frameSize + j] = inData[j * PCM_CHAN_CNT + i];
+        }
+    }
+}
+
+void HdiSink::Deinterleave16(uint8_t* inData, uint8_t* outData, int32_t frameCnt)
+{
+    if (sampleAttributes_.isSignedData == true) {
+        Deinterleave(reinterpret_cast<int16_t*>(inData), reinterpret_cast<int16_t*>(outData), frameCnt);
+    } else {
+        Deinterleave(reinterpret_cast<uint16_t*>(inData), reinterpret_cast<uint16_t*>(outData), frameCnt);
+    }
+}
+
+void HdiSink::Deinterleave8(uint8_t* inData, uint8_t* outData, int32_t frameCnt)
+{
+    if (sampleAttributes_.isSignedData == true) {
+        Deinterleave(reinterpret_cast<int8_t*>(inData), reinterpret_cast<int8_t*>(outData), frameCnt);
+    } else {
+        Deinterleave(inData, outData, frameCnt);
+    }
+}
+
+void HdiSink::Deinterleave32(uint8_t* inData, uint8_t* outData, int32_t frameCnt)
+{
+    if (sampleAttributes_.isSignedData == true) {
+        Deinterleave(reinterpret_cast<int32_t*>(inData), reinterpret_cast<int32_t*>(outData), frameCnt);
+    } else {
+        Deinterleave(reinterpret_cast<uint32_t*>(inData), reinterpret_cast<uint32_t*>(outData), frameCnt);
+    }
+}
+
+bool HdiSink::HandleInterleaveData(uint8_t* origData, int32_t frameCnt)
+{
+    if ((cacheData_ == nullptr) || (sampleAttributes_.interleaved == true) ||
+        (sampleAttributes_.channelCount != PCM_CHAN_CNT)) {
+        return false;
+    }
+    bool isHandled = true;
+    switch (sampleAttributes_.format) {
+        case AUDIO_FORMAT_PCM_16_BIT:
+            Deinterleave16(origData, cacheData_, frameCnt);
+            break;
+        case AUDIO_FORMAT_PCM_8_BIT:
+            Deinterleave8(origData, cacheData_, frameCnt);
+            break;
+        case AUDIO_FORMAT_PCM_32_BIT:
+            Deinterleave32(origData, cacheData_, frameCnt);
+            break;
+        default:
+            isHandled = false;
+            break;
+    }
+    return isHandled;
+}
+
 void HdiSink::DoRender()
 {
     MEDIA_LOG_D("DoRender started");
@@ -589,7 +665,11 @@ void HdiSink::DoRender()
     {
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
         if (audioRender_ != nullptr) {
-            ret = audioRender_->RenderFrame(audioRender_, outFramePtr.get(), outSize, &renderSize);
+            uint8_t* frame = outFramePtr.get();
+            if (HandleInterleaveData(frame, outSize / PCM_CHAN_CNT) == true) {
+                frame = cacheData_;
+            }
+            ret = audioRender_->RenderFrame(audioRender_, frame, outSize, &renderSize);
         }
     }
     if (ret != 0) {
