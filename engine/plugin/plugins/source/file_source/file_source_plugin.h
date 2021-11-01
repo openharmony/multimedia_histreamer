@@ -63,6 +63,7 @@ private:
     std::shared_ptr<FileSourceAllocator> mAllocator_{nullptr};
 
     Status ParseFileName(std::string& uri);
+    Status CheckFileStat();
     Status OpenFile();
     void CloseFile();
 };
