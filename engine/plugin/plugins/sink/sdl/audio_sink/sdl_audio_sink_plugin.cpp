@@ -89,7 +89,8 @@ const Status SdlAudioRegister(const std::shared_ptr<Register>& reg)
     AudioSinkPluginDef definition;
     definition.name = "sdl_audio_sink";
     definition.rank = 100; // 100
-    definition.inCaps.emplace_back(Capability(OHOS::Media::MEDIA_MIME_AUDIO_RAW));
+    Capability cap(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
+    definition.inCaps.emplace_back(cap);
     definition.creator = AudioSinkPluginCreator;
     return reg->AddPlugin(definition);
 }

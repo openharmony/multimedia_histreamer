@@ -144,6 +144,7 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
         }
     }
     definition.inCaps.push_back(cap);
+    definition.outCaps.push_back(Capability(OHOS::Media::MEDIA_MIME_AUDIO_RAW));
 }
 uint32_t GetWidth(AVSampleFormat sampleFormat)
 {

@@ -32,8 +32,10 @@ public:
 
     ErrorCode Prepare() override;
 
-    bool Negotiate(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &inMeta,
-                   CapabilitySet &outCaps) override;
+    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Capability& upstreamNegotiatedCap) override;
+
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
     ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer) override;
 
@@ -84,6 +86,8 @@ private:
     bool isFlushing_ {false};
 
     std::shared_ptr<DataCallbackImpl> dataCallback_ {nullptr};
+    Capability capNegWithDownstream_;
+    Capability capNegWithUpstream_;
 };
 }
 }

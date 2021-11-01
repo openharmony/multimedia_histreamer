@@ -16,7 +16,7 @@
 #define LOG_TAG "MediaSourceFilter"
 
 #include "media_source_filter.h"
-#include "utils/type_define.h"
+#include "compatible_check.h"
 #include "factory/filter_factory.h"
 #include "plugin/interface/source_plugin.h"
 #include "plugin/core/plugin_meta.h"
@@ -242,8 +242,10 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
             if ((plugin_->GetSize(fileSize) == Status::OK) && (fileSize != 0)) {
                 suffixMeta->SetUint64(Media::Plugin::MetaID::MEDIA_FILE_SIZE, fileSize);
             }
-            CapabilitySet peerCaps;
-            if (!GetOutPort(PORT_NAME_DEFAULT)->Negotiate(suffixMeta, peerCaps)) {
+            Capability peerCap;
+            auto tmpCap = MetaToCapability(*suffixMeta);
+            if (!GetOutPort(PORT_NAME_DEFAULT)->Negotiate(tmpCap, peerCap) ||
+                !GetOutPort(PORT_NAME_DEFAULT)->Configure(suffixMeta)) {
                 MEDIA_LOG_E("Negotiate fail!");
                 return ErrorCode::ERROR_INVALID_PARAM_VALUE;
             }

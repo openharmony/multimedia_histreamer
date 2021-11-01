@@ -40,8 +40,10 @@ public:
 
     ErrorCode GetParameter(int32_t key, Plugin::Any& value) override;
 
-    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
-                   CapabilitySet& outCaps) override;
+    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Capability& upstreamNegotiatedCap) override;
+
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
     ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) override;
 
@@ -59,8 +61,6 @@ private:
     ErrorCode SetPluginParameter(Tag tag, const Plugin::ValueType& value);
     ErrorCode ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta);
     ErrorCode ConfigureWithMeta(const std::shared_ptr<const Plugin::Meta>& meta);
-    template <typename T>
-    ErrorCode GetPluginParameter(Tag tag, T& value);
 
     std::atomic<bool> pushThreadIsBlocking {false};
     bool isFlushing {false};

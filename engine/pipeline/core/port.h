@@ -48,7 +48,9 @@ public:
     virtual ErrorCode Connect(std::shared_ptr<Port> port) = 0;
     virtual ErrorCode Disconnect() = 0;
     virtual ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) = 0;
-    virtual bool Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps) = 0;
+    virtual bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                           Capability& upstreamNegotiatedCap) = 0;
+    virtual bool Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta) = 0;
     virtual void PushData(AVBufferPtr buffer) = 0;
     virtual ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) = 0;
 
@@ -70,7 +72,9 @@ public:
     ErrorCode Disconnect() override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     std::shared_ptr<Port> GetPeerPort() override;
-    bool Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps) override;
+    bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Capability& upstreamNegotiatedCap) override;
+    bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
     void PushData(AVBufferPtr buffer) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
@@ -87,7 +91,9 @@ public:
     ErrorCode Disconnect() override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     std::shared_ptr<Port> GetPeerPort() override;
-    bool Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps) override;
+    bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Capability& upstreamNegotiatedCap) override;
+    bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
     void PushData(AVBufferPtr buffer) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
@@ -108,7 +114,9 @@ public:
     ~EmptyInPort() override = default;
     ErrorCode Connect(std::shared_ptr<Port> port) override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
-    bool Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps) override;
+    bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Capability& upstreamNegotiatedCap) override;
+    bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
     void PushData(AVBufferPtr buffer) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
@@ -126,7 +134,9 @@ public:
     ~EmptyOutPort() override = default;
     ErrorCode Connect(std::shared_ptr<Port> port) override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
-    bool Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps) override;
+    bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Capability& upstreamNegotiatedCap) override;
+    bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
     void PushData(AVBufferPtr buffer) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 

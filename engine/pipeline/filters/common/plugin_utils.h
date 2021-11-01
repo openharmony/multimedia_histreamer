@@ -34,7 +34,7 @@ namespace Media {
 namespace Pipeline {
 #define RETURN_PLUGIN_NOT_FOUND_IF_NULL(plugin)                                                                        \
     if ((plugin) == nullptr) {                                                                                         \
-        return ErrorCode::ERROR_PLUGIN_NOT_FOUND;                                                                                       \
+        return ErrorCode::ERROR_PLUGIN_NOT_FOUND;                                                                      \
     }
 
 /**
@@ -45,6 +45,9 @@ namespace Pipeline {
 ErrorCode TranslatePluginStatus(Plugin::Status pluginError);
 
 bool TranslateIntoParameter(const int &key, OHOS::Media::Plugin::Tag &tag);
+
+std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>>
+        FindAvailablePlugins(const Plugin::Capability& upStreamCaps, Plugin::PluginType pluginType);
 
 template <typename T>
 ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta> &inMeta,
