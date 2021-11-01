@@ -16,6 +16,7 @@
 #define LOG_TAG "FileSourcePlugin"
 
 #include "file_source_plugin.h"
+#include <sys/stat.h>
 #include "foundation/log.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_types.h"
@@ -255,9 +256,32 @@ Status FileSourcePlugin::ParseFileName(std::string& uri)
     return Status::OK;
 }
 
+Status FileSourcePlugin::CheckFileStat()
+{
+    struct stat fileStat;
+    if (stat(fileName_.c_str(), &fileStat) < 0) {
+        MEDIA_LOG_E("Cannot get info from %s", fileName_.c_str());
+        return Status::ERROR_UNKNOWN;
+    }
+    if (S_ISDIR(fileStat.st_mode)) {
+        MEDIA_LOG_E("%s is directory", fileName_.c_str());
+        return Status::ERROR_UNSUPPORTED_FORMAT;
+    }
+    if (S_ISSOCK(fileStat.st_mode)){
+        MEDIA_LOG_E("%s is a socket", fileName_.c_str());
+        return Status::ERROR_UNSUPPORTED_FORMAT;
+    }
+    return Status::OK;
+}
+
 Status FileSourcePlugin::OpenFile()
 {
     MEDIA_LOG_D("IN");
+    auto ret = CheckFileStat();
+    if (ret != Status::OK) {
+        CloseFile();
+        return ret;
+    }
     CloseFile();
     fp_ = std::fopen(fileName_.c_str(), "rb");
     if (fp_ == nullptr) {
