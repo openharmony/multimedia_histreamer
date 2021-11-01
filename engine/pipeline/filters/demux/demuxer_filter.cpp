@@ -17,6 +17,7 @@
 
 #include "demuxer_filter.h"
 #include <algorithm>
+#include "compatible_check.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
 #include "utils/constants.h"
@@ -201,13 +202,19 @@ ErrorCode DemuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
     return ErrorCode::SUCCESS;
 }
 
-bool DemuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
-                              CapabilitySet& outCaps)
+bool DemuxerFilter::Negotiate(const std::string &inPort, const std::shared_ptr<const Plugin::Capability> &upstreamCap,
+                              Capability &upstreamNegotiatedCap)
 {
     (void)inPort;
-    (void)outCaps;
-    (void)inMeta->GetUint64(Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
-    return inMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_);
+    (void)upstreamCap;
+    (void)upstreamNegotiatedCap;
+    return true;
+}
+
+bool DemuxerFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
+{
+    (void)upstreamMeta->GetUint64(Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
+    return upstreamMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_);
 }
 
 ErrorCode DemuxerFilter::SeekTo(int64_t msec)
@@ -446,9 +453,11 @@ void DemuxerFilter::NegotiateDownstream()
 {
     for (auto& stream : mediaMetaData_.trackInfos) {
         if (stream.needNegoCaps) {
-            CapabilitySet caps;
+            Capability caps;
             MEDIA_LOG_I("demuxer negotiate with streamIdx: %u", stream.streamIdx);
-            if (stream.port->Negotiate(GetStreamMeta(stream.streamIdx), caps)) {
+            auto streamMeta = GetStreamMeta(stream.streamIdx);
+            auto tmpCap = MetaToCapability(*streamMeta);
+            if (stream.port->Negotiate(tmpCap, caps) && stream.port->Configure(streamMeta)) {
                 stream.needNegoCaps = false;
             } else {
                 task_->PauseAsync();

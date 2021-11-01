@@ -63,17 +63,6 @@ ErrorCode AudioSinkFilter::SetParameter(int32_t key, const Plugin::Any& value)
     return SetPluginParameter(tag, value);
 }
 
-template <typename T>
-ErrorCode AudioSinkFilter::GetPluginParameter(Tag tag, T& value)
-{
-    Plugin::Any tmp;
-    auto err = TranslatePluginStatus(plugin_->GetParameter(tag, tmp));
-    if (err == ErrorCode::SUCCESS && tmp.Type() == typeid(T)) {
-        value = Plugin::AnyCast<T>(tmp);
-    }
-    return err;
-}
-
 ErrorCode AudioSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
 {
     if (state_.load() == FilterState::CREATED) {
@@ -88,20 +77,52 @@ ErrorCode AudioSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
     return TranslatePluginStatus(plugin_->GetParameter(tag, value));
 }
 
-bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
-                                CapabilitySet& outCaps)
+bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                                Capability& upstreamNegotiatedCap)
 {
     MEDIA_LOG_D("audio sink negotiate started");
-    auto creator = [](const std::string& pluginName) {
-        return Plugin::PluginManager::Instance().CreateAudioSinkPlugin(pluginName);
-    };
-    auto err = FindPluginAndUpdate<Plugin::AudioSink>(inMeta, Plugin::PluginType::AUDIO_SINK, plugin_,
-                                                      targetPluginInfo_, creator);
-    RETURN_TARGET_ERR_MESSAGE_LOG_IF_FAIL(err, false, "cannot find matched plugin");
+    auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::AUDIO_SINK);
+    if (candidatePlugins.empty()) {
+        MEDIA_LOG_E("no available audio sink plugin");
+        return false;
+    }
+    // always use first one
+    std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = candidatePlugins[0].first;
+    upstreamNegotiatedCap = candidatePlugins[0].second;
 
-    outCaps = targetPluginInfo_->inCaps;
+    // try to reuse plugin
+    if (plugin_ != nullptr){
+        if (targetPluginInfo_ != nullptr && targetPluginInfo_->name == selectedPluginInfo->name) {
+            if (plugin_->Reset() == Plugin::Status::OK) {
+                return true;
+            }
+            MEDIA_LOG_W("reuse previous plugin %s failed, will create new plugin", targetPluginInfo_->name.c_str());
+        }
+        plugin_->Deinit();
+    }
+    plugin_ = Plugin::PluginManager::Instance().CreateAudioSinkPlugin(selectedPluginInfo->name);
+    if (plugin_ == nullptr) {
+        MEDIA_LOG_E("cannot create plugin %s", selectedPluginInfo->name.c_str());
+        return false;
+    }
 
-    err = ConfigureToPreparePlugin(inMeta);
+    auto err = TranslatePluginStatus(plugin_->Init());
+    if (err != ErrorCode::SUCCESS) {
+        MEDIA_LOG_E("audio sink plugin init error");
+        return false;
+    }
+    targetPluginInfo_ = selectedPluginInfo;
+    return true;
+}
+
+bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+{
+    if (plugin_ == nullptr || targetPluginInfo_ == nullptr) {
+        MEDIA_LOG_E("cannot configure decoder when no plugin available");
+        return false;
+    }
+
+    auto err = ConfigureToPreparePlugin(upstreamMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("sink configure error");
         OnEvent({EVENT_ERROR, err});
@@ -112,6 +133,7 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
     MEDIA_LOG_I("audio sink send EVENT_READY");
     return true;
 }
+
 
 ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Plugin::Meta>& meta)
 {
@@ -149,9 +171,7 @@ ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Plugin:
 }
 ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta)
 {
-    auto err = TranslatePluginStatus(plugin_->Init());
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "sink plugin init error.");
-    err = ConfigureWithMeta(meta);
+    auto err = ConfigureWithMeta(meta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("sink configuration failed ");
         return err;
@@ -221,7 +241,9 @@ ErrorCode AudioSinkFilter::Stop()
 {
     MEDIA_LOG_I("audio sink stop start");
     FilterBase::Stop();
-    plugin_->Stop();
+    if (plugin_ != nullptr) {
+        plugin_->Stop();
+    }
     if (pushThreadIsBlocking.load()) {
         startWorkingCondition_.NotifyOne();
     }

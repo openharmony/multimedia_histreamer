@@ -66,11 +66,17 @@ public:
     virtual std::vector<WorkMode> GetWorkModes() = 0; // OutPort调用
 
     // InPort调用此接口确定是否要继续往后协商
-    virtual bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
-        CapabilitySet& outCaps)
+    virtual bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                           Capability& upstreamNegotiatedCap)
     {
         return false;
     }
+
+    virtual bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+    {
+        return false;
+    }
+
     virtual ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) = 0; // InPort调用
     virtual ErrorCode PullData(const std::string& outPort, uint64_t offset, size_t size,
                                AVBufferPtr& data) = 0; // OutPort调用

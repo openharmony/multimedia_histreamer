@@ -39,6 +39,21 @@ bool TranslateIntoParameter(const int& key, OHOS::Media::Plugin::Tag& tag)
     return true;
 }
 
+std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>>
+    FindAvailablePlugins(const Plugin::Capability& upStreamCaps, Plugin::PluginType pluginType)
+{
+    auto pluginNames = Plugin::PluginManager::Instance().ListPlugins(pluginType);
+    std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>> infos;
+    for (const auto & name : pluginNames) {
+        auto tmpInfo = Plugin::PluginManager::Instance().GetPluginInfo(pluginType, name);
+        Capability cap;
+        if (ApplyCapabilitySet(upStreamCaps, tmpInfo->inCaps, cap)) {
+            infos.emplace_back(tmpInfo, cap);
+        }
+    }
+    return infos;
+}
+
 template <typename T>
 ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta>& inMeta, Plugin::PluginType pluginType,
                               std::shared_ptr<T>& plugin, std::shared_ptr<Plugin::PluginInfo>& pluginInfo,

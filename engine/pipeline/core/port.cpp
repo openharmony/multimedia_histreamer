@@ -69,10 +69,16 @@ std::shared_ptr<Port> InPort::GetPeerPort()
     return prevPort.lock();
 }
 
-bool InPort::Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps)
+bool InPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap, Capability& upstreamNegotiatedCap)
 {
-    return filter && filter->Negotiate(name, inMeta, outCaps);
+    return filter && filter->Negotiate(name, upstreamCap, upstreamNegotiatedCap);
 }
+
+bool InPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+{
+    return filter && filter->Configure(name, upstreamMeta);
+}
+
 
 void InPort::PushData(AVBufferPtr buffer)
 {
@@ -144,9 +150,15 @@ std::shared_ptr<Port> OutPort::GetPeerPort()
     return nextPort;
 }
 
-bool OutPort::Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps)
+bool OutPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                        Capability& upstreamNegotiatedCap)
 {
-    return nextPort->Negotiate(inMeta, outCaps);
+    return nextPort->Negotiate(upstreamCap, upstreamNegotiatedCap);
+}
+
+bool OutPort::Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
+{
+    return nextPort->Configure(upstreamMeta);
 }
 
 void OutPort::PushData(AVBufferPtr buffer)
@@ -176,13 +188,22 @@ ErrorCode EmptyInPort::Activate(const std::vector<WorkMode>& modes, WorkMode& ou
     MEDIA_LOG_E("Activate in EmptyInPort");
     return ErrorCode::SUCCESS;
 }
-bool EmptyInPort::Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps)
+bool EmptyInPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                            Capability& upstreamNegotiatedCap)
 {
-    UNUSED_VARIABLE(inMeta);
-    UNUSED_VARIABLE(outCaps);
+    UNUSED_VARIABLE(upstreamCap);
+    UNUSED_VARIABLE(upstreamNegotiatedCap);
     MEDIA_LOG_E("Negotiate in EmptyInPort");
     return false;
 }
+
+bool EmptyInPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+{
+    UNUSED_VARIABLE(upstreamMeta);
+    MEDIA_LOG_E("Configure in EmptyInPort");
+    return false;
+}
+
 void EmptyInPort::PushData(AVBufferPtr buffer)
 {
     UNUSED_VARIABLE(buffer);
@@ -210,13 +231,22 @@ ErrorCode EmptyOutPort::Activate(const std::vector<WorkMode>& modes, WorkMode& o
     MEDIA_LOG_E("Activate in EmptyOutPort");
     return ErrorCode::SUCCESS;
 }
-bool EmptyOutPort::Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps)
+bool EmptyOutPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                             Capability& upstreamNegotiatedCap)
 {
-    UNUSED_VARIABLE(inMeta);
-    UNUSED_VARIABLE(outCaps);
+    UNUSED_VARIABLE(upstreamCap);
+    UNUSED_VARIABLE(upstreamNegotiatedCap);
     MEDIA_LOG_E("Negotiate in EmptyOutPort");
     return false;
 }
+
+bool EmptyOutPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+{
+    UNUSED_VARIABLE(upstreamMeta);
+    MEDIA_LOG_E("Configure in EmptyOutPort");
+    return false;
+}
+
 void EmptyOutPort::PushData(AVBufferPtr buffer)
 {
     UNUSED_VARIABLE(buffer);

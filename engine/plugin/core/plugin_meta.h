@@ -120,6 +120,17 @@ public:
         return true;
     }
 
+    bool GetData(Plugin::MetaID id, Plugin::ValueType& value) const
+    {
+        auto ite = items_.find(id);
+        if (ite == items_.end()) {
+            return false;
+        }
+        value = ite->second;
+        return true;
+    }
+
+
     void Clear();
 
     /**
@@ -143,6 +154,12 @@ public:
      */
     template <typename T>
     bool SetData(Plugin::MetaID id, const T& value)
+    {
+        items_[id] = value;
+        return true;
+    }
+
+    bool SetData(Plugin::MetaID id, const Plugin::ValueType& value)
     {
         items_[id] = value;
         return true;

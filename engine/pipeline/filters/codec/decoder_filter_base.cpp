@@ -84,6 +84,36 @@ ErrorCode DecoderFilterBase::GetParameter(int32_t key, Plugin::Any& value)
         }
     }
 }
+bool DecoderFilterBase::UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo)
+{
+    if (selectedPluginInfo == nullptr) {
+        MEDIA_LOG_W("no available info to update plugin");
+        return false;
+    }
+    if (plugin_ != nullptr){
+        if (targetPluginInfo_ != nullptr && targetPluginInfo_->name == selectedPluginInfo->name) {
+            if (plugin_->Reset() == Plugin::Status::OK) {
+                return true;
+            }
+            MEDIA_LOG_W("reuse previous plugin %s failed, will create new plugin", targetPluginInfo_->name.c_str());
+        }
+        plugin_->Deinit();
+    }
+
+    plugin_ = Plugin::PluginManager::Instance().CreateCodecPlugin(selectedPluginInfo->name);
+    if (plugin_ == nullptr) {
+        MEDIA_LOG_E("cannot create plugin %s", selectedPluginInfo->name.c_str());
+        return false;
+    }
+    auto err = TranslatePluginStatus(plugin_->Init());
+    if (err != ErrorCode::SUCCESS) {
+        MEDIA_LOG_E("decoder plugin init error");
+        return false;
+    }
+    targetPluginInfo_ = selectedPluginInfo;
+    return true;
+}
+
 }
 }
 }

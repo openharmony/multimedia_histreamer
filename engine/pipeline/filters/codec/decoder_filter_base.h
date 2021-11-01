@@ -56,6 +56,8 @@ protected:
         return err;
     }
 
+    bool UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo);
+
     ThreadDrivingMode drivingMode_ {ThreadDrivingMode::ASYNC};
 
     // plugin
