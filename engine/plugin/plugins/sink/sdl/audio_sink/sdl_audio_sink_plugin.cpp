@@ -240,7 +240,7 @@ Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
             break;
         }
         default:
-            MEDIA_LOG_I("receive one parameter with unconcern key");
+            MEDIA_LOG_W("receive one parameter with unconcern key");
             break;
     }
     return Status::OK;

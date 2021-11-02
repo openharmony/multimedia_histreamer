@@ -43,6 +43,8 @@ public:
     ErrorCode GetParameter(int32_t key, Plugin::Any &value) override;
 
 protected:
+    ErrorCode ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta> &meta);
+
     ErrorCode SetPluginParameterLocked(Tag tag, const Plugin::ValueType &value);
 
     template<typename T>

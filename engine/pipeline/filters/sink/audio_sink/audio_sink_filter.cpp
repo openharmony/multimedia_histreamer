@@ -19,6 +19,7 @@
 #include "common/plugin_utils.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
+#include "pipeline/filters/common/plugin_settings.h"
 
 namespace OHOS {
 namespace Media {
@@ -27,6 +28,7 @@ static AutoRegisterFilter<AudioSinkFilter> g_registerFilterHelper("builtin.playe
 
 AudioSinkFilter::AudioSinkFilter(const std::string& name) : FilterBase(name)
 {
+    filterType_ = FilterType::AUDIO_SINK;
     MEDIA_LOG_I("audio sink ctor called");
 }
 AudioSinkFilter::~AudioSinkFilter()
@@ -137,35 +139,15 @@ bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr
 
 ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Plugin::Meta>& meta)
 {
-    uint32_t channels;
-    if (meta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels)) {
-        MEDIA_LOG_D("found audio channel meta");
-        SetPluginParameter(Tag::AUDIO_CHANNELS, channels);
-    }
-    uint32_t sampleRate;
-    if (meta->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_RATE, sampleRate)) {
-        MEDIA_LOG_D("found audio sample rate meta");
-        SetPluginParameter(Tag::AUDIO_SAMPLE_RATE, sampleRate);
-    }
-    int64_t bitRate;
-    if (meta->GetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate)) {
-        MEDIA_LOG_D("found audio bit rate meta");
-        SetPluginParameter(Tag::MEDIA_BITRATE, bitRate);
-    }
-
-    auto audioFormat = Plugin::AudioSampleFormat::U8;
-    if (meta->GetData<Plugin::AudioSampleFormat>(Plugin::MetaID::AUDIO_SAMPLE_FORMAT, audioFormat)) {
-        SetPluginParameter(Tag::AUDIO_SAMPLE_FORMAT, audioFormat);
-    }
-
-    auto audioChannelLayout = Plugin::AudioChannelLayout::STEREO;
-    if (meta->GetData<Plugin::AudioChannelLayout>(Plugin::MetaID::AUDIO_CHANNEL_LAYOUT, audioChannelLayout)) {
-        SetPluginParameter(Tag::AUDIO_CHANNEL_LAYOUT, audioChannelLayout);
-    }
-
-    uint32_t samplePerFrame = 0;
-    if (meta->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplePerFrame)) {
-        SetPluginParameter(Tag::AUDIO_SAMPLE_PER_FRAME, samplePerFrame);
+    auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
+    for (const auto& keyPair : parameterMap) {
+        Plugin::ValueType outValue;
+        if (meta->GetData(static_cast<Plugin::MetaID>(keyPair.first), outValue) &&
+            keyPair.second.second(outValue)) {
+            SetPluginParameter(keyPair.first, outValue);
+        } else {
+            MEDIA_LOG_W("parameter %s in meta is not found or type mismatch", keyPair.second.first.c_str());
+        }
     }
     return ErrorCode::SUCCESS;
 }

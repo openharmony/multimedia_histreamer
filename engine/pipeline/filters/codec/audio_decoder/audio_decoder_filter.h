@@ -48,8 +48,6 @@ private:
 
     ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta> &meta);
 
-    ErrorCode ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta> &meta);
-
     void HandleFrame();
 
     void HandleOneFrame(const std::shared_ptr<AVBuffer> &data);
@@ -65,17 +63,6 @@ private:
 
 private:
     ErrorCode QueueAllBufferInPoolToPluginLocked();
-
-    template<typename T>
-    inline ErrorCode SetTagFromMetaLocked(const std::shared_ptr<const Plugin::Meta> &meta, Plugin::MetaID metaId,
-        Tag tag)
-    {
-        T tmp;
-        if (meta->GetData<T>(metaId, tmp)) {
-            return SetPluginParameterLocked(tag, tmp);
-        }
-        return ErrorCode::ERROR_NOT_FOUND;
-    }
 
     std::shared_ptr<OHOS::Media::BlockingQueue<OHOS::Media::AVBufferPtr>> inBufferQ_;
     std::shared_ptr<OHOS::Media::BlockingQueue<OHOS::Media::AVBufferPtr>> outBufferQ_; // PCM data

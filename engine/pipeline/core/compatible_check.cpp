@@ -23,7 +23,6 @@
 
 #include "foundation/log.h"
 #include "utils/utils.h"
-#include "plugin/common/plugin_audio_tags.h"
 
 namespace OHOS {
 namespace Media {

@@ -54,10 +54,10 @@ public:
 
     ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) override;
 
-    bool Negotiate(const std::string &inPort, const std::shared_ptr<const Plugin::Capability> &upstreamCap,
-                   Capability &upstreamNegotiatedCap) override;
+    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Capability& upstreamNegotiatedCap) override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta) override;
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
     ErrorCode SeekTo(int64_t msec);
 

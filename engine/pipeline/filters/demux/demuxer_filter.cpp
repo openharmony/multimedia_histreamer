@@ -102,6 +102,7 @@ DemuxerFilter::DemuxerFilter(std::string name)
       mediaMetaData_(),
       curTimeUs_(0)
 {
+    filterType_ = FilterType::DEMUXER;
     MEDIA_LOG_D("ctor called");
 }
 
@@ -202,8 +203,8 @@ ErrorCode DemuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
     return ErrorCode::SUCCESS;
 }
 
-bool DemuxerFilter::Negotiate(const std::string &inPort, const std::shared_ptr<const Plugin::Capability> &upstreamCap,
-                              Capability &upstreamNegotiatedCap)
+bool DemuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                              Capability& upstreamNegotiatedCap)
 {
     (void)inPort;
     (void)upstreamCap;
@@ -211,7 +212,7 @@ bool DemuxerFilter::Negotiate(const std::string &inPort, const std::shared_ptr<c
     return true;
 }
 
-bool DemuxerFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
+bool DemuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     (void)upstreamMeta->GetUint64(Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
     return upstreamMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_);
