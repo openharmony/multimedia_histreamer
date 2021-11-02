@@ -21,7 +21,6 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-
 class UtAudioSinkTest1 : public AudioSinkPlugin {
 public:
     explicit UtAudioSinkTest1(std::string name) : AudioSinkPlugin(std::move(name))
@@ -59,11 +58,8 @@ public:
     std::shared_ptr<Allocator> GetAllocator() override;
 
     Status SetCallback(const std::shared_ptr<Callback> &cb) override;
-
 };
-
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-
-#endif //HISTREAMER_UTAUDIOSINKTEST1_H
+#endif // HISTREAMER_UTAUDIOSINKTEST1_H

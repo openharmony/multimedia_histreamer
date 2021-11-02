@@ -22,7 +22,6 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-
 class UtDemuxerTest2 : public DemuxerPlugin {
 public:
     explicit UtDemuxerTest2(std::string name) : DemuxerPlugin(std::move(name))
@@ -51,10 +50,7 @@ public:
 
     Status SetCallback(const std::shared_ptr<Callback> &cb) override;
 };
-
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-
-
-#endif //HISTREAMER_UTDEMUXERTEST2_H
+#endif // HISTREAMER_UTDEMUXERTEST2_H

@@ -21,7 +21,6 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-
 class UtSourceTest1 : public SourcePlugin {
 public:
     explicit UtSourceTest1(std::string name) : SourcePlugin(std::move(name))
@@ -46,8 +45,7 @@ public:
 
     static bool available;
 };
-
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-#endif //HISTREAMER_UTSOURCETEST1_H
+#endif // HISTREAMER_UTSOURCETEST1_H
