@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace Media {
 namespace OSAL {
-Thread::Thread() noexcept : id_(), name_(), state_()
+Thread::Thread(ThreadPriority priority) noexcept : id_(), name_(), priority_(priority), state_()
 {
 }
 
@@ -35,6 +35,7 @@ Thread& Thread::operator=(Thread&& other) noexcept
     if (this != &other) {
         id_ = other.id_;
         name_ = std::move(other.name_);
+        priority_ = other.priority_;
         state_ = std::move(other.state_);
     }
     return *this;
@@ -64,6 +65,8 @@ bool Thread::CreateThread(const std::function<void()>& func)
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+    struct sched_param sched = {static_cast<int>(priority_)};
+    pthread_attr_setschedparam(&attr, &sched);
 #if defined(THREAD_STACK_SIZE) and THREAD_STACK_SIZE > 0
     pthread_attr_setstacksize(&attr, THREAD_STACK_SIZE);
     MEDIA_LOG_I("thread stack size set to %d", THREAD_STACK_SIZE);

@@ -18,17 +18,17 @@
 #include "hos_au_sink.h"
 #include <dlfcn.h>
 #include <memory>
-#include "securec.h"
-#include "audio_proxy_manager.h"
 #include "audio_adapter.h"
+#include "audio_proxy_manager.h"
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
-#include "utils/constants.h"
-#include "utils/utils.h"
 #include "foundation/osal/utils/util.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugins/hdi_adapter/utils/hdi_au_utils.h"
 #include "ring_buffer.h"
+#include "securec.h"
+#include "utils/constants.h"
+#include "utils/utils.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;
@@ -41,7 +41,7 @@ constexpr int32_t HALF = 2;
 constexpr int32_t SEC_TO_MILLS = 1000;
 constexpr int32_t PCM_CHAN_CNT = 2;
 
-Status LoadAndInitAdapter(AudioManager *proxyManager, AudioAdapterDescriptor *descriptor, AudioAdapter **adapter)
+Status LoadAndInitAdapter(AudioManager* proxyManager, AudioAdapterDescriptor* descriptor, AudioAdapter** adapter)
 {
     if (proxyManager == nullptr) {
         MEDIA_LOG_E("no audio manager when load adapter");
@@ -79,7 +79,7 @@ Status LoadAndInitAdapter(AudioManager *proxyManager, AudioAdapterDescriptor *de
     return Status::OK;
 }
 
-std::shared_ptr<AudioSinkPlugin> AudioSinkPluginCreator(const std::string &name)
+std::shared_ptr<AudioSinkPlugin> AudioSinkPluginCreator(const std::string& name)
 {
     return std::make_shared<OHOS::Media::HosLitePlugin::HdiSink>(name);
 }
@@ -92,15 +92,15 @@ Status RegisterHdiSinkPlugins(const std::shared_ptr<Register>& reg)
         return Status::ERROR_UNKNOWN;
     }
     int32_t adapterSize = 0;
-    AudioAdapterDescriptor *descriptors = nullptr;
+    AudioAdapterDescriptor* descriptors = nullptr;
     int32_t ret = proxyManager->GetAllAdapters(proxyManager, &descriptors, &adapterSize);
     if (ret != 0 || adapterSize == 0) {
         MEDIA_LOG_E("cannot find available audio adapter");
         return Status::OK;
     }
     for (int32_t index = 0; index < adapterSize; index++) {
-        AudioAdapter *adapter = nullptr;
-        const auto &desc = descriptors[index];
+        AudioAdapter* adapter = nullptr;
+        const auto& desc = descriptors[index];
         if (LoadAndInitAdapter(proxyManager, &descriptors[index], &adapter) != Status::OK) {
             continue;
         }
@@ -131,11 +131,11 @@ Status RegisterHdiSinkPlugins(const std::shared_ptr<Register>& reg)
     return Status::OK;
 }
 
-template<typename T>
-inline Status AssignIfCastSuccess(T &lvalue, const Any& anyValue, const char* tagName)
+template <typename T>
+inline Status AssignIfCastSuccess(T& lvalue, const Any& anyValue, const char* tagName)
 {
     if (typeid(T) == anyValue.Type()) {
-        lvalue = AnyCast<const T &>(anyValue);
+        lvalue = AnyCast<const T&>(anyValue);
         MEDIA_LOG_I("AssignIfCastSuccess found %s", tagName);
         return Status::OK;
     } else {
@@ -144,21 +144,19 @@ inline Status AssignIfCastSuccess(T &lvalue, const Any& anyValue, const char* ta
     }
 }
 
-
-int32_t CalculateBufferSize(const AudioSampleAttributes &attributes)
+int32_t CalculateBufferSize(const AudioSampleAttributes& attributes)
 {
     return attributes.frameSize * attributes.period;
 }
 
 PLUGIN_DEFINITION(HdiAuSink, LicenseType::APACHE_V2, RegisterHdiSinkPlugins, []() {});
-}
+} // namespace
 namespace OHOS {
 namespace Media {
 namespace HosLitePlugin {
 using namespace OHOS::Media::Plugin;
 
-HdiSink::HdiSink(std::string name) :
-    Plugin::AudioSinkPlugin(std::move(name)), audioManager_(nullptr), cacheData_(nullptr)
+HdiSink::HdiSink(std::string name) : Plugin::AudioSinkPlugin(std::move(name)), audioManager_(nullptr), cacheData_()
 {
     // default is media
     sampleAttributes_.type = AUDIO_IN_MEDIA;
@@ -173,14 +171,14 @@ Status HdiSink::Init()
         return Status::ERROR_UNKNOWN;
     }
     int32_t adapterSize = 0;
-    AudioAdapterDescriptor *descriptors = nullptr;
+    AudioAdapterDescriptor* descriptors = nullptr;
     int32_t ret = audioManager_->GetAllAdapters(audioManager_, &descriptors, &adapterSize);
     if (ret != 0 || adapterSize == 0) {
         MEDIA_LOG_E("cannot find available audio adapter");
         return Status::ERROR_UNKNOWN;
     }
     for (int32_t index = 0; index < adapterSize; index++) {
-        const auto &desc = descriptors[index];
+        const auto& desc = descriptors[index];
         if (pluginName_ != desc.adapterName) {
             continue;
         }
@@ -195,7 +193,7 @@ Status HdiSink::Init()
         return Status::ERROR_UNKNOWN;
     }
     if (!renderThread_) {
-        renderThread_ = std::make_shared<OHOS::Media::OSAL::Task>("auRenderThread");
+        renderThread_ = std::make_shared<OHOS::Media::OSAL::Task>("auRenderThread", OSAL::ThreadPriority::HIGH);
         renderThread_->RegisterHandler([this] { DoRender(); });
     }
     return Status::OK;
@@ -229,14 +227,10 @@ Status HdiSink::Deinit()
         }
         audioManager_ = nullptr;
     }
-    if (cacheData_ != nullptr) {
-        delete[](uint8_t*) cacheData_;
-        cacheData_ = nullptr;
-    }
     return Status::OK;
 }
 
-Status HdiSink::SetParameter(Tag tag, const ValueType &value)
+Status HdiSink::SetParameter(Tag tag, const ValueType& value)
 {
     switch (tag) {
         case Tag::AUDIO_CHANNELS:
@@ -284,7 +278,7 @@ Status HdiSink::SetParameter(Tag tag, const ValueType &value)
     return Status::OK;
 }
 
-Status HdiSink::GetParameter(Tag tag, ValueType &value)
+Status HdiSink::GetParameter(Tag tag, ValueType& value)
 {
     UNUSED_VARIABLE(tag);
     UNUSED_VARIABLE(value);
@@ -314,11 +308,11 @@ Status HdiSink::Prepare()
     deviceDescriptor_.desc = nullptr;
 
     MEDIA_LOG_I("create render: %s, port: %d:\ncategory %s,\nchannels %d, sampleRate %d,\n"
-        " audioChannelMask %x, format %d,\nisSignedData %d, interleaved %d,\nperiod %u, frameSize %u",
-        adapterDescriptor_.adapterName, deviceDescriptor_.portId,
-        (sampleAttributes_.type == AUDIO_IN_MEDIA) ? "media" : "communication", sampleAttributes_.channelCount,
-        sampleAttributes_.sampleRate, channelMask_, sampleAttributes_.format, sampleAttributes_.isSignedData,
-        sampleAttributes_.interleaved, sampleAttributes_.period, sampleAttributes_.frameSize);
+                " audioChannelMask %x, format %d,\nisSignedData %d, interleaved %d,\nperiod %u, frameSize %u",
+                adapterDescriptor_.adapterName, deviceDescriptor_.portId,
+                (sampleAttributes_.type == AUDIO_IN_MEDIA) ? "media" : "communication", sampleAttributes_.channelCount,
+                sampleAttributes_.sampleRate, channelMask_, sampleAttributes_.format, sampleAttributes_.isSignedData,
+                sampleAttributes_.interleaved, sampleAttributes_.period, sampleAttributes_.frameSize);
 
     {
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
@@ -336,12 +330,8 @@ Status HdiSink::Prepare()
         MEDIA_LOG_E("cannot allocate enough buffer for ring buffer cache");
         return Status::ERROR_NO_MEMORY;
     }
-    if (isInputInterleaved_ && (sampleAttributes_.channelCount == PCM_CHAN_CNT)) {
-        cacheData_ = new (std::nothrow) uint8_t[bufferSize];
-        if (cacheData_ == nullptr) {
-            MEDIA_LOG_E("cannot allocate enough buffer for cacheData");
-            return Status::ERROR_NO_MEMORY;
-        }
+    if ((sampleAttributes_.channelCount == PCM_CHAN_CNT) && isInputInterleaved_) {
+        cacheData_.resize(CalculateBufferSize(sampleAttributes_));
     }
     return Status::OK;
 }
@@ -412,13 +402,13 @@ std::shared_ptr<Allocator> HdiSink::GetAllocator()
     return nullptr;
 }
 
-Status HdiSink::SetCallback(const std::shared_ptr<Callback> &cb)
+Status HdiSink::SetCallback(const std::shared_ptr<Callback>& cb)
 {
     eventCallback_ = cb;
     return Status::OK;
 }
 
-Status HdiSink::GetMute(bool &mute)
+Status HdiSink::GetMute(bool& mute)
 {
     OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
@@ -447,7 +437,7 @@ Status HdiSink::SetMute(bool mute)
     return Status::OK;
 }
 
-Status HdiSink::GetVolume(float &volume)
+Status HdiSink::GetVolume(float& volume)
 {
     OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
@@ -478,7 +468,7 @@ Status HdiSink::SetVolume(float volume)
     return Status::OK;
 }
 
-Status HdiSink::GetSpeed(float &speed)
+Status HdiSink::GetSpeed(float& speed)
 {
     OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
@@ -536,7 +526,7 @@ Status HdiSink::Resume()
     return Status::OK;
 }
 
-Status HdiSink::GetLatency(uint64_t &ms)
+Status HdiSink::GetLatency(uint64_t& ms)
 {
     OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
@@ -552,19 +542,19 @@ Status HdiSink::GetLatency(uint64_t &ms)
     return Status::OK;
 }
 
-Status HdiSink::GetFrameSize(size_t &size)
+Status HdiSink::GetFrameSize(size_t& size)
 {
     UNUSED_VARIABLE(size);
     return Status::ERROR_UNIMPLEMENTED;
 }
 
-Status HdiSink::GetFrameCount(uint32_t &count)
+Status HdiSink::GetFrameCount(uint32_t& count)
 {
     UNUSED_VARIABLE(count);
     return Status::ERROR_UNIMPLEMENTED;
 }
 
-Status HdiSink::Write(const std::shared_ptr<Buffer> &input)
+Status HdiSink::Write(const std::shared_ptr<Buffer>& input)
 {
     MEDIA_LOG_D("Write begin.");
     if (input != nullptr && !input->IsEmpty()) {
@@ -635,20 +625,13 @@ void HdiSink::Deinterleave32(uint8_t* inData, uint8_t* outData, int32_t frameCnt
 
 bool HdiSink::HandleInterleaveData(uint8_t* origData, int32_t frameCnt)
 {
-    if ((cacheData_ == nullptr) || !isInputInterleaved_ ||
-        (sampleAttributes_.channelCount != PCM_CHAN_CNT)) {
+    if ((sampleAttributes_.channelCount != PCM_CHAN_CNT) || !isInputInterleaved_) {
         return false;
     }
     bool isHandled = true;
     switch (sampleAttributes_.format) {
         case AUDIO_FORMAT_PCM_16_BIT:
-            Deinterleave16(origData, cacheData_, frameCnt);
-            break;
-        case AUDIO_FORMAT_PCM_8_BIT:
-            Deinterleave8(origData, cacheData_, frameCnt);
-            break;
-        case AUDIO_FORMAT_PCM_32_BIT:
-            Deinterleave32(origData, cacheData_, frameCnt);
+            Deinterleave16(origData, cacheData_.data(), frameCnt);
             break;
         default:
             isHandled = false;
@@ -675,7 +658,7 @@ void HdiSink::DoRender()
         if (audioRender_ != nullptr) {
             uint8_t* frame = outFramePtr.get();
             if (HandleInterleaveData(frame, outSize / PCM_CHAN_CNT)) {
-                frame = cacheData_;
+                frame = cacheData_.data();
             }
             ret = audioRender_->RenderFrame(audioRender_, frame, outSize, &renderSize);
         }
@@ -683,9 +666,8 @@ void HdiSink::DoRender()
     if (ret != 0) {
         if (ret == HI_ERR_VI_BUF_FULL) {
             MEDIA_LOG_I("renderFrame buffer full");
-            uint32_t latency = sampleAttributes_.period * SEC_TO_MILLS / sampleAttributes_.sampleRate;
-            MEDIA_LOG_D("latency origin %" PRIu32 "ms", latency);
-            OHOS::Media::OSAL::SleepFor(latency / HALF);
+            constexpr int intervalMs = 5;
+            OHOS::Media::OSAL::SleepFor(intervalMs);
         } else {
             MEDIA_LOG_E("renderFrame error with code %" PRIu64 "x", static_cast<uint64_t>(ret));
         }
@@ -698,6 +680,6 @@ void HdiSink::DoRender()
         ringBuffer_->Advance(renderSize);
     }
 }
-}
-}
-}
+} // namespace HosLitePlugin
+} // namespace Media
+} // namespace OHOS

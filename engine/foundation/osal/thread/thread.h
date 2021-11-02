@@ -24,9 +24,16 @@
 namespace OHOS {
 namespace Media {
 namespace OSAL {
+enum class ThreadPriority : int {
+    HIGHEST = 5,
+    HIGH = 10,
+    NORMAL = 20,
+    LOW = 30,
+};
+
 class Thread {
 public:
-    Thread() noexcept;
+    explicit Thread(ThreadPriority priority = ThreadPriority::NORMAL) noexcept;
 
     Thread(const Thread&) = delete;
 
@@ -55,6 +62,7 @@ private:
 
     pthread_t id_{};
     std::string name_;
+    ThreadPriority priority_;
     std::unique_ptr<State> state_{};
 };
 } // namespace OSAL
