@@ -16,15 +16,17 @@
 #define LOG_TAG "FileSourcePlugin"
 
 #include "file_source_plugin.h"
+#include <sys/stat.h>
 #include "foundation/log.h"
+#include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/core/plugin_manager.h"
-#include "plugin/common/plugin_buffer.h"
+#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-std::shared_ptr<SourcePlugin> FileSourcePluginCreater(const std::string &name)
+std::shared_ptr<SourcePlugin> FileSourcePluginCreater(const std::string& name)
 {
     return std::make_shared<FileSourcePlugin>(name);
 }
@@ -40,41 +42,42 @@ const Status FileSourceRegister(const std::shared_ptr<Register>& reg)
     return reg->AddPlugin(definition);
 }
 
-PLUGIN_DEFINITION(FileSource, LicenseType::APACHE_V2, FileSourceRegister, []{});
+PLUGIN_DEFINITION(FileSource, LicenseType::APACHE_V2, FileSourceRegister, [] {});
 
 void* FileSourceAllocator::Alloc(size_t size)
 {
     if (size == 0) {
         return nullptr;
     }
-    return reinterpret_cast<void *>(new (std::nothrow) uint8_t[size]); // NOLINT: cast
+    return reinterpret_cast<void*>(new (std::nothrow) uint8_t[size]); // NOLINT: cast
 }
 
 void FileSourceAllocator::Free(void* ptr) // NOLINT: void*
 {
     if (ptr != nullptr) {
-        delete[] (uint8_t *)ptr;
+        delete[](uint8_t*) ptr;
     }
 }
 
 FileSourcePlugin::FileSourcePlugin(std::string name)
-    : SourcePlugin(std::move(name)), state_(State::CREATED), fileSize_(0), isSeekable_(true), position_(0)
+    : SourcePlugin(std::move(name)), fp_(nullptr), fileSize_(0), isSeekable_(true), position_(0)
 {
     MEDIA_LOG_D("IN");
-    state_ = State::CREATED;
 }
 
 FileSourcePlugin::~FileSourcePlugin()
 {
     MEDIA_LOG_D("IN");
-    state_ = State::DESTROYED;
+    if (fp_) {
+        std::fclose(fp_);
+        fp_ = nullptr;
+    }
 }
 
 Status FileSourcePlugin::Init()
 {
     MEDIA_LOG_D("IN");
     mAllocator_ = std::make_shared<FileSourceAllocator>();
-    state_ = State::INITIALIZED;
     return Status::OK;
 }
 
@@ -82,14 +85,12 @@ Status FileSourcePlugin::Deinit()
 {
     MEDIA_LOG_D("IN");
     CloseFile();
-    state_ = State::DESTROYED;
     return Status::OK;
 }
 
 Status FileSourcePlugin::Prepare()
 {
     MEDIA_LOG_D("IN");
-    state_ = State::PREPARED;
     return Status::OK;
 }
 
@@ -97,40 +98,37 @@ Status FileSourcePlugin::Reset()
 {
     MEDIA_LOG_D("IN");
     CloseFile();
-    state_ = State::INITIALIZED;
     return Status::OK;
 }
 
 Status FileSourcePlugin::Start()
 {
     MEDIA_LOG_D("IN");
-    state_ = State::RUNNING;
     return Status::OK;
 }
 
 Status FileSourcePlugin::Stop()
 {
     MEDIA_LOG_D("IN");
-    state_ = State::PREPARED;
     return Status::OK;
 }
 
 bool FileSourcePlugin::IsParameterSupported(Tag tag)
 {
     MEDIA_LOG_D("IN");
-    return true;
+    return false;
 }
 
-Status FileSourcePlugin::GetParameter(Tag tag, ValueType &value)
+Status FileSourcePlugin::GetParameter(Tag tag, ValueType& value)
 {
     MEDIA_LOG_D("IN");
-    return Status::OK;
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
-Status FileSourcePlugin::SetParameter(Tag tag, const ValueType &value)
+Status FileSourcePlugin::SetParameter(Tag tag, const ValueType& value)
 {
     MEDIA_LOG_D("IN");
-    return Status::OK;
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 std::shared_ptr<Allocator> FileSourcePlugin::GetAllocator()
@@ -139,19 +137,15 @@ std::shared_ptr<Allocator> FileSourcePlugin::GetAllocator()
     return mAllocator_;
 }
 
-Status FileSourcePlugin::SetCallback(const std::shared_ptr<Callback> &cb)
+Status FileSourcePlugin::SetCallback(const std::shared_ptr<Callback>& cb)
 {
     MEDIA_LOG_D("IN");
-    return Status::OK;
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status FileSourcePlugin::SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params)
 {
     MEDIA_LOG_D("IN");
-    if (state_ != State::INITIALIZED) {
-        MEDIA_LOG_W("Wrong state: %d", state_);
-        return Status::ERROR_WRONG_STATE;
-    }
     auto err = ParseFileName(uri);
     if (err != Status::OK) {
         MEDIA_LOG_E("Parse file name from uri fail, uri: %s", uri.c_str());
@@ -160,9 +154,9 @@ Status FileSourcePlugin::SetSource(std::string& uri, std::shared_ptr<std::map<st
     return OpenFile();
 }
 
-Status FileSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLen)
+Status FileSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
 {
-    if (fin_.eof() == true) {
+    if (std::feof(fp_)) {
         MEDIA_LOG_W("It is the end of file!");
         return Status::END_OF_STREAM;
     }
@@ -178,11 +172,9 @@ Status FileSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
     expectedLen = std::min(static_cast<size_t>(fileSize_ - position_), expectedLen);
     expectedLen = std::min(bufData->GetCapacity(), expectedLen);
 
-    auto ptr = bufData->GetWritableData(expectedLen);
-    size_t offset = 0;
-    MEDIA_LOG_I("buffer addr %p offset %zu", ptr, offset);
-    fin_.read((char *)(ptr + offset), expectedLen);
-    bufData->GetWritableData(fin_.gcount());
+    MEDIA_LOG_I("buffer position %zu, expectedLen %zu", position_, expectedLen);
+    auto size = std::fread(bufData->GetWritableData(expectedLen), sizeof(char), expectedLen, fp_);
+    bufData->GetWritableData(size);
     position_ += bufData->GetSize();
     MEDIA_LOG_D("position_: %" PRIu64 ", readSize: %zu", position_, bufData->GetSize());
     return Status::OK;
@@ -191,7 +183,7 @@ Status FileSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
 Status FileSourcePlugin::GetSize(size_t& size)
 {
     MEDIA_LOG_D("IN");
-    if (!fin_.is_open()) {
+    if (!fp_) {
         MEDIA_LOG_E("Need call SetSource() to open file first");
         return Status::ERROR_WRONG_STATE;
     }
@@ -208,20 +200,19 @@ bool FileSourcePlugin::IsSeekable()
 
 Status FileSourcePlugin::SeekTo(uint64_t offset)
 {
-    if (!fin_.is_open() || (offset > fileSize_) || (position_ == offset)) {
+    if (!fp_ || (offset > fileSize_) || (position_ == offset)) {
         MEDIA_LOG_E("Invalid operation");
         return Status::ERROR_WRONG_STATE;
     }
-    fin_.clear();
-    fin_.seekg(offset, std::ios::beg);
-    if (!fin_.good() || (fin_.tellg() != offset)) {
-        fin_.clear();
-        fin_.seekg(position_, std::ios::beg);
+    std::clearerr(fp_);
+    if (std::fseek(fp_, static_cast<long int>(offset), SEEK_SET) != 0) {
+        std::clearerr(fp_);
+        (void)std::fseek(fp_, static_cast<long int>(position_), SEEK_SET);
         MEDIA_LOG_E("Seek to %" PRIu64, offset);
         return Status::ERROR_UNKNOWN;
     }
     position_ = offset;
-    if (fin_.eof()) {
+    if (std::feof(fp_)) {
         MEDIA_LOG_I("It is the end of file!");
     }
     MEDIA_LOG_D("seek to position_: %" PRIu64 " success", position_);
@@ -249,7 +240,7 @@ Status FileSourcePlugin::ParseFileName(std::string& uri)
         if (uri.find("///", pos) != std::string::npos) {
             pos += 3; // 3: offset
         } else if (uri.find("//", pos) != std::string::npos) {
-            pos += 2; // 2: offset
+            pos += 2;                 // 2: offset
             pos = uri.find('/', pos); // skip host name
             if (pos == std::string::npos) {
                 MEDIA_LOG_E("Invalid file uri format: %s", uri.c_str());
@@ -265,37 +256,51 @@ Status FileSourcePlugin::ParseFileName(std::string& uri)
     return Status::OK;
 }
 
+Status FileSourcePlugin::CheckFileStat()
+{
+    struct stat fileStat;
+    if (stat(fileName_.c_str(), &fileStat) < 0) {
+        MEDIA_LOG_E("Cannot get info from %s", fileName_.c_str());
+        return Status::ERROR_UNKNOWN;
+    }
+    if (S_ISDIR(fileStat.st_mode)) {
+        MEDIA_LOG_E("%s is directory", fileName_.c_str());
+        return Status::ERROR_UNSUPPORTED_FORMAT;
+    }
+    if (S_ISSOCK(fileStat.st_mode)){
+        MEDIA_LOG_E("%s is a socket", fileName_.c_str());
+        return Status::ERROR_UNSUPPORTED_FORMAT;
+    }
+    return Status::OK;
+}
+
 Status FileSourcePlugin::OpenFile()
 {
     MEDIA_LOG_D("IN");
+    auto ret = CheckFileStat();
+    if (ret != Status::OK) {
+        CloseFile();
+        return ret;
+    }
     CloseFile();
-    fin_.open(fileName_.c_str(), std::ios::in | std::ios::binary);
-    if (!fin_.is_open()) {
+    fp_ = std::fopen(fileName_.c_str(), "rb");
+    if (fp_ == nullptr) {
         MEDIA_LOG_E("Fail to load file from %s", fileName_.c_str());
         return Status::ERROR_UNKNOWN;
     }
-    fin_.seekg(0, fin_.end);
-    if (!fin_.good()) {
-        isSeekable_ = false;
-        MEDIA_LOG_E("Seek to end fail");
-        return Status::ERROR_UNKNOWN;
-    }
-    fileSize_ = fin_.tellg();
-    if (fileSize_ <= 0) {
-        isSeekable_ = false;
-    }
+    fileSize_ = GetFileSize(fileName_.c_str());
     MEDIA_LOG_D("fileName_: %s, fileSize_: %zu", fileName_.c_str(), fileSize_);
-    fin_.seekg(0, fin_.beg);
     return Status::OK;
 }
 
 void FileSourcePlugin::CloseFile()
 {
-    if (fin_.is_open()) {
+    if (fp_) {
         MEDIA_LOG_I("close file");
-        fin_.close();
+        std::fclose(fp_);
+        fp_ = nullptr;
     }
 }
-}
-}
-}
+} // namespace Plugin
+} // namespace Media
+} // namespace OHOS

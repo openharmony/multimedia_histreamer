@@ -44,13 +44,13 @@ std::shared_ptr<Port> Port::GetPeerPort()
 ErrorCode InPort::Connect(std::shared_ptr<Port> port)
 {
     prevPort = port;
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode InPort::Disconnect()
 {
     prevPort.reset();
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode InPort::Activate(const std::vector<WorkMode>& modes, WorkMode& outMode)
@@ -58,10 +58,10 @@ ErrorCode InPort::Activate(const std::vector<WorkMode>& modes, WorkMode& outMode
     if (auto ptr = prevPort.lock()) {
         FAIL_RETURN(ptr->Activate(modes, workMode));
         outMode = workMode;
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
     MEDIA_LOG_E("[Filter %s] InPort %s Activate error: prevPort destructed", filter->GetName().c_str(), name.c_str());
-    return NULL_POINTER_ERROR;
+    return ErrorCode::ERROR_NULL_POINTER;
 }
 
 std::shared_ptr<Port> InPort::GetPeerPort()
@@ -89,23 +89,23 @@ ErrorCode InPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
         return ptr->PullData(offset, size, data);
     }
     MEDIA_LOG_E("prevPort destructed");
-    return NULL_POINTER_ERROR;
+    return ErrorCode::ERROR_NULL_POINTER;
 }
 
 ErrorCode OutPort::Connect(std::shared_ptr<Port> port)
 {
     if (InSamePipeline(port)) {
         nextPort = port;
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
     MEDIA_LOG_E("Connect filters that are not in the same pipeline.");
-    return INVALID_PARAM_VALUE;
+    return ErrorCode::ERROR_INVALID_PARAM_VALUE;
 }
 
 ErrorCode OutPort::Disconnect()
 {
     nextPort.reset();
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 bool OutPort::InSamePipeline(std::shared_ptr<Port> port) const
@@ -130,13 +130,13 @@ ErrorCode OutPort::Activate(const std::vector<WorkMode>& modes, WorkMode& outMod
             if (found != supportedModes.cend()) {
                 outMode = mode;
                 workMode = mode;
-                return SUCCESS; // 最先找到的兼容的mode，作为最后结果
+                return ErrorCode::SUCCESS; // 最先找到的兼容的mode，作为最后结果
             }
         }
     } else {
         MEDIA_LOG_E("filter destructed");
     }
-    return NEGOTIATE_ERROR;
+    return ErrorCode::ERROR_NEGOTIATE_FAILED;
 }
 
 std::shared_ptr<Port> OutPort::GetPeerPort()
@@ -160,21 +160,21 @@ ErrorCode OutPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
         return filter->PullData(name, offset, size, data);
     }
     MEDIA_LOG_E("filter destructed");
-    return NULL_POINTER_ERROR;
+    return ErrorCode::ERROR_NULL_POINTER;
 }
 
 ErrorCode EmptyInPort::Connect(std::shared_ptr<Port> port)
 {
     UNUSED_VARIABLE(port);
     MEDIA_LOG_E("Connect in EmptyInPort");
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 ErrorCode EmptyInPort::Activate(const std::vector<WorkMode>& modes, WorkMode& outMode)
 {
     UNUSED_VARIABLE(modes);
     UNUSED_VARIABLE(outMode);
     MEDIA_LOG_E("Activate in EmptyInPort");
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 bool EmptyInPort::Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps)
 {
@@ -194,21 +194,21 @@ ErrorCode EmptyInPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
     UNUSED_VARIABLE(size);
     UNUSED_VARIABLE(data);
     MEDIA_LOG_E("PullData in EmptyInPort");
-    return UNIMPLEMENT;
+    return ErrorCode::ERROR_UNIMPLEMENTED;
 }
 
 ErrorCode EmptyOutPort::Connect(std::shared_ptr<Port> port)
 {
     UNUSED_VARIABLE(port);
     MEDIA_LOG_E("Connect in EmptyOutPort");
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 ErrorCode EmptyOutPort::Activate(const std::vector<WorkMode>& modes, WorkMode& outMode)
 {
     UNUSED_VARIABLE(modes);
     UNUSED_VARIABLE(outMode);
     MEDIA_LOG_E("Activate in EmptyOutPort");
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 bool EmptyOutPort::Negotiate(const std::shared_ptr<const Plugin::Meta>& inMeta, CapabilitySet& outCaps)
 {
@@ -228,7 +228,7 @@ ErrorCode EmptyOutPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data
     UNUSED_VARIABLE(size);
     UNUSED_VARIABLE(data);
     MEDIA_LOG_E("PullData in EmptyOutPort");
-    return UNIMPLEMENT;
+    return ErrorCode::ERROR_UNIMPLEMENTED;
 }
 } // namespace Pipeline
 } // namespace Media

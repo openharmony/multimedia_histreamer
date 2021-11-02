@@ -16,6 +16,7 @@
 #ifndef HISTREAMER_FOUNDATION_OSAL_BASE_SYNCHRONIZER_H
 #define HISTREAMER_FOUNDATION_OSAL_BASE_SYNCHRONIZER_H
 
+#include <functional>
 #include <map>
 #include <set>
 #include <string>
@@ -27,7 +28,7 @@
 namespace OHOS {
 namespace Media {
 namespace OSAL {
-template<typename SyncIdType, typename ResultType = void>
+template <typename SyncIdType, typename ResultType = void>
 class Synchronizer {
 public:
     explicit Synchronizer(std::string name) : name_(std::move(name))
@@ -40,20 +41,27 @@ public:
 
     virtual ~Synchronizer() = default;
 
-    void Wait(SyncIdType syncId)
+    void Wait(SyncIdType syncId, const std::function<void()>& asyncOps)
     {
         MEDIA_LOG_I("Synchronizer %s Wait for %d", name_.c_str(), static_cast<int>(syncId));
-        OSAL::ScopedLock lock(mutex_);
-        waitSet_.insert(syncId);
-        cv_.Wait(lock, [this, syncId] { return syncMap_.find(syncId) != syncMap_.end(); });
-        syncMap_.erase(syncId);
+        if (asyncOps) {
+            OSAL::ScopedLock lock(mutex_);
+            waitSet_.insert(syncId);
+            asyncOps();
+            cv_.Wait(lock, [this, syncId] { return syncMap_.find(syncId) != syncMap_.end(); });
+            syncMap_.erase(syncId);
+        }
     }
 
-    bool WaitFor(SyncIdType syncId, int timeoutMs)
+    bool WaitFor(SyncIdType syncId, const std::function<void()>& asyncOps, int timeoutMs)
     {
         MEDIA_LOG_I("Synchronizer %s Wait for %d, timeout: %d", name_.c_str(), static_cast<int>(syncId), timeoutMs);
+        if (!asyncOps) {
+            return false;
+        }
         OSAL::ScopedLock lock(mutex_);
         waitSet_.insert(syncId);
+        asyncOps();
         auto rtv = cv_.WaitFor(lock, timeoutMs, [this, syncId] { return syncMap_.find(syncId) != syncMap_.end(); });
         if (rtv) {
             syncMap_.erase(syncId);
@@ -63,21 +71,28 @@ public:
         return rtv;
     }
 
-    void Wait(SyncIdType syncId, ResultType& result)
+    void Wait(SyncIdType syncId, const std::function<void()>& asyncOps, ResultType& result)
     {
         MEDIA_LOG_I("Synchronizer %s Wait for %d", name_.c_str(), static_cast<int>(syncId));
-        OSAL::ScopedLock lock(mutex_);
-        waitSet_.insert(syncId);
-        cv_.Wait(lock, [this, syncId] { return syncMap_.find(syncId) != syncMap_.end(); });
-        result = syncMap_[syncId];
-        syncMap_.erase(syncId);
+        if (asyncOps) {
+            OSAL::ScopedLock lock(mutex_);
+            waitSet_.insert(syncId);
+            asyncOps();
+            cv_.Wait(lock, [this, syncId] { return syncMap_.find(syncId) != syncMap_.end(); });
+            result = syncMap_[syncId];
+            syncMap_.erase(syncId);
+        }
     }
 
-    bool WaitFor(SyncIdType syncId, int timeoutMs, ResultType& result)
+    bool WaitFor(SyncIdType syncId, const std::function<void()>& asyncOps, int timeoutMs, ResultType& result)
     {
         MEDIA_LOG_I("Synchronizer %s Wait for %d, timeout: %d", name_.c_str(), static_cast<int>(syncId), timeoutMs);
+        if (!asyncOps) {
+            return false;
+        }
         OSAL::ScopedLock lock(mutex_);
         waitSet_.insert(syncId);
+        asyncOps();
         auto rtv = cv_.WaitFor(lock, timeoutMs, [this, syncId] { return syncMap_.find(syncId) != syncMap_.end(); });
         if (rtv) {
             result = syncMap_[syncId];

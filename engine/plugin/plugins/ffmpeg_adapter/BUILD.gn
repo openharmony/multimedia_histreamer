@@ -14,11 +14,12 @@
 
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
+  import("//build/lite/config/subsystem/multimedia/config.gni")
   group("plugin_ffmpeg_adapter") {
     deps = []
   }
   if (ohos_kernel_type == "liteos_m") {
-    print("unsupport static library")
+    # make static build if needed. current is not supported
   } else {
     config("plugin_ffmpeg_adapter_config") {
       include_dirs = [ "//third_party/ffmpeg" ]

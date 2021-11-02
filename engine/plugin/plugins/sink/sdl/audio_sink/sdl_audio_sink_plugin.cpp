@@ -222,7 +222,7 @@ Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
             sampleRate_ = Plugin::AnyCast<uint32_t>(value);
             break;
         }
-        case Tag::AUDIO_SAMPLE_PRE_FRAME: {
+        case Tag::AUDIO_SAMPLE_PER_FRAME: {
             RETURN_ERROR_IF_CHECK_ERROR(uint32_t);
             samplesPerFrame_ = Plugin::AnyCast<uint32_t>(value);
             break;

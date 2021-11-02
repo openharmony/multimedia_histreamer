@@ -46,14 +46,14 @@ public:
 
     std::tuple<ErrorCode, Action> Play() override
     {
-        return {SUCCESS, Action::ACTION_BUTT};
+        return {ErrorCode::SUCCESS, Action::ACTION_BUTT};
     }
 
     std::tuple<ErrorCode, Action> Seek(const Plugin::Any& param) override
     {
         MEDIA_LOG_D("Seek in playing state.");
         if (param.Type() != typeid(int64_t)) {
-            return {INVALID_PARAM_VALUE, Action::ACTION_BUTT};
+            return {ErrorCode::ERROR_INVALID_PARAM_VALUE, Action::ACTION_BUTT};
         }
         auto timeMs = Plugin::AnyCast<int64_t>(param);
         auto ret = executor_.DoSeek(timeMs);
@@ -62,12 +62,12 @@ public:
 
     std::tuple<ErrorCode, Action> Pause() override
     {
-        return {SUCCESS, Action::TRANS_TO_PAUSE};
+        return {ErrorCode::SUCCESS, Action::TRANS_TO_PAUSE};
     }
 
     std::tuple<ErrorCode, Action> Stop() override
     {
-        return {SUCCESS, Action::TRANS_TO_INIT};
+        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
     }
 
     std::tuple<ErrorCode, Action> OnComplete() override

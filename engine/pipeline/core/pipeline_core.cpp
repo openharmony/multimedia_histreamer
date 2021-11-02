@@ -84,12 +84,12 @@ void PipelineCore::Init(EventReceiver* receiver, FilterCallback* callback)
 ErrorCode PipelineCore::Prepare()
 {
     state_ = FilterState::PREPARING;
-    ErrorCode rtv = SUCCESS;
+    ErrorCode rtv = ErrorCode::SUCCESS;
     OSAL::ScopedLock lock(mutex_);
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
         auto& filterPtr = *it;
         if (filterPtr) {
-            if ((rtv = filterPtr->Prepare()) != SUCCESS) {
+            if ((rtv = filterPtr->Prepare()) != ErrorCode::SUCCESS) {
                 break;
             }
         } else {
@@ -104,26 +104,26 @@ ErrorCode PipelineCore::Start()
     state_ = FilterState::RUNNING;
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
         auto rtv = (*it)->Start();
-        FALSE_RETURN_V(rtv == SUCCESS, rtv);
+        FALSE_RETURN_V(rtv == ErrorCode::SUCCESS, rtv);
     }
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode PipelineCore::Pause()
 {
     if (state_ == FilterState::PAUSED) {
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
     if (state_ != FilterState::READY && state_ != FilterState::RUNNING) {
-        return ERROR_STATE;
+        return ErrorCode::ERROR_STATE;
     }
     state_ = FilterState::PAUSED;
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
-        if ((*it)->Pause() != SUCCESS) {
+        if ((*it)->Pause() != ErrorCode::SUCCESS) {
             MEDIA_LOG_I("pause filter: %s", (*it)->GetName().c_str());
         }
     }
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode PipelineCore::Resume()
@@ -131,10 +131,10 @@ ErrorCode PipelineCore::Resume()
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
         MEDIA_LOG_I("Resume filter: %s", (*it)->GetName().c_str());
         auto rtv = (*it)->Resume();
-        FALSE_RETURN_V(rtv == SUCCESS, rtv);
+        FALSE_RETURN_V(rtv == ErrorCode::SUCCESS, rtv);
     }
     state_ = FilterState::RUNNING;
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode PipelineCore::Stop()
@@ -150,13 +150,13 @@ ErrorCode PipelineCore::Stop()
         }
         auto filterName = (*it)->GetName();
         auto rtv = (*it)->Stop();
-        FALSE_RETURN_V(rtv == SUCCESS, rtv);
+        FALSE_RETURN_V(rtv == ErrorCode::SUCCESS, rtv);
     }
     for (const auto& filter : filtersToRemove_) {
         RemoveFilter(filter);
     }
     MEDIA_LOG_I("Stop finished, filter number: %zu", filters_.size());
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 void PipelineCore::FlushStart()
@@ -194,25 +194,25 @@ ErrorCode PipelineCore::AddFilters(std::initializer_list<Filter*> filtersIn)
         }
     }
     if (filtersToAdd.empty()) {
-        return ALREADY_EXISTS;
+        return ErrorCode::ERROR_ALREADY_EXISTS;
     }
     {
         OSAL::ScopedLock lock(mutex_);
         this->filters_.insert(this->filters_.end(), filtersToAdd.begin(), filtersToAdd.end());
     }
     InitFilters(filtersToAdd);
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode PipelineCore::RemoveFilter(Filter* filter)
 {
     auto it = std::find_if(filters_.begin(), filters_.end(),
                            [&filter](const Filter* filterPtr) { return filterPtr == filter; });
-    ErrorCode rtv = INVALID_PARAM_VALUE;
+    ErrorCode rtv = ErrorCode::ERROR_INVALID_PARAM_VALUE;
     if (it != filters_.end()) {
         MEDIA_LOG_I("RemoveFilter %s", (*it)->GetName().c_str());
         filters_.erase(it);
-        rtv = SUCCESS;
+        rtv = ErrorCode::SUCCESS;
     }
     return rtv;
 }
@@ -220,7 +220,7 @@ ErrorCode PipelineCore::RemoveFilter(Filter* filter)
 ErrorCode PipelineCore::RemoveFilterChain(Filter* firstFilter)
 {
     if (!firstFilter) {
-        return NULL_POINTER_ERROR;
+        return ErrorCode::ERROR_NULL_POINTER;
     }
     std::queue<Filter*> levelFilters;
     levelFilters.push(firstFilter);
@@ -233,7 +233,7 @@ ErrorCode PipelineCore::RemoveFilterChain(Filter* firstFilter)
             levelFilters.push(nextFilter);
         }
     }
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode PipelineCore::LinkFilters(std::initializer_list<Filter*> filters)
@@ -245,14 +245,14 @@ ErrorCode PipelineCore::LinkFilters(std::initializer_list<Filter*> filters)
         filtersToLink[i]->GetOutPort(PORT_NAME_DEFAULT)->Connect(filtersToLink[i + 1]->GetInPort(PORT_NAME_DEFAULT));
         filtersToLink[i + 1]->GetInPort(PORT_NAME_DEFAULT)->Connect(filtersToLink[i]->GetOutPort(PORT_NAME_DEFAULT));
     }
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode PipelineCore::LinkPorts(std::shared_ptr<OutPort> port1, std::shared_ptr<InPort> port2)
 {
     FAIL_RETURN(port1->Connect(port2));
     FAIL_RETURN(port2->Connect(port1));
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 void PipelineCore::OnEvent(Event event)

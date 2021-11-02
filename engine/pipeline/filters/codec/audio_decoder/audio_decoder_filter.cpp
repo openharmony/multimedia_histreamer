@@ -38,7 +38,7 @@ int32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Met
 {
     using namespace OHOS::Media;
     int32_t samplesPerFrame;
-    if (!meta->GetInt32(Plugin::MetaID::AUDIO_SAMPLE_PRE_FRAME, samplesPerFrame)) {
+    if (!meta->GetInt32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame)) {
         return 0;
     }
     int32_t channels;
@@ -130,7 +130,7 @@ AudioDecoderFilter::~AudioDecoderFilter()
 
 ErrorCode AudioDecoderFilter::QueueAllBufferInPoolToPluginLocked()
 {
-    ErrorCode err = SUCCESS;
+    ErrorCode err = ErrorCode::SUCCESS;
     while (!outBufferPool_->Empty()) {
         auto ptr = outBufferPool_->AllocateBuffer();
         if (ptr == nullptr) {
@@ -138,7 +138,7 @@ ErrorCode AudioDecoderFilter::QueueAllBufferInPoolToPluginLocked()
             continue;
         }
         err = TranslatePluginStatus(plugin_->QueueOutputBuffer(ptr, -1));
-        if (err != SUCCESS) {
+        if (err != ErrorCode::SUCCESS) {
             MEDIA_LOG_E("queue output buffer error");
         }
     }
@@ -150,7 +150,7 @@ ErrorCode AudioDecoderFilter::Start()
     MEDIA_LOG_D("audio decoder start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
         MEDIA_LOG_W("call decoder start() when state is not ready or working");
-        return ERROR_STATE;
+        return ErrorCode::ERROR_STATE;
     }
     return FilterBase::Start();
 }
@@ -159,7 +159,7 @@ ErrorCode AudioDecoderFilter::Prepare()
 {
     if (state_ != FilterState::INITIALIZED) {
         MEDIA_LOG_W("decoder filter is not in init state");
-        return ERROR_STATE;
+        return ErrorCode::ERROR_STATE;
     }
     if (!outBufferQ_) {
         outBufferQ_ = std::make_shared<BlockingQueue<AVBufferPtr>>("adecOutBuffQueue",
@@ -194,7 +194,7 @@ ErrorCode AudioDecoderFilter::Prepare()
     }
     auto err = FilterBase::Prepare();
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Audio Decoder prepare error because of filter base prepare error");
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 bool AudioDecoderFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta> &inMeta,
@@ -228,7 +228,7 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort, const std::shared_
         return false;
     }
     err = ConfigureToStartPluginLocked(inMeta);
-    if (err != SUCCESS) {
+    if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("decoder configure error");
         OnEvent({EVENT_ERROR, err});
         return false;
@@ -246,30 +246,22 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort, const std::shared_
 
 ErrorCode AudioDecoderFilter::ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta> &meta)
 {
-    uint32_t channels;
-    if (meta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels)) {
-        MEDIA_LOG_D("found audio channel meta");
-        SetPluginParameterLocked(Tag::AUDIO_CHANNELS, channels);
-    }
-    uint32_t sampleRate;
-    if (meta->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_RATE, sampleRate)) {
-        MEDIA_LOG_D("found audio sample rate meta");
-        SetPluginParameterLocked(Tag::AUDIO_SAMPLE_RATE, sampleRate);
-    }
-    int64_t bitRate;
-    if (meta->GetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate)) {
-        MEDIA_LOG_D("found audio bit rate meta");
-        SetPluginParameterLocked(Tag::MEDIA_BITRATE, bitRate);
-    }
-    auto audioFormat = Plugin::AudioSampleFormat::U8;
-    if (meta->GetData<Plugin::AudioSampleFormat>(Plugin::MetaID::AUDIO_SAMPLE_FORMAT, audioFormat)) {
-        SetPluginParameterLocked(Tag::AUDIO_SAMPLE_FORMAT, audioFormat);
-    }
-    std::vector<uint8_t> codecConfig;
-    if (meta->GetData<std::vector<uint8_t>>(Plugin::MetaID::MEDIA_CODEC_CONFIG, codecConfig)) {
-        SetPluginParameterLocked(Tag::MEDIA_CODEC_CONFIG, std::move(codecConfig));
-    }
-    return SUCCESS;
+#define SET_TAG_AND_LOG(T, metaId, tagId) \
+do { \
+    ret = SetTagFromMetaLocked<T>(meta, metaId, tagId); \
+    if (ret != ErrorCode::SUCCESS) { \
+        MEDIA_LOG_W("set plugin audio " #tagId " error with code %d", ret); \
+    } \
+} while (0)
+
+    ErrorCode ret;
+    SET_TAG_AND_LOG(uint32_t, Plugin::MetaID::AUDIO_CHANNELS, Tag::AUDIO_CHANNELS);
+    SET_TAG_AND_LOG(uint32_t, Plugin::MetaID::AUDIO_SAMPLE_RATE, Tag::AUDIO_SAMPLE_RATE);
+    SET_TAG_AND_LOG(int64_t, Plugin::MetaID::MEDIA_BITRATE, Tag::MEDIA_BITRATE);
+    SET_TAG_AND_LOG(Plugin::AudioSampleFormat, Plugin::MetaID::AUDIO_SAMPLE_FORMAT, Tag::AUDIO_SAMPLE_FORMAT);
+    SET_TAG_AND_LOG(uint32_t, Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, Tag::AUDIO_SAMPLE_PER_FRAME);
+    SET_TAG_AND_LOG(std::vector<uint8_t>, Plugin::MetaID::MEDIA_CODEC_CONFIG, Tag::MEDIA_CODEC_CONFIG);
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode AudioDecoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta)
@@ -283,7 +275,7 @@ ErrorCode AudioDecoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "configure decoder plugin error");
 
     uint32_t bufferCnt = 0;
-    if (GetPluginParameterLocked(Tag::REQUIRED_OUT_BUFFER_CNT, bufferCnt) != SUCCESS) {
+    if (GetPluginParameterLocked(Tag::REQUIRED_OUT_BUFFER_CNT, bufferCnt) != ErrorCode::SUCCESS) {
         bufferCnt = DEFAULT_OUT_BUFFER_POOL_SIZE;
     }
 
@@ -315,27 +307,27 @@ ErrorCode AudioDecoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
     err = TranslatePluginStatus(plugin_->Start());
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "decoder start failed");
 
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode AudioDecoderFilter::PushData(const std::string &inPort, AVBufferPtr buffer)
 {
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
         MEDIA_LOG_W("pushing data to decoder when state is %d", static_cast<int>(state_.load()));
-        return ERROR_STATE;
+        return ErrorCode::ERROR_STATE;
     }
     if (isFlushing_) {
         MEDIA_LOG_I("decoder is flushing, discarding this data from port %s", inPort.c_str());
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
     // async
     if (drivingMode_ == ThreadDrivingMode::ASYNC) {
         inBufferQ_->Push(buffer);
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
     // sync
     HandleOneFrame(buffer);
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 void AudioDecoderFilter::FlushStart()
@@ -352,7 +344,7 @@ void AudioDecoderFilter::FlushStart()
     pushTask_->PauseAsync();
     if (plugin_ != nullptr) {
         auto err = TranslatePluginStatus(plugin_->Flush());
-        if (err != SUCCESS) {
+        if (err != ErrorCode::SUCCESS) {
             MEDIA_LOG_E("decoder plugin flush error");
         }
     }
@@ -423,7 +415,7 @@ ErrorCode AudioDecoderFilter::Release()
         outBufferQ_->SetActive(false);
         outBufferQ_.reset();
     }
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 void AudioDecoderFilter::HandleFrame()

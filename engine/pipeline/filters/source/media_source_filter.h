@@ -43,8 +43,8 @@ public:
 
     std::vector<WorkMode> GetWorkModes() override;
     ErrorCode PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data) override;
-    virtual ErrorCode SetSource(std::shared_ptr<MediaSource> source);
-    ErrorCode InitPlugin(std::shared_ptr<MediaSource> source);
+    virtual ErrorCode SetSource(const std::shared_ptr<MediaSource>& source);
+    ErrorCode InitPlugin(const std::shared_ptr<MediaSource>& source);
     virtual ErrorCode SetBufferSize(size_t size);
     bool IsSeekable() const;
     ErrorCode Prepare() override;

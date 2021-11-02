@@ -35,7 +35,7 @@ TEST(Test_meta_bundle, GetNull_before_Update)
 
 TEST(Test_meta_bundle, GetGlobalMeta_after_Update)
 {
-    Meta meta;
+    Plugin::Meta meta;
     std::string title("title");
     std::string album("album");
     int32_t channels = 64;
@@ -61,7 +61,7 @@ TEST(Test_meta_bundle, GetGlobalMeta_after_Update)
 
 TEST(Test_meta_bundle, GetStreamMeta_after_Update)
 {
-    Meta meta;
+    Plugin::Meta meta;
     std::string mime("audio/mpeg");
     std::string language("zh");
     meta.SetString(Media::Plugin::MetaID::MIME, mime);

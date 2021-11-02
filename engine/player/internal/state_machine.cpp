@@ -61,10 +61,10 @@ ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param) const
 
 ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param)
 {
-    SendEventAsync(intent, param);
     constexpr int timeoutMs = 5000;
-    ErrorCode errorCode = ERROR_TIMEOUT;
-    if (!intentSync_.WaitFor(intent, timeoutMs, errorCode)) {
+    ErrorCode errorCode = ErrorCode::ERROR_TIMEOUT;
+    if (!intentSync_.WaitFor(
+            intent, [this, intent, param] { SendEventAsync(intent, param); }, timeoutMs, errorCode)) {
         MEDIA_LOG_E("SendEvent timeout, intent: %d", static_cast<int>(intent));
     }
     return errorCode;
@@ -79,7 +79,7 @@ ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param)
 {
     MEDIA_LOG_D("SendEventAsync, intent: %d", static_cast<int>(intent));
     jobs_.Push([this, intent, param]() -> Action { return ProcessIntent(intent, param); });
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
@@ -87,19 +87,19 @@ Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
     MEDIA_LOG_D("ProcessIntent, curState: %s, intent: %d.", curState_->GetName().c_str(), intent);
     OSAL::ScopedLock lock(mutex_);
     lastIntent = intent;
-    ErrorCode rtv = SUCCESS;
+    ErrorCode rtv = ErrorCode::SUCCESS;
     Action nextAction = Action::ACTION_BUTT;
     std::tie(rtv, nextAction) = curState_->Execute(intent, param);
-    if (rtv == SUCCESS) {
+    if (rtv == ErrorCode::SUCCESS) {
         rtv = ProcAction(nextAction);
     }
     OnIntentExecuted(intent, nextAction, rtv);
-    return (rtv == SUCCESS) ? nextAction : Action::ACTION_BUTT;
+    return (rtv == ErrorCode::SUCCESS) ? nextAction : Action::ACTION_BUTT;
 }
 
 void StateMachine::DoTask()
 {
-    constexpr int timeoutMs = 100;
+    constexpr int timeoutMs = 500;
     auto job = jobs_.Pop(timeoutMs);
     if (!job) {
         return;
@@ -158,7 +158,7 @@ ErrorCode StateMachine::ProcAction(Action nextAction)
         default:
             break;
     }
-    ErrorCode ret = SUCCESS;
+    ErrorCode ret = ErrorCode::SUCCESS;
     if (nextState) {
         ret = TransitionTo(nextState);
     }
@@ -169,15 +169,15 @@ ErrorCode StateMachine::TransitionTo(const std::shared_ptr<State>& state)
 {
     if (state == nullptr) {
         MEDIA_LOG_E("TransitionTo, nullptr for state");
-        return NULL_POINTER_ERROR;
+        return ErrorCode::ERROR_NULL_POINTER;
     }
-    ErrorCode rtv = SUCCESS;
+    ErrorCode rtv = ErrorCode::SUCCESS;
     if (state != curState_) {
         curState_->Exit();
         curState_ = state;
         Action nextAction;
         std::tie(rtv, nextAction) = curState_->Enter(lastIntent);
-        if (rtv == SUCCESS) {
+        if (rtv == ErrorCode::SUCCESS) {
             rtv = ProcAction(nextAction);
         }
         if (callback_) {

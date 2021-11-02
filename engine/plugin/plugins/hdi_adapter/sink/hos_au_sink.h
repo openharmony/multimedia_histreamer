@@ -17,6 +17,7 @@
 #define HISTREAMER_HDI_SINK_H
 
 #include <atomic>
+#include <vector>
 #include "audio_types.h"
 #include "foundation/osal/thread/mutex.h"
 #include "foundation/osal/thread/condition_variable.h"
@@ -90,12 +91,20 @@ public:
 private:
     Media::Plugin::Status ReleaseRender();
 
+    void Deinterleave8(uint8_t* inData, uint8_t* outData, int32_t frameCnt);
+
+    void Deinterleave16(uint8_t* inData, uint8_t* outData, int32_t frameCnt);
+
+    void Deinterleave32(uint8_t* inData, uint8_t* outData, int32_t frameCnt);
+
+    bool HandleInterleaveData(uint8_t* origData, int32_t frameCnt);
+
     void DoRender();
 
 private:
-    std::atomic<OHOS::Media::Plugin::State> pluginState_ {OHOS::Media::Plugin::State::CREATED};
-
     OHOS::Media::OSAL::Mutex renderMutex_ {};
+
+    std::atomic<bool> shouldRenderFrame_ {false};
 
     AudioManager* audioManager_ {nullptr};
     AudioAdapterDescriptor adapterDescriptor_ {};
@@ -104,12 +113,14 @@ private:
     AudioPort audioPort_ {};
     AudioDeviceDescriptor deviceDescriptor_ {};
     AudioSampleAttributes sampleAttributes_ {};
+    bool isInputInterleaved_{false};
     AudioChannelMask channelMask_ {AUDIO_CHANNEL_MONO};
 
     std::weak_ptr<OHOS::Media::Plugin::Callback> eventCallback_ {};
 
     std::shared_ptr<RingBuffer> ringBuffer_ {};
     std::shared_ptr<OHOS::Media::OSAL::Task> renderThread_ {};
+    std::vector<uint8_t> cacheData_;
 };
 }
 }

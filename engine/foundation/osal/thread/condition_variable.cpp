@@ -29,10 +29,12 @@ ConditionVariable::ConditionVariable() noexcept : condInited_(true)
 {
     pthread_condattr_t attr;
     pthread_condattr_init(&attr);
+#ifndef __LITEOS_M__
 #ifdef USING_CLOCK_REALTIME
     pthread_condattr_setclock(&attr, CLOCK_REALTIME);
 #else
     pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
+#endif
 #endif
     int rtv = pthread_cond_init(&cond_, &attr);
     if (rtv != 0) {

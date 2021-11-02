@@ -20,7 +20,7 @@ namespace OHOS {
 namespace Media {
 namespace OSAL {
 void SleepFor(unsigned ms);
-} // OSAL
+} // namespace OSAL
 } // namespace Media
 } // namespace OHOS
 

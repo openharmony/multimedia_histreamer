@@ -34,8 +34,8 @@ public:
     MockObject<AudioDecoderFilter> audioDecoder {};
     MockObject<AudioSinkFilter> audioSink {};
 
-    std::shared_ptr<HiPlayer::HiPlayerImpl> player = HiPlayer::HiPlayerImpl::CreateHiPlayerImpl();
-    std::shared_ptr<MediaSource> source = std::make_shared<MediaSource>("./test.mp3");
+    std::shared_ptr<HiPlayerImpl> player = HiPlayerImpl::CreateHiPlayerImpl();
+    static OHOS::Media::Source source;
     PInPort emptyInPort = EmptyInPort::GetInstance();
     POutPort emptyOutPort = EmptyOutPort::GetInstance();
 
@@ -46,20 +46,20 @@ public:
         MOCK_METHOD(audioDecoder, Init).defaults();
         MOCK_METHOD(audioSink, Init).defaults();
 
-        MOCK_METHOD(audioSource, Prepare).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(demuxer, Prepare).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(audioDecoder, Prepare).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(audioSink, Prepare).defaults().will(returnValue(SUCCESS));
+        MOCK_METHOD(audioSource, Prepare).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(demuxer, Prepare).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(audioDecoder, Prepare).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(audioSink, Prepare).defaults().will(returnValue(ErrorCode::SUCCESS));
 
-        MOCK_METHOD(audioSource, Start).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(demuxer, Start).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(audioDecoder, Start).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(audioSink, Start).defaults().will(returnValue(SUCCESS));
+        MOCK_METHOD(audioSource, Start).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(demuxer, Start).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(audioDecoder, Start).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(audioSink, Start).defaults().will(returnValue(ErrorCode::SUCCESS));
 
-        MOCK_METHOD(audioSource, Stop).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(demuxer, Stop).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(audioDecoder, Stop).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(audioSink, Stop).defaults().will(returnValue(SUCCESS));
+        MOCK_METHOD(audioSource, Stop).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(demuxer, Stop).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(audioDecoder, Stop).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(audioSink, Stop).defaults().will(returnValue(ErrorCode::SUCCESS));
 
         MOCK_METHOD(audioSource, GetInPort).defaults().will(returnValue(emptyInPort));
         MOCK_METHOD(demuxer, GetInPort).defaults().will(returnValue(emptyInPort));
@@ -71,13 +71,13 @@ public:
         MOCK_METHOD(audioDecoder, GetOutPort).defaults().will(returnValue(emptyOutPort));
         MOCK_METHOD(audioSink, GetOutPort).defaults().will(returnValue(emptyOutPort));
 
-        player->audioSource.reset<MediaSourceFilter>(audioSource);
-        player->demuxer.reset<DemuxerFilter>(demuxer);
-        player->audioDecoder.reset<AudioDecoderFilter>(audioDecoder);
-        player->audioSink.reset<AudioSinkFilter>(audioSink);
+        player->audioSource_.reset<MediaSourceFilter>(audioSource);
+        player->demuxer_.reset<DemuxerFilter>(demuxer);
+        player->audioDecoder_.reset<AudioDecoderFilter>(audioDecoder);
+        player->audioSink_.reset<AudioSinkFilter>(audioSink);
 
-        MOCK_METHOD(audioSource, SetSource).defaults().will(returnValue(SUCCESS));
-        MOCK_METHOD(audioSource, SetBufferSize).defaults().will(returnValue(SUCCESS));
+        MOCK_METHOD(audioSource, SetSource).defaults().will(returnValue(ErrorCode::SUCCESS));
+        MOCK_METHOD(audioSource, SetBufferSize).defaults().will(returnValue(ErrorCode::SUCCESS));
 
         player->Init();
     }
@@ -95,13 +95,16 @@ public:
     }
 };
 
+OHOS::Media::Source UtTestHiPlayer::source("./test.mp3");
+
 TEST_F(UtTestHiPlayer, Can_SetSource)
 {
+    // 因为player内部根据source参数创建shared_ptr，最终调用 audioSource.SetSource. 这里没法检查该指针参数了。
     MOCK_METHOD(audioSource, SetSource)
         .expects(once())
-        .with(source)
-        .will(returnValue(SUCCESS));
-    ASSERT_EQ(SUCCESS, player->SetSource(source));
+        .with(any())
+        .will(returnValue(ErrorCode::SUCCESS));
+    ASSERT_EQ(static_cast<int>(ErrorCode::SUCCESS), player->SetSource(source));
     player->fsm_.DoTask();
     ASSERT_EQ("PreparingState", player->fsm_.curState_->GetName());
 }
@@ -112,8 +115,8 @@ TEST_F(UtTestHiPlayer, Can_SetBufferSize)
     MOCK_METHOD(audioSource, SetBufferSize)
         .expects(once())
         .with(eq(size))
-        .will(returnValue(SUCCESS));
-    ASSERT_EQ(SUCCESS, player->SetBufferSize(size));
+        .will(returnValue(ErrorCode::SUCCESS));
+    ASSERT_EQ(ErrorCode::SUCCESS, player->SetBufferSize(size));
 }
 }
 

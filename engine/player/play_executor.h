@@ -32,55 +32,55 @@ public:
 
     virtual ErrorCode PrepareFilters()
     {
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
 
     virtual ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source) const
     {
         (void)source;
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
 
     virtual ErrorCode DoPlay()
     {
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
 
     virtual ErrorCode DoPause()
     {
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
 
     virtual ErrorCode DoResume()
     {
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
 
     virtual ErrorCode DoStop()
     {
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
 
     virtual ErrorCode DoSeek(int64_t msec)
     {
         (void)msec;
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
 
     virtual ErrorCode DoOnReady()
     {
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
 
     virtual ErrorCode DoOnComplete()
     {
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
 
     virtual ErrorCode DoOnError(ErrorCode errorCode)
     {
         (void)errorCode;
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
 };
 } // namespace Media

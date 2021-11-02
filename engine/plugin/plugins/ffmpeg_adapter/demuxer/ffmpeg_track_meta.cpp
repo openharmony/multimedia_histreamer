@@ -71,7 +71,7 @@ void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream, const std::sha
         if (!IsPcmStream(avStream)) {
             samplesPerFrame = static_cast<uint32_t>(context->frame_size);
         }
-        meta.insert({Tag::AUDIO_SAMPLE_PRE_FRAME, samplesPerFrame});
+        meta.insert({Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame});
         meta.insert({Tag::AUDIO_SAMPLE_FORMAT, Trans2Format(context->sample_fmt)});
         meta.insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(context->bit_rate)});
     }
@@ -144,7 +144,7 @@ void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_
         meta.insert({Tag::AUDIO_SAMPLE_FORMAT, Trans2Format(context->sample_fmt)});
         meta.insert(
             {Tag::AUDIO_CHANNEL_LAYOUT, ConvertChannelLayoutFromFFmpeg(context->channels, context->channel_layout)});
-        meta.insert({Tag::AUDIO_SAMPLE_PRE_FRAME, static_cast<uint32_t>(context->frame_size)});
+        meta.insert({Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(context->frame_size)});
         meta.insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(context->bit_rate)});
     }
     meta.insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(4)}); // 4
