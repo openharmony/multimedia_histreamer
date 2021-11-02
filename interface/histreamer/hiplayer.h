@@ -21,7 +21,6 @@
 
 namespace OHOS {
 namespace Media {
-
 #if defined(WIN32)
 __declspec(dllexport)
 #endif

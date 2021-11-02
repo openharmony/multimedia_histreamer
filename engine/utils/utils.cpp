@@ -18,7 +18,6 @@
 
 namespace OHOS {
 namespace Media {
-
 size_t GetFileSize(const char* fileName)
 {
     size_t fileSize = 0;
@@ -30,6 +29,5 @@ size_t GetFileSize(const char* fileName)
     }
     return fileSize;
 }
-
 } // namespace Media
 } // namespace OHOS

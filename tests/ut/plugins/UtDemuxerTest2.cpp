@@ -27,7 +27,7 @@ static Status RegisterPlugins(const std::shared_ptr<Register>& reg)
     DemuxerPluginDef regInfo;
     regInfo.name = "UtDemuxerTest2";
     regInfo.description = "unit test demuxer test2";
-    regInfo.rank = 100;
+    regInfo.rank = 100; // 100
     regInfo.creator = [](const std::string& name) -> std::shared_ptr<DemuxerPlugin> {
         return std::make_shared<UtDemuxerTest2>(name);
     };

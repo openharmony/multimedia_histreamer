@@ -24,7 +24,7 @@ static int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource
     if (dataSource->ReadAt(0, bufData, bufferSize) == Status::OK) {
         const uint8_t* data = bufData->GetMemory()->GetReadOnlyData();
         if (data[0] == 'U' && data[1] == 't') {
-            return 100;
+            return 100; // 100
         }
     }
     return 0;
@@ -35,7 +35,7 @@ static Status RegisterPlugins(const std::shared_ptr<Register>& reg)
     DemuxerPluginDef regInfo;
     regInfo.name = "UtDemuxerTest1";
     regInfo.description = "unit test demuxer test1";
-    regInfo.rank = 100;
+    regInfo.rank = 100; // 100
     regInfo.creator = [](const std::string& name) -> std::shared_ptr<DemuxerPlugin> {
         return std::make_shared<UtDemuxerTest1>(name);
     };

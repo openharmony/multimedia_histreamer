@@ -30,7 +30,7 @@ static Status SourceRegister(const std::shared_ptr<Register> &reg)
         SourcePluginDef definition;
         definition.name = "UtSourceTest2";
         definition.description = "unit test source test2";
-        definition.rank = 100;
+        definition.rank = 100; // 100
         definition.protocol = "file";
         definition.creator = PluginCreator;
         return reg->AddPlugin(definition);
