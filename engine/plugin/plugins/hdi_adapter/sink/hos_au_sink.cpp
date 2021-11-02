@@ -214,7 +214,7 @@ Media::Plugin::Status HdiSink::ReleaseRender()
 Status HdiSink::Deinit()
 {
     MEDIA_LOG_E("Deinit entered.");
-    shouldRenderFrame_ = false;
+    Stop();
     if (renderThread_ != nullptr) {
         renderThread_->Stop();
     }
@@ -381,6 +381,9 @@ Status HdiSink::Stop()
         if (audioRender_ == nullptr) {
             MEDIA_LOG_E("no available render");
             return Status::OK;
+        }
+        if (audioRender_->control.Flush(audioRender_) != 0) {
+            MEDIA_LOG_E("audio render flush error");
         }
         if (audioRender_->control.Stop(audioRender_) != 0) {
             MEDIA_LOG_E("audio render stop error");
