@@ -24,6 +24,7 @@ if (defined(ohos_lite)) {
     "factory/filter_factory.cpp",
     "filters/codec/audio_decoder/audio_decoder_filter.cpp",
     "filters/codec/decoder_filter_base.cpp",
+    "filters/common/plugin_settings.cpp",
     "filters/common/plugin_utils.cpp",
     "filters/demux/data_packer.cpp",
     "filters/demux/demuxer_filter.cpp",

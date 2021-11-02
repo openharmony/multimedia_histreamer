@@ -42,6 +42,7 @@ MediaSourceFilter::MediaSourceFilter(const std::string& name)
       pluginAllocator_(nullptr),
       pluginInfo_(nullptr)
 {
+    filterType_ = FilterType::MEDIA_SOURCE;
     MEDIA_LOG_D("ctor called");
 }
 

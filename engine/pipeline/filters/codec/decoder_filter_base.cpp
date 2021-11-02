@@ -16,19 +16,31 @@
 #define LOG_TAG "AudioDecoderFilter"
 
 #include "decoder_filter_base.h"
-#include "utils/constants.h"
+
+#include "pipeline/filters/common/plugin_settings.h"
 #include "utils/memory_helper.h"
-#include "osal/utils/util.h"
-#include "factory/filter_factory.h"
-#include "common/plugin_utils.h"
-#include "plugin/common/plugin_audio_tags.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
 DecoderFilterBase::DecoderFilterBase(const std::string &name): FilterBase(name) {}
 
-DecoderFilterBase::~DecoderFilterBase(){}
+DecoderFilterBase::~DecoderFilterBase()= default;
+
+ErrorCode DecoderFilterBase::ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta> &meta)
+{
+    auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
+    for (const auto& keyPair : parameterMap) {
+        Plugin::ValueType outValue;
+        if (meta->GetData(static_cast<Plugin::MetaID>(keyPair.first), outValue) &&
+            keyPair.second.second(outValue)) {
+            SetPluginParameterLocked(keyPair.first, outValue);
+        } else {
+            MEDIA_LOG_W("parameter %s in meta is not found or type mismatch", keyPair.second.first.c_str());
+        }
+    }
+    return ErrorCode::SUCCESS;
+}
 
 ErrorCode DecoderFilterBase::SetPluginParameterLocked(Tag tag, const Plugin::ValueType &value)
 {
