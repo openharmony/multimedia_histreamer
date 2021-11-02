@@ -20,30 +20,15 @@
 #include "factory/filter_factory.h"
 #include "plugin/interface/source_plugin.h"
 #include "plugin/core/plugin_meta.h"
+#include "common/plugin_utils.h"
+#include "utils/type_define.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
 using namespace Plugin;
 
-namespace {
-AutoRegisterFilter<MediaSourceFilter> g_registerFilterHelper("builtin.player.mediasource");
-
-ErrorCode TranslateError(Status err)
-{
-    ErrorCode ret = ErrorCode::ERROR_UNKNOWN;
-    switch (err) {
-        case Status::OK:
-            ret = ErrorCode::SUCCESS;
-            break;
-        case Status::END_OF_STREAM:
-            ret = ErrorCode::END_OF_STREAM;
-        default:
-            break;
-    }
-    return ret;
-}
-} // namespace
+static AutoRegisterFilter<MediaSourceFilter> g_registerFilterHelper("builtin.player.mediasource");
 
 MediaSourceFilter::MediaSourceFilter(const std::string& name)
     : FilterBase(name),
@@ -94,7 +79,7 @@ ErrorCode MediaSourceFilter::SetSource(const std::shared_ptr<MediaSource>& sourc
 ErrorCode MediaSourceFilter::InitPlugin(const std::shared_ptr<MediaSource>& source)
 {
     MEDIA_LOG_D("IN");
-    ErrorCode err = TranslateError(plugin_->Init());
+    ErrorCode err = TranslatePluginStatus(plugin_->Init());
     if (err != ErrorCode::SUCCESS) {
         return err;
     }
@@ -108,7 +93,7 @@ ErrorCode MediaSourceFilter::InitPlugin(const std::shared_ptr<MediaSource>& sour
         params->insert(std::pair<std::string, ValueType>(key, value));
     } else {
         // network protocl need to add params
-        err = TranslateError(plugin_->SetSource(uri_, nullptr));
+        err = TranslatePluginStatus(plugin_->SetSource(uri_, nullptr));
     }
     return err;
 }
@@ -142,7 +127,7 @@ ErrorCode MediaSourceFilter::Prepare()
     if (plugin_ == nullptr) {
         return ErrorCode::ERROR_PLUGIN_NOT_FOUND;
     }
-    auto err = TranslateError(plugin_->Prepare());
+    auto err = TranslatePluginStatus(plugin_->Prepare());
     if (err == ErrorCode::SUCCESS) {
         MEDIA_LOG_D("media source send EVENT_READY");
         OnEvent(Event{EVENT_READY, {}});
@@ -156,7 +141,7 @@ ErrorCode MediaSourceFilter::Start()
     if (taskPtr_) {
         taskPtr_->Start();
     }
-    return plugin_ ? TranslateError(plugin_->Start()) : ErrorCode::ERROR_PLUGIN_NOT_FOUND;
+    return plugin_ ? TranslatePluginStatus(plugin_->Start()) : ErrorCode::ERROR_PLUGIN_NOT_FOUND;
 }
 
 ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data)
@@ -184,7 +169,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
             MEDIA_LOG_D("totalSize_: %zu", totalSize);
         }
         if (position_ != offset) {
-            err = TranslateError(plugin_->SeekTo(offset));
+            err = TranslatePluginStatus(plugin_->SeekTo(offset));
             if (err != ErrorCode::SUCCESS) {
                 MEDIA_LOG_E("Seek to %llu fail", offset);
                 return err;
@@ -195,7 +180,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
     if (data == nullptr) {
         data = std::make_shared<AVBuffer>();
     }
-    err = TranslateError(plugin_->Read(data, readSize));
+    err = TranslatePluginStatus(plugin_->Read(data, readSize));
     if (err == ErrorCode::SUCCESS) {
         position_ += data->GetMemory()->GetSize();
     }
@@ -212,7 +197,7 @@ ErrorCode MediaSourceFilter::Stop()
     uri_.clear();
     ErrorCode ret = ErrorCode::ERROR_PLUGIN_NOT_FOUND;
     if (plugin_) {
-        ret = TranslateError(plugin_->Stop());
+        ret = TranslatePluginStatus(plugin_->Stop());
     }
     return ret;
 }
@@ -282,7 +267,7 @@ void MediaSourceFilter::ReadLoop()
 {
     MEDIA_LOG_D("IN");
     AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
-    ErrorCode ret = TranslateError(plugin_->Read(bufferPtr, 4096)); // 4096: default push data size
+    ErrorCode ret = TranslatePluginStatus(plugin_->Read(bufferPtr, 4096)); // 4096: default push data size
     if (ret == ErrorCode::END_OF_STREAM) {
         Stop();
         OnEvent({EVENT_COMPLETE, {}});
@@ -318,11 +303,11 @@ ErrorCode MediaSourceFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& inf
                                           PluginManager& manager)
 {
     if ((plugin_ != nullptr) && (pluginInfo_ != nullptr)) {
-        if (info->name == pluginInfo_->name && TranslateError(plugin_->Reset()) == ErrorCode::SUCCESS) {
+        if (info->name == pluginInfo_->name && TranslatePluginStatus(plugin_->Reset()) == ErrorCode::SUCCESS) {
             MEDIA_LOG_I("Reuse last plugin: %s", name.c_str());
             return ErrorCode::SUCCESS;
         }
-        if (TranslateError(plugin_->Deinit()) != ErrorCode::SUCCESS) {
+        if (TranslatePluginStatus(plugin_->Deinit()) != ErrorCode::SUCCESS) {
             MEDIA_LOG_E("Deinit last plugin: %s error", pluginInfo_->name.c_str());
         }
     }
