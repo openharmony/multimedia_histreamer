@@ -23,14 +23,18 @@
 namespace OHOS {
 namespace Media {
 namespace OSAL {
-Task::Task(std::string name)
-    : name_(std::move(name)), runningState_(RunningState::PAUSED), loop_(), pauseDone_(false), workInProgress_(false)
+Task::Task(std::string name, ThreadPriority priority)
+    : name_(std::move(name)),
+      runningState_(RunningState::PAUSED),
+      loop_(priority),
+      pauseDone_(false),
+      workInProgress_(false)
 {
     MEDIA_LOG_D("task %s ctor called", name_.c_str());
     loop_.SetName(name_);
 }
 
-Task::Task(std::string name, std::function<void()> handler) : Task(std::move(name))
+Task::Task(std::string name, std::function<void()> handler, ThreadPriority priority) : Task(std::move(name), priority)
 {
     MEDIA_LOG_D("task %s ctor called", name_.c_str());
     handler_ = std::move(handler);

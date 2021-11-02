@@ -17,6 +17,7 @@
 #define HISTREAMER_HDI_SINK_H
 
 #include <atomic>
+#include <vector>
 #include "audio_types.h"
 #include "foundation/osal/thread/mutex.h"
 #include "foundation/osal/thread/condition_variable.h"
@@ -119,7 +120,7 @@ private:
 
     std::shared_ptr<RingBuffer> ringBuffer_ {};
     std::shared_ptr<OHOS::Media::OSAL::Task> renderThread_ {};
-    uint8_t* cacheData_ {nullptr};
+    std::vector<uint8_t> cacheData_;
 };
 }
 }
