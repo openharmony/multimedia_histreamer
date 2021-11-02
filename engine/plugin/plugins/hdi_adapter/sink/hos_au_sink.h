@@ -112,6 +112,7 @@ private:
     AudioPort audioPort_ {};
     AudioDeviceDescriptor deviceDescriptor_ {};
     AudioSampleAttributes sampleAttributes_ {};
+    bool isInputInterleaved_{false};
     AudioChannelMask channelMask_ {AUDIO_CHANNEL_MONO};
 
     std::weak_ptr<OHOS::Media::Plugin::Callback> eventCallback_ {};

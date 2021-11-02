@@ -32,18 +32,18 @@ struct PluginHdiAudioFormatTable {
 };
 
 PluginHdiAudioFormatTable g_phft[] = {
-    {AUDIO_FORMAT_PCM_8_BIT, false, false, false, OHOS::Media::Plugin::AudioSampleFormat::U8},
-    {AUDIO_FORMAT_PCM_8_BIT, false, true, false, OHOS::Media::Plugin::AudioSampleFormat::U8P},
-    {AUDIO_FORMAT_PCM_8_BIT, true, false, false, OHOS::Media::Plugin::AudioSampleFormat::S8},
-    {AUDIO_FORMAT_PCM_8_BIT, true, true, false, OHOS::Media::Plugin::AudioSampleFormat::S8P},
-    {AUDIO_FORMAT_PCM_16_BIT, false, false, false, OHOS::Media::Plugin::AudioSampleFormat::U16},
-    {AUDIO_FORMAT_PCM_16_BIT, false, true, false, OHOS::Media::Plugin::AudioSampleFormat::U16P},
-    {AUDIO_FORMAT_PCM_16_BIT, true, false, false, OHOS::Media::Plugin::AudioSampleFormat::S16},
-    {AUDIO_FORMAT_PCM_16_BIT, true, true, false, OHOS::Media::Plugin::AudioSampleFormat::S16P},
-    {AUDIO_FORMAT_PCM_32_BIT, false, false, false, OHOS::Media::Plugin::AudioSampleFormat::U32},
-    {AUDIO_FORMAT_PCM_32_BIT, false, true, false, OHOS::Media::Plugin::AudioSampleFormat::U32P},
-    {AUDIO_FORMAT_PCM_32_BIT, true, false, false, OHOS::Media::Plugin::AudioSampleFormat::S32},
-    {AUDIO_FORMAT_PCM_32_BIT, true, true, false, OHOS::Media::Plugin::AudioSampleFormat::S32P},
+    {AUDIO_FORMAT_PCM_8_BIT, false, true, false, OHOS::Media::Plugin::AudioSampleFormat::U8},
+    {AUDIO_FORMAT_PCM_8_BIT, false, false, false, OHOS::Media::Plugin::AudioSampleFormat::U8P},
+    {AUDIO_FORMAT_PCM_8_BIT, true, true, false, OHOS::Media::Plugin::AudioSampleFormat::S8},
+    {AUDIO_FORMAT_PCM_8_BIT, true, false, false, OHOS::Media::Plugin::AudioSampleFormat::S8P},
+    {AUDIO_FORMAT_PCM_16_BIT, false, true, false, OHOS::Media::Plugin::AudioSampleFormat::U16},
+    {AUDIO_FORMAT_PCM_16_BIT, false, false, false, OHOS::Media::Plugin::AudioSampleFormat::U16P},
+    {AUDIO_FORMAT_PCM_16_BIT, true, true, false, OHOS::Media::Plugin::AudioSampleFormat::S16},
+    {AUDIO_FORMAT_PCM_16_BIT, true, false, false, OHOS::Media::Plugin::AudioSampleFormat::S16P},
+    {AUDIO_FORMAT_PCM_32_BIT, false, true, false, OHOS::Media::Plugin::AudioSampleFormat::U32},
+    {AUDIO_FORMAT_PCM_32_BIT, false, false, false, OHOS::Media::Plugin::AudioSampleFormat::U32P},
+    {AUDIO_FORMAT_PCM_32_BIT, true, true, false, OHOS::Media::Plugin::AudioSampleFormat::S32},
+    {AUDIO_FORMAT_PCM_32_BIT, true, false, false, OHOS::Media::Plugin::AudioSampleFormat::S32P},
 };
 
 std::pair<uint32_t, AudioSampleRatesMask> g_phst[] = {
