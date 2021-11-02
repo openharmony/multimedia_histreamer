@@ -27,7 +27,7 @@ static Status AudioSinkRegister(const std::shared_ptr<Register> &reg)
     AudioSinkPluginDef definition;
     definition.name = "UtAudioSinkTest1";
     definition.description = "unit test audio sink test1";
-    definition.rank = 100;
+    definition.rank = 100; // 100
     definition.creator = PluginCreator;
     return reg->AddPlugin(definition);
 }

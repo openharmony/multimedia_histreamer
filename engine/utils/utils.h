@@ -48,7 +48,6 @@ constexpr typename std::underlying_type<E>::type to_underlying(E e) noexcept
 }
 
 size_t GetFileSize(const char* fileName);
-
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_FOUNDATION_UTILS_H
