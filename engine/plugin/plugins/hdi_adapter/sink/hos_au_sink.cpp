@@ -250,6 +250,13 @@ Status HdiSink::SetParameter(Tag tag, const ValueType &value)
                 return ret;
             }
             if (PluginAuFormat2HdiAttrs(format, sampleAttributes_)) {
+                // always configure hdi with non-interleaved
+                if (sampleAttributes_.interleaved) {
+                    isInputInterleaved_ = true;
+                    sampleAttributes_.interleaved = false;
+                } else {
+                    isInputInterleaved_ = false;
+                }
                 return Status::OK;
             } else {
                 MEDIA_LOG_E("audioSampleFormat mismatch");
@@ -329,7 +336,7 @@ Status HdiSink::Prepare()
         MEDIA_LOG_E("cannot allocate enough buffer for ring buffer cache");
         return Status::ERROR_NO_MEMORY;
     }
-    if ((sampleAttributes_.interleaved == false) && (sampleAttributes_.channelCount == PCM_CHAN_CNT)) {
+    if (isInputInterleaved_ && (sampleAttributes_.channelCount == PCM_CHAN_CNT)) {
         cacheData_ = new (std::nothrow) uint8_t[bufferSize];
         if (cacheData_ == nullptr) {
             MEDIA_LOG_E("cannot allocate enough buffer for cacheData");
@@ -346,6 +353,7 @@ Status HdiSink::Reset()
     (void)memset_s(&audioPort_, sizeof(audioPort_), 0, sizeof(audioPort_));
     (void)memset_s(&sampleAttributes_, sizeof(sampleAttributes_), 0, sizeof(sampleAttributes_));
     (void)memset_s(&deviceDescriptor_, sizeof(deviceDescriptor_), 0, sizeof(deviceDescriptor_));
+    isInputInterleaved_ = false;
     channelMask_ = AUDIO_CHANNEL_MONO;
 
     return Status::OK;
@@ -627,7 +635,7 @@ void HdiSink::Deinterleave32(uint8_t* inData, uint8_t* outData, int32_t frameCnt
 
 bool HdiSink::HandleInterleaveData(uint8_t* origData, int32_t frameCnt)
 {
-    if ((cacheData_ == nullptr) || (sampleAttributes_.interleaved == true) ||
+    if ((cacheData_ == nullptr) || !isInputInterleaved_ ||
         (sampleAttributes_.channelCount != PCM_CHAN_CNT)) {
         return false;
     }
@@ -666,7 +674,7 @@ void HdiSink::DoRender()
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
         if (audioRender_ != nullptr) {
             uint8_t* frame = outFramePtr.get();
-            if (HandleInterleaveData(frame, outSize / PCM_CHAN_CNT) == true) {
+            if (HandleInterleaveData(frame, outSize / PCM_CHAN_CNT)) {
                 frame = cacheData_;
             }
             ret = audioRender_->RenderFrame(audioRender_, frame, outSize, &renderSize);
