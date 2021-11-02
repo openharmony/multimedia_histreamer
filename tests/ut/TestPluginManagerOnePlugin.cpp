@@ -36,7 +36,6 @@ TEST(TestPluginManagerOnePlugin, ListPlugins_case2)
     std::set<std::string> plugins = PluginManager::Instance().ListPlugins(PluginType::SOURCE);
     ASSERT_TRUE(plugins.size() == 1);
 }
-
 } // namespace Test
 } // namespace Media
 } // namespace OHOS

@@ -169,12 +169,14 @@ class UtDataSourceHelperTest1 : public DataSourceHelper {
 public:
     ~UtDataSourceHelperTest1() override = default;
 
-    Status ReadAt(int64_t offset, std::shared_ptr<Buffer> &buffer, size_t expectedLen) override {
+    Status ReadAt(int64_t offset, std::shared_ptr<Buffer> &buffer, size_t expectedLen) override
+    {
         buffer->GetMemory()->Write(reinterpret_cast<const uint8_t *>("UtPlugin"), 8);
         return Status::OK;
     }
 
-    Status GetSize(size_t &size) override {
+    Status GetSize(size_t &size) override
+    {
         return Status::OK;
     }
 };
@@ -183,12 +185,14 @@ class UtDataSourceHelperTest2 : public DataSourceHelper {
 public:
     ~UtDataSourceHelperTest2() override = default;
 
-    Status ReadAt(int64_t offset, std::shared_ptr<Buffer> &buffer, size_t expectedLen) override {
+    Status ReadAt(int64_t offset, std::shared_ptr<Buffer> &buffer, size_t expectedLen) override
+    {
         buffer->GetMemory()->Write(reinterpret_cast<const uint8_t *>("12345678"), 8);
         return Status::OK;
     }
 
-    Status GetSize(size_t &size) override {
+    Status GetSize(size_t &size) override
+    {
         return Status::OK;
     }
 };
@@ -216,7 +220,6 @@ TEST(TestPluginManager, Sniffer_case4)
 {
     ASSERT_TRUE(PluginManager::Instance().Sniffer("UtDemuxerTest1", nullptr) == 0);
 }
-
 } // namespace Test
 } // namespace Media
 } // namespace OHOS

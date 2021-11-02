@@ -21,7 +21,6 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-
 class UtCodecTest1 : public CodecPlugin {
 public:
     explicit UtCodecTest1(std::string name) : CodecPlugin(std::move(name))
@@ -42,9 +41,7 @@ public:
 
     Status SetCallback(const std::shared_ptr<Callback> &cb) override;
 };
-
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-
-#endif //HISTREAMER_UTCODECTEST1_H
+#endif // HISTREAMER_UTCODECTEST1_H

@@ -18,7 +18,6 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-
 bool UtSourceTest1::available = true;
 
 static std::shared_ptr<SourcePlugin> PluginCreator(const std::string &name)
@@ -45,7 +44,7 @@ PLUGIN_DEFINITION(UtSourceTest1, LicenseType::APACHE_V2, SourceRegister, [] {});
 
 Status OHOS::Media::Plugin::UtSourceTest1::SetSource(std::string &uri,
                                                      std::shared_ptr<std::map<std::string, ValueType>> params)
-                                                     {
+{
     return Status::OK;
 }
 
@@ -78,7 +77,6 @@ Status UtSourceTest1::SetCallback(const std::shared_ptr<Callback> &cb)
 {
     return Status::OK;
 }
-
 }
 }
 }

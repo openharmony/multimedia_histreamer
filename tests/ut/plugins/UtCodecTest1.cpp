@@ -22,7 +22,8 @@ static std::shared_ptr<CodecPlugin> PluginCreator(const std::string &name)
     return std::make_shared<UtCodecTest1>(name);
 }
 
-static Status CodecRegister(const std::shared_ptr<Register> &reg) {
+static Status CodecRegister(const std::shared_ptr<Register> &reg)
+{
     CodecPluginDef definition;
     definition.name = "UtCodecTest1";
     definition.description = "unit test codec test1";
