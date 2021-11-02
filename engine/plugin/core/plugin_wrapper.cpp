@@ -25,7 +25,7 @@ std::set<OHOS::Media::Plugin::MetaID> g_metaIdSet = {
     OHOS::Media::Plugin::MetaID::AUDIO_CHANNELS,
     OHOS::Media::Plugin::MetaID::AUDIO_SAMPLE_RATE,
     OHOS::Media::Plugin::MetaID::AUDIO_SAMPLE_FORMAT,
-    OHOS::Media::Plugin::MetaID::AUDIO_SAMPLE_PRE_FRAME,
+    OHOS::Media::Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME,
     OHOS::Media::Plugin::MetaID::AUDIO_CHANNEL_LAYOUT,
     OHOS::Media::Plugin::MetaID::MEDIA_TITLE,
     OHOS::Media::Plugin::MetaID::MEDIA_ARTIST,

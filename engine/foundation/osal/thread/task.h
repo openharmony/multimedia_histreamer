@@ -28,11 +28,12 @@
 namespace OHOS {
 namespace Media {
 namespace OSAL {
+
 class Task {
 public:
-    explicit Task(std::string name);
+    explicit Task(std::string name, ThreadPriority priority = ThreadPriority::NORMAL);
 
-    explicit Task(std::string name, std::function<void()> handler);
+    explicit Task(std::string name, std::function<void()> handler, ThreadPriority priority = ThreadPriority::NORMAL);
 
     virtual ~Task();
 

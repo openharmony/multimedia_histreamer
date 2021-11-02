@@ -39,22 +39,22 @@ public:
     }
     ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source) const override
     {
-        return source ? SUCCESS : INVALID_SOURCE;
+        return source ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_SOURCE;
     }
     ErrorCode DoOnReady() override
     {
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
     ErrorCode DoOnComplete() override
     {
         if (!isLooping_ && stateMachine_) {
             stateMachine_->SendEventAsync(Intent::STOP);
         }
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
     ErrorCode DoOnError(ErrorCode) override
     {
-        return SUCCESS;
+        return ErrorCode::SUCCESS;
     }
 
 private:
@@ -89,7 +89,7 @@ TEST_F(TestStateMachine, test_init_state)
 TEST_F(TestStateMachine, test_set_invalid_source)
 {
     EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
-    EXPECT_EQ(INVALID_SOURCE, stateMachine.SendEvent(Intent::SET_SOURCE));
+    EXPECT_EQ(ErrorCode::ERROR_INVALID_SOURCE, stateMachine.SendEvent(Intent::SET_SOURCE));
     EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
 }
 
@@ -97,14 +97,14 @@ TEST_F(TestStateMachine, test_set_valid_source)
 {
     EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
     auto source = std::make_shared<MediaSource>("FakeUri");
-    EXPECT_EQ(SUCCESS, stateMachine.SendEvent(Intent::SET_SOURCE, source));
+    EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::SET_SOURCE, source));
     EXPECT_TRUE(stateMachine.GetCurrentState() == "PreparingState");
 }
 
 TEST_F(TestStateMachine, test_set_notify_error_in_preparing)
 {
     EXPECT_TRUE(stateMachine.GetCurrentState() == "PreparingState");
-    EXPECT_EQ(SUCCESS, stateMachine.SendEvent(Intent::NOTIFY_ERROR));
+    EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::NOTIFY_ERROR));
     EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
 }
 
@@ -112,30 +112,30 @@ TEST_F(TestStateMachine, test_notify_ready)
 {
     EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
     auto source = std::make_shared<MediaSource>("FakeUri");
-    EXPECT_EQ(SUCCESS, stateMachine.SendEvent(Intent::SET_SOURCE, source));
+    EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::SET_SOURCE, source));
     EXPECT_TRUE(stateMachine.GetCurrentState() == "PreparingState");
-    EXPECT_EQ(SUCCESS, stateMachine.SendEvent(Intent::NOTIFY_READY));
+    EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::NOTIFY_READY));
     EXPECT_TRUE(stateMachine.GetCurrentState() == "ReadyState");
 }
 
 TEST_F(TestStateMachine, test_play_after_ready)
 {
     EXPECT_TRUE(stateMachine.GetCurrentState() == "ReadyState");
-    EXPECT_EQ(SUCCESS, stateMachine.SendEvent(Intent::PLAY));
+    EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::PLAY));
     EXPECT_TRUE(stateMachine.GetCurrentState() == "PlayingState");
 }
 
 TEST_F(TestStateMachine, test_pause)
 {
     EXPECT_TRUE(stateMachine.GetCurrentState() == "PlayingState");
-    EXPECT_EQ(SUCCESS, stateMachine.SendEvent(Intent::PAUSE));
+    EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::PAUSE));
     EXPECT_TRUE(stateMachine.GetCurrentState() == "PauseState");
 }
 
 TEST_F(TestStateMachine, test_play_after_pause)
 {
     EXPECT_TRUE(stateMachine.GetCurrentState() == "PauseState");
-    EXPECT_EQ(SUCCESS, stateMachine.SendEvent(Intent::PLAY));
+    EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::PLAY));
     EXPECT_TRUE(stateMachine.GetCurrentState() == "PlayingState");
 }
 
@@ -143,7 +143,7 @@ TEST_F(TestStateMachine, test_play_complete_looping)
 {
     g_playExecutorStub.SetLooping(true);
     EXPECT_TRUE(stateMachine.GetCurrentState() == "PlayingState");
-    EXPECT_EQ(SUCCESS, stateMachine.SendEvent(Intent::NOTIFY_COMPLETE));
+    EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::NOTIFY_COMPLETE));
     EXPECT_TRUE(stateMachine.GetCurrentState() == "PlayingState");
 }
 
@@ -151,7 +151,7 @@ TEST_F(TestStateMachine, test_play_complete_nolooping)
 {
     g_playExecutorStub.SetLooping(false);
     EXPECT_TRUE(stateMachine.GetCurrentState() == "PlayingState");
-    EXPECT_EQ(SUCCESS, stateMachine.SendEvent(Intent::NOTIFY_COMPLETE));
+    EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::NOTIFY_COMPLETE));
     OSAL::SleepFor(100);
     EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
 }

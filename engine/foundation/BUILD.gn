@@ -13,6 +13,7 @@
 #
 
 import("//build/lite/config/component/lite_component.gni")
+import("//build/lite/config/subsystem/multimedia/config.gni")
 
 histreamer_foundation_src = [
   "osal/thread/task.cpp",
@@ -46,12 +47,23 @@ lite_library("histreamer_foundation") {
   public_deps = [
     "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
     "//foundation/multimedia/utils/lite:media_common",
-    "//third_party/bounds_checking_function:libsec_shared",
   ]
-  cflags = [
-    "-O2",
-    "-fPIC",
-    "-Wall",
-  ]
+  if (ohos_kernel_type == "liteos_m") {
+    public_deps += [
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_static",
+      "//third_party/bounds_checking_function:libsec_static",
+    ]
+  } else {
+    public_deps += [
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "//third_party/bounds_checking_function:libsec_shared",
+    ]
+  }
+  cflags = [ "-O2" ]
   cflags_cc = cflags
+  if (defined(config_ohos_multimedia_histreamer_stack_size) &&
+      config_ohos_multimedia_histreamer_stack_size > 0) {
+    defines =
+        [ "THREAD_STACK_SIZE=$config_ohos_multimedia_histreamer_stack_size" ]
+  }
 }

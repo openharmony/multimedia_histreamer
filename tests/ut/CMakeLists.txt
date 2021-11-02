@@ -37,9 +37,12 @@ link_directories(
 
 file(GLOB UT_TEST_SRCS ./*.cpp)
 
+file(GLOB UT_TEST_PLUGINS ./plugins/*.cpp)
+
 set(SRC
         ${HISTREAMER_SRCS}
         ${UT_TEST_SRCS}
+        ${UT_TEST_PLUGINS}
         ${3RDPARTY_SRCS}
         ../main.cpp
         )

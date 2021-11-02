@@ -17,9 +17,9 @@
 
 #include "demuxer_filter.h"
 #include <algorithm>
+#include "factory/filter_factory.h"
 #include "foundation/log.h"
 #include "utils/constants.h"
-#include "factory/filter_factory.h"
 
 namespace OHOS {
 namespace Media {
@@ -189,7 +189,7 @@ ErrorCode DemuxerFilter::Prepare()
     }
     SetCurrentTime(0);
     state_ = FilterState::PREPARING;
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode DemuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
@@ -198,7 +198,7 @@ ErrorCode DemuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
     if (dataPacker_) {
         dataPacker_->PushData(std::move(buffer));
     }
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 bool DemuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
@@ -206,17 +206,17 @@ bool DemuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<c
 {
     (void)inPort;
     (void)outCaps;
-    return inMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_) &&
-           inMeta->GetUint64(Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
+    (void)inMeta->GetUint64(Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
+    return inMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_);
 }
 
 ErrorCode DemuxerFilter::SeekTo(int64_t msec)
 {
     if (!plugin_) {
         MEDIA_LOG_E("SeekTo failed due to no valid plugin");
-        return NULL_POINTER_ERROR;
+        return ErrorCode::ERROR_NULL_POINTER;
     }
-    ErrorCode rtv = SUCCESS;
+    ErrorCode rtv = ErrorCode::SUCCESS;
     auto ret = plugin_->SeekTo(-1, msec * 1000, Plugin::SeekMode::BACKWARD); // 1000
     if (ret == Plugin::Status::OK) {
         if (task_) {
@@ -224,7 +224,7 @@ ErrorCode DemuxerFilter::SeekTo(int64_t msec)
         }
     } else {
         MEDIA_LOG_E("SeekTo failed with return value: %d", static_cast<int>(ret));
-        rtv = SEEK_FAILURE;
+        rtv = ErrorCode::ERROR_SEEK_FAILURE;
     }
     return rtv;
 }
@@ -243,7 +243,7 @@ ErrorCode DemuxerFilter::GetCurrentTime(int64_t& time) const
 {
     OSAL::ScopedLock lock(timeMutex_);
     time = curTimeUs_ / 1000; // 1000, time in milliseconds
-    return SUCCESS;
+    return ErrorCode::SUCCESS;
 }
 
 void DemuxerFilter::Reset()
@@ -271,12 +271,17 @@ bool DemuxerFilter::InitPlugin(std::string pluginName)
             plugin_->Deinit();
         }
         plugin_ = Plugin::PluginManager::Instance().CreateDemuxerPlugin(pluginName);
+        if (!plugin_ || plugin_->Init() != Plugin::Status::OK) {
+            MEDIA_LOG_E("InitPlugin for %s failed.", pluginName.c_str());
+            return false;
+        }
         pluginAllocator_ = plugin_->GetAllocator();
         pluginName_.swap(pluginName);
-    }
-    if (plugin_->Init() != Plugin::Status::OK) {
-        MEDIA_LOG_E("InitPlugin for %s failed due to plugin not found.", pluginName.c_str());
-        return false;
+    } else {
+        if (plugin_->Reset() != Plugin::Status::OK) {
+            MEDIA_LOG_E("plugin %s failed to reset.", pluginName.c_str());
+            return false;
+        }
     }
     MEDIA_LOG_W("InitPlugin, %s used.", pluginName_.c_str());
     plugin_->SetDataSource(std::dynamic_pointer_cast<Plugin::DataSourceHelper>(dataSource_));
@@ -297,7 +302,7 @@ void DemuxerFilter::ActivatePullMode()
         return (offset < mediaDataSize_) && (size <= mediaDataSize_) && (offset <= (mediaDataSize_ - size));
     };
     peekRange_ = [this](uint64_t offset, size_t size, AVBufferPtr& bufferPtr) -> bool {
-        return inPorts_.front()->PullData(offset, size, bufferPtr) == SUCCESS;
+        return inPorts_.front()->PullData(offset, size, bufferPtr) == ErrorCode::SUCCESS;
     };
     getRange_ = peekRange_;
     typeFinder_->Init(uriSuffix_, mediaDataSize_, checkRange_, peekRange_);
@@ -327,7 +332,7 @@ void DemuxerFilter::MediaTypeFound(std::string pluginName)
     if (InitPlugin(std::move(pluginName))) {
         task_->Start();
     } else {
-        OnEvent({EVENT_ERROR, PLUGIN_NOT_FOUND});
+        OnEvent({EVENT_ERROR, ErrorCode::ERROR_PLUGIN_NOT_FOUND});
     }
 }
 
@@ -390,25 +395,25 @@ bool DemuxerFilter::PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo)
         MEDIA_LOG_E("PrepareStreams failed due to no valid port.");
         return false;
     }
-    ErrorCode ret = SUCCESS;
+    ErrorCode ret = ErrorCode::SUCCESS;
     if (callback_) {
         ret = callback_->OnCallback(FilterCallbackType::PORT_ADDED, static_cast<Filter*>(this), portInfo);
     }
-    return ret == SUCCESS;
+    return ret == ErrorCode::SUCCESS;
 }
 
-int DemuxerFilter::ReadFrame(AVBuffer& buffer, uint32_t& streamIndex)
+ErrorCode DemuxerFilter::ReadFrame(AVBuffer& buffer, uint32_t& streamIndex)
 {
     MEDIA_LOG_D("ReadFrame called");
-    ErrorCode result = UNKNOWN_ERROR;
+    ErrorCode result = ErrorCode::ERROR_UNKNOWN;
     auto rtv = plugin_->ReadFrame(buffer, 0);
     if (rtv == Plugin::Status::OK) {
         streamIndex = buffer.streamID;
         SetCurrentTime(buffer.pts);
-        result = SUCCESS;
+        result = ErrorCode::SUCCESS;
     }
     MEDIA_LOG_D("ReadFrame return with rtv = %d", static_cast<int32_t>(rtv));
-    return (rtv != Plugin::Status::END_OF_STREAM) ? result : END_OF_STREAM;
+    return (rtv != Plugin::Status::END_OF_STREAM) ? result : ErrorCode::END_OF_STREAM;
 }
 
 std::shared_ptr<Plugin::Meta> DemuxerFilter::GetStreamMeta(uint32_t streamIndex)
@@ -447,7 +452,7 @@ void DemuxerFilter::NegotiateDownstream()
                 stream.needNegoCaps = false;
             } else {
                 task_->PauseAsync();
-                OnEvent({EVENT_ERROR, PLUGIN_NOT_FOUND});
+                OnEvent({EVENT_ERROR, ErrorCode::ERROR_PLUGIN_NOT_FOUND});
             }
         }
     }
@@ -459,12 +464,12 @@ void DemuxerFilter::DemuxerLoop()
         AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
         uint32_t streamIndex = 0;
         auto rtv = ReadFrame(*bufferPtr, streamIndex);
-        if (rtv == SUCCESS) {
+        if (rtv == ErrorCode::SUCCESS) {
             HandleFrame(bufferPtr, streamIndex);
         } else {
             SendEventEos();
             task_->PauseAsync();
-            if (rtv != END_OF_STREAM) {
+            if (rtv != ErrorCode::END_OF_STREAM) {
                 MEDIA_LOG_E("ReadFrame failed with rtv = %d", rtv);
             }
         }
@@ -477,7 +482,7 @@ void DemuxerFilter::DemuxerLoop()
             OnEvent({EVENT_READY, {}});
         } else {
             task_->PauseAsync();
-            OnEvent({EVENT_ERROR, PARSE_META_FAILED});
+            OnEvent({EVENT_ERROR, ErrorCode::ERROR_PARSE_META_FAILED});
         }
     }
 }

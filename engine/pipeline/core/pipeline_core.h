@@ -102,7 +102,7 @@ public:
     {
         UNUSED_VARIABLE(inPort);
         UNUSED_VARIABLE(buffer);
-        return UNIMPLEMENT;
+        return ErrorCode::ERROR_UNIMPLEMENTED;
     }
     ErrorCode PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data) override
     {
@@ -110,7 +110,7 @@ public:
         UNUSED_VARIABLE(offset);
         UNUSED_VARIABLE(size);
         UNUSED_VARIABLE(data);
-        return UNIMPLEMENT;
+        return ErrorCode::ERROR_UNIMPLEMENTED;
     }
     std::vector<WorkMode> GetWorkModes() override
     {
@@ -132,13 +132,13 @@ public:
     {
         UNUSED_VARIABLE(key);
         UNUSED_VARIABLE(value);
-        return UNIMPLEMENT;
+        return ErrorCode::ERROR_UNIMPLEMENTED;
     }
     ErrorCode GetParameter(int32_t key, Plugin::Any& value) override
     {
         UNUSED_VARIABLE(key);
         UNUSED_VARIABLE(value);
-        return UNIMPLEMENT;
+        return ErrorCode::ERROR_UNIMPLEMENTED;
     }
 
     void InitFilters(const std::vector<Filter*>& filters);

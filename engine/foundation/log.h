@@ -76,7 +76,7 @@ inline std::string MediaGetFileName(std::string file)
 #define FAIL_RETURN(exec)                                                                                              \
     do {                                                                                                               \
         ErrorCode ret = (exec);                                                                                        \
-        if (ret != SUCCESS) {                                                                                          \
+        if (ret != ErrorCode::SUCCESS) {                                                                                          \
             MEDIA_LOG_E("FAIL_RETURN on ErrorCode(%d).", ret);                                                         \
             return ret;                                                                                                \
         }                                                                                                              \
@@ -87,7 +87,7 @@ inline std::string MediaGetFileName(std::string file)
 #define FAIL_LOG(exec)                                                                                                 \
     do {                                                                                                               \
         ErrorCode ret = (exec);                                                                                        \
-        if (ret != SUCCESS) {                                                                                          \
+        if (ret != ErrorCode::SUCCESS) {                                                                                          \
             MEDIA_LOG_E("FAIL_LOG on ErrorCode(%d).", ret);                                                            \
         }                                                                                                              \
     } while (0)
@@ -136,7 +136,7 @@ inline std::string MediaGetFileName(std::string file)
 #endif
 
 #define RETURN_TARGET_ERR_MESSAGE_LOG_IF_FAIL(err, returnErr, msg)                                                     \
-    if ((err) != SUCCESS) {                                                                                            \
+    if ((err) != ErrorCode::SUCCESS) {                                                                                            \
         MEDIA_LOG_E(msg);                                                                                              \
         return returnErr;                                                                                              \
     }

@@ -16,17 +16,24 @@
 #ifndef HISTREAMER_FOUNDATION_OSAL_THREAD_H
 #define HISTREAMER_FOUNDATION_OSAL_THREAD_H
 
+#include <pthread.h> // NOLINT
 #include <functional>
 #include <memory> // NOLINT
-#include <pthread.h> // NOLINT
 #include <string>
 
 namespace OHOS {
 namespace Media {
 namespace OSAL {
+enum class ThreadPriority : int {
+    HIGHEST = 5,
+    HIGH = 10,
+    NORMAL = 20,
+    LOW = 30,
+};
+
 class Thread {
 public:
-    Thread() noexcept;
+    explicit Thread(ThreadPriority priority = ThreadPriority::NORMAL) noexcept;
 
     Thread(const Thread&) = delete;
 
@@ -47,15 +54,16 @@ public:
 private:
     struct State {
         virtual ~State() = default;
-        std::function<void()> func_ {};
+        std::function<void()> func_{};
     };
 
     void SetNameInternal();
     static void* Run(void* arg); // NOLINT: void*
 
-    pthread_t id_ {};
+    pthread_t id_{};
     std::string name_;
-    std::unique_ptr<State> state_ {};
+    ThreadPriority priority_;
+    std::unique_ptr<State> state_{};
 };
 } // namespace OSAL
 } // namespace Media

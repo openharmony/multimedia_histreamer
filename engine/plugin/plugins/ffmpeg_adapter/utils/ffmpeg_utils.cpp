@@ -236,7 +236,7 @@ AudioSampleFormat Trans2Format(AVSampleFormat sampleFormat)
         case AV_SAMPLE_FMT_DBLP:
             return AudioSampleFormat::F64P;
         default:
-            return AudioSampleFormat::U8;
+            return AudioSampleFormat::S16;
     }
 }
 

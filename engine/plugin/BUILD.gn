@@ -27,7 +27,6 @@ if (defined(ohos_lite)) {
     deps = [
       ":histreamer_plugin_core",
       ":histreamer_plugin_intf",
-      "plugins:gen_plungin_static_header",
       "plugins:histreamer_plugin_store",
     ]
   }
@@ -47,7 +46,11 @@ if (defined(ohos_lite)) {
     }
     sources = hst_plugin_intf_src
     public_configs = [ ":hst_plugin_intf_config" ]
-    public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+    if (ohos_kernel_type == "liteos_m") {
+      public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    } else {
+      public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+    }
     cflags = [ "-Wall" ]
     cflags_cc = cflags
   }
@@ -73,7 +76,6 @@ if (defined(ohos_lite)) {
       "//foundation/multimedia/histreamer/engine/foundation",
       "//foundation/multimedia/histreamer/engine/utils",
       "//foundation/multimedia/utils/lite/interfaces/kits",
-      "${target_gen_dir}/plugins/include/",
     ]
   }
 
@@ -94,8 +96,13 @@ if (defined(ohos_lite)) {
       ":histreamer_plugin_intf",
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
-      "//third_party/bounds_checking_function:libsec_shared",
     ]
+    if (ohos_kernel_type == "liteos_m") {
+      public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+    } else {
+      public_deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
+    }
+    public_deps += [ "plugins:gen_plugin_static_header" ]
     cflags = [ "-Wall" ]
     cflags_cc = cflags
   }

@@ -16,14 +16,15 @@
 #ifndef HISTREAMER_FOUNDATION_UTILS_H
 #define HISTREAMER_FOUNDATION_UTILS_H
 
+#include <cstdint>
 #include <string>
 
-#define CALL_PTR_FUNC(ptr, func, param)                           \
-        if ((ptr)) {                                              \
-            (ptr)->func(param);                                   \
-        } else {                                                  \
-            MEDIA_LOG_E("Call weakPtr " #func " error." );        \
-        }
+#define CALL_PTR_FUNC(ptr, func, param)                                                                                \
+    if ((ptr)) {                                                                                                       \
+        (ptr)->func(param);                                                                                            \
+    } else {                                                                                                           \
+        MEDIA_LOG_E("Call weakPtr " #func " error.");                                                                  \
+    }
 
 #define UNUSED_VARIABLE(v) ((void)(v))
 
@@ -45,6 +46,8 @@ constexpr typename std::underlying_type<E>::type to_underlying(E e) noexcept
 {
     return static_cast<typename std::underlying_type<E>::type>(e);
 }
-}
-}
+
+size_t GetFileSize(const char* fileName);
+} // namespace Media
+} // namespace OHOS
 #endif // HISTREAMER_FOUNDATION_UTILS_H
