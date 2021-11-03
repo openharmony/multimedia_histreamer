@@ -156,7 +156,13 @@ namespace Media {
 namespace HosLitePlugin {
 using namespace OHOS::Media::Plugin;
 
-HdiSink::HdiSink(std::string name) : Plugin::AudioSinkPlugin(std::move(name)), audioManager_(nullptr), cacheData_()
+HdiSink::HdiSink(std::string name)
+    : Plugin::AudioSinkPlugin(std::move(name)),
+      audioManager_(nullptr),
+      cacheData_(),
+      bufferQueue_("HdiSinkQueue"),
+      currBuffer_(nullptr),
+      currBufferOffset_(0)
 {
     // default is media
     sampleAttributes_.type = AUDIO_IN_MEDIA;
@@ -193,7 +199,7 @@ Status HdiSink::Init()
         return Status::ERROR_UNKNOWN;
     }
     if (!renderThread_) {
-        renderThread_ = std::make_shared<OHOS::Media::OSAL::Task>("auRenderThread", OSAL::ThreadPriority::HIGH);
+        renderThread_ = std::make_shared<OHOS::Media::OSAL::Task>("auRenderThread", OSAL::ThreadPriority::HIGHEST);
         renderThread_->RegisterHandler([this] { DoRender(); });
     }
     return Status::OK;
@@ -324,12 +330,6 @@ Status HdiSink::Prepare()
         }
     }
     MEDIA_LOG_I("create audio render successfully");
-    auto bufferSize = DEFAULT_BUFFER_POOL_SIZE * CalculateBufferSize(sampleAttributes_);
-    ringBuffer_ = std::make_shared<RingBuffer>(bufferSize);
-    if (!ringBuffer_->Init()) {
-        MEDIA_LOG_E("cannot allocate enough buffer for ring buffer cache");
-        return Status::ERROR_NO_MEMORY;
-    }
     if ((sampleAttributes_.channelCount == PCM_CHAN_CNT) && isInputInterleaved_) {
         cacheData_.resize(CalculateBufferSize(sampleAttributes_));
     }
@@ -364,7 +364,7 @@ Status HdiSink::Start()
             return Status::ERROR_UNKNOWN;
         }
     }
-    ringBuffer_->SetActive(true);
+    bufferQueue_.SetActive(true);
     shouldRenderFrame_ = true;
     renderThread_->Start();
     return Status::OK;
@@ -374,8 +374,9 @@ Status HdiSink::Stop()
 {
     MEDIA_LOG_D("Stop Entered");
     shouldRenderFrame_ = false;
-    ringBuffer_->SetActive(false);
+    bufferQueue_.SetActive(false);
     renderThread_->Pause();
+    currBuffer_ = nullptr;
     {
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
         if (audioRender_ == nullptr) {
@@ -561,7 +562,7 @@ Status HdiSink::Write(const std::shared_ptr<Buffer>& input)
 {
     MEDIA_LOG_D("Write begin.");
     if (input != nullptr && !input->IsEmpty()) {
-        ringBuffer_->WriteBuffer(input);
+        bufferQueue_.Push(input);
         MEDIA_LOG_D("write to ring buffer");
     }
     MEDIA_LOG_D("Write finished.");
@@ -571,7 +572,7 @@ Status HdiSink::Write(const std::shared_ptr<Buffer>& input)
 Status HdiSink::Flush()
 {
     MEDIA_LOG_I("Flush Entered");
-    ringBuffer_->Clear();
+    bufferQueue_.Clear();
     {
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
         if (audioRender_ == nullptr) {
@@ -649,17 +650,21 @@ void HdiSink::DoRender()
     if (!shouldRenderFrame_.load()) {
         return;
     }
-    size_t outSize = 0;
-    auto outFramePtr = ringBuffer_->ReadBufferWithoutAdvance(CalculateBufferSize(sampleAttributes_), outSize);
-    if (outFramePtr == nullptr || outSize == 0) {
-        return;
+    if (!currBuffer_) {
+        currBuffer_ = bufferQueue_.Pop();
+        if (currBuffer_ == nullptr) {
+            return;
+        }
+        currBufferOffset_ = 0;
     }
+    auto mem = currBuffer_->GetMemory();
+    size_t outSize = mem->GetSize() - currBufferOffset_;
+    auto frame = const_cast<uint8_t*>(mem->GetReadOnlyData()) + currBufferOffset_;
     uint64_t renderSize = 0;
     auto ret = 0;
     {
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
         if (audioRender_ != nullptr) {
-            uint8_t* frame = outFramePtr.get();
             if (HandleInterleaveData(frame, outSize / PCM_CHAN_CNT)) {
                 frame = cacheData_.data();
             }
@@ -675,12 +680,12 @@ void HdiSink::DoRender()
             MEDIA_LOG_E("renderFrame error with code %" PRIu64 "x", static_cast<uint64_t>(ret));
         }
         return;
-    } else {
-        MEDIA_LOG_D("render frame %" PRIu64, renderSize);
     }
-
-    if (renderSize != 0) {
-        ringBuffer_->Advance(renderSize);
+    if (outSize == renderSize) {
+        currBuffer_ = nullptr;
+        MEDIA_LOG_D("render frame %" PRIu64, renderSize);
+    } else {
+        currBufferOffset_ += renderSize;
     }
 }
 } // namespace HosLitePlugin

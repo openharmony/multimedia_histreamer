@@ -25,15 +25,16 @@ namespace OHOS {
 namespace Media {
 namespace OSAL {
 enum class ThreadPriority : int {
-    HIGHEST = 5,
-    HIGH = 10,
-    NORMAL = 20,
-    LOW = 30,
+    LOW = 9,
+    NORMAL = 16,
+    MIDDLE = 24,
+    HIGH = 32,
+    HIGHEST = 39,
 };
 
 class Thread {
 public:
-    explicit Thread(ThreadPriority priority = ThreadPriority::NORMAL) noexcept;
+    explicit Thread(ThreadPriority priority = ThreadPriority::HIGH) noexcept;
 
     Thread(const Thread&) = delete;
 
