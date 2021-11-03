@@ -31,9 +31,9 @@ namespace OSAL {
 
 class Task {
 public:
-    explicit Task(std::string name, ThreadPriority priority = ThreadPriority::NORMAL);
+    explicit Task(std::string name, ThreadPriority priority = ThreadPriority::HIGH);
 
-    explicit Task(std::string name, std::function<void()> handler, ThreadPriority priority = ThreadPriority::NORMAL);
+    explicit Task(std::string name, std::function<void()> handler, ThreadPriority priority = ThreadPriority::HIGH);
 
     virtual ~Task();
 
