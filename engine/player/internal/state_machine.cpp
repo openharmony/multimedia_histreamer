@@ -99,8 +99,12 @@ Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
 
 void StateMachine::DoTask()
 {
+#ifdef UNIT_TEST
     constexpr int timeoutMs = 500;
     auto job = jobs_.Pop(timeoutMs);
+#else
+    auto job = jobs_.Pop();
+#endif
     if (!job) {
         return;
     }

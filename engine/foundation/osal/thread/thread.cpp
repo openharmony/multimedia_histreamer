@@ -65,6 +65,8 @@ bool Thread::CreateThread(const std::function<void()>& func)
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+    pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+    pthread_attr_setschedpolicy(&attr, SCHED_RR);
     struct sched_param sched = {static_cast<int>(priority_)};
     pthread_attr_setschedparam(&attr, &sched);
 #if defined(THREAD_STACK_SIZE) and THREAD_STACK_SIZE > 0

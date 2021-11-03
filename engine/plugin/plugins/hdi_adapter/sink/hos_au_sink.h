@@ -24,6 +24,7 @@
 #include "foundation/osal/thread/task.h"
 #include "plugin/interface/audio_sink_plugin.h"
 #include "audio_manager.h"
+#include "utils/blocking_queue.h"
 
 struct AudioAdapter;
 struct AudioRender;
@@ -117,10 +118,11 @@ private:
     AudioChannelMask channelMask_ {AUDIO_CHANNEL_MONO};
 
     std::weak_ptr<OHOS::Media::Plugin::Callback> eventCallback_ {};
-
-    std::shared_ptr<RingBuffer> ringBuffer_ {};
     std::shared_ptr<OHOS::Media::OSAL::Task> renderThread_ {};
     std::vector<uint8_t> cacheData_;
+    BlockingQueue<std::shared_ptr<Media::Plugin::Buffer>> bufferQueue_;
+    std::shared_ptr<Media::Plugin::Buffer> currBuffer_;
+    size_t currBufferOffset_;
 };
 }
 }
