@@ -349,7 +349,7 @@ void DemuxerFilter::InitMediaMetaData(const Plugin::MediaInfoHelper& mediaInfo)
     mediaMetaData_.globalMeta = std::make_shared<Plugin::Meta>(mediaInfo.globalMeta);
     mediaMetaData_.trackMetas.clear();
     int trackCnt = 0;
-    for (auto& trackMeta : mediaInfo.streamMeta) {
+    for (auto& trackMeta : mediaInfo.trackMeta) {
         mediaMetaData_.trackMetas.push_back(std::make_shared<Plugin::Meta>(trackMeta));
         if (!trackMeta.Empty()) {
             ++trackCnt;
@@ -368,36 +368,36 @@ bool DemuxerFilter::PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo)
     MEDIA_LOG_D("PrepareStreams called");
     InitMediaMetaData(mediaInfo);
     outPorts_.clear();
-    int streamCnt = mediaInfo.streamMeta.size();
+    int streamCnt = mediaInfo.trackMeta.size();
     PortInfo portInfo;
     portInfo.type = PortType::OUT;
     portInfo.ports.reserve(streamCnt);
     int audioTrackCnt = 0;
     for (int i = 0; i < streamCnt; ++i) {
-        if (mediaInfo.streamMeta[i].Empty()) {
-            MEDIA_LOG_E("PrepareStreams, unsupported stream with streamIdx = %d", i);
+        if (mediaInfo.trackMeta[i].Empty()) {
+            MEDIA_LOG_E("PrepareStreams, unsupported stream with trackId = %d", i);
             continue;
         }
         std::string mime;
-        uint32_t streamIdx = 0;
-        if (!mediaInfo.streamMeta[i].GetString(Plugin::MetaID::MIME, mime) ||
-            !mediaInfo.streamMeta[i].GetUint32(Plugin::MetaID::STREAM_INDEX, streamIdx)) {
-            MEDIA_LOG_E("PrepareStreams failed to extract mime or streamIdx.");
+        uint32_t trackId = 0;
+        if (!mediaInfo.trackMeta[i].GetString(Plugin::MetaID::MIME, mime) ||
+            !mediaInfo.trackMeta[i].GetUint32(Plugin::MetaID::TRACK_ID, trackId)) {
+            MEDIA_LOG_E("PrepareStreams failed to extract mime or trackId.");
             continue;
         }
         if (IsAudioMime(mime)) {
-            MEDIA_LOG_D("PrepareStreams, audio stream with streamIdx = %u.", streamIdx);
+            MEDIA_LOG_D("PrepareStreams, audio stream with trackId = %u.", trackId);
             if (audioTrackCnt == 1) {
-                MEDIA_LOG_E("PrepareStreams, discard audio stream: %d.", streamIdx);
+                MEDIA_LOG_E("PrepareStreams, discard audio track: %d.", trackId);
                 continue;
             }
             ++audioTrackCnt;
         }
         auto port = std::make_shared<OutPort>(this, NamePort(mime));
-        MEDIA_LOG_I("PrepareStreams, streamIdx: %d, portName: %s", i, port->GetName().c_str());
+        MEDIA_LOG_I("PrepareStreams, trackId: %d, portName: %s", i, port->GetName().c_str());
         outPorts_.push_back(port);
         portInfo.ports.push_back({port->GetName(), IsRawAudio(mime)});
-        mediaMetaData_.trackInfos.emplace_back(streamIdx, std::move(port), true);
+        mediaMetaData_.trackInfos.emplace_back(trackId, std::move(port), true);
     }
     if (portInfo.ports.empty()) {
         MEDIA_LOG_E("PrepareStreams failed due to no valid port.");

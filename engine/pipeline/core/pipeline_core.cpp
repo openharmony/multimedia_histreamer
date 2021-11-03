@@ -21,11 +21,11 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-std::shared_ptr<const Plugin::Meta> OHOS::Media::Pipeline::MetaBundle::GetStreamMeta(int32_t streamIndex)
+std::shared_ptr<const Plugin::Meta> OHOS::Media::Pipeline::MetaBundle::GeTrackMeta(int32_t trackId)
 {
-    for (auto& ptr : streamMeta_) {
+    for (auto& ptr : trackMeta_) {
         uint32_t found = 0;
-        if (ptr->GetUint32(Plugin::MetaID::STREAM_INDEX, found) && found == streamIndex) {
+        if (ptr->GetUint32(Plugin::MetaID::TRACK_ID, found) && found == trackId) {
             return ptr;
         }
     }
@@ -40,23 +40,23 @@ void MetaBundle::UpdateGlobalMeta(const Plugin::Meta& meta)
     globalMeta_->Update(meta);
 }
 
-void MetaBundle::UpdateStreamMeta(const Plugin::Meta& meta)
+void MetaBundle::UpdateTrackMeta(const Plugin::Meta& meta)
 {
-    uint32_t streamIndex = 0;
-    if (!meta.GetUint32(Plugin::MetaID::STREAM_INDEX, streamIndex)) {
-        MEDIA_LOG_W("update stream meta with invalid meta, which contains no stream index, will ignore this meta");
+    uint32_t trackId = 0;
+    if (!meta.GetUint32(Plugin::MetaID::TRACK_ID, trackId)) {
+        MEDIA_LOG_W("update stream meta with invalid meta, which contains no track id, will ignore this meta");
         return;
     }
-    for (const auto& tmp : streamMeta_) {
-        uint32_t stIndex = 0;
-        if (tmp->GetUint32(Plugin::MetaID::STREAM_INDEX, stIndex) && streamIndex == stIndex) {
+    for (const auto& tmp : trackMeta_) {
+        uint32_t tid = 0;
+        if (tmp->GetUint32(Plugin::MetaID::TRACK_ID, tid) && trackId == tid) {
             tmp->Update(meta);
             return;
         }
     }
     auto ptr = std::make_shared<Plugin::Meta>();
     ptr->Update(meta);
-    streamMeta_.emplace_back(ptr);
+    trackMeta_.emplace_back(ptr);
 }
 
 PipelineCore::PipelineCore(const std::string& name)
