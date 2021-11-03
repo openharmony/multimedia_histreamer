@@ -449,7 +449,7 @@ ErrorCode HiPlayerImpl::OnCallback(const FilterCallbackType& type, Filter* filte
     return ret;
 }
 
-ErrorCode HiPlayerImpl::GetStreamCnt(size_t& cnt) const
+ErrorCode HiPlayerImpl::GetTrackCnt(size_t& cnt) const
 {
     cnt = streamMeta_.size();
     return ErrorCode::SUCCESS;
@@ -461,12 +461,12 @@ ErrorCode HiPlayerImpl::GetSourceMeta(shared_ptr<const Plugin::Meta>& meta) cons
     return meta ? ErrorCode::SUCCESS : ErrorCode::ERROR_NOT_FOUND;
 }
 
-ErrorCode HiPlayerImpl::GetStreamMeta(size_t index, shared_ptr<const Plugin::Meta>& meta) const
+ErrorCode HiPlayerImpl::GetTrackMeta(size_t id, shared_ptr<const Plugin::Meta>& meta) const
 {
-    if (index > streamMeta_.size() || index < 0) {
+    if (id > streamMeta_.size() || id < 0) {
         return ErrorCode::ERROR_INVALID_PARAM_VALUE;
     }
-    meta = streamMeta_[index].lock();
+    meta = streamMeta_[id].lock();
     if (meta == nullptr) {
         return ErrorCode::ERROR_NOT_FOUND;
     }

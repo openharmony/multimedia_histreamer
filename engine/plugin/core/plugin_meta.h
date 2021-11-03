@@ -36,7 +36,7 @@ constexpr typename std::underlying_type<E>::type to_underlying(E e) noexcept
  */
 enum struct MetaID : uint32_t {
     MIME = to_underlying(Tag::MIME),
-    STREAM_INDEX = to_underlying(Tag::STREAM_INDEX),
+    TRACK_ID = to_underlying(Tag::TRACK_ID),
     MEDIA_CODEC_CONFIG = to_underlying(Tag::MEDIA_CODEC_CONFIG),
 
     AUDIO_CHANNELS = to_underlying(Tag::AUDIO_CHANNELS),

@@ -112,8 +112,8 @@ public:
     ErrorCode SetBufferSize(size_t size);
 
     ErrorCode GetSourceMeta(std::shared_ptr<const Plugin::Meta>& meta) const;
-    ErrorCode GetStreamCnt(size_t& cnt) const;
-    ErrorCode GetStreamMeta(size_t index, std::shared_ptr<const Plugin::Meta>& meta) const;
+    ErrorCode GetTrackCnt(size_t& cnt) const;
+    ErrorCode GetTrackMeta(size_t id, std::shared_ptr<const Plugin::Meta>& meta) const;
 
     ErrorCode SetVolume(float volume);
 
