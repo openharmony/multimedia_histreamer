@@ -90,6 +90,13 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
     }
     // always use first one
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = candidatePlugins[0].first;
+    for (const auto& onCap : selectedPluginInfo->inCaps) {
+        if (onCap.keys.count(CapabilityID::AUDIO_SAMPLE_FORMAT) == 0) {
+            MEDIA_LOG_E("each in caps of sink must contains valid audio sample format");
+            return false;
+        }
+    }
+
     upstreamNegotiatedCap = candidatePlugins[0].second;
 
     // try to reuse plugin

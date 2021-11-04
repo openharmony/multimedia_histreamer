@@ -16,6 +16,7 @@
 #ifndef HISTREAMER_HDI_ADAPTER_AU_UTILS_H
 #define HISTREAMER_HDI_ADAPTER_AU_UTILS_H
 
+#include <vector>
 #include "audio_types.h"
 #include "plugin/common/plugin_audio_tags.h"
 
@@ -23,9 +24,11 @@ namespace OHOS {
 namespace Media {
 namespace HosLitePlugin {
 bool PluginAuFormat2HdiAttrs(OHOS::Media::Plugin::AudioSampleFormat pFormat, AudioSampleAttributes& attrs);
+std::vector<OHOS::Media::Plugin::AudioSampleFormat> HdiAuFormat2PluginFormat(AudioFormat audioFormat);
 bool HdiAttrs2PluginAuFormat(AudioSampleAttributes attrs, OHOS::Media::Plugin::AudioSampleFormat& pFormat);
 
 bool PluginSampleRate2HdiRate(uint32_t pRate, AudioSampleRatesMask& mask);
+std::vector<uint32_t> HdiSampleRatesMask2PluginRates(uint32_t mask);
 bool HdiRate2PluginSampleRate(AudioSampleRatesMask mask, uint32_t& pRate);
 
 bool PluginChannelLayout2HdiMask(OHOS::Media::Plugin::AudioChannelLayout layout, AudioChannelMask& mask);
