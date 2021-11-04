@@ -66,7 +66,6 @@ private:
     OSAL::Thread loop_;
 
     OSAL::Mutex stateMutex_{};
-    OSAL::Mutex cvMutex_{};
     OSAL::ConditionVariable cv_{};
     std::atomic<bool> pauseDone_{};
     std::atomic<bool> workInProgress_{};
