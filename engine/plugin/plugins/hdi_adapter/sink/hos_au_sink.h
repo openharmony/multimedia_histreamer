@@ -102,6 +102,8 @@ private:
 
     void DoRender();
 
+    Media::Plugin::Status ProcessInputSampleFormat(const Media::Plugin::ValueType& value);
+
 private:
     OHOS::Media::OSAL::Mutex renderMutex_ {};
 
@@ -111,7 +113,6 @@ private:
     AudioAdapterDescriptor adapterDescriptor_ {};
     AudioAdapter* audioAdapter_ {nullptr};
     AudioRender* audioRender_ {nullptr};
-    AudioPort audioPort_ {};
     AudioDeviceDescriptor deviceDescriptor_ {};
     AudioSampleAttributes sampleAttributes_ {};
     bool isInputInterleaved_{false};
@@ -123,6 +124,7 @@ private:
     BlockingQueue<std::shared_ptr<Media::Plugin::Buffer>> bufferQueue_;
     std::shared_ptr<Media::Plugin::Buffer> currBuffer_;
     size_t currBufferOffset_;
+    bool usingDefaultInCaps_ {true}; // if true pass hdi with S16P pcm data and convert input into non-interleaved
 };
 }
 }

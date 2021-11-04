@@ -39,6 +39,7 @@ constexpr int32_t RANK100 = 100;
 constexpr int32_t HALF = 2;
 constexpr int32_t SEC_TO_MILLS = 1000;
 constexpr int32_t PCM_CHAN_CNT = 2;
+static std::map<std::string, std::pair<uint32_t, bool>> g_sinkInfos;
 
 Status LoadAndInitAdapter(AudioManager* proxyManager, AudioAdapterDescriptor* descriptor, AudioAdapter** adapter)
 {
@@ -78,9 +79,81 @@ Status LoadAndInitAdapter(AudioManager* proxyManager, AudioAdapterDescriptor* de
     return Status::OK;
 }
 
-std::shared_ptr<AudioSinkPlugin> AudioSinkPluginCreator(const std::string& name)
+void UpdatePluginCapWithPortCap(const AudioPortCapability& portCap, Capability& pluginCap)
+{
+    for(size_t cnt = 0; cnt < portCap.formatNum; cnt++) {
+        auto pluginCaps = OHOS::Media::HosLitePlugin::HdiAuFormat2PluginFormat(portCap.formats[cnt]);
+        if (pluginCaps.empty()) {
+            continue;
+        }
+        if (pluginCaps.size() == 1) {
+            pluginCap.AppendFixedKey<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, pluginCaps[0]);
+        } else {
+            pluginCap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, pluginCaps);
+        }
+    }
+    auto pluginSampleRates = OHOS::Media::HosLitePlugin::HdiSampleRatesMask2PluginRates(portCap.sampleRateMasks);
+    if (!pluginSampleRates.empty()) {
+        if (pluginSampleRates.size() == 1) {
+            pluginCap.AppendFixedKey<uint32_t>(Capability::Key::AUDIO_SAMPLE_RATE, pluginSampleRates[0]);
+        } else {
+            pluginCap.AppendDiscreteKeys<uint32_t>(Capability::Key::AUDIO_SAMPLE_RATE, pluginSampleRates);
+        }
+    }
+    AudioChannelLayout pluginLayout;
+    if (OHOS::Media::HosLitePlugin::HdiMask2PluginChannelLayout(portCap.channelMasks, pluginLayout)) {
+        pluginCap.AppendFixedKey(Capability::Key::AUDIO_CHANNEL_LAYOUT, pluginLayout);
+    }
+    if (portCap.channelCount > 0) {
+        pluginCap.AppendIntervalKey<uint32_t>(Capability::Key::AUDIO_CHANNELS, 1, portCap.channelCount);
+    }
+}
+
+std::shared_ptr<AudioSinkPlugin> AudioSinkPluginCreator(const std::string &name)
 {
     return std::make_shared<OHOS::Media::HosLitePlugin::HdiSink>(name);
+}
+
+void RegisterOutportOnAdapter(const std::shared_ptr<Register>& reg, const AudioAdapterDescriptor& desc,
+                              AudioAdapter* adapter)
+{
+    CapabilitySet adapterCapabilities;
+    bool usingDefaultCaps = false;
+    uint32_t pIndex = 0;
+    for (uint32_t portIndex = 0; portIndex < desc.portNum; portIndex++) {
+        if (desc.ports[portIndex].dir != PORT_OUT) {
+            continue;
+        }
+        Capability capability(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
+        AudioPortCapability portCap{0};
+        if (adapter->GetPortCapability != nullptr &&
+            adapter->GetPortCapability(adapter, &desc.ports[portIndex], &portCap) == 0) {
+            UpdatePluginCapWithPortCap(portCap, capability);
+            usingDefaultCaps = false;
+        } else {
+            MEDIA_LOG_W("query port capability failed when registering plugin, set audio sample format as S16/S16P");
+            capability.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT,
+                                                             {AudioSampleFormat::S16, AudioSampleFormat::S16P});
+            usingDefaultCaps = true;
+        }
+        adapterCapabilities.emplace_back(capability);
+        pIndex = portIndex;
+        break; // only take the first out port
+    }
+    if (adapterCapabilities.empty()) {
+        return;
+    }
+    AudioSinkPluginDef sinkPluginDef;
+    sinkPluginDef.creator = AudioSinkPluginCreator;
+    sinkPluginDef.name = desc.adapterName;
+    sinkPluginDef.inCaps = adapterCapabilities;
+    sinkPluginDef.rank = RANK100;
+    if (reg->AddPlugin(sinkPluginDef) == Status::OK) {
+        g_sinkInfos[sinkPluginDef.name] = std::make_pair(pIndex, usingDefaultCaps);
+        MEDIA_LOG_D("register plugin %s succ.", desc.adapterName);
+    } else {
+        MEDIA_LOG_W("register plugin %s failed", desc.adapterName);
+    }
 }
 
 Status RegisterHdiSinkPlugins(const std::shared_ptr<Register>& reg)
@@ -103,31 +176,15 @@ Status RegisterHdiSinkPlugins(const std::shared_ptr<Register>& reg)
         if (LoadAndInitAdapter(proxyManager, &descriptors[index], &adapter) != Status::OK) {
             continue;
         }
-        CapabilitySet adapterCapabilities;
-        for (uint32_t portIndex = 0; portIndex < desc.portNum; portIndex++) {
-            if (desc.ports[portIndex].dir != PORT_OUT) {
-                continue;
-            }
-            Capability capability(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
-            adapterCapabilities.emplace_back(capability);
-            break;
-        }
-        if (adapterCapabilities.empty()) {
-            continue;
-        }
-        AudioSinkPluginDef sinkPluginDef;
-        sinkPluginDef.creator = AudioSinkPluginCreator;
-        sinkPluginDef.name = desc.adapterName;
-        sinkPluginDef.inCaps = adapterCapabilities;
-        sinkPluginDef.rank = RANK100;
+        RegisterOutportOnAdapter(reg, desc, adapter);
         proxyManager->UnloadAdapter(proxyManager, adapter);
-        if (reg->AddPlugin(sinkPluginDef) == Status::OK) {
-            MEDIA_LOG_D("register plugin %s succ.", desc.adapterName);
-        } else {
-            MEDIA_LOG_W("register plugin %s failed", desc.adapterName);
-        }
     }
     return Status::OK;
+}
+
+void UnRegisterAudioDecoderPlugin()
+{
+    g_sinkInfos.clear();
 }
 
 template <typename T>
@@ -148,7 +205,7 @@ int32_t CalculateBufferSize(const AudioSampleAttributes& attributes)
     return attributes.frameSize * attributes.period;
 }
 
-PLUGIN_DEFINITION(HdiAuSink, LicenseType::APACHE_V2, RegisterHdiSinkPlugins, []() {});
+PLUGIN_DEFINITION(HdiAuSink, LicenseType::APACHE_V2, RegisterHdiSinkPlugins, UnRegisterAudioDecoderPlugin);
 } // namespace
 namespace OHOS {
 namespace Media {
@@ -165,6 +222,9 @@ HdiSink::HdiSink(std::string name)
 {
     // default is media
     sampleAttributes_.type = AUDIO_IN_MEDIA;
+    if (g_sinkInfos.count(pluginName_) != 0) {
+        usingDefaultInCaps_ = g_sinkInfos[pluginName_].second;
+    }
 }
 
 Status HdiSink::Init()
@@ -187,11 +247,11 @@ Status HdiSink::Init()
         if (pluginName_ != desc.adapterName) {
             continue;
         }
-
         if (LoadAndInitAdapter(audioManager_, &descriptors[index], &audioAdapter_) != Status::OK) {
             continue;
         }
         adapterDescriptor_ = descriptors[index];
+        break;
     }
     if (audioAdapter_ == nullptr) {
         MEDIA_LOG_E("cannot find adapter with name %s", pluginName_.c_str());
@@ -235,6 +295,31 @@ Status HdiSink::Deinit()
     return Status::OK;
 }
 
+Status HdiSink::ProcessInputSampleFormat(const ValueType& value)
+{
+    AudioSampleFormat format;
+    auto ret = AssignIfCastSuccess<AudioSampleFormat>(format, value, "audioSampleFormat");
+    if (ret != Status::OK) {
+        return ret;
+    }
+    if (PluginAuFormat2HdiAttrs(format, sampleAttributes_)) {
+        // if using default in caps e.g. S16/S16P always pass non-interleaved pcm data to hdi
+        // otherwise using the specified format
+        if (usingDefaultInCaps_) {
+            if (sampleAttributes_.interleaved) {
+                isInputInterleaved_ = true;
+                sampleAttributes_.interleaved = false;
+            } else {
+                isInputInterleaved_ = false;
+            }
+        }
+        return Status::OK;
+    } else {
+        MEDIA_LOG_E("audioSampleFormat mismatch");
+        return Status::ERROR_MISMATCHED_TYPE;
+    }
+}
+
 Status HdiSink::SetParameter(Tag tag, const ValueType& value)
 {
     switch (tag) {
@@ -242,26 +327,8 @@ Status HdiSink::SetParameter(Tag tag, const ValueType& value)
             return AssignIfCastSuccess<uint32_t>(sampleAttributes_.channelCount, value, "channel");
         case Tag::AUDIO_SAMPLE_RATE:
             return AssignIfCastSuccess<uint32_t>(sampleAttributes_.sampleRate, value, "sampleRate");
-        case Tag::AUDIO_SAMPLE_FORMAT: {
-            AudioSampleFormat format;
-            auto ret = AssignIfCastSuccess<AudioSampleFormat>(format, value, "audioSampleFormat");
-            if (ret != Status::OK) {
-                return ret;
-            }
-            if (PluginAuFormat2HdiAttrs(format, sampleAttributes_)) {
-                // always configure hdi with non-interleaved
-                if (sampleAttributes_.interleaved) {
-                    isInputInterleaved_ = true;
-                    sampleAttributes_.interleaved = false;
-                } else {
-                    isInputInterleaved_ = false;
-                }
-                return Status::OK;
-            } else {
-                MEDIA_LOG_E("audioSampleFormat mismatch");
-                return Status::ERROR_MISMATCHED_TYPE;
-            }
-        }
+        case Tag::AUDIO_SAMPLE_FORMAT:
+            return ProcessInputSampleFormat(value);
         case Tag::AUDIO_SAMPLE_PER_FRAME:
             return AssignIfCastSuccess<uint32_t>(sampleAttributes_.period, value, "samples per frame");
         case Tag::AUDIO_CHANNEL_LAYOUT: {
@@ -295,20 +362,11 @@ Status HdiSink::Prepare()
     sampleAttributes_.frameSize = GetPcmBytes(sampleAttributes_.format) * sampleAttributes_.channelCount;
     sampleAttributes_.startThreshold = sampleAttributes_.period / sampleAttributes_.frameSize;
     sampleAttributes_.stopThreshold = INT32_MAX;
-    bool foundPort = false;
-    for (uint32_t portIndex = 0; portIndex < adapterDescriptor_.portNum; portIndex++) {
-        if (adapterDescriptor_.ports[portIndex].dir == PORT_OUT) {
-            audioPort_ = adapterDescriptor_.ports[portIndex];
-            foundPort = true;
-            break;
-        }
-    }
-    if (!foundPort) {
+    if (g_sinkInfos.count(pluginName_) == 0) {
         MEDIA_LOG_E("cannot find out port");
         return Status::ERROR_UNKNOWN;
     }
-
-    deviceDescriptor_.portId = audioPort_.portId;
+    deviceDescriptor_.portId = g_sinkInfos[pluginName_].first;
     deviceDescriptor_.pins = PIN_OUT_SPEAKER;
     deviceDescriptor_.desc = nullptr;
 
@@ -318,7 +376,6 @@ Status HdiSink::Prepare()
                 (sampleAttributes_.type == AUDIO_IN_MEDIA) ? "media" : "communication", sampleAttributes_.channelCount,
                 sampleAttributes_.sampleRate, channelMask_, sampleAttributes_.format, sampleAttributes_.isSignedData,
                 sampleAttributes_.interleaved, sampleAttributes_.period, sampleAttributes_.frameSize);
-
     {
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
         auto ret = audioAdapter_->CreateRender(audioAdapter_, &deviceDescriptor_, &sampleAttributes_, &audioRender_);
@@ -329,7 +386,7 @@ Status HdiSink::Prepare()
         }
     }
     MEDIA_LOG_I("create audio render successfully");
-    if ((sampleAttributes_.channelCount == PCM_CHAN_CNT) && isInputInterleaved_) {
+    if (sampleAttributes_.channelCount == PCM_CHAN_CNT && usingDefaultInCaps_ && isInputInterleaved_) {
         cacheData_.resize(CalculateBufferSize(sampleAttributes_));
     }
     return Status::OK;
@@ -339,7 +396,6 @@ Status HdiSink::Reset()
 {
     MEDIA_LOG_D("Reset entered.");
     ReleaseRender();
-    (void)memset_s(&audioPort_, sizeof(audioPort_), 0, sizeof(audioPort_));
     (void)memset_s(&sampleAttributes_, sizeof(sampleAttributes_), 0, sizeof(sampleAttributes_));
     (void)memset_s(&deviceDescriptor_, sizeof(deviceDescriptor_), 0, sizeof(deviceDescriptor_));
     isInputInterleaved_ = false;
@@ -628,7 +684,7 @@ void HdiSink::Deinterleave32(uint8_t* inData, uint8_t* outData, int32_t frameCnt
 
 bool HdiSink::HandleInterleaveData(uint8_t* origData, int32_t frameCnt)
 {
-    if ((sampleAttributes_.channelCount != PCM_CHAN_CNT) || !isInputInterleaved_) {
+    if (sampleAttributes_.channelCount != PCM_CHAN_CNT || !usingDefaultInCaps_ || !isInputInterleaved_) {
         return false;
     }
     bool isHandled = true;

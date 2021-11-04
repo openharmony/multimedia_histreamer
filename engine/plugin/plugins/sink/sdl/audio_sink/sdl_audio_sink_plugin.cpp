@@ -90,6 +90,12 @@ const Status SdlAudioRegister(const std::shared_ptr<Register>& reg)
     definition.name = "sdl_audio_sink";
     definition.rank = 100; // 100
     Capability cap(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
+    cap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, {
+            AudioSampleFormat::U8, AudioSampleFormat::U8P, AudioSampleFormat::S8, AudioSampleFormat::S8P,
+            AudioSampleFormat::U16, AudioSampleFormat::U16P, AudioSampleFormat::S16, AudioSampleFormat::S16P,
+            AudioSampleFormat::U32, AudioSampleFormat::U32P, AudioSampleFormat::S32, AudioSampleFormat::S32P,
+            AudioSampleFormat::F32, AudioSampleFormat::F32P, AudioSampleFormat::F64, AudioSampleFormat::F64P
+    });
     definition.inCaps.emplace_back(cap);
     definition.creator = AudioSinkPluginCreator;
     return reg->AddPlugin(definition);
