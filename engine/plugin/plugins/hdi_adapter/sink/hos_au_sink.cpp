@@ -25,7 +25,6 @@
 #include "foundation/osal/utils/util.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugins/hdi_adapter/utils/hdi_au_utils.h"
-#include "ring_buffer.h"
 #include "securec.h"
 #include "utils/constants.h"
 #include "utils/utils.h"

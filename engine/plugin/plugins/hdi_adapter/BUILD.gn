@@ -25,7 +25,6 @@ if (defined(ohos_lite)) {
 
   plugin_hdi_adapter_src = [
     "sink/hos_au_sink.cpp",
-    "sink/ring_buffer.cpp",
     "utils/hdi_au_utils.cpp",
   ]
 
