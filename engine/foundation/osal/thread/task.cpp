@@ -127,10 +127,11 @@ void Task::Run()
             MEDIA_LOG_D("task %s stopped, exit task", name_.c_str());
             break;
         }
+        OSAL::ScopedLock lock(stateMutex_);
         if (runningState_.load() == RunningState::PAUSED) {
-            OSAL::ScopedLock lock(cvMutex_);
             pauseDone_ = true;
-            cv_.Wait(lock, [this] { return runningState_.load() != RunningState::PAUSED; });
+            constexpr int timeoutMs = 500;
+            cv_.WaitFor(lock, timeoutMs, [this] { return runningState_.load() != RunningState::PAUSED; });
         }
     }
 }
