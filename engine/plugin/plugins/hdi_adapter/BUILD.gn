@@ -31,7 +31,6 @@ if (defined(ohos_lite)) {
   config("plugin_hdi_adapter_config") {
     include_dirs = [
       "//drivers/peripheral/audio/interfaces/include",
-      "//drivers/peripheral/audio/hal/hdi_binder/proxy/include",
     ]
     ldflags = [ "-lhdi_videodisplayer" ]
   }

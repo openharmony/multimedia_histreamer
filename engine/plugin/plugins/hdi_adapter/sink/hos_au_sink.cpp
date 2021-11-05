@@ -19,7 +19,7 @@
 #include <dlfcn.h>
 #include <memory>
 #include "audio_adapter.h"
-#include "audio_proxy_manager.h"
+#include "audio_manager.h"
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
 #include "foundation/osal/utils/util.h"
@@ -41,9 +41,9 @@ constexpr int32_t SEC_TO_MILLS = 1000;
 constexpr int32_t PCM_CHAN_CNT = 2;
 static std::map<std::string, std::pair<uint32_t, bool>> g_sinkInfos;
 
-Status LoadAndInitAdapter(AudioManager* proxyManager, AudioAdapterDescriptor* descriptor, AudioAdapter** adapter)
+Status LoadAndInitAdapter(AudioManager* audioManager, AudioAdapterDescriptor* descriptor, AudioAdapter** adapter)
 {
-    if (proxyManager == nullptr) {
+    if (audioManager == nullptr) {
         MEDIA_LOG_E("no audio manager when load adapter");
         return Status::ERROR_UNKNOWN;
     }
@@ -51,7 +51,7 @@ Status LoadAndInitAdapter(AudioManager* proxyManager, AudioAdapterDescriptor* de
         MEDIA_LOG_E("**adapter null ptr");
         return Status::ERROR_INVALID_PARAMETER;
     }
-    if (proxyManager->LoadAdapter(proxyManager, descriptor, adapter) < 0) {
+    if (audioManager->LoadAdapter(audioManager, descriptor, adapter) < 0) {
         *adapter = nullptr;
         MEDIA_LOG_W("failed to load adapter %s", descriptor->adapterName);
         return Status::ERROR_UNSUPPORTED_FORMAT;
@@ -72,7 +72,7 @@ Status LoadAndInitAdapter(AudioManager* proxyManager, AudioAdapterDescriptor* de
     } while (++retryCnt < MAX_RETRY_CNT);
     if (retryCnt >= MAX_RETRY_CNT) {
         MEDIA_LOG_W("cannot init port on adapter %s after retry %d times", descriptor->adapterName, retryCnt);
-        proxyManager->UnloadAdapter(proxyManager, *adapter);
+        audioManager->UnloadAdapter(audioManager, *adapter);
         *adapter = nullptr;
         return Status::ERROR_UNKNOWN;
     }
@@ -158,14 +158,14 @@ void RegisterOutportOnAdapter(const std::shared_ptr<Register>& reg, const AudioA
 
 Status RegisterHdiSinkPlugins(const std::shared_ptr<Register>& reg)
 {
-    auto proxyManager = GetAudioManagerFuncs();
-    if (proxyManager == nullptr) {
+    auto audioManager = GetAudioManagerFuncs();
+    if (audioManager == nullptr) {
         MEDIA_LOG_E("cannot find audio manager funcs");
         return Status::ERROR_UNKNOWN;
     }
     int32_t adapterSize = 0;
     AudioAdapterDescriptor* descriptors = nullptr;
-    int32_t ret = proxyManager->GetAllAdapters(proxyManager, &descriptors, &adapterSize);
+    int32_t ret = audioManager->GetAllAdapters(audioManager, &descriptors, &adapterSize);
     if (ret != 0 || adapterSize == 0) {
         MEDIA_LOG_E("cannot find available audio adapter");
         return Status::OK;
@@ -173,11 +173,11 @@ Status RegisterHdiSinkPlugins(const std::shared_ptr<Register>& reg)
     for (int32_t index = 0; index < adapterSize; index++) {
         AudioAdapter* adapter = nullptr;
         const auto& desc = descriptors[index];
-        if (LoadAndInitAdapter(proxyManager, &descriptors[index], &adapter) != Status::OK) {
+        if (LoadAndInitAdapter(audioManager, &descriptors[index], &adapter) != Status::OK) {
             continue;
         }
         RegisterOutportOnAdapter(reg, desc, adapter);
-        proxyManager->UnloadAdapter(proxyManager, adapter);
+        audioManager->UnloadAdapter(audioManager, adapter);
     }
     return Status::OK;
 }
