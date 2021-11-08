@@ -74,7 +74,6 @@ struct CodecPlugin : public PluginBase {
      * @param timeoutMs    Indicates the timeout duration.
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      *  @retval ERROR_INVALID_DATA: The input buffer is invalid.
      *  @retval ERROR_TIMED_OUT: Operation timeout.
      */
@@ -89,7 +88,6 @@ struct CodecPlugin : public PluginBase {
      * @param timeoutMs     Indicates the timeout duration.
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      *  @retval ERROR_INVALID_DATA: The output buffer is invalid.
      *  @retval ERROR_TIMED_OUT: Operation timeout.
      */
@@ -102,7 +100,6 @@ struct CodecPlugin : public PluginBase {
      *
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      */
     virtual Status Flush() = 0;
 
@@ -114,7 +111,6 @@ struct CodecPlugin : public PluginBase {
      * @param cb   Data callback, NULL callback listening is canceled.
      * @return Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state.
      */
     virtual Status SetDataCallback(const std::weak_ptr<DataCallback>& dataCallback) = 0;
 };

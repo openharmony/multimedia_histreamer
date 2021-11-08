@@ -94,7 +94,6 @@ struct DemuxerPlugin : public PluginBase {
      * @param source Data source where data read from.
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      */
     virtual Status SetDataSource(const std::shared_ptr<DataSource>& source) = 0;
 
@@ -107,7 +106,6 @@ struct DemuxerPlugin : public PluginBase {
      * @param mediaInfo Indicates the pointer to the source attributes
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      */
     virtual Status GetMediaInfo(MediaInfo& mediaInfo) = 0;
 
@@ -128,7 +126,6 @@ struct DemuxerPlugin : public PluginBase {
      * @param trackId Identifies the media track. If an invalid value is passed, the default media track specified.
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      */
     virtual Status SelectTrack(int32_t trackId) = 0;
 
@@ -140,7 +137,6 @@ struct DemuxerPlugin : public PluginBase {
      * @param trackId Identifies the media track. ignore the invalid value is passed.
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      */
     virtual Status UnselectTrack(int32_t trackId) = 0;
 
@@ -152,7 +148,6 @@ struct DemuxerPlugin : public PluginBase {
      * @param trackIds Identifies the array of selected media tracks.
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      */
     virtual Status GetSelectedTracks(std::vector<int32_t>& trackIds) = 0;
 
@@ -165,7 +160,6 @@ struct DemuxerPlugin : public PluginBase {
      * @param timeOutMs Indicates the time required for waiting data frame read.
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      *  @retval ERROR_TIMED_OUT: Operation timeout.
      */
     virtual Status ReadFrame(Buffer& buffer, int32_t timeOutMs) = 0;
@@ -182,7 +176,6 @@ struct DemuxerPlugin : public PluginBase {
      * @param mode Indicates the seek mode.
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      *  @retval ERROR_INVALID_DATA: The input data is invalid.
      */
     virtual Status SeekTo(int32_t trackId, int64_t timeStampUs, SeekMode mode) = 0;
