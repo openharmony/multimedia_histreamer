@@ -190,7 +190,7 @@ Status FFmpegDemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& sou
 Status FFmpegDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
 {
     if (!mediaInfo_ && !ParseMediaData()) {
-        return Status::ERROR_INVALID_PARAMETER;
+        return Status::ERROR_WRONG_STATE;
     }
     mediaInfo = *mediaInfo_;
     return Status::OK;
@@ -209,12 +209,12 @@ Status FFmpegDemuxerPlugin::SelectTrack(int32_t trackId)
 {
     if (!mediaInfo_) {
         MEDIA_LOG_E("SelectTrack called before GetMediaInfo()...");
-        return Status::ERROR_INVALID_DATA;
+        return Status::ERROR_WRONG_STATE;
     }
     if (trackId < 0 || trackId >= static_cast<int32_t>(mediaInfo_->tracks.size())) {
         MEDIA_LOG_E("SelectTrack called with invalid trackId: %d, number of tracks: %d", trackId,
                     static_cast<int>(mediaInfo_->tracks.size()));
-        return Status::ERROR_INVALID_DATA;
+        return Status::ERROR_INVALID_PARAMETER;
     }
     OSAL::ScopedLock lock(mutex_);
     auto it = std::find_if(selectedTrackIds_.begin(), selectedTrackIds_.end(),

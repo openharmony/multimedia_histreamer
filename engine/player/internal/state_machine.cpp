@@ -62,7 +62,7 @@ ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param) const
 ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param)
 {
     constexpr int timeoutMs = 5000;
-    ErrorCode errorCode = ErrorCode::ERROR_TIMEOUT;
+    ErrorCode errorCode = ErrorCode::ERROR_TIMED_OUT;
     if (!intentSync_.WaitFor(
             intent, [this, intent, param] { SendEventAsync(intent, param); }, timeoutMs, errorCode)) {
         MEDIA_LOG_E("SendEvent timeout, intent: %d", static_cast<int>(intent));
@@ -173,7 +173,7 @@ ErrorCode StateMachine::TransitionTo(const std::shared_ptr<State>& state)
 {
     if (state == nullptr) {
         MEDIA_LOG_E("TransitionTo, nullptr for state");
-        return ErrorCode::ERROR_NULL_POINTER;
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     ErrorCode rtv = ErrorCode::SUCCESS;
     if (state != curState_) {

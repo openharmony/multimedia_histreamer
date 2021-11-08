@@ -39,7 +39,7 @@ public:
     }
     ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source) const override
     {
-        return source ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_SOURCE;
+        return source ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     ErrorCode DoOnReady() override
     {
@@ -89,7 +89,7 @@ TEST_F(TestStateMachine, test_init_state)
 TEST_F(TestStateMachine, test_set_invalid_source)
 {
     EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
-    EXPECT_EQ(ErrorCode::ERROR_INVALID_SOURCE, stateMachine.SendEvent(Intent::SET_SOURCE));
+    EXPECT_EQ(ErrorCode::ERROR_INVALID_PARAMETER_TYPE, stateMachine.SendEvent(Intent::SET_SOURCE));
     EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
 }
 

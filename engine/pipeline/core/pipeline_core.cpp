@@ -115,7 +115,7 @@ ErrorCode PipelineCore::Pause()
         return ErrorCode::SUCCESS;
     }
     if (state_ != FilterState::READY && state_ != FilterState::RUNNING) {
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     state_ = FilterState::PAUSED;
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
@@ -194,7 +194,8 @@ ErrorCode PipelineCore::AddFilters(std::initializer_list<Filter*> filtersIn)
         }
     }
     if (filtersToAdd.empty()) {
-        return ErrorCode::ERROR_ALREADY_EXISTS;
+        MEDIA_LOG_I("filters already exists");
+        return ErrorCode::SUCCESS;
     }
     {
         OSAL::ScopedLock lock(mutex_);
@@ -208,19 +209,17 @@ ErrorCode PipelineCore::RemoveFilter(Filter* filter)
 {
     auto it = std::find_if(filters_.begin(), filters_.end(),
                            [&filter](const Filter* filterPtr) { return filterPtr == filter; });
-    ErrorCode rtv = ErrorCode::ERROR_INVALID_PARAM_VALUE;
     if (it != filters_.end()) {
         MEDIA_LOG_I("RemoveFilter %s", (*it)->GetName().c_str());
         filters_.erase(it);
-        rtv = ErrorCode::SUCCESS;
     }
-    return rtv;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode PipelineCore::RemoveFilterChain(Filter* firstFilter)
 {
     if (!firstFilter) {
-        return ErrorCode::ERROR_NULL_POINTER;
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     std::queue<Filter*> levelFilters;
     levelFilters.push(firstFilter);

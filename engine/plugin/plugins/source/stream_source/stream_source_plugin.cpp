@@ -174,7 +174,7 @@ Status StreamSourcePlugin::SetSource(std::string& uri, std::shared_ptr<std::map<
 {
     if (uri.compare("stream://") || (params == nullptr)) {
         MEDIA_LOG_E("Bad uri: %s", uri.c_str());
-        return Status::ERROR_INVALID_DATA;
+        return Status::ERROR_INVALID_PARAMETER;
     }
     std::shared_ptr<MediaSource> source_ = nullptr;
     for (const auto& iter_ : *params) {
@@ -187,12 +187,12 @@ Status StreamSourcePlugin::SetSource(std::string& uri, std::shared_ptr<std::map<
     }
     if (source_ == nullptr) {
         MEDIA_LOG_E("Bad source");
-        return Status::ERROR_INVALID_DATA;
+        return Status::ERROR_INVALID_PARAMETER;
     }
     std::shared_ptr<StreamSource> stream_ = source_->GetSourceStream();
     if (stream_ == nullptr) {
         MEDIA_LOG_E("Get StreamSource fail");
-        return Status::ERROR_INVALID_DATA;
+        return Status::ERROR_INVALID_PARAMETER;
     }
 
     streamCallback_ = std::make_shared<StreamSourceCallback>(shared_from_this(), stream_);

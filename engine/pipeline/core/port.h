@@ -36,7 +36,7 @@ enum class WorkMode { PUSH, PULL };
 class Port {
 public:
     Port(InfoTransfer* ownerFilter, std::string portName, bool ownerNegotiate)
-        : filter(ownerFilter), name(std::move(portName)), useFilterNegotiate(ownerNegotiate) {}
+        : filter(ownerFilter), name(std::move(portName)) {}
     virtual ~Port() = default;
     const std::string& GetName();
     const InfoTransfer* GetOwnerFilter() const;
@@ -58,7 +58,6 @@ protected:
     InfoTransfer* filter;
     WorkMode workMode {WorkMode::PUSH};
     const std::string name;
-    bool useFilterNegotiate;
 };
 
 class OutPort;

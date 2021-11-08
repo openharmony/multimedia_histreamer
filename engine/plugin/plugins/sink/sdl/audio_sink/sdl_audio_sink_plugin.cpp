@@ -278,7 +278,7 @@ Status SdlAudioSinkPlugin::SetMute(bool mute)
 Status SdlAudioSinkPlugin::GetVolume(float& volume)
 {
     UNUSED_VARIABLE(volume);
-    return Status::ERROR_ALREADY_EXISTS;
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status SdlAudioSinkPlugin::SetVolume(float volume)

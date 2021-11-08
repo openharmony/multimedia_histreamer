@@ -151,7 +151,7 @@ ErrorCode AudioDecoderFilter::Start()
     MEDIA_LOG_D("audio decoder start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
         MEDIA_LOG_W("call decoder start() when state is not ready or working");
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     return FilterBase::Start();
 }
@@ -160,7 +160,7 @@ ErrorCode AudioDecoderFilter::Prepare()
 {
     if (state_ != FilterState::INITIALIZED) {
         MEDIA_LOG_W("decoder filter is not in init state");
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     if (!outBufferQ_) {
         outBufferQ_ = std::make_shared<BlockingQueue<AVBufferPtr>>("adecOutBuffQueue",
@@ -333,7 +333,7 @@ ErrorCode AudioDecoderFilter::PushData(const std::string &inPort, AVBufferPtr bu
 {
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
         MEDIA_LOG_W("pushing data to decoder when state is %d", static_cast<int>(state_.load()));
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     if (isFlushing_) {
         MEDIA_LOG_I("decoder is flushing, discarding this data from port %s", inPort.c_str());

@@ -46,7 +46,10 @@ struct SourcePlugin : public PluginBase {
      *               or to read the detailed information required by the data.
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_INVALID_DATA: Uri is not supported.
+     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
+     *  @retval ERROR_NOT_EXISTED: Uri is not existed.
+     *  @retval ERROR_UNSUPPORTED_FORMAT: Uri is not supported.
+     *  @retval ERROR_INVALID_PARAMETER: Uri is invalid.
      */
     virtual Status SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params = nullptr) = 0;
 

@@ -340,7 +340,7 @@ Status AudioFfmpegDecoderPlugin::Start()
 {
     {
         OSAL::ScopedLock lock(avMutex_);
-        if (avCodecContext_.get() == nullptr) {
+        if (avCodecContext_ == nullptr) {
             return Status::ERROR_WRONG_STATE;
         }
         auto res = avcodec_open2(avCodecContext_.get(), avCodec_.get(), nullptr);
@@ -450,8 +450,8 @@ Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
 Status AudioFfmpegDecoderPlugin::SendBuffer(const std::shared_ptr<Buffer>& inputBuffer)
 {
     if (inputBuffer->IsEmpty() && !(inputBuffer->flag & BUFFER_FLAG_EOS)) {
-        MEDIA_LOG_E("decoder does not support fd buffer");
-        return Status::ERROR_INVALID_DATA;
+        MEDIA_LOG_E("input buffer error");
+        return Status::ERROR_INVALID_PARAMETER;
     }
     Status ret = Status::OK;
     {

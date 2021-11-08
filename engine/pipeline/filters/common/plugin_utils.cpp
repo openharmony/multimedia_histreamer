@@ -18,6 +18,24 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
+const static std::map<Plugin::Status, ErrorCode> g_transTable = {
+        {Plugin::Status::END_OF_STREAM, ErrorCode::END_OF_STREAM},
+        {Plugin::Status::OK, ErrorCode::SUCCESS},
+        {Plugin::Status::NO_ERROR, ErrorCode::SUCCESS},
+        {Plugin::Status::ERROR_UNKNOWN, ErrorCode::ERROR_UNKNOWN},
+        {Plugin::Status::ERROR_PLUGIN_ALREADY_EXISTS,ErrorCode::ERROR_UNKNOWN},
+        {Plugin::Status::ERROR_INCOMPATIBLE_VERSION, ErrorCode::ERROR_UNKNOWN},
+        {Plugin::Status::ERROR_NO_MEMORY, ErrorCode::ERROR_NO_MEMORY},
+        {Plugin::Status::ERROR_WRONG_STATE,ErrorCode::ERROR_INVALID_OPERATION},
+        {Plugin::Status::ERROR_UNIMPLEMENTED, ErrorCode::ERROR_UNIMPLEMENTED},
+        {Plugin::Status::ERROR_INVALID_PARAMETER, ErrorCode::ERROR_INVALID_PARAMETER_VALUE},
+        {Plugin::Status::ERROR_INVALID_DATA, ErrorCode::ERROR_UNKNOWN},
+        {Plugin::Status::ERROR_MISMATCHED_TYPE, ErrorCode::ERROR_INVALID_PARAMETER_TYPE},
+        {Plugin::Status::ERROR_TIMED_OUT, ErrorCode::ERROR_TIMED_OUT},
+        {Plugin::Status::ERROR_UNSUPPORTED_FORMAT, ErrorCode::ERROR_UNSUPPORTED_FORMAT},
+        {Plugin::Status::ERROR_NOT_ENOUGH_DATA,ErrorCode::ERROR_UNKNOWN},
+        {Plugin::Status::ERROR_NOT_EXISTED, ErrorCode::ERROR_NOT_EXISTED}
+};
 /**
  * translate plugin error into pipeline error code
  * @param pluginError
@@ -25,10 +43,11 @@ namespace Pipeline {
  */
 OHOS::Media::ErrorCode TranslatePluginStatus(Plugin::Status pluginError)
 {
-    if (pluginError != OHOS::Media::Plugin::Status::OK) {
-        return OHOS::Media::ErrorCode::ERROR_UNKNOWN;
+    auto ite = g_transTable.find(pluginError);
+    if (ite == g_transTable.end()) {
+        return ErrorCode::ERROR_UNKNOWN;
     }
-    return OHOS::Media::ErrorCode::SUCCESS;
+    return ite->second;
 }
 bool TranslateIntoParameter(const int& key, OHOS::Media::Plugin::Tag& tag)
 {
@@ -69,7 +88,7 @@ ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta>& inMeta,
         }
     }
     if (info == nullptr) {
-        return ErrorCode::ERROR_PLUGIN_NOT_FOUND;
+        return ErrorCode::ERROR_UNSUPPORTED_FORMAT;
     }
 
     // try to reuse the plugin if their name are the same
@@ -83,7 +102,7 @@ ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta>& inMeta,
     }
     plugin = pluginCreator(info->name);
     if (plugin == nullptr) {
-        return ErrorCode::ERROR_PLUGIN_NOT_FOUND;
+        return ErrorCode::ERROR_UNSUPPORTED_FORMAT;
     }
     pluginInfo = info;
     return ErrorCode::SUCCESS;

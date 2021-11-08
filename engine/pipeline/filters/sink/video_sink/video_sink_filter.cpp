@@ -64,28 +64,28 @@ void VideoSinkFilter::Init(EventReceiver* receiver, FilterCallback* callback)
 ErrorCode VideoSinkFilter::SetParameter(int32_t key, const Plugin::Any& value)
 {
     if (state_.load() == FilterState::CREATED) {
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_AGAIN;
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
         MEDIA_LOG_I("SetParameter key %d is out of boundary", key);
-        return ErrorCode::ERROR_INVALID_PARAM_VALUE;
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    RETURN_PLUGIN_NOT_FOUND_IF_NULL(plugin_);
+    RETURN_AGAIN_IF_NULL(plugin_);
     return TranslatePluginStatus(plugin_->SetParameter(tag, value));
 }
 
 ErrorCode VideoSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
 {
     if (state_.load() == FilterState::CREATED) {
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_AGAIN;
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
         MEDIA_LOG_I("GetParameter key %d is out of boundary", key);
-        return ErrorCode::ERROR_INVALID_PARAM_VALUE;
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    RETURN_PLUGIN_NOT_FOUND_IF_NULL(plugin_);
+    RETURN_AGAIN_IF_NULL(plugin_);
     return TranslatePluginStatus(plugin_->GetParameter(tag, value));
 }
 
@@ -218,7 +218,7 @@ ErrorCode VideoSinkFilter::Start()
     MEDIA_LOG_D("start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
         MEDIA_LOG_W("sink is not ready when start, state_: %d", state_.load());
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     inBufQueue_->SetActive(true);
     renderTask_->Start();
@@ -252,7 +252,7 @@ ErrorCode VideoSinkFilter::Pause()
     MEDIA_LOG_D("Video sink filter pause start");
     if (state_ != FilterState::READY && state_ != FilterState::RUNNING) {
         MEDIA_LOG_W("video sink cannot pause when not working");
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(FilterBase::Pause(), "Video sink pause fail");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Pause()), "Pause plugin fail");
