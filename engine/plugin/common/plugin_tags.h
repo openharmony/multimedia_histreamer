@@ -77,51 +77,51 @@ enum struct Tag : uint32_t {
 
     /* -------------------- regular tag -------------------- */
     MIME = SECTION_REGULAR_START + 1, // string
-    TRACK_ID,                         // uint32_t
-    REQUIRED_OUT_BUFFER_CNT,          // uint32_t required buffer count of plugin; read only tag
-    PARAMETER_STRUCT,                 // ParameterStruct
+    TRACK_ID,                         ///< uint32_t, track id
+    REQUIRED_OUT_BUFFER_CNT,          ///< uint32_t required buffer count of plugin; read only tag
+    PARAMETER_STRUCT,                 ///< @see ParameterStruct
 
     /* -------------------- media tag -------------------- */
     MEDIA_TITLE = SECTION_MEDIA_START + 1, // string
-    MEDIA_ARTIST,                          // string
-    MEDIA_LYRICIST,                        // string
-    MEDIA_ALBUM,                           // string
-    MEDIA_ALBUM_ARTIST,                    // string
-    MEDIA_DATE,                            // string, format：YYYY-MM-DD
-    MEDIA_COMMENT,                         // string
-    MEDIA_GENRE,                           // string
-    MEDIA_COPYRIGHT,                       // string
-    MEDIA_LANGUAGE,                        // string
-    MEDIA_DESCRIPTION,                     // string
-    MEDIA_LYRICS,                          // string
-    MEDIA_DURATION,                        // uint64_t
-    MEDIA_FILE_SIZE,                       // uint64_t
-    MEDIA_BITRATE,                         // int64_t
-    MEDIA_FILE_EXTENSION,                  // string
-    MEDIA_CODEC_CONFIG,                    // vector<uint8>, e.g. AudioSpecificConfig for mp4
+    MEDIA_ARTIST,                          ///< string, artist
+    MEDIA_LYRICIST,                        ///< string, lyricist
+    MEDIA_ALBUM,                           ///< string, album
+    MEDIA_ALBUM_ARTIST,                    ///< string, album artist
+    MEDIA_DATE,                            ///< string, media date, format：YYYY-MM-DD
+    MEDIA_COMMENT,                         ///< string, comment
+    MEDIA_GENRE,                           ///< string, genre
+    MEDIA_COPYRIGHT,                       ///< string, copyright
+    MEDIA_LANGUAGE,                        ///< string, language
+    MEDIA_DESCRIPTION,                     ///< string, description
+    MEDIA_LYRICS,                          ///< string, cyrics
+    MEDIA_DURATION,                        ///< uint64_t, duration
+    MEDIA_FILE_SIZE,                       ///< uint64_t, file size
+    MEDIA_BITRATE,                         ///< int64_t, bite rate
+    MEDIA_FILE_EXTENSION,                  ///< string, file extension
+    MEDIA_CODEC_CONFIG,                    ///< vector<uint8>, codec config. e.g. AudioSpecificConfig for mp4
     MEDIA_POSITION, ///< uint64_t : The byte position within media stream/file
 
     /* -------------------- audio universal tag -------------------- */
     AUDIO_CHANNELS = SECTION_AUDIO_UNIVERSAL_START + 1, // uint32_t
-    AUDIO_CHANNEL_LAYOUT,                               // AudioChannelLayout
-    AUDIO_SAMPLE_RATE,                                  // uint32_t
-    AUDIO_SAMPLE_FORMAT,                                // AudioSampleFormat
-    AUDIO_SAMPLE_PER_FRAME,                             // uint32_t
+    AUDIO_CHANNEL_LAYOUT,                               ///< @see AudioChannelLayout
+    AUDIO_SAMPLE_RATE,                                  ///< uint32_t, sample rate
+    AUDIO_SAMPLE_FORMAT,                                ///< @see AudioSampleFormat
+    AUDIO_SAMPLE_PER_FRAME,                             ///< uint32_t, sample per frame
 
     /* -------------------- audio specific tag -------------------- */
     AUDIO_SPECIFIC_MPEG_START = MAKE_AUDIO_SPECIFIC_START(AudioFormat::MPEG),
-    AUDIO_MPEG_VERSION, // uint32_t
-    AUDIO_MPEG_LAYER,   // uint32_t
+    AUDIO_MPEG_VERSION, ///< uint32_t, mpeg version
+    AUDIO_MPEG_LAYER,   ///< uint32_t, mpeg layer
 
     AUDIO_SPECIFIC_AAC_START = MAKE_AUDIO_SPECIFIC_START(AudioFormat::AAC),
-    AUDIO_AAC_PROFILE,       // AudioAacProfile
-    AUDIO_AAC_LEVEL,         // uint32_t
-    AUDIO_AAC_STREAM_FORMAT, // AudioAacStreamFormat
+    AUDIO_AAC_PROFILE,       ///< @see AudioAacProfile
+    AUDIO_AAC_LEVEL,         ///< uint32_t, acc level
+    AUDIO_AAC_STREAM_FORMAT, ///< @see AudioAacStreamFormat
 
     /* -------------------- video universal tag -------------------- */
     VIDEO_WIDTH = SECTION_VIDEO_UNIVERSAL_START + 1, // uint32_t
-    VIDEO_HEIGHT,                                    // uint32_t
-    VIDEO_PIXEL_FORMAT,                              // uint32_t
+    VIDEO_HEIGHT,                                    ///< uint32_t, video height
+    VIDEO_PIXEL_FORMAT,                              ///< uint32_t, video pixel format
 };
 
 using ValueType = Any;

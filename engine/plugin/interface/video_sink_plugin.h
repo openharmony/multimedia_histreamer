@@ -43,7 +43,6 @@ struct VideoSinkPlugin : public PluginBase {
      *
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state.
      */
     virtual Status Pause() = 0;
 
@@ -55,7 +54,6 @@ struct VideoSinkPlugin : public PluginBase {
      *
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state.
      */
     virtual Status Resume() = 0;
 
@@ -67,7 +65,6 @@ struct VideoSinkPlugin : public PluginBase {
      * @param input Indicates the pointer to the frame to write.
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state.
      */
     virtual Status Write(const std::shared_ptr<Buffer>& input) = 0;
 
@@ -78,7 +75,6 @@ struct VideoSinkPlugin : public PluginBase {
      *
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state.
      */
     virtual Status Flush() = 0;
 };
