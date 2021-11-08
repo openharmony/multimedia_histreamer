@@ -32,10 +32,12 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-#define RETURN_PLUGIN_NOT_FOUND_IF_NULL(plugin)                                                                        \
-    if ((plugin) == nullptr) {                                                                                         \
-        return ErrorCode::ERROR_PLUGIN_NOT_FOUND;                                                                      \
-    }
+#define RETURN_AGAIN_IF_NULL(plugin) \
+do { \
+    if ((plugin) == nullptr) { \
+        return ErrorCode::ERROR_AGAIN; \
+    }\
+} while (0)
 
 /**
  * translate plugin error into pipeline error code

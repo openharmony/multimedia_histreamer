@@ -260,7 +260,7 @@ bool SdlVideoSinkPlugin::IsParameterSupported(Tag tag)
 
 Status SdlVideoSinkPlugin::GetParameter(Tag tag, ValueType& value)
 {
-    return Status::ERROR_ALREADY_EXISTS;
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status SdlVideoSinkPlugin::SetParameter(Tag tag, const ValueType& value)
@@ -302,7 +302,7 @@ std::shared_ptr<Allocator> SdlVideoSinkPlugin::GetAllocator()
 
 Status SdlVideoSinkPlugin::SetCallback(const std::shared_ptr<Callback>& cb)
 {
-    return Status::ERROR_ALREADY_EXISTS;
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status SdlVideoSinkPlugin::Pause()

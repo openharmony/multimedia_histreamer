@@ -183,7 +183,7 @@ Status VideoFfmpegDecoderPlugin::GetParameter(Tag tag, ValueType& value)
         value = res->second;
         return Status::OK;
     }
-    return Status::ERROR_INVALID_PARAMETER;
+    return Status::ERROR_INVALID_PARAMETER_VALUE;
 }
 
 template <typename T>
@@ -297,7 +297,7 @@ Status VideoFfmpegDecoderPlugin::OpenCodecContext()
     if (vdec == nullptr) {
         MEDIA_LOG_E("Codec: %d is not found", static_cast<int32_t>(avCodecContext_->codec_id));
         DeinitCodecContext();
-        return Status::ERROR_INVALID_PARAMETER;
+        return Status::ERROR_INVALID_PARAMETER_VALUE;
     }
     auto res = avcodec_open2(avCodecContext_.get(), avCodec_.get(), nullptr);
     if (res != 0) {

@@ -79,7 +79,7 @@ Status PluginRegister::RegisterImpl::AddPlugin(const PluginDefBase& def)
             registerData->registerTable[def.pluginType].erase(def.name);
         } else {
             // 重复注册，且有更合适的版本存在
-            return Status::ERROR_ALREADY_EXISTS;
+            return Status::ERROR_PLUGIN_ALREADY_EXISTS;
         }
     }
     registerData->registerNames[def.pluginType].insert(def.name);

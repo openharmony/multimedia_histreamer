@@ -123,7 +123,7 @@ int32_t HiPlayerImpl::Prepare()
     } else if (curFsmState_ == StateId::INIT) {
         return to_underlying(errorCode_.load());
     } else {
-        return to_underlying(ErrorCode::ERROR_STATE);
+        return to_underlying(ErrorCode::ERROR_INVALID_OPERATION);
     }
 }
 
@@ -182,7 +182,7 @@ int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
 {
     if (leftVolume < 0 || leftVolume > MAX_MEDIA_VOLUME || rightVolume < 0 || rightVolume > MAX_MEDIA_VOLUME) {
         MEDIA_LOG_E("volume not valid, should be in range [0,100]");
-        return to_underlying(ErrorCode::ERROR_INVALID_PARAM_VALUE);
+        return to_underlying(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }
     if (leftVolume < 1e-6 && rightVolume >= 1e-6) { // 1e-6
         volume_ = rightVolume;
@@ -283,14 +283,16 @@ ErrorCode HiPlayerImpl::DoStop()
 
 ErrorCode HiPlayerImpl::DoSeek(int64_t msec)
 {
-    {
-        pipeline_->FlushStart();
-        pipeline_->FlushEnd();
-    }
+    pipeline_->FlushStart();
+    pipeline_->FlushEnd();
     auto rtv = demuxer_->SeekTo(msec);
     auto ptr = callback_.lock();
     if (ptr != nullptr) {
-        ptr->OnRewindToComplete();
+        if (rtv != ErrorCode::SUCCESS) {
+            ptr->OnError(to_underlying(PlayerErrorTypeExt::SEEK_ERROR), to_underlying(rtv));
+        } else {
+            ptr->OnRewindToComplete();
+        }
     }
     return rtv;
 }
@@ -383,7 +385,7 @@ int32_t HiPlayerImpl::GetDuration(int64_t& outDurationMs)
     auto sourceMeta = sourceMeta_.lock();
     if (sourceMeta == nullptr) {
         outDurationMs = 0;
-        return to_underlying(ErrorCode::ERROR_NOT_FOUND);
+        return to_underlying(ErrorCode::ERROR_AGAIN);
     }
     if (sourceMeta->GetUint64(Media::Plugin::MetaID::MEDIA_DURATION, duration)) {
         outDurationMs = duration;
@@ -403,14 +405,14 @@ int32_t HiPlayerImpl::GetDuration(int64_t& outDurationMs)
         outDurationMs = duration;
         return to_underlying(ErrorCode::SUCCESS);
     }
-    return to_underlying(ErrorCode::ERROR_NOT_FOUND);
+    return to_underlying(ErrorCode::ERROR_AGAIN);
 }
 
 ErrorCode HiPlayerImpl::SetVolume(float volume)
 {
     if (audioSink_ == nullptr) {
         MEDIA_LOG_W("cannot set volume while audio sink filter is null");
-        return ErrorCode::ERROR_NULL_POINTER;
+        return ErrorCode::ERROR_AGAIN;
     }
     ErrorCode ret = ErrorCode::SUCCESS;
     if (volume > 0) {
@@ -458,24 +460,27 @@ ErrorCode HiPlayerImpl::GetTrackCnt(size_t& cnt) const
 ErrorCode HiPlayerImpl::GetSourceMeta(shared_ptr<const Plugin::Meta>& meta) const
 {
     meta = sourceMeta_.lock();
-    return meta ? ErrorCode::SUCCESS : ErrorCode::ERROR_NOT_FOUND;
+    return meta ? ErrorCode::SUCCESS : ErrorCode::ERROR_AGAIN;
 }
 
 ErrorCode HiPlayerImpl::GetTrackMeta(size_t id, shared_ptr<const Plugin::Meta>& meta) const
 {
     if (id > streamMeta_.size() || id < 0) {
-        return ErrorCode::ERROR_INVALID_PARAM_VALUE;
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     meta = streamMeta_[id].lock();
     if (meta == nullptr) {
-        return ErrorCode::ERROR_NOT_FOUND;
+        return ErrorCode::ERROR_AGAIN;
     }
     return ErrorCode::SUCCESS;
 }
 
 ErrorCode HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& parameter)
 {
-    ErrorCode rtv = ErrorCode::ERROR_PORT_UNEXPECTED;
+    if (parameter.Type() != typeid(PortInfo)) {
+        return ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
+    }
+    ErrorCode rtv = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     auto param = Plugin::AnyCast<PortInfo>(parameter);
     if (filter == demuxer_.get() && param.type == PortType::OUT) {
         MEDIA_LOG_I("new port found on demuxer %zu", param.ports.size());
@@ -507,9 +512,12 @@ ErrorCode HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& par
 #ifdef VIDEO_SUPPORT
 ErrorCode HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin::Any& parameter)
 {
+    if (parameter.Type() != typeid(PortInfo)) {
+        return ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
+    }
     auto param = Plugin::AnyCast<PortInfo>(parameter);
     if (filter != demuxer_.get() || param.type != PortType::OUT) {
-        return ErrorCode::ERROR_PORT_UNEXPECTED;
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     std::vector<Filter*> newFilters;
     for (const auto& portDesc : param.ports) {
@@ -517,7 +525,7 @@ ErrorCode HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin::Any& par
             MEDIA_LOG_I("port name %s", portDesc.name.c_str());
             videoDecoder = FilterFactory::Instance().CreateFilterWithType<VideoDecoderFilter>(
                 "builtin.player.videodecoder", "videodecoder-" + portDesc.name);
-            if (pipeline_->AddFilters({videoDecoder.get()}) != ErrorCode::ERROR_ALREADY_EXISTS) {
+            if (pipeline_->AddFilters({videoDecoder.get()}) == ErrorCode::SUCCESS) {
                 // link demuxer and video decoder
                 auto fromPort = filter->GetOutPort(portDesc.name);
                 auto toPort = videoDecoder->GetInPort(PORT_NAME_DEFAULT);
@@ -525,7 +533,7 @@ ErrorCode HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin::Any& par
                 newFilters.emplace_back(videoDecoder.get());
 
                 // link video decoder and video sink
-                if (pipeline_->AddFilters({videoSink.get()}) != ErrorCode::ERROR_ALREADY_EXISTS) {
+                if (pipeline_->AddFilters({videoSink.get()}) == ErrorCode::SUCCESS) {
                     fromPort = videoDecoder->GetOutPort(PORT_NAME_DEFAULT);
                     toPort = videoSink->GetInPort(PORT_NAME_DEFAULT);
                     FAIL_LOG(pipeline_->LinkPorts(fromPort, toPort)); // link ports

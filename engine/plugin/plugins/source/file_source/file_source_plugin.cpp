@@ -223,18 +223,18 @@ Status FileSourcePlugin::ParseFileName(std::string& uri)
 {
     if (uri.empty()) {
         MEDIA_LOG_E("uri is empty");
-        return Status::ERROR_INVALID_DATA;
+        return Status::ERROR_INVALID_PARAMETER;
     }
     MEDIA_LOG_D("uri: %s", uri.c_str());
     if (uri.find("file:/") != std::string::npos) {
         if (uri.find('#') != std::string::npos) {
             MEDIA_LOG_E("Invalid file uri format: %s", uri.c_str());
-            return Status::ERROR_INVALID_DATA;
+            return Status::ERROR_INVALID_PARAMETER;
         }
         auto pos = uri.find("file:");
         if (pos == std::string::npos) {
             MEDIA_LOG_E("Invalid file uri format: %s", uri.c_str());
-            return Status::ERROR_INVALID_DATA;
+            return Status::ERROR_INVALID_PARAMETER;
         }
         pos += 5; // 5: offset
         if (uri.find("///", pos) != std::string::npos) {
@@ -244,7 +244,7 @@ Status FileSourcePlugin::ParseFileName(std::string& uri)
             pos = uri.find('/', pos); // skip host name
             if (pos == std::string::npos) {
                 MEDIA_LOG_E("Invalid file uri format: %s", uri.c_str());
-                return Status::ERROR_INVALID_DATA;
+                return Status::ERROR_INVALID_PARAMETER;
             }
             pos++;
         }
@@ -261,7 +261,7 @@ Status FileSourcePlugin::CheckFileStat()
     struct stat fileStat;
     if (stat(fileName_.c_str(), &fileStat) < 0) {
         MEDIA_LOG_E("Cannot get info from %s", fileName_.c_str());
-        return Status::ERROR_UNKNOWN;
+        return Status::ERROR_NOT_EXISTED;
     }
     if (S_ISDIR(fileStat.st_mode)) {
         MEDIA_LOG_E("%s is directory", fileName_.c_str());

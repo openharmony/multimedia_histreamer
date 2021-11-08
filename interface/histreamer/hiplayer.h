@@ -21,6 +21,10 @@
 
 namespace OHOS {
 namespace Media {
+enum struct PlayerErrorTypeExt : int32_t {
+    SEEK_ERROR = 1,
+};
+
 #if defined(WIN32)
 __declspec(dllexport)
 #endif

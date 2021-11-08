@@ -222,7 +222,7 @@ ErrorCode DemuxerFilter::SeekTo(int64_t msec)
 {
     if (!plugin_) {
         MEDIA_LOG_E("SeekTo failed due to no valid plugin");
-        return ErrorCode::ERROR_NULL_POINTER;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     ErrorCode rtv = ErrorCode::SUCCESS;
     auto ret = plugin_->SeekTo(-1, msec * 1000, Plugin::SeekMode::BACKWARD); // 1000
@@ -232,7 +232,7 @@ ErrorCode DemuxerFilter::SeekTo(int64_t msec)
         }
     } else {
         MEDIA_LOG_E("SeekTo failed with return value: %d", static_cast<int>(ret));
-        rtv = ErrorCode::ERROR_SEEK_FAILURE;
+        rtv = ErrorCode::ERROR_UNKNOWN;
     }
     return rtv;
 }
@@ -274,7 +274,7 @@ bool DemuxerFilter::InitPlugin(std::string pluginName)
     if (pluginName.empty()) {
         return false;
     }
-    if (!(pluginName_ == pluginName)) {
+    if (pluginName_ != pluginName) {
         if (plugin_) {
             plugin_->Deinit();
         }
@@ -340,7 +340,7 @@ void DemuxerFilter::MediaTypeFound(std::string pluginName)
     if (InitPlugin(std::move(pluginName))) {
         task_->Start();
     } else {
-        OnEvent({EVENT_ERROR, ErrorCode::ERROR_PLUGIN_NOT_FOUND});
+        OnEvent({EVENT_ERROR, ErrorCode::ERROR_UNSUPPORTED_FORMAT});
     }
 }
 
@@ -462,7 +462,7 @@ void DemuxerFilter::NegotiateDownstream()
                 stream.needNegoCaps = false;
             } else {
                 task_->PauseAsync();
-                OnEvent({EVENT_ERROR, ErrorCode::ERROR_PLUGIN_NOT_FOUND});
+                OnEvent({EVENT_ERROR, ErrorCode::ERROR_UNSUPPORTED_FORMAT});
             }
         }
     }
@@ -492,7 +492,8 @@ void DemuxerFilter::DemuxerLoop()
             OnEvent({EVENT_READY, {}});
         } else {
             task_->PauseAsync();
-            OnEvent({EVENT_ERROR, ErrorCode::ERROR_PARSE_META_FAILED});
+            MEDIA_LOG_E("demuxer filter parse meta failed");
+            OnEvent({EVENT_ERROR, ErrorCode::ERROR_UNKNOWN});
         }
     }
 }

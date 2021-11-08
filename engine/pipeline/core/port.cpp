@@ -61,7 +61,7 @@ ErrorCode InPort::Activate(const std::vector<WorkMode>& modes, WorkMode& outMode
         return ErrorCode::SUCCESS;
     }
     MEDIA_LOG_E("[Filter %s] InPort %s Activate error: prevPort destructed", filter->GetName().c_str(), name.c_str());
-    return ErrorCode::ERROR_NULL_POINTER;
+    return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
 }
 
 std::shared_ptr<Port> InPort::GetPeerPort()
@@ -95,7 +95,7 @@ ErrorCode InPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
         return ptr->PullData(offset, size, data);
     }
     MEDIA_LOG_E("prevPort destructed");
-    return ErrorCode::ERROR_NULL_POINTER;
+    return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
 }
 
 ErrorCode OutPort::Connect(std::shared_ptr<Port> port)
@@ -105,7 +105,7 @@ ErrorCode OutPort::Connect(std::shared_ptr<Port> port)
         return ErrorCode::SUCCESS;
     }
     MEDIA_LOG_E("Connect filters that are not in the same pipeline.");
-    return ErrorCode::ERROR_INVALID_PARAM_VALUE;
+    return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
 }
 
 ErrorCode OutPort::Disconnect()
@@ -140,9 +140,10 @@ ErrorCode OutPort::Activate(const std::vector<WorkMode>& modes, WorkMode& outMod
             }
         }
     } else {
-        MEDIA_LOG_E("filter destructed");
+        MEDIA_LOG_E("no valid filter");
     }
-    return ErrorCode::ERROR_NEGOTIATE_FAILED;
+    MEDIA_LOG_E("negotiate failed");
+    return ErrorCode::ERROR_UNKNOWN;
 }
 
 std::shared_ptr<Port> OutPort::GetPeerPort()
@@ -172,7 +173,7 @@ ErrorCode OutPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
         return filter->PullData(name, offset, size, data);
     }
     MEDIA_LOG_E("filter destructed");
-    return ErrorCode::ERROR_NULL_POINTER;
+    return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
 }
 
 ErrorCode EmptyInPort::Connect(std::shared_ptr<Port> port)
