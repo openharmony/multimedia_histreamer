@@ -88,7 +88,7 @@ void Task::Pause()
     if (runningState_.load() == RunningState::STARTED) {
         pauseDone_ = false;
         runningState_ = RunningState::PAUSED;
-        while (!pauseDone_.load()) {}
+        pauseCond_.Wait(lock, [this] { return pauseDone_.load(); });
     }
     MEDIA_LOG_D("task %s Pause done.", name_.c_str());
 }
@@ -130,6 +130,7 @@ void Task::Run()
         OSAL::ScopedLock lock(stateMutex_);
         if (runningState_.load() == RunningState::PAUSED) {
             pauseDone_ = true;
+            pauseCond_.NotifyOne();
             constexpr int timeoutMs = 500;
             cv_.WaitFor(lock, timeoutMs, [this] { return runningState_.load() != RunningState::PAUSED; });
         }

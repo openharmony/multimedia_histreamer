@@ -232,7 +232,7 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
             {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
-                MEDIA_LOG_I("choose plugin %s as working parameter", candidate.first->name);
+                MEDIA_LOG_I("choose plugin %s as working parameter", candidate.first->name.c_str());
                 break;
             }
         }

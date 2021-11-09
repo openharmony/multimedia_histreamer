@@ -19,6 +19,7 @@
 #include "common/plugin_utils.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
+#include "foundation/osal/utils/util.h"
 #include "pipeline/filters/common/plugin_settings.h"
 
 namespace OHOS {
@@ -100,7 +101,7 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
     upstreamNegotiatedCap = candidatePlugins[0].second;
 
     // try to reuse plugin
-    if (plugin_ != nullptr){
+    if (plugin_ != nullptr) {
         if (targetPluginInfo_ != nullptr && targetPluginInfo_->name == selectedPluginInfo->name) {
             if (plugin_->Reset() == Plugin::Status::OK) {
                 return true;
@@ -143,14 +144,12 @@ bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr
     return true;
 }
 
-
 ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
         Plugin::ValueType outValue;
-        if (meta->GetData(static_cast<Plugin::MetaID>(keyPair.first), outValue) &&
-            keyPair.second.second(outValue)) {
+        if (meta->GetData(static_cast<Plugin::MetaID>(keyPair.first), outValue) && keyPair.second.second(outValue)) {
             SetPluginParameter(keyPair.first, outValue);
         } else {
             MEDIA_LOG_W("parameter %s in meta is not found or type mismatch", keyPair.second.first.c_str());
@@ -190,20 +189,19 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
         MEDIA_LOG_I("PushData return due to: isFlushing = %d, state = %d", isFlushing, static_cast<int>(state_.load()));
         return ErrorCode::SUCCESS;
     }
-
+    auto err = TranslatePluginStatus(plugin_->Write(buffer));
+    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "audio sink write failed");
     if ((buffer->flag & BUFFER_FLAG_EOS) != 0) {
+        constexpr int waitTimeForPlaybackCompleteMs = 60;
+        OHOS::Media::OSAL::SleepFor(waitTimeForPlaybackCompleteMs);
         Event event{
             .type = EVENT_COMPLETE,
         };
         MEDIA_LOG_D("audio sink push data send event_complete");
         OnEvent(event);
-        MEDIA_LOG_D("audio sink push data end");
-        return ErrorCode::SUCCESS;
     }
-    auto err = TranslatePluginStatus(plugin_->Write(buffer));
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "audio sink write failed");
     MEDIA_LOG_D("audio sink push data end");
-    return err;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode AudioSinkFilter::Start()
@@ -275,12 +273,14 @@ void AudioSinkFilter::FlushStart()
     if (pushThreadIsBlocking) {
         startWorkingCondition_.NotifyOne();
     }
+    plugin_->Pause();
     plugin_->Flush();
 }
 
 void AudioSinkFilter::FlushEnd()
 {
     MEDIA_LOG_D("audio sink flush end entered");
+    plugin_->Resume();
     isFlushing = false;
 }
 

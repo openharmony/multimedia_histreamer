@@ -18,13 +18,12 @@
 
 #include <atomic>
 #include <vector>
+#include "audio_manager.h"
 #include "audio_types.h"
-#include "foundation/osal/thread/mutex.h"
 #include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
 #include "foundation/osal/thread/task.h"
 #include "plugin/interface/audio_sink_plugin.h"
-#include "audio_manager.h"
-#include "utils/blocking_queue.h"
 
 struct AudioAdapter;
 struct AudioRender;
@@ -54,24 +53,23 @@ public:
 
     bool IsParameterSupported(Media::Plugin::Tag tag) override;
 
-    Media::Plugin::Status GetParameter(Media::Plugin::Tag tag, Media::Plugin::ValueType &value) override;
+    Media::Plugin::Status GetParameter(Media::Plugin::Tag tag, Media::Plugin::ValueType& value) override;
 
-    Media::Plugin::Status
-    SetParameter(Media::Plugin::Tag tag, const Media::Plugin::ValueType &value) override;
+    Media::Plugin::Status SetParameter(Media::Plugin::Tag tag, const Media::Plugin::ValueType& value) override;
 
     std::shared_ptr<OHOS::Media::Plugin::Allocator> GetAllocator() override;
 
-    Media::Plugin::Status SetCallback(const std::shared_ptr<OHOS::Media::Plugin::Callback> &cb) override;
+    Media::Plugin::Status SetCallback(const std::shared_ptr<OHOS::Media::Plugin::Callback>& cb) override;
 
-    Media::Plugin::Status GetMute(bool &mute) override;
+    Media::Plugin::Status GetMute(bool& mute) override;
 
     Media::Plugin::Status SetMute(bool mute) override;
 
-    Media::Plugin::Status GetVolume(float &volume) override;
+    Media::Plugin::Status GetVolume(float& volume) override;
 
     Media::Plugin::Status SetVolume(float volume) override;
 
-    Media::Plugin::Status GetSpeed(float &speed) override;
+    Media::Plugin::Status GetSpeed(float& speed) override;
 
     Media::Plugin::Status SetSpeed(float speed) override;
 
@@ -79,13 +77,13 @@ public:
 
     Media::Plugin::Status Resume() override;
 
-    Media::Plugin::Status GetLatency(uint64_t &ms) override;
+    Media::Plugin::Status GetLatency(uint64_t& ms) override;
 
-    Media::Plugin::Status GetFrameSize(size_t &size) override;
+    Media::Plugin::Status GetFrameSize(size_t& size) override;
 
-    Media::Plugin::Status GetFrameCount(uint32_t &count) override;
+    Media::Plugin::Status GetFrameCount(uint32_t& count) override;
 
-    Media::Plugin::Status Write(const std::shared_ptr<Media::Plugin::Buffer> &input) override;
+    Media::Plugin::Status Write(const std::shared_ptr<Media::Plugin::Buffer>& input) override;
 
     Media::Plugin::Status Flush() override;
 
@@ -100,15 +98,12 @@ private:
 
     bool HandleInterleaveData(uint8_t* origData, int32_t frameCnt);
 
-    void DoRender();
+    void RenderFrame(const std::shared_ptr<Plugin::Buffer>& input);
 
     Media::Plugin::Status ProcessInputSampleFormat(const Media::Plugin::ValueType& value);
 
 private:
     OHOS::Media::OSAL::Mutex renderMutex_ {};
-
-    std::atomic<bool> shouldRenderFrame_ {false};
-
     AudioManager* audioManager_ {nullptr};
     AudioAdapterDescriptor adapterDescriptor_ {};
     AudioAdapter* audioAdapter_ {nullptr};
@@ -116,17 +111,14 @@ private:
     AudioDeviceDescriptor deviceDescriptor_ {};
     AudioSampleAttributes sampleAttributes_ {};
     bool isInputInterleaved_{false};
-    AudioChannelMask channelMask_ {AUDIO_CHANNEL_MONO};
-
-    std::weak_ptr<OHOS::Media::Plugin::Callback> eventCallback_ {};
-    std::shared_ptr<OHOS::Media::OSAL::Task> renderThread_ {};
+    AudioChannelMask channelMask_{AUDIO_CHANNEL_MONO};
+    std::weak_ptr<OHOS::Media::Plugin::Callback> eventCallback_{};
     std::vector<uint8_t> cacheData_;
-    BlockingQueue<std::shared_ptr<Media::Plugin::Buffer>> bufferQueue_;
-    std::shared_ptr<Media::Plugin::Buffer> currBuffer_;
-    size_t currBufferOffset_;
     bool usingDefaultInCaps_ {true}; // if true pass hdi with S16P pcm data and convert input into non-interleaved
+    std::atomic<bool> processing_;
+    OSAL::ConditionVariable renderCond_;
 };
-}
-}
-}
+} // namespace HosLitePlugin
+} // namespace Media
+} // namespace OHOS
 #endif
