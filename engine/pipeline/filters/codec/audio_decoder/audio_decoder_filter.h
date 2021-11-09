@@ -44,35 +44,18 @@ public:
     void FlushEnd() override;
 
 private:
-    class DataCallbackImpl;
-
     ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta> &meta);
 
-    void HandleFrame();
-
-    void HandleOneFrame(const std::shared_ptr<AVBuffer> &data);
+    bool HandleFrame(const std::shared_ptr<AVBuffer>& buffer);
 
     void FinishFrame();
 
     ErrorCode Release();
 
-    // callbacks
-    void OnInputBufferDone(const std::shared_ptr<AVBuffer> &buffer);
-
-    void OnOutputBufferDone(const std::shared_ptr<AVBuffer> &buffer);
-
 private:
-    ErrorCode QueueAllBufferInPoolToPluginLocked();
-
-    std::shared_ptr<OHOS::Media::BlockingQueue<OHOS::Media::AVBufferPtr>> inBufferQ_;
-    std::shared_ptr<OHOS::Media::BlockingQueue<OHOS::Media::AVBufferPtr>> outBufferQ_; // PCM data
-    std::shared_ptr<OHOS::Media::OSAL::Task> handleFrameTask_ {}; // dequeue from es bufferQ then enqueue to plugin
-    // this task will dequeue from the plugin and then push to downstream
-    std::shared_ptr<OHOS::Media::OSAL::Task> pushTask_ {nullptr};
     std::shared_ptr<BufferPool<AVBuffer>> outBufferPool_ {};
     bool isFlushing_ {false};
 
-    std::shared_ptr<DataCallbackImpl> dataCallback_ {nullptr};
     Capability capNegWithDownstream_;
     Capability capNegWithUpstream_;
 };
