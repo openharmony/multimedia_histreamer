@@ -15,7 +15,7 @@
 
 #ifdef VIDEO_SUPPORT
 
-#define LOG_TAG "SdlVideoSinkPlugin"
+#define HST_LOG_TAG "SdlVideoSinkPlugin"
 
 #include "sdl_video_sink_plugin.h"
 #include <functional>

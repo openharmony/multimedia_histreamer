@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "ConditionVariable"
+#define HST_LOG_TAG "ConditionVariable"
 
 #include "condition_variable.h"
 #include "foundation/log.h"

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Ffmpeg_Au_Decoder"
+#define HST_LOG_TAG "Ffmpeg_Au_Decoder"
 
 #include "audio_ffmpeg_decoder_plugin.h"
 #include <cstring>
@@ -373,7 +373,7 @@ Status AudioFfmpegDecoderPlugin::Stop()
 
 Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs)
 {
-    MEDIA_LOG_I("queue out put");
+    MEDIA_LOG_D("queue out put");
     (void)timeoutMs;
     outBufferQ_.Push(outputBuffer);
     return Status::OK;
@@ -509,7 +509,9 @@ void AudioFfmpegDecoderPlugin::ReceiveBufferLocked(Status& status, const std::sh
         receiveOneFrame = false;
         status = Status::END_OF_STREAM;
     } else {
-        MEDIA_LOG_I("audio decoder receive error: %s", AVStrError(ret).c_str());
+        if (ret != AVERROR(EAGAIN)) { // do not print again as error
+            MEDIA_LOG_I("audio decoder receive error: %s", AVStrError(ret).c_str());
+        }
         notifyBufferDone = false;
         receiveOneFrame = false;
         status = Status::OK;

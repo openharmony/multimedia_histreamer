@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Compatible_Check"
+#define HST_LOG_TAG "Compatible_Check"
 
 #include "compatible_check.h"
 

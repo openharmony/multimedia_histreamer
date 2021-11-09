@@ -272,7 +272,7 @@ AVBufferPtr DataPacker::WrapAssemblerBuffer(uint64_t offset)
 
 void DataPacker::Flush()
 {
-    MEDIA_LOG_D("DataPacker Flush called.");
+    MEDIA_LOG_I("DataPacker Flush called.");
     OSAL::ScopedLock lock(mutex_);
     que_.clear();
     size_ = 0;

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "PluginCoreAuSink"
+#define HST_LOG_TAG "PluginCoreAuSink"
 
 #include "audio_sink.h"
 

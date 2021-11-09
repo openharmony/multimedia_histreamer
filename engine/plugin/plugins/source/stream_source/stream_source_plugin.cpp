@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "StreamSourcePlugin"
+#define HST_LOG_TAG "StreamSourcePlugin"
 
 #include "stream_source_plugin.h"
 #include "plugin/common/plugin_buffer.h"

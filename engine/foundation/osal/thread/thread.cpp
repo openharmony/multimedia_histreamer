@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Thread"
+#define HST_LOG_TAG "Thread"
 
 #include "thread.h"
 #include "foundation/log.h"
@@ -77,7 +77,7 @@ bool Thread::CreateThread(const std::function<void()>& func)
 #endif
     int rtv = pthread_create(&id_, &attr, Thread::Run, state_.get());
     if (rtv == 0) {
-        MEDIA_LOG_I("thread %d, id %s create succ", pthread_self(), name_.c_str());
+        MEDIA_LOG_I("thread %s, id %" PRIu64 " create succ", name_.c_str(), pthread_self());
         SetNameInternal();
     } else {
         state_.reset();

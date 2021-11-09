@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Task"
+#define HST_LOG_TAG "Task"
 
 #include "task.h"
 
 #include "foundation/log.h"
-#include "utils/util.h"
 
 namespace OHOS {
 namespace Media {

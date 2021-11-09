@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "AudioSinkFilter"
+#define HST_LOG_TAG "AudioSinkFilter"
 
 #include "audio_sink_filter.h"
 #include "common/plugin_utils.h"
@@ -83,7 +83,7 @@ ErrorCode AudioSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
 bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                 Capability& upstreamNegotiatedCap)
 {
-    MEDIA_LOG_D("audio sink negotiate started");
+    MEDIA_LOG_I("audio sink negotiate started");
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::AUDIO_SINK);
     if (candidatePlugins.empty()) {
         MEDIA_LOG_E("no available audio sink plugin");
@@ -206,7 +206,7 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
 
 ErrorCode AudioSinkFilter::Start()
 {
-    MEDIA_LOG_D("start called");
+    MEDIA_LOG_I("start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
         MEDIA_LOG_W("sink is not ready when start, state: %d", state_.load());
         return ErrorCode::ERROR_INVALID_OPERATION;
@@ -240,7 +240,7 @@ ErrorCode AudioSinkFilter::Stop()
 
 ErrorCode AudioSinkFilter::Pause()
 {
-    MEDIA_LOG_D("audio sink filter pause start");
+    MEDIA_LOG_I("audio sink filter pause start");
     // only worked when state is working
     if (state_ != FilterState::READY && state_ != FilterState::RUNNING) {
         MEDIA_LOG_W("audio sink cannot pause when not working");
@@ -254,7 +254,7 @@ ErrorCode AudioSinkFilter::Pause()
 }
 ErrorCode AudioSinkFilter::Resume()
 {
-    MEDIA_LOG_D("audio sink filter resume");
+    MEDIA_LOG_I("audio sink filter resume");
     // only worked when state is paused
     if (state_ == FilterState::PAUSED) {
         state_ = FilterState::RUNNING;
@@ -268,7 +268,7 @@ ErrorCode AudioSinkFilter::Resume()
 
 void AudioSinkFilter::FlushStart()
 {
-    MEDIA_LOG_D("audio sink flush start entered");
+    MEDIA_LOG_I("audio sink flush start entered");
     isFlushing = true;
     if (pushThreadIsBlocking) {
         startWorkingCondition_.NotifyOne();
@@ -279,7 +279,7 @@ void AudioSinkFilter::FlushStart()
 
 void AudioSinkFilter::FlushEnd()
 {
-    MEDIA_LOG_D("audio sink flush end entered");
+    MEDIA_LOG_I("audio sink flush end entered");
     plugin_->Resume();
     isFlushing = false;
 }

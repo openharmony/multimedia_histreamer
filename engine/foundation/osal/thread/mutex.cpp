@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Mutex"
+#define HST_LOG_TAG "Mutex"
 
 #include "mutex.h"
 #include "foundation/log.h"

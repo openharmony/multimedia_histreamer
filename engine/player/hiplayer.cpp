@@ -13,16 +13,18 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "HiPlayer"
+#define HST_LOG_TAG "HiPlayer"
 
 #include "histreamer/hiplayer.h"
 
 #include "hiplayer_impl.h"
+#include "foundation/log.h"
 
 namespace OHOS {
 namespace Media {
 std::shared_ptr<Media::PlayerInterface> CreateHiPlayer()
 {
+    MEDIA_LOG_W("Histreamer compile time: %s %s", __DATE__, __TIME__);
     return HiPlayerImpl::CreateHiPlayerImpl();
 }
 } // namespace Media

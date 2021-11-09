@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "AudioDecoderFilter"
+#define HST_LOG_TAG "DecoderFilterBase"
 
 #include "decoder_filter_base.h"
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "SdlAudioSinkPlugin"
+#define HST_LOG_TAG "SdlAudioSinkPlugin"
 
 #include "sdl_audio_sink_plugin.h"
 #include <functional>

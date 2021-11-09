@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "HdiAuUtils"
+#define HST_LOG_TAG "HdiAuUtils"
 
 #include "hdi_au_utils.h"
 

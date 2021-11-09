@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "AudioDecoderFilter"
+#define HST_LOG_TAG "AudioDecoderFilter"
 
 #include "audio_decoder_filter.h"
 #include "osal/utils/util.h"
@@ -148,7 +148,7 @@ ErrorCode AudioDecoderFilter::QueueAllBufferInPoolToPluginLocked()
 
 ErrorCode AudioDecoderFilter::Start()
 {
-    MEDIA_LOG_D("audio decoder start called");
+    MEDIA_LOG_I("audio decoder start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
         MEDIA_LOG_W("call decoder start() when state is not ready or working");
         return ErrorCode::ERROR_INVALID_OPERATION;
@@ -158,6 +158,7 @@ ErrorCode AudioDecoderFilter::Start()
 
 ErrorCode AudioDecoderFilter::Prepare()
 {
+    MEDIA_LOG_I("audio decoder prepare called");
     if (state_ != FilterState::INITIALIZED) {
         MEDIA_LOG_W("decoder filter is not in init state");
         return ErrorCode::ERROR_INVALID_OPERATION;

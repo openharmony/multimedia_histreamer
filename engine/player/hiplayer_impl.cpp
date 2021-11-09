@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "HiPlayerImpl"
+#define HST_LOG_TAG "HiPlayerImpl"
 
 #include "hiplayer_impl.h"
 #include "foundation/log.h"

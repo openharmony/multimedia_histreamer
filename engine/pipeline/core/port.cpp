@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "FilterPort"
+#define HST_LOG_TAG "FilterPort"
 
 #include "port.h"
 #include <algorithm>
