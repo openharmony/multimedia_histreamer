@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "DemuxerFilter"
+#define HST_LOG_TAG "DemuxerFilter"
 
 #include "demuxer_filter.h"
 #include <algorithm>
@@ -129,6 +129,7 @@ void DemuxerFilter::Init(EventReceiver* receiver, FilterCallback* callback)
 
 ErrorCode DemuxerFilter::Start()
 {
+    MEDIA_LOG_I("Start called.");
     if (task_) {
         task_->Start();
     }
@@ -158,13 +159,13 @@ ErrorCode DemuxerFilter::Stop()
 
 ErrorCode DemuxerFilter::Pause()
 {
-    MEDIA_LOG_D("Pause called");
+    MEDIA_LOG_I("Pause called");
     return FilterBase::Pause();
 }
 
 void DemuxerFilter::FlushStart()
 {
-    MEDIA_LOG_D("FlushStart entered");
+    MEDIA_LOG_I("FlushStart entered");
     if (dataPacker_) {
         dataPacker_->Flush();
     }
@@ -175,12 +176,12 @@ void DemuxerFilter::FlushStart()
 
 void DemuxerFilter::FlushEnd()
 {
-    MEDIA_LOG_D("FlushEnd entered");
+    MEDIA_LOG_I("FlushEnd entered");
 }
 
 ErrorCode DemuxerFilter::Prepare()
 {
-    MEDIA_LOG_D("Prepare called");
+    MEDIA_LOG_I("Prepare called");
     pluginState_ = DemuxerState::DEMUXER_STATE_NULL;
     Pipeline::WorkMode mode;
     GetInPort(PORT_NAME_DEFAULT)->Activate({Pipeline::WorkMode::PULL, Pipeline::WorkMode::PUSH}, mode);
@@ -300,7 +301,7 @@ bool DemuxerFilter::InitPlugin(std::string pluginName)
             }
         }
     }
-    MEDIA_LOG_W("InitPlugin, %s used.", pluginName_.c_str());
+    MEDIA_LOG_I("InitPlugin, %s used.", pluginName_.c_str());
     (void)plugin_->SetDataSource(std::dynamic_pointer_cast<Plugin::DataSourceHelper>(dataSource_));
     pluginState_ = DemuxerState::DEMUXER_STATE_PARSE_HEADER;
     return plugin_->Prepare() == Plugin::Status::OK;
@@ -373,7 +374,7 @@ bool DemuxerFilter::IsOffsetValid(int64_t offset) const
 
 bool DemuxerFilter::PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo)
 {
-    MEDIA_LOG_D("PrepareStreams called");
+    MEDIA_LOG_I("PrepareStreams called");
     InitMediaMetaData(mediaInfo);
     outPorts_.clear();
     int streamCnt = mediaInfo.trackMeta.size();
@@ -439,7 +440,7 @@ std::shared_ptr<Plugin::Meta> DemuxerFilter::GetStreamMeta(uint32_t streamIndex)
 
 void DemuxerFilter::SendEventEos()
 {
-    MEDIA_LOG_D("SendEventEos called");
+    MEDIA_LOG_I("SendEventEos called");
     AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
     bufferPtr->flag = BUFFER_FLAG_EOS;
     for (const auto& stream : mediaMetaData_.trackInfos) {

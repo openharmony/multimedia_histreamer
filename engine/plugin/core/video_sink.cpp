@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "PluginCoreViSink"
+#define HST_LOG_TAG "PluginCoreViSink"
 
 #include "video_sink.h"
 

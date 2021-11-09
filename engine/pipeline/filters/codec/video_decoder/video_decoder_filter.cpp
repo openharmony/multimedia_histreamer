@@ -15,7 +15,7 @@
 
 #ifdef VIDEO_SUPPORT
 
-#define LOG_TAG "VideoDecoderFilter"
+#define HST_LOG_TAG "VideoDecoderFilter"
 
 #include "video_decoder_filter.h"
 #include "foundation/log.h"

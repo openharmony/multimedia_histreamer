@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "StateMachine"
+#define HST_LOG_TAG "StateMachine"
 
 #include "state_machine.h"
 

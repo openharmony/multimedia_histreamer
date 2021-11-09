@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "MediaSourceFilter"
+#define HST_LOG_TAG "MediaSourceFilter"
 
 #include "media_source_filter.h"
 #include "compatible_check.h"
@@ -59,7 +59,7 @@ MediaSourceFilter::~MediaSourceFilter()
 
 ErrorCode MediaSourceFilter::SetSource(const std::shared_ptr<MediaSource>& source)
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_I("SetSource entered.");
     if (source == nullptr) {
         MEDIA_LOG_E("Invalid source");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
@@ -101,7 +101,7 @@ ErrorCode MediaSourceFilter::InitPlugin(const std::shared_ptr<MediaSource>& sour
 
 ErrorCode MediaSourceFilter::SetBufferSize(size_t size)
 {
-    MEDIA_LOG_D("IN, size: %zu", size);
+    MEDIA_LOG_I("SetBufferSize, size: %zu", size);
     bufferSize_ = size;
     return ErrorCode::SUCCESS;
 }
@@ -124,7 +124,7 @@ std::vector<WorkMode> MediaSourceFilter::GetWorkModes()
 
 ErrorCode MediaSourceFilter::Prepare()
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_I("Prepare entered.");
     if (plugin_ == nullptr) {
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
@@ -138,7 +138,7 @@ ErrorCode MediaSourceFilter::Prepare()
 
 ErrorCode MediaSourceFilter::Start()
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_I("Start entered.");
     if (taskPtr_) {
         taskPtr_->Start();
     }
@@ -190,7 +190,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
 
 ErrorCode MediaSourceFilter::Stop()
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_I("Stop entered.");
     if (taskPtr_) {
         taskPtr_->Stop();
     }
@@ -205,12 +205,12 @@ ErrorCode MediaSourceFilter::Stop()
 
 void MediaSourceFilter::FlushStart()
 {
-    MEDIA_LOG_D("FlushStart entered.");
+    MEDIA_LOG_I("FlushStart entered.");
 }
 
 void MediaSourceFilter::FlushEnd()
 {
-    MEDIA_LOG_D("FlushEnd entered.");
+    MEDIA_LOG_I("FlushEnd entered.");
 }
 
 void MediaSourceFilter::InitPorts()

@@ -15,7 +15,7 @@
 
 #ifdef VIDEO_SUPPORT
 
-#define LOG_TAG "Ffmpeg_Video_Decoder"
+#define HST_LOG_TAG "Ffmpeg_Video_Decoder"
 
 #include "video_ffmpeg_decoder_plugin.h"
 #include <cstring>

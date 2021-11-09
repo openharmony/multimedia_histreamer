@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "State"
+#define HST_LOG_TAG "State"
 
 #include "state.h"
 #include "foundation/log.h"

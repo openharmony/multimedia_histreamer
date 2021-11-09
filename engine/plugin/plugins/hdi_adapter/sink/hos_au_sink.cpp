@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "HdiSink"
+#define HST_LOG_TAG "HdiSinkPlugin"
 
 #include "hos_au_sink.h"
 #include <dlfcn.h>
@@ -224,7 +224,7 @@ HdiSink::HdiSink(std::string name)
 
 Status HdiSink::Init()
 {
-    MEDIA_LOG_D("Init entered.");
+    MEDIA_LOG_I("Init entered.");
     audioManager_ = GetAudioManagerFuncs();
     if (audioManager_ == nullptr) {
         MEDIA_LOG_E("Init error due to audioManager nullptr");
@@ -269,7 +269,7 @@ Media::Plugin::Status HdiSink::ReleaseRender()
 
 Status HdiSink::Deinit()
 {
-    MEDIA_LOG_E("Deinit entered.");
+    MEDIA_LOG_I("Deinit entered.");
     Stop();
     // release all resources
     ReleaseRender();
@@ -347,6 +347,7 @@ Status HdiSink::GetParameter(Tag tag, ValueType& value)
 
 Status HdiSink::Prepare()
 {
+    MEDIA_LOG_I("Prepare entered.");
     sampleAttributes_.frameSize = GetPcmBytes(sampleAttributes_.format) * sampleAttributes_.channelCount;
     sampleAttributes_.startThreshold = sampleAttributes_.period * sampleAttributes_.frameSize;
     sampleAttributes_.stopThreshold = INT32_MAX;
@@ -383,7 +384,7 @@ Status HdiSink::Prepare()
 
 Status HdiSink::Reset()
 {
-    MEDIA_LOG_D("Reset entered.");
+    MEDIA_LOG_I("Reset entered.");
     ReleaseRender();
     (void)memset_s(&sampleAttributes_, sizeof(sampleAttributes_), 0, sizeof(sampleAttributes_));
     (void)memset_s(&deviceDescriptor_, sizeof(deviceDescriptor_), 0, sizeof(deviceDescriptor_));
@@ -396,7 +397,7 @@ Status HdiSink::Reset()
 
 Status HdiSink::Start()
 {
-    MEDIA_LOG_D("Start entered.");
+    MEDIA_LOG_I("Start entered.");
     OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
         MEDIA_LOG_E("no available render");
@@ -413,7 +414,7 @@ Status HdiSink::Start()
 
 Status HdiSink::Stop()
 {
-    MEDIA_LOG_D("Stop Entered");
+    MEDIA_LOG_I("Stop Entered");
     OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
     processing_ = false;
     renderCond_.NotifyOne();
@@ -536,7 +537,7 @@ Status HdiSink::SetSpeed(float speed)
 
 Status HdiSink::Pause()
 {
-    MEDIA_LOG_D("Pause Entered");
+    MEDIA_LOG_I("Pause Entered");
     OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
     processing_ = false;
     renderCond_.NotifyOne();
@@ -549,7 +550,7 @@ Status HdiSink::Pause()
 
 Status HdiSink::Resume()
 {
-    MEDIA_LOG_D("Resume Entered");
+    MEDIA_LOG_I("Resume Entered");
     OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
     processing_ = true;
     if (audioRender_ != nullptr && audioRender_->control.Resume(audioRender_) != 0) {
@@ -681,7 +682,7 @@ bool HdiSink::HandleInterleaveData(uint8_t* origData, int32_t frameCnt)
 
 void HdiSink::RenderFrame(const std::shared_ptr<Buffer>& input)
 {
-    MEDIA_LOG_D("DoRender started");
+    MEDIA_LOG_D("RenderFrame started");
     auto mem = input->GetMemory();
     auto frame = const_cast<uint8_t*>(mem->GetReadOnlyData());
     bool dataInterleaved = false;
@@ -701,7 +702,7 @@ void HdiSink::RenderFrame(const std::shared_ptr<Buffer>& input)
         }
         if (ret != 0) {
             if (ret == HI_ERR_VI_BUF_FULL) {
-                MEDIA_LOG_I("renderFrame buffer full");
+                MEDIA_LOG_D("renderFrame buffer full"); // do not log this info
                 constexpr int timeoutMs = 5;
                 OSAL::ScopedLock lock(renderMutex_);
                 renderCond_.WaitFor(lock, timeoutMs, [this] { return processing_.load() == false; });

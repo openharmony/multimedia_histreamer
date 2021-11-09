@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#define HST_LOG_TAG "PipelineCore"
+
 #include "pipeline_core.h"
 #include <queue>
 #include "foundation/log.h"

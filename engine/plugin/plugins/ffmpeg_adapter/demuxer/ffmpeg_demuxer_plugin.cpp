@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "FFmpegDemuxerPlugin"
+#define HST_LOG_TAG "FFmpegDemuxerPlugin"
 
 #include "ffmpeg_demuxer_plugin.h"
 #include <algorithm>
@@ -91,13 +91,13 @@ FFmpegDemuxerPlugin::FFmpegDemuxerPlugin(std::string name)
 
 FFmpegDemuxerPlugin::~FFmpegDemuxerPlugin()
 {
-    MEDIA_LOG_I("dtor called.");
+    MEDIA_LOG_D("dtor called.");
     pluginImpl_ = nullptr;
 }
 
 Status FFmpegDemuxerPlugin::Init()
 {
-    MEDIA_LOG_I("Init called.");
+    MEDIA_LOG_D("Init called.");
     Reset();
     pluginImpl_ = g_pluginInputFormat[pluginName_];
 

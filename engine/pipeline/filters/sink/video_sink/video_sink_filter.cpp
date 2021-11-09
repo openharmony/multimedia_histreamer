@@ -15,7 +15,7 @@
 
 #ifdef VIDEO_SUPPORT
 
-#define LOG_TAG "VideoSinkFilter"
+#define HST_LOG_TAG "VideoSinkFilter"
 
 #include "video_sink_filter.h"
 
