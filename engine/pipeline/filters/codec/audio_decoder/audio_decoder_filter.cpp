@@ -31,8 +31,6 @@ constexpr int32_t AF_64BIT_BYTES = 8;
 constexpr int32_t AF_32BIT_BYTES = 4;
 constexpr int32_t AF_16BIT_BYTES = 2;
 constexpr int32_t AF_8BIT_BYTES = 1;
-constexpr int32_t RETRY_TIMES = 3;
-constexpr int32_t RETRY_DELAY = 10; // 10ms
 
 int32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta)
 {
@@ -90,28 +88,7 @@ namespace Media {
 namespace Pipeline {
 static AutoRegisterFilter<AudioDecoderFilter> g_registerFilterHelper("builtin.player.audiodecoder");
 
-class AudioDecoderFilter::DataCallbackImpl : public Plugin::DataCallbackHelper {
-public:
-    explicit DataCallbackImpl(AudioDecoderFilter& filter): decoderFilter_(filter){}
-
-    ~DataCallbackImpl() override = default;
-
-    void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer> &input) override
-    {
-        decoderFilter_.OnInputBufferDone(input);
-    }
-
-    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer> &output) override
-    {
-        decoderFilter_.OnOutputBufferDone(output);
-    }
-
-private:
-    AudioDecoderFilter& decoderFilter_;
-};
-
-AudioDecoderFilter::AudioDecoderFilter(const std::string &name): DecoderFilterBase(name),
-    dataCallback_(std::make_shared<DataCallbackImpl>(*this))
+AudioDecoderFilter::AudioDecoderFilter(const std::string &name): DecoderFilterBase(name)
 {
     filterType_ = FilterType::AUDIO_DECODER;
     MEDIA_LOG_D("audio decoder ctor called");
@@ -121,29 +98,6 @@ AudioDecoderFilter::~AudioDecoderFilter()
 {
     MEDIA_LOG_D("audio decoder dtor called");
     Release();
-    if (inBufferQ_) {
-        inBufferQ_->SetActive(false);
-    }
-    if (outBufferQ_) {
-        outBufferQ_->SetActive(false);
-    }
-}
-
-ErrorCode AudioDecoderFilter::QueueAllBufferInPoolToPluginLocked()
-{
-    ErrorCode err = ErrorCode::SUCCESS;
-    while (!outBufferPool_->Empty()) {
-        auto ptr = outBufferPool_->AllocateBuffer();
-        if (ptr == nullptr) {
-            MEDIA_LOG_W("cannot allocate buffer in buffer pool");
-            continue;
-        }
-        err = TranslatePluginStatus(plugin_->QueueOutputBuffer(ptr, -1));
-        if (err != ErrorCode::SUCCESS) {
-            MEDIA_LOG_E("queue output buffer error");
-        }
-    }
-    return err;
 }
 
 ErrorCode AudioDecoderFilter::Start()
@@ -162,37 +116,6 @@ ErrorCode AudioDecoderFilter::Prepare()
     if (state_ != FilterState::INITIALIZED) {
         MEDIA_LOG_W("decoder filter is not in init state");
         return ErrorCode::ERROR_INVALID_OPERATION;
-    }
-    if (!outBufferQ_) {
-        outBufferQ_ = std::make_shared<BlockingQueue<AVBufferPtr>>("adecOutBuffQueue",
-                            DEFAULT_OUT_BUFFER_POOL_SIZE);
-    } else {
-        outBufferQ_->SetActive(true);
-    }
-    if (!pushTask_) {
-        pushTask_ = std::make_shared<OHOS::Media::OSAL::Task>("adecPushThread");
-        pushTask_->RegisterHandler([this] { FinishFrame(); });
-    }
-    if (drivingMode_ == ThreadDrivingMode::ASYNC) {
-        if (!inBufferQ_) {
-            inBufferQ_ = std::make_shared<BlockingQueue<AVBufferPtr>>("adecFilterInBufQue",
-                DEFAULT_IN_BUFFER_POOL_SIZE);
-        } else {
-            inBufferQ_->SetActive(true);
-        }
-        if (!handleFrameTask_) {
-            handleFrameTask_ = std::make_shared<OHOS::Media::OSAL::Task>("adecHandleFrameThread");
-            handleFrameTask_->RegisterHandler([this] { HandleFrame(); });
-        }
-    } else {
-        if (inBufferQ_) {
-            inBufferQ_->SetActive(false);
-            inBufferQ_.reset();
-        }
-        if (handleFrameTask_) {
-            handleFrameTask_->Stop();
-            handleFrameTask_.reset();
-        }
     }
     auto err = FilterBase::Prepare();
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Audio Decoder prepare error because of filter base prepare error");
@@ -275,11 +198,6 @@ bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_
         OnEvent({EVENT_ERROR, err});
         return false;
     }
-
-    if (drivingMode_ == ThreadDrivingMode::ASYNC && handleFrameTask_ != nullptr) {
-        handleFrameTask_->Start();
-    }
-    pushTask_->Start();
     state_ = FilterState::READY;
     OnEvent({EVENT_READY});
     MEDIA_LOG_I("audio decoder send EVENT_READY");
@@ -288,10 +206,7 @@ bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_
 
 ErrorCode AudioDecoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
-    auto err = TranslatePluginStatus(plugin_->SetDataCallback(dataCallback_));
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "set decoder plugin callback failed");
-
-    err = ConfigureWithMetaLocked(meta);
+    auto err = ConfigureWithMetaLocked(meta);
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "configure decoder plugin error");
 
     uint32_t bufferCnt = 0;
@@ -321,9 +236,6 @@ ErrorCode AudioDecoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
 
     err = TranslatePluginStatus(plugin_->Prepare());
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "decoder prepare failed");
-    err = QueueAllBufferInPoolToPluginLocked();
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "queue out buffer to plugin failed");
-
     err = TranslatePluginStatus(plugin_->Start());
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "decoder start failed");
 
@@ -340,13 +252,11 @@ ErrorCode AudioDecoderFilter::PushData(const std::string &inPort, AVBufferPtr bu
         MEDIA_LOG_I("decoder is flushing, discarding this data from port %s", inPort.c_str());
         return ErrorCode::SUCCESS;
     }
-    // async
-    if (drivingMode_ == ThreadDrivingMode::ASYNC) {
-        inBufferQ_->Push(buffer);
-        return ErrorCode::SUCCESS;
-    }
-    // sync
-    HandleOneFrame(buffer);
+    bool isHandled = false;
+    do {
+        isHandled = HandleFrame(buffer);
+        FinishFrame();
+    } while (!isHandled);
     return ErrorCode::SUCCESS;
 }
 
@@ -354,14 +264,6 @@ void AudioDecoderFilter::FlushStart()
 {
     MEDIA_LOG_I("FlushStart entered.");
     isFlushing_ = true;
-    if (inBufferQ_) {
-        inBufferQ_->SetActive(false);
-    }
-    handleFrameTask_->PauseAsync();
-    if (outBufferQ_) {
-        outBufferQ_->SetActive(false);
-    }
-    pushTask_->PauseAsync();
     if (plugin_ != nullptr) {
         auto err = TranslatePluginStatus(plugin_->Flush());
         if (err != ErrorCode::SUCCESS) {
@@ -375,17 +277,6 @@ void AudioDecoderFilter::FlushEnd()
 {
     MEDIA_LOG_I("FlushEnd entered");
     isFlushing_ = false;
-    if (inBufferQ_) {
-        inBufferQ_->SetActive(true);
-    }
-    handleFrameTask_->Start();
-    if (outBufferQ_) {
-        outBufferQ_->SetActive(true);
-    }
-    pushTask_->Start();
-    if (plugin_ != nullptr) {
-        QueueAllBufferInPoolToPluginLocked();
-    }
 }
 
 ErrorCode AudioDecoderFilter::Stop()
@@ -399,14 +290,6 @@ ErrorCode AudioDecoderFilter::Stop()
         err = TranslatePluginStatus(plugin_->Stop());
         RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "decoder stop error");
     }
-    outBufferQ_->SetActive(false);
-    pushTask_->Pause();
-
-    if (drivingMode_ == ThreadDrivingMode::ASYNC && handleFrameTask_ != nullptr) {
-        inBufferQ_->SetActive(false);
-        handleFrameTask_->Pause();
-    }
-
     outBufferPool_.reset();
     MEDIA_LOG_I("AudioDecoderFilter stop end.");
     return FilterBase::Stop();
@@ -418,94 +301,51 @@ ErrorCode AudioDecoderFilter::Release()
         plugin_->Stop();
         plugin_->Deinit();
     }
-
-    if (drivingMode_ == ThreadDrivingMode::ASYNC && handleFrameTask_ != nullptr) {
-        handleFrameTask_->Stop();
-        handleFrameTask_.reset();
-    }
-
-    if (inBufferQ_ != nullptr) {
-        inBufferQ_->SetActive(false);
-    }
-    // 先停止线程 然后释放bufferQ 如果顺序反过来 可能导致线程访问已经释放的锁
-    if (pushTask_ != nullptr) {
-        pushTask_->Stop();
-        pushTask_.reset();
-    }
-
-    if (outBufferQ_ != nullptr) {
-        outBufferQ_->SetActive(false);
-    }
     return ErrorCode::SUCCESS;
 }
 
-void AudioDecoderFilter::HandleFrame()
+bool AudioDecoderFilter::HandleFrame(const std::shared_ptr<AVBuffer>& buffer)
 {
     MEDIA_LOG_D("HandleFrame called");
-    auto oneBuffer = inBufferQ_->Pop();
-    if (oneBuffer == nullptr) {
-        MEDIA_LOG_W("decoder find nullptr in esBufferQ");
-        return;
+    if (TranslatePluginStatus(plugin_->QueueInputBuffer(buffer, 0)) != ErrorCode::SUCCESS) {
+        MEDIA_LOG_I("Queue input buffer to plugin fail");
+        return false;
     }
-    HandleOneFrame(oneBuffer);
     MEDIA_LOG_D("HandleFrame finished");
-}
-
-void AudioDecoderFilter::HandleOneFrame(const std::shared_ptr<AVBuffer>& data)
-{
-    MEDIA_LOG_D("HandleOneFrame called");
-    Plugin::Status status = Plugin::Status::OK;
-    int32_t retryCnt = 0;
-    do {
-        status = plugin_->QueueInputBuffer(data, 0);
-        if (status != Plugin::Status::ERROR_TIMED_OUT) {
-            break;
-        }
-        MEDIA_LOG_I("queue input buffer timeout, will retry");
-        retryCnt++;
-        if (retryCnt <= RETRY_TIMES) {
-            OSAL::SleepFor(RETRY_DELAY);
-        } else {
-            break;
-        }
-    } while (true);
-    if (status != Plugin::Status::OK) {
-        MEDIA_LOG_W("queue input buffer with error %d, ignore this buffer", status);
-    }
-    MEDIA_LOG_D("HandleOneFrame finished");
+    return true;
 }
 
 void AudioDecoderFilter::FinishFrame()
 {
     MEDIA_LOG_D("begin finish frame");
-    // get buffer from plugin
-    auto ptr = outBufferQ_->Pop();
-    if (ptr) {
+    auto outBuffer = outBufferPool_->AllocateAppendBufferNonBlocking();
+    if (outBuffer == nullptr) {
+        MEDIA_LOG_E("Get out buffer from buffer pool fail");
+        return;
+    }
+    outBuffer->Reset();
+    auto ret = TranslatePluginStatus(plugin_->QueueOutputBuffer(outBuffer, 0));
+    if (ret != ErrorCode::SUCCESS) {
+        MEDIA_LOG_E("Queue out buffer to plugin fail: %d", ret);
+        return;
+    }
+    std::shared_ptr<AVBuffer> pcmFrame = nullptr;
+    auto status = plugin_->DequeueOutputBuffer(pcmFrame, 0);
+    if (status != Plugin::Status::OK && status != Plugin::Status::END_OF_STREAM) {
+        MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %d", ret);
+        return;
+    }
+    if (pcmFrame) {
         // push to port
         auto oPort = outPorts_[0];
         if (oPort->GetWorkMode() == WorkMode::PUSH) {
-            oPort->PushData(ptr);
+            oPort->PushData(pcmFrame);
         } else {
             MEDIA_LOG_W("decoder out port works in pull mode");
         }
-        ptr.reset(); // 释放buffer 如果没有被缓存使其回到buffer pool 如果被sink缓存 则从buffer pool拿其他的buffer
-        auto oPtr = outBufferPool_->AllocateBuffer();
-        if (oPtr != nullptr) {
-            oPtr->Reset();
-            plugin_->QueueOutputBuffer(oPtr, -1);
-        }
+        pcmFrame.reset(); // 释放buffer 如果没有被缓存使其回到buffer pool 如果被sink缓存 则从buffer pool拿其他的buffer
     }
     MEDIA_LOG_D("end finish frame");
-}
-
-void AudioDecoderFilter::OnInputBufferDone(const std::shared_ptr<AVBuffer> &buffer)
-{
-    // do nothing since we has no input buffer pool
-}
-
-void AudioDecoderFilter::OnOutputBufferDone(const std::shared_ptr<AVBuffer> &buffer)
-{
-    outBufferQ_->Push(buffer);
 }
 }
 }

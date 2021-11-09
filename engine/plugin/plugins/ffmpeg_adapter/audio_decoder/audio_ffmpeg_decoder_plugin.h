@@ -71,13 +71,16 @@ public:
 
     Status QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
 
+    Status DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
+
     Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) override;
+
+    Status DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) override;
 
     Status Flush() override;
 
     Status SetDataCallback(const std::weak_ptr<DataCallback>& dataCallback) override
     {
-        dataCb_ = dataCallback;
         return Status::OK;
     }
 
@@ -91,25 +94,16 @@ private:
     template <typename T>
     bool FindInParameterMapThenAssignLocked(Tag tag, T& assign);
 
-    Status SendBuffer(const std::shared_ptr<Buffer>& inputBuffer);
-
     Status SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer);
 
-    void ReceiveFrameSucc(const std::shared_ptr<Buffer>& ioInfo, Status& status,
-                          bool& receiveOneFrame, bool& notifyBufferDone);
+    Status ReceiveFrameSucc(const std::shared_ptr<Buffer>& ioInfo);
 
-    bool ReceiveBuffer(Status& err);
-    void ReceiveBufferLocked(Status& status, const std::shared_ptr<Buffer>& ioInfo, bool& receiveOneFrame,
-                             bool& notifyBufferDone);
+    Status ReceiveBuffer(void);
 
-    void NotifyInputBufferDone(const std::shared_ptr<Buffer>& input);
-
-    void NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output);
+    Status ReceiveBufferLocked(const std::shared_ptr<Buffer>& ioInfo);
 
     mutable OSAL::Mutex parameterMutex_ {};
     std::map<Tag, ValueType> audioParameter_ {};
-
-    std::weak_ptr<DataCallback> dataCb_ {};
 
     mutable OSAL::Mutex avMutex_ {};
     std::shared_ptr<const AVCodec> avCodec_ {};
@@ -118,9 +112,7 @@ private:
 
     std::vector<uint8_t> paddedBuffer_ {};
     size_t paddedBufferSize_ {0};
-
-    // outBufferQ有自己的锁保护 不要和lock_同时混用 否则可能导致死锁
-    OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufferQ_;
+    std::shared_ptr<Buffer> outBuffer_ {nullptr};
 };
 } // namespace Plugin
 } // namespace Media

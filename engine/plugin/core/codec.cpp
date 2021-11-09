@@ -31,9 +31,19 @@ Status Codec::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32
     return codec_->QueueInputBuffer(inputBuffer, timeoutMs);
 }
 
+Status Codec::DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
+{
+    return codec_->DequeueInputBuffer(inputBuffer, timeoutMs);
+}
+
 Status Codec::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
 {
     return codec_->QueueOutputBuffer(outputBuffers, timeoutMs);
+}
+
+Status Codec::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
+{
+    return codec_->DequeueOutputBuffer(outputBuffers, timeoutMs);
 }
 
 Status Codec::Flush()
