@@ -18,11 +18,11 @@
 #include "sdl_audio_sink_plugin.h"
 #include <functional>
 #include "foundation/log.h"
-#include "utils/constants.h"
-#include "utils/utils.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
+#include "utils/constants.h"
+#include "utils/utils.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;

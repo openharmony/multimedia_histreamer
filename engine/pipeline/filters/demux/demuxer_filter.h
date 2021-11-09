@@ -18,16 +18,16 @@
 
 #include <atomic>
 #include <string>
+#include "core/filter_base.h"
+#include "data_packer.h"
 #include "osal/thread/mutex.h"
 #include "osal/thread/task.h"
+#include "plugin/common/plugin_types.h"
+#include "plugin/core/demuxer.h"
+#include "plugin/core/plugin_meta.h"
+#include "type_finder.h"
 #include "utils/type_define.h"
 #include "utils/utils.h"
-#include "plugin/common/plugin_types.h"
-#include "plugin/core/plugin_meta.h"
-#include "plugin/core/demuxer.h"
-#include "type_finder.h"
-#include "data_packer.h"
-#include "core/filter_base.h"
 
 namespace OHOS {
 namespace Media {
@@ -92,6 +92,8 @@ private:
     void Reset();
 
     void InitTypeFinder();
+
+    bool CreatePlugin(std::string pluginName);
 
     bool InitPlugin(std::string pluginName);
 

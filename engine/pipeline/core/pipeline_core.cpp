@@ -148,7 +148,7 @@ ErrorCode PipelineCore::Stop()
             MEDIA_LOG_E("PipelineCore error: %zu", filters_.size());
             continue;
         }
-        auto filterName = (*it)->GetName();
+        MEDIA_LOG_I("Stop filter: %s", (*it)->GetName().c_str());
         auto rtv = (*it)->Stop();
         FALSE_RETURN_V(rtv == ErrorCode::SUCCESS, rtv);
     }
@@ -162,6 +162,7 @@ ErrorCode PipelineCore::Stop()
 void PipelineCore::FlushStart()
 {
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
+        MEDIA_LOG_I("FlushStart for filter: %s", (*it)->GetName().c_str());
         (*it)->FlushStart();
     }
 }
@@ -169,6 +170,7 @@ void PipelineCore::FlushStart()
 void PipelineCore::FlushEnd()
 {
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
+        MEDIA_LOG_I("FlushEnd for filter: %s", (*it)->GetName().c_str());
         (*it)->FlushEnd();
     }
 }

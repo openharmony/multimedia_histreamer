@@ -269,33 +269,41 @@ void DemuxerFilter::InitTypeFinder()
     }
 }
 
+bool DemuxerFilter::CreatePlugin(std::string pluginName)
+{
+    if (plugin_) {
+        plugin_->Deinit();
+    }
+    plugin_ = Plugin::PluginManager::Instance().CreateDemuxerPlugin(pluginName);
+    if (!plugin_ || plugin_->Init() != Plugin::Status::OK) {
+        MEDIA_LOG_E("CreatePlugin %s failed.", pluginName.c_str());
+        return false;
+    }
+    pluginAllocator_ = plugin_->GetAllocator();
+    pluginName_.swap(pluginName);
+    return true;
+}
+
 bool DemuxerFilter::InitPlugin(std::string pluginName)
 {
     if (pluginName.empty()) {
         return false;
     }
     if (pluginName_ != pluginName) {
-        if (plugin_) {
-            plugin_->Deinit();
-        }
-        plugin_ = Plugin::PluginManager::Instance().CreateDemuxerPlugin(pluginName);
-        if (!plugin_ || plugin_->Init() != Plugin::Status::OK) {
-            MEDIA_LOG_E("InitPlugin for %s failed.", pluginName.c_str());
+        if (!CreatePlugin(std::move(pluginName))) {
             return false;
         }
-        pluginAllocator_ = plugin_->GetAllocator();
-        pluginName_.swap(pluginName);
     } else {
         if (plugin_->Reset() != Plugin::Status::OK) {
-            MEDIA_LOG_E("plugin %s failed to reset.", pluginName.c_str());
-            return false;
+            if (!CreatePlugin(std::move(pluginName))) {
+                return false;
+            }
         }
     }
     MEDIA_LOG_W("InitPlugin, %s used.", pluginName_.c_str());
-    plugin_->SetDataSource(std::dynamic_pointer_cast<Plugin::DataSourceHelper>(dataSource_));
+    (void)plugin_->SetDataSource(std::dynamic_pointer_cast<Plugin::DataSourceHelper>(dataSource_));
     pluginState_ = DemuxerState::DEMUXER_STATE_PARSE_HEADER;
-    plugin_->Prepare();
-    return true;
+    return plugin_->Prepare() == Plugin::Status::OK;
 }
 
 void DemuxerFilter::ActivatePullMode()
