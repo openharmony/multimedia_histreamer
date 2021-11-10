@@ -102,7 +102,7 @@ bool DecoderFilterBase::UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::
         MEDIA_LOG_W("no available info to update plugin");
         return false;
     }
-    if (plugin_ != nullptr){
+    if (plugin_ != nullptr) {
         if (targetPluginInfo_ != nullptr && targetPluginInfo_->name == selectedPluginInfo->name) {
             if (plugin_->Reset() == Plugin::Status::OK) {
                 return true;
@@ -125,7 +125,6 @@ bool DecoderFilterBase::UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::
     targetPluginInfo_ = selectedPluginInfo;
     return true;
 }
-
 }
 }
 }
