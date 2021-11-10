@@ -15,15 +15,6 @@
 import("//build/lite/config/component/lite_component.gni")
 import("//build/lite/config/subsystem/multimedia/config.gni")
 
-histreamer_foundation_src = [
-  "osal/thread/task.cpp",
-  "osal/thread/condition_variable.cpp",
-  "osal/thread/mutex.cpp",
-  "osal/thread/scoped_lock.cpp",
-  "osal/thread/thread.cpp",
-  "osal/utils/util.cpp",
-]
-
 config("histreamer_foundation_config") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine",
@@ -36,13 +27,15 @@ config("histreamer_foundation_config") {
   defines = [ "MEDIA_OHOS" ]
 }
 
-lite_library("histreamer_foundation") {
-  if (ohos_kernel_type == "liteos_m") {
-    target_type = "static_library"
-  } else {
-    target_type = "shared_library"
-  }
-  sources = histreamer_foundation_src
+source_set("histreamer_foundation") {
+  sources = [
+    "osal/thread/condition_variable.cpp",
+    "osal/thread/mutex.cpp",
+    "osal/thread/scoped_lock.cpp",
+    "osal/thread/task.cpp",
+    "osal/thread/thread.cpp",
+    "osal/utils/util.cpp",
+  ]
   public_configs = [ ":histreamer_foundation_config" ]
   public_deps = [
     "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
@@ -59,7 +52,11 @@ lite_library("histreamer_foundation") {
       "//third_party/bounds_checking_function:libsec_shared",
     ]
   }
-  cflags = [ "-O2" ]
+  cflags = [
+    "-O2",
+    "-fPIC",
+    "-Wall",
+  ]
   cflags_cc = cflags
   if (defined(config_ohos_multimedia_histreamer_stack_size) &&
       config_ohos_multimedia_histreamer_stack_size > 0) {
