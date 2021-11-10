@@ -15,13 +15,6 @@
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
-  histreamer_player_src = [
-    "hiplayer.cpp",
-    "hiplayer_impl.cpp",
-    "internal/state.cpp",
-    "internal/state_machine.cpp",
-  ]
-
   config("histreamer_player_config") {
     include_dirs = [
       "//foundation/multimedia/histreamer/engine",
@@ -32,13 +25,13 @@ if (defined(ohos_lite)) {
     ]
   }
 
-  lite_library("histreamer_player") {
-    if (ohos_kernel_type == "liteos_m") {
-      target_type = "static_library"
-    } else {
-      target_type = "shared_library"
-    }
-    sources = histreamer_player_src
+  source_set("histreamer_player") {
+    sources = [
+      "hiplayer.cpp",
+      "hiplayer_impl.cpp",
+      "internal/state.cpp",
+      "internal/state_machine.cpp",
+    ]
     public_configs = [ ":histreamer_player_config" ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
@@ -46,7 +39,10 @@ if (defined(ohos_lite)) {
       "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
       "//foundation/multimedia/utils/lite:media_common",
     ]
-    cflags = [ "-Wall" ]
+    cflags = [
+      "-fPIC",
+      "-Wall",
+    ]
     cflags_cc = cflags
   }
 }
