@@ -36,7 +36,7 @@ namespace Pipeline {
 do { \
     if ((plugin) == nullptr) { \
         return ErrorCode::ERROR_AGAIN; \
-    }\
+    } \
 } while (0)
 
 /**

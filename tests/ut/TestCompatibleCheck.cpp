@@ -597,7 +597,8 @@ TEST(TestMergeCapability, ComplexType_Test)
     ASSERT_TRUE(disCaps[2] == Plugin::AudioSampleFormat::U64);
     ASSERT_TRUE(disCaps[3] == Plugin::AudioSampleFormat::U64P);
     ASSERT_TRUE(disCaps[4] == Plugin::AudioSampleFormat::F64);
-    auto intCaps1 = Plugin::AnyCast<Plugin::DiscreteCapability<Plugin::AudioChannelLayout>>(out.keys[CapabilityID::AUDIO_CHANNEL_LAYOUT]);
+    auto intCaps1 = Plugin::AnyCast<Plugin::DiscreteCapability<Plugin::AudioChannelLayout>>(
+            out.keys[CapabilityID::AUDIO_CHANNEL_LAYOUT]);
     ASSERT_TRUE(intCaps1.size() == 4);
     ASSERT_TRUE(intCaps1[0] == Plugin::AudioChannelLayout::STEREO);
     ASSERT_TRUE(intCaps1[1] == Plugin::AudioChannelLayout::SURROUND);

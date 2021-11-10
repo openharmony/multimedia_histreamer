@@ -20,7 +20,6 @@
 
 namespace OHOS {
 namespace Media {
-
 // 各个组件向Pipeline报告的事件类型
 enum EventType {
     EVENT_READY = 0,
