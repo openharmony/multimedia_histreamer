@@ -402,13 +402,14 @@ Status AudioFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
 
 Status AudioFfmpegDecoderPlugin::DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
 {
-    // dummy
+    MEDIA_LOG_D("dequeue input buffer");
+    (void)timeoutMs;
     return Status::OK;
 }
 
 Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
 {
-    MEDIA_LOG_I("queue out put");
+    MEDIA_LOG_D("queue output buffer");
     (void)timeoutMs;
     if (!outputBuffers) {
         return Status::ERROR_INVALID_PARAMETER;
@@ -419,7 +420,7 @@ Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>
 
 Status AudioFfmpegDecoderPlugin::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
 {
-    MEDIA_LOG_I("dequeue out put");
+    MEDIA_LOG_D("dequeue output buffer");
     (void)timeoutMs;
     Status status;
     do {
