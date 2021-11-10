@@ -290,7 +290,6 @@ ErrorCode AudioDecoderFilter::Stop()
         err = TranslatePluginStatus(plugin_->Stop());
         RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "decoder stop error");
     }
-    outBufferPool_.reset();
     MEDIA_LOG_I("AudioDecoderFilter stop end.");
     return FilterBase::Stop();
 }
