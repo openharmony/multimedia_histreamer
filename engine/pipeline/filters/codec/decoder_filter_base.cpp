@@ -52,28 +52,13 @@ ErrorCode DecoderFilterBase::SetParameter(int32_t key, const Plugin::Any& value)
     if (state_.load() == FilterState::CREATED) {
         return ErrorCode::ERROR_AGAIN;
     }
-    switch (key) {
-        case KEY_CODEC_DRIVE_MODE: {
-            if (state_ == FilterState::READY || state_ == FilterState::RUNNING || state_ == FilterState::PAUSED) {
-                MEDIA_LOG_W("decoder cannot set parameter KEY_CODEC_DRIVE_MODE in this state");
-                return ErrorCode::ERROR_AGAIN;
-            }
-            if (value.Type() != typeid(ThreadDrivingMode)) {
-                return ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
-            }
-            drivingMode_ = Plugin::AnyCast<ThreadDrivingMode>(value);
-            return ErrorCode::SUCCESS;
-        }
-        default: {
-            Tag tag = Tag::INVALID;
-            if (!TranslateIntoParameter(key, tag)) {
-                MEDIA_LOG_I("SetParameter key %d is out of boundary", key);
-                return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
-            }
-            RETURN_AGAIN_IF_NULL(plugin_);
-            return SetPluginParameterLocked(tag, value);
-        }
+    Tag tag = Tag::INVALID;
+    if (!TranslateIntoParameter(key, tag)) {
+        MEDIA_LOG_I("SetParameter key %d is out of boundary", key);
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
+    RETURN_AGAIN_IF_NULL(plugin_);
+    return SetPluginParameterLocked(tag, value);
 }
 
 ErrorCode DecoderFilterBase::GetParameter(int32_t key, Plugin::Any& value)
@@ -81,20 +66,13 @@ ErrorCode DecoderFilterBase::GetParameter(int32_t key, Plugin::Any& value)
     if (state_.load() == FilterState::CREATED) {
         return ErrorCode::ERROR_AGAIN;
     }
-    switch (key) {
-        case KEY_CODEC_DRIVE_MODE:
-            value = drivingMode_;
-            return ErrorCode::SUCCESS;
-        default: {
-            Tag tag = Tag::INVALID;
-            if (!TranslateIntoParameter(key, tag)) {
-                MEDIA_LOG_I("GetParameter key %d is out of boundary", key);
-                return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
-            }
-            RETURN_AGAIN_IF_NULL(plugin_);
-            return TranslatePluginStatus(plugin_->GetParameter(tag, value));
-        }
+    Tag tag = Tag::INVALID;
+    if (!TranslateIntoParameter(key, tag)) {
+        MEDIA_LOG_I("GetParameter key %d is out of boundary", key);
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
+    RETURN_AGAIN_IF_NULL(plugin_);
+    return TranslatePluginStatus(plugin_->GetParameter(tag, value));
 }
 bool DecoderFilterBase::UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo)
 {

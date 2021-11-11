@@ -32,14 +32,6 @@ const int32_t KEY_CODEC_PARAMETER_START = 0x00030000; // NOLINT: global variable
 
 // sink parameter start from 0x00400000
 const int32_t KEY_SINK_PARAMETER_START = 0x00040000; // NOLINT: global variable
-
-// ThreadDrivingMode
-const int32_t KEY_CODEC_DRIVE_MODE = KEY_CODEC_PARAMETER_START + 2; // NOLINT: global var
-
-enum class ThreadDrivingMode {
-    SYNC,
-    ASYNC,
-};
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

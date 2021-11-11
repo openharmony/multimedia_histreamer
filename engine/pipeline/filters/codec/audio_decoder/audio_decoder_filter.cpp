@@ -252,11 +252,11 @@ ErrorCode AudioDecoderFilter::PushData(const std::string &inPort, AVBufferPtr bu
         MEDIA_LOG_I("decoder is flushing, discarding this data from port %s", inPort.c_str());
         return ErrorCode::SUCCESS;
     }
-    bool isHandled = false;
+    ErrorCode res;
     do {
-        isHandled = HandleFrame(buffer);
+        res = HandleFrame(buffer);
         FinishFrame();
-    } while (!isHandled);
+    } while (res == ErrorCode::ERROR_TIMED_OUT); // if timed out we should try again
     return ErrorCode::SUCCESS;
 }
 
@@ -303,15 +303,14 @@ ErrorCode AudioDecoderFilter::Release()
     return ErrorCode::SUCCESS;
 }
 
-bool AudioDecoderFilter::HandleFrame(const std::shared_ptr<AVBuffer>& buffer)
+ErrorCode AudioDecoderFilter::HandleFrame(const std::shared_ptr<AVBuffer>& buffer)
 {
     MEDIA_LOG_D("HandleFrame called");
-    if (TranslatePluginStatus(plugin_->QueueInputBuffer(buffer, 0)) != ErrorCode::SUCCESS) {
-        MEDIA_LOG_I("Queue input buffer to plugin fail");
-        return false;
+    auto ret = TranslatePluginStatus(plugin_->QueueInputBuffer(buffer, 0));
+    if (ret != ErrorCode::SUCCESS && ret != ErrorCode::ERROR_TIMED_OUT) {
+        MEDIA_LOG_E("Queue input buffer to plugin fail: %d", ret);
     }
-    MEDIA_LOG_D("HandleFrame finished");
-    return true;
+    return ret;
 }
 
 void AudioDecoderFilter::FinishFrame()
