@@ -60,8 +60,6 @@ protected:
 
     bool UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo);
 
-    ThreadDrivingMode drivingMode_ {ThreadDrivingMode::ASYNC};
-
     // plugin
     std::shared_ptr<Plugin::Codec> plugin_ {nullptr};
     std::shared_ptr<Plugin::PluginInfo> targetPluginInfo_ {nullptr};
