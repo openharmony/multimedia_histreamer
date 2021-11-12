@@ -65,8 +65,6 @@ public:
 
     std::shared_ptr<Plugin::Meta> GetGlobalMetaInfo() const;
 
-    ErrorCode GetCurrentTime(int64_t& time) const;
-
 private:
     class DataSourceImpl;
 
@@ -121,8 +119,6 @@ private:
 
     void DemuxerLoop();
 
-    void SetCurrentTime(int64_t timestampUsec);
-
     std::string uriSuffix_;
     uint64_t mediaDataSize_;
     std::shared_ptr<OSAL::Task> task_;
@@ -139,9 +135,6 @@ private:
     std::function<bool(uint64_t, size_t)> checkRange_;
     std::function<bool(uint64_t, size_t, AVBufferPtr&)> peekRange_;
     std::function<bool(uint64_t, size_t, AVBufferPtr&)> getRange_;
-
-    mutable OSAL::Mutex timeMutex_;
-    int64_t curTimeUs_;
 };
 } // namespace Pipeline
 } // namespace Media

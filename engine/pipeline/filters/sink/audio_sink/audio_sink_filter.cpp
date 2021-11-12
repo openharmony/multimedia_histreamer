@@ -170,6 +170,13 @@ ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const 
     return ErrorCode::SUCCESS;
 }
 
+void AudioSinkFilter::ReportCurrentPosition(int64_t pts)
+{
+    if (plugin_) {
+        OnEvent({EVENT_AUDIO_PROGRESS, pts / 1000}); // 1000
+    }
+}
+
 ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
 {
     MEDIA_LOG_D("audio sink push data started, state: %d", state_.load());
@@ -191,11 +198,12 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
     }
     auto err = TranslatePluginStatus(plugin_->Write(buffer));
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "audio sink write failed");
+    ReportCurrentPosition(static_cast<int64_t>(buffer->pts));
     if ((buffer->flag & BUFFER_FLAG_EOS) != 0) {
         constexpr int waitTimeForPlaybackCompleteMs = 60;
         OHOS::Media::OSAL::SleepFor(waitTimeForPlaybackCompleteMs);
         Event event{
-            .type = EVENT_COMPLETE,
+            .type = EVENT_AUDIO_COMPLETE,
         };
         MEDIA_LOG_D("audio sink push data send event_complete");
         OnEvent(event);

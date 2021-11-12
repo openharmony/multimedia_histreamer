@@ -273,7 +273,6 @@ void MediaSourceFilter::ReadLoop()
     ErrorCode ret = TranslatePluginStatus(plugin_->Read(bufferPtr, 4096)); // 4096: default push data size
     if (ret == ErrorCode::END_OF_STREAM) {
         Stop();
-        OnEvent({EVENT_COMPLETE, {}});
         return;
     }
     outPorts_[0]->PushData(bufferPtr);
