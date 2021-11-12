@@ -135,6 +135,34 @@ public:
     ErrorCode DoOnError(ErrorCode) override;
 
 private:
+    enum class MediaType : int32_t { AUDIO, VIDEO, BUTT };
+    struct MediaStat {
+        MediaType mediaType{MediaType::BUTT};
+        std::atomic<int64_t> currentPositionMs{0};
+        std::atomic<bool> completeEventReceived{false};
+        explicit MediaStat(MediaType mediaType) : mediaType(mediaType)
+        {
+        }
+        MediaStat(const MediaStat& other) : mediaType(other.mediaType)
+        {
+            currentPositionMs = other.currentPositionMs.load();
+            completeEventReceived = other.completeEventReceived.load();
+        }
+    };
+
+    class MediaStats {
+    public:
+        MediaStats() = default;
+        void Reset();
+        void Append(MediaType);
+        void ReceiveEvent(EventType eventType, int64_t param = 0);
+        int64_t GetCurrentPosition();
+        bool IsEventCompleteAllReceived();
+
+    private:
+        std::vector<MediaStat> mediaStats;
+    };
+
     HiPlayerImpl();
     HiPlayerImpl(const HiPlayerImpl& other);
     HiPlayerImpl& operator=(const HiPlayerImpl& other);
@@ -151,7 +179,6 @@ private:
 
     void ActiveFilters(const std::vector<Pipeline::Filter*>& filters);
 
-private:
     OSAL::Mutex stateMutex_;
     OSAL::ConditionVariable cond_;
     StateMachine fsm_;
@@ -180,6 +207,7 @@ private:
     std::weak_ptr<PlayerCallback> callback_;
     float volume_;
     std::atomic<ErrorCode> errorCode_;
+    MediaStats mediaStats_;
 };
 } // namespace Media
 } // namespace OHOS

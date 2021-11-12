@@ -99,8 +99,7 @@ DemuxerFilter::DemuxerFilter(std::string name)
       pluginState_(DemuxerState::DEMUXER_STATE_NULL),
       pluginAllocator_(nullptr),
       dataSource_(std::make_shared<DataSourceImpl>(*this)),
-      mediaMetaData_(),
-      curTimeUs_(0)
+      mediaMetaData_()
 {
     filterType_ = FilterType::DEMUXER;
     MEDIA_LOG_D("ctor called");
@@ -190,7 +189,6 @@ ErrorCode DemuxerFilter::Prepare()
     } else {
         ActivatePushMode();
     }
-    SetCurrentTime(0);
     state_ = FilterState::PREPARING;
     return ErrorCode::SUCCESS;
 }
@@ -248,16 +246,8 @@ std::shared_ptr<Plugin::Meta> DemuxerFilter::GetGlobalMetaInfo() const
     return mediaMetaData_.globalMeta;
 }
 
-ErrorCode DemuxerFilter::GetCurrentTime(int64_t& time) const
-{
-    OSAL::ScopedLock lock(timeMutex_);
-    time = curTimeUs_ / 1000; // 1000, time in milliseconds
-    return ErrorCode::SUCCESS;
-}
-
 void DemuxerFilter::Reset()
 {
-    SetCurrentTime(0);
     mediaMetaData_.globalMeta.reset();
     mediaMetaData_.trackMetas.clear();
     mediaMetaData_.trackInfos.clear();
@@ -426,7 +416,6 @@ ErrorCode DemuxerFilter::ReadFrame(AVBuffer& buffer, uint32_t& streamIndex)
     auto rtv = plugin_->ReadFrame(buffer, 0);
     if (rtv == Plugin::Status::OK) {
         streamIndex = buffer.streamID;
-        SetCurrentTime(buffer.pts);
         result = ErrorCode::SUCCESS;
     }
     MEDIA_LOG_D("ReadFrame return with rtv = %d", static_cast<int32_t>(rtv));
@@ -505,12 +494,6 @@ void DemuxerFilter::DemuxerLoop()
             OnEvent({EVENT_ERROR, ErrorCode::ERROR_UNKNOWN});
         }
     }
-}
-
-void DemuxerFilter::SetCurrentTime(int64_t timestampUsec)
-{
-    OSAL::ScopedLock lock(timeMutex_);
-    curTimeUs_ = timestampUsec;
 }
 } // namespace Pipeline
 } // namespace Media

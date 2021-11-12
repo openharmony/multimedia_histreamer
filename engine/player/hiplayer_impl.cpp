@@ -34,7 +34,8 @@ HiPlayerImpl::HiPlayerImpl()
       curFsmState_(StateId::INIT),
       pipelineStates_(PlayerStates::PLAYER_IDLE),
       volume_(-1.0f),
-      errorCode_(ErrorCode::SUCCESS)
+      errorCode_(ErrorCode::SUCCESS),
+      mediaStats_()
 {
     MEDIA_LOG_I("hiPlayerImpl ctor");
     FilterFactory::Instance().Init();
@@ -79,6 +80,7 @@ std::shared_ptr<HiPlayerImpl> HiPlayerImpl::CreateHiPlayerImpl()
 int32_t HiPlayerImpl::Init()
 {
     errorCode_ = ErrorCode::SUCCESS;
+    mediaStats_.Reset();
     if (initialized_.load()) {
         return to_underlying(ErrorCode::SUCCESS);
     }
@@ -168,6 +170,61 @@ int32_t HiPlayerImpl::Stop()
     return to_underlying(fsm_.SendEvent(Intent::STOP));
 }
 
+void HiPlayerImpl::MediaStats::Reset()
+{
+    mediaStats.clear();
+}
+
+void HiPlayerImpl::MediaStats::Append(MediaType mediaType)
+{
+    for (auto& stat : mediaStats) {
+        if (stat.mediaType == mediaType) {
+            return;
+        }
+    }
+    mediaStats.emplace_back(mediaType);
+}
+
+void HiPlayerImpl::MediaStats::ReceiveEvent(EventType eventType, int64_t param)
+{
+    switch (eventType) {
+        case EVENT_AUDIO_COMPLETE:
+            for (auto& stat : mediaStats) {
+                if (stat.mediaType == MediaType::AUDIO) {
+                    stat.completeEventReceived = true;
+                    break;
+                }
+            }
+            break;
+        case EVENT_AUDIO_PROGRESS:
+            for (auto& stat : mediaStats) {
+                if (stat.mediaType == MediaType::AUDIO) {
+                    stat.currentPositionMs = param;
+                    break;
+                }
+            }
+            break;
+        default:
+            MEDIA_LOG_W("MediaStats::ReceiveEvent receive unexpected event %d", static_cast<int>(eventType));
+            break;
+    }
+}
+
+int64_t HiPlayerImpl::MediaStats::GetCurrentPosition()
+{
+    int64_t currentPosition = 0;
+    for (const auto& stat : mediaStats) {
+        currentPosition = std::max(currentPosition, stat.currentPositionMs.load());
+    }
+    return currentPosition;
+}
+
+bool HiPlayerImpl::MediaStats::IsEventCompleteAllReceived()
+{
+    return std::all_of(mediaStats.begin(), mediaStats.end(),
+                       [](const MediaStat& stat) { return stat.completeEventReceived.load(); });
+}
+
 ErrorCode HiPlayerImpl::StopAsync()
 {
     return fsm_.SendEventAsync(Intent::STOP);
@@ -221,8 +278,14 @@ void HiPlayerImpl::OnEvent(Event event)
         case EVENT_READY:
             fsm_.SendEventAsync(Intent::NOTIFY_READY);
             break;
-        case EVENT_COMPLETE:
-            fsm_.SendEventAsync(Intent::NOTIFY_COMPLETE);
+        case EVENT_AUDIO_COMPLETE:
+            mediaStats_.ReceiveEvent(EVENT_AUDIO_COMPLETE, 0);
+            if (mediaStats_.IsEventCompleteAllReceived()) {
+                fsm_.SendEventAsync(Intent::NOTIFY_COMPLETE);
+            }
+            break;
+        case EVENT_AUDIO_PROGRESS:
+            mediaStats_.ReceiveEvent(EVENT_AUDIO_PROGRESS, Plugin::AnyCast<int64_t>(event.param));
             break;
         default:
             MEDIA_LOG_E("Unknown event(%d)", event.type);
@@ -274,6 +337,7 @@ ErrorCode HiPlayerImpl::DoResume()
 
 ErrorCode HiPlayerImpl::DoStop()
 {
+    mediaStats_.Reset();
     auto ret = pipeline_->Stop();
     if (ret == ErrorCode::SUCCESS) {
         pipelineStates_ = PlayerStates::PLAYER_STOPPED;
@@ -291,6 +355,8 @@ ErrorCode HiPlayerImpl::DoSeek(int64_t msec)
         if (rtv != ErrorCode::SUCCESS) {
             ptr->OnError(to_underlying(PlayerErrorTypeExt::SEEK_ERROR), to_underlying(rtv));
         } else {
+            mediaStats_.ReceiveEvent(EVENT_AUDIO_PROGRESS, msec);
+            mediaStats_.ReceiveEvent(EVENT_VIDEO_PROGRESS, msec);
             ptr->OnRewindToComplete();
         }
     }
@@ -355,6 +421,7 @@ int32_t HiPlayerImpl::Reset()
     Stop();
     pipelineStates_ = PlayerStates::PLAYER_IDLE;
     singleLoop_ = false;
+    mediaStats_.Reset();
     return to_underlying(ErrorCode::SUCCESS);
 }
 
@@ -376,7 +443,8 @@ int32_t HiPlayerImpl::GetPlayerState(int32_t& state)
 
 int32_t HiPlayerImpl::GetCurrentPosition(int64_t& currentPositionMs)
 {
-    return to_underlying(demuxer_->GetCurrentTime(currentPositionMs));
+    currentPositionMs = mediaStats_.GetCurrentPosition();
+    return to_underlying(ErrorCode::SUCCESS);
 }
 
 int32_t HiPlayerImpl::GetDuration(int64_t& outDurationMs)
@@ -502,6 +570,7 @@ ErrorCode HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& par
                                               audioSink_->GetInPort(PORT_NAME_DEFAULT)));
                 ActiveFilters({newAudioDecoder.get(), audioSink_.get()});
             }
+            mediaStats_.Append(MediaType::AUDIO);
             rtv = ErrorCode::SUCCESS;
             break;
         }
