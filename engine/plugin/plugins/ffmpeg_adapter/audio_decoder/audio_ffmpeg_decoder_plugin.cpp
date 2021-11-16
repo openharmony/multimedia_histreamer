@@ -407,14 +407,14 @@ Status AudioFfmpegDecoderPlugin::DequeueInputBuffer(std::shared_ptr<Buffer>& inp
     return Status::OK;
 }
 
-Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
+Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs)
 {
     MEDIA_LOG_D("queue output buffer");
     (void)timeoutMs;
-    if (!outputBuffers) {
+    if (!outputBuffer) {
         return Status::ERROR_INVALID_PARAMETER;
     }
-    outBuffer_ = outputBuffers;
+    outBuffer_ = outputBuffer;
     return Status::OK;
 }
 
@@ -422,10 +422,8 @@ Status AudioFfmpegDecoderPlugin::DequeueOutputBuffer(std::shared_ptr<Buffer>& ou
 {
     MEDIA_LOG_D("dequeue output buffer");
     (void)timeoutMs;
-    Status status;
-    do {
-        status = ReceiveBuffer();
-    } while (status == Status::ERROR_NOT_ENOUGH_DATA);
+    Status status = ReceiveBuffer();
+    outputBuffers.reset();
     if (status == Status::OK || status == Status::END_OF_STREAM) {
         outputBuffers = outBuffer_;
     }
@@ -466,11 +464,14 @@ Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
         packetPtr = &packet;
     }
     auto ret = avcodec_send_packet(avCodecContext_.get(), packetPtr);
-    if (ret < 0) {
+    if (ret == 0) {
+        return Status::OK;
+    } else if (ret == AVERROR(EAGAIN)) {
+        return Status::ERROR_AGAIN;
+    } else {
         MEDIA_LOG_E("send buffer error %s", AVStrError(ret).c_str());
-        return Status::ERROR_TIMED_OUT;
+        return Status::ERROR_UNKNOWN;
     }
-    return Status::OK;
 }
 
 Status AudioFfmpegDecoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>& ioInfo)
@@ -509,15 +510,17 @@ Status AudioFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
         ioInfo->GetMemory()->Reset();
         ioInfo->flag = BUFFER_FLAG_EOS;
         status = Status::END_OF_STREAM;
-    } else {
-        MEDIA_LOG_I("audio decoder receive error: %s", AVStrError(ret).c_str());
+    } else if (ret == AVERROR(EAGAIN)) {
         status = Status::ERROR_NOT_ENOUGH_DATA;
+    } else {
+        MEDIA_LOG_E("audio decoder receive error: %s", AVStrError(ret).c_str());
+        status = Status::ERROR_UNKNOWN;
     }
     av_frame_unref(cachedFrame_.get());
     return status;
 }
 
-Status AudioFfmpegDecoderPlugin::ReceiveBuffer(void)
+Status AudioFfmpegDecoderPlugin::ReceiveBuffer()
 {
     std::shared_ptr<Buffer> ioInfo = outBuffer_;
     if ((ioInfo == nullptr) || ioInfo->IsEmpty() ||

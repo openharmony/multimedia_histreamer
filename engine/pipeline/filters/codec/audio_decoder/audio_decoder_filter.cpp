@@ -244,6 +244,7 @@ ErrorCode AudioDecoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
 
 ErrorCode AudioDecoderFilter::PushData(const std::string &inPort, AVBufferPtr buffer)
 {
+    const static int8_t maxRetryCnt = 3; // max retry times of handling one frame
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
         MEDIA_LOG_W("pushing data to decoder when state is %d", static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
@@ -252,11 +253,19 @@ ErrorCode AudioDecoderFilter::PushData(const std::string &inPort, AVBufferPtr bu
         MEDIA_LOG_I("decoder is flushing, discarding this data from port %s", inPort.c_str());
         return ErrorCode::SUCCESS;
     }
-    ErrorCode res;
+    ErrorCode handleFrameRes;
+    int8_t retryCnt = 0;
     do {
-        res = HandleFrame(buffer);
-        FinishFrame();
-    } while (res == ErrorCode::ERROR_TIMED_OUT); // if timed out we should try again
+        handleFrameRes = HandleFrame(buffer);
+        while(FinishFrame() == ErrorCode::SUCCESS) {
+            MEDIA_LOG_D("finish frame");
+        }
+        retryCnt++;
+        if (retryCnt >= maxRetryCnt) { // if retry cnt exceeds we will drop this frame
+            break;
+        }
+        // if timed out or returns again we should try again
+    } while (handleFrameRes == ErrorCode::ERROR_TIMED_OUT || handleFrameRes == ErrorCode::ERROR_AGAIN);
     return ErrorCode::SUCCESS;
 }
 
@@ -313,25 +322,27 @@ ErrorCode AudioDecoderFilter::HandleFrame(const std::shared_ptr<AVBuffer>& buffe
     return ret;
 }
 
-void AudioDecoderFilter::FinishFrame()
+ErrorCode AudioDecoderFilter::FinishFrame()
 {
     MEDIA_LOG_D("begin finish frame");
     auto outBuffer = outBufferPool_->AllocateAppendBufferNonBlocking();
     if (outBuffer == nullptr) {
         MEDIA_LOG_E("Get out buffer from buffer pool fail");
-        return;
+        return ErrorCode::ERROR_NO_MEMORY;
     }
     outBuffer->Reset();
     auto ret = TranslatePluginStatus(plugin_->QueueOutputBuffer(outBuffer, 0));
     if (ret != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("Queue out buffer to plugin fail: %d", ret);
-        return;
+        return ret;
     }
     std::shared_ptr<AVBuffer> pcmFrame = nullptr;
     auto status = plugin_->DequeueOutputBuffer(pcmFrame, 0);
     if (status != Plugin::Status::OK && status != Plugin::Status::END_OF_STREAM) {
-        MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %d", ret);
-        return;
+        if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
+            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %d", status);
+        }
+        return TranslatePluginStatus(status);
     }
     if (pcmFrame) {
         // push to port
@@ -344,6 +355,7 @@ void AudioDecoderFilter::FinishFrame()
         pcmFrame.reset(); // 释放buffer 如果没有被缓存使其回到buffer pool 如果被sink缓存 则从buffer pool拿其他的buffer
     }
     MEDIA_LOG_D("end finish frame");
+    return ErrorCode::SUCCESS;
 }
 }
 }

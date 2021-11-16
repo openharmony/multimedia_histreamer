@@ -20,6 +20,7 @@
 #include "compatible_check.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
+#include "pipeline/filters/common/plugin_utils.h"
 #include "utils/constants.h"
 #include "utils/steady_clock.h"
 
@@ -224,15 +225,13 @@ ErrorCode DemuxerFilter::SeekTo(int64_t msec)
         MEDIA_LOG_E("SeekTo failed due to no valid plugin");
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
-    ErrorCode rtv = ErrorCode::SUCCESS;
-    auto ret = plugin_->SeekTo(-1, msec * 1000, Plugin::SeekMode::BACKWARD); // 1000
-    if (ret == Plugin::Status::OK) {
+    auto rtv = TranslatePluginStatus(plugin_->SeekTo(-1, msec * 1000, Plugin::SeekMode::BACKWARD)); // 1000
+    if (rtv == ErrorCode::SUCCESS) {
         if (task_) {
             task_->Start();
         }
     } else {
-        MEDIA_LOG_E("SeekTo failed with return value: %d", static_cast<int>(ret));
-        rtv = ErrorCode::ERROR_UNKNOWN;
+        MEDIA_LOG_E("SeekTo failed with return value: %d", static_cast<int>(rtv));
     }
     return rtv;
 }

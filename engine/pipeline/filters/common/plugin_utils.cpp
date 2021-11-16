@@ -34,7 +34,8 @@ const static std::map<Plugin::Status, ErrorCode> g_transTable = {
         {Plugin::Status::ERROR_TIMED_OUT, ErrorCode::ERROR_TIMED_OUT},
         {Plugin::Status::ERROR_UNSUPPORTED_FORMAT, ErrorCode::ERROR_UNSUPPORTED_FORMAT},
         {Plugin::Status::ERROR_NOT_ENOUGH_DATA,ErrorCode::ERROR_UNKNOWN},
-        {Plugin::Status::ERROR_NOT_EXISTED, ErrorCode::ERROR_NOT_EXISTED}
+        {Plugin::Status::ERROR_NOT_EXISTED, ErrorCode::ERROR_NOT_EXISTED},
+        {Plugin::Status::ERROR_AGAIN, ErrorCode::ERROR_AGAIN}
 };
 /**
  * translate plugin error into pipeline error code

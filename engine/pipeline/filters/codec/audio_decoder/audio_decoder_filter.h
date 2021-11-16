@@ -48,7 +48,7 @@ private:
 
     ErrorCode HandleFrame(const std::shared_ptr<AVBuffer>& buffer);
 
-    void FinishFrame();
+    ErrorCode FinishFrame();
 
     ErrorCode Release();
 
