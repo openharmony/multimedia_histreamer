@@ -61,8 +61,9 @@ public:
         return ErrorCode::SUCCESS;
     }
 
-    virtual ErrorCode DoSeek(int64_t msec)
+    virtual ErrorCode DoSeek(bool allowed, int64_t msec)
     {
+        (void)allowed;
         (void)msec;
         return ErrorCode::SUCCESS;
     }

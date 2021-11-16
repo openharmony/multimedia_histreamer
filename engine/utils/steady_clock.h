@@ -39,13 +39,13 @@ private:
 } // namespace OHOS
 
 #if defined(PROFILE)
-#define PROFILE_BEGIN(message, ...)                                                                                     \
+#define PROFILE_BEGIN(message, ...)                                                                                    \
     MEDIA_LOG_W(message, ##__VA_ARGS__);                                                                               \
     OHOS::Media::SteadyClock _steadyClock;
 
 #define PROFILE_RESET() _steadyClock.Reset()
 
-#define PROFILE_END(message, ...)                                                                                       \
+#define PROFILE_END(message, ...)                                                                                      \
     MEDIA_LOG_W(message ", Time duration in milliseconds: %" PRId64, ##__VA_ARGS__, _steadyClock.ElapsedMilliseconds())
 
 #else

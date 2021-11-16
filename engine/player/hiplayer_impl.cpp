@@ -130,6 +130,9 @@ int32_t HiPlayerImpl::Prepare()
         return to_underlying(ErrorCode::SUCCESS);
     } else if (curFsmState_ == StateId::INIT) {
         PROFILE_END("Prepare failed,");
+        if (errorCode_ == ErrorCode::SUCCESS) {
+            errorCode_ = ErrorCode::ERROR_INVALID_STATE;
+        }
         return to_underlying(errorCode_.load());
     } else {
         return to_underlying(ErrorCode::ERROR_INVALID_OPERATION);
@@ -155,7 +158,7 @@ int32_t HiPlayerImpl::Play()
     } else {
         ret = fsm_.SendEvent(Intent::PLAY);
     }
-    PROFILE_END("Play ret = %d", ret);
+    PROFILE_END("Play ret = %d", to_underlying(ret));
     return to_underlying(ret);
 }
 
@@ -363,24 +366,29 @@ ErrorCode HiPlayerImpl::DoStop()
     return ret;
 }
 
-ErrorCode HiPlayerImpl::DoSeek(int64_t msec)
+ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t msec)
 {
     PROFILE_BEGIN();
-    pipeline_->FlushStart();
-    PROFILE_END("Flush start");
-    PROFILE_RESET();
-    pipeline_->FlushEnd();
-    PROFILE_END("Flush end");
-    PROFILE_RESET();
-    auto rtv = demuxer_->SeekTo(msec);
-    PROFILE_END("SeekTo");
+    auto rtv = allowed && msec >= 0 ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_OPERATION;
+    if (rtv == ErrorCode::SUCCESS) {
+        pipeline_->FlushStart();
+        PROFILE_END("Flush start");
+        PROFILE_RESET();
+        pipeline_->FlushEnd();
+        PROFILE_END("Flush end");
+        PROFILE_RESET();
+        rtv = demuxer_->SeekTo(msec);
+        if (rtv == ErrorCode::SUCCESS) {
+            mediaStats_.ReceiveEvent(EVENT_AUDIO_PROGRESS, msec);
+            mediaStats_.ReceiveEvent(EVENT_VIDEO_PROGRESS, msec);
+        }
+        PROFILE_END("SeekTo");
+    }
     auto ptr = callback_.lock();
     if (ptr != nullptr) {
         if (rtv != ErrorCode::SUCCESS) {
             ptr->OnError(to_underlying(PlayerErrorTypeExt::SEEK_ERROR), to_underlying(rtv));
         } else {
-            mediaStats_.ReceiveEvent(EVENT_AUDIO_PROGRESS, msec);
-            mediaStats_.ReceiveEvent(EVENT_VIDEO_PROGRESS, msec);
             ptr->OnRewindToComplete();
         }
     }

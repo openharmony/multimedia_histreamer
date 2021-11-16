@@ -129,7 +129,7 @@ public:
     ErrorCode DoPause() override;
     ErrorCode DoResume() override;
     ErrorCode DoStop() override;
-    ErrorCode DoSeek(int64_t msec) override;
+    ErrorCode DoSeek(bool allowed, int64_t msec) override;
     ErrorCode DoOnReady() override;
     ErrorCode DoOnComplete() override;
     ErrorCode DoOnError(ErrorCode) override;
