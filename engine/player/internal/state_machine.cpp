@@ -92,8 +92,12 @@ Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
     ErrorCode rtv = ErrorCode::SUCCESS;
     Action nextAction = Action::ACTION_BUTT;
     std::tie(rtv, nextAction) = curState_->Execute(intent, param);
-    if (rtv == ErrorCode::SUCCESS) {
-        rtv = ProcAction(nextAction);
+    if (nextAction != Action::ACTION_BUTT) {
+        if (rtv == ErrorCode::SUCCESS) {
+            rtv = ProcAction(nextAction);
+        } else {
+            (void)ProcAction(nextAction);
+        }
     }
     OnIntentExecuted(intent, nextAction, rtv);
     PROFILE_END("ProcessIntent, curState: %s, intent: %d.", curState_->GetName().c_str(), intent);
@@ -201,16 +205,10 @@ void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode resu
     if (action == Action::ACTION_PENDING) {
         return;
     }
-    if (intent == Intent::PLAY) {
-        if (action == Action::TRANS_TO_PLAYING || result != ErrorCode::SUCCESS) {
-            intentSync_.Notify(Intent::PLAY, result);
-        }
+    if (intent == Intent::NOTIFY_READY && action == Action::TRANS_TO_PLAYING) {
+        intentSync_.Notify(Intent::PLAY, result);
     } else {
-        if (intent == Intent::NOTIFY_READY && action == Action::TRANS_TO_PLAYING) {
-            intentSync_.Notify(Intent::PLAY, result);
-        } else {
-            intentSync_.Notify(intent, result);
-        }
+        intentSync_.Notify(intent, result);
     }
 }
 } // namespace Media
