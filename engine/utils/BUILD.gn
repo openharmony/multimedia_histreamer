@@ -20,12 +20,16 @@ config("histreamer_utils_config") {
     "//foundation/multimedia/histreamer/engine/foundation",
     "//foundation/multimedia/histreamer/engine/plugin",
   ]
-  defines = [ "MEDIA_OHOS" ]
+  defines = [
+    "MEDIA_OHOS",
+    # "PROFILE",
+  ]
 }
 
 source_set("histreamer_utils") {
   sources = [
     "constants.cpp",
+    "steady_clock.cpp",
     "utils.cpp",
   ]
   public_configs = [ ":histreamer_utils_config" ]

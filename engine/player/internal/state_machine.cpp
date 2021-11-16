@@ -16,6 +16,7 @@
 #define HST_LOG_TAG "StateMachine"
 
 #include "state_machine.h"
+#include "utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {
@@ -85,6 +86,7 @@ ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param)
 Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
 {
     MEDIA_LOG_D("ProcessIntent, curState: %s, intent: %d.", curState_->GetName().c_str(), intent);
+    PROFILE_BEGIN("ProcessIntent, curState: %s, intent: %d.", curState_->GetName().c_str(), intent);
     OSAL::ScopedLock lock(mutex_);
     lastIntent = intent;
     ErrorCode rtv = ErrorCode::SUCCESS;
@@ -94,6 +96,7 @@ Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
         rtv = ProcAction(nextAction);
     }
     OnIntentExecuted(intent, nextAction, rtv);
+    PROFILE_END("ProcessIntent, curState: %s, intent: %d.", curState_->GetName().c_str(), intent);
     return (rtv == ErrorCode::SUCCESS) ? nextAction : Action::ACTION_BUTT;
 }
 
@@ -199,7 +202,7 @@ void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode resu
         return;
     }
     if (intent == Intent::PLAY) {
-        if (action == Action::TRANS_TO_PLAYING) {
+        if (action == Action::TRANS_TO_PLAYING || result != ErrorCode::SUCCESS) {
             intentSync_.Notify(Intent::PLAY, result);
         }
     } else {

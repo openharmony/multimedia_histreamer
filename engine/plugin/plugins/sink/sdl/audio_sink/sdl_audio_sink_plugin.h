@@ -104,6 +104,7 @@ private:
     int64_t channelMask_ {0};
     AudioSampleFormat audioFormat_ {AudioSampleFormat::U8};
     std::shared_ptr<SwrContext> swrCtx_ {nullptr};
+    int volume_;
 };
 }
 }

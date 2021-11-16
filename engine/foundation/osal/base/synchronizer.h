@@ -97,6 +97,7 @@ public:
         if (rtv) {
             result = syncMap_[syncId];
             syncMap_.erase(syncId);
+            MEDIA_LOG_D("Synchronizer %s return.", name_.c_str());
         } else {
             waitSet_.erase(syncId);
         }
