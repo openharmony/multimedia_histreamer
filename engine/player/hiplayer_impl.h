@@ -148,6 +148,11 @@ private:
             currentPositionMs = other.currentPositionMs.load();
             completeEventReceived = other.completeEventReceived.load();
         }
+        MediaStat& operator=(const MediaStat& other)
+        {
+            currentPositionMs = other.currentPositionMs.load();
+            completeEventReceived = other.completeEventReceived.load();
+        }
     };
 
     class MediaStats {
