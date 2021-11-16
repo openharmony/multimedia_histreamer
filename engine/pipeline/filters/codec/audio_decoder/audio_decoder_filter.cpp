@@ -152,8 +152,7 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
             }
             atLeastOutCapMatched = true;
             thisOut->mime = outCap.mime;
-            if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_))
-            {
+            if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_)) {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
                 MEDIA_LOG_I("choose plugin %s as working parameter", candidate.first->name.c_str());
@@ -257,7 +256,7 @@ ErrorCode AudioDecoderFilter::PushData(const std::string &inPort, AVBufferPtr bu
     int8_t retryCnt = 0;
     do {
         handleFrameRes = HandleFrame(buffer);
-        while(FinishFrame() == ErrorCode::SUCCESS) {
+        while (FinishFrame() == ErrorCode::SUCCESS) {
             MEDIA_LOG_D("finish frame");
         }
         retryCnt++;

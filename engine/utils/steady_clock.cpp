@@ -20,7 +20,6 @@
 
 namespace OHOS {
 namespace Media {
-
 namespace {
 using namespace std::chrono;
 }
@@ -60,6 +59,5 @@ int64_t SteadyClock::ElapsedSeconds()
 {
     return duration_cast<seconds>(high_resolution_clock::now() - begin_).count();
 }
-
 } // namespace Media
 } // namespace OHOS
