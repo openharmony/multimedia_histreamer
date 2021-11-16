@@ -56,6 +56,12 @@ public:
         return {ret, Action::ACTION_BUTT};
     }
 
+    std::tuple<ErrorCode, Action> Pause() override
+    {
+        MEDIA_LOG_D("Pause in pause state.");
+        return {ErrorCode::SUCCESS, Action::ACTION_BUTT};
+    }
+
     std::tuple<ErrorCode, Action> Resume() override
     {
         MEDIA_LOG_D("Resume in pause state.");
