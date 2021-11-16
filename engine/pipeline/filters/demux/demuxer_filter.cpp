@@ -21,6 +21,7 @@
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
 #include "utils/constants.h"
+#include "utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {
@@ -107,7 +108,7 @@ DemuxerFilter::DemuxerFilter(std::string name)
 
 DemuxerFilter::~DemuxerFilter()
 {
-    MEDIA_LOG_D("dtor called");
+    MEDIA_LOG_I("dtor called");
     if (task_) {
         task_->Stop();
     }
@@ -450,6 +451,7 @@ void DemuxerFilter::HandleFrame(const AVBufferPtr& bufferPtr, uint32_t streamInd
 
 void DemuxerFilter::NegotiateDownstream()
 {
+    PROFILE_BEGIN("NegotiateDownstream profile begins.");
     for (auto& stream : mediaMetaData_.trackInfos) {
         if (stream.needNegoCaps) {
             Capability caps;
@@ -464,6 +466,7 @@ void DemuxerFilter::NegotiateDownstream()
             }
         }
     }
+    PROFILE_END("NegotiateDownstream end.");
 }
 
 void DemuxerFilter::DemuxerLoop()
@@ -483,7 +486,9 @@ void DemuxerFilter::DemuxerLoop()
         }
     } else {
         Plugin::MediaInfoHelper mediaInfo;
+        PROFILE_BEGIN();
         if (plugin_->GetMediaInfo(mediaInfo) == Plugin::Status::OK && PrepareStreams(mediaInfo)) {
+            PROFILE_END("Succeed to extract mediainfo.");
             NegotiateDownstream();
             pluginState_ = DemuxerState::DEMUXER_STATE_PARSE_FRAME;
             state_ = FilterState::READY;

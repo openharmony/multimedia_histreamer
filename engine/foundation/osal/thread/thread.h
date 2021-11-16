@@ -55,7 +55,8 @@ public:
 private:
     struct State {
         virtual ~State() = default;
-        std::function<void()> func_{};
+        std::function<void()> func{};
+        std::string name;
     };
 
     void SetNameInternal();

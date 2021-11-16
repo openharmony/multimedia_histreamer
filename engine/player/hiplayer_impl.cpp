@@ -19,6 +19,7 @@
 #include "foundation/log.h"
 #include "pipeline/factory/filter_factory.h"
 #include "plugin/core/plugin_meta.h"
+#include "utils/steady_clock.h"
 #include "utils/utils.h"
 
 namespace {
@@ -104,25 +105,31 @@ int32_t HiPlayerImpl::Init()
 }
 int32_t HiPlayerImpl::SetSource(const Source& source)
 {
+    PROFILE_BEGIN("SetSource begin");
     auto ret = Init();
     if (ret != to_underlying(ErrorCode::SUCCESS)) {
         return ret;
     }
-    return to_underlying(fsm_.SendEvent(Intent::SET_SOURCE, std::make_shared<Media::Source>(source)));
+    ret = to_underlying(fsm_.SendEvent(Intent::SET_SOURCE, std::make_shared<Media::Source>(source)));
+    PROFILE_END("SetSource end.");
+    return ret;
 }
 
 int32_t HiPlayerImpl::Prepare()
 {
     MEDIA_LOG_D("Prepare entered, current fsm state: %s.", fsm_.GetCurrentState().c_str());
     OSAL::ScopedLock lock(stateMutex_);
+    PROFILE_BEGIN();
     if (curFsmState_ == StateId::PREPARING) {
         errorCode_ = ErrorCode::SUCCESS;
         cond_.Wait(lock, [this] { return curFsmState_ == StateId::READY || curFsmState_ == StateId::INIT; });
     }
     MEDIA_LOG_D("Prepare finished, current fsm state: %s.", fsm_.GetCurrentState().c_str());
     if (curFsmState_ == StateId::READY) {
+        PROFILE_END("Prepare successfully,");
         return to_underlying(ErrorCode::SUCCESS);
     } else if (curFsmState_ == StateId::INIT) {
+        PROFILE_END("Prepare failed,");
         return to_underlying(errorCode_.load());
     } else {
         return to_underlying(ErrorCode::ERROR_INVALID_OPERATION);
@@ -141,12 +148,14 @@ PFilter HiPlayerImpl::CreateAudioDecoder(const std::string& desc)
 
 int32_t HiPlayerImpl::Play()
 {
+    PROFILE_BEGIN();
     ErrorCode ret;
     if (pipelineStates_ == PlayerStates::PLAYER_PAUSED) {
         ret = fsm_.SendEvent(Intent::RESUME);
     } else {
         ret = fsm_.SendEvent(Intent::PLAY);
     }
+    PROFILE_END("Play ret = %d", ret);
     return to_underlying(ret);
 }
 
@@ -157,17 +166,26 @@ bool HiPlayerImpl::IsPlaying()
 
 int32_t HiPlayerImpl::Pause()
 {
-    return to_underlying(fsm_.SendEvent(Intent::PAUSE));
+    PROFILE_BEGIN();
+    auto ret = to_underlying(fsm_.SendEvent(Intent::PAUSE));
+    PROFILE_END("Pause ret = %d", ret);
+    return ret;
 }
 
 ErrorCode HiPlayerImpl::Resume()
 {
-    return fsm_.SendEvent(Intent::RESUME);
+    PROFILE_BEGIN();
+    auto ret = fsm_.SendEvent(Intent::RESUME);
+    PROFILE_END("Resume ret = %d", ret);
+    return ret;
 }
 
 int32_t HiPlayerImpl::Stop()
 {
-    return to_underlying(fsm_.SendEvent(Intent::STOP));
+    PROFILE_BEGIN();
+    auto ret = to_underlying(fsm_.SendEvent(Intent::STOP));
+    PROFILE_END("Stop ret = %d", ret);
+    return ret;
 }
 
 void HiPlayerImpl::MediaStats::Reset()
@@ -347,9 +365,15 @@ ErrorCode HiPlayerImpl::DoStop()
 
 ErrorCode HiPlayerImpl::DoSeek(int64_t msec)
 {
+    PROFILE_BEGIN();
     pipeline_->FlushStart();
+    PROFILE_END("Flush start");
+    PROFILE_RESET();
     pipeline_->FlushEnd();
+    PROFILE_END("Flush end");
+    PROFILE_RESET();
     auto rtv = demuxer_->SeekTo(msec);
+    PROFILE_END("SeekTo");
     auto ptr = callback_.lock();
     if (ptr != nullptr) {
         if (rtv != ErrorCode::SUCCESS) {
@@ -427,7 +451,16 @@ int32_t HiPlayerImpl::Reset()
 
 int32_t HiPlayerImpl::Release()
 {
-    return Reset();
+    PROFILE_BEGIN();
+    auto ret = Reset();
+    fsm_.Stop();
+    pipeline_.reset();
+    audioSource_.reset();
+    demuxer_.reset();
+    audioDecoderMap_.clear();
+    audioSink_.reset();
+    PROFILE_END("Release ret = %d", ret);
+    return ret;
 }
 
 int32_t HiPlayerImpl::DeInit()

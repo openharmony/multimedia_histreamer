@@ -41,8 +41,6 @@ public:
 
     virtual void Stop();
 
-    virtual void StopAsync();
-
     virtual void Pause();
 
     virtual void PauseAsync();
@@ -54,7 +52,9 @@ public:
 private:
     enum class RunningState {
         STARTED,
+        PAUSING,
         PAUSED,
+        STOPPING,
         STOPPED,
     };
 
@@ -64,12 +64,8 @@ private:
     std::atomic<RunningState> runningState_{RunningState::PAUSED};
     std::function<void()> handler_ = [this] { DoTask(); };
     OSAL::Thread loop_;
-
     OSAL::Mutex stateMutex_{};
-    OSAL::ConditionVariable cv_{};
-    OSAL::ConditionVariable pauseCond_{};
-    std::atomic<bool> pauseDone_{};
-    std::atomic<bool> workInProgress_{};
+    OSAL::ConditionVariable syncCond_{};
 };
 } // namespace OSAL
 } // namespace Media

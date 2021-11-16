@@ -18,8 +18,8 @@
 
 #include <memory>
 #include "foundation/error_code.h"
-#include "osal/thread/mutex.h"
 #include "foundation/log.h"
+#include "osal/thread/mutex.h"
 #include "play_executor.h"
 #include "state.h"
 
@@ -47,7 +47,7 @@ public:
 
     std::tuple<ErrorCode, Action> Stop() override
     {
-        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
+        return {ErrorCode::SUCCESS, Action::ACTION_BUTT};
     }
 
     std::tuple<ErrorCode, Action> Enter(Intent) override

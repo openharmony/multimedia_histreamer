@@ -557,7 +557,7 @@ int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource)
     }
     auto plugin = g_pluginInputFormat[pluginInfo->name];
     if (!plugin || !plugin->read_probe) {
-        MEDIA_LOG_E("Sniff failed due to invalid plugin for %s.", name.c_str());
+        MEDIA_LOG_D("Sniff failed due to invalid plugin for %s.", name.c_str());
         return 0;
     }
     size_t bufferSize = 4096;

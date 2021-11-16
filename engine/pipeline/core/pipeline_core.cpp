@@ -19,6 +19,7 @@
 #include <queue>
 #include "foundation/log.h"
 #include "osal/thread/scoped_lock.h"
+#include "utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {
@@ -151,7 +152,9 @@ ErrorCode PipelineCore::Stop()
             continue;
         }
         MEDIA_LOG_I("Stop filter: %s", (*it)->GetName().c_str());
+        PROFILE_BEGIN();
         auto rtv = (*it)->Stop();
+        PROFILE_END("Stop finished for %s", (*it)->GetName().c_str());
         FALSE_RETURN_V(rtv == ErrorCode::SUCCESS, rtv);
     }
     for (const auto& filter : filtersToRemove_) {

@@ -61,7 +61,8 @@ void Thread::SetName(const std::string& name)
 bool Thread::CreateThread(const std::function<void()>& func)
 {
     state_ = std::unique_ptr<State>(new State);
-    state_->func_ = func;
+    state_->func = func;
+    state_->name = name_;
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
@@ -103,10 +104,10 @@ void Thread::SetNameInternal()
 void* Thread::Run(void* arg) // NOLINT: void*
 {
     auto state = static_cast<State*>(arg);
-    if (state && state->func_) {
-        state->func_();
+    if (state && state->func) {
+        state->func();
     }
-    MEDIA_LOG_I("Thread::Run exited...");
+    MEDIA_LOG_W("Thread %s exited...", state->name.c_str());
     return nullptr;
 }
 } // namespace OSAL
