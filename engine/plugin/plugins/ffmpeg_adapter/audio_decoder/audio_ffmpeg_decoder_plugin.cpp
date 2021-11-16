@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Ffmpeg_Au_Decoder"
+#define HST_LOG_TAG "Ffmpeg_Au_Decoder"
 
 #include "audio_ffmpeg_decoder_plugin.h"
 #include <cstring>
@@ -144,6 +144,7 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
         }
     }
     definition.inCaps.push_back(cap);
+    definition.outCaps.push_back(Capability(OHOS::Media::MEDIA_MIME_AUDIO_RAW));
 }
 uint32_t GetWidth(AVSampleFormat sampleFormat)
 {
@@ -176,7 +177,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 AudioFfmpegDecoderPlugin::AudioFfmpegDecoderPlugin(std::string name)
-    : CodecPlugin(std::move(name)), outBufferQ_("adecPluginQueue", BUFFER_QUEUE_SIZE) {}
+    : CodecPlugin(std::move(name)) {}
 
 AudioFfmpegDecoderPlugin::~AudioFfmpegDecoderPlugin()
 {
@@ -293,7 +294,6 @@ Status AudioFfmpegDecoderPlugin::Prepare()
             static_cast<uint32_t>(avCodecContext_->workaround_bugs) | static_cast<uint32_t>(FF_BUG_AUTODETECT);
         avCodecContext_->err_recognition = 1;
     }
-    outBufferQ_.SetActive(true);
     return Status::OK;
 }
 
@@ -324,7 +324,6 @@ Status AudioFfmpegDecoderPlugin::ResetLocked()
 {
     audioParameter_.clear();
     avCodecContext_.reset();
-    outBufferQ_.Clear();
     return Status::OK;
 }
 
@@ -339,7 +338,7 @@ Status AudioFfmpegDecoderPlugin::Start()
 {
     {
         OSAL::ScopedLock lock(avMutex_);
-        if (avCodecContext_.get() == nullptr) {
+        if (avCodecContext_ == nullptr) {
             return Status::ERROR_WRONG_STATE;
         }
         auto res = avcodec_open2(avCodecContext_.get(), avCodec_.get(), nullptr);
@@ -348,7 +347,6 @@ Status AudioFfmpegDecoderPlugin::Start()
             return Status::ERROR_UNKNOWN;
         }
     }
-    outBufferQ_.SetActive(true);
     return Status::OK;
 }
 
@@ -365,17 +363,11 @@ Status AudioFfmpegDecoderPlugin::Stop()
             }
             avCodecContext_.reset();
         }
+        if (outBuffer_) {
+            outBuffer_.reset();
+        }
     }
-    outBufferQ_.SetActive(false);
     return ret;
-}
-
-Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs)
-{
-    MEDIA_LOG_I("queue out put");
-    (void)timeoutMs;
-    outBufferQ_.Push(outputBuffer);
-    return Status::OK;
 }
 
 Status AudioFfmpegDecoderPlugin::Flush()
@@ -393,17 +385,49 @@ Status AudioFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
 {
     MEDIA_LOG_D("queue input buffer");
     (void)timeoutMs;
-    Status status = SendBuffer(inputBuffer);
-    if (status != Status::OK) {
-        return status;
+    if (inputBuffer->IsEmpty() && !(inputBuffer->flag & BUFFER_FLAG_EOS)) {
+        MEDIA_LOG_E("decoder does not support fd buffer");
+        return Status::ERROR_INVALID_DATA;
     }
-    bool receiveOneFrame = false;
-    do {
-        receiveOneFrame = ReceiveBuffer(status);
-        if (status != Status::OK) {
-            break;
+    Status ret = Status::OK;
+    {
+        OSAL::ScopedLock lock(avMutex_);
+        if (avCodecContext_ == nullptr) {
+            return Status::ERROR_WRONG_STATE;
         }
-    } while (receiveOneFrame);
+        ret = SendBufferLocked(inputBuffer);
+    }
+    return ret;
+}
+
+Status AudioFfmpegDecoderPlugin::DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
+{
+    MEDIA_LOG_D("dequeue input buffer");
+    (void)timeoutMs;
+    return Status::OK;
+}
+
+Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs)
+{
+    MEDIA_LOG_D("queue output buffer");
+    (void)timeoutMs;
+    if (!outputBuffer) {
+        return Status::ERROR_INVALID_PARAMETER;
+    }
+    outBuffer_ = outputBuffer;
+    return Status::OK;
+}
+
+Status AudioFfmpegDecoderPlugin::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
+{
+    MEDIA_LOG_D("dequeue output buffer");
+    (void)timeoutMs;
+    Status status = ReceiveBuffer();
+    outputBuffers.reset();
+    if (status == Status::OK || status == Status::END_OF_STREAM) {
+        outputBuffers = outBuffer_;
+    }
+    outBuffer_.reset();
     return status;
 }
 
@@ -440,32 +464,17 @@ Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
         packetPtr = &packet;
     }
     auto ret = avcodec_send_packet(avCodecContext_.get(), packetPtr);
-    if (ret < 0) {
+    if (ret == 0) {
+        return Status::OK;
+    } else if (ret == AVERROR(EAGAIN)) {
+        return Status::ERROR_AGAIN;
+    } else {
         MEDIA_LOG_E("send buffer error %s", AVStrError(ret).c_str());
+        return Status::ERROR_UNKNOWN;
     }
-    return Status::OK;
 }
 
-Status AudioFfmpegDecoderPlugin::SendBuffer(const std::shared_ptr<Buffer>& inputBuffer)
-{
-    if (inputBuffer->IsEmpty() && !(inputBuffer->flag & BUFFER_FLAG_EOS)) {
-        MEDIA_LOG_E("decoder does not support fd buffer");
-        return Status::ERROR_INVALID_DATA;
-    }
-    Status ret = Status::OK;
-    {
-        OSAL::ScopedLock lock(avMutex_);
-        if (avCodecContext_ == nullptr) {
-            return Status::ERROR_WRONG_STATE;
-        }
-        ret = SendBufferLocked(inputBuffer);
-    }
-    NotifyInputBufferDone(inputBuffer);
-    return ret;
-}
-
-void AudioFfmpegDecoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>& ioInfo, Status& status,
-                                                bool& receiveOneFrame, bool& notifyBufferDone)
+Status AudioFfmpegDecoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>& ioInfo)
 {
     int32_t channels = cachedFrame_->channels;
     int32_t samples = cachedFrame_->nb_samples;
@@ -475,87 +484,59 @@ void AudioFfmpegDecoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>& i
     auto ioInfoMem = ioInfo->GetMemory();
     if (ioInfoMem->GetCapacity() < outputSize) {
         MEDIA_LOG_W("output buffer size is not enough");
-        receiveOneFrame = false;
-        notifyBufferDone = false;
-    } else {
-        if (av_sample_fmt_is_planar(avCodecContext_->sample_fmt)) {
-            int32_t planarSize = outputSize / channels;
-            for (size_t idx = 0; idx < channels; idx++) {
-                ioInfoMem->Write(cachedFrame_->extended_data[idx], planarSize);
-            }
-        } else {
-            ioInfoMem->Write(cachedFrame_->data[0], outputSize);
-        }
-        ioInfo->pts = static_cast<uint64_t>(cachedFrame_->pts);
-        notifyBufferDone = true;
-        receiveOneFrame = true;
-        status = Status::OK;
+        return Status::ERROR_NO_MEMORY;
     }
+    if (av_sample_fmt_is_planar(avCodecContext_->sample_fmt)) {
+        int32_t planarSize = outputSize / channels;
+        for (size_t idx = 0; idx < channels; idx++) {
+            ioInfoMem->Write(cachedFrame_->extended_data[idx], planarSize);
+        }
+    } else {
+        ioInfoMem->Write(cachedFrame_->data[0], outputSize);
+    }
+    ioInfo->pts = static_cast<uint64_t>(cachedFrame_->pts);
+    return Status::OK;
 }
 
-void AudioFfmpegDecoderPlugin::ReceiveBufferLocked(Status& status, const std::shared_ptr<Buffer>& ioInfo,
-                                                   bool& receiveOneFrame, bool& notifyBufferDone)
+Status AudioFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffer>& ioInfo)
 {
+    Status status;
     auto ret = avcodec_receive_frame(avCodecContext_.get(), cachedFrame_.get());
     if (ret >= 0) {
         MEDIA_LOG_D("receive one frame");
-        ReceiveFrameSucc(ioInfo, status, receiveOneFrame, notifyBufferDone);
+        status = ReceiveFrameSucc(ioInfo);
     } else if (ret == AVERROR_EOF) {
         MEDIA_LOG_I("eos received");
         ioInfo->GetMemory()->Reset();
         ioInfo->flag = BUFFER_FLAG_EOS;
-        notifyBufferDone = true;
-        receiveOneFrame = false;
         status = Status::END_OF_STREAM;
+    } else if (ret == AVERROR(EAGAIN)) {
+        status = Status::ERROR_NOT_ENOUGH_DATA;
     } else {
-        MEDIA_LOG_I("audio decoder receive error: %s", AVStrError(ret).c_str());
-        notifyBufferDone = false;
-        receiveOneFrame = false;
-        status = Status::OK;
+        MEDIA_LOG_E("audio decoder receive error: %s", AVStrError(ret).c_str());
+        status = Status::ERROR_UNKNOWN;
     }
     av_frame_unref(cachedFrame_.get());
+    return status;
 }
-bool AudioFfmpegDecoderPlugin::ReceiveBuffer(Status& status)
+
+Status AudioFfmpegDecoderPlugin::ReceiveBuffer()
 {
-    bool notifyBufferDone = false;
-    bool receiveOneFrame = false;
-    std::shared_ptr<Buffer> ioInfo = outBufferQ_.Pop();
-    if (ioInfo == nullptr || ioInfo->IsEmpty()) {
+    std::shared_ptr<Buffer> ioInfo = outBuffer_;
+    if ((ioInfo == nullptr) || ioInfo->IsEmpty() ||
+        (ioInfo->GetBufferMeta()->GetType() != BufferMetaType::AUDIO)) {
         MEDIA_LOG_W("cannot fetch valid buffer to output");
-        return false;
+        return Status::ERROR_NO_MEMORY;
     }
-    if (ioInfo->GetBufferMeta()->GetType() != BufferMetaType::AUDIO) {
-        MEDIA_LOG_W("cannot process with non-audio buffer");
-        receiveOneFrame = false;
-    } else {
+    Status status;
+    {
         OSAL::ScopedLock l(avMutex_);
         if (avCodecContext_ == nullptr) {
-            return false;
+            return Status::ERROR_WRONG_STATE;
         }
-        ReceiveBufferLocked(status, ioInfo, receiveOneFrame, notifyBufferDone);
+        status = ReceiveBufferLocked(ioInfo);
     }
-    if (notifyBufferDone) {
-        NotifyOutputBufferDone(ioInfo);
-    } else {
-        outBufferQ_.Push(ioInfo);
-    }
-    return receiveOneFrame;
-}
-
-void AudioFfmpegDecoderPlugin::NotifyInputBufferDone(const std::shared_ptr<Buffer>& input)
-{
-    auto ptr = dataCb_.lock();
-    if (ptr != nullptr) {
-        ptr->OnInputBufferDone(input);
-    }
-}
-
-void AudioFfmpegDecoderPlugin::NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output)
-{
-    auto ptr = dataCb_.lock();
-    if (ptr != nullptr) {
-        ptr->OnOutputBufferDone(output);
-    }
+    return status;
 }
 
 std::shared_ptr<Allocator> AudioFfmpegDecoderPlugin::GetAllocator()

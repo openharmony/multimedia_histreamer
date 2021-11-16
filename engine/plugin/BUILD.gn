@@ -32,42 +32,24 @@ if (defined(ohos_lite)) {
   }
 
   # build plugin interface
-  hst_plugin_intf_src = [ "common/plugin_buffer.cpp" ]
-
   config("hst_plugin_intf_config") {
     include_dirs = [ "//foundation/multimedia/histreamer/engine/plugin" ]
   }
 
-  lite_library("histreamer_plugin_intf") {
-    if (ohos_kernel_type == "liteos_m") {
-      target_type = "static_library"
-    } else {
-      target_type = "shared_library"
-    }
-    sources = hst_plugin_intf_src
+  source_set("histreamer_plugin_intf") {
+    sources = [ "common/plugin_buffer.cpp" ]
     public_configs = [ ":hst_plugin_intf_config" ]
     if (ohos_kernel_type == "liteos_m") {
       public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
     } else {
       public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     }
-    cflags = [ "-Wall" ]
+    cflags = [
+      "-fPIC",
+      "-Wall",
+    ]
     cflags_cc = cflags
   }
-
-  # build plugin core
-  hst_plugin_core_src = [
-    "core/base.cpp",
-    "core/audio_sink.cpp",
-    "core/video_sink.cpp",
-    "core/codec.cpp",
-    "core/demuxer.cpp",
-    "core/source.cpp",
-    "core/plugin_register.cpp",
-    "core/plugin_wrapper.cpp",
-    "core/plugin_manager.cpp",
-    "core/plugin_meta.cpp",
-  ]
 
   config("hst_plugin_core_config") {
     include_dirs = [
@@ -79,14 +61,20 @@ if (defined(ohos_lite)) {
     ]
   }
 
-  lite_library("histreamer_plugin_core") {
-    if (ohos_kernel_type == "liteos_m") {
-      target_type = "static_library"
-    } else {
-      target_type = "shared_library"
-    }
+  source_set("histreamer_plugin_core") {
     defines = [ "MEDIA_OHOS" ]
-    sources = hst_plugin_core_src
+    sources = [
+      "core/audio_sink.cpp",
+      "core/base.cpp",
+      "core/codec.cpp",
+      "core/demuxer.cpp",
+      "core/plugin_manager.cpp",
+      "core/plugin_meta.cpp",
+      "core/plugin_register.cpp",
+      "core/plugin_wrapper.cpp",
+      "core/source.cpp",
+      "core/video_sink.cpp",
+    ]
     if (plugin_dynamic_register) {
       sources += [ "core/plugin_loader.cpp" ]
       defines += [ "DYNAMIC_PLUGINS" ]
@@ -103,7 +91,10 @@ if (defined(ohos_lite)) {
       public_deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
     }
     public_deps += [ "plugins:gen_plugin_static_header" ]
-    cflags = [ "-Wall" ]
+    cflags = [
+      "-fPIC",
+      "-Wall",
+    ]
     cflags_cc = cflags
   }
 }

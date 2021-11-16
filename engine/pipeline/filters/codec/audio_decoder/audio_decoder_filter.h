@@ -32,8 +32,10 @@ public:
 
     ErrorCode Prepare() override;
 
-    bool Negotiate(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &inMeta,
-                   CapabilitySet &outCaps) override;
+    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Capability& upstreamNegotiatedCap) override;
+
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
     ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer) override;
 
@@ -42,48 +44,20 @@ public:
     void FlushEnd() override;
 
 private:
-    class DataCallbackImpl;
-
     ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta> &meta);
 
-    ErrorCode ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta> &meta);
+    ErrorCode HandleFrame(const std::shared_ptr<AVBuffer>& buffer);
 
-    void HandleFrame();
-
-    void HandleOneFrame(const std::shared_ptr<AVBuffer> &data);
-
-    void FinishFrame();
+    ErrorCode FinishFrame();
 
     ErrorCode Release();
 
-    // callbacks
-    void OnInputBufferDone(const std::shared_ptr<AVBuffer> &buffer);
-
-    void OnOutputBufferDone(const std::shared_ptr<AVBuffer> &buffer);
-
 private:
-    ErrorCode QueueAllBufferInPoolToPluginLocked();
-
-    template<typename T>
-    inline ErrorCode SetTagFromMetaLocked(const std::shared_ptr<const Plugin::Meta> &meta, Plugin::MetaID metaId,
-        Tag tag)
-    {
-        T tmp;
-        if (meta->GetData<T>(metaId, tmp)) {
-            return SetPluginParameterLocked(tag, tmp);
-        }
-        return ErrorCode::ERROR_NOT_FOUND;
-    }
-
-    std::shared_ptr<OHOS::Media::BlockingQueue<OHOS::Media::AVBufferPtr>> inBufferQ_;
-    std::shared_ptr<OHOS::Media::BlockingQueue<OHOS::Media::AVBufferPtr>> outBufferQ_; // PCM data
-    std::shared_ptr<OHOS::Media::OSAL::Task> handleFrameTask_ {}; // dequeue from es bufferQ then enqueue to plugin
-    // this task will dequeue from the plugin and then push to downstream
-    std::shared_ptr<OHOS::Media::OSAL::Task> pushTask_ {nullptr};
     std::shared_ptr<BufferPool<AVBuffer>> outBufferPool_ {};
     bool isFlushing_ {false};
 
-    std::shared_ptr<DataCallbackImpl> dataCallback_ {nullptr};
+    Capability capNegWithDownstream_;
+    Capability capNegWithUpstream_;
 };
 }
 }

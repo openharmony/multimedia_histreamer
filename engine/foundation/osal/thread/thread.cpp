@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Thread"
+#define HST_LOG_TAG "Thread"
 
 #include "thread.h"
 #include "foundation/log.h"
@@ -61,12 +61,15 @@ void Thread::SetName(const std::string& name)
 bool Thread::CreateThread(const std::function<void()>& func)
 {
     state_ = std::unique_ptr<State>(new State);
-    state_->func_ = func;
+    state_->func = func;
+    state_->name = name_;
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+#ifdef MEDIA_OHOS
     pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
     pthread_attr_setschedpolicy(&attr, SCHED_RR);
+#endif
     struct sched_param sched = {static_cast<int>(priority_)};
     pthread_attr_setschedparam(&attr, &sched);
 #if defined(THREAD_STACK_SIZE) and THREAD_STACK_SIZE > 0
@@ -75,7 +78,7 @@ bool Thread::CreateThread(const std::function<void()>& func)
 #endif
     int rtv = pthread_create(&id_, &attr, Thread::Run, state_.get());
     if (rtv == 0) {
-        MEDIA_LOG_I("thread %d, id %s create succ", pthread_self(), name_.c_str());
+        MEDIA_LOG_I("thread %s, id %" PRIu64 " create succ", name_.c_str(), pthread_self());
         SetNameInternal();
     } else {
         state_.reset();
@@ -101,10 +104,10 @@ void Thread::SetNameInternal()
 void* Thread::Run(void* arg) // NOLINT: void*
 {
     auto state = static_cast<State*>(arg);
-    if (state && state->func_) {
-        state->func_();
+    if (state && state->func) {
+        state->func();
     }
-    MEDIA_LOG_I("Thread::Run exited...");
+    MEDIA_LOG_W("Thread %s exited...", state->name.c_str());
     return nullptr;
 }
 } // namespace OSAL

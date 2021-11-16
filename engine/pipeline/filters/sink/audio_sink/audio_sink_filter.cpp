@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "AudioSinkFilter"
+#define HST_LOG_TAG "AudioSinkFilter"
 
 #include "audio_sink_filter.h"
 #include "common/plugin_utils.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
+#include "foundation/osal/utils/util.h"
+#include "pipeline/filters/common/plugin_settings.h"
 
 namespace OHOS {
 namespace Media {
@@ -27,11 +29,12 @@ static AutoRegisterFilter<AudioSinkFilter> g_registerFilterHelper("builtin.playe
 
 AudioSinkFilter::AudioSinkFilter(const std::string& name) : FilterBase(name)
 {
+    filterType_ = FilterType::AUDIO_SINK;
     MEDIA_LOG_I("audio sink ctor called");
 }
 AudioSinkFilter::~AudioSinkFilter()
 {
-    MEDIA_LOG_I("audio sink dtor called");
+    MEDIA_LOG_D("audio sink dtor called");
     if (plugin_) {
         plugin_->Stop();
         plugin_->Deinit();
@@ -52,56 +55,84 @@ ErrorCode AudioSinkFilter::SetPluginParameter(Tag tag, const Plugin::ValueType& 
 ErrorCode AudioSinkFilter::SetParameter(int32_t key, const Plugin::Any& value)
 {
     if (state_.load() == FilterState::CREATED) {
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_AGAIN;
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
         MEDIA_LOG_I("SetParameter key %d is out of boundary", key);
-        return ErrorCode::ERROR_INVALID_PARAM_VALUE;
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    RETURN_PLUGIN_NOT_FOUND_IF_NULL(plugin_);
+    RETURN_AGAIN_IF_NULL(plugin_);
     return SetPluginParameter(tag, value);
-}
-
-template <typename T>
-ErrorCode AudioSinkFilter::GetPluginParameter(Tag tag, T& value)
-{
-    Plugin::Any tmp;
-    auto err = TranslatePluginStatus(plugin_->GetParameter(tag, tmp));
-    if (err == ErrorCode::SUCCESS && tmp.Type() == typeid(T)) {
-        value = Plugin::AnyCast<T>(tmp);
-    }
-    return err;
 }
 
 ErrorCode AudioSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
 {
     if (state_.load() == FilterState::CREATED) {
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_AGAIN;
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
         MEDIA_LOG_I("GetParameter key %d is out of boundary", key);
-        return ErrorCode::ERROR_INVALID_PARAM_VALUE;
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    RETURN_PLUGIN_NOT_FOUND_IF_NULL(plugin_);
+    RETURN_AGAIN_IF_NULL(plugin_);
     return TranslatePluginStatus(plugin_->GetParameter(tag, value));
 }
 
-bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
-                                CapabilitySet& outCaps)
+bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                                Capability& upstreamNegotiatedCap)
 {
-    MEDIA_LOG_D("audio sink negotiate started");
-    auto creator = [](const std::string& pluginName) {
-        return Plugin::PluginManager::Instance().CreateAudioSinkPlugin(pluginName);
-    };
-    auto err = FindPluginAndUpdate<Plugin::AudioSink>(inMeta, Plugin::PluginType::AUDIO_SINK, plugin_,
-                                                      targetPluginInfo_, creator);
-    RETURN_TARGET_ERR_MESSAGE_LOG_IF_FAIL(err, false, "cannot find matched plugin");
+    MEDIA_LOG_I("audio sink negotiate started");
+    auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::AUDIO_SINK);
+    if (candidatePlugins.empty()) {
+        MEDIA_LOG_E("no available audio sink plugin");
+        return false;
+    }
+    // always use first one
+    std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = candidatePlugins[0].first;
+    for (const auto& onCap : selectedPluginInfo->inCaps) {
+        if (onCap.keys.count(CapabilityID::AUDIO_SAMPLE_FORMAT) == 0) {
+            MEDIA_LOG_E("each in caps of sink must contains valid audio sample format");
+            return false;
+        }
+    }
 
-    outCaps = targetPluginInfo_->inCaps;
+    upstreamNegotiatedCap = candidatePlugins[0].second;
 
-    err = ConfigureToPreparePlugin(inMeta);
+    // try to reuse plugin
+    if (plugin_ != nullptr) {
+        if (targetPluginInfo_ != nullptr && targetPluginInfo_->name == selectedPluginInfo->name) {
+            if (plugin_->Reset() == Plugin::Status::OK) {
+                return true;
+            }
+            MEDIA_LOG_W("reuse previous plugin %s failed, will create new plugin", targetPluginInfo_->name.c_str());
+        }
+        plugin_->Deinit();
+    }
+    plugin_ = Plugin::PluginManager::Instance().CreateAudioSinkPlugin(selectedPluginInfo->name);
+    if (plugin_ == nullptr) {
+        MEDIA_LOG_E("cannot create plugin %s", selectedPluginInfo->name.c_str());
+        return false;
+    }
+
+    auto err = TranslatePluginStatus(plugin_->Init());
+    if (err != ErrorCode::SUCCESS) {
+        MEDIA_LOG_E("audio sink plugin init error");
+        return false;
+    }
+    targetPluginInfo_ = selectedPluginInfo;
+    return true;
+}
+
+bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+{
+    if (plugin_ == nullptr || targetPluginInfo_ == nullptr) {
+        MEDIA_LOG_E("cannot configure decoder when no plugin available");
+        return false;
+    }
+
+    auto err = ConfigureToPreparePlugin(upstreamMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("sink configure error");
         OnEvent({EVENT_ERROR, err});
@@ -115,43 +146,20 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
 
 ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Plugin::Meta>& meta)
 {
-    uint32_t channels;
-    if (meta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels)) {
-        MEDIA_LOG_D("found audio channel meta");
-        SetPluginParameter(Tag::AUDIO_CHANNELS, channels);
-    }
-    uint32_t sampleRate;
-    if (meta->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_RATE, sampleRate)) {
-        MEDIA_LOG_D("found audio sample rate meta");
-        SetPluginParameter(Tag::AUDIO_SAMPLE_RATE, sampleRate);
-    }
-    int64_t bitRate;
-    if (meta->GetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate)) {
-        MEDIA_LOG_D("found audio bit rate meta");
-        SetPluginParameter(Tag::MEDIA_BITRATE, bitRate);
-    }
-
-    auto audioFormat = Plugin::AudioSampleFormat::U8;
-    if (meta->GetData<Plugin::AudioSampleFormat>(Plugin::MetaID::AUDIO_SAMPLE_FORMAT, audioFormat)) {
-        SetPluginParameter(Tag::AUDIO_SAMPLE_FORMAT, audioFormat);
-    }
-
-    auto audioChannelLayout = Plugin::AudioChannelLayout::STEREO;
-    if (meta->GetData<Plugin::AudioChannelLayout>(Plugin::MetaID::AUDIO_CHANNEL_LAYOUT, audioChannelLayout)) {
-        SetPluginParameter(Tag::AUDIO_CHANNEL_LAYOUT, audioChannelLayout);
-    }
-
-    uint32_t samplePerFrame = 0;
-    if (meta->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplePerFrame)) {
-        SetPluginParameter(Tag::AUDIO_SAMPLE_PER_FRAME, samplePerFrame);
+    auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
+    for (const auto& keyPair : parameterMap) {
+        Plugin::ValueType outValue;
+        if (meta->GetData(static_cast<Plugin::MetaID>(keyPair.first), outValue) && keyPair.second.second(outValue)) {
+            SetPluginParameter(keyPair.first, outValue);
+        } else {
+            MEDIA_LOG_W("parameter %s in meta is not found or type mismatch", keyPair.second.first.c_str());
+        }
     }
     return ErrorCode::SUCCESS;
 }
 ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta)
 {
-    auto err = TranslatePluginStatus(plugin_->Init());
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "sink plugin init error.");
-    err = ConfigureWithMeta(meta);
+    auto err = ConfigureWithMeta(meta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("sink configuration failed ");
         return err;
@@ -160,6 +168,13 @@ ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const 
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "sink prepare failed");
 
     return ErrorCode::SUCCESS;
+}
+
+void AudioSinkFilter::ReportCurrentPosition(int64_t pts)
+{
+    if (plugin_) {
+        OnEvent({EVENT_AUDIO_PROGRESS, pts / 1000}); // 1000
+    }
 }
 
 ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
@@ -181,28 +196,28 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
         MEDIA_LOG_I("PushData return due to: isFlushing = %d, state = %d", isFlushing, static_cast<int>(state_.load()));
         return ErrorCode::SUCCESS;
     }
-
+    auto err = TranslatePluginStatus(plugin_->Write(buffer));
+    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "audio sink write failed");
+    ReportCurrentPosition(static_cast<int64_t>(buffer->pts));
     if ((buffer->flag & BUFFER_FLAG_EOS) != 0) {
+        constexpr int waitTimeForPlaybackCompleteMs = 60;
+        OHOS::Media::OSAL::SleepFor(waitTimeForPlaybackCompleteMs);
         Event event{
-            .type = EVENT_COMPLETE,
+            .type = EVENT_AUDIO_COMPLETE,
         };
         MEDIA_LOG_D("audio sink push data send event_complete");
         OnEvent(event);
-        MEDIA_LOG_D("audio sink push data end");
-        return ErrorCode::SUCCESS;
     }
-    auto err = TranslatePluginStatus(plugin_->Write(buffer));
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "audio sink write failed");
     MEDIA_LOG_D("audio sink push data end");
-    return err;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode AudioSinkFilter::Start()
 {
-    MEDIA_LOG_D("start called");
+    MEDIA_LOG_I("start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
         MEDIA_LOG_W("sink is not ready when start, state: %d", state_.load());
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto err = FilterBase::Start();
     if (err != ErrorCode::SUCCESS) {
@@ -221,7 +236,9 @@ ErrorCode AudioSinkFilter::Stop()
 {
     MEDIA_LOG_I("audio sink stop start");
     FilterBase::Stop();
-    plugin_->Stop();
+    if (plugin_ != nullptr) {
+        plugin_->Stop();
+    }
     if (pushThreadIsBlocking.load()) {
         startWorkingCondition_.NotifyOne();
     }
@@ -231,11 +248,11 @@ ErrorCode AudioSinkFilter::Stop()
 
 ErrorCode AudioSinkFilter::Pause()
 {
-    MEDIA_LOG_D("audio sink filter pause start");
+    MEDIA_LOG_I("audio sink filter pause start");
     // only worked when state is working
     if (state_ != FilterState::READY && state_ != FilterState::RUNNING) {
         MEDIA_LOG_W("audio sink cannot pause when not working");
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto err = FilterBase::Pause();
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "audio sink pause failed");
@@ -245,7 +262,7 @@ ErrorCode AudioSinkFilter::Pause()
 }
 ErrorCode AudioSinkFilter::Resume()
 {
-    MEDIA_LOG_D("audio sink filter resume");
+    MEDIA_LOG_I("audio sink filter resume");
     // only worked when state is paused
     if (state_ == FilterState::PAUSED) {
         state_ = FilterState::RUNNING;
@@ -259,17 +276,19 @@ ErrorCode AudioSinkFilter::Resume()
 
 void AudioSinkFilter::FlushStart()
 {
-    MEDIA_LOG_D("audio sink flush start entered");
+    MEDIA_LOG_I("audio sink flush start entered");
     isFlushing = true;
     if (pushThreadIsBlocking) {
         startWorkingCondition_.NotifyOne();
     }
+    plugin_->Pause();
     plugin_->Flush();
 }
 
 void AudioSinkFilter::FlushEnd()
 {
-    MEDIA_LOG_D("audio sink flush end entered");
+    MEDIA_LOG_I("audio sink flush end entered");
+    plugin_->Resume();
     isFlushing = false;
 }
 
@@ -277,7 +296,7 @@ ErrorCode AudioSinkFilter::SetVolume(float volume)
 {
     if (state_ != FilterState::READY && state_ != FilterState::RUNNING && state_ != FilterState::PAUSED) {
         MEDIA_LOG_E("audio sink filter cannot set volume in state %d", state_.load());
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_AGAIN;
     }
     MEDIA_LOG_W("set volume %.3f", volume);
     return TranslatePluginStatus(plugin_->SetVolume(volume));

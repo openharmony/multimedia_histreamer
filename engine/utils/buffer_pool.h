@@ -59,6 +59,7 @@ public:
         if (msgSize_ == msgSize && align == align_) {
             return;
         }
+        metaType_ = type;
         msgSize_ = msgSize;
         align_ = align;
         freeBuffers_.clear();
@@ -121,6 +122,21 @@ public:
         return AllocateBufferUnprotected();
     }
 
+    std::shared_ptr<T> AllocateAppendBufferNonBlocking()
+    {
+        OSAL::ScopedLock lock(mutex_);
+        if (!isActive_) {
+            return nullptr;
+        }
+        if (freeBuffers_.empty()) {
+            poolSize_++;
+            auto buf = new Plugin::Buffer(metaType_);
+            buf->AllocMemory(nullptr, msgSize_);
+            freeBuffers_.emplace_back(std::unique_ptr<T>(buf));
+        }
+        return AllocateBufferUnprotected();
+    }
+
     size_t Size() const
     {
         OSAL::ScopedLock lock(mutex_);
@@ -171,6 +187,7 @@ private:
     size_t align_  {0}; // 0: use default alignment.
     std::atomic<bool> isActive_;
     std::atomic<bool> allocInProgress;
+    Plugin::BufferMetaType metaType_;
 };
 } // namespace Media
 } // namespace OHOS

@@ -29,7 +29,7 @@ using AllocatorHelper = Allocator;
 
 struct MediaInfoHelper {
     Meta globalMeta;
-    std::vector<Meta> streamMeta;
+    std::vector<Meta> trackMeta;
 };
 
 struct DataSourceHelper {

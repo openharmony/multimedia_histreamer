@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "ScopedLock"
+#define HST_LOG_TAG "ScopedLock"
 
 #include "scoped_lock.h"
 

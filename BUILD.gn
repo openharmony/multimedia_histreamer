@@ -18,6 +18,7 @@ if (defined(ohos_lite)) {
   lite_library("histreamer") {
     if (ohos_kernel_type == "liteos_m") {
       target_type = "static_library"
+      complete_static_lib = true
     } else {
       target_type = "shared_library"
     }

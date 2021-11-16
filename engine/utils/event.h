@@ -20,13 +20,13 @@
 
 namespace OHOS {
 namespace Media {
-class Meta;
-
 // 各个组件向Pipeline报告的事件类型
 enum EventType {
     EVENT_READY = 0,
-    EVENT_PROGRESS,
-    EVENT_COMPLETE,
+    EVENT_AUDIO_PROGRESS,
+    EVENT_VIDEO_PROGRESS,
+    EVENT_AUDIO_COMPLETE,
+    EVENT_VIDEO_COMPLETE,
     EVENT_ERROR,
     EVENT_BUFFERING,
     EVENT_BUFFER_PROGRESS,

@@ -13,19 +13,23 @@
  * limitations under the License.
  */
 
-#define HST_LOG_TAG "HiPlayer"
-
-#include "histreamer/hiplayer.h"
-
-#include "hiplayer_impl.h"
-#include "foundation/log.h"
+#ifndef HISTREAMER_PIPELINE_CORE_FILTER_TYPE_H
+#define HISTREAMER_PIPELINE_CORE_FILTER_TYPE_H
 
 namespace OHOS {
 namespace Media {
-std::shared_ptr<Media::PlayerInterface> CreateHiPlayer()
-{
-    MEDIA_LOG_W("Histreamer compile time: %s %s", __DATE__, __TIME__);
-    return HiPlayerImpl::CreateHiPlayerImpl();
-}
-} // namespace Media
-} // namespace OHOS
+namespace Pipeline {
+enum struct FilterType : uint8_t {
+    NONE = 0,
+    MEDIA_SOURCE,
+    DEMUXER,
+    AUDIO_DECODER,
+    VIDEO_DECODER,
+    AUDIO_SINK,
+    VIDEO_SINK,
+};
+} // Pipeline
+} // Media
+} // OHOS
+
+#endif // HISTREAMER_PIPELINE_CORE_FILTER_TYPE_H

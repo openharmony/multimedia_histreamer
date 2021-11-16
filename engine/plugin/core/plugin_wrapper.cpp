@@ -19,7 +19,7 @@
 namespace {
 std::set<OHOS::Media::Plugin::MetaID> g_metaIdSet = {
     OHOS::Media::Plugin::MetaID::MIME,
-    OHOS::Media::Plugin::MetaID::STREAM_INDEX,
+    OHOS::Media::Plugin::MetaID::TRACK_ID,
     OHOS::Media::Plugin::MetaID::MEDIA_CODEC_CONFIG,
     OHOS::Media::Plugin::MetaID::MEDIA_BITRATE,
     OHOS::Media::Plugin::MetaID::AUDIO_CHANNELS,
@@ -66,11 +66,11 @@ void ConvertToMediaInfoHelper(uint32_t pkgVersion, const MediaInfo& src, MediaIn
     if (streamSize <= 0) {
         return;
     }
-    dest.streamMeta.resize(streamSize);
+    dest.trackMeta.resize(streamSize);
     for (size_t i = 0; i < streamSize; ++i) {
         for (auto const& meta : src.tracks[i]) {
             if (g_metaIdSet.count(MetaID(meta.first))) {
-                dest.streamMeta[i].SetData(MetaID(meta.first), meta.second);
+                dest.trackMeta[i].SetData(MetaID(meta.first), meta.second);
             }
         }
     }

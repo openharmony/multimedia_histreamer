@@ -14,29 +14,29 @@
 
 import("//build/lite/config/component/lite_component.gni")
 
-histreamer_utils_src = [
-  "constants.cpp",
-  "utils.cpp",
-]
-
 config("histreamer_utils_config") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine",
     "//foundation/multimedia/histreamer/engine/foundation",
     "//foundation/multimedia/histreamer/engine/plugin",
   ]
-  defines = [ "MEDIA_OHOS" ]
+  defines = [
+    "MEDIA_OHOS",
+    # "PROFILE",
+  ]
 }
 
-lite_library("histreamer_utils") {
-  if (ohos_kernel_type == "liteos_m") {
-    target_type = "static_library"
-  } else {
-    target_type = "shared_library"
-  }
-  sources = histreamer_utils_src
+source_set("histreamer_utils") {
+  sources = [
+    "constants.cpp",
+    "steady_clock.cpp",
+    "utils.cpp",
+  ]
   public_configs = [ ":histreamer_utils_config" ]
   public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
-  cflags = [ "-O2" ]
+  cflags = [
+    "-fPIC",
+    "-O2",
+  ]
   cflags_cc = cflags
 }

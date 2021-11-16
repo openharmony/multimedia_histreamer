@@ -25,6 +25,7 @@
 #include "utils/constants.h"
 #include "utils/event.h"
 #include "utils/utils.h"
+#include "filter_type.h"
 #include "port.h"
 
 namespace OHOS {
@@ -119,6 +120,8 @@ protected:
     std::vector<PairPort> routeMap_ {}; // inport -> outport
 
     std::map<std::string, uint32_t> mediaTypeCntMap_ {};
+
+    FilterType filterType_ {FilterType::NONE};
 
 private:
     template <typename T>

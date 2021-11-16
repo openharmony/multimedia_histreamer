@@ -117,7 +117,7 @@ struct Register {
      * @param def   Basic information about the plugin
      * @return  Registration status return
      *  @retval OK: The plugin is registered succeed.
-     *  @retval ERROR_ALREADY_EXISTS: The plugin already exists in plugin registered.
+     *  @retval ERROR_PLUGIN_ALREADY_EXISTS: The plugin already exists in plugin registered.
      *  @retval ERROR_INCOMPATIBLE_VERSION: Incompatible version during plugin registration.
      */
     virtual Status AddPlugin(const PluginDefBase& def) = 0;
@@ -141,7 +141,7 @@ struct PackageRegister : Register {
      * @param def   plugin packaging information.
      * @return  Registration status return
      *  @retval OK: The package is registered succeed without any errors.
-     *  @retval ERROR_ALREADY_EXISTS: The package or plugins already exists.
+     *  @retval ERROR_PLUGIN_ALREADY_EXISTS: The package or plugins already exists.
      *  @retval ERROR_INCOMPATIBLE_VERSION: Incompatible plugin interface version or api version.
      */
     virtual Status AddPackage(const PackageDef& def) = 0;

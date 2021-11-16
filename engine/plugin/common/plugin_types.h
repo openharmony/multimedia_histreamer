@@ -65,7 +65,7 @@ enum struct Status : int32_t {
     OK = 0,                    ///< The execution result is correct.
     NO_ERROR = OK,             ///< Same as Status::OK
     ERROR_UNKNOWN = -1,        ///< An unknown error occurred.
-    ERROR_ALREADY_EXISTS = -2, ///< The plugin already exists, usually occurs when in plugin registered.
+    ERROR_PLUGIN_ALREADY_EXISTS = -2, ///< The plugin already exists, usually occurs when in plugin registered.
     ERROR_INCOMPATIBLE_VERSION =
         -3,                         ///< Incompatible version, may occur during plugin registration or function calling.
     ERROR_NO_MEMORY = -4,           ///< The system memory is insufficient.
@@ -77,6 +77,8 @@ enum struct Status : int32_t {
     ERROR_TIMED_OUT = -10,          ///< Operation timeout.
     ERROR_UNSUPPORTED_FORMAT = -11, ///< The plugin not support this format/name.
     ERROR_NOT_ENOUGH_DATA = -12,    ///< Not enough data when read from source.
+    ERROR_NOT_EXISTED = -13,        ///< Source is not existed.
+    ERROR_AGAIN = -14,              ///< Operation is not available right now, should try again later
 };
 
 /**

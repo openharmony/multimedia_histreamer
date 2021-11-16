@@ -18,16 +18,16 @@
 
 #include <atomic>
 #include <string>
+#include "core/filter_base.h"
+#include "data_packer.h"
 #include "osal/thread/mutex.h"
 #include "osal/thread/task.h"
+#include "plugin/common/plugin_types.h"
+#include "plugin/core/demuxer.h"
+#include "plugin/core/plugin_meta.h"
+#include "type_finder.h"
 #include "utils/type_define.h"
 #include "utils/utils.h"
-#include "plugin/common/plugin_types.h"
-#include "plugin/core/plugin_meta.h"
-#include "plugin/core/demuxer.h"
-#include "type_finder.h"
-#include "data_packer.h"
-#include "core/filter_base.h"
 
 namespace OHOS {
 namespace Media {
@@ -54,16 +54,16 @@ public:
 
     ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) override;
 
-    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
-                   CapabilitySet& peerCaps) override;
+    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Capability& upstreamNegotiatedCap) override;
+
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
     ErrorCode SeekTo(int64_t msec);
 
     std::vector<std::shared_ptr<Plugin::Meta>> GetStreamMetaInfo() const;
 
     std::shared_ptr<Plugin::Meta> GetGlobalMetaInfo() const;
-
-    ErrorCode GetCurrentTime(int64_t& time) const;
 
 private:
     class DataSourceImpl;
@@ -91,6 +91,8 @@ private:
 
     void InitTypeFinder();
 
+    bool CreatePlugin(std::string pluginName);
+
     bool InitPlugin(std::string pluginName);
 
     void ActivatePullMode();
@@ -117,8 +119,6 @@ private:
 
     void DemuxerLoop();
 
-    void SetCurrentTime(int64_t timestampUsec);
-
     std::string uriSuffix_;
     uint64_t mediaDataSize_;
     std::shared_ptr<OSAL::Task> task_;
@@ -135,9 +135,6 @@ private:
     std::function<bool(uint64_t, size_t)> checkRange_;
     std::function<bool(uint64_t, size_t, AVBufferPtr&)> peekRange_;
     std::function<bool(uint64_t, size_t, AVBufferPtr&)> getRange_;
-
-    mutable OSAL::Mutex timeMutex_;
-    int64_t curTimeUs_;
 };
 } // namespace Pipeline
 } // namespace Media

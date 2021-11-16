@@ -26,49 +26,43 @@
 #ifdef MEDIA_OHOS
 #include "hilog/log.h"
 #include "media_log.h"
-#endif
-
-inline std::string MediaGetFileName(std::string file)
-{
-    if (file == "") {
-        return "Unknown File";
-    }
-
-    return file.substr(file.find_last_of("/\\") + 1);
-}
-
-#ifndef LOG_TAG
-#define LOG_TAG "NULL"
-#endif
-
-// Control the logd and logi.
-// If logd and logi are needed, #define MEDIA_LOG_DEBUG 1 at the beginning of the cpp file.
-#ifndef MEDIA_LOG_DEBUG
-#define MEDIA_LOG_DEBUG 0
-#endif
-
-#define MEDIA_LOG_MESSAGE(level, msg, ...)                                                                             \
-    do {                                                                                                               \
-        std::string file(__FILE__);                                                                                    \
-        std::string bareFile = MediaGetFileName(file);                                                                 \
-        printf("%lu " LOG_TAG " " level " (%s, %d) : Func(%s) " msg "\n", pthread_self(), bareFile.c_str(), __LINE__,  \
-               __FUNCTION__, ##__VA_ARGS__);                                                                           \
-        fflush(stdout);                                                                                                \
-    } while (0)
-
-#ifdef MEDIA_OHOS
-#define MEDIA_LOG_E(msg, ...) MEDIA_ERR_LOG(msg, ##__VA_ARGS__)
-#define MEDIA_LOG_W(msg, ...) MEDIA_WARNING_LOG(msg, ##__VA_ARGS__)
-#define MEDIA_LOG_I(msg, ...) MEDIA_INFO_LOG(msg, ##__VA_ARGS__)
-#define MEDIA_LOG_D(msg, ...) MEDIA_DEBUG_LOG(msg, ##__VA_ARGS__)
 #else
 #include "log_adapter.h"
 #endif
 
+#ifndef HST_LOG_TAG
+#define HST_LOG_TAG "NULL"
+#endif
+
+#ifdef MEDIA_OHOS
+#ifndef OHOS_DEBUG
+#define HST_DECORATOR_HILOG(op, fmt, args...) \
+    do { \
+        op(LOG_CORE, "%s:" fmt, HST_LOG_TAG, ##args); \
+    } while (0)
+#else
+#define HST_DECORATOR_HILOG(op, fmt, args...)\
+    do { \
+        op(LOG_CORE, "%s[%d]:" fmt, HST_LOG_TAG, __LINE__, ##args); \
+    } while (0)
+#endif
+
+#define MEDIA_LOG_D(fmt, ...) HST_DECORATOR_HILOG(HILOG_DEBUG, fmt, ##__VA_ARGS__)
+#define MEDIA_LOG_I(fmt, ...) HST_DECORATOR_HILOG(HILOG_INFO, fmt, ##__VA_ARGS__)
+#define MEDIA_LOG_W(fmt, ...) HST_DECORATOR_HILOG(HILOG_WARN, fmt, ##__VA_ARGS__)
+#define MEDIA_LOG_E(fmt, ...) HST_DECORATOR_HILOG(HILOG_ERROR, fmt, ##__VA_ARGS__)
+#define MEDIA_LOG_F(fmt, ...) HST_DECORATOR_HILOG(HILOG_FATAL, fmt, ##__VA_ARGS__)
+#endif
+
+
+// Control the MEDIA_LOG_D.
+// If MEDIA_LOG_D is needed, #define MEDIA_LOG_DEBUG 1 at the beginning of the cpp file.
+#ifndef MEDIA_LOG_DEBUG
+#define MEDIA_LOG_DEBUG 0
+#endif
+
 #if !MEDIA_LOG_DEBUG
-#undef MEDIA_LOG_I
 #undef MEDIA_LOG_D
-#define MEDIA_LOG_I(msg, ...) ((void)0)
 #define MEDIA_LOG_D(msg, ...) ((void)0)
 #endif
 

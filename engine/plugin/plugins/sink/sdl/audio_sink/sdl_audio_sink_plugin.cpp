@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "SdlAudioSinkPlugin"
+#define HST_LOG_TAG "SdlAudioSinkPlugin"
 
 #include "sdl_audio_sink_plugin.h"
 #include <functional>
 #include "foundation/log.h"
-#include "utils/constants.h"
-#include "utils/utils.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
+#include "utils/constants.h"
+#include "utils/utils.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;
@@ -89,7 +89,14 @@ const Status SdlAudioRegister(const std::shared_ptr<Register>& reg)
     AudioSinkPluginDef definition;
     definition.name = "sdl_audio_sink";
     definition.rank = 100; // 100
-    definition.inCaps.emplace_back(Capability(OHOS::Media::MEDIA_MIME_AUDIO_RAW));
+    Capability cap(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
+    cap.AppendDiscreteKeys<AudioSampleFormat>(
+        Capability::Key::AUDIO_SAMPLE_FORMAT,
+        {AudioSampleFormat::U8, AudioSampleFormat::U8P, AudioSampleFormat::S8, AudioSampleFormat::S8P,
+         AudioSampleFormat::U16, AudioSampleFormat::U16P, AudioSampleFormat::S16, AudioSampleFormat::S16P,
+         AudioSampleFormat::U32, AudioSampleFormat::U32P, AudioSampleFormat::S32, AudioSampleFormat::S32P,
+         AudioSampleFormat::F32, AudioSampleFormat::F32P, AudioSampleFormat::F64, AudioSampleFormat::F64P});
+    definition.inCaps.emplace_back(cap);
     definition.creator = AudioSinkPluginCreator;
     return reg->AddPlugin(definition);
 }
@@ -103,7 +110,8 @@ namespace Plugin {
 SdlAudioSinkPlugin::SdlAudioSinkPlugin(std::string name)
     : AudioSinkPlugin(std::move(name)),
       transformCache_((MAX_AUDIO_FRAME_SIZE * 3) / 2), // 3, 2
-      mixCache_((MAX_AUDIO_FRAME_SIZE * 3) / 2)        // 3, 2
+      mixCache_((MAX_AUDIO_FRAME_SIZE * 3) / 2),       // 3, 2
+      volume_(SDL_MIX_MAXVOLUME)
 {
 }
 Status SdlAudioSinkPlugin::Init()
@@ -239,7 +247,7 @@ Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
             break;
         }
         default:
-            MEDIA_LOG_I("receive one parameter with unconcern key");
+            MEDIA_LOG_W("receive one parameter with unconcern key");
             break;
     }
     return Status::OK;
@@ -271,13 +279,15 @@ Status SdlAudioSinkPlugin::SetMute(bool mute)
 Status SdlAudioSinkPlugin::GetVolume(float& volume)
 {
     UNUSED_VARIABLE(volume);
-    return Status::ERROR_ALREADY_EXISTS;
+    volume = volume_ * 1.0 / SDL_MIX_MAXVOLUME;
+    return Status::OK;
 }
 
 Status SdlAudioSinkPlugin::SetVolume(float volume)
 {
     UNUSED_VARIABLE(volume);
-    return Status::ERROR_UNIMPLEMENTED;
+    volume_ = static_cast<int>(volume * SDL_MIX_MAXVOLUME);
+    return Status::OK;
 }
 
 Status SdlAudioSinkPlugin::GetSpeed(float& speed)
@@ -302,6 +312,7 @@ Status SdlAudioSinkPlugin::Pause()
 Status SdlAudioSinkPlugin::Resume()
 {
     MEDIA_LOG_I("Resume");
+    rb->SetActive(true);
     SDL_PauseAudio(0);
     return Status::OK;
 }
@@ -350,6 +361,7 @@ Status SdlAudioSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
 Status SdlAudioSinkPlugin::Flush()
 {
     SDL_ClearQueuedAudio(1);
+    rb->SetActive(false);
     return Status::OK;
 }
 
@@ -363,7 +375,7 @@ void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len)
         return;
     }
     SDL_memset(stream, 0, len);
-    SDL_MixAudio(stream, mixCache_.data(), realLen, SDL_MIX_MAXVOLUME);
+    SDL_MixAudio(stream, mixCache_.data(), realLen, volume_);
     SDL_PauseAudio(0);
     MEDIA_LOG_D("sdl audio callback end with %zu", realLen);
 }

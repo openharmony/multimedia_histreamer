@@ -36,7 +36,7 @@ constexpr typename std::underlying_type<E>::type to_underlying(E e) noexcept
  */
 enum struct MetaID : uint32_t {
     MIME = to_underlying(Tag::MIME),
-    STREAM_INDEX = to_underlying(Tag::STREAM_INDEX),
+    TRACK_ID = to_underlying(Tag::TRACK_ID),
     MEDIA_CODEC_CONFIG = to_underlying(Tag::MEDIA_CODEC_CONFIG),
 
     AUDIO_CHANNELS = to_underlying(Tag::AUDIO_CHANNELS),
@@ -120,6 +120,16 @@ public:
         return true;
     }
 
+    bool GetData(Plugin::MetaID id, Plugin::ValueType& value) const
+    {
+        auto ite = items_.find(id);
+        if (ite == items_.end()) {
+            return false;
+        }
+        value = ite->second;
+        return true;
+    }
+
     void Clear();
 
     /**
@@ -143,6 +153,12 @@ public:
      */
     template <typename T>
     bool SetData(Plugin::MetaID id, const T& value)
+    {
+        items_[id] = value;
+        return true;
+    }
+
+    bool SetData(Plugin::MetaID id, const Plugin::ValueType& value)
     {
         items_[id] = value;
         return true;
