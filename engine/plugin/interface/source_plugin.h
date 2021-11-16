@@ -47,7 +47,9 @@ struct SourcePlugin : public PluginBase {
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
      *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
-     *  @retval ERROR_INVALID_DATA: Uri is not supported.
+     *  @retval ERROR_NOT_EXISTED: Uri is not existed.
+     *  @retval ERROR_UNSUPPORTED_FORMAT: Uri is not supported.
+     *  @retval ERROR_INVALID_PARAMETER: Uri is invalid.
      */
     virtual Status SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params = nullptr) = 0;
 
@@ -60,7 +62,6 @@ struct SourcePlugin : public PluginBase {
      * @param expectedLen   Expected data size to be read
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      *  @retval ERROR_NOT_ENOUGH_DATA: Data not enough
      *  @retval END_OF_STREAM: End of stream
      */
@@ -74,7 +75,6 @@ struct SourcePlugin : public PluginBase {
      * @param size data source size.
      * @return  Execution status return.
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      */
     virtual Status GetSize(size_t& size) = 0;
 
@@ -85,7 +85,6 @@ struct SourcePlugin : public PluginBase {
      *
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      */
     virtual bool IsSeekable() = 0;
 
@@ -99,7 +98,6 @@ struct SourcePlugin : public PluginBase {
      * @param offset position to read data frames
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      *  @retval ERROR_INVALID_DATA: The offset is invalid.
      */
     virtual Status SeekTo(uint64_t offset) = 0;

@@ -30,7 +30,7 @@ TEST(Test_meta_bundle, GetNull_before_Update)
 {
     Pipeline::MetaBundle bundle;
     ASSERT_TRUE(bundle.GetGlobalMeta() == nullptr);
-    ASSERT_TRUE(bundle.GetStreamMeta(0) == nullptr);
+    ASSERT_TRUE(bundle.GeTrackMeta(0) == nullptr);
 }
 
 TEST(Test_meta_bundle, GetGlobalMeta_after_Update)
@@ -45,7 +45,7 @@ TEST(Test_meta_bundle, GetGlobalMeta_after_Update)
 
     Pipeline::MetaBundle bundle;
     ASSERT_TRUE(bundle.GetGlobalMeta() == nullptr);
-    ASSERT_TRUE(bundle.GetStreamMeta(0) == nullptr);
+    ASSERT_TRUE(bundle.GeTrackMeta(0) == nullptr);
     bundle.UpdateGlobalMeta(meta);
     auto out = bundle.GetGlobalMeta();
     ASSERT_TRUE(out != nullptr);
@@ -69,13 +69,13 @@ TEST(Test_meta_bundle, GetStreamMeta_after_Update)
 
     Pipeline::MetaBundle bundle;
     ASSERT_TRUE(bundle.GetGlobalMeta() == nullptr);
-    ASSERT_TRUE(bundle.GetStreamMeta(0) == nullptr);
-    bundle.UpdateStreamMeta(meta);
-    auto out = bundle.GetStreamMeta(0);
+    ASSERT_TRUE(bundle.GeTrackMeta(0) == nullptr);
+    bundle.UpdateTrackMeta(meta);
+    auto out = bundle.GeTrackMeta(0);
     ASSERT_TRUE(out == nullptr);
-    meta.SetUint32(Media::Plugin::MetaID::STREAM_INDEX, 1);
-    bundle.UpdateStreamMeta(meta);
-    out = bundle.GetStreamMeta(1);
+    meta.SetUint32(Media::Plugin::MetaID::TRACK_ID, 1);
+    bundle.UpdateTrackMeta(meta);
+    out = bundle.GeTrackMeta(1);
     std::string outString;
     ASSERT_TRUE(out->GetString(Media::Plugin::MetaID::MIME, outString));
     ASSERT_STREQ("audio/mpeg", outString.c_str());
@@ -84,7 +84,7 @@ TEST(Test_meta_bundle, GetStreamMeta_after_Update)
     int32_t oChannel = 0;
     ASSERT_FALSE(out->GetInt32(Media::Plugin::MetaID::AUDIO_CHANNELS, oChannel));
     uint32_t sIndex = 0;
-    ASSERT_TRUE(out->GetUint32(Media::Plugin::MetaID::STREAM_INDEX, sIndex));
+    ASSERT_TRUE(out->GetUint32(Media::Plugin::MetaID::TRACK_ID, sIndex));
     ASSERT_EQ(sIndex, 1);
 }
 } // namespace Test

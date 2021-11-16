@@ -47,10 +47,10 @@ public:
     {
         MEDIA_LOG_D("Seek in ready state.");
         if (param.Type() != typeid(int64_t)) {
-            return {ErrorCode::ERROR_INVALID_PARAM_VALUE, Action::ACTION_BUTT};
+            return {ErrorCode::ERROR_INVALID_PARAMETER_TYPE, Action::ACTION_BUTT};
         }
         auto timeMs = Plugin::AnyCast<int64_t>(param);
-        auto ret = executor_.DoSeek(timeMs);
+        auto ret = executor_.DoSeek(true, timeMs);
         return {ret, Action::ACTION_BUTT};
     }
 

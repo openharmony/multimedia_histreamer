@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "DemuxerFilter"
+#define HST_LOG_TAG "DemuxerFilter"
 
 #include "demuxer_filter.h"
 #include <algorithm>
+#include "compatible_check.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
+#include "pipeline/filters/common/plugin_utils.h"
 #include "utils/constants.h"
+#include "utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {
@@ -98,15 +101,15 @@ DemuxerFilter::DemuxerFilter(std::string name)
       pluginState_(DemuxerState::DEMUXER_STATE_NULL),
       pluginAllocator_(nullptr),
       dataSource_(std::make_shared<DataSourceImpl>(*this)),
-      mediaMetaData_(),
-      curTimeUs_(0)
+      mediaMetaData_()
 {
+    filterType_ = FilterType::DEMUXER;
     MEDIA_LOG_D("ctor called");
 }
 
 DemuxerFilter::~DemuxerFilter()
 {
-    MEDIA_LOG_D("dtor called");
+    MEDIA_LOG_I("dtor called");
     if (task_) {
         task_->Stop();
     }
@@ -127,6 +130,7 @@ void DemuxerFilter::Init(EventReceiver* receiver, FilterCallback* callback)
 
 ErrorCode DemuxerFilter::Start()
 {
+    MEDIA_LOG_I("Start called.");
     if (task_) {
         task_->Start();
     }
@@ -156,13 +160,13 @@ ErrorCode DemuxerFilter::Stop()
 
 ErrorCode DemuxerFilter::Pause()
 {
-    MEDIA_LOG_D("Pause called");
+    MEDIA_LOG_I("Pause called");
     return FilterBase::Pause();
 }
 
 void DemuxerFilter::FlushStart()
 {
-    MEDIA_LOG_D("FlushStart entered");
+    MEDIA_LOG_I("FlushStart entered");
     if (dataPacker_) {
         dataPacker_->Flush();
     }
@@ -173,12 +177,12 @@ void DemuxerFilter::FlushStart()
 
 void DemuxerFilter::FlushEnd()
 {
-    MEDIA_LOG_D("FlushEnd entered");
+    MEDIA_LOG_I("FlushEnd entered");
 }
 
 ErrorCode DemuxerFilter::Prepare()
 {
-    MEDIA_LOG_D("Prepare called");
+    MEDIA_LOG_I("Prepare called");
     pluginState_ = DemuxerState::DEMUXER_STATE_NULL;
     Pipeline::WorkMode mode;
     GetInPort(PORT_NAME_DEFAULT)->Activate({Pipeline::WorkMode::PULL, Pipeline::WorkMode::PUSH}, mode);
@@ -187,7 +191,6 @@ ErrorCode DemuxerFilter::Prepare()
     } else {
         ActivatePushMode();
     }
-    SetCurrentTime(0);
     state_ = FilterState::PREPARING;
     return ErrorCode::SUCCESS;
 }
@@ -201,30 +204,34 @@ ErrorCode DemuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
     return ErrorCode::SUCCESS;
 }
 
-bool DemuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
-                              CapabilitySet& outCaps)
+bool DemuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                              Capability& upstreamNegotiatedCap)
 {
     (void)inPort;
-    (void)outCaps;
-    (void)inMeta->GetUint64(Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
-    return inMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_);
+    (void)upstreamCap;
+    (void)upstreamNegotiatedCap;
+    return true;
+}
+
+bool DemuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+{
+    (void)upstreamMeta->GetUint64(Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
+    return upstreamMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_);
 }
 
 ErrorCode DemuxerFilter::SeekTo(int64_t msec)
 {
     if (!plugin_) {
         MEDIA_LOG_E("SeekTo failed due to no valid plugin");
-        return ErrorCode::ERROR_NULL_POINTER;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
-    ErrorCode rtv = ErrorCode::SUCCESS;
-    auto ret = plugin_->SeekTo(-1, msec * 1000, Plugin::SeekMode::BACKWARD); // 1000
-    if (ret == Plugin::Status::OK) {
+    auto rtv = TranslatePluginStatus(plugin_->SeekTo(-1, msec * 1000, Plugin::SeekMode::BACKWARD)); // 1000
+    if (rtv == ErrorCode::SUCCESS) {
         if (task_) {
             task_->Start();
         }
     } else {
-        MEDIA_LOG_E("SeekTo failed with return value: %d", static_cast<int>(ret));
-        rtv = ErrorCode::ERROR_SEEK_FAILURE;
+        MEDIA_LOG_E("SeekTo failed with return value: %d", static_cast<int>(rtv));
     }
     return rtv;
 }
@@ -239,16 +246,8 @@ std::shared_ptr<Plugin::Meta> DemuxerFilter::GetGlobalMetaInfo() const
     return mediaMetaData_.globalMeta;
 }
 
-ErrorCode DemuxerFilter::GetCurrentTime(int64_t& time) const
-{
-    OSAL::ScopedLock lock(timeMutex_);
-    time = curTimeUs_ / 1000; // 1000, time in milliseconds
-    return ErrorCode::SUCCESS;
-}
-
 void DemuxerFilter::Reset()
 {
-    SetCurrentTime(0);
     mediaMetaData_.globalMeta.reset();
     mediaMetaData_.trackMetas.clear();
     mediaMetaData_.trackInfos.clear();
@@ -261,33 +260,41 @@ void DemuxerFilter::InitTypeFinder()
     }
 }
 
+bool DemuxerFilter::CreatePlugin(std::string pluginName)
+{
+    if (plugin_) {
+        plugin_->Deinit();
+    }
+    plugin_ = Plugin::PluginManager::Instance().CreateDemuxerPlugin(pluginName);
+    if (!plugin_ || plugin_->Init() != Plugin::Status::OK) {
+        MEDIA_LOG_E("CreatePlugin %s failed.", pluginName.c_str());
+        return false;
+    }
+    pluginAllocator_ = plugin_->GetAllocator();
+    pluginName_.swap(pluginName);
+    return true;
+}
+
 bool DemuxerFilter::InitPlugin(std::string pluginName)
 {
     if (pluginName.empty()) {
         return false;
     }
-    if (!(pluginName_ == pluginName)) {
-        if (plugin_) {
-            plugin_->Deinit();
-        }
-        plugin_ = Plugin::PluginManager::Instance().CreateDemuxerPlugin(pluginName);
-        if (!plugin_ || plugin_->Init() != Plugin::Status::OK) {
-            MEDIA_LOG_E("InitPlugin for %s failed.", pluginName.c_str());
+    if (pluginName_ != pluginName) {
+        if (!CreatePlugin(std::move(pluginName))) {
             return false;
         }
-        pluginAllocator_ = plugin_->GetAllocator();
-        pluginName_.swap(pluginName);
     } else {
         if (plugin_->Reset() != Plugin::Status::OK) {
-            MEDIA_LOG_E("plugin %s failed to reset.", pluginName.c_str());
-            return false;
+            if (!CreatePlugin(std::move(pluginName))) {
+                return false;
+            }
         }
     }
-    MEDIA_LOG_W("InitPlugin, %s used.", pluginName_.c_str());
-    plugin_->SetDataSource(std::dynamic_pointer_cast<Plugin::DataSourceHelper>(dataSource_));
+    MEDIA_LOG_I("InitPlugin, %s used.", pluginName_.c_str());
+    (void)plugin_->SetDataSource(std::dynamic_pointer_cast<Plugin::DataSourceHelper>(dataSource_));
     pluginState_ = DemuxerState::DEMUXER_STATE_PARSE_HEADER;
-    plugin_->Prepare();
-    return true;
+    return plugin_->Prepare() == Plugin::Status::OK;
 }
 
 void DemuxerFilter::ActivatePullMode()
@@ -332,7 +339,7 @@ void DemuxerFilter::MediaTypeFound(std::string pluginName)
     if (InitPlugin(std::move(pluginName))) {
         task_->Start();
     } else {
-        OnEvent({EVENT_ERROR, ErrorCode::ERROR_PLUGIN_NOT_FOUND});
+        OnEvent({EVENT_ERROR, ErrorCode::ERROR_UNSUPPORTED_FORMAT});
     }
 }
 
@@ -341,7 +348,7 @@ void DemuxerFilter::InitMediaMetaData(const Plugin::MediaInfoHelper& mediaInfo)
     mediaMetaData_.globalMeta = std::make_shared<Plugin::Meta>(mediaInfo.globalMeta);
     mediaMetaData_.trackMetas.clear();
     int trackCnt = 0;
-    for (auto& trackMeta : mediaInfo.streamMeta) {
+    for (auto& trackMeta : mediaInfo.trackMeta) {
         mediaMetaData_.trackMetas.push_back(std::make_shared<Plugin::Meta>(trackMeta));
         if (!trackMeta.Empty()) {
             ++trackCnt;
@@ -357,39 +364,39 @@ bool DemuxerFilter::IsOffsetValid(int64_t offset) const
 
 bool DemuxerFilter::PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo)
 {
-    MEDIA_LOG_D("PrepareStreams called");
+    MEDIA_LOG_I("PrepareStreams called");
     InitMediaMetaData(mediaInfo);
     outPorts_.clear();
-    int streamCnt = mediaInfo.streamMeta.size();
+    int streamCnt = mediaInfo.trackMeta.size();
     PortInfo portInfo;
     portInfo.type = PortType::OUT;
     portInfo.ports.reserve(streamCnt);
     int audioTrackCnt = 0;
     for (int i = 0; i < streamCnt; ++i) {
-        if (mediaInfo.streamMeta[i].Empty()) {
-            MEDIA_LOG_E("PrepareStreams, unsupported stream with streamIdx = %d", i);
+        if (mediaInfo.trackMeta[i].Empty()) {
+            MEDIA_LOG_E("PrepareStreams, unsupported stream with trackId = %d", i);
             continue;
         }
         std::string mime;
-        uint32_t streamIdx = 0;
-        if (!mediaInfo.streamMeta[i].GetString(Plugin::MetaID::MIME, mime) ||
-            !mediaInfo.streamMeta[i].GetUint32(Plugin::MetaID::STREAM_INDEX, streamIdx)) {
-            MEDIA_LOG_E("PrepareStreams failed to extract mime or streamIdx.");
+        uint32_t trackId = 0;
+        if (!mediaInfo.trackMeta[i].GetString(Plugin::MetaID::MIME, mime) ||
+            !mediaInfo.trackMeta[i].GetUint32(Plugin::MetaID::TRACK_ID, trackId)) {
+            MEDIA_LOG_E("PrepareStreams failed to extract mime or trackId.");
             continue;
         }
         if (IsAudioMime(mime)) {
-            MEDIA_LOG_D("PrepareStreams, audio stream with streamIdx = %u.", streamIdx);
+            MEDIA_LOG_D("PrepareStreams, audio stream with trackId = %u.", trackId);
             if (audioTrackCnt == 1) {
-                MEDIA_LOG_E("PrepareStreams, discard audio stream: %d.", streamIdx);
+                MEDIA_LOG_E("PrepareStreams, discard audio track: %d.", trackId);
                 continue;
             }
             ++audioTrackCnt;
         }
         auto port = std::make_shared<OutPort>(this, NamePort(mime));
-        MEDIA_LOG_I("PrepareStreams, streamIdx: %d, portName: %s", i, port->GetName().c_str());
+        MEDIA_LOG_I("PrepareStreams, trackId: %d, portName: %s", i, port->GetName().c_str());
         outPorts_.push_back(port);
         portInfo.ports.push_back({port->GetName(), IsRawAudio(mime)});
-        mediaMetaData_.trackInfos.emplace_back(streamIdx, std::move(port), true);
+        mediaMetaData_.trackInfos.emplace_back(trackId, std::move(port), true);
     }
     if (portInfo.ports.empty()) {
         MEDIA_LOG_E("PrepareStreams failed due to no valid port.");
@@ -409,7 +416,6 @@ ErrorCode DemuxerFilter::ReadFrame(AVBuffer& buffer, uint32_t& streamIndex)
     auto rtv = plugin_->ReadFrame(buffer, 0);
     if (rtv == Plugin::Status::OK) {
         streamIndex = buffer.streamID;
-        SetCurrentTime(buffer.pts);
         result = ErrorCode::SUCCESS;
     }
     MEDIA_LOG_D("ReadFrame return with rtv = %d", static_cast<int32_t>(rtv));
@@ -423,7 +429,7 @@ std::shared_ptr<Plugin::Meta> DemuxerFilter::GetStreamMeta(uint32_t streamIndex)
 
 void DemuxerFilter::SendEventEos()
 {
-    MEDIA_LOG_D("SendEventEos called");
+    MEDIA_LOG_I("SendEventEos called");
     AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
     bufferPtr->flag = BUFFER_FLAG_EOS;
     for (const auto& stream : mediaMetaData_.trackInfos) {
@@ -444,18 +450,22 @@ void DemuxerFilter::HandleFrame(const AVBufferPtr& bufferPtr, uint32_t streamInd
 
 void DemuxerFilter::NegotiateDownstream()
 {
+    PROFILE_BEGIN("NegotiateDownstream profile begins.");
     for (auto& stream : mediaMetaData_.trackInfos) {
         if (stream.needNegoCaps) {
-            CapabilitySet caps;
+            Capability caps;
             MEDIA_LOG_I("demuxer negotiate with streamIdx: %u", stream.streamIdx);
-            if (stream.port->Negotiate(GetStreamMeta(stream.streamIdx), caps)) {
+            auto streamMeta = GetStreamMeta(stream.streamIdx);
+            auto tmpCap = MetaToCapability(*streamMeta);
+            if (stream.port->Negotiate(tmpCap, caps) && stream.port->Configure(streamMeta)) {
                 stream.needNegoCaps = false;
             } else {
                 task_->PauseAsync();
-                OnEvent({EVENT_ERROR, ErrorCode::ERROR_PLUGIN_NOT_FOUND});
+                OnEvent({EVENT_ERROR, ErrorCode::ERROR_UNSUPPORTED_FORMAT});
             }
         }
     }
+    PROFILE_END("NegotiateDownstream end.");
 }
 
 void DemuxerFilter::DemuxerLoop()
@@ -475,22 +485,19 @@ void DemuxerFilter::DemuxerLoop()
         }
     } else {
         Plugin::MediaInfoHelper mediaInfo;
+        PROFILE_BEGIN();
         if (plugin_->GetMediaInfo(mediaInfo) == Plugin::Status::OK && PrepareStreams(mediaInfo)) {
+            PROFILE_END("Succeed to extract mediainfo.");
             NegotiateDownstream();
             pluginState_ = DemuxerState::DEMUXER_STATE_PARSE_FRAME;
             state_ = FilterState::READY;
             OnEvent({EVENT_READY, {}});
         } else {
             task_->PauseAsync();
-            OnEvent({EVENT_ERROR, ErrorCode::ERROR_PARSE_META_FAILED});
+            MEDIA_LOG_E("demuxer filter parse meta failed");
+            OnEvent({EVENT_ERROR, ErrorCode::ERROR_UNKNOWN});
         }
     }
-}
-
-void DemuxerFilter::SetCurrentTime(int64_t timestampUsec)
-{
-    OSAL::ScopedLock lock(timeMutex_);
-    curTimeUs_ = timestampUsec;
 }
 } // namespace Pipeline
 } // namespace Media

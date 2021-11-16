@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "FileSourcePlugin"
+#define HST_LOG_TAG "FileSourcePlugin"
 
 #include "file_source_plugin.h"
 #include <sys/stat.h>
 #include "foundation/log.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_types.h"
-#include "plugin/core/plugin_manager.h"
 #include "utils/utils.h"
 
 namespace OHOS {
@@ -172,7 +171,7 @@ Status FileSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLe
     expectedLen = std::min(static_cast<size_t>(fileSize_ - position_), expectedLen);
     expectedLen = std::min(bufData->GetCapacity(), expectedLen);
 
-    MEDIA_LOG_I("buffer position %zu, expectedLen %zu", position_, expectedLen);
+    MEDIA_LOG_D("buffer position %" PRIu64 ", expectedLen %zu", position_, expectedLen);
     auto size = std::fread(bufData->GetWritableData(expectedLen), sizeof(char), expectedLen, fp_);
     bufData->GetWritableData(size);
     position_ += bufData->GetSize();
@@ -223,18 +222,18 @@ Status FileSourcePlugin::ParseFileName(std::string& uri)
 {
     if (uri.empty()) {
         MEDIA_LOG_E("uri is empty");
-        return Status::ERROR_INVALID_DATA;
+        return Status::ERROR_INVALID_PARAMETER;
     }
     MEDIA_LOG_D("uri: %s", uri.c_str());
     if (uri.find("file:/") != std::string::npos) {
         if (uri.find('#') != std::string::npos) {
             MEDIA_LOG_E("Invalid file uri format: %s", uri.c_str());
-            return Status::ERROR_INVALID_DATA;
+            return Status::ERROR_INVALID_PARAMETER;
         }
         auto pos = uri.find("file:");
         if (pos == std::string::npos) {
             MEDIA_LOG_E("Invalid file uri format: %s", uri.c_str());
-            return Status::ERROR_INVALID_DATA;
+            return Status::ERROR_INVALID_PARAMETER;
         }
         pos += 5; // 5: offset
         if (uri.find("///", pos) != std::string::npos) {
@@ -244,7 +243,7 @@ Status FileSourcePlugin::ParseFileName(std::string& uri)
             pos = uri.find('/', pos); // skip host name
             if (pos == std::string::npos) {
                 MEDIA_LOG_E("Invalid file uri format: %s", uri.c_str());
-                return Status::ERROR_INVALID_DATA;
+                return Status::ERROR_INVALID_PARAMETER;
             }
             pos++;
         }
@@ -252,7 +251,7 @@ Status FileSourcePlugin::ParseFileName(std::string& uri)
     } else {
         fileName_ = uri;
     }
-    MEDIA_LOG_I("fileName_: %s", fileName_.c_str());
+    MEDIA_LOG_D("fileName_: %s", fileName_.c_str());
     return Status::OK;
 }
 
@@ -261,7 +260,7 @@ Status FileSourcePlugin::CheckFileStat()
     struct stat fileStat;
     if (stat(fileName_.c_str(), &fileStat) < 0) {
         MEDIA_LOG_E("Cannot get info from %s", fileName_.c_str());
-        return Status::ERROR_UNKNOWN;
+        return Status::ERROR_NOT_EXISTED;
     }
     if (S_ISDIR(fileStat.st_mode)) {
         MEDIA_LOG_E("%s is directory", fileName_.c_str());

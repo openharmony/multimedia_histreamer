@@ -13,22 +13,17 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Task"
+#define HST_LOG_TAG "Task"
 
 #include "task.h"
 
 #include "foundation/log.h"
-#include "utils/util.h"
 
 namespace OHOS {
 namespace Media {
 namespace OSAL {
 Task::Task(std::string name, ThreadPriority priority)
-    : name_(std::move(name)),
-      runningState_(RunningState::PAUSED),
-      loop_(priority),
-      pauseDone_(false),
-      workInProgress_(false)
+    : name_(std::move(name)), runningState_(RunningState::PAUSED), loop_(priority)
 {
     MEDIA_LOG_D("task %s ctor called", name_.c_str());
     loop_.SetName(name_);
@@ -44,7 +39,7 @@ Task::~Task()
 {
     MEDIA_LOG_D("task %s dtor called", name_.c_str());
     runningState_ = RunningState::STOPPED;
-    cv_.NotifyOne();
+    syncCond_.NotifyAll();
 }
 
 void Task::Start()
@@ -55,7 +50,7 @@ void Task::Start()
     if (!loop_ && !loop_.CreateThread([this] { Run(); })) {
         MEDIA_LOG_E("task %s create failed", name_.c_str());
     } else {
-        cv_.NotifyOne();
+        syncCond_.NotifyAll();
     }
     MEDIA_LOG_D("task %s start called", name_.c_str());
 #endif
@@ -63,44 +58,49 @@ void Task::Start()
 
 void Task::Stop()
 {
+    MEDIA_LOG_W("task %s stop entered, current state: %d", name_.c_str(), runningState_.load());
     OSAL::ScopedLock lock(stateMutex_);
-    runningState_ = RunningState::STOPPED;
-    cv_.NotifyOne();
-    while (workInProgress_.load()) {}
-    MEDIA_LOG_D("task %s stop called", name_.c_str());
-}
-
-void Task::StopAsync()
-{
-    OSAL::ScopedLock lock(stateMutex_);
-    runningState_ = RunningState::STOPPED;
-    cv_.NotifyOne();
-    MEDIA_LOG_D("task %s stop called", name_.c_str());
+    if (runningState_.load() != RunningState::STOPPED) {
+        runningState_ = RunningState::STOPPING;
+        syncCond_.NotifyAll();
+        syncCond_.Wait(lock, [this] { return runningState_.load() == RunningState::STOPPED; });
+    }
+    MEDIA_LOG_W("task %s stop exited", name_.c_str());
 }
 
 void Task::Pause()
 {
-    if (runningState_.load() != RunningState::STARTED) {
-        return;
-    }
-    OSAL::ScopedLock lock(stateMutex_);
     MEDIA_LOG_D("task %s Pause called", name_.c_str());
-    if (runningState_.load() == RunningState::STARTED) {
-        pauseDone_ = false;
-        runningState_ = RunningState::PAUSED;
-        while (!pauseDone_.load()) {}
+    OSAL::ScopedLock lock(stateMutex_);
+    switch (runningState_.load()) {
+        case RunningState::STARTED: {
+            runningState_ = RunningState::PAUSING;
+            syncCond_.Wait(lock, [this] {
+                return runningState_.load() == RunningState::PAUSED || runningState_.load() == RunningState::STOPPED;
+            });
+            break;
+        }
+        case RunningState::STOPPING: {
+            syncCond_.Wait(lock, [this] { return runningState_.load() == RunningState::STOPPED; });
+            break;
+        }
+        case RunningState::PAUSING: {
+            syncCond_.Wait(lock, [this] { return runningState_.load() == RunningState::PAUSED; });
+            break;
+        }
+        default:
+            break;
     }
     MEDIA_LOG_D("task %s Pause done.", name_.c_str());
 }
 
 void Task::PauseAsync()
 {
-    if (runningState_.load() != RunningState::STARTED) {
-        return;
-    }
+    MEDIA_LOG_D("task %s PauseAsync called", name_.c_str());
     OSAL::ScopedLock lock(stateMutex_);
-    MEDIA_LOG_D("task %s Pause called", name_.c_str());
-    runningState_ = RunningState::PAUSED;
+    if (runningState_.load() == RunningState::STARTED) {
+        runningState_ = RunningState::PAUSING;
+    }
 }
 
 void Task::RegisterHandler(std::function<void()> handler)
@@ -118,19 +118,19 @@ void Task::Run()
 {
     for (;;) {
         if (runningState_.load() == RunningState::STARTED) {
-            workInProgress_ = true;
             handler_();
-            workInProgress_ = false;
-            continue;
         }
-        if (runningState_.load() == RunningState::STOPPED) {
-            MEDIA_LOG_D("task %s stopped, exit task", name_.c_str());
+        OSAL::ScopedLock lock(stateMutex_);
+        if (runningState_.load() == RunningState::PAUSING || runningState_.load() == RunningState::PAUSED) {
+            runningState_ = RunningState::PAUSED;
+            syncCond_.NotifyAll();
+            constexpr int timeoutMs = 500;
+            syncCond_.WaitFor(lock, timeoutMs, [this] { return runningState_.load() != RunningState::PAUSED; });
+        }
+        if (runningState_.load() == RunningState::STOPPING || runningState_.load() == RunningState::STOPPED) {
+            runningState_ = RunningState::STOPPED;
+            syncCond_.NotifyAll();
             break;
-        }
-        if (runningState_.load() == RunningState::PAUSED) {
-            OSAL::ScopedLock lock(cvMutex_);
-            pauseDone_ = true;
-            cv_.Wait(lock, [this] { return runningState_.load() != RunningState::PAUSED; });
         }
     }
 }

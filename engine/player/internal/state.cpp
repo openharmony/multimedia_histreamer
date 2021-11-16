@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "State"
+#define HST_LOG_TAG "State"
 
 #include "state.h"
 #include "foundation/log.h"
@@ -70,6 +70,7 @@ std::tuple<ErrorCode, Action> State::Resume()
 std::tuple<ErrorCode, Action> State::Seek(const Plugin::Any& param)
 {
     (void)param;
+    executor_.DoSeek(false, 0);
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::SetAttribute()

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "TypeFinder"
+#define HST_LOG_TAG "TypeFinder"
 
 #include "type_finder.h"
 #include <algorithm>
@@ -63,12 +63,12 @@ TypeFinder::TypeFinder()
       peekRange_(),
       typeFound_()
 {
-    MEDIA_LOG_I("TypeFinder ctor called...");
+    MEDIA_LOG_D("TypeFinder ctor called...");
 }
 
 TypeFinder::~TypeFinder()
 {
-    MEDIA_LOG_I("TypeFinder dtor called...");
+    MEDIA_LOG_D("TypeFinder dtor called...");
     if (task_) {
         task_->Stop();
     }

@@ -18,8 +18,8 @@
 
 #include <memory>
 #include "foundation/error_code.h"
-#include "osal/thread/mutex.h"
 #include "foundation/log.h"
+#include "osal/thread/mutex.h"
 #include "play_executor.h"
 #include "state.h"
 
@@ -39,7 +39,7 @@ public:
         std::shared_ptr<MediaSource> source;
         if (param.Type() != typeid(std::shared_ptr<MediaSource>) ||
             !(source = Plugin::AnyCast<std::shared_ptr<MediaSource>>(param))) {
-            return {ErrorCode::ERROR_INVALID_SOURCE, Action::ACTION_BUTT};
+            return {ErrorCode::ERROR_INVALID_PARAMETER_TYPE, Action::ACTION_BUTT};
         }
         auto ret = executor_.DoSetSource(source);
         return {ret, Action::TRANS_TO_PREPARING};
@@ -47,7 +47,7 @@ public:
 
     std::tuple<ErrorCode, Action> Stop() override
     {
-        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
+        return {ErrorCode::SUCCESS, Action::ACTION_BUTT};
     }
 
     std::tuple<ErrorCode, Action> Enter(Intent) override

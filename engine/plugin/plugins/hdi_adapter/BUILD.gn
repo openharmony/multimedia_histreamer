@@ -25,15 +25,11 @@ if (defined(ohos_lite)) {
 
   plugin_hdi_adapter_src = [
     "sink/hos_au_sink.cpp",
-    "sink/ring_buffer.cpp",
     "utils/hdi_au_utils.cpp",
   ]
 
   config("plugin_hdi_adapter_config") {
-    include_dirs = [
-      "//drivers/peripheral/audio/interfaces/include",
-      "//drivers/peripheral/audio/hal/hdi_binder/proxy/include",
-    ]
+    include_dirs = [ "//drivers/peripheral/audio/interfaces/include" ]
     ldflags = [ "-lhdi_videodisplayer" ]
   }
 

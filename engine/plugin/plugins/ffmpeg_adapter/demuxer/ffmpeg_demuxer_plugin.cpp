@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "FFmpegDemuxerPlugin"
+#define HST_LOG_TAG "FFmpegDemuxerPlugin"
 
 #include "ffmpeg_demuxer_plugin.h"
 #include <algorithm>
@@ -91,13 +91,13 @@ FFmpegDemuxerPlugin::FFmpegDemuxerPlugin(std::string name)
 
 FFmpegDemuxerPlugin::~FFmpegDemuxerPlugin()
 {
-    MEDIA_LOG_I("dtor called.");
+    MEDIA_LOG_D("dtor called.");
     pluginImpl_ = nullptr;
 }
 
 Status FFmpegDemuxerPlugin::Init()
 {
-    MEDIA_LOG_I("Init called.");
+    MEDIA_LOG_D("Init called.");
     Reset();
     pluginImpl_ = g_pluginInputFormat[pluginName_];
 
@@ -190,7 +190,7 @@ Status FFmpegDemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& sou
 Status FFmpegDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
 {
     if (!mediaInfo_ && !ParseMediaData()) {
-        return Status::ERROR_INVALID_PARAMETER;
+        return Status::ERROR_WRONG_STATE;
     }
     mediaInfo = *mediaInfo_;
     return Status::OK;
@@ -209,12 +209,12 @@ Status FFmpegDemuxerPlugin::SelectTrack(int32_t trackId)
 {
     if (!mediaInfo_) {
         MEDIA_LOG_E("SelectTrack called before GetMediaInfo()...");
-        return Status::ERROR_INVALID_DATA;
+        return Status::ERROR_WRONG_STATE;
     }
     if (trackId < 0 || trackId >= static_cast<int32_t>(mediaInfo_->tracks.size())) {
         MEDIA_LOG_E("SelectTrack called with invalid trackId: %d, number of tracks: %d", trackId,
                     static_cast<int>(mediaInfo_->tracks.size()));
-        return Status::ERROR_INVALID_DATA;
+        return Status::ERROR_INVALID_PARAMETER;
     }
     OSAL::ScopedLock lock(mutex_);
     auto it = std::find_if(selectedTrackIds_.begin(), selectedTrackIds_.end(),
@@ -557,7 +557,7 @@ int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource)
     }
     auto plugin = g_pluginInputFormat[pluginInfo->name];
     if (!plugin || !plugin->read_probe) {
-        MEDIA_LOG_E("Sniff failed due to invalid plugin for %s.", name.c_str());
+        MEDIA_LOG_D("Sniff failed due to invalid plugin for %s.", name.c_str());
         return 0;
     }
     size_t bufferSize = 4096;

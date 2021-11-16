@@ -15,7 +15,7 @@
 
 #ifdef VIDEO_SUPPORT
 
-#define LOG_TAG "VideoDecoderFilter"
+#define HST_LOG_TAG "VideoDecoderFilter"
 
 #include "video_decoder_filter.h"
 #include "foundation/log.h"
@@ -98,7 +98,7 @@ ErrorCode VideoDecoderFilter::Start()
     MEDIA_LOG_D("video decoder start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
         MEDIA_LOG_W("call decoder start() when state_ is not ready or working");
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     return FilterBase::Start();
 }
@@ -108,7 +108,7 @@ ErrorCode VideoDecoderFilter::Prepare()
     MEDIA_LOG_D("video decoder prepare called");
     if (state_ != FilterState::INITIALIZED) {
         MEDIA_LOG_W("decoder filter is not in init state_");
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     if (!outBufQue_) {
         outBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("vdecFilterOutBufQue", DEFAULT_OUT_BUFFER_POOL_SIZE);
@@ -213,13 +213,13 @@ ErrorCode VideoDecoderFilter::SetVideoDecoderFormat(const std::shared_ptr<const 
 {
     vdecFormat_.format = static_cast<uint32_t>(Plugin::VideoPixelFormat::NV12);
     if (!meta->GetString(Plugin::MetaID::MIME, vdecFormat_.mime)) {
-        return ErrorCode::ERROR_INVALID_PARAM_VALUE;
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     if (!meta->GetUint32(Plugin::MetaID::VIDEO_WIDTH, vdecFormat_.width)) {
-        return ErrorCode::ERROR_INVALID_PARAM_VALUE;
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     if (!meta->GetUint32(Plugin::MetaID::VIDEO_HEIGHT, vdecFormat_.height)) {
-        return ErrorCode::ERROR_INVALID_PARAM_VALUE;
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     if (!meta->GetInt64(Plugin::MetaID::MEDIA_BITRATE, vdecFormat_.bitRate)) {
         MEDIA_LOG_D("Do not have codec bit rate");
@@ -326,7 +326,7 @@ ErrorCode VideoDecoderFilter::PushData(const std::string& inPort, AVBufferPtr bu
 {
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
         MEDIA_LOG_W("pushing data to decoder when state_ is %d", static_cast<int>(state_.load()));
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     if (isFlushing_) {
         MEDIA_LOG_I("decoder is flushing, discarding this data from port %s", inPort.c_str());

@@ -57,7 +57,8 @@ struct Callback {
  * @brief Base class of a plugin. All plugins of different types inherit this interface.
  *
  * @details The base class contains only common operation methods and defines basic operation processes.
- * Different operations are valid only in the corresponding states. Some operations also change the plugin status.
+ * Different operations are valid only in the corresponding states. The timing of calls is guaranteed by
+ * the plugin framework. Some operations also change the plugin status.
  * For details, see the description of each function.
  *
  * @since 1.0
@@ -89,7 +90,6 @@ struct PluginBase {
      * @return  Execution status return
      *  @retval OK: Plugin initialization succeeded.
      *  @retval ERROR_NO_MEMORY: Memory allocation or external resource loading error caused by insufficient memory.
-     *  @retval ERROR_WRONG_STATE: Call this function in non CREATED state
      */
     virtual Status Init()
     {
@@ -119,7 +119,6 @@ struct PluginBase {
      * @return Execution status return
      *  @retval OK: Plugin deinitialize succeeded.
      *  @retval ERROR_NO_MEMORY: Memory allocation error caused by insufficient memory.
-     *  @retval ERROR_WRONG_STATE: Call this function in non INITIALIZED state
      */
     virtual Status Prepare()
     {
@@ -134,7 +133,6 @@ struct PluginBase {
      *
      * @return Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in wrong state
      *  @retval ERROR_UNIMPLEMENTED: This method is not implemented and cannot respond to reset.
      */
     virtual Status Reset()
@@ -151,7 +149,6 @@ struct PluginBase {
      *
      * @return Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non PREPARED state
      */
     virtual Status Start()
     {
@@ -166,7 +163,6 @@ struct PluginBase {
      *
      * @return Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non RUNNING state
      */
     virtual Status Stop()
     {
@@ -195,7 +191,6 @@ struct PluginBase {
      * @param value Plugin parameter value. which is described by Any type. Need check the real type in tag.
      * @return Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state.
      *  @retval ERROR_INVALID_PARAMETER: The plugin does not support this parameter.
      */
     virtual Status GetParameter(Tag tag, ValueType &value)
@@ -212,7 +207,6 @@ struct PluginBase {
      * @param value Plugin parameter value. which is described by Any type. Need check the real type in tag.
      * @return Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state.
      *  @retval ERROR_INVALID_PARAMETER: The plugin does not support this parameter.
      *  @retval ERROR_INVALID_DATA: The value is not in the valid range.
      *  @retval ERROR_MISMATCHED_TYPE: The data type is mismatched.
@@ -238,7 +232,6 @@ struct PluginBase {
      * @param cb   Message callback, NULL callback listening is canceled.
      * @return Execution status return
      *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_WRONG_STATE: Call this function in non wrong state.
      */
     virtual Status SetCallback(const std::shared_ptr<Callback> &cb) = 0;
 

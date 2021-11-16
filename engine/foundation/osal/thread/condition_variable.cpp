@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "ConditionVariable"
+#define HST_LOG_TAG "ConditionVariable"
 
 #include "condition_variable.h"
 #include "foundation/log.h"
@@ -53,12 +53,18 @@ ConditionVariable::~ConditionVariable() noexcept
 
 void ConditionVariable::NotifyOne() noexcept
 {
-    pthread_cond_signal(&cond_);
+    int ret = pthread_cond_signal(&cond_);
+    if (ret != 0) {
+        MEDIA_LOG_E("NotifyOne failed with errno = %d", ret);
+    }
 }
 
 void ConditionVariable::NotifyAll() noexcept
 {
-    pthread_cond_broadcast(&cond_);
+    int ret = pthread_cond_broadcast(&cond_);
+    if (ret != 0) {
+        MEDIA_LOG_E("NotifyAll failed with errno = %d", ret);
+    }
 }
 
 void ConditionVariable::Wait(ScopedLock& lock) noexcept

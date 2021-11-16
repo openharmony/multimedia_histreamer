@@ -44,15 +44,15 @@ public:
         return globalMeta_;
     }
 
-    std::shared_ptr<const Plugin::Meta> GetStreamMeta(int32_t streamIndex);
+    std::shared_ptr<const Plugin::Meta> GeTrackMeta(int32_t trackId);
 
     void UpdateGlobalMeta(const Plugin::Meta& meta);
 
-    void UpdateStreamMeta(const Plugin::Meta& meta);
+    void UpdateTrackMeta(const Plugin::Meta& meta);
 
 private:
     std::shared_ptr<Plugin::Meta> globalMeta_;
-    std::vector<std::shared_ptr<Plugin::Meta>> streamMeta_;
+    std::vector<std::shared_ptr<Plugin::Meta>> trackMeta_;
 };
 
 class PipelineCore : public Pipeline {

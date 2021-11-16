@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "PluginCoreBase"
+#define HST_LOG_TAG "PluginCoreBase"
 
 #include "base.h"
 #include "foundation/log.h"
@@ -28,7 +28,7 @@ Base::Base(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<PluginBase> plugin)
 
 Status Base::Init()
 {
-    MEDIA_LOG_I("%s Enter.", __FUNCTION__);
+    MEDIA_LOG_D("%s Enter.", __FUNCTION__);
     OSAL::ScopedLock lock(stateChangeMutex_);
     RETURN_WRONG_STATE_IF_CON_TRUE(pluginState_ == State::DESTROYED, plugin_, pluginState_.load());
     if (pluginState_ != State::CREATED) {
@@ -40,13 +40,13 @@ Status Base::Init()
     if (ret == Status::OK) {
         pluginState_ = State::INITIALIZED;
     }
-    MEDIA_LOG_I("%s Exit.", __FUNCTION__);
+    MEDIA_LOG_D("%s Exit.", __FUNCTION__);
     return ret;
 }
 
 Status Base::Deinit()
 {
-    MEDIA_LOG_I("%s Enter.", __FUNCTION__);
+    MEDIA_LOG_D("%s Enter.", __FUNCTION__);
     OSAL::ScopedLock lock(stateChangeMutex_);
     if (pluginState_ == State::DESTROYED) {
         MEDIA_LOG_I("plugin %s already deinited, no need to destroy any more", plugin_->GetName().c_str());
@@ -55,13 +55,13 @@ Status Base::Deinit()
     auto ret = plugin_->Deinit();
     LOG_WARN_IF_NOT_OK(plugin_, ret);
     pluginState_ = State::DESTROYED;
-    MEDIA_LOG_I("%s Exit.", __FUNCTION__);
+    MEDIA_LOG_D("%s Exit.", __FUNCTION__);
     return ret;
 }
 
 Status Base::Prepare()
 {
-    MEDIA_LOG_I("%s Enter.", __FUNCTION__);
+    MEDIA_LOG_D("%s Enter.", __FUNCTION__);
     OSAL::ScopedLock lock(stateChangeMutex_);
     RETURN_WRONG_STATE_IF_CON_TRUE(pluginState_ != State::PREPARED && pluginState_ != State::INITIALIZED,
         plugin_, pluginState_.load());
@@ -74,13 +74,13 @@ Status Base::Prepare()
     if (ret == Status::OK) {
         pluginState_ = State::PREPARED;
     }
-    MEDIA_LOG_I("%s Exit.", __FUNCTION__);
+    MEDIA_LOG_D("%s Exit.", __FUNCTION__);
     return ret;
 }
 
 Status Base::Reset()
 {
-    MEDIA_LOG_I("%s Enter.", __FUNCTION__);
+    MEDIA_LOG_D("%s Enter.", __FUNCTION__);
     OSAL::ScopedLock lock(stateChangeMutex_);
     RETURN_WRONG_STATE_IF_CON_TRUE(pluginState_ == State::RUNNING || pluginState_ == State::PAUSED ||
         pluginState_ == State::DESTROYED, plugin_, pluginState_.load());
@@ -92,13 +92,13 @@ Status Base::Reset()
     auto ret = plugin_->Reset();
     LOG_WARN_IF_NOT_OK(plugin_, ret);
     pluginState_ = State::INITIALIZED;
-    MEDIA_LOG_I("%s Exit.", __FUNCTION__);
+    MEDIA_LOG_D("%s Exit.", __FUNCTION__);
     return ret;
 }
 
 Status Base::Start()
 {
-    MEDIA_LOG_I("%s Enter.", __FUNCTION__);
+    MEDIA_LOG_D("%s Enter.", __FUNCTION__);
     OSAL::ScopedLock lock(stateChangeMutex_);
     RETURN_WRONG_STATE_IF_CON_TRUE(pluginState_ != State::PREPARED && pluginState_ != State::RUNNING, plugin_,
         pluginState_.load());
@@ -111,13 +111,13 @@ Status Base::Start()
     if (ret == Status::OK) {
         pluginState_ = State::RUNNING;
     }
-    MEDIA_LOG_I("%s Exit.", __FUNCTION__);
+    MEDIA_LOG_D("%s Exit.", __FUNCTION__);
     return ret;
 }
 
 Status Base::Stop()
 {
-    MEDIA_LOG_I("%s Enter.", __FUNCTION__);
+    MEDIA_LOG_D("%s Enter.", __FUNCTION__);
     OSAL::ScopedLock lock(stateChangeMutex_);
     if (pluginState_ != State::RUNNING && pluginState_ != State::PAUSED) {
         MEDIA_LOG_I("plugin %s not running or paused, no need to stop", plugin_->GetName().c_str());
@@ -128,7 +128,7 @@ Status Base::Stop()
     if (ret == Status::OK) {
         pluginState_ = State::PREPARED;
     }
-    MEDIA_LOG_I("%s Exit.", __FUNCTION__);
+    MEDIA_LOG_D("%s Exit.", __FUNCTION__);
     return ret;
 }
 

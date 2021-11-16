@@ -60,7 +60,7 @@ bool IsPcmStream(const AVStream& avStream)
 void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
                                         TagMap& meta)
 {
-    meta.insert({Tag::STREAM_INDEX, static_cast<uint32_t>(avStream.index)});
+    meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
     if (context->channels != -1) {
         meta.insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(context->sample_rate)});
         meta.insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(context->channels)});
@@ -137,7 +137,7 @@ void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_
                                     TagMap& meta)
 {
     meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_AAC_LATM)});
-    meta.insert({Tag::STREAM_INDEX, static_cast<uint32_t>(avStream.index)});
+    meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
     if (context->channels != -1) {
         meta.insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(context->sample_rate)});
         meta.insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(context->channels)});
@@ -155,7 +155,7 @@ void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_
 void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta)
 {
     meta.insert({Tag::MIME, std::string(MEDIA_MIME_VIDEO_AVC)});
-    meta.insert({Tag::STREAM_INDEX, static_cast<uint32_t>(avStream.index)});
+    meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
     meta.insert({Tag::MEDIA_BITRATE, context->bit_rate});
     meta.insert({Tag::VIDEO_WIDTH, static_cast<uint32_t>(context->width)});
     meta.insert({Tag::VIDEO_HEIGHT, static_cast<uint32_t>(context->height)});

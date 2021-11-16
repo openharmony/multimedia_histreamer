@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "FilterBase"
+#define HST_LOG_TAG "FilterBase"
 
 #include "filter_base.h"
 #include <algorithm>

@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "MediaSourceFilter"
+#define HST_LOG_TAG "MediaSourceFilter"
 
 #include "media_source_filter.h"
-#include "utils/type_define.h"
+#include "compatible_check.h"
 #include "factory/filter_factory.h"
 #include "plugin/interface/source_plugin.h"
 #include "plugin/core/plugin_meta.h"
@@ -42,6 +42,7 @@ MediaSourceFilter::MediaSourceFilter(const std::string& name)
       pluginAllocator_(nullptr),
       pluginInfo_(nullptr)
 {
+    filterType_ = FilterType::MEDIA_SOURCE;
     MEDIA_LOG_D("ctor called");
 }
 
@@ -58,10 +59,10 @@ MediaSourceFilter::~MediaSourceFilter()
 
 ErrorCode MediaSourceFilter::SetSource(const std::shared_ptr<MediaSource>& source)
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_I("SetSource entered.");
     if (source == nullptr) {
         MEDIA_LOG_E("Invalid source");
-        return ErrorCode::ERROR_INVALID_SOURCE;
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     protocol_.clear();
     ErrorCode err = FindPlugin(source);
@@ -100,7 +101,7 @@ ErrorCode MediaSourceFilter::InitPlugin(const std::shared_ptr<MediaSource>& sour
 
 ErrorCode MediaSourceFilter::SetBufferSize(size_t size)
 {
-    MEDIA_LOG_D("IN, size: %zu", size);
+    MEDIA_LOG_I("SetBufferSize, size: %zu", size);
     bufferSize_ = size;
     return ErrorCode::SUCCESS;
 }
@@ -123,9 +124,9 @@ std::vector<WorkMode> MediaSourceFilter::GetWorkModes()
 
 ErrorCode MediaSourceFilter::Prepare()
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_I("Prepare entered.");
     if (plugin_ == nullptr) {
-        return ErrorCode::ERROR_PLUGIN_NOT_FOUND;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto err = TranslatePluginStatus(plugin_->Prepare());
     if (err == ErrorCode::SUCCESS) {
@@ -137,18 +138,18 @@ ErrorCode MediaSourceFilter::Prepare()
 
 ErrorCode MediaSourceFilter::Start()
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_I("Start entered.");
     if (taskPtr_) {
         taskPtr_->Start();
     }
-    return plugin_ ? TranslatePluginStatus(plugin_->Start()) : ErrorCode::ERROR_PLUGIN_NOT_FOUND;
+    return plugin_ ? TranslatePluginStatus(plugin_->Start()) : ErrorCode::ERROR_INVALID_OPERATION;
 }
 
 ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data)
 {
     MEDIA_LOG_D("IN, offset: %llu, size: %zu, outPort: %s", offset, size, outPort.c_str());
     if (!plugin_) {
-        return ErrorCode::ERROR_PLUGIN_NOT_FOUND;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     ErrorCode err;
     auto readSize = size;
@@ -189,13 +190,13 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
 
 ErrorCode MediaSourceFilter::Stop()
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_I("Stop entered.");
     if (taskPtr_) {
         taskPtr_->Stop();
     }
     protocol_.clear();
     uri_.clear();
-    ErrorCode ret = ErrorCode::ERROR_PLUGIN_NOT_FOUND;
+    ErrorCode ret = ErrorCode::SUCCESS;
     if (plugin_) {
         ret = TranslatePluginStatus(plugin_->Stop());
     }
@@ -204,12 +205,12 @@ ErrorCode MediaSourceFilter::Stop()
 
 void MediaSourceFilter::FlushStart()
 {
-    MEDIA_LOG_D("FlushStart entered.");
+    MEDIA_LOG_I("FlushStart entered.");
 }
 
 void MediaSourceFilter::FlushEnd()
 {
-    MEDIA_LOG_D("FlushEnd entered.");
+    MEDIA_LOG_I("FlushEnd entered.");
 }
 
 void MediaSourceFilter::InitPorts()
@@ -242,10 +243,12 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
             if ((plugin_->GetSize(fileSize) == Status::OK) && (fileSize != 0)) {
                 suffixMeta->SetUint64(Media::Plugin::MetaID::MEDIA_FILE_SIZE, fileSize);
             }
-            CapabilitySet peerCaps;
-            if (!GetOutPort(PORT_NAME_DEFAULT)->Negotiate(suffixMeta, peerCaps)) {
+            Capability peerCap;
+            auto tmpCap = MetaToCapability(*suffixMeta);
+            if (!GetOutPort(PORT_NAME_DEFAULT)->Negotiate(tmpCap, peerCap) ||
+                !GetOutPort(PORT_NAME_DEFAULT)->Configure(suffixMeta)) {
                 MEDIA_LOG_E("Negotiate fail!");
-                return ErrorCode::ERROR_INVALID_PARAM_VALUE;
+                return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
             }
         }
     }
@@ -270,7 +273,6 @@ void MediaSourceFilter::ReadLoop()
     ErrorCode ret = TranslatePluginStatus(plugin_->Read(bufferPtr, 4096)); // 4096: default push data size
     if (ret == ErrorCode::END_OF_STREAM) {
         Stop();
-        OnEvent({EVENT_COMPLETE, {}});
         return;
     }
     outPorts_[0]->PushData(bufferPtr);
@@ -326,7 +328,7 @@ ErrorCode MediaSourceFilter::FindPlugin(const std::shared_ptr<MediaSource>& sour
     ParseProtocol(source);
     if (protocol_.empty()) {
         MEDIA_LOG_E("protocol_ is empty");
-        return ErrorCode::ERROR_NULL_POINTER;
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     PluginManager& pluginManager = PluginManager::Instance();
     std::set<std::string> nameList = pluginManager.ListPlugins(PluginType::SOURCE);
@@ -344,7 +346,7 @@ ErrorCode MediaSourceFilter::FindPlugin(const std::shared_ptr<MediaSource>& sour
         }
     }
     MEDIA_LOG_I("Cannot find any plugin");
-    return ErrorCode::ERROR_PLUGIN_NOT_FOUND;
+    return ErrorCode::ERROR_UNSUPPORTED_FORMAT;
 }
 } // namespace Pipeline
 } // namespace Media

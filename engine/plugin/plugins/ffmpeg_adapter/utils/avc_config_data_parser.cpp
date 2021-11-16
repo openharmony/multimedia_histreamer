@@ -15,7 +15,7 @@
 
 #ifdef VIDEO_SUPPORT
 
-#define LOG_TAG "AVCConfigDataParser"
+#define HST_LOG_TAG "AVCConfigDataParser"
 
 #include "avc_config_data_parser.h"
 #include <memory>

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "HdiAuUtils"
+#define HST_LOG_TAG "HdiAuUtils"
 
 #include "hdi_au_utils.h"
 
@@ -81,6 +81,35 @@ bool PluginAuFormat2HdiAttrs(OHOS::Media::Plugin::AudioSampleFormat pFormat, Aud
     return false;
 }
 
+std::vector<OHOS::Media::Plugin::AudioSampleFormat> HdiAuFormat2PluginFormat(AudioFormat audioFormat)
+{
+    std::vector<OHOS::Media::Plugin::AudioSampleFormat> ret;
+    switch (audioFormat) {
+        case AUDIO_FORMAT_PCM_8_BIT:
+            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::U8);
+            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::U8P);
+            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::S8);
+            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::S8P);
+            break;
+        case AUDIO_FORMAT_PCM_16_BIT:
+            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::U16);
+            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::U16P);
+            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::S16);
+            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::S16P);
+            break;
+        case AUDIO_FORMAT_PCM_32_BIT:
+            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::U32);
+            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::U32P);
+            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::S32);
+            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::S32P);
+            break;
+        default:
+            // do nothing
+            break;
+    }
+    return ret;
+}
+
 bool HdiAttrs2PluginAuFormat(AudioSampleAttributes attrs, OHOS::Media::Plugin::AudioSampleFormat& pFormat)
 {
     for (const auto& item : g_phft) {
@@ -104,6 +133,18 @@ bool PluginSampleRate2HdiRate(uint32_t pRate, AudioSampleRatesMask& mask)
     mask = AUDIO_SAMPLE_RATE_MASK_INVALID;
     return false;
 }
+
+std::vector<uint32_t> HdiSampleRatesMask2PluginRates(uint32_t mask)
+{
+    std::vector<uint32_t> ret;
+    for (const auto& pairKey : g_phst) {
+        if ((static_cast<uint32_t>(pairKey.second) & mask) != 0) {
+            ret.emplace_back(pairKey.first);
+        }
+    }
+    return ret;
+}
+
 bool HdiRate2PluginSampleRate(AudioSampleRatesMask mask, uint32_t& pRate)
 {
     for (const auto& item : g_phst) {

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "AACAudioConfigParser"
+#define HST_LOG_TAG "AACAudioConfigParser"
 
 #include "aac_audio_config_parser.h"
 #include "bit_reader.h"

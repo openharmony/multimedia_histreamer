@@ -112,8 +112,8 @@ public:
     ErrorCode SetBufferSize(size_t size);
 
     ErrorCode GetSourceMeta(std::shared_ptr<const Plugin::Meta>& meta) const;
-    ErrorCode GetStreamCnt(size_t& cnt) const;
-    ErrorCode GetStreamMeta(size_t index, std::shared_ptr<const Plugin::Meta>& meta) const;
+    ErrorCode GetTrackCnt(size_t& cnt) const;
+    ErrorCode GetTrackMeta(size_t id, std::shared_ptr<const Plugin::Meta>& meta) const;
 
     ErrorCode SetVolume(float volume);
 
@@ -129,12 +129,45 @@ public:
     ErrorCode DoPause() override;
     ErrorCode DoResume() override;
     ErrorCode DoStop() override;
-    ErrorCode DoSeek(int64_t msec) override;
+    ErrorCode DoSeek(bool allowed, int64_t msec) override;
     ErrorCode DoOnReady() override;
     ErrorCode DoOnComplete() override;
     ErrorCode DoOnError(ErrorCode) override;
 
 private:
+    enum class MediaType : int32_t { AUDIO, VIDEO, BUTT };
+    struct MediaStat {
+        MediaType mediaType{MediaType::BUTT};
+        std::atomic<int64_t> currentPositionMs{0};
+        std::atomic<bool> completeEventReceived{false};
+        explicit MediaStat(MediaType mediaType) : mediaType(mediaType)
+        {
+        }
+        MediaStat(const MediaStat& other) : mediaType(other.mediaType)
+        {
+            currentPositionMs = other.currentPositionMs.load();
+            completeEventReceived = other.completeEventReceived.load();
+        }
+        MediaStat& operator=(const MediaStat& other)
+        {
+            currentPositionMs = other.currentPositionMs.load();
+            completeEventReceived = other.completeEventReceived.load();
+        }
+    };
+
+    class MediaStats {
+    public:
+        MediaStats() = default;
+        void Reset();
+        void Append(MediaType);
+        void ReceiveEvent(EventType eventType, int64_t param = 0);
+        int64_t GetCurrentPosition();
+        bool IsEventCompleteAllReceived();
+
+    private:
+        std::vector<MediaStat> mediaStats;
+    };
+
     HiPlayerImpl();
     HiPlayerImpl(const HiPlayerImpl& other);
     HiPlayerImpl& operator=(const HiPlayerImpl& other);
@@ -151,7 +184,6 @@ private:
 
     void ActiveFilters(const std::vector<Pipeline::Filter*>& filters);
 
-private:
     OSAL::Mutex stateMutex_;
     OSAL::ConditionVariable cond_;
     StateMachine fsm_;
@@ -180,6 +212,7 @@ private:
     std::weak_ptr<PlayerCallback> callback_;
     float volume_;
     std::atomic<ErrorCode> errorCode_;
+    MediaStats mediaStats_;
 };
 } // namespace Media
 } // namespace OHOS

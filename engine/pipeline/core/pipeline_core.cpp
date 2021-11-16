@@ -13,19 +13,22 @@
  * limitations under the License.
  */
 
+#define HST_LOG_TAG "PipelineCore"
+
 #include "pipeline_core.h"
 #include <queue>
 #include "foundation/log.h"
 #include "osal/thread/scoped_lock.h"
+#include "utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-std::shared_ptr<const Plugin::Meta> OHOS::Media::Pipeline::MetaBundle::GetStreamMeta(int32_t streamIndex)
+std::shared_ptr<const Plugin::Meta> OHOS::Media::Pipeline::MetaBundle::GeTrackMeta(int32_t trackId)
 {
-    for (auto& ptr : streamMeta_) {
+    for (auto& ptr : trackMeta_) {
         uint32_t found = 0;
-        if (ptr->GetUint32(Plugin::MetaID::STREAM_INDEX, found) && found == streamIndex) {
+        if (ptr->GetUint32(Plugin::MetaID::TRACK_ID, found) && found == trackId) {
             return ptr;
         }
     }
@@ -40,23 +43,23 @@ void MetaBundle::UpdateGlobalMeta(const Plugin::Meta& meta)
     globalMeta_->Update(meta);
 }
 
-void MetaBundle::UpdateStreamMeta(const Plugin::Meta& meta)
+void MetaBundle::UpdateTrackMeta(const Plugin::Meta& meta)
 {
-    uint32_t streamIndex = 0;
-    if (!meta.GetUint32(Plugin::MetaID::STREAM_INDEX, streamIndex)) {
-        MEDIA_LOG_W("update stream meta with invalid meta, which contains no stream index, will ignore this meta");
+    uint32_t trackId = 0;
+    if (!meta.GetUint32(Plugin::MetaID::TRACK_ID, trackId)) {
+        MEDIA_LOG_W("update stream meta with invalid meta, which contains no track id, will ignore this meta");
         return;
     }
-    for (const auto& tmp : streamMeta_) {
-        uint32_t stIndex = 0;
-        if (tmp->GetUint32(Plugin::MetaID::STREAM_INDEX, stIndex) && streamIndex == stIndex) {
+    for (const auto& tmp : trackMeta_) {
+        uint32_t tid = 0;
+        if (tmp->GetUint32(Plugin::MetaID::TRACK_ID, tid) && trackId == tid) {
             tmp->Update(meta);
             return;
         }
     }
     auto ptr = std::make_shared<Plugin::Meta>();
     ptr->Update(meta);
-    streamMeta_.emplace_back(ptr);
+    trackMeta_.emplace_back(ptr);
 }
 
 PipelineCore::PipelineCore(const std::string& name)
@@ -115,7 +118,7 @@ ErrorCode PipelineCore::Pause()
         return ErrorCode::SUCCESS;
     }
     if (state_ != FilterState::READY && state_ != FilterState::RUNNING) {
-        return ErrorCode::ERROR_STATE;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     state_ = FilterState::PAUSED;
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
@@ -148,8 +151,10 @@ ErrorCode PipelineCore::Stop()
             MEDIA_LOG_E("PipelineCore error: %zu", filters_.size());
             continue;
         }
-        auto filterName = (*it)->GetName();
+        MEDIA_LOG_I("Stop filter: %s", (*it)->GetName().c_str());
+        PROFILE_BEGIN();
         auto rtv = (*it)->Stop();
+        PROFILE_END("Stop finished for %s", (*it)->GetName().c_str());
         FALSE_RETURN_V(rtv == ErrorCode::SUCCESS, rtv);
     }
     for (const auto& filter : filtersToRemove_) {
@@ -162,6 +167,7 @@ ErrorCode PipelineCore::Stop()
 void PipelineCore::FlushStart()
 {
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
+        MEDIA_LOG_I("FlushStart for filter: %s", (*it)->GetName().c_str());
         (*it)->FlushStart();
     }
 }
@@ -169,6 +175,7 @@ void PipelineCore::FlushStart()
 void PipelineCore::FlushEnd()
 {
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
+        MEDIA_LOG_I("FlushEnd for filter: %s", (*it)->GetName().c_str());
         (*it)->FlushEnd();
     }
 }
@@ -194,7 +201,8 @@ ErrorCode PipelineCore::AddFilters(std::initializer_list<Filter*> filtersIn)
         }
     }
     if (filtersToAdd.empty()) {
-        return ErrorCode::ERROR_ALREADY_EXISTS;
+        MEDIA_LOG_I("filters already exists");
+        return ErrorCode::SUCCESS;
     }
     {
         OSAL::ScopedLock lock(mutex_);
@@ -208,19 +216,17 @@ ErrorCode PipelineCore::RemoveFilter(Filter* filter)
 {
     auto it = std::find_if(filters_.begin(), filters_.end(),
                            [&filter](const Filter* filterPtr) { return filterPtr == filter; });
-    ErrorCode rtv = ErrorCode::ERROR_INVALID_PARAM_VALUE;
     if (it != filters_.end()) {
         MEDIA_LOG_I("RemoveFilter %s", (*it)->GetName().c_str());
         filters_.erase(it);
-        rtv = ErrorCode::SUCCESS;
     }
-    return rtv;
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode PipelineCore::RemoveFilterChain(Filter* firstFilter)
 {
     if (!firstFilter) {
-        return ErrorCode::ERROR_NULL_POINTER;
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     std::queue<Filter*> levelFilters;
     levelFilters.push(firstFilter);
