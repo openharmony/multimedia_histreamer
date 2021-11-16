@@ -73,9 +73,9 @@ public:
 
     Status DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
 
-    Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) override;
+    Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs) override;
 
-    Status DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) override;
+    Status DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs) override;
 
     Status Flush() override;
 
@@ -98,7 +98,7 @@ private:
 
     Status ReceiveFrameSucc(const std::shared_ptr<Buffer>& ioInfo);
 
-    Status ReceiveBuffer(void);
+    Status ReceiveBuffer();
 
     Status ReceiveBufferLocked(const std::shared_ptr<Buffer>& ioInfo);
 

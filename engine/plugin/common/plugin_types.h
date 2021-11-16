@@ -78,6 +78,7 @@ enum struct Status : int32_t {
     ERROR_UNSUPPORTED_FORMAT = -11, ///< The plugin not support this format/name.
     ERROR_NOT_ENOUGH_DATA = -12,    ///< Not enough data when read from source.
     ERROR_NOT_EXISTED = -13,        ///< Source is not existed.
+    ERROR_AGAIN = -14,              ///< Operation is not available right now, should try again later
 };
 
 /**

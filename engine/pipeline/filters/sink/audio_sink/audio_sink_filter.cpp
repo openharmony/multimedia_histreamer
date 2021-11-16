@@ -34,7 +34,7 @@ AudioSinkFilter::AudioSinkFilter(const std::string& name) : FilterBase(name)
 }
 AudioSinkFilter::~AudioSinkFilter()
 {
-    MEDIA_LOG_I("audio sink dtor called");
+    MEDIA_LOG_D("audio sink dtor called");
     if (plugin_) {
         plugin_->Stop();
         plugin_->Deinit();
