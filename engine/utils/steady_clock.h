@@ -40,13 +40,14 @@ private:
 
 #if defined(PROFILE)
 #define PROFILE_BEGIN(message, ...)                                                                                    \
-    MEDIA_LOG_W(message, ##__VA_ARGS__);                                                                               \
+    MEDIA_LOG_W(message ", timestamp(ms): %" PRId64, ##__VA_ARGS__, SteadyClock::GetCurrentTimeMs());                  \
     OHOS::Media::SteadyClock _steadyClock;
 
 #define PROFILE_RESET() _steadyClock.Reset()
 
 #define PROFILE_END(message, ...)                                                                                      \
-    MEDIA_LOG_W(message ", Time duration in milliseconds: %" PRId64, ##__VA_ARGS__, _steadyClock.ElapsedMilliseconds())
+    MEDIA_LOG_W(message ", timestamp(ms): %" PRId64 ", duration(ms): %" PRId64, ##__VA_ARGS__,                         \
+                SteadyClock::GetCurrentTimeMs(), _steadyClock.ElapsedMilliseconds())
 
 #else
 #define PROFILE_BEGIN(message, ...)

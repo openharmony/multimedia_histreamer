@@ -22,7 +22,7 @@ config("histreamer_utils_config") {
   ]
   defines = [
     "MEDIA_OHOS",
-    # "PROFILE",
+    #"PROFILE",
   ]
 }
 
