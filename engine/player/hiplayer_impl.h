@@ -152,6 +152,7 @@ private:
         {
             currentPositionMs = other.currentPositionMs.load();
             completeEventReceived = other.completeEventReceived.load();
+            return *this;
         }
     };
 
