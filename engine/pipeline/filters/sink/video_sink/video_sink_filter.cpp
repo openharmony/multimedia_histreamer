@@ -140,7 +140,7 @@ bool VideoSinkFilter::Configure(const std::string& inPort, const std::shared_ptr
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
     }
-   auto err = ConfigureNoLocked(upstreamMeta);
+    auto err = ConfigureNoLocked(upstreamMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("sink configure error");
         Event event{
