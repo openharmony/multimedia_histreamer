@@ -93,21 +93,21 @@ std::map<AudioSampleFormat, AVSampleFormat> g_reverseFormatMap = {
 
 void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
 {
-    Capability cap("audio/unknown");
+    Capability inputCaps("audio/unknown");
     switch (codec->id) {
         case AV_CODEC_ID_MP3:
-            cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_MPEG)
+            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_MPEG)
                 .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 1)
                 .AppendIntervalKey<uint32_t>(Capability::Key::AUDIO_MPEG_LAYER, 1, 3); // 3
             break;
         case AV_CODEC_ID_FLAC:
-            cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_FLAC);
+            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_FLAC);
             break;
         case AV_CODEC_ID_AAC:
-            cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC);
+            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC);
             break;
         case AV_CODEC_ID_AAC_LATM:
-            cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM);
+            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM);
             break;
         default:
             MEDIA_LOG_I("codec is not supported right now");
@@ -120,7 +120,7 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
             values.push_back(codec->supported_samplerates[index]);
         }
         if (index) {
-            cap.AppendDiscreteKeys(Capability::Key::AUDIO_SAMPLE_RATE, values);
+            inputCaps.AppendDiscreteKeys(Capability::Key::AUDIO_SAMPLE_RATE, values);
         }
     }
 
@@ -130,21 +130,22 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
             values.push_back(AudioChannelLayout(codec->channel_layouts[index]));
         }
         if (index) {
-            cap.AppendDiscreteKeys<AudioChannelLayout>(Capability::Key::AUDIO_CHANNEL_LAYOUT, values);
+            inputCaps.AppendDiscreteKeys<AudioChannelLayout>(Capability::Key::AUDIO_CHANNEL_LAYOUT, values);
         }
     }
+    definition.inCaps.push_back(inputCaps);
 
+    Capability outputCaps(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
     if (codec->sample_fmts != nullptr) {
         DiscreteCapability<AudioSampleFormat> values;
-        for (index = 0; codec->sample_fmts[index] != AV_SAMPLE_FMT_NONE; ++index) {
+        for (index = 0; index < AV_SAMPLE_FMT_NB; ++index) {
             values.push_back(g_formatMap[codec->sample_fmts[index]]);
         }
         if (index) {
-            cap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, values);
+            outputCaps.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, values);
         }
     }
-    definition.inCaps.push_back(cap);
-    definition.outCaps.push_back(Capability(OHOS::Media::MEDIA_MIME_AUDIO_RAW));
+    definition.outCaps.push_back(outputCaps);
 }
 uint32_t GetWidth(AVSampleFormat sampleFormat)
 {

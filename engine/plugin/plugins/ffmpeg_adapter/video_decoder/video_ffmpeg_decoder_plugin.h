@@ -68,7 +68,11 @@ public:
 
     Status QueueInputBuffer(const std::shared_ptr<Buffer> &inputBuffer, int32_t timeoutMs) override;
 
+    Status DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
+
     Status QueueOutputBuffer(const std::shared_ptr<Buffer> &outputBuffers, int32_t timeoutMs) override;
+
+    Status DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) override;
 
     Status Flush() override;
 
@@ -80,13 +84,16 @@ public:
 
 private:
     Status CreateCodecContext();
-    void InitCodecContext();
-    void DeinitCodecContext();
-    void SetCodecExtraData();
-    Status OpenCodecContext();
-    Status CloseCodecContext();
 
-    void ConfigCodecId();
+    void InitCodecContext();
+
+    void DeinitCodecContext();
+
+    void SetCodecExtraData();
+
+    Status OpenCodecContext();
+
+    Status CloseCodecContext();
 
     Status ResetLocked();
 
@@ -111,6 +118,7 @@ private:
 #endif
 
     void NotifyInputBufferDone(const std::shared_ptr<Buffer> &input);
+
     void NotifyOutputBufferDone(const std::shared_ptr<Buffer> &output);
 
     std::shared_ptr<const AVCodec> avCodec_;

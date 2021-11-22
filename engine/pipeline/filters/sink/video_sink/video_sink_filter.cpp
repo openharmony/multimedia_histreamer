@@ -22,6 +22,7 @@
 #include "common/plugin_utils.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
+#include "utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {
@@ -89,22 +90,57 @@ ErrorCode VideoSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
     return TranslatePluginStatus(plugin_->GetParameter(tag, value));
 }
 
-bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
-                                CapabilitySet& outCaps)
+bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                                Capability& upstreamNegotiatedCap)
 {
-    MEDIA_LOG_D("video sink negotiate started");
+    PROFILE_BEGIN("video sink negotiate start");
     if (state_ != FilterState::PREPARING) {
         MEDIA_LOG_W("Video sink filter is not in preparing when negotiate");
         return false;
     }
-    auto creator = [](const std::string& pluginName) {
-        return Plugin::PluginManager::Instance().CreateVideoSinkPlugin(pluginName);
-    };
-    auto err =
-        FindPluginAndUpdate<Plugin::VideoSink>(inMeta, Plugin::PluginType::VIDEO_SINK, plugin_, pluginInfo_, creator);
-    RETURN_TARGET_ERR_MESSAGE_LOG_IF_FAIL(err, false, "cannot find matched video sink plugin");
-    outCaps = pluginInfo_->inCaps;
-    err = ConfigureLocked(inMeta);
+    auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::VIDEO_SINK);
+    if (candidatePlugins.empty()) {
+        MEDIA_LOG_E("no available video sink plugin");
+        return false;
+    }
+    // always use first one
+    std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = candidatePlugins[0].first;
+    MEDIA_LOG_E("select plugin %s", selectedPluginInfo->name.c_str());
+    for (const auto& onCap : selectedPluginInfo->inCaps) {
+        if (onCap.keys.count(CapabilityID::VIDEO_PIXEL_FORMAT) == 0) {
+            MEDIA_LOG_E("each in caps of sink must contains valid video pixel format");
+            return false;
+        }
+    }
+    upstreamNegotiatedCap = candidatePlugins[0].second;
+    // try to reuse plugin
+    if (plugin_ != nullptr) {
+        if (pluginInfo_ != nullptr && pluginInfo_->name == selectedPluginInfo->name) {
+            if (plugin_->Reset() == Plugin::Status::OK) {
+                return true;
+            }
+            MEDIA_LOG_W("reuse previous plugin %s failed, will create new plugin", pluginInfo_->name.c_str());
+        }
+        plugin_->Deinit();
+    }
+    plugin_ = Plugin::PluginManager::Instance().CreateVideoSinkPlugin(selectedPluginInfo->name);
+    if (plugin_ == nullptr) {
+        MEDIA_LOG_E("cannot create plugin %s", selectedPluginInfo->name.c_str());
+        return false;
+    }
+    pluginInfo_ = selectedPluginInfo;
+    PROFILE_END("video sink negotiate end");
+    return true;
+}
+
+bool VideoSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+{
+    PROFILE_BEGIN("video sink configure start");
+    if (plugin_ == nullptr || pluginInfo_ == nullptr) {
+        MEDIA_LOG_E("cannot configure decoder when no plugin available");
+        return false;
+    }
+   auto err = ConfigureNoLocked(upstreamMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("sink configure error");
         Event event{
@@ -120,6 +156,7 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
     };
     OnEvent(event);
     MEDIA_LOG_I("video sink send EVENT_READY");
+    PROFILE_END("video sink configure end");
     return true;
 }
 
@@ -136,8 +173,8 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Plu
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_HEIGHT, height));
         RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Set plugin height fail");
     }
-    uint32_t pixelFormat;
-    if (meta->GetUint32(Plugin::MetaID::VIDEO_PIXEL_FORMAT, pixelFormat)) {
+    Plugin::VideoPixelFormat pixelFormat;
+    if (meta->GetData<Plugin::VideoPixelFormat>(Plugin::MetaID::VIDEO_PIXEL_FORMAT, pixelFormat)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_PIXEL_FORMAT, pixelFormat));
         RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Set plugin pixel format fail");
     }
@@ -145,7 +182,7 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Plu
     return err;
 }
 
-ErrorCode VideoSinkFilter::ConfigureLocked(const std::shared_ptr<const Plugin::Meta>& meta)
+ErrorCode VideoSinkFilter::ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Init()), "Init plugin error");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePluginParams(meta), "Configure plugin params fail");
@@ -201,7 +238,7 @@ ErrorCode VideoSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
 
     if (buffer->GetMemory()->GetSize() == 0) {
         Event event{
-            .type = EVENT_COMPLETE,
+            .type = EVENT_VIDEO_COMPLETE,
         };
         MEDIA_LOG_D("video sink push data send event_complete");
         OnEvent(event);
