@@ -21,6 +21,7 @@
 #include "foundation/log.h"
 #include "foundation/osal/utils/util.h"
 #include "pipeline/filters/common/plugin_settings.h"
+#include "utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {
@@ -84,6 +85,7 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
                                 Capability& upstreamNegotiatedCap)
 {
     MEDIA_LOG_I("audio sink negotiate started");
+    PROFILE_BEGIN("Audio Sink Negotiate begin");
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::AUDIO_SINK);
     if (candidatePlugins.empty()) {
         MEDIA_LOG_E("no available audio sink plugin");
@@ -122,11 +124,13 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
         return false;
     }
     targetPluginInfo_ = selectedPluginInfo;
+    PROFILE_END("Audio Sink Negotiate end");
     return true;
 }
 
 bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
+    PROFILE_BEGIN("Audio sink configure begin");
     if (plugin_ == nullptr || targetPluginInfo_ == nullptr) {
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
@@ -141,6 +145,7 @@ bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr
     state_ = FilterState::READY;
     OnEvent({EVENT_READY});
     MEDIA_LOG_I("audio sink send EVENT_READY");
+    PROFILE_END("Audio sink configure end");
     return true;
 }
 

@@ -490,6 +490,10 @@ int32_t HiPlayerImpl::GetCurrentPosition(int64_t& currentPositionMs)
 
 int32_t HiPlayerImpl::GetDuration(int64_t& outDurationMs)
 {
+    if (audioSource_ && !audioSource_->IsSeekable()) {
+        outDurationMs = -1;
+        return to_underlying(ErrorCode::SUCCESS);
+    }
     uint64_t duration = 0;
     auto sourceMeta = sourceMeta_.lock();
     if (sourceMeta == nullptr) {

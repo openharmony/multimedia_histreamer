@@ -39,6 +39,7 @@ if (defined(ohos_lite)) {
       "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
       "//foundation/multimedia/utils/lite:media_common",
     ]
+    defines = [ "MEDIA_OHOS" ]
     cflags = [
       "-fPIC",
       "-Wall",

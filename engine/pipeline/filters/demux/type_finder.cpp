@@ -19,6 +19,7 @@
 #include <algorithm>
 #include "foundation/log.h"
 #include "osal/utils/util.h"
+#include "utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {
@@ -134,7 +135,8 @@ void TypeFinder::FindMediaTypeAsync(std::function<void(std::string)> typeFound)
 Plugin::Status TypeFinder::ReadAt(int64_t offset, std::shared_ptr<Plugin::Buffer>& buffer, size_t expectedLen)
 {
     if (!buffer || expectedLen == 0 || !IsOffsetValid(offset)) {
-        MEDIA_LOG_E("ReadAt failed, buffer empty: %d, expectedLen: %zu, offset: %" PRId64, !buffer, expectedLen, offset);
+        MEDIA_LOG_E("ReadAt failed, buffer empty: %d, expectedLen: %zu, offset: %" PRId64, !buffer, expectedLen,
+                    offset);
         return Plugin::Status::ERROR_INVALID_PARAMETER;
     }
     const int maxTryTimes = 3;
@@ -171,12 +173,15 @@ void TypeFinder::DoTask()
 
 std::string TypeFinder::SniffMediaType()
 {
+    PROFILE_BEGIN("SniffMediaType begin.");
     constexpr int probThresh = 50; // valid range [0, 100]
     std::string pluginName;
     int maxProb = 0;
     auto dataSource = shared_from_this();
+    int cnt = 0;
     for (const auto& plugin : plugins_) {
         auto prob = Plugin::PluginManager::Instance().Sniffer(plugin->name, dataSource);
+        ++cnt;
         if (prob > probThresh) {
             pluginName = plugin->name;
             break;
@@ -186,6 +191,7 @@ std::string TypeFinder::SniffMediaType()
             pluginName = plugin->name;
         }
     }
+    PROFILE_END("SniffMediaType end, sniffed plugin num = %d", cnt);
     return pluginName;
 }
 

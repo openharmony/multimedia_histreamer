@@ -54,5 +54,6 @@ if (defined(ohos_lite)) {
       "-Wall",
     ]
     cflags_cc = cflags
+    defines = [ "MEDIA_OHOS" ]
   }
 }
