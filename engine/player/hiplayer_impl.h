@@ -160,7 +160,7 @@ private:
     public:
         MediaStats() = default;
         void Reset();
-        void Append(MediaType);
+        void Append(MediaType mediaType);
         void ReceiveEvent(EventType eventType, int64_t param = 0);
         int64_t GetCurrentPosition();
         bool IsEventCompleteAllReceived();
