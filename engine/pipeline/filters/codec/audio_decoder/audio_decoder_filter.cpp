@@ -22,6 +22,7 @@
 #include "factory/filter_factory.h"
 #include "common/plugin_utils.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "utils/steady_clock.h"
 
 namespace {
 constexpr int32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 5;
@@ -126,6 +127,7 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
                                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                    Capability& upstreamNegotiatedCap)
 {
+    PROFILE_BEGIN("Audio Decoder Negotiate begin");
     if (state_ != FilterState::PREPARING) {
         MEDIA_LOG_W("decoder filter is not in preparing when negotiate");
         return false;
@@ -168,11 +170,13 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
         MEDIA_LOG_W("cannot find available downstream plugin");
         return false;
     }
+    PROFILE_END("Audio Decoder Negotiate end");
     return UpdateAndInitPluginByInfo(selectedPluginInfo);
 }
 
 bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
 {
+    PROFILE_BEGIN("Audio decoder configure begin");
     if (plugin_ == nullptr || targetPluginInfo_ == nullptr) {
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
@@ -200,6 +204,7 @@ bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_
     state_ = FilterState::READY;
     OnEvent({EVENT_READY});
     MEDIA_LOG_I("audio decoder send EVENT_READY");
+    PROFILE_END("Audio decoder configure end");
     return true;
 }
 
