@@ -138,7 +138,7 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
         MEDIA_LOG_E("decoder out port is not found");
         return false;
     }
-    std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo;
+    std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
     bool atLeastOutCapMatched = false;
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::CODEC);
     for (const auto& candidate : candidatePlugins) {
@@ -160,6 +160,9 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
                 MEDIA_LOG_I("choose plugin %s as working parameter", candidate.first->name.c_str());
                 break;
             }
+        }
+        if (selectedPluginInfo != nullptr) {
+            break;
         }
     }
     if (!atLeastOutCapMatched) {
