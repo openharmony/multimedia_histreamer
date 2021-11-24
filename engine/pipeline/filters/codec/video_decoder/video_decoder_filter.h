@@ -39,8 +39,10 @@ public:
 
     void FlushEnd() override;
 
-    bool Negotiate(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &inMeta,
-                   CapabilitySet &outCaps) override;
+    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Capability& upstreamNegotiatedCap) override;
+
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
     ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer) override;
 
@@ -56,7 +58,7 @@ private:
         uint32_t width;
         uint32_t height;
         int64_t bitRate;
-        uint32_t format;
+        Plugin::VideoPixelFormat format;
         std::vector<uint8_t> codecConfig;
     };
 
@@ -64,15 +66,13 @@ private:
 
     ErrorCode AllocateOutputBuffers();
 
-    ErrorCode InitPlugin();
-
     ErrorCode ConfigurePluginOutputBuffers();
 
     ErrorCode ConfigurePluginParams();
 
     ErrorCode ConfigurePlugin();
 
-    ErrorCode Configure(const std::shared_ptr<const Plugin::Meta> &meta);
+    ErrorCode ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta);
 
     void HandleFrame();
 
@@ -81,14 +81,16 @@ private:
     void FinishFrame();
 
     bool isFlushing_ {false};
+    Capability capNegWithDownstream_;
+    Capability capNegWithUpstream_;
     VideoDecoderFormat vdecFormat_;
     std::shared_ptr<DataCallbackImpl> dataCallback_ {nullptr};
 
     std::shared_ptr<OHOS::Media::OSAL::Task> handleFrameTask_ {nullptr};
     std::shared_ptr<OHOS::Media::OSAL::Task> pushTask_ {nullptr};
-    std::shared_ptr<BufferPool<AVBuffer>> outBufPool_  {nullptr};
-    std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQue_  {nullptr};
-    std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> outBufQue_  {nullptr};
+    std::shared_ptr<BufferPool<AVBuffer>> outBufPool_ {nullptr};
+    std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQue_ {nullptr};
+    std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> outBufQue_ {nullptr};
 };
 }
 }

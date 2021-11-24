@@ -44,8 +44,10 @@ public:
 
     ErrorCode GetParameter(int32_t key, Plugin::Any& value) override;
 
-    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
-                   CapabilitySet& outCaps) override;
+    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Capability& upstreamNegotiatedCap) override;
+
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
     ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) override;
 
@@ -60,20 +62,19 @@ public:
 
 private:
     ErrorCode ConfigurePluginParams(const std::shared_ptr<const Plugin::Meta>& meta);
-    ErrorCode ConfigureLocked(const std::shared_ptr<const Plugin::Meta>& meta);
+    ErrorCode ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta);
     void RenderFrame();
     bool DoSync();
 
-    std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQueue_;
-    std::shared_ptr<OHOS::Media::OSAL::Task> renderTask_;
-    std::shared_ptr<VideoSinkAdapter> adapter_;
-    std::atomic<bool> pushThreadIsBlocking_{false};
-    bool isFlushing_{false};
-    OSAL::ConditionVariable startWorkingCondition_{};
+    std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQueue_ {nullptr};
+    std::shared_ptr<OHOS::Media::OSAL::Task> renderTask_ {nullptr};
+    std::atomic<bool> pushThreadIsBlocking_ {false};
+    bool isFlushing_ {false};
+    OSAL::ConditionVariable startWorkingCondition_ {};
     OSAL::Mutex mutex_;
 
-    std::shared_ptr<Plugin::VideoSink> plugin_{nullptr};
-    std::shared_ptr<Plugin::PluginInfo> pluginInfo_{nullptr};
+    std::shared_ptr<Plugin::VideoSink> plugin_ {nullptr};
+    std::shared_ptr<Plugin::PluginInfo> pluginInfo_ {nullptr};
 };
 } // namespace Pipeline
 } // namespace Media

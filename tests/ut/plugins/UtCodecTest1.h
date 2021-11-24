@@ -33,6 +33,10 @@ public:
 
     Status QueueOutputBuffer(const std::shared_ptr<Buffer> &outputBuffers, int32_t timeoutMs) override;
 
+    Status DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
+
+    Status DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) override;
+
     Status Flush() override;
 
     Status SetDataCallback(const std::weak_ptr<DataCallback> &dataCallback) override;

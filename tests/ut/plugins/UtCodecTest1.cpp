@@ -59,7 +59,17 @@ std::shared_ptr<Allocator> UtCodecTest1::GetAllocator()
     return std::shared_ptr<Allocator>();
 }
 
-Status UtCodecTest1::SetCallback(const std::shared_ptr<Callback> &cb)
+Status UtCodecTest1::SetCallback(const std::shared_ptr<Callback>& cb)
+{
+    return Status::OK;
+}
+
+Status UtCodecTest1::DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
+{
+    return Status::OK;
+}
+
+Status UtCodecTest1::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
 {
     return Status::OK;
 }

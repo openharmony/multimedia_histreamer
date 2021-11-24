@@ -39,7 +39,11 @@ const Status SdlVideoRegister(const std::shared_ptr<Register>& reg)
     VideoSinkPluginDef definition;
     definition.name = "sdl_video_sink";
     definition.rank = 100; // 100
-    definition.inCaps.emplace_back(Capability(OHOS::Media::MEDIA_MIME_VIDEO_RAW));
+    Capability cap(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
+    cap.AppendDiscreteKeys<VideoPixelFormat>(
+        Capability::Key::VIDEO_PIXEL_FORMAT,
+        {VideoPixelFormat::YUV420P, VideoPixelFormat::NV12, VideoPixelFormat::NV21});
+    definition.inCaps.emplace_back(cap);
     definition.creator = VideoSinkPluginCreator;
     return reg->AddPlugin(definition);
 }
@@ -281,9 +285,9 @@ Status SdlVideoSinkPlugin::SetParameter(Tag tag, const ValueType& value)
             break;
         }
         case Tag::VIDEO_PIXEL_FORMAT: {
-            if (value.Type() == typeid(uint32_t)) {
-                uint32_t format = Plugin::AnyCast<uint32_t>(value);
-                pixelFormat_ = TranslatePixelFormat(static_cast<VideoPixelFormat>(format));
+            if (value.Type() == typeid(VideoPixelFormat)) {
+                VideoPixelFormat format = Plugin::AnyCast<VideoPixelFormat>(value);
+                pixelFormat_ = TranslatePixelFormat(format);
                 MEDIA_LOG_D("SDL pixelFormat: %u", pixelFormat_);
             }
             break;
@@ -413,8 +417,8 @@ int32_t SdlVideoSinkPlugin::UpdateYUVTexture(const uint8_t** data, int32_t* line
 {
     int32_t ret;
     lineSize[1] = static_cast<int32_t>(videoMeta->stride[1]);
-    lineSize[2] = static_cast<int32_t>(videoMeta->stride[2]);                   // 2
-    ySize = lineSize[0] * static_cast<int32_t>(AlignUp(pixelHeight_, 16));      // 16
+    lineSize[2] = static_cast<int32_t>(videoMeta->stride[2]); // 2
+    ySize = lineSize[0] * static_cast<int32_t>(AlignUp(pixelHeight_, 16)); // 16
     uvSize = lineSize[1] * static_cast<int32_t>(AlignUp(pixelHeight_, 16)) / 2; // 2, 16
     data[1] = data[0] + ySize;
     data[2] = data[1] + uvSize; // 2
@@ -430,7 +434,7 @@ int32_t SdlVideoSinkPlugin::UpdateYUVTexture(const uint8_t** data, int32_t* line
     }
 #endif
     ret = SDL_UpdateYUVTexture(texture_.get(), NULL, data[0], lineSize[0], data[1], lineSize[1], data[2], // 2
-                               lineSize[2]);                                                              // 2
+                               lineSize[2]); // 2
     return ret;
 }
 
