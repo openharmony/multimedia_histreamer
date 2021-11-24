@@ -22,6 +22,7 @@
 #include "osal/utils/util.h"
 #include "utils/constants.h"
 #include "utils/memory_helper.h"
+#include "utils/steady_clock.h"
 #include "factory/filter_factory.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
@@ -75,7 +76,7 @@ VideoDecoderFilter::~VideoDecoderFilter()
         plugin_->Stop();
         plugin_->Deinit();
     }
-    if (drivingMode_ == ThreadDrivingMode::ASYNC && handleFrameTask_) {
+    if (handleFrameTask_) {
         handleFrameTask_->Stop();
         handleFrameTask_.reset();
     }
@@ -124,35 +125,91 @@ ErrorCode VideoDecoderFilter::Prepare()
     } else {
         inBufQue_->SetActive(true);
     }
-    if (drivingMode_ == ThreadDrivingMode::ASYNC && !handleFrameTask_) {
+    if (!handleFrameTask_) {
         handleFrameTask_ = std::make_shared<OHOS::Media::OSAL::Task>("decHandleFrameThread");
         handleFrameTask_->RegisterHandler([this] { HandleFrame(); });
     }
     return FilterBase::Prepare();
 }
 
-bool VideoDecoderFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& inMeta,
-                                   CapabilitySet& outCaps)
+bool VideoDecoderFilter::Negotiate(const std::string& inPort,
+                                   const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                                   Capability& upstreamNegotiatedCap)
 {
+    PROFILE_BEGIN("video decoder negotiate start");
     if (state_ != FilterState::PREPARING) {
         MEDIA_LOG_W("decoder filter is not in preparing when negotiate");
         return false;
     }
-
-    MEDIA_LOG_D("video decoder negotiate called");
-    auto creator = [](const std::string& pluginName) {
-        return Plugin::PluginManager::Instance().CreateCodecPlugin(pluginName);
-    };
-    ErrorCode err =
-        FindPluginAndUpdate<Plugin::Codec>(inMeta, Plugin::PluginType::CODEC, plugin_, targetPluginInfo_, creator);
-    RETURN_TARGET_ERR_MESSAGE_LOG_IF_FAIL(err, false, "cannot find matched plugin");
-    outCaps = targetPluginInfo_->inCaps;
     auto targetOutPort = GetRouteOutPort(inPort);
     if (targetOutPort == nullptr) {
         MEDIA_LOG_E("decoder out port is not found");
         return false;
     }
-    if (Configure(inMeta) != ErrorCode::SUCCESS) {
+    std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
+    bool atLeastOutCapMatched = false;
+    auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::CODEC);
+    for (const auto& candidate : candidatePlugins) {
+        if (candidate.first->outCaps.empty()) {
+            MEDIA_LOG_E("decoder plugin must have out caps");
+        }
+        for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
+            auto thisOut = std::make_shared<Plugin::Capability>();
+            if (!MergeCapabilityKeys(*upstreamCap, outCap, *thisOut)) {
+                MEDIA_LOG_W("one of out cap of plugin %s does not match with upstream capability",
+                            candidate.first->name.c_str());
+                continue;
+            }
+            atLeastOutCapMatched = true;
+            thisOut->mime = outCap.mime;
+            if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_)) {
+                capNegWithUpstream_ = candidate.second;
+                selectedPluginInfo = candidate.first;
+                MEDIA_LOG_I("choose plugin %s as working parameter", candidate.first->name.c_str());
+                break;
+            }
+        }
+        if (selectedPluginInfo != nullptr) { // select the first one
+            break;
+        }
+    }
+    if (!atLeastOutCapMatched) {
+        MEDIA_LOG_W("cannot find available decoder plugin");
+        return false;
+    }
+    if (selectedPluginInfo == nullptr) {
+        MEDIA_LOG_W("cannot find available downstream plugin");
+        return false;
+    }
+    PROFILE_END("video decoder negotiate end");
+    return UpdateAndInitPluginByInfo(selectedPluginInfo);
+}
+
+bool VideoDecoderFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+{
+    PROFILE_BEGIN("video decoder configure start");
+    if (plugin_ == nullptr || targetPluginInfo_ == nullptr) {
+        MEDIA_LOG_E("cannot configure decoder when no plugin available");
+        return false;
+    }
+    if (upstreamMeta->GetString(Plugin::MetaID::MIME, vdecFormat_.mime)) {
+        MEDIA_LOG_D("mime: %s", vdecFormat_.mime.c_str());
+    }
+    auto thisMeta = std::make_shared<Plugin::Meta>();
+    if (!MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta)) {
+        MEDIA_LOG_E("cannot configure decoder plugin since meta is not compatible with negotiated caps");
+    }
+    auto targetOutPort = GetRouteOutPort(inPort);
+    if (targetOutPort == nullptr) {
+        MEDIA_LOG_E("decoder out port is not found");
+        return false;
+    }
+    if (!targetOutPort->Configure(thisMeta)) {
+        MEDIA_LOG_E("decoder filter downstream Configure failed");
+        return false;
+    }
+    auto err = ConfigureNoLocked(thisMeta);
+    if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("decoder configure error");
         Event event{
             .type = EVENT_ERROR,
@@ -161,15 +218,13 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort, const std::shared_
         OnEvent(event);
         return false;
     }
-    std::shared_ptr<Plugin::Meta> videoMeta = std::make_shared<Plugin::Meta>();
-    videoMeta->Update(*inMeta);
-    videoMeta->SetString(Plugin::MetaID::MIME, MEDIA_MIME_VIDEO_RAW);
-    videoMeta->SetUint32(Plugin::MetaID::VIDEO_PIXEL_FORMAT, vdecFormat_.format);
-    CapabilitySet sinkCaps;
-    if (!targetOutPort->Negotiate(videoMeta, sinkCaps)) {
-        MEDIA_LOG_E("negotiate with sink failed");
-        return false;
-    }
+    state_ = FilterState::READY;
+    Event event{
+            .type = EVENT_READY,
+    };
+    OnEvent(event);
+    MEDIA_LOG_I("video decoder send EVENT_READY");
+    PROFILE_END("video decoder configure end");
     return true;
 }
 
@@ -183,15 +238,15 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
     // YUV420: size = stride * height * 1.5
     uint32_t bufferSize = 0;
     uint32_t stride = Plugin::AlignUp(vdecFormat_.width, VIDEO_ALIGN_SIZE);
-    if ((vdecFormat_.format == static_cast<uint32_t>(Plugin::VideoPixelFormat::YUV420P)) ||
-        (vdecFormat_.format == static_cast<uint32_t>(Plugin::VideoPixelFormat::NV21)) ||
-        (vdecFormat_.format == static_cast<uint32_t>(Plugin::VideoPixelFormat::NV12))) {
+    if (vdecFormat_.format == Plugin::VideoPixelFormat::YUV420P ||
+        vdecFormat_.format == Plugin::VideoPixelFormat::NV21 ||
+        vdecFormat_.format == Plugin::VideoPixelFormat::NV12) {
         bufferSize = static_cast<uint32_t>(Plugin::AlignUp(stride, VIDEO_ALIGN_SIZE) *
                                            Plugin::AlignUp(vdecFormat_.height, VIDEO_ALIGN_SIZE) * VIDEO_PIX_DEPTH);
         MEDIA_LOG_D("Output buffer size: %u", bufferSize);
     } else {
         // need to check video sink support and calc buffer size
-        MEDIA_LOG_E("Unsupported video pixel format: %d", vdecFormat_.format);
+        MEDIA_LOG_E("Unsupported video pixel format: %u", vdecFormat_.format);
         return ErrorCode::ERROR_UNIMPLEMENTED;
     }
     auto outAllocator = plugin_->GetAllocator(); // zero copy need change to use sink allocator
@@ -211,14 +266,16 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
 
 ErrorCode VideoDecoderFilter::SetVideoDecoderFormat(const std::shared_ptr<const Plugin::Meta>& meta)
 {
-    vdecFormat_.format = static_cast<uint32_t>(Plugin::VideoPixelFormat::NV12);
-    if (!meta->GetString(Plugin::MetaID::MIME, vdecFormat_.mime)) {
+    if (!meta->GetData<Plugin::VideoPixelFormat>(Plugin::MetaID::VIDEO_PIXEL_FORMAT, vdecFormat_.format)) {
+        MEDIA_LOG_E("Get video pixel format fail");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     if (!meta->GetUint32(Plugin::MetaID::VIDEO_WIDTH, vdecFormat_.width)) {
+        MEDIA_LOG_E("Get video width fail");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     if (!meta->GetUint32(Plugin::MetaID::VIDEO_HEIGHT, vdecFormat_.height)) {
+        MEDIA_LOG_E("Get video width height");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     if (!meta->GetInt64(Plugin::MetaID::MEDIA_BITRATE, vdecFormat_.bitRate)) {
@@ -233,10 +290,6 @@ ErrorCode VideoDecoderFilter::SetVideoDecoderFormat(const std::shared_ptr<const 
 
 ErrorCode VideoDecoderFilter::ConfigurePluginParams()
 {
-    if (SetPluginParameterLocked(Tag::MIME, vdecFormat_.mime) != ErrorCode::SUCCESS) {
-        MEDIA_LOG_W("Set mime to plugin fail");
-        return ErrorCode::ERROR_UNKNOWN;
-    }
     if (SetPluginParameterLocked(Tag::VIDEO_WIDTH, vdecFormat_.width) != ErrorCode::SUCCESS) {
         MEDIA_LOG_W("Set width to plugin fail");
         return ErrorCode::ERROR_UNKNOWN;
@@ -284,41 +337,28 @@ ErrorCode VideoDecoderFilter::ConfigurePluginOutputBuffers()
     return err;
 }
 
-ErrorCode VideoDecoderFilter::InitPlugin()
+ErrorCode VideoDecoderFilter::ConfigurePlugin()
 {
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->SetDataCallback(dataCallback_)),
                                    "Set plugin callback fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Init()), "Init plugin error");
-    return ErrorCode::SUCCESS;
-}
-
-ErrorCode VideoDecoderFilter::ConfigurePlugin()
-{
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePluginParams(), "Configure plugin params error");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePluginOutputBuffers(), "Configure plugin output buffers error");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
     return TranslatePluginStatus(plugin_->Start());
 }
 
-ErrorCode VideoDecoderFilter::Configure(const std::shared_ptr<const Plugin::Meta>& meta)
+ErrorCode VideoDecoderFilter::ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     MEDIA_LOG_D("video decoder configure called");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(InitPlugin(), "Init plugin fail");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(SetVideoDecoderFormat(meta), "Set video decoder format fail");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(AllocateOutputBuffers(), "Alloc output buffers fail");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePlugin(), "Config plugin fail");
-    if (drivingMode_ == ThreadDrivingMode::ASYNC && handleFrameTask_) {
+    if (handleFrameTask_) {
         handleFrameTask_->Start();
     }
     if (pushTask_) {
         pushTask_->Start();
     }
-    state_ = FilterState::READY;
-    Event event{
-        .type = EVENT_READY,
-    };
-    OnEvent(event);
-    MEDIA_LOG_I("video decoder send EVENT_READY");
     return ErrorCode::SUCCESS;
 }
 
@@ -332,11 +372,7 @@ ErrorCode VideoDecoderFilter::PushData(const std::string& inPort, AVBufferPtr bu
         MEDIA_LOG_I("decoder is flushing, discarding this data from port %s", inPort.c_str());
         return ErrorCode::SUCCESS;
     }
-    if (drivingMode_ == ThreadDrivingMode::ASYNC) {
-        inBufQue_->Push(buffer);
-        return ErrorCode::SUCCESS;
-    }
-    HandleOneFrame(buffer);
+    inBufQue_->Push(buffer);
     return ErrorCode::SUCCESS;
 }
 
@@ -347,7 +383,7 @@ void VideoDecoderFilter::FlushStart()
     if (inBufQue_) {
         inBufQue_->SetActive(false);
     }
-    if (drivingMode_ == ThreadDrivingMode::ASYNC && handleFrameTask_) {
+    if (handleFrameTask_) {
         handleFrameTask_->PauseAsync();
     }
     if (outBufQue_) {
@@ -371,7 +407,7 @@ void VideoDecoderFilter::FlushEnd()
     if (inBufQue_) {
         inBufQue_->SetActive(true);
     }
-    if (drivingMode_ == ThreadDrivingMode::ASYNC && handleFrameTask_) {
+    if (handleFrameTask_) {
         handleFrameTask_->Start();
     }
     if (outBufQue_) {
@@ -392,7 +428,7 @@ ErrorCode VideoDecoderFilter::Stop()
     outBufQue_->SetActive(false);
     pushTask_->Pause();
     inBufQue_->SetActive(false);
-    if (drivingMode_ == ThreadDrivingMode::ASYNC && handleFrameTask_) {
+    if (handleFrameTask_) {
         handleFrameTask_->Pause();
     }
     outBufPool_.reset();
