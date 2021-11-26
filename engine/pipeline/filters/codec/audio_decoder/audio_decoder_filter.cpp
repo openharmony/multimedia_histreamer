@@ -33,18 +33,18 @@ constexpr int32_t AF_32BIT_BYTES = 4;
 constexpr int32_t AF_16BIT_BYTES = 2;
 constexpr int32_t AF_8BIT_BYTES = 1;
 
-int32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta)
+uint32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta)
 {
     using namespace OHOS::Media;
-    int32_t samplesPerFrame;
-    if (!meta->GetInt32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame)) {
+    uint32_t samplesPerFrame;
+    if (!meta->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame)) {
         return 0;
     }
-    int32_t channels;
-    if (!meta->GetInt32(Plugin::MetaID::AUDIO_CHANNELS, channels)) {
+    uint32_t channels;
+    if (!meta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels)) {
         return 0;
     }
-    int32_t bytesPerSample = 0;
+    uint32_t bytesPerSample = 0;
     Plugin::AudioSampleFormat format;
     if (!meta->GetData<Plugin::AudioSampleFormat>(Plugin::MetaID::AUDIO_SAMPLE_FORMAT, format)) {
         return 0;
