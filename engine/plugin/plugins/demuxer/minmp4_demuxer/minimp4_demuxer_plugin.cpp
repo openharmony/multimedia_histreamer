@@ -212,14 +212,14 @@ void MiniMP4DemuxerPlugin::FillADTSHead(std::shared_ptr<Memory> &data, uint32_t 
     uint32_t samplerateIndex = 0;
     /* 按格式读取信息帧 */
     uint8_t objectTypeIndication = miniMP4_.track->object_type_indication;
-    samplerateIndex = ((miniMP4_.track->dsi[0] & 0x7) << 1) + (miniMP4_.track->dsi[1] >> 7); // 按协议取信息帧
+    samplerateIndex = ((miniMP4_.track->dsi[0] & 0x7) << 1) + (miniMP4_.track->dsi[1] >> 7); // 1,7 按协议取信息帧
     adtsHeader[0] = static_cast<uint8_t>(0xFF);
     adtsHeader[1] = static_cast<uint8_t>(0xF1);
-    adtsHeader[2] = static_cast<uint8_t>(objectTypeIndication) + (samplerateIndex << 2) + (channelConfig >> 2); // 按协议取信息帧
-    adtsHeader[3] = static_cast<uint8_t>(((channelConfig & 0x3) << 6) + (packetLen >> 11)); // 按协议取信息帧
-    adtsHeader[4] = static_cast<uint8_t>((packetLen & 0x7FF) >> 3); // 按协议取信息帧
-    adtsHeader[5] = static_cast<uint8_t>(((packetLen & 0x7) << 5) + 0x1F); // 按协议取信息帧
-    adtsHeader[6] = static_cast<uint8_t>(0xFC); // 按协议取信息帧
+    adtsHeader[2] = static_cast<uint8_t>(objectTypeIndication) + (samplerateIndex << 2) + (channelConfig >> 2); // 2
+    adtsHeader[3] = static_cast<uint8_t>(((channelConfig & 0x3) << 6) + (packetLen >> 11)); // 3,6,11 按协议取信息帧
+    adtsHeader[4] = static_cast<uint8_t>((packetLen & 0x7FF) >> 3); // 4, 3 按协议取信息帧
+    adtsHeader[5] = static_cast<uint8_t>(((packetLen & 0x7) << 5) + 0x1F); // 5 按协议取信息帧
+    adtsHeader[6] = static_cast<uint8_t>(0xFC); // 6 按协议取信息帧
     data->Write(adtsHeader, ADTS_HEADER_SIZE, 0);
 }
 
@@ -304,11 +304,11 @@ Status MiniMP4DemuxerPlugin::AudioAdapterForDecoder()
     size_t sampleRateIndex = (static_cast<uint32_t>(miniMP4_.track->dsi[0] & 0x7) << 1) +
         (static_cast<uint32_t>(miniMP4_.track->dsi[1]) >> 7);
 
-    if ((sampleRateVec.size() <= sampleRateIndex) || (miniMP4_.track->dsi_bytes >= 20)) { // 按协议适配解码器
+    if ((sampleRateVec.size() <= sampleRateIndex) || (miniMP4_.track->dsi_bytes >= 20)) { // 20 按协议适配解码器
         return Status::ERROR_MISMATCHED_TYPE;
     }
     miniMP4_.track->SampleDescription.audio.samplerate_hz = sampleRateVec[sampleRateIndex];
-    miniMP4_.track->SampleDescription.audio.channelcount = (miniMP4_.track->dsi[1] & 0x7F) >> 3; // 按协议适配解码器
+    miniMP4_.track->SampleDescription.audio.channelcount = (miniMP4_.track->dsi[1] & 0x7F) >> 3; // 3 按协议适配解码器
     return Status::OK;
 }
 namespace {
