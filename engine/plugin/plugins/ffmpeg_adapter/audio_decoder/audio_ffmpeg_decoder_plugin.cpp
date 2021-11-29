@@ -138,7 +138,7 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
     Capability outputCaps(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
     if (codec->sample_fmts != nullptr) {
         DiscreteCapability<AudioSampleFormat> values;
-        for (index = 0; index < AV_SAMPLE_FMT_NB; ++index) {
+        for (index = 0; codec->sample_fmts[index] != AV_SAMPLE_FMT_NONE; ++index) {
             values.push_back(g_formatMap[codec->sample_fmts[index]]);
         }
         if (index) {
