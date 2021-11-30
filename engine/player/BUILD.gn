@@ -27,10 +27,10 @@ if (defined(ohos_lite)) {
 
   source_set("histreamer_player") {
     sources = [
-      "hiplayer.cpp",
-      "hiplayer_impl.cpp",
       "internal/state.cpp",
       "internal/state_machine.cpp",
+      "lite/hiplayer.cpp",
+      "lite/hiplayer_impl.cpp",
     ]
     public_configs = [ ":histreamer_player_config" ]
     public_deps = [

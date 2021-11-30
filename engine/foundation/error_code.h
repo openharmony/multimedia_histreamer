@@ -16,6 +16,8 @@
 #ifndef HISTREAMER_FOUNDATION_ERROR_CODE_H
 #define HISTREAMER_FOUNDATION_ERROR_CODE_H
 
+#include <cstdint>
+
 #ifdef WIN32
 // Fix compile error: expected identifier before numeric constant
 // also can add in plugin_loader.cpp before include log.h
@@ -40,6 +42,6 @@ enum struct ErrorCode : int32_t {
     ERROR_NO_MEMORY = ERROR_UNKNOWN + 9,
     ERROR_INVALID_STATE = ERROR_UNKNOWN + 10,
 };
-} // namespace Media
-} // namespace OHOS
-#endif // HISTREAMER_FOUNDATION_ERROR_CODE_H
+}  // namespace Media
+}  // namespace OHOS
+#endif  // HISTREAMER_FOUNDATION_ERROR_CODE_H

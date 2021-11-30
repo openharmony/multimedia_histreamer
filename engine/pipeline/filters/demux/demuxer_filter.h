@@ -59,7 +59,7 @@ public:
 
     bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
-    ErrorCode SeekTo(int64_t msec);
+    ErrorCode SeekTo(int32_t msec);
 
     std::vector<std::shared_ptr<Plugin::Meta>> GetStreamMetaInfo() const;
 
