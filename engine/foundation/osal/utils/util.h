@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Media {
 namespace OSAL {
 void SleepFor(unsigned ms);
-bool ConvertFullPath(const std::string partialPath, std::string& fullPath);
+bool ConvertFullPath(const std::string& partialPath, std::string& fullPath);
 } // namespace OSAL
 } // namespace Media
 } // namespace OHOS

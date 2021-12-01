@@ -54,7 +54,7 @@ void SleepFor(unsigned ms)
     usleep(ms * factor);
 }
 
-bool ConvertFullPath(const std::string partialPath, std::string& fullPath)
+bool ConvertFullPath(const std::string& partialPath, std::string& fullPath)
 {
     if (partialPath.empty() || partialPath.length() >= PATH_MAX) {
         return false;
