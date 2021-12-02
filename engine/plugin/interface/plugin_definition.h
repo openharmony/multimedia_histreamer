@@ -55,6 +55,9 @@ namespace Plugin {
 enum struct LicenseType : uint8_t {
     APACHE_V2, ///< The Apache License 2.0
     LGPL,      ///< The GNU Lesser General Public License
+    GPL,       ///< The GNU General Public License
+    CC0,       ///< The Creative Commons Zero v1.0 Universal
+    UNKNOWN,   ///< Unknown License
 };
 
 /**
