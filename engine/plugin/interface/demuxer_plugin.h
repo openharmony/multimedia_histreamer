@@ -85,7 +85,7 @@ struct DataSource {
  */
 struct DemuxerPlugin : public PluginBase {
     /// constructor
-    explicit DemuxerPlugin(std::string name): PluginBase(std::forward<std::string>(name)) {}
+    explicit DemuxerPlugin(std::string name): PluginBase(std::move(name)) {}
     /**
      * @brief Set the data source to demuxer component.
      *
