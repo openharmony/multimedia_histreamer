@@ -289,11 +289,6 @@ namespace {
         definition.inCaps.push_back(cap);
         definition.outCaps.emplace_back(Capability(OHOS::Media::MEDIA_MIME_AUDIO_RAW));
     }
-
-    void UnRegisterAudioDecoderPlugin()
-    {
-        return;
-    }
 }
 
 PLUGIN_DEFINITION(Minimp3Decoder, LicenseType::CC0, RegisterDecoderPlugin, [] {});
