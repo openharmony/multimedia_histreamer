@@ -164,6 +164,8 @@ public:
         return true;
     }
 
+    std::string Dump();
+
 private:
     std::map<Plugin::MetaID, Plugin::ValueType> items_{};
 };
