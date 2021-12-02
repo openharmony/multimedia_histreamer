@@ -17,9 +17,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/subsystem/multimedia/config.gni")
   group("plugin_minimp4_demuxer") {
     if (ohos_kernel_type == "liteos_m") {
-      deps = [
-        ":histreamer_plugin_Minimp4Demuxer",
-      ]
+      deps = [ ":histreamer_plugin_Minimp4Demuxer" ]
     }
   }
   config("plugin_minimp4_demuxer_adapter_config") {
@@ -32,9 +30,7 @@ if (defined(ohos_lite)) {
 
   if (ohos_kernel_type == "liteos_m") {
     static_library("histreamer_plugin_Minimp4Demuxer") {
-      sources = [
-        "minimp4_demuxer_plugin.cpp",
-      ]
+      sources = [ "minimp4_demuxer_plugin.cpp" ]
       public_configs = [ ":plugin_minimp4_demuxer_adapter_config" ]
       public_deps = [
         "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
@@ -44,9 +40,7 @@ if (defined(ohos_lite)) {
     }
   } else {
     shared_library("histreamer_plugin_Minimp4Demuxer") {
-      sources = [
-        "minimp4_demuxer_plugin.cpp",
-      ]
+      sources = [ "minimp4_demuxer_plugin.cpp" ]
       public_configs = [ ":plugin_minimp4_demuxer_adapter_config" ]
       public_deps = [
         "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",

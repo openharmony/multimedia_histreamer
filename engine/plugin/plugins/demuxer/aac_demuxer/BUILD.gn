@@ -15,11 +15,9 @@
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   import("//build/lite/config/subsystem/multimedia/config.gni")
-  group("plugin_aac_demuxer_adapter") {
+  group("plugin_aac_demuxer") {
     if (ohos_kernel_type == "liteos_m") {
-      deps = [
-        ":histreamer_plugin_AACDemuxer",
-      ]
+      deps = [ ":histreamer_plugin_AACDemuxer" ]
     }
   }
   config("plugin_aac_demuxer_adapter_config") {
@@ -34,9 +32,7 @@ if (defined(ohos_lite)) {
 
   if (ohos_kernel_type == "liteos_m") {
     static_library("histreamer_plugin_AACDemuxer") {
-      sources = [
-        "aac_demuxer_plugin.cpp",
-      ]
+      sources = [ "aac_demuxer_plugin.cpp" ]
       public_configs = [ ":plugin_aac_demuxer_adapter_config" ]
       public_deps = [
         "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
@@ -46,9 +42,7 @@ if (defined(ohos_lite)) {
     }
   } else {
     shared_library("histreamer_plugin_AACDemuxer") {
-      sources = [
-        "aac_demuxer_plugin.cpp",
-      ]
+      sources = [ "aac_demuxer_plugin.cpp" ]
       public_configs = [ ":plugin_aac_demuxer_adapter_config" ]
       public_deps = [
         "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
