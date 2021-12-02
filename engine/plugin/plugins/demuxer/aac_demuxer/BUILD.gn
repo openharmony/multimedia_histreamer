@@ -32,15 +32,29 @@ if (defined(ohos_lite)) {
     ]
   }
 
-  static_library("histreamer_plugin_AACDemuxer") {
-    sources = [
-      "aac_demuxer_plugin.cpp",
-    ]
-    public_configs = [ ":plugin_aac_demuxer_adapter_config" ]
-    public_deps = [
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
-    ]
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("histreamer_plugin_AACDemuxer") {
+      sources = [
+        "aac_demuxer_plugin.cpp",
+      ]
+      public_configs = [ ":plugin_aac_demuxer_adapter_config" ]
+      public_deps = [
+        "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+        "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+        "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+      ]
+    }
+  } else {
+    shared_library("histreamer_plugin_AACDemuxer") {
+      sources = [
+        "aac_demuxer_plugin.cpp",
+      ]
+      public_configs = [ ":plugin_aac_demuxer_adapter_config" ]
+      public_deps = [
+        "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+        "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+        "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+      ]
+    }
   }
 }

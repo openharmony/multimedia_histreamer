@@ -31,21 +31,25 @@ if (defined(ohos_lite)) {
       deps += [ "ffmpeg_adapter:plugin_ffmpeg_adapter" ]
     }
 
-    if (enable_histreamer_plugin_minimp3_demuxer_adapter) {
-      deps += [ "demuxer/minimp3_demuxer:plugin_minimp3_demuxer_adapter" ]
+    if (defined(enable_histreamer_plugin_minimp3_demuxer)
+        && enable_histreamer_plugin_minimp3_demuxer) {
+      deps += [ "demuxer/minimp3_demuxer:plugin_minimp3_demuxer" ]
     }
 
-    if (enable_histreamer_plugin_minimp3_decoder_adapter) {
-      deps += [ "decoder/minimp3_decoder:plugin_minimp3_decoder_adapter" ]
+    if (defined(enable_histreamer_plugin_minimp3_decoder)
+        && enable_histreamer_plugin_minimp3_decoder) {
+      deps += [ "decoder/minimp3_decoder:plugin_minimp3_decoder" ]
     }
 
-    if (enable_histreamer_plugin_minimp4_demuxer_adapter) {
-      deps += [ "demuxer/minimp4_demuxer:plugin_minimp4_demuxer_adapter" ]
+    if (defined(enable_histreamer_plugin_minimp4_demuxer)
+       && enable_histreamer_plugin_minimp4_demuxer) {
+      deps += [ "demuxer/minimp4_demuxer:plugin_minimp4_demuxer" ]
     }
 
 
-    if (enable_histreamer_plugin_aac_demuxer_adapter) {
-      deps += [ "demuxer/aac_demuxer:plugin_aac_demuxer_adapter" ]
+    if (defined(enable_histreamer_plugin_aac_demuxer)
+        && enable_histreamer_plugin_aac_demuxer) {
+      deps += [ "demuxer/aac_demuxer:plugin_aac_demuxer" ]
     }
 
     if (enable_histreamer_plugin_file_source) {
@@ -82,26 +86,30 @@ if (defined(ohos_lite)) {
         ]
       }
 
-      if (enable_histreamer_plugin_minimp3_demuxer_adapter) {
+      if (defined(enable_histreamer_plugin_minimp3_demuxer)
+         && enable_histreamer_plugin_minimp3_demuxer) {
         args += [
           "Minimp3Demuxer",
         ]
       }
 
-      if (enable_histreamer_plugin_minimp3_decoder_adapter) {
+      if (defined(enable_histreamer_plugin_minimp3_decoder)
+         && enable_histreamer_plugin_minimp3_decoder) {
         args += [
           "Minimp3Decoder",
         ]
       }
 
-        if (enable_histreamer_plugin_minimp4_demuxer_adapter) {
+        if (defined(enable_histreamer_plugin_minimp4_demuxer)
+           && enable_histreamer_plugin_minimp4_demuxer) {
         args += [
           "MiniMP4Demuxer",
         ]
       }
 
 
-      if (enable_histreamer_plugin_aac_demuxer_adapter) {
+      if (defined(enable_histreamer_plugin_aac_demuxer)
+         && enable_histreamer_plugin_aac_demuxer) {
         args += [
           "AACDemuxer",
         ]

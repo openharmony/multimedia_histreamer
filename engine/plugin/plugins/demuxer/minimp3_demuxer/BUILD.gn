@@ -15,7 +15,7 @@
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   import("//build/lite/config/subsystem/multimedia/config.gni")
-  group("plugin_minimp3_demuxer_adapter") {
+  group("plugin_minimp3_demuxer") {
     if (ohos_kernel_type == "liteos_m") {
       deps = [ ":histreamer_plugin_Minimp3Demuxer" ]
     }
@@ -29,16 +29,31 @@ if (defined(ohos_lite)) {
     ]
   }
 
-  static_library("histreamer_plugin_Minimp3Demuxer") {
-    sources = [
-      "//foundation/multimedia/histreamer/engine/plugin/plugins/common/minimp3/minimp3_wrapper.c",
-      "minimp3_demuxer_plugin.cpp",
-    ]
-    public_configs = [ ":plugin_minimp3_demuxer_config" ]
-    public_deps = [
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
-    ]
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("histreamer_plugin_Minimp3Demuxer") {
+      sources = [
+        "//foundation/multimedia/histreamer/engine/plugin/plugins/common/minimp3/minimp3_wrapper.c",
+        "minimp3_demuxer_plugin.cpp",
+      ]
+      public_configs = [ ":plugin_minimp3_demuxer_config" ]
+      public_deps = [
+        "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+        "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+        "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+      ]
+    }
+  } else {
+    shared_library("histreamer_plugin_Minimp3Demuxer") {
+      sources = [
+        "//foundation/multimedia/histreamer/engine/plugin/plugins/common/minimp3/minimp3_wrapper.c",
+        "minimp3_demuxer_plugin.cpp",
+      ]
+      public_configs = [ ":plugin_minimp3_demuxer_config" ]
+      public_deps = [
+        "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+        "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+        "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+      ]
+    }
   }
 }
