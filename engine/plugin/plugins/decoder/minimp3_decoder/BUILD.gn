@@ -41,7 +41,10 @@ if (defined(ohos_lite)) {
     }
   } else {
     shared_library("histreamer_plugin_Minimp3Decoder") {
-      sources = [ "minimp3_decoder_plugin.cpp" ]
+      sources = [
+        "//foundation/multimedia/histreamer/engine/plugin/plugins/common/minimp3/minimp3_wrapper.c",
+        "minimp3_decoder_plugin.cpp",
+      ]
       public_configs = [ ":plugin_minimp3_adapter_config" ]
       public_deps = [
         "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",

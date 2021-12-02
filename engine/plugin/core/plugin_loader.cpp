@@ -60,7 +60,11 @@ void* PluginLoader::LoadPluginFile(const std::string& path)
 #else
     auto pathStr = path.c_str();
     if (pathStr) {
-        return ::dlopen(pathStr, RTLD_NOW);
+        auto ptr = ::dlopen(pathStr, RTLD_NOW);
+        if (ptr == nullptr) {
+            MEDIA_LOG_E("dlopen failed due to %s", ::dlerror());
+        }
+        return ptr;
     }
     return nullptr;
 #endif

@@ -14,11 +14,12 @@
  */
 
 #include "plugin_meta.h"
-#include "plugin/common/plugin_audio_tags.h"
 
 #include <cstring>
 #include <memory>
 #include <vector>
+
+#include "plugin/common/plugin_audio_tags.h"
 
 namespace OHOS {
 namespace Media {
@@ -187,7 +188,7 @@ static inline std::string format_string(const char* format, Args... args)
 
     if (newLength > oldLength) {
         std::vector<char> newBuffer(newLength, 0);
-        snprintf_s(newBuffer.data(), newLength, format, args...);
+        snprintf_s(newBuffer.data(), newLength, newLength - 1, format, args...);
         return std::string(newBuffer.data());
     }
 
@@ -198,8 +199,7 @@ std::string Meta::Dump()
 {
     std::string result = "MetaDump: ";
     for (auto& ptr : items_) {
-        // we need to copy memory for pointers
-        if (typeid(ptr.second) == typeid(PointerPair)) {
+        if (ptr.second.Type() == typeid(PointerPair)) {
             auto pointerPair = Plugin::AnyCast<PointerPair>(ptr.second);
             result = format_string("%s {Meta: %d, PointerPair(%x, %d)},",
                                    result.c_str(), ptr.first,
@@ -208,9 +208,6 @@ std::string Meta::Dump()
             result = format_string("%s {Meta: %d, AudioSampleFormat(%d)},",
                                    result.c_str(), ptr.first,
                                    Plugin::AnyCast<Plugin::AudioSampleFormat>(ptr.second));
-        } else {
-//            result = format_string("%s {Meta: %d, UnknownTypeValue},",
-//                                   result.c_str(), ptr.first);
         }
     }
     return result;
