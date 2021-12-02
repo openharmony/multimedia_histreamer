@@ -26,15 +26,13 @@
 using Mp3DecoderHandle = Minimp3WrapperMp3dec;
 using Mp3DecoderSample = Minimp3WrapperMp3dSample;
 
-struct AudioDecoderRst
-{
+struct AudioDecoderRst {
     uint32_t usedInputLength;
     uint8_t *packetBuffer;
     uint32_t packetLength;
 };
 
-struct AudioDecoderMp3Attr
-{
+struct AudioDecoderMp3Attr {
     Mp3DecoderHandle  mp3DecoderHandle;
     Mp3DecoderSample *pcm;
     AudioDecoderRst  *rst;
@@ -106,7 +104,6 @@ private:
     std::shared_ptr<Buffer>     outputBuffer_ {nullptr};
     std::weak_ptr<DataCallback> dataCb_ {};
 };
-
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

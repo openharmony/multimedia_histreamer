@@ -109,6 +109,16 @@
     } while (0)
 #endif
 
+#ifndef FALSE_LOG
+#define FALSE_LOG(exec)                                                                                    \
+    do {                                                                                                               \
+        bool value = (exec);                                                                                           \
+        if (!value) {                                                                                                  \
+            MEDIA_LOG_E("FALSE_LOG: " #exec);                                                       \
+        }                                                                                                              \
+    } while (0)
+#endif
+
 #ifndef ASSERT_CONDITION
 #define ASSERT_CONDITION(exec, msg)                                                                                    \
     do {                                                                                                               \

@@ -178,18 +178,13 @@ bool Meta::GetPointer(Plugin::MetaID id, void** ptr, size_t& size) const // NOLI
 }
 
 template <typename ...Args>
-static inline std::string format_string(const char* format, Args... args)
+static inline std::string FormatString(const char* format, Args... args)
 {
-    constexpr size_t oldLength = BUFSIZ;
-    char buffer[oldLength] = {0};
+    char buffer[BUFSIZ] = {0};
 
-    size_t newLength = snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, format, args...);
-    newLength++;  // add '\0'
-
-    if (newLength > oldLength) {
-        std::vector<char> newBuffer(newLength, 0);
-        snprintf_s(newBuffer.data(), newLength, newLength - 1, format, args...);
-        return std::string(newBuffer.data());
+    int length = snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, format, args...);
+    if (length <= 0) {
+        return "Unknown error";
     }
 
     return buffer;
@@ -201,11 +196,11 @@ std::string Meta::Dump()
     for (auto& ptr : items_) {
         if (ptr.second.Type() == typeid(PointerPair)) {
             auto pointerPair = Plugin::AnyCast<PointerPair>(ptr.second);
-            result = format_string("%s {Meta: %d, PointerPair(%x, %d)},",
+            result = FormatString("%s {Meta: %d, PointerPair(%x, %d)},",
                                    result.c_str(), ptr.first,
                                    pointerPair.first.get(), pointerPair.second);
         } else if (ptr.second.Type() == typeid(Plugin::AudioSampleFormat)) {
-            result = format_string("%s {Meta: %d, AudioSampleFormat(%d)},",
+            result = FormatString("%s {Meta: %d, AudioSampleFormat(%d)},",
                                    result.c_str(), ptr.first,
                                    Plugin::AnyCast<Plugin::AudioSampleFormat>(ptr.second));
         }

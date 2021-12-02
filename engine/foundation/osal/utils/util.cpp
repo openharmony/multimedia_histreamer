@@ -31,18 +31,17 @@ void usleep(__int64 usec)
     CloseHandle(timer);
 }
 
-char *realpath(const char *__restrict __name, char *__restrict __resolved)
+char *realpath(const char *__restrict name, char *__restrict resolved)
 {
-    return _fullpath(__resolved, __name, PATH_MAX);
+    return _fullpath(resolved, name, PATH_MAX);
 }
 
-int access(const char *__name, int __type)
+int access(const char *name, int type)
 {
-    return _access(__name, __type);
+    return _access(name, type);
 }
 #else
 #include <unistd.h>
-extern "C" int usleep(unsigned);
 #endif
 
 namespace OHOS {

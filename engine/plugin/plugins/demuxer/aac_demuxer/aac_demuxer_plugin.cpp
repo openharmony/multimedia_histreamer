@@ -42,12 +42,12 @@ namespace {
 }
 
 AACDemuxerPlugin::AACDemuxerPlugin(std::string name)
-        : DemuxerPlugin(std::move(name)),
-          ioContext_(),
-          mediaIOSize_(MEDIA_IO_SIZE),
-          fileSize_(0)
+    : DemuxerPlugin(std::move(name)),
+      ioContext_(),
+      mediaIOSize_(MEDIA_IO_SIZE),
+      fileSize_(0)
 {
-    memset_s(&aacDemuxerRst_, sizeof(aacDemuxerRst_), 0x00, sizeof(AACDemuxerRst));
+    FALSE_LOG(memset_s(&aacDemuxerRst_, sizeof(aacDemuxerRst_), 0x00, sizeof(AACDemuxerRst)) == 0);
     MEDIA_LOG_I("AACDemuxerPlugin, plugin name: %s", pluginName_.c_str());
 }
 
@@ -75,24 +75,23 @@ Status AACDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
     auto result = ioContext_.dataSource->ReadAt(ioContext_.offset, buffer, static_cast<size_t>(GET_INFO_READ_LEN));
     inputDataPtr = (uint8_t *)bufData->GetReadOnlyData();
     int ret = AudioDemuxerAACPrepare(inputDataPtr, bufData->GetSize(), &aacDemuxerRst_);
-
     if (ret == 0) {
         mediaInfo.tracks.resize(1);
         if (aacDemuxerRst_.frameChannels == 1) {
-            mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT,      AudioChannelLayout::MONO}           );
+            mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::MONO});
         } else {
-            mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT,      AudioChannelLayout::STEREO}         );
+            mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::STEREO});
         }
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_RATE,       (uint32_t)aacDemuxerRst_.frameSampleRate}  );
-        mediaInfo.tracks[0].insert({Tag::MEDIA_BITRATE,           (uint32_t)aacDemuxerRst_.frameBitrateKbps} );
-        mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNELS,          (uint32_t)aacDemuxerRst_.frameChannels}    );
-        mediaInfo.tracks[0].insert({Tag::TRACK_ID,                (uint32_t)0}                               );
-        mediaInfo.tracks[0].insert({Tag::MIME,                    std::string(MEDIA_MIME_AUDIO_AAC)}         );
-        mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_VERSION,      (uint32_t)aacDemuxerRst_.mpegVersion}      );
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT,     AudioSampleFormat::S16P}                   );
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_PER_FRAME,  (uint32_t)(1024)}                          );
-        mediaInfo.tracks[0].insert({Tag::AUDIO_AAC_PROFILE,       AudioAacProfile::LC}                       );
-        mediaInfo.tracks[0].insert({Tag::AUDIO_AAC_STREAM_FORMAT, AudioAacStreamFormat::MP4ADTS}             );
+        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_RATE, (uint32_t)aacDemuxerRst_.frameSampleRate});
+        mediaInfo.tracks[0].insert({Tag::MEDIA_BITRATE, (uint32_t)aacDemuxerRst_.frameBitrateKbps});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNELS, (uint32_t)aacDemuxerRst_.frameChannels});
+        mediaInfo.tracks[0].insert({Tag::TRACK_ID, (uint32_t)0});
+        mediaInfo.tracks[0].insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_AAC)});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_VERSION, (uint32_t)aacDemuxerRst_.mpegVersion});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::S16P});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_PER_FRAME, (uint32_t)(1024)});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_AAC_PROFILE, AudioAacProfile::LC});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_AAC_STREAM_FORMAT, AudioAacStreamFormat::MP4ADTS});
         return Status::OK;
     } else {
         return Status::ERROR_UNSUPPORTED_FORMAT;
@@ -121,7 +120,7 @@ Status AACDemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
     } else {
         aacFrameData = outBuffer.GetMemory();
     }
-    switch(status) {
+    switch (status) {
         case 0:
             ioContext_.offset += aacDemuxerRst_.usedInputLength;
             aacFrameData->Write(aacDemuxerRst_.frameBuffer, aacDemuxerRst_.frameLength);
@@ -245,9 +244,9 @@ int AACDemuxerPlugin::AudioDemuxerAACPrepare(const uint8_t *buf, uint32_t len, A
         int mpegVersionIndex  = ((buf[1] & 0x0F) >> 3);
         int mpegVersion = -1;
         if (mpegVersionIndex == 0) {
-            mpegVersion = 4;
+            mpegVersion = 4; // 4
         } else if (mpegVersionIndex == 1) {
-            mpegVersion = 2;
+            mpegVersion = 2; // 2
         } else {
             return -1;
         }
@@ -274,7 +273,7 @@ int AACDemuxerPlugin::AudioDemuxerAACProcess(const uint8_t *buffer, uint32_t buf
         return -1;
     }
     rst->frameLength = 0;
-    rst->frameBuffer = NULL;
+    rst->frameBuffer = nullptr;
     rst->usedInputLength = 0;
 
     unsigned int length = 0;
@@ -284,8 +283,8 @@ int AACDemuxerPlugin::AudioDemuxerAACProcess(const uint8_t *buffer, uint32_t buf
             break;
         }
 
-        length = (unsigned int)getFrameLength(buffer);
-        if (length + 2 > bufferLen) {
+        length = static_cast<unsigned int>(getFrameLength(buffer));
+        if (length + 2 > bufferLen) { // 2
             rst->usedInputLength = bufferLen;
             return 0;
         }
@@ -298,11 +297,11 @@ int AACDemuxerPlugin::AudioDemuxerAACProcess(const uint8_t *buffer, uint32_t buf
         if (IsAACPattern(buffer + length)) {
             rst->frameBuffer = (uint8_t *)malloc(length);
             if (rst->frameBuffer) {
-                memcpy(rst->frameBuffer, buffer, length);
+                FALSE_LOG(memcpy_s(rst->frameBuffer, length, buffer, length) == 0);
                 rst->frameLength = length;
                 rst->usedInputLength = length;
             } else {
-                MEDIA_LOG_D("Err:malloc length %d\n", length);
+                MEDIA_LOG_E("malloc error, length %d\n", length);
             }
         } else {
             MEDIA_LOG_D("can't find next aac, length %d is error\n", length);
@@ -324,9 +323,7 @@ int AACDemuxerPlugin::AudioDemuxerAACFreeFrame(uint8_t *frame)
     return 0;
 }
 
-
 namespace {
-
     int IsAACPattern(const uint8_t *data)
     {
         return data[0] == 0xff && (data[1] & 0xf0) == 0xf0 && (data[1] & 0x06) == 0x00;
@@ -343,13 +340,13 @@ namespace {
         if (result != Status::OK) {
             return 0;
         }
-        inputDataPtr = (uint8_t *)bufData->GetReadOnlyData();
 
+        inputDataPtr = (uint8_t *)bufData->GetReadOnlyData();
         if (IsAACPattern(inputDataPtr) == 0) {
             return 0;
         }
 
-        return 100;
+        return 100; // 100
     }
 
     Status RegisterPlugin(const std::shared_ptr<Register>& reg)
@@ -364,7 +361,7 @@ namespace {
         DemuxerPluginDef regInfo;
         regInfo.name = pluginName;
         regInfo.description = "adapter for aac demuxer plugin";
-        regInfo.rank = 100;
+        regInfo.rank = 100; // 100
         regInfo.creator = [](const std::string &name) -> std::shared_ptr<DemuxerPlugin> {
             return std::make_shared<AACDemuxerPlugin>(name);
         };
@@ -378,7 +375,6 @@ namespace {
 }
 
 PLUGIN_DEFINITION(AACDemuxer, LicenseType::APACHE_V2, RegisterPlugin, [] {});
-
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

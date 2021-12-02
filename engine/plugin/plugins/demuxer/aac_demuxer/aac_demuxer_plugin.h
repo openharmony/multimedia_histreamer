@@ -24,22 +24,15 @@
 #include "interface/demuxer_plugin.h"
 #include "thread/mutex.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
-struct AudioDemuxerUserArg
-{
+namespace OHOS {
+namespace Media {
+namespace Plugin {
+struct AudioDemuxerUserArg {
     uint32_t fileSize;
     void *priv;
 };
 
-struct AACDemuxerRst
-{
+struct AACDemuxerRst {
     uint64_t usedInputLength;
     uint8_t  *frameBuffer;
     uint32_t frameLength;
@@ -53,9 +46,6 @@ struct AACDemuxerRst
     uint32_t samplesPerFrame;
 };
 
-namespace OHOS {
-namespace Media {
-namespace Plugin {
 class AACDemuxerPlugin : public DemuxerPlugin {
 public:
     explicit AACDemuxerPlugin(std::string name);
@@ -101,7 +91,6 @@ private:
     IOContext ioContext_;
     size_t fileSize_;
 };
-
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

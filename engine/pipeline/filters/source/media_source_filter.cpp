@@ -291,7 +291,7 @@ bool MediaSourceFilter::GetProtocolByUri()
     if (protocol_ == "file") {
         std::string fullPath;
         ret = OSAL::ConvertFullPath(uri_, fullPath);
-        if (ret == true && !fullPath.empty()) {
+        if (ret && !fullPath.empty()) {
             uri_ = fullPath;
         }
     }

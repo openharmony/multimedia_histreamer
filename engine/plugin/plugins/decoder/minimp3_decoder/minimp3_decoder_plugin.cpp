@@ -43,7 +43,7 @@ Minimp3DecoderPlugin::Minimp3DecoderPlugin(std::string name)
     : CodecPlugin(std::move(name)),
       mp3Parameter_()
 {
-    (void)memset_s(&mp3DecoderAttr_, sizeof(mp3DecoderAttr_), 0x00, sizeof(AudioDecoderMp3Attr));
+    FALSE_LOG(memset_s(&mp3DecoderAttr_, sizeof(mp3DecoderAttr_), 0x00, sizeof(AudioDecoderMp3Attr)) == 0);
     MEDIA_LOG_I("Minimp3DecoderPlugin, plugin name: %s", pluginName_.c_str());
 }
 
@@ -92,7 +92,8 @@ Status Minimp3DecoderPlugin::Prepare()
         samplesPerFrame_ = AnyCast<uint32_t>(mp3Parameter_.find(Tag::AUDIO_SAMPLE_PER_FRAME)->second);
     }
 
-    if (samplesPerFrame_ != MP3_384_SAMPLES_PER_FRAME && samplesPerFrame_ != MP3_576_SAMPLES_PER_FRAME && samplesPerFrame_ != MP3_1152_SAMPLES_PER_FRAME) {
+    if (samplesPerFrame_ != MP3_384_SAMPLES_PER_FRAME && samplesPerFrame_ != MP3_576_SAMPLES_PER_FRAME && 
+        samplesPerFrame_ != MP3_1152_SAMPLES_PER_FRAME) {
         return Status::ERROR_INVALID_PARAMETER;
     }
 
@@ -133,7 +134,8 @@ Status Minimp3DecoderPlugin::SetCallback(const std::shared_ptr<Callback>& cb)
     return Status::OK;
 }
 
-Status Minimp3DecoderPlugin::GetPcmDataProcess(const std::shared_ptr<Buffer>& inputBuffer, std::shared_ptr<Buffer>& outputBuffer)
+Status Minimp3DecoderPlugin::GetPcmDataProcess(const std::shared_ptr<Buffer>& inputBuffer, 
+                                               std::shared_ptr<Buffer>& outputBuffer)
 {
     if (inputBuffer == nullptr) {
         return Status::ERROR_NOT_ENOUGH_DATA;
@@ -232,7 +234,8 @@ Status Minimp3DecoderPlugin::AudioDecoderMp3Process(std::shared_ptr<Buffer> inBu
         return Status::ERROR_UNKNOWN;
     }
     int16_t *pcmPtr = (int16_t *)outData->GetWritableData(probePcmLength, 0);
-    int sampleCount = minimp3DecoderImpl_.decoderFrame(&mp3DecoderAttr_.mp3DecoderHandle, inData->GetReadOnlyData(), inData->GetSize(), pcmPtr, &frameInfo);
+    int sampleCount = minimp3DecoderImpl_.decoderFrame(&mp3DecoderAttr_.mp3DecoderHandle, inData->GetReadOnlyData(), 
+                                                       inData->GetSize(), pcmPtr, &frameInfo);
     if (sampleCount > 0) {
         if (frameInfo.frame_bytes) {
             return Status::OK;
@@ -274,7 +277,7 @@ namespace {
         Capability cap("audio/unknown");
         cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_MPEG)
                 .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 1)
-                .AppendIntervalKey<uint32_t>(Capability::Key::AUDIO_MPEG_LAYER, 1, 3);
+                .AppendIntervalKey<uint32_t>(Capability::Key::AUDIO_MPEG_LAYER, 1, 3); // 3
 
         DiscreteCapability<uint32_t> values = {8000, 16000, 22050, 44100, 48000, 32000};
         cap.AppendDiscreteKeys(Capability::Key::AUDIO_SAMPLE_RATE, values);
@@ -292,7 +295,6 @@ namespace {
 }
 
 PLUGIN_DEFINITION(Minimp3Decoder, LicenseType::CC0, RegisterDecoderPlugin, [] {});
-
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

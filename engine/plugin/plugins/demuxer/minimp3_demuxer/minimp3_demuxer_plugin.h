@@ -30,8 +30,7 @@ using Mp3DemuxerHandle     = Minimp3WrapperMp3dec;
 using Mp3DemuxerSampleAttr = Minimp3WrapperMp3dSample;
 using Mp3DemuxerFrameInfo  = Minimp3WrapperMp3decFrameInfo;
 
-enum AudioDemuxerStatus
-{
+enum AudioDemuxerStatus {
     AUDIO_DEMUXER_PREPARE_UNMATCHED_FORMAT = -2,
     AUDIO_DEMUXER_ERROR = -1,
     AUDIO_DEMUXER_SUCCESS = 0,
@@ -41,14 +40,12 @@ enum AudioDemuxerStatus
     AUDIO_DEMUXER_SEEK_NEED_MORE_DATA,
 };
 
-struct AudioDemuxerUserArg
-{
+struct AudioDemuxerUserArg {
     uint32_t fileSize;
     void *priv;
 };
 
-struct AudioDemuxerRst
-{
+struct AudioDemuxerRst {
     uint64_t usedInputLength;
     uint8_t  *frameBuffer;
     uint32_t frameLength;
@@ -60,8 +57,7 @@ struct AudioDemuxerRst
     uint32_t samplesPerFrame;
 };
 
-struct AudioDemuxerMp3Attr
-{
+struct AudioDemuxerMp3Attr {
     Mp3DemuxerHandle mp3DemuxerHandle;
     AudioDemuxerRst  *rst;
     void     *userArg;
@@ -119,16 +115,19 @@ private:
         bool eos {false};
     };
     void AudioDemuxerMp3IgnoreTailZero(uint8_t *data, uint32_t *dataLen);
-    static int  AudioDemuxerMp3IterateCallback(void *userData, const uint8_t *frame, int frameSize, int freeFormatBytes, 
-                                                size_t bufSize, uint64_t offset, Mp3DemuxerFrameInfo *info);
-    static int  AudioDemuxerMp3IterateCallbackForPrepare(void *userData, const uint8_t *frame, int frameSize, int freeFormatBytes, 
-                                                            size_t bufSize, uint64_t offset, Mp3DemuxerFrameInfo *info);
+    static int  AudioDemuxerMp3IterateCallback(void *userData, const uint8_t *frame, int frameSize, 
+                                               int freeFormatBytes, size_t bufSize, uint64_t offset, 
+                                               Mp3DemuxerFrameInfo *info);
+    static int  AudioDemuxerMp3IterateCallbackForPrepare(void *userData, const uint8_t *frame, 
+                                                         int frameSize, int freeFormatBytes, size_t bufSize, 
+                                                         uint64_t offset, Mp3DemuxerFrameInfo *info);
     void AudioDemuxerMp3Open();
     int  AudioDemuxerMp3Close();
-    Status AudioDemuxerMp3Prepare(AudioDemuxerMp3Attr *mp3DemuxerAttr, uint8_t *inputBuffer, uint32_t inputLength, AudioDemuxerRst *mp3DemuxerRst);
+    Status AudioDemuxerMp3Prepare(AudioDemuxerMp3Attr *mp3DemuxerAttr, uint8_t *inputBuffer, 
+                                  uint32_t inputLength, AudioDemuxerRst *mp3DemuxerRst);
     int AudioDemuxerMp3Process(uint8_t *buf, uint32_t len);
     int AudioDemuxerMp3FreeFrame(uint8_t *frame);
-    int AudioDemuxerMp3Seek( uint32_t pos, uint8_t *buf, uint32_t len, AudioDemuxerRst *rst);
+    int AudioDemuxerMp3Seek(uint32_t pos, uint8_t *buf, uint32_t len, AudioDemuxerRst *rst);
     int AudioDemuxerMp3GetSeekPosition(uint32_t targetTtimeS, uint64_t *pos);
 
     int                 mediaIOSize_;
@@ -138,7 +137,6 @@ private:
     Minimp3DemuxerOp    minimp3DemuxerImpl_;
     AudioDemuxerMp3Attr mp3DemuxerAttr_;
 };
-
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
