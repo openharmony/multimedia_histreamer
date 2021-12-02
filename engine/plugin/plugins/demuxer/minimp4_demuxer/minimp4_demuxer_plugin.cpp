@@ -339,7 +339,7 @@ int Sniff(const std::string &name, std::shared_ptr<DataSource> dataSource)
     if (dataSource->ReadAt(MP4_HEADER_OFFSET, buffer, static_cast<size_t>(sizeof(m4aCheck))) != Status::OK) {
         return 0;
     }
-    if (memcmp_s(bufData->GetReadOnlyData(), sizeof(m4aCheck), &m4aCheck, sizeof(m4aCheck)) != 0) {
+    if (memcmp(bufData->GetReadOnlyData(), &m4aCheck, sizeof(m4aCheck)) != 0) {
         MEDIA_LOG_E("memcmp m4aCheck is error");
         return 0;
     }
