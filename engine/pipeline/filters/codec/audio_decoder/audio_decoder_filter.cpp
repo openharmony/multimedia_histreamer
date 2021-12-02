@@ -146,6 +146,10 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
             MEDIA_LOG_E("decoder plugin must have out caps");
         }
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
+            if (outCap.keys.count(Capability::Key::AUDIO_SAMPLE_FORMAT) == 0) {
+                MEDIA_LOG_W("decoder plugin should specify sample format in out caps");
+                continue;
+            }
             auto thisOut = std::make_shared<Plugin::Capability>();
             if (!MergeCapabilityKeys(*upstreamCap, outCap, *thisOut)) {
                 MEDIA_LOG_W("one of out cap of plugin %s does not match with upstream capability",

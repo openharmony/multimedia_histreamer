@@ -282,11 +282,12 @@ namespace {
         DiscreteCapability<AudioChannelLayout> channelLayoutValues = {AudioChannelLayout::MONO, AudioChannelLayout::STEREO};
         cap.AppendDiscreteKeys<AudioChannelLayout>(Capability::Key::AUDIO_CHANNEL_LAYOUT, channelLayoutValues);
 
-        DiscreteCapability<AudioSampleFormat> sampleFmtValues = {AudioSampleFormat::S32, AudioSampleFormat::S16, AudioSampleFormat::S16P};
-        cap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, sampleFmtValues);
-
         definition.inCaps.push_back(cap);
-        definition.outCaps.emplace_back(Capability(OHOS::Media::MEDIA_MIME_AUDIO_RAW));
+
+        Capability outCap(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
+        outCap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT,
+                                                     {AudioSampleFormat::S32, AudioSampleFormat::S16, AudioSampleFormat::S16P});
+        definition.outCaps.emplace_back(outCap);
     }
 }
 
