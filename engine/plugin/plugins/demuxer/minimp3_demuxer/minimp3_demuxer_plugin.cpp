@@ -115,7 +115,7 @@ Status Minimp3DemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
                 mediaInfo.tracks[0].insert({Tag::MIME,                   std::string(MEDIA_MIME_AUDIO_MPEG)}        );
                 mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_VERSION,     static_cast<uint32_t>(1)}                  );
                 mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_LAYER,       (uint32_t)(mp3DemuxerRst_.audioLayer)}     );
-                mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT,    AudioSampleFormat::S16P}                   );
+                mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT,    AudioSampleFormat::S16}                    );
                 mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_PER_FRAME, (uint32_t)(mp3DemuxerRst_.samplesPerFrame)});
 
                 processLoop = 0;

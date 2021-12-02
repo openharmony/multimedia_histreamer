@@ -221,7 +221,7 @@ int  Minimp3DecoderPlugin::AudioDecoderMp3Close()
     return 0;
 }
 
-Status  Minimp3DecoderPlugin::AudioDecoderMp3Process(std::shared_ptr<Buffer> inBuffer, std::shared_ptr<Buffer> outBuffer)
+Status Minimp3DecoderPlugin::AudioDecoderMp3Process(std::shared_ptr<Buffer> inBuffer, std::shared_ptr<Buffer> outBuffer)
 {
     auto inData  = inBuffer->GetMemory();
     auto outData = outBuffer->GetMemory();

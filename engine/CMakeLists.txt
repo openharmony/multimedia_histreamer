@@ -55,6 +55,9 @@ file(GLOB_RECURSE HISTREAMER_SRCS
         ${TOP_DIR}/engine/plugin/plugins/sink/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/source/file_source/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/demuxer/minimp3_demuxer/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/decoder/minimp3_decoder/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/common/minimp3/*.c
         ${TOP_DIR}/engine/plugin/types/*.cpp
         ${TOP_DIR}/engine/player/*.cpp
         ${TOP_DIR}/engine/foundation/*.cpp

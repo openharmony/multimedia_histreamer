@@ -24,7 +24,7 @@
 #include "core/plugin_register.h"
 #include "interface/demuxer_plugin.h"
 #include "thread/mutex.h"
-#include "minimp3_wrapper.h"
+#include "plugin/plugins/common/minimp3/minimp3_wrapper.h"
 
 using Mp3DemuxerHandle     = Minimp3WrapperMp3dec;
 using Mp3DemuxerSampleAttr = Minimp3WrapperMp3dSample;
