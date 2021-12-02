@@ -17,23 +17,22 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/subsystem/multimedia/config.gni")
   group("plugin_minimp3_demuxer_adapter") {
     if (ohos_kernel_type == "liteos_m") {
-      deps = [
-        ":histreamer_plugin_Minimp3Demuxer",
-      ]
+      deps = [ ":histreamer_plugin_Minimp3Demuxer" ]
     }
   }
   config("plugin_minimp3_demuxer_config") {
     include_dirs = [
       "minimp3_demuxer",
       "//third_party/minimp3",
+      "//foundation/multimedia/histreamer/engine/plugin/plugins/common/minimp3",
       "//foundation/multimedia/histreamer/engine/foundation",
     ]
   }
 
   static_library("histreamer_plugin_Minimp3Demuxer") {
     sources = [
+      "//foundation/multimedia/histreamer/engine/plugin/plugins/common/minimp3/minimp3_wrapper.c",
       "minimp3_demuxer_plugin.cpp",
-      "minimp3_wrapper.c",
     ]
     public_configs = [ ":plugin_minimp3_demuxer_config" ]
     public_deps = [
