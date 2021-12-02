@@ -239,9 +239,8 @@ Status Minimp3DecoderPlugin::AudioDecoderMp3Process(std::shared_ptr<Buffer> inBu
         }
     } else if (sampleCount == 0) {
         return Status::OK;
-    } else {
-        return Status::ERROR_UNKNOWN;
     }
+    return Status::ERROR_UNKNOWN;
 }
 
 namespace {
