@@ -42,7 +42,7 @@ extern "C"
 
         int (*iterateBuf)(const uint8_t *buf, size_t bufSize, MINIMP3_WRAPPER_MP3D_ITERATE_CB callback, void *userData);
 
-        int (*iterateCb)(Minimp3WrapperMp3decIO *io, uint8_t *buf, size_t bufSize, 
+        int (*iterateCb)(Minimp3WrapperMp3decIO *io, uint8_t *buf, size_t bufSize,
                          MINIMP3_WRAPPER_MP3D_ITERATE_CB callback, void *userData);
     } Minimp3DemuxerOp;
 

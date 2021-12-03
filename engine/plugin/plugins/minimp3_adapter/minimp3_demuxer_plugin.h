@@ -115,15 +115,15 @@ private:
         bool eos {false};
     };
     void AudioDemuxerMp3IgnoreTailZero(uint8_t *data, uint32_t *dataLen);
-    static int  AudioDemuxerMp3IterateCallback(void *userData, const uint8_t *frame, int frameSize, 
-                                               int freeFormatBytes, size_t bufSize, uint64_t offset, 
+    static int  AudioDemuxerMp3IterateCallback(void *userData, const uint8_t *frame, int frameSize,
+                                               int freeFormatBytes, size_t bufSize, uint64_t offset,
                                                Mp3DemuxerFrameInfo *info);
-    static int  AudioDemuxerMp3IterateCallbackForPrepare(void *userData, const uint8_t *frame, 
-                                                         int frameSize, int freeFormatBytes, size_t bufSize, 
+    static int  AudioDemuxerMp3IterateCallbackForPrepare(void *userData, const uint8_t *frame,
+                                                         int frameSize, int freeFormatBytes, size_t bufSize,
                                                          uint64_t offset, Mp3DemuxerFrameInfo *info);
     void AudioDemuxerMp3Open();
     int  AudioDemuxerMp3Close();
-    Status AudioDemuxerMp3Prepare(AudioDemuxerMp3Attr *mp3DemuxerAttr, uint8_t *inputBuffer, 
+    Status AudioDemuxerMp3Prepare(AudioDemuxerMp3Attr *mp3DemuxerAttr, uint8_t *inputBuffer,
                                   uint32_t inputLength, AudioDemuxerRst *mp3DemuxerRst);
     int AudioDemuxerMp3Process(uint8_t *buf, uint32_t len);
     int AudioDemuxerMp3FreeFrame(uint8_t *frame);
