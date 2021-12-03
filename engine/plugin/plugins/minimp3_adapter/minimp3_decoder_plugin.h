@@ -21,7 +21,7 @@
 #include "utils/blocking_queue.h"
 #include "plugin/interface/codec_plugin.h"
 #include "plugin/common/plugin_types.h"
-#include "plugin/plugins/common/minimp3/minimp3_wrapper.h"
+#include "minimp3_wrapper.h"
 
 using Mp3DecoderHandle = Minimp3WrapperMp3dec;
 using Mp3DecoderSample = Minimp3WrapperMp3dSample;

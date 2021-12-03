@@ -218,7 +218,7 @@ void Minimp3DecoderPlugin::AudioDecoderMp3Open()
     Minimp3WrapperMp3decInit(&mp3DecoderAttr_.mp3DecoderHandle);
 }
 
-int  Minimp3DecoderPlugin::AudioDecoderMp3Close()
+int Minimp3DecoderPlugin::AudioDecoderMp3Close()
 {
     return 0;
 }

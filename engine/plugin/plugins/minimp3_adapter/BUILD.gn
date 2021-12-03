@@ -15,6 +15,11 @@
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   import("//build/lite/config/subsystem/multimedia/config.gni")
+  group("plugin_minimp3_demuxer") {
+    if (ohos_kernel_type == "liteos_m") {
+      deps = [ ":histreamer_plugin_Minimp3Demuxer" ]
+    }
+  }
   group("plugin_minimp3_decoder") {
     if (ohos_kernel_type == "liteos_m") {
       deps = [ ":histreamer_plugin_Minimp3Decoder" ]
@@ -22,14 +27,26 @@ if (defined(ohos_lite)) {
   }
   config("plugin_minimp3_adapter_config") {
     include_dirs = [
-      "minimp3_decoder",
+      "minimp3_adapter",
       "//third_party/minimp3",
-      "//foundation/multimedia/histreamer/engine/plugin/plugins/common/minimp3",
       "//foundation/multimedia/histreamer/engine/foundation",
     ]
   }
 
   if (ohos_kernel_type == "liteos_m") {
+    static_library("histreamer_plugin_Minimp3Demuxer") {
+      sources = [
+        "minimp3_wrapper.c",
+        "minimp3_demuxer_plugin.cpp",
+      ]
+      public_configs = [ ":plugin_minimp3_adapter_config" ]
+      public_deps = [
+        "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+        "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+        "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+      ]
+    }
+
     static_library("histreamer_plugin_Minimp3Decoder") {
       sources = [ "minimp3_decoder_plugin.cpp" ]
       public_configs = [ ":plugin_minimp3_adapter_config" ]
@@ -40,9 +57,22 @@ if (defined(ohos_lite)) {
       ]
     }
   } else {
+    shared_library("histreamer_plugin_Minimp3Demuxer") {
+      sources = [
+        "minimp3_wrapper.c",
+        "minimp3_demuxer_plugin.cpp",
+      ]
+      public_configs = [ ":plugin_minimp3_adapter_config" ]
+      public_deps = [
+        "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+        "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+        "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+      ]
+    }
+
     shared_library("histreamer_plugin_Minimp3Decoder") {
       sources = [
-        "//foundation/multimedia/histreamer/engine/plugin/plugins/common/minimp3/minimp3_wrapper.c",
+        "minimp3_wrapper.c",
         "minimp3_decoder_plugin.cpp",
       ]
       public_configs = [ ":plugin_minimp3_adapter_config" ]
