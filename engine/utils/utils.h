@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <string>
+#include "securec.h"
 
 #define CALL_PTR_FUNC(ptr, func, param)                                                                                \
     if ((ptr)) {                                                                                                       \

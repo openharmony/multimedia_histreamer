@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#define HST_LOG_TAG "PluginLoader"
+
 #include "plugin_loader.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
@@ -22,6 +24,8 @@
 #else
 #include <dlfcn.h>
 #endif
+
+#include "foundation/log.h"
 
 using namespace OHOS::Media::Plugin;
 
@@ -38,7 +42,7 @@ PluginLoader::~PluginLoader()
 std::shared_ptr<PluginLoader> PluginLoader::Create(const std::string& name, const std::string& path)
 {
     if (name.empty() || path.empty()) {
-        return std::shared_ptr<PluginLoader>();
+        return {};
     }
     return CheckSymbol(LoadPluginFile(path), name);
 }
@@ -89,9 +93,11 @@ std::shared_ptr<PluginLoader> PluginLoader::CheckSymbol(void* handler, const std
             loader->registerFunc_ = registerFunc;
             loader->unregisterFunc_ = unregisterFunc;
             return loader;
+        } else {
+            MEDIA_LOG_W("register or unregister found is not found in %s", name.c_str());
         }
     }
-    return std::shared_ptr<PluginLoader>();
+    return {};
 }
 
 void PluginLoader::UnLoadPluginFile()
