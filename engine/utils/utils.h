@@ -41,6 +41,19 @@ inline bool StringStartsWith(const std::string& input, const std::string& prefix
     return input.rfind(prefix, 0) == 0;
 }
 
+template <typename ...Args>
+static inline std::string FormatString(const char* format, Args... args)
+{
+    char buffer[BUFSIZ] = {0};
+
+    int length = snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, format, args...);
+    if (length <= 0) {
+        return "Unknown error";
+    }
+
+    return buffer;
+}
+
 template <typename E>
 constexpr typename std::underlying_type<E>::type to_underlying(E e) noexcept
 {

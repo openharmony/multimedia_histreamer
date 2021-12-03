@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "plugin/common/plugin_audio_tags.h"
+#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
@@ -175,19 +176,6 @@ bool Meta::GetPointer(Plugin::MetaID id, void** ptr, size_t& size) const // NOLI
     } else {
         return false;
     }
-}
-
-template <typename ...Args>
-static inline std::string FormatString(const char* format, Args... args)
-{
-    char buffer[BUFSIZ] = {0};
-
-    int length = snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, format, args...);
-    if (length <= 0) {
-        return "Unknown error";
-    }
-
-    return buffer;
 }
 
 std::string Meta::Dump()
