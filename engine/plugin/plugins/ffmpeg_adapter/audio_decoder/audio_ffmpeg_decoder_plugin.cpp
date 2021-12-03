@@ -56,7 +56,7 @@ Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
             continue;
         }
         CodecPluginDef definition;
-        definition.name = "audecoder_" + std::string(codec->name);
+        definition.name = "ffmpegAuDec_" + std::string(codec->name);
         definition.codecType = CodecType::AUDIO_DECODER;
         definition.rank = 100; // 100
         definition.creator = AuFfmpegDecoderCreator;
@@ -286,6 +286,7 @@ Status AudioFfmpegDecoderPlugin::Prepare()
                 auto ite = g_reverseFormatMap.find(audioSampleFormat);
                 if (ite != g_reverseFormatMap.end()) {
                     avCodecContext_->sample_fmt = ite->second;
+                    avCodecContext_->request_sample_fmt = avCodecContext_->sample_fmt;
                 }
             }
             InitCodecContextExtraDataLocked();

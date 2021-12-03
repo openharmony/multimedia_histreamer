@@ -34,7 +34,7 @@ namespace Plugin {
  */
 struct VideoSinkPlugin : public PluginBase {
     /// constructor
-    explicit VideoSinkPlugin(std::string name): PluginBase(std::forward<std::string>(name)) {}
+    explicit VideoSinkPlugin(std::string name): PluginBase(std::move(name)) {}
     /**
      * @brief Pauses video rendering
      *

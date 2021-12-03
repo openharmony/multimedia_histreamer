@@ -35,7 +35,7 @@ namespace Plugin {
  */
 struct SourcePlugin : public PluginBase {
     /// constructor
-    explicit SourcePlugin(std::string name): PluginBase(std::forward<std::string>(name)) {}
+    explicit SourcePlugin(std::string name): PluginBase(std::move(name)) {}
     /**
      * @brief Set the data source to demuxer component.
      *

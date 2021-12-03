@@ -42,7 +42,8 @@ public:
             return {ErrorCode::ERROR_INVALID_PARAMETER_TYPE, Action::ACTION_BUTT};
         }
         auto ret = executor_.DoSetSource(source);
-        return {ret, Action::TRANS_TO_PREPARING};
+        Action action = ret == ErrorCode::SUCCESS ? Action::TRANS_TO_PREPARING : Action::ACTION_BUTT;
+        return {ret, action};
     }
 
     std::tuple<ErrorCode, Action> Stop() override

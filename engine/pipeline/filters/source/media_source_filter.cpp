@@ -278,19 +278,34 @@ void MediaSourceFilter::ReadLoop()
     outPorts_[0]->PushData(bufferPtr);
 }
 
-void MediaSourceFilter::ParseProtocol(const std::shared_ptr<MediaSource>& source)
+bool MediaSourceFilter::GetProtocolByUri()
 {
+    auto const pos = uri_.find("://");
+    if (pos != std::string::npos) {
+        auto prefix = uri_.substr(0, pos);
+        protocol_.append(prefix);
+    } else {
+        protocol_.append("file");
+    }
+    auto ret = true;
+    if (protocol_ == "file") {
+        std::string fullPath;
+        ret = OSAL::ConvertFullPath(uri_, fullPath);
+        if (ret && !fullPath.empty()) {
+            uri_ = fullPath;
+        }
+    }
+    return ret;
+}
+
+bool MediaSourceFilter::ParseProtocol(const std::shared_ptr<MediaSource>& source)
+{
+    bool ret = true;
     OHOS::Media::SourceType srcType = source->GetSourceType();
     MEDIA_LOG_D("sourceType = %d", OHOS::Media::to_underlying(srcType));
     if (srcType == OHOS::Media::SourceType::SOURCE_TYPE_URI) {
         uri_ = source->GetSourceUri();
-        auto const pos = uri_.find("://");
-        if (pos != std::string::npos) {
-            auto prefix = uri_.substr(0, pos);
-            protocol_.append(prefix);
-        } else {
-            protocol_.append("file");
-        }
+        ret = GetProtocolByUri();
     } else if (srcType == SourceType::SOURCE_TYPE_FD) {
         protocol_.append("fd");
         uri_ = source->GetSourceUri();
@@ -298,7 +313,8 @@ void MediaSourceFilter::ParseProtocol(const std::shared_ptr<MediaSource>& source
         protocol_.append("stream");
         uri_.append("stream://");
     }
-    MEDIA_LOG_D("protocol: %s, uri: %s", protocol_.c_str(), uri_.c_str());
+    MEDIA_LOG_I("protocol: %s, uri: %s", protocol_.c_str(), uri_.c_str());
+    return ret;
 }
 
 ErrorCode MediaSourceFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& info, const std::string& name,
@@ -325,7 +341,10 @@ ErrorCode MediaSourceFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& inf
 
 ErrorCode MediaSourceFilter::FindPlugin(const std::shared_ptr<MediaSource>& source)
 {
-    ParseProtocol(source);
+    if (!ParseProtocol(source)) {
+        MEDIA_LOG_E("Invalid source!");
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+    }
     if (protocol_.empty()) {
         MEDIA_LOG_E("protocol_ is empty");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;

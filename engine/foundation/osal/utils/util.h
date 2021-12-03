@@ -16,10 +16,13 @@
 #ifndef HISTREAMER_FOUNDATION_OSAL_UTILS_UTIL_H
 #define HISTREAMER_FOUNDATION_OSAL_UTILS_UTIL_H
 
+#include <string>
+
 namespace OHOS {
 namespace Media {
 namespace OSAL {
 void SleepFor(unsigned ms);
+bool ConvertFullPath(const std::string& partialPath, std::string& fullPath);
 } // namespace OSAL
 } // namespace Media
 } // namespace OHOS

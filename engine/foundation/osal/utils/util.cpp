@@ -14,13 +14,11 @@
  */
 
 #include "util.h"
+#include <climits>
 
-#if !defined(_MSC_VER) && !defined(__clang__)
-#include <unistd.h>
-#endif
-
-#ifdef _MSC_VER
+#ifdef WIN32
 #include <windows.h>
+#include <io.h>
 
 void usleep(__int64 usec)
 {
@@ -32,8 +30,18 @@ void usleep(__int64 usec)
     WaitForSingleObject(timer, INFINITE);
     CloseHandle(timer);
 }
+
+char *realpath(const char *__restrict name, char *__restrict resolved)
+{
+    return _fullpath(resolved, name, PATH_MAX);
+}
+
+int access(const char *name, int type)
+{
+    return _access(name, type);
+}
 #else
-extern "C" int usleep(unsigned);
+#include <unistd.h>
 #endif
 
 namespace OHOS {
@@ -43,6 +51,22 @@ void SleepFor(unsigned ms)
 {
     constexpr int factor = 1000;
     usleep(ms * factor);
+}
+
+bool ConvertFullPath(const std::string& partialPath, std::string& fullPath)
+{
+    if (partialPath.empty() || partialPath.length() >= PATH_MAX) {
+        return false;
+    }
+    char tmpPath[PATH_MAX] = {0};
+    if (realpath(partialPath.c_str(), tmpPath) == nullptr) {
+        return false;
+    }
+    if (access(tmpPath, F_OK) || access(tmpPath, R_OK)) {
+        return false;
+    }
+    fullPath = tmpPath;
+    return true;
 }
 } // namespace OSAL
 } // namespace Media

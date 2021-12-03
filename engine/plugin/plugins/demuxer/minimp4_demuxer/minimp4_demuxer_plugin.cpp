@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
+#define HST_LOG_TAG "Minimp4DemuxerPlugin"
+
 #include "minimp4_demuxer_plugin.h"
 #include <algorithm>
 #include <cstdio>
@@ -62,7 +64,7 @@ MiniMP4DemuxerPlugin::MiniMP4DemuxerPlugin(std::string name)
     MEDIA_LOG_I("MiniMP4DemuxerPlugin, plugin name: %s", pluginName_.c_str());
 }
 
-MiniMP4DemuxerPlugin ~MiniMP4DemuxerPlugin()
+MiniMP4DemuxerPlugin::~MiniMP4DemuxerPlugin()
 {
     MEDIA_LOG_I("~MiniMP4DemuxerPlugin");
 }
@@ -196,7 +198,7 @@ Status MiniMP4DemuxerPlugin::GetMediaInfo(MediaInfo &mediaInfo)
         {Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(4) },
         {Tag::AUDIO_AAC_PROFILE, AudioAacProfile::LC },
         {Tag::AUDIO_AAC_STREAM_FORMAT, AudioAacStreamFormat::MP4ADTS },
-        {Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::F32P },
+        {Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::S16P },
         {Tag::AUDIO_SAMPLE_PER_FRAME, DEFAULT_AUDIO_SAMPLE_PER_FRAME },
         {Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::STEREO } };
     mediaInfo_->tracks.push_back(tagPair);
@@ -337,7 +339,7 @@ int Sniff(const std::string &name, std::shared_ptr<DataSource> dataSource)
     if (dataSource->ReadAt(MP4_HEADER_OFFSET, buffer, static_cast<size_t>(sizeof(m4aCheck))) != Status::OK) {
         return 0;
     }
-    if (memcmp_s(bufData->GetReadOnlyData(), sizeof(m4aCheck), &m4aCheck, sizeof(m4aCheck)) != 0) {
+    if (memcmp(bufData->GetReadOnlyData(), &m4aCheck, sizeof(m4aCheck)) != 0) {
         MEDIA_LOG_E("memcmp m4aCheck is error");
         return 0;
     }

@@ -17,6 +17,10 @@
 
 #include <cstring>
 #include <memory>
+#include <vector>
+
+#include "plugin/common/plugin_audio_tags.h"
+#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
@@ -125,7 +129,7 @@ void Meta::Update(const Meta& meta)
 {
     for (auto& ptr : meta.items_) {
         // we need to copy memory for pointers
-        if (typeid(ptr.second) == typeid(PointerPair)) {
+        if (ptr.second.Type() == typeid(PointerPair)) {
             auto pointerPair = Plugin::AnyCast<PointerPair>(ptr.second);
             SetPointer(ptr.first, pointerPair.first.get(), pointerPair.second);
         } else {
@@ -172,6 +176,24 @@ bool Meta::GetPointer(Plugin::MetaID id, void** ptr, size_t& size) const // NOLI
     } else {
         return false;
     }
+}
+
+std::string Meta::Dump()
+{
+    std::string result = "MetaDump: ";
+    for (auto& ptr : items_) {
+        if (ptr.second.Type() == typeid(PointerPair)) {
+            auto pointerPair = Plugin::AnyCast<PointerPair>(ptr.second);
+            result = FormatString("%s {Meta: %d, PointerPair(%x, %d)},",
+                                  result.c_str(), ptr.first,
+                                  pointerPair.first.get(), pointerPair.second);
+        } else if (ptr.second.Type() == typeid(Plugin::AudioSampleFormat)) {
+            result = FormatString("%s {Meta: %d, AudioSampleFormat(%d)},",
+                                  result.c_str(), ptr.first,
+                                  Plugin::AnyCast<Plugin::AudioSampleFormat>(ptr.second));
+        }
+    }
+    return result;
 }
 } // namespace Plugin
 } // namespace Media

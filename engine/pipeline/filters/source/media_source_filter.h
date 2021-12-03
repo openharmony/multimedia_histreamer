@@ -22,6 +22,7 @@
 #include "source.h"
 #include "foundation/error_code.h"
 #include "osal/thread/task.h"
+#include "osal/utils/util.h"
 #include "utils/blocking_queue.h"
 #include "utils/constants.h"
 #include "utils/type_define.h"
@@ -59,7 +60,8 @@ private:
     static std::string GetUriSuffix(const std::string& uri);
     ErrorCode DoNegotiate(const std::shared_ptr<MediaSource>& source);
     void ReadLoop();
-    void ParseProtocol(const std::shared_ptr<MediaSource>& source);
+    bool GetProtocolByUri();
+    bool ParseProtocol(const std::shared_ptr<MediaSource>& source);
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);
     ErrorCode FindPlugin(const std::shared_ptr<MediaSource>& source);

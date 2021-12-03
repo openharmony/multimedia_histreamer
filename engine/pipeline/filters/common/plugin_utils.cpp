@@ -73,51 +73,6 @@ std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>>
     }
     return infos;
 }
-
-template <typename T>
-ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta>& inMeta, Plugin::PluginType pluginType,
-                              std::shared_ptr<T>& plugin, std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
-                              std::function<std::shared_ptr<T>(const std::string&)> pluginCreator)
-{
-    uint32_t maxRank = 0;
-    std::shared_ptr<Plugin::PluginInfo> info;
-    auto pluginNames = Plugin::PluginManager::Instance().ListPlugins(pluginType);
-    for (const auto& name : pluginNames) {
-        auto tmpInfo = Plugin::PluginManager::Instance().GetPluginInfo(pluginType, name);
-        if (CompatibleWith(tmpInfo->inCaps, *inMeta) && tmpInfo->rank > maxRank) {
-            info = tmpInfo;
-        }
-    }
-    if (info == nullptr) {
-        return ErrorCode::ERROR_UNSUPPORTED_FORMAT;
-    }
-
-    // try to reuse the plugin if their name are the same
-    if (plugin != nullptr && pluginInfo != nullptr) {
-        if (info->name == pluginInfo->name) {
-            if (TranslatePluginStatus(plugin->Reset()) == ErrorCode::SUCCESS) {
-                return ErrorCode::SUCCESS;
-            }
-        }
-        plugin->Deinit();
-    }
-    plugin = pluginCreator(info->name);
-    if (plugin == nullptr) {
-        return ErrorCode::ERROR_UNSUPPORTED_FORMAT;
-    }
-    pluginInfo = info;
-    return ErrorCode::SUCCESS;
-}
-
-template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta>&, Plugin::PluginType,
-                                       std::shared_ptr<Plugin::Codec>&, std::shared_ptr<Plugin::PluginInfo>&,
-                                       std::function<std::shared_ptr<Plugin::Codec>(const std::string&)>);
-template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta>&, Plugin::PluginType,
-                                       std::shared_ptr<Plugin::AudioSink>&, std::shared_ptr<Plugin::PluginInfo>&,
-                                       std::function<std::shared_ptr<Plugin::AudioSink>(const std::string&)>);
-template ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta>&, Plugin::PluginType,
-                                       std::shared_ptr<Plugin::VideoSink>&, std::shared_ptr<Plugin::PluginInfo>&,
-                                       std::function<std::shared_ptr<Plugin::VideoSink>(const std::string&)>);
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
