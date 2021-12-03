@@ -16,6 +16,13 @@
 #ifndef HISTREAMER_FOUNDATION_ERROR_CODE_H
 #define HISTREAMER_FOUNDATION_ERROR_CODE_H
 
+#ifdef WIN32
+// Fix compile error: expected identifier before numeric constant
+// also can add in plugin_loader.cpp before include log.h
+#undef ERROR_INVALID_OPERATION
+#undef ERROR_INVALID_STATE
+#endif
+
 namespace OHOS {
 namespace Media {
 enum struct ErrorCode : int32_t {
