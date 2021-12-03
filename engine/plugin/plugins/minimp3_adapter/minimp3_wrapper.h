@@ -33,7 +33,7 @@ extern "C"
     typedef struct {
         void (*init)(Minimp3WrapperMp3dec *dec);
 
-        int (*decoderFrame)(Minimp3WrapperMp3dec *dec, const uint8_t *mp3, int mp3Bytes, 
+        int (*decoderFrame)(Minimp3WrapperMp3dec *dec, const uint8_t *mp3, int mp3Bytes,
                             Minimp3WrapperMp3dSample *pcm, Minimp3WrapperMp3decFrameInfo *info);
 
         int (*detecBuf)(const uint8_t *buf, size_t bufSize);
@@ -48,17 +48,17 @@ extern "C"
 
     void Minimp3WrapperMp3decInit(Minimp3WrapperMp3dec *dec);
 
-    int Minimp3WrapperMp3decDecodeFrame(Minimp3WrapperMp3dec *dec, const uint8_t *mp3, int mp3Bytes, 
+    int Minimp3WrapperMp3decDecodeFrame(Minimp3WrapperMp3dec *dec, const uint8_t *mp3, int mp3Bytes,
                                         Minimp3WrapperMp3dSample *pcm, Minimp3WrapperMp3decFrameInfo *info);
 
     int Minimp3WrapperMp3decDetectBuf(const uint8_t *buf, size_t bufSize);
 
     int Minimp3WrapperMp3decDetectCb(Minimp3WrapperMp3decIO *io, uint8_t *buf, size_t bufSize);
 
-    int Minimp3WrapperMp3decIterateBuf(const uint8_t *buf, size_t bufSize, 
+    int Minimp3WrapperMp3decIterateBuf(const uint8_t *buf, size_t bufSize,
                                        MINIMP3_WRAPPER_MP3D_ITERATE_CB callback, void *userData);
 
-    int Minimp3WrapperMp3decIterateCb(Minimp3WrapperMp3decIO *io, uint8_t *buf, size_t bufSize, 
+    int Minimp3WrapperMp3decIterateCb(Minimp3WrapperMp3decIO *io, uint8_t *buf, size_t bufSize,
                                       MINIMP3_WRAPPER_MP3D_ITERATE_CB callback, void *userData);
 
     Minimp3DemuxerOp MiniMp3GetOpt(void);

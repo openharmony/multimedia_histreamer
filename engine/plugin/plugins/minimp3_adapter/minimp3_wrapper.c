@@ -26,7 +26,8 @@ void Minimp3WrapperMp3decInit(Minimp3WrapperMp3dec *dec)
     mp3dec_init(dec);
 }
 
-int Minimp3WrapperMp3decDecodeFrame(Minimp3WrapperMp3dec *dec, const uint8_t *mp3, int mp3Bytes, Minimp3WrapperMp3dSample *pcm, Minimp3WrapperMp3decFrameInfo *info)
+int Minimp3WrapperMp3decDecodeFrame(Minimp3WrapperMp3dec *dec, const uint8_t *mp3, int mp3Bytes,
+                                    Minimp3WrapperMp3dSample *pcm, Minimp3WrapperMp3decFrameInfo *info)
 {
     return mp3dec_decode_frame(dec, mp3, mp3Bytes, pcm, info);
 }
@@ -41,18 +42,19 @@ int Minimp3WrapperMp3decDetectCb(Minimp3WrapperMp3decIO *io, uint8_t *buf, size_
     return mp3dec_detect_cb(io, buf, bufSize);
 }
 
-int Minimp3WrapperMp3decIterateBuf(const uint8_t *buf, size_t bufSize, MINIMP3_WRAPPER_MP3D_ITERATE_CB callback, void *userData)
+int Minimp3WrapperMp3decIterateBuf(const uint8_t *buf, size_t bufSize, MINIMP3_WRAPPER_MP3D_ITERATE_CB callback,
+                                   void *userData)
 {
     return mp3dec_iterate_buf(buf, bufSize, callback, userData);
 }
 
-int Minimp3WrapperMp3decIterateCb(Minimp3WrapperMp3decIO *io, uint8_t *buf, size_t bufSize, MINIMP3_WRAPPER_MP3D_ITERATE_CB callback, void *userData)
+int Minimp3WrapperMp3decIterateCb(Minimp3WrapperMp3decIO *io, uint8_t *buf, size_t bufSize,
+                                  MINIMP3_WRAPPER_MP3D_ITERATE_CB callback, void *userData)
 {
     return mp3dec_iterate_cb(io, buf, bufSize, callback, userData);
 }
 
-Minimp3DemuxerOp minimp3DemuxerOp = 
-{
+Minimp3DemuxerOp minimp3DemuxerOp = {
     .init         = Minimp3WrapperMp3decInit,
     .decoderFrame = Minimp3WrapperMp3decDecodeFrame,
     .detecBuf     = Minimp3WrapperMp3decDetectBuf,

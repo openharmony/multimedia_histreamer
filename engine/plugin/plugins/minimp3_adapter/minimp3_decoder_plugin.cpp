@@ -92,7 +92,7 @@ Status Minimp3DecoderPlugin::Prepare()
         samplesPerFrame_ = AnyCast<uint32_t>(mp3Parameter_.find(Tag::AUDIO_SAMPLE_PER_FRAME)->second);
     }
 
-    if (samplesPerFrame_ != MP3_384_SAMPLES_PER_FRAME && samplesPerFrame_ != MP3_576_SAMPLES_PER_FRAME && 
+    if (samplesPerFrame_ != MP3_384_SAMPLES_PER_FRAME && samplesPerFrame_ != MP3_576_SAMPLES_PER_FRAME &&
         samplesPerFrame_ != MP3_1152_SAMPLES_PER_FRAME) {
         return Status::ERROR_INVALID_PARAMETER;
     }
@@ -118,7 +118,7 @@ Status Minimp3DecoderPlugin::Stop()
     return Status::OK;
 }
 
-bool Minimp3DecoderPlugin::IsParameterSupported(Tag tag) 
+bool Minimp3DecoderPlugin::IsParameterSupported(Tag tag)
 {
     (void)tag;
     return false;
@@ -134,7 +134,7 @@ Status Minimp3DecoderPlugin::SetCallback(const std::shared_ptr<Callback>& cb)
     return Status::OK;
 }
 
-Status Minimp3DecoderPlugin::GetPcmDataProcess(const std::shared_ptr<Buffer>& inputBuffer, 
+Status Minimp3DecoderPlugin::GetPcmDataProcess(const std::shared_ptr<Buffer>& inputBuffer,
                                                std::shared_ptr<Buffer>& outputBuffer)
 {
     if (inputBuffer == nullptr) {
@@ -207,7 +207,7 @@ Status Minimp3DecoderPlugin::Flush()
     return Status::OK;
 }
 
-Status Minimp3DecoderPlugin::SetDataCallback(const std::weak_ptr<DataCallback>& dataCallback) 
+Status Minimp3DecoderPlugin::SetDataCallback(const std::weak_ptr<DataCallback>& dataCallback)
 {
     dataCb_ = dataCallback;
     return Status::OK;
@@ -234,7 +234,7 @@ Status Minimp3DecoderPlugin::AudioDecoderMp3Process(std::shared_ptr<Buffer> inBu
         return Status::ERROR_UNKNOWN;
     }
     int16_t *pcmPtr = (int16_t *)outData->GetWritableData(probePcmLength, 0);
-    int sampleCount = minimp3DecoderImpl_.decoderFrame(&mp3DecoderAttr_.mp3DecoderHandle, inData->GetReadOnlyData(), 
+    int sampleCount = minimp3DecoderImpl_.decoderFrame(&mp3DecoderAttr_.mp3DecoderHandle, inData->GetReadOnlyData(),
                                                        inData->GetSize(), pcmPtr, &frameInfo);
     if (sampleCount > 0) {
         if (frameInfo.frame_bytes) {
@@ -282,14 +282,15 @@ namespace {
         DiscreteCapability<uint32_t> values = {8000, 16000, 22050, 44100, 48000, 32000};
         cap.AppendDiscreteKeys(Capability::Key::AUDIO_SAMPLE_RATE, values);
 
-        DiscreteCapability<AudioChannelLayout> channelLayoutValues = {AudioChannelLayout::MONO, AudioChannelLayout::STEREO};
+        DiscreteCapability<AudioChannelLayout> channelLayoutValues = {
+                AudioChannelLayout::MONO, AudioChannelLayout::STEREO};
         cap.AppendDiscreteKeys<AudioChannelLayout>(Capability::Key::AUDIO_CHANNEL_LAYOUT, channelLayoutValues);
 
         definition.inCaps.push_back(cap);
 
         Capability outCap(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
         outCap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT,
-                                                     {AudioSampleFormat::S32, AudioSampleFormat::S16, AudioSampleFormat::S16P});
+                {AudioSampleFormat::S32, AudioSampleFormat::S16, AudioSampleFormat::S16P});
         definition.outCaps.emplace_back(outCap);
     }
 }

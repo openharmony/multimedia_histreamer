@@ -185,12 +185,12 @@ std::string Meta::Dump()
         if (ptr.second.Type() == typeid(PointerPair)) {
             auto pointerPair = Plugin::AnyCast<PointerPair>(ptr.second);
             result = FormatString("%s {Meta: %d, PointerPair(%x, %d)},",
-                                   result.c_str(), ptr.first,
-                                   pointerPair.first.get(), pointerPair.second);
+                                  result.c_str(), ptr.first,
+                                  pointerPair.first.get(), pointerPair.second);
         } else if (ptr.second.Type() == typeid(Plugin::AudioSampleFormat)) {
             result = FormatString("%s {Meta: %d, AudioSampleFormat(%d)},",
-                                   result.c_str(), ptr.first,
-                                   Plugin::AnyCast<Plugin::AudioSampleFormat>(ptr.second));
+                                  result.c_str(), ptr.first,
+                                  Plugin::AnyCast<Plugin::AudioSampleFormat>(ptr.second));
         }
     }
     return result;
