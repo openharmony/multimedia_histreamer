@@ -29,10 +29,9 @@ HiStreamer插件列表如下:
 | --         | --          | --  | --       | --           | --          |
 | FFMPEG Adapter| plugins/ffmpeg_adapter | FFMPEG | LGPL etc. | 解封装:mp3,m4a,mp4,wav<br>解码:mp3,aac | 支持动态链接的<br>small/standard设备 |
 | File Source | plugins/source/file_source | FileSystem | Apache | 读取文件数据 | 所有设备 |
-| Minimp3 Demuxer | plugins/demuxer/minimp3_demuxer | minimp3 | CC0 | 解封装: mp3 | 所有设备 |
+| Minimp3 Adapter | plugins/minimp3_adapter | minimp3 | CC0 | 解封装: mp3<br>解码: mp3 | 所有设备 |
 | Minimp4 Demuxer | plugins/demuxer/minimp4_demuxer | minimp4 | CC0 | 解封装: m4a | 所有设备 |
 | Aac Demuxer | plugins/demuxer/aac_demuxer | NA | Apache | 解封装: aac | 所有设备 |
-| Minimp3 Decoder | plugins/decoder/minimp3_decoder | minimp3 | CC0 | 解码: mp3 | 所有设备 |
 | HDI Sink | plugins/hdi_adapter | Audio HDI | Apache | 播放音乐 | mini/small设备 |
 
 ## 目录<a name="section161941989596"></a>
@@ -58,9 +57,10 @@ HiStreamer插件列表如下:
 │     ├─core                           # 插件框架
 │     ├─interface                      # 插件接口
 │     └─plugins                        # 若干插件实现
-│         ├─demuxer                    # 解封装插件
+│         ├─minimp3_adapter            # minimp3适配
 │         ├─ffmpeg_adapter             # FFMPEG适配(适配成封装解封装、编解码插件)
 │         ├─hdi_adapter                # HDI适配(适配成输出插件)
+│         ├─demuxer                    # 解封装插件
 │         ├─sink                       # 输出插件
 │         └─source                     # 数据源插件
 └─interface                            # 引擎对外接口
