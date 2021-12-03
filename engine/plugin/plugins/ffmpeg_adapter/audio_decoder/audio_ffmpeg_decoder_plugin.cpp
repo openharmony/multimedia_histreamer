@@ -286,6 +286,7 @@ Status AudioFfmpegDecoderPlugin::Prepare()
                 auto ite = g_reverseFormatMap.find(audioSampleFormat);
                 if (ite != g_reverseFormatMap.end()) {
                     avCodecContext_->sample_fmt = ite->second;
+                    avCodecContext_->request_sample_fmt = avCodecContext_->sample_fmt;
                 }
             }
             InitCodecContextExtraDataLocked();
