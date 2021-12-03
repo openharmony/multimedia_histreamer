@@ -31,14 +31,9 @@ if (defined(ohos_lite)) {
       deps += [ "ffmpeg_adapter:plugin_ffmpeg_adapter" ]
     }
 
-    if (defined(enable_histreamer_plugin_minimp3_demuxer) &&
-        enable_histreamer_plugin_minimp3_demuxer) {
-      deps += [ "demuxer/minimp3_demuxer:plugin_minimp3_demuxer" ]
-    }
-
-    if (defined(enable_histreamer_plugin_minimp3_decoder) &&
-        enable_histreamer_plugin_minimp3_decoder) {
-      deps += [ "decoder/minimp3_decoder:plugin_minimp3_decoder" ]
+    if (defined(enable_histreamer_plugin_minimp3_adapter) &&
+        enable_histreamer_plugin_minimp3_adapter) {
+      deps += [ "minimp3_adapter:plugin_minimp3_adapter" ]
     }
 
     if (defined(enable_histreamer_plugin_minimp4_demuxer) &&
@@ -85,14 +80,12 @@ if (defined(ohos_lite)) {
         ]
       }
 
-      if (defined(enable_histreamer_plugin_minimp3_demuxer) &&
-          enable_histreamer_plugin_minimp3_demuxer) {
-        args += [ "Minimp3Demuxer" ]
-      }
-
-      if (defined(enable_histreamer_plugin_minimp3_decoder) &&
-          enable_histreamer_plugin_minimp3_decoder) {
-        args += [ "Minimp3Decoder" ]
+      if (defined(enable_histreamer_plugin_minimp3_adapter) &&
+          enable_histreamer_plugin_minimp3_adapter) {
+        args += [
+          "Minimp3Demuxer",
+          "Minimp3Decoder",
+        ]
       }
 
       if (defined(enable_histreamer_plugin_minimp4_demuxer) &&
