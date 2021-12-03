@@ -50,11 +50,6 @@ bool TranslateIntoParameter(const int &key, OHOS::Media::Plugin::Tag &tag);
 
 std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>>
         FindAvailablePlugins(const Plugin::Capability& upStreamCaps, Plugin::PluginType pluginType);
-
-template <typename T>
-ErrorCode FindPluginAndUpdate(const std::shared_ptr<const Plugin::Meta> &inMeta,
-    Plugin::PluginType pluginType, std::shared_ptr<T>& plugin, std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
-    std::function<std::shared_ptr<T>(const std::string&)> pluginCreator);
 }
 }
 }
