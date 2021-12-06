@@ -12,89 +12,85 @@
 # limitations under the License.
 #
 
-if (defined(ohos_lite)) {
-  import("//build/lite/config/component/lite_component.gni")
-
-  declare_args() {
-    if (ohos_kernel_type == "liteos_m") {
-      plugin_dynamic_register = false
-    } else {
-      plugin_dynamic_register = true
-    }
+declare_args() {
+  if (ohos_kernel_type == "liteos_m") {
+    plugin_dynamic_register = false
+  } else {
+    plugin_dynamic_register = true
   }
+}
 
-  group("histreamer_plugin") {
-    deps = [
-      ":histreamer_plugin_core",
-      ":histreamer_plugin_intf",
-      "plugins:histreamer_plugin_store",
-    ]
-  }
+group("histreamer_plugin") {
+  deps = [
+    ":histreamer_plugin_core",
+    ":histreamer_plugin_intf",
+    "plugins:histreamer_plugin_store",
+  ]
+}
 
-  # build plugin interface
-  config("hst_plugin_intf_config") {
-    include_dirs = [ "//foundation/multimedia/histreamer/engine/plugin" ]
-  }
+# build plugin interface
+config("hst_plugin_intf_config") {
+  include_dirs = [ "//foundation/multimedia/histreamer/engine/plugin" ]
+}
 
-  source_set("histreamer_plugin_intf") {
-    sources = [ "common/plugin_buffer.cpp" ]
-    public_configs = [ ":hst_plugin_intf_config" ]
-    if (ohos_kernel_type == "liteos_m") {
-      public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
-    } else {
-      public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
-    }
-    cflags = [
-      "-fPIC",
-      "-Wall",
-    ]
-    cflags_cc = cflags
+source_set("histreamer_plugin_intf") {
+  sources = [ "common/plugin_buffer.cpp" ]
+  public_configs = [ ":hst_plugin_intf_config" ]
+  if (ohos_kernel_type == "liteos_m") {
+    public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  } else {
+    public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
   }
+  cflags = [
+    "-fPIC",
+    "-Wall",
+  ]
+  cflags_cc = cflags
+}
 
-  config("hst_plugin_core_config") {
-    include_dirs = [
-      "//foundation/multimedia/histreamer/engine/",
-      "//foundation/multimedia/histreamer/engine/plugin",
-      "//foundation/multimedia/histreamer/engine/foundation",
-      "//foundation/multimedia/histreamer/engine/utils",
-      "//foundation/multimedia/utils/lite/interfaces/kits",
-    ]
-  }
+config("hst_plugin_core_config") {
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine/",
+    "//foundation/multimedia/histreamer/engine/plugin",
+    "//foundation/multimedia/histreamer/engine/foundation",
+    "//foundation/multimedia/histreamer/engine/utils",
+    "//foundation/multimedia/utils/lite/interfaces/kits",
+  ]
+}
 
-  source_set("histreamer_plugin_core") {
-    defines = [ "MEDIA_OHOS" ]
-    sources = [
-      "core/audio_sink.cpp",
-      "core/base.cpp",
-      "core/codec.cpp",
-      "core/demuxer.cpp",
-      "core/plugin_manager.cpp",
-      "core/plugin_meta.cpp",
-      "core/plugin_register.cpp",
-      "core/plugin_wrapper.cpp",
-      "core/source.cpp",
-      "core/video_sink.cpp",
-    ]
-    if (plugin_dynamic_register) {
-      sources += [ "core/plugin_loader.cpp" ]
-      defines += [ "DYNAMIC_PLUGINS" ]
-    }
-    public_configs = [ ":hst_plugin_core_config" ]
-    public_deps = [
-      ":histreamer_plugin_intf",
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
-    ]
-    if (ohos_kernel_type == "liteos_m") {
-      public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
-    } else {
-      public_deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
-    }
-    public_deps += [ "plugins:gen_plugin_static_header" ]
-    cflags = [
-      "-fPIC",
-      "-Wall",
-    ]
-    cflags_cc = cflags
+source_set("histreamer_plugin_core") {
+  defines = [ "MEDIA_OHOS" ]
+  sources = [
+    "core/audio_sink.cpp",
+    "core/base.cpp",
+    "core/codec.cpp",
+    "core/demuxer.cpp",
+    "core/plugin_manager.cpp",
+    "core/plugin_meta.cpp",
+    "core/plugin_register.cpp",
+    "core/plugin_wrapper.cpp",
+    "core/source.cpp",
+    "core/video_sink.cpp",
+  ]
+  if (plugin_dynamic_register) {
+    sources += [ "core/plugin_loader.cpp" ]
+    defines += [ "DYNAMIC_PLUGINS" ]
   }
+  public_configs = [ ":hst_plugin_core_config" ]
+  public_deps = [
+    ":histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+  ]
+  if (ohos_kernel_type == "liteos_m") {
+    public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+  } else {
+    public_deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
+  }
+  public_deps += [ "plugins:gen_plugin_static_header" ]
+  cflags = [
+    "-fPIC",
+    "-Wall",
+  ]
+  cflags_cc = cflags
 }

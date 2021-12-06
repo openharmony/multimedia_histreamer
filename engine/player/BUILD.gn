@@ -12,38 +12,53 @@
 # limitations under the License.
 #
 
-if (defined(ohos_lite)) {
-  import("//build/lite/config/component/lite_component.gni")
-
-  config("histreamer_player_config") {
-    include_dirs = [
-      "//foundation/multimedia/histreamer/engine",
-      "//foundation/multimedia/histreamer/engine/player",
-      "//foundation/multimedia/histreamer/interface",
-      "//foundation/multimedia/media_lite/interfaces/innerkits",
-      "//foundation/multimedia/media_lite/interfaces/kits/player_lite",
+config("histreamer_player_config") {
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine",
+    "//foundation/multimedia/histreamer/engine/player",
+    "//foundation/multimedia/histreamer/interface",
+    "//foundation/multimedia/media_lite/interfaces/innerkits",
+    "//foundation/multimedia/media_lite/interfaces/kits/player_lite",
+  ]
+  if (defined(ohos_lite)) {
+    include_dirs += [ "//foundation/multimedia/histreamer/engine/player/lite" ]
+  } else {
+    include_dirs += [
+      "//foundation/multimedia/histreamer/engine/factory",
+      "//foundation/multimedia/histreamer/engine/player/standard",
     ]
   }
+}
 
-  source_set("histreamer_player") {
-    sources = [
-      "internal/state.cpp",
-      "internal/state_machine.cpp",
+source_set("histreamer_player") {
+  sources = [
+    "internal/state.cpp",
+    "internal/state_machine.cpp",
+  ]
+  public_configs = [ ":histreamer_player_config" ]
+  public_deps = [
+    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline",
+    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+  ]
+  if (defined(ohos_lite)) {
+    sources += [
       "lite/hiplayer.cpp",
       "lite/hiplayer_impl.cpp",
     ]
-    public_configs = [ ":histreamer_player_config" ]
-    public_deps = [
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline",
-      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
-      "//foundation/multimedia/utils/lite:media_common",
+    public_deps += [ "//foundation/multimedia/utils/lite:media_common" ]
+  } else {
+    sources += [
+      "../factory/hst_engine_factory.cpp",
+      "standard/hiplayer_impl.cpp",
+      "standard/media_utils.cpp",
     ]
-    defines = [ "MEDIA_OHOS" ]
-    cflags = [
-      "-fPIC",
-      "-Wall",
-    ]
-    cflags_cc = cflags
   }
+  print("player source: ", sources)
+  defines = [ "MEDIA_OHOS" ]
+  cflags = [
+    "-fPIC",
+    "-Wall",
+  ]
+  cflags_cc = cflags
 }

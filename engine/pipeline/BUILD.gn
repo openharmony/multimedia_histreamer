@@ -12,48 +12,44 @@
 # limitations under the License.
 #
 
-if (defined(ohos_lite)) {
-  import("//build/lite/config/component/lite_component.gni")
+# build plugin interface
+config("histreamer_pipeline_config") {
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine",
+    "//foundation/multimedia/histreamer/engine/pipeline",
+    "//foundation/multimedia/histreamer/engine/pipeline/filters",
+    "//foundation/multimedia/histreamer/engine/pipeline/core",
+  ]
+}
 
-  # build plugin interface
-  config("histreamer_pipeline_config") {
-    include_dirs = [
-      "//foundation/multimedia/histreamer/engine",
-      "//foundation/multimedia/histreamer/engine/pipeline",
-      "//foundation/multimedia/histreamer/engine/pipeline/filters",
-      "//foundation/multimedia/histreamer/engine/pipeline/core",
-    ]
-  }
-
-  source_set("histreamer_pipeline") {
-    sources = [
-      "core/compatible_check.cpp",
-      "core/filter_base.cpp",
-      "core/pipeline_core.cpp",
-      "core/port.cpp",
-      "factory/filter_factory.cpp",
-      "filters/codec/audio_decoder/audio_decoder_filter.cpp",
-      "filters/codec/decoder_filter_base.cpp",
-      "filters/common/plugin_settings.cpp",
-      "filters/common/plugin_utils.cpp",
-      "filters/demux/data_packer.cpp",
-      "filters/demux/demuxer_filter.cpp",
-      "filters/demux/type_finder.cpp",
-      "filters/sink/audio_sink/audio_sink_filter.cpp",
-      "filters/source/media_source_filter.cpp",
-    ]
-    public_configs = [ ":histreamer_pipeline_config" ]
-    public_deps = [
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_core",
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
-    ]
-    cflags = [
-      "-fPIC",
-      "-Wall",
-    ]
-    cflags_cc = cflags
-    defines = [ "MEDIA_OHOS" ]
-  }
+source_set("histreamer_pipeline") {
+  sources = [
+    "core/compatible_check.cpp",
+    "core/filter_base.cpp",
+    "core/pipeline_core.cpp",
+    "core/port.cpp",
+    "factory/filter_factory.cpp",
+    "filters/codec/audio_decoder/audio_decoder_filter.cpp",
+    "filters/codec/decoder_filter_base.cpp",
+    "filters/common/plugin_settings.cpp",
+    "filters/common/plugin_utils.cpp",
+    "filters/demux/data_packer.cpp",
+    "filters/demux/demuxer_filter.cpp",
+    "filters/demux/type_finder.cpp",
+    "filters/sink/audio_sink/audio_sink_filter.cpp",
+    "filters/source/media_source_filter.cpp",
+  ]
+  public_configs = [ ":histreamer_pipeline_config" ]
+  public_deps = [
+    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_core",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+  ]
+  cflags = [
+    "-fPIC",
+    "-Wall",
+  ]
+  cflags_cc = cflags
+  defines = [ "MEDIA_OHOS" ]
 }
