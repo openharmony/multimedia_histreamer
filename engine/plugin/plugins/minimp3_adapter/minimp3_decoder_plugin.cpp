@@ -289,8 +289,7 @@ namespace {
         definition.inCaps.push_back(cap);
 
         Capability outCap(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
-        outCap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT,
-                {AudioSampleFormat::S32, AudioSampleFormat::S16, AudioSampleFormat::S16P});
+        outCap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, {AudioSampleFormat::S16});
         definition.outCaps.emplace_back(outCap);
     }
 }
