@@ -12,26 +12,21 @@
 # limitations under the License.
 #
 
-if (defined(ohos_lite)) {
-  import("//build/lite/config/component/lite_component.gni")
+group("plugin_file_source") {
+  deps = [ ":histreamer_plugin_FileSource" ]
+}
 
-  group("plugin_file_source") {
-    deps = [ ":histreamer_plugin_FileSource" ]
-  }
+if (ohos_kernel_type == "liteos_m") {
+  target_type = "static_library"
+} else {
+  target_type = "shared_library"
+}
 
-  plugin_file_source_src = [ "file_source_plugin.cpp" ]
-
-  lite_library("histreamer_plugin_FileSource") {
-    if (ohos_kernel_type == "liteos_m") {
-      target_type = "static_library"
-    } else {
-      target_type = "shared_library"
-    }
-    sources = plugin_file_source_src
-    public_deps = [
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
-    ]
-  }
+target(target_type, "histreamer_plugin_FileSource") {
+  sources = [ "file_source_plugin.cpp" ]
+  public_deps = [
+    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+  ]
 }

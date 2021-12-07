@@ -12,9 +12,7 @@
 # limitations under the License.
 #
 
-if (defined(ohos_lite)) {
-  import("//build/lite/config/subsystem/multimedia/config.gni")
-}
+import("//foundation/multimedia/histreamer/config.gni")
 
 config("histreamer_foundation_config") {
   include_dirs = [

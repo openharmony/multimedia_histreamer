@@ -54,8 +54,10 @@ config("hst_plugin_core_config") {
     "//foundation/multimedia/histreamer/engine/plugin",
     "//foundation/multimedia/histreamer/engine/foundation",
     "//foundation/multimedia/histreamer/engine/utils",
-    "//foundation/multimedia/utils/lite/interfaces/kits",
   ]
+  if (defined(ohos_lite)) {
+    include_dirs += [ "//foundation/multimedia/utils/lite/interfaces/kits" ]
+  }
 }
 
 source_set("histreamer_plugin_core") {
