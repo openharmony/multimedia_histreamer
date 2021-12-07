@@ -130,7 +130,7 @@ Status Minimp3DemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
                 return Status::ERROR_UNKNOWN;
         }
     }
-
+    mp3DemuxerAttr_.bitRate = mp3DemuxerRst_.frameBitrateKbps;
     return Status::OK;
 }
 
@@ -180,7 +180,7 @@ Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
 Status Minimp3DemuxerPlugin::SeekTo(int32_t trackId, int64_t timeStampUs, SeekMode mode)
 {
     uint64_t pos = 0;
-    uint32_t targetTtimeS = static_cast<uint32_t>(timeStampUs / (1000 * 1000));
+    uint32_t targetTtimeS = static_cast<uint32_t>(timeStampUs / 1000);
     if (AudioDemuxerMp3GetSeekPosition(targetTtimeS, &pos) == 0) {
         mp3DemuxerRst_.usedInputLength = pos;
     } else {
