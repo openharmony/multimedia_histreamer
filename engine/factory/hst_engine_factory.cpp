@@ -58,6 +58,9 @@ std::unique_ptr<IAVMetadataHelperEngine> HstEngineFactory::CreateAVMetadataHelpe
 extern "C" {
 #endif
 
+#if defined(WIN32)
+__declspec(dllexport)
+#endif
 __attribute__((visibility("default"))) OHOS::Media::IEngineFactory* CreateEngineFactory()
 {
     return new (std::nothrow) OHOS::Media::HstEngineFactory();
