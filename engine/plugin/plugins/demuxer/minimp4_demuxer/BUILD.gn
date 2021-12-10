@@ -16,9 +16,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   import("//build/lite/config/subsystem/multimedia/config.gni")
   group("plugin_minimp4_demuxer") {
-    if (ohos_kernel_type == "liteos_m") {
-      deps = [ ":histreamer_plugin_Minimp4Demuxer" ]
-    }
+    deps = [ ":histreamer_plugin_Minimp4Demuxer" ]
   }
   config("plugin_minimp4_demuxer_adapter_config") {
     include_dirs = [

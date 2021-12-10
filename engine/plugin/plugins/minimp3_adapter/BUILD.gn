@@ -20,6 +20,7 @@ if (defined(ohos_lite)) {
       deps = [ ":histreamer_plugin_Minimp3_static" ]
     } else {
       deps = []
+      deps += [ ":histreamer_plugin_Minimp3Demuxer" ]
     }
   }
 

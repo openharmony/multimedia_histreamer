@@ -16,11 +16,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   group("plugin_stream_source") {
-    if (ohos_kernel_type == "liteos_m") {
-      deps = [ ":histreamer_plugin_StreamSource" ]
-    } else {
-      deps = []
-    }
+    deps = [ ":histreamer_plugin_StreamSource" ]
   }
 
   plugin_stream_source_src = [ "stream_source_plugin.cpp" ]
