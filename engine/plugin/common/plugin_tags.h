@@ -76,29 +76,29 @@ enum struct Tag : uint32_t {
     SECTION_VIDEO_SPECIFIC_START = static_cast<uint8_t>(TagSection::VIDEO_SPECIFIC) << 16U,   // video specific tag
 
     /* -------------------- regular tag -------------------- */
-    MIME = SECTION_REGULAR_START + 1, // string
+    MIME = SECTION_REGULAR_START + 1, ///< std::string
     TRACK_ID,                         ///< uint32_t, track id
     REQUIRED_OUT_BUFFER_CNT,          ///< uint32_t required buffer count of plugin; read only tag
     PARAMETER_STRUCT,                 ///< @see ParameterStruct
 
     /* -------------------- media tag -------------------- */
     MEDIA_TITLE = SECTION_MEDIA_START + 1, // string
-    MEDIA_ARTIST,                          ///< string, artist
-    MEDIA_LYRICIST,                        ///< string, lyricist
-    MEDIA_ALBUM,                           ///< string, album
-    MEDIA_ALBUM_ARTIST,                    ///< string, album artist
-    MEDIA_DATE,                            ///< string, media date, format：YYYY-MM-DD
-    MEDIA_COMMENT,                         ///< string, comment
-    MEDIA_GENRE,                           ///< string, genre
-    MEDIA_COPYRIGHT,                       ///< string, copyright
-    MEDIA_LANGUAGE,                        ///< string, language
-    MEDIA_DESCRIPTION,                     ///< string, description
-    MEDIA_LYRICS,                          ///< string, cyrics
+    MEDIA_ARTIST,                          ///< std::string, artist
+    MEDIA_LYRICIST,                        ///< std::string, lyricist
+    MEDIA_ALBUM,                           ///< std::string, album
+    MEDIA_ALBUM_ARTIST,                    ///< std::string, album artist
+    MEDIA_DATE,                            ///< std::string, media date, format：YYYY-MM-DD
+    MEDIA_COMMENT,                         ///< std::string, comment
+    MEDIA_GENRE,                           ///< std::string, genre
+    MEDIA_COPYRIGHT,                       ///< std::string, copyright
+    MEDIA_LANGUAGE,                        ///< std::string, language
+    MEDIA_DESCRIPTION,                     ///< std::string, description
+    MEDIA_LYRICS,                          ///< std::string, cyrics
     MEDIA_DURATION,                        ///< uint64_t, duration
     MEDIA_FILE_SIZE,                       ///< uint64_t, file size
     MEDIA_BITRATE,                         ///< int64_t, bite rate
-    MEDIA_FILE_EXTENSION,                  ///< string, file extension
-    MEDIA_CODEC_CONFIG,                    ///< vector<uint8>, codec config. e.g. AudioSpecificConfig for mp4
+    MEDIA_FILE_EXTENSION,                  ///< std::string, file extension
+    MEDIA_CODEC_CONFIG,                    ///< std::vector<uint8_t>, codec config. e.g. AudioSpecificConfig for mp4
     MEDIA_POSITION, ///< uint64_t : The byte position within media stream/file
 
     /* -------------------- audio universal tag -------------------- */

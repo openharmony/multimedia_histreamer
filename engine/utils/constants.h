@@ -51,6 +51,9 @@ extern const char* const MEDIA_MIME_AUDIO_AMR_WB;
 extern const char* const MEDIA_MIME_VIDEO_RAW;
 extern const char* const MEDIA_MIME_VIDEO_AVC;
 
+// container mime
+extern const char* const MEDIA_MIME_CONTAINER_MP4;
+
 bool IsAudioMime(const std::string& mime);
 bool IsVideoMime(const std::string& mime);
 bool IsRawAudio(const std::string& mime);

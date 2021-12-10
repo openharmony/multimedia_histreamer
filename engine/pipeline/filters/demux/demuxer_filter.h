@@ -71,12 +71,12 @@ private:
     enum class DemuxerState { DEMUXER_STATE_NULL, DEMUXER_STATE_PARSE_HEADER, DEMUXER_STATE_PARSE_FRAME };
 
     struct StreamTrackInfo {
-        uint32_t streamIdx = 0;
+        uint32_t trackId = 0;
         std::shared_ptr<OutPort> port = nullptr;
         bool needNegoCaps = false;
 
-        StreamTrackInfo(uint32_t streamIdx, std::shared_ptr<OutPort> port, bool needNegoCaps)
-            : streamIdx(streamIdx), port(std::move(port)), needNegoCaps(needNegoCaps)
+        StreamTrackInfo(uint32_t trackId, std::shared_ptr<OutPort> port, bool needNegoCaps)
+            : trackId(trackId), port(std::move(port)), needNegoCaps(needNegoCaps)
         {
         }
     };
@@ -107,13 +107,13 @@ private:
 
     bool PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo);
 
-    ErrorCode ReadFrame(AVBuffer& buffer, uint32_t& streamIndex);
+    ErrorCode ReadFrame(AVBuffer& buffer, uint32_t& trackId);
 
-    std::shared_ptr<Plugin::Meta> GetStreamMeta(uint32_t streamIndex);
+    std::shared_ptr<Plugin::Meta> GetTrackMeta(uint32_t trackId);
 
     void SendEventEos();
 
-    void HandleFrame(const AVBufferPtr& buffer, uint32_t streamIndex);
+    void HandleFrame(const AVBufferPtr& buffer, uint32_t trackId);
 
     void NegotiateDownstream();
 

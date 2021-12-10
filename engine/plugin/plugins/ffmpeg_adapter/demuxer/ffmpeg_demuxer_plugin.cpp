@@ -36,21 +36,6 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace {
-const std::map<std::string, MetaID> TAG_MAP = {
-    {"title", MetaID::MEDIA_TITLE},
-    {"artist", MetaID::MEDIA_ARTIST},
-    {"lyricist", MetaID::MEDIA_LYRICIST},
-    {"album", MetaID::MEDIA_ALBUM},
-    {"album-artist", MetaID::MEDIA_ALBUM_ARTIST},
-    {"date", MetaID::MEDIA_DATE},
-    {"comment", MetaID::MEDIA_COMMENT},
-    {"genre", MetaID::MEDIA_GENRE},
-    {"copyright", MetaID::MEDIA_COPYRIGHT},
-    {"language", MetaID::MEDIA_LANGUAGE},
-    {"description", MetaID::MEDIA_DESCRIPTION},
-    {"lyrics", MetaID::MEDIA_LYRICS},
-};
-
 std::map<std::string, std::shared_ptr<AVInputFormat>> g_pluginInputFormat;
 
 int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource);
@@ -245,7 +230,7 @@ Status FFmpegDemuxerPlugin::GetSelectedTracks(std::vector<int32_t>& trackIds)
 
 bool FFmpegDemuxerPlugin::ConvertAVPacketToFrameInfo(const AVStream& avStream, const AVPacket& pkt, Buffer& frameInfo)
 {
-    frameInfo.streamID = static_cast<uint32_t>(pkt.stream_index);
+    frameInfo.trackID = static_cast<uint32_t>(pkt.stream_index);
     int64_t pts = (pkt.pts > 0) ? pkt.pts : 0;
     frameInfo.pts = ConvertTimeFromFFmpeg(pts, avStream.time_base);
     frameInfo.dts = static_cast<uint32_t>(pkt.dts);
@@ -407,12 +392,13 @@ void FFmpegDemuxerPlugin::SaveFileInfoToMetaInfo(TagMap& meta)
     meta.clear();
     AVDictionaryEntry* tag = nullptr;
     while ((tag = av_dict_get(formatContext_->metadata, "", tag, AV_DICT_IGNORE_SUFFIX))) {
-        auto it = TAG_MAP.find(tag->key);
-        if (it == TAG_MAP.end()) {
+        Tag target;
+        auto found = FindTagByAvMetaName(tag->key, target);
+        if (!found) {
             continue;
         }
-        if (it->second != Media::Plugin::MetaID::MEDIA_DATE) {
-            meta.insert({Tag(it->second), std::string(tag->value)});
+        if (target != Media::Plugin::Tag::MEDIA_DATE) {
+            meta.insert({target, std::string(tag->value)});
         } else {
             uint32_t year = 0;
             uint32_t month = 0;
