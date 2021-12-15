@@ -59,7 +59,7 @@ struct PluginInfo {
  * Extra information about the plugin.
  * Describes the input source types supported by the Source plugin for record.
  */
-#define PLUGIN_INFO_EXTRA_INPUT_TYPE        "input_type"  // NOLINT: macro constant
+#define PLUGIN_INFO_EXTRA_INPUT_TYPE        "inputType"  // NOLINT: macro constant
 
 /**
  * Extra information about the plugin.

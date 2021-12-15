@@ -26,7 +26,7 @@
 #endif
 #include "engine_intf/i_player_engine.h"
 #include "filters/demux/demuxer_filter.h"
-#include "filters/source/media_source_filter.h"
+#include "filters/source/media_source/media_source_filter.h"
 #include "foundation/error_code.h"
 #include "internal/state_machine.h"
 #include "osal/thread/condition_variable.h"

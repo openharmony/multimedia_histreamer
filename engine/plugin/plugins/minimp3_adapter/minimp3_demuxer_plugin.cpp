@@ -569,7 +569,7 @@ namespace {
                 dataSource->GetSize(tmpSize);
                 MEDIA_LOG_I("tmp_size %d", tmpSize);
             }
-            if (tmp_size < PROBE_READ_LENGTH) {
+            if (tmpSize < PROBE_READ_LENGTH) {
                 MEDIA_LOG_I("tmpSize %d", tmpSize);
                 readSize = tmpSize;
             }

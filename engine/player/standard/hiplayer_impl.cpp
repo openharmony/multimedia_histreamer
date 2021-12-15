@@ -454,6 +454,7 @@ int32_t HiPlayerImpl::SetLooping(bool loop)
 int32_t HiPlayerImpl::SetObs(const std::weak_ptr<IPlayerEngineObs>& obs)
 {
     obs_ = obs;
+    return TransErrorCode(ErrorCode::SUCCESS);
 }
 
 int32_t HiPlayerImpl::Reset()

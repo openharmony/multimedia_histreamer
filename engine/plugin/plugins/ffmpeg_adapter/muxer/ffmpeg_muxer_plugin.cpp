@@ -100,6 +100,7 @@ Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg
         g_pluginOutputFmt[pluginName] = std::shared_ptr<AVOutputFormat>(const_cast<AVOutputFormat*>(outputFormat),
                                                                         [](AVOutputFormat* ptr){}); // do not delete
     }
+    return Plugin::Status::OK;
 }
 PLUGIN_DEFINITION(FFMpegMuxers, Plugin::LicenseType::LGPL, RegisterMuxerPlugins, []{g_pluginOutputFmt.clear();})
 
@@ -295,6 +296,7 @@ Status FFmpegMuxerPlugin::Release()
 {
     formatContext_.reset();
     outputFormat_.reset();
+    return Status::OK;
 }
 
 Status FFmpegMuxerPlugin::InitFormatCtxLocked()
