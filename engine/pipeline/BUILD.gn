@@ -37,7 +37,7 @@ source_set("histreamer_pipeline") {
     "filters/demux/demuxer_filter.cpp",
     "filters/demux/type_finder.cpp",
     "filters/sink/audio_sink/audio_sink_filter.cpp",
-    "filters/source/media_source_filter.cpp",
+    "filters/source/media_source/media_source_filter.cpp",
   ]
   public_configs = [ ":histreamer_pipeline_config" ]
   public_deps = [

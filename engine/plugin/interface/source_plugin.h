@@ -119,7 +119,8 @@ struct SourcePlugin : public PluginBase {
  * @version 1.0
  */
 struct SourcePluginDef : public PluginDefBase {
-    std::string protocol;                    ///< Protocols supported by demuxer
+    std::string protocol;                    ///< Protocols supported by playback source
+    std::string input_type;                  ///< Input type supported by record source
     CapabilitySet outCaps;                   ///< Plug-in output capability, For details, @see Capability.
     PluginCreatorFunc<SourcePlugin> creator {nullptr}; ///< Source plugin create function.
     SourcePluginDef()

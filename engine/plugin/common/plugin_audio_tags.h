@@ -165,6 +165,17 @@ enum struct AudioAacStreamFormat : uint8_t {
     MP4FF,              ///< AAC inside MPEG-4/ISO File Format
     RAW,                ///< AAC Raw Format
 };
+
+/**
+ * @enum Audio Source type.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+enum struct AudioSourceType : int32_t {
+    AUDIO_SOURCE_MIC = 1,      ///< Microphone data
+    AUDIO_SOURCE_ES,           ///< Raw encoded data
+};
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
