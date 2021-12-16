@@ -6,6 +6,9 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
+unset(PLAYER_LITE CACHE)
+option(PLAYER_LITE "tests should use player lite interface" ON)
+
 if (NOT MINGW)
     # support findSymbol, cmake >= 3.13
     # ADD_LINK_OPTIONS( -rdynamic)
