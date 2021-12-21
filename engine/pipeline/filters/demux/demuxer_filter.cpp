@@ -124,7 +124,7 @@ void DemuxerFilter::Init(EventReceiver* receiver, FilterCallback* callback)
     this->callback_ = callback;
     inPorts_.clear();
     outPorts_.clear();
-    inPorts_.push_back(std::make_shared<Pipeline::InPort>(this, PORT_NAME_DEFAULT, true));
+    inPorts_.push_back(std::make_shared<Pipeline::InPort>(this, PORT_NAME_DEFAULT));
     state_ = FilterState::INITIALIZED;
 }
 

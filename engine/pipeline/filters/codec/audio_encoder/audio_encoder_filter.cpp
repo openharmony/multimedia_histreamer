@@ -375,7 +375,7 @@ ErrorCode AudioEncoderFilter::FinishFrame()
     MEDIA_LOG_D("end finish frame");
     return ErrorCode::SUCCESS;
 }
-}
-}
-}
+} // OHOS
+} // Media
+} // Pipeline
 #endif

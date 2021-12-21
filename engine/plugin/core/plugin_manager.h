@@ -22,6 +22,7 @@
 #include "audio_sink.h"
 #include "codec.h"
 #include "demuxer.h"
+#include "muxer.h"
 #include "source.h"
 #include "video_sink.h"
 
@@ -46,6 +47,8 @@ public:
     std::shared_ptr<Source> CreateSourcePlugin(const std::string& name);
 
     std::shared_ptr<Demuxer> CreateDemuxerPlugin(const std::string& name);
+
+    std::shared_ptr<Muxer> CreateMuxerPlugin(const std::string& name);
 
     std::shared_ptr<Codec> CreateCodecPlugin(const std::string& name);
 

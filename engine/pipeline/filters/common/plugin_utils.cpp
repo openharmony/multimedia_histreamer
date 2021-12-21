@@ -73,6 +73,22 @@ std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>>
     }
     return infos;
 }
+std::vector<std::shared_ptr<Plugin::PluginInfo>> FindAvailablePluginsByOutputMime(const std::string& outputMime,
+                                                                                  Plugin::PluginType pluginType)
+{
+    auto pluginNames = Plugin::PluginManager::Instance().ListPlugins(pluginType);
+    std::vector<std::shared_ptr<Plugin::PluginInfo>> rets;
+    for (const auto& name : pluginNames) {
+        auto tmpInfo = Plugin::PluginManager::Instance().GetPluginInfo(pluginType, name);
+        for (const auto& cap : tmpInfo->outCaps) {
+            if (cap.mime == outputMime) {
+                rets.emplace_back(tmpInfo);
+                break;
+            }
+        }
+    }
+    return rets;
+}
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

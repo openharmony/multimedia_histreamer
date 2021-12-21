@@ -35,7 +35,7 @@ enum class WorkMode { PUSH, PULL };
 
 class Port {
 public:
-    Port(InfoTransfer* ownerFilter, std::string portName, bool ownerNegotiate)
+    Port(InfoTransfer *ownerFilter, std::string portName)
         : filter(ownerFilter), name(std::move(portName)) {}
     virtual ~Port() = default;
     const std::string& GetName();
@@ -70,8 +70,8 @@ class OutPort;
 
 class InPort : public Port {
 public:
-    explicit InPort(InfoTransfer* filter, std::string name = PORT_NAME_DEFAULT, bool ownerNegotiate = false)
-        : Port(filter, std::move(name), ownerNegotiate) {}
+    explicit InPort(InfoTransfer *filter, std::string name = PORT_NAME_DEFAULT)
+        : Port(filter, std::move(name)) {}
     ~InPort() override = default;
     ErrorCode Connect(std::shared_ptr<Port> port) override;
     ErrorCode Disconnect() override;
@@ -89,8 +89,8 @@ private:
 
 class OutPort : public Port {
 public:
-    explicit OutPort(InfoTransfer* filter, std::string name = PORT_NAME_DEFAULT, bool ownerNegotiate = false)
-        : Port(filter, std::move(name), ownerNegotiate) {}
+    explicit OutPort(InfoTransfer *filter, std::string name = PORT_NAME_DEFAULT)
+        : Port(filter, std::move(name)) {}
     ~OutPort() override = default;
     ErrorCode Connect(std::shared_ptr<Port> port) override;
     ErrorCode Disconnect() override;
@@ -115,7 +115,7 @@ public:
     {
         return port;
     }
-    EmptyInPort() : InPort(nullptr, "emptyInPort", false) {}
+    EmptyInPort() : InPort(nullptr, "emptyInPort") {}
     ~EmptyInPort() override = default;
     ErrorCode Connect(std::shared_ptr<Port> port) override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
@@ -135,7 +135,7 @@ public:
     {
         return port;
     }
-    EmptyOutPort() : OutPort(nullptr, "emptyOutPort", false) {}
+    EmptyOutPort() : OutPort(nullptr, "emptyOutPort") {}
     ~EmptyOutPort() override = default;
     ErrorCode Connect(std::shared_ptr<Port> port) override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;

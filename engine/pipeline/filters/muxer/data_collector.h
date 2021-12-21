@@ -13,25 +13,39 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_PIPELINE_CORE_FILTER_TYPE_H
-#define HISTREAMER_PIPELINE_CORE_FILTER_TYPE_H
+#ifndef HISTREAMER_PIPELINE_DATA_COLLECTOR_H
+#define HISTREAMER_PIPELINE_DATA_COLLECTOR_H
+
+#include <memory>
+#include "foundation/error_code.h"
+#include "utils/type_define.h"
+
+namespace OHOS {
+namespace Media {
+namespace Plugin {
+class MuxerPlugin;
+}
+}
+}
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-enum struct FilterType : uint8_t {
-    NONE = 0,
-    MEDIA_SOURCE,
-    CAPTURE_SOURCE,
-    DEMUXER,
-    MUXER,
-    AUDIO_DECODER,
-    VIDEO_DECODER,
-    AUDIO_SINK,
-    VIDEO_SINK,
+class DataCollector {
+public:
+    DataCollector(){};
+    void SetOutput(std::shared_ptr<Plugin::MuxerPlugin> plugin)
+    {
+        output_ = plugin;
+    }
+    virtual ErrorCode PushData(int32_t trackId, std::shared_ptr<AVBuffer> buffer) = 0;
+    virtual ErrorCode Flush() = 0;
+    virtual ~DataCollector() = default;
+
+protected:
+    std::shared_ptr<Plugin::MuxerPlugin> output_;
 };
 } // Pipeline
 } // Media
 } // OHOS
-
-#endif // HISTREAMER_PIPELINE_CORE_FILTER_TYPE_H
+#endif // HISTREAMER_PIPELINE_DATA_COLLECTOR_H

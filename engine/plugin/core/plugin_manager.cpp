@@ -46,7 +46,7 @@ std::shared_ptr<PluginInfo> PluginManager::GetPluginInfo(PluginType type, const 
     if (regInfo && regInfo->info && regInfo->info->pluginType == type) {
         return regInfo->info;
     }
-    return std::shared_ptr<PluginInfo>();
+    return {};
 }
 
 int32_t PluginManager::Sniffer(const std::string& name, std::shared_ptr<DataSourceHelper> source)
@@ -74,24 +74,37 @@ std::shared_ptr<Demuxer> PluginManager::CreateDemuxerPlugin(const std::string& n
 {
     std::shared_ptr<PluginRegInfo> regInfo = pluginRegister->GetPluginRegInfo(PluginType::DEMUXER, name);
     if (!regInfo) {
-        return std::shared_ptr<Demuxer>();
+        return {};
     }
     std::shared_ptr<DemuxerPlugin> demuxer = std::dynamic_pointer_cast<DemuxerPlugin>(regInfo->creator(name));
     if (!demuxer) {
-        return std::shared_ptr<Demuxer>();
+        return {};
     }
     return std::shared_ptr<Demuxer>(new Demuxer(regInfo->packageDef->pkgVersion, regInfo->info->apiVersion, demuxer));
+}
+
+std::shared_ptr<Muxer> PluginManager::CreateMuxerPlugin(const std::string& name)
+{
+    std::shared_ptr<PluginRegInfo> regInfo = pluginRegister->GetPluginRegInfo(PluginType::MUXER, name);
+    if (!regInfo) {
+        return {};
+    }
+    std::shared_ptr<MuxerPlugin> muxer = std::dynamic_pointer_cast<MuxerPlugin>(regInfo->creator(name));
+    if (!muxer) {
+        return {};
+    }
+    return std::shared_ptr<Muxer>(new Muxer(regInfo->packageDef->pkgVersion, regInfo->info->apiVersion, muxer));
 }
 
 std::shared_ptr<Source> PluginManager::CreateSourcePlugin(const std::string& name)
 {
     std::shared_ptr<PluginRegInfo> regInfo = pluginRegister->GetPluginRegInfo(PluginType::SOURCE, name);
     if (!regInfo) {
-        return std::shared_ptr<Source>();
+        return {};
     }
     std::shared_ptr<SourcePlugin> source = std::dynamic_pointer_cast<SourcePlugin>(regInfo->creator(name));
     if (!source) {
-        return std::shared_ptr<Source>();
+        return {};
     }
     return std::shared_ptr<Source>(new Source(regInfo->packageDef->pkgVersion, regInfo->info->apiVersion, source));
 }
@@ -100,11 +113,11 @@ std::shared_ptr<Codec> PluginManager::CreateCodecPlugin(const std::string& name)
 {
     std::shared_ptr<PluginRegInfo> regInfo = pluginRegister->GetPluginRegInfo(PluginType::CODEC, name);
     if (!regInfo) {
-        return std::shared_ptr<Codec>();
+        return {};
     }
     std::shared_ptr<CodecPlugin> codec = std::dynamic_pointer_cast<CodecPlugin>(regInfo->creator(name));
     if (!codec) {
-        return std::shared_ptr<Codec>();
+        return {};
     }
     return std::shared_ptr<Codec>(new Codec(regInfo->packageDef->pkgVersion, regInfo->info->apiVersion, codec));
 }
@@ -113,11 +126,11 @@ std::shared_ptr<AudioSink> PluginManager::CreateAudioSinkPlugin(const std::strin
 {
     std::shared_ptr<PluginRegInfo> regInfo = pluginRegister->GetPluginRegInfo(PluginType::AUDIO_SINK, name);
     if (!regInfo) {
-        return std::shared_ptr<AudioSink>();
+        return {};
     }
     std::shared_ptr<AudioSinkPlugin> audioSink = std::dynamic_pointer_cast<AudioSinkPlugin>(regInfo->creator(name));
     if (!audioSink) {
-        return std::shared_ptr<AudioSink>();
+        return {};
     }
     return std::shared_ptr<AudioSink>(
         new AudioSink(regInfo->packageDef->pkgVersion, regInfo->info->apiVersion, audioSink));
@@ -127,11 +140,11 @@ std::shared_ptr<VideoSink> PluginManager::CreateVideoSinkPlugin(const std::strin
 {
     std::shared_ptr<PluginRegInfo> regInfo = pluginRegister->GetPluginRegInfo(PluginType::VIDEO_SINK, name);
     if (!regInfo) {
-        return std::shared_ptr<VideoSink>();
+        return {};
     }
     std::shared_ptr<VideoSinkPlugin> videoSink = std::dynamic_pointer_cast<VideoSinkPlugin>(regInfo->creator(name));
     if (!videoSink) {
-        return std::shared_ptr<VideoSink>();
+        return {};
     }
     return std::shared_ptr<VideoSink>(
         new VideoSink(regInfo->packageDef->pkgVersion, regInfo->info->apiVersion, videoSink));

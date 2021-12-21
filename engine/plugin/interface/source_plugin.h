@@ -51,7 +51,7 @@ struct SourcePlugin : public PluginBase {
      *  @retval ERROR_UNSUPPORTED_FORMAT: Uri is not supported.
      *  @retval ERROR_INVALID_PARAMETER: Uri is invalid.
      */
-    virtual Status SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params = nullptr) = 0;
+    virtual Status SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params) = 0;
 
     /**
      * @brief Read data from data source.

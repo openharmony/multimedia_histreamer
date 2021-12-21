@@ -190,6 +190,9 @@ do { \
     ret = SetSingleParameter<uint32_t, int32_t>(Tag::AUDIO_SAMPLE_RATE, tagMap, stream->codecpar->sample_rate,
                                                 ui2iFunc);
     RETURN_IF_NOT_OK(ret);
+    ret = SetSingleParameter<uint32_t, int32_t>(Tag::AUDIO_SAMPLE_PER_FRAME, tagMap, stream->codecpar->frame_size,
+                                                ui2iFunc);
+    RETURN_IF_NOT_OK(ret);
     ret = SetSingleParameter<AudioChannelLayout, uint64_t>(Tag::AUDIO_CHANNEL_LAYOUT, tagMap,
         stream->codecpar->channel_layout, [](AudioChannelLayout layout){return (uint64_t)layout;});
     // specially for some format

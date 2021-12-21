@@ -66,7 +66,7 @@ public:
     virtual std::vector<WorkMode> GetWorkModes() = 0; // OutPort调用
 
     // InPort调用此接口确定是否要继续往后协商
-    virtual bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+    virtual bool Negotiate(const std::string& inPort, const std::shared_ptr<const Capability>& upstreamCap,
                            Capability& upstreamNegotiatedCap)
     {
         return false;

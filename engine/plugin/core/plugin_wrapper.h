@@ -17,7 +17,9 @@
 #define HISTREAMER_PLUGIN_CORE_WRAPPER_H
 
 #include "demuxer.h"
+#include "muxer.h"
 #include "interface/demuxer_plugin.h"
+#include "interface/muxer_plugin.h"
 #include "interface/plugin_base.h"
 #include "utils/utils.h"
 
@@ -45,6 +47,20 @@ struct DataSourceWrapper : DataSource {
 private:
     MEDIA_UNUSED uint32_t version;
     std::shared_ptr<DataSourceHelper> helper;
+};
+
+struct DataSinkWrapper : DataSink {
+    DataSinkWrapper(uint32_t pkgVersion, std::shared_ptr<DataSinkHelper> dataSink)
+    : version_(pkgVersion), helper_(std::move(dataSink)){}
+    ~DataSinkWrapper() override = default;
+
+    Status WriteAt(int64_t offset, const std::shared_ptr<Buffer>& buffer) override
+    {
+        return helper_->WriteAt(offset, buffer);
+    }
+private:
+    MEDIA_UNUSED uint32_t version_;
+    std::shared_ptr<DataSinkHelper> helper_;
 };
 
 struct AllocatorHelperWrapper : AllocatorHelper {
