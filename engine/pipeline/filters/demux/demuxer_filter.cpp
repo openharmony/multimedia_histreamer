@@ -195,7 +195,7 @@ ErrorCode DemuxerFilter::Prepare()
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode DemuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
+ErrorCode DemuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
 {
     MEDIA_LOG_D("PushData for port: %s", inPort.c_str());
     if (dataPacker_) {
@@ -433,7 +433,7 @@ void DemuxerFilter::SendEventEos()
     AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
     bufferPtr->flag = BUFFER_FLAG_EOS;
     for (const auto& stream : mediaMetaData_.trackInfos) {
-        stream.port->PushData(bufferPtr);
+        stream.port->PushData(bufferPtr, -1);
     }
 }
 
@@ -443,7 +443,7 @@ void DemuxerFilter::HandleFrame(const AVBufferPtr& bufferPtr, uint32_t trackId)
         if (stream.trackId != trackId) {
             continue;
         }
-        stream.port->PushData(bufferPtr);
+        stream.port->PushData(bufferPtr, -1);
         break;
     }
 }

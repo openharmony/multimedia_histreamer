@@ -51,7 +51,13 @@ public:
     virtual bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                            Capability& upstreamNegotiatedCap) = 0;
     virtual bool Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta) = 0;
-    virtual void PushData(AVBufferPtr buffer) = 0;
+    /**
+     * push data
+     * @param buffer pushed buffer
+     * @param offset means the offset from the start of the stream between Filter.Start and Filter.Stop. -1 means ignore
+     * this parameter.
+     */
+    virtual void PushData(AVBufferPtr buffer, int64_t offset) = 0;
     virtual ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) = 0;
 
 protected:
@@ -74,7 +80,7 @@ public:
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Capability& upstreamNegotiatedCap) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer) override;
+    void PushData(AVBufferPtr buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:
@@ -93,7 +99,7 @@ public:
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Capability& upstreamNegotiatedCap) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer) override;
+    void PushData(AVBufferPtr buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:
@@ -116,7 +122,7 @@ public:
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Capability& upstreamNegotiatedCap) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer) override;
+    void PushData(AVBufferPtr buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:
@@ -136,7 +142,7 @@ public:
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Capability& upstreamNegotiatedCap) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer) override;
+    void PushData(AVBufferPtr buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:

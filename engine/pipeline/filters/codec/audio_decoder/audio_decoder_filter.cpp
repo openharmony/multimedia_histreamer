@@ -253,7 +253,7 @@ ErrorCode AudioDecoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode AudioDecoderFilter::PushData(const std::string &inPort, AVBufferPtr buffer)
+ErrorCode AudioDecoderFilter::PushData(const std::string &inPort, AVBufferPtr buffer, int64_t offset)
 {
     const static int8_t maxRetryCnt = 3; // max retry times of handling one frame
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
@@ -359,7 +359,7 @@ ErrorCode AudioDecoderFilter::FinishFrame()
         // push to port
         auto oPort = outPorts_[0];
         if (oPort->GetWorkMode() == WorkMode::PUSH) {
-            oPort->PushData(pcmFrame);
+            oPort->PushData(pcmFrame, -1);
         } else {
             MEDIA_LOG_W("decoder out port works in pull mode");
         }

@@ -98,10 +98,11 @@ public:
     {
         return {};
     }
-    ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) override
+    ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) override
     {
         UNUSED_VARIABLE(inPort);
         UNUSED_VARIABLE(buffer);
+        UNUSED_VARIABLE(offset);
         return ErrorCode::ERROR_UNIMPLEMENTED;
     }
     ErrorCode PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data) override

@@ -362,7 +362,7 @@ ErrorCode VideoDecoderFilter::ConfigureNoLocked(const std::shared_ptr<const Plug
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode VideoDecoderFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
+ErrorCode VideoDecoderFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
 {
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
         MEDIA_LOG_W("pushing data to decoder when state_ is %d", static_cast<int>(state_.load()));
@@ -468,7 +468,7 @@ void VideoDecoderFilter::FinishFrame()
     if (ptr) {
         auto oPort = outPorts_[0];
         if (oPort->GetWorkMode() == WorkMode::PUSH) {
-            oPort->PushData(ptr);
+            oPort->PushData(ptr, -1);
         } else {
             MEDIA_LOG_W("decoder out port works in pull mode");
         }

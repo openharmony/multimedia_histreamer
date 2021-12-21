@@ -77,7 +77,16 @@ public:
         return false;
     }
 
-    virtual ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) = 0; // InPort调用
+    /**
+     * push data to this filter
+     *
+     * @param inPort in port
+     * @param buffer in buffer
+     * @param offset means the offset from the start of the stream between Filter.Start and Filter.Stop. -1 means ignore
+     * this parameter.
+     * @return
+     */
+    virtual ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) = 0; // InPort调用
     virtual ErrorCode PullData(const std::string& outPort, uint64_t offset, size_t size,
                                AVBufferPtr& data) = 0; // OutPort调用
     virtual const EventReceiver* GetOwnerPipeline() const = 0;

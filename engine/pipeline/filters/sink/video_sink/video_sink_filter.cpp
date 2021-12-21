@@ -215,7 +215,7 @@ void VideoSinkFilter::RenderFrame()
     }
 }
 
-ErrorCode VideoSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
+ErrorCode VideoSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
 {
     MEDIA_LOG_D("video sink push data started, state_: %d", state_.load());
     if (isFlushing_ || state_.load() == FilterState::INITIALIZED) {

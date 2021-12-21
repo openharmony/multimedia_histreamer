@@ -80,10 +80,10 @@ bool InPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 }
 
 
-void InPort::PushData(AVBufferPtr buffer)
+void InPort::PushData(AVBufferPtr buffer, int64_t offset)
 {
     if (filter) {
-        filter->PushData(name, buffer);
+        filter->PushData(name, buffer, offset);
     } else {
         MEDIA_LOG_E("filter destructed");
     }
@@ -162,9 +162,9 @@ bool OutPort::Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
     return nextPort->Configure(upstreamMeta);
 }
 
-void OutPort::PushData(AVBufferPtr buffer)
+void OutPort::PushData(AVBufferPtr buffer, int64_t offset)
 {
-    nextPort->PushData(buffer);
+    nextPort->PushData(buffer, offset);
 }
 
 ErrorCode OutPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
@@ -205,9 +205,10 @@ bool EmptyInPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamM
     return false;
 }
 
-void EmptyInPort::PushData(AVBufferPtr buffer)
+void EmptyInPort::PushData(AVBufferPtr buffer, int64_t offset)
 {
     UNUSED_VARIABLE(buffer);
+    UNUSED_VARIABLE(offset);
     MEDIA_LOG_E("PushData in EmptyInPort");
 }
 ErrorCode EmptyInPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
@@ -248,9 +249,10 @@ bool EmptyOutPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstream
     return false;
 }
 
-void EmptyOutPort::PushData(AVBufferPtr buffer)
+void EmptyOutPort::PushData(AVBufferPtr buffer, int64_t offset)
 {
     UNUSED_VARIABLE(buffer);
+    UNUSED_VARIABLE(offset);
     MEDIA_LOG_E("PushData in EmptyOutPort");
 }
 ErrorCode EmptyOutPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)

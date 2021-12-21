@@ -275,7 +275,7 @@ void MediaSourceFilter::ReadLoop()
         Stop();
         return;
     }
-    outPorts_[0]->PushData(bufferPtr);
+    outPorts_[0]->PushData(bufferPtr, -1);
 }
 
 bool MediaSourceFilter::GetProtocolByUri()
