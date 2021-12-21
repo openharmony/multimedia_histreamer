@@ -1,0 +1,51 @@
+{
+    "name": "@ohos/multimedia_histreamer",
+    "version": "",
+    "description": "提供媒体框架所需的流水线处理，媒体源，编解码，封装解封装，音视频数据处理算法等插件能力",
+    "homePage": "https://gitee.com/openharmony",
+    "license": "",
+    "repository": "",
+    "domain": "os",
+    "language": "",
+    "publishAs": "",
+    "private": false,
+    "scripts": {},
+    "tags": [],
+    "keywords": [],
+    "envs": [],
+    "dirs": [],
+    "author": {
+        "name": "",
+        "email": "",
+        "url": ""
+    },
+    "contributors": [
+        {
+            "name": "",
+            "email": "",
+            "url": ""
+        }
+    ],
+    "segment": {},
+    "component": {
+        "name": "histreamer",
+        "subsystem": "multimedia",
+        "syscap": [],
+        "features": [],
+        "adated_system_type": [
+            "small",
+            "standard"
+        ],
+        "rom": "",
+        "ram": "",
+        "deps": {
+            "components": [],
+            "third_party": []
+        },
+        "build": {
+            "sub_component": [],
+            "inner_kits": [],
+            "test": []
+        }
+    }
+}
