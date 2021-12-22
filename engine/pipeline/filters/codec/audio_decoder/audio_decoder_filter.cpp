@@ -16,12 +16,12 @@
 #define HST_LOG_TAG "AudioDecoderFilter"
 
 #include "audio_decoder_filter.h"
-#include "osal/utils/util.h"
 #include "utils/constants.h"
 #include "utils/memory_helper.h"
 #include "factory/filter_factory.h"
 #include "common/plugin_utils.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "plugin/core/plugin_manager.h"
 #include "utils/steady_clock.h"
 
 namespace {
@@ -177,14 +177,19 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
         MEDIA_LOG_W("cannot find available downstream plugin");
         return false;
     }
+    auto res = UpdateAndInitPluginByInfo<Plugin::Codec>(plugin_, pluginInfo_, selectedPluginInfo,
+    [](const std::string& name)->
+        std::shared_ptr<Plugin::Codec> {
+            return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
+        });
     PROFILE_END("Audio Decoder Negotiate end");
-    return UpdateAndInitPluginByInfo(selectedPluginInfo);
+    return res;
 }
 
 bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
 {
     PROFILE_BEGIN("Audio decoder configure begin");
-    if (plugin_ == nullptr || targetPluginInfo_ == nullptr) {
+    if (plugin_ == nullptr || pluginInfo_ == nullptr) {
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
     }

@@ -75,8 +75,7 @@ private:
     OSAL::ConditionVariable startWorkingCondition_ {};
     OSAL::Mutex mutex_ {};
 
-    std::shared_ptr<Plugin::AudioSink> plugin_ {nullptr};
-    std::shared_ptr<Plugin::PluginInfo> targetPluginInfo_ {};
+    std::shared_ptr<Plugin::AudioSink> plugin_{};
 };
 } // namespace Pipeline
 } // namespace Media

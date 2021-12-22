@@ -81,7 +81,6 @@ private:
     OSAL::Mutex mutex_;
 
     std::shared_ptr<Plugin::VideoSink> plugin_ {nullptr};
-    std::shared_ptr<Plugin::PluginInfo> pluginInfo_ {nullptr};
 };
 } // namespace Pipeline
 } // namespace Media

@@ -184,14 +184,18 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
         MEDIA_LOG_W("cannot find available downstream plugin");
         return false;
     }
+    auto res = UpdateAndInitPluginByInfo<Plugin::Codec>(plugin_, pluginInfo_, selectedPluginInfo,
+        [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
+        return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
+    });
     PROFILE_END("Audio Decoder Negotiate end");
-    return UpdateAndInitPluginByInfo(selectedPluginInfo);
+    return res;
 }
 
 bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
 {
     PROFILE_BEGIN("Audio encoder configure begin");
-    if (plugin_ == nullptr || targetPluginInfo_ == nullptr) {
+    if (plugin_ == nullptr || pluginInfo_ == nullptr) {
         MEDIA_LOG_E("cannot configure encoder when no plugin available");
         return false;
     }

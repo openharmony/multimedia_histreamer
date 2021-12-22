@@ -74,7 +74,6 @@ private:
     size_t bufferSize_;
     std::shared_ptr<Plugin::Source> plugin_;
     std::shared_ptr<Allocator> pluginAllocator_;
-    std::shared_ptr<Plugin::PluginInfo> pluginInfo_;
 };
 } // namespace Pipeline
 } // namespace Media

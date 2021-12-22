@@ -181,14 +181,19 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
         MEDIA_LOG_W("cannot find available downstream plugin");
         return false;
     }
+
+    auto res = UpdateAndInitPluginByInfo<Plugin::Codec>(plugin_, pluginInfo_, selectedPluginInfo,
+        [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
+        return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
+    });
     PROFILE_END("video decoder negotiate end");
-    return UpdateAndInitPluginByInfo(selectedPluginInfo);
+    return res;
 }
 
 bool VideoDecoderFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     PROFILE_BEGIN("video decoder configure start");
-    if (plugin_ == nullptr || targetPluginInfo_ == nullptr) {
+    if (plugin_ == nullptr || pluginInfo_ == nullptr) {
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
     }

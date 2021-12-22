@@ -26,6 +26,8 @@
 #include "utils/event.h"
 #include "utils/utils.h"
 #include "filter_type.h"
+#include "plugin/core/plugin_info.h"
+#include "plugin/core/base.h"
 #include "port.h"
 
 namespace OHOS {
@@ -109,6 +111,11 @@ protected:
      */
     POutPort GetRouteOutPort(const std::string& inPortName);
 
+    template<typename T>
+    static bool UpdateAndInitPluginByInfo(std::shared_ptr<T>& plugin, std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
+        const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
+        const std::function<std::shared_ptr<T>(const std::string&)>& pluginCreator);
+
 protected:
     std::string name_;
     std::atomic<FilterState> state_;
@@ -122,6 +129,8 @@ protected:
     std::map<std::string, uint32_t> mediaTypeCntMap_ {};
 
     FilterType filterType_ {FilterType::NONE};
+
+    std::shared_ptr<Plugin::PluginInfo> pluginInfo_{};
 
 private:
     template <typename T>
