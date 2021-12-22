@@ -60,6 +60,7 @@ file(GLOB_RECURSE HISTREAMER_BASE_SRCS
         ${TOP_DIR}/engine/plugin/plugins/sink/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/source/file_source/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/source/audio_capture/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/minimp3_adapter/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/minimp3_adapter/*.c
         ${TOP_DIR}/engine/plugin/types/*.cpp

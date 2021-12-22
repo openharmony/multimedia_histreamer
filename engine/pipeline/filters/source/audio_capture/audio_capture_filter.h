@@ -42,24 +42,36 @@ public:
     ~AudioCaptureFilter() override;
 
     std::vector<WorkMode> GetWorkModes() override;
-    virtual ErrorCode SetAudioSource(OHOS::Media::Plugin::AudioSourceType source, int32_t &sourceId);
     ErrorCode SetParameter(int32_t key, const Plugin::Any& value) override;
     ErrorCode GetParameter(int32_t key, Plugin::Any& value) override;
     ErrorCode Prepare() override;
     ErrorCode Start() override;
     ErrorCode Stop() override;
+    ErrorCode Pause() override;
+    ErrorCode Resume() override;
 
 private:
     void InitPorts() override;
-    ErrorCode InitPlugin();
+    ErrorCode ConfigurePlugin();
     void ReadLoop();
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);
+    ErrorCode FindPlugin();
+    bool DoNegotiate(CapabilitySet &outCaps);
+    bool CheckSampleRate(Plugin::Capability cap);
+    bool CheckChannels(Plugin::Capability cap);
+    bool CheckSampleFormat(Plugin::Capability cap);
+    ErrorCode DoConfigure();
 
     std::shared_ptr<OSAL::Task> taskPtr_ {nullptr};
     std::shared_ptr<Plugin::Source> plugin_ {nullptr};
     std::shared_ptr<Allocator> pluginAllocator_ {nullptr};
     std::shared_ptr<Plugin::PluginInfo> pluginInfo_ {nullptr};
+    std::string inputType_;
+    uint32_t sampleRate_;
+    uint32_t channelNum_;
+    int64_t bitRate_;
+    Plugin::AudioSampleFormat sampleFormat_;
 };
 } // namespace Pipeline
 } // namespace Media

@@ -107,6 +107,7 @@ enum struct Tag : uint32_t {
     AUDIO_SAMPLE_RATE,                                  ///< uint32_t, sample rate
     AUDIO_SAMPLE_FORMAT,                                ///< @see AudioSampleFormat
     AUDIO_SAMPLE_PER_FRAME,                             ///< uint32_t, sample per frame
+    AUDIO_SOURCE_TYPE,                                  ///< uint32_t, audio source type for recorder
 
     /* -------------------- audio specific tag -------------------- */
     AUDIO_SPECIFIC_MPEG_START = MAKE_AUDIO_SPECIFIC_START(AudioFormat::MPEG),
@@ -122,6 +123,7 @@ enum struct Tag : uint32_t {
     VIDEO_WIDTH = SECTION_VIDEO_UNIVERSAL_START + 1, // uint32_t
     VIDEO_HEIGHT,                                    ///< uint32_t, video height
     VIDEO_PIXEL_FORMAT,                              ///< uint32_t, video pixel format
+    VIDEO_SOURCE_TYPE,                               ///< uint32_t, video source type for recorder
 };
 
 using ValueType = Any;
