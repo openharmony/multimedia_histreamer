@@ -17,6 +17,7 @@
 #define HISTREAMER_PIPELINE_DATA_SPLITER_H
 
 #include <memory>
+#include <utility>
 #include "foundation/error_code.h"
 #include "utils/type_define.h"
 
@@ -30,7 +31,7 @@ public:
     DataSpliter() = default;
     void SetOutput(std::shared_ptr<DataCollector> output)
     {
-        output_ = output;
+        output_ = std::move(output);
     }
 
     void SetMaxOutputSize(size_t size)

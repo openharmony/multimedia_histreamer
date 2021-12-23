@@ -75,6 +75,20 @@ void ConvertToMediaInfoHelper(uint32_t pkgVersion, const MediaInfo& src, MediaIn
         }
     }
 }
+void ConvertToSinkType(uint32_t pkgVersion, const FileSink::Type& src, FileSinkPlugin::Type& dest)
+{
+    (void)(pkgVersion);
+    switch (src) {
+        case FileSink::Type::FD:
+            dest = FileSinkPlugin::Type::FD;
+            break;
+        case FileSink::Type::URI:
+            dest = FileSinkPlugin::Type::URI;
+            break;
+        default:
+            dest = FileSinkPlugin::Type::UNKNOWN;
+    }
+}
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

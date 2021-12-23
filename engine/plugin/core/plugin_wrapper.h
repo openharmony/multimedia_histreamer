@@ -17,10 +17,11 @@
 #define HISTREAMER_PLUGIN_CORE_WRAPPER_H
 
 #include "demuxer.h"
-#include "muxer.h"
+#include "file_sink.h"
 #include "interface/demuxer_plugin.h"
 #include "interface/muxer_plugin.h"
 #include "interface/plugin_base.h"
+#include "muxer.h"
 #include "utils/utils.h"
 
 namespace OHOS {
@@ -85,6 +86,8 @@ private:
 };
 
 void ConvertToMediaInfoHelper(uint32_t pkgVersion, const MediaInfo& src, MediaInfoHelper& dest);
+
+void ConvertToSinkType(uint32_t pkgVersion, const FileSink::Type& src, FileSinkPlugin::Type& dest);
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

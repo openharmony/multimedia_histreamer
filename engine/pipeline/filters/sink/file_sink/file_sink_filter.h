@@ -17,6 +17,7 @@
 #define HISTREAMER_PIPELINE_FILE_SINK_FILTER_H
 
 #include "filter_base.h"
+#include "plugin/core/file_sink.h"
 
 namespace OHOS {
 namespace Media {
@@ -25,9 +26,26 @@ class FileSinkFilter : public FilterBase {
 public:
     explicit FileSinkFilter(std::string name);
     ~FileSinkFilter() override;
+
+    void Init(EventReceiver *receiver, FilterCallback *callback) override;
+
+    bool Negotiate(const std::string &inPort, const std::shared_ptr<const Capability> &upstreamCap,
+                   Capability &upstreamNegotiatedCap) override;
+
+    bool Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta) override;
+
+    ErrorCode Stop() override;
+
     ErrorCode SetOutputPath(const std::string& path);
     ErrorCode SetFd(int32_t fd);
-    ErrorCode SetMaxFileSize(uint64_t maxFileSize);
+
+    ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer, int64_t offset) override;
+
+private:
+    std::shared_ptr<Plugin::FileSink> plugin_;
+    std::string outputPath_{};
+    int32_t fd_{-1};
+    int64_t currentPos_{0};
 };
 } // Pipeline
 } // Media

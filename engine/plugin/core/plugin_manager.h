@@ -22,6 +22,7 @@
 #include "audio_sink.h"
 #include "codec.h"
 #include "demuxer.h"
+#include "file_sink.h"
 #include "muxer.h"
 #include "source.h"
 #include "video_sink.h"
@@ -33,7 +34,7 @@ class PluginManager {
 public:
     PluginManager(const PluginManager&) = delete;
     PluginManager operator=(const PluginManager&) = delete;
-    ~PluginManager();
+    ~PluginManager() = default;
     static PluginManager& Instance()
     {
         static PluginManager impl;
@@ -56,6 +57,8 @@ public:
 
     std::shared_ptr<VideoSink> CreateVideoSinkPlugin(const std::string& name);
 
+    std::shared_ptr<FileSink> CreateFileSinkPlugin(const std::string& name);
+
     int32_t Sniffer(const std::string& name, std::shared_ptr<DataSourceHelper> source);
 
 private:
@@ -63,8 +66,23 @@ private:
 
     void Init();
 
+    template<typename T, typename U>
+    std::shared_ptr<T> CreatePlugin(const std::string& name, PluginType pluginType)
+    {
+        std::shared_ptr<PluginRegInfo> regInfo = pluginRegister_->GetPluginRegInfo(pluginType, name);
+        if (!regInfo) {
+            return {};
+        }
+        std::shared_ptr<U> plugin = std::dynamic_pointer_cast<U>(regInfo->creator(name));
+        if (!plugin) {
+            return {};
+        }
+        return std::shared_ptr<T>(
+                new T(regInfo->packageDef->pkgVersion, regInfo->info->apiVersion, plugin));
+    }
+
 private:
-    std::shared_ptr<PluginRegister> pluginRegister;
+    std::shared_ptr<PluginRegister> pluginRegister_;
 };
 } // namespace Plugin
 } // namespace Media

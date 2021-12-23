@@ -58,6 +58,7 @@ const std::map<FilterType, PluginParaAllowedMap> PluginParameterTable::table_ = 
         DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t),
     }},
     {FilterType::MUXER, {
+        DECLARE_PARAMETER_ITEM(Plugin::Tag::MIME, std::string),
         DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_CHANNELS, uint32_t),
         DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_RATE, uint32_t),
         DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_BITRATE, int64_t),

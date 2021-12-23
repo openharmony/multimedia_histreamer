@@ -18,12 +18,14 @@
 
 #include "plugin_base.h"
 #include "plugin_definition.h"
+#include "plugin/common/plugin_caps.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 struct FileSinkPlugin : public Plugin::PluginBase {
     enum struct Type {
+        UNKNOWN = -1,
         URI, ///< sink type is uri, sink value is std::string
         FD, ///< sink type is fd, sink value is int32_t
     };
@@ -49,7 +51,7 @@ struct FileSinkPluginDef : public PluginDefBase {
     FileSinkPluginDef()
     {
         apiVersion = FILE_SINK_API_VERSION; ///< file sink plugin version.
-        pluginType = PluginType::FILE_SINK; ///< Plugin type, MUST be MUXER.
+        pluginType = PluginType::FILE_SINK; ///< Plugin type, MUST be FILE_SINK.
     }
 };
 } // Plugin

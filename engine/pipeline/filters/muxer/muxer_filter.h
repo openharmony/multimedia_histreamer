@@ -56,7 +56,7 @@ public:
 private:
     class MuxerDataSink : public Plugin::DataSinkHelper {
     public:
-        virtual Plugin::Status WriteAt(int64_t offset, const std::shared_ptr<Plugin::Buffer>& buffer);
+        Plugin::Status WriteAt(int64_t offset, const std::shared_ptr<Plugin::Buffer>& buffer) override;
         MuxerFilter* muxerFilter_;
     };
 

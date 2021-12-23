@@ -17,13 +17,14 @@
 #define HISTREAMER_PIPELINE_DATA_COLLECTOR_H
 
 #include <memory>
+#include <utility>
 #include "foundation/error_code.h"
 #include "utils/type_define.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-class MuxerPlugin;
+struct MuxerPlugin;
 }
 }
 }
@@ -33,10 +34,10 @@ namespace Media {
 namespace Pipeline {
 class DataCollector {
 public:
-    DataCollector(){};
+    DataCollector()= default;
     void SetOutput(std::shared_ptr<Plugin::MuxerPlugin> plugin)
     {
-        output_ = plugin;
+        output_ = std::move(plugin);
     }
     virtual ErrorCode PushData(int32_t trackId, std::shared_ptr<AVBuffer> buffer) = 0;
     virtual ErrorCode Flush() = 0;
