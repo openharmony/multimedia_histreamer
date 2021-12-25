@@ -47,19 +47,7 @@ enum struct VideoPixelFormat : uint32_t {
     YUVJ422P,  ///< planar YUV 4:2:2, 16bpp, full scale (JPEG)
     YUVJ444P,  ///< planar YUV 4:4:4, 24bpp, full scale (JPEG)
 };
-
-/**
- * @enum Video Source type.
- *
- * @since 1.0
- * @version 1.0
- */
-enum VideoSourceType : int32_t {
-    VIDEO_SOURCE_SURFACE_YUV = 0, ///< YUV video data
-    VIDEO_SOURCE_SURFACE_RGB,     ///< RGB video data
-    VIDEO_SOURCE_SURFACE_ES,      ///< Raw encoded data
-};
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-#endif // HISTREAMER_PLUGIN_COMMON_AUDIO_TAGS_H
+#endif // HISTREAMER_PLUGIN_COMMON_VIDEO_TAGS_H
