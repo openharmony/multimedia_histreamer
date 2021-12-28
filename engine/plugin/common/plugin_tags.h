@@ -79,7 +79,6 @@ enum struct Tag : uint32_t {
     MIME = SECTION_REGULAR_START + 1, ///< std::string
     TRACK_ID,                         ///< uint32_t, track id
     REQUIRED_OUT_BUFFER_CNT,          ///< uint32_t required buffer count of plugin; read only tag
-    PARAMETER_STRUCT,                 ///< @see ParameterStruct
     HTTP_BUFFER_SIZE,                 ///< uint32_t, download buffer size
     HTTP_WATERLINE_HIGH,              ///< uint32_t, high waterline
 
@@ -134,32 +133,6 @@ using ValueType = Any;
  * The tag content is stored in key-value format.
  */
 using TagMap = std::map<Tag, ValueType>;
-
-/**
- * @enum Direction
- *
- * @since 1.0
- * @version 1.0
- */
-enum struct Direction : uint8_t {
-    IN = 1<<0U, ///< in direction
-    OUT = 1<<1U, ///< out direction
-};
-
-/**
- * @brief parameter struct, which can be used in PluginBase.SetParameter for complex parameter setting.
- *
- * @since 1.0
- * @version 1.0
- */
-struct ParameterStruct {
-    uint32_t direction {static_cast<uint8_t>(Direction::IN) |
-        static_cast<uint8_t>(Direction::OUT)}; ///< direction of parameter, default is in and out
-    int32_t trackId {
-        -1}; ///< indicates track that will be effected by this parameter, -1 means that all tracks will be effected
-    Tag tagId; ///< parameter tag id
-    ValueType value; ///< value of the parameter
-};
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
