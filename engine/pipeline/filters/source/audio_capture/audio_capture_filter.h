@@ -35,7 +35,6 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-
 class AudioCaptureFilter : public FilterBase {
 public:
     explicit AudioCaptureFilter(const std::string& name);

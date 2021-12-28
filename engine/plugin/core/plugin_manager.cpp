@@ -27,7 +27,6 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-
 PluginManager::PluginManager()
 {
     Init();

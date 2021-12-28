@@ -22,7 +22,6 @@
 
 namespace OHOS {
 namespace Media {
-
 int32_t HstEngineFactory::Score(Scene scene, const std::string& uri)
 {
     (void)scene;

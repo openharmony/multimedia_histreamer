@@ -18,7 +18,6 @@
 
 namespace OHOS {
 namespace Media {
-
 namespace {
 struct ErrorCodePair {
     ErrorCode errorCode;

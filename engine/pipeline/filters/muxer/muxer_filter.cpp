@@ -244,7 +244,9 @@ ErrorCode MuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer, i
         MEDIA_LOG_W("pushing data to decoder when state is %d", static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
+
     //todo we should consider more tracks
+
     if (!hasWriteHeader_) {
         plugin_->WriteHeader();
         hasWriteHeader_ = true;
