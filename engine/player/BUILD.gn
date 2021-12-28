@@ -56,9 +56,21 @@ source_set("histreamer_player") {
   }
   print("player source: ", sources)
   defines = [ "MEDIA_OHOS" ]
+  if (!defined(ohos_lite)) {
+    configs -= [
+      "//build/config/compiler:no_rtti",
+      "//build/config/compiler:no_exceptions",
+    ]
+  }
   cflags = [
     "-fPIC",
     "-Wall",
   ]
+  if (!defined(ohos_lite)) {
+    cflags += [
+      "-frtti",
+      "-fexceptions",
+    ]
+  }
   cflags_cc = cflags
 }

@@ -12,6 +12,10 @@
 # limitations under the License.
 #
 
+if (!defined(ohos_lite)) {
+  ohos_kernel_type = ""
+}
+
 group("plugin_stream_source") {
   deps = [ ":histreamer_plugin_StreamSource" ]
 }

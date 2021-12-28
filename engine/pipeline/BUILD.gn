@@ -46,10 +46,23 @@ source_set("histreamer_pipeline") {
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
+  if (!defined(ohos_lite)) {
+    configs -= [
+      "//build/config/compiler:no_rtti",
+      "//build/config/compiler:no_exceptions",
+    ]
+  }
   cflags = [
     "-fPIC",
     "-Wall",
   ]
+
+  if (!defined(ohos_lite)) {
+    cflags += [
+      "-frtti",
+      "-fexceptions",
+    ]
+  }
   cflags_cc = cflags
   defines = [ "MEDIA_OHOS" ]
 }

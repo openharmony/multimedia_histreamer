@@ -25,7 +25,6 @@
 
 #ifdef MEDIA_OHOS
 #include "hilog/log.h"
-#include "media_log.h"
 #else
 #include "log_adapter.h"
 #endif

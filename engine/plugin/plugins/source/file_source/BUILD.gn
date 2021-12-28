@@ -12,6 +12,10 @@
 # limitations under the License.
 #
 
+if (!defined(ohos_lite)) {
+  ohos_kernel_type = ""
+}
+
 group("plugin_file_source") {
   deps = [ ":histreamer_plugin_FileSource" ]
 }
@@ -29,4 +33,21 @@ target(target_type, "histreamer_plugin_FileSource") {
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
+  if (!defined(ohos_lite)) {
+    configs -= [
+      "//build/config/compiler:no_rtti",
+      "//build/config/compiler:no_exceptions",
+    ]
+  }
+  cflags = [
+    "-fPIC",
+    "-Wall",
+  ]
+  if (!defined(ohos_lite)) {
+    cflags += [
+      "-frtti",
+      "-fexceptions",
+    ]
+  }
+  cflags_cc = cflags
 }

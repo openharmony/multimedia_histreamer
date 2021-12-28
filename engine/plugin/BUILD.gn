@@ -12,6 +12,10 @@
 # limitations under the License.
 #
 
+if (!defined(ohos_lite)) {
+  ohos_kernel_type = ""
+}
+
 declare_args() {
   if (ohos_kernel_type == "liteos_m") {
     plugin_dynamic_register = false
@@ -36,15 +40,33 @@ config("hst_plugin_intf_config") {
 source_set("histreamer_plugin_intf") {
   sources = [ "common/plugin_buffer.cpp" ]
   public_configs = [ ":hst_plugin_intf_config" ]
-  if (ohos_kernel_type == "liteos_m") {
-    public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  if (defined(ohos_lite)) {
+    if (ohos_kernel_type == "liteos_m") {
+      public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    } else {
+      public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+    }
   } else {
-    public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+    public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
   }
+
+  if (!defined(ohos_lite)) {
+    configs -= [
+      "//build/config/compiler:no_rtti",
+      "//build/config/compiler:no_exceptions",
+    ]
+  }
+
   cflags = [
     "-fPIC",
     "-Wall",
   ]
+  if (!defined(ohos_lite)) {
+    cflags += [
+      "-frtti",
+      "-fexceptions",
+    ]
+  }
   cflags_cc = cflags
 }
 
@@ -86,15 +108,33 @@ source_set("histreamer_plugin_core") {
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
-  if (ohos_kernel_type == "liteos_m") {
-    public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+
+  if (defined(ohos_lite)) {
+    if (ohos_kernel_type == "liteos_m") {
+      public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+    } else {
+      public_deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
+    }
   } else {
-    public_deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
+    public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
   }
   public_deps += [ "plugins:gen_plugin_static_header" ]
+  if (!defined(ohos_lite)) {
+    configs -= [
+      "//build/config/compiler:no_rtti",
+      "//build/config/compiler:no_exceptions",
+    ]
+  }
+
   cflags = [
     "-fPIC",
     "-Wall",
   ]
+  if (!defined(ohos_lite)) {
+    cflags += [
+      "-frtti",
+      "-fexceptions",
+    ]
+  }
   cflags_cc = cflags
 }

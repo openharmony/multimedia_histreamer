@@ -12,6 +12,10 @@
 # limitations under the License.
 #
 
+if (!defined(ohos_lite)) {
+  ohos_kernel_type = ""
+}
+
 group("plugin_ffmpeg_adapter") {
   deps = []
   if (ohos_kernel_type != "liteos_m") {
@@ -48,6 +52,19 @@ if (ohos_kernel_type == "liteos_m") {
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
       "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
     ]
+    if (!defined(ohos_lite)) {
+      configs -= [
+        "//build/config/compiler:no_rtti",
+        "//build/config/compiler:no_exceptions",
+      ]
+    }
+    if (!defined(ohos_lite)) {
+      cflags = [
+        "-frtti",
+        "-fexceptions",
+      ]
+    cflags_cc = cflags
+    }
   }
 
   shared_library("histreamer_plugin_FFmpegDemuxer") {
@@ -64,5 +81,18 @@ if (ohos_kernel_type == "liteos_m") {
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
       "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
     ]
+    if (!defined(ohos_lite)) {
+      configs -= [
+        "//build/config/compiler:no_rtti",
+        "//build/config/compiler:no_exceptions",
+      ]
+    }
+    if (!defined(ohos_lite)) {
+      cflags = [
+        "-frtti",
+        "-fexceptions",
+      ]
+      cflags_cc = cflags
+    }
   }
 }

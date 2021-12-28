@@ -14,6 +14,10 @@
 
 import("//foundation/multimedia/histreamer/config.gni")
 
+if (!defined(ohos_lite)) {
+  ohos_kernel_type = ""
+}
+
 print("histreamer plugin config:enable_histreamer_plugin_ffmpeg_adapter =",
       enable_histreamer_plugin_ffmpeg_adapter)
 print("histreamer plugin config:enable_histreamer_plugin_hdi_adapter =",
