@@ -80,6 +80,8 @@ enum struct Tag : uint32_t {
     TRACK_ID,                         ///< uint32_t, track id
     REQUIRED_OUT_BUFFER_CNT,          ///< uint32_t required buffer count of plugin; read only tag
     PARAMETER_STRUCT,                 ///< @see ParameterStruct
+    HTTP_BUFFER_SIZE,                 ///< uint32_t, download buffer size
+    HTTP_WATERLINE_HIGH,              ///< uint32_t, high waterline
 
     /* -------------------- media tag -------------------- */
     MEDIA_TITLE = SECTION_MEDIA_START + 1, // string

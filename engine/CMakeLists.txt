@@ -87,6 +87,7 @@ set(HISTREAMER_SRCS ${HISTREAMER_BASE_SRCS} ${PLAYER_SRCS})
 
 file(GLOB_RECURSE PLUGINS_STATIC_BUILD_SRCS
         ${TOP_DIR}/engine/plugin/plugins/source/file_source/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/source/http_source/*.cpp
         )
 
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
@@ -94,6 +95,7 @@ INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 link_directories(
         ${ffmpeg_lib_path}
         ${sdl_lib_path}
+        ${TOP_DIR}/../3rdparty/curl/lib/windows
 )
 
 if (WIN32)
@@ -106,6 +108,7 @@ if (WIN32)
             avfilter
             swresample
             SDL2
+            curl
     )
 elseif (LINUX_DEMO)
 else ()
