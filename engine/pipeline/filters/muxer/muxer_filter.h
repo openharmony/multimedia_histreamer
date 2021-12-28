@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifdef RECORDER_SUPPORT
+
 #ifndef HISTREAMER_PIPELINE_MUXER_FILTER_H
 #define HISTREAMER_PIPELINE_MUXER_FILTER_H
-
+#ifdef RECORDER_SUPPORT
 #include "filter_base.h"
 #include "plugin/core/muxer.h"
 #include "plugin/core/plugin_info.h"
@@ -82,5 +82,6 @@ private:
 } // Pipeline
 } // Media
 } // OHOS
-#endif // HISTREAMER_PIPELINE_MUXER_FILTER_H
 #endif
+#endif // HISTREAMER_PIPELINE_MUXER_FILTER_H
+

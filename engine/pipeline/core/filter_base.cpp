@@ -232,21 +232,21 @@ bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<T>& plugin, std::shar
     return true;
 }
 template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::Codec>& plugin,
-        std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
-        const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
-        const std::function<std::shared_ptr<Plugin::Codec>(const std::string&)>& pluginCreator);
+    std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
+    const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
+    const std::function<std::shared_ptr<Plugin::Codec>(const std::string&)>& pluginCreator);
 template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::AudioSink>& plugin,
-        std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
-        const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
-        const std::function<std::shared_ptr<Plugin::AudioSink>(const std::string&)>& pluginCreator);
+    std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
+    const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
+    const std::function<std::shared_ptr<Plugin::AudioSink>(const std::string&)>& pluginCreator);
 template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::VideoSink>& plugin,
-        std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
-        const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
-        const std::function<std::shared_ptr<Plugin::VideoSink>(const std::string&)>& pluginCreator);
+    std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
+    const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
+    const std::function<std::shared_ptr<Plugin::VideoSink>(const std::string&)>& pluginCreator);
 template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::FileSink>& plugin,
-        std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
-        const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
-        const std::function<std::shared_ptr<Plugin::FileSink>(const std::string&)>& pluginCreator);
+    std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
+    const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
+    const std::function<std::shared_ptr<Plugin::FileSink>(const std::string&)>& pluginCreator);
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

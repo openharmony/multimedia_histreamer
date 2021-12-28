@@ -57,7 +57,8 @@ std::map<AudioSampleFormat, OHOS::AudioStandard::AudioSampleFormat> g_formatMap 
     {AudioSampleFormat::F64P, OHOS::AudioStandard::AudioSampleFormat::INVALID_WIDTH},
 };
 
-std::shared_ptr<SourcePlugin> AudioCapturePluginCreater(const std::string &name) {
+std::shared_ptr<SourcePlugin> AudioCapturePluginCreater(const std::string &name)
+{
     return std::make_shared<AudioCapturePlugin>(name);
 }
 
@@ -125,7 +126,8 @@ void UpdateSupportedSampleFormat(Capability &outCaps)
     }
 }
 
-const Status AudioCaptureRegister(const std::shared_ptr<Register> &reg) {
+const Status AudioCaptureRegister(const std::shared_ptr<Register> &reg)
+{
     SourcePluginDef definition;
     definition.name = "AudioCapture";
     definition.description = "Audio capture form audio service";

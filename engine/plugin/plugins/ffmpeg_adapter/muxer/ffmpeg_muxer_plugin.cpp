@@ -90,7 +90,7 @@ Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg
         def.name = pluginName;
         def.description = "ffmpeg muxer";
         def.rank = 100; // 100
-        def.creator = [](const std::string& name) -> std::shared_ptr<Plugin::MuxerPlugin>{
+        def.creator = [](const std::string& name) -> std::shared_ptr<Plugin::MuxerPlugin> {
             return std::make_shared<FFMux::FFmpegMuxerPlugin>(name);
         };
         if (reg->AddPlugin(def) != Plugin::Status::OK) {
@@ -98,11 +98,11 @@ Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg
             continue;
         }
         g_pluginOutputFmt[pluginName] = std::shared_ptr<AVOutputFormat>(const_cast<AVOutputFormat*>(outputFormat),
-                                                                        [](AVOutputFormat* ptr){}); // do not delete
+                                                                        [](AVOutputFormat* ptr) {}); // do not delete
     }
     return Plugin::Status::OK;
 }
-PLUGIN_DEFINITION(FFMpegMuxers, Plugin::LicenseType::LGPL, RegisterMuxerPlugins, []{g_pluginOutputFmt.clear();})
+PLUGIN_DEFINITION(FFMpegMuxers, Plugin::LicenseType::LGPL, RegisterMuxerPlugins, [] {g_pluginOutputFmt.clear();})
 
 Plugin::Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime, AVStream* stream)
 {
@@ -195,12 +195,6 @@ do { \
     RETURN_IF_NOT_OK(ret);
     ret = SetSingleParameter<AudioChannelLayout, uint64_t>(Tag::AUDIO_CHANNEL_LAYOUT, tagMap,
         stream->codecpar->channel_layout, [](AudioChannelLayout layout){return (uint64_t)layout;});
-    // specially for some format
-//    if (stream->codecpar->codec_id == AV_CODEC_ID_AAC || stream->codecpar->codec_id == AV_CODEC_ID_AAC_LATM) {
-//        ret = SetSingleParameter<AudioAacProfile, int32_t>(Tag::AUDIO_AAC_PROFILE, tagMap, stream->codecpar->profile,
-//                                                           []());
-//    }
-
     return ret;
 #undef RETURN_IF_NOT_OK
 }
@@ -242,7 +236,7 @@ Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const
     }
     // others
     ret = SetSingleParameter<int64_t, int64_t>(Tag::MEDIA_BITRATE, tagMap, stream->codecpar->bit_rate,
-                                         [](int64_t rate){return rate;});
+                                               [](int64_t rate){return rate;});
     if (ret != Status::OK) {
         return ret;
     }
@@ -256,7 +250,7 @@ Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const
         }
         auto extraData = Plugin::AnyCast<std::vector<uint8_t>>(ite->second);
         stream->codecpar->extradata = static_cast<uint8_t *>(av_mallocz(
-                extraData.size() + AV_INPUT_BUFFER_PADDING_SIZE));
+            extraData.size() + AV_INPUT_BUFFER_PADDING_SIZE));
         if (stream->codecpar->extradata == nullptr) {
             return Status::ERROR_NO_MEMORY;
         }
@@ -284,7 +278,7 @@ Plugin::Status SetTagsOfGeneral(AVFormatContext* fmtCtx, const Plugin::TagMap& t
 }
 }
 
-namespace OHOS{
+namespace OHOS {
 namespace Media {
 namespace FFMux {
 using namespace OHOS::Media::Plugin;

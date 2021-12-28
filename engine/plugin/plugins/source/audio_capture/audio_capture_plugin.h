@@ -13,11 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef HISTREAMER_PIPELINE_AUDIO_CAPTURE_PLUGIN_H
+#define HISTREAMER_PIPELINE_AUDIO_CAPTURE_PLUGIN_H
 #ifdef RECORDER_SUPPORT
-
-#ifndef MEDIA_PIPELINE_AUDIO_CAPTURE_PLUGIN_H
-#define MEDIA_PIPELINE_AUDIO_CAPTURE_PLUGIN_H
-
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
 #include "audio_capturer.h"
@@ -75,6 +73,6 @@ private:
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-
-#endif // MEDIA_PIPELINE_AUDIO_CAPTURE_PLUGIN_H
 #endif
+#endif // HISTREAMER_PIPELINE_AUDIO_CAPTURE_PLUGIN_H
+

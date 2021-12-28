@@ -52,7 +52,7 @@ private:
 
 struct DataSinkWrapper : DataSink {
     DataSinkWrapper(uint32_t pkgVersion, std::shared_ptr<DataSinkHelper> dataSink)
-    : version_(pkgVersion), helper_(std::move(dataSink)){}
+        : version_(pkgVersion), helper_(std::move(dataSink)) {}
     ~DataSinkWrapper() override = default;
 
     Status WriteAt(int64_t offset, const std::shared_ptr<Buffer>& buffer) override

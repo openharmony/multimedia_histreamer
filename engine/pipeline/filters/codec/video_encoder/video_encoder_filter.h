@@ -13,11 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef HISTREAMER_PIPELINE_VIDEO_ENCODER_FILTER_H
+#define HISTREAMER_PIPELINE_VIDEO_ENCODER_FILTER_H
 #if defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
-
-#ifndef MEDIA_PIPELINE_VIDEO_ENCODER_FILTER_H
-#define MEDIA_PIPELINE_VIDEO_ENCODER_FILTER_H
-
 #include "utils/type_define.h"
 #include "filters/codec/decoder_filter_base.h"
 #include "plugin/common/plugin_tags.h"
@@ -105,5 +103,5 @@ private:
 }
 }
 }
-#endif // MEDIA_PIPELINE_VIDEO_ENCODER_FILTER_H
 #endif
+#endif // HISTREAMER_PIPELINE_VIDEO_ENCODER_FILTER_H
