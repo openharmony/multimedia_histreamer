@@ -24,12 +24,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 struct FileSinkPlugin : public Plugin::PluginBase {
-    enum struct Type {
-        UNKNOWN = -1,
-        URI, ///< sink type is uri, sink value is std::string
-        FD, ///< sink type is fd, sink value is int32_t
-    };
-    virtual Status SetSink(Type type, const Plugin::ValueType& sink) = 0;
+    virtual Status SetSink(const Plugin::ValueType &sink) = 0;
     virtual bool IsSeekable() = 0;
     virtual Status SeekTo(uint64_t offset) = 0;
     virtual Status Write(const std::shared_ptr<Buffer>& buffer) = 0;
@@ -45,8 +40,14 @@ struct FileSinkPlugin : public Plugin::PluginBase {
 /// File Sink plugin version
 #define FILE_SINK_API_VERSION MAKE_VERSION(FILE_SINK_API_VERSION_MAJOR, FILE_SINK_API_VERSION_MINOR)
 
+enum struct OutputType {
+    UNKNOWN = -1,
+    URI, ///< sink type is uri, sink value is std::string
+    FD, ///< sink type is fd, sink value is int32_t
+};
+
 struct FileSinkPluginDef : public PluginDefBase {
-    CapabilitySet inCaps;                   ///< Plug-in input capability, For details, @see Capability.
+    OutputType outputType;
     PluginCreatorFunc<FileSinkPlugin> creator {nullptr}; ///< Muxer plugin create function.
     FileSinkPluginDef()
     {

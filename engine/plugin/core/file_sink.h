@@ -25,17 +25,11 @@ namespace Media {
 namespace Plugin {
 class FileSink : public Base {
 public:
-    enum struct Type{
-        UNKNOWN = -1,
-        URI, ///< sink type is uri, sink value is std::string
-        FD, ///< sink type is fd, sink value is int32_t
-    };
-
     FileSink(const FileSink &) = delete;
     FileSink operator = (const FileSink &) = delete;
     ~FileSink() override = default;
 
-    Status SetSink(Type type, const Plugin::ValueType& sink);
+    Status SetSink(const Plugin::ValueType &sink);
     bool IsSeekable();
     Status SeekTo(uint64_t offset);
     Status Write(const std::shared_ptr<Buffer>& buffer);

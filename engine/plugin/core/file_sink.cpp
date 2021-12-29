@@ -21,11 +21,9 @@ namespace Media {
 namespace Plugin {
 FileSink::FileSink(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<FileSinkPlugin> plugin)
         : Base(pkgVer, apiVer, plugin), fileSink_(std::move(plugin)) {}
-Status FileSink::SetSink(Type type, const Plugin::ValueType& sink)
+Status FileSink::SetSink(const Plugin::ValueType &sink)
 {
-    FileSinkPlugin::Type pluginType = FileSinkPlugin::Type::UNKNOWN;
-    ConvertToSinkType(pkgVersion_, type, pluginType);
-    return fileSink_->SetSink(pluginType, sink);
+    return fileSink_->SetSink(sink);
 }
 bool FileSink::IsSeekable()
 {

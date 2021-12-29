@@ -86,8 +86,6 @@ private:
 };
 
 void ConvertToMediaInfoHelper(uint32_t pkgVersion, const MediaInfo& src, MediaInfoHelper& dest);
-
-void ConvertToSinkType(uint32_t pkgVersion, const FileSink::Type& src, FileSinkPlugin::Type& dest);
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
