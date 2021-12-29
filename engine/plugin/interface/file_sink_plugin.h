@@ -19,11 +19,22 @@
 #include "plugin_base.h"
 #include "plugin_definition.h"
 #include "plugin/common/plugin_caps.h"
+#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 struct FileSinkPlugin : public Plugin::PluginBase {
+    explicit FileSinkPlugin(std::string name): PluginBase(std::move(name)) {}
+    std::shared_ptr<Allocator> GetAllocator() override
+    {
+        return nullptr;
+    }
+    Status SetCallback(const std::shared_ptr<Callback> &cb) override
+    {
+        UNUSED_VARIABLE(cb);
+        return Status::ERROR_UNIMPLEMENTED;
+    }
     virtual Status SetSink(const Plugin::ValueType &sink) = 0;
     virtual bool IsSeekable() = 0;
     virtual Status SeekTo(uint64_t offset) = 0;

@@ -42,7 +42,7 @@ bool FileSinkFilter::Negotiate(const std::string &inPort, const std::shared_ptr<
 {
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::FILE_SINK);
     if (candidatePlugins.empty()) {
-        MEDIA_LOG_E("no available audio sink plugin");
+        MEDIA_LOG_E("no available file sink plugin");
         return false;
     }
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = candidatePlugins[0].first;
@@ -72,10 +72,10 @@ bool FileSinkFilter::Configure(const std::string &inPort, const std::shared_ptr<
     auto err = ErrorCode::SUCCESS;
     if (fd_ == -1) { // always use fd firstly
         if (!outputPath_.empty()) {
-            err = TranslatePluginStatus(plugin_->SetSink(Plugin::FileSink::Type::URI, outputPath_));
+            err = TranslatePluginStatus(plugin_->SetSink(outputPath_));
         }
     } else {
-        err = TranslatePluginStatus(plugin_->SetSink(Plugin::FileSink::Type::FD, fd_));
+        err = TranslatePluginStatus(plugin_->SetSink(fd_));
     }
 
     if (err != ErrorCode::SUCCESS) {
@@ -97,7 +97,7 @@ ErrorCode FileSinkFilter::SetOutputPath(const std::string &path)
     }
     auto ret = ErrorCode::SUCCESS;
     if (plugin_ != nullptr) {
-        ret = TranslatePluginStatus(plugin_->SetSink(Plugin::FileSink::Type::URI, path));
+        ret = TranslatePluginStatus(plugin_->SetSink(path));
     }
     if (ret != ErrorCode::SUCCESS) {
         return ret;
@@ -113,7 +113,7 @@ ErrorCode FileSinkFilter::SetFd(int32_t fd)
     }
     auto ret = ErrorCode::SUCCESS;
     if (plugin_ != nullptr) {
-        ret = TranslatePluginStatus(plugin_->SetSink(Plugin::FileSink::Type::FD, fd));
+        ret = TranslatePluginStatus(plugin_->SetSink(fd));
     }
     if (ret != ErrorCode::SUCCESS) {
         return ret;
