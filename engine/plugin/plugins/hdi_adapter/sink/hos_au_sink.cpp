@@ -16,7 +16,6 @@
 #define HST_LOG_TAG "HdiSinkPlugin"
 
 #include "hos_au_sink.h"
-#include <dlfcn.h>
 #include <memory>
 #include "audio_adapter.h"
 #include "audio_manager.h"
