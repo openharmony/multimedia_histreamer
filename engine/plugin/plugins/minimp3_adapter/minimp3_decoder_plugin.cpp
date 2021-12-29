@@ -41,9 +41,12 @@ namespace {
 
 Minimp3DecoderPlugin::Minimp3DecoderPlugin(std::string name)
     : CodecPlugin(std::move(name)),
-      mp3Parameter_()
+      mp3Parameter_(),
+      samplesPerFrame_(0),
+      channels_(0)
 {
     FALSE_LOG(memset_s(&mp3DecoderAttr_, sizeof(mp3DecoderAttr_), 0x00, sizeof(AudioDecoderMp3Attr)) == 0);
+    FALSE_LOG(memset_s(&minimp3DecoderImpl_, sizeof(minimp3DecoderImpl_), 0x00, sizeof(Minimp3DemuxerOp)) == 0);
     MEDIA_LOG_I("Minimp3DecoderPlugin, plugin name: %s", pluginName_.c_str());
 }
 
