@@ -63,7 +63,7 @@ if (ohos_kernel_type == "liteos_m") {
         "-frtti",
         "-fexceptions",
       ]
-    cflags_cc = cflags
+      cflags_cc = cflags
     }
   }
 

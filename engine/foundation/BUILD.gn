@@ -27,7 +27,8 @@ config("histreamer_foundation_config") {
       "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits",
     ]
   } else {
-    include_dirs += [ "//base/hiviewdfx/hilog/interfaces/native/innerkits/include" ]
+    include_dirs +=
+        [ "//base/hiviewdfx/hilog/interfaces/native/innerkits/include" ]
   }
   defines = [ "MEDIA_OHOS" ]
 }
