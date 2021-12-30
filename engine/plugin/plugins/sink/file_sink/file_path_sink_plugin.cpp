@@ -24,7 +24,7 @@ std::shared_ptr<FileSinkPlugin> FilePathSinkPluginCreator(const std::string& nam
     return std::make_shared<FilePathSinkPlugin>(name);
 }
 
-const Status FilePathSinkRegister(const std::shared_ptr<Register>& reg)
+Status FilePathSinkRegister(const std::shared_ptr<Register>& reg)
 {
     FileSinkPluginDef definition;
     definition.name = "file_path_sink";

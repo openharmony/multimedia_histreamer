@@ -14,8 +14,13 @@
  */
 #define HST_LOG_TAG "FileFdSinkPlugin"
 #include "file_fd_sink_plugin.h"
-#include "foundation/log.h"
+#ifdef WIN32
 #include <fcntl.h>
+#else
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+#include "foundation/log.h"
 
 namespace OHOS {
 namespace Media {
@@ -25,7 +30,7 @@ std::shared_ptr<FileSinkPlugin> FileFdSinkPluginCreator(const std::string& name)
     return std::make_shared<FileFdSinkPlugin>(name);
 }
 
-const Status FileFdSinkRegister(const std::shared_ptr<Register>& reg)
+Status FileFdSinkRegister(const std::shared_ptr<Register>& reg)
 {
     FileSinkPluginDef definition;
     definition.name = "file_fd_sink";
@@ -60,12 +65,13 @@ bool FileFdSinkPlugin::IsSeekable()
     return isSeekable_;
 }
 
-Status FileFdSinkPlugin::SeekTo(uint64_t offset) {
+Status FileFdSinkPlugin::SeekTo(uint64_t offset)
+{
     if (fd_ == -1 || (fileSize_ = lseek(fd_, 0L, SEEK_END)) == -1 || offset > fileSize_) {
         MEDIA_LOG_E("Invalid operation");
         return Status::ERROR_WRONG_STATE;
     }
-    if (lseek(fd_, 0L, SEEK_SET) != -1 &&  lseek(fd_, offset, SEEK_SET) != -1) {
+    if (lseek(fd_, 0L, SEEK_SET) != -1 && lseek(fd_, offset, SEEK_SET) != -1) {
         if (eof(fd_)) {
             MEDIA_LOG_I("It is the end of file!");
         }
