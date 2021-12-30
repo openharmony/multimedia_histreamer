@@ -35,8 +35,7 @@ public:
         return manager;
     }
 
-    //todo how to decide the priority of providers
-
+    // todo how to decide the priority of providers
     void RegisterProvider(const std::shared_ptr<SyncInfoProvider>& provider);
     void UnRegisterProvider(const std::shared_ptr<SyncInfoProvider>& provider);
 

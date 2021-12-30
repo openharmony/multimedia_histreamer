@@ -139,7 +139,7 @@ void VideoCaptureFilter::ReadLoop()
 }
 
 ErrorCode VideoCaptureFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& info, const std::string& name,
-                                          PluginManager& manager)
+                                           PluginManager& manager)
 {
     if ((plugin_ != nullptr) && (pluginInfo_ != nullptr)) {
         if (info->name == pluginInfo_->name && TranslatePluginStatus(plugin_->Reset()) == ErrorCode::SUCCESS) {

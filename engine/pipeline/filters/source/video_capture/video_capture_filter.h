@@ -13,11 +13,9 @@
  * limitations under the License.
  */
 
-#ifdef RECORDER_SUPPORT
-
 #ifndef MEDIA_PIPELINE_VIDEO_CAPTURE_FILTER_H
 #define MEDIA_PIPELINE_VIDEO_CAPTURE_FILTER_H
-
+#ifdef RECORDER_SUPPORT
 #include <memory>
 #include <string>
 
@@ -35,7 +33,6 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-
 class VideoCaptureFilter : public FilterBase {
 public:
     explicit VideoCaptureFilter(const std::string& name);
@@ -64,7 +61,5 @@ private:
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
-
 #endif
-
 #endif

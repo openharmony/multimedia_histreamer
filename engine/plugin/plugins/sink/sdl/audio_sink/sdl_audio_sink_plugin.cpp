@@ -158,8 +158,8 @@ Status SdlAudioSinkPlugin::Prepare()
         return Status::ERROR_NO_MEMORY;
     }
     AVSampleFormat sampleFormat = TranslateFormat(audioFormat_);
-    MEDIA_LOG_I("configure swr with outChannelLayout 0x%x, outSampleFmt %d, "
-                "outSampleRate %d inChannelLayout 0x%x, "
+    MEDIA_LOG_I("configure swr with outChannelLayout 0x%lx, outSampleFmt %d, "
+                "outSampleRate %d inChannelLayout 0x%lx, "
                 "inSampleFormat %d, inSampleRate %d",
                 outChannelLayout, outSampleFmt, sampleRate_, channelMask_, sampleFormat, sampleRate_);
     swrContext = swr_alloc_set_opts(swrContext, outChannelLayout, outSampleFmt, sampleRate_, channelMask_, sampleFormat,

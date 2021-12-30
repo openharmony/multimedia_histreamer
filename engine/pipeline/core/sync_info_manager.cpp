@@ -17,11 +17,11 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-void SyncInfoManager::RegisterProvider(const std::shared_ptr<SyncInfoProvider> &provider)
+void SyncInfoManager::RegisterProvider(const std::shared_ptr<SyncInfoProvider>& provider)
 {
 }
 
-void SyncInfoManager::UnRegisterProvider(const std::shared_ptr<SyncInfoProvider> &provider)
+void SyncInfoManager::UnRegisterProvider(const std::shared_ptr<SyncInfoProvider>& provider)
 {
 }
 } // Pipeline

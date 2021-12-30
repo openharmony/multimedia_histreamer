@@ -57,14 +57,21 @@ std::unique_ptr<IAVMetadataHelperEngine> HstEngineFactory::CreateAVMetadataHelpe
 extern "C" {
 #endif
 
-#if defined(WIN32)
-__declspec(dllexport)
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+#define HST_EXPORT __declspec(dllexport)
+#else
+#if defined(__GNUC__) || (defined(__SUNPRO_C) && (__SUNPRO_C >= 0x590))
+#define HST_EXPORT __attribute__((visibility("default")))
+#else
+#define HST_EXPORT
 #endif
-__attribute__((visibility("default"))) OHOS::Media::IEngineFactory* CreateEngineFactory()
+#endif
+
+HST_EXPORT OHOS::Media::IEngineFactory* CreateEngineFactory()
 {
     return new (std::nothrow) OHOS::Media::HstEngineFactory();
 }
-
+#undef HST_EXPORT
 #ifdef __cplusplus
 }
 #endif

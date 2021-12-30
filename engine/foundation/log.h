@@ -69,7 +69,7 @@
 #define FAIL_RETURN(exec)                                                                                              \
     do {                                                                                                               \
         ErrorCode ret = (exec);                                                                                        \
-        if (ret != ErrorCode::SUCCESS) {                                                                                          \
+        if (ret != ErrorCode::SUCCESS) {                                                                               \
             MEDIA_LOG_E("FAIL_RETURN on ErrorCode(%d).", ret);                                                         \
             return ret;                                                                                                \
         }                                                                                                              \
@@ -80,7 +80,7 @@
 #define FAIL_LOG(exec)                                                                                                 \
     do {                                                                                                               \
         ErrorCode ret = (exec);                                                                                        \
-        if (ret != ErrorCode::SUCCESS) {                                                                                          \
+        if (ret != ErrorCode::SUCCESS) {                                                                               \
             MEDIA_LOG_E("FAIL_LOG on ErrorCode(%d).", ret);                                                            \
         }                                                                                                              \
     } while (0)
@@ -109,11 +109,11 @@
 #endif
 
 #ifndef FALSE_LOG
-#define FALSE_LOG(exec)                                                                                    \
+#define FALSE_LOG(exec)                                                                                                \
     do {                                                                                                               \
         bool value = (exec);                                                                                           \
         if (!value) {                                                                                                  \
-            MEDIA_LOG_E("FALSE_LOG: " #exec);                                                       \
+            MEDIA_LOG_E("FALSE_LOG: " #exec);                                                                          \
         }                                                                                                              \
     } while (0)
 #endif
@@ -139,7 +139,7 @@
 #endif
 
 #define RETURN_TARGET_ERR_MESSAGE_LOG_IF_FAIL(err, returnErr, msg)                                                     \
-    if ((err) != ErrorCode::SUCCESS) {                                                                                            \
+    if ((err) != ErrorCode::SUCCESS) {                                                                                 \
         MEDIA_LOG_E(msg);                                                                                              \
         return returnErr;                                                                                              \
     }

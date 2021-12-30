@@ -117,7 +117,7 @@ bool MuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<con
         MEDIA_LOG_E("cannot find any available plugins");
         return false;
     }
-    auto muxerCap =std::make_shared<Capability>(containerMime_);
+    auto muxerCap = std::make_shared<Capability>(containerMime_);
     Capability downCap;
     if (!outPorts_[0]->Negotiate(muxerCap, downCap)) {
         MEDIA_LOG_E("downstream of muxer filter negotiate failed");
@@ -244,9 +244,7 @@ ErrorCode MuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer, i
         MEDIA_LOG_W("pushing data to decoder when state is %d", static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
-
-    //todo we should consider more tracks
-
+    // todo we should consider more tracks
     if (!hasWriteHeader_) {
         plugin_->WriteHeader();
         hasWriteHeader_ = true;

@@ -20,11 +20,11 @@
 #include <string>
 #include <vector>
 
-#include "utils/type_define.h"
 #include "core/plugin_register.h"
-#include "interface/demuxer_plugin.h"
-#include "thread/mutex.h"
 #include "minimp3_wrapper.h"
+#include "plugin/interface/demuxer_plugin.h"
+#include "thread/mutex.h"
+#include "utils/type_define.h"
 
 using Mp3DemuxerHandle     = Minimp3WrapperMp3dec;
 using Mp3DemuxerSampleAttr = Minimp3WrapperMp3dSample;
@@ -130,15 +130,17 @@ private:
     int AudioDemuxerMp3Seek(uint32_t pos, uint8_t *buf, uint32_t len, AudioDemuxerRst *rst);
     int AudioDemuxerMp3GetSeekPosition(uint32_t targetTtimeS, uint64_t *pos);
 
+    void FillInMediaInfo(MediaInfo& mediaInfo) const;
+
     int                 inIoBufferSize_;
     size_t              fileSize_;
     uint8_t             *inIoBuffer_;
     uint32_t            ioRemainSize_;
     uint64_t            durationMs_;
     IOContext           ioContext_;
-    AudioDemuxerRst     mp3DemuxerRst_;
-    Minimp3DemuxerOp    minimp3DemuxerImpl_;
-    AudioDemuxerMp3Attr mp3DemuxerAttr_;
+    AudioDemuxerRst     mp3DemuxerRst_{};
+    Minimp3DemuxerOp    minimp3DemuxerImpl_{};
+    AudioDemuxerMp3Attr mp3DemuxerAttr_{};
 };
 } // namespace Plugin
 } // namespace Media

@@ -51,11 +51,11 @@ FileFdSinkPlugin::FileFdSinkPlugin(std::string name)
 Status FileFdSinkPlugin::SetSink(const Plugin::ValueType& sink)
 {
     MEDIA_LOG_D("OUT");
-    if(sink.Type() != typeid(int32_t)) {
+    if (sink.Type() != typeid(int32_t)) {
         MEDIA_LOG_E("Invalid parameter to file_fd_sink plugin");
         return Status::ERROR_INVALID_PARAMETER;
     }
-    fd_=  Plugin::AnyCast<int32_t>(sink);
+    fd_ =  Plugin::AnyCast<int32_t>(sink);
     return Status::OK;
 }
 

@@ -41,7 +41,7 @@ std::shared_ptr<Port> Port::GetPeerPort()
     return nullptr;
 }
 
-ErrorCode InPort::Connect(std::shared_ptr<Port> port)
+ErrorCode InPort::Connect(const std::shared_ptr<Port>& port)
 {
     prevPort = port;
     return ErrorCode::SUCCESS;
@@ -98,7 +98,7 @@ ErrorCode InPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
     return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
 }
 
-ErrorCode OutPort::Connect(std::shared_ptr<Port> port)
+ErrorCode OutPort::Connect(const std::shared_ptr<Port>& port)
 {
     if (InSamePipeline(port)) {
         nextPort = port;
@@ -114,7 +114,7 @@ ErrorCode OutPort::Disconnect()
     return ErrorCode::SUCCESS;
 }
 
-bool OutPort::InSamePipeline(std::shared_ptr<Port> port) const
+bool OutPort::InSamePipeline(const std::shared_ptr<Port>& port) const
 {
     auto filter1 = GetOwnerFilter();
     FALSE_RETURN_V(filter1 != nullptr, false);
@@ -176,7 +176,7 @@ ErrorCode OutPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
     return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
 }
 
-ErrorCode EmptyInPort::Connect(std::shared_ptr<Port> port)
+ErrorCode EmptyInPort::Connect(const std::shared_ptr<Port> &port)
 {
     UNUSED_VARIABLE(port);
     MEDIA_LOG_E("Connect in EmptyInPort");
@@ -220,7 +220,7 @@ ErrorCode EmptyInPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
     return ErrorCode::ERROR_UNIMPLEMENTED;
 }
 
-ErrorCode EmptyOutPort::Connect(std::shared_ptr<Port> port)
+ErrorCode EmptyOutPort::Connect(const std::shared_ptr<Port> &port)
 {
     UNUSED_VARIABLE(port);
     MEDIA_LOG_E("Connect in EmptyOutPort");

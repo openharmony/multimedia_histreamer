@@ -77,7 +77,7 @@ Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg
             continue;
         }
         if (outputFormat->long_name != nullptr) {
-            if (!strncmp(outputFormat->long_name, "raw ", 4)) {
+            if (!strncmp(outputFormat->long_name, "raw ", 4)) { // 4
                 continue;
             }
         }
@@ -194,7 +194,9 @@ do { \
                                                 ui2iFunc);
     RETURN_IF_NOT_OK(ret);
     ret = SetSingleParameter<AudioChannelLayout, uint64_t>(Tag::AUDIO_CHANNEL_LAYOUT, tagMap,
-        stream->codecpar->channel_layout, [](AudioChannelLayout layout){return (uint64_t)layout;});
+        stream->codecpar->channel_layout, [](AudioChannelLayout layout) {
+        return (uint64_t)layout;
+    });
     return ret;
 #undef RETURN_IF_NOT_OK
 }
@@ -236,7 +238,9 @@ Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const
     }
     // others
     ret = SetSingleParameter<int64_t, int64_t>(Tag::MEDIA_BITRATE, tagMap, stream->codecpar->bit_rate,
-                                               [](int64_t rate){return rate;});
+         [](int64_t rate) {
+            return rate;
+        });
     if (ret != Status::OK) {
         return ret;
     }
@@ -337,7 +341,7 @@ Status FFmpegMuxerPlugin::Deinit()
 
 AVIOContext* FFmpegMuxerPlugin::InitAvIoCtx()
 {
-    constexpr int bufferSize = 4096;
+    constexpr int bufferSize = 4096; // 4096
     auto buffer = static_cast<unsigned char*>(av_malloc(bufferSize));
     if (buffer == nullptr) {
         MEDIA_LOG_E("AllocAVIOContext failed to av_malloc...");

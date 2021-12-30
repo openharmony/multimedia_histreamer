@@ -20,7 +20,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 FileSink::FileSink(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<FileSinkPlugin> plugin)
-        : Base(pkgVer, apiVer, plugin), fileSink_(std::move(plugin)) {}
+    : Base(pkgVer, apiVer, plugin), fileSink_(std::move(plugin)) {}
 Status FileSink::SetSink(const Plugin::ValueType &sink)
 {
     return fileSink_->SetSink(sink);

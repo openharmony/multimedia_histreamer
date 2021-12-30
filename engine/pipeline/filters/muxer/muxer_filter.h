@@ -73,7 +73,6 @@ private:
     std::shared_ptr<Plugin::Muxer> plugin_{};
     std::shared_ptr<Plugin::PluginInfo> targetPluginInfo_ {nullptr};
     std::shared_ptr<DataSpliter> dataSpliter_{};
-    std::shared_ptr<DataCollector> dataCollector_{};
     std::vector<std::pair<std::string, Capability>> capabilityCache_{};
     std::vector<std::pair<std::string, Plugin::Meta>> metaCache_{};
     bool hasWriteHeader_{false};

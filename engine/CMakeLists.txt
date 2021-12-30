@@ -57,7 +57,7 @@ file(GLOB_RECURSE HISTREAMER_BASE_SRCS
         ${TOP_DIR}/engine/plugin/common/*.cpp
         ${TOP_DIR}/engine/plugin/core/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/ffmpeg_adapter/*.cpp
-        ${TOP_DIR}/engine/plugin/plugins/sink/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/sink/sdl/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/source/file_source/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/source/audio_capture/*.cpp

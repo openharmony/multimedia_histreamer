@@ -15,6 +15,8 @@
 
 #include "plugin_register.h"
 
+#include <dirent.h>
+
 #include "all_plugin_static.h"
 #include "interface/audio_sink_plugin.h"
 #include "interface/codec_plugin.h"
@@ -23,8 +25,6 @@
 #include "interface/source_plugin.h"
 #include "interface/video_sink_plugin.h"
 #include "interface/file_sink_plugin.h"
-
-#include <dirent.h>
 
 using namespace OHOS::Media::Plugin;
 
@@ -326,7 +326,7 @@ void PluginRegister::UnregisterAllPlugins()
     registeredLoaders.clear();
 }
 
-void PluginRegister::EraseRegisteredPlugins(std::shared_ptr<PluginLoader> loader)
+void PluginRegister::EraseRegisteredPlugins(const std::shared_ptr<PluginLoader>& loader)
 {
     for (auto& it : registerData->registerTable) {
         PluginType type = it.first;

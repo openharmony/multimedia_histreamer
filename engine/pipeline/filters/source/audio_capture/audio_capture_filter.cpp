@@ -136,7 +136,6 @@ ErrorCode AudioCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
     Tag tag = static_cast<OHOS::Media::Plugin::Tag>(key);
     switch (tag) {
         case Tag::AUDIO_SOURCE_TYPE: {
-
             break;
         }
         case Tag::AUDIO_SAMPLE_RATE: {

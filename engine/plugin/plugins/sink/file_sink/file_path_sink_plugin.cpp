@@ -52,7 +52,7 @@ Status FilePathSinkPlugin::Stop()
 Status FilePathSinkPlugin::SetSink(const Plugin::ValueType& sink)
 {
     MEDIA_LOG_D("OUT");
-    if(sink.Type() != typeid(std::string)) {
+    if (sink.Type() != typeid(std::string)) {
         MEDIA_LOG_E("Invalid parameter to file_path_sink plugin");
         return Status::ERROR_INVALID_PARAMETER;
     }

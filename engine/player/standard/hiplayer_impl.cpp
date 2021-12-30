@@ -466,9 +466,9 @@ int32_t HiPlayerImpl::Reset()
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 
-int32_t HiPlayerImpl::GetCurrentTime(int32_t& currentTime)
+int32_t HiPlayerImpl::GetCurrentTime(int32_t& currentPositionMs)
 {
-    currentTime = mediaStats_.GetCurrentTime();
+    currentPositionMs = mediaStats_.GetCurrentTime();
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 

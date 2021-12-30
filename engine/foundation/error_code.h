@@ -16,8 +16,6 @@
 #ifndef HISTREAMER_FOUNDATION_ERROR_CODE_H
 #define HISTREAMER_FOUNDATION_ERROR_CODE_H
 
-#include <cstdint>
-
 #ifdef WIN32
 // Fix compile error: expected identifier before numeric constant
 // also can add in plugin_loader.cpp before include log.h

@@ -45,7 +45,7 @@ public:
     {
         return workMode;
     }
-    virtual ErrorCode Connect(std::shared_ptr<Port> port) = 0;
+    virtual ErrorCode Connect(const std::shared_ptr<Port>& port) = 0;
     virtual ErrorCode Disconnect() = 0;
     virtual ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) = 0;
     virtual bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
@@ -73,7 +73,7 @@ public:
     explicit InPort(InfoTransfer *filter, std::string name = PORT_NAME_DEFAULT)
         : Port(filter, std::move(name)) {}
     ~InPort() override = default;
-    ErrorCode Connect(std::shared_ptr<Port> port) override;
+    ErrorCode Connect(const std::shared_ptr<Port>& port) override;
     ErrorCode Disconnect() override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     std::shared_ptr<Port> GetPeerPort() override;
@@ -92,7 +92,7 @@ public:
     explicit OutPort(InfoTransfer *filter, std::string name = PORT_NAME_DEFAULT)
         : Port(filter, std::move(name)) {}
     ~OutPort() override = default;
-    ErrorCode Connect(std::shared_ptr<Port> port) override;
+    ErrorCode Connect(const std::shared_ptr<Port>& port) override;
     ErrorCode Disconnect() override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     std::shared_ptr<Port> GetPeerPort() override;
@@ -103,7 +103,7 @@ public:
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:
-    bool InSamePipeline(std::shared_ptr<Port> port) const;
+    bool InSamePipeline(const std::shared_ptr<Port>& port) const;
 
 private:
     std::shared_ptr<Port> nextPort;
@@ -117,7 +117,7 @@ public:
     }
     EmptyInPort() : InPort(nullptr, "emptyInPort") {}
     ~EmptyInPort() override = default;
-    ErrorCode Connect(std::shared_ptr<Port> port) override;
+    ErrorCode Connect(const std::shared_ptr<Port>& port) override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Capability& upstreamNegotiatedCap) override;
@@ -137,7 +137,7 @@ public:
     }
     EmptyOutPort() : OutPort(nullptr, "emptyOutPort") {}
     ~EmptyOutPort() override = default;
-    ErrorCode Connect(std::shared_ptr<Port> port) override;
+    ErrorCode Connect(const std::shared_ptr<Port>& port) override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Capability& upstreamNegotiatedCap) override;
