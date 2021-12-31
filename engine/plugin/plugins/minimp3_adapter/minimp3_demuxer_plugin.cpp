@@ -96,7 +96,12 @@ uint8_t *Minimp3DemuxerPlugin::GetDataFromSource()
 {
     uint32_t ioNeedReadSize = inIoBufferSize_ - ioRemainSize_;
     if (ioRemainSize_) {
-        memcpy(inIoBuffer_, inIoBuffer_ + ioNeedReadSize, ioRemainSize_); // 将剩余数据移动到buffer的起始位置
+        // 将剩余数据移动到buffer的起始位置
+        auto ret = memcpy_s(inIoBuffer_, ioRemainSize_, inIoBuffer_ + ioNeedReadSize, ioRemainSize_);
+        if (ret != 0) {
+            MEDIA_LOG_E("copy buffer error");
+            return nullptr;
+        }
     }
     if (ioContext_.offset >= fileSize_) {
         ioContext_.eos = true;

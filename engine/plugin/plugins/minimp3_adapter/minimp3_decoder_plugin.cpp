@@ -281,7 +281,7 @@ void UpdatePluginDefinition(CodecPluginDef& definition)
             .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 1)
             .AppendIntervalKey<uint32_t>(Capability::Key::AUDIO_MPEG_LAYER, 1, 3); // 3
 
-    DiscreteCapability<uint32_t> values = {8000, 16000, 22050, 44100, 48000, 32000}; // 8000, 16000, 22050, 44100, 48000, 32000
+    DiscreteCapability<uint32_t> values = {8000, 16000, 22050, 44100, 48000, 32000}; // 8000, 16000 etc. sample rates
     cap.AppendDiscreteKeys(Capability::Key::AUDIO_SAMPLE_RATE, values);
 
     DiscreteCapability<AudioChannelLayout> channelLayoutValues = {

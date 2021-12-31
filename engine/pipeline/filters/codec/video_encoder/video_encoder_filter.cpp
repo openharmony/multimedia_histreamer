@@ -229,7 +229,7 @@ bool VideoEncoderFIlter::Configure(const std::string& inPort, const std::shared_
         return false;
     }
     state_ = FilterState::READY;
-    Event event{
+    Event event {
         .type = EVENT_READY,
     };
     OnEvent(event);

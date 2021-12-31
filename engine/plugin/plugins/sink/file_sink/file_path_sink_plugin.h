@@ -15,8 +15,8 @@
 #ifndef HISTREAMER_FILE_PATH_SINK_PLUGIN_H
 #define HISTREAMER_FILE_PATH_SINK_PLUGIN_H
 
-#include "plugin/interface/file_sink_plugin.h"
 #include <cstdio>
+#include "plugin/interface/file_sink_plugin.h"
 
 namespace OHOS {
 namespace Media {

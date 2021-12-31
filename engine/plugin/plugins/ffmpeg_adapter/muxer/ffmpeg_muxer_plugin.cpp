@@ -181,7 +181,7 @@ do { \
     using namespace Plugin;
     auto ret = SetSingleParameter<AudioSampleFormat, int32_t>(Tag::AUDIO_SAMPLE_FORMAT, tagMap,
                                                               stream->codecpar->format, Trans2FFmepgFormat);
-    std::function<int32_t(uint32_t)> ui2iFunc = [](uint32_t i){return i;};
+    std::function<int32_t(uint32_t)> ui2iFunc = [](uint32_t i) {return i;};
 
     RETURN_IF_NOT_OK(ret);
     ret = SetSingleParameter<uint32_t, int32_t>(Tag::AUDIO_CHANNELS, tagMap, stream->codecpar->channels,
@@ -194,9 +194,7 @@ do { \
                                                 ui2iFunc);
     RETURN_IF_NOT_OK(ret);
     ret = SetSingleParameter<AudioChannelLayout, uint64_t>(Tag::AUDIO_CHANNEL_LAYOUT, tagMap,
-        stream->codecpar->channel_layout, [](AudioChannelLayout layout) {
-        return (uint64_t)layout;
-    });
+        stream->codecpar->channel_layout, [](AudioChannelLayout layout) {return (uint64_t)layout;});
     return ret;
 #undef RETURN_IF_NOT_OK
 }
@@ -238,9 +236,7 @@ Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const
     }
     // others
     ret = SetSingleParameter<int64_t, int64_t>(Tag::MEDIA_BITRATE, tagMap, stream->codecpar->bit_rate,
-         [](int64_t rate) {
-            return rate;
-        });
+         [](int64_t rate) {return rate;});
     if (ret != Status::OK) {
         return ret;
     }
