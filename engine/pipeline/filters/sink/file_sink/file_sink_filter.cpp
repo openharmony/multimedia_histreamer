@@ -162,6 +162,7 @@ ErrorCode FileSinkFilter::Stop()
     currentPos_ = 0;
     fd_ = -1;
     outputPath_.clear();
+    return ErrorCode::SUCCESS;
 }
 } // Pipeline
 } // Media

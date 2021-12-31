@@ -72,9 +72,11 @@ Status FileFdSinkPlugin::SeekTo(uint64_t offset)
         return Status::ERROR_WRONG_STATE;
     }
     if (lseek(fd_, 0L, SEEK_SET) != -1 && lseek(fd_, offset, SEEK_SET) != -1) {
+#ifdef WIN32
         if (eof(fd_)) {
             MEDIA_LOG_I("It is the end of file!");
         }
+#endif
         return Status::OK;
     }
     MEDIA_LOG_E("Seek to %" PRIu64, offset);

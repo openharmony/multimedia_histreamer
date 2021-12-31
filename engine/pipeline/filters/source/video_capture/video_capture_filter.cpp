@@ -60,12 +60,6 @@ std::vector<WorkMode> VideoCaptureFilter::GetWorkModes()
     return {WorkMode::PUSH};
 }
 
-
-ErrorCode VideoCaptureFilter::SetVideoSource(OHOS::Media::Plugin::VideoSourceType source, int32_t &sourceId)
-{
-    return ErrorCode::SUCCESS;
-}
-
 ErrorCode VideoCaptureFilter::InitPlugin()
 {
     MEDIA_LOG_D("IN");

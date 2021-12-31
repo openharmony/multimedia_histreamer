@@ -19,6 +19,7 @@
 #include <memory>
 #include "foundation/log.h"
 #include "player/standard/hiplayer_impl.h"
+#include "recorder/standard/hirecorder_impl.h"
 
 namespace OHOS {
 namespace Media {
@@ -42,7 +43,15 @@ std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine()
 std::unique_ptr<IRecorderEngine> HstEngineFactory::CreateRecorderEngine()
 {
     MEDIA_LOG_W("CreateRecorderEngine enter.");
+#ifdef RECORDER_SUPPORT
+    auto recorder = std::unique_ptr<Record::HiRecorderImpl>(new (std::nothrow) Record::HiRecorderImpl());
+    if (recorder && recorder->Init() == ErrorCode::SUCCESS) {
+        return recorder;
+    }
     return nullptr;
+#else
+    return nullptr;
+#endif
 }
 
 std::unique_ptr<IAVMetadataHelperEngine> HstEngineFactory::CreateAVMetadataHelperEngine()
