@@ -17,6 +17,7 @@
 
 #include "stream_source_plugin.h"
 #include "plugin/common/plugin_buffer.h"
+#include "plugin/common/plugin_source_tags.h"
 #include "plugin/core/plugin_manager.h"
 
 namespace OHOS {
@@ -33,7 +34,7 @@ const Status StreamSourceRegister(const std::shared_ptr<Register>& reg)
     definition.name = "StreamSource";
     definition.description = "Stream source";
     definition.rank = 100; // 100: max rank
-    definition.protocol = "stream";
+    definition.protocol.emplace_back(ProtocolType::STREAM);
     definition.creator = StreamSourcePluginCreater;
     return reg->AddPlugin(definition);
 }

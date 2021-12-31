@@ -30,6 +30,13 @@ using namespace Plugin;
 
 static AutoRegisterFilter<MediaSourceFilter> g_registerFilterHelper("builtin.player.mediasource");
 
+static std::map<std::string, ProtocolType> g_protocolStringToType = {
+    {"http", ProtocolType::HTTP},
+    {"https", ProtocolType::HTTPS},
+    {"file", ProtocolType::FILE},
+    {"stream", ProtocolType::STREAM}
+};
+
 MediaSourceFilter::MediaSourceFilter(const std::string& name)
     : FilterBase(name),
       taskPtr_(nullptr),
@@ -354,12 +361,14 @@ ErrorCode MediaSourceFilter::FindPlugin(const std::shared_ptr<MediaSource>& sour
         std::shared_ptr<PluginInfo> info = pluginManager.GetPluginInfo(PluginType::SOURCE, name);
         MEDIA_LOG_I("name: %s, info->name: %s", name.c_str(), info->name.c_str());
         auto val = info->extra[PLUGIN_INFO_EXTRA_PROTOCOL];
-        if (val.Type() == typeid(std::string)) {
-            auto supportProtocol = OHOS::Media::Plugin::AnyCast<std::string>(val);
-            MEDIA_LOG_D("supportProtocol: %s", supportProtocol.c_str());
-            if (protocol_ == supportProtocol && CreatePlugin(info, name, pluginManager) == ErrorCode::SUCCESS) {
-                MEDIA_LOG_I("CreatePlugin %s success", name_.c_str());
-                return ErrorCode::SUCCESS;
+        if (val.Type() == typeid(std::vector<ProtocolType>)) {
+            auto supportProtocols = OHOS::Media::Plugin::AnyCast<std::vector<ProtocolType>>(val);
+            for(auto supportProtocol : supportProtocols){
+                if (g_protocolStringToType[protocol_] == supportProtocol &&
+                    CreatePlugin(info, name, pluginManager) == ErrorCode::SUCCESS) {
+                    MEDIA_LOG_I("supportProtocol:%s CreatePlugin %s success", protocol_.c_str(), name_.c_str());
+                    return ErrorCode::SUCCESS;
+                }
             }
         }
     }

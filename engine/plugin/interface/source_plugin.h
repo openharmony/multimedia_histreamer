@@ -19,6 +19,7 @@
 #include <map>
 #include <string>
 #include "common/plugin_caps.h"
+#include "common/plugin_source_tags.h"
 #include "plugin_base.h"
 #include "plugin_definition.h"
 
@@ -119,7 +120,7 @@ struct SourcePlugin : public PluginBase {
  * @version 1.0
  */
 struct SourcePluginDef : public PluginDefBase {
-    std::string protocol;                    ///< Protocols supported by playback source
+    std::vector<ProtocolType> protocol;      ///< Protocols supported by playback source
     std::string inputType;                   ///< Input type supported by record source
     CapabilitySet outCaps;                   ///< Plug-in output capability, For details, @see Capability.
     PluginCreatorFunc<SourcePlugin> creator {nullptr}; ///< Source plugin create function.

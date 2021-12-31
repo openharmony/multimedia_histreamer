@@ -31,6 +31,7 @@ enum struct ProtocolType : uint32_t {
     UNKNOWN, ///< Unknown protocol
     FILE,    ///< File protocol, uri prefix: "file://"
     FD,      ///< File descriptor protocol, uri prefix: "fd://"
+    STREAM,  ///< Stream protocol, uri prefix: "stream://"
     HTTP,    ///< Http protocol, uri prefix: "http://"
     HTTPS,   ///< Https protocol, uri prefix: "https://"
     HLS,     ///< Http live streaming protocol, uri prefix: "https://" or "https://" or "file://", suffix: ".m3u8"
