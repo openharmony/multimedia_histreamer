@@ -85,20 +85,20 @@ else ()
             )
 endif ()
 
-if (RECORDRE_LITE)
+if (RECORDER_LITE)
     message(STATUS "#1 recorder lite source")
-    file(GLOB_RECURSE RECORDRE_SRCS
+    file(GLOB_RECURSE RECORDER_SRCS
             ${TOP_DIR}/engine/recorder/lite/*.cpp
             )
 else ()
     message(STATUS "recorder standard source")
-    file(GLOB_RECURSE RECORDRE_SRCS
+    file(GLOB_RECURSE RECORDER_SRCS
             ${TOP_DIR}/engine/recorder/standard/*.cpp
             ${TOP_DIR}/engine/factory/*.cpp
             )
 endif ()
 
-set(HISTREAMER_SRCS ${HISTREAMER_BASE_SRCS} ${PLAYER_SRCS} ${PLAYER_SRCS} ${RECORDRE_SRCS})
+set(HISTREAMER_SRCS ${HISTREAMER_BASE_SRCS} ${PLAYER_SRCS} ${RECORDER_SRCS})
 
 file(GLOB_RECURSE PLUGINS_STATIC_BUILD_SRCS
         ${TOP_DIR}/engine/plugin/plugins/source/file_source/*.cpp

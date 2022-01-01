@@ -48,10 +48,8 @@ std::unique_ptr<IRecorderEngine> HstEngineFactory::CreateRecorderEngine()
     if (recorder && recorder->Init() == ErrorCode::SUCCESS) {
         return recorder;
     }
-    return nullptr;
-#else
-    return nullptr;
 #endif
+    return nullptr;
 }
 
 std::unique_ptr<IAVMetadataHelperEngine> HstEngineFactory::CreateAVMetadataHelperEngine()
