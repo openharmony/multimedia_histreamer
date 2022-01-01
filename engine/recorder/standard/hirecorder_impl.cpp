@@ -347,8 +347,8 @@ ErrorCode HiRecorderImpl::DoSetParameter(const Plugin::Any& param) const
             break;
         case RecorderParameterType::AUD_CHANNEL:
 
-            ret = audioCapture_->SetParameter(static_cast<int32_t>(OHOS::Media::Plugin::Tag::AUDIO_SAMPLE_FORMAT),
-                                              static_cast<uint32_t>(Plugin::AnyCast<AudSampleFormat>(any).sampleFmt));
+            ret = audioCapture_->SetParameter(static_cast<int32_t>(OHOS::Media::Plugin::Tag::AUDIO_CHANNELS),
+                                              static_cast<uint32_t>(Plugin::AnyCast<AudChannel>(any).channel));
             break;
         case RecorderParameterType::AUD_BIT_RATE:
             ret = audioCapture_->SetParameter(static_cast<int32_t>(OHOS::Media::Plugin::Tag::MEDIA_BITRATE),
