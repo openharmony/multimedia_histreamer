@@ -156,7 +156,7 @@ __attribute__((unused))
 #endif
     size_t alignment;
 
-    /// Offset of the buffer address to make sure access acording to alignment.
+    /// Offset of the buffer address to make sure access according to alignment.
     size_t offset {0};
 
     /// Valid data size
@@ -321,13 +321,13 @@ public:
     /// track index.
     uint32_t trackID;
 
-    /// presentation timestamp in microsecond of the buffer.
+    /// presentation timestamp of the buffer based on {@link HST_TIME_BASE}.
     uint64_t pts;
 
-    /// decoding timestamp in microsecond of the buffer.
+    /// decoding timestamp of the buffer based on {@link HST_TIME_BASE}.
     uint64_t dts;
 
-    /// duration in microsecond in time of the buffer data.
+    /// duration in time of the buffer data based on {@link HST_TIME_BASE}.
     uint64_t duration;
 
     /// flag of the buffer, which is used to record extra information.

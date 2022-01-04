@@ -55,7 +55,7 @@ Plugin::Status DemuxerFilter::DataSourceImpl::ReadAt(int64_t offset, std::shared
                                                      size_t expectedLen)
 {
     if (!buffer || buffer->IsEmpty() || expectedLen == 0 || !filter.IsOffsetValid(offset)) {
-        MEDIA_LOG_E("ReadAt failed, buffer empty: %d, expectedLen: %d, offset: %lld", !buffer,
+        MEDIA_LOG_E("ReadAt failed, buffer empty: %d, expectedLen: %d, offset: %" PRId64, !buffer,
                     static_cast<int>(expectedLen), offset);
         return Plugin::Status::ERROR_UNKNOWN;
     }

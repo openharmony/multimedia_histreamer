@@ -88,7 +88,7 @@ Status Minimp3DemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& so
     }
     mp3DemuxerAttr_.fileSize = fileSize_;
     fileSize = fileSize_;
-    MEDIA_LOG_I("fileSize_ %d", fileSize_);
+    MEDIA_LOG_I("fileSize_ %zu", fileSize_);
     return Status::OK;
 }
 

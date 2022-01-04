@@ -21,6 +21,7 @@
 #include "foundation/log.h"
 #include "foundation/osal/utils/util.h"
 #include "pipeline/filters/common/plugin_settings.h"
+#include "plugin/common/plugin_time.h"
 #include "utils/steady_clock.h"
 
 namespace OHOS {
@@ -160,7 +161,7 @@ ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const 
 void AudioSinkFilter::ReportCurrentPosition(int64_t pts)
 {
     if (plugin_) {
-        OnEvent({EVENT_AUDIO_PROGRESS, pts / 1000}); // 1000
+        OnEvent({EVENT_AUDIO_PROGRESS, static_cast<int64_t>(pts)});
     }
 }
 

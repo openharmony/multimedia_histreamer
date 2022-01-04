@@ -145,7 +145,7 @@ struct CodecPlugin : public PluginBase {
      *
      * @param cb   Data callback, NULL callback listening is canceled.
      * @return Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     * @retval OK: Plugin reset succeeded.
      */
     virtual Status SetDataCallback(const std::weak_ptr<DataCallback>& dataCallback) = 0;
 };

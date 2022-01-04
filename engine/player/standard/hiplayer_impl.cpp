@@ -19,6 +19,7 @@
 #include "foundation/log.h"
 #include "pipeline/factory/filter_factory.h"
 #include "player/standard/media_utils.h"
+#include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_meta.h"
 #include "utils/steady_clock.h"
 #include "utils/utils.h"
@@ -290,7 +291,7 @@ void HiPlayerImpl::OnEvent(Event event)
             }
             break;
         case EVENT_AUDIO_PROGRESS:
-            mediaStats_.ReceiveEvent(EVENT_AUDIO_PROGRESS, Plugin::AnyCast<int64_t>(event.param));
+            mediaStats_.ReceiveEvent(EVENT_AUDIO_PROGRESS, HstTime2Ms(Plugin::AnyCast<int64_t>(event.param)));
             break;
         default:
             MEDIA_LOG_E("Unknown event(%d)", event.type);
@@ -485,7 +486,7 @@ int32_t HiPlayerImpl::GetDuration(int32_t& durationMs)
         return TransErrorCode(ErrorCode::ERROR_AGAIN);
     }
     if (sourceMeta->GetUint64(Media::Plugin::MetaID::MEDIA_DURATION, duration)) {
-        durationMs = duration;
+        durationMs = HstTime2Ms(duration);
         return TransErrorCode(ErrorCode::SUCCESS);
     }
     // use max stream duration as whole source duration if source meta does not contains the duration meta
@@ -499,7 +500,7 @@ int32_t HiPlayerImpl::GetDuration(int32_t& durationMs)
         }
     }
     if (found) {
-        durationMs = duration;
+        durationMs = HstTime2Ms(duration);
         return TransErrorCode(ErrorCode::SUCCESS);
     }
     return TransErrorCode(ErrorCode::ERROR_AGAIN);

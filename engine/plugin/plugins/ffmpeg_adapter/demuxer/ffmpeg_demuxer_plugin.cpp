@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +25,7 @@
 #include "foundation/log.h"
 #include "osal/thread/scoped_lock.h"
 #include "plugin/common/plugin_buffer.h"
+#include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_manager.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "utils/memory_helper.h"
@@ -408,8 +410,8 @@ void FFmpegDemuxerPlugin::SaveFileInfoToMetaInfo(TagMap& meta)
             }
         }
     }
-    int64_t msec = formatContext_->duration / 1000; // 1000
-    meta.insert({Tag::MEDIA_DURATION, static_cast<uint64_t>(msec)});
+    int64_t nanoSec = formatContext_->duration * (HST_SECOND / AV_TIME_BASE);
+    meta.insert({Tag::MEDIA_DURATION, static_cast<uint64_t>(nanoSec)});
 }
 
 bool FFmpegDemuxerPlugin::ParseMediaData()
