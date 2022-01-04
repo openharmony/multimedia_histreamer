@@ -18,6 +18,7 @@
 #include "hdi_au_utils.h"
 
 #include <utility>
+#include <map>
 
 namespace OHOS {
 namespace Media {
@@ -81,33 +82,40 @@ bool PluginAuFormat2HdiAttrs(OHOS::Media::Plugin::AudioSampleFormat pFormat, Aud
     return false;
 }
 
-std::vector<OHOS::Media::Plugin::AudioSampleFormat> HdiAuFormat2PluginFormat(AudioFormat audioFormat)
+bool HdiAuFormat2PluginFormat(::AudioSampleFormat hdiAudioFormat, OHOS::Media::Plugin::AudioSampleFormat& pluginFormat)
 {
-    std::vector<OHOS::Media::Plugin::AudioSampleFormat> ret;
-    switch (audioFormat) {
-        case AUDIO_FORMAT_PCM_8_BIT:
-            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::U8);
-            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::U8P);
-            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::S8);
-            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::S8P);
-            break;
-        case AUDIO_FORMAT_PCM_16_BIT:
-            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::U16);
-            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::U16P);
-            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::S16);
-            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::S16P);
-            break;
-        case AUDIO_FORMAT_PCM_32_BIT:
-            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::U32);
-            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::U32P);
-            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::S32);
-            ret.emplace_back(OHOS::Media::Plugin::AudioSampleFormat::S32P);
-            break;
-        default:
-            // do nothing
-            break;
+    using PluginAudioSampleFormat = OHOS::Media::Plugin::AudioSampleFormat;
+    static const std::map<::AudioSampleFormat, PluginAudioSampleFormat> formatMap = {
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_U8, PluginAudioSampleFormat::U8},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_U8P, PluginAudioSampleFormat::U8P},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_S8, PluginAudioSampleFormat::S8},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_S8P, PluginAudioSampleFormat::S8P},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_U16, PluginAudioSampleFormat::U16},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_U16P, PluginAudioSampleFormat::U16P},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_S16, PluginAudioSampleFormat::S16},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_S16P, PluginAudioSampleFormat::S16P},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_U24, PluginAudioSampleFormat::U24},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_U24, PluginAudioSampleFormat::U24P},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_S24, PluginAudioSampleFormat::S24},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_S24P, PluginAudioSampleFormat::S24P},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_U32, PluginAudioSampleFormat::U32},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_U32P, PluginAudioSampleFormat::U32P},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_S32, PluginAudioSampleFormat::S32},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_S32P, PluginAudioSampleFormat::S32P},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_U64, PluginAudioSampleFormat::U64},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_U64P, PluginAudioSampleFormat::U64P},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_S64, PluginAudioSampleFormat::S64},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_S64, PluginAudioSampleFormat::S64P},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_F32, PluginAudioSampleFormat::F32},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_F32P, PluginAudioSampleFormat::F32P},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_F64, PluginAudioSampleFormat::F64},
+        {::AudioSampleFormat::AUDIO_SAMPLE_FORMAT_F64P, PluginAudioSampleFormat::F64P},
+    };
+    if (formatMap.count(hdiAudioFormat) == 0) {
+        return false;
     }
-    return ret;
+    pluginFormat = formatMap.find(hdiAudioFormat)->second;
+    return true;
 }
 
 bool HdiAttrs2PluginAuFormat(AudioSampleAttributes attrs, OHOS::Media::Plugin::AudioSampleFormat& pFormat)

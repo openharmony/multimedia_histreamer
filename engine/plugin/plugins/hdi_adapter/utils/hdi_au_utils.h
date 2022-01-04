@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Media {
 namespace HosLitePlugin {
 bool PluginAuFormat2HdiAttrs(OHOS::Media::Plugin::AudioSampleFormat pFormat, AudioSampleAttributes& attrs);
-std::vector<OHOS::Media::Plugin::AudioSampleFormat> HdiAuFormat2PluginFormat(AudioFormat audioFormat);
+bool HdiAuFormat2PluginFormat(::AudioSampleFormat hdiAudioFormat, OHOS::Media::Plugin::AudioSampleFormat& pluginFormat);
 bool HdiAttrs2PluginAuFormat(AudioSampleAttributes attrs, OHOS::Media::Plugin::AudioSampleFormat& pFormat);
 
 bool PluginSampleRate2HdiRate(uint32_t pRate, AudioSampleRatesMask& mask);
