@@ -79,8 +79,9 @@ enum struct Tag : uint32_t {
     MIME = SECTION_REGULAR_START + 1, ///< std::string
     TRACK_ID,                         ///< uint32_t, track id
     REQUIRED_OUT_BUFFER_CNT,          ///< uint32_t required buffer count of plugin; read only tag
-    HTTP_BUFFER_SIZE,                 ///< uint32_t, download buffer size
-    HTTP_WATERLINE_HIGH,              ///< uint32_t, high waterline
+    BUFFERING_SIZE,                   ///< uint32_t, download buffer size
+    WATERLINE_HIGH,                   ///< uint32_t, high waterline
+    WATERLINE_LOW,                    ///< uint32_t, low waterline
 
     /* -------------------- media tag -------------------- */
     MEDIA_TITLE = SECTION_MEDIA_START + 1, // string
