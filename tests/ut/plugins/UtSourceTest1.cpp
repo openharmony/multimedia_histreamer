@@ -32,7 +32,7 @@ static Status SourceRegister(const std::shared_ptr<Register> &reg)
         definition.name = "UtSourceTest1";
         definition.description = "unit test source test1";
         definition.rank = 100; // 100
-        definition.protocol = "file";
+        definition.protocol.emplace_back(ProtocolType::FILE);
         definition.creator = PluginCreator;
         return reg->AddPlugin(definition);
     } else {

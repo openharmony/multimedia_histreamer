@@ -14,15 +14,17 @@
  */
 
 #include "plugin_register.h"
+
+#include <dirent.h>
+
+#include "all_plugin_static.h"
 #include "interface/audio_sink_plugin.h"
 #include "interface/codec_plugin.h"
 #include "interface/demuxer_plugin.h"
+#include "interface/muxer_plugin.h"
 #include "interface/source_plugin.h"
 #include "interface/video_sink_plugin.h"
-
-#include "all_plugin_static.h"
-
-#include <dirent.h>
+#include "interface/file_sink_plugin.h"
 
 using namespace OHOS::Media::Plugin;
 
@@ -32,6 +34,8 @@ static std::map<PluginType, int> g_apiVersionMap = {
     {PluginType::CODEC, CODEC_API_VERSION},
     {PluginType::AUDIO_SINK, AUDIO_SINK_API_VERSION},
     {PluginType::VIDEO_SINK, VIDEO_SINK_API_VERSION},
+    {PluginType::MUXER, MUXER_API_VERSION},
+    {PluginType::FILE_SINK, FILE_SINK_API_VERSION},
 };
 
 static std::string g_libFileHead = "libhistreamer_plugin_";
@@ -322,7 +326,7 @@ void PluginRegister::UnregisterAllPlugins()
     registeredLoaders.clear();
 }
 
-void PluginRegister::EraseRegisteredPlugins(std::shared_ptr<PluginLoader> loader)
+void PluginRegister::EraseRegisteredPlugins(const std::shared_ptr<PluginLoader>& loader)
 {
     for (auto& it : registerData->registerTable) {
         PluginType type = it.first;

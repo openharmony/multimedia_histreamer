@@ -25,7 +25,7 @@
 #include "filters/sink/video_sink/video_sink_filter.h"
 #endif
 #include "filters/demux/demuxer_filter.h"
-#include "filters/source/media_source_filter.h"
+#include "filters/source/media_source/media_source_filter.h"
 #include "foundation/error_code.h"
 #include "histreamer/hiplayer.h"
 #include "internal/state_machine.h"
@@ -129,7 +129,7 @@ public:
     ErrorCode DoPause() override;
     ErrorCode DoResume() override;
     ErrorCode DoStop() override;
-    ErrorCode DoSeek(bool allowed, int64_t msec) override;
+    ErrorCode DoSeek(bool allowed, int32_t msec) override;
     ErrorCode DoOnReady() override;
     ErrorCode DoOnComplete() override;
     ErrorCode DoOnError(ErrorCode) override;

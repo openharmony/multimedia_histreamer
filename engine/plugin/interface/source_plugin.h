@@ -19,6 +19,7 @@
 #include <map>
 #include <string>
 #include "common/plugin_caps.h"
+#include "common/plugin_source_tags.h"
 #include "plugin_base.h"
 #include "plugin_definition.h"
 
@@ -51,7 +52,7 @@ struct SourcePlugin : public PluginBase {
      *  @retval ERROR_UNSUPPORTED_FORMAT: Uri is not supported.
      *  @retval ERROR_INVALID_PARAMETER: Uri is invalid.
      */
-    virtual Status SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params = nullptr) = 0;
+    virtual Status SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params) = 0;
 
     /**
      * @brief Read data from data source.
@@ -119,7 +120,8 @@ struct SourcePlugin : public PluginBase {
  * @version 1.0
  */
 struct SourcePluginDef : public PluginDefBase {
-    std::string protocol;                    ///< Protocols supported by demuxer
+    std::vector<ProtocolType> protocol;      ///< Protocols supported by playback source
+    std::string inputType;                   ///< Input type supported by record source
     CapabilitySet outCaps;                   ///< Plug-in output capability, For details, @see Capability.
     PluginCreatorFunc<SourcePlugin> creator {nullptr}; ///< Source plugin create function.
     SourcePluginDef()

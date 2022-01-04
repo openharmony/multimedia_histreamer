@@ -12,39 +12,35 @@
 # limitations under the License.
 #
 
-if (defined(ohos_lite)) {
-  import("//build/lite/config/component/lite_component.gni")
-  import("//build/lite/config/subsystem/multimedia/config.gni")
-  group("plugin_minimp4_demuxer") {
-    deps = [ ":histreamer_plugin_Minimp4Demuxer" ]
-  }
-  config("plugin_minimp4_demuxer_adapter_config") {
-    include_dirs = [
-      "minimp4_demuxer",
-      "//third_party/minimp4",
-      "//foundation/multimedia/histreamer/engine/foundation",
+group("plugin_minimp4_demuxer") {
+  deps = [ ":histreamer_plugin_Minimp4Demuxer" ]
+}
+config("plugin_minimp4_demuxer_adapter_config") {
+  include_dirs = [
+    "minimp4_demuxer",
+    "//third_party/minimp4",
+    "//foundation/multimedia/histreamer/engine/foundation",
+  ]
+}
+
+if (ohos_kernel_type == "liteos_m") {
+  static_library("histreamer_plugin_Minimp4Demuxer") {
+    sources = [ "minimp4_demuxer_plugin.cpp" ]
+    public_configs = [ ":plugin_minimp4_demuxer_adapter_config" ]
+    public_deps = [
+      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
     ]
   }
-
-  if (ohos_kernel_type == "liteos_m") {
-    static_library("histreamer_plugin_Minimp4Demuxer") {
-      sources = [ "minimp4_demuxer_plugin.cpp" ]
-      public_configs = [ ":plugin_minimp4_demuxer_adapter_config" ]
-      public_deps = [
-        "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-        "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-        "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
-      ]
-    }
-  } else {
-    shared_library("histreamer_plugin_Minimp4Demuxer") {
-      sources = [ "minimp4_demuxer_plugin.cpp" ]
-      public_configs = [ ":plugin_minimp4_demuxer_adapter_config" ]
-      public_deps = [
-        "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-        "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-        "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
-      ]
-    }
+} else {
+  shared_library("histreamer_plugin_Minimp4Demuxer") {
+    sources = [ "minimp4_demuxer_plugin.cpp" ]
+    public_configs = [ ":plugin_minimp4_demuxer_adapter_config" ]
+    public_deps = [
+      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+    ]
   }
 }

@@ -113,24 +113,12 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
         }
     }
     upstreamNegotiatedCap = candidatePlugins[0].second;
-    // try to reuse plugin
-    if (plugin_ != nullptr) {
-        if (pluginInfo_ != nullptr && pluginInfo_->name == selectedPluginInfo->name) {
-            if (plugin_->Reset() == Plugin::Status::OK) {
-                return true;
-            }
-            MEDIA_LOG_W("reuse previous plugin %s failed, will create new plugin", pluginInfo_->name.c_str());
-        }
-        plugin_->Deinit();
-    }
-    plugin_ = Plugin::PluginManager::Instance().CreateVideoSinkPlugin(selectedPluginInfo->name);
-    if (plugin_ == nullptr) {
-        MEDIA_LOG_E("cannot create plugin %s", selectedPluginInfo->name.c_str());
-        return false;
-    }
-    pluginInfo_ = selectedPluginInfo;
+    auto res = UpdateAndInitPluginByInfo<Plugin::VideoSink>(plugin_, pluginInfo_, selectedPluginInfo,
+        [](const std::string& name) -> std::shared_ptr<Plugin::VideoSink> {
+        return Plugin::PluginManager::Instance().CreateVideoSinkPlugin(name);
+    });
     PROFILE_END("video sink negotiate end");
-    return true;
+    return res;
 }
 
 bool VideoSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
@@ -215,7 +203,7 @@ void VideoSinkFilter::RenderFrame()
     }
 }
 
-ErrorCode VideoSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
+ErrorCode VideoSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
 {
     MEDIA_LOG_D("video sink push data started, state_: %d", state_.load());
     if (isFlushing_ || state_.load() == FilterState::INITIALIZED) {

@@ -102,36 +102,18 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
 
     upstreamNegotiatedCap = candidatePlugins[0].second;
 
-    // try to reuse plugin
-    if (plugin_ != nullptr) {
-        if (targetPluginInfo_ != nullptr && targetPluginInfo_->name == selectedPluginInfo->name) {
-            if (plugin_->Reset() == Plugin::Status::OK) {
-                return true;
-            }
-            MEDIA_LOG_W("reuse previous plugin %s failed, will create new plugin", targetPluginInfo_->name.c_str());
-        }
-        plugin_->Deinit();
-    }
-    plugin_ = Plugin::PluginManager::Instance().CreateAudioSinkPlugin(selectedPluginInfo->name);
-    if (plugin_ == nullptr) {
-        MEDIA_LOG_E("cannot create plugin %s", selectedPluginInfo->name.c_str());
-        return false;
-    }
-
-    auto err = TranslatePluginStatus(plugin_->Init());
-    if (err != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("audio sink plugin init error");
-        return false;
-    }
-    targetPluginInfo_ = selectedPluginInfo;
+    auto res = UpdateAndInitPluginByInfo<Plugin::AudioSink>(plugin_, pluginInfo_, selectedPluginInfo,
+        [](const std::string& name) -> std::shared_ptr<Plugin::AudioSink> {
+        return Plugin::PluginManager::Instance().CreateAudioSinkPlugin(name);
+    });
     PROFILE_END("Audio Sink Negotiate end");
-    return true;
+    return res;
 }
 
 bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     PROFILE_BEGIN("Audio sink configure begin");
-    if (plugin_ == nullptr || targetPluginInfo_ == nullptr) {
+    if (plugin_ == nullptr || pluginInfo_ == nullptr) {
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
     }
@@ -182,7 +164,7 @@ void AudioSinkFilter::ReportCurrentPosition(int64_t pts)
     }
 }
 
-ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffer)
+ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
 {
     MEDIA_LOG_D("audio sink push data started, state: %d", state_.load());
     if (isFlushing || state_.load() == FilterState::INITIALIZED) {

@@ -55,12 +55,12 @@ public:
     Status SeekTo(uint64_t offset) override;
 
 private:
-    std::string fileName_{};
+    std::string fileName_ {};
     std::FILE* fp_;
     size_t fileSize_;
     bool isSeekable_;
     uint64_t position_;
-    std::shared_ptr<FileSourceAllocator> mAllocator_{nullptr};
+    std::shared_ptr<FileSourceAllocator> mAllocator_ {nullptr};
 
     Status ParseFileName(std::string& uri);
     Status CheckFileStat();

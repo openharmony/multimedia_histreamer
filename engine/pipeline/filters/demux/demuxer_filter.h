@@ -52,14 +52,21 @@ public:
 
     void FlushEnd() override;
 
-    ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) override;
+    /**
+     *
+     * @param inPort
+     * @param buffer
+     * @param offset always ignore this parameter
+     * @return
+     */
+    ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) override;
 
     bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Capability& upstreamNegotiatedCap) override;
 
     bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
-    ErrorCode SeekTo(int64_t msec);
+    ErrorCode SeekTo(int32_t msec);
 
     std::vector<std::shared_ptr<Plugin::Meta>> GetStreamMetaInfo() const;
 
@@ -71,12 +78,12 @@ private:
     enum class DemuxerState { DEMUXER_STATE_NULL, DEMUXER_STATE_PARSE_HEADER, DEMUXER_STATE_PARSE_FRAME };
 
     struct StreamTrackInfo {
-        uint32_t streamIdx = 0;
+        uint32_t trackId = 0;
         std::shared_ptr<OutPort> port = nullptr;
         bool needNegoCaps = false;
 
-        StreamTrackInfo(uint32_t streamIdx, std::shared_ptr<OutPort> port, bool needNegoCaps)
-            : streamIdx(streamIdx), port(std::move(port)), needNegoCaps(needNegoCaps)
+        StreamTrackInfo(uint32_t trackId, std::shared_ptr<OutPort> port, bool needNegoCaps)
+            : trackId(trackId), port(std::move(port)), needNegoCaps(needNegoCaps)
         {
         }
     };
@@ -107,13 +114,13 @@ private:
 
     bool PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo);
 
-    ErrorCode ReadFrame(AVBuffer& buffer, uint32_t& streamIndex);
+    ErrorCode ReadFrame(AVBuffer& buffer, uint32_t& trackId);
 
-    std::shared_ptr<Plugin::Meta> GetStreamMeta(uint32_t streamIndex);
+    std::shared_ptr<Plugin::Meta> GetTrackMeta(uint32_t trackId);
 
     void SendEventEos();
 
-    void HandleFrame(const AVBufferPtr& buffer, uint32_t streamIndex);
+    void HandleFrame(const AVBufferPtr& buffer, uint32_t trackId);
 
     void NegotiateDownstream();
 

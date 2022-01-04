@@ -253,7 +253,7 @@ ErrorCode HiPlayerImpl::StopAsync()
 
 int32_t HiPlayerImpl::Rewind(int64_t mSeconds, int32_t mode)
 {
-    return to_underlying(fsm_.SendEventAsync(Intent::SEEK, mSeconds));
+    return to_underlying(fsm_.SendEventAsync(Intent::SEEK, static_cast<int32_t>(mSeconds)));
 }
 
 int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
@@ -366,7 +366,7 @@ ErrorCode HiPlayerImpl::DoStop()
     return ret;
 }
 
-ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t msec)
+ErrorCode HiPlayerImpl::DoSeek(bool allowed, int32_t msec)
 {
     PROFILE_BEGIN();
     auto rtv = allowed && msec >= 0 ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_OPERATION;
@@ -412,7 +412,7 @@ ErrorCode HiPlayerImpl::DoOnComplete()
     if (!singleLoop_) {
         StopAsync();
     } else {
-        fsm_.SendEventAsync(Intent::SEEK, static_cast<int64_t>(0));
+        fsm_.SendEventAsync(Intent::SEEK, static_cast<int32_t>(0));
     }
     auto ptr = callback_.lock();
     if (ptr != nullptr) {

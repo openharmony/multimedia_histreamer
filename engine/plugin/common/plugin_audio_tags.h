@@ -117,6 +117,8 @@ enum struct AudioSampleFormat : uint8_t {
     S8, U8, S8P, U8P,
     /* 16 bit */
     S16, U16, S16P, U16P,
+    /* 24 bit */
+    S24, U24, S24P, U24P,
     /* 32 bit */
     S32, U32, S32P, U32P,
     /* 64 bit */

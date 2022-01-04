@@ -66,7 +66,7 @@ public:
     virtual std::vector<WorkMode> GetWorkModes() = 0; // OutPort调用
 
     // InPort调用此接口确定是否要继续往后协商
-    virtual bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+    virtual bool Negotiate(const std::string& inPort, const std::shared_ptr<const Capability>& upstreamCap,
                            Capability& upstreamNegotiatedCap)
     {
         return false;
@@ -77,7 +77,16 @@ public:
         return false;
     }
 
-    virtual ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) = 0; // InPort调用
+    /**
+     * push data to this filter
+     *
+     * @param inPort in port
+     * @param buffer in buffer
+     * @param offset means the offset from the start of the stream between Filter.Start and Filter.Stop. -1 means ignore
+     * this parameter.
+     * @return
+     */
+    virtual ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) = 0; // InPort调用
     virtual ErrorCode PullData(const std::string& outPort, uint64_t offset, size_t size,
                                AVBufferPtr& data) = 0; // OutPort调用
     virtual const EventReceiver* GetOwnerPipeline() const = 0;

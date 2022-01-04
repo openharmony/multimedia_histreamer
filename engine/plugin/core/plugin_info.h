@@ -51,9 +51,15 @@ struct PluginInfo {
 
 /**
  * Extra information about the plugin.
- * Describes the protocol types supported by the Source plugin.
+ * Describes the protocol types supported by the Source plugin for playback.
  */
 #define PLUGIN_INFO_EXTRA_PROTOCOL          "protocol"  // NOLINT: macro constant
+
+/**
+ * Extra information about the plugin.
+ * Describes the input source types supported by the Source plugin for record.
+ */
+#define PLUGIN_INFO_EXTRA_INPUT_TYPE        "inputType"  // NOLINT: macro constant
 
 /**
  * Extra information about the plugin.

@@ -45,7 +45,14 @@ public:
 
     bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
-    ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer) override;
+    /**
+     *
+     * @param inPort
+     * @param buffer
+     * @param offset always ignore this parameter
+     * @return
+     */
+    ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) override;
 
     ErrorCode Start() override;
     ErrorCode Stop() override;
@@ -68,8 +75,7 @@ private:
     OSAL::ConditionVariable startWorkingCondition_ {};
     OSAL::Mutex mutex_ {};
 
-    std::shared_ptr<Plugin::AudioSink> plugin_ {nullptr};
-    std::shared_ptr<Plugin::PluginInfo> targetPluginInfo_ {};
+    std::shared_ptr<Plugin::AudioSink> plugin_{};
 };
 } // namespace Pipeline
 } // namespace Media

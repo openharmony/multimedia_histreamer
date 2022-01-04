@@ -18,10 +18,11 @@
 
 #include <functional>
 #include <map>
-#include "utils/blocking_queue.h"
+
+#include "minimp3_wrapper.h"
 #include "plugin/interface/codec_plugin.h"
 #include "plugin/common/plugin_types.h"
-#include "minimp3_wrapper.h"
+#include "utils/blocking_queue.h"
 
 using Mp3DecoderHandle = Minimp3WrapperMp3dec;
 using Mp3DecoderSample = Minimp3WrapperMp3dSample;
@@ -93,12 +94,12 @@ private:
 
     int  AudioDecoderMp3FreePacket(uint8_t *packet);
 
-    mutable OSAL::Mutex         ioMutex_ {};
+    mutable OSAL::Mutex         ioMutex_{};
     uint32_t                    samplesPerFrame_;
     uint32_t                    channels_;
-    State                       state_ {State::CREATED};
-    Minimp3DemuxerOp            minimp3DecoderImpl_;
-    AudioDecoderMp3Attr         mp3DecoderAttr_;
+    State                       state_{State::CREATED};
+    Minimp3DemuxerOp            minimp3DecoderImpl_{};
+    AudioDecoderMp3Attr         mp3DecoderAttr_{};
     std::map<Tag, ValueType>    mp3Parameter_ {};
     std::shared_ptr<Buffer>     inputBuffer_ {nullptr};
     std::shared_ptr<Buffer>     outputBuffer_ {nullptr};

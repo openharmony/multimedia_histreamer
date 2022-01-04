@@ -12,8 +12,6 @@
 # limitations under the License.
 #
 
-import("//build/lite/config/component/lite_component.gni")
-
 config("histreamer_utils_config") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine",

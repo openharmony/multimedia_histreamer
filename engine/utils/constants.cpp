@@ -41,6 +41,8 @@ const char* const MEDIA_MIME_AUDIO_AMR_WB = "audio/amr-wb";
 const char* const MEDIA_MIME_VIDEO_RAW = "video/raw";
 const char* const MEDIA_MIME_VIDEO_AVC = "video/h264";
 
+const char* const MEDIA_MIME_CONTAINER_MP4 = "video/mp4";
+
 bool IsAudioMime(const std::string& mime)
 {
     return mime.find("audio/") == 0;

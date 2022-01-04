@@ -33,7 +33,7 @@ namespace Media {
 namespace Pipeline {
 class Pipeline : public Filter {
 public:
-    virtual ~Pipeline() = default;
+    ~Pipeline() override = default;
 
     /**
      * 添加Filter到Pipeline

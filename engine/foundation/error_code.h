@@ -40,6 +40,6 @@ enum struct ErrorCode : int32_t {
     ERROR_NO_MEMORY = ERROR_UNKNOWN + 9,
     ERROR_INVALID_STATE = ERROR_UNKNOWN + 10,
 };
-} // namespace Media
-} // namespace OHOS
-#endif // HISTREAMER_FOUNDATION_ERROR_CODE_H
+}  // namespace Media
+}  // namespace OHOS
+#endif  // HISTREAMER_FOUNDATION_ERROR_CODE_H

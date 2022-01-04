@@ -59,7 +59,7 @@ private:
     void RegisterDynamicPlugins();
     void RegisterPluginsFromPath(const char* libDirPath);
     void UnregisterAllPlugins();
-    void EraseRegisteredPlugins(std::shared_ptr<PluginLoader> loader);
+    void EraseRegisteredPlugins(const std::shared_ptr<PluginLoader>& loader);
 
 private:
     using REGISTERED_TABLE = std::map<PluginType, std::map<std::string, std::shared_ptr<PluginRegInfo>>>;

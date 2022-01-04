@@ -128,7 +128,7 @@ BufferMetaType BufferMeta::GetType() const
     return type;
 }
 
-Buffer::Buffer(BufferMetaType type) : streamID(0), pts(0), dts(0), duration(0), flag (0), meta()
+Buffer::Buffer(BufferMetaType type) : trackID(0), pts(0), dts(0), duration(0), flag (0), meta()
 {
     if (type == BufferMetaType::AUDIO) {
         meta = std::shared_ptr<AudioBufferMeta>(new AudioBufferMeta());
@@ -195,7 +195,7 @@ bool Buffer::IsEmpty()
 void Buffer::Reset()
 {
     data[0]->Reset();
-    streamID = 0;
+    trackID = 0;
     pts = 0;
     dts = 0;
     duration = 0;

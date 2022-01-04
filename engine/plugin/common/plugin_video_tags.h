@@ -50,4 +50,4 @@ enum struct VideoPixelFormat : uint32_t {
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-#endif // HISTREAMER_PLUGIN_COMMON_AUDIO_TAGS_H
+#endif // HISTREAMER_PLUGIN_COMMON_VIDEO_TAGS_H

@@ -29,59 +29,34 @@ namespace Plugin {
 namespace {
 // Histreamer channel layout to ffmpeg channel layout
 std::map<AudioChannelLayout, uint64_t> g_toFFMPEGChannelLayout = {
-    {AudioChannelLayout::MONO, AV_CH_FRONT_LEFT},
-    {AudioChannelLayout::STEREO, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT},
-    {AudioChannelLayout::CH_2POINT1, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_LOW_FREQUENCY},
-    {AudioChannelLayout::CH_2_1, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_BACK_CENTER},
-    {AudioChannelLayout::SURROUND, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER},
-    {AudioChannelLayout::CH_3POINT1, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_LOW_FREQUENCY},
-    {AudioChannelLayout::CH_4POINT0, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_BACK_CENTER},
-    {AudioChannelLayout::CH_4POINT1,
-     AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_BACK_CENTER | AV_CH_LOW_FREQUENCY},
-    {AudioChannelLayout::CH_2_2, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_SIDE_LEFT | AV_CH_SIDE_RIGHT},
-    {AudioChannelLayout::QUAD, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_BACK_LEFT | AV_CH_BACK_RIGHT},
-    {AudioChannelLayout::CH_5POINT0,
-     AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_SIDE_LEFT | AV_CH_SIDE_RIGHT},
-    {AudioChannelLayout::CH_5POINT1, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_SIDE_LEFT |
-                                         AV_CH_SIDE_RIGHT | AV_CH_LOW_FREQUENCY},
-    {AudioChannelLayout::CH_5POINT0_BACK,
-     AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_BACK_LEFT | AV_CH_BACK_RIGHT},
-    {AudioChannelLayout::CH_5POINT1_BACK, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_BACK_LEFT |
-                                              AV_CH_BACK_RIGHT | AV_CH_LOW_FREQUENCY},
-    {AudioChannelLayout::CH_6POINT0, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_BACK_LEFT |
-                                         AV_CH_BACK_RIGHT | AV_CH_BACK_CENTER},
-    {AudioChannelLayout::CH_6POINT0_FRONT, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_SIDE_LEFT | AV_CH_SIDE_RIGHT |
-                                               AV_CH_FRONT_LEFT_OF_CENTER | AV_CH_FRONT_RIGHT_OF_CENTER},
-    {AudioChannelLayout::HEXAGONAL, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_BACK_LEFT |
-                                        AV_CH_BACK_RIGHT | AV_CH_BACK_CENTER},
-    {AudioChannelLayout::CH_6POINT1, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_SIDE_LEFT |
-                                         AV_CH_SIDE_RIGHT | AV_CH_LOW_FREQUENCY | AV_CH_BACK_CENTER},
-    {AudioChannelLayout::CH_6POINT1_BACK, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_BACK_LEFT |
-                                              AV_CH_BACK_RIGHT | AV_CH_LOW_FREQUENCY | AV_CH_BACK_CENTER},
-    {AudioChannelLayout::CH_6POINT1_FRONT, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_SIDE_LEFT | AV_CH_SIDE_RIGHT |
-                                               AV_CH_FRONT_LEFT_OF_CENTER | AV_CH_FRONT_RIGHT_OF_CENTER |
-                                               AV_CH_LOW_FREQUENCY},
-    {AudioChannelLayout::CH_7POINT0, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_SIDE_LEFT |
-                                         AV_CH_SIDE_RIGHT | AV_CH_BACK_LEFT | AV_CH_BACK_RIGHT},
-    {AudioChannelLayout::CH_7POINT0_FRONT, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_SIDE_LEFT |
-                                               AV_CH_SIDE_RIGHT | AV_CH_FRONT_LEFT_OF_CENTER |
-                                               AV_CH_FRONT_RIGHT_OF_CENTER},
-    {AudioChannelLayout::CH_7POINT1, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_SIDE_LEFT |
-                                         AV_CH_SIDE_RIGHT | AV_CH_LOW_FREQUENCY | AV_CH_BACK_LEFT | AV_CH_BACK_RIGHT},
-    {AudioChannelLayout::CH_7POINT1_WIDE, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_SIDE_LEFT |
-                                              AV_CH_SIDE_RIGHT | AV_CH_LOW_FREQUENCY | AV_CH_FRONT_LEFT_OF_CENTER |
-                                              AV_CH_FRONT_RIGHT_OF_CENTER},
-    {AudioChannelLayout::CH_7POINT1_WIDE_BACK, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER |
-                                                   AV_CH_BACK_LEFT | AV_CH_BACK_RIGHT | AV_CH_LOW_FREQUENCY |
-                                                   AV_CH_FRONT_LEFT_OF_CENTER | AV_CH_FRONT_RIGHT_OF_CENTER},
-    {AudioChannelLayout::OCTAGONAL, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_SIDE_LEFT |
-                                        AV_CH_SIDE_RIGHT | AV_CH_BACK_LEFT | AV_CH_BACK_CENTER | AV_CH_BACK_RIGHT},
-    {AudioChannelLayout::HEXADECAGONAL, AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT | AV_CH_FRONT_CENTER | AV_CH_SIDE_LEFT |
-                                            AV_CH_SIDE_RIGHT | AV_CH_BACK_LEFT | AV_CH_BACK_CENTER | AV_CH_BACK_RIGHT |
-                                            AV_CH_WIDE_LEFT | AV_CH_WIDE_RIGHT | AV_CH_TOP_BACK_LEFT |
-                                            AV_CH_TOP_BACK_CENTER | AV_CH_TOP_BACK_RIGHT | AV_CH_TOP_FRONT_LEFT |
-                                            AV_CH_TOP_FRONT_CENTER | AV_CH_TOP_FRONT_RIGHT},
-    {AudioChannelLayout::STEREO_DOWNMIX, AV_CH_STEREO_LEFT | AV_CH_STEREO_RIGHT},
+    {AudioChannelLayout::MONO, AV_CH_LAYOUT_MONO},
+    {AudioChannelLayout::STEREO, AV_CH_LAYOUT_STEREO},
+    {AudioChannelLayout::CH_2POINT1, AV_CH_LAYOUT_2POINT1},
+    {AudioChannelLayout::CH_2_1, AV_CH_LAYOUT_2_1},
+    {AudioChannelLayout::SURROUND, AV_CH_LAYOUT_SURROUND},
+    {AudioChannelLayout::CH_3POINT1, AV_CH_LAYOUT_3POINT1},
+    {AudioChannelLayout::CH_4POINT0, AV_CH_LAYOUT_4POINT0},
+    {AudioChannelLayout::CH_4POINT1, AV_CH_LAYOUT_4POINT1},
+    {AudioChannelLayout::CH_2_2, AV_CH_LAYOUT_2_2},
+    {AudioChannelLayout::QUAD, AV_CH_LAYOUT_QUAD},
+    {AudioChannelLayout::CH_5POINT0, AV_CH_LAYOUT_5POINT0},
+    {AudioChannelLayout::CH_5POINT1, AV_CH_LAYOUT_5POINT1},
+    {AudioChannelLayout::CH_5POINT0_BACK, AV_CH_LAYOUT_5POINT0_BACK},
+    {AudioChannelLayout::CH_5POINT1_BACK, AV_CH_LAYOUT_5POINT1_BACK},
+    {AudioChannelLayout::CH_6POINT0, AV_CH_LAYOUT_6POINT0},
+    {AudioChannelLayout::CH_6POINT0_FRONT, AV_CH_LAYOUT_6POINT0_FRONT},
+    {AudioChannelLayout::HEXAGONAL, AV_CH_LAYOUT_HEXAGONAL},
+    {AudioChannelLayout::CH_6POINT1, AV_CH_LAYOUT_6POINT1},
+    {AudioChannelLayout::CH_6POINT1_BACK, AV_CH_LAYOUT_6POINT1_BACK},
+    {AudioChannelLayout::CH_6POINT1_FRONT, AV_CH_LAYOUT_6POINT1_FRONT},
+    {AudioChannelLayout::CH_7POINT0, AV_CH_LAYOUT_7POINT0},
+    {AudioChannelLayout::CH_7POINT0_FRONT, AV_CH_LAYOUT_7POINT0_FRONT},
+    {AudioChannelLayout::CH_7POINT1, AV_CH_LAYOUT_7POINT1},
+    {AudioChannelLayout::CH_7POINT1_WIDE, AV_CH_LAYOUT_7POINT1_WIDE},
+    {AudioChannelLayout::CH_7POINT1_WIDE_BACK, AV_CH_LAYOUT_7POINT1_WIDE_BACK},
+    {AudioChannelLayout::OCTAGONAL, AV_CH_LAYOUT_OCTAGONAL},
+    {AudioChannelLayout::HEXADECAGONAL, AV_CH_LAYOUT_HEXADECAGONAL},
+    {AudioChannelLayout::STEREO_DOWNMIX, AV_CH_LAYOUT_STEREO_DOWNMIX},
 };
 
 // ffmpeg channel layout to histreamer channel layout
@@ -106,6 +81,20 @@ std::map<uint64_t, AudioChannelMasks> g_fromFFMPEGChannelLayout = {
     {AV_CH_TOP_BACK_RIGHT, AudioChannelMasks::TOP_BACK_RIGHT},
     {AV_CH_STEREO_LEFT, AudioChannelMasks::STEREO_LEFT},
     {AV_CH_STEREO_RIGHT, AudioChannelMasks::STEREO_RIGHT},
+};
+const std::map<std::string, Tag> TAG_MAP = {
+    {"title", Tag::MEDIA_TITLE},
+    {"artist", Tag::MEDIA_ARTIST},
+    {"lyricist", Tag::MEDIA_LYRICIST},
+    {"album", Tag::MEDIA_ALBUM},
+    {"album-artist", Tag::MEDIA_ALBUM_ARTIST},
+    {"date", Tag::MEDIA_DATE},
+    {"comment", Tag::MEDIA_COMMENT},
+    {"genre", Tag::MEDIA_GENRE},
+    {"copyright", Tag::MEDIA_COPYRIGHT},
+    {"language", Tag::MEDIA_LANGUAGE},
+    {"description", Tag::MEDIA_DESCRIPTION},
+    {"lyrics", Tag::MEDIA_LYRICS},
 };
 } // namespace
 
@@ -306,6 +295,25 @@ uint64_t ConvertChannelLayoutToFFmpeg(AudioChannelLayout channelLayout)
         return 0;
     }
     return it->second;
+}
+bool FindAvMetaNameByTag(Tag tag, std::string& metaName)
+{
+    for (const auto& pair : TAG_MAP) {
+        if (pair.second == tag) {
+            metaName = pair.first;
+            return true;
+        }
+    }
+    return false;
+}
+bool FindTagByAvMetaName(const std::string& metaName, Tag& tag)
+{
+    auto ite = TAG_MAP.find(metaName);
+    if (ite == std::end(TAG_MAP)) {
+        return false;
+    }
+    tag = ite->second;
+    return true;
 }
 } // namespace Plugin
 } // namespace Media

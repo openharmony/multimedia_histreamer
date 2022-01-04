@@ -35,7 +35,7 @@ enum class WorkMode { PUSH, PULL };
 
 class Port {
 public:
-    Port(InfoTransfer* ownerFilter, std::string portName, bool ownerNegotiate)
+    Port(InfoTransfer *ownerFilter, std::string portName)
         : filter(ownerFilter), name(std::move(portName)) {}
     virtual ~Port() = default;
     const std::string& GetName();
@@ -45,13 +45,19 @@ public:
     {
         return workMode;
     }
-    virtual ErrorCode Connect(std::shared_ptr<Port> port) = 0;
+    virtual ErrorCode Connect(const std::shared_ptr<Port>& port) = 0;
     virtual ErrorCode Disconnect() = 0;
     virtual ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) = 0;
     virtual bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                            Capability& upstreamNegotiatedCap) = 0;
     virtual bool Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta) = 0;
-    virtual void PushData(AVBufferPtr buffer) = 0;
+    /**
+     * push data
+     * @param buffer pushed buffer
+     * @param offset means the offset from the start of the stream between Filter.Start and Filter.Stop. -1 means ignore
+     * this parameter.
+     */
+    virtual void PushData(AVBufferPtr buffer, int64_t offset) = 0;
     virtual ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) = 0;
 
 protected:
@@ -64,17 +70,17 @@ class OutPort;
 
 class InPort : public Port {
 public:
-    explicit InPort(InfoTransfer* filter, std::string name = PORT_NAME_DEFAULT, bool ownerNegotiate = false)
-        : Port(filter, std::move(name), ownerNegotiate) {}
+    explicit InPort(InfoTransfer *filter, std::string name = PORT_NAME_DEFAULT)
+        : Port(filter, std::move(name)) {}
     ~InPort() override = default;
-    ErrorCode Connect(std::shared_ptr<Port> port) override;
+    ErrorCode Connect(const std::shared_ptr<Port>& port) override;
     ErrorCode Disconnect() override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     std::shared_ptr<Port> GetPeerPort() override;
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Capability& upstreamNegotiatedCap) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer) override;
+    void PushData(AVBufferPtr buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:
@@ -83,21 +89,21 @@ private:
 
 class OutPort : public Port {
 public:
-    explicit OutPort(InfoTransfer* filter, std::string name = PORT_NAME_DEFAULT, bool ownerNegotiate = false)
-        : Port(filter, std::move(name), ownerNegotiate) {}
+    explicit OutPort(InfoTransfer *filter, std::string name = PORT_NAME_DEFAULT)
+        : Port(filter, std::move(name)) {}
     ~OutPort() override = default;
-    ErrorCode Connect(std::shared_ptr<Port> port) override;
+    ErrorCode Connect(const std::shared_ptr<Port>& port) override;
     ErrorCode Disconnect() override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     std::shared_ptr<Port> GetPeerPort() override;
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Capability& upstreamNegotiatedCap) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer) override;
+    void PushData(AVBufferPtr buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:
-    bool InSamePipeline(std::shared_ptr<Port> port) const;
+    bool InSamePipeline(const std::shared_ptr<Port>& port) const;
 
 private:
     std::shared_ptr<Port> nextPort;
@@ -109,14 +115,14 @@ public:
     {
         return port;
     }
-    EmptyInPort() : InPort(nullptr, "emptyInPort", false) {}
+    EmptyInPort() : InPort(nullptr, "emptyInPort") {}
     ~EmptyInPort() override = default;
-    ErrorCode Connect(std::shared_ptr<Port> port) override;
+    ErrorCode Connect(const std::shared_ptr<Port>& port) override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Capability& upstreamNegotiatedCap) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer) override;
+    void PushData(AVBufferPtr buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:
@@ -129,14 +135,14 @@ public:
     {
         return port;
     }
-    EmptyOutPort() : OutPort(nullptr, "emptyOutPort", false) {}
+    EmptyOutPort() : OutPort(nullptr, "emptyOutPort") {}
     ~EmptyOutPort() override = default;
-    ErrorCode Connect(std::shared_ptr<Port> port) override;
+    ErrorCode Connect(const std::shared_ptr<Port>& port) override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Capability& upstreamNegotiatedCap) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer) override;
+    void PushData(AVBufferPtr buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:

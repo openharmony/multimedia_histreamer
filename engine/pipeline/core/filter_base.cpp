@@ -17,6 +17,7 @@
 
 #include "filter_base.h"
 #include <algorithm>
+#include "common/plugin_utils.h"
 #include "foundation/log.h"
 
 namespace OHOS {
@@ -111,10 +112,11 @@ std::vector<Filter*> FilterBase::GetNextFilters()
     return nextFilters;
 }
 
-ErrorCode FilterBase::PushData(const std::string& inPort, AVBufferPtr buffer)
+ErrorCode FilterBase::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
 {
     UNUSED_VARIABLE(inPort);
     UNUSED_VARIABLE(buffer);
+    UNUSED_VARIABLE(offset);
     return ErrorCode::SUCCESS;
 }
 
@@ -196,6 +198,55 @@ POutPort FilterBase::GetRouteOutPort(const std::string& inPortName)
     }
     return GetOutPort(ite->second);
 }
+
+template <typename T>
+bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<T>& plugin, std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
+    const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
+    const std::function<std::shared_ptr<T>(const std::string&)>& pluginCreator)
+{
+    if (selectedPluginInfo == nullptr) {
+        MEDIA_LOG_W("no available info to update plugin");
+        return false;
+    }
+    if (plugin != nullptr) {
+        if (pluginInfo != nullptr && pluginInfo->name == selectedPluginInfo->name) {
+            if (plugin->Reset() == Plugin::Status::OK) {
+                return true;
+            }
+            MEDIA_LOG_W("reuse previous plugin %s failed, will create new plugin", pluginInfo->name.c_str());
+        }
+        plugin->Deinit();
+    }
+
+    plugin = pluginCreator(selectedPluginInfo->name);
+    if (plugin == nullptr) {
+        MEDIA_LOG_E("cannot create plugin %s", selectedPluginInfo->name.c_str());
+        return false;
+    }
+    auto err = TranslatePluginStatus(plugin->Init());
+    if (err != ErrorCode::SUCCESS) {
+        MEDIA_LOG_E("plugin %s init error", selectedPluginInfo->name.c_str());
+        return false;
+    }
+    pluginInfo = selectedPluginInfo;
+    return true;
+}
+template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::Codec>& plugin,
+    std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
+    const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
+    const std::function<std::shared_ptr<Plugin::Codec>(const std::string&)>& pluginCreator);
+template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::AudioSink>& plugin,
+    std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
+    const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
+    const std::function<std::shared_ptr<Plugin::AudioSink>(const std::string&)>& pluginCreator);
+template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::VideoSink>& plugin,
+    std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
+    const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
+    const std::function<std::shared_ptr<Plugin::VideoSink>(const std::string&)>& pluginCreator);
+template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::FileSink>& plugin,
+    std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
+    const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
+    const std::function<std::shared_ptr<Plugin::FileSink>(const std::string&)>& pluginCreator);
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

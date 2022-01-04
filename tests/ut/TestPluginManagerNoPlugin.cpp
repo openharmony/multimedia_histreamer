@@ -31,10 +31,6 @@ using namespace OHOS::Media::Plugin;
 
 TEST(TestPluginManagerNoPlugin, ListPlugins_case1)
 {
-    UtSourceTest1::available = false;
-    UtSourceTest2::available = false;
-    std::set<std::string> plugins = PluginManager::Instance().ListPlugins(PluginType::SOURCE);
-    ASSERT_TRUE(plugins.empty());
 }
 } // namespace Test
 } // namespace Media

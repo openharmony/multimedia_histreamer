@@ -29,6 +29,8 @@ namespace Media {
 namespace Plugin {
 /// End of Stream Buffer Flag
 #define BUFFER_FLAG_EOS 0x00000001
+/// Video Key Frame Flag
+#define BUFFER_FLAG_KEY_FRAME 0x00000002
 
 // Align value template
 template <typename T>
@@ -316,16 +318,16 @@ public:
     /// no memory in the buffer.
     bool IsEmpty();
 
-    /// stream index.
-    uint32_t streamID;
+    /// track index.
+    uint32_t trackID;
 
-    /// presentation timestamp of the buffer.
+    /// presentation timestamp in microsecond of the buffer.
     uint64_t pts;
 
-    /// decoding timestamp of the buffer.
+    /// decoding timestamp in microsecond of the buffer.
     uint64_t dts;
 
-    /// duration in time of the buffer data.
+    /// duration in microsecond in time of the buffer data.
     uint64_t duration;
 
     /// flag of the buffer, which is used to record extra information.

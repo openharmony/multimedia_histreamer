@@ -35,15 +35,16 @@ namespace {
     constexpr uint32_t MP3_1152_SAMPLES_PER_FRAME = 1152;
     constexpr uint32_t BUFFER_ITEM_CNT            = 6;
     constexpr uint32_t MAX_RANK                   = 100;
-    Status RegisterDecoderPlugin(const std::shared_ptr<Register>& reg);
-    void UpdatePluginDefinition(CodecPluginDef& definition);
 }
 
 Minimp3DecoderPlugin::Minimp3DecoderPlugin(std::string name)
     : CodecPlugin(std::move(name)),
+      samplesPerFrame_(0),
+      channels_(0),
       mp3Parameter_()
 {
     FALSE_LOG(memset_s(&mp3DecoderAttr_, sizeof(mp3DecoderAttr_), 0x00, sizeof(AudioDecoderMp3Attr)) == 0);
+    FALSE_LOG(memset_s(&minimp3DecoderImpl_, sizeof(minimp3DecoderImpl_), 0x00, sizeof(Minimp3DemuxerOp)) == 0);
     MEDIA_LOG_I("Minimp3DecoderPlugin, plugin name: %s", pluginName_.c_str());
 }
 
@@ -247,52 +248,52 @@ Status Minimp3DecoderPlugin::AudioDecoderMp3Process(std::shared_ptr<Buffer> inBu
 }
 
 namespace {
-    std::shared_ptr<CodecPlugin> Minimp3DecoderCreator(const std::string& name)
-    {
-        return std::make_shared<Minimp3DecoderPlugin>(name);
+void UpdatePluginDefinition(CodecPluginDef& definition);
+std::shared_ptr<CodecPlugin> Minimp3DecoderCreator(const std::string& name)
+{
+    return std::make_shared<Minimp3DecoderPlugin>(name);
+}
+
+Status RegisterDecoderPlugin(const std::shared_ptr<Register>& reg)
+{
+    MEDIA_LOG_I("RegisterPlugins called.");
+    if (!reg) {
+        MEDIA_LOG_E("RegisterPlugins failed due to nullptr pointer for reg.");
+        return Status::ERROR_INVALID_PARAMETER;
     }
 
-    Status RegisterDecoderPlugin(const std::shared_ptr<Register>& reg)
-    {
-        MEDIA_LOG_I("RegisterPlugins called.");
-        if (!reg) {
-            MEDIA_LOG_E("RegisterPlugins failed due to nullptr pointer for reg.");
-            return Status::ERROR_INVALID_PARAMETER;
-        }
-
-        CodecPluginDef definition;
-        definition.name      = "Minimp3DecoderPlugin";
-        definition.codecType = CodecType::AUDIO_DECODER;
-        definition.rank      = MAX_RANK;
-        definition.creator   = Minimp3DecoderCreator;
-        UpdatePluginDefinition(definition);
-        if (reg->AddPlugin(definition) != Status::OK) {
-            MEDIA_LOG_W("register minimp3 decoder plugin failed");
-        }
-        return Status::OK;
+    CodecPluginDef definition;
+    definition.name      = "Minimp3DecoderPlugin";
+    definition.codecType = CodecType::AUDIO_DECODER;
+    definition.rank      = MAX_RANK;
+    definition.creator   = Minimp3DecoderCreator;
+    UpdatePluginDefinition(definition);
+    if (reg->AddPlugin(definition) != Status::OK) {
+        MEDIA_LOG_W("register minimp3 decoder plugin failed");
     }
+    return Status::OK;
+}
 
-    void UpdatePluginDefinition(CodecPluginDef& definition)
-    {
-        Capability cap("audio/unknown");
-        cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_MPEG)
-                .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 1)
-                .AppendIntervalKey<uint32_t>(Capability::Key::AUDIO_MPEG_LAYER, 1, 3); // 3
+void UpdatePluginDefinition(CodecPluginDef& definition)
+{
+    Capability cap("audio/unknown");
+    cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_MPEG)
+            .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 1)
+            .AppendIntervalKey<uint32_t>(Capability::Key::AUDIO_MPEG_LAYER, 1, 3); // 3
 
-        DiscreteCapability<uint32_t> values = {8000, 16000, 22050, 44100, 48000, 32000};
-        cap.AppendDiscreteKeys(Capability::Key::AUDIO_SAMPLE_RATE, values);
+    DiscreteCapability<uint32_t> values = {8000, 16000, 22050, 44100, 48000, 32000}; // 8000, 16000 etc. sample rates
+    cap.AppendDiscreteKeys(Capability::Key::AUDIO_SAMPLE_RATE, values);
 
-        DiscreteCapability<AudioChannelLayout> channelLayoutValues = {
-                AudioChannelLayout::MONO, AudioChannelLayout::STEREO};
-        cap.AppendDiscreteKeys<AudioChannelLayout>(Capability::Key::AUDIO_CHANNEL_LAYOUT, channelLayoutValues);
+    DiscreteCapability<AudioChannelLayout> channelLayoutValues = {
+            AudioChannelLayout::MONO, AudioChannelLayout::STEREO};
+    cap.AppendDiscreteKeys<AudioChannelLayout>(Capability::Key::AUDIO_CHANNEL_LAYOUT, channelLayoutValues);
 
-        definition.inCaps.push_back(cap);
+    definition.inCaps.push_back(cap);
 
-        Capability outCap(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
-        outCap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT,
-                {AudioSampleFormat::S32, AudioSampleFormat::S16, AudioSampleFormat::S16P});
-        definition.outCaps.emplace_back(outCap);
-    }
+    Capability outCap(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
+    outCap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, {AudioSampleFormat::S16});
+    definition.outCaps.emplace_back(outCap);
+}
 }
 
 PLUGIN_DEFINITION(Minimp3Decoder, LicenseType::CC0, RegisterDecoderPlugin, [] {});

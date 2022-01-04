@@ -22,7 +22,9 @@ namespace Pipeline {
 enum struct FilterType : uint8_t {
     NONE = 0,
     MEDIA_SOURCE,
+    CAPTURE_SOURCE,
     DEMUXER,
+    MUXER,
     AUDIO_DECODER,
     VIDEO_DECODER,
     AUDIO_SINK,

@@ -58,13 +58,9 @@ protected:
         return err;
     }
 
-    bool UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo);
-
-    // plugin
-    std::shared_ptr<Plugin::Codec> plugin_ {nullptr};
-    std::shared_ptr<Plugin::PluginInfo> targetPluginInfo_ {nullptr};
+    std::shared_ptr<Plugin::Codec> plugin_{};
 };
-}
-}
-}
+} // namespace Pipeline
+} // namespace Media
+} // namespace OHOS
 #endif // HISTREAMER_PIPELINE_FILTER_DECODER_BASE_H

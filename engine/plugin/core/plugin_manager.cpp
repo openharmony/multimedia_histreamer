@@ -24,29 +24,26 @@
 
 #include <utility>
 
-using namespace OHOS::Media::Plugin;
-
+namespace OHOS {
+namespace Media {
+namespace Plugin {
 PluginManager::PluginManager()
 {
     Init();
 }
 
-PluginManager::~PluginManager()
-{
-}
-
 std::set<std::string> PluginManager::ListPlugins(PluginType type)
 {
-    return pluginRegister->ListPlugins(type);
+    return pluginRegister_->ListPlugins(type);
 }
 
 std::shared_ptr<PluginInfo> PluginManager::GetPluginInfo(PluginType type, const std::string& name)
 {
-    std::shared_ptr<PluginRegInfo> regInfo = pluginRegister->GetPluginRegInfo(type, name);
+    std::shared_ptr<PluginRegInfo> regInfo = pluginRegister_->GetPluginRegInfo(type, name);
     if (regInfo && regInfo->info && regInfo->info->pluginType == type) {
         return regInfo->info;
     }
-    return std::shared_ptr<PluginInfo>();
+    return {};
 }
 
 int32_t PluginManager::Sniffer(const std::string& name, std::shared_ptr<DataSourceHelper> source)
@@ -54,7 +51,7 @@ int32_t PluginManager::Sniffer(const std::string& name, std::shared_ptr<DataSour
     if (source == nullptr) {
         return 0;
     }
-    std::shared_ptr<PluginRegInfo> regInfo = pluginRegister->GetPluginRegInfo(PluginType::DEMUXER, name);
+    std::shared_ptr<PluginRegInfo> regInfo = pluginRegister_->GetPluginRegInfo(PluginType::DEMUXER, name);
     if (!regInfo) {
         return 0;
     }
@@ -66,73 +63,43 @@ int32_t PluginManager::Sniffer(const std::string& name, std::shared_ptr<DataSour
 
 void PluginManager::Init()
 {
-    pluginRegister = std::make_shared<PluginRegister>();
-    pluginRegister->RegisterPlugins();
+    pluginRegister_ = std::make_shared<PluginRegister>();
+    pluginRegister_->RegisterPlugins();
 }
 
 std::shared_ptr<Demuxer> PluginManager::CreateDemuxerPlugin(const std::string& name)
 {
-    std::shared_ptr<PluginRegInfo> regInfo = pluginRegister->GetPluginRegInfo(PluginType::DEMUXER, name);
-    if (!regInfo) {
-        return std::shared_ptr<Demuxer>();
-    }
-    std::shared_ptr<DemuxerPlugin> demuxer = std::dynamic_pointer_cast<DemuxerPlugin>(regInfo->creator(name));
-    if (!demuxer) {
-        return std::shared_ptr<Demuxer>();
-    }
-    return std::shared_ptr<Demuxer>(new Demuxer(regInfo->packageDef->pkgVersion, regInfo->info->apiVersion, demuxer));
+    return CreatePlugin<Demuxer, DemuxerPlugin>(name, PluginType::DEMUXER);
+}
+
+std::shared_ptr<Muxer> PluginManager::CreateMuxerPlugin(const std::string& name)
+{
+    return CreatePlugin<Muxer, MuxerPlugin>(name, PluginType::MUXER);
 }
 
 std::shared_ptr<Source> PluginManager::CreateSourcePlugin(const std::string& name)
 {
-    std::shared_ptr<PluginRegInfo> regInfo = pluginRegister->GetPluginRegInfo(PluginType::SOURCE, name);
-    if (!regInfo) {
-        return std::shared_ptr<Source>();
-    }
-    std::shared_ptr<SourcePlugin> source = std::dynamic_pointer_cast<SourcePlugin>(regInfo->creator(name));
-    if (!source) {
-        return std::shared_ptr<Source>();
-    }
-    return std::shared_ptr<Source>(new Source(regInfo->packageDef->pkgVersion, regInfo->info->apiVersion, source));
+    return CreatePlugin<Source, SourcePlugin>(name, PluginType::SOURCE);
 }
 
 std::shared_ptr<Codec> PluginManager::CreateCodecPlugin(const std::string& name)
 {
-    std::shared_ptr<PluginRegInfo> regInfo = pluginRegister->GetPluginRegInfo(PluginType::CODEC, name);
-    if (!regInfo) {
-        return std::shared_ptr<Codec>();
-    }
-    std::shared_ptr<CodecPlugin> codec = std::dynamic_pointer_cast<CodecPlugin>(regInfo->creator(name));
-    if (!codec) {
-        return std::shared_ptr<Codec>();
-    }
-    return std::shared_ptr<Codec>(new Codec(regInfo->packageDef->pkgVersion, regInfo->info->apiVersion, codec));
+    return CreatePlugin<Codec, CodecPlugin>(name, PluginType::CODEC);
 }
 
 std::shared_ptr<AudioSink> PluginManager::CreateAudioSinkPlugin(const std::string& name)
 {
-    std::shared_ptr<PluginRegInfo> regInfo = pluginRegister->GetPluginRegInfo(PluginType::AUDIO_SINK, name);
-    if (!regInfo) {
-        return std::shared_ptr<AudioSink>();
-    }
-    std::shared_ptr<AudioSinkPlugin> audioSink = std::dynamic_pointer_cast<AudioSinkPlugin>(regInfo->creator(name));
-    if (!audioSink) {
-        return std::shared_ptr<AudioSink>();
-    }
-    return std::shared_ptr<AudioSink>(
-        new AudioSink(regInfo->packageDef->pkgVersion, regInfo->info->apiVersion, audioSink));
+    return CreatePlugin<AudioSink, AudioSinkPlugin>(name, PluginType::AUDIO_SINK);
 }
 
 std::shared_ptr<VideoSink> PluginManager::CreateVideoSinkPlugin(const std::string& name)
 {
-    std::shared_ptr<PluginRegInfo> regInfo = pluginRegister->GetPluginRegInfo(PluginType::VIDEO_SINK, name);
-    if (!regInfo) {
-        return std::shared_ptr<VideoSink>();
-    }
-    std::shared_ptr<VideoSinkPlugin> videoSink = std::dynamic_pointer_cast<VideoSinkPlugin>(regInfo->creator(name));
-    if (!videoSink) {
-        return std::shared_ptr<VideoSink>();
-    }
-    return std::shared_ptr<VideoSink>(
-        new VideoSink(regInfo->packageDef->pkgVersion, regInfo->info->apiVersion, videoSink));
+    return CreatePlugin<VideoSink, VideoSinkPlugin>(name, PluginType::VIDEO_SINK);
 }
+std::shared_ptr<FileSink> PluginManager::CreateFileSinkPlugin(const std::string& name)
+{
+    return CreatePlugin<FileSink, FileSinkPlugin>(name, PluginType::FILE_SINK);
+}
+} // namespace Plugin
+} // namespace Media
+} // namespace OHOS

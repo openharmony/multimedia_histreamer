@@ -36,7 +36,7 @@ const Status FileSourceRegister(const std::shared_ptr<Register>& reg)
     definition.name = "FileSource";
     definition.description = "File source";
     definition.rank = 100; // 100: max rank
-    definition.protocol = "file";
+    definition.protocol.emplace_back(ProtocolType::FILE);
     definition.creator = FileSourcePluginCreater;
     return reg->AddPlugin(definition);
 }

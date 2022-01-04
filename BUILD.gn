@@ -14,7 +14,6 @@
 
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
-
   lite_library("histreamer") {
     if (ohos_kernel_type == "liteos_m") {
       target_type = "static_library"
@@ -35,5 +34,18 @@ if (defined(ohos_lite)) {
   }
   config("hiplayer_external_library_config") {
     include_dirs = [ "//foundation/multimedia/histreamer/interface" ]
+  }
+} else {
+  shared_library("histreamer") {
+    sources = []
+    deps = [
+      "engine/foundation:histreamer_foundation",
+      "engine/pipeline:histreamer_pipeline",
+      "engine/player:histreamer_player",
+      "engine/plugin:histreamer_plugin",
+      "engine/utils:histreamer_utils",
+    ]
+    output_name = "media_engine_histreamer"
+    output_extension = "z.so"
   }
 }

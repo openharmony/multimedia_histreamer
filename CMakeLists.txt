@@ -6,10 +6,8 @@ project(histreamer)
 if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
 else ()
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+    #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 endif ()
-
-set(CMAKE_CXX_STANDARD 11)
 
 set(TOP_DIR ${PROJECT_SOURCE_DIR})
 

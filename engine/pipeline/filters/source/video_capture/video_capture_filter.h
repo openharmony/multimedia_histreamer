@@ -13,71 +13,53 @@
  * limitations under the License.
  */
 
-#ifndef MEDIA_PIPELINE_MEDIA_SOURCE_FILTER_H
-#define MEDIA_PIPELINE_MEDIA_SOURCE_FILTER_H
-
+#ifndef MEDIA_PIPELINE_VIDEO_CAPTURE_FILTER_H
+#define MEDIA_PIPELINE_VIDEO_CAPTURE_FILTER_H
+#ifdef RECORDER_SUPPORT
 #include <memory>
 #include <string>
 
-#include "source.h"
 #include "foundation/error_code.h"
 #include "osal/thread/task.h"
 #include "osal/utils/util.h"
-#include "utils/blocking_queue.h"
 #include "utils/constants.h"
 #include "utils/type_define.h"
 #include "utils/utils.h"
 #include "pipeline/core/filter_base.h"
 #include "plugin/core/plugin_manager.h"
 #include "plugin/interface/source_plugin.h"
+#include "plugin/common/plugin_video_tags.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-using SourceType = OHOS::Media::SourceType;
-using MediaSource = OHOS::Media::Source;
-
-class MediaSourceFilter : public FilterBase {
+class VideoCaptureFilter : public FilterBase {
 public:
-    explicit MediaSourceFilter(const std::string& name);
-    ~MediaSourceFilter() override;
+    explicit VideoCaptureFilter(const std::string& name);
+    ~VideoCaptureFilter() override;
 
     std::vector<WorkMode> GetWorkModes() override;
-    ErrorCode PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data) override;
-    virtual ErrorCode SetSource(const std::shared_ptr<MediaSource>& source);
-    ErrorCode InitPlugin(const std::shared_ptr<MediaSource>& source);
-    virtual ErrorCode SetBufferSize(size_t size);
-    bool IsSeekable() const;
+    virtual ErrorCode SetVideoSource(OHOS::Media::Plugin::VideoSourceType source, int32_t &sourceId);
+    ErrorCode SetParameter(int32_t key, const Plugin::Any& value) override;
+    ErrorCode GetParameter(int32_t key, Plugin::Any& value) override;
     ErrorCode Prepare() override;
     ErrorCode Start() override;
     ErrorCode Stop() override;
-    void FlushStart() override;
-    void FlushEnd() override;
 
 private:
     void InitPorts() override;
-    void ActivateMode();
-    static std::string GetUriSuffix(const std::string& uri);
-    ErrorCode DoNegotiate(const std::shared_ptr<MediaSource>& source);
+    ErrorCode InitPlugin();
     void ReadLoop();
-    bool GetProtocolByUri();
-    bool ParseProtocol(const std::shared_ptr<MediaSource>& source);
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);
-    ErrorCode FindPlugin(const std::shared_ptr<MediaSource>& source);
 
-    std::shared_ptr<OSAL::Task> taskPtr_;
-    std::string protocol_;
-    std::string uri_;
-    bool isSeekable_;
-    uint64_t position_;
-    size_t bufferSize_;
-    std::shared_ptr<Plugin::Source> plugin_;
-    std::shared_ptr<Allocator> pluginAllocator_;
-    std::shared_ptr<Plugin::PluginInfo> pluginInfo_;
+    std::shared_ptr<OSAL::Task> taskPtr_ {nullptr};
+    std::shared_ptr<Plugin::Source> plugin_ {nullptr};
+    std::shared_ptr<Allocator> pluginAllocator_ {nullptr};
+    std::shared_ptr<Plugin::PluginInfo> pluginInfo_ {nullptr};
 };
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
-
+#endif
 #endif
