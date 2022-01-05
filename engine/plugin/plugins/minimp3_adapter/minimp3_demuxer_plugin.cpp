@@ -63,7 +63,7 @@ Minimp3DemuxerPlugin::Minimp3DemuxerPlugin(std::string name)
       inIoBufferSize_(MEDIA_IO_SIZE),
       fileSize_(0),
       inIoBuffer_(nullptr),
-      ioRemainSize_(0),
+      ioDataRemainSize_(0),
       durationMs_(0),
       ioContext_()
 {
@@ -92,20 +92,20 @@ Status Minimp3DemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& so
     return Status::OK;
 }
 
-uint8_t *Minimp3DemuxerPlugin::GetDataFromSource()
+Status Minimp3DemuxerPlugin::GetDataFromSource()
 {
-    uint32_t ioNeedReadSize = inIoBufferSize_ - ioRemainSize_;
-    if (ioRemainSize_) {
+    uint32_t ioNeedReadSize = inIoBufferSize_ - ioDataRemainSize_;
+    if (ioDataRemainSize_) {
         // 将剩余数据移动到buffer的起始位置
-        auto ret = memmove_s(inIoBuffer_, ioRemainSize_, inIoBuffer_ + ioNeedReadSize, ioRemainSize_);
+        auto ret = memmove_s(inIoBuffer_, ioDataRemainSize_, inIoBuffer_ + mp3DemuxerRst_.usedInputLength, ioDataRemainSize_);
         if (ret != 0) {
             MEDIA_LOG_E("copy buffer error(%d)", ret);
-            return nullptr;
+            return Status::ERROR_UNKNOWN;
         }
     }
-    if (ioContext_.offset >= fileSize_) {
+    if (ioContext_.offset >= fileSize_ && ioDataRemainSize_ == 0) {
         ioContext_.eos = true;
-        return nullptr;
+        return Status::END_OF_STREAM;
     }
     if (ioContext_.offset + ioNeedReadSize > fileSize_) {
         ioNeedReadSize = fileSize_ - ioContext_.offset; // 在读取文件即将结束时，剩余数据不足，更新读取长度
@@ -115,34 +115,36 @@ uint8_t *Minimp3DemuxerPlugin::GetDataFromSource()
         auto buffer  = std::make_shared<Buffer>();
         auto bufData = buffer->AllocMemory(nullptr, ioNeedReadSize);
         int retryTimes = 0;
-        MEDIA_LOG_D("ioNeedReadSize %" PRIu32 " inIoBufferSize_ %d ioRemainSize_ %" PRIu32, ioNeedReadSize,
-                    inIoBufferSize_, ioRemainSize_);
+        MEDIA_LOG_D("ioNeedReadSize %" PRIu32 " inIoBufferSize_ %d ioDataRemainSize_ %" PRIu32, ioNeedReadSize,
+                    inIoBufferSize_, ioDataRemainSize_);
         do {
             auto result = ioContext_.dataSource->ReadAt(ioContext_.offset, buffer, static_cast<size_t>(ioNeedReadSize));
             MEDIA_LOG_D("ioContext_.offset %d", static_cast<uint32_t>(ioContext_.offset));
-            if (bufData->GetSize() == 0 && retryTimes < 300) { // 300
+            if (result != Status::OK) {
+                return result;
+            }
+            if (bufData->GetSize() == 0 && retryTimes < 200) { // 200
                 MEDIA_LOG_D("bufData->GetSize() == 0");
                 OSAL::SleepFor(30); // 30
                 retryTimes++;
                 continue;
+            } else if (bufData->GetSize() == 0 && ioDataRemainSize_ == 0) {
+                return Status::ERROR_NOT_ENOUGH_DATA;
             }
-            if (result != Status::OK) {
-                ioContext_.eos = true;
-                return nullptr;
-            }
-            ioContext_.offset += bufData->GetSize();
             MEDIA_LOG_D("bufData->GetSize() %d", bufData->GetSize());
             if (ioNeedReadSize >= bufData->GetSize()) {
-                memcpy_s(inIoBuffer_ + ioRemainSize_, ioNeedReadSize,
+                memcpy_s(inIoBuffer_ + ioDataRemainSize_, ioNeedReadSize,
                          const_cast<uint8_t *>(bufData->GetReadOnlyData()), bufData->GetSize());
             } else {
-                return nullptr;
+                return Status::ERROR_UNKNOWN;
             }
+            ioContext_.offset += bufData->GetSize();
+            ioDataRemainSize_  += bufData->GetSize();
             break;
         } while (true);
     }
 
-    return inIoBuffer_;
+    return Status::OK;
 }
 
 void Minimp3DemuxerPlugin::FillInMediaInfo(MediaInfo& mediaInfo) const
@@ -169,25 +171,21 @@ Status Minimp3DemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
     int processLoop = 1;
     Status status = Status::ERROR_UNKNOWN;
     while (processLoop) {
-        uint8_t *inputDataPtr = GetDataFromSource();
-        if (ioContext_.eos && inputDataPtr == nullptr) {
-            MEDIA_LOG_W("Meet end of source");
-            return Status::END_OF_STREAM;
+        status = GetDataFromSource();
+        if (status != Status::OK) {
+            return status;
         }
-        if (inputDataPtr == nullptr) {
-            MEDIA_LOG_E("inputDataPtr null");
-            return Status::ERROR_UNKNOWN;
-        }
-        status = AudioDemuxerMp3Prepare(&mp3DemuxerAttr_, inputDataPtr, inIoBufferSize_, &mp3DemuxerRst_);
+        status = AudioDemuxerMp3Prepare(&mp3DemuxerAttr_, inIoBuffer_, inIoBufferSize_, &mp3DemuxerRst_);
         switch (status) {
             case Status::ERROR_NOT_ENOUGH_DATA:
                 MEDIA_LOG_D("GetMediaInfo: need more data usedInputLength %" PRIu64, mp3DemuxerRst_.usedInputLength);
-                ioRemainSize_ = inIoBufferSize_ - mp3DemuxerRst_.usedInputLength;
+                ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
                 processLoop = 1;
                 break;
             case Status::OK:
                 MEDIA_LOG_D("GetMediaInfo: OK usedInputLength %" PRIu64, mp3DemuxerRst_.usedInputLength);
-                ioRemainSize_ = inIoBufferSize_ - mp3DemuxerRst_.usedInputLength;
+                ioDataRemainSize_ = 0;
+                ioContext_.offset = 0;
                 FillInMediaInfo(mediaInfo);
                 processLoop = 0;
                 break;
@@ -212,18 +210,12 @@ Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
     int  status  = -1;
     Status retResult = Status::OK;
     std::shared_ptr<Memory> mp3FrameData;
-    uint8_t *inputPtr = GetDataFromSource();
-    if (ioContext_.eos && inputPtr == nullptr) {
-        MEDIA_LOG_W("Meet end of source");
-        return Status::END_OF_STREAM;
+    retResult = GetDataFromSource();
+    if (retResult != Status::OK) {
+        return retResult;
     }
-    if (inputPtr == nullptr) {
-        MEDIA_LOG_E("inputDataPtr null");
-        return Status::ERROR_UNKNOWN;
-    }
-
-    status = AudioDemuxerMp3Process(inputPtr, inIoBufferSize_);
-
+    MEDIA_LOG_D("ioDataRemainSize_ = %d", ioDataRemainSize_);
+    status = AudioDemuxerMp3Process(inIoBuffer_, inIoBufferSize_);
     if (outBuffer.IsEmpty()) {
         mp3FrameData = outBuffer.AllocMemory(nullptr, mp3DemuxerRst_.frameLength);
     } else {
@@ -232,9 +224,9 @@ Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
     MEDIA_LOG_D("status = %d", status);
     switch (status) {
         case AUDIO_DEMUXER_SUCCESS:
-            ioRemainSize_ = inIoBufferSize_ - mp3DemuxerRst_.usedInputLength;
-            MEDIA_LOG_D("ReadFrame: success usedInputLength %" PRIu64 " ioRemainSize_ %" PRIu32,
-                        mp3DemuxerRst_.usedInputLength, ioRemainSize_);
+            ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
+            MEDIA_LOG_D("ReadFrame: success usedInputLength %d ioDataRemainSize_ %d",
+                        (uint32_t)mp3DemuxerRst_.usedInputLength, ioDataRemainSize_);
             mp3FrameData->Write(mp3DemuxerRst_.frameBuffer, mp3DemuxerRst_.frameLength);
             MEDIA_LOG_D("ReadFrame: mp3DemuxerRst_.frameLength %" PRIu32, mp3DemuxerRst_.frameLength);
             if (mp3DemuxerRst_.frameBuffer) {
@@ -243,9 +235,9 @@ Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
             }
             break;
         case AUDIO_DEMUXER_PROCESS_NEED_MORE_DATA:
-            ioRemainSize_ = inIoBufferSize_ - mp3DemuxerRst_.usedInputLength;
-            MEDIA_LOG_D("ReadFrame: need more data usedInputLength %" PRIu64 " ioRemainSize_ %" PRIu32,
-                        mp3DemuxerRst_.usedInputLength, ioRemainSize_);
+            ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
+            MEDIA_LOG_D("ReadFrame: need more data usedInputLength %" PRIu64 " ioDataRemainSize_ %" PRIu32,
+                        mp3DemuxerRst_.usedInputLength, ioDataRemainSize_);
             break;
         case AUDIO_DEMUXER_ERROR:
         default:
@@ -266,7 +258,7 @@ Status Minimp3DemuxerPlugin::SeekTo(int32_t trackId, int64_t timeStampUs, SeekMo
     auto targetTtimeS = static_cast<uint32_t>(timeStampUs / 1000); // 1000
     if (AudioDemuxerMp3GetSeekPosition(targetTtimeS, &pos) == 0) {
         ioContext_.offset = pos;
-        ioRemainSize_ = 0;
+        ioDataRemainSize_ = 0;
         MEDIA_LOG_D("ioContext_.offset %d", static_cast<uint32_t>(ioContext_.offset));
         memset_s(inIoBuffer_, inIoBufferSize_, 0x00, inIoBufferSize_);
     } else {
@@ -304,7 +296,7 @@ Status Minimp3DemuxerPlugin::Reset()
     ioContext_.eos = false;
     ioContext_.dataSource.reset();
     ioContext_.offset = 0;
-    ioRemainSize_ = 0;
+    ioDataRemainSize_ = 0;
     memset_s(inIoBuffer_, inIoBufferSize_, 0x00, inIoBufferSize_);
     return Status::OK;
 }
@@ -391,9 +383,9 @@ int Minimp3DemuxerPlugin::AudioDemuxerMp3IterateCallback(void *userData, const u
     uint64_t usedInputLength = 0;
 
     if (mp3Demuxer->internalRemainLen >= frameSize) {
-        usedInputLength = offset + frameSize;
+        usedInputLength = frameSize;
     } else {
-        usedInputLength = offset;
+        usedInputLength = 0;
     }
     MEDIA_LOG_D("offset = %" PRIu64 " internalRemainLen %" PRIu32 " frameSize %d", offset,
                 mp3Demuxer->internalRemainLen, frameSize);
