@@ -24,6 +24,12 @@
 #include "error_code.h"
 
 #ifdef MEDIA_OHOS
+#ifndef LOG_DOMAIN
+#define LOG_DOMAIN 0xD002B00
+#endif
+#ifndef LOG_TAG
+#define LOG_TAG "MultiMedia"
+#endif
 #include "hilog/log.h"
 #else
 #include "log_adapter.h"
