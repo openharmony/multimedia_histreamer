@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_PLUGIN_CORE_FILE_SINK_H
-#define HISTREAMER_PLUGIN_CORE_FILE_SINK_H
+#ifndef HISTREAMER_PLUGIN_CORE_OUTPUT_SINK_H
+#define HISTREAMER_PLUGIN_CORE_OUTPUT_SINK_H
 
 #include "base.h"
 #include "common/plugin_buffer.h"
-#include "plugin/interface/file_sink_plugin.h"
+#include "plugin/interface/output_sink_plugin.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-class FileSink : public Base {
+class OutputSink : public Base {
 public:
-    FileSink(const FileSink &) = delete;
-    FileSink operator = (const FileSink &) = delete;
-    ~FileSink() override = default;
+    OutputSink(const OutputSink &) = delete;
+    OutputSink operator = (const OutputSink &) = delete;
+    ~OutputSink() override = default;
 
     Status SetSink(const Plugin::ValueType &sink);
     bool IsSeekable();
@@ -37,12 +37,12 @@ public:
 private:
     friend class PluginManager;
 
-    FileSink(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<FileSinkPlugin> plugin);
+    OutputSink(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<OutputSinkPlugin> plugin);
 
 private:
-    std::shared_ptr<FileSinkPlugin> fileSink_;
+    std::shared_ptr<OutputSinkPlugin> outputSink_;
 };
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-#endif // HISTREAMER_PLUGIN_CORE_FILE_SINK_H
+#endif // HISTREAMER_PLUGIN_CORE_OUTPUT_SINK_H

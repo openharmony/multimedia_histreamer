@@ -24,18 +24,18 @@
 #include "interface/muxer_plugin.h"
 #include "interface/source_plugin.h"
 #include "interface/video_sink_plugin.h"
-#include "interface/file_sink_plugin.h"
+#include "interface/output_sink_plugin.h"
 
 using namespace OHOS::Media::Plugin;
 
 static std::map<PluginType, int> g_apiVersionMap = {
-    {PluginType::SOURCE, SOURCE_API_VERSION},
-    {PluginType::DEMUXER, DEMUXER_API_VERSION},
-    {PluginType::CODEC, CODEC_API_VERSION},
-    {PluginType::AUDIO_SINK, AUDIO_SINK_API_VERSION},
-    {PluginType::VIDEO_SINK, VIDEO_SINK_API_VERSION},
-    {PluginType::MUXER, MUXER_API_VERSION},
-    {PluginType::FILE_SINK, FILE_SINK_API_VERSION},
+    {PluginType::SOURCE,      SOURCE_API_VERSION},
+    {PluginType::DEMUXER,     DEMUXER_API_VERSION},
+    {PluginType::CODEC,       CODEC_API_VERSION},
+    {PluginType::AUDIO_SINK,  AUDIO_SINK_API_VERSION},
+    {PluginType::VIDEO_SINK,  VIDEO_SINK_API_VERSION},
+    {PluginType::MUXER,       MUXER_API_VERSION},
+    {PluginType::OUTPUT_SINK, OUTPUT_SINK_API_VERSION},
 };
 
 static std::string g_libFileHead = "libhistreamer_plugin_";

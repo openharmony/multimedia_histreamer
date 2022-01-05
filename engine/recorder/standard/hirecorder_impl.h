@@ -35,7 +35,7 @@
 #include "pipeline/filters/codec/video_encoder/video_encoder_filter.h"
 #endif
 #include "pipeline/filters/muxer/muxer_filter.h"
-#include "pipeline/filters/sink/file_sink/file_sink_filter.h"
+#include "pipeline/filters/sink/output_sink/output_sink_filter.h"
 #include "recorder_executor.h"
 
 namespace OHOS {
@@ -102,7 +102,7 @@ private:
     int32_t sourceId_;
     std::atomic<ErrorCode> errorCode_;
     std::shared_ptr<Pipeline::MuxerFilter> muxer_;
-    std::shared_ptr<Pipeline::FileSinkFilter> fileSink_;
+    std::shared_ptr<Pipeline::OutputSinkFilter> outputSink_;
     std::shared_ptr<Pipeline::AudioCaptureFilter> audioCapture_;
     std::shared_ptr<Pipeline::AudioEncoderFilter> audioEncoder_;
 #ifdef VIDEO_SUPPORT

@@ -22,7 +22,7 @@
 #include "audio_sink.h"
 #include "codec.h"
 #include "demuxer.h"
-#include "file_sink.h"
+#include "output_sink.h"
 #include "muxer.h"
 #include "source.h"
 #include "video_sink.h"
@@ -57,7 +57,7 @@ public:
 
     std::shared_ptr<VideoSink> CreateVideoSinkPlugin(const std::string& name);
 
-    std::shared_ptr<FileSink> CreateFileSinkPlugin(const std::string& name);
+    std::shared_ptr<OutputSink> CreateOutputSinkPlugin(const std::string& name);
 
     int32_t Sniffer(const std::string& name, std::shared_ptr<DataSourceHelper> source);
 

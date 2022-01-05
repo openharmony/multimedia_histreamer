@@ -95,7 +95,7 @@ enum struct PluginType : int32_t {
     AUDIO_SINK,        ///< reference AudioSinkPlugin
     VIDEO_SINK,        ///< reference VideoSinkPlugin
     MUXER,             ///< reference MuxerPlugin
-    FILE_SINK,         ///< reference FileSinkPlugin
+    OUTPUT_SINK,       ///< reference OutputSinkPlugin
 };
 } // namespace Plugin
 } // namespace Media

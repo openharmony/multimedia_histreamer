@@ -243,10 +243,10 @@ template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::Vide
     std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
     const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
     const std::function<std::shared_ptr<Plugin::VideoSink>(const std::string&)>& pluginCreator);
-template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::FileSink>& plugin,
+template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::OutputSink>& plugin,
     std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
     const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
-    const std::function<std::shared_ptr<Plugin::FileSink>(const std::string&)>& pluginCreator);
+    const std::function<std::shared_ptr<Plugin::OutputSink>(const std::string&)>& pluginCreator);
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

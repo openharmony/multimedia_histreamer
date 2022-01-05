@@ -96,9 +96,9 @@ std::shared_ptr<VideoSink> PluginManager::CreateVideoSinkPlugin(const std::strin
 {
     return CreatePlugin<VideoSink, VideoSinkPlugin>(name, PluginType::VIDEO_SINK);
 }
-std::shared_ptr<FileSink> PluginManager::CreateFileSinkPlugin(const std::string& name)
+std::shared_ptr<OutputSink> PluginManager::CreateOutputSinkPlugin(const std::string& name)
 {
-    return CreatePlugin<FileSink, FileSinkPlugin>(name, PluginType::FILE_SINK);
+    return CreatePlugin<OutputSink, OutputSinkPlugin>(name, PluginType::OUTPUT_SINK);
 }
 } // namespace Plugin
 } // namespace Media

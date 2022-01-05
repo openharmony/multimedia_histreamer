@@ -38,11 +38,11 @@ HiRecorderImpl::HiRecorderImpl()
     muxer_ = FilterFactory::Instance().CreateFilterWithType<MuxerFilter>(
             "builtin.recorder.muxer",
             "muxer");
-    fileSink_ = FilterFactory::Instance().CreateFilterWithType<FileSinkFilter>(
-            "builtin.recorder.file_sink",
-            "file_sink");
+    outputSink_ = FilterFactory::Instance().CreateFilterWithType<OutputSinkFilter>(
+            "builtin.recorder.output_sink",
+            "output_sink");
     FALSE_RETURN(muxer_ != nullptr);
-    FALSE_RETURN(fileSink_ != nullptr);
+    FALSE_RETURN(outputSink_ != nullptr);
 
     pipeline_ = std::make_shared<PipelineCore>();
 }
@@ -57,7 +57,7 @@ HiRecorderImpl::~HiRecorderImpl()
     videoEncoder_.reset();
 #endif
     muxer_.reset();
-    fileSink_.reset();
+    outputSink_.reset();
     fsm_.Stop();
     MEDIA_LOG_D("dtor called.");
 }
@@ -69,9 +69,9 @@ ErrorCode HiRecorderImpl::Init()
         return ErrorCode::SUCCESS;
     }
     pipeline_->Init(this, nullptr);
-    ErrorCode ret = pipeline_->AddFilters({muxer_.get(), fileSink_.get()});
+    ErrorCode ret = pipeline_->AddFilters({muxer_.get(), outputSink_.get()});
     if (ret == ErrorCode::SUCCESS) {
-        ret = pipeline_->LinkFilters({muxer_.get(), fileSink_.get()});
+        ret = pipeline_->LinkFilters({muxer_.get(), outputSink_.get()});
     }
     FALSE_LOG(ret==ErrorCode::SUCCESS);
     if (ret == ErrorCode::SUCCESS) {
@@ -359,10 +359,10 @@ ErrorCode HiRecorderImpl::DoSetParameter(const Plugin::Any& param) const
                                                  static_cast<OHOS::Media::Plugin::AudioFormat>(Plugin::AnyCast<AudEnc>(any).encFmt));
             break;
         case RecorderParameterType::OUT_PATH:
-            ret = fileSink_->SetOutputPath(Plugin::AnyCast<OutFilePath>(any).path);
+            ret = outputSink_->SetOutputPath(Plugin::AnyCast<OutFilePath>(any).path);
             break;
         case RecorderParameterType::OUT_FD:
-            ret = fileSink_->SetFd(Plugin::AnyCast<OutFd>(any).fd);
+            ret = outputSink_->SetFd(Plugin::AnyCast<OutFd>(any).fd);
             break;
         default:
             break;

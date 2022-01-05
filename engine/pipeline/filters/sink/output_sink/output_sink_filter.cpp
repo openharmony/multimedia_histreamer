@@ -14,9 +14,9 @@
  */
 #ifdef RECORDER_SUPPORT
 
-#define HST_LOG_TAG "FileSinkFilter"
+#define HST_LOG_TAG "OutputSinkFilter"
 
-#include "file_sink_filter.h"
+#include "output_sink_filter.h"
 
 #include "common/plugin_utils.h"
 #include "factory/filter_factory.h"
@@ -26,21 +26,21 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-static AutoRegisterFilter<FileSinkFilter> g_registerFilterHelper("builtin.recorder.file_sink");
+static AutoRegisterFilter<OutputSinkFilter> g_registerFilterHelper("builtin.recorder.output_sink");
 
-FileSinkFilter::FileSinkFilter(std::string name) : FilterBase(std::move(name)) {}
+OutputSinkFilter::OutputSinkFilter(std::string name) : FilterBase(std::move(name)) {}
 
-FileSinkFilter::~FileSinkFilter() {}
+OutputSinkFilter::~OutputSinkFilter() {}
 
-void FileSinkFilter::Init(EventReceiver *receiver, FilterCallback *callback)
+void OutputSinkFilter::Init(EventReceiver *receiver, FilterCallback *callback)
 {
     FilterBase::Init(receiver, callback);
     outPorts_.clear();
 }
-bool FileSinkFilter::Negotiate(const std::string &inPort, const std::shared_ptr<const Capability> &upstreamCap,
-                               Capability &upstreamNegotiatedCap)
+bool OutputSinkFilter::Negotiate(const std::string &inPort, const std::shared_ptr<const Capability> &upstreamCap,
+                                 Capability &upstreamNegotiatedCap)
 {
-    auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::FILE_SINK);
+    auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::OUTPUT_SINK);
     if (candidatePlugins.empty()) {
         MEDIA_LOG_E("no available file sink plugin");
         return false;
@@ -54,14 +54,14 @@ bool FileSinkFilter::Negotiate(const std::string &inPort, const std::shared_ptr<
             upstreamNegotiatedCap = pair.second;
         }
     }
-    auto res = UpdateAndInitPluginByInfo<Plugin::FileSink>(plugin_, pluginInfo_, selectedPluginInfo,
-    [](const std::string& name) -> std::shared_ptr<Plugin::FileSink> {
-        return Plugin::PluginManager::Instance().CreateFileSinkPlugin(name);
+    auto res = UpdateAndInitPluginByInfo<Plugin::OutputSink>(plugin_, pluginInfo_, selectedPluginInfo,
+    [](const std::string& name) -> std::shared_ptr<Plugin::OutputSink> {
+        return Plugin::PluginManager::Instance().CreateOutputSinkPlugin(name);
     });
     return res;
 }
 
-bool FileSinkFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
+bool OutputSinkFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
 {
     PROFILE_BEGIN("Audio sink configure begin");
     if (plugin_ == nullptr || pluginInfo_ == nullptr) {
@@ -90,7 +90,7 @@ bool FileSinkFilter::Configure(const std::string &inPort, const std::shared_ptr<
     return true;
 }
 
-ErrorCode FileSinkFilter::SetOutputPath(const std::string &path)
+ErrorCode OutputSinkFilter::SetOutputPath(const std::string &path)
 {
     if (path.empty()) {
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
@@ -106,7 +106,7 @@ ErrorCode FileSinkFilter::SetOutputPath(const std::string &path)
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode FileSinkFilter::SetFd(int32_t fd)
+ErrorCode OutputSinkFilter::SetFd(int32_t fd)
 {
     if (fd < 0) {
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
@@ -122,7 +122,7 @@ ErrorCode FileSinkFilter::SetFd(int32_t fd)
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode FileSinkFilter::PushData(const std::string &inPort, AVBufferPtr buffer, int64_t offset)
+ErrorCode OutputSinkFilter::PushData(const std::string &inPort, AVBufferPtr buffer, int64_t offset)
 {
     auto ret = ErrorCode::SUCCESS;
     if (offset >= 0 && offset != currentPos_) {
@@ -157,7 +157,7 @@ ErrorCode FileSinkFilter::PushData(const std::string &inPort, AVBufferPtr buffer
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode FileSinkFilter::Stop()
+ErrorCode OutputSinkFilter::Stop()
 {
     currentPos_ = 0;
     fd_ = -1;

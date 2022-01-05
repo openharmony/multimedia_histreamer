@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_PIPELINE_FILE_SINK_FILTER_H
-#define HISTREAMER_PIPELINE_FILE_SINK_FILTER_H
+#ifndef HISTREAMER_PIPELINE_OUTPUT_SINK_FILTER_H
+#define HISTREAMER_PIPELINE_OUTPUT_SINK_FILTER_H
 #ifdef RECORDER_SUPPORT
 #include "filter_base.h"
-#include "plugin/core/file_sink.h"
+#include "plugin/core/output_sink.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class FileSinkFilter : public FilterBase {
+class OutputSinkFilter : public FilterBase {
 public:
-    explicit FileSinkFilter(std::string name);
-    ~FileSinkFilter() override;
+    explicit OutputSinkFilter(std::string name);
+    ~OutputSinkFilter() override;
 
     void Init(EventReceiver *receiver, FilterCallback *callback) override;
 
@@ -42,7 +42,7 @@ public:
     ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer, int64_t offset) override;
 
 private:
-    std::shared_ptr<Plugin::FileSink> plugin_;
+    std::shared_ptr<Plugin::OutputSink> plugin_;
     std::string outputPath_{};
     int32_t fd_{-1};
     int64_t currentPos_{0};
@@ -51,5 +51,5 @@ private:
 } // Media
 } // OHOS
 #endif
-#endif // HISTREAMER_PIPELINE_FILE_SINK_FILTER_H
+#endif // HISTREAMER_PIPELINE_OUTPUT_SINK_FILTER_H
 
