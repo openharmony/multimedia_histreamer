@@ -133,7 +133,7 @@ ErrorCode AudioCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value
 
 ErrorCode AudioCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
 {
-    Tag tag = static_cast<OHOS::Media::Plugin::Tag>(key);
+    Tag tag = static_cast<Plugin::Tag>(key);
     switch (tag) {
         case Tag::AUDIO_SOURCE_TYPE: {
             break;
@@ -229,7 +229,7 @@ ErrorCode AudioCaptureFilter::Pause()
 {
     MEDIA_LOG_I("Pause entered.");
     if (taskPtr_) {
-        taskPtr_->Pause();
+        taskPtr_->PauseAsync();
     }
     ErrorCode ret = ErrorCode::SUCCESS;
     if (plugin_) {

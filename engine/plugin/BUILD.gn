@@ -89,7 +89,7 @@ source_set("histreamer_plugin_core") {
     "core/base.cpp",
     "core/codec.cpp",
     "core/demuxer.cpp",
-    "core/file_sink.cpp",
+    "core/output_sink.cpp",
     "core/muxer.cpp",
     "core/plugin_manager.cpp",
     "core/plugin_meta.cpp",

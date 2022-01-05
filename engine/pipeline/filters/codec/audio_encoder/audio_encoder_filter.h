@@ -13,21 +13,24 @@
  * limitations under the License.
  */
 
+#ifdef RECORDER_SUPPORT
+
 #ifndef HISTREAMER_PIPELINE_FILTER_AUDIO_ENCODER_H
 #define HISTREAMER_PIPELINE_FILTER_AUDIO_ENCODER_H
-#ifdef RECORDER_SUPPORT
-#include "filters/codec/decoder_filter_base.h"
+
+#include "filters/codec/codec_filter_base.h"
 #include "plugin/common/plugin_tags.h"
+#include "utils/ring_buffer.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class AudioEncoderFilter : public DecoderFilterBase {
+class AudioEncoderFilter : public CodecFilterBase {
 public:
     explicit AudioEncoderFilter(const std::string &name);
     ~AudioEncoderFilter() override;
 
-    virtual ErrorCode SetAudioEncoder(int32_t sourceId, OHOS::Media::Plugin::AudioFormat encoder);
+    virtual ErrorCode SetAudioEncoder(int32_t sourceId, Plugin::AudioFormat encoder);
 
     ErrorCode Start() override;
 
@@ -37,6 +40,8 @@ public:
 
     bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Capability& upstreamNegotiatedCap) override;
+
+    uint32_t CalculateBufferSize(const std::shared_ptr<const Plugin::Meta> &meta);
 
     bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
@@ -49,10 +54,6 @@ public:
      */
     ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer, int64_t offset) override;
 
-    void FlushStart() override;
-
-    void FlushEnd() override;
-
 private:
     ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta> &meta);
 
@@ -63,14 +64,16 @@ private:
     ErrorCode Release();
 
 private:
-    std::shared_ptr<BufferPool<AVBuffer>> outBufferPool_ {};
-    bool isFlushing_ {false};
-
+    std::shared_ptr<BufferPool<AVBuffer>> outBufferPool_{};
     Capability capNegWithDownstream_;
     Capability capNegWithUpstream_;
+    uint32_t frameSize_;
+    std::string mime_;
+    std::unique_ptr<Plugin::RingBuffer> rb{};
+    AVBufferPtr cahceBuffer_{nullptr};
 };
 } // OHOS
 } // Media
 } // Pipeline
-#endif
 #endif // HISTREAMER_PIPELINE_FILTER_AUDIO_ENCODER_H
+#endif

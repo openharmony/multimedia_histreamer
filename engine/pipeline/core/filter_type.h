@@ -27,6 +27,8 @@ enum struct FilterType : uint8_t {
     MUXER,
     AUDIO_DECODER,
     VIDEO_DECODER,
+    AUDIO_ENCODER,
+    VIDEO_ENCODER,
     AUDIO_SINK,
     VIDEO_SINK,
 };

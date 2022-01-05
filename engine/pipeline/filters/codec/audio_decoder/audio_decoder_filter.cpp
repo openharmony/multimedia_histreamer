@@ -89,7 +89,7 @@ namespace Media {
 namespace Pipeline {
 static AutoRegisterFilter<AudioDecoderFilter> g_registerFilterHelper("builtin.player.audiodecoder");
 
-AudioDecoderFilter::AudioDecoderFilter(const std::string &name): DecoderFilterBase(name)
+AudioDecoderFilter::AudioDecoderFilter(const std::string &name): CodecFilterBase(name)
 {
     filterType_ = FilterType::AUDIO_DECODER;
     MEDIA_LOG_D("audio decoder ctor called");

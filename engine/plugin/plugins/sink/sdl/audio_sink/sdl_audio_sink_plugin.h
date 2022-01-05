@@ -20,7 +20,7 @@
 #include "SDL.h"
 #include "plugin/interface/audio_sink_plugin.h"
 #include "plugin/common/plugin_audio_tags.h"
-#include "plugin/plugins/sink/sdl/ring_buffer.h"
+#include "utils/ring_buffer.h"
 
 #ifdef __cplusplus
 extern "C" {

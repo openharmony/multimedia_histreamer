@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_PIPELINE_FILTER_DECODER_BASE_H
-#define HISTREAMER_PIPELINE_FILTER_DECODER_BASE_H
+#ifndef HISTREAMER_PIPELINE_FILTER_CODEC_BASE_H
+#define HISTREAMER_PIPELINE_FILTER_CODEC_BASE_H
 
 #include <string>
 
@@ -33,10 +33,10 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class DecoderFilterBase : public FilterBase {
+class CodecFilterBase : public FilterBase {
 public:
-    explicit DecoderFilterBase(const std::string &name);
-    ~DecoderFilterBase() override;
+    explicit CodecFilterBase(const std::string &name);
+    ~CodecFilterBase() override;
 
     ErrorCode SetParameter(int32_t key, const Plugin::Any &value) override;
 
@@ -63,4 +63,4 @@ protected:
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
-#endif // HISTREAMER_PIPELINE_FILTER_DECODER_BASE_H
+#endif // HISTREAMER_PIPELINE_FILTER_CODEC_BASE_H

@@ -93,6 +93,11 @@ public:
         }
     }
 
+    size_t GetSize()
+    {
+        return (tail_ - head_);
+    }
+
 private:
     const size_t bufferSize_;
     std::unique_ptr<uint8_t[]> buffer_;

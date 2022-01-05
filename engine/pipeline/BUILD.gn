@@ -30,7 +30,7 @@ source_set("histreamer_pipeline") {
     "core/port.cpp",
     "factory/filter_factory.cpp",
     "filters/codec/audio_decoder/audio_decoder_filter.cpp",
-    "filters/codec/decoder_filter_base.cpp",
+    "filters/codec/codec_filter_base.cpp",
     "filters/common/plugin_settings.cpp",
     "filters/common/plugin_utils.cpp",
     "filters/demux/data_packer.cpp",

@@ -17,16 +17,16 @@
 #define HISTREAMER_PIPELINE_VIDEO_ENCODER_FILTER_H
 #if defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
 #include "utils/type_define.h"
-#include "filters/codec/decoder_filter_base.h"
+#include "filters/codec/codec_filter_base.h"
 #include "plugin/common/plugin_tags.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class VideoEncoderFIlter : public DecoderFilterBase {
+class VideoEncoderFilter : public CodecFilterBase {
 public:
-    explicit VideoEncoderFIlter(const std::string &name);
-    ~VideoEncoderFIlter() override;
+    explicit VideoEncoderFilter(const std::string &name);
+    ~VideoEncoderFilter() override;
 
     virtual ErrorCode SetVideoEncoder(int32_t sourceId, OHOS::Media::Plugin::VideoFormat encoder);
 

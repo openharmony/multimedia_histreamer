@@ -61,7 +61,7 @@ private:
 };
 
 VideoDecoderFilter::VideoDecoderFilter(const std::string& name)
-    : DecoderFilterBase(name), dataCallback_(std::make_shared<DataCallbackImpl>(*this))
+    : CodecFilterBase(name), dataCallback_(std::make_shared<DataCallbackImpl>(*this))
 {
     MEDIA_LOG_I("video decoder ctor called");
     vdecFormat_.width = 0;
