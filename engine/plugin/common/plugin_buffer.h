@@ -27,6 +27,8 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+constexpr size_t INVALID_POSITION = -1;
+
 /// End of Stream Buffer Flag
 #define BUFFER_FLAG_EOS 0x00000001
 /// Video Key Frame Flag
@@ -114,9 +116,9 @@ public:
 
     uint8_t *GetWritableData(size_t writeSize, size_t position = 0);
 
-    size_t Write(const uint8_t* in, size_t writeSize, size_t position = std::string::npos);
+    size_t Write(const uint8_t* in, size_t writeSize, size_t position = INVALID_POSITION);
 
-    size_t Read(uint8_t* out, size_t readSize, size_t position = std::string::npos);
+    size_t Read(uint8_t* out, size_t readSize, size_t position = INVALID_POSITION);
 
     void Reset();
 

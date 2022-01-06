@@ -49,7 +49,7 @@ void Memory::Reset()
 size_t Memory::Write(const uint8_t* in, size_t writeSize, size_t position)
 {
     size_t start = 0;
-    if (position == std::string::npos) {
+    if (position == INVALID_POSITION) {
         start = size;
     } else {
         start = std::min(position, capacity);
@@ -65,7 +65,7 @@ size_t Memory::Write(const uint8_t* in, size_t writeSize, size_t position)
 size_t Memory::Read(uint8_t* out, size_t readSize, size_t position)
 {
     size_t start = 0;
-    if (position != std::string::npos) {
+    if (position != INVALID_POSITION) {
         start = std::min(position, capacity);
     }
     size_t length = std::min(readSize, size);
