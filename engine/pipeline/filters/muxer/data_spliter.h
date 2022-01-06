@@ -64,8 +64,8 @@ public:
 protected:
     static const size_t DEFAULT_MAX_DURATION_US = 60 * 1000 * 1000;
     static const size_t DEFAULT_MAX_OUTPUT_SIZE = 0;
-    std::shared_ptr<Filter> nextFilter_{};
-    std::shared_ptr<Plugin::Muxer> muxer_{};
+    std::shared_ptr<Filter> nextFilter_ {};
+    std::shared_ptr<Plugin::Muxer> muxer_ {};
     size_t maxOutputSize_{DEFAULT_MAX_OUTPUT_SIZE};
     size_t maxDurationUs_{DEFAULT_MAX_DURATION_US};
 };
