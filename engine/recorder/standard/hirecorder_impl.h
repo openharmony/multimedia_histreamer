@@ -57,6 +57,7 @@ public:
     int32_t SetAudioSource(AudioSourceType source, int32_t& sourceId) override;
 #ifdef VIDEO_SUPPORT
     int32_t SetVideoSource(VideoSourceType source, int32_t &sourceId) override;
+    sptr<Surface> GetSurface(int32_t sourceId) override;
 #endif
     int32_t SetOutputFormat(OutputFormatType format) override;
     int32_t SetObs(const std::weak_ptr<IRecorderEngineObs>& obs) override;

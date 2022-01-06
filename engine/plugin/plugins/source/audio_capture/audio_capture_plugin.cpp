@@ -528,7 +528,7 @@ Status AudioCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
         return Status::ERROR_NO_MEMORY;
     }
     bool isBlocking = true;
-    auto size = audioCapturer_->Read(bufData->GetWritableData(expectedLen), expectedLen, isBlocking);
+    auto size = audioCapturer_->Read(bufData->GetWritableAddr(expectedLen), expectedLen, isBlocking);
     if (size <= 0) {
         MEDIA_LOG_D("audioCapturer Read() fail");
         return Status::ERROR_NOT_ENOUGH_DATA;

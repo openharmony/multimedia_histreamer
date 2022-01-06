@@ -65,14 +65,14 @@ StreamSourceCallback::StreamSourceCallback(std::shared_ptr<StreamSourcePlugin> d
 uint8_t* StreamSourceCallback::GetBuffer(size_t index)
 {
     auto bufferPtr = dataSource_->FindBuffer(index);
-    return bufferPtr->GetMemory()->GetWritableData(bufferPtr->GetMemory()->GetCapacity());
+    return bufferPtr->GetMemory()->GetWritableAddr(bufferPtr->GetMemory()->GetCapacity());
 }
 
 void StreamSourceCallback::QueueBuffer(size_t index, size_t offset, size_t size, int64_t timestampUs, uint32_t flags)
 {
     auto bufferPtr = dataSource_->FindBuffer(index);
     dataSource_->EraseBuffer(index);
-    bufferPtr->GetMemory()->GetWritableData(size);
+    bufferPtr->GetMemory()->UpdateDataSize(size);
     dataSource_->EnqueBuffer(bufferPtr);
 }
 

@@ -138,6 +138,10 @@ int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId
     PROFILE_END("SetVideoSource end.");
     return TransErrorCode(ret);
 }
+
+sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
+{
+}
 #endif
 
 int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
@@ -290,10 +294,9 @@ void HiRecorderImpl::OnStateChanged(StateId state)
 ErrorCode HiRecorderImpl::DoSetVideoSource(VideoSourceType sourceType, int32_t sourceId) const
 {
 #ifdef VIDEO_SUPPORT
-    return videoCapture_->SetVideoSource(static_cast<Plugin::VideoSourceType>(sourceType), sourceId);
-#else
-    return ErrorCode::ERROR_UNIMPLEMENTED;
+    // videoCapture_->SetVideoSource(static_cast<Plugin::VideoSourceType>(sourceType), sourceId);
 #endif
+    return ErrorCode::ERROR_UNIMPLEMENTED;
 }
 
 ErrorCode HiRecorderImpl::DoSetAudioSource(AudioSourceType sourceType, int32_t sourceId) const

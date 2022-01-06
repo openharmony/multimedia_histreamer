@@ -265,7 +265,7 @@ ErrorCode AudioEncoderFilter::PushData(const std::string &inPort, AVBufferPtr bu
         cahceBuffer_->flag = 0;
         auto frmSize = (totalSize >= frameSize_) ? frameSize_ : totalSize;
         if (frmSize > 0) {
-            if (rb->ReadBuffer(cahceBuffer_->GetMemory()->GetWritableData(frmSize), frmSize) != frmSize) {
+            if (rb->ReadBuffer(cahceBuffer_->GetMemory()->GetWritableAddr(frmSize), frmSize) != frmSize) {
                 MEDIA_LOG_E("Read data from ring buffer fail");
                 return ErrorCode::ERROR_UNKNOWN;
             }

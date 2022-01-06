@@ -83,14 +83,22 @@ const uint8_t* Memory::GetReadOnlyData(size_t position)
     return GetRealAddr() + position;
 }
 
-uint8_t* Memory::GetWritableData(size_t writeSize, size_t position)
+uint8_t* Memory::GetWritableAddr(size_t estimatedWriteSize, size_t position)
 {
-    if (position + writeSize > capacity) {
+    if (position + estimatedWriteSize > capacity) {
         return nullptr;
     }
     uint8_t* ptr = GetRealAddr() + position;
-    size = (writeSize + position);
+    size = (estimatedWriteSize + position);
     return ptr;
+}
+
+void Memory::UpdateDataSize(size_t realWriteSize, size_t position)
+{
+    if (position + realWriteSize > capacity) {
+        return;
+    }
+    size = (realWriteSize + position);
 }
 
 size_t Memory::GetSize()

@@ -114,7 +114,10 @@ public:
 
     const uint8_t* GetReadOnlyData(size_t position = 0);
 
-    uint8_t *GetWritableData(size_t writeSize, size_t position = 0);
+    uint8_t *GetWritableAddr(size_t estimatedWriteSize, size_t position = 0);
+
+    // If estimatedWriteSize doesn't equal to realWriteSize, should call UpdateDataSize
+    void UpdateDataSize(size_t realWriteSize, size_t position = 0);
 
     size_t Write(const uint8_t* in, size_t writeSize, size_t position = INVALID_POSITION);
 

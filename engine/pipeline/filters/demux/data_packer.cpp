@@ -56,7 +56,7 @@ inline static size_t AudioBufferCapacity(AVBufferPtr& ptr)
 
 inline static uint8_t* AudioBufferWritableData(AVBufferPtr& ptr, size_t size, size_t position = 0)
 {
-    return ptr->GetMemory()->GetWritableData(size, position);
+    return ptr->GetMemory()->GetWritableAddr(size, position);
 }
 
 inline static const uint8_t* AudioBufferReadOnlyData(AVBufferPtr& ptr)
