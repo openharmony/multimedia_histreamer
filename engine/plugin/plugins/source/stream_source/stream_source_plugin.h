@@ -29,7 +29,6 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-using SourceType = OHOS::Media::SourceType;
 using MediaSource = OHOS::Media::Source;
 using StreamCallback = OHOS::Media::StreamCallback;
 using StreamSource = OHOS::Media::StreamSource;

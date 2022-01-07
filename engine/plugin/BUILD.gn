@@ -38,7 +38,10 @@ config("hst_plugin_intf_config") {
 }
 
 source_set("histreamer_plugin_intf") {
-  sources = [ "common/plugin_buffer.cpp" ]
+  sources = [
+    "common/media_source.cpp",
+    "common/plugin_buffer.cpp",
+  ]
   public_configs = [ ":hst_plugin_intf_config" ]
   if (defined(ohos_lite)) {
     if (ohos_kernel_type == "liteos_m") {
@@ -89,8 +92,8 @@ source_set("histreamer_plugin_core") {
     "core/base.cpp",
     "core/codec.cpp",
     "core/demuxer.cpp",
-    "core/output_sink.cpp",
     "core/muxer.cpp",
+    "core/output_sink.cpp",
     "core/plugin_manager.cpp",
     "core/plugin_meta.cpp",
     "core/plugin_register.cpp",

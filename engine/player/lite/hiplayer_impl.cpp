@@ -111,7 +111,7 @@ int32_t HiPlayerImpl::SetSource(const Source& source)
     if (ret != to_underlying(ErrorCode::SUCCESS)) {
         return ret;
     }
-    ret = to_underlying(fsm_.SendEvent(Intent::SET_SOURCE, std::make_shared<Media::Source>(source)));
+    ret = to_underlying(fsm_.SendEvent(Intent::SET_SOURCE, std::make_shared<MediaSource>(source.GetSourceUri())));
     PROFILE_END("SetSource end.");
     return ret;
 }

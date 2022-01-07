@@ -19,6 +19,7 @@
 #include "foundation/log.h"
 #include "pipeline/factory/filter_factory.h"
 #include "player/standard/media_utils.h"
+#include "plugin/common/media_source.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_meta.h"
 #include "utils/steady_clock.h"
@@ -110,7 +111,7 @@ int32_t HiPlayerImpl::SetSource(const std::string& uri)
     PROFILE_BEGIN("SetSource begin");
     auto ret = Init();
     if (ret == ErrorCode::SUCCESS) {
-        ret = fsm_.SendEvent(Intent::SET_SOURCE, std::make_shared<Media::Source>(uri));
+        ret = fsm_.SendEvent(Intent::SET_SOURCE, std::make_shared<MediaSource>(uri));
     }
     PROFILE_END("SetSource end.");
     return TransErrorCode(ret);

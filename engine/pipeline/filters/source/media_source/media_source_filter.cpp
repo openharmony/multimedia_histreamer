@@ -307,9 +307,9 @@ bool MediaSourceFilter::GetProtocolByUri()
 bool MediaSourceFilter::ParseProtocol(const std::shared_ptr<MediaSource>& source)
 {
     bool ret = true;
-    OHOS::Media::SourceType srcType = source->GetSourceType();
+    SourceType srcType = source->GetSourceType();
     MEDIA_LOG_D("sourceType = %d", OHOS::Media::to_underlying(srcType));
-    if (srcType == OHOS::Media::SourceType::SOURCE_TYPE_URI) {
+    if (srcType == SourceType::SOURCE_TYPE_URI) {
         uri_ = source->GetSourceUri();
         ret = GetProtocolByUri();
     } else if (srcType == SourceType::SOURCE_TYPE_FD) {
