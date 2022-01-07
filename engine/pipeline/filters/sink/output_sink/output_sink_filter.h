@@ -43,9 +43,10 @@ public:
 
 private:
     std::shared_ptr<Plugin::OutputSink> plugin_;
-    std::string outputPath_{};
-    int32_t fd_{-1};
-    int64_t currentPos_{0};
+    Plugin::OutputType outputType_ {Plugin::OutputType::UNKNOWN};
+    std::string outputPath_ {};
+    int32_t fd_ {-1};
+    int64_t currentPos_ {0};
 };
 } // Pipeline
 } // Media

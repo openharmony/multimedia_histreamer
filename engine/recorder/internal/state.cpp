@@ -165,13 +165,15 @@ std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin:
         case Intent::STOP:
             std::tie(rtv, nextAction) = Stop();
             break;
-        default:
-            break;
         case Intent::NOTIFY_READY:
+            // do nothing for ready
             break;
         case Intent::NOTIFY_ERROR:
+            std::tie(rtv, nextAction) = OnError(param);
             break;
         case Intent::INTENT_BUTT:
+            break;
+        default:
             break;
     }
     MEDIA_LOG_D("DispatchIntent %s, curState: %s, nextState: %s", intentDesc_.at(intent).c_str(), name_.c_str(),

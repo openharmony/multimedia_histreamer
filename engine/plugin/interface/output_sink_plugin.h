@@ -35,7 +35,7 @@ struct OutputSinkPlugin : public Plugin::PluginBase {
         UNUSED_VARIABLE(cb);
         return Status::ERROR_UNIMPLEMENTED;
     }
-    virtual Status SetSink(const Plugin::ValueType &sink) = 0;
+    virtual Status SetSink(const Plugin::ValueType& sink) = 0;
     virtual bool IsSeekable() = 0;
     virtual Status SeekTo(uint64_t offset) = 0;
     virtual Status Write(const std::shared_ptr<Buffer>& buffer) = 0;
@@ -59,11 +59,13 @@ enum struct OutputType {
 
 struct OutputSinkPluginDef : public PluginDefBase {
     OutputType outputType;
+    CapabilitySet inCaps;
     PluginCreatorFunc<OutputSinkPlugin> creator {nullptr}; ///< Output sink plugin create function.
     OutputSinkPluginDef()
     {
         apiVersion = OUTPUT_SINK_API_VERSION; ///< Output sink plugin version.
         pluginType = PluginType::OUTPUT_SINK; ///< Plugin type, MUST be OUTPUT_SINK.
+        inCaps.emplace_back(Capability("*")); ///< Output sink sink can accept any data
     }
 };
 } // Plugin

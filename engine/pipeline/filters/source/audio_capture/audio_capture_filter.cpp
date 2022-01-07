@@ -86,35 +86,35 @@ ErrorCode AudioCaptureFilter::ConfigurePlugin()
 
 ErrorCode AudioCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value)
 {
-    OHOS::Media::Plugin::Tag tag = static_cast<OHOS::Media::Plugin::Tag>(key);
+    auto tag = static_cast<OHOS::Media::Plugin::Tag>(key);
     switch (tag) {
         case Tag::AUDIO_SOURCE_TYPE: {
             if (value.Type() == typeid(uint32_t)) {
                 if (Plugin::AnyCast<uint32_t>(value) == 0) { // need to adapter to recorder engine enum
                     inputType_ = "mic";
                 }
-                MEDIA_LOG_D("inputType_: %u", inputType_.c_str());
+                MEDIA_LOG_D("inputType_: %s", inputType_.c_str());
             }
             break;
         }
         case OHOS::Media::Plugin::Tag::AUDIO_SAMPLE_RATE: {
             if (value.Type() == typeid(uint32_t)) {
                 sampleRate_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("sampleRate_: %u", sampleRate_);
+                MEDIA_LOG_D("sampleRate_: %" PRIu32, sampleRate_);
             }
             break;
         }
         case OHOS::Media::Plugin::Tag::AUDIO_CHANNELS: {
             if (value.Type() == typeid(uint32_t)) {
                 channelNum_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("channelNum_: %u", channelNum_);
+                MEDIA_LOG_D("channelNum_: %" PRIu32, channelNum_);
             }
             break;
         }
         case OHOS::Media::Plugin::Tag::MEDIA_BITRATE: {
             if (value.Type() == typeid(int64_t)) {
                 bitRate_ = Plugin::AnyCast<int64_t>(value);
-                MEDIA_LOG_D("bitRate_: %u", bitRate_);
+                MEDIA_LOG_D("bitRate_: %" PRId64, bitRate_);
             }
             break;
         }
@@ -126,7 +126,7 @@ ErrorCode AudioCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value
             break;
         }
         default:
-            MEDIA_LOG_I("Unknown key");
+            MEDIA_LOG_I("Unknown key %d", OHOS::Media::to_underlying(tag));
             break;
     }
     return ErrorCode::SUCCESS;
@@ -156,7 +156,7 @@ ErrorCode AudioCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
             break;
         }
         default:
-            MEDIA_LOG_I("Unknown key");
+            MEDIA_LOG_I("Unknown key %d", tag);
             break;
     }
     return ErrorCode::SUCCESS;
@@ -294,7 +294,7 @@ ErrorCode AudioCaptureFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& in
     return ErrorCode::SUCCESS;
 }
 
-bool AudioCaptureFilter::CheckSampleRate(Plugin::Capability cap)
+bool AudioCaptureFilter::CheckSampleRate(const Plugin::Capability& cap)
 {
     for (const auto& pairKey : cap.keys) {
         if (pairKey.first != Capability::Key::AUDIO_SAMPLE_RATE ||
@@ -312,7 +312,7 @@ bool AudioCaptureFilter::CheckSampleRate(Plugin::Capability cap)
     return false;
 }
 
-bool AudioCaptureFilter::CheckChannels(Plugin::Capability cap)
+bool AudioCaptureFilter::CheckChannels(const Plugin::Capability& cap)
 {
     for (const auto& pairKey : cap.keys) {
         if (pairKey.first != Capability::Key::AUDIO_CHANNELS ||
@@ -330,7 +330,7 @@ bool AudioCaptureFilter::CheckChannels(Plugin::Capability cap)
     return false;
 }
 
-bool AudioCaptureFilter::CheckSampleFormat(Plugin::Capability cap)
+bool AudioCaptureFilter::CheckSampleFormat(const Plugin::Capability& cap)
 {
     for (const auto& pairKey : cap.keys) {
         if (pairKey.first != Capability::Key::AUDIO_SAMPLE_FORMAT ||
@@ -349,7 +349,7 @@ bool AudioCaptureFilter::CheckSampleFormat(Plugin::Capability cap)
     return false;
 }
 
-bool AudioCaptureFilter::DoNegotiate(CapabilitySet &outCaps)
+bool AudioCaptureFilter::DoNegotiate(const CapabilitySet &outCaps)
 {
     if (outCaps.empty()) {
         MEDIA_LOG_E("audio capture plugin must have out caps");

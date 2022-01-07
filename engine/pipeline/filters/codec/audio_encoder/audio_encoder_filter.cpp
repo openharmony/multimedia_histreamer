@@ -24,10 +24,6 @@
 
 #define DEFAULT_OUT_BUFFER_POOL_SIZE 5
 #define MAX_OUT_DECODED_DATA_SIZE_PER_FRAME 20 * 1024 // 20kB
-#define AF_64BIT_BYTES 8
-#define AF_32BIT_BYTES 4
-#define AF_16BIT_BYTES 2
-#define AF_8BIT_BYTES  1
 
 namespace OHOS {
 namespace Media {
@@ -109,7 +105,6 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
         }
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
             if (outCap.mime != mime_) {
-                MEDIA_LOG_W("encoder plugin should specify sample format in out caps");
                 continue;
             }
             auto thisOut = std::make_shared<Plugin::Capability>();
@@ -123,7 +118,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
             if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_)) {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
-                MEDIA_LOG_I("choose plugin %s as working parameter", candidate.first->name.c_str());
+                MEDIA_LOG_I("choose plugin %s as working plugin", candidate.first->name.c_str());
                 break;
             }
         }
@@ -155,48 +150,16 @@ uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<const Plu
         MEDIA_LOG_E("Get samplePerFrame from plugin fail");
         return 0;
     }
-    uint32_t samplesPerFrame = Plugin::AnyCast<uint32_t>(value);
+    auto samplesPerFrame = Plugin::AnyCast<uint32_t>(value);
     uint32_t channels;
     if (!meta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels)) {
         return 0;
     }
-    uint32_t bytesPerSample = 0;
     Plugin::AudioSampleFormat format;
     if (!meta->GetData<Plugin::AudioSampleFormat>(Plugin::MetaID::AUDIO_SAMPLE_FORMAT, format)) {
         return 0;
     }
-    switch (format) {
-        case Plugin::AudioSampleFormat::S64:
-        case Plugin::AudioSampleFormat::S64P:
-        case Plugin::AudioSampleFormat::U64:
-        case Plugin::AudioSampleFormat::U64P:
-        case Plugin::AudioSampleFormat::F64:
-        case Plugin::AudioSampleFormat::F64P:
-            bytesPerSample = AF_64BIT_BYTES;
-            break;
-        case Plugin::AudioSampleFormat::F32:
-        case Plugin::AudioSampleFormat::F32P:
-        case Plugin::AudioSampleFormat::S32:
-        case Plugin::AudioSampleFormat::S32P:
-        case Plugin::AudioSampleFormat::U32:
-        case Plugin::AudioSampleFormat::U32P:
-            bytesPerSample = AF_32BIT_BYTES;
-            break;
-        case Plugin::AudioSampleFormat::S16:
-        case Plugin::AudioSampleFormat::S16P:
-        case Plugin::AudioSampleFormat::U16:
-        case Plugin::AudioSampleFormat::U16P:
-            bytesPerSample = AF_16BIT_BYTES;
-            break;
-        case Plugin::AudioSampleFormat::S8:
-        case Plugin::AudioSampleFormat::U8:
-            bytesPerSample = AF_8BIT_BYTES;
-            break;
-        default:
-            bytesPerSample = 0;
-            break;
-    }
-    return bytesPerSample * samplesPerFrame * channels;
+    return GetBytesPerSample(format) * samplesPerFrame * channels;
 }
 
 bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
@@ -207,20 +170,21 @@ bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_
         return false;
     }
 
-    auto thisMeta = std::make_shared<Plugin::Meta>();
-    if (!MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta)) {
-        MEDIA_LOG_E("cannot configure encoder plugin since meta is not compatible with negotiated caps");
-    }
+//    auto thisMeta = std::make_shared<Plugin::Meta>();
+//    if (!MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta)) {
+//        MEDIA_LOG_E("cannot configure encoder plugin since meta is not compatible with negotiated caps");
+//        return false;
+//    }
     auto targetOutPort = GetRouteOutPort(inPort);
     if (targetOutPort == nullptr) {
         MEDIA_LOG_E("encoder out port is not found");
         return false;
     }
-    if (!targetOutPort->Configure(thisMeta)) {
+    if (!targetOutPort->Configure(upstreamMeta)) {
         MEDIA_LOG_E("encoder filter downstream Configure failed");
         return false;
     }
-    auto err = ConfigureToStartPluginLocked(thisMeta);
+    auto err = ConfigureToStartPluginLocked(upstreamMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("encoder configure error");
         OnEvent({EVENT_ERROR, err});
@@ -373,14 +337,14 @@ ErrorCode AudioEncoderFilter::FinishFrame()
     outBuffer->Reset();
     auto ret = TranslatePluginStatus(plugin_->QueueOutputBuffer(outBuffer, 0));
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("Queue out buffer to plugin fail: %d", ret);
+        MEDIA_LOG_E("Queue out buffer to plugin fail: %d", to_underlying(ret));
         return ret;
     }
     std::shared_ptr<AVBuffer> pcmFrame = nullptr;
     auto status = plugin_->DequeueOutputBuffer(pcmFrame, 0);
     if (status != Plugin::Status::OK && status != Plugin::Status::END_OF_STREAM) {
         if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
-            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %d", status);
+            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %d", static_cast<int32_t>(status));
         }
         return TranslatePluginStatus(status);
     }

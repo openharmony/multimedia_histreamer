@@ -99,8 +99,7 @@ private:
         { StateId::PAUSE, RECORDER_PAUSED},
         { StateId::RECORDING, RECORDER_STARTED}};
     std::weak_ptr<IRecorderEngineObs> obs_{};
-    int32_t sourceId_;
-    std::atomic<ErrorCode> errorCode_;
+    int32_t sourceId_ {};
     std::shared_ptr<Pipeline::MuxerFilter> muxer_;
     std::shared_ptr<Pipeline::OutputSinkFilter> outputSink_;
     std::shared_ptr<Pipeline::AudioCaptureFilter> audioCapture_;

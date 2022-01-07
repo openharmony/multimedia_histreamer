@@ -19,14 +19,15 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-std::shared_ptr<FileSinkPlugin> FilePathSinkPluginCreator(const std::string& name)
+std::shared_ptr<OutputSinkPlugin> FilePathSinkPluginCreator(const std::string& name)
 {
     return std::make_shared<FilePathSinkPlugin>(name);
 }
 
 Status FilePathSinkRegister(const std::shared_ptr<Register>& reg)
 {
-    FileSinkPluginDef definition;
+    OutputSinkPluginDef definition;
+    definition.outputType = OutputType::URI;
     definition.name = "file_path_sink";
     definition.description = "file path sink";
     definition.rank = 100; // 100
@@ -38,7 +39,7 @@ Status FilePathSinkRegister(const std::shared_ptr<Register>& reg)
 PLUGIN_DEFINITION(FilePathSink, LicenseType::APACHE_V2, FilePathSinkRegister, [] {});
 
 FilePathSinkPlugin::FilePathSinkPlugin(std::string name)
-    : FileSinkPlugin(std::move(name)), fp_(nullptr), isSeekable_(true)
+    : OutputSinkPlugin(std::move(name)), fp_(nullptr), isSeekable_(true)
 {
 }
 
@@ -110,10 +111,18 @@ Status FilePathSinkPlugin::Flush()
 
 Status FilePathSinkPlugin::OpenFile()
 {
-    fp_ = std::fopen(fileName_.c_str(), "a+");
+    fp_ = std::fopen(fileName_.c_str(), "w+");
     if (fp_ == nullptr) {
-        MEDIA_LOG_E("Fail to load file from %s", fileName_.c_str());
-        return Status::ERROR_UNKNOWN;
+        int32_t err = errno;
+        MEDIA_LOG_E("Fail to load file due to %s", strerror(err));
+        switch (err) {
+            case EPERM:
+                return Status::ERROR_PERMISSION_DENIED;
+            case ENOENT:
+                return Status::ERROR_NOT_EXISTED;
+            default:
+                return Status::ERROR_UNKNOWN;
+        }
     }
     MEDIA_LOG_D("fileName_: %s", fileName_.c_str());
     return Status::OK;

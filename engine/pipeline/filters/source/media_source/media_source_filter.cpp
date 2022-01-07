@@ -154,7 +154,7 @@ ErrorCode MediaSourceFilter::Start()
 
 ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data)
 {
-    MEDIA_LOG_D("IN, offset: %llu, size: %zu, outPort: %s", offset, size, outPort.c_str());
+    MEDIA_LOG_D("IN, offset: %" PRIu64 ", size: %zu, outPort: %s", offset, size, outPort.c_str());
     if (!plugin_) {
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
@@ -164,7 +164,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
         size_t totalSize = 0;
         if ((plugin_->GetSize(totalSize) == Status::OK) && (totalSize != 0)) {
             if (offset >= totalSize) {
-                MEDIA_LOG_W("offset: %llu is larger than totalSize: %zu", offset, totalSize);
+                MEDIA_LOG_W("offset: %" PRIu64 " is larger than totalSize: %zu", offset, totalSize);
                 return ErrorCode::END_OF_STREAM;
             }
             if ((offset + readSize) > totalSize) {
@@ -179,7 +179,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
         if (position_ != offset) {
             err = TranslatePluginStatus(plugin_->SeekTo(offset));
             if (err != ErrorCode::SUCCESS) {
-                MEDIA_LOG_E("Seek to %llu fail", offset);
+                MEDIA_LOG_E("Seek to %" PRIu64 " fail", offset);
                 return err;
             }
             position_ = offset;

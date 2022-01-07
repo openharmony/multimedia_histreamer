@@ -115,6 +115,7 @@ public:
 
     virtual void UnlinkPrevFilters() = 0;
     virtual std::vector<Filter*> GetNextFilters() = 0;
+    virtual std::vector<Filter*> GetPreFilters() = 0;
 };
 } // namespace Pipeline
 } // namespace Media

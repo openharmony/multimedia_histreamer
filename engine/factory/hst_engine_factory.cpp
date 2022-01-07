@@ -42,7 +42,7 @@ std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine()
 
 std::unique_ptr<IRecorderEngine> HstEngineFactory::CreateRecorderEngine()
 {
-    MEDIA_LOG_W("CreateRecorderEngine enter.");
+    MEDIA_LOG_I("CreateRecorderEngine enter.");
 #ifdef RECORDER_SUPPORT
     auto recorder = std::unique_ptr<Record::HiRecorderImpl>(new (std::nothrow) Record::HiRecorderImpl());
     if (recorder && recorder->Init() == ErrorCode::SUCCESS) {

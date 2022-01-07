@@ -204,7 +204,7 @@ ErrorCode AudioSinkFilter::Start()
 {
     MEDIA_LOG_I("start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
-        MEDIA_LOG_W("sink is not ready when start, state: %d", state_.load());
+        MEDIA_LOG_W("sink is not ready when start, state: %d", static_cast<int32_t>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto err = FilterBase::Start();
@@ -283,10 +283,10 @@ void AudioSinkFilter::FlushEnd()
 ErrorCode AudioSinkFilter::SetVolume(float volume)
 {
     if (state_ != FilterState::READY && state_ != FilterState::RUNNING && state_ != FilterState::PAUSED) {
-        MEDIA_LOG_E("audio sink filter cannot set volume in state %d", state_.load());
+        MEDIA_LOG_E("audio sink filter cannot set volume in state %d", static_cast<int32_t>(state_.load()));
         return ErrorCode::ERROR_AGAIN;
     }
-    MEDIA_LOG_W("set volume %.3f", volume);
+    MEDIA_LOG_I("set volume %.3f", volume);
     return TranslatePluginStatus(plugin_->SetVolume(volume));
 }
 } // namespace Pipeline

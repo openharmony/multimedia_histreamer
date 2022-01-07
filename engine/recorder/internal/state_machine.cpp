@@ -203,11 +203,7 @@ void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode resu
 {
     MEDIA_LOG_D("OnIntentExecuted, curState: %s, intent: %d, action: %d, result: %d", curState_->GetName().c_str(),
                 static_cast<int>(intent), static_cast<int>(action), static_cast<int>(result));
-    if (intent == Intent::NOTIFY_READY && action == Action::TRANS_TO_RECORDING) {
-        intentSync_.Notify(Intent::START, result);
-    } else {
-        intentSync_.Notify(intent, result);
-    }
+    intentSync_.Notify(intent, result);
 }
 } // namespace Record
 } // namespace Media

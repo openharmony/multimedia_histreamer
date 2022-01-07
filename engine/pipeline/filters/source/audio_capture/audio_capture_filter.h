@@ -56,10 +56,10 @@ private:
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);
     ErrorCode FindPlugin();
-    bool DoNegotiate(CapabilitySet &outCaps);
-    bool CheckSampleRate(Plugin::Capability cap);
-    bool CheckChannels(Plugin::Capability cap);
-    bool CheckSampleFormat(Plugin::Capability cap);
+    bool DoNegotiate(const CapabilitySet& outCaps);
+    bool CheckSampleRate(const Plugin::Capability& cap);
+    bool CheckChannels(const Plugin::Capability& cap);
+    bool CheckSampleFormat(const Plugin::Capability& cap);
     ErrorCode DoConfigure();
 
     std::shared_ptr<OSAL::Task> taskPtr_ {nullptr};

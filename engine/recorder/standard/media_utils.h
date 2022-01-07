@@ -28,8 +28,7 @@ namespace Record {
 int TransErrorCode(ErrorCode errorCode);
 std::string TransOutputFormatType(OutputFormatType outputFormatType);
 
-struct RecorderSource
-{
+struct RecorderSource {
     int32_t sourceType;
     int32_t sourceId;
 };
@@ -70,8 +69,7 @@ enum class RecorderParameterType : uint32_t {
     OUT_FD,
 };
 
-struct RecordParam
-{
+struct RecordParam {
     int32_t sourceId;
     RecorderParameterType type;
     Plugin::Any any;

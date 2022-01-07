@@ -444,7 +444,7 @@ bool MergeCapabilityKeys(const Capability& originCap, const Capability& otherCap
         // if key is in otherCap, calculate the intersections
         auto funcIte = g_capabilityValueCheckMap.find(pairKey.first);
         if (funcIte == g_capabilityValueCheckMap.end()) {
-            MEDIA_LOG_W("found one capability %d cannot be applied", pairKey.first);
+            MEDIA_LOG_W("found one capability %d cannot be applied", static_cast<int32_t>(pairKey.first));
             continue;
         }
         Plugin::ValueType tmp;

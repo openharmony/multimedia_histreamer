@@ -29,7 +29,8 @@ namespace Media {
 namespace Record {
 class RecordingSettingState : public State {
 public:
-    explicit RecordingSettingState(StateId stateId, RecorderExecutor& executor) : State(stateId, "RecordingSettingState", executor)
+    explicit RecordingSettingState(StateId stateId, RecorderExecutor& executor)
+        : State(stateId, "RecordingSettingState", executor)
     {
     }
 

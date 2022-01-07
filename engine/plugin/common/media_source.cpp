@@ -24,7 +24,7 @@ MediaSource::MediaSource(std::string uri)
 }
 
 MediaSource::MediaSource(std::shared_ptr<DataStream> dataStream)
-    : dataStream_(std::move(dataStream)), type_(SourceType::SOURCE_TYPE_STREAM)
+    : type_(SourceType::SOURCE_TYPE_STREAM), dataStream_(std::move(dataStream))
 {
 }
 

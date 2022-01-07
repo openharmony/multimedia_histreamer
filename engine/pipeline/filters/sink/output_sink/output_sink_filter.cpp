@@ -42,17 +42,28 @@ bool OutputSinkFilter::Negotiate(const std::string &inPort, const std::shared_pt
 {
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::OUTPUT_SINK);
     if (candidatePlugins.empty()) {
-        MEDIA_LOG_E("no available file sink plugin");
+        MEDIA_LOG_E("no available output sink plugin");
         return false;
     }
-    std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = candidatePlugins[0].first;
-    upstreamNegotiatedCap = candidatePlugins[0].second;
-    // find the highest rank plugin
-    for (const auto& pair : candidatePlugins) {
-        if (pair.first->rank > selectedPluginInfo->rank) {
-            selectedPluginInfo = pair.first;
-            upstreamNegotiatedCap = pair.second;
+    std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
+    for (const auto& candidate : candidatePlugins) {
+        const auto& tmp = candidate.first->extra[PLUGIN_INFO_EXTRA_OUTPUT_TYPE];
+        if (tmp.Type() != typeid(Plugin::OutputType)) {
+            continue;
         }
+        if (Plugin::AnyCast<Plugin::OutputType>(tmp) == outputType_) {
+            if (selectedPluginInfo == nullptr) {
+                selectedPluginInfo = candidate.first;
+                upstreamNegotiatedCap = candidate.second;
+            } else if (candidate.first->rank > selectedPluginInfo->rank) {
+                selectedPluginInfo = candidate.first;
+                upstreamNegotiatedCap = candidate.second;
+            }
+        }
+    }
+    if (selectedPluginInfo == nullptr) {
+        MEDIA_LOG_W("no available output sink plugin with output type of %d", static_cast<int32_t>(outputType_));
+        return false;
     }
     auto res = UpdateAndInitPluginByInfo<Plugin::OutputSink>(plugin_, pluginInfo_, selectedPluginInfo,
     [](const std::string& name) -> std::shared_ptr<Plugin::OutputSink> {
@@ -61,9 +72,9 @@ bool OutputSinkFilter::Negotiate(const std::string &inPort, const std::shared_pt
     return res;
 }
 
-bool OutputSinkFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
+bool OutputSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
-    PROFILE_BEGIN("Audio sink configure begin");
+    PROFILE_BEGIN("Output sink configure begin");
     if (plugin_ == nullptr || pluginInfo_ == nullptr) {
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
@@ -79,19 +90,22 @@ bool OutputSinkFilter::Configure(const std::string &inPort, const std::shared_pt
     }
 
     if (err != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("sink configure error");
+        MEDIA_LOG_E("Output sink configure error");
         OnEvent({EVENT_ERROR, err});
         return false;
     }
     state_ = FilterState::READY;
     OnEvent({EVENT_READY});
-    MEDIA_LOG_I("audio sink send EVENT_READY");
-    PROFILE_END("Audio sink configure end");
+    MEDIA_LOG_I("Output sink send EVENT_READY");
+    PROFILE_END("Output sink configure end");
     return true;
 }
 
 ErrorCode OutputSinkFilter::SetOutputPath(const std::string &path)
 {
+    if (outputType_ != Plugin::OutputType::UNKNOWN && outputType_ != Plugin::OutputType::URI) {
+        return ErrorCode::ERROR_INVALID_OPERATION;
+    }
     if (path.empty()) {
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
@@ -103,11 +117,15 @@ ErrorCode OutputSinkFilter::SetOutputPath(const std::string &path)
         return ret;
     }
     outputPath_ = path;
+    outputType_ = Plugin::OutputType::URI;
     return ErrorCode::SUCCESS;
 }
 
 ErrorCode OutputSinkFilter::SetFd(int32_t fd)
 {
+    if (outputType_ != Plugin::OutputType::UNKNOWN && outputType_ != Plugin::OutputType::FD) {
+        return ErrorCode::ERROR_INVALID_OPERATION;
+    }
     if (fd < 0) {
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
@@ -119,6 +137,7 @@ ErrorCode OutputSinkFilter::SetFd(int32_t fd)
         return ret;
     }
     fd_ = fd;
+    outputType_ = Plugin::OutputType::FD;
     return ErrorCode::SUCCESS;
 }
 
@@ -132,7 +151,7 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, AVBufferPtr buff
         } else {
             ret = TranslatePluginStatus(plugin_->SeekTo(offset));
             if (ret != ErrorCode::SUCCESS) {
-                MEDIA_LOG_E("plugin %s seek to %" PRId64 "failed", pluginInfo_->name.c_str(), offset);
+                MEDIA_LOG_E("plugin %s seek to %" PRId64 " failed", pluginInfo_->name.c_str(), offset);
                 return ErrorCode::ERROR_INVALID_OPERATION;
             }
             currentPos_ = offset;
@@ -141,7 +160,7 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, AVBufferPtr buff
     if (!buffer->IsEmpty()) {
         ret = TranslatePluginStatus(plugin_->Write(buffer));
         if (ret != ErrorCode::SUCCESS) {
-            MEDIA_LOG_E("write to plugin failed with error code %d", ret);
+            MEDIA_LOG_E("write to plugin failed with error code %d", to_underlying(ret));
             return ret;
         }
         currentPos_ += buffer->GetMemory()->GetSize();

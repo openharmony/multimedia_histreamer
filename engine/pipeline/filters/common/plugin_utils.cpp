@@ -35,7 +35,8 @@ const static std::map<Plugin::Status, ErrorCode> g_transTable = {
         {Plugin::Status::ERROR_UNSUPPORTED_FORMAT, ErrorCode::ERROR_UNSUPPORTED_FORMAT},
         {Plugin::Status::ERROR_NOT_ENOUGH_DATA,ErrorCode::ERROR_UNKNOWN},
         {Plugin::Status::ERROR_NOT_EXISTED, ErrorCode::ERROR_NOT_EXISTED},
-        {Plugin::Status::ERROR_AGAIN, ErrorCode::ERROR_AGAIN}
+        {Plugin::Status::ERROR_AGAIN, ErrorCode::ERROR_AGAIN},
+        {Plugin::Status::ERROR_PERMISSION_DENIED, ErrorCode::ERROR_PERMISSION_DENIED},
 };
 /**
  * translate plugin error into pipeline error code
@@ -64,7 +65,7 @@ std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>>
 {
     auto pluginNames = Plugin::PluginManager::Instance().ListPlugins(pluginType);
     std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>> infos;
-    for (const auto & name : pluginNames) {
+    for (const auto& name : pluginNames) {
         auto tmpInfo = Plugin::PluginManager::Instance().GetPluginInfo(pluginType, name);
         Capability cap;
         if (ApplyCapabilitySet(upStreamCaps, tmpInfo->inCaps, cap)) {
@@ -88,6 +89,48 @@ std::vector<std::shared_ptr<Plugin::PluginInfo>> FindAvailablePluginsByOutputMim
         }
     }
     return rets;
+}
+uint8_t GetBytesPerSample(Plugin::AudioSampleFormat fmt)
+{
+    uint8_t bytesPerSample = 0;
+    switch (fmt) {
+        case Plugin::AudioSampleFormat::S64:
+        case Plugin::AudioSampleFormat::S64P:
+        case Plugin::AudioSampleFormat::U64:
+        case Plugin::AudioSampleFormat::U64P:
+        case Plugin::AudioSampleFormat::F64:
+        case Plugin::AudioSampleFormat::F64P:
+            bytesPerSample = 8; // 8 bytes
+            break;
+        case Plugin::AudioSampleFormat::F32:
+        case Plugin::AudioSampleFormat::F32P:
+        case Plugin::AudioSampleFormat::S32:
+        case Plugin::AudioSampleFormat::S32P:
+        case Plugin::AudioSampleFormat::U32:
+        case Plugin::AudioSampleFormat::U32P:
+            bytesPerSample = 4; // 4 bytes
+            break;
+        case Plugin::AudioSampleFormat::S24:
+        case Plugin::AudioSampleFormat::S24P:
+        case Plugin::AudioSampleFormat::U24:
+        case Plugin::AudioSampleFormat::U24P:
+            bytesPerSample = 3; // 3 bytes
+            break;
+        case Plugin::AudioSampleFormat::S16:
+        case Plugin::AudioSampleFormat::S16P:
+        case Plugin::AudioSampleFormat::U16:
+        case Plugin::AudioSampleFormat::U16P:
+            bytesPerSample = 2; // 2 bytes
+            break;
+        case Plugin::AudioSampleFormat::S8:
+        case Plugin::AudioSampleFormat::U8:
+            bytesPerSample = 1; // 1 bytes
+            break;
+        default:
+            bytesPerSample = 0;
+            break;
+    }
+    return bytesPerSample;
 }
 } // namespace Pipeline
 } // namespace Media

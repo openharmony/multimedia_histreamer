@@ -53,6 +53,7 @@ std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>>
 
 std::vector<std::shared_ptr<Plugin::PluginInfo>> FindAvailablePluginsByOutputMime(const std::string& outputMime,
                                                                                   Plugin::PluginType pluginType);
+uint8_t GetBytesPerSample(Plugin::AudioSampleFormat fmt);
 }
 }
 }

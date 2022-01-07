@@ -98,6 +98,10 @@ public:
     {
         return {};
     }
+    std::vector<Filter*> GetPreFilters() override
+    {
+        return {};
+    }
     ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) override
     {
         UNUSED_VARIABLE(inPort);
@@ -150,6 +154,8 @@ public:
     }
 
 private:
+    void ReOrderFiltersLocked();
+
     std::string name_;
     size_t readyEventCnt_ {0};
     FilterState state_ {FilterState::CREATED};

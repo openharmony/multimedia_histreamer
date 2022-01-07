@@ -80,6 +80,8 @@ public:
 
     std::vector<Filter*> GetNextFilters() override;
 
+    std::vector<Filter*> GetPreFilters() override;
+
     ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) override;
     ErrorCode PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data) override;
     std::vector<WorkMode> GetWorkModes() override

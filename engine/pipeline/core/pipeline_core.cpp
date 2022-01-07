@@ -17,6 +17,7 @@
 
 #include "pipeline_core.h"
 #include <queue>
+#include <stack>
 #include "foundation/log.h"
 #include "osal/thread/scoped_lock.h"
 #include "utils/steady_clock.h"
@@ -89,6 +90,7 @@ ErrorCode PipelineCore::Prepare()
     state_ = FilterState::PREPARING;
     ErrorCode rtv = ErrorCode::SUCCESS;
     OSAL::ScopedLock lock(mutex_);
+    ReOrderFiltersLocked();
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
         auto& filterPtr = *it;
         if (filterPtr) {
@@ -280,6 +282,51 @@ void PipelineCore::InitFilters(const std::vector<Filter*>& filters)
 {
     for (auto& filter : filters) {
         filter->Init(this, filterCallback_);
+    }
+}
+
+namespace {
+struct TopologySortAux {
+    size_t inDegree {0};
+    Filter* filter {nullptr};
+    std::vector<size_t> nexts{};
+};
+}
+
+void PipelineCore::ReOrderFiltersLocked()
+{
+    std::vector<TopologySortAux> auxes;
+    std::map<Filter*, size_t> mapInfo;
+    size_t index = 0;
+    std::stack<size_t> st;
+    for (const auto& f : filters_) {
+        auxes.emplace_back(TopologySortAux{f->GetPreFilters().size(), f, {}});
+        if (f->GetPreFilters().empty()) {
+            st.push(index);
+        }
+        mapInfo[f] = index++;
+    }
+    for (const auto& f : filters_) {
+        auto& tmp = auxes[mapInfo[f]].nexts;
+        for (const auto& next : f->GetNextFilters()) {
+            tmp.emplace_back(mapInfo[next]);
+        }
+    }
+    std::vector<Filter*> res;
+    while (!st.empty()) {
+        auto cur = st.top();
+        st.pop();
+        for (const auto& idx : auxes[cur].nexts) {
+            auxes[idx].inDegree--;
+            if (auxes[idx].inDegree == 0) {
+                st.push(idx);
+            }
+        }
+        res.emplace_back(auxes[cur].filter);
+    }
+    if (res.size() == filters_.size()) {
+        filters_.clear();
+        filters_.assign(res.begin(), res.end());
     }
 }
 } // namespace Pipeline

@@ -102,8 +102,8 @@ void UpdateSupportedSampleFormat(Capability &outCaps)
     if (!supportedFormatsList.empty()) {
         DiscreteCapability<AudioSampleFormat> values;
         for (auto iter = supportedFormatsList.begin(); iter != supportedFormatsList.end(); ++iter) {
-            auto samplingRate = static_cast<OHOS::AudioStandard::AudioSamplingRate>(*iter);
-            switch (samplingRate) {
+            auto sampleFormat = static_cast<OHOS::AudioStandard::AudioSampleFormat>(*iter);
+            switch (sampleFormat) {
                 case OHOS::AudioStandard::AudioSampleFormat::SAMPLE_U8:
                     values.push_back(AudioSampleFormat::U8);
                     break;

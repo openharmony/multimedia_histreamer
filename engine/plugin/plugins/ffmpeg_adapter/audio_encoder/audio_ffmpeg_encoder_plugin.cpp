@@ -94,13 +94,14 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
     Capability inputCaps(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
     size_t index = 0;
     if (codec->sample_fmts != nullptr) {
-        DiscreteCapability<AudioSampleFormat> values;
-        for (index = 0; codec->sample_fmts[index] != AV_SAMPLE_FMT_NONE; ++index) {
-            values.push_back(g_formatMap[codec->sample_fmts[index]]);
-        }
-        if (index) {
-            inputCaps.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, values);
-        }
+        // todo we should always consider transfer sample fmt to supported format
+//        DiscreteCapability<AudioSampleFormat> values;
+//        for (index = 0; codec->sample_fmts[index] != AV_SAMPLE_FMT_NONE; ++index) {
+//            values.push_back(g_formatMap[codec->sample_fmts[index]]);
+//        }
+//        if (index) {
+//            inputCaps.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, values);
+//        }
     }
     if (codec->supported_samplerates != nullptr) {
         DiscreteCapability<uint32_t> values;
@@ -116,14 +117,14 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
     Capability outputCaps;
     switch (codec->id) {
         case AV_CODEC_ID_AAC:
-            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC)
+            outputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC)
                      .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 4)
                      .AppendFixedKey<AudioAacProfile>(Capability::Key::AUDIO_AAC_PROFILE, AudioAacProfile::LC)
                      .AppendFixedKey<AudioAacStreamFormat>(Capability::Key::AUDIO_AAC_STREAM_FORMAT,
                                                            AudioAacStreamFormat::MP4ADTS);
             break;
         case AV_CODEC_ID_AAC_LATM:
-            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM)
+            outputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM)
                      .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 4)
                      .AppendFixedKey<AudioAacStreamFormat>(Capability::Key::AUDIO_AAC_STREAM_FORMAT,
                                                            AudioAacStreamFormat::MP4LOAS);

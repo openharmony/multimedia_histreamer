@@ -63,6 +63,12 @@ struct PluginInfo {
 
 /**
  * Extra information about the plugin.
+ * Describes the output types supported by the OutputSink plugin.
+ */
+#define PLUGIN_INFO_EXTRA_OUTPUT_TYPE        "outputType"  // NOLINT: macro constant
+
+/**
+ * Extra information about the plugin.
  * Describes the extensions supported by the Demuxer plugin.
  */
 #define PLUGIN_INFO_EXTRA_EXTENSIONS        "extensions" // NOLINT: macro constant

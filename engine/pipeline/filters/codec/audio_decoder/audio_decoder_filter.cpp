@@ -28,10 +28,6 @@ namespace {
 constexpr int32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 5;
 constexpr int32_t DEFAULT_IN_BUFFER_POOL_SIZE = 5;
 constexpr int32_t MAX_OUT_DECODED_DATA_SIZE_PER_FRAME = 20 * 1024; // 20kB
-constexpr int32_t AF_64BIT_BYTES = 8;
-constexpr int32_t AF_32BIT_BYTES = 4;
-constexpr int32_t AF_16BIT_BYTES = 2;
-constexpr int32_t AF_8BIT_BYTES = 1;
 
 uint32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta)
 {
@@ -44,43 +40,11 @@ uint32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Me
     if (!meta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels)) {
         return 0;
     }
-    uint32_t bytesPerSample = 0;
     Plugin::AudioSampleFormat format;
     if (!meta->GetData<Plugin::AudioSampleFormat>(Plugin::MetaID::AUDIO_SAMPLE_FORMAT, format)) {
         return 0;
     }
-    switch (format) {
-        case Plugin::AudioSampleFormat::S64:
-        case Plugin::AudioSampleFormat::S64P:
-        case Plugin::AudioSampleFormat::U64:
-        case Plugin::AudioSampleFormat::U64P:
-        case Plugin::AudioSampleFormat::F64:
-        case Plugin::AudioSampleFormat::F64P:
-            bytesPerSample = AF_64BIT_BYTES;
-            break;
-        case Plugin::AudioSampleFormat::F32:
-        case Plugin::AudioSampleFormat::F32P:
-        case Plugin::AudioSampleFormat::S32:
-        case Plugin::AudioSampleFormat::S32P:
-        case Plugin::AudioSampleFormat::U32:
-        case Plugin::AudioSampleFormat::U32P:
-            bytesPerSample = AF_32BIT_BYTES;
-            break;
-        case Plugin::AudioSampleFormat::S16:
-        case Plugin::AudioSampleFormat::S16P:
-        case Plugin::AudioSampleFormat::U16:
-        case Plugin::AudioSampleFormat::U16P:
-            bytesPerSample = AF_16BIT_BYTES;
-            break;
-        case Plugin::AudioSampleFormat::S8:
-        case Plugin::AudioSampleFormat::U8:
-            bytesPerSample = AF_8BIT_BYTES;
-            break;
-        default:
-            bytesPerSample = 0;
-            break;
-    }
-    return bytesPerSample * samplesPerFrame * channels;
+    return Pipeline::GetBytesPerSample(format) * samplesPerFrame * channels;
 }
 };
 
@@ -198,6 +162,7 @@ bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_
     auto thisMeta = std::make_shared<Plugin::Meta>();
     if (!MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta)) {
         MEDIA_LOG_E("cannot configure decoder plugin since meta is not compatible with negotiated caps");
+        return false;
     }
     auto targetOutPort = GetRouteOutPort(inPort);
     if (targetOutPort == nullptr) {
@@ -334,7 +299,7 @@ ErrorCode AudioDecoderFilter::HandleFrame(const std::shared_ptr<AVBuffer>& buffe
     MEDIA_LOG_D("HandleFrame called");
     auto ret = TranslatePluginStatus(plugin_->QueueInputBuffer(buffer, 0));
     if (ret != ErrorCode::SUCCESS && ret != ErrorCode::ERROR_TIMED_OUT) {
-        MEDIA_LOG_E("Queue input buffer to plugin fail: %d", ret);
+        MEDIA_LOG_E("Queue input buffer to plugin fail: %d", to_underlying(ret));
     }
     return ret;
 }
@@ -350,14 +315,14 @@ ErrorCode AudioDecoderFilter::FinishFrame()
     outBuffer->Reset();
     auto ret = TranslatePluginStatus(plugin_->QueueOutputBuffer(outBuffer, 0));
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("Queue out buffer to plugin fail: %d", ret);
+        MEDIA_LOG_E("Queue out buffer to plugin fail: %d", to_underlying(ret));
         return ret;
     }
     std::shared_ptr<AVBuffer> pcmFrame = nullptr;
     auto status = plugin_->DequeueOutputBuffer(pcmFrame, 0);
     if (status != Plugin::Status::OK && status != Plugin::Status::END_OF_STREAM) {
         if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
-            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %d", status);
+            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %d", static_cast<int32_t>((status)));
         }
         return TranslatePluginStatus(status);
     }

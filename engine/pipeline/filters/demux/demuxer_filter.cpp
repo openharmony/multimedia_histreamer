@@ -481,7 +481,7 @@ void DemuxerFilter::DemuxerLoop()
             SendEventEos();
             task_->PauseAsync();
             if (rtv != ErrorCode::END_OF_STREAM) {
-                MEDIA_LOG_E("ReadFrame failed with rtv = %d", rtv);
+                MEDIA_LOG_E("ReadFrame failed with rtv = %d", to_underlying(rtv));
             }
         }
     } else {
