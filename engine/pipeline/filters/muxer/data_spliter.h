@@ -24,14 +24,22 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class DataCollector;
-
 class DataSpliter {
 public:
     DataSpliter() = default;
-    void SetOutput(std::shared_ptr<DataCollector> output)
+    void SetNextFilter(std::shared_ptr<Filter> output)
     {
-        output_ = std::move(output);
+        nextFilter_ = std::move(output);
+    }
+
+    void SetMuxerPlugin(std::shared_ptr<Plugin::Muxer> muxer)
+    {
+        muxer_ = std::move(muxer);
+    }
+
+    ErrorCode FinishWithoutDrain()
+    {
+        return ErrorCode::SUCCESS;
     }
 
     void SetMaxOutputSize(size_t size)
@@ -44,21 +52,20 @@ public:
     }
     virtual ErrorCode PushData(int32_t trackId, std::shared_ptr<AVBuffer> buffer) = 0;
 
-    virtual ErrorCode Resume()
+    virtual ErrorCode Start()
     {
         return ErrorCode::SUCCESS;
     }
-    virtual ErrorCode Pause()
+    virtual ErrorCode Stop()
     {
         return ErrorCode::SUCCESS;
     }
 
-    virtual ErrorCode SplitMuxBegin() = 0;
-    virtual ErrorCode SplitMuxEnd() = 0;
 protected:
     static const size_t DEFAULT_MAX_DURATION_US = 60 * 1000 * 1000;
     static const size_t DEFAULT_MAX_OUTPUT_SIZE = 0;
-    std::shared_ptr<DataCollector> output_;
+    std::shared_ptr<Filter> nextFilter_ {};
+    std::shared_ptr<Plugin::Muxer> muxer_ {};
     size_t maxOutputSize_{DEFAULT_MAX_OUTPUT_SIZE};
     size_t maxDurationUs_{DEFAULT_MAX_DURATION_US};
 };

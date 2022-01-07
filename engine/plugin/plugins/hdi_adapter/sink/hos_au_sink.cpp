@@ -30,6 +30,7 @@
 
 namespace {
 using namespace OHOS::Media::Plugin;
+using PluginSampleFmt = OHOS::Media::Plugin::AudioSampleFormat;
 constexpr int32_t MAX_RETRY_CNT = 3;
 constexpr int32_t RETRY_INTERVAL = 100; // 100ms
 constexpr int32_t DEFAULT_BUFFER_POOL_SIZE = 5;
@@ -80,15 +81,18 @@ Status LoadAndInitAdapter(AudioManager* audioManager, AudioAdapterDescriptor* de
 
 void UpdatePluginCapWithPortCap(const AudioPortCapability& portCap, Capability& pluginCap)
 {
-    for (size_t cnt = 0; cnt < portCap.formatNum; cnt++) {
-        auto pluginCaps = OHOS::Media::HosLitePlugin::HdiAuFormat2PluginFormat(portCap.formats[cnt]);
-        if (pluginCaps.empty()) {
-            continue;
+    std::vector<PluginSampleFmt> sampleFormats;
+    for (size_t cnt = 0; cnt < portCap.supportSampleFormatNum; cnt++) {
+        PluginSampleFmt tmp;
+        if (OHOS::Media::HosLitePlugin::HdiAuFormat2PluginFormat(portCap.supportSampleFormats[cnt], tmp)) {
+            sampleFormats.emplace_back(tmp);
         }
-        if (pluginCaps.size() == 1) {
-            pluginCap.AppendFixedKey<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, pluginCaps[0]);
+    }
+    if (!sampleFormats.empty()) {
+        if (sampleFormats.size() == 1) {
+            pluginCap.AppendFixedKey<PluginSampleFmt>(Capability::Key::AUDIO_SAMPLE_FORMAT, sampleFormats[0]);
         } else {
-            pluginCap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, pluginCaps);
+            pluginCap.AppendDiscreteKeys<PluginSampleFmt>(Capability::Key::AUDIO_SAMPLE_FORMAT, sampleFormats);
         }
     }
     auto pluginSampleRates = OHOS::Media::HosLitePlugin::HdiSampleRatesMask2PluginRates(portCap.sampleRateMasks);
@@ -131,8 +135,8 @@ void RegisterOutportOnAdapter(const std::shared_ptr<Register>& reg, const AudioA
             usingDefaultCaps = false;
         } else {
             MEDIA_LOG_W("query port capability failed when registering plugin, set audio sample format as S16/S16P");
-            capability.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT,
-                                                             {AudioSampleFormat::S16, AudioSampleFormat::S16P});
+            capability.AppendDiscreteKeys<PluginSampleFmt>(Capability::Key::AUDIO_SAMPLE_FORMAT,
+                                                           {PluginSampleFmt::S16, PluginSampleFmt::S16P});
             usingDefaultCaps = true;
         }
         adapterCapabilities.emplace_back(capability);

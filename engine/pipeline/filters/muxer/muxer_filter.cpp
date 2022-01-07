@@ -228,12 +228,12 @@ ErrorCode MuxerFilter::SetMaxDurationUs(uint64_t maxDurationUs)
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode MuxerFilter::SplitMuxBegin()
+ErrorCode MuxerFilter::StartNextSegment()
 {
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode MuxerFilter::SplitMuxEnd()
+ErrorCode MuxerFilter::SendEos()
 {
     return ErrorCode::SUCCESS;
 }

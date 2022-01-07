@@ -42,8 +42,8 @@ public:
     ErrorCode SetOutputFormat(std::string containerMime);
     ErrorCode AddTrack(std::shared_ptr<InPort>& trackPort);
     ErrorCode SetMaxDurationUs(uint64_t maxDurationUs);
-    ErrorCode SplitMuxBegin();
-    ErrorCode SplitMuxEnd();
+    ErrorCode StartNextSegment();
+    ErrorCode SendEos();
 
     /**
      *
