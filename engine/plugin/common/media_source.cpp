@@ -18,20 +18,39 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-MediaSource::MediaSource(const std::string &uri)
-        : uri_(uri), type_(SourceType::SOURCE_TYPE_URI) {
+MediaSource::MediaSource(std::string uri)
+    : uri_(std::move(uri)), type_(SourceType::SOURCE_TYPE_URI)
+{
 }
 
-SourceType MediaSource::GetSourceType() const {
+MediaSource::MediaSource(std::shared_ptr<DataStream> dataStream)
+    : dataStream_(std::move(dataStream)), type_(SourceType::SOURCE_TYPE_STREAM)
+{
+}
+
+MediaSource::MediaSource(std::string uri, std::map<std::string, std::string> header)
+    : uri_(std::move(uri)), header_(std::move(header))
+{
+}
+
+SourceType MediaSource::GetSourceType() const
+{
     return type_;
 }
 
-const std::string &MediaSource::GetSourceUri() const {
+const std::string &MediaSource::GetSourceUri() const
+{
     return uri_;
 }
 
-const std::map<std::string, std::string> &MediaSource::GetSourceHeader() const {
+const std::map<std::string, std::string> &MediaSource::GetSourceHeader() const
+{
     return header_;
+}
+
+std::shared_ptr<DataStream> MediaSource::GetDataStream() const
+{
+    return dataStream_;
 }
 } // namespace Plugin
 } // namespace Media
