@@ -202,7 +202,7 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
     if (buffer->pts != -1) {
         UpdateLatestPts(buffer->pts);
     } else {
-        ;
+        // TODO: handle the invalid audio pts
     }
 
     MEDIA_LOG_D("audio sink push data end");
@@ -313,11 +313,11 @@ ErrorCode AudioSinkFilter::UpdateLatestPts(int64_t pts)
         return TranslatePluginStatus(status);
     }
     nowNs = SteadyClock::GetCurrentTimeNanoSec();
-    if (INT64_MAX - nowNs > latencyNano ) { // overflow
+    if (INT64_MAX - nowNs < latencyNano ) { // overflow
         return ErrorCode::ERROR_UNKNOWN;
     }
     latestSysClock_ = nowNs + latencyNano;
-    lastPts_ = pts;
+    latestPts_ = pts;
     frameCnt_++;
     return ErrorCode::SUCCESS;
 }
@@ -325,7 +325,7 @@ ErrorCode AudioSinkFilter::UpdateLatestPts(int64_t pts)
 ErrorCode AudioSinkFilter::CheckPts(int64_t pts, int64_t& delta)
 {
     int64_t ptsOut {0};
-    if (latestSysClock_ == 0 && lastPts_ == 0) {
+    if (latestSysClock_ == 0 && latestPts_ == 0) {
         delta = 0;
         return ErrorCode::SUCCESS;
     }
@@ -339,15 +339,15 @@ ErrorCode AudioSinkFilter::CheckPts(int64_t pts, int64_t& delta)
 ErrorCode AudioSinkFilter::GetCurrentPosition(int64_t& position)
 {
     int64_t nowNs {0};
-    if (lastPts_ == 0 && frameCnt_ == 0) {
+    if (latestPts_ == 0 && frameCnt_ == 0) {
         position = 0;
         return ErrorCode::SUCCESS;
     }
     nowNs = SteadyClock::GetCurrentTimeNanoSec();
-    if (INT64_MAX - (nowNs - latestSysClock_) > lastPts_ ) { // overflow
+    if (INT64_MAX - (nowNs - latestSysClock_) < latestPts_ ) { // overflow
         return ErrorCode::ERROR_UNKNOWN;
     }
-    position = nowNs - latestSysClock_ + lastPts_ ;
+    position = nowNs - latestSysClock_ + latestPts_ ;
     return ErrorCode::SUCCESS;
 }
 

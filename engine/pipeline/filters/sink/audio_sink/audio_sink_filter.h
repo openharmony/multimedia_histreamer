@@ -76,7 +76,7 @@ private:
     void ReportCurrentPosition(int64_t pts);
 
     ErrorCode UpdateLatestPts(int64_t pts);
-    int64_t lastPts_ {0};
+    int64_t latestPts_ {0};
     int64_t latestSysClock_ {0}; // now+latency
     int64_t frameCnt_ {0};
 

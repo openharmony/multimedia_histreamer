@@ -83,7 +83,7 @@ struct VideoSinkPlugin : public PluginBase {
       *
       * The function is valid only in the after PREPARED state.
       *
-      * @param ms    Indicates the pointer to the latency (in nanoseconds) to be obtained.
+      * @param nanoSec    Indicates the pointer to the latency (in nanoseconds) to be obtained.
       * @return  Execution status return
       *  @retval OK: Plugin reset succeeded.
       */

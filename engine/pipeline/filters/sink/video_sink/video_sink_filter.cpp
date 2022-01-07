@@ -182,28 +182,11 @@ ErrorCode VideoSinkFilter::ConfigureNoLocked(const std::shared_ptr<const Plugin:
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Start()), "Start plugin fail");
     return ErrorCode::SUCCESS;
 }
-void VideoSinkFilter::GetPtsSerial(int64_t pts)
-{
-    if (pts == -1 && frameCnt_ > 0) {
-        ptSerialCnt_++;
-        return ;
-    } else {
-        isPtsSerial_ = true;
-    }
-}
 
-bool VideoSinkFilter::DoSync(int64_t pts)
+bool VideoSinkFilter::DoSync(int64_t pts) const
 {
     int64_t  delta {0};
     int64_t  tempOut {0};
-    if (!isPtsSerial_) {
-        GetPtsSerial(pts);
-    } else {
-        if (pts == -1 ) {
-            return false;
-        }
-    }
-
     if (frameCnt_ == 0 || pts == 0) {
         return true;
     }
@@ -214,14 +197,14 @@ bool VideoSinkFilter::DoSync(int64_t pts)
     if (delta > 0) {
         tempOut = HstTime2Ms(delta);
         if (tempOut > 100) { // 100ms
-            MEDIA_LOG_E("DoSync early % ms",PRId64, tempOut);
+            MEDIA_LOG_E("DoSync early %" PRId64 " ms", tempOut);
             OHOS::Media::OSAL::SleepFor(tempOut);
             return true;
         }
     } else if (delta < 0) {
-        tempOut = HstTime2Ms(abs(delta));
+        tempOut = HstTime2Ms(-delta);
         if (tempOut > 40) { // 40ms drop frame
-            MEDIA_LOG_E("DoSync later % ms",PRId64, tempOut);
+            MEDIA_LOG_E("DoSync later %" PRId64 " ms", tempOut);
             return false;
         }
     }
@@ -237,11 +220,18 @@ void VideoSinkFilter::RenderFrame()
         MEDIA_LOG_W("Video sink find nullptr in esBufferQ");
         return;
     }
+
     Plugin::Status status = plugin_->GetLatency(latencyNano);
     if (status != Plugin::Status::OK) {
         MEDIA_LOG_E("Video sink GetLatency fail errorcode = %d", to_underlying(TranslatePluginStatus(status)));
-        return ;
+        return;
     }
+
+    if (INT64_MAX - latencyNano < oneBuffer->pts) {
+        MEDIA_LOG_E("Video pts(%" PRIu64 ") + latency overflow.", oneBuffer->pts);
+        return;
+    }
+
     if (!DoSync(oneBuffer->pts + latencyNano)) {
         return;
     }

@@ -132,7 +132,7 @@ struct AudioSinkPlugin : public PluginBase {
      *
      * The function is valid only in the after PREPARED state.
      *
-     * @param ms    Indicates the pointer to the latency (in milliseconds) to be obtained.
+     * @param nanoSec    Indicates the pointer to the latency (in milliseconds) to be obtained.
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
      */

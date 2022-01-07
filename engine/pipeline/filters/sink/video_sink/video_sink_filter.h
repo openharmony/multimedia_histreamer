@@ -72,8 +72,7 @@ private:
     ErrorCode ConfigurePluginParams(const std::shared_ptr<const Plugin::Meta>& meta);
     ErrorCode ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta);
     void RenderFrame();
-    bool DoSync(int64_t pts);
-    void GetPtsSerial(int64_t pts);
+    bool DoSync(int64_t pts) const;
     std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQueue_ {nullptr};
     std::shared_ptr<OHOS::Media::OSAL::Task> renderTask_ {nullptr};
     std::atomic<bool> pushThreadIsBlocking_ {false};
@@ -84,8 +83,6 @@ private:
     std::shared_ptr<Plugin::VideoSink> plugin_ {nullptr};
 
     int64_t frameCnt_ {0};
-    int64_t ptSerialCnt_ {0};
-    bool isPtsSerial_ {false};
 };
 } // namespace Pipeline
 } // namespace Media
