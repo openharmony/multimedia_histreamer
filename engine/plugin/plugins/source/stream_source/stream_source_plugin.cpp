@@ -165,7 +165,7 @@ std::shared_ptr<Allocator> StreamSourcePlugin::GetAllocator()
     return mAllocator_;
 }
 
-Status StreamSourcePlugin::SetCallback(const std::shared_ptr<Callback>& cb)
+Status StreamSourcePlugin::SetCallback(Callback* cb)
 {
     MEDIA_LOG_D("IN");
     return Status::OK;

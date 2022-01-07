@@ -157,3 +157,9 @@ std::shared_ptr<Allocator> Base::GetAllocator()
 {
     return plugin_->GetAllocator();
 }
+
+Status Base::SetCallback(CallbackWrap* cb)
+{
+    pluginCallback_.SetCallbackWrap(cb);
+    return plugin_->SetCallback(&pluginCallback_);
+}

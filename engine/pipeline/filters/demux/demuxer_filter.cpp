@@ -270,6 +270,7 @@ bool DemuxerFilter::CreatePlugin(std::string pluginName)
         MEDIA_LOG_E("CreatePlugin %s failed.", pluginName.c_str());
         return false;
     }
+    plugin_->SetCallback(this);
     pluginAllocator_ = plugin_->GetAllocator();
     pluginName_.swap(pluginName);
     return true;

@@ -162,7 +162,7 @@ std::shared_ptr<Allocator> FFmpegDemuxerPlugin::GetAllocator()
     return allocator_;
 }
 
-Status FFmpegDemuxerPlugin::SetCallback(const std::shared_ptr<Callback>& cb)
+Status FFmpegDemuxerPlugin::SetCallback(Callback* cb)
 {
     callback_ = cb;
     return Status::OK;

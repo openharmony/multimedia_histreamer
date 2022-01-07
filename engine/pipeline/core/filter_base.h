@@ -33,7 +33,7 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class FilterBase : public Filter {
+class FilterBase : public Filter, public Plugin::CallbackWrap {
 public:
     explicit FilterBase(std::string name);
     ~FilterBase() override = default;
@@ -135,6 +135,8 @@ protected:
 private:
     template <typename T>
     static T FindPort(const std::vector<T>& list, const std::string& name);
+    void onEvent(int32_t event) override;
+    void onError(int32_t errorType, int32_t errorCode) override;
 };
 } // namespace Pipeline
 } // namespace Media

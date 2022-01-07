@@ -90,6 +90,7 @@ ErrorCode MediaSourceFilter::InitPlugin(const std::shared_ptr<MediaSource>& sour
     if (err != ErrorCode::SUCCESS) {
         return err;
     }
+    plugin_->SetCallback(this);
     pluginAllocator_ = plugin_->GetAllocator();
     SourceType srcType = source->GetSourceType();
     MEDIA_LOG_D("sourceType = %d", OHOS::Media::to_underlying(srcType));

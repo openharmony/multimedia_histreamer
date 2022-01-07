@@ -182,6 +182,7 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
         std::shared_ptr<Plugin::Codec> {
             return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
         });
+    plugin_->SetCallback(this);
     PROFILE_END("Audio Decoder Negotiate end");
     return res;
 }

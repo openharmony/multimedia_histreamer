@@ -30,7 +30,7 @@ struct OutputSinkPlugin : public Plugin::PluginBase {
     {
         return nullptr;
     }
-    Status SetCallback(const std::shared_ptr<Callback> &cb) override
+    Status SetCallback(Callback* cb) override
     {
         UNUSED_VARIABLE(cb);
         return Status::ERROR_UNIMPLEMENTED;

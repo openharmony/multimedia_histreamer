@@ -68,7 +68,7 @@ public:
 
     std::shared_ptr<Allocator> GetAllocator() override;
 
-    Status SetCallback(const std::shared_ptr<Callback>& cb) override;
+    Status SetCallback(Callback* cb) override;
 
     Status GetPcmDataProcess(const std::shared_ptr<Buffer>& inputBuffer, std::shared_ptr<Buffer>& outputBuffer);
 

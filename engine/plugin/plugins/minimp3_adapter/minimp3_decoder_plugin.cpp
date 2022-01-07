@@ -130,7 +130,7 @@ std::shared_ptr<Allocator> Minimp3DecoderPlugin::GetAllocator()
     return nullptr;
 }
 
-Status Minimp3DecoderPlugin::SetCallback(const std::shared_ptr<Callback>& cb)
+Status Minimp3DecoderPlugin::SetCallback(Callback* cb)
 {
     return Status::OK;
 }

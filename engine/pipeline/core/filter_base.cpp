@@ -247,6 +247,15 @@ template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::Outp
     std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
     const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
     const std::function<std::shared_ptr<Plugin::OutputSink>(const std::string&)>& pluginCreator);
+
+    void FilterBase::onEvent(int32_t event)
+    {
+    }
+
+    void FilterBase::onError(int32_t errorType, int32_t errorCode)
+    {
+        eventReceiver_->OnEvent({EventType::EVENT_ERROR, ErrorEvent{errorType, errorCode}});
+    }
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

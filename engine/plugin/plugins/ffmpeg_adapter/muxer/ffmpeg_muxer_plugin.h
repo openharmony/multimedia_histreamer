@@ -41,7 +41,7 @@ public:
 
     std::shared_ptr<Plugin::Allocator> GetAllocator() override;
 
-    Plugin::Status SetCallback(const std::shared_ptr<Plugin::Callback> &cb) override;
+    Plugin::Status SetCallback(Plugin::Callback* cb) override;
 
     Plugin::Status GetParameter(Plugin::Tag tag, Plugin::ValueType &value) override;
 

@@ -24,6 +24,12 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+enum class ErrorType {
+    PLUGIN_ERROR,
+    ALGO_ERROR,
+    CLIENT_ERROR,
+    SERVER_ERROR,
+};
 /**
  * @brief Plugin status callback interface.
  *
@@ -50,7 +56,7 @@ struct Callback {
      *
      * @param errorType Error type, For details, @see Status
      */
-    virtual void onError(Status errorType) = 0;
+    virtual void onError(ErrorType errorType, int32_t errorCode) = 0;
 };
 
 /**
@@ -233,7 +239,7 @@ struct PluginBase {
      * @return Execution status return
      *  @retval OK: Plugin reset succeeded.
      */
-    virtual Status SetCallback(const std::shared_ptr<Callback> &cb) = 0;
+    virtual Status SetCallback(Callback* cb) = 0;
 
 protected:
     const std::string pluginName_;

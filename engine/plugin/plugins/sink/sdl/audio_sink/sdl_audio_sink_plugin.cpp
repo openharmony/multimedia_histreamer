@@ -258,7 +258,7 @@ std::shared_ptr<Allocator> SdlAudioSinkPlugin::GetAllocator()
     return nullptr;
 }
 
-Status SdlAudioSinkPlugin::SetCallback(const std::shared_ptr<Callback>& cb)
+Status SdlAudioSinkPlugin::SetCallback(Callback* cb)
 {
     UNUSED_VARIABLE(cb);
     return Status::ERROR_UNIMPLEMENTED;
