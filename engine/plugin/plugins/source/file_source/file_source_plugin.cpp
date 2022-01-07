@@ -142,12 +142,12 @@ Status FileSourcePlugin::SetCallback(Callback* cb)
     return Status::ERROR_UNIMPLEMENTED;
 }
 
-Status FileSourcePlugin::SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params)
+Status FileSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 {
     MEDIA_LOG_D("IN");
-    auto err = ParseFileName(uri);
+    auto err = ParseFileName(source->GetSourceUri());
     if (err != Status::OK) {
-        MEDIA_LOG_E("Parse file name from uri fail, uri: %s", uri.c_str());
+        MEDIA_LOG_E("Parse file name from uri fail, uri: %s", source->GetSourceUri().c_str());
         return err;
     }
     return OpenFile();
@@ -218,7 +218,7 @@ Status FileSourcePlugin::SeekTo(uint64_t offset)
     return Status::OK;
 }
 
-Status FileSourcePlugin::ParseFileName(std::string& uri)
+Status FileSourcePlugin::ParseFileName(const std::string& uri)
 {
     if (uri.empty()) {
         MEDIA_LOG_E("uri is empty");

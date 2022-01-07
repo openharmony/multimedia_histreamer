@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "base.h"
+#include "common/media_source.h"
 #include "common/plugin_types.h"
 #include "common/plugin_tags.h"
 #include "common/plugin_buffer.h"
@@ -35,7 +36,7 @@ public:
     Source operator=(const Source &) = delete;
     ~Source() override = default;
 
-    Status SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params = nullptr);
+    Status SetSource(std::shared_ptr<MediaSource> source);
 
     Status Read(std::shared_ptr<Buffer> &buffer, size_t expectedLen);
 

@@ -485,10 +485,9 @@ Status AudioCapturePlugin::SetCallback(Callback* cb)
     return Status::ERROR_UNIMPLEMENTED;
 }
 
-Status AudioCapturePlugin::SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params)
+Status AudioCapturePlugin::SetSource(std::shared_ptr<MediaSource> source)
 {
-    UNUSED_VARIABLE(uri);
-    UNUSED_VARIABLE(params);
+    UNUSED_VARIABLE(source);
     return Status::ERROR_UNIMPLEMENTED;
 }
 

@@ -42,8 +42,7 @@ static Status SourceRegister(const std::shared_ptr<Register> &reg)
 
 PLUGIN_DEFINITION(UtSourceTest1, LicenseType::APACHE_V2, SourceRegister, [] {});
 
-Status OHOS::Media::Plugin::UtSourceTest1::SetSource(std::string &uri,
-                                                     std::shared_ptr<std::map<std::string, ValueType>> params)
+Status OHOS::Media::Plugin::UtSourceTest1::SetSource(std::shared_ptr<MediaSource> source)
 {
     return Status::OK;
 }

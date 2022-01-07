@@ -92,18 +92,7 @@ ErrorCode MediaSourceFilter::InitPlugin(const std::shared_ptr<MediaSource>& sour
     }
     plugin_->SetCallback(this);
     pluginAllocator_ = plugin_->GetAllocator();
-    SourceType srcType = source->GetSourceType();
-    MEDIA_LOG_D("sourceType = %d", OHOS::Media::to_underlying(srcType));
-    if (srcType == SourceType::SOURCE_TYPE_STREAM) {
-        auto params = std::make_shared<std::map<std::string, ValueType>>();
-        std::string key = "StreamSource";
-        ValueType value = source;
-        params->insert(std::pair<std::string, ValueType>(key, value));
-    } else {
-        // network protocl need to add params
-        err = TranslatePluginStatus(plugin_->SetSource(uri_, nullptr));
-    }
-    return err;
+    return TranslatePluginStatus(plugin_->SetSource(source));
 }
 
 ErrorCode MediaSourceFilter::SetBufferSize(size_t size)
