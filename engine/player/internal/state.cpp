@@ -88,7 +88,7 @@ std::tuple<ErrorCode, Action> State::OnError(const Plugin::Any& param)
     if (param.Type() == typeid(ErrorCode)) {
         errorCode = Plugin::AnyCast<ErrorCode>(param);
     }
-    if (param.Type() == typeid(ErrorEvent)){
+    if (param.Type() == typeid(ErrorEvent)) {
         auto errorEvent = OHOS::Media::Plugin::AnyCast<ErrorEvent>(param);
         MEDIA_LOG_I("errorEvent Type:%d Code:%d", errorEvent.errorType, errorEvent.errorCode);
     }

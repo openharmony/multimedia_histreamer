@@ -67,6 +67,7 @@ ErrorCode AudioCaptureFilter::ConfigurePlugin()
     if (err != ErrorCode::SUCCESS) {
         return err;
     }
+    plugin_->SetCallback(this);
     pluginAllocator_ = plugin_->GetAllocator();
     err = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_RATE, sampleRate_));
     if (err != ErrorCode::SUCCESS) {

@@ -478,7 +478,7 @@ std::shared_ptr<Allocator> AudioCapturePlugin::GetAllocator()
     return mAllocator_;
 }
 
-Status AudioCapturePlugin::SetCallback(const std::shared_ptr<Callback>& cb)
+Status AudioCapturePlugin::SetCallback(Callback* cb)
 {
     MEDIA_LOG_D("IN");
     UNUSED_VARIABLE(cb);

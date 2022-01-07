@@ -47,7 +47,7 @@ public:
 
     void onError(ErrorType errorType, int32_t errorCode) override
     {
-        callbackWrap_->onError((int32_t)errorType, errorCode);
+        callbackWrap_->onError(static_cast<int32_t>(errorType), errorCode);
     }
 
     void SetCallbackWrap(CallbackWrap* callbackWrap)

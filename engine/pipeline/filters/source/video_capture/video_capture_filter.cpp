@@ -67,6 +67,7 @@ ErrorCode VideoCaptureFilter::InitPlugin()
     if (err != ErrorCode::SUCCESS) {
         return err;
     }
+    plugin_->SetCallback(this);
     pluginAllocator_ = plugin_->GetAllocator();
     return err;
 }

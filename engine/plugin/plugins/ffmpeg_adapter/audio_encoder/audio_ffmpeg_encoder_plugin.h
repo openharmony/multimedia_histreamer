@@ -66,7 +66,7 @@ public:
 
     std::shared_ptr<Allocator> GetAllocator() override;
 
-    Status SetCallback(const std::shared_ptr<Callback>& cb) override
+    Status SetCallback(Callback* cb) override
     {
         return Status::OK;
     }

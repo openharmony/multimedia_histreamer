@@ -173,6 +173,7 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Plu
 ErrorCode VideoSinkFilter::ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Init()), "Init plugin error");
+    plugin_->SetCallback(this);
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePluginParams(meta), "Configure plugin params fail");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Start()), "Start plugin fail");

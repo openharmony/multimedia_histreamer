@@ -304,7 +304,7 @@ std::shared_ptr<Allocator> SdlVideoSinkPlugin::GetAllocator()
     return nullptr;
 }
 
-Status SdlVideoSinkPlugin::SetCallback(const std::shared_ptr<Callback>& cb)
+Status SdlVideoSinkPlugin::SetCallback(Callback* cb)
 {
     return Status::ERROR_UNIMPLEMENTED;
 }
