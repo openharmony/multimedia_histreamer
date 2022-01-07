@@ -22,6 +22,9 @@
 #include "common/plugin_utils.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
+#include "pipeline/core/clock_manager.h"
+#include "plugin/common/plugin_time.h"
+#include "osal/utils/util.h"
 #include "utils/steady_clock.h"
 
 namespace OHOS {
@@ -179,22 +182,67 @@ ErrorCode VideoSinkFilter::ConfigureNoLocked(const std::shared_ptr<const Plugin:
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Start()), "Start plugin fail");
     return ErrorCode::SUCCESS;
 }
-
-bool VideoSinkFilter::DoSync()
+void VideoSinkFilter::GetPtsSerial(int64_t pts)
 {
-    // Add av sync handle here
+    if (pts == -1 && frameCnt_ > 0) {
+        ptSerialCnt_++;
+        return ;
+    } else {
+        isPtsSerial_ = true;
+    }
+}
+
+bool VideoSinkFilter::DoSync(int64_t pts)
+{
+    int64_t  delta {0};
+    int64_t  tempOut {0};
+    if (!isPtsSerial_) {
+        GetPtsSerial(pts);
+    } else {
+        if (pts == -1 ) {
+            return false;
+        }
+    }
+
+    if (frameCnt_ == 0 || pts == 0) {
+        return true;
+    }
+    if (ClockManager::Instance().GetProvider().CheckPts(pts, delta) != ErrorCode::SUCCESS) {
+        MEDIA_LOG_E("DoSync CheckPts fail");
+        return false;
+    }
+    if (delta > 0) {
+        tempOut = HstTime2Ms(delta);
+        if (tempOut > 100) { // 100ms
+            MEDIA_LOG_E("DoSync early % ms",PRId64, tempOut);
+            OHOS::Media::OSAL::SleepFor(tempOut);
+            return true;
+        }
+    } else if (delta < 0) {
+        tempOut = HstTime2Ms(abs(delta));
+        if (tempOut > 40) { // 40ms drop frame
+            MEDIA_LOG_E("DoSync later % ms",PRId64, tempOut);
+            return false;
+        }
+    }
     return true;
 }
 
 void VideoSinkFilter::RenderFrame()
 {
+    uint64_t latencyNano {0};
     MEDIA_LOG_D("RenderFrame called");
     auto oneBuffer = inBufQueue_->Pop();
     if (oneBuffer == nullptr) {
         MEDIA_LOG_W("Video sink find nullptr in esBufferQ");
         return;
     }
-    if (DoSync() == false) {
+    Plugin::Status status = plugin_->GetLatency(latencyNano);
+    if (status != Plugin::Status::OK) {
+        MEDIA_LOG_E("Video sink GetLatency fail errorcode = %d", to_underlying(TranslatePluginStatus(status)));
+        return ;
+    }
+    if (!DoSync(oneBuffer->pts + latencyNano)) {
         return;
     }
     auto err = plugin_->Write(oneBuffer);
@@ -207,6 +255,7 @@ void VideoSinkFilter::RenderFrame()
 ErrorCode VideoSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
 {
     MEDIA_LOG_D("video sink push data started, state_: %d", state_.load());
+    frameCnt_++;
     if (isFlushing_ || state_.load() == FilterState::INITIALIZED) {
         MEDIA_LOG_I("video sink is flushing ignore this buffer");
         return ErrorCode::SUCCESS;
@@ -303,6 +352,7 @@ ErrorCode VideoSinkFilter::Resume()
         }
         inBufQueue_->SetActive(true);
         renderTask_->Start();
+        frameCnt_ = 0;
     }
     return ErrorCode::SUCCESS;
 }

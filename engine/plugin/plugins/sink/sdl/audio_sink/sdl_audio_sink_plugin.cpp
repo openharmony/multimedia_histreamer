@@ -317,10 +317,10 @@ Status SdlAudioSinkPlugin::Resume()
     return Status::OK;
 }
 
-Status SdlAudioSinkPlugin::GetLatency(uint64_t& ms)
+Status SdlAudioSinkPlugin::GetLatency(uint64_t& nanoSec)
 {
-    UNUSED_VARIABLE(ms);
-    return Status::ERROR_UNIMPLEMENTED;
+    nanoSec = 0;
+    return Status::OK;
 }
 
 Status SdlAudioSinkPlugin::GetFrameSize(size_t& size)

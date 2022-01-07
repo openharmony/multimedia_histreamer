@@ -66,6 +66,8 @@ public:
 
     Status Flush() override;
 
+    Status GetLatency(uint64_t &nanoSec) override;
+
 private:
 
     uint32_t windowWidth_;

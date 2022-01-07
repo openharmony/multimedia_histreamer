@@ -489,6 +489,13 @@ Status SdlVideoSinkPlugin::Flush()
 {
     return Status::OK;
 }
+
+Status SdlVideoSinkPlugin::GetLatency(uint64_t& nanoSec)
+{
+    nanoSec = 10; // 10 ns
+    return Status::OK;
+}
+
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

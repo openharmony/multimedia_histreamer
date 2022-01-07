@@ -42,6 +42,7 @@ public:
 
     Status Write(const std::shared_ptr<Buffer>& input);
 
+    Status GetLatency(uint64_t& nanoSec);
 private:
     friend class PluginManager;
 

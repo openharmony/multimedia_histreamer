@@ -136,7 +136,7 @@ struct AudioSinkPlugin : public PluginBase {
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
      */
-    virtual Status GetLatency(uint64_t& ms) = 0;
+    virtual Status GetLatency(uint64_t& nanoSec) = 0;
 
     /**
      * @brief Get the audio frame size, that is, the length (in bytes) of a frame.

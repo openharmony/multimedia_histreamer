@@ -24,6 +24,7 @@ namespace Media {
 class SteadyClock {
 public:
     static int64_t GetCurrentTimeMs();
+    static int64_t GetCurrentTimeNanoSec();
     SteadyClock();
     ~SteadyClock() = default;
     void Reset();

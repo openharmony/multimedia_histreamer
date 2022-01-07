@@ -77,6 +77,17 @@ struct VideoSinkPlugin : public PluginBase {
      *  @retval OK: Plugin reset succeeded.
      */
     virtual Status Flush() = 0;
+
+    /**
+      * @brief Get the estimated latency of the video device driver.
+      *
+      * The function is valid only in the after PREPARED state.
+      *
+      * @param ms    Indicates the pointer to the latency (in nanoseconds) to be obtained.
+      * @return  Execution status return
+      *  @retval OK: Plugin reset succeeded.
+      */
+    virtual Status GetLatency(uint64_t& nanoSec) = 0;
 };
 
 /// Video sink plugin api major number.

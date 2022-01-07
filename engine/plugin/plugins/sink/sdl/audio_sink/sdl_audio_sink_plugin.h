@@ -79,7 +79,7 @@ public:
 
     Status Resume() override;
 
-    Status GetLatency(uint64_t &ms) override;
+    Status GetLatency(uint64_t &nanoSec) override;
 
     Status GetFrameSize(size_t &size) override;
 

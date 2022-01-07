@@ -23,8 +23,9 @@
 #include "osal/thread/mutex.h"
 #include "osal/thread/task.h"
 #include "utils/blocking_queue.h"
-#include "foundation/error_code.h"
 #include "utils/utils.h"
+#include "foundation/error_code.h"
+#include "pipeline/core/clock_provider.h"
 #include "pipeline/core/filter_base.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/video_sink.h"
@@ -71,8 +72,8 @@ private:
     ErrorCode ConfigurePluginParams(const std::shared_ptr<const Plugin::Meta>& meta);
     ErrorCode ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta);
     void RenderFrame();
-    bool DoSync();
-
+    bool DoSync(int64_t pts);
+    void GetPtsSerial(int64_t pts);
     std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQueue_ {nullptr};
     std::shared_ptr<OHOS::Media::OSAL::Task> renderTask_ {nullptr};
     std::atomic<bool> pushThreadIsBlocking_ {false};
@@ -81,6 +82,10 @@ private:
     OSAL::Mutex mutex_;
 
     std::shared_ptr<Plugin::VideoSink> plugin_ {nullptr};
+
+    int64_t frameCnt_ {0};
+    int64_t ptSerialCnt_ {0};
+    bool isPtsSerial_ {false};
 };
 } // namespace Pipeline
 } // namespace Media

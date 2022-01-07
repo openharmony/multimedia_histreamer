@@ -77,3 +77,8 @@ Status AudioSink::SetVolume(float volume)
 {
     return audioSink->SetVolume(volume);
 }
+
+Status AudioSink::GetLatency(uint64_t& nanoSec)
+{
+    return audioSink->GetLatency(nanoSec);
+}

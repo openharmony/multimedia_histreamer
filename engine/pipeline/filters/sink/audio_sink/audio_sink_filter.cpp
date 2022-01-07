@@ -14,14 +14,16 @@
  */
 
 #define HST_LOG_TAG "AudioSinkFilter"
-
 #include "audio_sink_filter.h"
 #include "common/plugin_utils.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
 #include "foundation/osal/utils/util.h"
 #include "pipeline/filters/common/plugin_settings.h"
+#include "pipeline/core/clock_manager.h"
 #include "plugin/common/plugin_time.h"
+#include "plugin/common/plugin_types.h"
+#include "plugin/core/plugin_meta.h"
 #include "utils/steady_clock.h"
 
 namespace OHOS {
@@ -47,6 +49,7 @@ void AudioSinkFilter::Init(EventReceiver* receiver, FilterCallback* callback)
 {
     FilterBase::Init(receiver, callback);
     outPorts_.clear();
+    ClockManager::Instance().RegisterProvider(shared_from_this());
 }
 
 ErrorCode AudioSinkFilter::SetPluginParameter(Tag tag, const Plugin::ValueType& value)
@@ -196,6 +199,12 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
         MEDIA_LOG_D("audio sink push data send event_complete");
         OnEvent(event);
     }
+    if (buffer->pts != -1) {
+        UpdateLatestPts(buffer->pts);
+    } else {
+        ;
+    }
+
     MEDIA_LOG_D("audio sink push data end");
     return ErrorCode::SUCCESS;
 }
@@ -217,6 +226,7 @@ ErrorCode AudioSinkFilter::Start()
     if (pushThreadIsBlocking.load()) {
         startWorkingCondition_.NotifyOne();
     }
+    frameCnt_ = 0;
     return ErrorCode::SUCCESS;
 }
 
@@ -257,6 +267,9 @@ ErrorCode AudioSinkFilter::Resume()
         if (pushThreadIsBlocking) {
             startWorkingCondition_.NotifyOne();
         }
+        if (frameCnt_ > 0) {
+            frameCnt_ = 0;
+        }
         return TranslatePluginStatus(plugin_->Resume());
     }
     return ErrorCode::SUCCESS;
@@ -289,6 +302,61 @@ ErrorCode AudioSinkFilter::SetVolume(float volume)
     MEDIA_LOG_I("set volume %.3f", volume);
     return TranslatePluginStatus(plugin_->SetVolume(volume));
 }
+
+ErrorCode AudioSinkFilter::UpdateLatestPts(int64_t pts)
+{
+    uint64_t latencyNano {10};
+    int64_t nowNs {0};
+    Plugin::Status status = plugin_->GetLatency(latencyNano);
+    if (status != Plugin::Status::OK) {
+        MEDIA_LOG_E("audio sink GetLatency fail errorcode = %d", to_underlying(TranslatePluginStatus(status)));
+        return TranslatePluginStatus(status);
+    }
+    nowNs = SteadyClock::GetCurrentTimeNanoSec();
+    if (INT64_MAX - nowNs > latencyNano ) { // overflow
+        return ErrorCode::ERROR_UNKNOWN;
+    }
+    latestSysClock_ = nowNs + latencyNano;
+    lastPts_ = pts;
+    frameCnt_++;
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode AudioSinkFilter::CheckPts(int64_t pts, int64_t& delta)
+{
+    int64_t ptsOut {0};
+    if (latestSysClock_ == 0 && lastPts_ == 0) {
+        delta = 0;
+        return ErrorCode::SUCCESS;
+    }
+    if (GetCurrentPosition(ptsOut) != ErrorCode::SUCCESS) {
+        return ErrorCode::ERROR_UNKNOWN;
+    }
+    delta = pts - ptsOut;
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode AudioSinkFilter::GetCurrentPosition(int64_t& position)
+{
+    int64_t nowNs {0};
+    if (lastPts_ == 0 && frameCnt_ == 0) {
+        position = 0;
+        return ErrorCode::SUCCESS;
+    }
+    nowNs = SteadyClock::GetCurrentTimeNanoSec();
+    if (INT64_MAX - (nowNs - latestSysClock_) > lastPts_ ) { // overflow
+        return ErrorCode::ERROR_UNKNOWN;
+    }
+    position = nowNs - latestSysClock_ + lastPts_ ;
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode AudioSinkFilter::GetCurrentTimeNano(int64_t& nowNano)
+{
+    nowNano = SteadyClock::GetCurrentTimeNanoSec();
+    return ErrorCode::SUCCESS;
+}
+
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

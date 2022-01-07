@@ -21,15 +21,16 @@
 #include "foundation/error_code.h"
 #include "osal/thread/condition_variable.h"
 #include "osal/thread/mutex.h"
-#include "utils/utils.h"
+#include "pipeline/core/clock_provider.h"
 #include "pipeline/core/filter_base.h"
 #include "plugin/core/audio_sink.h"
 #include "plugin/core/plugin_info.h"
+#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class AudioSinkFilter : public FilterBase {
+class AudioSinkFilter : public std::enable_shared_from_this<AudioSinkFilter>, public FilterBase, public ClockProvider {
 public:
     explicit AudioSinkFilter(const std::string& name);
     ~AudioSinkFilter() override;
@@ -64,18 +65,27 @@ public:
     void FlushEnd() override;
     ErrorCode SetVolume(float volume);
 
+    ErrorCode CheckPts(int64_t pts, int64_t& delta) override;
+    ErrorCode GetCurrentPosition(int64_t& position) override;
+    ErrorCode GetCurrentTimeNano(int64_t& nowNano) override;
+
 private:
     ErrorCode SetPluginParameter(Tag tag, const Plugin::ValueType& value);
     ErrorCode ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta);
     ErrorCode ConfigureWithMeta(const std::shared_ptr<const Plugin::Meta>& meta);
     void ReportCurrentPosition(int64_t pts);
 
+    ErrorCode UpdateLatestPts(int64_t pts);
+    int64_t lastPts_ {0};
+    int64_t latestSysClock_ {0}; // now+latency
+    int64_t frameCnt_ {0};
+
     std::atomic<bool> pushThreadIsBlocking {false};
     bool isFlushing {false};
     OSAL::ConditionVariable startWorkingCondition_ {};
     OSAL::Mutex mutex_ {};
 
-    std::shared_ptr<Plugin::AudioSink> plugin_{};
+    std::shared_ptr<Plugin::AudioSink> plugin_ {};
 };
 } // namespace Pipeline
 } // namespace Media
