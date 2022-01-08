@@ -23,6 +23,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <stack>
 
 #include "filter_base.h"
 #include "foundation/error_code.h"
@@ -154,7 +155,7 @@ public:
     }
 
 private:
-    void ReOrderFiltersLocked();
+    void ReorderFilters();
 
     std::string name_;
     size_t readyEventCnt_ {0};

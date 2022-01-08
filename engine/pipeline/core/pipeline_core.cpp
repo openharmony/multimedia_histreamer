@@ -90,7 +90,7 @@ ErrorCode PipelineCore::Prepare()
     state_ = FilterState::PREPARING;
     ErrorCode rtv = ErrorCode::SUCCESS;
     OSAL::ScopedLock lock(mutex_);
-    ReOrderFiltersLocked();
+    ReorderFilters();
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
         auto& filterPtr = *it;
         if (filterPtr) {
@@ -286,47 +286,54 @@ void PipelineCore::InitFilters(const std::vector<Filter*>& filters)
 }
 
 namespace {
-struct TopologySortAux {
+struct FilterNode {
     size_t inDegree {0};
     Filter* filter {nullptr};
-    std::vector<size_t> nexts{};
+    std::vector<size_t> nexts {}; // store filter index
+    FilterNode(size_t degree, Filter* f, std::vector<size_t> next) : inDegree(degree), filter(f), nexts(std::move(next))
+    {
+    }
 };
-}
 
-void PipelineCore::ReOrderFiltersLocked()
-{
-    std::vector<TopologySortAux> auxes;
-    std::map<Filter*, size_t> mapInfo;
+void ConstructGraph(const std::vector<Filter*> &filters, std::vector<FilterNode> &graph, std::stack<size_t> &stack) {
+    std::map<Filter*, size_t> mapInfo; // filter to index map
     size_t index = 0;
-    std::stack<size_t> st;
-    for (const auto& f : filters_) {
-        auxes.emplace_back(TopologySortAux{f->GetPreFilters().size(), f, {}});
+    for (const auto& f : filters) {
+        graph.emplace_back(FilterNode(f->GetPreFilters().size(), f, {}));
         if (f->GetPreFilters().empty()) {
-            st.push(index);
+            stack.push(index);
         }
         mapInfo[f] = index++;
     }
-    for (const auto& f : filters_) {
-        auto& tmp = auxes[mapInfo[f]].nexts;
+    for (const auto& f : filters) {
+        auto& tmp = graph[mapInfo[f]].nexts;
         for (const auto& next : f->GetNextFilters()) {
             tmp.emplace_back(mapInfo[next]);
         }
     }
-    std::vector<Filter*> res;
-    while (!st.empty()) {
-        auto cur = st.top();
-        st.pop();
-        for (const auto& idx : auxes[cur].nexts) {
-            auxes[idx].inDegree--;
-            if (auxes[idx].inDegree == 0) {
-                st.push(idx);
+}
+}
+
+void PipelineCore::ReorderFilters()
+{
+    std::vector<FilterNode> graph;
+    std::stack<size_t> stack;
+    ConstructGraph(filters_, graph, stack);
+    std::vector<Filter*> result;
+    while (!stack.empty()) {
+        auto cur = stack.top();
+        stack.pop();
+        for (const auto& idx : graph[cur].nexts) {
+            graph[idx].inDegree--;
+            if (graph[idx].inDegree == 0) {
+                stack.push(idx);
             }
         }
-        res.emplace_back(auxes[cur].filter);
+        result.emplace_back(graph[cur].filter);
     }
-    if (res.size() == filters_.size()) {
+    if (result.size() == filters_.size()) {
         filters_.clear();
-        filters_.assign(res.begin(), res.end());
+        filters_.assign(result.begin(), result.end());
     }
 }
 } // namespace Pipeline
