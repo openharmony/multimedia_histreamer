@@ -24,6 +24,7 @@ config("histreamer_pipeline_config") {
 
 source_set("histreamer_pipeline") {
   sources = [
+    "core/clock_manager.cpp",
     "core/compatible_check.cpp",
     "core/filter_base.cpp",
     "core/pipeline_core.cpp",
