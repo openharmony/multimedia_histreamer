@@ -104,7 +104,7 @@ std::shared_ptr<Allocator> UtAudioSinkTest1::GetAllocator()
     return std::shared_ptr<Allocator>();
 }
 
-Status UtAudioSinkTest1::SetCallback(const std::shared_ptr<Callback> &cb)
+Status UtAudioSinkTest1::SetCallback(Callback* cb)
 {
     return Status::OK;
 }

@@ -59,7 +59,7 @@ std::shared_ptr<Allocator> UtCodecTest1::GetAllocator()
     return std::shared_ptr<Allocator>();
 }
 
-Status UtCodecTest1::SetCallback(const std::shared_ptr<Callback>& cb)
+Status UtCodecTest1::SetCallback(Callback* cb)
 {
     return Status::OK;
 }

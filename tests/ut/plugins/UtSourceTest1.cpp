@@ -72,7 +72,7 @@ std::shared_ptr<Allocator> UtSourceTest1::GetAllocator()
     return std::shared_ptr<Allocator>();
 }
 
-Status UtSourceTest1::SetCallback(const std::shared_ptr<Callback> &cb)
+Status UtSourceTest1::SetCallback(Callback* cb)
 {
     return Status::OK;
 }
