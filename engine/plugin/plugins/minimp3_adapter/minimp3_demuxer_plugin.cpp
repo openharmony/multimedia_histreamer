@@ -38,6 +38,7 @@ constexpr uint32_t PROBE_READ_LENGTH       = 16 * 1024;
 constexpr uint32_t MAX_RANK                = 100;
 constexpr uint32_t MEDIA_IO_SIZE           = 12 * 1024;
 constexpr uint32_t MAX_FRAME_SIZE          = MEDIA_IO_SIZE;
+constexpr uint32_t AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX = 1024;
 uint32_t durationMs = 0;
 uint32_t fileSize = 0;
 AudioDemuxerMp3Attr mp3ProbeAttr;
@@ -130,7 +131,7 @@ Status Minimp3DemuxerPlugin::GetDataFromSource()
                 MEDIA_LOG_W("read data from source warning %d", (int)result);
                 return result;
             }
-            if (bufData->GetSize() == 0 && retryTimes < 200 && (ioDataRemainSize_ == 0 || mp3DemuxerRst_.usedInputLength == 0)) { // 200
+            if (bufData->GetSize() == 0 && retryTimes < 200 && ioDataRemainSize_ == 0) { // 200
                 MEDIA_LOG_D("bufData->GetSize() == 0 retryTimes = %d", retryTimes);
                 OSAL::SleepFor(30); // 30
                 retryTimes++;
@@ -235,10 +236,16 @@ Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
     MEDIA_LOG_D("status = %d", status);
     switch (status) {
         case AUDIO_DEMUXER_SUCCESS:
-            ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
             MEDIA_LOG_D("ReadFrame: success usedInputLength %d ioDataRemainSize_ %d",
                         (uint32_t)mp3DemuxerRst_.usedInputLength, ioDataRemainSize_);
-            mp3FrameData->Write(mp3DemuxerRst_.frameBuffer, mp3DemuxerRst_.frameLength);
+            if (mp3DemuxerRst_.frameLength) {
+                mp3FrameData->Write(mp3DemuxerRst_.frameBuffer, mp3DemuxerRst_.frameLength);
+                ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
+            } else if (mp3DemuxerRst_.usedInputLength == 0){
+                ioDataRemainSize_ = ioDataRemainSize_ > AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX ? (ioDataRemainSize_ - AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX): 0;
+            } else {
+                ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
+            }
             MEDIA_LOG_D("ReadFrame: mp3DemuxerRst_.frameLength %" PRIu32, mp3DemuxerRst_.frameLength);
             if (mp3DemuxerRst_.frameBuffer) {
                 free(mp3DemuxerRst_.frameBuffer);
@@ -476,7 +483,6 @@ int Minimp3DemuxerPlugin::AudioDemuxerMp3Process(uint8_t *buf, uint32_t len)
     mp3DemuxerAttr_.rst = &mp3DemuxerRst_;
     mp3DemuxerAttr_.internalRemainLen = processLen;
     ret = minimp3DemuxerImpl_.iterateBuf(buf, processLen, AudioDemuxerMp3IterateCallback, &mp3DemuxerAttr_);
-
     if (mp3DemuxerAttr_.mp3SeekFlag == 1 && mp3DemuxerAttr_.discardItemCount < MP3_SEEK_DISCARD_ITEMS) {
         (void)memset_s(mp3DemuxerRst_.frameBuffer, mp3DemuxerRst_.frameLength, 0x00, mp3DemuxerRst_.frameLength);
         mp3DemuxerAttr_.discardItemCount++;
