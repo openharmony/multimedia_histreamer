@@ -63,6 +63,7 @@ file(GLOB_RECURSE HISTREAMER_BASE_SRCS
         ${TOP_DIR}/engine/plugin/plugins/source/file_source/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/source/audio_capture/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/source/http_lite_source/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/minimp3_adapter/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/minimp3_adapter/*.c
         ${TOP_DIR}/engine/plugin/types/*.cpp
@@ -103,7 +104,6 @@ set(HISTREAMER_SRCS ${HISTREAMER_BASE_SRCS} ${PLAYER_SRCS} ${RECORDER_SRCS})
 
 file(GLOB_RECURSE PLUGINS_STATIC_BUILD_SRCS
         ${TOP_DIR}/engine/plugin/plugins/source/file_source/*.cpp
-        ${TOP_DIR}/engine/plugin/plugins/source/http_source/*.cpp
         )
 
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
