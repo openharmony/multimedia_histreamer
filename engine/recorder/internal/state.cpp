@@ -16,7 +16,7 @@
 #define HST_LOG_TAG "State"
 
 #include "state.h"
-#include "recorder/standard/media_utils.h"
+
 namespace OHOS {
 namespace Media {
 namespace Record {
