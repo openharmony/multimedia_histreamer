@@ -57,20 +57,21 @@ file(GLOB_RECURSE HISTREAMER_BASE_SRCS
         ${TOP_DIR}/engine/pipeline/*.cpp
         ${TOP_DIR}/engine/plugin/common/*.cpp
         ${TOP_DIR}/engine/plugin/core/*.cpp
-        ${TOP_DIR}/engine/plugin/plugins/ffmpeg_adapter/*.cpp
-        ${TOP_DIR}/engine/plugin/plugins/sink/sdl/*.cpp
-        ${TOP_DIR}/engine/plugin/plugins/sink/file_sink/*.cpp
-        ${TOP_DIR}/engine/plugin/plugins/source/file_source/*.cpp
-        #${TOP_DIR}/engine/plugin/plugins/source/http_lite_source/*.cpp
-        #${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
-        ${TOP_DIR}/engine/plugin/plugins/minimp3_adapter/*.cpp
-        ${TOP_DIR}/engine/plugin/plugins/minimp3_adapter/*.c
         ${TOP_DIR}/engine/plugin/types/*.cpp
         ${TOP_DIR}/engine/player/internal/*.cpp
         ${TOP_DIR}/engine/recorder/internal/*.cpp
         ${TOP_DIR}/engine/foundation/*.cpp
         ${TOP_DIR}/engine/utils/*.cpp
         )
+
+file(GLOB_RECURSE COMMON_PLUGIN_SRCS
+        ${TOP_DIR}/engine/plugin/plugins/ffmpeg_adapter/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/sink/sdl/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/sink/file_sink/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/source/file_source/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/minimp3_adapter/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/minimp3_adapter/*.c
+)
 
 if (OHOS_LITE)
     message(STATUS "#1 player lite source")
@@ -80,6 +81,10 @@ if (OHOS_LITE)
     message(STATUS "#1 recorder lite source")
     file(GLOB_RECURSE RECORDER_SRCS
             ${TOP_DIR}/engine/recorder/lite/*.cpp
+            )
+    file(GLOB_RECURSE PLAT_PLUGIN_SRCS
+            ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
+            ${TOP_DIR}/engine/plugin/plugins/source/http_lite_source/*.cpp
             )
 else ()
     message(STATUS "player standard source")
@@ -92,9 +97,12 @@ else ()
             ${TOP_DIR}/engine/recorder/standard/*.cpp
             ${TOP_DIR}/engine/factory/*.cpp
             )
+    file(GLOB_RECURSE PLAT_PLUGIN_SRCS
+            ${TOP_DIR}/engine/plugin/plugins/source/audio_capture/*.cpp
+            )
 endif ()
 
-set(HISTREAMER_SRCS ${HISTREAMER_BASE_SRCS} ${PLAYER_SRCS} ${RECORDER_SRCS})
+set(HISTREAMER_SRCS ${HISTREAMER_BASE_SRCS} ${PLAYER_SRCS} ${RECORDER_SRCS} ${COMMON_PLUGIN_SRCS} ${PLAT_PLUGIN_SRCS})
 
 file(GLOB_RECURSE PLUGINS_STATIC_BUILD_SRCS
         ${TOP_DIR}/engine/plugin/plugins/source/file_source/*.cpp
