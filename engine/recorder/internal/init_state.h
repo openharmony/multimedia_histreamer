@@ -34,18 +34,18 @@ public:
 
     ~InitState() override = default;
 
-    std::tuple<ErrorCode, Action> SetVideoSource(VideoSourceType source, int32_t& sourceId) override
+    std::tuple<ErrorCode, Action> SetVideoSource(const Plugin::Any& param) override
     {
         OSAL::ScopedLock lock(mutex_);
-        auto ret = executor_.DoSetVideoSource(source, sourceId);
+        auto ret = executor_.DoSetVideoSource(param);
         Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_RECORDING_SETTING : Action::ACTION_BUTT;
         return {ret, action};
     }
 
-    std::tuple<ErrorCode, Action> SetAudioSource(AudioSourceType source, int32_t& sourceId) override
+    std::tuple<ErrorCode, Action> SetAudioSource(const Plugin::Any& param) override
     {
         OSAL::ScopedLock lock(mutex_);
-        auto ret = executor_.DoSetAudioSource(source, sourceId);
+        auto ret = executor_.DoSetAudioSource(param);
         Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_RECORDING_SETTING : Action::ACTION_BUTT;
         return {ret, action};
     }

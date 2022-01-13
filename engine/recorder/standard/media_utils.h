@@ -26,7 +26,6 @@ namespace OHOS {
 namespace Media {
 namespace Record {
 int TransErrorCode(ErrorCode errorCode);
-std::string TransOutputFormatType(OutputFormatType outputFormatType);
 
 struct RecorderSource {
     int32_t sourceType;

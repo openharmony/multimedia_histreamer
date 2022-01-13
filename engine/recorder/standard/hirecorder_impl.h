@@ -71,8 +71,8 @@ public:
     void OnStateChanged(StateId state) override;
 
     // interface from RecorderExecutor
-    ErrorCode DoSetVideoSource(VideoSourceType sourceType, int32_t sourceId) const override;
-    ErrorCode DoSetAudioSource(AudioSourceType sourceType, int32_t sourceId) const override;
+    ErrorCode DoSetVideoSource(const Plugin::Any& param) const override;
+    ErrorCode DoSetAudioSource(const Plugin::Any& param) const override;
     ErrorCode DoSetParameter(const Plugin::Any& param) const override;
     ErrorCode DoPrepare() override;
     ErrorCode DoStart() override;
@@ -80,7 +80,7 @@ public:
     ErrorCode DoResume() override;
     ErrorCode DoStop() override;
     ErrorCode DoOnComplete() override;
-    ErrorCode DoOnError(RecorderErrorType infoType, ErrorCode errorCode) override;
+    ErrorCode DoOnError(const Plugin::Any& param) override;
 private:
     OSAL::Mutex stateMutex_{};
     OSAL::ConditionVariable cond_{};
@@ -96,7 +96,8 @@ private:
         { StateId::PAUSE, RECORDER_PAUSED},
         { StateId::RECORDING, RECORDER_STARTED}};
     std::weak_ptr<IRecorderEngineObs> obs_{};
-    int32_t sourceId_ {};
+    std::atomic<int32_t> sourceId_{0};
+    std::map<int32_t, sptr<Surface>> sourceIdToSurfaceMap_{};
     std::shared_ptr<Pipeline::MuxerFilter> muxer_;
     std::shared_ptr<Pipeline::OutputSinkFilter> outputSink_;
     std::shared_ptr<Pipeline::AudioCaptureFilter> audioCapture_;

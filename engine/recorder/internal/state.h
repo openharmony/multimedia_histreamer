@@ -24,7 +24,6 @@
 #include "foundation/error_code.h"
 #include "foundation/log.h"
 #include "recorder_executor.h"
-#include "recorder.h"
 
 namespace OHOS {
 namespace Media {
@@ -75,8 +74,8 @@ public:
     const std::string &GetName();
     StateId GetStateId();
 
-    virtual std::tuple<ErrorCode, Action> SetVideoSource(VideoSourceType source, int32_t& sourceId);
-    virtual std::tuple<ErrorCode, Action> SetAudioSource(AudioSourceType source, int32_t& sourceId);
+    virtual std::tuple<ErrorCode, Action> SetVideoSource(const Plugin::Any& param);
+    virtual std::tuple<ErrorCode, Action> SetAudioSource(const Plugin::Any& param);
     virtual std::tuple<ErrorCode, Action> SetOutputFormat();
     virtual std::tuple<ErrorCode, Action> SetObs();
     virtual std::tuple<ErrorCode, Action> GetSurface();

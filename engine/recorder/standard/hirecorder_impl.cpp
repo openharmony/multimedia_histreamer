@@ -32,8 +32,8 @@ HiRecorderImpl::HiRecorderImpl() : fsm_(*this), curFsmState_(StateId::INIT),
     MEDIA_LOG_I("hiRecorderImpl ctor");
 
     FilterFactory::Instance().Init();
-    muxer_ = FilterFactory::Instance().CreateFilterWithType<MuxerFilter>( "builtin.recorder.muxer",
-                                                                          "muxer");
+    muxer_ = FilterFactory::Instance().CreateFilterWithType<MuxerFilter>(
+            "builtin.recorder.muxer","muxer");
     outputSink_ = FilterFactory::Instance().CreateFilterWithType<OutputSinkFilter>(
             "builtin.recorder.output_sink", "output_sink");
     FALSE_RETURN(muxer_ != nullptr);
@@ -97,7 +97,7 @@ int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId
         ret = muxer_->AddTrack(muxerInPort);
     }
     if (ret == ErrorCode::SUCCESS) {
-        pipeline_->LinkPorts( audioEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
+        ret = pipeline_->LinkPorts(audioEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
     }
     if (ret == ErrorCode::SUCCESS) {
         ret = fsm_.SendEvent(Intent::SET_AUDIO_SOURCE, RecorderSource{source, sourceId});
@@ -105,7 +105,8 @@ int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId
     if (ret != ErrorCode::SUCCESS) {
         sourceId =-1;
     }
-    sourceId_ = sourceId;
+    sourceId_++;
+    sourceId = sourceId_;
     PROFILE_END("SetAudioSource end.");
     return TransErrorCode(ret);
 }
@@ -114,8 +115,10 @@ int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId
 {
     PROFILE_BEGIN("SetVideoSource begin");
     ErrorCode ret{ErrorCode::SUCCESS};
-    videoCapture_ = FilterFactory::Instance().CreateFilterWithType<VideoCaptureFilter>("builtin.recorder.videocapture", "videocapture");
-    videoEncoder_ = FilterFactory::Instance().CreateFilterWithType<VideoEncoderFilter>("builtin.recorder.videoencoder", "videoencoder");
+    videoCapture_ = FilterFactory::Instance().CreateFilterWithType<VideoCaptureFilter>(
+            "builtin.recorder.videocapture", "videocapture");
+    videoEncoder_ = FilterFactory::Instance().CreateFilterWithType<VideoEncoderFilter>(
+            "builtin.recorder.videoencoder", "videoencoder");
     ret = pipeline_->AddFilters({videoCapture_.get(), videoEncoder_.get()});
     if (ret == ErrorCode::SUCCESS) {
         ret = pipeline_->LinkFilters({videoCapture_.get(), videoEncoder_.get()});
@@ -125,7 +128,7 @@ int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId
         ret =muxer_->AddTrack(muxerInPort);
     }
     if (ret == ErrorCode::SUCCESS) {
-        pipeline_->LinkPorts(videoEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
+        ret = pipeline_->LinkPorts(videoEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
     }
     if (ret == ErrorCode::SUCCESS) {
         ret = fsm_.SendEvent(Intent::SET_VIDEO_SOURCE, RecorderSource{source, sourceId});
@@ -133,13 +136,19 @@ int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId
     if (ret != ErrorCode::SUCCESS) {
         sourceId =-1;
     }
-    sourceId_ = sourceId;
+    sourceId_++;
+    sourceId = sourceId_;
+    sourceIdToSurfaceMap_.emplace(sourceId_, Surface::CreateSurfaceAsConsumer());
     PROFILE_END("SetVideoSource end.");
     return TransErrorCode(ret);
 }
 
 sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
 {
+    if(sourceIdToSurfaceMap_.find(sourceId) != sourceIdToSurfaceMap_.end()) {
+        return sourceIdToSurfaceMap_[sourceId];
+    }
+    return nullptr;
 }
 
 int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
@@ -286,18 +295,16 @@ void HiRecorderImpl::OnStateChanged(StateId state)
     }
 }
 
-ErrorCode HiRecorderImpl::DoSetVideoSource(VideoSourceType sourceType, int32_t sourceId) const
+ErrorCode HiRecorderImpl::DoSetVideoSource(const Plugin::Any& param) const
 {
-#ifdef VIDEO_SUPPORT
-    // videoCapture_->SetVideoSource(static_cast<Plugin::VideoSourceType>(sourceType), sourceId);
-#endif
-    return ErrorCode::ERROR_UNIMPLEMENTED;
+    return videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_SOURCE_TYPE),
+                                       Plugin::AnyCast<RecorderSource>(param).sourceType);
 }
 
-ErrorCode HiRecorderImpl::DoSetAudioSource(AudioSourceType sourceType, int32_t sourceId) const
+ErrorCode HiRecorderImpl::DoSetAudioSource(const Plugin::Any& param) const
 {
     return audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_SOURCE_TYPE),
-                                       static_cast<uint32_t>(sourceId));
+                                       Plugin::AnyCast<RecorderSource>(param).sourceType);
 }
 
 ErrorCode HiRecorderImpl::DoSetParameter(const Plugin::Any& param) const
@@ -392,11 +399,12 @@ ErrorCode HiRecorderImpl::DoOnComplete()
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode HiRecorderImpl::DoOnError(RecorderErrorType infoType, ErrorCode errorCode)
+ErrorCode HiRecorderImpl::DoOnError(const Plugin::Any& param)
 {
     auto ptr = obs_.lock();
     if (ptr != nullptr) {
-        ptr->OnError(static_cast<IRecorderEngineObs::ErrorType>(infoType), TransErrorCode(errorCode));
+        ptr->OnError(static_cast<IRecorderEngineObs::ErrorType>(RecorderErrorType::RECORDER_ERROR_INTERNAL),
+                     TransErrorCode(Plugin::AnyCast<ErrorCode>(param)));
     }
     return ErrorCode::SUCCESS;
 }

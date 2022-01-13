@@ -131,7 +131,7 @@ Status FilePathSinkPlugin::OpenFile()
 void FilePathSinkPlugin::CloseFile()
 {
     if (fp_) {
-        MEDIA_LOG_I("close file");
+        MEDIA_LOG_D("close file");
         std::fclose(fp_);
         fp_ = nullptr;
     }

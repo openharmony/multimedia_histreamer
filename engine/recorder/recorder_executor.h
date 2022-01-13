@@ -18,7 +18,6 @@
 
 #include <memory>
 #include "foundation/error_code.h"
-#include "recorder.h"
 
 namespace OHOS {
 namespace Media {
@@ -28,17 +27,15 @@ public:
     {
     }
 
-    virtual ErrorCode DoSetVideoSource(VideoSourceType sourceType, int32_t sourceId) const
+    virtual ErrorCode DoSetVideoSource(const Plugin::Any& param) const
     {
-        (void)sourceType;
-        (void)sourceId;
+        (void)param;
         return ErrorCode::SUCCESS;
     }
 
-    virtual ErrorCode DoSetAudioSource(AudioSourceType sourceType, int32_t sourceId) const
+    virtual ErrorCode DoSetAudioSource(const Plugin::Any& param) const
     {
-        (void)sourceType;
-        (void)sourceId;
+        (void)param;
         return ErrorCode::SUCCESS;
     }
 
@@ -77,10 +74,9 @@ public:
         return ErrorCode::SUCCESS;
     }
 
-    virtual ErrorCode DoOnError(RecorderErrorType infoType, ErrorCode errorCode)
+    virtual ErrorCode DoOnError(const Plugin::Any& param)
     {
-        (void)infoType;
-        (void)errorCode;
+        (void)param;
         return ErrorCode::SUCCESS;
     }
 };

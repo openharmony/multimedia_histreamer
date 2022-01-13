@@ -52,17 +52,15 @@ StateId State::GetStateId()
     return stateId_;
 }
 
-std::tuple<ErrorCode, Action> State::SetVideoSource(VideoSourceType source, int32_t& sourceId)
+std::tuple<ErrorCode, Action> State::SetVideoSource(const Plugin::Any& param)
 {
-    (void)source;
-    (void)sourceId;
+    (void)param;
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 
-std::tuple<ErrorCode, Action> State::SetAudioSource(AudioSourceType source, int32_t& sourceId)
+std::tuple<ErrorCode, Action> State::SetAudioSource(const Plugin::Any& param)
 {
-    (void)source;
-    (void)sourceId;
+    (void)param;
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 
@@ -122,7 +120,7 @@ std::tuple<ErrorCode, Action> State::OnError(const Plugin::Any& param)
     if (param.Type() == typeid(ErrorCode)) {
         errorCode = Plugin::AnyCast<ErrorCode>(param);
     }
-    executor_.DoOnError(RECORDER_ERROR_INTERNAL, errorCode);
+    executor_.DoOnError(errorCode);
     return {ErrorCode::SUCCESS, Action::TRANS_TO_ERROR};
 }
 
@@ -136,16 +134,10 @@ std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin:
             std::tie(rtv, nextAction) = SetObs();
             break;
         case Intent::SET_VIDEO_SOURCE:
-            sourceId = Plugin::AnyCast<RecorderSource>(param).sourceId;
-            std::tie(rtv, nextAction) = SetVideoSource(
-                    static_cast<VideoSourceType>(Plugin::AnyCast<RecorderSource>(param).sourceType),
-                    sourceId);
+            std::tie(rtv, nextAction) = SetVideoSource(param);
             break;
         case Intent::SET_AUDIO_SOURCE:
-            sourceId = Plugin::AnyCast<RecorderSource>(param).sourceId;
-            std::tie(rtv, nextAction) = SetAudioSource(
-                    static_cast<AudioSourceType>(Plugin::AnyCast<RecorderSource>(param).sourceType),
-                    sourceId);
+            std::tie(rtv, nextAction) = SetAudioSource(param);
             break;
         case Intent::SET_PARAMETER:
             std::tie(rtv, nextAction) = SetParameter(param);
