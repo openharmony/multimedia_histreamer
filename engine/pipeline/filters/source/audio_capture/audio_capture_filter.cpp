@@ -90,7 +90,8 @@ ErrorCode AudioCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value
     switch (tag) {
         case Tag::AUDIO_SOURCE_TYPE: {
             if (value.Type() == typeid(uint32_t)) {
-                if (Plugin::AnyCast<uint32_t>(value) == 0) { // need to adapter to recorder engine enum
+                if (Plugin::AnyCast<uint32_t>(value) == 0 || Plugin::AnyCast<uint32_t>(value) == 1) {
+                    // need to adapter to recorder engine enum
                     inputType_ = "mic";
                 }
                 MEDIA_LOG_D("inputType_: %s", inputType_.c_str());

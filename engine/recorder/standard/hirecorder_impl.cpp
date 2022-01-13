@@ -100,13 +100,12 @@ int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId
         ret = pipeline_->LinkPorts(audioEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
     }
     if (ret == ErrorCode::SUCCESS) {
+        sourceId_++;
+        sourceId = sourceId_;
         ret = fsm_.SendEvent(Intent::SET_AUDIO_SOURCE, RecorderSource {source, sourceId});
+    } else {
+        sourceId = -1;
     }
-    if (ret != ErrorCode::SUCCESS) {
-        sourceId =-1;
-    }
-    sourceId_++;
-    sourceId = sourceId_;
     PROFILE_END("SetAudioSource end.");
     return TransErrorCode(ret);
 }
@@ -131,24 +130,18 @@ int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId
         ret = pipeline_->LinkPorts(videoEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
     }
     if (ret == ErrorCode::SUCCESS) {
+        sourceId_++;
+        sourceId = sourceId_;
         ret = fsm_.SendEvent(Intent::SET_VIDEO_SOURCE, RecorderSource {source, sourceId});
+    } else {
+        sourceId = -1;
     }
-    if (ret != ErrorCode::SUCCESS) {
-        sourceId =-1;
-    }
-    sourceId_++;
-    sourceId = sourceId_;
-    sourceIdToSurfaceMap_.emplace(sourceId_, Surface::CreateSurfaceAsConsumer());
     PROFILE_END("SetVideoSource end.");
     return TransErrorCode(ret);
 }
 
 sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
 {
-    if(sourceIdToSurfaceMap_.find(sourceId) != sourceIdToSurfaceMap_.end()) {
-        return sourceIdToSurfaceMap_[sourceId];
-    }
-    return nullptr;
 }
 
 int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
@@ -304,13 +297,13 @@ void HiRecorderImpl::OnStateChanged(StateId state)
 ErrorCode HiRecorderImpl::DoSetVideoSource(const Plugin::Any& param) const
 {
     return videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_SOURCE_TYPE),
-                                       Plugin::AnyCast<RecorderSource>(param).sourceType);
+                                       static_cast<uint32_t>(Plugin::AnyCast<RecorderSource>(param).sourceType));
 }
 
 ErrorCode HiRecorderImpl::DoSetAudioSource(const Plugin::Any& param) const
 {
     return audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_SOURCE_TYPE),
-                                       Plugin::AnyCast<RecorderSource>(param).sourceType);
+                                       static_cast<uint32_t>(Plugin::AnyCast<RecorderSource>(param).sourceType));
 }
 
 ErrorCode HiRecorderImpl::DoSetParameter(const Plugin::Any& param) const

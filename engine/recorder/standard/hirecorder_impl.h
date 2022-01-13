@@ -97,7 +97,6 @@ private:
         { StateId::RECORDING, RECORDER_STARTED}};
     std::weak_ptr<IRecorderEngineObs> obs_ {};
     std::atomic<int32_t> sourceId_ {0};
-    std::map<int32_t, sptr<Surface>> sourceIdToSurfaceMap_ {};
     std::shared_ptr<Pipeline::MuxerFilter> muxer_;
     std::shared_ptr<Pipeline::OutputSinkFilter> outputSink_;
     std::shared_ptr<Pipeline::AudioCaptureFilter> audioCapture_;
