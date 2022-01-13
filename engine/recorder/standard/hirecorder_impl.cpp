@@ -110,7 +110,6 @@ int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId
     return TransErrorCode(ret);
 }
 
-#ifdef VIDEO_SUPPORT
 int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId)
 {
     PROFILE_BEGIN("SetVideoSource begin");
@@ -142,7 +141,6 @@ int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId
 sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
 {
 }
-#endif
 
 int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
 {
@@ -167,11 +165,8 @@ int32_t HiRecorderImpl::Configure(int32_t sourceId,  const RecorderParam &recPar
 {
     Plugin::Any any;
     switch(recParam.type) {
-        case RecorderPublicParamType::AUD_SAMPLE_RATE:
+        case RecorderPublicParamType::AUD_SAMPLERATE:
             any = RecordParam{sourceId, RecorderParameterType::AUD_SAMPLE_RATE, dynamic_cast<const AudSampleRate&>(recParam)};
-            break;
-        case RecorderPublicParamType::AUD_SAMPLE_FORMAT:
-            any = RecordParam{sourceId, RecorderParameterType::AUD_SAMPLE_FORMAT, dynamic_cast<const AudSampleFormat&>(recParam)};
             break;
         case RecorderPublicParamType::AUD_CHANNEL:
             any = RecordParam{sourceId, RecorderParameterType::AUD_CHANNEL, dynamic_cast<const AudChannel&>(recParam)};
@@ -253,7 +248,7 @@ int32_t HiRecorderImpl::Stop(bool isDrainAll)
 int32_t HiRecorderImpl::Reset()
 {
     pipelineStates_ = RecorderState::RECORDER_IDLE;
-    return Stop();
+    return Stop(false);
 }
 
 int32_t HiRecorderImpl::SetParameter(int32_t sourceId, const RecorderParam &recParam)
@@ -322,10 +317,6 @@ ErrorCode HiRecorderImpl::DoSetParameter(const Plugin::Any& param) const
         case RecorderParameterType::AUD_SAMPLE_RATE:
             ret = audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_SAMPLE_RATE),
                                               static_cast<uint32_t>(Plugin::AnyCast<AudSampleRate>(any).sampleRate));
-            break;
-        case RecorderParameterType::AUD_SAMPLE_FORMAT:
-            ret = audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_SAMPLE_FORMAT),
-                                              static_cast<Plugin::AudioSampleFormat>(Plugin::AnyCast<AudSampleFormat>(any).sampleFmt));
             break;
         case RecorderParameterType::AUD_CHANNEL:
             ret = audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_CHANNELS),

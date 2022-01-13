@@ -55,7 +55,7 @@ int AudioDemuxerMp3IterateCallbackForProbe(void *userData, const uint8_t *frame,
                                            size_t bufSize, uint64_t offset, Mp3DemuxerFrameInfo *info);
 Status AudioDemuxerMp3Probe(AudioDemuxerMp3Attr *mp3DemuxerAttr, uint8_t *inputBuffer, uint32_t inputLength,
                             AudioDemuxerRst *mp3DemuxerRst);
-int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource);
+int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource);
 Status RegisterPlugin(const std::shared_ptr<Register>& reg);
 }
 

@@ -36,7 +36,8 @@ if (defined(ohos_lite)) {
     include_dirs = [ "//foundation/multimedia/histreamer/interface" ]
   }
 } else {
-  shared_library("histreamer") {
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer") {
     sources = []
     deps = [
       "engine/foundation:histreamer_foundation",
@@ -47,5 +48,7 @@ if (defined(ohos_lite)) {
     ]
     output_name = "media_engine_histreamer"
     output_extension = "z.so"
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
   }
 }

@@ -20,7 +20,6 @@
 #include "foundation/error_code.h"
 #include "foundation/log.h"
 #include "osal/thread/mutex.h"
-#include "engine_intf/recorder_param.h"
 #include "recorder_executor.h"
 #include "state.h"
 

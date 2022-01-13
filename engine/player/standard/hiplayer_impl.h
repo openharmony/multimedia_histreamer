@@ -24,7 +24,7 @@
 #include "filters/codec/video_decoder/video_decoder_filter.h"
 #include "filters/sink/video_sink/video_sink_filter.h"
 #endif
-#include "engine_intf/i_player_engine.h"
+#include "i_player_engine.h"
 #include "filters/demux/demuxer_filter.h"
 #include "filters/source/media_source/media_source_filter.h"
 #include "foundation/error_code.h"
@@ -65,15 +65,18 @@ public:
     int32_t Reset() override;
     int32_t Seek(int32_t mSeconds, PlayerSeekMode mode) override;
     int32_t SetVolume(float leftVolume, float rightVolume) override;
-#ifndef SURFACE_DISABLED
     int32_t SetVideoSurface(sptr<Surface> surface) override;
-#endif
     int32_t SetLooping(bool loop) override;
     int32_t SetObs(const std::weak_ptr<IPlayerEngineObs>& obs) override;
     int32_t GetCurrentTime(int32_t& currentPositionMs) override;
     int32_t GetDuration(int32_t& durationMs) override;
     int32_t SetPlaybackSpeed(PlaybackRateMode mode) override;
     int32_t GetPlaybackSpeed(PlaybackRateMode& mode) override;
+
+    int32_t GetVideoTrackInfo(std::vector<Format> &videoTrack) override;
+    int32_t GetAudioTrackInfo(std::vector<Format> &audioTrack) override;
+    int32_t GetVideoWidth() override;
+    int32_t GetVideoHeight() override;
 
     // internal interfaces
     void OnEvent(Event event) override;

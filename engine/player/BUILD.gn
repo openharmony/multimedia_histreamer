@@ -17,23 +17,30 @@ config("histreamer_player_config") {
     "//foundation/multimedia/histreamer/engine",
     "//foundation/multimedia/histreamer/engine/player",
     "//foundation/multimedia/histreamer/interface",
-    "//foundation/multimedia/media_lite/interfaces/innerkits",
-    "//foundation/multimedia/media_lite/interfaces/kits/player_lite",
   ]
   if (defined(ohos_lite)) {
-    include_dirs += [ "//foundation/multimedia/histreamer/engine/player/lite" ]
+    include_dirs += [
+      "//foundation/multimedia/histreamer/engine/player/lite",
+      "//foundation/multimedia/media_lite/interfaces/innerkits",
+      "//foundation/multimedia/media_lite/interfaces/kits/player_lite",
+    ]
   } else {
     include_dirs += [
       "//foundation/multimedia/histreamer/engine/factory",
       "//foundation/multimedia/histreamer/engine/player/standard",
+      "//foundation/multimedia/media_standard/interfaces/innerkits/native/media/include",
+      "//foundation/multimedia/image_standard/interfaces/innerkits/include",
+      "//foundation/multimedia/media_standard/services/include",
+      "//foundation/multimedia/media_standard/services/services/engine_intf",
+      "//utils/native/base/include",
     ]
   }
 }
 
 source_set("histreamer_player") {
   sources = [
-    "internal/state.cpp",
-    "internal/state_machine.cpp",
+    "//foundation/multimedia/histreamer/engine/player/internal/state.cpp",
+    "//foundation/multimedia/histreamer/engine/player/internal/state_machine.cpp",
   ]
   public_configs = [ ":histreamer_player_config" ]
   public_deps = [
@@ -41,36 +48,36 @@ source_set("histreamer_player") {
     "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
-  if (defined(ohos_lite)) {
-    sources += [
-      "lite/hiplayer.cpp",
-      "lite/hiplayer_impl.cpp",
-    ]
-    public_deps += [ "//foundation/multimedia/utils/lite:media_common" ]
-  } else {
-    sources += [
-      "../factory/hst_engine_factory.cpp",
-      "standard/hiplayer_impl.cpp",
-      "standard/media_utils.cpp",
-    ]
-  }
-  print("player source: ", sources)
-  defines = [ "MEDIA_OHOS" ]
-  if (!defined(ohos_lite)) {
-    configs -= [
-      "//build/config/compiler:no_rtti",
-      "//build/config/compiler:no_exceptions",
-    ]
-  }
   cflags = [
     "-fPIC",
     "-Wall",
   ]
-  if (!defined(ohos_lite)) {
-    cflags += [
+  cflags_cc = cflags
+  if (defined(ohos_lite)) {
+    sources += [
+      "//foundation/multimedia/histreamer/engine/player/lite/hiplayer.cpp",
+      "//foundation/multimedia/histreamer/engine/player/lite/hiplayer_impl.cpp",
+    ]
+    public_deps += [ "//foundation/multimedia/utils/lite:media_common" ]
+  } else {
+    sources += [
+      "//foundation/multimedia/histreamer/engine/factory/hst_engine_factory.cpp",
+      "//foundation/multimedia/histreamer/engine/player/standard/hiplayer_impl.cpp",
+      "//foundation/multimedia/histreamer/engine/player/standard/media_utils.cpp",
+    ]
+    public_deps += [
+      "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
+      "//foundation/graphic/standard/frameworks/surface:surface",
+      "//foundation/multimedia/media_standard/services/utils:media_format",
+    ]
+    configs -= [
+      "//build/config/compiler:no_rtti",
+      "//build/config/compiler:no_exceptions",
+    ]
+    cflags_cc += [
       "-frtti",
       "-fexceptions",
     ]
   }
-  cflags_cc = cflags
+  defines = [ "MEDIA_OHOS" ]
 }

@@ -26,7 +26,6 @@
 
 namespace {
 constexpr int32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 5;
-constexpr int32_t DEFAULT_IN_BUFFER_POOL_SIZE = 5;
 constexpr int32_t MAX_OUT_DECODED_DATA_SIZE_PER_FRAME = 20 * 1024; // 20kB
 
 uint32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta)
@@ -339,6 +338,6 @@ ErrorCode AudioDecoderFilter::FinishFrame()
     MEDIA_LOG_D("end finish frame");
     return ErrorCode::SUCCESS;
 }
-}
-}
-}
+} // Pipeline
+} // Media
+} // OHOS

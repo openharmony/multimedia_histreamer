@@ -30,7 +30,7 @@ std::shared_ptr<SourcePlugin> FileSourcePluginCreater(const std::string& name)
     return std::make_shared<FileSourcePlugin>(name);
 }
 
-const Status FileSourceRegister(const std::shared_ptr<Register>& reg)
+Status FileSourceRegister(const std::shared_ptr<Register>& reg)
 {
     SourcePluginDef definition;
     definition.name = "FileSource";

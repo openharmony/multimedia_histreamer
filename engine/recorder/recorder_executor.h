@@ -18,7 +18,7 @@
 
 #include <memory>
 #include "foundation/error_code.h"
-#include "engine_intf/recorder.h"
+#include "recorder.h"
 
 namespace OHOS {
 namespace Media {

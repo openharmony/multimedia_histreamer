@@ -14,13 +14,13 @@
 
 declare_args() {
   # build histreamer plugin feature ability
-  enable_histreamer_plugin_ffmpeg_adapter = true
-  enable_histreamer_plugin_hdi_adapter = true
-  enable_histreamer_plugin_file_source = true
-  enable_histreamer_plugin_stream_source = true
-  enable_histreamer_plugin_minimp3_adapter = false
-  enable_histreamer_plugin_minimp4_demuxer = false
-  enable_histreamer_plugin_aac_demuxer = false
+  multimedia_histreamer_enable_plugin_ffmpeg_adapter = true
+  multimedia_histreamer_enable_plugin_hdi_adapter = false
+  multimedia_histreamer_enable_plugin_file_source = true
+  multimedia_histreamer_enable_plugin_stream_source = false
+  multimedia_histreamer_enable_plugin_minimp3_adapter = false
+  multimedia_histreamer_enable_plugin_minimp4_demuxer = false
+  multimedia_histreamer_enable_plugin_aac_demuxer = false
 
   # configuration for histreamer created thread's stack size.
   # 0 means using system default thread stack size, other positive values will be accepted.

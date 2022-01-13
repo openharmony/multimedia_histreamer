@@ -43,11 +43,14 @@ source_set("histreamer_foundation") {
     "osal/utils/util.cpp",
   ]
   public_configs = [ ":histreamer_foundation_config" ]
+  cflags = [
+    "-O2",
+    "-fPIC",
+    "-Wall",
+  ]
+  cflags_cc = cflags
   if (defined(ohos_lite)) {
-    public_deps = [
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-      "//foundation/multimedia/utils/lite:media_common",
-    ]
+    public_deps = [ "//foundation/multimedia/utils/lite:media_common" ]
     if (ohos_kernel_type == "liteos_m") {
       public_deps += [
         "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_static",
@@ -64,13 +67,10 @@ source_set("histreamer_foundation") {
       "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
       "//third_party/bounds_checking_function:libsec_static",
     ]
+    configs -= [ "//build/config/compiler:no_rtti" ]
+    cflags_cc += [ "-frtti" ]
   }
-  cflags = [
-    "-O2",
-    "-fPIC",
-    "-Wall",
-  ]
-  cflags_cc = cflags
+
   if (defined(config_ohos_multimedia_histreamer_stack_size) &&
       config_ohos_multimedia_histreamer_stack_size > 0) {
     defines =

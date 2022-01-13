@@ -66,7 +66,7 @@ private:
     Capability capNegWithDownstream_;
     Capability capNegWithUpstream_;
 };
-}
-}
-}
+} // Pipeline
+} // Media
+} // OHOS
 #endif // HISTREAMER_PIPELINE_FILTER_AUDIO_DECODER_H

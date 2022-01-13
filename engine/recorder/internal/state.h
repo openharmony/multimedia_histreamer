@@ -20,12 +20,11 @@
 #include <memory>
 #include <string>
 #include <tuple>
-#include <recorder_param.h>
 #include "common/any.h"
 #include "foundation/error_code.h"
 #include "foundation/log.h"
 #include "recorder_executor.h"
-#include "engine_intf/recorder.h"
+#include "recorder.h"
 
 namespace OHOS {
 namespace Media {

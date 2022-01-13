@@ -25,9 +25,11 @@ namespace OHOS {
 namespace Media {
 int32_t HstEngineFactory::Score(Scene scene, const std::string& uri)
 {
-    (void)scene;
-    (void)uri;
-    return MIN_SCORE + 1;
+    // only used for play back and recorder
+    if (scene == Scene::SCENE_PLAYBACK || scene == Scene::SCENE_RECORDER) {
+        return MIN_SCORE + 1;
+    }
+    return MIN_SCORE;
 }
 
 std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine()
@@ -55,6 +57,18 @@ std::unique_ptr<IRecorderEngine> HstEngineFactory::CreateRecorderEngine()
 std::unique_ptr<IAVMetadataHelperEngine> HstEngineFactory::CreateAVMetadataHelperEngine()
 {
     MEDIA_LOG_W("CreateAVMetadataHelperEngine not supported now, return nullptr.");
+    return nullptr;
+}
+
+std::unique_ptr<IAVCodecEngine> HstEngineFactory::CreateAVCodecEngine()
+{
+    MEDIA_LOG_W("CreateAVCodecEngine not supported now, return nullptr.");
+    return nullptr;
+}
+
+std::unique_ptr<IAVCodecListEngine> HstEngineFactory::CreateAVCodecListEngine()
+{
+    MEDIA_LOG_W("CreateAVCodecListEngine not supported now, return nullptr.");
     return nullptr;
 }
 }  // namespace Media

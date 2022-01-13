@@ -40,7 +40,7 @@ namespace Plugin {
 namespace {
 std::map<std::string, std::shared_ptr<AVInputFormat>> g_pluginInputFormat;
 
-int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource);
+int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource);
 
 Status RegisterPlugins(const std::shared_ptr<Register>& reg);
 
@@ -536,14 +536,13 @@ int ConvertSeekModeToFFmpeg(SeekMode mode)
     return seekFlag;
 }
 
-int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource)
+int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource)
 {
-    auto pluginInfo = PluginManager::Instance().GetPluginInfo(PluginType::DEMUXER, name);
-    if (!pluginInfo || !dataSource) {
-        MEDIA_LOG_E("Sniff failed due to plugin not found or dataSource invalid for %s.", name.c_str());
+    if (!pluginName.empty() || !dataSource) {
+        MEDIA_LOG_E("Sniff failed due to plugin not found or dataSource invalid for %s.", pluginName.c_str());
         return 0;
     }
-    auto plugin = g_pluginInputFormat[pluginInfo->name];
+    auto plugin = g_pluginInputFormat[pluginName];
     if (!plugin || !plugin->read_probe) {
         MEDIA_LOG_D("Sniff failed due to invalid plugin for %s.", name.c_str());
         return 0;
@@ -561,7 +560,7 @@ int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource)
         AVProbeData probeData{"", buff.data(), static_cast<int>(bufferInfo->GetMemory()->GetSize()), ""};
         confidence = plugin->read_probe(&probeData);
     }
-    MEDIA_LOG_D("Sniff: plugin name = %s, probability = %d / 100 ...", plugin->name, confidence);
+    MEDIA_LOG_D("Sniff: plugin pluginName = %s, probability = %d / 100 ...", plugin->name, confidence);
     return confidence;
 }
 

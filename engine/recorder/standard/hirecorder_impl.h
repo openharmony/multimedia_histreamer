@@ -20,7 +20,7 @@
 #include <unordered_map>
 
 #include "common/any.h"
-#include "engine_intf/i_recorder_engine.h"
+#include "i_recorder_engine.h"
 #include "foundation/error_code.h"
 #include "media_utils.h"
 #include "recorder/internal/state_machine.h"
@@ -30,10 +30,8 @@
 #include "pipeline/core/pipeline_core.h"
 #include "pipeline/filters/source/audio_capture/audio_capture_filter.h"
 #include "pipeline/filters/codec/audio_encoder/audio_encoder_filter.h"
-#ifdef VIDEO_SUPPORT
 #include "pipeline/filters/source/video_capture/video_capture_filter.h"
 #include "pipeline/filters/codec/video_encoder/video_encoder_filter.h"
-#endif
 #include "pipeline/filters/muxer/muxer_filter.h"
 #include "pipeline/filters/sink/output_sink/output_sink_filter.h"
 #include "recorder_executor.h"
@@ -55,10 +53,8 @@ public:
 
     // interface from IRecorderEngine
     int32_t SetAudioSource(AudioSourceType source, int32_t& sourceId) override;
-#ifdef VIDEO_SUPPORT
     int32_t SetVideoSource(VideoSourceType source, int32_t &sourceId) override;
     sptr<Surface> GetSurface(int32_t sourceId) override;
-#endif
     int32_t SetOutputFormat(OutputFormatType format) override;
     int32_t SetObs(const std::weak_ptr<IRecorderEngineObs>& obs) override;
     int32_t Configure(int32_t sourceId, const RecorderParam& recParam) override;
@@ -66,7 +62,7 @@ public:
     int32_t Start() override;
     int32_t Pause() override;
     int32_t Resume() override;
-    int32_t Stop(bool isDrainAll = false) override;
+    int32_t Stop(bool isDrainAll) override;
     int32_t Reset() override;
     int32_t SetParameter(int32_t sourceId, const RecorderParam& recParam) override;
     // internal interfaces from Pipeline::EventReceiver
@@ -105,10 +101,8 @@ private:
     std::shared_ptr<Pipeline::OutputSinkFilter> outputSink_;
     std::shared_ptr<Pipeline::AudioCaptureFilter> audioCapture_;
     std::shared_ptr<Pipeline::AudioEncoderFilter> audioEncoder_;
-#ifdef VIDEO_SUPPORT
     std::shared_ptr<Pipeline::VideoCaptureFilter> videoCapture_;
     std::shared_ptr<Pipeline::VideoEncoderFilter> videoEncoder_;
-#endif
 };
 }  // namespace Record
 }  // namespace Media

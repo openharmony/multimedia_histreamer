@@ -15,7 +15,7 @@ IF (UNIX AND NOT CYGWIN)
     ADD_DEFINITIONS(
             -fPIC -DPROFILE
     )
-    set(CMAKE_CXX_FLAGS "-g -ggdb3 -O0 -std=c++14 -Wall -Wl,--disable-new-dtags")
+    set(CMAKE_CXX_FLAGS "-g -ggdb3 -O0 -Wall -Wl,--disable-new-dtags")
 ENDIF (UNIX AND NOT CYGWIN)
 
 ADD_DEFINITIONS(
@@ -44,7 +44,7 @@ include_directories(
         ${TOP_DIR}/engine/plugin
 )
 
-if (NOT ${PLAYER_LITE})
+if (NOT ${OHOS_LITE})
     message(STATUS "engine factory header included.")
     include_directories(
             ${TOP_DIR}/engine/factory
@@ -61,9 +61,8 @@ file(GLOB_RECURSE HISTREAMER_BASE_SRCS
         ${TOP_DIR}/engine/plugin/plugins/sink/sdl/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/sink/file_sink/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/source/file_source/*.cpp
-        ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
-        ${TOP_DIR}/engine/plugin/plugins/source/audio_capture/*.cpp
-        ${TOP_DIR}/engine/plugin/plugins/source/http_lite_source/*.cpp
+        #${TOP_DIR}/engine/plugin/plugins/source/http_lite_source/*.cpp
+        #${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/minimp3_adapter/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/minimp3_adapter/*.c
         ${TOP_DIR}/engine/plugin/types/*.cpp
@@ -71,13 +70,16 @@ file(GLOB_RECURSE HISTREAMER_BASE_SRCS
         ${TOP_DIR}/engine/recorder/internal/*.cpp
         ${TOP_DIR}/engine/foundation/*.cpp
         ${TOP_DIR}/engine/utils/*.cpp
-        ${TOP_DIR}/engine/external/*.cpp
         )
 
-if (PLAYER_LITE)
+if (OHOS_LITE)
     message(STATUS "#1 player lite source")
     file(GLOB_RECURSE PLAYER_SRCS
             ${TOP_DIR}/engine/player/lite/*.cpp
+            )
+    message(STATUS "#1 recorder lite source")
+    file(GLOB_RECURSE RECORDER_SRCS
+            ${TOP_DIR}/engine/recorder/lite/*.cpp
             )
 else ()
     message(STATUS "player standard source")
@@ -85,14 +87,6 @@ else ()
             ${TOP_DIR}/engine/player/standard/*.cpp
             ${TOP_DIR}/engine/factory/*.cpp
             )
-endif ()
-
-if (RECORDER_LITE)
-    message(STATUS "#1 recorder lite source")
-    file(GLOB_RECURSE RECORDER_SRCS
-            ${TOP_DIR}/engine/recorder/lite/*.cpp
-            )
-else ()
     message(STATUS "recorder standard source")
     file(GLOB_RECURSE RECORDER_SRCS
             ${TOP_DIR}/engine/recorder/standard/*.cpp

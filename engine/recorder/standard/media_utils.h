@@ -17,7 +17,7 @@
 #define HISTREAMER_MEDIA_UTILS_H
 
 #include "i_recorder_engine.h"
-#include "engine_intf/recorder.h"
+#include "recorder.h"
 #include "foundation/error_code.h"
 #include "recorder/internal/state.h"
 #include "utils/constants.h"

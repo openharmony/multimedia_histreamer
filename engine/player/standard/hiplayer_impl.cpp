@@ -267,12 +267,27 @@ int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
     return TransErrorCode(SetVolume(volume_));
 }
 
-#ifndef SURFACE_DISABLED
 int32_t HiPlayerImpl::SetVideoSurface(sptr<Surface> surface)
 {
     return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
 }
-#endif
+
+int32_t HiPlayerImpl::GetVideoTrackInfo(std::vector<Format> &videoTrack)
+{
+    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+}
+int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format> &audioTrack)
+{
+    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+}
+int32_t HiPlayerImpl::GetVideoWidth()
+{
+    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+}
+int32_t HiPlayerImpl::GetVideoHeight()
+{
+    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+}
 
 void HiPlayerImpl::OnEvent(Event event)
 {
