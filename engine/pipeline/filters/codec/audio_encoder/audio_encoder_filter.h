@@ -64,13 +64,13 @@ private:
     ErrorCode Release();
 
 private:
-    std::shared_ptr<BufferPool<AVBuffer>> outBufferPool_{};
+    std::shared_ptr<BufferPool<AVBuffer>> outBufferPool_ {};
     Capability capNegWithDownstream_;
     Capability capNegWithUpstream_;
     uint32_t frameSize_;
     std::string mime_;
-    std::unique_ptr<Plugin::RingBuffer> rb{};
-    AVBufferPtr cahceBuffer_{nullptr};
+    std::unique_ptr<Plugin::RingBuffer> rb {};
+    AVBufferPtr cahceBuffer_ {nullptr};
 };
 } // OHOS
 } // Media

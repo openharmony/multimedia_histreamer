@@ -57,7 +57,6 @@ protected:
         }
         return err;
     }
-
     std::shared_ptr<Plugin::Codec> plugin_{};
 };
 } // namespace Pipeline

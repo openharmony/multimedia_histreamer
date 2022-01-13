@@ -295,7 +295,8 @@ struct FilterNode {
     }
 };
 
-void ConstructGraph(const std::vector<Filter*> &filters, std::vector<FilterNode> &graph, std::stack<size_t> &stack) {
+void ConstructGraph(const std::vector<Filter*> &filters, std::vector<FilterNode> &graph, std::stack<size_t> &stack)
+{
     std::map<Filter*, size_t> mapInfo; // filter to index map, index is the node index in graph
     size_t index = 0;
     for (const auto& f : filters) {

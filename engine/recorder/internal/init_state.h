@@ -62,7 +62,7 @@ public:
         return {ret, Action::ACTION_BUTT};
     }
 private:
-    OSAL::Mutex mutex_{};
+    OSAL::Mutex mutex_ {};
 };
 } // namespace Record
 } // namespace Media

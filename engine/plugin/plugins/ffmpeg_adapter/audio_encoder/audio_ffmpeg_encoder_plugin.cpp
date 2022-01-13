@@ -118,14 +118,14 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
     switch (codec->id) {
         case AV_CODEC_ID_AAC:
             outputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC)
-                     .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 4)
+                     .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 4)  // 4
                      .AppendFixedKey<AudioAacProfile>(Capability::Key::AUDIO_AAC_PROFILE, AudioAacProfile::LC)
                      .AppendFixedKey<AudioAacStreamFormat>(Capability::Key::AUDIO_AAC_STREAM_FORMAT,
                                                            AudioAacStreamFormat::MP4ADTS);
             break;
         case AV_CODEC_ID_AAC_LATM:
             outputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM)
-                     .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 4)
+                     .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 4)  // 4
                      .AppendFixedKey<AudioAacStreamFormat>(Capability::Key::AUDIO_AAC_STREAM_FORMAT,
                                                            AudioAacStreamFormat::MP4LOAS);
             break;
@@ -140,7 +140,7 @@ PLUGIN_DEFINITION(FFmpegAudioEncoders, LicenseType::LGPL, RegisterAudioEncoderPl
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-AudioFfmpegEncoderPlugin::AudioFfmpegEncoderPlugin(std::string name) : CodecPlugin(std::move(name))
+AudioFfmpegEncoderPlugin::AudioFfmpegEncoderPlugin(std::string name) : CodecPlugin(std::move(name)), prev_pts_(0)
 {
 }
 

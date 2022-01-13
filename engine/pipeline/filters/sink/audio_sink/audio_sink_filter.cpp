@@ -125,7 +125,7 @@ bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr
     auto err = ConfigureToPreparePlugin(upstreamMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("sink configure error");
-        OnEvent({EVENT_ERROR, err});
+        OnEvent( {EVENT_ERROR, err});
         return false;
     }
     state_ = FilterState::READY;
@@ -164,7 +164,7 @@ ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const 
 void AudioSinkFilter::ReportCurrentPosition(int64_t pts)
 {
     if (plugin_) {
-        OnEvent({EVENT_AUDIO_PROGRESS, static_cast<int64_t>(pts)});
+        OnEvent( {EVENT_AUDIO_PROGRESS, static_cast<int64_t>(pts)});
     }
 }
 
@@ -202,7 +202,6 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
     if (buffer->pts != -1) {
         UpdateLatestPts(buffer->pts);
     } else {
-        // TODO: handle the invalid audio pts
     }
 
     MEDIA_LOG_D("audio sink push data end");
@@ -313,7 +312,7 @@ ErrorCode AudioSinkFilter::UpdateLatestPts(int64_t pts)
         return TranslatePluginStatus(status);
     }
     nowNs = SteadyClock::GetCurrentTimeNanoSec();
-    if (INT64_MAX - nowNs < latencyNano ) { // overflow
+    if (INT64_MAX - nowNs < latencyNano) { // overflow
         return ErrorCode::ERROR_UNKNOWN;
     }
     latestSysClock_ = nowNs + latencyNano;
@@ -344,7 +343,7 @@ ErrorCode AudioSinkFilter::GetCurrentPosition(int64_t& position)
         return ErrorCode::SUCCESS;
     }
     nowNs = SteadyClock::GetCurrentTimeNanoSec();
-    if (INT64_MAX - (nowNs - latestSysClock_) < latestPts_ ) { // overflow
+    if (INT64_MAX - (nowNs - latestSysClock_) < latestPts_) { // overflow
         return ErrorCode::ERROR_UNKNOWN;
     }
     position = nowNs - latestSysClock_ + latestPts_ ;
@@ -356,7 +355,6 @@ ErrorCode AudioSinkFilter::GetCurrentTimeNano(int64_t& nowNano)
     nowNano = SteadyClock::GetCurrentTimeNanoSec();
     return ErrorCode::SUCCESS;
 }
-
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

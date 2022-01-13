@@ -89,7 +89,7 @@ ErrorCode HiPlayerImpl::Init()
         return ErrorCode::SUCCESS;
     }
     pipeline_->Init(this, this);
-    ErrorCode ret = pipeline_->AddFilters({audioSource_.get(), demuxer_.get()});
+    ErrorCode ret = pipeline_->AddFilters( {audioSource_.get(), demuxer_.get()});
     if (ret == ErrorCode::SUCCESS) {
         ret = pipeline_->LinkFilters({audioSource_.get(), demuxer_.get()});
     }
@@ -583,7 +583,7 @@ ErrorCode HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& par
             MEDIA_LOG_I("port name %s", portDesc.name.c_str());
             auto fromPort = filter->GetOutPort(portDesc.name);
             if (portDesc.isPcm) {
-                pipeline_->AddFilters({audioSink_.get()});
+                pipeline_->AddFilters( {audioSink_.get()});
                 FAIL_LOG(pipeline_->LinkPorts(fromPort, audioSink_->GetInPort(PORT_NAME_DEFAULT)));
                 ActiveFilters({audioSink_.get()});
             } else {

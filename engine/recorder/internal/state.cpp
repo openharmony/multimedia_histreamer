@@ -128,7 +128,7 @@ std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin:
 {
     ErrorCode rtv = ErrorCode::SUCCESS;
     Action nextAction = Action::ACTION_BUTT;
-    int32_t sourceId =-1;
+    int32_t sourceId = -1;
     switch (intent) {
         case Intent::SET_OBS:
             std::tie(rtv, nextAction) = SetObs();

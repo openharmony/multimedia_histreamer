@@ -17,7 +17,6 @@
 #include "media_errors.h"
 namespace OHOS {
 namespace Media {
-
 namespace {
 struct ErrorCodePair {
     ErrorCode errorCode;

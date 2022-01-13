@@ -108,3 +108,4 @@ Status UtAudioSinkTest1::SetCallback(Callback* cb)
 {
     return Status::OK;
 }
+

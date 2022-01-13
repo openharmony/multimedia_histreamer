@@ -18,8 +18,6 @@
 #include "file_source_plugin.h"
 #include <sys/stat.h>
 #include "foundation/log.h"
-#include "plugin/common/plugin_buffer.h"
-#include "plugin/common/plugin_types.h"
 #include "utils/utils.h"
 
 namespace OHOS {

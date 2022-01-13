@@ -58,7 +58,7 @@ public:
         return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
     }
 private:
-    OSAL::Mutex mutex_{};
+    OSAL::Mutex mutex_ {};
 };
 } // namespace Record
 } // namespace Media

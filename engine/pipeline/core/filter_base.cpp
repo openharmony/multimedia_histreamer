@@ -60,7 +60,7 @@ ErrorCode FilterBase::Prepare()
     // Filter默认InPort按Push方式获取数据
     // 只有 Demuxer 的 Prepare() 需要覆写此实现， Demuxer的 InPort可能按 Pull 或 Push 方式获取数据
     WorkMode mode;
-    return GetInPort(PORT_NAME_DEFAULT)->Activate({WorkMode::PUSH}, mode);
+    return GetInPort(PORT_NAME_DEFAULT)->Activate( {WorkMode::PUSH}, mode);
 }
 
 ErrorCode FilterBase::Start()
@@ -273,7 +273,7 @@ template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::Outp
 
     void FilterBase::onError(int32_t errorType, int32_t errorCode)
     {
-        eventReceiver_->OnEvent({EventType::EVENT_ERROR, ErrorEvent{errorType, errorCode}});
+        eventReceiver_->OnEvent( {EventType::EVENT_ERROR, ErrorEvent{errorType, errorCode}});
     }
 } // namespace Pipeline
 } // namespace Media

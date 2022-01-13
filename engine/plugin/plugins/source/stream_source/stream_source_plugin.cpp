@@ -173,7 +173,7 @@ Status StreamSourcePlugin::SetCallback(Callback* cb)
 
 Status StreamSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 {
-    auto source_ = std::make_shared<OHOS::Media::Source>(""); // TODO: just compile it, should reimplement plugin
+    auto source_ = std::make_shared<OHOS::Media::Source>("");
     std::shared_ptr<StreamSource> stream_ = source_->GetSourceStream();
     if (stream_ == nullptr) {
         MEDIA_LOG_E("Get StreamSource fail");

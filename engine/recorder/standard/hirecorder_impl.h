@@ -82,22 +82,22 @@ public:
     ErrorCode DoOnComplete() override;
     ErrorCode DoOnError(const Plugin::Any& param) override;
 private:
-    OSAL::Mutex stateMutex_{};
-    OSAL::ConditionVariable cond_{};
+    OSAL::Mutex stateMutex_ {};
+    OSAL::ConditionVariable cond_ {};
     StateMachine fsm_;
     std::atomic<StateId> curFsmState_;
     std::shared_ptr<Pipeline::PipelineCore> pipeline_;
     std::atomic<RecorderState> pipelineStates_;
-    std::atomic<bool> initialized_{false};
+    std::atomic<bool> initialized_ {false};
     const std::map<StateId, RecorderState> stateIdToRecorderStateMap_ = {
         { StateId::INIT, RECORDER_INITIALIZED},
         { StateId::RECORDING_SETTING, RECORDER_PREPARING},
         { StateId::READY, RECORDER_PREPARED},
         { StateId::PAUSE, RECORDER_PAUSED},
         { StateId::RECORDING, RECORDER_STARTED}};
-    std::weak_ptr<IRecorderEngineObs> obs_{};
-    std::atomic<int32_t> sourceId_{0};
-    std::map<int32_t, sptr<Surface>> sourceIdToSurfaceMap_{};
+    std::weak_ptr<IRecorderEngineObs> obs_ {};
+    std::atomic<int32_t> sourceId_ {0};
+    std::map<int32_t, sptr<Surface>> sourceIdToSurfaceMap_ {};
     std::shared_ptr<Pipeline::MuxerFilter> muxer_;
     std::shared_ptr<Pipeline::OutputSinkFilter> outputSink_;
     std::shared_ptr<Pipeline::AudioCaptureFilter> audioCapture_;
@@ -109,4 +109,4 @@ private:
 }  // namespace Media
 }  // namespace OHOS
 #endif
-#endif //HISTREAMER_HIRECORDER_IMPL_H
+#endif // HISTREAMER_HIRECORDER_IMPL_H

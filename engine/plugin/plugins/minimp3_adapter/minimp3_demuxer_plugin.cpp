@@ -99,7 +99,10 @@ Status Minimp3DemuxerPlugin::GetDataFromSource()
     MEDIA_LOG_D("ioDataRemainSize_ %d ioNeedReadSize %d", ioDataRemainSize_, ioNeedReadSize);
     if (ioDataRemainSize_) {
         // 将剩余数据移动到buffer的起始位置
-        auto ret = memmove_s(inIoBuffer_, ioDataRemainSize_, inIoBuffer_ + mp3DemuxerRst_.usedInputLength, ioDataRemainSize_);
+        auto ret = memmove_s(inIoBuffer_,
+                             ioDataRemainSize_,
+                             inIoBuffer_ + mp3DemuxerRst_.usedInputLength,
+                             ioDataRemainSize_);
         if (ret != 0) {
             MEDIA_LOG_E("copy buffer error(%d)", ret);
             return Status::ERROR_UNKNOWN;
@@ -145,7 +148,7 @@ Status Minimp3DemuxerPlugin::GetDataFromSource()
             if (bufData->GetSize() > 0) {
                 if (ioNeedReadSize >= bufData->GetSize()) {
                     memcpy_s(inIoBuffer_ + ioDataRemainSize_, ioNeedReadSize,
-                            const_cast<uint8_t *>(bufData->GetReadOnlyData()), bufData->GetSize());
+                        const_cast<uint8_t *>(bufData->GetReadOnlyData()), bufData->GetSize());
                 } else {
                     MEDIA_LOG_E("Error: ioNeedReadSize < bufData->GetSize()");
                     return Status::ERROR_UNKNOWN;
@@ -479,7 +482,11 @@ int Minimp3DemuxerPlugin::AudioDemuxerMp3Process(uint8_t *buf, uint32_t len)
     int ret = 0;
     uint32_t processLen = len;
     AudioDemuxerMp3IgnoreTailZero(buf, &processLen);
-    memset_s(&mp3DemuxerRst_, sizeof(mp3DemuxerRst_), 0x00, sizeof(AudioDemuxerRst));
+    int res = memset_s(&mp3DemuxerRst_, sizeof(mp3DemuxerRst_),
+                       0x00, sizeof(AudioDemuxerRst));
+    if (res){
+        return AUDIO_DEMUXER_ERROR;
+    }
     mp3DemuxerAttr_.rst = &mp3DemuxerRst_;
     mp3DemuxerAttr_.internalRemainLen = processLen;
     ret = minimp3DemuxerImpl_.iterateBuf(buf, processLen, AudioDemuxerMp3IterateCallback, &mp3DemuxerAttr_);
