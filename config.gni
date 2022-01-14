@@ -18,6 +18,7 @@ declare_args() {
   multimedia_histreamer_enable_plugin_hdi_adapter = false
   multimedia_histreamer_enable_plugin_file_source = true
   multimedia_histreamer_enable_plugin_stream_source = false
+  multimedia_histreamer_enable_plugin_http_lite_source = false
   multimedia_histreamer_enable_plugin_minimp3_adapter = false
   multimedia_histreamer_enable_plugin_minimp4_demuxer = false
   multimedia_histreamer_enable_plugin_aac_demuxer = false
