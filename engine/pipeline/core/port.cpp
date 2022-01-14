@@ -98,6 +98,21 @@ ErrorCode InPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
     return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
 }
 
+ErrorCode InPort::SetAllocator(std::shared_ptr<Allocator> allocator)
+{
+    if (!allocator) {
+        MEDIA_LOG_W("allocator is null");
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+    }
+    allocator_ = std::move(allocator);
+    return ErrorCode::SUCCESS;
+}
+
+std::shared_ptr<Allocator> InPort::GetAllocator()
+{
+    return allocator_;
+}
+
 ErrorCode OutPort::Connect(const std::shared_ptr<Port>& port)
 {
     if (InSamePipeline(port)) {

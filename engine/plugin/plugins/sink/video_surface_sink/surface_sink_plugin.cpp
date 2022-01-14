@@ -1,0 +1,345 @@
+/*
+ * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifdef VIDEO_SUPPORT
+
+#define HST_LOG_TAG "SurfaceSinkPlugin"
+
+#include "surface_sink_plugin.h"
+#include <functional>
+#include <algorithm>
+#include "foundation/log.h"
+#include "utils/constants.h"
+#include "plugin/common/plugin_buffer.h"
+#include "plugin/common/plugin_video_tags.h"
+
+namespace {
+using namespace OHOS::Media::Plugin;
+
+std::shared_ptr<VideoSinkPlugin> VideoSinkPluginCreator(const std::string& name)
+{
+    return std::make_shared<SurfaceSinkPlugin>(name);
+}
+
+const Status SurfaceSinkRegister(const std::shared_ptr<Register>& reg)
+{
+    VideoSinkPluginDef definition;
+    definition.name = "surface_sink";
+    definition.rank = 100; // 100
+    Capability cap(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
+    cap.AppendDiscreteKeys<VideoPixelFormat>(
+        Capability::Key::VIDEO_PIXEL_FORMAT,
+        {VideoPixelFormat::NV21, VideoPixelFormat::RGB24});
+    definition.inCaps.emplace_back(cap);
+    definition.creator = VideoSinkPluginCreator;
+    return reg->AddPlugin(definition);
+}
+
+PLUGIN_DEFINITION(SurfaceSink, LicenseType::LGPL, SurfaceSinkRegister, [] {});
+} // namespace
+
+namespace OHOS {
+namespace Media {
+namespace Plugin {
+static uint32_t TranslatePixelFormat(const VideoPixelFormat pixelFormat)
+{
+    uint32_t surfaceFormat = PixelFormat::PIXEL_FMT_BUTT;
+    switch (pixelFormat) {
+        case VideoPixelFormat::YUV420P:
+            surfaceFormat = PixelFormat::PIXEL_FMT_YCBCR_420_P;
+            break;
+        case VideoPixelFormat::YUYV422:
+            surfaceFormat = PixelFormat::PIXEL_FMT_YUYV_422_PKG;
+            break;
+        case VideoPixelFormat::RGB24:
+            surfaceFormat = PixelFormat::PIXEL_FMT_RGBA_8888;
+            break;
+        case VideoPixelFormat::BGR24:
+            surfaceFormat = PixelFormat::PIXEL_FMT_BGRA_8888;
+            break;
+        case VideoPixelFormat::YUV422P:
+            surfaceFormat = PixelFormat::PIXEL_FMT_YUV_422_I;
+            break;
+        case VideoPixelFormat::YUV444P:
+        case VideoPixelFormat::YUV410P:
+        case VideoPixelFormat::YUV411P:
+        case VideoPixelFormat::GRAY8:
+        case VideoPixelFormat::MONOWHITE:
+        case VideoPixelFormat::MONOBLACK:
+        case VideoPixelFormat::PAL8:
+        case VideoPixelFormat::YUVJ420P:
+        case VideoPixelFormat::YUVJ422P:
+        case VideoPixelFormat::YUVJ444P:
+            break;
+        case VideoPixelFormat::NV12:
+            surfaceFormat = PixelFormat::PIXEL_FMT_YCBCR_420_SP;
+            break;
+        case VideoPixelFormat::NV21:
+            surfaceFormat = PixelFormat::PIXEL_FMT_YCRCB_420_SP;
+            break;
+        default:
+            break;
+    }
+    return surfaceFormat;
+}
+
+void* SurfaceAllocator::Alloc(size_t size)
+{
+    if ((size == 0) || (size < requestConfig_.width * requestConfig_.height) ||
+        (bufferCnt_ > surface_->GetQueueSize())) {
+        MEDIA_LOG_E("Alloc fail, bufferCnt_: %u", bufferCnt_);
+        return nullptr;
+    }
+    OHOS::sptr<OHOS::SurfaceBuffer> surfaceBuffer = nullptr;
+    auto ret = surface_->RequestBuffer(surfaceBuffer, -1, requestConfig_);
+    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
+        if (ret == OHOS::SurfaceError::SURFACE_ERROR_NO_BUFFER) {
+            MEDIA_LOG_E("buffer queue is no more buffers");
+        } else {
+            MEDIA_LOG_E("surface RequestBuffer fail");
+        }
+        return nullptr;
+    }
+    void *addr = surfaceBuffer->GetVirAddr();
+    if (addr == nullptr) {
+        ret = surface_->CancelBuffer(surfaceBuffer);
+        if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
+            MEDIA_LOG_E("surface CancelBuffer fail");
+        }
+        return nullptr;
+    }
+    surfaceMap_.emplace_back(addr, surfaceBuffer);
+    bufferCnt_++;
+    return reinterpret_cast<void*>(addr); // NOLINT: cast
+}
+
+void SurfaceAllocator::Free(void* ptr) // NOLINT: void*
+{
+    if (ptr == nullptr) {
+        return;
+    }
+    auto surfaceBuffer = GetSurfaceBuffer(ptr);
+    if (surfaceBuffer) {
+        auto ret = surface_->CancelBuffer(surfaceBuffer);
+        if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
+            MEDIA_LOG_E("surface CancelBuffer fail");
+        }
+    }
+}
+
+sptr<SurfaceBuffer> SurfaceAllocator::GetSurfaceBuffer(void* addr)
+{
+    auto ite = std::find_if(surfaceMap_.begin(), surfaceMap_.end(),
+                            [&addr](const PairAddr& pp) { return addr == pp.first; });
+    if (ite == surfaceMap_.end()) {
+        MEDIA_LOG_W("Can not find %p in surfaceMap", addr);
+        return nullptr;
+    }
+    return ite->second;
+}
+
+SurfaceSinkPlugin::SurfaceSinkPlugin(std::string name)
+    : VideoSinkPlugin(std::move(name)),
+      width_(DEFAULT_WIDTH),
+      height_(DEFAULT_HEIGHT),
+      pixelFormat_(VideoPixelFormat::NV21),
+      maxSurfaceNum_(DEFAULT_BUFFER_NUM)
+{
+}
+
+Status SurfaceSinkPlugin::Init()
+{
+    std::weak_ptr<SurfaceSinkPlugin> weakPtr(shared_from_this());
+#ifdef DUMP_RAW_DATA
+    dumpData_.open("./vsink_out.dat", std::ios::out | std::ios::binary);
+#endif
+
+    return Status::OK;
+}
+
+Status SurfaceSinkPlugin::Deinit()
+{
+#ifdef DUMP_RAW_DATA
+    dumpData_.close();
+#endif
+    return Status::OK;
+}
+
+
+Status SurfaceSinkPlugin::Prepare()
+{
+    if (!surface_) {
+        MEDIA_LOG_E("need surface config first");
+        return Status::ERROR_UNKNOWN;
+    }
+    auto ret = surface_->SetQueueSize(maxSurfaceNum_);
+    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
+        MEDIA_LOG_E("surface SetQueueSize fail");
+        return Status::ERROR_UNKNOWN;
+    }
+    const constexpr int32_t strideAlign = 8; // 8
+    auto format = TranslatePixelFormat(pixelFormat_);
+    if (format == PixelFormat::PIXEL_FMT_BUTT) {
+        MEDIA_LOG_E("surface can not support pixel format: %u", pixelFormat_);
+        return Status::ERROR_UNKNOWN;
+    }
+    mAllocator_->Config(static_cast<int32_t>(width_), static_cast<int32_t>(height_), 0, format,
+                        strideAlign);
+    return Status::OK;
+}
+
+Status SurfaceSinkPlugin::Reset()
+{
+#ifdef DUMP_RAW_DATA
+    dumpData_.close();
+#endif
+    return Status::OK;
+}
+
+Status SurfaceSinkPlugin::Start()
+{
+    MEDIA_LOG_I("video sink start ...");
+    return Status::OK;
+}
+
+Status SurfaceSinkPlugin::Stop()
+{
+    MEDIA_LOG_I("video sink stop ...");
+    return Status::OK;
+}
+
+bool SurfaceSinkPlugin::IsParameterSupported(Tag tag)
+{
+    return false;
+}
+
+Status SurfaceSinkPlugin::GetParameter(Tag tag, ValueType& value)
+{
+    return Status::ERROR_UNIMPLEMENTED;
+}
+
+Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
+{
+    switch (tag) {
+        case Tag::VIDEO_WIDTH: {
+            if (value.Type() == typeid(uint32_t)) {
+                width_ = Plugin::AnyCast<uint32_t>(value);
+                MEDIA_LOG_D("pixelWidth_: %u", pixelWidth_);
+            }
+            break;
+        }
+        case Tag::VIDEO_HEIGHT: {
+            if (value.Type() == typeid(uint32_t)) {
+                height_ = Plugin::AnyCast<uint32_t>(value);
+                MEDIA_LOG_D("pixelHeight_: %u", pixelHeight_);
+            }
+            break;
+        }
+        case Tag::VIDEO_PIXEL_FORMAT: {
+            if (value.Type() == typeid(VideoPixelFormat)) {
+                pixelFormat_ = Plugin::AnyCast<VideoPixelFormat>(value);
+                MEDIA_LOG_D("pixelFormat: %u", pixelFormat_);
+            }
+            break;
+        }
+        case Tag::VIDEO_SURFACE: {
+            if (value.Type() == typeid(sptr<Surface>)) {
+                surface_ = Plugin::AnyCast<sptr<Surface>>(value);
+                if (!surface_) {
+                    MEDIA_LOG_E("surface is null");
+                    return Status::ERROR_INVALID_PARAMETER;
+                }
+                mAllocator_ = std::make_shared<SurfaceAllocator>(surface_);
+            }
+            break;
+        }
+        case Tag::VIDEO_MAX_SURFACE_NUM: {
+            if (value.Type() == typeid(uint32_t)) {
+                maxSurfaceNum_ = Plugin::AnyCast<uint32_t>(value);
+                MEDIA_LOG_D("maxSurfaceNum_: %u", maxSurfaceNum_);
+            }
+            break;
+        }
+        default:
+            MEDIA_LOG_I("Unknown key");
+            break;
+    }
+    return Status::OK;
+}
+
+std::shared_ptr<Allocator> SurfaceSinkPlugin::GetAllocator()
+{
+    return mAllocator_;
+}
+
+Status SurfaceSinkPlugin::SetCallback(Callback* cb)
+{
+    return Status::ERROR_UNIMPLEMENTED;
+}
+
+Status SurfaceSinkPlugin::Pause()
+{
+    return Status::OK;
+}
+
+Status SurfaceSinkPlugin::Resume()
+{
+    return Status::OK;
+}
+
+Status SurfaceSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
+{
+    MEDIA_LOG_D("sink write begin");
+    if (inputInfo == nullptr || inputInfo->IsEmpty()) {
+        return Status::OK;
+    }
+    auto data = inputInfo->GetMemory()->GetReadOnlyData();
+    auto surfaceBuffer = mAllocator_->GetSurfaceBuffer(const_cast<void*>(data));
+    if (!surfaceBuffer) {
+        return Status::ERROR_UNKNOWN;
+    }
+    OHOS::BufferFlushConfig flushConfig = {
+        {0, 0, static_cast<int32_t>(width_), static_cast<int32_t>(height_)},
+    };
+    int32_t fenceFd = -1;
+    auto bufferMeta = inputInfo->GetBufferMeta();
+    if (bufferMeta != nullptr && bufferMeta->GetType() == BufferMetaType::VIDEO) {
+        std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
+        fenceFd = videoMeta->fenceFd;
+    }
+    auto ret = surface_->FlushBuffer(surfaceBuffer, fenceFd, flushConfig);
+    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
+        MEDIA_LOG_E("surface FlushBuffer fail");
+        return Status::ERROR_UNKNOWN;
+    }
+    return Status::OK;
+}
+
+Status SurfaceSinkPlugin::Flush()
+{
+    return Status::OK;
+}
+
+Status SurfaceSinkPlugin::GetLatency(uint64_t& nanoSec)
+{
+    nanoSec = 10; // 10 ns
+    return Status::OK;
+}
+
+} // namespace Plugin
+} // namespace Media
+} // namespace OHOS
+
+#endif

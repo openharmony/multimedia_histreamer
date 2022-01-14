@@ -126,6 +126,8 @@ enum struct Tag : uint32_t {
     VIDEO_HEIGHT,                                    ///< uint32_t, video height
     VIDEO_PIXEL_FORMAT,                              ///< uint32_t, video pixel format
     VIDEO_SOURCE_TYPE,                               ///< uint32_t, video source type for recorder
+    VIDEO_SURFACE,                                   ///< @see class Surface
+    VIDEO_MAX_SURFACE_NUM,                           ///< uint32_t, max video surface num
 };
 
 using ValueType = Any;

@@ -162,8 +162,8 @@ private:
     std::shared_ptr<Pipeline::AudioDecoderFilter> audioDecoder_;
     std::shared_ptr<Pipeline::AudioSinkFilter> audioSink_;
 #ifdef VIDEO_SUPPORT
-    std::shared_ptr<Pipeline::VideoDecoderFilter> videoDecoder;
-    std::shared_ptr<Pipeline::VideoSinkFilter> videoSink;
+    std::shared_ptr<Pipeline::VideoDecoderFilter> videoDecoder_;
+    std::shared_ptr<Pipeline::VideoSinkFilter> videoSink_;
 #endif
     std::unordered_map<std::string, std::shared_ptr<Pipeline::AudioDecoderFilter>> audioDecoderMap_;
 };

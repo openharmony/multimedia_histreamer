@@ -177,6 +177,10 @@ ErrorCode VideoSinkFilter::ConfigureNoLocked(const std::shared_ptr<const Plugin:
 {
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Init()), "Init plugin error");
     plugin_->SetCallback(this);
+    auto inPort = inPorts_[0];
+    if (inPort->SetAllocator(plugin_->GetAllocator()) != ErrorCode::SUCCESS) {
+        MEDIA_LOG_I("plugin %s do not have allocator", pluginInfo_->name.c_str());
+    }
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePluginParams(meta), "Configure plugin params fail");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Start()), "Start plugin fail");
@@ -371,6 +375,24 @@ void VideoSinkFilter::FlushEnd()
         inBufQueue_->SetActive(true);
     }
 }
+
+#ifndef SURFACE_DISABLED
+ErrorCode VideoSinkFilter::SetVideoSurface(sptr<Surface> surface)
+{
+    if (!surface) {
+        MEDIA_LOG_W("surface is null");
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+    }
+    if (plugin_) {
+        auto ret = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_SURFACE, surface));
+        if (ret != ErrorCode::SUCCESS) {
+            MEDIA_LOG_W("Set surface to plugin fail");
+            return ret;
+        }
+    }
+    return ErrorCode::SUCCESS;
+}
+#endif
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

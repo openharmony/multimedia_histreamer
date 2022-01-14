@@ -19,6 +19,8 @@
 #ifdef VIDEO_SUPPORT
 
 #include <atomic>
+#include "refbase.h"
+#include "surface/surface.h"
 #include "osal/thread/condition_variable.h"
 #include "osal/thread/mutex.h"
 #include "osal/thread/task.h"
@@ -67,6 +69,10 @@ public:
 
     void FlushStart() override;
     void FlushEnd() override;
+
+#ifndef SURFACE_DISABLED
+    ErrorCode SetVideoSurface(sptr<Surface> surface);
+#endif
 
 private:
     ErrorCode ConfigurePluginParams(const std::shared_ptr<const Plugin::Meta>& meta);

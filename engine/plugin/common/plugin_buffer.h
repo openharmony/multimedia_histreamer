@@ -47,6 +47,18 @@ constexpr T AlignUp(T num, U alignment)
 }
 
 /**
+ * @enum MemoryType
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+enum struct MemoryType : uint8_t {
+    VIRTUAL_ADDR = 0,  ///< Virtual address
+    HANDLE,            ///< Physical address
+    Fd,                ///< Share Memory fd
+};
+
+/**
  * @brief Memory allocator, which is provided by the plugin implementer.
  *
  * @since 1.0
@@ -259,8 +271,11 @@ public:
     /// Destructor
     ~VideoBufferMeta() = default;
 
+    /// the memory type of video buffer
+    MemoryType memoryType {MemoryType::VIRTUAL_ADDR};
+
     /// describing video formats.
-    VideoPixelFormat  videoPixelFormat {VideoPixelFormat::UNKNOWN};
+    VideoPixelFormat videoPixelFormat {VideoPixelFormat::UNKNOWN};
 
     /// identifier of the frame。
     uint32_t id {0};
@@ -273,6 +288,12 @@ public:
 
     /// the number of planes in the image.
     uint32_t planes {0};
+
+    /// the fence fd for Surface
+    int32_t fenceFd {-1};
+
+    /// the buffer handle for SurfaceBuffer
+    intptr_t handle {0};
 
     /// array of strides for the planes.
     std::vector<uint32_t> stride {};
@@ -343,7 +364,7 @@ private:
     /// Data described by this buffer.
     std::vector<std::shared_ptr<Memory>> data {};
 
-    /// The audio buffer meta information.
+    /// The buffer meta information.
     std::shared_ptr<BufferMeta> meta;
 };
 } // namespace Plugin
