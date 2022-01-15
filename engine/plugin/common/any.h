@@ -25,9 +25,9 @@
 #if CPP_STANDARD >= 201103L
 
 #include <array>
-#include <type_traits>
-#include <array>
 #include <cstring>
+#include <type_traits>
+#include <typeinfo>
 
 #include "securec.h"
 
