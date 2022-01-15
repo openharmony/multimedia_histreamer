@@ -80,6 +80,7 @@ enum struct Status : int32_t {
     ERROR_NOT_EXISTED = -13,        ///< Source is not existed.
     ERROR_AGAIN = -14,              ///< Operation is not available right now, should try again later.
     ERROR_PERMISSION_DENIED = -15,  ///< Permission denied.
+    ERROR_NULL_POINTER = -16,       ///< Null pointer.
 };
 
 /**

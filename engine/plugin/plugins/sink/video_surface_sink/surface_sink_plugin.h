@@ -41,7 +41,7 @@ using PairAddr = std::pair<void*, sptr<SurfaceBuffer>>;
 
 class SurfaceAllocator : public Allocator {
 public:
-    SurfaceAllocator(sptr<Surface> surface = nullptr)
+    SurfaceAllocator(sptr<Surface> surface = nullptr) : Allocator(MemoryType::SURFACE_BUFFER)
     {
         surface_ = surface;
         surfaceMap_.reserve(DEFAULT_BUFFER_NUM);

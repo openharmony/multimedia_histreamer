@@ -29,6 +29,11 @@ sptr<SurfaceBuffer> SurfaceMemory::GetSurfaceBuffer()
     return surfaceBuffer;
 }
 
+int32_t SurfaceMemory::GetFenceFd()
+{
+    return fenceFd;
+}
+
 uint8_t* SurfaceMemory::GetRealAddr() const
 {
     return static_cast<uint8_t*>(surfaceBuffer->GetVirAddr());

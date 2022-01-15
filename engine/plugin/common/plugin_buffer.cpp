@@ -114,6 +114,11 @@ uint8_t* Memory::GetRealAddr() const
     return addr.get() + offset;
 }
 
+MemoryType Memory::GetMemoryType()
+{
+    return memoryType;
+}
+
 BufferMeta::BufferMeta(BufferMetaType type) : type(type)
 {
 }

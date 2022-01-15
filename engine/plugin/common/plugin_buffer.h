@@ -147,6 +147,8 @@ public:
 
     void Reset();
 
+    MemoryType GetMemoryType();
+
 private:
     /**
      * Create objects based on the external memory, use shared pointers,

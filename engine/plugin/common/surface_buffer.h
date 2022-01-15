@@ -29,6 +29,8 @@ class SurfaceMemory : public Memory {
 public:
     sptr<SurfaceBuffer> GetSurfaceBuffer();
 
+    int32_t GetFenceFd();
+
 private:
     SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr, size_t align = 1);
 

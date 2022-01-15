@@ -22,8 +22,7 @@
 #include <algorithm>
 #include "foundation/log.h"
 #include "utils/constants.h"
-#include "plugin/common/plugin_buffer.h"
-#include "plugin/common/plugin_video_tags.h"
+#include "plugin/common/surface_buffer.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;
@@ -103,7 +102,8 @@ void* SurfaceAllocator::Alloc(size_t size)
         return nullptr;
     }
     OHOS::sptr<OHOS::SurfaceBuffer> surfaceBuffer = nullptr;
-    auto ret = surface_->RequestBuffer(surfaceBuffer, -1, requestConfig_);
+    int32_t fence = -1;
+    auto ret = surface_->RequestBuffer(surfaceBuffer, fence, requestConfig_);
     if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
         if (ret == OHOS::SurfaceError::SURFACE_ERROR_NO_BUFFER) {
             MEDIA_LOG_E("buffer queue is no more buffers");
@@ -305,25 +305,17 @@ Status SurfaceSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
     if (inputInfo == nullptr || inputInfo->IsEmpty()) {
         return Status::OK;
     }
-    auto data = inputInfo->GetMemory()->GetReadOnlyData();
-    auto surfaceBuffer = mAllocator_->GetSurfaceBuffer(const_cast<void*>(data));
-    if (!surfaceBuffer) {
-        return Status::ERROR_UNKNOWN;
-    }
+    auto memory = inputInfo->GetMemory();
+    FALSE_RETURN_V(memory != nullptr, Status::ERROR_NULL_POINTER);
+    FALSE_RETURN_V(memory->GetMemoryType() == MemoryType::SURFACE_BUFFER, Status::ERROR_INVALID_PARAMETER);
+    std::shared_ptr<SurfaceMemory> surfaceMemory = std::dynamic_pointer_cast<SurfaceMemory>(memory);
+    auto surfaceBuffer = surfaceMemory->GetSurfaceBuffer();
+    FALSE_RETURN_V(surfaceBuffer != nullptr, Status::ERROR_NULL_POINTER);
     OHOS::BufferFlushConfig flushConfig = {
         {0, 0, static_cast<int32_t>(width_), static_cast<int32_t>(height_)},
     };
-    int32_t fenceFd = -1;
-    auto bufferMeta = inputInfo->GetBufferMeta();
-    if (bufferMeta != nullptr && bufferMeta->GetType() == BufferMetaType::VIDEO) {
-        std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
-        fenceFd = videoMeta->fenceFd;
-    }
-    auto ret = surface_->FlushBuffer(surfaceBuffer, fenceFd, flushConfig);
-    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        MEDIA_LOG_E("surface FlushBuffer fail");
-        return Status::ERROR_UNKNOWN;
-    }
+    auto ret = surface_->FlushBuffer(surfaceBuffer, surfaceMemory->GetFenceFd(), flushConfig);
+    FALSE_RETURN_V(ret == OHOS::SurfaceError::SURFACE_ERROR_OK, Status::ERROR_UNKNOWN);
     return Status::OK;
 }
 
