@@ -19,8 +19,10 @@
 #ifdef VIDEO_SUPPORT
 
 #include <atomic>
+#ifndef OHOS_LITE
 #include "refbase.h"
 #include "surface/surface.h"
+#endif
 #include "osal/thread/condition_variable.h"
 #include "osal/thread/mutex.h"
 #include "osal/thread/task.h"
@@ -70,7 +72,7 @@ public:
     void FlushStart() override;
     void FlushEnd() override;
 
-#ifndef SURFACE_DISABLED
+#ifndef OHOS_LITE
     ErrorCode SetVideoSurface(sptr<Surface> surface);
 #endif
 

@@ -376,7 +376,7 @@ void VideoSinkFilter::FlushEnd()
     }
 }
 
-#ifndef SURFACE_DISABLED
+#ifndef OHOS_LITE
 ErrorCode VideoSinkFilter::SetVideoSurface(sptr<Surface> surface)
 {
     if (!surface) {
