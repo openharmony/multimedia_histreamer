@@ -46,7 +46,7 @@ const Status SurfaceSinkRegister(const std::shared_ptr<Register>& reg)
     return reg->AddPlugin(definition);
 }
 
-PLUGIN_DEFINITION(SurfaceSink, LicenseType::LGPL, SurfaceSinkRegister, [] {});
+PLUGIN_DEFINITION(SurfaceSink, LicenseType::APACHE_V2, SurfaceSinkRegister, [] {});
 } // namespace
 
 namespace OHOS {
