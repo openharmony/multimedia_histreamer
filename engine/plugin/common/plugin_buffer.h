@@ -147,8 +147,10 @@ private:
      * @param bufData External memory.
      * @param align The alignment of the memory.
      */
-    Memory(size_t capacity, std::shared_ptr<uint8_t> bufData, size_t align = 1);
+    Memory(size_t capacity, std::shared_ptr<uint8_t> bufData,
+           size_t align = 1, MemoryType type = MemoryType::VIRTUAL_ADDR);
 
+protected:
     /**
      * Allocates memory by the specified allocator.
      * Allocation and release are the responsibility of the external allocator.
@@ -157,13 +159,17 @@ private:
      * @param allocator External allocator.
      * @param align The alignment of the memory.
      */
-    explicit Memory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr, size_t align = 1);
+    explicit Memory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr,
+                    size_t align = 1, MemoryType type = MemoryType::VIRTUAL_ADDR);
 
-protected:
     /**
      * Get real memory address, it is addr + offset, the offset is calculated according to alignment.
      */
     virtual uint8_t *GetRealAddr() const;
+
+protected:
+    /// Memory type
+    MemoryType memoryType;
 
 private:
     /// Allocated memory size.

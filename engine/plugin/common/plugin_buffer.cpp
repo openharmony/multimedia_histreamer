@@ -18,13 +18,15 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-Memory::Memory(size_t capacity, std::shared_ptr<uint8_t> bufData, size_t align)
-    : capacity(capacity), alignment(align), offset(0), size(0), allocator(nullptr), addr(std::move(bufData))
+Memory::Memory(size_t capacity, std::shared_ptr<uint8_t> bufData, size_t align, MemoryType type)
+    : memoryType(type), capacity(capacity), alignment(align),
+      offset(0), size(0), allocator(nullptr), addr(std::move(bufData))
 {
 }
 
-Memory::Memory(size_t capacity, std::shared_ptr<Allocator> allocator, size_t align)
-    : capacity(capacity), alignment(align), size(0), allocator(std::move(allocator)), addr(nullptr)
+Memory::Memory(size_t capacity, std::shared_ptr<Allocator> allocator, size_t align, MemoryType type)
+    : memoryType(type), capacity(capacity), alignment(align),
+      size(0), allocator(std::move(allocator)), addr(nullptr)
 {
     size_t allocSize = align ? (capacity + align - 1) : capacity;
     if (this->allocator) {

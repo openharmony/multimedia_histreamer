@@ -13,11 +13,17 @@
  * limitations under the License.
  */
 
+#include <utility>
 #include "surface_buffer.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+SurfaceMemory::SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocator, size_t align)
+    : Memory(capacity, std::move(allocator), align, MemoryType::SURFACE_BUFFER)
+{
+}
+
 sptr<SurfaceBuffer> SurfaceMemory::GetSurfaceBuffer()
 {
     return surfaceBuffer;

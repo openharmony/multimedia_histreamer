@@ -28,6 +28,8 @@ public:
     sptr<SurfaceBuffer> GetSurfaceBuffer();
 
 private:
+    SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr, size_t align = 1);
+
     uint8_t *GetRealAddr() const override;
 
 private:
