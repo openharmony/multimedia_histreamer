@@ -24,8 +24,9 @@
 #include "surface/surface.h"
 #include "display_type.h"
 #include "common/graphic_common.h"
-#include "plugin/interface/video_sink_plugin.h"
+#include "plugin/common/surface_allocator.h"
 #include "plugin/common/plugin_video_tags.h"
+#include "plugin/interface/video_sink_plugin.h"
 
 #ifdef DUMP_RAW_DATA
 #include <fstream>
@@ -34,40 +35,9 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-using PairAddr = std::pair<void*, sptr<SurfaceBuffer>>;
 #define DEFAULT_WIDTH      640
 #define DEFAULT_HEIGHT     480
 #define DEFAULT_BUFFER_NUM 8
-
-class SurfaceAllocator : public Allocator {
-public:
-    SurfaceAllocator(sptr<Surface> surface = nullptr) : Allocator(MemoryType::SURFACE_BUFFER)
-    {
-        surface_ = surface;
-        surfaceMap_.reserve(DEFAULT_BUFFER_NUM);
-    }
-    ~SurfaceAllocator() override = default;
-
-    void* Alloc(size_t size) override;
-    void Free(void* ptr) override; // NOLINT: void*
-
-    void Config(int32_t width, int32_t height, int32_t usage, int32_t format, int32_t strideAlign)
-    {
-        requestConfig_ = {
-            width, height, strideAlign, format,
-            usage | HBM_USE_CPU_READ | HBM_USE_CPU_WRITE | HBM_USE_MEM_DMA, 0
-        };
-        bufferCnt_ = 0;
-    }
-
-    sptr<SurfaceBuffer> GetSurfaceBuffer(void* addr);
-
-private:
-    sptr<Surface> surface_ {nullptr};
-    std::vector<PairAddr> surfaceMap_ {};
-    BufferRequestConfig requestConfig_;
-    uint32_t bufferCnt_ {0};
-};
 
 class SurfaceSinkPlugin : public VideoSinkPlugin, public std::enable_shared_from_this<SurfaceSinkPlugin> {
 public:

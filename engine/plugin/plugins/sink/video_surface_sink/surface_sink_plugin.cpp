@@ -94,62 +94,6 @@ static uint32_t TranslatePixelFormat(const VideoPixelFormat pixelFormat)
     return surfaceFormat;
 }
 
-void* SurfaceAllocator::Alloc(size_t size)
-{
-    if ((size == 0) || (size < requestConfig_.width * requestConfig_.height) ||
-        (bufferCnt_ > surface_->GetQueueSize())) {
-        MEDIA_LOG_E("Alloc fail, bufferCnt_: %u", bufferCnt_);
-        return nullptr;
-    }
-    OHOS::sptr<OHOS::SurfaceBuffer> surfaceBuffer = nullptr;
-    int32_t fence = -1;
-    auto ret = surface_->RequestBuffer(surfaceBuffer, fence, requestConfig_);
-    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        if (ret == OHOS::SurfaceError::SURFACE_ERROR_NO_BUFFER) {
-            MEDIA_LOG_E("buffer queue is no more buffers");
-        } else {
-            MEDIA_LOG_E("surface RequestBuffer fail");
-        }
-        return nullptr;
-    }
-    void *addr = surfaceBuffer->GetVirAddr();
-    if (addr == nullptr) {
-        ret = surface_->CancelBuffer(surfaceBuffer);
-        if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-            MEDIA_LOG_E("surface CancelBuffer fail");
-        }
-        return nullptr;
-    }
-    surfaceMap_.emplace_back(addr, surfaceBuffer);
-    bufferCnt_++;
-    return reinterpret_cast<void*>(addr); // NOLINT: cast
-}
-
-void SurfaceAllocator::Free(void* ptr) // NOLINT: void*
-{
-    if (ptr == nullptr) {
-        return;
-    }
-    auto surfaceBuffer = GetSurfaceBuffer(ptr);
-    if (surfaceBuffer) {
-        auto ret = surface_->CancelBuffer(surfaceBuffer);
-        if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-            MEDIA_LOG_E("surface CancelBuffer fail");
-        }
-    }
-}
-
-sptr<SurfaceBuffer> SurfaceAllocator::GetSurfaceBuffer(void* addr)
-{
-    auto ite = std::find_if(surfaceMap_.begin(), surfaceMap_.end(),
-                            [&addr](const PairAddr& pp) { return addr == pp.first; });
-    if (ite == surfaceMap_.end()) {
-        MEDIA_LOG_W("Can not find %p in surfaceMap", addr);
-        return nullptr;
-    }
-    return ite->second;
-}
-
 SurfaceSinkPlugin::SurfaceSinkPlugin(std::string name)
     : VideoSinkPlugin(std::move(name)),
       width_(DEFAULT_WIDTH),

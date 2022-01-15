@@ -23,6 +23,10 @@
 #include "plugin_tags.h"
 #include "plugin_audio_tags.h"
 #include "plugin_video_tags.h"
+#ifndef OHOS_LITE
+#include "refbase.h"
+#include "surface/surface.h"
+#endif
 
 namespace OHOS {
 namespace Media {
@@ -181,6 +185,10 @@ protected:
 protected:
     /// Memory type
     MemoryType memoryType;
+
+#ifndef OHOS_LITE
+    sptr<SurfaceBuffer> surfaceBuffer;
+#endif
 
 private:
     /// Allocated memory size.

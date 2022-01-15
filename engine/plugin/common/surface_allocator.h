@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_PLUGIN_COMMON_SURFACE_BUFFER_H
-#define HISTREAMER_PLUGIN_COMMON_SURFACE_BUFFER_H
+#ifndef HISTREAMER_PLUGIN_COMMON_SURFACE_ALLOCATOR_H
+#define HISTREAMER_PLUGIN_COMMON_SURFACE_ALLOCATOR_H
 
 #ifndef OHOS_LITE
 
@@ -25,25 +25,25 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-class SurfaceMemory : public Memory {
+
+class SurfaceAllocator : public Allocator {
 public:
-    sptr<SurfaceBuffer> GetSurfaceBuffer();
+    SurfaceAllocator(sptr<Surface> surface = nullptr);
+    ~SurfaceAllocator() override = default;
 
-    int32_t GetFenceFd();
+    sptr<SurfaceBuffer> AllocSurfaceBuffer(size_t size);
+
+    void FreeSurfaceBuffer(sptr<SurfaceBuffer> buffer);
+
+    void* Alloc(size_t size) override;
+    void Free(void* ptr) override; // NOLINT: void*
+
+    void Config(int32_t width, int32_t height, int32_t usage, int32_t format, int32_t strideAlign);
 
 private:
-    SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr, size_t align = 1);
-
-    uint8_t *GetRealAddr() const override;
-
-private:
-    /// the fence fd for Surface
-    int32_t fenceFd {-1};
-
-    /// the buffer handle for SurfaceBuffer
-    intptr_t handle {0};
-
-    friend class Buffer;
+    sptr<Surface> surface_ {nullptr};
+    BufferRequestConfig requestConfig_;
+    uint32_t bufferCnt_ {0};
 };
 } // namespace Plugin
 } // namespace Media
