@@ -66,6 +66,7 @@ enum struct MemoryType : uint8_t {
  * @version 1.0
  */
 struct Allocator {
+    explicit Allocator(MemoryType type = MemoryType::VIRTUAL_ADDR) : memoryType(type) {}
     virtual ~Allocator() = default;
     /**
      * @brief Allocates a buffer using the specified size
@@ -82,6 +83,14 @@ struct Allocator {
      * @param ptr   Pointer of the allocated buffer.
      */
     virtual void Free(void* ptr) = 0; // NOLINT: intentionally using void* here
+
+    MemoryType GetMemoryType()
+    {
+        return memoryType;
+    }
+
+private:
+    MemoryType memoryType;
 };
 
 /**

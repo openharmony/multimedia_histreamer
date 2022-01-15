@@ -14,6 +14,7 @@
  */
 
 #include "plugin_buffer.h"
+#include "surface_buffer.h"
 
 namespace OHOS {
 namespace Media {
@@ -174,7 +175,14 @@ std::shared_ptr<Memory> Buffer::WrapMemoryPtr(std::shared_ptr<uint8_t> data, siz
 
 std::shared_ptr<Memory> Buffer::AllocMemory(std::shared_ptr<Allocator> allocator, size_t capacity, size_t align)
 {
-    std::shared_ptr<Memory> memory = std::shared_ptr<Memory>(new Memory(capacity, allocator, align));
+    auto type = (allocator != nullptr) ? allocator->GetMemoryType() : MemoryType::VIRTUAL_ADDR;
+    std::shared_ptr<Memory> memory = (type == MemoryType::VIRTUAL_ADDR ?
+        std::shared_ptr<Memory>(new Memory(capacity, allocator, align)) :
+        ((type == MemoryType::SURFACE_BUFFER) ?
+        std::shared_ptr<Memory>(new SurfaceMemory(capacity, allocator, align)) : nullptr));
+    if (memory == nullptr) {
+        return nullptr;
+    }
     data.push_back(memory);
     return memory;
 }

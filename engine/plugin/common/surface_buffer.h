@@ -40,6 +40,8 @@ private:
 
     /// the buffer handle for SurfaceBuffer
     intptr_t handle {0};
+
+    friend class Buffer;
 };
 } // namespace Plugin
 } // namespace Media
