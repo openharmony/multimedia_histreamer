@@ -158,10 +158,11 @@ private:
      */
     explicit Memory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr, size_t align = 1);
 
+protected:
     /**
      * Get real memory address, it is addr + offset, the offset is calculated according to alignment.
      */
-    uint8_t *GetRealAddr() const;
+    virtual uint8_t *GetRealAddr() const;
 
 private:
     /// Allocated memory size.
