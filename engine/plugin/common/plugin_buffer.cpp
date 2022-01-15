@@ -178,8 +178,12 @@ std::shared_ptr<Memory> Buffer::AllocMemory(std::shared_ptr<Allocator> allocator
     auto type = (allocator != nullptr) ? allocator->GetMemoryType() : MemoryType::VIRTUAL_ADDR;
     std::shared_ptr<Memory> memory = (type == MemoryType::VIRTUAL_ADDR ?
         std::shared_ptr<Memory>(new Memory(capacity, allocator, align)) :
+#ifndef OHOS_LITE
         ((type == MemoryType::SURFACE_BUFFER) ?
         std::shared_ptr<Memory>(new SurfaceMemory(capacity, allocator, align)) : nullptr));
+#else
+        nullptr);
+#endif
     if (memory == nullptr) {
         return nullptr;
     }

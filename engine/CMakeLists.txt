@@ -84,7 +84,7 @@ if (OHOS_LITE)
             )
     file(GLOB_RECURSE PLAT_PLUGIN_SRCS
             ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
-            ${TOP_DIR}/engine/plugin/plugins/source/http_lite_source/*.cpp
+            ${TOP_DIR}/engine/plugin/plugins/source/http_source/*.cpp
             )
 else ()
     message(STATUS "player standard source")

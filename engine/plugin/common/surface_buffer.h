@@ -16,6 +16,8 @@
 #ifndef HISTREAMER_PLUGIN_COMMON_SURFACE_BUFFER_H
 #define HISTREAMER_PLUGIN_COMMON_SURFACE_BUFFER_H
 
+#ifndef OHOS_LITE
+
 #include "refbase.h"
 #include "surface/surface.h"
 #include "plugin_buffer.h"
@@ -46,4 +48,6 @@ private:
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
+
+#endif
 #endif // HISTREAMER_PLUGIN_COMMON_SURFACE_BUFFER_H

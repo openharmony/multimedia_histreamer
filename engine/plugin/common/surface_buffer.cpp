@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef OHOS_LITE
 #include <utility>
 #include "surface_buffer.h"
 
@@ -36,3 +36,4 @@ uint8_t* SurfaceMemory::GetRealAddr() const
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
+#endif
