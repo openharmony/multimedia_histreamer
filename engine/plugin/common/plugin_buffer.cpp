@@ -26,26 +26,17 @@ Memory::Memory(size_t capacity, std::shared_ptr<uint8_t> bufData, size_t align, 
 {
 }
 
-Memory::Memory(size_t capacity, std::shared_ptr<Allocator> allocator, size_t align, MemoryType type)
-    : memoryType(type), capacity(capacity), alignment(align),
+Memory::Memory(size_t capacity, std::shared_ptr<Allocator> allocator, size_t align, MemoryType type, bool allocMem)
+    : memoryType(type), capacity(capacity), alignment(align), offset(0),
       size(0), allocator(std::move(allocator)), addr(nullptr)
 {
+    if (!allocMem) { // SurfaceMemory alloc mem in subclass
+        return;
+    }
     size_t allocSize = align ? (capacity + align - 1) : capacity;
     if (this->allocator) {
-#ifndef OHOS_LITE
-        if (this->allocator->GetMemoryType() == MemoryType::SURFACE_BUFFER) {
-            auto surfaceAllocator = std::dynamic_pointer_cast<SurfaceAllocator>(this->allocator);
-            surfaceBuffer = surfaceAllocator->AllocSurfaceBuffer(allocSize);
-            // TODO: It seems can not use: shared_ptr<sptr<SurfaceBuffer>>
-            // How to automatically FreeSurfaceBuffer?
-        } else {
-            addr = std::shared_ptr<uint8_t>(static_cast<uint8_t*>(this->allocator->Alloc(allocSize)),
-                                            [this](uint8_t* ptr) { this->allocator->Free((void*)ptr); });
-        }
-#else
         addr = std::shared_ptr<uint8_t>(static_cast<uint8_t*>(this->allocator->Alloc(allocSize)),
                                         [this](uint8_t* ptr) { this->allocator->Free((void*)ptr); });
-#endif
     } else {
         addr = std::shared_ptr<uint8_t>(new uint8_t[allocSize], std::default_delete<uint8_t[]>());
     }

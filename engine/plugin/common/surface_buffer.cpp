@@ -13,15 +13,27 @@
  * limitations under the License.
  */
 #ifndef OHOS_LITE
-#include <utility>
 #include "surface_buffer.h"
+#include <utility>
+#include "foundation/log.h"
+#include "surface_allocator.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 SurfaceMemory::SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocator, size_t align)
-    : Memory(capacity, std::move(allocator), align, MemoryType::SURFACE_BUFFER)
+    : Memory(capacity, std::move(allocator), align, MemoryType::SURFACE_BUFFER, false)
 {
+    size_t allocSize = align ? (capacity + align - 1) : capacity;
+    FALSE_RETURN(this->allocator != nullptr && this->allocator->GetMemoryType() == MemoryType::SURFACE_BUFFER);
+    auto surfaceAllocator = std::dynamic_pointer_cast<SurfaceAllocator>(this->allocator);
+    surfaceBuffer = surfaceAllocator->AllocSurfaceBuffer(allocSize);
+}
+
+SurfaceMemory::~SurfaceMemory()
+{
+    auto surfaceAllocator = std::dynamic_pointer_cast<SurfaceAllocator>(this->allocator);
+    surfaceAllocator->FreeSurfaceBuffer(surfaceBuffer);
 }
 
 sptr<SurfaceBuffer> SurfaceMemory::GetSurfaceBuffer()

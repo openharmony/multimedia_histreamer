@@ -27,6 +27,8 @@ namespace Media {
 namespace Plugin {
 class SurfaceMemory : public Memory {
 public:
+    ~SurfaceMemory();
+
     sptr<SurfaceBuffer> GetSurfaceBuffer();
 
     int32_t GetFenceFd();

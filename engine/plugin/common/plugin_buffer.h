@@ -175,7 +175,7 @@ protected:
      * @param align The alignment of the memory.
      */
     explicit Memory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr,
-                    size_t align = 1, MemoryType type = MemoryType::VIRTUAL_ADDR);
+                    size_t align = 1, MemoryType type = MemoryType::VIRTUAL_ADDR, bool allocMem = true);
 
     /**
      * Get real memory address, it is addr + offset, the offset is calculated according to alignment.
@@ -190,7 +190,6 @@ protected:
     sptr<SurfaceBuffer> surfaceBuffer;
 #endif
 
-private:
     /// Allocated memory size.
     size_t capacity;
 
@@ -209,7 +208,8 @@ __attribute__((unused))
     /// Externally specified allocator, optional.
     std::shared_ptr<Allocator> allocator;
 
-    /// Allocated memory address.
+private:
+    /// Allocated virtual memory address.
     std::shared_ptr<uint8_t> addr;
 
     friend class Buffer;
