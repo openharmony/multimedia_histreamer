@@ -17,7 +17,6 @@
 
 #define HST_LOG_TAG "VideoDecoderFilter"
 
-#include <common/surface_allocator.h>
 #include "video_decoder_filter.h"
 #include "foundation/log.h"
 #include "osal/utils/util.h"
@@ -27,6 +26,7 @@
 #include "factory/filter_factory.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
+#include "plugin/common/surface_allocator.h"
 
 namespace OHOS {
 namespace Media {
@@ -256,7 +256,10 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
         MEDIA_LOG_E("Unsupported video pixel format: %u", vdecFormat_.format);
         return ErrorCode::ERROR_UNIMPLEMENTED;
     }
+
     std::shared_ptr<Allocator> outAllocator {nullptr};
+
+#ifndef OHOS_LITE
     // Use sink allocator first, zero copy while passing data
     if (capNegWithDownstream_.extraParams.find(Tag::BUFFER_ALLOCATOR) != capNegWithDownstream_.extraParams.end()) {
         auto sinkAllocatorAny = capNegWithDownstream_.extraParams[Tag::BUFFER_ALLOCATOR];
@@ -264,6 +267,7 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
             outAllocator = Plugin::AnyCast<std::shared_ptr<Plugin::SurfaceAllocator>>(sinkAllocatorAny);
         }
     }
+#endif
     if (outAllocator == nullptr) {
         outAllocator = plugin_->GetAllocator();
     }

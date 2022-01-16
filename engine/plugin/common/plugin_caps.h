@@ -141,7 +141,7 @@ struct Capability {
     /// Store the parameters(Capability::Key, value pairs), which should be negotiated
     KeyMap keys;
 
-    /// Pass extra parameters downstream or upstream
+    /// Pass extra parameters(Tag, value pairs) downstream or upstream, which are not negotiated
     TagMap extraParams;
 };
 

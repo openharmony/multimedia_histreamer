@@ -17,15 +17,15 @@
 
 #define HST_LOG_TAG "VideoSinkFilter"
 
-#include <common/surface_allocator.h>
 #include "video_sink_filter.h"
 
 #include "common/plugin_utils.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
+#include "osal/utils/util.h"
 #include "pipeline/core/clock_manager.h"
 #include "plugin/common/plugin_time.h"
-#include "osal/utils/util.h"
+#include "plugin/common/surface_allocator.h"
 #include "utils/steady_clock.h"
 
 namespace OHOS {
@@ -121,6 +121,7 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
         [](const std::string& name) -> std::shared_ptr<Plugin::VideoSink> {
         return Plugin::PluginManager::Instance().CreateVideoSinkPlugin(name);
     });
+#ifndef OHOS_LITE
     auto pluginAllocator = plugin_->GetAllocator();
     if (pluginAllocator != nullptr && pluginAllocator->GetMemoryType() == Plugin::MemoryType::SURFACE_BUFFER) {
         // TODO: currently assume BUFFER_ALLOCATOR always SurfaceAllocator
@@ -128,6 +129,7 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
         auto allocator = std::dynamic_pointer_cast<Plugin::SurfaceAllocator>(pluginAllocator);
         upstreamNegotiatedCap.extraParams.emplace(std::make_pair(Tag::BUFFER_ALLOCATOR, allocator));
     }
+#endif
     PROFILE_END("video sink negotiate end");
     return res;
 }
