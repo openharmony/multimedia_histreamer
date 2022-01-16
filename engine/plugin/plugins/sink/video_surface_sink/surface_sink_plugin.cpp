@@ -22,7 +22,7 @@
 #include <algorithm>
 #include "foundation/log.h"
 #include "utils/constants.h"
-#include "plugin/common/surface_buffer.h"
+#include "plugin/common/surface_memory.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;
@@ -273,7 +273,6 @@ Status SurfaceSinkPlugin::GetLatency(uint64_t& nanoSec)
     nanoSec = 10; // 10 ns
     return Status::OK;
 }
-
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

@@ -406,12 +406,12 @@ void FFmpegDemuxerPlugin::SaveFileInfoToMetaInfo(TagMap& meta)
             uint32_t month = 0;
             uint32_t day = 0;
             if (sscanf_s(tag->value, "%04u-%02u-%02u", &year, &month, &day) == 3) { // 3
-                meta.insert( {Tag::MEDIA_DATE, RemoveDelimiter(tag->value, '-')});
+                meta.insert({Tag::MEDIA_DATE, RemoveDelimiter(tag->value, '-')});
             }
         }
     }
     int64_t nanoSec = formatContext_->duration * (HST_SECOND / AV_TIME_BASE);
-    meta.insert( {Tag::MEDIA_DURATION, static_cast<uint64_t>(nanoSec)});
+    meta.insert({Tag::MEDIA_DURATION, static_cast<uint64_t>(nanoSec)});
 }
 
 bool FFmpegDemuxerPlugin::ParseMediaData()

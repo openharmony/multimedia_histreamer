@@ -19,7 +19,7 @@
 #include <map>
 #include <memory>
 #include "plugin_buffer.h"
-#include "plugin_types.h"
+#include "plugin_types.h" // NOLINT: used it
 
 namespace OHOS {
 namespace Media {

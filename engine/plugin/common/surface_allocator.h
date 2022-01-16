@@ -25,10 +25,9 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-
 class SurfaceAllocator : public Allocator {
 public:
-    SurfaceAllocator(sptr<Surface> surface = nullptr);
+    explicit SurfaceAllocator(sptr<Surface> surface = nullptr);
     ~SurfaceAllocator() override = default;
 
     sptr<SurfaceBuffer> AllocSurfaceBuffer(size_t size);

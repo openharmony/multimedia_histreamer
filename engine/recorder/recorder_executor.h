@@ -83,4 +83,4 @@ public:
 } // namespace Media
 } // namespace OHOS
 
-#endif //HISTREAMER_RECORDER_EXECUTOR_H
+#endif // HISTREAMER_RECORDER_EXECUTOR_H

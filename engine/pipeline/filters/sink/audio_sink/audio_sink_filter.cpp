@@ -125,7 +125,7 @@ bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr
     auto err = ConfigureToPreparePlugin(upstreamMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("sink configure error");
-        OnEvent( {EVENT_ERROR, err});
+        OnEvent({EVENT_ERROR, err});
         return false;
     }
     state_ = FilterState::READY;
@@ -164,7 +164,7 @@ ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const 
 void AudioSinkFilter::ReportCurrentPosition(int64_t pts)
 {
     if (plugin_) {
-        OnEvent( {EVENT_AUDIO_PROGRESS, static_cast<int64_t>(pts)});
+        OnEvent({EVENT_AUDIO_PROGRESS, static_cast<int64_t>(pts)});
     }
 }
 

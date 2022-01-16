@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifdef RECORDER_SUPPORT
-
 #ifndef HISTREAMER_AUDIO_FFMPEG_ENCODER_PLUGIN_H
 #define HISTREAMER_AUDIO_FFMPEG_ENCODER_PLUGIN_H
+
+#ifdef RECORDER_SUPPORT
 
 #include <functional>
 #include <map>
@@ -121,5 +120,5 @@ private:
 } // namespace Media
 } // namespace OHOS
 
-#endif // HISTREAMER_AUDIO_FFMPEG_ENCODER_PLUGIN_H
 #endif
+#endif // HISTREAMER_AUDIO_FFMPEG_ENCODER_PLUGIN_H

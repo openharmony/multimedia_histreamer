@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #ifndef OHOS_LITE
-#include "surface_buffer.h"
+#include "surface_memory.h"
 #include <utility>
 #include "foundation/log.h"
 #include "surface_allocator.h"

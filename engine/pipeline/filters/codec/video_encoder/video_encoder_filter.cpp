@@ -147,10 +147,7 @@ bool VideoEncoderFilter::Negotiate(const std::string& inPort,
         return false;
     }
     auto targetOutPort = GetRouteOutPort(inPort);
-    if (targetOutPort == nullptr) {
-        MEDIA_LOG_E("encoder out port is not found");
-        return false;
-    }
+    FALSE_RETURN_V(targetOutPort != nullptr, false);
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
     bool atLeastOutCapMatched = false;
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::CODEC);

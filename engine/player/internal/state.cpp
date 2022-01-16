@@ -15,8 +15,8 @@
 
 #define HST_LOG_TAG "State"
 
-#include "event.h"
 #include "state.h"
+#include "event.h"
 #include "foundation/log.h"
 
 namespace OHOS {

@@ -33,7 +33,7 @@ HiRecorderImpl::HiRecorderImpl() : fsm_(*this), curFsmState_(StateId::INIT),
 
     FilterFactory::Instance().Init();
     muxer_ = FilterFactory::Instance().CreateFilterWithType<MuxerFilter>(
-        "builtin.recorder.muxer","muxer");
+            "builtin.recorder.muxer","muxer");
     outputSink_ = FilterFactory::Instance().CreateFilterWithType<OutputSinkFilter>(
             "builtin.recorder.output_sink", "output_sink");
     FALSE_RETURN(muxer_ != nullptr);
@@ -62,9 +62,9 @@ ErrorCode HiRecorderImpl::Init()
         return ErrorCode::SUCCESS;
     }
     pipeline_->Init(this, nullptr);
-    ErrorCode ret = pipeline_->AddFilters( {muxer_.get(), outputSink_.get()} );
+    ErrorCode ret = pipeline_->AddFilters({muxer_.get(), outputSink_.get()} );
     if (ret == ErrorCode::SUCCESS) {
-        ret = pipeline_->LinkFilters( {muxer_.get(), outputSink_.get()} );
+        ret = pipeline_->LinkFilters({muxer_.get(), outputSink_.get()} );
     }
     FALSE_LOG(ret == ErrorCode::SUCCESS);
     if (ret == ErrorCode::SUCCESS) {
@@ -88,9 +88,9 @@ int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId
             "builtin.recorder.audiocapture", "audiocapture");
     audioEncoder_ = FilterFactory::Instance().CreateFilterWithType<AudioEncoderFilter>(
             "builtin.recorder.audioencoder", "audioencoder");
-    ret = pipeline_->AddFilters( {audioCapture_.get(), audioEncoder_.get()});
+    ret = pipeline_->AddFilters({audioCapture_.get(), audioEncoder_.get()});
     if (ret == ErrorCode::SUCCESS) {
-        ret = pipeline_->LinkFilters( {audioCapture_.get(), audioEncoder_.get()});
+        ret = pipeline_->LinkFilters({audioCapture_.get(), audioEncoder_.get()});
     }
     std::shared_ptr<InPort> muxerInPort {nullptr};
     if (ret == ErrorCode::SUCCESS) {
@@ -120,9 +120,9 @@ int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId
         "builtin.recorder.videoencoder", "videoencoder");
     ret = pipeline_->AddFilters({videoCapture_.get(), videoEncoder_.get()});
     if (ret == ErrorCode::SUCCESS) {
-        ret = pipeline_->LinkFilters( {videoCapture_.get(), videoEncoder_.get()});
+        ret = pipeline_->LinkFilters({videoCapture_.get(), videoEncoder_.get()});
     }
-    std::shared_ptr<InPort> muxerInPort{ nullptr };
+    std::shared_ptr<InPort> muxerInPort {nullptr};
     if (ret == ErrorCode::SUCCESS) {
         ret =muxer_->AddTrack(muxerInPort);
     }
@@ -166,7 +166,7 @@ int32_t HiRecorderImpl::SetObs(const std::weak_ptr<IRecorderEngineObs>& obs)
 int32_t HiRecorderImpl::Configure(int32_t sourceId,  const RecorderParam &recParam)
 {
     Plugin::Any any;
-    switch(recParam.type) {
+    switch (recParam.type) {
         case RecorderPublicParamType::AUD_SAMPLERATE:
             any = RecordParam {sourceId, RecorderParameterType::AUD_SAMPLE_RATE,
                                dynamic_cast<const AudSampleRate&>(recParam)};
@@ -176,7 +176,7 @@ int32_t HiRecorderImpl::Configure(int32_t sourceId,  const RecorderParam &recPar
                                dynamic_cast<const AudChannel&>(recParam)};
             break;
         case RecorderPublicParamType::AUD_BITRATE:
-            any = RecordParam {sourceId,RecorderParameterType::AUD_BIT_RATE,
+            any = RecordParam {sourceId, RecorderParameterType::AUD_BIT_RATE,
                                dynamic_cast<const AudBitRate&>(recParam)};
             break;
         case RecorderPublicParamType::AUD_ENC_FMT:

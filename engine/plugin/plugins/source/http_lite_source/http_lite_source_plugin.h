@@ -72,7 +72,6 @@ private:
     Status OpenUri(std::string &url);
     void CloseUri();
 };
-
 } // namespace HttpLitePlugin
 } // namespace Plugin
 } // namespace Media

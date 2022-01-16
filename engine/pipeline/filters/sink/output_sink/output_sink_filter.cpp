@@ -91,7 +91,7 @@ bool OutputSinkFilter::Configure(const std::string& inPort, const std::shared_pt
 
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("Output sink configure error");
-        OnEvent( {EVENT_ERROR, err});
+        OnEvent({EVENT_ERROR, err});
         return false;
     }
     state_ = FilterState::READY;

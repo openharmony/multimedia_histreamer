@@ -244,8 +244,9 @@ Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
             if (mp3DemuxerRst_.frameLength) {
                 mp3FrameData->Write(mp3DemuxerRst_.frameBuffer, mp3DemuxerRst_.frameLength);
                 ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
-            } else if (mp3DemuxerRst_.usedInputLength == 0){
-                ioDataRemainSize_ = ioDataRemainSize_ > AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX ? (ioDataRemainSize_ - AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX): 0;
+            } else if (mp3DemuxerRst_.usedInputLength == 0) {
+                ioDataRemainSize_ = ioDataRemainSize_ > AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX ?
+                    (ioDataRemainSize_ - AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX): 0;
             } else {
                 ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
             }
@@ -482,11 +483,8 @@ int Minimp3DemuxerPlugin::AudioDemuxerMp3Process(uint8_t *buf, uint32_t len)
     int ret = 0;
     uint32_t processLen = len;
     AudioDemuxerMp3IgnoreTailZero(buf, &processLen);
-    int res = memset_s(&mp3DemuxerRst_, sizeof(mp3DemuxerRst_),
-                       0x00, sizeof(AudioDemuxerRst));
-    if (res){
-        return AUDIO_DEMUXER_ERROR;
-    }
+    (void)memset_s(&mp3DemuxerRst_, sizeof(mp3DemuxerRst_),
+                   0x00, sizeof(AudioDemuxerRst));
     mp3DemuxerAttr_.rst = &mp3DemuxerRst_;
     mp3DemuxerAttr_.internalRemainLen = processLen;
     ret = minimp3DemuxerImpl_.iterateBuf(buf, processLen, AudioDemuxerMp3IterateCallback, &mp3DemuxerAttr_);

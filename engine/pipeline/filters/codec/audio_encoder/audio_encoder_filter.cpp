@@ -170,11 +170,6 @@ bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_
         return false;
     }
 
-//    auto thisMeta = std::make_shared<Plugin::Meta>();
-//    if (!MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta)) {
-//        MEDIA_LOG_E("cannot configure encoder plugin since meta is not compatible with negotiated caps");
-//        return false;
-//    }
     auto targetOutPort = GetRouteOutPort(inPort);
     if (targetOutPort == nullptr) {
         MEDIA_LOG_E("encoder out port is not found");

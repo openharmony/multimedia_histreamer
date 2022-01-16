@@ -163,8 +163,8 @@ Status PluginRegister::RegisterImpl::InitSourceInfo(std::shared_ptr<PluginRegInf
     reg->creator = reinterpret_cast<PluginCreatorFunc<PluginBase>>(base.creator);
     std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
     SetPluginInfo(info, def);
-    info->extra.insert( {PLUGIN_INFO_EXTRA_PROTOCOL, base.protocol});
-    info->extra.insert( {PLUGIN_INFO_EXTRA_INPUT_TYPE, base.inputType});
+    info->extra.insert({PLUGIN_INFO_EXTRA_PROTOCOL, base.protocol});
+    info->extra.insert({PLUGIN_INFO_EXTRA_INPUT_TYPE, base.inputType});
     SourceCapabilityConvert(info, def);
     reg->info = info;
     return Status::OK;

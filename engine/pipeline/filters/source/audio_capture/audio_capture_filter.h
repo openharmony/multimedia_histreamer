@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifdef RECORDER_SUPPORT
-
 #ifndef MEDIA_PIPELINE_AUDIO_CAPTURE_FILTER_H
 #define MEDIA_PIPELINE_AUDIO_CAPTURE_FILTER_H
+
+#ifdef RECORDER_SUPPORT
 
 #include <memory>
 #include <string>

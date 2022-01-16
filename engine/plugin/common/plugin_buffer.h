@@ -153,18 +153,6 @@ public:
 
     MemoryType GetMemoryType();
 
-private:
-    /**
-     * Create objects based on the external memory, use shared pointers,
-     * the allocation and release of memory are managed externally.
-     *
-     * @param capacity Allocated memory size.
-     * @param bufData External memory.
-     * @param align The alignment of the memory.
-     */
-    Memory(size_t capacity, std::shared_ptr<uint8_t> bufData,
-           size_t align = 1, MemoryType type = MemoryType::VIRTUAL_ADDR);
-
 protected:
     /**
      * Allocates memory by the specified allocator.
@@ -182,7 +170,6 @@ protected:
      */
     virtual uint8_t *GetRealAddr() const;
 
-protected:
     /// Memory type
     MemoryType memoryType;
 
@@ -209,6 +196,17 @@ __attribute__((unused))
     std::shared_ptr<Allocator> allocator;
 
 private:
+    /**
+     * Create objects based on the external memory, use shared pointers,
+     * the allocation and release of memory are managed externally.
+     *
+     * @param capacity Allocated memory size.
+     * @param bufData External memory.
+     * @param align The alignment of the memory.
+     */
+    Memory(size_t capacity, std::shared_ptr<uint8_t> bufData,
+           size_t align = 1, MemoryType type = MemoryType::VIRTUAL_ADDR);
+
     /// Allocated virtual memory address.
     std::shared_ptr<uint8_t> addr;
 

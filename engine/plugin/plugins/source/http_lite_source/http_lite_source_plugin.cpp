@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 #define HST_LOG_TAG "HttpLiteSourcePlugin"
+#include "http_lite_source_plugin.h"
+#include "foundation/log.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/core/plugin_manager.h"
-#include "http_lite_source_plugin.h"
 #include "utils/util.h"
-#include "foundation/log.h"
 
 namespace OHOS {
 namespace Media {
@@ -37,7 +37,7 @@ const Status HttpSourceRegister(std::shared_ptr<Register> reg)
     SourcePluginDef definition;
     definition.name = "HttpLiteSource";
     definition.description = "Http lite source";
-    definition.rank = 100;
+    definition.rank = 100; // 100
     definition.protocol.emplace_back(ProtocolType::HTTP);
     definition.protocol.emplace_back(ProtocolType::HTTPS);
     definition.creator = HttpSourcePluginCreater;
@@ -132,7 +132,7 @@ Status HttpSourcePlugin::Start()
     OSAL::ScopedLock lock(httpMutex_);
     MEDIA_LOG_D("IN");
     if (isSeekable_ && httpHandle_ != nullptr) {
-        waterline_ = 20;
+        waterline_ = 20; // 20
         httpHandle_->SetWaterline(waterline_, 0);
     }
     MEDIA_LOG_D("OUT");
@@ -223,8 +223,8 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     httpHandle_->GetHttpBufferRange(&position_, &downloadPos);
     MEDIA_LOG_D("position_ %d downloadPos %d", (uint32_t)position_, (uint32_t)downloadPos);
     int8_t retryTimes = 0;
-    while (!needExit_ && position_ == downloadPos && retryTimes < 60) {
-        OHOS::Media::OSAL::SleepFor(200);
+    while (!needExit_ && position_ == downloadPos && retryTimes < 60) { // 60
+        OHOS::Media::OSAL::SleepFor(200); // 200
         httpHandle_->GetHttpBufferRange(&position_, &downloadPos);
         retryTimes++;
     }
@@ -336,9 +336,10 @@ Status HttpSourcePlugin::SeekTo(uint64_t offset)
         MEDIA_LOG_D("seek to position_ %d failed", position_);
         return Status::ERROR_UNKNOWN;
     }
-    position_ = (uint32_t)offset;
+    position_ = static_cast<uint32_t>(offset);
     httpHandle_->GetHttpBufferRange(&readPos, &writePos);
-    MEDIA_LOG_D("offset = %d, after SeekTo readPos = %d, writePos = %d", (uint32_t)offset, readPos, writePos);
+    MEDIA_LOG_D("offset = %d, after SeekTo readPos = %d, writePos = %d",
+                static_cast<uint32_t>(offset), readPos, writePos);
     MEDIA_LOG_D("seek to position_ %d success", position_);
     return Status::OK;
 }
@@ -356,7 +357,8 @@ Status HttpSourcePlugin::OpenUri(std::string &url)
     httpAttr.bufferSize = bufferSize_;
     httpAttr.pluginHandle = this;
     httpAttr.callbackFunc = OnError;
-    MEDIA_LOG_D("OpenUri httpAttr.pluginHandle %p httpAttr.callbackFunc %p", httpAttr.pluginHandle, httpAttr.callbackFunc);
+    MEDIA_LOG_D("OpenUri httpAttr.pluginHandle %p httpAttr.callbackFunc %p",
+                httpAttr.pluginHandle, httpAttr.callbackFunc);
     return httpHandle_->HttpOpen(url, httpAttr) ? Status::OK : Status::ERROR_UNKNOWN;
 }
 
@@ -368,7 +370,6 @@ void HttpSourcePlugin::CloseUri()
         httpHandle_ = nullptr;
     }
 }
-
 } // namespace HttpLitePlugin
 } // namespace Plugin
 } // namespace Media

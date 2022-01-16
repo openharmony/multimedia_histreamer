@@ -95,13 +95,6 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
     size_t index = 0;
     if (codec->sample_fmts != nullptr) {
         // todo we should always consider transfer sample fmt to supported format
-//        DiscreteCapability<AudioSampleFormat> values;
-//        for (index = 0; codec->sample_fmts[index] != AV_SAMPLE_FMT_NONE; ++index) {
-//            values.push_back(g_formatMap[codec->sample_fmts[index]]);
-//        }
-//        if (index) {
-//            inputCaps.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, values);
-//        }
     }
     if (codec->supported_samplerates != nullptr) {
         DiscreteCapability<uint32_t> values;
@@ -118,16 +111,16 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
     switch (codec->id) {
         case AV_CODEC_ID_AAC:
             outputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC)
-                     .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 4)  // 4
-                     .AppendFixedKey<AudioAacProfile>(Capability::Key::AUDIO_AAC_PROFILE, AudioAacProfile::LC)
-                     .AppendFixedKey<AudioAacStreamFormat>(Capability::Key::AUDIO_AAC_STREAM_FORMAT,
-                                                           AudioAacStreamFormat::MP4ADTS);
+                .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 4)  // 4
+                .AppendFixedKey<AudioAacProfile>(Capability::Key::AUDIO_AAC_PROFILE, AudioAacProfile::LC)
+                .AppendFixedKey<AudioAacStreamFormat>(Capability::Key::AUDIO_AAC_STREAM_FORMAT,
+                                                      AudioAacStreamFormat::MP4ADTS);
             break;
         case AV_CODEC_ID_AAC_LATM:
             outputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM)
-                     .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 4)  // 4
-                     .AppendFixedKey<AudioAacStreamFormat>(Capability::Key::AUDIO_AAC_STREAM_FORMAT,
-                                                           AudioAacStreamFormat::MP4LOAS);
+                .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 4)  // 4
+                .AppendFixedKey<AudioAacStreamFormat>(Capability::Key::AUDIO_AAC_STREAM_FORMAT,
+                                                      AudioAacStreamFormat::MP4LOAS);
             break;
         default:
             MEDIA_LOG_I("codec is not supported right now");
@@ -453,9 +446,6 @@ Status AudioFfmpegEncoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>&
         return Status::ERROR_NO_MEMORY;
     }
     ioInfoMem->Write(packet->data, packet->size);
-    if (UINT64_MAX - prev_pts_ < packet->duration) {
-
-    }
     // how get perfect pts with upstream pts ?
     ioInfo->pts = (UINT64_MAX - prev_pts_ < packet->duration) ?
                   (packet->duration - (UINT64_MAX - prev_pts_)) :

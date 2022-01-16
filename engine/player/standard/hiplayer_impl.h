@@ -141,18 +141,18 @@ private:
     ErrorCode RemoveFilterChains(Pipeline::Filter* filter, const Plugin::Any& parameter);
     void ActiveFilters(const std::vector<Pipeline::Filter*>& filters);
 
-    OSAL::Mutex stateMutex_{};
-    OSAL::ConditionVariable cond_{};
+    OSAL::Mutex stateMutex_ {};
+    OSAL::ConditionVariable cond_ {};
     StateMachine fsm_;
     std::atomic<StateId> curFsmState_;
     std::shared_ptr<Pipeline::PipelineCore> pipeline_;
     std::atomic<PlayerStates> pipelineStates_;
-    std::atomic<bool> initialized_{false};
+    std::atomic<bool> initialized_ {false};
 
-    std::weak_ptr<Plugin::Meta> sourceMeta_{};
-    std::vector<std::weak_ptr<Plugin::Meta>> streamMeta_{};
-    std::atomic<bool> singleLoop_{false};
-    std::weak_ptr<IPlayerEngineObs> obs_{};
+    std::weak_ptr<Plugin::Meta> sourceMeta_ {};
+    std::vector<std::weak_ptr<Plugin::Meta>> streamMeta_ {};
+    std::atomic<bool> singleLoop_ {false};
+    std::weak_ptr<IPlayerEngineObs> obs_ {};
     float volume_;
     std::atomic<ErrorCode> errorCode_;
     MediaStats mediaStats_;

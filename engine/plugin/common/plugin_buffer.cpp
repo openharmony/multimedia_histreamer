@@ -14,7 +14,7 @@
  */
 
 #include "plugin_buffer.h"
-#include "surface_buffer.h"
+#include "surface_memory.h"
 
 namespace OHOS {
 namespace Media {

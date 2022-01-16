@@ -54,7 +54,7 @@ void* SurfaceAllocator::Alloc(size_t size)
     return nullptr;
 }
 
-void SurfaceAllocator::Free(void* ptr)
+void SurfaceAllocator::Free(void* ptr) // NOLINT: void*
 {
     (void)ptr;
 }
