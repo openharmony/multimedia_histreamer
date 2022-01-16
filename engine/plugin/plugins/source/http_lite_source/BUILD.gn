@@ -37,9 +37,7 @@ if (defined(ohos_lite)) {
     } else {
       target_type = "shared_library"
     }
-    sources = [
-      "http_lite_source_plugin.cpp",
-    ]
+    sources = [ "http_lite_source_plugin.cpp" ]
     public_configs = [ ":plugin_http_lite_source_config" ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
