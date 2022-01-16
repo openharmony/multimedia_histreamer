@@ -33,7 +33,7 @@ HiRecorderImpl::HiRecorderImpl() : fsm_(*this), curFsmState_(StateId::INIT),
 
     FilterFactory::Instance().Init();
     muxer_ = FilterFactory::Instance().CreateFilterWithType<MuxerFilter>(
-            "builtin.recorder.muxer","muxer");
+            "builtin.recorder.muxer", "muxer");
     outputSink_ = FilterFactory::Instance().CreateFilterWithType<OutputSinkFilter>(
             "builtin.recorder.output_sink", "output_sink");
     FALSE_RETURN(muxer_ != nullptr);
@@ -62,9 +62,9 @@ ErrorCode HiRecorderImpl::Init()
         return ErrorCode::SUCCESS;
     }
     pipeline_->Init(this, nullptr);
-    ErrorCode ret = pipeline_->AddFilters({muxer_.get(), outputSink_.get()} );
+    ErrorCode ret = pipeline_->AddFilters({muxer_.get(), outputSink_.get()});
     if (ret == ErrorCode::SUCCESS) {
-        ret = pipeline_->LinkFilters({muxer_.get(), outputSink_.get()} );
+        ret = pipeline_->LinkFilters({muxer_.get(), outputSink_.get()});
     }
     FALSE_LOG(ret == ErrorCode::SUCCESS);
     if (ret == ErrorCode::SUCCESS) {
@@ -113,7 +113,7 @@ int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId
 int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId)
 {
     PROFILE_BEGIN("SetVideoSource begin");
-    ErrorCode ret{ErrorCode::SUCCESS};
+    ErrorCode ret {ErrorCode::SUCCESS};
     videoCapture_ = FilterFactory::Instance().CreateFilterWithType<VideoCaptureFilter>(
         "builtin.recorder.videocapture", "videocapture");
     videoEncoder_ = FilterFactory::Instance().CreateFilterWithType<VideoEncoderFilter>(
