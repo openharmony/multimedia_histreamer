@@ -131,7 +131,7 @@ enum struct BufferMetaType : uint32_t {
 class Memory {
 public:
     /// Destructor
-    ~Memory() = default;
+    virtual ~Memory() = default;
 
     // Todo: Add the documentation description.
     size_t GetCapacity();
