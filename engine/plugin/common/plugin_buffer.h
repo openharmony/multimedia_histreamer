@@ -298,9 +298,6 @@ public:
     /// Destructor
     ~VideoBufferMeta() = default;
 
-    /// the memory type of video buffer
-    MemoryType memoryType {MemoryType::VIRTUAL_ADDR};
-
     /// describing video formats.
     VideoPixelFormat videoPixelFormat {VideoPixelFormat::UNKNOWN};
 
@@ -315,12 +312,6 @@ public:
 
     /// the number of planes in the image.
     uint32_t planes {0};
-
-    /// the fence fd for Surface
-    int32_t fenceFd {-1};
-
-    /// the buffer handle for SurfaceBuffer
-    intptr_t handle {0};
 
     /// array of strides for the planes.
     std::vector<uint32_t> stride {};
