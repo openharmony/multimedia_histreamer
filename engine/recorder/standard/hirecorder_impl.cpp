@@ -112,6 +112,7 @@ int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId
 
 int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId)
 {
+#ifdef VIDEO_SUPPORT
     PROFILE_BEGIN("SetVideoSource begin");
     ErrorCode ret {ErrorCode::SUCCESS};
     videoCapture_ = FilterFactory::Instance().CreateFilterWithType<VideoCaptureFilter>(
@@ -138,6 +139,9 @@ int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId
     }
     PROFILE_END("SetVideoSource end.");
     return TransErrorCode(ret);
+#else
+    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+#endif
 }
 
 sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
@@ -296,8 +300,12 @@ void HiRecorderImpl::OnStateChanged(StateId state)
 
 ErrorCode HiRecorderImpl::DoSetVideoSource(const Plugin::Any& param) const
 {
+#ifdef VIDEO_SUPPORT
     return videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_SOURCE_TYPE),
                                        static_cast<uint32_t>(Plugin::AnyCast<RecorderSource>(param).sourceType));
+#else
+    return ErrorCode::ERROR_UNIMPLEMENTED;
+#endif
 }
 
 ErrorCode HiRecorderImpl::DoSetAudioSource(const Plugin::Any& param) const

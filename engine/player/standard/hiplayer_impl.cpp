@@ -269,7 +269,11 @@ int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
 
 int32_t HiPlayerImpl::SetVideoSurface(sptr<Surface> surface)
 {
+#ifdef VIDEO_SUPPORT
     return TransErrorCode(videoSink_->SetVideoSurface(surface));
+#else
+    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+#endif
 }
 
 int32_t HiPlayerImpl::GetVideoTrackInfo(std::vector<Format> &videoTrack)

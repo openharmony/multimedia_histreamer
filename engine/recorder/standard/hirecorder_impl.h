@@ -101,8 +101,10 @@ private:
     std::shared_ptr<Pipeline::OutputSinkFilter> outputSink_;
     std::shared_ptr<Pipeline::AudioCaptureFilter> audioCapture_;
     std::shared_ptr<Pipeline::AudioEncoderFilter> audioEncoder_;
+#ifdef VIDEO_SUPPORT
     std::shared_ptr<Pipeline::VideoCaptureFilter> videoCapture_;
     std::shared_ptr<Pipeline::VideoEncoderFilter> videoEncoder_;
+#endif
 };
 }  // namespace Record
 }  // namespace Media
