@@ -83,12 +83,8 @@ public:
     void PushData(AVBufferPtr buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
-    ErrorCode SetAllocator(std::shared_ptr<Allocator> allocator);
-    std::shared_ptr<Allocator> GetAllocator();
-
 private:
     std::weak_ptr<Port> prevPort;
-    std::shared_ptr<Allocator> allocator_ {nullptr}; // provide allocator to upstream filter
 };
 
 class OutPort : public Port {
