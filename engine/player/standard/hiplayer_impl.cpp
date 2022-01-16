@@ -468,6 +468,11 @@ int32_t HiPlayerImpl::SetLooping(bool loop)
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 
+int32_t HiPlayerImpl::SetParameter(const Format& params)
+{
+    return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
+}
+
 int32_t HiPlayerImpl::SetObs(const std::weak_ptr<IPlayerEngineObs>& obs)
 {
     obs_ = obs;

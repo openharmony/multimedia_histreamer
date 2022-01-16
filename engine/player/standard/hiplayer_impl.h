@@ -67,6 +67,7 @@ public:
     int32_t SetVolume(float leftVolume, float rightVolume) override;
     int32_t SetVideoSurface(sptr<Surface> surface) override;
     int32_t SetLooping(bool loop) override;
+    int32_t SetParameter(const Format &param) override;
     int32_t SetObs(const std::weak_ptr<IPlayerEngineObs>& obs) override;
     int32_t GetCurrentTime(int32_t& currentPositionMs) override;
     int32_t GetDuration(int32_t& durationMs) override;
