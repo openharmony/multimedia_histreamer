@@ -17,6 +17,7 @@
 
 #define HST_LOG_TAG "VideoSinkFilter"
 
+#include <common/surface_allocator.h>
 #include "video_sink_filter.h"
 
 #include "common/plugin_utils.h"
@@ -120,6 +121,13 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
         [](const std::string& name) -> std::shared_ptr<Plugin::VideoSink> {
         return Plugin::PluginManager::Instance().CreateVideoSinkPlugin(name);
     });
+    auto pluginAllocator = plugin_->GetAllocator();
+    if (pluginAllocator != nullptr && pluginAllocator->GetMemoryType() == Plugin::MemoryType::SURFACE_BUFFER) {
+        // TODO: currently assume BUFFER_ALLOCATOR always SurfaceAllocator
+        // It's better to pass pluginAllocator directly, but I'm afraid we can not get subclass obj from any.
+        auto allocator = std::dynamic_pointer_cast<Plugin::SurfaceAllocator>(pluginAllocator);
+        upstreamNegotiatedCap.extraParams.emplace(std::make_pair(Tag::BUFFER_ALLOCATOR, allocator));
+    }
     PROFILE_END("video sink negotiate end");
     return res;
 }

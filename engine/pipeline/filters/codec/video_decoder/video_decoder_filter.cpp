@@ -17,6 +17,7 @@
 
 #define HST_LOG_TAG "VideoDecoderFilter"
 
+#include <common/surface_allocator.h>
 #include "video_decoder_filter.h"
 #include "foundation/log.h"
 #include "osal/utils/util.h"
@@ -255,7 +256,17 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
         MEDIA_LOG_E("Unsupported video pixel format: %u", vdecFormat_.format);
         return ErrorCode::ERROR_UNIMPLEMENTED;
     }
-    auto outAllocator = plugin_->GetAllocator(); // zero copy need change to use sink allocator
+    std::shared_ptr<Allocator> outAllocator {nullptr};
+    // Use sink allocator first, zero copy while passing data
+    if (capNegWithDownstream_.extraParams.find(Tag::BUFFER_ALLOCATOR) != capNegWithDownstream_.extraParams.end()) {
+        auto sinkAllocatorAny = capNegWithDownstream_.extraParams[Tag::BUFFER_ALLOCATOR];
+        if (sinkAllocatorAny.Type() == typeid(std::shared_ptr<Plugin::SurfaceAllocator>)) {
+            outAllocator = Plugin::AnyCast<std::shared_ptr<Plugin::SurfaceAllocator>>(sinkAllocatorAny);
+        }
+    }
+    if (outAllocator == nullptr) {
+        outAllocator = plugin_->GetAllocator();
+    }
     if (outAllocator == nullptr) {
         MEDIA_LOG_I("plugin doest not support out allocator, using framework allocator");
         outBufPool_->Init(bufferSize, Plugin::BufferMetaType::VIDEO);

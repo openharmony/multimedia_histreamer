@@ -138,8 +138,11 @@ struct Capability {
     /// mime of capability
     std::string mime;
 
-    /// storage map of Capability::Key and values
+    /// Store the parameters(Capability::Key, value pairs), which should be negotiated
     KeyMap keys;
+
+    /// Pass extra parameters downstream or upstream
+    TagMap extraParams;
 };
 
 /// A collection of multiple capabilities

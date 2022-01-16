@@ -78,7 +78,8 @@ enum struct Tag : uint32_t {
     /* -------------------- regular tag -------------------- */
     MIME = SECTION_REGULAR_START + 1, ///< std::string
     TRACK_ID,                         ///< uint32_t, track id
-    REQUIRED_OUT_BUFFER_CNT,          ///< uint32_t required buffer count of plugin; read only tag
+    REQUIRED_OUT_BUFFER_CNT,          ///< uint32_t, required buffer count of plugin; read only tag
+    BUFFER_ALLOCATOR,                 ///< Allocator, allocator to alloc buffers
     BUFFERING_SIZE,                   ///< uint32_t, download buffer size
     WATERLINE_HIGH,                   ///< uint32_t, high waterline
     WATERLINE_LOW,                    ///< uint32_t, low waterline
