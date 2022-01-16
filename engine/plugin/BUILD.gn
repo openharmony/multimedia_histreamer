@@ -41,6 +41,8 @@ source_set("histreamer_plugin_intf") {
   sources = [
     "common/media_source.cpp",
     "common/plugin_buffer.cpp",
+    "common/surface_allocator.cpp",
+    "common/surface_memory.cpp",
   ]
   public_configs = [ ":hst_plugin_intf_config" ]
   if (defined(ohos_lite)) {
@@ -82,6 +84,12 @@ config("hst_plugin_core_config") {
   ]
   if (defined(ohos_lite)) {
     include_dirs += [ "//foundation/multimedia/utils/lite/interfaces/kits" ]
+  } else {
+    include_dirs += [
+      "//utils/native/base/include",
+      "//foundation/graphic/standard/interfaces/innerkits",
+      "//drivers/peripheral/display/interfaces/include",
+    ]
   }
 }
 
