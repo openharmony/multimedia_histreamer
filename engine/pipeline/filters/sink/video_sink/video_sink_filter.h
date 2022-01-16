@@ -19,7 +19,7 @@
 #ifdef VIDEO_SUPPORT
 
 #include <atomic>
-#ifndef OHOS_LITE
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #include "refbase.h"
 #include "surface/surface.h"
 #endif
@@ -72,7 +72,7 @@ public:
     void FlushStart() override;
     void FlushEnd() override;
 
-#ifndef OHOS_LITE
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
     ErrorCode SetVideoSurface(sptr<Surface> surface);
 #endif
 

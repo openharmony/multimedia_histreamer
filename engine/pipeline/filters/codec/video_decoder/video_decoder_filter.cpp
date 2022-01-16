@@ -259,7 +259,7 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
 
     std::shared_ptr<Allocator> outAllocator {nullptr};
 
-#ifndef OHOS_LITE
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
     // Use sink allocator first, zero copy while passing data
     if (capNegWithDownstream_.extraParams.find(Tag::BUFFER_ALLOCATOR) != capNegWithDownstream_.extraParams.end()) {
         auto sinkAllocatorAny = capNegWithDownstream_.extraParams[Tag::BUFFER_ALLOCATOR];

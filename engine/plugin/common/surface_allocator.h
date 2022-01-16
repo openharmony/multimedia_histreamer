@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_PLUGIN_COMMON_SURFACE_ALLOCATOR_H
 #define HISTREAMER_PLUGIN_COMMON_SURFACE_ALLOCATOR_H
 
-#ifndef OHOS_LITE
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
 #include "refbase.h"
 #include "surface/surface.h"

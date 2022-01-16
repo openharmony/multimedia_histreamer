@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OHOS_LITE
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #include "surface_allocator.h"
 #include "foundation/log.h"
 #include "display_type.h"

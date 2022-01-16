@@ -23,7 +23,7 @@
 #include "plugin_tags.h"
 #include "plugin_audio_tags.h"
 #include "plugin_video_tags.h"
-#ifndef OHOS_LITE
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #include "refbase.h"
 #include "surface/surface.h"
 #endif
@@ -172,10 +172,6 @@ protected:
 
     /// Memory type
     MemoryType memoryType;
-
-#ifndef OHOS_LITE
-    sptr<SurfaceBuffer> surfaceBuffer;
-#endif
 
     /// Allocated memory size.
     size_t capacity;

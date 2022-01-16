@@ -121,7 +121,7 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
         [](const std::string& name) -> std::shared_ptr<Plugin::VideoSink> {
         return Plugin::PluginManager::Instance().CreateVideoSinkPlugin(name);
     });
-#ifndef OHOS_LITE
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
     auto pluginAllocator = plugin_->GetAllocator();
     if (pluginAllocator != nullptr && pluginAllocator->GetMemoryType() == Plugin::MemoryType::SURFACE_BUFFER) {
         // Warning: currently assume BUFFER_ALLOCATOR always SurfaceAllocator
@@ -382,7 +382,7 @@ void VideoSinkFilter::FlushEnd()
     }
 }
 
-#ifndef OHOS_LITE
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 ErrorCode VideoSinkFilter::SetVideoSurface(sptr<Surface> surface)
 {
     if (!surface) {

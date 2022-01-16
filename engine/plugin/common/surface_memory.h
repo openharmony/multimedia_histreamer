@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_PLUGIN_COMMON_SURFACE_BUFFER_H
-#define HISTREAMER_PLUGIN_COMMON_SURFACE_BUFFER_H
+#ifndef HISTREAMER_PLUGIN_COMMON_SURFACE_MEMORY_H
+#define HISTREAMER_PLUGIN_COMMON_SURFACE_MEMORY_H
 
-#ifndef OHOS_LITE
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
 #include "refbase.h"
 #include "surface/surface.h"
@@ -34,11 +34,14 @@ public:
     int32_t GetFenceFd();
 
 private:
-    SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr, size_t align = 1);
+    explicit SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr, size_t align = 1);
 
     uint8_t *GetRealAddr() const override;
 
 private:
+    /// Surface buffer
+    sptr<SurfaceBuffer> surfaceBuffer;
+
     /// the fence fd for Surface
     int32_t fenceFd {-1};
 
@@ -52,4 +55,4 @@ private:
 } // namespace OHOS
 
 #endif
-#endif // HISTREAMER_PLUGIN_COMMON_SURFACE_BUFFER_H
+#endif // HISTREAMER_PLUGIN_COMMON_SURFACE_MEMORY_H
