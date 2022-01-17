@@ -172,7 +172,7 @@ void Minimp3DemuxerPlugin::FillInMediaInfo(MediaInfo& mediaInfo) const
         mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::STEREO});
     }
     mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(mp3DemuxerRst_.frameSampleRate)});
-    mediaInfo.tracks[0].insert({Tag::MEDIA_BITRATE, static_cast<uint32_t>(mp3DemuxerRst_.frameBitrateKbps)});
+    mediaInfo.tracks[0].insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(mp3DemuxerRst_.frameBitrateKbps)});
     mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(mp3DemuxerRst_.frameChannels)});
     mediaInfo.tracks[0].insert({Tag::TRACK_ID, static_cast<uint32_t>(0)});
     mediaInfo.tracks[0].insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_MPEG)});
