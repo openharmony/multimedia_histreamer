@@ -19,28 +19,28 @@
 
 namespace {
 using namespace OHOS;
-std::pair<AudioStandard::AudioSamplingRate, uint32_t> g_auSampleRateMap[] = {
-        {AudioStandard::SAMPLE_RATE_8000, 8000},
-        {AudioStandard::SAMPLE_RATE_11025, 11025},
-        {AudioStandard::SAMPLE_RATE_12000, 12000},
-        {AudioStandard::SAMPLE_RATE_16000, 16000},
-        {AudioStandard::SAMPLE_RATE_22050, 22050},
-        {AudioStandard::SAMPLE_RATE_24000, 24000},
-        {AudioStandard::SAMPLE_RATE_32000, 32000},
-        {AudioStandard::SAMPLE_RATE_44100, 44100},
-        {AudioStandard::SAMPLE_RATE_48000, 48000},
-        {AudioStandard::SAMPLE_RATE_64000, 64000},
-        {AudioStandard::SAMPLE_RATE_96000, 96000},
+const std::pair<AudioStandard::AudioSamplingRate, uint32_t> g_auSampleRateMap[] = {
+    {AudioStandard::SAMPLE_RATE_8000, 8000},
+    {AudioStandard::SAMPLE_RATE_11025, 11025},
+    {AudioStandard::SAMPLE_RATE_12000, 12000},
+    {AudioStandard::SAMPLE_RATE_16000, 16000},
+    {AudioStandard::SAMPLE_RATE_22050, 22050},
+    {AudioStandard::SAMPLE_RATE_24000, 24000},
+    {AudioStandard::SAMPLE_RATE_32000, 32000},
+    {AudioStandard::SAMPLE_RATE_44100, 44100},
+    {AudioStandard::SAMPLE_RATE_48000, 48000},
+    {AudioStandard::SAMPLE_RATE_64000, 64000},
+    {AudioStandard::SAMPLE_RATE_96000, 96000},
 };
-std::pair<AudioStandard::AudioSampleFormat, Media::Plugin::AudioSampleFormat> g_aduFmtMap[] = {
-        {AudioStandard::SAMPLE_U8, Media::Plugin::AudioSampleFormat::U8},
-        {AudioStandard::SAMPLE_S16LE, Media::Plugin::AudioSampleFormat::S16},
-        {AudioStandard::SAMPLE_S24LE, Media::Plugin::AudioSampleFormat::S24},
-        {AudioStandard::SAMPLE_S32LE, Media::Plugin::AudioSampleFormat::S32}
+const std::pair<AudioStandard::AudioSampleFormat, Media::Plugin::AudioSampleFormat> g_aduFmtMap[] = {
+    {AudioStandard::SAMPLE_U8, Media::Plugin::AudioSampleFormat::U8},
+    {AudioStandard::SAMPLE_S16LE, Media::Plugin::AudioSampleFormat::S16},
+    {AudioStandard::SAMPLE_S24LE, Media::Plugin::AudioSampleFormat::S24},
+    {AudioStandard::SAMPLE_S32LE, Media::Plugin::AudioSampleFormat::S32}
 };
-std::pair<AudioStandard::AudioChannel, uint32_t> g_auChannelsMap[] = {
-        {AudioStandard::MONO, 1},
-        {AudioStandard::STEREO, 2},
+const std::pair<AudioStandard::AudioChannel, uint32_t> g_auChannelsMap[] = {
+    {AudioStandard::MONO, 1},
+    {AudioStandard::STEREO, 2},
 };
 }
 

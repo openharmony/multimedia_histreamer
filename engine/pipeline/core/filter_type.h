@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_PIPELINE_CORE_FILTER_TYPE_H
 #define HISTREAMER_PIPELINE_CORE_FILTER_TYPE_H
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace OHOS {
 namespace Media {

@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifdef RECORDER_SUPPORT
-
 #ifndef HISTREAMER_PIPELINE_FILTER_AUDIO_ENCODER_H
 #define HISTREAMER_PIPELINE_FILTER_AUDIO_ENCODER_H
+
+#ifdef RECORDER_SUPPORT
 
 #include "filters/codec/codec_filter_base.h"
 #include "plugin/common/plugin_tags.h"
@@ -76,5 +76,5 @@ private:
 } // OHOS
 } // Media
 } // Pipeline
-#endif // HISTREAMER_PIPELINE_FILTER_AUDIO_ENCODER_H
 #endif
+#endif // HISTREAMER_PIPELINE_FILTER_AUDIO_ENCODER_H
