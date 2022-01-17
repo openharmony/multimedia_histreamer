@@ -26,10 +26,7 @@ namespace Media {
 int32_t HstEngineFactory::Score(Scene scene, const std::string& uri)
 {
     // only used for play back and recorder
-    if (scene == Scene::SCENE_PLAYBACK || scene == Scene::SCENE_RECORDER) {
-        return MIN_SCORE + 1;
-    }
-    return MIN_SCORE;
+    return 0;
 }
 
 std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine()
