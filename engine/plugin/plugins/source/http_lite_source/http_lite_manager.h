@@ -70,7 +70,7 @@ public:
     unsigned int GetContentLength() const;
     HttpLiteStatus GetHttpStatus() const;
     unsigned int GetLastReadTime() const;
-    void GetHttpBufferRange(uint32_t *read, uint32_t *write);
+    void GetHttpBufferRange(unsigned int *read, unsigned int *write);
     void SetWaterline(int high, int low);
     bool IsStreaming();
     HttpLiteUrlType IsHlsSource(std::string &url);

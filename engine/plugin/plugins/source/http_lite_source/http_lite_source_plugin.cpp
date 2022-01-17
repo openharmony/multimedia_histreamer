@@ -219,7 +219,7 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
         return ret;
     }
     MEDIA_LOG_D("OpenUri success");
-    uint32_t downloadPos = 0;
+    unsigned int downloadPos = 0;
     httpHandle_->GetHttpBufferRange(&position_, &downloadPos);
     MEDIA_LOG_D("position_ %d downloadPos %d", (uint32_t)position_, (uint32_t)downloadPos);
     int8_t retryTimes = 0;
@@ -284,8 +284,8 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
         } else {
             bufData = buffer->GetMemory();
         }
-        uint32_t read = 0;
-        uint32_t write = 0;
+        unsigned int read = 0;
+        unsigned int write = 0;
         unsigned int realReadSize = 0;
         bool isEos = false;
 
@@ -323,8 +323,8 @@ bool HttpSourcePlugin::IsSeekable()
 Status HttpSourcePlugin::SeekTo(uint64_t offset)
 {
     OSAL::ScopedLock lock(httpMutex_);
-    uint32_t readPos = 0;
-    uint32_t writePos = 0;
+    unsigned int readPos = 0;
+    unsigned int writePos = 0;
     uint32_t readLength;
     uint8_t tmpBuf;
     bool sourceFlag;
@@ -336,7 +336,7 @@ Status HttpSourcePlugin::SeekTo(uint64_t offset)
         MEDIA_LOG_D("seek to position_ %d failed", position_);
         return Status::ERROR_UNKNOWN;
     }
-    position_ = static_cast<uint32_t>(offset);
+    position_ = static_cast<unsigned int>(offset);
     httpHandle_->GetHttpBufferRange(&readPos, &writePos);
     MEDIA_LOG_D("offset = %d, after SeekTo readPos = %d, writePos = %d",
                 static_cast<uint32_t>(offset), readPos, writePos);

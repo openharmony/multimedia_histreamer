@@ -62,7 +62,7 @@ private:
     bool needExit_;
     bool isSeekable_;
     uint32_t bufferSize_;
-    uint32_t position_;
+    unsigned int position_;
     uint32_t waterline_;
     size_t   fileSize_;
     Callback* callback_ {};
