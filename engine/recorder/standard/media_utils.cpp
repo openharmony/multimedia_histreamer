@@ -15,15 +15,11 @@
 
 #include "recorder/standard/media_utils.h"
 #include "media_errors.h"
+#include "plugin/common/plugin_audio_tags.h"
 namespace OHOS {
 namespace Media {
 namespace {
-struct ErrorCodePair {
-    ErrorCode errorCode;
-    int serviceErrCode;
-};
-
-const ErrorCodePair g_errorCodePair[] = {
+const std::pair<ErrorCode, int32_t> g_errorCodePair[] = {
     {ErrorCode::SUCCESS, MSERR_OK},
     {ErrorCode::ERROR_UNKNOWN, MSERR_UNKNOWN},
     {ErrorCode::ERROR_AGAIN, MSERR_UNKNOWN},
@@ -42,11 +38,50 @@ namespace Record {
 int TransErrorCode(ErrorCode errorCode)
 {
     for (const auto& errPair : g_errorCodePair) {
-        if (errPair.errorCode == errorCode) {
-            return errPair.serviceErrCode;
+        if (errPair.first == errorCode) {
+            return errPair.second;
         }
     }
     return MSERR_UNKNOWN;
+}
+Plugin::SrcInputType TransAudioInputType(OHOS::Media::AudioSourceType sourceType)
+{
+    const static std::pair<OHOS::Media::AudioSourceType, Plugin::SrcInputType> mapArray[] = {
+            {OHOS::Media::AudioSourceType::AUDIO_MIC, Plugin::SrcInputType::AUD_MIC},
+            {OHOS::Media::AudioSourceType::AUDIO_SOURCE_DEFAULT, Plugin::SrcInputType::AUD_MIC},
+    };
+    for (const auto& item : mapArray) {
+        if (item.first == sourceType) {
+            return item.second;
+        }
+    }
+    return Plugin::SrcInputType::UNKNOWN;
+}
+Plugin::SrcInputType TransVideoInputType(OHOS::Media::VideoSourceType sourceType)
+{
+    const static std::pair<OHOS::Media::VideoSourceType, Plugin::SrcInputType> mapArray[] = {
+            {OHOS::Media::VideoSourceType::VIDEO_SOURCE_SURFACE_YUV, Plugin::SrcInputType::VID_SURFACE_YUV},
+            {OHOS::Media::VideoSourceType::VIDEO_SOURCE_SURFACE_ES, Plugin::SrcInputType::VID_SURFACE_ES},
+    };
+    for (const auto& item : mapArray) {
+        if (item.first == sourceType) {
+            return item.second;
+        }
+    }
+    return Plugin::SrcInputType::UNKNOWN;
+}
+bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& encoderMeta)
+{
+    switch (aFormat) {
+        case OHOS::Media::AudioCodecFormat::AUDIO_DEFAULT:
+        case OHOS::Media::AudioCodecFormat::AAC_LC:
+            encoderMeta.SetString(Plugin::MetaID::MIME, MEDIA_MIME_AUDIO_AAC);
+            encoderMeta.SetData(Plugin::MetaID::AUDIO_AAC_PROFILE, Plugin::AudioAacProfile::LC);
+            return true;
+        default:
+            break;
+    }
+    return false;
 }
 }  // namespace Record
 }  // namespace Media

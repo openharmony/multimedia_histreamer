@@ -120,7 +120,7 @@ struct SourcePlugin : public PluginBase {
  */
 struct SourcePluginDef : public PluginDefBase {
     std::vector<ProtocolType> protocol;      ///< Protocols supported by playback source
-    std::string inputType;                   ///< Input type supported by record source
+    SrcInputType inputType;                   ///< Input type supported by record source
     CapabilitySet outCaps;                   ///< Plug-in output capability, For details, @see Capability.
     PluginCreatorFunc<SourcePlugin> creator {nullptr}; ///< Source plugin create function.
     SourcePluginDef()

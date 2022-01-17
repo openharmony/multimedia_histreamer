@@ -19,6 +19,8 @@
 #include "i_recorder_engine.h"
 #include "recorder.h"
 #include "foundation/error_code.h"
+#include "plugin/common/plugin_source_tags.h"
+#include "plugin/core/plugin_meta.h"
 #include "recorder/internal/state.h"
 #include "utils/constants.h"
 
@@ -26,19 +28,16 @@ namespace OHOS {
 namespace Media {
 namespace Record {
 int TransErrorCode(ErrorCode errorCode);
-
-struct RecorderSource {
-    int32_t sourceType;
-    int32_t sourceId;
-};
-
+Plugin::SrcInputType TransAudioInputType(OHOS::Media::AudioSourceType sourceType);
+Plugin::SrcInputType TransVideoInputType(OHOS::Media::VideoSourceType sourceType);
+bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& encoderMeta);
 /**
 * @brief Enumerates recorder states.
 *
 * @since 1.0
 * @version 1.0
 */
-enum  RecorderState : uint32_t {
+enum struct RecorderState : uint32_t {
     /** Error */
     RECORDER_STATE_ERROR = 0,
     /** Idle */

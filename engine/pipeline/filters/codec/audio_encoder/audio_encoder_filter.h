@@ -30,7 +30,7 @@ public:
     explicit AudioEncoderFilter(const std::string &name);
     ~AudioEncoderFilter() override;
 
-    virtual ErrorCode SetAudioEncoder(int32_t sourceId, Plugin::AudioFormat encoder);
+    virtual ErrorCode SetAudioEncoder(int32_t sourceId, std::shared_ptr<Plugin::Meta> encoderMeta);
 
     ErrorCode Start() override;
 
@@ -69,6 +69,7 @@ private:
     Capability capNegWithUpstream_;
     uint32_t frameSize_;
     std::string mime_;
+    std::shared_ptr<Plugin::Meta> encoderMeta_ {};
     std::unique_ptr<Plugin::RingBuffer> rb {};
     AVBufferPtr cahceBuffer_ {nullptr};
 };

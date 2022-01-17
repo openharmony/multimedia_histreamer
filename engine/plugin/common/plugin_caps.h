@@ -52,6 +52,7 @@ struct Capability {
      * @version 1.0
      */
     enum struct Key : uint32_t {
+        MEDIA_BITRATE = static_cast<uint32_t>(Tag::MEDIA_BITRATE),
         AUDIO_SAMPLE_RATE = static_cast<uint32_t>(Tag::AUDIO_SAMPLE_RATE),
         AUDIO_CHANNELS = static_cast<uint32_t>(Tag::AUDIO_CHANNELS),
         AUDIO_CHANNEL_LAYOUT = static_cast<uint32_t>(Tag::AUDIO_CHANNEL_LAYOUT),

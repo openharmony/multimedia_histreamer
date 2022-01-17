@@ -66,6 +66,14 @@ const std::map<FilterType, PluginParaAllowedMap> PluginParameterTable::table_ = 
         DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t),
         DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_CODEC_CONFIG, std::vector<uint8_t>),
     }},
+    {FilterType::AUDIO_ENCODER, {
+        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_CHANNELS, uint32_t),
+        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_RATE, uint32_t),
+        DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_BITRATE, int64_t),
+        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat),
+        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t),
+        DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_CODEC_CONFIG, std::vector<uint8_t>),
+    }},
 };
 }
 }

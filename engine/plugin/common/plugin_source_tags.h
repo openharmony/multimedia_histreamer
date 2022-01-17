@@ -44,28 +44,18 @@ enum struct ProtocolType : uint32_t {
 };
 
 /**
- * @enum Audio source input type.
+ * @enum source input type.
  *
  * @since 1.0
  * @version 1.0
  */
-enum struct AudioInputType : uint32_t {
-    UNKNOWN, ///< Unknown audio input type
-    MIC,     ///< Microphone PCM data
-    ES,      ///< Raw encoded data
-};
-
-/**
- * @enum Video source input type.
- *
- * @since 1.0
- * @version 1.0
- */
-enum struct VideoInputType : uint32_t {
-    UNKNOWN,     ///< Unknown video input type
-    SURFACE_YUV, ///< YUV video data
-    SURFACE_RGB, ///< RGB video data
-    SURFACE_ES,  ///< Raw encoded data
+enum struct SrcInputType : uint32_t {
+    UNKNOWN,         ///< Unknown audio input type
+    AUD_MIC,         ///< Audio source input type of Microphone PCM data
+    AUD_ES,          ///< Audio source input type of Raw encoded data
+    VID_SURFACE_YUV, ///< Video source input type of YUV video data
+    VID_SURFACE_RGB, ///< Video source input type of RGB video data
+    VID_SURFACE_ES,  ///< Video source input type of Raw encoded data
 };
 } // namespace Plugin
 } // namespace Media

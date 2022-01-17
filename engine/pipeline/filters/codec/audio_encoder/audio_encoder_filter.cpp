@@ -65,19 +65,15 @@ ErrorCode AudioEncoderFilter::Prepare()
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode AudioEncoderFilter::SetAudioEncoder(int32_t sourceId, Plugin::AudioFormat encoder)
+ErrorCode AudioEncoderFilter::SetAudioEncoder(int32_t sourceId, std::shared_ptr<Plugin::Meta> encoderMeta)
 {
-    switch (encoder) {
-        case Plugin::AudioFormat::AAC :
-            mime_ = MEDIA_MIME_AUDIO_AAC;
-            break;
-        case Plugin::AudioFormat::MPEG :
-            mime_ = MEDIA_MIME_AUDIO_MPEG;
-            break;
-        default:
-            mime_ = MEDIA_MIME_AUDIO_AAC;
-            break;
+    std::string mime;
+    if (!encoderMeta->GetString(Plugin::MetaID::MIME, mime)) {
+        MEDIA_LOG_E("encoder meta must contains mime item");
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
+    mime_ = mime;
+    encoderMeta_ = std::move(encoderMeta);
     return ErrorCode::SUCCESS;
 }
 
@@ -104,7 +100,8 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
             MEDIA_LOG_E("encoder plugin must have out caps");
         }
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
-            if (outCap.mime != mime_) {
+            Plugin::Meta tmpMeta;
+            if (outCap.mime != mime_ || !MergeMetaWithCapability(*encoderMeta_, outCap, tmpMeta)) {
                 continue;
             }
             auto thisOut = std::make_shared<Plugin::Capability>();
@@ -138,6 +135,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
         [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
         return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
     });
+    upstreamNegotiatedCap = *upstreamCap;
     PROFILE_END("audio encoder negotiate end");
     return res;
 }
@@ -170,16 +168,22 @@ bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_
         return false;
     }
 
+    auto thisMeta = std::make_shared<Plugin::Meta>();
+    // todo how to decide the caps ?
+    if (!MergeMetaWithCapability(*upstreamMeta, pluginInfo_->outCaps[0], *thisMeta)) {
+        MEDIA_LOG_E("cannot configure encoder plugin since meta is not compatible with negotiated caps");
+        return false;
+    }
     auto targetOutPort = GetRouteOutPort(inPort);
     if (targetOutPort == nullptr) {
         MEDIA_LOG_E("encoder out port is not found");
         return false;
     }
-    if (!targetOutPort->Configure(upstreamMeta)) {
+    if (!targetOutPort->Configure(thisMeta)) {
         MEDIA_LOG_E("encoder filter downstream Configure failed");
         return false;
     }
-    auto err = ConfigureToStartPluginLocked(upstreamMeta);
+    auto err = ConfigureToStartPluginLocked(thisMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("encoder configure error");
         OnEvent({EVENT_ERROR, err});

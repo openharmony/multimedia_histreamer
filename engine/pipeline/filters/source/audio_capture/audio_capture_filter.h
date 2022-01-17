@@ -50,7 +50,7 @@ public:
 
 private:
     void InitPorts() override;
-    ErrorCode ConfigurePlugin();
+    ErrorCode InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& audioMeta);
     void ReadLoop();
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);
@@ -65,11 +65,17 @@ private:
     std::shared_ptr<Plugin::Source> plugin_ {nullptr};
     std::shared_ptr<Allocator> pluginAllocator_ {nullptr};
     std::shared_ptr<Plugin::PluginInfo> pluginInfo_ {nullptr};
-    std::string inputType_;
-    uint32_t sampleRate_;
-    uint32_t channelNum_;
-    int64_t bitRate_;
-    Plugin::AudioSampleFormat sampleFormat_;
+    Plugin::SrcInputType inputType_ {};
+    bool inputTypeSpecified_ {false};
+    uint32_t sampleRate_ {0};
+    bool sampleRateSpecified_ {false};
+    uint32_t channelNum_ {0};
+    bool channelNumSpecified_ {false};
+    int64_t bitRate_ {0};
+    bool bitRateSpecified_ {false};
+    Plugin::AudioSampleFormat sampleFormat_ {OHOS::Media::Plugin::AudioSampleFormat::S16};
+    bool sampleFormatSpecified_ {false};
+    Capability capNegWithDownstream_ {};
 };
 } // namespace Pipeline
 } // namespace Media

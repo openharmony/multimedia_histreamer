@@ -203,7 +203,7 @@ bool MuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<con
     }
     state_ = FilterState::READY;
     OnEvent({EVENT_READY});
-    MEDIA_LOG_I("audio decoder send EVENT_READY");
+    MEDIA_LOG_I("muxer send EVENT_READY");
     return true;
 }
 

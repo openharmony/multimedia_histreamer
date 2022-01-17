@@ -90,11 +90,11 @@ private:
     std::atomic<RecorderState> pipelineStates_;
     std::atomic<bool> initialized_ {false};
     const std::map<StateId, RecorderState> stateIdToRecorderStateMap_ = {
-        { StateId::INIT, RECORDER_INITIALIZED},
-        { StateId::RECORDING_SETTING, RECORDER_PREPARING},
-        { StateId::READY, RECORDER_PREPARED},
-        { StateId::PAUSE, RECORDER_PAUSED},
-        { StateId::RECORDING, RECORDER_STARTED}};
+        { StateId::INIT, RecorderState::RECORDER_INITIALIZED},
+        { StateId::RECORDING_SETTING, RecorderState::RECORDER_PREPARING},
+        { StateId::READY, RecorderState::RECORDER_PREPARED},
+        { StateId::PAUSE, RecorderState::RECORDER_PAUSED},
+        { StateId::RECORDING, RecorderState::RECORDER_STARTED}};
     std::weak_ptr<IRecorderEngineObs> obs_ {};
     std::atomic<int32_t> sourceId_ {0};
     std::shared_ptr<Pipeline::MuxerFilter> muxer_;

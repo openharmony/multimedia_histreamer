@@ -249,7 +249,7 @@ private:
 class AudioBufferMeta : public BufferMeta {
 public:
     /// Destructor
-    ~AudioBufferMeta() = default;
+    ~AudioBufferMeta() override = default;
 
     /// the number of valid samples in the buffer
     size_t samples {0};
@@ -290,7 +290,7 @@ private:
 class VideoBufferMeta : public BufferMeta {
 public:
     /// Destructor
-    ~VideoBufferMeta() = default;
+    ~VideoBufferMeta() override = default;
 
     /// describing video formats.
     VideoPixelFormat videoPixelFormat {VideoPixelFormat::UNKNOWN};

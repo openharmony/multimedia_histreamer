@@ -97,6 +97,7 @@ static std::vector<CapabilityID> g_allCapabilityId = {
         CapabilityID::AUDIO_AAC_LEVEL, // 7
         CapabilityID::AUDIO_AAC_STREAM_FORMAT, // 8
         CapabilityID::VIDEO_PIXEL_FORMAT, // 9
+        CapabilityID::MEDIA_BITRATE, // 10
 };
 
 
@@ -112,6 +113,7 @@ static std::map<CapabilityID, std::function<bool(const CapEntry&, const  Plugin:
         {g_allCapabilityId[7], FixInvalDiscNumericalCheck<uint32_t>}, // 7
         {g_allCapabilityId[8], FixDiscNumericalCheck<Plugin::AudioAacStreamFormat, uint8_t>}, // 8
         {g_allCapabilityId[9], FixDiscNumericalCheck<Plugin::VideoPixelFormat, uint32_t>}, // 9
+        {g_allCapabilityId[10], FixInvalDiscNumericalCheck<int64_t>}, // 10
 };
 
 template <typename T>
@@ -127,6 +129,7 @@ static std::map<CapabilityID, std::function<bool(const Plugin::ValueType&, Plugi
         {g_allCapabilityId[7], ExtractFixedCap<uint32_t>}, // 7
         {g_allCapabilityId[8], ExtractFixedCap<Plugin::AudioAacStreamFormat>}, // 8
         {g_allCapabilityId[9], ExtractFixedCap<Plugin::VideoPixelFormat>}, // 9
+        {g_allCapabilityId[10], ExtractFixedCap<int64_t>}, // 10
 };
 
 static std::map<CapabilityID,
@@ -142,6 +145,7 @@ static std::map<CapabilityID,
         {g_allCapabilityId[7], FixInvalDiscCapValCheck<uint32_t>}, // 7
         {g_allCapabilityId[8], FixDiscCapValCheck<Plugin::AudioAacStreamFormat, uint8_t>}, // 8
         {g_allCapabilityId[9], FixDiscCapValCheck<Plugin::VideoPixelFormat, uint32_t>}, // 9
+        {g_allCapabilityId[10], FixInvalDiscCapValCheck<int64_t>}, // 10
 };
 
 
