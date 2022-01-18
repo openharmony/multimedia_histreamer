@@ -26,6 +26,7 @@ namespace Media {
 int32_t HstEngineFactory::Score(Scene scene, const std::string& uri)
 {
     // only used for play back and recorder
+    MEDIA_LOG_I("Score in");
     return 0;
 }
 

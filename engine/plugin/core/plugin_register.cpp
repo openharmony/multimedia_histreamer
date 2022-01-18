@@ -306,7 +306,7 @@ void PluginRegister::RegisterStaticPlugins()
 
 void PluginRegister::RegisterDynamicPlugins()
 {
-    RegisterPluginsFromPath("/usr/lib");
+    RegisterPluginsFromPath(HST_PLUGIN_PATH);
 }
 
 void PluginRegister::RegisterPluginsFromPath(const char* libDirPath)

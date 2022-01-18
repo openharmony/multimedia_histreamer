@@ -113,6 +113,11 @@ source_set("histreamer_plugin_core") {
     sources += [ "core/plugin_loader.cpp" ]
     defines += [ "DYNAMIC_PLUGINS" ]
   }
+  if (defined(ohos_lite)) {
+    defines += [ "HST_PLUGIN_PATH=\"/usr/lib\"" ]
+  } else {
+    defines += [ "HST_PLUGIN_PATH=\"/system/lib/media\"" ]
+  }
   public_configs = [ ":hst_plugin_core_config" ]
   public_deps = [
     ":histreamer_plugin_intf",
