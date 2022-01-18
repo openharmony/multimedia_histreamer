@@ -32,8 +32,6 @@ config("plugin_ffmpeg_adapter_config") {
 source_set("ffmpeg_audio_decoders") {
   sources = [
     "audio_decoder/audio_ffmpeg_decoder_plugin.cpp",
-    "utils/aac_audio_config_parser.cpp",
-    "utils/bit_reader.cpp",
     "utils/ffmpeg_utils.cpp",
   ]
   public_configs = [ ":plugin_ffmpeg_adapter_config" ]
@@ -47,13 +45,7 @@ source_set("ffmpeg_audio_decoders") {
     "-Wall",
   ]
   if (defined(ohos_lite)) {
-    ldflags = [
-      "-laudio_hw",
-      "-lcodec",
-      "-lavformat",
-      "-lavcodec",
-      "-lavutil",
-    ]
+    # deps on lite
   } else {
     public_deps += [ "//third_party/ffmpeg:libohosffmpeg" ]
     configs -= [
@@ -86,13 +78,7 @@ source_set("ffmpeg_demuxers") {
     "-Wall",
   ]
   if (defined(ohos_lite)) {
-    ldflags = [
-      "-laudio_hw",
-      "-lcodec",
-      "-lavformat",
-      "-lavcodec",
-      "-lavutil",
-    ]
+    # deps on lite
   } else {
     public_deps += [ "//third_party/ffmpeg:libohosffmpeg" ]
     configs -= [
@@ -117,11 +103,16 @@ if (defined(ohos_lite)) {
       target_type = "shared_library"
       sources = []
       deps = [ ":ffmpeg_audio_decoders" ]
+      ldflags = [ "-lavcodec" ]
     }
     lite_library("histreamer_plugin_FFmpegDemuxer") {
       target_type = "shared_library"
       sources = []
       deps = [ ":ffmpeg_demuxers" ]
+      ldflags = [
+        "-lavformat",
+        "-lavcodec",
+      ]
     }
   }
 } else {
