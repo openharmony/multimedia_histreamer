@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,36 +13,30 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_HIRECORDER_READY_STATE_H
-#define HISTREAMER_HIRECORDER_READY_STATE_H
+#ifndef HISTREAMERR_HIRECORDER_ERROR_STATE_H
+#define HISTREAMERR_HIRECORDER_ERROR_STATE_H
 
-#include <memory>
 #include "foundation/error_code.h"
+#include "osal/thread/mutex.h"
 #include "recorder_executor.h"
 #include "state.h"
 
 namespace OHOS {
 namespace Media {
 namespace Record {
-class ReadyState : public State {
+class ErrorState : public State {
 public:
-    explicit ReadyState(StateId stateId, RecorderExecutor& executor) : State(stateId, "ReadyState", executor)
+    explicit ErrorState(StateId stateId, RecorderExecutor& executor) : State(stateId, "ErrorState", executor)
     {
     }
 
-    ~ReadyState() override = default;
-
-    std::tuple<ErrorCode, Action> Start() override
-    {
-        MEDIA_LOG_D("Start in ready state.");
-        return {ErrorCode::SUCCESS, Action::TRANS_TO_RECORDING};
-    }
+    ~ErrorState() override = default;
 
     std::tuple<ErrorCode, Action> Stop(const Plugin::Any& param) override
     {
         OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoStop(param);
-        Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_INIT : Action::TRANS_TO_ERROR;
+        Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_INIT : Action::ACTION_BUTT;
         return {ret, action};
     }
 private:
@@ -51,4 +45,4 @@ private:
 } // namespace Record
 } // namespace Media
 } // namespace OHOS
-#endif // HISTREAMER_HIRECORDER_READY_STATE_H
+#endif // HISTREAMERR_HIRECORDER_ERROR_STATE_H

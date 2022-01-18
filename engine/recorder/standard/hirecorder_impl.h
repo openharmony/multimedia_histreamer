@@ -53,7 +53,7 @@ public:
 
     // interface from IRecorderEngine
     int32_t SetAudioSource(AudioSourceType source, int32_t& sourceId) override;
-    int32_t SetVideoSource(VideoSourceType source, int32_t &sourceId) override;
+    int32_t SetVideoSource(VideoSourceType source, int32_t& sourceId) override;
     sptr<Surface> GetSurface(int32_t sourceId) override;
     int32_t SetOutputFormat(OutputFormatType format) override;
     int32_t SetObs(const std::weak_ptr<IRecorderEngineObs>& obs) override;
@@ -73,28 +73,22 @@ public:
     // interface from RecorderExecutor
     ErrorCode DoSetVideoSource(const Plugin::Any& param) const override;
     ErrorCode DoSetAudioSource(const Plugin::Any& param) const override;
-    ErrorCode DoSetParameter(const Plugin::Any& param) const override;
+    ErrorCode DoConfigure(const Plugin::Any& param) const override;
+    ErrorCode DoSetOutputFormat(const Plugin::Any& param) const override;
     ErrorCode DoPrepare() override;
     ErrorCode DoStart() override;
     ErrorCode DoPause() override;
     ErrorCode DoResume() override;
-    ErrorCode DoStop() override;
+    ErrorCode DoStop(const Plugin::Any& param) override;
     ErrorCode DoOnComplete() override;
-    ErrorCode DoOnError(const Plugin::Any& param) override;
 private:
     OSAL::Mutex stateMutex_ {};
     OSAL::ConditionVariable cond_ {};
     StateMachine fsm_;
     std::atomic<StateId> curFsmState_;
     std::shared_ptr<Pipeline::PipelineCore> pipeline_;
-    std::atomic<RecorderState> pipelineStates_;
     std::atomic<bool> initialized_ {false};
-    const std::map<StateId, RecorderState> stateIdToRecorderStateMap_ = {
-        { StateId::INIT, RecorderState::RECORDER_INITIALIZED},
-        { StateId::RECORDING_SETTING, RecorderState::RECORDER_PREPARING},
-        { StateId::READY, RecorderState::RECORDER_PREPARED},
-        { StateId::PAUSE, RecorderState::RECORDER_PAUSED},
-        { StateId::RECORDING, RecorderState::RECORDER_STARTED}};
+
     std::weak_ptr<IRecorderEngineObs> obs_ {};
     std::atomic<int32_t> sourceId_ {0};
     std::shared_ptr<Pipeline::MuxerFilter> muxer_;

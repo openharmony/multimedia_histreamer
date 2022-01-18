@@ -262,6 +262,12 @@ ErrorCode AudioCaptureFilter::Resume()
     return plugin_ ? TranslatePluginStatus(plugin_->Start()) : ErrorCode::ERROR_INVALID_OPERATION;
 }
 
+ErrorCode AudioCaptureFilter::SendEos()
+{
+    MEDIA_LOG_I("SendEos entered.");
+    return ErrorCode::SUCCESS;
+}
+
 void AudioCaptureFilter::InitPorts()
 {
     MEDIA_LOG_D("IN");

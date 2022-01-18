@@ -44,7 +44,7 @@ public:
     ErrorCode Prepare() override;
     ErrorCode Start() override;
     ErrorCode Stop() override;
-
+    ErrorCode SendEos();
 private:
     void InitPorts() override;
     ErrorCode InitPlugin();

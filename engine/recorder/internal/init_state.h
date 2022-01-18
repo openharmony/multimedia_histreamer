@@ -16,9 +16,7 @@
 #ifndef HISTREAMER_HIRECORDER_INIT_STATE_H
 #define HISTREAMER_HIRECORDER_INIT_STATE_H
 
-#include <memory>
 #include "foundation/error_code.h"
-#include "foundation/log.h"
 #include "osal/thread/mutex.h"
 #include "recorder_executor.h"
 #include "state.h"
@@ -50,16 +48,9 @@ public:
         return {ret, action};
     }
 
-    std::tuple<ErrorCode, Action> Stop() override
+    std::tuple<ErrorCode, Action> Stop(const Plugin::Any& param) override
     {
         return {ErrorCode::SUCCESS, Action::ACTION_BUTT};
-    }
-
-    std::tuple<ErrorCode, Action> Enter(Intent) override
-    {
-        OSAL::ScopedLock lock(mutex_);
-        auto ret = executor_.DoStop();
-        return {ret, Action::ACTION_BUTT};
     }
 private:
     OSAL::Mutex mutex_ {};
@@ -67,4 +58,4 @@ private:
 } // namespace Record
 } // namespace Media
 } // namespace OHOS
-#endif
+#endif // HISTREAMER_HIRECORDER_INIT_STATE_H

@@ -16,7 +16,6 @@
 #ifndef HISTREAMER_RECORDER_EXECUTOR_H
 #define HISTREAMER_RECORDER_EXECUTOR_H
 
-#include <memory>
 #include "foundation/error_code.h"
 
 namespace OHOS {
@@ -39,8 +38,15 @@ public:
         return ErrorCode::SUCCESS;
     }
 
-    virtual ErrorCode DoSetParameter(const Plugin::Any& param) const
+    virtual ErrorCode DoConfigure(const Plugin::Any& param) const
     {
+        (void)param;
+        return ErrorCode::SUCCESS;
+    }
+
+    virtual ErrorCode DoSetOutputFormat(const Plugin::Any& param) const
+    {
+        (void)param;
         return ErrorCode::SUCCESS;
     }
 
@@ -64,19 +70,14 @@ public:
         return ErrorCode::SUCCESS;
     }
 
-    virtual ErrorCode DoStop()
+    virtual ErrorCode DoStop(const Plugin::Any& param)
     {
+        (void)param;
         return ErrorCode::SUCCESS;
     }
 
     virtual ErrorCode DoOnComplete()
     {
-        return ErrorCode::SUCCESS;
-    }
-
-    virtual ErrorCode DoOnError(const Plugin::Any& param)
-    {
-        (void)param;
         return ErrorCode::SUCCESS;
     }
 };

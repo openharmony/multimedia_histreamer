@@ -47,7 +47,7 @@ public:
     ErrorCode Stop() override;
     ErrorCode Pause() override;
     ErrorCode Resume() override;
-
+    ErrorCode SendEos();
 private:
     void InitPorts() override;
     ErrorCode InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& audioMeta);

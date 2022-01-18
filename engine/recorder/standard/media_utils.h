@@ -17,11 +17,9 @@
 #define HISTREAMER_MEDIA_UTILS_H
 
 #include "i_recorder_engine.h"
-#include "recorder.h"
 #include "foundation/error_code.h"
 #include "plugin/common/plugin_source_tags.h"
 #include "plugin/core/plugin_meta.h"
-#include "recorder/internal/state.h"
 #include "utils/constants.h"
 
 namespace OHOS {
@@ -31,45 +29,10 @@ int TransErrorCode(ErrorCode errorCode);
 Plugin::SrcInputType TransAudioInputType(OHOS::Media::AudioSourceType sourceType);
 Plugin::SrcInputType TransVideoInputType(OHOS::Media::VideoSourceType sourceType);
 bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& encoderMeta);
-/**
-* @brief Enumerates recorder states.
-*
-* @since 1.0
-* @version 1.0
-*/
-enum struct RecorderState : uint32_t {
-    /** Error */
-    RECORDER_STATE_ERROR = 0,
-    /** Idle */
-    RECORDER_IDLE = 1 << 0,
-    /** Initialized */
-    RECORDER_INITIALIZED = 1 << 1,
-    /** Preparing */
-    RECORDER_PREPARING = 1 << 2,
-    /** Prepared */
-    RECORDER_PREPARED = 1 << 3,
-    /** Recorder started */
-    RECORDER_STARTED = 1 << 4,
-    /** Recorder paused */
-    RECORDER_PAUSED = 1 << 5,
-    /** Recorder stopped */
-    RECORDER_STOPPED = 1 << 6,
-};
-
-enum class RecorderParameterType : uint32_t {
-    AUD_SAMPLE_RATE,
-    AUD_SAMPLE_FORMAT,
-    AUD_CHANNEL,
-    MEDIA_BITRATE,
-    AUD_BIT_RATE,
-    AUD_ENC_FMT,
-    OUT_PATH,
-    OUT_FD,
-};
 
 struct RecordParam {
     int32_t sourceId;
-    RecorderParameterType type;
+    uint32_t type;
     Plugin::Any any;
 };
 

@@ -18,7 +18,6 @@
 
 #include <memory>
 #include "foundation/error_code.h"
-#include "foundation/log.h"
 #include "recorder_executor.h"
 #include "state.h"
 
@@ -55,12 +54,25 @@ public:
         return {ErrorCode::SUCCESS, Action::TRANS_TO_PAUSE};
     }
 
-    std::tuple<ErrorCode, Action> Stop() override
+    std::tuple<ErrorCode, Action> Stop(const Plugin::Any& param) override
     {
-        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
+        OSAL::ScopedLock lock(mutex_);
+        auto ret = executor_.DoStop(param);
+        Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_INIT : Action::TRANS_TO_ERROR;
+        return {ret, action};
     }
+
+    std::tuple<ErrorCode, Action> OnComplete() override
+    {
+        OSAL::ScopedLock lock(mutex_);
+        auto ret = executor_.DoOnComplete();
+        Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_INIT : Action::ACTION_BUTT;
+        return {ret, action};
+    }
+private:
+    OSAL::Mutex mutex_ {};
 };
 } // namespace Record
 } // namespace Media
 } // namespace OHOS
-#endif
+#endif // HISTREAMER_HIRECORDER_RECORDING_STATE_H

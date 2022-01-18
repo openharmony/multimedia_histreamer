@@ -122,6 +122,12 @@ ErrorCode VideoCaptureFilter::Stop()
     return ret;
 }
 
+ErrorCode VideoCaptureFilter::SendEos()
+{
+    MEDIA_LOG_I("SendEos entered.");
+    return ErrorCode::SUCCESS;
+}
+
 void VideoCaptureFilter::InitPorts()
 {
     MEDIA_LOG_D("IN");

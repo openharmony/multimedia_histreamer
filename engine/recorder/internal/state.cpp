@@ -64,8 +64,15 @@ std::tuple<ErrorCode, Action> State::SetAudioSource(const Plugin::Any& param)
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 
-std::tuple<ErrorCode, Action> State::SetOutputFormat()
+std::tuple<ErrorCode, Action> State::Configure(const Plugin::Any &param)
 {
+    (void)param;
+    return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
+}
+
+std::tuple<ErrorCode, Action> State::SetOutputFormat(const Plugin::Any& param)
+{
+    (void)param;
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 
@@ -89,8 +96,9 @@ std::tuple<ErrorCode, Action> State::Start()
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 
-std::tuple<ErrorCode, Action> State::Stop()
+std::tuple<ErrorCode, Action> State::Stop(const Plugin::Any& param)
 {
+    (void)param;
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 
@@ -104,24 +112,19 @@ std::tuple<ErrorCode, Action> State::Resume()
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 
-std::tuple<ErrorCode, Action> State::Reset()
-{
-    return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
-}
-
-std::tuple<ErrorCode, Action> State::SetParameter(const Plugin::Any &param)
+std::tuple<ErrorCode, Action> State::OnReady()
 {
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 
 std::tuple<ErrorCode, Action> State::OnError(const Plugin::Any& param)
 {
-    ErrorCode errorCode = ErrorCode::ERROR_UNKNOWN;
-    if (param.Type() == typeid(ErrorCode)) {
-        errorCode = Plugin::AnyCast<ErrorCode>(param);
-    }
-    executor_.DoOnError(errorCode);
     return {ErrorCode::SUCCESS, Action::TRANS_TO_ERROR};
+}
+
+std::tuple<ErrorCode, Action> State::OnComplete()
+{
+    return {ErrorCode::SUCCESS, Action::ACTION_BUTT};
 }
 
 std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin::Any& param)
@@ -138,8 +141,11 @@ std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin:
         case Intent::SET_AUDIO_SOURCE:
             std::tie(rtv, nextAction) = SetAudioSource(param);
             break;
-        case Intent::SET_PARAMETER:
-            std::tie(rtv, nextAction) = SetParameter(param);
+        case Intent::CONFIGURE:
+            std::tie(rtv, nextAction) = Configure(param);
+            break;
+        case Intent::SET_OUTPUT_FORMAT:
+            std::tie(rtv, nextAction) = SetOutputFormat(param);
             break;
         case Intent::PREPARE:
             std::tie(rtv, nextAction) = Prepare();
@@ -154,10 +160,13 @@ std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin:
             std::tie(rtv, nextAction) = Resume();
             break;
         case Intent::STOP:
-            std::tie(rtv, nextAction) = Stop();
+            std::tie(rtv, nextAction) = Stop(param);
             break;
         case Intent::NOTIFY_READY:
-            // do nothing for ready
+            std::tie(rtv, nextAction) = OnReady();
+            break;
+        case Intent::NOTIFY_COMPLETE:
+            std::tie(rtv, nextAction) = OnComplete();
             break;
         case Intent::NOTIFY_ERROR:
             std::tie(rtv, nextAction) = OnError(param);

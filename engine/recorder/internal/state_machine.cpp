@@ -28,6 +28,7 @@ StateMachine::StateMachine(RecorderExecutor& executor)
       jobs_("StateMachineJobQue")
 {
     AddState(curState_);
+    AddState(std::make_shared<ErrorState>(StateId::ERROR, executor));
     AddState(std::make_shared<RecordingSettingState>(StateId::RECORDING_SETTING, executor));
     AddState(std::make_shared<ReadyState>(StateId::READY, executor));
     AddState(std::make_shared<RecordingState>(StateId::RECORDING, executor));
@@ -169,6 +170,9 @@ ErrorCode StateMachine::ProcAction(Action nextAction)
         case Action::TRANS_TO_PAUSE:
             nextState = states_[StateId::PAUSE];
             break;
+        case Action::TRANS_TO_ERROR:
+            nextState = states_[StateId::ERROR];
+            break;
         default:
             break;
     }
@@ -205,7 +209,14 @@ void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode resu
 {
     MEDIA_LOG_D("OnIntentExecuted, curState: %s, intent: %d, action: %d, result: %d", curState_->GetName().c_str(),
                 static_cast<int>(intent), static_cast<int>(action), static_cast<int>(result));
-    intentSync_.Notify(intent, result);
+    if (action == Action::ACTION_PENDING) {
+        return;
+    }
+    if (intent == Intent::NOTIFY_READY && action == Action::TRANS_TO_RECORDING) {
+        intentSync_.Notify(Intent::START, result);
+    } else {
+        intentSync_.Notify(intent, result);
+    }
 }
 } // namespace Record
 } // namespace Media

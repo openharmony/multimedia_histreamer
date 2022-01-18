@@ -16,9 +16,7 @@
 #ifndef HISTREAMER_HIRECORDER_RECORDING_SETTING_STATE_H
 #define HISTREAMER_HIRECORDER_RECORDING_SETTING_STATE_H
 
-#include <memory>
 #include "foundation/error_code.h"
-#include "foundation/log.h"
 #include "osal/thread/mutex.h"
 #include "recorder_executor.h"
 #include "state.h"
@@ -35,17 +33,47 @@ public:
 
     ~RecordingSettingState() override = default;
 
-    std::tuple<ErrorCode, Action> SetParameter(const Plugin::Any& param) override
+    std::tuple<ErrorCode, Action> SetVideoSource(const Plugin::Any& param) override
     {
         OSAL::ScopedLock lock(mutex_);
-        auto ret = executor_.DoSetParameter(param);
+        auto ret = executor_.DoSetVideoSource(param);
+        Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_RECORDING_SETTING : Action::ACTION_BUTT;
+        return {ret, action};
+    }
+
+    std::tuple<ErrorCode, Action> SetAudioSource(const Plugin::Any& param) override
+    {
+        OSAL::ScopedLock lock(mutex_);
+        auto ret = executor_.DoSetAudioSource(param);
+        Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_RECORDING_SETTING : Action::ACTION_BUTT;
+        return {ret, action};
+    }
+
+    std::tuple<ErrorCode, Action> Configure(const Plugin::Any& param) override
+    {
+        OSAL::ScopedLock lock(mutex_);
+        auto ret = executor_.DoConfigure(param);
+        Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_RECORDING_SETTING : Action::ACTION_BUTT;
+        return {ret, action};
+    }
+
+    std::tuple<ErrorCode, Action> SetOutputFormat(const Plugin::Any& param) override
+    {
+        OSAL::ScopedLock lock(mutex_);
+        auto ret = executor_.DoSetOutputFormat(param);
         Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_RECORDING_SETTING : Action::ACTION_BUTT;
         return {ret, action};
     }
 
     std::tuple<ErrorCode, Action> Prepare() override
     {
-        return {ErrorCode::SUCCESS, Action::TRANS_TO_READY};
+        OSAL::ScopedLock lock(mutex_);
+        auto rtv = executor_.DoPrepare();
+        if (rtv == ErrorCode::SUCCESS) {
+            return {rtv, Action::ACTION_BUTT};
+        } else {
+            return {rtv, Action::TRANS_TO_ERROR};
+        }
     }
 
     std::tuple<ErrorCode, Action> Start() override
@@ -53,9 +81,17 @@ public:
         return {ErrorCode::SUCCESS, Action::ACTION_PENDING};
     }
 
-    std::tuple<ErrorCode, Action> Stop() override
+    std::tuple<ErrorCode, Action> Stop(const Plugin::Any& param) override
     {
-        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
+        OSAL::ScopedLock lock(mutex_);
+        auto ret = executor_.DoStop(param);
+        Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_INIT : Action::TRANS_TO_ERROR;
+        return {ret, action};
+    }
+
+    std::tuple<ErrorCode, Action> OnReady() override
+    {
+        return {ErrorCode::SUCCESS, Action::TRANS_TO_READY};
     }
 private:
     OSAL::Mutex mutex_ {};
@@ -63,4 +99,4 @@ private:
 } // namespace Record
 } // namespace Media
 } // namespace OHOS
-#endif
+#endif // HISTREAMER_HIRECORDER_RECORDING_SETTING_STATE_H

@@ -27,6 +27,7 @@
 #include "osal/thread/task.h"
 #include "utils/blocking_queue.h"
 #include "plugin/common/any.h"
+#include "error_state.h"
 #include "init_state.h"
 #include "recording_setting_state.h"
 #include "ready_state.h"
