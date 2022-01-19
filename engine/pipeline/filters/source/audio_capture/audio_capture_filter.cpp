@@ -98,53 +98,42 @@ ErrorCode AudioCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::
 
 ErrorCode AudioCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value)
 {
+#define ASSIGN_PARAMETER_IF_MATCH(type, val, val1, val2) \
+do { \
+    if (val.Type() == typeid(type)) { \
+        val1 = Plugin::AnyCast<type>(val); \
+        val2 = true; \
+    } \
+} while (0)
+
     auto tag = static_cast<OHOS::Media::Plugin::Tag>(key);
     switch (tag) {
-        case Tag::SRC_INPUT_TYPE: {
-            if (value.Type() == typeid(Plugin::SrcInputType)) {
-                inputType_ = Plugin::AnyCast<Plugin::SrcInputType>(value);
-                inputTypeSpecified_ = true;
-                MEDIA_LOG_D("inputType_: %s", inputType_.c_str());
-            }
+        case Tag::SRC_INPUT_TYPE:
+            ASSIGN_PARAMETER_IF_MATCH(Plugin::SrcInputType, value, inputType_, inputTypeSpecified_);
             break;
-        }
-        case OHOS::Media::Plugin::Tag::AUDIO_SAMPLE_RATE: {
-            if (value.Type() == typeid(uint32_t)) {
-                sampleRate_ = Plugin::AnyCast<uint32_t>(value);
-                sampleRateSpecified_ = true;
-                MEDIA_LOG_D("sampleRate_: %" PRIu32, sampleRate_);
-            }
+        case Tag::AUDIO_SAMPLE_RATE:
+            ASSIGN_PARAMETER_IF_MATCH(uint32_t, value, sampleRate_, sampleRateSpecified_);
             break;
-        }
-        case OHOS::Media::Plugin::Tag::AUDIO_CHANNELS: {
-            if (value.Type() == typeid(uint32_t)) {
-                channelNum_ = Plugin::AnyCast<uint32_t>(value);
-                channelNumSpecified_ = true;
-                MEDIA_LOG_D("channelNum_: %" PRIu32, channelNum_);
-            }
+        case Tag::AUDIO_CHANNELS:
+            ASSIGN_PARAMETER_IF_MATCH(uint32_t, value, channelNum_, channelNumSpecified_);
             break;
-        }
-        case OHOS::Media::Plugin::Tag::MEDIA_BITRATE: {
-            if (value.Type() == typeid(int64_t)) {
-                bitRate_ = Plugin::AnyCast<int64_t>(value);
-                bitRateSpecified_ = true;
-                MEDIA_LOG_D("bitRate_: %" PRId64, bitRate_);
-            }
+        case Tag::MEDIA_BITRATE:
+            ASSIGN_PARAMETER_IF_MATCH(int64_t, value, bitRate_, bitRateSpecified_);
             break;
-        }
-        case OHOS::Media::Plugin::Tag::AUDIO_SAMPLE_FORMAT: {
-            if (value.Type() == typeid(OHOS::Media::Plugin::AudioSampleFormat)) {
-                sampleFormat_ = Plugin::AnyCast<OHOS::Media::Plugin::AudioSampleFormat>(value);
-                sampleRateSpecified_ = true;
-                MEDIA_LOG_D("sampleFormat_: %u", sampleFormat_);
-            }
+        case Tag::AUDIO_SAMPLE_FORMAT:
+            ASSIGN_PARAMETER_IF_MATCH(OHOS::Media::Plugin::AudioSampleFormat, value, sampleFormat_,
+                                      sampleRateSpecified_);
             break;
-        }
+        case Tag::AUDIO_CHANNEL_LAYOUT:
+            ASSIGN_PARAMETER_IF_MATCH(OHOS::Media::Plugin::AudioChannelLayout, value, channelLayout_,
+                                      channelLayoutSpecified_);
+            break;
         default:
             MEDIA_LOG_W("Unknown key %d", OHOS::Media::to_underlying(tag));
             break;
     }
     return ErrorCode::SUCCESS;
+#undef ASSIGN_PARAMETER_IF_MATCH
 }
 
 ErrorCode AudioCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
@@ -159,15 +148,15 @@ ErrorCode AudioCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
             value = sampleRate_;
             break;
         }
-        case OHOS::Media::Plugin::Tag::AUDIO_CHANNELS: {
+        case Tag::AUDIO_CHANNELS: {
             value = channelNum_;
             break;
         }
-        case OHOS::Media::Plugin::Tag::MEDIA_BITRATE: {
+        case Tag::MEDIA_BITRATE: {
             value = bitRate_;
             break;
         }
-        case OHOS::Media::Plugin::Tag::AUDIO_SAMPLE_FORMAT: {
+        case Tag::AUDIO_SAMPLE_FORMAT: {
             value = sampleFormat_;
             break;
         }
@@ -395,6 +384,15 @@ bool AudioCaptureFilter::DoNegotiate(const CapabilitySet &outCaps)
         }
         if (channelNumSpecified_) {
             thisOut->keys[Capability::Key::AUDIO_CHANNELS] = channelNum_;
+        }
+        if (channelNum_ == 1) {
+            thisOut->keys[Capability::Key::AUDIO_CHANNEL_LAYOUT] = AudioChannelLayout::MONO;
+        } else if (channelNum_ == 2) { // stereo
+            thisOut->keys[Capability::Key::AUDIO_CHANNEL_LAYOUT] = AudioChannelLayout::STEREO;
+        } else if (channelLayoutSpecified_) {
+            thisOut->keys[Capability::Key::AUDIO_CHANNEL_LAYOUT] = channelLayout_;
+        } else {
+            MEDIA_LOG_W("audio channel layout is unknown");
         }
         if (bitRateSpecified_) {
             thisOut->keys[Capability::Key::MEDIA_BITRATE] = bitRate_;

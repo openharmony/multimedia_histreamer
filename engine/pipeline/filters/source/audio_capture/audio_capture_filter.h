@@ -75,6 +75,8 @@ private:
     bool bitRateSpecified_ {false};
     Plugin::AudioSampleFormat sampleFormat_ {OHOS::Media::Plugin::AudioSampleFormat::S16};
     bool sampleFormatSpecified_ {false};
+    Plugin::AudioChannelLayout channelLayout_ {OHOS::Media::Plugin::AudioChannelLayout::STEREO};
+    bool channelLayoutSpecified_ {false};
     Capability capNegWithDownstream_ {};
 };
 } // namespace Pipeline

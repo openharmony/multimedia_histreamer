@@ -269,11 +269,6 @@ void HiRecorderImpl::OnEvent(Event event)
         }
         case EVENT_READY: {
             fsm_.SendEventAsync(Intent::NOTIFY_READY);
-            auto ptr = obs_.lock();
-            if (ptr != nullptr) {
-                ptr->OnInfo(IRecorderEngineObs::InfoType::INTERNEL_WARNING,
-                            TransErrorCode(Plugin::AnyCast<ErrorCode>(event.param)));
-            }
             break;
         }
         default:

@@ -26,6 +26,7 @@
 extern "C" {
 #endif
 #include "libavcodec/avcodec.h"
+#include "libswresample/swresample.h"
 #ifdef __cplusplus
 };
 #endif
@@ -93,7 +94,7 @@ private:
     template <typename T>
     bool FindInParameterMapThenAssignLocked(Tag tag, T& assign);
 
-    void InitInputFrame();
+    void ConfigCodecLocked();
 
     Status SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer);
 
@@ -105,16 +106,23 @@ private:
 
     void InitCacheFrame();
 
+    bool CheckReformat();
+
+    void ReSample();
+
     mutable OSAL::Mutex parameterMutex_ {};
     std::map<Tag, ValueType> audioParameter_ {};
 
     mutable OSAL::Mutex avMutex_ {};
     std::shared_ptr<const AVCodec> avCodec_ {nullptr};
     std::shared_ptr<AVCodecContext> avCodecContext_ {nullptr};
-    std::shared_ptr<Buffer> cachedBuffer_ {nullptr};
     AVFrame* cachedFrame_ {nullptr};
     std::shared_ptr<Buffer> outBuffer_ {nullptr};
     uint64_t prev_pts_;
+    bool needReformat_ {false};
+    AVSampleFormat sourceFmt_ {AVSampleFormat::AV_SAMPLE_FMT_NONE};
+    std::shared_ptr<SwrContext> swrCtx_ {nullptr};
+    std::vector<uint8_t> resampleCache_ {};
 };
 } // namespace Plugin
 } // namespace Media

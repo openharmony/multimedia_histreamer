@@ -12,18 +12,21 @@
 # limitations under the License.
 #
 
+group("plugin_hdi_adapter") {
+  deps = []
+  if (defined(ohos_lite)) {
+    deps += [ ":histreamer_plugin_HdiAuSink" ]
+  } else {
+    print("plugin_hdi_adapter is not available on standard systems")
+  }
+}
+
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
-
-  group("plugin_hdi_adapter") {
-    deps = [ ":histreamer_plugin_HdiAuSink" ]
-  }
-
   plugin_hdi_adapter_src = [
     "sink/hos_au_sink.cpp",
     "utils/hdi_au_utils.cpp",
   ]
-
   config("plugin_hdi_adapter_config") {
     include_dirs = [ "//drivers/peripheral/audio/interfaces/include" ]
     ldflags = [ "-lhdi_videodisplayer" ]
@@ -44,36 +47,5 @@ if (defined(ohos_lite)) {
     ]
   }
 } else {
-  group("plugin_hdi_adapter") {
-    deps = [ ":histreamer_plugin_HdiAuSink" ]
-  }
-
-  plugin_hdi_adapter_src = [
-    "sink/hos_au_sink.cpp",
-    "utils/hdi_au_utils.cpp",
-  ]
-
-  config("plugin_hdi_adapter_config") {
-    include_dirs = [ "//drivers/peripheral/audio/interfaces/include" ]
-    ldflags = [ "-lhdi_videodisplayer" ]
-  }
-
-  shared_library("histreamer_plugin_HdiAuSink") {
-    sources = plugin_hdi_adapter_src
-    public_configs = [ ":plugin_hdi_adapter_config" ]
-    public_deps = [
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
-    ]
-    configs -= [
-      "//build/config/compiler:no_rtti",
-      "//build/config/compiler:no_exceptions",
-    ]
-    cflags = [
-      "-frtti",
-      "-fexceptions",
-    ]
-    cflags_cc = cflags
-  }
+  print("plugin_hdi_adapter is not available on standard systems")
 }

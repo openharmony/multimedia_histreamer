@@ -205,6 +205,30 @@ bool AudioFfmpegEncoderPlugin::FindInParameterMapThenAssignLocked(Tag tag, T& as
     }
 }
 
+void AudioFfmpegEncoderPlugin::ConfigCodecLocked()
+{
+    uint32_t tmp = 0;
+    if (FindInParameterMapThenAssignLocked<uint32_t>(Tag::AUDIO_CHANNELS, tmp)) {
+        avCodecContext_->channels = tmp;
+    }
+    if (FindInParameterMapThenAssignLocked<uint32_t>(Tag::AUDIO_SAMPLE_RATE, tmp)) {
+        avCodecContext_->sample_rate = tmp; // unused for constant quantizer encoding
+    }
+    int64_t bitRate = 0;
+    if (FindInParameterMapThenAssignLocked<int64_t>(Tag::MEDIA_BITRATE, bitRate)) {
+        avCodecContext_->bit_rate = bitRate;
+    }
+    AudioSampleFormat audioSampleFormat = AudioSampleFormat::S16;
+    if (FindInParameterMapThenAssignLocked(Tag::AUDIO_SAMPLE_FORMAT, audioSampleFormat) &&
+        g_reverseFormatMap.count(audioSampleFormat) != 0) {
+        avCodecContext_->sample_fmt = g_reverseFormatMap.find(audioSampleFormat)->second;
+    }
+    AudioChannelLayout audioChannelLayout = AudioChannelLayout::STEREO;
+    if (FindInParameterMapThenAssignLocked(Tag::AUDIO_CHANNEL_LAYOUT, audioChannelLayout)) {
+        avCodecContext_->channel_layout = ConvertChannelLayoutToFFmpeg(audioChannelLayout);
+    }
+}
+
 Status AudioFfmpegEncoderPlugin::Prepare()
 {
     {
@@ -226,31 +250,15 @@ Status AudioFfmpegEncoderPlugin::Prepare()
                 avcodec_free_context(&ptr);
             }
         });
-        uint32_t tmp = 0;
         {
             OSAL::ScopedLock lock1(parameterMutex_);
-            if (FindInParameterMapThenAssignLocked<uint32_t>(Tag::AUDIO_CHANNELS, tmp)) {
-                avCodecContext_->channels = tmp;
-            }
-            if (FindInParameterMapThenAssignLocked<uint32_t>(Tag::AUDIO_SAMPLE_RATE, tmp)) {
-                avCodecContext_->sample_rate = tmp; // unused for constant quantizer encoding
-            }
-            int64_t bitRate = 0;
-            if (FindInParameterMapThenAssignLocked<int64_t>(Tag::MEDIA_BITRATE, bitRate)) {
-                avCodecContext_->bit_rate = bitRate;
-            }
-            AudioSampleFormat audioSampleFormat = AudioSampleFormat::S16;
-            if (FindInParameterMapThenAssignLocked(Tag::AUDIO_SAMPLE_FORMAT, audioSampleFormat)) {
-                auto ite = g_reverseFormatMap.find(audioSampleFormat);
-                if (ite != g_reverseFormatMap.end()) {
-                    avCodecContext_->sample_fmt = ite->second;
-                }
-            }
-            if (!avCodecContext_->time_base.den) {
-                avCodecContext_->time_base.den = avCodecContext_->sample_rate;
-                avCodecContext_->time_base.num = 1;
-                avCodecContext_->ticks_per_frame = 1;
-            }
+            ConfigCodecLocked();
+        }
+
+        if (!avCodecContext_->time_base.den) {
+            avCodecContext_->time_base.den = avCodecContext_->sample_rate;
+            avCodecContext_->time_base.num = 1;
+            avCodecContext_->ticks_per_frame = 1;
         }
 
         avCodecContext_->workaround_bugs =
@@ -284,12 +292,48 @@ void AudioFfmpegEncoderPlugin::InitCacheFrame()
     cachedFrame_->channel_layout = avCodecContext_->channel_layout;
 }
 
+bool AudioFfmpegEncoderPlugin::CheckReformat()
+{
+    if (avCodec_ == nullptr || avCodecContext_ == nullptr) {
+        return false;
+    }
+    for (size_t index = 0; avCodec_->sample_fmts[index] != AV_SAMPLE_FMT_NONE; ++index) {
+        if (avCodec_->sample_fmts[index] == avCodecContext_->sample_fmt) {
+            return false;
+        }
+    }
+    return true;
+}
+
 Status AudioFfmpegEncoderPlugin::Start()
 {
     {
         OSAL::ScopedLock lock(avMutex_);
         if (avCodecContext_ == nullptr) {
             return Status::ERROR_WRONG_STATE;
+        }
+        needReformat_ = CheckReformat();
+        if (needReformat_) {
+            sourceFmt_ = avCodecContext_->sample_fmt;
+            // always use the first fmt
+            avCodecContext_->sample_fmt = avCodec_->sample_fmts[0];
+            SwrContext* swrContext = swr_alloc();
+            if (swrContext == nullptr) {
+                MEDIA_LOG_E("cannot allocate swr context");
+                return Status::ERROR_NO_MEMORY;
+            }
+            swrContext = swr_alloc_set_opts(swrContext, AV_CH_LAYOUT_STEREO, avCodecContext_->sample_fmt,
+                avCodecContext_->sample_rate, AV_CH_LAYOUT_STEREO, sourceFmt_, avCodecContext_->sample_rate,
+                0, nullptr);
+            if (swr_init(swrContext) != 0) {
+                MEDIA_LOG_E("swr init error");
+                return Status::ERROR_UNKNOWN;
+            }
+            swrCtx_ = std::shared_ptr<SwrContext>(swrContext, [](SwrContext* ptr) {
+                if (ptr) {
+                    swr_free(&ptr);
+                }
+            });
         }
         auto res = avcodec_open2(avCodecContext_.get(), avCodec_.get(), nullptr);
         if (res != 0) {
@@ -299,6 +343,9 @@ Status AudioFfmpegEncoderPlugin::Start()
         if (avCodecContext_->frame_size <= 0) {
             MEDIA_LOG_E("frame_size unknown");
             return Status::ERROR_UNKNOWN;
+        }
+        if (needReformat_) {
+            resampleCache_.reserve(avCodecContext_->frame_size * avCodecContext_->channels);
         }
         SetParameter(Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(avCodecContext_->frame_size));
         InitCacheFrame();
@@ -402,16 +449,30 @@ Status AudioFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
                         inputMemory->GetSize(), avCodecContext_->frame_size);
             return Status::ERROR_NOT_ENOUGH_DATA;
         }
+        uint8_t* sampleData = nullptr;
+        if (needReformat_) {
+            std::vector<const uint8_t *> input(avCodecContext_->channels);
+            input[0] = static_cast<const uint8_t *>(inputMemory->GetReadOnlyData());
+            if (av_sample_fmt_is_planar(sourceFmt_)) {
+                size_t planeSize = inputMemory->GetSize() / avCodecContext_->channels;
+                for (auto i = 1; i < avCodecContext_->channels; ++i) {
+                    input[i] = input[i - 1] + planeSize;
+                }
+            }
+            sampleData = resampleCache_.data();
+            swr_convert(swrCtx_.get(), &sampleData, resampleCache_.capacity(), input.data(), avCodecContext_->frame_size);
+        } else {
+            sampleData = const_cast<uint8_t*>(inputMemory->GetReadOnlyData());
+        }
         bool isPlanar = av_sample_fmt_is_planar(avCodecContext_->sample_fmt);
         if (isPlanar && avCodecContext_->channels > 1) {
             for (size_t idx = 0; idx < avCodecContext_->channels; idx++) {
-                cachedFrame_->data[idx] =
-                        const_cast<uint8_t*>(inputMemory->GetReadOnlyData(avCodecContext_->frame_size * idx));
+                cachedFrame_->data[idx] = sampleData + avCodecContext_->frame_size * idx;
                 cachedFrame_->extended_data[idx] = cachedFrame_->data[idx];
                 cachedFrame_->linesize[idx] = avCodecContext_->frame_size;
             }
         } else {
-            cachedFrame_->data[0] = const_cast<uint8_t*>(inputMemory->GetReadOnlyData());
+            cachedFrame_->data[0] = sampleData;
             cachedFrame_->extended_data = cachedFrame_->data;
             cachedFrame_->linesize[0] = bufferLength;
             cachedFrame_->nb_samples = bufferLength / avCodecContext_->frame_size; // need to check

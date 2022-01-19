@@ -102,7 +102,7 @@ Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg
     }
     return Plugin::Status::OK;
 }
-PLUGIN_DEFINITION(FFMpegMuxers, Plugin::LicenseType::LGPL, RegisterMuxerPlugins, [] {g_pluginOutputFmt.clear();})
+PLUGIN_DEFINITION(FFmpegMuxers, Plugin::LicenseType::LGPL, RegisterMuxerPlugins, [] {g_pluginOutputFmt.clear();})
 
 Plugin::Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime, AVStream* stream)
 {

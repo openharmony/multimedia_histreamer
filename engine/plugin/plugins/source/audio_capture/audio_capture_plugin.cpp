@@ -103,7 +103,7 @@ Plugin::Status AudioCaptureRegister(const std::shared_ptr<Plugin::Register> &reg
     // add es outCaps later
     return reg->AddPlugin(definition);
 }
-PLUGIN_DEFINITION(AudioCapture, Plugin::LicenseType::APACHE_V2, AudioCaptureRegister, [] {});
+PLUGIN_DEFINITION(StdAudioCapture, Plugin::LicenseType::APACHE_V2, AudioCaptureRegister, [] {});
 }
 
 namespace OHOS {
@@ -170,20 +170,20 @@ Status AudioCapturePlugin::Deinit()
 Status AudioCapturePlugin::Prepare()
 {
     MEDIA_LOG_D("IN");
-    AudioStandard::AudioCapturerParams params;
-    params.audioEncoding = AudioStandard::ENCODING_INVALID;
+    AudioStandard::AudioEncodingType audioEncoding = AudioStandard::ENCODING_INVALID;
     auto supportedEncodingTypes = OHOS::AudioStandard::AudioCapturer::GetSupportedEncodingTypes();
     for (auto& supportedEncodingType : supportedEncodingTypes) {
         if (supportedEncodingType == AudioStandard::ENCODING_PCM) {
-            params.audioEncoding = AudioStandard::ENCODING_PCM;
+            audioEncoding = AudioStandard::ENCODING_PCM;
             break;
         }
     }
-    if (params.audioEncoding != AudioStandard::ENCODING_PCM) {
+    if (audioEncoding != AudioStandard::ENCODING_PCM) {
         MEDIA_LOG_E("audioCapturer do not support pcm encoding");
         return Status::ERROR_UNKNOWN;
     }
-    if (audioCapturer_->SetParams(params)) {
+    capturerParams_.audioEncoding = AudioStandard::ENCODING_PCM;
+    if (audioCapturer_->SetParams(capturerParams_)) {
         MEDIA_LOG_E("audioCapturer SetParams() fail");
         return Status::ERROR_UNKNOWN;
     }
@@ -216,6 +216,7 @@ Status AudioCapturePlugin::Reset()
     totalPauseTimeNs_ = 0;
     bitRate_ = 0;
     isStop_ = false;
+    capturerParams_ = AudioStandard::AudioCapturerParams();
     return Status::OK;
 }
 
@@ -362,7 +363,7 @@ bool AudioCapturePlugin::AssignSampleFmtIfSupported(Plugin::AudioSampleFormat sa
 {
     AudioStandard::AudioSampleFormat aFmt = AudioStandard::AudioSampleFormat::INVALID_WIDTH;
     if (!AuCapturePlugin::PluginFmt2SampleFmt(sampleFormat, aFmt)) {
-        MEDIA_LOG_E("sample format %" PRIu8 "not supported", sampleFormat);
+        MEDIA_LOG_E("sample format %hhu not supported", sampleFormat);
         return false;
     }
     auto supportedFormatsList = OHOS::AudioStandard::AudioCapturer::GetSupportedFormats();
@@ -476,11 +477,11 @@ Status AudioCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
     } else {
         bufData = buffer->GetMemory();
     }
-    if (bufData->GetSize() <= 0) {
+    if (bufData->GetCapacity() <= 0) {
         return Status::ERROR_NO_MEMORY;
     }
     bool isBlocking = true;
-    auto size = audioCapturer_->Read(bufData->GetWritableAddr(expectedLen), expectedLen, isBlocking);
+    auto size = audioCapturer_->Read(*bufData->GetWritableAddr(expectedLen), expectedLen, isBlocking);
     if (size <= 0) {
         MEDIA_LOG_D("audioCapturer Read() fail");
         return Status::ERROR_NOT_ENOUGH_DATA;
