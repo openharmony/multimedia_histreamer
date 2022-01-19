@@ -41,7 +41,7 @@ static Status SourceRegister(const std::shared_ptr<Register> &reg)
 
 PLUGIN_DEFINITION(UtSourceTest2, LicenseType::APACHE_V2, SourceRegister, [] {});
 
-Status UtSourceTest2::SetSource(std::string &uri, std::shared_ptr<std::map<std::string, ValueType>> params)
+Status UtSourceTest2::SetSource(std::shared_ptr<MediaSource> source)
 {
     return Status::OK;
 }
@@ -71,7 +71,7 @@ std::shared_ptr<Allocator> UtSourceTest2::GetAllocator()
     return std::shared_ptr<Allocator>();
 }
 
-Status UtSourceTest2::SetCallback(const std::shared_ptr<Callback> &cb)
+Status UtSourceTest2::SetCallback(Callback* cb)
 {
     return Status::OK;
 }

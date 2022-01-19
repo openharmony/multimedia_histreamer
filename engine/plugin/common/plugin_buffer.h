@@ -23,10 +23,16 @@
 #include "plugin_tags.h"
 #include "plugin_audio_tags.h"
 #include "plugin_video_tags.h"
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+#include "refbase.h"
+#include "surface/surface.h"
+#endif
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+constexpr size_t INVALID_POSITION = -1;
+
 /// End of Stream Buffer Flag
 #define BUFFER_FLAG_EOS 0x00000001
 /// Video Key Frame Flag
@@ -45,12 +51,26 @@ constexpr T AlignUp(T num, U alignment)
 }
 
 /**
+ * @enum MemoryType
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+enum struct MemoryType : uint8_t {
+    VIRTUAL_ADDR = 0,  ///< Virtual address
+    SURFACE_BUFFER,    ///< Surface
+    SHARE_MEMORY_FD,   ///< Share Memory fd
+    HANDLE,            ///< Physical address
+};
+
+/**
  * @brief Memory allocator, which is provided by the plugin implementer.
  *
  * @since 1.0
  * @version 1.0
  */
 struct Allocator {
+    explicit Allocator(MemoryType type = MemoryType::VIRTUAL_ADDR) : memoryType(type) {}
     virtual ~Allocator() = default;
     /**
      * @brief Allocates a buffer using the specified size
@@ -67,6 +87,14 @@ struct Allocator {
      * @param ptr   Pointer of the allocated buffer.
      */
     virtual void Free(void* ptr) = 0; // NOLINT: intentionally using void* here
+
+    MemoryType GetMemoryType()
+    {
+        return memoryType;
+    }
+
+private:
+    MemoryType memoryType;
 };
 
 /**
@@ -103,7 +131,7 @@ enum struct BufferMetaType : uint32_t {
 class Memory {
 public:
     /// Destructor
-    ~Memory() = default;
+    virtual ~Memory() = default;
 
     // Todo: Add the documentation description.
     size_t GetCapacity();
@@ -112,13 +140,56 @@ public:
 
     const uint8_t* GetReadOnlyData(size_t position = 0);
 
-    uint8_t *GetWritableData(size_t writeSize, size_t position = 0);
+    uint8_t *GetWritableAddr(size_t estimatedWriteSize, size_t position = 0);
 
-    size_t Write(const uint8_t* in, size_t writeSize, size_t position = std::string::npos);
+    // If estimatedWriteSize doesn't equal to realWriteSize, should call UpdateDataSize
+    void UpdateDataSize(size_t realWriteSize, size_t position = 0);
 
-    size_t Read(uint8_t* out, size_t readSize, size_t position = std::string::npos);
+    size_t Write(const uint8_t* in, size_t writeSize, size_t position = INVALID_POSITION);
+
+    size_t Read(uint8_t* out, size_t readSize, size_t position = INVALID_POSITION);
 
     void Reset();
+
+    MemoryType GetMemoryType();
+
+protected:
+    /**
+     * Allocates memory by the specified allocator.
+     * Allocation and release are the responsibility of the external allocator.
+     *
+     * @param capacity Allocated memory size.
+     * @param allocator External allocator.
+     * @param align The alignment of the memory.
+     */
+    explicit Memory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr,
+                    size_t align = 1, MemoryType type = MemoryType::VIRTUAL_ADDR, bool allocMem = true);
+
+    /**
+     * Get real memory address, it is addr + offset, the offset is calculated according to alignment.
+     */
+    virtual uint8_t *GetRealAddr() const;
+
+    /// Memory type
+    MemoryType memoryType;
+
+    /// Allocated memory size.
+    size_t capacity;
+
+    /// The alignment of the memory.
+#if (defined(__GNUC__) || defined(__clang__)) && (!defined(WIN32))
+__attribute__((unused))
+#endif
+    size_t alignment;
+
+    /// Offset of the buffer address to make sure access according to alignment.
+    size_t offset {0};
+
+    /// Valid data size
+    size_t size;
+
+    /// Externally specified allocator, optional.
+    std::shared_ptr<Allocator> allocator;
 
 private:
     /**
@@ -129,43 +200,10 @@ private:
      * @param bufData External memory.
      * @param align The alignment of the memory.
      */
-    Memory(size_t capacity, std::shared_ptr<uint8_t> bufData, size_t align = 1);
+    Memory(size_t capacity, std::shared_ptr<uint8_t> bufData,
+           size_t align = 1, MemoryType type = MemoryType::VIRTUAL_ADDR);
 
-    /**
-     * Allocates memory by the specified allocator.
-     * Allocation and release are the responsibility of the external allocator.
-     *
-     * @param capacity Allocated memory size.
-     * @param allocator External allocator.
-     * @param align The alignment of the memory.
-     */
-    explicit Memory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr, size_t align = 1);
-
-    /**
-     * Get real memory address, it is addr + offset, the offset is calculated according to alignment.
-     */
-    uint8_t *GetRealAddr() const;
-
-private:
-    /// Allocated memory size.
-    size_t capacity;
-
-    /// The alignment of the memory.
-#if (defined(__GNUC__) || defined(__clang__)) && (!defined(WIN32))
-__attribute__((unused))
-#endif
-    size_t alignment;
-
-    /// Offset of the buffer address to make sure access acording to alignment.
-    size_t offset {0};
-
-    /// Valid data size
-    size_t size;
-
-    /// Externally specified allocator, optional.
-    std::shared_ptr<Allocator> allocator;
-
-    /// Allocated memory address.
+    /// Allocated virtual memory address.
     std::shared_ptr<uint8_t> addr;
 
     friend class Buffer;
@@ -211,7 +249,7 @@ private:
 class AudioBufferMeta : public BufferMeta {
 public:
     /// Destructor
-    ~AudioBufferMeta() = default;
+    ~AudioBufferMeta() override = default;
 
     /// the number of valid samples in the buffer
     size_t samples {0};
@@ -252,10 +290,10 @@ private:
 class VideoBufferMeta : public BufferMeta {
 public:
     /// Destructor
-    ~VideoBufferMeta() = default;
+    ~VideoBufferMeta() override = default;
 
     /// describing video formats.
-    VideoPixelFormat  videoPixelFormat {VideoPixelFormat::UNKNOWN};
+    VideoPixelFormat videoPixelFormat {VideoPixelFormat::UNKNOWN};
 
     /// identifier of the frame。
     uint32_t id {0};
@@ -321,13 +359,13 @@ public:
     /// track index.
     uint32_t trackID;
 
-    /// presentation timestamp in microsecond of the buffer.
+    /// presentation timestamp of the buffer based on {@link HST_TIME_BASE}.
     uint64_t pts;
 
-    /// decoding timestamp in microsecond of the buffer.
+    /// decoding timestamp of the buffer based on {@link HST_TIME_BASE}.
     uint64_t dts;
 
-    /// duration in microsecond in time of the buffer data.
+    /// duration in time of the buffer data based on {@link HST_TIME_BASE}.
     uint64_t duration;
 
     /// flag of the buffer, which is used to record extra information.
@@ -338,7 +376,7 @@ private:
     /// Data described by this buffer.
     std::vector<std::shared_ptr<Memory>> data {};
 
-    /// The audio buffer meta information.
+    /// The buffer meta information.
     std::shared_ptr<BufferMeta> meta;
 };
 } // namespace Plugin

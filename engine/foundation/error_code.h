@@ -39,6 +39,7 @@ enum struct ErrorCode : int32_t {
     ERROR_TIMED_OUT = ERROR_UNKNOWN + 8,
     ERROR_NO_MEMORY = ERROR_UNKNOWN + 9,
     ERROR_INVALID_STATE = ERROR_UNKNOWN + 10,
+    ERROR_PERMISSION_DENIED = ERROR_UNKNOWN + 11,
 };
 }  // namespace Media
 }  // namespace OHOS

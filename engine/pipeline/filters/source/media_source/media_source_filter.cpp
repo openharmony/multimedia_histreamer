@@ -90,19 +90,9 @@ ErrorCode MediaSourceFilter::InitPlugin(const std::shared_ptr<MediaSource>& sour
     if (err != ErrorCode::SUCCESS) {
         return err;
     }
+    plugin_->SetCallback(this);
     pluginAllocator_ = plugin_->GetAllocator();
-    SourceType srcType = source->GetSourceType();
-    MEDIA_LOG_D("sourceType = %d", OHOS::Media::to_underlying(srcType));
-    if (srcType == SourceType::SOURCE_TYPE_STREAM) {
-        auto params = std::make_shared<std::map<std::string, ValueType>>();
-        std::string key = "StreamSource";
-        ValueType value = source;
-        params->insert(std::pair<std::string, ValueType>(key, value));
-    } else {
-        // network protocl need to add params
-        err = TranslatePluginStatus(plugin_->SetSource(uri_, nullptr));
-    }
-    return err;
+    return TranslatePluginStatus(plugin_->SetSource(source));
 }
 
 ErrorCode MediaSourceFilter::SetBufferSize(size_t size)
@@ -153,7 +143,7 @@ ErrorCode MediaSourceFilter::Start()
 
 ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data)
 {
-    MEDIA_LOG_D("IN, offset: %llu, size: %zu, outPort: %s", offset, size, outPort.c_str());
+    MEDIA_LOG_D("IN, offset: %" PRIu64 ", size: %zu, outPort: %s", offset, size, outPort.c_str());
     if (!plugin_) {
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
@@ -163,7 +153,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
         size_t totalSize = 0;
         if ((plugin_->GetSize(totalSize) == Status::OK) && (totalSize != 0)) {
             if (offset >= totalSize) {
-                MEDIA_LOG_W("offset: %llu is larger than totalSize: %zu", offset, totalSize);
+                MEDIA_LOG_W("offset: %" PRIu64 " is larger than totalSize: %zu", offset, totalSize);
                 return ErrorCode::END_OF_STREAM;
             }
             if ((offset + readSize) > totalSize) {
@@ -178,7 +168,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
         if (position_ != offset) {
             err = TranslatePluginStatus(plugin_->SeekTo(offset));
             if (err != ErrorCode::SUCCESS) {
-                MEDIA_LOG_E("Seek to %llu fail", offset);
+                MEDIA_LOG_E("Seek to %" PRIu64 " fail", offset);
                 return err;
             }
             position_ = offset;
@@ -307,9 +297,9 @@ bool MediaSourceFilter::GetProtocolByUri()
 bool MediaSourceFilter::ParseProtocol(const std::shared_ptr<MediaSource>& source)
 {
     bool ret = true;
-    OHOS::Media::SourceType srcType = source->GetSourceType();
+    SourceType srcType = source->GetSourceType();
     MEDIA_LOG_D("sourceType = %d", OHOS::Media::to_underlying(srcType));
-    if (srcType == OHOS::Media::SourceType::SOURCE_TYPE_URI) {
+    if (srcType == SourceType::SOURCE_TYPE_URI) {
         uri_ = source->GetSourceUri();
         ret = GetProtocolByUri();
     } else if (srcType == SourceType::SOURCE_TYPE_FD) {

@@ -78,7 +78,9 @@ enum struct Status : int32_t {
     ERROR_UNSUPPORTED_FORMAT = -11, ///< The plugin not support this format/name.
     ERROR_NOT_ENOUGH_DATA = -12,    ///< Not enough data when read from source.
     ERROR_NOT_EXISTED = -13,        ///< Source is not existed.
-    ERROR_AGAIN = -14,              ///< Operation is not available right now, should try again later
+    ERROR_AGAIN = -14,              ///< Operation is not available right now, should try again later.
+    ERROR_PERMISSION_DENIED = -15,  ///< Permission denied.
+    ERROR_NULL_POINTER = -16,       ///< Null pointer.
 };
 
 /**
@@ -95,7 +97,7 @@ enum struct PluginType : int32_t {
     AUDIO_SINK,        ///< reference AudioSinkPlugin
     VIDEO_SINK,        ///< reference VideoSinkPlugin
     MUXER,             ///< reference MuxerPlugin
-    FILE_SINK,         ///< reference FileSinkPlugin
+    OUTPUT_SINK,       ///< reference OutputSinkPlugin
 };
 } // namespace Plugin
 } // namespace Media

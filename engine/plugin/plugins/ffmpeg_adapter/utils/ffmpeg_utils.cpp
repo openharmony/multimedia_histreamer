@@ -20,6 +20,7 @@
 #include "foundation/log.h"
 #include "libavutil/channel_layout.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "plugin/common/plugin_time.h"
 #include "utils/utils.h"
 
 namespace OHOS {
@@ -111,8 +112,7 @@ uint64_t ConvertTimeFromFFmpeg(int64_t pts, AVRational base)
     if (pts == AV_NOPTS_VALUE) {
         out = static_cast<uint64_t>(-1);
     } else {
-        constexpr int timeScale = 1000000;
-        AVRational bq = {1, timeScale};
+        AVRational bq = {1, HST_SECOND};
         out = av_rescale_q(pts, base, bq);
     }
     return out;
@@ -124,8 +124,7 @@ int64_t ConvertTimeToFFmpeg(int64_t timestampUs, AVRational base)
     if (base.num == 0) {
         result = AV_NOPTS_VALUE;
     } else {
-        constexpr int timeScale = 1000000;
-        AVRational bq = {1, timeScale};
+        AVRational bq = {1, HST_SECOND};
         result = av_rescale_q(timestampUs, bq, base);
     }
     return result;

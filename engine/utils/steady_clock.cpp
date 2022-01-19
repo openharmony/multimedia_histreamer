@@ -29,6 +29,10 @@ int64_t SteadyClock::GetCurrentTimeMs()
     return duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count();
 }
 
+int64_t SteadyClock::GetCurrentTimeNanoSec()
+{
+    return duration_cast<nanoseconds>(high_resolution_clock::now().time_since_epoch()).count();
+}
 SteadyClock::SteadyClock() : begin_(high_resolution_clock::now())
 {
     MEDIA_LOG_D("ctor called.");

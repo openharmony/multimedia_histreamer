@@ -78,12 +78,15 @@ enum struct Tag : uint32_t {
     /* -------------------- regular tag -------------------- */
     MIME = SECTION_REGULAR_START + 1, ///< std::string
     TRACK_ID,                         ///< uint32_t, track id
-    REQUIRED_OUT_BUFFER_CNT,          ///< uint32_t required buffer count of plugin; read only tag
-    HTTP_BUFFER_SIZE,                 ///< uint32_t, download buffer size
-    HTTP_WATERLINE_HIGH,              ///< uint32_t, high waterline
+    REQUIRED_OUT_BUFFER_CNT,          ///< uint32_t, required buffer count of plugin; read only tag
+    BUFFER_ALLOCATOR,                 ///< Allocator, allocator to alloc buffers
+    BUFFERING_SIZE,                   ///< uint32_t, download buffer size
+    WATERLINE_HIGH,                   ///< uint32_t, high waterline
+    WATERLINE_LOW,                    ///< uint32_t, low waterline
+    SRC_INPUT_TYPE,                   ///< @see SrcInputType
 
     /* -------------------- media tag -------------------- */
-    MEDIA_TITLE = SECTION_MEDIA_START + 1, // string
+    MEDIA_TITLE = SECTION_MEDIA_START + 1, ///< string
     MEDIA_ARTIST,                          ///< std::string, artist
     MEDIA_LYRICIST,                        ///< std::string, lyricist
     MEDIA_ALBUM,                           ///< std::string, album
@@ -95,20 +98,19 @@ enum struct Tag : uint32_t {
     MEDIA_LANGUAGE,                        ///< std::string, language
     MEDIA_DESCRIPTION,                     ///< std::string, description
     MEDIA_LYRICS,                          ///< std::string, cyrics
-    MEDIA_DURATION,                        ///< uint64_t, duration
+    MEDIA_DURATION,                        ///< uint64_t, duration based on {@link HST_TIME_BASE}
     MEDIA_FILE_SIZE,                       ///< uint64_t, file size
     MEDIA_BITRATE,                         ///< int64_t, bite rate
     MEDIA_FILE_EXTENSION,                  ///< std::string, file extension
     MEDIA_CODEC_CONFIG,                    ///< std::vector<uint8_t>, codec config. e.g. AudioSpecificConfig for mp4
-    MEDIA_POSITION, ///< uint64_t : The byte position within media stream/file
+    MEDIA_POSITION,                        ///< uint64_t : The byte position within media stream/file
 
     /* -------------------- audio universal tag -------------------- */
-    AUDIO_CHANNELS = SECTION_AUDIO_UNIVERSAL_START + 1, // uint32_t
+    AUDIO_CHANNELS = SECTION_AUDIO_UNIVERSAL_START + 1, ///< uint32_t
     AUDIO_CHANNEL_LAYOUT,                               ///< @see AudioChannelLayout
     AUDIO_SAMPLE_RATE,                                  ///< uint32_t, sample rate
     AUDIO_SAMPLE_FORMAT,                                ///< @see AudioSampleFormat
     AUDIO_SAMPLE_PER_FRAME,                             ///< uint32_t, sample per frame
-    AUDIO_SOURCE_TYPE,                                  ///< uint32_t, audio source type for recorder
 
     /* -------------------- audio specific tag -------------------- */
     AUDIO_SPECIFIC_MPEG_START = MAKE_AUDIO_SPECIFIC_START(AudioFormat::MPEG),
@@ -121,10 +123,11 @@ enum struct Tag : uint32_t {
     AUDIO_AAC_STREAM_FORMAT, ///< @see AudioAacStreamFormat
 
     /* -------------------- video universal tag -------------------- */
-    VIDEO_WIDTH = SECTION_VIDEO_UNIVERSAL_START + 1, // uint32_t
+    VIDEO_WIDTH = SECTION_VIDEO_UNIVERSAL_START + 1, ///< uint32_t, video width
     VIDEO_HEIGHT,                                    ///< uint32_t, video height
     VIDEO_PIXEL_FORMAT,                              ///< uint32_t, video pixel format
-    VIDEO_SOURCE_TYPE,                               ///< uint32_t, video source type for recorder
+    VIDEO_SURFACE,                                   ///< @see class Surface
+    VIDEO_MAX_SURFACE_NUM,                           ///< uint32_t, max video surface num
 };
 
 using ValueType = Any;

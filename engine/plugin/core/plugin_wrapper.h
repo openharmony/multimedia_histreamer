@@ -17,7 +17,7 @@
 #define HISTREAMER_PLUGIN_CORE_WRAPPER_H
 
 #include "demuxer.h"
-#include "file_sink.h"
+#include "output_sink.h"
 #include "interface/demuxer_plugin.h"
 #include "interface/muxer_plugin.h"
 #include "interface/plugin_base.h"

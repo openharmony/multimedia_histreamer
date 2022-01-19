@@ -258,7 +258,7 @@ std::shared_ptr<Allocator> SdlAudioSinkPlugin::GetAllocator()
     return nullptr;
 }
 
-Status SdlAudioSinkPlugin::SetCallback(const std::shared_ptr<Callback>& cb)
+Status SdlAudioSinkPlugin::SetCallback(Callback* cb)
 {
     UNUSED_VARIABLE(cb);
     return Status::ERROR_UNIMPLEMENTED;
@@ -317,10 +317,10 @@ Status SdlAudioSinkPlugin::Resume()
     return Status::OK;
 }
 
-Status SdlAudioSinkPlugin::GetLatency(uint64_t& ms)
+Status SdlAudioSinkPlugin::GetLatency(uint64_t& nanoSec)
 {
-    UNUSED_VARIABLE(ms);
-    return Status::ERROR_UNIMPLEMENTED;
+    nanoSec = 0;
+    return Status::OK;
 }
 
 Status SdlAudioSinkPlugin::GetFrameSize(size_t& size)

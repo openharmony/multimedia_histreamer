@@ -60,12 +60,6 @@ std::vector<WorkMode> VideoCaptureFilter::GetWorkModes()
     return {WorkMode::PUSH};
 }
 
-
-ErrorCode VideoCaptureFilter::SetVideoSource(OHOS::Media::Plugin::VideoSourceType source, int32_t &sourceId)
-{
-    return ErrorCode::SUCCESS;
-}
-
 ErrorCode VideoCaptureFilter::InitPlugin()
 {
     MEDIA_LOG_D("IN");
@@ -73,6 +67,7 @@ ErrorCode VideoCaptureFilter::InitPlugin()
     if (err != ErrorCode::SUCCESS) {
         return err;
     }
+    plugin_->SetCallback(this);
     pluginAllocator_ = plugin_->GetAllocator();
     return err;
 }
@@ -125,6 +120,12 @@ ErrorCode VideoCaptureFilter::Stop()
         ret = TranslatePluginStatus(plugin_->Stop());
     }
     return ret;
+}
+
+ErrorCode VideoCaptureFilter::SendEos()
+{
+    MEDIA_LOG_I("SendEos entered.");
+    return ErrorCode::SUCCESS;
 }
 
 void VideoCaptureFilter::InitPorts()

@@ -65,14 +65,14 @@ StreamSourceCallback::StreamSourceCallback(std::shared_ptr<StreamSourcePlugin> d
 uint8_t* StreamSourceCallback::GetBuffer(size_t index)
 {
     auto bufferPtr = dataSource_->FindBuffer(index);
-    return bufferPtr->GetMemory()->GetWritableData(bufferPtr->GetMemory()->GetCapacity());
+    return bufferPtr->GetMemory()->GetWritableAddr(bufferPtr->GetMemory()->GetCapacity());
 }
 
 void StreamSourceCallback::QueueBuffer(size_t index, size_t offset, size_t size, int64_t timestampUs, uint32_t flags)
 {
     auto bufferPtr = dataSource_->FindBuffer(index);
     dataSource_->EraseBuffer(index);
-    bufferPtr->GetMemory()->GetWritableData(size);
+    bufferPtr->GetMemory()->UpdateDataSize(size);
     dataSource_->EnqueBuffer(bufferPtr);
 }
 
@@ -165,31 +165,15 @@ std::shared_ptr<Allocator> StreamSourcePlugin::GetAllocator()
     return mAllocator_;
 }
 
-Status StreamSourcePlugin::SetCallback(const std::shared_ptr<Callback>& cb)
+Status StreamSourcePlugin::SetCallback(Callback* cb)
 {
     MEDIA_LOG_D("IN");
     return Status::OK;
 }
 
-Status StreamSourcePlugin::SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params)
+Status StreamSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 {
-    if (uri.compare("stream://") || (params == nullptr)) {
-        MEDIA_LOG_E("Bad uri: %s", uri.c_str());
-        return Status::ERROR_INVALID_PARAMETER;
-    }
-    std::shared_ptr<MediaSource> source_ = nullptr;
-    for (const auto& iter_ : *params) {
-        std::string key_ = iter_.first;
-        ValueType val_ = iter_.second;
-        if ((key_.compare("StreamSource") == 0) && (val_.Type() == typeid(std::shared_ptr<MediaSource>))) {
-            source_ = Plugin::AnyCast<std::shared_ptr<MediaSource>>(val_);
-            break;
-        }
-    }
-    if (source_ == nullptr) {
-        MEDIA_LOG_E("Bad source");
-        return Status::ERROR_INVALID_PARAMETER;
-    }
+    auto source_ = std::make_shared<OHOS::Media::Source>("");
     std::shared_ptr<StreamSource> stream_ = source_->GetSourceStream();
     if (stream_ == nullptr) {
         MEDIA_LOG_E("Get StreamSource fail");

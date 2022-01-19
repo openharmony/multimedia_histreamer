@@ -52,6 +52,7 @@ struct Capability {
      * @version 1.0
      */
     enum struct Key : uint32_t {
+        MEDIA_BITRATE = static_cast<uint32_t>(Tag::MEDIA_BITRATE),
         AUDIO_SAMPLE_RATE = static_cast<uint32_t>(Tag::AUDIO_SAMPLE_RATE),
         AUDIO_CHANNELS = static_cast<uint32_t>(Tag::AUDIO_CHANNELS),
         AUDIO_CHANNEL_LAYOUT = static_cast<uint32_t>(Tag::AUDIO_CHANNEL_LAYOUT),
@@ -138,8 +139,11 @@ struct Capability {
     /// mime of capability
     std::string mime;
 
-    /// storage map of Capability::Key and values
+    /// Store the parameters(Capability::Key, value pairs), which should be negotiated
     KeyMap keys;
+
+    /// Pass extra parameters(Tag, value pairs) downstream or upstream, which are not negotiated
+    TagMap extraParams;
 };
 
 /// A collection of multiple capabilities

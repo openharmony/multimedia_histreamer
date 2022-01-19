@@ -23,9 +23,9 @@ Source::Source(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<SourcePlugin> p
 {
 }
 
-Status Source::SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params)
+Status Source::SetSource(std::shared_ptr<MediaSource> source)
 {
-    return source_->SetSource(uri, params);
+    return source_->SetSource(source);
 }
 
 Status Source::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)

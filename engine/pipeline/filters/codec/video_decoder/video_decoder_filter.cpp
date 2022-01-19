@@ -26,6 +26,7 @@
 #include "factory/filter_factory.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
+#include "plugin/common/surface_allocator.h"
 
 namespace OHOS {
 namespace Media {
@@ -61,7 +62,7 @@ private:
 };
 
 VideoDecoderFilter::VideoDecoderFilter(const std::string& name)
-    : DecoderFilterBase(name), dataCallback_(std::make_shared<DataCallbackImpl>(*this))
+    : CodecFilterBase(name), dataCallback_(std::make_shared<DataCallbackImpl>(*this))
 {
     MEDIA_LOG_I("video decoder ctor called");
     vdecFormat_.width = 0;
@@ -203,6 +204,7 @@ bool VideoDecoderFilter::Configure(const std::string& inPort, const std::shared_
     auto thisMeta = std::make_shared<Plugin::Meta>();
     if (!MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta)) {
         MEDIA_LOG_E("cannot configure decoder plugin since meta is not compatible with negotiated caps");
+        return false;
     }
     auto targetOutPort = GetRouteOutPort(inPort);
     if (targetOutPort == nullptr) {
@@ -254,7 +256,21 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
         MEDIA_LOG_E("Unsupported video pixel format: %u", vdecFormat_.format);
         return ErrorCode::ERROR_UNIMPLEMENTED;
     }
-    auto outAllocator = plugin_->GetAllocator(); // zero copy need change to use sink allocator
+
+    std::shared_ptr<Allocator> outAllocator {nullptr};
+
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+    // Use sink allocator first, zero copy while passing data
+    if (capNegWithDownstream_.extraParams.find(Tag::BUFFER_ALLOCATOR) != capNegWithDownstream_.extraParams.end()) {
+        auto sinkAllocatorAny = capNegWithDownstream_.extraParams[Tag::BUFFER_ALLOCATOR];
+        if (sinkAllocatorAny.Type() == typeid(std::shared_ptr<Plugin::SurfaceAllocator>)) {
+            outAllocator = Plugin::AnyCast<std::shared_ptr<Plugin::SurfaceAllocator>>(sinkAllocatorAny);
+        }
+    }
+#endif
+    if (outAllocator == nullptr) {
+        outAllocator = plugin_->GetAllocator();
+    }
     if (outAllocator == nullptr) {
         MEDIA_LOG_I("plugin doest not support out allocator, using framework allocator");
         outBufPool_->Init(bufferSize, Plugin::BufferMetaType::VIDEO);

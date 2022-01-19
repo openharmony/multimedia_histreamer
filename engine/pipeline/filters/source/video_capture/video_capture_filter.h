@@ -39,13 +39,12 @@ public:
     ~VideoCaptureFilter() override;
 
     std::vector<WorkMode> GetWorkModes() override;
-    virtual ErrorCode SetVideoSource(OHOS::Media::Plugin::VideoSourceType source, int32_t &sourceId);
     ErrorCode SetParameter(int32_t key, const Plugin::Any& value) override;
     ErrorCode GetParameter(int32_t key, Plugin::Any& value) override;
     ErrorCode Prepare() override;
     ErrorCode Start() override;
     ErrorCode Stop() override;
-
+    ErrorCode SendEos();
 private:
     void InitPorts() override;
     ErrorCode InitPlugin();

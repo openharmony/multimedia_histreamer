@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_PLUGIN_INTF_FILE_SINK_PLUGIN_H
-#define HISTREAMER_PLUGIN_INTF_FILE_SINK_PLUGIN_H
+#ifndef HISTREAMER_PLUGIN_INTF_OUTPUT_SINK_PLUGIN_H
+#define HISTREAMER_PLUGIN_INTF_OUTPUT_SINK_PLUGIN_H
 
 #include "plugin_base.h"
 #include "plugin_definition.h"
@@ -24,32 +24,32 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-struct FileSinkPlugin : public Plugin::PluginBase {
-    explicit FileSinkPlugin(std::string name): PluginBase(std::move(name)) {}
+struct OutputSinkPlugin : public Plugin::PluginBase {
+    explicit OutputSinkPlugin(std::string name): PluginBase(std::move(name)) {}
     std::shared_ptr<Allocator> GetAllocator() override
     {
         return nullptr;
     }
-    Status SetCallback(const std::shared_ptr<Callback> &cb) override
+    Status SetCallback(Callback* cb) override
     {
         UNUSED_VARIABLE(cb);
         return Status::ERROR_UNIMPLEMENTED;
     }
-    virtual Status SetSink(const Plugin::ValueType &sink) = 0;
+    virtual Status SetSink(const Plugin::ValueType& sink) = 0;
     virtual bool IsSeekable() = 0;
     virtual Status SeekTo(uint64_t offset) = 0;
     virtual Status Write(const std::shared_ptr<Buffer>& buffer) = 0;
     virtual Status Flush() = 0;
 };
 
-/// File Sink plugin api major number.
-#define FILE_SINK_API_VERSION_MAJOR (1)
+/// Output Sink plugin api major number.
+#define OUTPUT_SINK_API_VERSION_MAJOR (1)
 
-/// File Sink plugin api minor number
-#define FILE_SINK_API_VERSION_MINOR (0)
+/// Output Sink plugin api minor number
+#define OUTPUT_SINK_API_VERSION_MINOR (0)
 
-/// File Sink plugin version
-#define FILE_SINK_API_VERSION MAKE_VERSION(FILE_SINK_API_VERSION_MAJOR, FILE_SINK_API_VERSION_MINOR)
+/// Output Sink plugin version
+#define OUTPUT_SINK_API_VERSION MAKE_VERSION(OUTPUT_SINK_API_VERSION_MAJOR, OUTPUT_SINK_API_VERSION_MINOR)
 
 enum struct OutputType {
     UNKNOWN = -1,
@@ -57,16 +57,18 @@ enum struct OutputType {
     FD, ///< sink type is fd, sink value is int32_t
 };
 
-struct FileSinkPluginDef : public PluginDefBase {
+struct OutputSinkPluginDef : public PluginDefBase {
     OutputType outputType;
-    PluginCreatorFunc<FileSinkPlugin> creator {nullptr}; ///< Muxer plugin create function.
-    FileSinkPluginDef()
+    CapabilitySet inCaps;
+    PluginCreatorFunc<OutputSinkPlugin> creator {nullptr}; ///< Output sink plugin create function.
+    OutputSinkPluginDef()
     {
-        apiVersion = FILE_SINK_API_VERSION; ///< file sink plugin version.
-        pluginType = PluginType::FILE_SINK; ///< Plugin type, MUST be FILE_SINK.
+        apiVersion = OUTPUT_SINK_API_VERSION; ///< Output sink plugin version.
+        pluginType = PluginType::OUTPUT_SINK; ///< Plugin type, MUST be OUTPUT_SINK.
+        inCaps.emplace_back(Capability("*")); ///< Output sink sink can accept any data
     }
 };
 } // Plugin
 } // Media
 } // OHOS
-#endif // HISTREAMER_PLUGIN_INTF_FILE_SINK_PLUGIN_H
+#endif // HISTREAMER_PLUGIN_INTF_OUTPUT_SINK_PLUGIN_H

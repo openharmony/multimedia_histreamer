@@ -15,12 +15,12 @@
 #ifndef HISTREAMER_FILE_FD_SINK_PLUGIN_H
 #define HISTREAMER_FILE_FD_SINK_PLUGIN_H
 
-#include "plugin/interface/file_sink_plugin.h"
+#include "plugin/interface/output_sink_plugin.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-class FileFdSinkPlugin : public FileSinkPlugin {
+class FileFdSinkPlugin : public OutputSinkPlugin {
 public:
     explicit FileFdSinkPlugin(std::string name);
     ~FileFdSinkPlugin() override = default;

@@ -47,8 +47,8 @@ public:
     Status GetParameter(Tag tag, ValueType& value) override;
     Status SetParameter(Tag tag, const ValueType& value) override;
     std::shared_ptr<Allocator> GetAllocator() override;
-    Status SetCallback(const std::shared_ptr<Callback>& cb) override;
-    Status SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params = nullptr) override;
+    Status SetCallback(Callback* cb) override;
+    Status SetSource(std::shared_ptr<MediaSource> source) override;
     Status Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen) override;
     Status GetSize(size_t& size) override;
     bool IsSeekable() override;
@@ -62,7 +62,7 @@ private:
     uint64_t position_;
     std::shared_ptr<FileSourceAllocator> mAllocator_ {nullptr};
 
-    Status ParseFileName(std::string& uri);
+    Status ParseFileName(const std::string& uri);
     Status CheckFileStat();
     Status OpenFile();
     void CloseFile();

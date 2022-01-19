@@ -56,7 +56,7 @@ public:
 
     std::shared_ptr<Allocator> GetAllocator() override;
 
-    Status SetCallback(const std::shared_ptr<Callback> &cb) override;
+    Status SetCallback(Callback* cb) override;
 
     Status Pause() override;
 
@@ -65,6 +65,8 @@ public:
     Status Write(const std::shared_ptr<Buffer> &input) override;
 
     Status Flush() override;
+
+    Status GetLatency(uint64_t &nanoSec) override;
 
 private:
 

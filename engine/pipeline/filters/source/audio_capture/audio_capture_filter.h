@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef MEDIA_PIPELINE_AUDIO_CAPTURE_FILTER_H
+#define MEDIA_PIPELINE_AUDIO_CAPTURE_FILTER_H
 
-#ifndef HISTREAMER_PIPELINE_AUDIO_CAPTURE_FILTER_H
-#define HISTREAMER_PIPELINE_AUDIO_CAPTURE_FILTER_H
 #ifdef RECORDER_SUPPORT
+
 #include <memory>
 #include <string>
 
@@ -46,29 +47,35 @@ public:
     ErrorCode Stop() override;
     ErrorCode Pause() override;
     ErrorCode Resume() override;
-
+    ErrorCode SendEos();
 private:
     void InitPorts() override;
-    ErrorCode ConfigurePlugin();
+    ErrorCode InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& audioMeta);
     void ReadLoop();
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);
     ErrorCode FindPlugin();
-    bool DoNegotiate(CapabilitySet &outCaps);
-    bool CheckSampleRate(Plugin::Capability cap);
-    bool CheckChannels(Plugin::Capability cap);
-    bool CheckSampleFormat(Plugin::Capability cap);
+    bool DoNegotiate(const CapabilitySet& outCaps);
+    bool CheckSampleRate(const Plugin::Capability& cap);
+    bool CheckChannels(const Plugin::Capability& cap);
+    bool CheckSampleFormat(const Plugin::Capability& cap);
     ErrorCode DoConfigure();
 
     std::shared_ptr<OSAL::Task> taskPtr_ {nullptr};
     std::shared_ptr<Plugin::Source> plugin_ {nullptr};
     std::shared_ptr<Allocator> pluginAllocator_ {nullptr};
     std::shared_ptr<Plugin::PluginInfo> pluginInfo_ {nullptr};
-    std::string inputType_;
-    uint32_t sampleRate_;
-    uint32_t channelNum_;
-    int64_t bitRate_;
-    Plugin::AudioSampleFormat sampleFormat_;
+    Plugin::SrcInputType inputType_ {};
+    bool inputTypeSpecified_ {false};
+    uint32_t sampleRate_ {0};
+    bool sampleRateSpecified_ {false};
+    uint32_t channelNum_ {0};
+    bool channelNumSpecified_ {false};
+    int64_t bitRate_ {0};
+    bool bitRateSpecified_ {false};
+    Plugin::AudioSampleFormat sampleFormat_ {OHOS::Media::Plugin::AudioSampleFormat::S16};
+    bool sampleFormatSpecified_ {false};
+    Capability capNegWithDownstream_ {};
 };
 } // namespace Pipeline
 } // namespace Media

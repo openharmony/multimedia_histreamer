@@ -100,7 +100,7 @@ std::vector<Filter*> FilterBase::GetNextFilters()
     for (auto&& outPort : outPorts_) {
         auto peerPort = outPort->GetPeerPort();
         if (!peerPort) {
-            MEDIA_LOG_E("Filter %s outport %s has no peer port (%zu).", name_.c_str(), outPort->GetName().c_str(),
+            MEDIA_LOG_I("Filter %s outport %s has no peer port (%zu).", name_.c_str(), outPort->GetName().c_str(),
                         outPorts_.size());
             continue;
         }
@@ -110,6 +110,25 @@ std::vector<Filter*> FilterBase::GetNextFilters()
         }
     }
     return nextFilters;
+}
+
+std::vector<Filter*> FilterBase::GetPreFilters()
+{
+    std::vector<Filter*> preFilters;
+    preFilters.reserve(inPorts_.size());
+    for (auto&& inPort : inPorts_) {
+        auto peerPort = inPort->GetPeerPort();
+        if (!peerPort) {
+            MEDIA_LOG_I("Filter %s inport %s has no peer port (%zu).", name_.c_str(), inPort->GetName().c_str(),
+                        inPorts_.size());
+            continue;
+        }
+        auto filter = const_cast<Filter*>(dynamic_cast<const Filter*>(peerPort->GetOwnerFilter()));
+        if (filter) {
+            preFilters.emplace_back(filter);
+        }
+    }
+    return preFilters;
 }
 
 ErrorCode FilterBase::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
@@ -243,10 +262,19 @@ template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::Vide
     std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
     const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
     const std::function<std::shared_ptr<Plugin::VideoSink>(const std::string&)>& pluginCreator);
-template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::FileSink>& plugin,
+template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::OutputSink>& plugin,
     std::shared_ptr<Plugin::PluginInfo>& pluginInfo,
     const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
-    const std::function<std::shared_ptr<Plugin::FileSink>(const std::string&)>& pluginCreator);
+    const std::function<std::shared_ptr<Plugin::OutputSink>(const std::string&)>& pluginCreator);
+
+    void FilterBase::onEvent(int32_t event)
+    {
+    }
+
+    void FilterBase::onError(int32_t errorType, int32_t errorCode)
+    {
+        eventReceiver_->OnEvent({EventType::EVENT_ERROR, ErrorEvent{errorType, errorCode}});
+    }
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

@@ -16,12 +16,12 @@
 #ifndef HISTREAMER_PIPELINE_FILTER_AUDIO_DECODER_H
 #define HISTREAMER_PIPELINE_FILTER_AUDIO_DECODER_H
 
-#include "filters/codec/decoder_filter_base.h"
+#include "filters/codec/codec_filter_base.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class AudioDecoderFilter : public DecoderFilterBase {
+class AudioDecoderFilter : public CodecFilterBase {
 public:
     explicit AudioDecoderFilter(const std::string &name);
     ~AudioDecoderFilter() override;
@@ -66,7 +66,7 @@ private:
     Capability capNegWithDownstream_;
     Capability capNegWithUpstream_;
 };
-}
-}
-}
+} // Pipeline
+} // Media
+} // OHOS
 #endif // HISTREAMER_PIPELINE_FILTER_AUDIO_DECODER_H

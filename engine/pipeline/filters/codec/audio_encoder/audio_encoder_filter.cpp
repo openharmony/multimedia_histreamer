@@ -19,81 +19,20 @@
 
 #include "audio_encoder_filter.h"
 #include "osal/utils/util.h"
-#include "utils/constants.h"
-#include "utils/memory_helper.h"
 #include "factory/filter_factory.h"
-#include "common/plugin_utils.h"
-#include "plugin/common/plugin_audio_tags.h"
 #include "utils/steady_clock.h"
 
-namespace {
-constexpr int32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 5;
-constexpr int32_t DEFAULT_IN_BUFFER_POOL_SIZE = 5;
-constexpr int32_t MAX_OUT_DECODED_DATA_SIZE_PER_FRAME = 20 * 1024; // 20kB
-constexpr int32_t AF_64BIT_BYTES = 8;
-constexpr int32_t AF_32BIT_BYTES = 4;
-constexpr int32_t AF_16BIT_BYTES = 2;
-constexpr int32_t AF_8BIT_BYTES = 1;
-
-uint32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta)
-{
-    using namespace OHOS::Media;
-    uint32_t samplesPerFrame;
-    if (!meta->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame)) {
-        return 0;
-    }
-    uint32_t channels;
-    if (!meta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels)) {
-        return 0;
-    }
-    uint32_t bytesPerSample = 0;
-    Plugin::AudioSampleFormat format;
-    if (!meta->GetData<Plugin::AudioSampleFormat>(Plugin::MetaID::AUDIO_SAMPLE_FORMAT, format)) {
-        return 0;
-    }
-    switch (format) {
-        case Plugin::AudioSampleFormat::S64:
-        case Plugin::AudioSampleFormat::S64P:
-        case Plugin::AudioSampleFormat::U64:
-        case Plugin::AudioSampleFormat::U64P:
-        case Plugin::AudioSampleFormat::F64:
-        case Plugin::AudioSampleFormat::F64P:
-            bytesPerSample = AF_64BIT_BYTES;
-            break;
-        case Plugin::AudioSampleFormat::F32:
-        case Plugin::AudioSampleFormat::F32P:
-        case Plugin::AudioSampleFormat::S32:
-        case Plugin::AudioSampleFormat::S32P:
-        case Plugin::AudioSampleFormat::U32:
-        case Plugin::AudioSampleFormat::U32P:
-            bytesPerSample = AF_32BIT_BYTES;
-            break;
-        case Plugin::AudioSampleFormat::S16:
-        case Plugin::AudioSampleFormat::S16P:
-        case Plugin::AudioSampleFormat::U16:
-        case Plugin::AudioSampleFormat::U16P:
-            bytesPerSample = AF_16BIT_BYTES;
-            break;
-        case Plugin::AudioSampleFormat::S8:
-        case Plugin::AudioSampleFormat::U8:
-            bytesPerSample = AF_8BIT_BYTES;
-            break;
-        default:
-            bytesPerSample = 0;
-            break;
-    }
-    return bytesPerSample * samplesPerFrame * channels;
-}
-};
+#define DEFAULT_OUT_BUFFER_POOL_SIZE 5
+#define MAX_OUT_DECODED_DATA_SIZE_PER_FRAME 20 * 1024 // 20kB
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
 static AutoRegisterFilter<AudioEncoderFilter> g_registerFilterHelper("builtin.recorder.audioencoder");
 
-AudioEncoderFilter::AudioEncoderFilter(const std::string &name): DecoderFilterBase(name)
+AudioEncoderFilter::AudioEncoderFilter(const std::string &name) : CodecFilterBase(name)
 {
-    filterType_ = FilterType::AUDIO_DECODER;
+    filterType_ = FilterType::AUDIO_ENCODER;
     MEDIA_LOG_D("audio encoder ctor called");
 }
 
@@ -110,6 +49,7 @@ ErrorCode AudioEncoderFilter::Start()
         MEDIA_LOG_W("call encoder start() when state is not ready or working");
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
+    rb->SetActive(true);
     return FilterBase::Start();
 }
 
@@ -121,12 +61,19 @@ ErrorCode AudioEncoderFilter::Prepare()
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto err = FilterBase::Prepare();
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Audio Decoder prepare error because of filter base prepare error");
+    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Audio Encoder prepare error because of filter base prepare error");
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode AudioEncoderFilter::SetAudioEncoder(int32_t sourceId, OHOS::Media::Plugin::AudioFormat encoder)
+ErrorCode AudioEncoderFilter::SetAudioEncoder(int32_t sourceId, std::shared_ptr<Plugin::Meta> encoderMeta)
 {
+    std::string mime;
+    if (!encoderMeta->GetString(Plugin::MetaID::MIME, mime)) {
+        MEDIA_LOG_E("encoder meta must contains mime item");
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+    }
+    mime_ = mime;
+    encoderMeta_ = std::move(encoderMeta);
     return ErrorCode::SUCCESS;
 }
 
@@ -134,7 +81,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
                                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                    Capability& upstreamNegotiatedCap)
 {
-    PROFILE_BEGIN("Audio Decoder Negotiate begin");
+    PROFILE_BEGIN("Audio Encoder Negotiate begin");
     if (state_ != FilterState::PREPARING) {
         MEDIA_LOG_W("encoder filter is not in preparing when negotiate");
         return false;
@@ -153,8 +100,8 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
             MEDIA_LOG_E("encoder plugin must have out caps");
         }
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
-            if (outCap.keys.count(Capability::Key::AUDIO_SAMPLE_FORMAT) == 0) {
-                MEDIA_LOG_W("encoder plugin should specify sample format in out caps");
+            Plugin::Meta tmpMeta;
+            if (outCap.mime != mime_ || !MergeMetaWithCapability(*encoderMeta_, outCap, tmpMeta)) {
                 continue;
             }
             auto thisOut = std::make_shared<Plugin::Capability>();
@@ -168,7 +115,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
             if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_)) {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
-                MEDIA_LOG_I("choose plugin %s as working parameter", candidate.first->name.c_str());
+                MEDIA_LOG_I("choose plugin %s as working plugin", candidate.first->name.c_str());
                 break;
             }
         }
@@ -188,8 +135,29 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
         [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
         return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
     });
-    PROFILE_END("Audio Decoder Negotiate end");
+    upstreamNegotiatedCap = *upstreamCap;
+    PROFILE_END("audio encoder negotiate end");
     return res;
+}
+
+uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<const Plugin::Meta> &meta)
+{
+    Plugin::ValueType value;
+    if (plugin_->GetParameter(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, value) != Plugin::Status::OK ||
+        value.Type() != typeid(uint32_t)) {
+        MEDIA_LOG_E("Get samplePerFrame from plugin fail");
+        return 0;
+    }
+    auto samplesPerFrame = Plugin::AnyCast<uint32_t>(value);
+    uint32_t channels;
+    if (!meta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels)) {
+        return 0;
+    }
+    Plugin::AudioSampleFormat format;
+    if (!meta->GetData<Plugin::AudioSampleFormat>(Plugin::MetaID::AUDIO_SAMPLE_FORMAT, format)) {
+        return 0;
+    }
+    return GetBytesPerSample(format) * samplesPerFrame * channels;
 }
 
 bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
@@ -201,8 +169,10 @@ bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_
     }
 
     auto thisMeta = std::make_shared<Plugin::Meta>();
-    if (!MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta)) {
+    // todo how to decide the caps ?
+    if (!MergeMetaWithCapability(*upstreamMeta, pluginInfo_->outCaps[0], *thisMeta)) {
         MEDIA_LOG_E("cannot configure encoder plugin since meta is not compatible with negotiated caps");
+        return false;
     }
     auto targetOutPort = GetRouteOutPort(inPort);
     if (targetOutPort == nullptr) {
@@ -230,37 +200,45 @@ ErrorCode AudioEncoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
 {
     auto err = ConfigureWithMetaLocked(meta);
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "configure encoder plugin error");
-
-    uint32_t bufferCnt = 0;
-    if (GetPluginParameterLocked(Tag::REQUIRED_OUT_BUFFER_CNT, bufferCnt) != ErrorCode::SUCCESS) {
-        bufferCnt = DEFAULT_OUT_BUFFER_POOL_SIZE;
-    }
-
-    // 每次重新创建bufferPool
-    outBufferPool_ = std::make_shared<BufferPool<AVBuffer>>(bufferCnt);
-
-    int32_t bufferSize = CalculateBufferSize(meta);
-    if (bufferSize == 0) {
-        bufferSize = MAX_OUT_DECODED_DATA_SIZE_PER_FRAME;
-    }
-    auto outAllocator = plugin_->GetAllocator();
-    if (outAllocator == nullptr) {
-        MEDIA_LOG_I("plugin doest not support out allocator, using framework allocator");
-        outBufferPool_->Init(bufferSize);
-    } else {
-        MEDIA_LOG_I("using plugin output allocator");
-        for (size_t cnt = 0; cnt < bufferCnt; cnt++) {
-            auto buf = MemoryHelper::make_unique<AVBuffer>();
-            buf->AllocMemory(outAllocator, bufferSize);
-            outBufferPool_->Append(std::move(buf));
-        }
-    }
-
     err = TranslatePluginStatus(plugin_->Prepare());
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "encoder prepare failed");
     err = TranslatePluginStatus(plugin_->Start());
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "encoder start failed");
 
+    uint32_t bufferCnt = 0;
+    if (GetPluginParameterLocked(Tag::REQUIRED_OUT_BUFFER_CNT, bufferCnt) != ErrorCode::SUCCESS) {
+        bufferCnt = DEFAULT_OUT_BUFFER_POOL_SIZE;
+    }
+    // 每次重新创建bufferPool
+    outBufferPool_ = std::make_shared<BufferPool<AVBuffer>>(bufferCnt);
+    frameSize_ = CalculateBufferSize(meta);
+    if (frameSize_ == 0) {
+        frameSize_ = MAX_OUT_DECODED_DATA_SIZE_PER_FRAME;
+    }
+    auto outAllocator = plugin_->GetAllocator();
+    if (outAllocator == nullptr) {
+        MEDIA_LOG_I("plugin doest not support out allocator, using framework allocator");
+        outBufferPool_->Init(frameSize_);
+    } else {
+        MEDIA_LOG_I("using plugin output allocator");
+        for (size_t cnt = 0; cnt < bufferCnt; cnt++) {
+            auto buf = MemoryHelper::make_unique<AVBuffer>();
+            buf->AllocMemory(outAllocator, frameSize_);
+            outBufferPool_->Append(std::move(buf));
+        }
+    }
+    rb = MemoryHelper::make_unique<Plugin::RingBuffer>(frameSize_ * 10); // 最大缓存10帧
+    if (!rb) {
+        MEDIA_LOG_E("create ring buffer fail");
+        return ErrorCode::ERROR_NO_MEMORY;
+    }
+    rb->Init();
+    cahceBuffer_ = std::make_shared<AVBuffer>(Plugin::BufferMetaType::AUDIO);
+    auto bufferMem = cahceBuffer_->AllocMemory(NULL, frameSize_);
+    if (!bufferMem) {
+        MEDIA_LOG_E("alloc cache frame buffer memory fail");
+        return ErrorCode::ERROR_NO_MEMORY;
+    }
     return ErrorCode::SUCCESS;
 }
 
@@ -271,43 +249,45 @@ ErrorCode AudioEncoderFilter::PushData(const std::string &inPort, AVBufferPtr bu
         MEDIA_LOG_W("pushing data to encoder when state is %d", static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
-    if (isFlushing_) {
-        MEDIA_LOG_I("encoder is flushing, discarding this data from port %s", inPort.c_str());
-        return ErrorCode::SUCCESS;
+    auto inputMemory = buffer->GetMemory();
+    if (!inputMemory) {
+        MEDIA_LOG_E("invalid buffer memory");
+        return ErrorCode::ERROR_NO_MEMORY;
     }
-    ErrorCode handleFrameRes;
-    int8_t retryCnt = 0;
-    do {
-        handleFrameRes = HandleFrame(buffer);
-        while (FinishFrame() == ErrorCode::SUCCESS) {
-            MEDIA_LOG_D("finish frame");
+    if (inputMemory->GetSize() > 0) {
+        rb->WriteBuffer(const_cast<uint8_t *>(inputMemory->GetReadOnlyData()), inputMemory->GetSize());
+    }
+    auto totalSize = rb->GetSize();
+    bool isEos = false;
+    while ((totalSize >= frameSize_) || ((inputMemory->GetSize() == 0) && !isEos)) {
+        cahceBuffer_->GetMemory()->Reset();
+        cahceBuffer_->flag = 0;
+        auto frmSize = (totalSize >= frameSize_) ? frameSize_ : totalSize;
+        if (frmSize > 0) {
+            if (rb->ReadBuffer(cahceBuffer_->GetMemory()->GetWritableAddr(frmSize), frmSize) != frmSize) {
+                MEDIA_LOG_E("Read data from ring buffer fail");
+                return ErrorCode::ERROR_UNKNOWN;
+            }
+        } else { // EOS
+            cahceBuffer_->flag = BUFFER_FLAG_EOS;
+            isEos = true;
         }
-        retryCnt++;
-        if (retryCnt >= maxRetryCnt) { // if retry cnt exceeds we will drop this frame
-            break;
-        }
-        // if timed out or returns again we should try again
-    } while (handleFrameRes == ErrorCode::ERROR_TIMED_OUT || handleFrameRes == ErrorCode::ERROR_AGAIN);
+        ErrorCode handleFrameRes;
+        int8_t retryCnt = 0;
+        do {
+            handleFrameRes = HandleFrame(cahceBuffer_);
+            while (FinishFrame() == ErrorCode::SUCCESS) {
+                MEDIA_LOG_D("finish frame");
+            }
+            retryCnt++;
+            if (retryCnt >= maxRetryCnt) { // if retry cnt exceeds we will drop this frame
+                break;
+            }
+            // if timed out or returns again we should try again
+        } while (handleFrameRes == ErrorCode::ERROR_TIMED_OUT || handleFrameRes == ErrorCode::ERROR_AGAIN);
+        totalSize -= frmSize;
+    }
     return ErrorCode::SUCCESS;
-}
-
-void AudioEncoderFilter::FlushStart()
-{
-    MEDIA_LOG_I("FlushStart entered.");
-    isFlushing_ = true;
-    if (plugin_ != nullptr) {
-        auto err = TranslatePluginStatus(plugin_->Flush());
-        if (err != ErrorCode::SUCCESS) {
-            MEDIA_LOG_E("encoder plugin flush error");
-        }
-    }
-    MEDIA_LOG_I("FlushStart exit.");
-}
-
-void AudioEncoderFilter::FlushEnd()
-{
-    MEDIA_LOG_I("FlushEnd entered");
-    isFlushing_ = false;
 }
 
 ErrorCode AudioEncoderFilter::Stop()
@@ -321,6 +301,7 @@ ErrorCode AudioEncoderFilter::Stop()
         err = TranslatePluginStatus(plugin_->Stop());
         RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "encoder stop error");
     }
+    rb->SetActive(false);
     MEDIA_LOG_I("AudioEncoderFilter stop end.");
     return FilterBase::Stop();
 }
@@ -355,14 +336,14 @@ ErrorCode AudioEncoderFilter::FinishFrame()
     outBuffer->Reset();
     auto ret = TranslatePluginStatus(plugin_->QueueOutputBuffer(outBuffer, 0));
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("Queue out buffer to plugin fail: %d", ret);
+        MEDIA_LOG_E("Queue out buffer to plugin fail: %d", to_underlying(ret));
         return ret;
     }
     std::shared_ptr<AVBuffer> pcmFrame = nullptr;
     auto status = plugin_->DequeueOutputBuffer(pcmFrame, 0);
     if (status != Plugin::Status::OK && status != Plugin::Status::END_OF_STREAM) {
         if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
-            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %d", status);
+            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %d", static_cast<int32_t>(status));
         }
         return TranslatePluginStatus(status);
     }

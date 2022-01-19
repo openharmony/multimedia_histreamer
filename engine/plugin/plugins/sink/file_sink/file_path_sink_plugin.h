@@ -16,12 +16,12 @@
 #define HISTREAMER_FILE_PATH_SINK_PLUGIN_H
 
 #include <cstdio>
-#include "plugin/interface/file_sink_plugin.h"
+#include "plugin/interface/output_sink_plugin.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-class FilePathSinkPlugin : public FileSinkPlugin {
+class FilePathSinkPlugin : public OutputSinkPlugin {
 public:
     explicit FilePathSinkPlugin(std::string name);
     ~FilePathSinkPlugin() override = default;

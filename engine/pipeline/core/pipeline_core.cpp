@@ -17,6 +17,7 @@
 
 #include "pipeline_core.h"
 #include <queue>
+#include <stack>
 #include "foundation/log.h"
 #include "osal/thread/scoped_lock.h"
 #include "utils/steady_clock.h"
@@ -89,6 +90,7 @@ ErrorCode PipelineCore::Prepare()
     state_ = FilterState::PREPARING;
     ErrorCode rtv = ErrorCode::SUCCESS;
     OSAL::ScopedLock lock(mutex_);
+    ReorderFilters();
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
         auto& filterPtr = *it;
         if (filterPtr) {
@@ -280,6 +282,59 @@ void PipelineCore::InitFilters(const std::vector<Filter*>& filters)
 {
     for (auto& filter : filters) {
         filter->Init(this, filterCallback_);
+    }
+}
+
+namespace {
+struct FilterNode {
+    size_t inDegree {0};
+    Filter* filter {nullptr};
+    std::vector<size_t> nexts {}; // store filter index
+    FilterNode(size_t degree, Filter* f, std::vector<size_t> next) : inDegree(degree), filter(f), nexts(std::move(next))
+    {
+    }
+};
+
+void ConstructGraph(const std::vector<Filter*> &filters, std::vector<FilterNode> &graph, std::stack<size_t> &stack)
+{
+    std::map<Filter*, size_t> mapInfo; // filter to index map, index is the node index in graph
+    size_t index = 0;
+    for (const auto& f : filters) {
+        graph.emplace_back(FilterNode(f->GetPreFilters().size(), f, {}));
+        if (f->GetPreFilters().empty()) {
+            stack.push(index);
+        }
+        mapInfo[f] = index++;
+    }
+    for (const auto& f : filters) {
+        auto& tmp = graph[mapInfo[f]].nexts;
+        for (const auto& next : f->GetNextFilters()) {
+            tmp.emplace_back(mapInfo[next]);
+        }
+    }
+}
+}
+
+void PipelineCore::ReorderFilters()
+{
+    std::vector<FilterNode> graph;
+    std::stack<size_t> stack;
+    ConstructGraph(filters_, graph, stack);
+    std::vector<Filter*> result;
+    while (!stack.empty()) {
+        auto cur = stack.top();
+        stack.pop();
+        for (const auto& idx : graph[cur].nexts) {
+            graph[idx].inDegree--;
+            if (graph[idx].inDegree == 0) {
+                stack.push(idx);
+            }
+        }
+        result.emplace_back(graph[cur].filter);
+    }
+    if (result.size() == filters_.size()) {
+        filters_.clear();
+        filters_.assign(result.begin(), result.end());
     }
 }
 } // namespace Pipeline

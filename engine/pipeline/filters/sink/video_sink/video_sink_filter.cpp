@@ -22,6 +22,10 @@
 #include "common/plugin_utils.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
+#include "osal/utils/util.h"
+#include "pipeline/core/clock_manager.h"
+#include "plugin/common/plugin_time.h"
+#include "plugin/common/surface_allocator.h"
 #include "utils/steady_clock.h"
 
 namespace OHOS {
@@ -117,6 +121,15 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
         [](const std::string& name) -> std::shared_ptr<Plugin::VideoSink> {
         return Plugin::PluginManager::Instance().CreateVideoSinkPlugin(name);
     });
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+    auto pluginAllocator = plugin_->GetAllocator();
+    if (pluginAllocator != nullptr && pluginAllocator->GetMemoryType() == Plugin::MemoryType::SURFACE_BUFFER) {
+        // Warning: currently assume BUFFER_ALLOCATOR always SurfaceAllocator
+        // It's better to pass pluginAllocator directly, but I'm afraid we can not get subclass obj from any.
+        auto allocator = std::dynamic_pointer_cast<Plugin::SurfaceAllocator>(pluginAllocator);
+        upstreamNegotiatedCap.extraParams.emplace(std::make_pair(Tag::BUFFER_ALLOCATOR, allocator));
+    }
+#endif
     PROFILE_END("video sink negotiate end");
     return res;
 }
@@ -173,27 +186,63 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Plu
 ErrorCode VideoSinkFilter::ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Init()), "Init plugin error");
+    plugin_->SetCallback(this);
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePluginParams(meta), "Configure plugin params fail");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Start()), "Start plugin fail");
     return ErrorCode::SUCCESS;
 }
 
-bool VideoSinkFilter::DoSync()
+bool VideoSinkFilter::DoSync(int64_t pts) const
 {
-    // Add av sync handle here
+    int64_t  delta {0};
+    int64_t  tempOut {0};
+    if (frameCnt_ == 0 || pts == 0) {
+        return true;
+    }
+    if (ClockManager::Instance().GetProvider().CheckPts(pts, delta) != ErrorCode::SUCCESS) {
+        MEDIA_LOG_E("DoSync CheckPts fail");
+        return false;
+    }
+    if (delta > 0) {
+        tempOut = HstTime2Ms(delta);
+        if (tempOut > 100) { // 100ms
+            MEDIA_LOG_E("DoSync early %" PRId64 " ms", tempOut);
+            OHOS::Media::OSAL::SleepFor(tempOut);
+            return true;
+        }
+    } else if (delta < 0) {
+        tempOut = HstTime2Ms(-delta);
+        if (tempOut > 40) { // 40ms drop frame
+            MEDIA_LOG_E("DoSync later %" PRId64 " ms", tempOut);
+            return false;
+        }
+    }
     return true;
 }
 
 void VideoSinkFilter::RenderFrame()
 {
+    uint64_t latencyNano {0};
     MEDIA_LOG_D("RenderFrame called");
     auto oneBuffer = inBufQueue_->Pop();
     if (oneBuffer == nullptr) {
         MEDIA_LOG_W("Video sink find nullptr in esBufferQ");
         return;
     }
-    if (DoSync() == false) {
+
+    Plugin::Status status = plugin_->GetLatency(latencyNano);
+    if (status != Plugin::Status::OK) {
+        MEDIA_LOG_E("Video sink GetLatency fail errorcode = %d", to_underlying(TranslatePluginStatus(status)));
+        return;
+    }
+
+    if (INT64_MAX - latencyNano < oneBuffer->pts) {
+        MEDIA_LOG_E("Video pts(%" PRIu64 ") + latency overflow.", oneBuffer->pts);
+        return;
+    }
+
+    if (!DoSync(oneBuffer->pts + latencyNano)) {
         return;
     }
     auto err = plugin_->Write(oneBuffer);
@@ -206,6 +255,7 @@ void VideoSinkFilter::RenderFrame()
 ErrorCode VideoSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
 {
     MEDIA_LOG_D("video sink push data started, state_: %d", state_.load());
+    frameCnt_++;
     if (isFlushing_ || state_.load() == FilterState::INITIALIZED) {
         MEDIA_LOG_I("video sink is flushing ignore this buffer");
         return ErrorCode::SUCCESS;
@@ -302,6 +352,7 @@ ErrorCode VideoSinkFilter::Resume()
         }
         inBufQueue_->SetActive(true);
         renderTask_->Start();
+        frameCnt_ = 0;
     }
     return ErrorCode::SUCCESS;
 }
@@ -330,6 +381,24 @@ void VideoSinkFilter::FlushEnd()
         inBufQueue_->SetActive(true);
     }
 }
+
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+ErrorCode VideoSinkFilter::SetVideoSurface(sptr<Surface> surface)
+{
+    if (!surface) {
+        MEDIA_LOG_W("surface is null");
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+    }
+    if (plugin_) {
+        auto ret = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_SURFACE, surface));
+        if (ret != ErrorCode::SUCCESS) {
+            MEDIA_LOG_W("Set surface to plugin fail");
+            return ret;
+        }
+    }
+    return ErrorCode::SUCCESS;
+}
+#endif
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

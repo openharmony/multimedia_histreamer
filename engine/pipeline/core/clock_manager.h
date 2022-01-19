@@ -13,53 +13,53 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_PIPELINE_CORE_SYNC_INFO_MANAGER_H
-#define HISTREAMER_PIPELINE_CORE_SYNC_INFO_MANAGER_H
+#ifndef HISTREAMER_PIPELINE_CORE_CLOCK_MANAGER_H
+#define HISTREAMER_PIPELINE_CORE_CLOCK_MANAGER_H
 
 #include <memory>
 #include <queue>
 
-#include "sync_info_provider.h"
+#include "clock_provider.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class SyncInfoManager {
+class ClockManager {
 public:
-    SyncInfoManager(const SyncInfoManager&) = delete;
-    SyncInfoManager operator=(const SyncInfoManager&) = delete;
-    ~SyncInfoManager() = default;
-    static SyncInfoManager& Instance()
+    ClockManager(const ClockManager&) = delete;
+    ClockManager operator=(const ClockManager&) = delete;
+    ~ClockManager() = default;
+    static ClockManager& Instance()
     {
-        static SyncInfoManager manager;
+        static ClockManager manager;
         return manager;
     }
 
     // todo how to decide the priority of providers
-    void RegisterProvider(const std::shared_ptr<SyncInfoProvider>& provider);
-    void UnRegisterProvider(const std::shared_ptr<SyncInfoProvider>& provider);
+    void RegisterProvider(const std::shared_ptr<ClockProvider>& provider);
+    void UnRegisterProvider(const std::shared_ptr<ClockProvider>& provider);
 
-    SyncInfoProvider& GetProvider()
+    ClockProvider& GetProvider()
     {
         return providerProxy_;
     }
 private:
-    SyncInfoManager() = default;
-    class SyncInfoProviderProxy : public SyncInfoProvider {
+    ClockManager() = default;
+    class SyncClockProviderProxy : public ClockProvider {
     public:
-        ~SyncInfoProviderProxy() override = default;
+        ~SyncClockProviderProxy() override = default;
 
-        void SetStub(std::shared_ptr<SyncInfoProvider>& stub)
+        void SetStub(std::shared_ptr<ClockProvider>& stub)
         {
             stub_ = stub;
         }
 
-        ErrorCode CheckPts(int64_t pts, int64_t &ret) override
+        ErrorCode CheckPts(int64_t pts, int64_t &delta) override
         {
             if (stub_ == nullptr) {
                 return ErrorCode::ERROR_INVALID_OPERATION;
             }
-            return stub_->CheckPts(pts, ret);
+            return stub_->CheckPts(pts, delta);
         }
 
         ErrorCode GetCurrentPosition(int64_t &position) override
@@ -70,23 +70,23 @@ private:
             return stub_->GetCurrentPosition(position);
         }
 
-        ErrorCode GetCurrentTimeUs(int64_t &nowUs) override
+        ErrorCode GetCurrentTimeNano(int64_t& nowNano) override
         {
             if (stub_ == nullptr) {
                 return ErrorCode::ERROR_INVALID_OPERATION;
             }
-            return stub_->GetCurrentTimeUs(nowUs);
+            return stub_->GetCurrentTimeNano(nowNano);
         }
 
     private:
-        std::shared_ptr<SyncInfoProvider> stub_;
+        std::shared_ptr<ClockProvider> stub_;
     };
 
-    SyncInfoProviderProxy providerProxy_;
+    SyncClockProviderProxy providerProxy_;
 
-    std::priority_queue<std::shared_ptr<SyncInfoProvider>> providers_;
+    std::priority_queue<std::shared_ptr<ClockProvider>> providers_;
 };
 } // Pipeline
 } // Media
 } // OHOS
-#endif // HISTREAMER_PIPELINE_CORE_SYNC_INFO_MANAGER_H
+#endif // HISTREAMER_PIPELINE_CORE_CLOCK_MANAGER_H

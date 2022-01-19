@@ -188,14 +188,14 @@ using UnregisterFunc = void (*)();
  * @param unregisterFunc    Plugin deregister function，MUST NOT be NULL.
  */
 #define PLUGIN_DEFINITION(name, license, registerFunc, unregisterFunc)                                                 \
-    PLUGIN_EXPORT const OHOS::Media::Plugin::Status PLUGIN_PASTE(register_, name)(                                     \
+    PLUGIN_EXPORT OHOS::Media::Plugin::Status PLUGIN_PASTE(register_, name)(                                           \
         std::shared_ptr<OHOS::Media::Plugin::Register> reg)                                                            \
     {                                                                                                                  \
         std::dynamic_pointer_cast<OHOS::Media::Plugin::PackageRegister>(reg)->AddPackage(                              \
             {PLUGIN_INTERFACE_VERSION, PLUGIN_STRINGIFY(name), license});                                              \
         return registerFunc(reg);                                                                                      \
     }                                                                                                                  \
-    PLUGIN_EXPORT const void PLUGIN_PASTE(unregister_, name)()                                                         \
+    PLUGIN_EXPORT void PLUGIN_PASTE(unregister_, name)()                                                               \
     {                                                                                                                  \
         unregisterFunc();                                                                                              \
     }

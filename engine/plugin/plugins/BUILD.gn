@@ -18,43 +18,51 @@ if (!defined(ohos_lite)) {
   ohos_kernel_type = ""
 }
 
-print("histreamer plugin config:enable_histreamer_plugin_ffmpeg_adapter =",
-      enable_histreamer_plugin_ffmpeg_adapter)
-print("histreamer plugin config:enable_histreamer_plugin_hdi_adapter =",
-      enable_histreamer_plugin_hdi_adapter)
-print("histreamer plugin config:enable_histreamer_plugin_file_source =",
-      enable_histreamer_plugin_file_source)
-print("histreamer plugin config:enable_histreamer_plugin_stream_source =",
-      enable_histreamer_plugin_stream_source)
+print(
+    "histreamer plugin config:multimedia_histreamer_enable_plugin_ffmpeg_adapter =",
+    multimedia_histreamer_enable_plugin_ffmpeg_adapter)
+print(
+    "histreamer plugin config:multimedia_histreamer_enable_plugin_hdi_adapter =",
+    multimedia_histreamer_enable_plugin_hdi_adapter)
+print(
+    "histreamer plugin config:multimedia_histreamer_enable_plugin_file_source =",
+    multimedia_histreamer_enable_plugin_file_source)
+print(
+    "histreamer plugin config:multimedia_histreamer_enable_plugin_stream_source =",
+    multimedia_histreamer_enable_plugin_stream_source)
 
 group("histreamer_plugin_store") {
   deps = []
-  if (enable_histreamer_plugin_ffmpeg_adapter) {
+  if (multimedia_histreamer_enable_plugin_ffmpeg_adapter) {
     deps += [ "ffmpeg_adapter:plugin_ffmpeg_adapter" ]
   }
 
-  if (enable_histreamer_plugin_minimp3_adapter) {
+  if (multimedia_histreamer_enable_plugin_minimp3_adapter) {
     deps += [ "minimp3_adapter:plugin_minimp3_adapter" ]
   }
 
-  if (enable_histreamer_plugin_minimp4_demuxer) {
+  if (multimedia_histreamer_enable_plugin_minimp4_demuxer) {
     deps += [ "demuxer/minimp4_demuxer:plugin_minimp4_demuxer" ]
   }
 
-  if (enable_histreamer_plugin_aac_demuxer) {
+  if (multimedia_histreamer_enable_plugin_aac_demuxer) {
     deps += [ "demuxer/aac_demuxer:plugin_aac_demuxer" ]
   }
 
-  if (enable_histreamer_plugin_file_source) {
+  if (multimedia_histreamer_enable_plugin_file_source) {
     deps += [ "source/file_source:plugin_file_source" ]
   }
 
-  if (enable_histreamer_plugin_hdi_adapter) {
+  if (multimedia_histreamer_enable_plugin_hdi_adapter) {
     deps += [ "hdi_adapter:plugin_hdi_adapter" ]
   }
 
-  if (enable_histreamer_plugin_stream_source) {
+  if (multimedia_histreamer_enable_plugin_stream_source) {
     deps += [ "source/stream_source:plugin_stream_source" ]
+  }
+
+  if (multimedia_histreamer_enable_plugin_http_lite_source) {
+    deps += [ "source/http_lite_source:plugin_http_lite_source" ]
   }
 }
 
@@ -72,38 +80,42 @@ action("gen_plugin_static_header") {
   ]
 
   if (ohos_kernel_type == "liteos_m") {
-    if (enable_histreamer_plugin_ffmpeg_adapter) {
+    if (multimedia_histreamer_enable_plugin_ffmpeg_adapter) {
       args += [
         "FFmpegDemuxer",
         "FFmpegAudioDecoders",
       ]
     }
 
-    if (enable_histreamer_plugin_minimp3_adapter) {
+    if (multimedia_histreamer_enable_plugin_minimp3_adapter) {
       args += [
         "Minimp3Demuxer",
         "Minimp3Decoder",
       ]
     }
 
-    if (enable_histreamer_plugin_minimp4_demuxer) {
+    if (multimedia_histreamer_enable_plugin_minimp4_demuxer) {
       args += [ "MiniMP4Demuxer" ]
     }
 
-    if (enable_histreamer_plugin_aac_demuxer) {
+    if (multimedia_histreamer_enable_plugin_aac_demuxer) {
       args += [ "AACDemuxer" ]
     }
 
-    if (enable_histreamer_plugin_file_source) {
+    if (multimedia_histreamer_enable_plugin_file_source) {
       args += [ "FileSource" ]
     }
 
-    if (enable_histreamer_plugin_hdi_adapter) {
+    if (multimedia_histreamer_enable_plugin_hdi_adapter) {
       args += [ "HdiAuSink" ]
     }
 
-    if (enable_histreamer_plugin_stream_source) {
+    if (multimedia_histreamer_enable_plugin_stream_source) {
       args += [ "StreamSource" ]
+    }
+
+    if (multimedia_histreamer_enable_plugin_http_lite_source) {
+      args += [ "HttpLiteSource" ]
     }
   }
 

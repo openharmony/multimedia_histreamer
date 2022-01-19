@@ -14,18 +14,24 @@
  */
 
 #include "plugin_buffer.h"
+#include "surface_memory.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-Memory::Memory(size_t capacity, std::shared_ptr<uint8_t> bufData, size_t align)
-    : capacity(capacity), alignment(align), offset(0), size(0), allocator(nullptr), addr(std::move(bufData))
+Memory::Memory(size_t capacity, std::shared_ptr<uint8_t> bufData, size_t align, MemoryType type)
+    : memoryType(type), capacity(capacity), alignment(align),
+      offset(0), size(0), allocator(nullptr), addr(std::move(bufData))
 {
 }
 
-Memory::Memory(size_t capacity, std::shared_ptr<Allocator> allocator, size_t align)
-    : capacity(capacity), alignment(align), size(0), allocator(std::move(allocator)), addr(nullptr)
+Memory::Memory(size_t capacity, std::shared_ptr<Allocator> allocator, size_t align, MemoryType type, bool allocMem)
+    : memoryType(type), capacity(capacity), alignment(align), offset(0),
+      size(0), allocator(std::move(allocator)), addr(nullptr)
 {
+    if (!allocMem) { // SurfaceMemory alloc mem in subclass
+        return;
+    }
     size_t allocSize = align ? (capacity + align - 1) : capacity;
     if (this->allocator) {
         addr = std::shared_ptr<uint8_t>(static_cast<uint8_t*>(this->allocator->Alloc(allocSize)),
@@ -49,7 +55,7 @@ void Memory::Reset()
 size_t Memory::Write(const uint8_t* in, size_t writeSize, size_t position)
 {
     size_t start = 0;
-    if (position == std::string::npos) {
+    if (position == INVALID_POSITION) {
         start = size;
     } else {
         start = std::min(position, capacity);
@@ -65,7 +71,7 @@ size_t Memory::Write(const uint8_t* in, size_t writeSize, size_t position)
 size_t Memory::Read(uint8_t* out, size_t readSize, size_t position)
 {
     size_t start = 0;
-    if (position != std::string::npos) {
+    if (position != INVALID_POSITION) {
         start = std::min(position, capacity);
     }
     size_t length = std::min(readSize, size);
@@ -83,14 +89,22 @@ const uint8_t* Memory::GetReadOnlyData(size_t position)
     return GetRealAddr() + position;
 }
 
-uint8_t* Memory::GetWritableData(size_t writeSize, size_t position)
+uint8_t* Memory::GetWritableAddr(size_t estimatedWriteSize, size_t position)
 {
-    if (position + writeSize > capacity) {
+    if (position + estimatedWriteSize > capacity) {
         return nullptr;
     }
     uint8_t* ptr = GetRealAddr() + position;
-    size = (writeSize + position);
+    size = (estimatedWriteSize + position);
     return ptr;
+}
+
+void Memory::UpdateDataSize(size_t realWriteSize, size_t position)
+{
+    if (position + realWriteSize > capacity) {
+        return;
+    }
+    size = (realWriteSize + position);
 }
 
 size_t Memory::GetSize()
@@ -101,6 +115,11 @@ size_t Memory::GetSize()
 uint8_t* Memory::GetRealAddr() const
 {
     return addr.get() + offset;
+}
+
+MemoryType Memory::GetMemoryType()
+{
+    return memoryType;
 }
 
 BufferMeta::BufferMeta(BufferMetaType type) : type(type)
@@ -164,7 +183,18 @@ std::shared_ptr<Memory> Buffer::WrapMemoryPtr(std::shared_ptr<uint8_t> data, siz
 
 std::shared_ptr<Memory> Buffer::AllocMemory(std::shared_ptr<Allocator> allocator, size_t capacity, size_t align)
 {
-    std::shared_ptr<Memory> memory = std::shared_ptr<Memory>(new Memory(capacity, allocator, align));
+    auto type = (allocator != nullptr) ? allocator->GetMemoryType() : MemoryType::VIRTUAL_ADDR;
+    std::shared_ptr<Memory> memory = (type == MemoryType::VIRTUAL_ADDR ?
+        std::shared_ptr<Memory>(new Memory(capacity, allocator, align)) :
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+        ((type == MemoryType::SURFACE_BUFFER) ?
+        std::shared_ptr<Memory>(new SurfaceMemory(capacity, allocator, align)) : nullptr));
+#else
+        nullptr);
+#endif
+    if (memory == nullptr) {
+        return nullptr;
+    }
     data.push_back(memory);
     return memory;
 }

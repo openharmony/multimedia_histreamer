@@ -13,16 +13,19 @@
  * limitations under the License.
  */
 
-#include "sync_info_manager.h"
+#include "clock_manager.h"
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-void SyncInfoManager::RegisterProvider(const std::shared_ptr<SyncInfoProvider>& provider)
+void ClockManager::RegisterProvider(const std::shared_ptr<ClockProvider> &provider)
 {
+    providerProxy_.SetStub(const_cast<std::shared_ptr<ClockProvider> &>(provider));
 }
 
-void SyncInfoManager::UnRegisterProvider(const std::shared_ptr<SyncInfoProvider>& provider)
+void ClockManager::UnRegisterProvider(const std::shared_ptr<ClockProvider> &provider)
 {
+    std::shared_ptr<ClockProvider> ptrRest {nullptr};
+    providerProxy_.SetStub(ptrRest);
 }
 } // Pipeline
 } // Media

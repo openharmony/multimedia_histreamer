@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +25,7 @@
 #include "foundation/log.h"
 #include "osal/thread/scoped_lock.h"
 #include "plugin/common/plugin_buffer.h"
+#include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_manager.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "utils/memory_helper.h"
@@ -38,7 +40,7 @@ namespace Plugin {
 namespace {
 std::map<std::string, std::shared_ptr<AVInputFormat>> g_pluginInputFormat;
 
-int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource);
+int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource);
 
 Status RegisterPlugins(const std::shared_ptr<Register>& reg);
 
@@ -160,7 +162,7 @@ std::shared_ptr<Allocator> FFmpegDemuxerPlugin::GetAllocator()
     return allocator_;
 }
 
-Status FFmpegDemuxerPlugin::SetCallback(const std::shared_ptr<Callback>& cb)
+Status FFmpegDemuxerPlugin::SetCallback(Callback* cb)
 {
     callback_ = cb;
     return Status::OK;
@@ -408,8 +410,8 @@ void FFmpegDemuxerPlugin::SaveFileInfoToMetaInfo(TagMap& meta)
             }
         }
     }
-    int64_t msec = formatContext_->duration / 1000; // 1000
-    meta.insert({Tag::MEDIA_DURATION, static_cast<uint64_t>(msec)});
+    int64_t nanoSec = formatContext_->duration * (HST_SECOND / AV_TIME_BASE);
+    meta.insert({Tag::MEDIA_DURATION, static_cast<uint64_t>(nanoSec)});
 }
 
 bool FFmpegDemuxerPlugin::ParseMediaData()
@@ -534,14 +536,13 @@ int ConvertSeekModeToFFmpeg(SeekMode mode)
     return seekFlag;
 }
 
-int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource)
+int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource)
 {
-    auto pluginInfo = PluginManager::Instance().GetPluginInfo(PluginType::DEMUXER, name);
-    if (!pluginInfo || !dataSource) {
-        MEDIA_LOG_E("Sniff failed due to plugin not found or dataSource invalid for %s.", name.c_str());
+    if (!pluginName.empty() || !dataSource) {
+        MEDIA_LOG_E("Sniff failed due to plugin not found or dataSource invalid for %s.", pluginName.c_str());
         return 0;
     }
-    auto plugin = g_pluginInputFormat[pluginInfo->name];
+    auto plugin = g_pluginInputFormat[pluginName];
     if (!plugin || !plugin->read_probe) {
         MEDIA_LOG_D("Sniff failed due to invalid plugin for %s.", name.c_str());
         return 0;
@@ -559,7 +560,7 @@ int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource)
         AVProbeData probeData{"", buff.data(), static_cast<int>(bufferInfo->GetMemory()->GetSize()), ""};
         confidence = plugin->read_probe(&probeData);
     }
-    MEDIA_LOG_D("Sniff: plugin name = %s, probability = %d / 100 ...", plugin->name, confidence);
+    MEDIA_LOG_D("Sniff: plugin pluginName = %s, probability = %d / 100 ...", plugin->name, confidence);
     return confidence;
 }
 

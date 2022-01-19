@@ -14,13 +14,16 @@
  */
 
 #define HST_LOG_TAG "AudioSinkFilter"
-
 #include "audio_sink_filter.h"
 #include "common/plugin_utils.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
 #include "foundation/osal/utils/util.h"
 #include "pipeline/filters/common/plugin_settings.h"
+#include "pipeline/core/clock_manager.h"
+#include "plugin/common/plugin_time.h"
+#include "plugin/common/plugin_types.h"
+#include "plugin/core/plugin_meta.h"
 #include "utils/steady_clock.h"
 
 namespace OHOS {
@@ -46,6 +49,7 @@ void AudioSinkFilter::Init(EventReceiver* receiver, FilterCallback* callback)
 {
     FilterBase::Init(receiver, callback);
     outPorts_.clear();
+    ClockManager::Instance().RegisterProvider(shared_from_this());
 }
 
 ErrorCode AudioSinkFilter::SetPluginParameter(Tag tag, const Plugin::ValueType& value)
@@ -160,7 +164,7 @@ ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const 
 void AudioSinkFilter::ReportCurrentPosition(int64_t pts)
 {
     if (plugin_) {
-        OnEvent({EVENT_AUDIO_PROGRESS, pts / 1000}); // 1000
+        OnEvent({EVENT_AUDIO_PROGRESS, static_cast<int64_t>(pts)});
     }
 }
 
@@ -195,6 +199,11 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
         MEDIA_LOG_D("audio sink push data send event_complete");
         OnEvent(event);
     }
+    if (buffer->pts != -1) {
+        UpdateLatestPts(buffer->pts);
+    } else {
+    }
+
     MEDIA_LOG_D("audio sink push data end");
     return ErrorCode::SUCCESS;
 }
@@ -203,7 +212,7 @@ ErrorCode AudioSinkFilter::Start()
 {
     MEDIA_LOG_I("start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
-        MEDIA_LOG_W("sink is not ready when start, state: %d", state_.load());
+        MEDIA_LOG_W("sink is not ready when start, state: %d", static_cast<int32_t>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto err = FilterBase::Start();
@@ -216,6 +225,7 @@ ErrorCode AudioSinkFilter::Start()
     if (pushThreadIsBlocking.load()) {
         startWorkingCondition_.NotifyOne();
     }
+    frameCnt_ = 0;
     return ErrorCode::SUCCESS;
 }
 
@@ -256,6 +266,9 @@ ErrorCode AudioSinkFilter::Resume()
         if (pushThreadIsBlocking) {
             startWorkingCondition_.NotifyOne();
         }
+        if (frameCnt_ > 0) {
+            frameCnt_ = 0;
+        }
         return TranslatePluginStatus(plugin_->Resume());
     }
     return ErrorCode::SUCCESS;
@@ -282,11 +295,65 @@ void AudioSinkFilter::FlushEnd()
 ErrorCode AudioSinkFilter::SetVolume(float volume)
 {
     if (state_ != FilterState::READY && state_ != FilterState::RUNNING && state_ != FilterState::PAUSED) {
-        MEDIA_LOG_E("audio sink filter cannot set volume in state %d", state_.load());
+        MEDIA_LOG_E("audio sink filter cannot set volume in state %d", static_cast<int32_t>(state_.load()));
         return ErrorCode::ERROR_AGAIN;
     }
-    MEDIA_LOG_W("set volume %.3f", volume);
+    MEDIA_LOG_I("set volume %.3f", volume);
     return TranslatePluginStatus(plugin_->SetVolume(volume));
+}
+
+ErrorCode AudioSinkFilter::UpdateLatestPts(int64_t pts)
+{
+    uint64_t latencyNano {10};
+    int64_t nowNs {0};
+    Plugin::Status status = plugin_->GetLatency(latencyNano);
+    if (status != Plugin::Status::OK) {
+        MEDIA_LOG_E("audio sink GetLatency fail errorcode = %d", to_underlying(TranslatePluginStatus(status)));
+        return TranslatePluginStatus(status);
+    }
+    nowNs = SteadyClock::GetCurrentTimeNanoSec();
+    if (INT64_MAX - nowNs < latencyNano) { // overflow
+        return ErrorCode::ERROR_UNKNOWN;
+    }
+    latestSysClock_ = nowNs + latencyNano;
+    latestPts_ = pts;
+    frameCnt_++;
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode AudioSinkFilter::CheckPts(int64_t pts, int64_t& delta)
+{
+    int64_t ptsOut {0};
+    if (latestSysClock_ == 0 && latestPts_ == 0) {
+        delta = 0;
+        return ErrorCode::SUCCESS;
+    }
+    if (GetCurrentPosition(ptsOut) != ErrorCode::SUCCESS) {
+        return ErrorCode::ERROR_UNKNOWN;
+    }
+    delta = pts - ptsOut;
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode AudioSinkFilter::GetCurrentPosition(int64_t& position)
+{
+    int64_t nowNs {0};
+    if (latestPts_ == 0 && frameCnt_ == 0) {
+        position = 0;
+        return ErrorCode::SUCCESS;
+    }
+    nowNs = SteadyClock::GetCurrentTimeNanoSec();
+    if (INT64_MAX - (nowNs - latestSysClock_) < latestPts_) { // overflow
+        return ErrorCode::ERROR_UNKNOWN;
+    }
+    position = nowNs - latestSysClock_ + latestPts_ ;
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode AudioSinkFilter::GetCurrentTimeNano(int64_t& nowNano)
+{
+    nowNano = SteadyClock::GetCurrentTimeNanoSec();
+    return ErrorCode::SUCCESS;
 }
 } // namespace Pipeline
 } // namespace Media

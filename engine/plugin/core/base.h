@@ -23,11 +23,41 @@
 #include "common/plugin_tags.h"
 #include "common/plugin_buffer.h"
 #include "foundation/osal/thread/mutex.h"
+#include "interface/plugin_base.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 struct PluginBase;
+
+struct CallbackWrap {
+    virtual ~CallbackWrap() = default;
+
+    virtual void onEvent(int32_t event) = 0;
+
+    virtual void onError(int32_t errorType, int32_t errorCode) = 0;
+};
+
+class CallbackImpl : public Plugin::Callback {
+public:
+    void onEvent(int32_t event) override
+    {
+        callbackWrap_->onEvent(event);
+    }
+
+    void onError(ErrorType errorType, int32_t errorCode) override
+    {
+        callbackWrap_->onError(static_cast<int32_t>(errorType), errorCode);
+    }
+
+    void SetCallbackWrap(CallbackWrap* callbackWrap)
+    {
+        callbackWrap_ = callbackWrap;
+    }
+
+private:
+    CallbackWrap* callbackWrap_;
+};
 
 class Base {
 public:
@@ -59,6 +89,8 @@ public:
 
     virtual std::shared_ptr<Allocator> GetAllocator();
 
+    virtual Status SetCallback(CallbackWrap* cb);
+
 protected:
     friend class PluginManager;
 
@@ -73,6 +105,8 @@ protected:
 
     OHOS::Media::OSAL::Mutex stateChangeMutex_ {};
     std::atomic<State> pluginState_ {State::CREATED};
+private:
+    CallbackImpl pluginCallback_;
 };
 } // namespace Plugin
 } // namespace Media

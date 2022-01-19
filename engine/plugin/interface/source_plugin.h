@@ -18,6 +18,7 @@
 
 #include <map>
 #include <string>
+#include "common/media_source.h"
 #include "common/plugin_caps.h"
 #include "common/plugin_source_tags.h"
 #include "plugin_base.h"
@@ -38,13 +39,11 @@ struct SourcePlugin : public PluginBase {
     /// constructor
     explicit SourcePlugin(std::string name): PluginBase(std::move(name)) {}
     /**
-     * @brief Set the data source to demuxer component.
+     * @brief Set the data source to source plugin.
      *
      * The function is valid only in the CREATED state.
      *
-     * @param uri data uri
-     * @param params Special data, which is used to assist in obtaining data in the URI
-     *               or to read the detailed information required by the data.
+     * @param source data source, uri or stream source
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
      *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
@@ -52,7 +51,7 @@ struct SourcePlugin : public PluginBase {
      *  @retval ERROR_UNSUPPORTED_FORMAT: Uri is not supported.
      *  @retval ERROR_INVALID_PARAMETER: Uri is invalid.
      */
-    virtual Status SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params) = 0;
+    virtual OHOS::Media::Plugin::Status SetSource(std::shared_ptr<MediaSource> source) = 0;
 
     /**
      * @brief Read data from data source.
@@ -121,7 +120,7 @@ struct SourcePlugin : public PluginBase {
  */
 struct SourcePluginDef : public PluginDefBase {
     std::vector<ProtocolType> protocol;      ///< Protocols supported by playback source
-    std::string inputType;                   ///< Input type supported by record source
+    SrcInputType inputType;                   ///< Input type supported by record source
     CapabilitySet outCaps;                   ///< Plug-in output capability, For details, @see Capability.
     PluginCreatorFunc<SourcePlugin> creator {nullptr}; ///< Source plugin create function.
     SourcePluginDef()

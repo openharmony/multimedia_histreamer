@@ -19,7 +19,6 @@
 #include <memory>
 #include <string>
 
-#include "source.h"
 #include "foundation/error_code.h"
 #include "osal/thread/task.h"
 #include "osal/utils/util.h"
@@ -28,14 +27,15 @@
 #include "utils/type_define.h"
 #include "utils/utils.h"
 #include "pipeline/core/filter_base.h"
+#include "plugin/common/media_source.h"
 #include "plugin/core/plugin_manager.h"
 #include "plugin/interface/source_plugin.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-using SourceType = OHOS::Media::SourceType;
-using MediaSource = OHOS::Media::Source;
+using SourceType = OHOS::Media::Plugin::SourceType;
+using MediaSource = OHOS::Media::Plugin::MediaSource;
 
 class MediaSourceFilter : public FilterBase {
 public:

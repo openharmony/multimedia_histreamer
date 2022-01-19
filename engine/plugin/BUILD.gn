@@ -38,7 +38,12 @@ config("hst_plugin_intf_config") {
 }
 
 source_set("histreamer_plugin_intf") {
-  sources = [ "common/plugin_buffer.cpp" ]
+  sources = [
+    "common/media_source.cpp",
+    "common/plugin_buffer.cpp",
+    "common/surface_allocator.cpp",
+    "common/surface_memory.cpp",
+  ]
   public_configs = [ ":hst_plugin_intf_config" ]
   if (defined(ohos_lite)) {
     if (ohos_kernel_type == "liteos_m") {
@@ -79,6 +84,12 @@ config("hst_plugin_core_config") {
   ]
   if (defined(ohos_lite)) {
     include_dirs += [ "//foundation/multimedia/utils/lite/interfaces/kits" ]
+  } else {
+    include_dirs += [
+      "//utils/native/base/include",
+      "//foundation/graphic/standard/interfaces/innerkits",
+      "//drivers/peripheral/display/interfaces/include",
+    ]
   }
 }
 
@@ -89,8 +100,8 @@ source_set("histreamer_plugin_core") {
     "core/base.cpp",
     "core/codec.cpp",
     "core/demuxer.cpp",
-    "core/file_sink.cpp",
     "core/muxer.cpp",
+    "core/output_sink.cpp",
     "core/plugin_manager.cpp",
     "core/plugin_meta.cpp",
     "core/plugin_register.cpp",
@@ -101,6 +112,11 @@ source_set("histreamer_plugin_core") {
   if (plugin_dynamic_register) {
     sources += [ "core/plugin_loader.cpp" ]
     defines += [ "DYNAMIC_PLUGINS" ]
+  }
+  if (defined(ohos_lite)) {
+    defines += [ "HST_PLUGIN_PATH=\"/usr/lib\"" ]
+  } else {
+    defines += [ "HST_PLUGIN_PATH=\"/system/lib/media\"" ]
   }
   public_configs = [ ":hst_plugin_core_config" ]
   public_deps = [

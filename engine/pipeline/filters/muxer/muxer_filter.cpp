@@ -18,7 +18,6 @@
 
 #include "muxer_filter.h"
 
-#include "data_collector.h"
 #include "data_spliter.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
@@ -89,6 +88,7 @@ bool MuxerFilter::UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::Plugin
         MEDIA_LOG_E("muxer plugin init error");
         return false;
     }
+    plugin_->SetCallback(this);
     targetPluginInfo_ = selectedPluginInfo;
     return true;
 }
@@ -203,7 +203,7 @@ bool MuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<con
     }
     state_ = FilterState::READY;
     OnEvent({EVENT_READY});
-    MEDIA_LOG_I("audio decoder send EVENT_READY");
+    MEDIA_LOG_I("muxer send EVENT_READY");
     return true;
 }
 

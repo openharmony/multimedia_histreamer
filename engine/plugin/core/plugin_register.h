@@ -94,17 +94,21 @@ private:
 
         static Status DemuxerCapabilityConvert(std::shared_ptr<PluginInfo>& info, const PluginDefBase& def);
 
-        Status InitCodecInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& definition);
+        Status InitMuxerInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def);
+
+        Status InitCodecInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def);
 
         static Status CodecCapabilityConvert(std::shared_ptr<PluginInfo>& info, const PluginDefBase& def);
 
-        Status InitAudioSinkInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& definition);
+        Status InitAudioSinkInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def);
 
         static Status AudioSinkCapabilityConvert(std::shared_ptr<PluginInfo>& info, const PluginDefBase& def);
 
-        Status InitVideoSinkInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& definition);
+        Status InitVideoSinkInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def);
 
         static Status VideoSinkCapabilityConvert(std::shared_ptr<PluginInfo>& info, const PluginDefBase& def);
+
+        Status InitOutputSinkInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def);
 
         bool Verification(const PluginDefBase& definition);
 

@@ -87,46 +87,48 @@ bool FixDiscCapValCheck(const Plugin::ValueType& val1, const Plugin::ValueType& 
 }
 
 static std::vector<CapabilityID> g_allCapabilityId = {
-        CapabilityID::AUDIO_SAMPLE_RATE, // 0
-        CapabilityID::AUDIO_CHANNELS, // 1
-        CapabilityID::AUDIO_CHANNEL_LAYOUT, // 2
-        CapabilityID::AUDIO_SAMPLE_FORMAT, // 3
-        CapabilityID::AUDIO_MPEG_VERSION, // 4
-        CapabilityID::AUDIO_MPEG_LAYER, // 5
-        CapabilityID::AUDIO_AAC_PROFILE, // 6
-        CapabilityID::AUDIO_AAC_LEVEL, // 7
-        CapabilityID::AUDIO_AAC_STREAM_FORMAT, // 8
-        CapabilityID::VIDEO_PIXEL_FORMAT, // 9
+    CapabilityID::AUDIO_SAMPLE_RATE, // 0
+    CapabilityID::AUDIO_CHANNELS, // 1
+    CapabilityID::AUDIO_CHANNEL_LAYOUT, // 2
+    CapabilityID::AUDIO_SAMPLE_FORMAT, // 3
+    CapabilityID::AUDIO_MPEG_VERSION, // 4
+    CapabilityID::AUDIO_MPEG_LAYER, // 5
+    CapabilityID::AUDIO_AAC_PROFILE, // 6
+    CapabilityID::AUDIO_AAC_LEVEL, // 7
+    CapabilityID::AUDIO_AAC_STREAM_FORMAT, // 8
+    CapabilityID::VIDEO_PIXEL_FORMAT, // 9
+    CapabilityID::MEDIA_BITRATE, // 10
 };
 
 
-static std::map<CapabilityID, std::function<bool(const CapEntry&, const  Plugin::Meta&)>>
-        g_capabilityCheckMap = {
-        {g_allCapabilityId[0], FixInvalDiscNumericalCheck<uint32_t>}, // 0
-        {g_allCapabilityId[1], FixInvalDiscNumericalCheck<uint32_t>}, // 1
-        {g_allCapabilityId[2], FixDiscNumericalCheck<Plugin::AudioChannelLayout, uint64_t>}, // 2
-        {g_allCapabilityId[3], FixDiscNumericalCheck<Plugin::AudioSampleFormat, uint8_t>}, // 3
-        {g_allCapabilityId[4], FixInvalDiscNumericalCheck<uint32_t>}, // 4
-        {g_allCapabilityId[5], FixInvalDiscNumericalCheck<uint32_t>}, // 5
-        {g_allCapabilityId[6], FixDiscNumericalCheck<Plugin::AudioAacProfile, uint8_t>}, // 6
-        {g_allCapabilityId[7], FixInvalDiscNumericalCheck<uint32_t>}, // 7
-        {g_allCapabilityId[8], FixDiscNumericalCheck<Plugin::AudioAacStreamFormat, uint8_t>}, // 8
-        {g_allCapabilityId[9], FixDiscNumericalCheck<Plugin::VideoPixelFormat, uint32_t>}, // 9
+static std::map<CapabilityID, std::function<bool(const CapEntry&, const  Plugin::Meta&)>> g_capabilityCheckMap = {
+    {g_allCapabilityId[0], FixInvalDiscNumericalCheck<uint32_t>}, // 0
+    {g_allCapabilityId[1], FixInvalDiscNumericalCheck<uint32_t>}, // 1
+    {g_allCapabilityId[2], FixDiscNumericalCheck<Plugin::AudioChannelLayout, uint64_t>}, // 2
+    {g_allCapabilityId[3], FixDiscNumericalCheck<Plugin::AudioSampleFormat, uint8_t>}, // 3
+    {g_allCapabilityId[4], FixInvalDiscNumericalCheck<uint32_t>}, // 4
+    {g_allCapabilityId[5], FixInvalDiscNumericalCheck<uint32_t>}, // 5
+    {g_allCapabilityId[6], FixDiscNumericalCheck<Plugin::AudioAacProfile, uint8_t>}, // 6
+    {g_allCapabilityId[7], FixInvalDiscNumericalCheck<uint32_t>}, // 7
+    {g_allCapabilityId[8], FixDiscNumericalCheck<Plugin::AudioAacStreamFormat, uint8_t>}, // 8
+    {g_allCapabilityId[9], FixDiscNumericalCheck<Plugin::VideoPixelFormat, uint32_t>}, // 9
+    {g_allCapabilityId[10], FixInvalDiscNumericalCheck<int64_t>}, // 10
 };
 
 template <typename T>
 bool ExtractFixedCap(const Plugin::ValueType& value, Plugin::ValueType& fixedValue);
 static std::map<CapabilityID, std::function<bool(const Plugin::ValueType&, Plugin::ValueType&)>> g_capExtrMap = {
-        {g_allCapabilityId[0], ExtractFixedCap<uint32_t>}, // 0
-        {g_allCapabilityId[1], ExtractFixedCap<uint32_t>}, // 1
-        {g_allCapabilityId[2], ExtractFixedCap<Plugin::AudioChannelLayout>}, // 2
-        {g_allCapabilityId[3], ExtractFixedCap<Plugin::AudioSampleFormat>}, // 3
-        {g_allCapabilityId[4], ExtractFixedCap<uint32_t>}, // 4
-        {g_allCapabilityId[5], ExtractFixedCap<uint32_t>}, // 5
-        {g_allCapabilityId[6], ExtractFixedCap<Plugin::AudioAacProfile>}, // 6
-        {g_allCapabilityId[7], ExtractFixedCap<uint32_t>}, // 7
-        {g_allCapabilityId[8], ExtractFixedCap<Plugin::AudioAacStreamFormat>}, // 8
-        {g_allCapabilityId[9], ExtractFixedCap<Plugin::VideoPixelFormat>}, // 9
+    {g_allCapabilityId[0], ExtractFixedCap<uint32_t>}, // 0
+    {g_allCapabilityId[1], ExtractFixedCap<uint32_t>}, // 1
+    {g_allCapabilityId[2], ExtractFixedCap<Plugin::AudioChannelLayout>}, // 2
+    {g_allCapabilityId[3], ExtractFixedCap<Plugin::AudioSampleFormat>}, // 3
+    {g_allCapabilityId[4], ExtractFixedCap<uint32_t>}, // 4
+    {g_allCapabilityId[5], ExtractFixedCap<uint32_t>}, // 5
+    {g_allCapabilityId[6], ExtractFixedCap<Plugin::AudioAacProfile>}, // 6
+    {g_allCapabilityId[7], ExtractFixedCap<uint32_t>}, // 7
+    {g_allCapabilityId[8], ExtractFixedCap<Plugin::AudioAacStreamFormat>}, // 8
+    {g_allCapabilityId[9], ExtractFixedCap<Plugin::VideoPixelFormat>}, // 9
+    {g_allCapabilityId[10], ExtractFixedCap<int64_t>}, // 10
 };
 
 static std::map<CapabilityID,
@@ -142,6 +144,7 @@ static std::map<CapabilityID,
         {g_allCapabilityId[7], FixInvalDiscCapValCheck<uint32_t>}, // 7
         {g_allCapabilityId[8], FixDiscCapValCheck<Plugin::AudioAacStreamFormat, uint8_t>}, // 8
         {g_allCapabilityId[9], FixDiscCapValCheck<Plugin::VideoPixelFormat, uint32_t>}, // 9
+        {g_allCapabilityId[10], FixInvalDiscCapValCheck<int64_t>}, // 10
 };
 
 
@@ -444,7 +447,7 @@ bool MergeCapabilityKeys(const Capability& originCap, const Capability& otherCap
         // if key is in otherCap, calculate the intersections
         auto funcIte = g_capabilityValueCheckMap.find(pairKey.first);
         if (funcIte == g_capabilityValueCheckMap.end()) {
-            MEDIA_LOG_W("found one capability %d cannot be applied", pairKey.first);
+            MEDIA_LOG_W("found one capability %d cannot be applied", static_cast<int32_t>(pairKey.first));
             continue;
         }
         Plugin::ValueType tmp;

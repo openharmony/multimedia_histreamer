@@ -82,7 +82,7 @@ std::shared_ptr<Allocator> UtDemuxerTest2::GetAllocator()
     return std::shared_ptr<Allocator>();
 }
 
-Status UtDemuxerTest2::SetCallback(const std::shared_ptr<Callback> &cb)
+Status UtDemuxerTest2::SetCallback(Callback* cb)
 {
     return Status::OK;
 }

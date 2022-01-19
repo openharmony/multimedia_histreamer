@@ -59,7 +59,7 @@ public:
 
     std::shared_ptr<OHOS::Media::Plugin::Allocator> GetAllocator() override;
 
-    Media::Plugin::Status SetCallback(const std::shared_ptr<OHOS::Media::Plugin::Callback>& cb) override;
+    Media::Plugin::Status SetCallback(OHOS::Media::Plugin::Callback* cb) override;
 
     Media::Plugin::Status GetMute(bool& mute) override;
 
@@ -112,7 +112,7 @@ private:
     AudioSampleAttributes sampleAttributes_ {};
     bool isInputInterleaved_{false};
     AudioChannelMask channelMask_{AUDIO_CHANNEL_MONO};
-    std::weak_ptr<OHOS::Media::Plugin::Callback> eventCallback_{};
+    OHOS::Media::Plugin::Callback* eventCallback_ {};
     std::vector<uint8_t> cacheData_;
     bool usingDefaultInCaps_ {true}; // if true pass hdi with S16P pcm data and convert input into non-interleaved
     std::atomic<bool> processing_;

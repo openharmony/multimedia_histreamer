@@ -130,7 +130,7 @@ std::shared_ptr<Allocator> Minimp3DecoderPlugin::GetAllocator()
     return nullptr;
 }
 
-Status Minimp3DecoderPlugin::SetCallback(const std::shared_ptr<Callback>& cb)
+Status Minimp3DecoderPlugin::SetCallback(Callback* cb)
 {
     return Status::OK;
 }
@@ -234,7 +234,7 @@ Status Minimp3DecoderPlugin::AudioDecoderMp3Process(std::shared_ptr<Buffer> inBu
     if (outData->GetCapacity() < probePcmLength) {
         return Status::ERROR_UNKNOWN;
     }
-    int16_t *pcmPtr = (int16_t *)outData->GetWritableData(probePcmLength, 0);
+    int16_t *pcmPtr = (int16_t *)outData->GetWritableAddr(probePcmLength, 0);
     int sampleCount = minimp3DecoderImpl_.decoderFrame(&mp3DecoderAttr_.mp3DecoderHandle, inData->GetReadOnlyData(),
                                                        inData->GetSize(), pcmPtr, &frameInfo);
     if (sampleCount > 0) {

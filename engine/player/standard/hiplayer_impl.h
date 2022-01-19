@@ -24,7 +24,7 @@
 #include "filters/codec/video_decoder/video_decoder_filter.h"
 #include "filters/sink/video_sink/video_sink_filter.h"
 #endif
-#include "engine_intf/i_player_engine.h"
+#include "i_player_engine.h"
 #include "filters/demux/demuxer_filter.h"
 #include "filters/source/media_source/media_source_filter.h"
 #include "foundation/error_code.h"
@@ -65,15 +65,19 @@ public:
     int32_t Reset() override;
     int32_t Seek(int32_t mSeconds, PlayerSeekMode mode) override;
     int32_t SetVolume(float leftVolume, float rightVolume) override;
-#ifndef SURFACE_DISABLED
     int32_t SetVideoSurface(sptr<Surface> surface) override;
-#endif
     int32_t SetLooping(bool loop) override;
+    int32_t SetParameter(const Format &param) override;
     int32_t SetObs(const std::weak_ptr<IPlayerEngineObs>& obs) override;
     int32_t GetCurrentTime(int32_t& currentPositionMs) override;
     int32_t GetDuration(int32_t& durationMs) override;
     int32_t SetPlaybackSpeed(PlaybackRateMode mode) override;
     int32_t GetPlaybackSpeed(PlaybackRateMode& mode) override;
+
+    int32_t GetVideoTrackInfo(std::vector<Format> &videoTrack) override;
+    int32_t GetAudioTrackInfo(std::vector<Format> &audioTrack) override;
+    int32_t GetVideoWidth() override;
+    int32_t GetVideoHeight() override;
 
     // internal interfaces
     void OnEvent(Event event) override;
@@ -138,18 +142,18 @@ private:
     ErrorCode RemoveFilterChains(Pipeline::Filter* filter, const Plugin::Any& parameter);
     void ActiveFilters(const std::vector<Pipeline::Filter*>& filters);
 
-    OSAL::Mutex stateMutex_{};
-    OSAL::ConditionVariable cond_{};
+    OSAL::Mutex stateMutex_ {};
+    OSAL::ConditionVariable cond_ {};
     StateMachine fsm_;
     std::atomic<StateId> curFsmState_;
     std::shared_ptr<Pipeline::PipelineCore> pipeline_;
     std::atomic<PlayerStates> pipelineStates_;
-    std::atomic<bool> initialized_{false};
+    std::atomic<bool> initialized_ {false};
 
-    std::weak_ptr<Plugin::Meta> sourceMeta_{};
-    std::vector<std::weak_ptr<Plugin::Meta>> streamMeta_{};
-    std::atomic<bool> singleLoop_{false};
-    std::weak_ptr<IPlayerEngineObs> obs_{};
+    std::weak_ptr<Plugin::Meta> sourceMeta_ {};
+    std::vector<std::weak_ptr<Plugin::Meta>> streamMeta_ {};
+    std::atomic<bool> singleLoop_ {false};
+    std::weak_ptr<IPlayerEngineObs> obs_ {};
     float volume_;
     std::atomic<ErrorCode> errorCode_;
     MediaStats mediaStats_;
@@ -159,8 +163,8 @@ private:
     std::shared_ptr<Pipeline::AudioDecoderFilter> audioDecoder_;
     std::shared_ptr<Pipeline::AudioSinkFilter> audioSink_;
 #ifdef VIDEO_SUPPORT
-    std::shared_ptr<Pipeline::VideoDecoderFilter> videoDecoder;
-    std::shared_ptr<Pipeline::VideoSinkFilter> videoSink;
+    std::shared_ptr<Pipeline::VideoDecoderFilter> videoDecoder_;
+    std::shared_ptr<Pipeline::VideoSinkFilter> videoSink_;
 #endif
     std::unordered_map<std::string, std::shared_ptr<Pipeline::AudioDecoderFilter>> audioDecoderMap_;
 };

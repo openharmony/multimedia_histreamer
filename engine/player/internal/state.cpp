@@ -16,6 +16,7 @@
 #define HST_LOG_TAG "State"
 
 #include "state.h"
+#include "event.h"
 #include "foundation/log.h"
 
 namespace OHOS {
@@ -86,6 +87,10 @@ std::tuple<ErrorCode, Action> State::OnError(const Plugin::Any& param)
     ErrorCode errorCode = ErrorCode::ERROR_UNKNOWN;
     if (param.Type() == typeid(ErrorCode)) {
         errorCode = Plugin::AnyCast<ErrorCode>(param);
+    }
+    if (param.Type() == typeid(ErrorEvent)) {
+        auto errorEvent = OHOS::Media::Plugin::AnyCast<ErrorEvent>(param);
+        MEDIA_LOG_I("errorEvent Type:%d Code:%d", errorEvent.errorType, errorEvent.errorCode);
     }
     executor_.DoOnError(errorCode);
     return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};

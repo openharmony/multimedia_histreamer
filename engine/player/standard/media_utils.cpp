@@ -51,7 +51,7 @@ int TransErrorCode(ErrorCode errorCode)
 
 PlayerStates TransStateId2PlayerState(StateId state)
 {
-    PlayerStates playerState;
+    PlayerStates playerState = PLAYER_STATE_ERROR;
     switch (state) {
         case StateId::INIT:
             playerState = PLAYER_INITIALIZED;

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_PIPELINE_CORE_SYNC_INFO_PROVIDER_H
-#define HISTREAMER_PIPELINE_CORE_SYNC_INFO_PROVIDER_H
+#ifndef HISTREAMER_PIPELINE_CORE_CLOCK_PROVIDER_H
+#define HISTREAMER_PIPELINE_CORE_CLOCK_PROVIDER_H
 
 #include <cstdint>
 #include "foundation/error_code.h"
@@ -22,14 +22,14 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class SyncInfoProvider {
+class ClockProvider {
 public:
-    virtual ~SyncInfoProvider() = default;
-    virtual ErrorCode CheckPts(int64_t pts, int64_t& ret) = 0;
+    virtual ~ClockProvider() = default;
+    virtual ErrorCode CheckPts(int64_t pts, int64_t& delta) = 0;
     virtual ErrorCode GetCurrentPosition(int64_t& position) = 0;
-    virtual ErrorCode GetCurrentTimeUs(int64_t& nowUs) = 0;
+    virtual ErrorCode GetCurrentTimeNano(int64_t& nowNano) = 0;
 };
 } // Pipeline
 } // Media
 } // OHOS
-#endif // HISTREAMER_PIPELINE_CORE_SYNC_INFO_PROVIDER_H
+#endif // HISTREAMER_PIPELINE_CORE_CLOCK_PROVIDER_H

@@ -19,6 +19,8 @@
 #include "foundation/log.h"
 #include "pipeline/factory/filter_factory.h"
 #include "player/standard/media_utils.h"
+#include "plugin/common/media_source.h"
+#include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_meta.h"
 #include "utils/steady_clock.h"
 #include "utils/utils.h"
@@ -56,9 +58,9 @@ HiPlayerImpl::HiPlayerImpl()
     audioSink_ =
         FilterFactory::Instance().CreateFilterWithType<AudioSinkFilter>("builtin.player.audiosink", "audioSink");
 #ifdef VIDEO_SUPPORT
-    videoSink =
+    videoSink_ =
         FilterFactory::Instance().CreateFilterWithType<VideoSinkFilter>("builtin.player.videosink", "videoSink");
-    FALSE_RETURN(videoSink != nullptr);
+    FALSE_RETURN(videoSink_ != nullptr);
 #endif
 #endif
     FALSE_RETURN(audioSource_ != nullptr);
@@ -109,7 +111,7 @@ int32_t HiPlayerImpl::SetSource(const std::string& uri)
     PROFILE_BEGIN("SetSource begin");
     auto ret = Init();
     if (ret == ErrorCode::SUCCESS) {
-        ret = fsm_.SendEvent(Intent::SET_SOURCE, std::make_shared<Media::Source>(uri));
+        ret = fsm_.SendEvent(Intent::SET_SOURCE, std::make_shared<MediaSource>(uri));
     }
     PROFILE_END("SetSource end.");
     return TransErrorCode(ret);
@@ -265,12 +267,31 @@ int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
     return TransErrorCode(SetVolume(volume_));
 }
 
-#ifndef SURFACE_DISABLED
 int32_t HiPlayerImpl::SetVideoSurface(sptr<Surface> surface)
+{
+#ifdef VIDEO_SUPPORT
+    return TransErrorCode(videoSink_->SetVideoSurface(surface));
+#else
+    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+#endif
+}
+
+int32_t HiPlayerImpl::GetVideoTrackInfo(std::vector<Format> &videoTrack)
 {
     return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
 }
-#endif
+int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format> &audioTrack)
+{
+    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+}
+int32_t HiPlayerImpl::GetVideoWidth()
+{
+    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+}
+int32_t HiPlayerImpl::GetVideoHeight()
+{
+    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+}
 
 void HiPlayerImpl::OnEvent(Event event)
 {
@@ -290,7 +311,7 @@ void HiPlayerImpl::OnEvent(Event event)
             }
             break;
         case EVENT_AUDIO_PROGRESS:
-            mediaStats_.ReceiveEvent(EVENT_AUDIO_PROGRESS, Plugin::AnyCast<int64_t>(event.param));
+            mediaStats_.ReceiveEvent(EVENT_AUDIO_PROGRESS, HstTime2Ms(Plugin::AnyCast<int64_t>(event.param)));
             break;
         default:
             MEDIA_LOG_E("Unknown event(%d)", event.type);
@@ -451,6 +472,11 @@ int32_t HiPlayerImpl::SetLooping(bool loop)
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 
+int32_t HiPlayerImpl::SetParameter(const Format& params)
+{
+    return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
+}
+
 int32_t HiPlayerImpl::SetObs(const std::weak_ptr<IPlayerEngineObs>& obs)
 {
     obs_ = obs;
@@ -485,7 +511,7 @@ int32_t HiPlayerImpl::GetDuration(int32_t& durationMs)
         return TransErrorCode(ErrorCode::ERROR_AGAIN);
     }
     if (sourceMeta->GetUint64(Media::Plugin::MetaID::MEDIA_DURATION, duration)) {
-        durationMs = duration;
+        durationMs = HstTime2Ms(duration);
         return TransErrorCode(ErrorCode::SUCCESS);
     }
     // use max stream duration as whole source duration if source meta does not contains the duration meta
@@ -499,7 +525,7 @@ int32_t HiPlayerImpl::GetDuration(int32_t& durationMs)
         }
     }
     if (found) {
-        durationMs = duration;
+        durationMs = HstTime2Ms(duration);
         return TransErrorCode(ErrorCode::SUCCESS);
     }
     return TransErrorCode(ErrorCode::ERROR_AGAIN);
@@ -566,7 +592,7 @@ ErrorCode HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& par
             MEDIA_LOG_I("port name %s", portDesc.name.c_str());
             auto fromPort = filter->GetOutPort(portDesc.name);
             if (portDesc.isPcm) {
-                pipeline_->AddFilters({audioSink_.get()});
+                pipeline_->AddFilters( {audioSink_.get()});
                 FAIL_LOG(pipeline_->LinkPorts(fromPort, audioSink_->GetInPort(PORT_NAME_DEFAULT)));
                 ActiveFilters({audioSink_.get()});
             } else {
@@ -599,21 +625,21 @@ ErrorCode HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin::Any& par
     for (const auto& portDesc : param.ports) {
         if (StringStartsWith(portDesc.name, "video")) {
             MEDIA_LOG_I("port name %s", portDesc.name.c_str());
-            videoDecoder = FilterFactory::Instance().CreateFilterWithType<VideoDecoderFilter>(
+            videoDecoder_ = FilterFactory::Instance().CreateFilterWithType<VideoDecoderFilter>(
                 "builtin.player.videodecoder", "videodecoder-" + portDesc.name);
-            if (pipeline_->AddFilters({videoDecoder.get()}) == ErrorCode::SUCCESS) {
+            if (pipeline_->AddFilters({videoDecoder_.get()}) == ErrorCode::SUCCESS) {
                 // link demuxer and video decoder
                 auto fromPort = filter->GetOutPort(portDesc.name);
-                auto toPort = videoDecoder->GetInPort(PORT_NAME_DEFAULT);
+                auto toPort = videoDecoder_->GetInPort(PORT_NAME_DEFAULT);
                 FAIL_LOG(pipeline_->LinkPorts(fromPort, toPort));  // link ports
-                newFilters.emplace_back(videoDecoder.get());
+                newFilters.emplace_back(videoDecoder_.get());
 
                 // link video decoder and video sink
-                if (pipeline_->AddFilters({videoSink.get()}) == ErrorCode::SUCCESS) {
-                    fromPort = videoDecoder->GetOutPort(PORT_NAME_DEFAULT);
-                    toPort = videoSink->GetInPort(PORT_NAME_DEFAULT);
+                if (pipeline_->AddFilters({videoSink_.get()}) == ErrorCode::SUCCESS) {
+                    fromPort = videoDecoder_->GetOutPort(PORT_NAME_DEFAULT);
+                    toPort = videoSink_->GetInPort(PORT_NAME_DEFAULT);
                     FAIL_LOG(pipeline_->LinkPorts(fromPort, toPort));  // link ports
-                    newFilters.push_back(videoSink.get());
+                    newFilters.push_back(videoSink_.get());
                 }
             }
         }

@@ -24,18 +24,18 @@
 #include "interface/muxer_plugin.h"
 #include "interface/source_plugin.h"
 #include "interface/video_sink_plugin.h"
-#include "interface/file_sink_plugin.h"
+#include "interface/output_sink_plugin.h"
 
 using namespace OHOS::Media::Plugin;
 
 static std::map<PluginType, int> g_apiVersionMap = {
-    {PluginType::SOURCE, SOURCE_API_VERSION},
-    {PluginType::DEMUXER, DEMUXER_API_VERSION},
-    {PluginType::CODEC, CODEC_API_VERSION},
-    {PluginType::AUDIO_SINK, AUDIO_SINK_API_VERSION},
-    {PluginType::VIDEO_SINK, VIDEO_SINK_API_VERSION},
-    {PluginType::MUXER, MUXER_API_VERSION},
-    {PluginType::FILE_SINK, FILE_SINK_API_VERSION},
+    {PluginType::SOURCE,      SOURCE_API_VERSION},
+    {PluginType::DEMUXER,     DEMUXER_API_VERSION},
+    {PluginType::CODEC,       CODEC_API_VERSION},
+    {PluginType::AUDIO_SINK,  AUDIO_SINK_API_VERSION},
+    {PluginType::VIDEO_SINK,  VIDEO_SINK_API_VERSION},
+    {PluginType::MUXER,       MUXER_API_VERSION},
+    {PluginType::OUTPUT_SINK, OUTPUT_SINK_API_VERSION},
 };
 
 static std::string g_libFileHead = "libhistreamer_plugin_";
@@ -96,28 +96,29 @@ std::shared_ptr<PluginRegInfo> PluginRegister::RegisterImpl::BuildRegInfo(const 
     std::shared_ptr<PluginRegInfo> regInfo = std::make_shared<PluginRegInfo>();
     regInfo->packageDef = packageDef;
     switch (def.pluginType) {
-        case PluginType::SOURCE: {
+        case PluginType::SOURCE:
             InitSourceInfo(regInfo, def);
             break;
-        }
-        case PluginType::DEMUXER: {
+        case PluginType::DEMUXER:
             InitDemuxerInfo(regInfo, def);
             break;
-        }
-        case PluginType::CODEC: {
+        case PluginType::MUXER:
+            InitMuxerInfo(regInfo, def);
+            break;
+        case PluginType::CODEC:
             InitCodecInfo(regInfo, def);
             break;
-        }
-        case PluginType::AUDIO_SINK: {
+        case PluginType::AUDIO_SINK:
             InitAudioSinkInfo(regInfo, def);
             break;
-        }
-        case PluginType::VIDEO_SINK: {
+        case PluginType::VIDEO_SINK:
             InitVideoSinkInfo(regInfo, def);
             break;
-        }
+        case PluginType::OUTPUT_SINK:
+            InitOutputSinkInfo(regInfo, def);
+            break;
         default:
-            return std::shared_ptr<PluginRegInfo>();
+            return {};
     }
     regInfo->loader = std::move(pluginLoader);
     return regInfo;
@@ -163,6 +164,7 @@ Status PluginRegister::RegisterImpl::InitSourceInfo(std::shared_ptr<PluginRegInf
     std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
     SetPluginInfo(info, def);
     info->extra.insert({PLUGIN_INFO_EXTRA_PROTOCOL, base.protocol});
+    info->extra.insert({PLUGIN_INFO_EXTRA_INPUT_TYPE, base.inputType});
     SourceCapabilityConvert(info, def);
     reg->info = info;
     return Status::OK;
@@ -177,6 +179,18 @@ Status PluginRegister::RegisterImpl::InitDemuxerInfo(std::shared_ptr<PluginRegIn
     SetPluginInfo(info, def);
     info->extra.insert({PLUGIN_INFO_EXTRA_EXTENSIONS, base.extensions});
     DemuxerCapabilityConvert(info, def);
+    reg->info = info;
+    return Status::OK;
+}
+
+Status PluginRegister::RegisterImpl::InitMuxerInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def)
+{
+    auto& base = (MuxerPluginDef&)def;
+    reg->creator = reinterpret_cast<PluginCreatorFunc<PluginBase>>(base.creator);
+    std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
+    SetPluginInfo(info, def);
+    info->inCaps = base.inCaps;
+    info->outCaps = base.outCaps;
     reg->info = info;
     return Status::OK;
 }
@@ -209,6 +223,18 @@ Status PluginRegister::RegisterImpl::InitVideoSinkInfo(std::shared_ptr<PluginReg
     std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
     SetPluginInfo(info, def);
     VideoSinkCapabilityConvert(info, def);
+    reg->info = info;
+    return Status::OK;
+}
+
+Status PluginRegister::RegisterImpl::InitOutputSinkInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def)
+{
+    auto& base = (OutputSinkPluginDef&)def;
+    reg->creator = reinterpret_cast<PluginCreatorFunc<PluginBase>>(base.creator);
+    std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
+    SetPluginInfo(info, def);
+    info->extra[PLUGIN_INFO_EXTRA_OUTPUT_TYPE] = base.outputType;
+    info->inCaps = base.inCaps;
     reg->info = info;
     return Status::OK;
 }
@@ -264,7 +290,7 @@ std::shared_ptr<PluginRegInfo> PluginRegister::GetPluginRegInfo(PluginType type,
     if (registerData->IsPluginExist(type, name)) {
         return registerData->registerTable[type][name];
     }
-    return std::shared_ptr<PluginRegInfo>();
+    return {};
 }
 
 void PluginRegister::RegisterPlugins()
@@ -280,7 +306,7 @@ void PluginRegister::RegisterStaticPlugins()
 
 void PluginRegister::RegisterDynamicPlugins()
 {
-    RegisterPluginsFromPath("/usr/lib");
+    RegisterPluginsFromPath(HST_PLUGIN_PATH);
 }
 
 void PluginRegister::RegisterPluginsFromPath(const char* libDirPath)

@@ -101,6 +101,9 @@ SdlVideoSinkPlugin::SdlVideoSinkPlugin(std::string name)
     : VideoSinkPlugin(std::move(name)),
       windowWidth_(DEFAULT_WINDOW_WIDTH),
       windowHeight_(DEFAULT_WINDOW_HEIGHT),
+      pixelWidth_(0),
+      pixelHeight_(0),
+      pixelFormat_(0),
       curPts_(0)
 {
 }
@@ -304,7 +307,7 @@ std::shared_ptr<Allocator> SdlVideoSinkPlugin::GetAllocator()
     return nullptr;
 }
 
-Status SdlVideoSinkPlugin::SetCallback(const std::shared_ptr<Callback>& cb)
+Status SdlVideoSinkPlugin::SetCallback(Callback* cb)
 {
     return Status::ERROR_UNIMPLEMENTED;
 }
@@ -361,7 +364,8 @@ Status SdlVideoSinkPlugin::VideoImageDisaplay(const std::shared_ptr<Buffer>& inp
         MEDIA_LOG_E("WH[%u,%u] change to WH[%u,%u]", pixelWidth_, pixelHeight_, videoMeta->width, videoMeta->height);
         // do something
     }
-    int32_t ySize, uvSize;
+    int32_t ySize = 0;
+    int32_t uvSize = 0;
     auto bufferMem = inputInfo->GetMemory();
     auto ptr = bufferMem->GetReadOnlyData();
     data[0] = ptr;
@@ -487,6 +491,12 @@ Status SdlVideoSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
 
 Status SdlVideoSinkPlugin::Flush()
 {
+    return Status::OK;
+}
+
+Status SdlVideoSinkPlugin::GetLatency(uint64_t& nanoSec)
+{
+    nanoSec = 10; // 10 ns
     return Status::OK;
 }
 } // namespace Plugin

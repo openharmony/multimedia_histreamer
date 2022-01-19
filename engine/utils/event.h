@@ -23,8 +23,8 @@ namespace Media {
 // 各个组件向Pipeline报告的事件类型
 enum EventType {
     EVENT_READY = 0,
-    EVENT_AUDIO_PROGRESS,
-    EVENT_VIDEO_PROGRESS,
+    EVENT_AUDIO_PROGRESS, // unit is ms
+    EVENT_VIDEO_PROGRESS, // unit is ms
     EVENT_AUDIO_COMPLETE,
     EVENT_VIDEO_COMPLETE,
     EVENT_ERROR,
@@ -36,6 +36,11 @@ enum EventType {
 struct Event {
     EventType type;
     Plugin::Any param;
+};
+
+struct ErrorEvent {
+    int32_t errorType;
+    int32_t errorCode;
 };
 } // namespace Media
 } // namespace OHOS

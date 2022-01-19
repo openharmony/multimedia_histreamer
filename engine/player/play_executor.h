@@ -18,11 +18,11 @@
 
 #include <memory>
 #include "foundation/error_code.h"
-#include "source.h"
+#include "plugin/common/media_source.h"
 
 namespace OHOS {
 namespace Media {
-using MediaSource = OHOS::Media::Source;
+using MediaSource = Plugin::MediaSource;
 
 class PlayExecutor {
 public:

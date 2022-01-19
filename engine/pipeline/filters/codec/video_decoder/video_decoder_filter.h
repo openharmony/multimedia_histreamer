@@ -19,12 +19,12 @@
 #ifdef VIDEO_SUPPORT
 
 #include "utils/type_define.h"
-#include "filters/codec/decoder_filter_base.h"
+#include "filters/codec/codec_filter_base.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class VideoDecoderFilter : public DecoderFilterBase {
+class VideoDecoderFilter : public CodecFilterBase {
 public:
     explicit VideoDecoderFilter(const std::string &name);
     ~VideoDecoderFilter() override;

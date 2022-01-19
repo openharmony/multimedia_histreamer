@@ -16,6 +16,8 @@
 #ifndef HISTREAMER_PIPELINE_CORE_FILTER_TYPE_H
 #define HISTREAMER_PIPELINE_CORE_FILTER_TYPE_H
 
+#include <cstdint>
+
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
@@ -27,6 +29,8 @@ enum struct FilterType : uint8_t {
     MUXER,
     AUDIO_DECODER,
     VIDEO_DECODER,
+    AUDIO_ENCODER,
+    VIDEO_ENCODER,
     AUDIO_SINK,
     VIDEO_SINK,
 };

@@ -29,7 +29,7 @@ public:
 
     ~UtSourceTest2() override = default;
 
-    Status SetSource(std::string &uri, std::shared_ptr<std::map<std::string, ValueType>> params) override;
+    Status SetSource(std::shared_ptr<MediaSource> source) override;
 
     Status Read(std::shared_ptr<Buffer> &buffer, size_t expectedLen) override;
 
@@ -41,7 +41,7 @@ public:
 
     std::shared_ptr<Allocator> GetAllocator() override;
 
-    Status SetCallback(const std::shared_ptr<Callback> &cb) override;
+    Status SetCallback(Callback* cb) override;
 
     static bool available;
 };

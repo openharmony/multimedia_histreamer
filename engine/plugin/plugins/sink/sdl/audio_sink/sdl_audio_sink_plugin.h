@@ -20,7 +20,7 @@
 #include "SDL.h"
 #include "plugin/interface/audio_sink_plugin.h"
 #include "plugin/common/plugin_audio_tags.h"
-#include "plugin/plugins/sink/sdl/ring_buffer.h"
+#include "utils/ring_buffer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,7 +59,7 @@ public:
 
     std::shared_ptr<Allocator> GetAllocator() override;
 
-    Status SetCallback(const std::shared_ptr<Callback> &cb) override;
+    Status SetCallback(Callback* cb) override;
 
     // audio sink
 
@@ -79,7 +79,7 @@ public:
 
     Status Resume() override;
 
-    Status GetLatency(uint64_t &ms) override;
+    Status GetLatency(uint64_t &nanoSec) override;
 
     Status GetFrameSize(size_t &size) override;
 

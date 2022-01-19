@@ -18,8 +18,6 @@
 #include "file_source_plugin.h"
 #include <sys/stat.h>
 #include "foundation/log.h"
-#include "plugin/common/plugin_buffer.h"
-#include "plugin/common/plugin_types.h"
 #include "utils/utils.h"
 
 namespace OHOS {
@@ -30,7 +28,7 @@ std::shared_ptr<SourcePlugin> FileSourcePluginCreater(const std::string& name)
     return std::make_shared<FileSourcePlugin>(name);
 }
 
-const Status FileSourceRegister(const std::shared_ptr<Register>& reg)
+Status FileSourceRegister(const std::shared_ptr<Register>& reg)
 {
     SourcePluginDef definition;
     definition.name = "FileSource";
@@ -136,18 +134,18 @@ std::shared_ptr<Allocator> FileSourcePlugin::GetAllocator()
     return mAllocator_;
 }
 
-Status FileSourcePlugin::SetCallback(const std::shared_ptr<Callback>& cb)
+Status FileSourcePlugin::SetCallback(Callback* cb)
 {
     MEDIA_LOG_D("IN");
     return Status::ERROR_UNIMPLEMENTED;
 }
 
-Status FileSourcePlugin::SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params)
+Status FileSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 {
     MEDIA_LOG_D("IN");
-    auto err = ParseFileName(uri);
+    auto err = ParseFileName(source->GetSourceUri());
     if (err != Status::OK) {
-        MEDIA_LOG_E("Parse file name from uri fail, uri: %s", uri.c_str());
+        MEDIA_LOG_E("Parse file name from uri fail, uri: %s", source->GetSourceUri().c_str());
         return err;
     }
     return OpenFile();
@@ -172,8 +170,8 @@ Status FileSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLe
     expectedLen = std::min(bufData->GetCapacity(), expectedLen);
 
     MEDIA_LOG_D("buffer position %" PRIu64 ", expectedLen %zu", position_, expectedLen);
-    auto size = std::fread(bufData->GetWritableData(expectedLen), sizeof(char), expectedLen, fp_);
-    bufData->GetWritableData(size);
+    auto size = std::fread(bufData->GetWritableAddr(expectedLen), sizeof(char), expectedLen, fp_);
+    bufData->UpdateDataSize(size);
     position_ += bufData->GetSize();
     MEDIA_LOG_D("position_: %" PRIu64 ", readSize: %zu", position_, bufData->GetSize());
     return Status::OK;
@@ -218,7 +216,7 @@ Status FileSourcePlugin::SeekTo(uint64_t offset)
     return Status::OK;
 }
 
-Status FileSourcePlugin::ParseFileName(std::string& uri)
+Status FileSourcePlugin::ParseFileName(const std::string& uri)
 {
     if (uri.empty()) {
         MEDIA_LOG_E("uri is empty");

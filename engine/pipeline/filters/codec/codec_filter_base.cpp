@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#define HST_LOG_TAG "DecoderFilterBase"
+#define HST_LOG_TAG "CodecFilterBase"
 
-#include "decoder_filter_base.h"
+#include "codec_filter_base.h"
 
 #include "pipeline/filters/common/plugin_settings.h"
 #include "utils/memory_helper.h"
@@ -23,11 +23,11 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-DecoderFilterBase::DecoderFilterBase(const std::string &name): FilterBase(name) {}
+CodecFilterBase::CodecFilterBase(const std::string &name): FilterBase(name) {}
 
-DecoderFilterBase::~DecoderFilterBase()= default;
+CodecFilterBase::~CodecFilterBase()= default;
 
-ErrorCode DecoderFilterBase::ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta> &meta)
+ErrorCode CodecFilterBase::ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta> &meta)
 {
     auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
@@ -42,12 +42,12 @@ ErrorCode DecoderFilterBase::ConfigureWithMetaLocked(const std::shared_ptr<const
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode DecoderFilterBase::SetPluginParameterLocked(Tag tag, const Plugin::ValueType &value)
+ErrorCode CodecFilterBase::SetPluginParameterLocked(Tag tag, const Plugin::ValueType &value)
 {
     return TranslatePluginStatus(plugin_->SetParameter(tag, value));
 }
 
-ErrorCode DecoderFilterBase::SetParameter(int32_t key, const Plugin::Any& value)
+ErrorCode CodecFilterBase::SetParameter(int32_t key, const Plugin::Any& value)
 {
     if (state_.load() == FilterState::CREATED) {
         return ErrorCode::ERROR_AGAIN;
@@ -61,7 +61,7 @@ ErrorCode DecoderFilterBase::SetParameter(int32_t key, const Plugin::Any& value)
     return SetPluginParameterLocked(tag, value);
 }
 
-ErrorCode DecoderFilterBase::GetParameter(int32_t key, Plugin::Any& value)
+ErrorCode CodecFilterBase::GetParameter(int32_t key, Plugin::Any& value)
 {
     if (state_.load() == FilterState::CREATED) {
         return ErrorCode::ERROR_AGAIN;

@@ -499,7 +499,7 @@ Status FFmpegMuxerPlugin::WriteTrailer()
     return Status::OK;
 }
 
-Status FFmpegMuxerPlugin::SetCallback(const std::shared_ptr<Callback> &cb)
+Status FFmpegMuxerPlugin::SetCallback(Callback* cb)
 {
     return Status::END_OF_STREAM;
 }

@@ -13,33 +13,33 @@
  * limitations under the License.
  */
 
-#include "file_sink.h"
+#include "output_sink.h"
 #include "plugin_wrapper.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-FileSink::FileSink(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<FileSinkPlugin> plugin)
-    : Base(pkgVer, apiVer, plugin), fileSink_(std::move(plugin)) {}
-Status FileSink::SetSink(const Plugin::ValueType &sink)
+OutputSink::OutputSink(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<OutputSinkPlugin> plugin)
+    : Base(pkgVer, apiVer, plugin), outputSink_(std::move(plugin)) {}
+Status OutputSink::SetSink(const Plugin::ValueType &sink)
 {
-    return fileSink_->SetSink(sink);
+    return outputSink_->SetSink(sink);
 }
-bool FileSink::IsSeekable()
+bool OutputSink::IsSeekable()
 {
-    return fileSink_->IsSeekable();
+    return outputSink_->IsSeekable();
 }
-Status FileSink::SeekTo(uint64_t offset)
+Status OutputSink::SeekTo(uint64_t offset)
 {
-    return fileSink_->SeekTo(offset);
+    return outputSink_->SeekTo(offset);
 }
-Status FileSink::Write(const std::shared_ptr<Buffer>& buffer)
+Status OutputSink::Write(const std::shared_ptr<Buffer>& buffer)
 {
-    return fileSink_->Write(buffer);
+    return outputSink_->Write(buffer);
 }
-Status FileSink::Flush()
+Status OutputSink::Flush()
 {
-    return fileSink_->Flush();
+    return outputSink_->Flush();
 }
 } // namespace Plugin
 } // namespace Media

@@ -444,7 +444,7 @@ std::shared_ptr<Allocator> HdiSink::GetAllocator()
     return nullptr;
 }
 
-Status HdiSink::SetCallback(const std::shared_ptr<Callback>& cb)
+Status HdiSink::SetCallback(Callback* cb)
 {
     eventCallback_ = cb;
     return Status::OK;

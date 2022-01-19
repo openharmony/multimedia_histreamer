@@ -25,10 +25,12 @@ public:
     HstEngineFactory() = default;
     ~HstEngineFactory() override = default;
 
-    int32_t Score(Scene scene, const std::string& uri = "") override;
+    int32_t Score(Scene scene, const std::string& uri) override;
     std::unique_ptr<IPlayerEngine> CreatePlayerEngine() override;
     std::unique_ptr<IRecorderEngine> CreateRecorderEngine() override;
     std::unique_ptr<IAVMetadataHelperEngine> CreateAVMetadataHelperEngine() override;
+    std::unique_ptr<IAVCodecEngine> CreateAVCodecEngine() override;
+    std::unique_ptr<IAVCodecListEngine> CreateAVCodecListEngine() override;
 };
 } // namespace Media
 } // namespace OHOS

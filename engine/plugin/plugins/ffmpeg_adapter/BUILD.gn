@@ -25,74 +25,107 @@ group("plugin_ffmpeg_adapter") {
     ]
   }
 }
-if (ohos_kernel_type == "liteos_m") {
-  # make static build if needed. current is not supported
+config("plugin_ffmpeg_adapter_config") {
+  include_dirs = [ "//third_party/ffmpeg" ]
+}
+
+source_set("ffmpeg_audio_decoders") {
+  sources = [
+    "audio_decoder/audio_ffmpeg_decoder_plugin.cpp",
+    "utils/ffmpeg_utils.cpp",
+  ]
+  public_configs = [ ":plugin_ffmpeg_adapter_config" ]
+  public_deps = [
+    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+  ]
+  cflags = [
+    "-fPIC",
+    "-Wall",
+  ]
+  if (defined(ohos_lite)) {
+    # deps on lite
+  } else {
+    public_deps += [ "//third_party/ffmpeg:libohosffmpeg" ]
+    configs -= [
+      "//build/config/compiler:no_rtti",
+      "//build/config/compiler:no_exceptions",
+    ]
+    cflags += [
+      "-frtti",
+      "-fexceptions",
+    ]
+  }
+  cflags_cc = cflags
+}
+source_set("ffmpeg_demuxers") {
+  sources = [
+    "demuxer/ffmpeg_demuxer_plugin.cpp",
+    "demuxer/ffmpeg_track_meta.cpp",
+    "utils/aac_audio_config_parser.cpp",
+    "utils/bit_reader.cpp",
+    "utils/ffmpeg_utils.cpp",
+  ]
+  public_configs = [ ":plugin_ffmpeg_adapter_config" ]
+  public_deps = [
+    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+  ]
+  cflags = [
+    "-fPIC",
+    "-Wall",
+  ]
+  if (defined(ohos_lite)) {
+    # deps on lite
+  } else {
+    public_deps += [ "//third_party/ffmpeg:libohosffmpeg" ]
+    configs -= [
+      "//build/config/compiler:no_rtti",
+      "//build/config/compiler:no_exceptions",
+    ]
+    cflags += [
+      "-frtti",
+      "-fexceptions",
+    ]
+  }
+  cflags_cc = cflags
+}
+
+if (defined(ohos_lite)) {
+  # lite
+  import("//build/lite/config/component/lite_component.gni")
+  if (ohos_kernel_type == "liteos_m") {
+    # plugin is not need on this platform
+  } else {
+    lite_library("histreamer_plugin_FFmpegAudioDecoders") {
+      target_type = "shared_library"
+      sources = []
+      deps = [ ":ffmpeg_audio_decoders" ]
+      ldflags = [ "-lavcodec" ]
+    }
+    lite_library("histreamer_plugin_FFmpegDemuxer") {
+      target_type = "shared_library"
+      sources = []
+      deps = [ ":ffmpeg_demuxers" ]
+      ldflags = [
+        "-lavformat",
+        "-lavcodec",
+      ]
+    }
+  }
 } else {
-  config("plugin_ffmpeg_adapter_config") {
-    include_dirs = [ "//third_party/ffmpeg" ]
-    ldflags = [
-      "-laudio_hw",
-      "-lcodec",
-      "-lavformat",
-      "-lavcodec",
-      "-lavutil",
-    ]
+  # standard
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer_plugin_FFmpegAudioDecoders") {
+    deps = [ ":ffmpeg_audio_decoders" ]
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
   }
-
-  shared_library("histreamer_plugin_FFmpegAudioDecoders") {
-    sources = [
-      "audio_decoder/audio_ffmpeg_decoder_plugin.cpp",
-      "utils/aac_audio_config_parser.cpp",
-      "utils/bit_reader.cpp",
-      "utils/ffmpeg_utils.cpp",
-    ]
-    public_configs = [ ":plugin_ffmpeg_adapter_config" ]
-    public_deps = [
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
-    ]
-    if (!defined(ohos_lite)) {
-      configs -= [
-        "//build/config/compiler:no_rtti",
-        "//build/config/compiler:no_exceptions",
-      ]
-    }
-    if (!defined(ohos_lite)) {
-      cflags = [
-        "-frtti",
-        "-fexceptions",
-      ]
-      cflags_cc = cflags
-    }
-  }
-
-  shared_library("histreamer_plugin_FFmpegDemuxer") {
-    sources = [
-      "demuxer/ffmpeg_demuxer_plugin.cpp",
-      "demuxer/ffmpeg_track_meta.cpp",
-      "utils/aac_audio_config_parser.cpp",
-      "utils/bit_reader.cpp",
-      "utils/ffmpeg_utils.cpp",
-    ]
-    public_configs = [ ":plugin_ffmpeg_adapter_config" ]
-    public_deps = [
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
-    ]
-    if (!defined(ohos_lite)) {
-      configs -= [
-        "//build/config/compiler:no_rtti",
-        "//build/config/compiler:no_exceptions",
-      ]
-    }
-    if (!defined(ohos_lite)) {
-      cflags = [
-        "-frtti",
-        "-fexceptions",
-      ]
-      cflags_cc = cflags
-    }
+  ohos_shared_library("histreamer_plugin_FFmpegDemuxer") {
+    deps = [ ":ffmpeg_demuxers" ]
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
   }
 }

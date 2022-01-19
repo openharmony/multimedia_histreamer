@@ -19,14 +19,15 @@
 #include <memory>
 #include "foundation/log.h"
 #include "player/standard/hiplayer_impl.h"
+#include "recorder/standard/hirecorder_impl.h"
 
 namespace OHOS {
 namespace Media {
 int32_t HstEngineFactory::Score(Scene scene, const std::string& uri)
 {
-    (void)scene;
-    (void)uri;
-    return MIN_SCORE + 1;
+    // only used for play back and recorder
+    MEDIA_LOG_I("Score in");
+    return 0;
 }
 
 std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine()
@@ -41,13 +42,31 @@ std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine()
 
 std::unique_ptr<IRecorderEngine> HstEngineFactory::CreateRecorderEngine()
 {
-    MEDIA_LOG_W("CreateRecorderEngine enter.");
+    MEDIA_LOG_I("CreateRecorderEngine enter.");
+#ifdef RECORDER_SUPPORT
+    auto recorder = std::unique_ptr<Record::HiRecorderImpl>(new (std::nothrow) Record::HiRecorderImpl());
+    if (recorder && recorder->Init() == ErrorCode::SUCCESS) {
+        return recorder;
+    }
+#endif
     return nullptr;
 }
 
 std::unique_ptr<IAVMetadataHelperEngine> HstEngineFactory::CreateAVMetadataHelperEngine()
 {
     MEDIA_LOG_W("CreateAVMetadataHelperEngine not supported now, return nullptr.");
+    return nullptr;
+}
+
+std::unique_ptr<IAVCodecEngine> HstEngineFactory::CreateAVCodecEngine()
+{
+    MEDIA_LOG_W("CreateAVCodecEngine not supported now, return nullptr.");
+    return nullptr;
+}
+
+std::unique_ptr<IAVCodecListEngine> HstEngineFactory::CreateAVCodecListEngine()
+{
+    MEDIA_LOG_W("CreateAVCodecListEngine not supported now, return nullptr.");
     return nullptr;
 }
 }  // namespace Media

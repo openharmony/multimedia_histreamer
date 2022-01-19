@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_PIPELINE_AUDIO_CAPTURE_PLUGIN_H
-#define HISTREAMER_PIPELINE_AUDIO_CAPTURE_PLUGIN_H
-#ifdef RECORDER_SUPPORT
+#ifndef HISTREAMER_AUDIO_CAPTURE_PLUGIN_H
+#define HISTREAMER_AUDIO_CAPTURE_PLUGIN_H
+
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
 #include "audio_capturer.h"
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
-class AudioCaptureAllocator : public Allocator {
+namespace AuCapturePlugin {
+class AudioCaptureAllocator : public Plugin::Allocator {
 public:
     AudioCaptureAllocator() = default;
     ~AudioCaptureAllocator() override = default;
@@ -32,47 +32,46 @@ public:
     void Free(void* ptr) override; // NOLINT: void*
 };
 
-class AudioCapturePlugin : public SourcePlugin {
+class AudioCapturePlugin : public Plugin::SourcePlugin {
 public:
     explicit AudioCapturePlugin(std::string name);
     ~AudioCapturePlugin() override;
 
-    Status Init() override;
-    Status Deinit() override;
-    Status Prepare() override;
-    Status Reset() override;
-    Status Start() override;
-    Status Stop() override;
-    bool IsParameterSupported(Tag tag) override;
-    Status GetParameter(Tag tag, ValueType& value) override;
-    Status SetParameter(Tag tag, const ValueType& value) override;
-    std::shared_ptr<Allocator> GetAllocator() override;
-    Status SetCallback(const std::shared_ptr<Callback>& cb) override;
-    Status SetSource(std::string& uri, std::shared_ptr<std::map<std::string, ValueType>> params = nullptr) override;
-    Status Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen) override;
-    Status GetSize(size_t& size) override;
+    Plugin::Status Init() override;
+    Plugin::Status Deinit() override;
+    Plugin::Status Prepare() override;
+    Plugin::Status Reset() override;
+    Plugin::Status Start() override;
+    Plugin::Status Stop() override;
+    bool IsParameterSupported(Plugin::Tag tag) override;
+    Plugin::Status GetParameter(Plugin::Tag tag, Plugin::ValueType& value) override;
+    Plugin::Status SetParameter(Plugin::Tag tag, const Plugin::ValueType& value) override;
+    std::shared_ptr<Plugin::Allocator> GetAllocator() override;
+    Plugin::Status SetCallback(Plugin::Callback* cb) override;
+    Plugin::Status SetSource(std::shared_ptr<Plugin::MediaSource> source) override;
+    Plugin::Status Read(std::shared_ptr<Plugin::Buffer>& buffer, size_t expectedLen) override;
+    Plugin::Status GetSize(size_t& size) override;
     bool IsSeekable() override;
-    Status SeekTo(uint64_t offset) override;
+    Plugin::Status SeekTo(uint64_t offset) override;
 
 private:
-    bool IsSampleRateSupported(const uint32_t sampleRate);
-    bool IsChannelNumSupported(const uint32_t chanNum);
-    bool IsSampleFormatSupported(const OHOS::AudioStandard::AudioSampleFormat sampleFormat);
-    Status GetAudioTime(uint64_t &audioTime);
+    bool AssignSampleRateIfSupported(uint32_t sampleRate);
+    bool AssignChannelNumIfSupported(uint32_t channelNum);
+    bool AssignSampleFmtIfSupported(OHOS::Media::Plugin::AudioSampleFormat sampleFormat);
+    Plugin::Status GetAudioTime(uint64_t &audioTimeNs);
 
     std::shared_ptr<AudioCaptureAllocator> mAllocator_ {nullptr};
     std::shared_ptr<OHOS::AudioStandard::AudioCapturer> audioCapturer_ {nullptr};
-    AudioStandard::AudioCapturerParams capturerParams_;
-    bool isStop_;
-    int64_t bitRate_;
-    size_t bufferSize_;
-    uint64_t curTimestamp_;
-    uint64_t stopTimestamp_;
-    uint64_t totalPauseTime_;
+    AudioStandard::AudioCapturerParams capturerParams_ {};
+    bool isStop_ {false};
+    int64_t bitRate_ {0};
+    size_t bufferSize_ {0};
+    uint64_t curTimestampNs_ {0};
+    uint64_t stopTimestampNs_ {0};
+    uint64_t totalPauseTimeNs_ {0};
 };
-} // namespace Plugin
+} // namespace AuCapturePlugin
 } // namespace Media
 } // namespace OHOS
-#endif
-#endif // HISTREAMER_PIPELINE_AUDIO_CAPTURE_PLUGIN_H
+#endif // HISTREAMER_AUDIO_CAPTURE_PLUGIN_H
 

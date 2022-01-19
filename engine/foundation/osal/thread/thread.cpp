@@ -78,7 +78,7 @@ bool Thread::CreateThread(const std::function<void()>& func)
 #endif
     int rtv = pthread_create(&id_, &attr, Thread::Run, state_.get());
     if (rtv == 0) {
-        MEDIA_LOG_I("thread %s, id %" PRIu64 " create succ", name_.c_str(), pthread_self());
+        MEDIA_LOG_I("thread %s create succ", name_.c_str());
         SetNameInternal();
     } else {
         state_.reset();

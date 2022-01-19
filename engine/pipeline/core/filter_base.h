@@ -33,7 +33,7 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class FilterBase : public Filter {
+class FilterBase : public Filter, public Plugin::CallbackWrap {
 public:
     explicit FilterBase(std::string name);
     ~FilterBase() override = default;
@@ -79,6 +79,8 @@ public:
     void UnlinkPrevFilters() override;
 
     std::vector<Filter*> GetNextFilters() override;
+
+    std::vector<Filter*> GetPreFilters() override;
 
     ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) override;
     ErrorCode PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data) override;
@@ -135,6 +137,8 @@ protected:
 private:
     template <typename T>
     static T FindPort(const std::vector<T>& list, const std::string& name);
+    void onEvent(int32_t event) override;
+    void onError(int32_t errorType, int32_t errorCode) override;
 };
 } // namespace Pipeline
 } // namespace Media
