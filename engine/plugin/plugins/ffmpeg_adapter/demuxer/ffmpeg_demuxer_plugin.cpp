@@ -281,11 +281,11 @@ Status FFmpegDemuxerPlugin::ReadFrame(Buffer& info, int32_t timeOutMs)
 /**
  * SeekTo seek operation
  * @param trackId  -1 for unspecified, >= 0 for specific trackid
- * @param timeStampUs
+ * @param hstTime
  * @param mode
  * @return operation result.
  */
-Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t timeStampUs, SeekMode mode)
+Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
 {
     if (trackId == -1) {
         trackId = av_find_default_stream_index(formatContext_.get());
@@ -294,12 +294,11 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t timeStampUs, SeekMod
         MEDIA_LOG_E("SeekTo called with invalid trackid = %d, nb_streams = %d.", trackId, formatContext_->nb_streams);
         return Status::ERROR_INVALID_PARAMETER;
     }
-
     auto avStream = formatContext_->streams[trackId];
-    int64_t ffTime = ConvertTimeToFFmpeg(timeStampUs, avStream->time_base);
+    int64_t ffTime = ConvertTimeToFFmpeg(hstTime, avStream->time_base);
     if (avStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
         int keyFrameIdx = av_index_search_timestamp(avStream, ffTime, ConvertSeekModeToFFmpeg(mode));
-        MEDIA_LOG_I("SeekTo %" PRId64 ", ffTime: %" PRId64 ", key frame index: %d", timeStampUs, ffTime, keyFrameIdx);
+        MEDIA_LOG_I("SeekTo %" PRId64 "ns, ffTime: %" PRId64 ", key frame index: %d", hstTime, ffTime, keyFrameIdx);
         if (keyFrameIdx >= 0) {
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(58, 78, 0)
             ffTime = avformat_index_get_entry(avStream, keyFrameIdx)->timestamp;
@@ -311,7 +310,7 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t timeStampUs, SeekMod
         }
     }
     auto newTime = ConvertTimeFromFFmpeg(ffTime, avStream->time_base);
-    MEDIA_LOG_W("SeekTo %" PRIu64 " / %" PRId64 ", ffTime: %" PRId64, newTime, timeStampUs, ffTime);
+    MEDIA_LOG_I("SeekTo %" PRIu64 " / %" PRId64 ", ffTime: %" PRId64, newTime, hstTime, ffTime);
     auto rtv = av_seek_frame(formatContext_.get(), trackId, ffTime, ConvertSeekModeToFFmpeg(mode));
     if (rtv < 0) {
         MEDIA_LOG_E("seek failed, return value: %d", rtv);

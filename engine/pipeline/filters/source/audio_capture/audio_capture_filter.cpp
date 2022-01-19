@@ -325,10 +325,11 @@ bool AudioCaptureFilter::CheckSampleRate(const Plugin::Capability& cap)
             continue;
         }
         auto supportedSampleRateList = Plugin::AnyCast<DiscreteCapability<uint32_t>>(pairKey.second);
-        return std::any_of(supportedSampleRateList.begin(), supportedSampleRateList.end(),
-            [this] (const auto& rate) {
-            return rate == sampleRate_;
-        });
+        for (const auto& rate : supportedSampleRateList) {
+            if (rate == sampleRate_) {
+                return true;
+            }
+        }
     }
     return false;
 }
@@ -344,10 +345,11 @@ bool AudioCaptureFilter::CheckChannels(const Plugin::Capability& cap)
             continue;
         }
         auto supportedChannelsList = Plugin::AnyCast<DiscreteCapability<uint32_t>>(pairKey.second);
-        return std::any_of(supportedChannelsList.begin(), supportedChannelsList.end(),
-            [this] (const auto& channel) {
-            return channel == channelNum_;
-        });
+        for (const auto& channel : supportedChannelsList) {
+            if (channel == channelNum_) {
+                return true;
+            }
+        }
     }
     return false;
 }
@@ -364,10 +366,11 @@ bool AudioCaptureFilter::CheckSampleFormat(const Plugin::Capability& cap)
         }
         auto supportedSampleFormatList =
             Plugin::AnyCast<DiscreteCapability<Plugin::AudioSampleFormat>>(pairKey.second);
-        return std::any_of(supportedSampleFormatList.begin(), supportedSampleFormatList.end(),
-            [this] (const auto& fmt) {
-            return fmt == sampleFormat_;
-        });
+        for (const auto& fmt : supportedSampleFormatList) {
+            if (fmt == sampleFormat_) {
+                return true;
+            }
+        }
     }
     return false;
 }

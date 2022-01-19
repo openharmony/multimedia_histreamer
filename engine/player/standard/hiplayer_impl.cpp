@@ -311,7 +311,7 @@ void HiPlayerImpl::OnEvent(Event event)
             }
             break;
         case EVENT_AUDIO_PROGRESS:
-            mediaStats_.ReceiveEvent(EVENT_AUDIO_PROGRESS, HstTime2Ms(Plugin::AnyCast<int64_t>(event.param)));
+            mediaStats_.ReceiveEvent(EVENT_AUDIO_PROGRESS, Plugin::HstTime2Ms(Plugin::AnyCast<int64_t>(event.param)));
             break;
         default:
             MEDIA_LOG_E("Unknown event(%d)", event.type);
@@ -511,7 +511,7 @@ int32_t HiPlayerImpl::GetDuration(int32_t& durationMs)
         return TransErrorCode(ErrorCode::ERROR_AGAIN);
     }
     if (sourceMeta->GetUint64(Media::Plugin::MetaID::MEDIA_DURATION, duration)) {
-        durationMs = HstTime2Ms(duration);
+        durationMs = Plugin::HstTime2Ms(duration);
         return TransErrorCode(ErrorCode::SUCCESS);
     }
     // use max stream duration as whole source duration if source meta does not contains the duration meta
@@ -525,7 +525,7 @@ int32_t HiPlayerImpl::GetDuration(int32_t& durationMs)
         }
     }
     if (found) {
-        durationMs = HstTime2Ms(duration);
+        durationMs = Plugin::HstTime2Ms(duration);
         return TransErrorCode(ErrorCode::SUCCESS);
     }
     return TransErrorCode(ErrorCode::ERROR_AGAIN);

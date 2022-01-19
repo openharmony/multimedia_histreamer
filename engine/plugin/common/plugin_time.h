@@ -16,6 +16,9 @@
 #ifndef HISTREAMER_PLUGIN_COMMON_TIME_H
 #define HISTREAMER_PLUGIN_COMMON_TIME_H
 
+namespace OHOS {
+namespace Media {
+namespace Plugin {
 #define HST_TIME_BASE ((int64_t)1)
 #define HST_NSECOND HST_TIME_BASE
 #define HST_USECOND ((int64_t)1000 * HST_NSECOND)
@@ -74,4 +77,7 @@ inline bool Sec2HstTime (int64_t sec, int64_t& hTime)
     hTime = sec * HST_SECOND;
     return true;
 }
+} // Plugin
+} // Media
+} // OHOS
 #endif // HISTREAMER_PLUGIN_COMMON_TIME_H

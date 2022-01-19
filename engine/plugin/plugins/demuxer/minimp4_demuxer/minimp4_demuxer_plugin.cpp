@@ -22,13 +22,12 @@
 #include <new>
 
 #include <securec.h>
-
+#include "core/plugin_manager.h"
+#include "foundation/log.h"
+#include "plugin/common/plugin_buffer.h"
+#include "plugin/common/plugin_time.h"
 #include "utils/constants.h"
 #include "utils/memory_helper.h"
-#include "foundation/log.h"
-#include "core/plugin_manager.h"
-#include "plugin/common/plugin_buffer.h"
-
 
 namespace OHOS {
 namespace Media {
@@ -261,7 +260,7 @@ Status MiniMP4DemuxerPlugin::ReadFrame(Buffer &info, int32_t timeOutMs)
     return Status::OK;
 }
 
-Status MiniMP4DemuxerPlugin::SeekTo(int32_t trackId, int64_t timeStampUs, SeekMode mode)
+Status MiniMP4DemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
 {
     uint32_t frameSize = 0;
     uint32_t timeStamp = 0;
@@ -269,7 +268,8 @@ Status MiniMP4DemuxerPlugin::SeekTo(int32_t trackId, int64_t timeStampUs, SeekMo
     uint64_t offsetStart = MP4D_frame_offset(&miniMP4_, 0, 0, &frameSize, &timeStamp, &duration);
     uint64_t offsetEnd =
         MP4D_frame_offset(&miniMP4_, 0, miniMP4_.track->sample_count - 1, &frameSize, &timeStamp, &duration);
-    uint64_t targetPos = (timeStampUs * static_cast<int64_t>(miniMP4_.track->avg_bitrate_bps)) / 8 + offsetStart;
+    uint64_t targetPos = (Plugin::HstTime2Us(hstTime) * static_cast<int64_t>(miniMP4_.track->avg_bitrate_bps)) / 8 +
+        offsetStart;
     if (targetPos >= offsetEnd) {
         sampleIndex_ = miniMP4_.track->sample_count;
         return Status::OK;
