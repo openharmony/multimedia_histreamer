@@ -172,13 +172,13 @@ struct DemuxerPlugin : public PluginBase {
      * The function is valid only after RUNNING state.
      *
      * @param trackId Identifies the stream in the media file.
-     * @param timeStampUs Indicates the target position, in microseconds.
+     * @param hstTime Indicates the target position, based on {@link HST_TIME_BASE} .
      * @param mode Indicates the seek mode.
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
      *  @retval ERROR_INVALID_DATA: The input data is invalid.
      */
-    virtual Status SeekTo(int32_t trackId, int64_t timeStampUs, SeekMode mode) = 0;
+    virtual Status SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode) = 0;
 };
 
 /// Demuxer plugin api major number.

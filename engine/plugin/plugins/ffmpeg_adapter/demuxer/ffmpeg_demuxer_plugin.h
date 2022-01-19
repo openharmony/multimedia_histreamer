@@ -60,7 +60,7 @@ public:
     Status UnselectTrack(int32_t trackId) override;
     Status GetSelectedTracks(std::vector<int32_t>& trackIds) override;
     Status ReadFrame(Buffer& info, int32_t timeOutMs) override;
-    Status SeekTo(int32_t trackId, int64_t timeStampUs, SeekMode mode) override;
+    Status SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode) override;
 
 private:
     class DemuxerPluginAllocator : public Allocator {

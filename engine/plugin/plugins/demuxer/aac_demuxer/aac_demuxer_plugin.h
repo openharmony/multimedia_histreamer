@@ -65,7 +65,7 @@ public:
     Status SetDataSource(const std::shared_ptr<DataSource>& source) override;
     Status GetMediaInfo(MediaInfo& mediaInfo) override;
     Status ReadFrame(Buffer& outBuffer, int32_t timeOutMs) override;
-    Status SeekTo(int32_t trackId, int64_t timeStampUs, SeekMode mode) override;
+    Status SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode) override;
 
     size_t GetTrackCount() override;
     Status SelectTrack(int32_t trackId) override;

@@ -81,5 +81,5 @@ private:
 } // namespace Media
 } // namespace OHOS
 #endif
-#endif // HISTREAMER_PIPELINE_AUDIO_CAPTURE_FILTER_H
+#endif // MEDIA_PIPELINE_AUDIO_CAPTURE_FILTER_H
 

@@ -20,11 +20,11 @@
 #include <cstdio>
 #include <cstring>
 #include <new>
-#include "core/plugin_manager.h"
 #include "foundation/log.h"
 #include "utils/memory_helper.h"
 #include "osal/thread/scoped_lock.h"
 #include "plugin/common/plugin_buffer.h"
+#include "plugin/common/plugin_time.h"
 #include "osal/utils/util.h"
 
 namespace OHOS {
@@ -274,10 +274,10 @@ Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
     return retResult;
 }
 
-Status Minimp3DemuxerPlugin::SeekTo(int32_t trackId, int64_t timeStampUs, SeekMode mode)
+Status Minimp3DemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
 {
     uint64_t pos = 0;
-    auto targetTtimeS = static_cast<uint32_t>(timeStampUs / 1000); // 1000
+    auto targetTtimeS = static_cast<uint32_t>(HstTime2Ms(hstTime));
     if (AudioDemuxerMp3GetSeekPosition(targetTtimeS, &pos) == 0) {
         ioContext_.offset = pos;
         ioDataRemainSize_ = 0;
