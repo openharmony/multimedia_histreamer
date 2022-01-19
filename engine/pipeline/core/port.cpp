@@ -69,9 +69,12 @@ std::shared_ptr<Port> InPort::GetPeerPort()
     return prevPort.lock();
 }
 
-bool InPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap, Capability& upstreamNegotiatedCap)
+bool InPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                       Plugin::Capability& negotiatedCap,
+                       const Plugin::TagMap& upstreamParams,
+                       Plugin::TagMap& downstreamParams)
 {
-    return filter && filter->Negotiate(name, upstreamCap, upstreamNegotiatedCap);
+    return filter && filter->Negotiate(name, upstreamCap, negotiatedCap, upstreamParams, downstreamParams);
 }
 
 bool InPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
@@ -152,9 +155,11 @@ std::shared_ptr<Port> OutPort::GetPeerPort()
 }
 
 bool OutPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                        Capability& upstreamNegotiatedCap)
+                        Plugin::Capability& negotiatedCap,
+                        const Plugin::TagMap& upstreamParams,
+                        Plugin::TagMap& downstreamParams)
 {
-    return nextPort->Negotiate(upstreamCap, upstreamNegotiatedCap);
+    return nextPort->Negotiate(upstreamCap, negotiatedCap, upstreamParams, downstreamParams);
 }
 
 bool OutPort::Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
@@ -182,6 +187,7 @@ ErrorCode EmptyInPort::Connect(const std::shared_ptr<Port> &port)
     MEDIA_LOG_E("Connect in EmptyInPort");
     return ErrorCode::SUCCESS;
 }
+
 ErrorCode EmptyInPort::Activate(const std::vector<WorkMode>& modes, WorkMode& outMode)
 {
     UNUSED_VARIABLE(modes);
@@ -189,11 +195,16 @@ ErrorCode EmptyInPort::Activate(const std::vector<WorkMode>& modes, WorkMode& ou
     MEDIA_LOG_E("Activate in EmptyInPort");
     return ErrorCode::SUCCESS;
 }
+
 bool EmptyInPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                            Capability& upstreamNegotiatedCap)
+                            Plugin::Capability& negotiatedCap,
+                            const Plugin::TagMap& upstreamParams,
+                            Plugin::TagMap& downstreamParams)
 {
     UNUSED_VARIABLE(upstreamCap);
-    UNUSED_VARIABLE(upstreamNegotiatedCap);
+    UNUSED_VARIABLE(negotiatedCap);
+    UNUSED_VARIABLE(upstreamParams);
+    UNUSED_VARIABLE(downstreamParams);
     MEDIA_LOG_E("Negotiate in EmptyInPort");
     return false;
 }
@@ -234,10 +245,14 @@ ErrorCode EmptyOutPort::Activate(const std::vector<WorkMode>& modes, WorkMode& o
     return ErrorCode::SUCCESS;
 }
 bool EmptyOutPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                             Capability& upstreamNegotiatedCap)
+                             Plugin::Capability& negotiatedCap,
+                             const Plugin::TagMap& upstreamParams,
+                             Plugin::TagMap& downstreamParams)
 {
     UNUSED_VARIABLE(upstreamCap);
-    UNUSED_VARIABLE(upstreamNegotiatedCap);
+    UNUSED_VARIABLE(negotiatedCap);
+    UNUSED_VARIABLE(upstreamParams);
+    UNUSED_VARIABLE(downstreamParams);
     MEDIA_LOG_E("Negotiate in EmptyOutPort");
     return false;
 }

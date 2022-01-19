@@ -135,7 +135,9 @@ ErrorCode VideoDecoderFilter::Prepare()
 
 bool VideoDecoderFilter::Negotiate(const std::string& inPort,
                                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                                   Capability& upstreamNegotiatedCap)
+                                   Plugin::Capability& negotiatedCap,
+                                   const Plugin::TagMap& upstreamParams,
+                                   Plugin::TagMap& downstreamParams)
 {
     PROFILE_BEGIN("video decoder negotiate start");
     if (state_ != FilterState::PREPARING) {
@@ -150,6 +152,9 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
     bool atLeastOutCapMatched = false;
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::CODEC);
+    // need to get the max buffer num from plugin capability when use hdi as codec plugin interfaces
+    Plugin::TagMap proposeParams = upstreamParams;
+    proposeParams.insert({Plugin::Tag::VIDEO_MAX_SURFACE_NUM, static_cast<uint32_t>(DEFAULT_OUT_BUFFER_POOL_SIZE)});
     for (const auto& candidate : candidatePlugins) {
         if (candidate.first->outCaps.empty()) {
             MEDIA_LOG_E("decoder plugin must have out caps");
@@ -163,9 +168,10 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
             }
             atLeastOutCapMatched = true;
             thisOut->mime = outCap.mime;
-            if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_)) {
+            if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_, proposeParams, downstreamParams)) {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
+                sinkParams_ = downstreamParams;
                 MEDIA_LOG_I("choose plugin %s as working parameter", candidate.first->name.c_str());
                 break;
             }
@@ -235,6 +241,21 @@ bool VideoDecoderFilter::Configure(const std::string& inPort, const std::shared_
     return true;
 }
 
+std::shared_ptr<Allocator> VideoDecoderFilter::DecideOutPutAllocator()
+{
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+    // Use sink allocator first, zero copy while passing data
+    Plugin::Tag tag = Plugin::Tag::BUFFER_ALLOCATOR;
+    auto ite = sinkParams_.find(tag);
+    if (ite != std::end(sinkParams_)) {
+        if (ite->second.Type() == typeid(std::shared_ptr<Plugin::SurfaceAllocator>)) {
+            return Plugin::AnyCast<std::shared_ptr<Plugin::SurfaceAllocator>>(ite->second);
+        }
+    }
+#endif
+    return plugin_->GetAllocator();
+}
+
 ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
 {
     uint32_t bufferCnt = 0;
@@ -257,20 +278,7 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
         return ErrorCode::ERROR_UNIMPLEMENTED;
     }
 
-    std::shared_ptr<Allocator> outAllocator {nullptr};
-
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
-    // Use sink allocator first, zero copy while passing data
-    if (capNegWithDownstream_.extraParams.find(Tag::BUFFER_ALLOCATOR) != capNegWithDownstream_.extraParams.end()) {
-        auto sinkAllocatorAny = capNegWithDownstream_.extraParams[Tag::BUFFER_ALLOCATOR];
-        if (sinkAllocatorAny.Type() == typeid(std::shared_ptr<Plugin::SurfaceAllocator>)) {
-            outAllocator = Plugin::AnyCast<std::shared_ptr<Plugin::SurfaceAllocator>>(sinkAllocatorAny);
-        }
-    }
-#endif
-    if (outAllocator == nullptr) {
-        outAllocator = plugin_->GetAllocator();
-    }
+    std::shared_ptr<Allocator> outAllocator = DecideOutPutAllocator();
     if (outAllocator == nullptr) {
         MEDIA_LOG_I("plugin doest not support out allocator, using framework allocator");
         outBufPool_->Init(bufferSize, Plugin::BufferMetaType::VIDEO);

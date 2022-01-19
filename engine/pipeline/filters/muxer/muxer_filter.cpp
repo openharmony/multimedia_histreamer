@@ -93,8 +93,11 @@ bool MuxerFilter::UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::Plugin
     return true;
 }
 
-bool MuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Capability>& upstreamCap,
-                            Capability& upstreamNegotiatedCap)
+bool MuxerFilter::Negotiate(const std::string& inPort,
+                            const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                            Plugin::Capability& negotiatedCap,
+                            const Plugin::TagMap& upstreamParams,
+                            Plugin::TagMap& downstreamParams)
 {
     if (state_ != FilterState::PREPARING) {
         MEDIA_LOG_W("decoder filter is not in preparing when negotiate");
@@ -119,7 +122,7 @@ bool MuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<con
     }
     auto muxerCap = std::make_shared<Capability>(containerMime_);
     Capability downCap;
-    if (!outPorts_[0]->Negotiate(muxerCap, downCap)) {
+    if (!outPorts_[0]->Negotiate(muxerCap, downCap, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("downstream of muxer filter negotiate failed");
         return false;
     }

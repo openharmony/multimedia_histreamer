@@ -37,8 +37,11 @@ void OutputSinkFilter::Init(EventReceiver *receiver, FilterCallback *callback)
     FilterBase::Init(receiver, callback);
     outPorts_.clear();
 }
-bool OutputSinkFilter::Negotiate(const std::string &inPort, const std::shared_ptr<const Capability> &upstreamCap,
-                                 Capability &upstreamNegotiatedCap)
+bool OutputSinkFilter::Negotiate(const std::string &inPort,
+                                 const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                                 Plugin::Capability& negotiatedCap,
+                                 const Plugin::TagMap& upstreamParams,
+                                 Plugin::TagMap& downstreamParams)
 {
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::OUTPUT_SINK);
     if (candidatePlugins.empty()) {
@@ -54,10 +57,10 @@ bool OutputSinkFilter::Negotiate(const std::string &inPort, const std::shared_pt
         if (Plugin::AnyCast<Plugin::OutputType>(tmp) == outputType_) {
             if (selectedPluginInfo == nullptr) {
                 selectedPluginInfo = candidate.first;
-                upstreamNegotiatedCap = candidate.second;
+                negotiatedCap = candidate.second;
             } else if (candidate.first->rank > selectedPluginInfo->rank) {
                 selectedPluginInfo = candidate.first;
-                upstreamNegotiatedCap = candidate.second;
+                negotiatedCap = candidate.second;
             }
         }
     }

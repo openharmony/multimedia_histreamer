@@ -79,7 +79,9 @@ ErrorCode AudioEncoderFilter::SetAudioEncoder(int32_t sourceId, std::shared_ptr<
 
 bool AudioEncoderFilter::Negotiate(const std::string& inPort,
                                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                                   Capability& upstreamNegotiatedCap)
+                                   Plugin::Capability& negotiatedCap,
+                                   const Plugin::TagMap& upstreamParams,
+                                   Plugin::TagMap& downstreamParams)
 {
     PROFILE_BEGIN("Audio Encoder Negotiate begin");
     if (state_ != FilterState::PREPARING) {
@@ -112,7 +114,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
             }
             atLeastOutCapMatched = true;
             thisOut->mime = outCap.mime;
-            if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_)) {
+            if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_, upstreamParams, downstreamParams)) {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
                 MEDIA_LOG_I("choose plugin %s as working plugin", candidate.first->name.c_str());
@@ -135,7 +137,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
         [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
         return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
     });
-    upstreamNegotiatedCap = *upstreamCap;
+    negotiatedCap = *upstreamCap;
     PROFILE_END("audio encoder negotiate end");
     return res;
 }

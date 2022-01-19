@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #include "surface_memory.h"
 #include <utility>
@@ -27,28 +28,45 @@ SurfaceMemory::SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocat
     size_t allocSize = align ? (capacity + align - 1) : capacity;
     FALSE_RETURN(this->allocator != nullptr && this->allocator->GetMemoryType() == MemoryType::SURFACE_BUFFER);
     auto surfaceAllocator = std::dynamic_pointer_cast<SurfaceAllocator>(this->allocator);
-    surfaceBuffer = surfaceAllocator->AllocSurfaceBuffer(allocSize);
+    surfaceBuffer_ = surfaceAllocator->AllocSurfaceBuffer(allocSize);
 }
 
 SurfaceMemory::~SurfaceMemory()
 {
     auto surfaceAllocator = std::dynamic_pointer_cast<SurfaceAllocator>(this->allocator);
-    surfaceAllocator->FreeSurfaceBuffer(surfaceBuffer);
+    if (surfaceAllocator && surfaceBuffer_) {
+        surfaceAllocator->FreeSurfaceBuffer(surfaceBuffer_);
+    }
 }
 
 sptr<SurfaceBuffer> SurfaceMemory::GetSurfaceBuffer()
 {
-    return surfaceBuffer;
+    return surfaceBuffer_;
+}
+
+void SurfaceMemory::SetFenceFd(int32_t& fd)
+{
+    fenceFd_ = fd;
 }
 
 int32_t SurfaceMemory::GetFenceFd()
 {
-    return fenceFd;
+    return fenceFd_;
+}
+
+BufferHandle *SurfaceMemory::GetBufferHandle()
+{
+    if (surfaceBuffer_) {
+        return surfaceBuffer_->GetBufferHandle();
+    }
 }
 
 uint8_t* SurfaceMemory::GetRealAddr() const
 {
-    return static_cast<uint8_t*>(surfaceBuffer->GetVirAddr());
+    if (surfaceBuffer_) {
+        return static_cast<uint8_t *>(surfaceBuffer_->GetVirAddr());
+    }
+    return nullptr;
 }
 } // namespace Plugin
 } // namespace Media

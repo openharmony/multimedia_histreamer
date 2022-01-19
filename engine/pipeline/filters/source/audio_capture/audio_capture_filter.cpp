@@ -397,7 +397,9 @@ bool AudioCaptureFilter::DoNegotiate(const CapabilitySet &outCaps)
         if (bitRateSpecified_) {
             thisOut->keys[Capability::Key::MEDIA_BITRATE] = bitRate_;
         }
-        if (outPorts_[0]->Negotiate(thisOut, capNegWithDownstream_)) {
+        Plugin::TagMap upstreamParams;
+        Plugin::TagMap downstreamParams;
+        if (outPorts_[0]->Negotiate(thisOut, capNegWithDownstream_, upstreamParams, downstreamParams)) {
             MEDIA_LOG_I("Negotiate success");
             return true;
         }

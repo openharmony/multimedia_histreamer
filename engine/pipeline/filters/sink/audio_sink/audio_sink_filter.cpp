@@ -85,8 +85,11 @@ ErrorCode AudioSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
     return TranslatePluginStatus(plugin_->GetParameter(tag, value));
 }
 
-bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                                Capability& upstreamNegotiatedCap)
+bool AudioSinkFilter::Negotiate(const std::string& inPort,
+                                const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                                Plugin::Capability& negotiatedCap,
+                                const Plugin::TagMap& upstreamParams,
+                                Plugin::TagMap& downstreamParams)
 {
     MEDIA_LOG_I("audio sink negotiate started");
     PROFILE_BEGIN("Audio Sink Negotiate begin");
@@ -103,9 +106,7 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
             return false;
         }
     }
-
-    upstreamNegotiatedCap = candidatePlugins[0].second;
-
+    negotiatedCap = candidatePlugins[0].second;
     auto res = UpdateAndInitPluginByInfo<Plugin::AudioSink>(plugin_, pluginInfo_, selectedPluginInfo,
         [](const std::string& name) -> std::shared_ptr<Plugin::AudioSink> {
         return Plugin::PluginManager::Instance().CreateAudioSinkPlugin(name);

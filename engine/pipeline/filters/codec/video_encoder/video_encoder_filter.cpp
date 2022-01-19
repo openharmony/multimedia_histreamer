@@ -139,7 +139,9 @@ ErrorCode VideoEncoderFilter::SetVideoEncoder(int32_t sourceId, OHOS::Media::Plu
 
 bool VideoEncoderFilter::Negotiate(const std::string& inPort,
                                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                                   Capability& upstreamNegotiatedCap)
+                                   Plugin::Capability& negotiatedCap,
+                                   const Plugin::TagMap& upstreamParams,
+                                   Plugin::TagMap& downstreamParams)
 {
     PROFILE_BEGIN("video encoder negotiate start");
     if (state_ != FilterState::PREPARING) {
@@ -164,7 +166,7 @@ bool VideoEncoderFilter::Negotiate(const std::string& inPort,
             }
             atLeastOutCapMatched = true;
             thisOut->mime = outCap.mime;
-            if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_)) {
+            if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_, upstreamParams, downstreamParams)) {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
                 MEDIA_LOG_I("choose plugin %s as working parameter", candidate.first->name.c_str());

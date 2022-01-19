@@ -205,12 +205,17 @@ ErrorCode DemuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer,
     return ErrorCode::SUCCESS;
 }
 
-bool DemuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                              Capability& upstreamNegotiatedCap)
+bool DemuxerFilter::Negotiate(const std::string& inPort,
+                              const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                              Plugin::Capability& negotiatedCap,
+                              const Plugin::TagMap& upstreamParams,
+                              Plugin::TagMap& downstreamParams)
 {
     (void)inPort;
     (void)upstreamCap;
-    (void)upstreamNegotiatedCap;
+    (void)negotiatedCap;
+    (void)upstreamParams;
+    (void)downstreamParams;
     return true;
 }
 
@@ -463,7 +468,10 @@ void DemuxerFilter::NegotiateDownstream()
             MEDIA_LOG_I("demuxer negotiate with trackId: %u", stream.trackId);
             auto streamMeta = GetTrackMeta(stream.trackId);
             auto tmpCap = MetaToCapability(*streamMeta);
-            if (stream.port->Negotiate(tmpCap, caps) && stream.port->Configure(streamMeta)) {
+            Plugin::TagMap upstreamParams;
+            Plugin::TagMap downstreamParams;
+            if (stream.port->Negotiate(tmpCap, caps, upstreamParams, downstreamParams) &&
+                stream.port->Configure(streamMeta)) {
                 stream.needNegoCaps = false;
             } else {
                 task_->PauseAsync();

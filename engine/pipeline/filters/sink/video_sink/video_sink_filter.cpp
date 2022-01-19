@@ -94,8 +94,34 @@ ErrorCode VideoSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
     return TranslatePluginStatus(plugin_->GetParameter(tag, value));
 }
 
-bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                                Capability& upstreamNegotiatedCap)
+void VideoSinkFilter::HandleNegotiateParams(const Plugin::TagMap& upstreamParams, Plugin::TagMap& downstreamParams)
+{
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+    Plugin::Tag tag = Plugin::Tag::VIDEO_MAX_SURFACE_NUM;
+    auto ite = upstreamParams.find(tag);
+    if (ite != std::end(upstreamParams)) {
+        if (ite->second.Type() == typeid(uint32_t)) {
+            auto ret = plugin_->SetParameter(tag, Plugin::AnyCast<uint32_t>(ite->second));
+            if (ret != Plugin::Status::OK) {
+                MEDIA_LOG_W("Set max surface num to plugin fail");
+            }
+        }
+    }
+    auto pluginAllocator = plugin_->GetAllocator();
+    if (pluginAllocator != nullptr && pluginAllocator->GetMemoryType() == Plugin::MemoryType::SURFACE_BUFFER) {
+        // Warning: currently assume BUFFER_ALLOCATOR always SurfaceAllocator
+        // It's better to pass pluginAllocator directly, but I'm afraid we can not get subclass obj from any.
+        auto allocator = std::dynamic_pointer_cast<Plugin::SurfaceAllocator>(pluginAllocator);
+        downstreamParams.emplace(std::make_pair(Tag::BUFFER_ALLOCATOR, allocator));
+    }
+#endif
+}
+
+bool VideoSinkFilter::Negotiate(const std::string& inPort,
+                                const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                                Plugin::Capability& negotiatedCap,
+                                const Plugin::TagMap& upstreamParams,
+                                Plugin::TagMap& downstreamParams)
 {
     PROFILE_BEGIN("video sink negotiate start");
     if (state_ != FilterState::PREPARING) {
@@ -116,20 +142,12 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort, const std::shared_ptr
             return false;
         }
     }
-    upstreamNegotiatedCap = candidatePlugins[0].second;
+    negotiatedCap = candidatePlugins[0].second;
     auto res = UpdateAndInitPluginByInfo<Plugin::VideoSink>(plugin_, pluginInfo_, selectedPluginInfo,
         [](const std::string& name) -> std::shared_ptr<Plugin::VideoSink> {
         return Plugin::PluginManager::Instance().CreateVideoSinkPlugin(name);
     });
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
-    auto pluginAllocator = plugin_->GetAllocator();
-    if (pluginAllocator != nullptr && pluginAllocator->GetMemoryType() == Plugin::MemoryType::SURFACE_BUFFER) {
-        // Warning: currently assume BUFFER_ALLOCATOR always SurfaceAllocator
-        // It's better to pass pluginAllocator directly, but I'm afraid we can not get subclass obj from any.
-        auto allocator = std::dynamic_pointer_cast<Plugin::SurfaceAllocator>(pluginAllocator);
-        upstreamNegotiatedCap.extraParams.emplace(std::make_pair(Tag::BUFFER_ALLOCATOR, allocator));
-    }
-#endif
+    HandleNegotiateParams(upstreamParams, downstreamParams);
     PROFILE_END("video sink negotiate end");
     return res;
 }
@@ -205,14 +223,14 @@ bool VideoSinkFilter::DoSync(int64_t pts) const
         return false;
     }
     if (delta > 0) {
-        tempOut = HstTime2Ms(delta);
+        tempOut = Plugin::HstTime2Ms(delta);
         if (tempOut > 100) { // 100ms
             MEDIA_LOG_E("DoSync early %" PRId64 " ms", tempOut);
             OHOS::Media::OSAL::SleepFor(tempOut);
             return true;
         }
     } else if (delta < 0) {
-        tempOut = HstTime2Ms(-delta);
+        tempOut = Plugin::HstTime2Ms(-delta);
         if (tempOut > 40) { // 40ms drop frame
             MEDIA_LOG_E("DoSync later %" PRId64 " ms", tempOut);
             return false;

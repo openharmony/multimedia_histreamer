@@ -38,8 +38,11 @@ public:
 
     ErrorCode Prepare() override;
 
-    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                   Capability& upstreamNegotiatedCap) override;
+    bool Negotiate(const std::string& inPort,
+                   const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Plugin::Capability& negotiatedCap,
+                   const Plugin::TagMap& upstreamParams,
+                   Plugin::TagMap& downstreamParams) override;
 
     uint32_t CalculateBufferSize(const std::shared_ptr<const Plugin::Meta> &meta);
 
