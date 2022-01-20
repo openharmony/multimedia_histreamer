@@ -27,7 +27,6 @@ using namespace Pipeline;
 HiRecorderImpl::HiRecorderImpl() : fsm_(*this), curFsmState_(StateId::INIT)
 {
     MEDIA_LOG_I("hiRecorderImpl ctor");
-
     FilterFactory::Instance().Init();
     muxer_ = FilterFactory::Instance().CreateFilterWithType<MuxerFilter>(
             "builtin.recorder.muxer", "muxer");
@@ -147,7 +146,8 @@ sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
 
 int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
 {
-    ErrorCode ret = fsm_.SendEvent(Intent::SET_OUTPUT_FORMAT, g_outputFormatToMimeMap.at(format));
+    containerMime_ = g_outputFormatToMimeMap.at(format);
+    ErrorCode ret = fsm_.SendEvent(Intent::SET_OUTPUT_FORMAT, containerMime_);
     if (ret != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("SetOutputFormat failed with error %d", static_cast<int>(ret));
     }
@@ -351,9 +351,14 @@ ErrorCode HiRecorderImpl::DoConfigure(const Plugin::Any &param) const
             ret = audioEncoder_->SetAudioEncoder(sourceId,encoderMeta);
             break;
         }
-        case RecorderPublicParamType::OUT_PATH:
-            ret = outputSink_->SetOutputPath(Plugin::AnyCast<OutFilePath>(any).path);
+        case RecorderPublicParamType::OUT_PATH: {
+            auto filePath = Plugin::AnyCast<OutFilePath>(any).path;
+            if (IsDirectory(filePath)) {
+                filePath = ConvertDirPathToFilePath(filePath, containerMime_);
+            }
+            ret = outputSink_->SetOutputPath(filePath);
             break;
+        }
         case RecorderPublicParamType::OUT_FD:
             ret = outputSink_->SetFd(Plugin::AnyCast<OutFd>(any).fd);
             break;

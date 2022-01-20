@@ -82,6 +82,7 @@ public:
     ErrorCode DoStop(const Plugin::Any& param) override;
     ErrorCode DoOnComplete() override;
 private:
+    std::string  containerMime_;
     OSAL::Mutex stateMutex_ {};
     OSAL::ConditionVariable cond_ {};
     StateMachine fsm_;

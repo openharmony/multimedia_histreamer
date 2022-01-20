@@ -29,6 +29,8 @@ int TransErrorCode(ErrorCode errorCode);
 Plugin::SrcInputType TransAudioInputType(OHOS::Media::AudioSourceType sourceType);
 Plugin::SrcInputType TransVideoInputType(OHOS::Media::VideoSourceType sourceType);
 bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& encoderMeta);
+bool IsDirectory(const std::string& path);
+std::string ConvertDirPathToFilePath(const std::string& dirPath, const std::string& containerMime);
 
 struct RecordParam {
     int32_t sourceId;

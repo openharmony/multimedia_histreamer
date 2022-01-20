@@ -12,10 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <regex>
+#include <sys/stat.h>
 #include "recorder/standard/media_utils.h"
 #include "media_errors.h"
 #include "plugin/common/plugin_audio_tags.h"
+
 namespace OHOS {
 namespace Media {
 namespace {
@@ -82,6 +84,34 @@ bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& e
             break;
     }
     return false;
+}
+bool IsDirectory(const std::string& path)
+{
+    struct stat s;
+    return  ((stat(path.c_str(), &s) == 0) && S_ISDIR(s.st_mode)) ? true :false;
+}
+std::string ConvertDirPathToFilePath(const std::string& dirPath, const std::string& containerMime)
+{
+    std::regex reg("\\\\");
+    auto filePath = std::regex_replace(dirPath, reg, "/") ;
+    if (filePath[filePath.size() - 1] != '/') {
+        filePath += "/";
+    }
+    auto currtime = time(nullptr);
+    auto p = localtime(&currtime);
+    char timeStamp[24] = { 0 }; /// magic number 24
+    sprintf_s(timeStamp, sizeof(timeStamp), "%d%02d%02d%02d%02d%02d", p->tm_year + 1900,
+              p->tm_mon + 1, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec);
+    if (containerMime == MEDIA_MIME_AUDIO_MPEG) {
+        filePath += "AUDIO_";
+        filePath += timeStamp;
+        filePath += ".mp3";
+    } else if (containerMime == MEDIA_MIME_CONTAINER_MP4) {
+        filePath += "VIDEO_";
+        filePath += timeStamp;
+        filePath += ".mp4";
+    }
+    return filePath;
 }
 }  // namespace Record
 }  // namespace Media

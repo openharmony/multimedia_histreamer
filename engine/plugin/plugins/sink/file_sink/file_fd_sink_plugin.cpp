@@ -15,6 +15,7 @@
 #define HST_LOG_TAG "FileFdSinkPlugin"
 
 #include "file_fd_sink_plugin.h"
+#include <sys/stat.h>
 #ifdef WIN32
 #include <fcntl.h>
 #else
@@ -58,7 +59,8 @@ Status FileFdSinkPlugin::SetSink(const Plugin::ValueType& sink)
         return Status::ERROR_INVALID_PARAMETER;
     }
     fd_ =  Plugin::AnyCast<int32_t>(sink);
-    return Status::OK;
+    struct stat s;
+    return ((fstat(fd_, &s) == 0) && S_ISREG(s.st_mode)) ? Status::OK : Status::ERROR_INVALID_PARAMETER;
 }
 
 bool FileFdSinkPlugin::IsSeekable()
