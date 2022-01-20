@@ -18,6 +18,7 @@
 #include "hst_engine_factory.h"
 #include <memory>
 #include "foundation/log.h"
+#include "parameter.h"
 #include "player/standard/hiplayer_impl.h"
 #include "recorder/standard/hirecorder_impl.h"
 
@@ -25,9 +26,17 @@ namespace OHOS {
 namespace Media {
 int32_t HstEngineFactory::Score(Scene scene, const std::string& uri)
 {
-    // only used for play back and recorder
     MEDIA_LOG_I("Score in");
-    return 0;
+    if (scene == Scene::SCENE_PLAYBACK || scene == Scene::SCENE_RECORDER) {
+        char useHistreamer[10] = {0}; // 10 for system parameter usage
+        auto res = GetParameter("debug.media_service.histreamer", "0", useHistreamer,
+            sizeof(useHistreamer));
+        if (res == 1 && useHistreamer[0] == '1') {
+            MEDIA_LOG_I("enable histreamer");
+            return MAX_SCORE;
+        }
+    }
+    return MIN_SCORE;
 }
 
 std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine()
