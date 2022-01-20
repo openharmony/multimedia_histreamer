@@ -19,6 +19,7 @@
 #include <cstdint>
 #include "audio_info.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "plugin/common/plugin_types.h"
 
 namespace OHOS {
 namespace Media {
@@ -31,6 +32,7 @@ bool PluginFmt2SampleFmt(OHOS::Media::Plugin::AudioSampleFormat pFmt, OHOS::Audi
 
 bool ChannelNumEnum2Num(OHOS::AudioStandard::AudioChannel enumVal, uint32_t& numVal);
 bool ChannelNumNum2Enum(uint32_t numVal, OHOS::AudioStandard::AudioChannel& enumVal);
+Plugin::Status Error2Status(int32_t err);
 } // AuCapturePlugin
 } // Media
 } // OHOS

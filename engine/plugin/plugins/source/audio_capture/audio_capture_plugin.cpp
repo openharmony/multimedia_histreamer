@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cmath>
 #include "audio_type_translate.h"
+#include "errors.h"
 #include "foundation/log.h"
 #include "plugin/common/plugin_time.h"
 #include "utils/utils.h"
@@ -111,6 +112,15 @@ namespace Media {
 namespace AuCapturePlugin {
 using namespace OHOS::Media::Plugin;
 
+#define FAIL_LOG_RETURN(exec, msg) \
+do { \
+    auto ret = exec; \
+    if (ret != ERR_OK) { \
+        MEDIA_LOG_E(msg " failed return %d", ret); \
+        return Error2Status(ret); \
+    } \
+} while (0)
+
 void* AudioCaptureAllocator::Alloc(size_t size)
 {
     if (size == 0) {
@@ -178,20 +188,15 @@ Status AudioCapturePlugin::Prepare()
             break;
         }
     }
+
     if (audioEncoding != AudioStandard::ENCODING_PCM) {
         MEDIA_LOG_E("audioCapturer do not support pcm encoding");
         return Status::ERROR_UNKNOWN;
     }
     capturerParams_.audioEncoding = AudioStandard::ENCODING_PCM;
-    if (audioCapturer_->SetParams(capturerParams_)) {
-        MEDIA_LOG_E("audioCapturer SetParams() fail");
-        return Status::ERROR_UNKNOWN;
-    }
+    FAIL_LOG_RETURN(audioCapturer_->SetParams(capturerParams_), "audioCapturer SetParam");
     size_t size;
-    if (audioCapturer_->GetBufferSize(size)) {
-        MEDIA_LOG_E("audioCapturer GetBufferSize() fail");
-        return Status::ERROR_UNKNOWN;
-    }
+    FAIL_LOG_RETURN(audioCapturer_->GetBufferSize(size), "audioCapturer GetBufferSize");
     if (size >= MAX_CAPTURE_BUFFER_SIZE) {
         MEDIA_LOG_E("bufferSize is too big: %zu", size);
         return Status::ERROR_INVALID_PARAMETER;
@@ -207,7 +212,6 @@ Status AudioCapturePlugin::Reset()
     if (audioCapturer_->GetStatus() == AudioStandard::CapturerState::CAPTURER_RUNNING) {
         if (!audioCapturer_->Stop()) {
             MEDIA_LOG_E("Stop audioCapturer fail");
-            return Status::ERROR_UNKNOWN;
         }
     }
     bufferSize_ = 0;
@@ -228,7 +232,7 @@ Status AudioCapturePlugin::Start()
         return Status::ERROR_WRONG_STATE;
     }
     if (!audioCapturer_->Start()) {
-        MEDIA_LOG_E("Start audioCapturer fail");
+        MEDIA_LOG_E("audioCapturer start failed");
         return Status::ERROR_UNKNOWN;
     }
     if (isStop_) {
@@ -254,7 +258,6 @@ Status AudioCapturePlugin::Stop()
     }
     if (!audioCapturer_->Stop()) {
         MEDIA_LOG_E("Stop audioCapturer fail");
-        return Status::ERROR_UNKNOWN;
     }
     if (!isStop_) {
         stopTimestampNs_ = curTimestampNs_;
@@ -273,10 +276,10 @@ Status AudioCapturePlugin::GetParameter(Tag tag, ValueType& value)
 {
     MEDIA_LOG_D("IN");
     AudioStandard::AudioCapturerParams params;
-    if (!audioCapturer_ || !audioCapturer_->GetParams(params)) {
-        MEDIA_LOG_E("audioCapturer GetParams() fail");
-        return Status::ERROR_UNKNOWN;
+    if (!audioCapturer_) {
+        return Plugin::Status::ERROR_WRONG_STATE;
     }
+    FAIL_LOG_RETURN(audioCapturer_->GetParams(params), "audioCapturer GetParams");
     switch (tag) {
         case Tag::AUDIO_SAMPLE_RATE: {
             if (params.samplingRate != capturerParams_.samplingRate) {
@@ -320,18 +323,13 @@ bool AudioCapturePlugin::AssignSampleRateIfSupported(uint32_t sampleRate)
         MEDIA_LOG_E("sample rate %" PRIu32 "not supported", sampleRate);
         return false;
     }
-    auto supportedSampleRateList = OHOS::AudioStandard::AudioCapturer::GetSupportedSamplingRates();
-    if (supportedSampleRateList.empty()) {
-        MEDIA_LOG_E("GetSupportedSamplingRates() fail");
-        return false;
-    }
-    return std::any_of(supportedSampleRateList.begin(), supportedSampleRateList.end(),
-        [aRate, this] (const auto& rate) {
-        if (rate == aRate) {
+    for (const auto& rate : AudioStandard::AudioCapturer::GetSupportedSamplingRates()) {
+        if (rate == sampleRate) {
             capturerParams_.samplingRate = rate;
+            return true;
         }
-        return rate == aRate;
-    });
+    }
+    return false;
 }
 
 bool AudioCapturePlugin::AssignChannelNumIfSupported(uint32_t channelNum)
@@ -345,18 +343,13 @@ bool AudioCapturePlugin::AssignChannelNumIfSupported(uint32_t channelNum)
         MEDIA_LOG_E("sample rate %" PRIu32 "not supported", channelNum);
         return false;
     }
-    auto supportedChannelsList = OHOS::AudioStandard::AudioCapturer::GetSupportedChannels();
-    if (supportedChannelsList.empty()) {
-        MEDIA_LOG_E("GetSupportedChannels() fail");
-        return false;
-    }
-    return std::any_of(supportedChannelsList.begin(), supportedChannelsList.end(),
-        [aChannel, this] (const auto& channel) {
-        if (channel == aChannel) {
+    for (const auto& channel : AudioStandard::AudioCapturer::GetSupportedChannels()) {
+        if (channel == channelNum) {
             capturerParams_.audioChannel = channel;
+            return true;
         }
-        return channel == aChannel;
-    });
+    }
+    return false;
 }
 
 bool AudioCapturePlugin::AssignSampleFmtIfSupported(Plugin::AudioSampleFormat sampleFormat)
@@ -366,19 +359,13 @@ bool AudioCapturePlugin::AssignSampleFmtIfSupported(Plugin::AudioSampleFormat sa
         MEDIA_LOG_E("sample format %hhu not supported", sampleFormat);
         return false;
     }
-    auto supportedFormatsList = OHOS::AudioStandard::AudioCapturer::GetSupportedFormats();
-    if (supportedFormatsList.empty()) {
-        MEDIA_LOG_E("GetSupportedFormats() fail");
-        return false;
-    }
-    return std::any_of(supportedFormatsList.begin(), supportedFormatsList.end(),
-        [aFmt, this] (const auto& fmt) {
-        if (aFmt == fmt) {
+    for (const auto& fmt : AudioStandard::AudioCapturer::GetSupportedFormats()) {
+        if (fmt == aFmt) {
             capturerParams_.audioSampleFormat = fmt;
-            MEDIA_LOG_D("audioSampleFormat: %u", capturerParams_.audioSampleFormat);
+            return true;
         }
-        return aFmt == fmt;
-    });
+    }
+    return false;
 }
 
 Status AudioCapturePlugin::SetParameter(Tag tag, const ValueType& value)
@@ -458,7 +445,7 @@ Status AudioCapturePlugin::GetAudioTime(uint64_t &audioTimeNs)
     if (timeStamp.time.tv_sec < 0 || timeStamp.time.tv_nsec < 0) {
         return Status::ERROR_INVALID_PARAMETER;
     }
-    if ((UINT64_MAX - timeStamp.time.tv_nsec) / TIME_SEC_TO_NS > timeStamp.time.tv_sec) {
+    if ((UINT64_MAX - timeStamp.time.tv_nsec) / TIME_SEC_TO_NS < timeStamp.time.tv_sec) {
         return Status::ERROR_INVALID_PARAMETER;
     }
     audioTimeNs = timeStamp.time.tv_sec * TIME_SEC_TO_NS + timeStamp.time.tv_nsec;
