@@ -45,7 +45,6 @@ source_set("histreamer_player") {
   ]
   public_configs = [ ":histreamer_player_config" ]
   public_deps = [
-    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
@@ -68,6 +67,7 @@ source_set("histreamer_player") {
       "//foundation/multimedia/histreamer/engine/player/standard/media_utils.cpp",
     ]
     public_deps += [
+      "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
       "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
       "//foundation/graphic/standard/frameworks/surface:surface",
       "//foundation/multimedia/media_standard/services/utils:media_format",
