@@ -108,7 +108,7 @@ private:
 
     bool CheckReformat();
 
-    void ReSample();
+    void FillInFrameCache(const std::shared_ptr<Memory>& mem);
 
     mutable OSAL::Mutex parameterMutex_ {};
     std::map<Tag, ValueType> audioParameter_ {};
@@ -117,12 +117,15 @@ private:
     std::shared_ptr<const AVCodec> avCodec_ {nullptr};
     std::shared_ptr<AVCodecContext> avCodecContext_ {nullptr};
     AVFrame* cachedFrame_ {nullptr};
+    uint32_t fullInputFrameSize_ {0};
     std::shared_ptr<Buffer> outBuffer_ {nullptr};
     uint64_t prev_pts_;
     bool needReformat_ {false};
     AVSampleFormat sourceFmt_ {AVSampleFormat::AV_SAMPLE_FMT_NONE};
+    uint32_t sourceBytesPerSample {0};
     std::shared_ptr<SwrContext> swrCtx_ {nullptr};
     std::vector<uint8_t> resampleCache_ {};
+    std::vector<uint8_t*> resampleChannelAddr_ {};
 };
 } // namespace Plugin
 } // namespace Media

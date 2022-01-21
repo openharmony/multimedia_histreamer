@@ -17,13 +17,15 @@
 #define HISTREAMER_RING_BUFFER_H
 
 #include <atomic>
-#include <condition_variable>
 #include <memory>
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/osal/thread/scoped_lock.h"
 #include "utils/memory_helper.h"
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Histreamer {
 class RingBuffer {
 public:
     explicit RingBuffer(size_t bufferSize) : bufferSize_(bufferSize)
@@ -40,7 +42,7 @@ public:
 
     size_t ReadBuffer(void* ptr, size_t readSize)
     {
-        std::unique_lock<std::mutex> lck(writeMutex_);
+        OSAL::ScopedLock lck(writeMutex_);
         if (!isActive_) {
             return 0;
         }
@@ -55,18 +57,18 @@ public:
                            available - (bufferSize_ - index));
         }
         head_ += available;
-        writeCondition_.notify_one();
+        writeCondition_.NotifyOne();
         return available;
     }
 
     void WriteBuffer(void* ptr, size_t writeSize)
     {
-        std::unique_lock<std::mutex> lck(writeMutex_);
+        OSAL::ScopedLock lck(writeMutex_);
         if (!isActive_) {
             return;
         }
         while (writeSize + tail_ > head_ + bufferSize_) {
-            writeCondition_.wait(lck);
+            writeCondition_.Wait(lck);
             if (!isActive_) {
                 return;
             }
@@ -84,12 +86,12 @@ public:
 
     void SetActive(bool active)
     {
-        std::unique_lock<std::mutex> lck(writeMutex_);
+        OSAL::ScopedLock lck(writeMutex_);
         isActive_ = active;
         if (!active) {
             head_ = 0;
             tail_ = 0;
-            writeCondition_.notify_one();
+            writeCondition_.NotifyOne();
         }
     }
 
@@ -103,12 +105,12 @@ private:
     std::unique_ptr<uint8_t[]> buffer_;
     size_t head_ {0}; // head
     size_t tail_ {0}; // tail
-    std::mutex writeMutex_ {};
-    std::condition_variable writeCondition_ {};
+    OSAL::Mutex writeMutex_ {};
+    OSAL::ConditionVariable writeCondition_ {};
     bool isActive_ {true};
 };
-} // namespace Plugin
+} // namespace Histreamer
 } // namespace Media
 } // namespace OHOS
 
-#endif // MEDIA_PIPELINE_RING_BUFFER_H
+#endif // HISTREAMER_RING_BUFFER_H

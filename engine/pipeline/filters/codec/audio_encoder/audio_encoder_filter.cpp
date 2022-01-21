@@ -229,7 +229,7 @@ ErrorCode AudioEncoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
             outBufferPool_->Append(std::move(buf));
         }
     }
-    rb = MemoryHelper::make_unique<Plugin::RingBuffer>(frameSize_ * 10); // 最大缓存10帧
+    rb = MemoryHelper::make_unique<Histreamer::RingBuffer>(frameSize_ * 10); // 最大缓存10帧
     if (!rb) {
         MEDIA_LOG_E("create ring buffer fail");
         return ErrorCode::ERROR_NO_MEMORY;

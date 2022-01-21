@@ -308,6 +308,7 @@ Status FFmpegMuxerPlugin::InitFormatCtxLocked()
             return Status::ERROR_NO_MEMORY;
         }
         fmt->pb = ioCtx;
+        fmt->oformat = outputFormat_.get();
         fmt->flags = static_cast<uint32_t>(fmt->flags) | static_cast<uint32_t>(AVFMT_FLAG_CUSTOM_IO);
         formatContext_ = std::shared_ptr<AVFormatContext>(fmt, [](AVFormatContext* ptr) {
             if (ptr) {

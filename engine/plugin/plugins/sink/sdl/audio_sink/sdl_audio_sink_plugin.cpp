@@ -138,7 +138,7 @@ Status SdlAudioSinkPlugin::Prepare()
     int outChannels = av_get_channel_layout_nb_channels(outChannelLayout);
     avFrameSize_ = av_samples_get_buffer_size(nullptr, outChannels, samplesPerFrame_, outSampleFmt, 1);
 
-    rb = MemoryHelper::make_unique<RingBuffer>(avFrameSize_ * 10); // 最大缓存10帧
+    rb = MemoryHelper::make_unique<Histreamer::RingBuffer>(avFrameSize_ * 10); // 最大缓存10帧
     rb->Init();
 
     wantedSpec_.freq = sampleRate_;
