@@ -33,11 +33,8 @@ using namespace OHOS::Media::Plugin;
 using PluginSampleFmt = OHOS::Media::Plugin::AudioSampleFormat;
 constexpr int32_t MAX_RETRY_CNT = 3;
 constexpr int32_t RETRY_INTERVAL = 100; // 100ms
-constexpr int32_t DEFAULT_BUFFER_POOL_SIZE = 5;
 constexpr int32_t HI_ERR_VI_BUF_FULL = 0xA016800F;
 constexpr int32_t RANK100 = 100;
-constexpr int32_t HALF = 2;
-constexpr int32_t SEC_TO_MILLS = 1000;
 constexpr int32_t PCM_CHAN_CNT = 2;
 static std::map<std::string, std::pair<uint32_t, bool>> g_sinkInfos;
 
