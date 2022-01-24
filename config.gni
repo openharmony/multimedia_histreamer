@@ -24,6 +24,7 @@ declare_args() {
   multimedia_histreamer_enable_plugin_aac_demuxer = false
   multimedia_histreamer_enable_plugin_std_audio_capture = false
   multimedia_histreamer_enable_plugin_file_sink = false
+  multimedia_histreamer_enable_plugin_audio_server_sink = false
 
   # configuration for histreamer created thread's stack size.
   # 0 means using system default thread stack size, other positive values will be accepted.

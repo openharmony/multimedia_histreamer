@@ -17,7 +17,8 @@
                 "multimedia_histreamer_enable_plugin_minimp4_demuxer",
                 "multimedia_histreamer_enable_plugin_aac_demuxer",
                 "multimedia_histreamer_enable_plugin_std_audio_capture",
-                "multimedia_histreamer_enable_plugin_file_sink"
+                "multimedia_histreamer_enable_plugin_file_sink",
+                "multimedia_histreamer_enable_plugin_audio_server_sink"
             ]
         }
     }

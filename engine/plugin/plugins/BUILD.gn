@@ -30,6 +30,9 @@ print(
 print(
     "histreamer plugin config:multimedia_histreamer_enable_plugin_stream_source =",
     multimedia_histreamer_enable_plugin_stream_source)
+print(
+    "histreamer plugin config:multimedia_histreamer_enable_plugin_audio_server_sink =",
+    multimedia_histreamer_enable_plugin_audio_server_sink)
 
 group("histreamer_plugin_store") {
   deps = []
@@ -67,6 +70,10 @@ group("histreamer_plugin_store") {
 
   if (multimedia_histreamer_enable_plugin_std_audio_capture) {
     deps += [ "source/audio_capture:plugin_standard_audio_capture" ]
+  }
+
+  if (multimedia_histreamer_enable_plugin_audio_server_sink) {
+    deps += [ "sink/audio_server_sink:plugin_audio_server_sink" ]
   }
 
   if (multimedia_histreamer_enable_plugin_file_sink) {
