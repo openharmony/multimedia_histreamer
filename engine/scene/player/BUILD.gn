@@ -15,7 +15,7 @@
 config("histreamer_player_config") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine",
-    "//foundation/multimedia/histreamer/engine/player",
+    "//foundation/multimedia/histreamer/engine/scene/player",
     "//foundation/multimedia/histreamer/interface",
   ]
   if (defined(ohos_lite)) {
@@ -26,8 +26,8 @@ config("histreamer_player_config") {
     ]
   } else {
     include_dirs += [
-      "//foundation/multimedia/histreamer/engine/factory",
-      "//foundation/multimedia/histreamer/engine/player/standard",
+      "//foundation/multimedia/histreamer/engine/scene/standard",
+      "//foundation/multimedia/histreamer/engine/scene/player/standard",
       "//foundation/multimedia/media_standard/interfaces/innerkits/native/media/include",
       "//foundation/multimedia/image_standard/interfaces/innerkits/include",
       "//foundation/multimedia/media_standard/services/include",
@@ -40,8 +40,8 @@ config("histreamer_player_config") {
 
 source_set("histreamer_player") {
   sources = [
-    "//foundation/multimedia/histreamer/engine/player/internal/state.cpp",
-    "//foundation/multimedia/histreamer/engine/player/internal/state_machine.cpp",
+    "//foundation/multimedia/histreamer/engine/scene/player/internal/state.cpp",
+    "//foundation/multimedia/histreamer/engine/scene/player/internal/state_machine.cpp",
   ]
   public_configs = [ ":histreamer_player_config" ]
   public_deps = [
@@ -56,15 +56,15 @@ source_set("histreamer_player") {
   cflags_cc = cflags
   if (defined(ohos_lite)) {
     sources += [
-      "//foundation/multimedia/histreamer/engine/player/lite/hiplayer.cpp",
-      "//foundation/multimedia/histreamer/engine/player/lite/hiplayer_impl.cpp",
+      "//foundation/multimedia/histreamer/engine/scene/player/lite/hiplayer.cpp",
+      "//foundation/multimedia/histreamer/engine/scene/player/lite/hiplayer_impl.cpp",
     ]
     public_deps += [ "//foundation/multimedia/utils/lite:media_common" ]
   } else {
     sources += [
-      "//foundation/multimedia/histreamer/engine/factory/hst_engine_factory.cpp",
-      "//foundation/multimedia/histreamer/engine/player/standard/hiplayer_impl.cpp",
-      "//foundation/multimedia/histreamer/engine/player/standard/media_utils.cpp",
+      "//foundation/multimedia/histreamer/engine/scene/standard/hst_engine_factory.cpp",
+      "//foundation/multimedia/histreamer/engine/scene/player/standard/hiplayer_impl.cpp",
+      "//foundation/multimedia/histreamer/engine/scene/player/standard/media_utils.cpp",
     ]
     public_deps += [
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",

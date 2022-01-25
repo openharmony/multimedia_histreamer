@@ -27,7 +27,7 @@
 #include "filters/demux/demuxer_filter.h"
 #include "filters/source/media_source/media_source_filter.h"
 #include "foundation/error_code.h"
-#include "histreamer/hiplayer.h"
+#include "scene/lite/hiplayer.h"
 #include "internal/state_machine.h"
 #include "osal/thread/condition_variable.h"
 #include "osal/thread/mutex.h"

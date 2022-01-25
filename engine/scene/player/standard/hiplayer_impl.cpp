@@ -18,7 +18,7 @@
 #include "hiplayer_impl.h"
 #include "foundation/log.h"
 #include "pipeline/factory/filter_factory.h"
-#include "player/standard/media_utils.h"
+#include "scene/player/standard/media_utils.h"
 #include "plugin/common/media_source.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_meta.h"

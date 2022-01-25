@@ -36,7 +36,7 @@
 #include "pipeline/core/pipeline_core.h"
 #include "pipeline/filters/codec/audio_decoder/audio_decoder_filter.h"
 #include "pipeline/filters/sink/audio_sink/audio_sink_filter.h"
-#include "pipeline/pipeline_common/media_stat_stub.h"
+#include "scene/common/media_stat_stub.h"
 #include "play_executor.h"
 #include "utils/utils.h"
 

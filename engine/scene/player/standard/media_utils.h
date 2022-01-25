@@ -13,19 +13,18 @@
  * limitations under the License.
  */
 
-#define HST_LOG_TAG "HiPlayer"
+#ifndef HISTREAMER_MEDIA_UTILS_H
+#define HISTREAMER_MEDIA_UTILS_H
 
-#include "histreamer/hiplayer.h"
-
-#include "hiplayer_impl.h"
-#include "foundation/log.h"
+#include "i_player_engine.h"
+#include "foundation/error_code.h"
+#include "scene/player/internal/state.h"
 
 namespace OHOS {
 namespace Media {
-std::shared_ptr<Media::PlayerInterface> CreateHiPlayer()
-{
-    MEDIA_LOG_W("Histreamer compile time: %s %s", __DATE__, __TIME__);
-    return HiPlayerImpl::CreateHiPlayerImpl();
-}
-} // namespace Media
-} // namespace OHOS
+int TransErrorCode(ErrorCode errorCode);
+PlayerStates TransStateId2PlayerState(StateId state);
+}  // namespace Media
+}  // namespace OHOS
+
+#endif  // HISTREAMER_MEDIA_UTILS_H

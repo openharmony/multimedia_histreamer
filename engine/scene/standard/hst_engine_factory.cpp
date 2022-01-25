@@ -19,8 +19,8 @@
 #include <memory>
 #include "foundation/log.h"
 #include "parameter.h"
-#include "player/standard/hiplayer_impl.h"
-#include "recorder/standard/hirecorder_impl.h"
+#include "scene/player/standard/hiplayer_impl.h"
+#include "scene/recorder/standard/hirecorder_impl.h"
 
 namespace OHOS {
 namespace Media {

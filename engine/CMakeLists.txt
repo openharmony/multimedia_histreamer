@@ -35,11 +35,9 @@ ENDIF (CMAKE_CL_64)
 ######################################################
 # include directories
 include_directories(
-        ${TOP_DIR}/interface
         ${TOP_DIR}/engine
-        ${TOP_DIR}/engine/external
-        ${TOP_DIR}/engine/player
-        ${TOP_DIR}/engine/recorder
+        ${TOP_DIR}/engine/scene/player
+        ${TOP_DIR}/engine/scene/recorder
         ${TOP_DIR}/engine/pipeline
         ${TOP_DIR}/engine/pipeline/core
         ${TOP_DIR}/engine/foundation
@@ -64,8 +62,9 @@ file(GLOB_RECURSE HISTREAMER_BASE_SRCS
         ${TOP_DIR}/engine/plugin/common/*.cpp
         ${TOP_DIR}/engine/plugin/core/*.cpp
         ${TOP_DIR}/engine/plugin/types/*.cpp
-        ${TOP_DIR}/engine/player/internal/*.cpp
-        ${TOP_DIR}/engine/recorder/internal/*.cpp
+        ${TOP_DIR}/engine/scene/player/internal/*.cpp
+        ${TOP_DIR}/engine/scene/recorder/internal/*.cpp
+        ${TOP_DIR}/engine/scene/common/*.cpp
         ${TOP_DIR}/engine/foundation/*.cpp
         ${TOP_DIR}/engine/utils/*.cpp
         )
@@ -82,11 +81,13 @@ file(GLOB_RECURSE COMMON_PLUGIN_SRCS
 if (OHOS_LITE)
     message(STATUS "#1 player lite source")
     file(GLOB_RECURSE PLAYER_SRCS
-            ${TOP_DIR}/engine/player/lite/*.cpp
+            ${TOP_DIR}/engine/scene/lite/*.cpp
+            ${TOP_DIR}/engine/scene/player/lite/*.cpp
             )
     message(STATUS "#1 recorder lite source")
     file(GLOB_RECURSE RECORDER_SRCS
-            ${TOP_DIR}/engine/recorder/lite/*.cpp
+            ${TOP_DIR}/engine/scene/lite/*.cpp
+            ${TOP_DIR}/engine/scene/recorder/lite/*.cpp
             )
     file(GLOB_RECURSE PLAT_PLUGIN_SRCS
             ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
@@ -95,13 +96,13 @@ if (OHOS_LITE)
 else ()
     message(STATUS "player standard source")
     file(GLOB_RECURSE PLAYER_SRCS
-            ${TOP_DIR}/engine/player/standard/*.cpp
-            ${TOP_DIR}/engine/factory/*.cpp
+            ${TOP_DIR}/engine/scene/standard/*.cpp
+            ${TOP_DIR}/engine/scene/player/standard/*.cpp
             )
     message(STATUS "recorder standard source")
     file(GLOB_RECURSE RECORDER_SRCS
-            ${TOP_DIR}/engine/recorder/standard/*.cpp
-            ${TOP_DIR}/engine/factory/*.cpp
+            ${TOP_DIR}/engine/scene/standard/*.cpp
+            ${TOP_DIR}/engine/scene/recorder/standard/*.cpp
             )
     file(GLOB_RECURSE PLAT_PLUGIN_SRCS
             ${TOP_DIR}/engine/plugin/plugins/source/audio_capture/*.cpp

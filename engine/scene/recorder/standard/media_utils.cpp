@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "recorder/standard/media_utils.h"
+#include "media_utils.h"
 #include <regex>
 #include <sys/stat.h>
 #include "media_errors.h"
