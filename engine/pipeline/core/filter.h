@@ -22,7 +22,7 @@
 #include "filter_callback.h"
 #include "foundation/error_code.h"
 #include "utils/constants.h"
-#include "utils/event.h"
+#include "pipeline/pipeline_common/event.h"
 #include "utils/utils.h"
 #include "parameter.h"
 #include "port.h"
@@ -55,7 +55,7 @@ enum class FilterState {
 class EventReceiver {
 public:
     virtual ~EventReceiver() = default;
-    virtual void OnEvent(Event event) = 0;
+    virtual void OnEvent(const Event& event) = 0;
 };
 
 // InfoTransfer:

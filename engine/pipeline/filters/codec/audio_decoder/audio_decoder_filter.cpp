@@ -159,7 +159,6 @@ bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
     }
-
     auto thisMeta = std::make_shared<Plugin::Meta>();
     if (!MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta)) {
         MEDIA_LOG_E("cannot configure decoder plugin since meta is not compatible with negotiated caps");
@@ -177,11 +176,11 @@ bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_
     auto err = ConfigureToStartPluginLocked(thisMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("decoder configure error");
-        OnEvent({EVENT_ERROR, err});
+        OnEvent({name_, EventType::EVENT_ERROR, err});
         return false;
     }
     state_ = FilterState::READY;
-    OnEvent({EVENT_READY});
+    OnEvent({name_, EventType::EVENT_READY, err});
     MEDIA_LOG_I("audio decoder send EVENT_READY");
     PROFILE_END("Audio decoder configure end");
     return true;
@@ -200,7 +199,7 @@ ErrorCode AudioDecoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
     // 每次重新创建bufferPool
     outBufferPool_ = std::make_shared<BufferPool<AVBuffer>>(bufferCnt);
 
-    int32_t bufferSize = CalculateBufferSize(meta);
+    auto bufferSize = CalculateBufferSize(meta);
     if (bufferSize == 0) {
         bufferSize = MAX_OUT_DECODED_DATA_SIZE_PER_FRAME;
     }

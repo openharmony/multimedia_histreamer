@@ -225,17 +225,13 @@ bool DemuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<c
     return upstreamMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_);
 }
 
-ErrorCode DemuxerFilter::SeekTo(int32_t msec)
+ErrorCode DemuxerFilter::SeekTo(int64_t pos)
 {
     if (!plugin_) {
         MEDIA_LOG_E("SeekTo failed due to no valid plugin");
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
-    int64_t hstTime = 0;
-    if (!Plugin::Ms2HstTime(msec, hstTime)) {
-        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
-    }
-    auto rtv = TranslatePluginStatus(plugin_->SeekTo(-1, hstTime, Plugin::SeekMode::BACKWARD));
+    auto rtv = TranslatePluginStatus(plugin_->SeekTo(-1, pos, Plugin::SeekMode::BACKWARD));
     if (rtv == ErrorCode::SUCCESS) {
         if (task_) {
             task_->Start();
@@ -350,7 +346,7 @@ void DemuxerFilter::MediaTypeFound(std::string pluginName)
     if (InitPlugin(std::move(pluginName))) {
         task_->Start();
     } else {
-        OnEvent({EVENT_ERROR, ErrorCode::ERROR_UNSUPPORTED_FORMAT});
+        OnEvent({name_, EventType::EVENT_ERROR, ErrorCode::ERROR_UNSUPPORTED_FORMAT});
     }
 }
 
@@ -475,7 +471,7 @@ void DemuxerFilter::NegotiateDownstream()
                 stream.needNegoCaps = false;
             } else {
                 task_->PauseAsync();
-                OnEvent({EVENT_ERROR, ErrorCode::ERROR_UNSUPPORTED_FORMAT});
+                OnEvent({name_, EventType::EVENT_ERROR, ErrorCode::ERROR_UNSUPPORTED_FORMAT});
             }
         }
     }
@@ -505,11 +501,11 @@ void DemuxerFilter::DemuxerLoop()
             NegotiateDownstream();
             pluginState_ = DemuxerState::DEMUXER_STATE_PARSE_FRAME;
             state_ = FilterState::READY;
-            OnEvent({EVENT_READY, {}});
+            OnEvent({name_, EventType::EVENT_READY, {}});
         } else {
             task_->PauseAsync();
             MEDIA_LOG_E("demuxer filter parse meta failed");
-            OnEvent({EVENT_ERROR, ErrorCode::ERROR_UNKNOWN});
+            OnEvent({name_, EventType::EVENT_ERROR, ErrorCode::ERROR_UNKNOWN});
         }
     }
 }

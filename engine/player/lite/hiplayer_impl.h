@@ -105,7 +105,7 @@ public:
         return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
     }
 
-    void OnEvent(Event event) override;
+    void OnEvent(const Event& event) override;
 
     ErrorCode Resume();
 
@@ -129,7 +129,7 @@ public:
     ErrorCode DoPause() override;
     ErrorCode DoResume() override;
     ErrorCode DoStop() override;
-    ErrorCode DoSeek(bool allowed, int32_t msec) override;
+    ErrorCode DoSeek(bool allowed, int64_t hstTime) override;
     ErrorCode DoOnReady() override;
     ErrorCode DoOnComplete() override;
     ErrorCode DoOnError(ErrorCode) override;

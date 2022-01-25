@@ -23,7 +23,7 @@
 #include "filter.h"
 #include "foundation/error_code.h"
 #include "utils/constants.h"
-#include "utils/event.h"
+#include "pipeline/pipeline_common/event.h"
 #include "utils/utils.h"
 #include "filter_type.h"
 #include "plugin/core/plugin_info.h"
@@ -90,7 +90,7 @@ public:
     }
 
     // Port调用此方法向Filter报告事件
-    void OnEvent(Event event) override;
+    void OnEvent(const Event& event) override;
 
 protected:
     virtual void InitPorts();

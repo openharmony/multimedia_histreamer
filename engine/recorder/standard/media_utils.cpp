@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "recorder/standard/media_utils.h"
 #include <regex>
 #include <sys/stat.h>
-#include "recorder/standard/media_utils.h"
 #include "media_errors.h"
 #include "plugin/common/plugin_audio_tags.h"
-
 namespace OHOS {
 namespace Media {
 namespace {
@@ -85,10 +85,11 @@ bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& e
     }
     return false;
 }
+
 bool IsDirectory(const std::string& path)
 {
-    struct stat s;
-    return  ((stat(path.c_str(), &s) == 0) && S_ISDIR(s.st_mode)) ? true :false;
+    struct stat s {};
+    return ((stat(path.c_str(), &s) == 0) && S_ISDIR(s.st_mode));
 }
 bool ConvertDirPathToFilePath(const std::string& dirPath, OutputFormatType outputFormatType, std::string& filePath)
 {

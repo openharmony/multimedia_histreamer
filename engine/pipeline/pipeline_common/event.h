@@ -16,17 +16,16 @@
 #ifndef HISTREAMER_FOUNDATION_EVENT_H
 #define HISTREAMER_FOUNDATION_EVENT_H
 
-#include "common/any.h"
+#include "plugin/common/any.h"
 
 namespace OHOS {
 namespace Media {
 // 各个组件向Pipeline报告的事件类型
-enum EventType {
+enum struct EventType : uint32_t {
     EVENT_READY = 0,
-    EVENT_AUDIO_PROGRESS, // unit is ms
-    EVENT_VIDEO_PROGRESS, // unit is ms
-    EVENT_AUDIO_COMPLETE,
-    EVENT_VIDEO_COMPLETE,
+    EVENT_AUDIO_PROGRESS, // unit is HST_TIME_BASE
+    EVENT_VIDEO_PROGRESS, // unit is HST_TIME_BASE
+    EVENT_COMPLETE,
     EVENT_ERROR,
     EVENT_BUFFERING,
     EVENT_BUFFER_PROGRESS,
@@ -34,6 +33,7 @@ enum EventType {
 };
 
 struct Event {
+    std::string srcFilter;
     EventType type;
     Plugin::Any param;
 };

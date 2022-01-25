@@ -493,7 +493,6 @@ void AudioFfmpegEncoderPlugin::FillInFrameCache(const std::shared_ptr<Memory>& m
 
 Status AudioFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer)
 {
-    size_t bufferLength = 0;
     bool eos = false;
     if (inputBuffer == nullptr || (inputBuffer->flag & BUFFER_FLAG_EOS) != 0) {
         // eos buffer
@@ -502,8 +501,8 @@ Status AudioFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
         auto inputMemory = inputBuffer->GetMemory();
         if (inputMemory->GetSize() != fullInputFrameSize_) {
             // need more data
-            MEDIA_LOG_W("Not enough data, input: %zu, frameSize: %d",
-                        inputMemory->GetSize(), avCodecContext_->frame_size);
+            MEDIA_LOG_W("Not enough data, input: %zu, fullInputFrameSize: %d",
+                        inputMemory->GetSize(), fullInputFrameSize_);
             return Status::ERROR_NOT_ENOUGH_DATA;
         }
         FillInFrameCache(inputMemory);
@@ -538,9 +537,10 @@ Status AudioFfmpegEncoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>&
     }
     ioInfoMem->Write(packet->data, packet->size);
     // how get perfect pts with upstream pts ?
+    ioInfo->duration = ConvertTimeFromFFmpeg(packet->duration, avCodecContext_->time_base);
     ioInfo->pts = (UINT64_MAX - prev_pts_ < packet->duration) ?
-                  (packet->duration - (UINT64_MAX - prev_pts_)) :
-                  (prev_pts_ + static_cast<uint64_t>(packet->duration));
+                  (ioInfo->duration - (UINT64_MAX - prev_pts_)) :
+                  (prev_pts_ + ioInfo->duration);
     prev_pts_ = ioInfo->pts;
     return Status::OK;
 }
@@ -582,7 +582,7 @@ Status AudioFfmpegEncoderPlugin::ReceiveBuffer()
         if (avCodecContext_ == nullptr) {
             return Status::ERROR_WRONG_STATE;
         }
-//        status = ReceiveBufferLocked(ioInfo);
+        status = ReceiveBufferLocked(ioInfo);
     }
     return status;
 }

@@ -71,7 +71,7 @@ Status FilePathSinkPlugin::SeekTo(uint64_t offset)
 {
     if (fp_ == nullptr ||
         std::fseek(fp_, 0L, SEEK_END) != 0 ||
-        (std::feof(fp_) && (fileSize_ = std::ftell(fp_)) == -1) ||
+        (fileSize_ = std::ftell(fp_)) == -1 ||
         (fileSize_ != -1 && offset > fileSize_)) {
         MEDIA_LOG_E("Invalid operation");
         return Status::ERROR_WRONG_STATE;

@@ -187,7 +187,7 @@ ErrorCode AudioCaptureFilter::Prepare()
     MEDIA_LOG_I("Prepare entered.");
     if (!taskPtr_) {
         taskPtr_ = std::make_shared<OSAL::Task>("DataReader");
-        taskPtr_->RegisterHandler(std::bind(&AudioCaptureFilter::ReadLoop, this));
+        taskPtr_->RegisterHandler([this] { ReadLoop(); });
     }
     ErrorCode err = FindPlugin();
     if (err != ErrorCode::SUCCESS || !plugin_) {
@@ -202,7 +202,7 @@ ErrorCode AudioCaptureFilter::Prepare()
     err = TranslatePluginStatus(plugin_->Prepare());
     if (err == ErrorCode::SUCCESS) {
         MEDIA_LOG_D("media source send EVENT_READY");
-        OnEvent(Event{EVENT_READY, {}});
+        OnEvent(Event{name_, EventType::EVENT_READY, {}});
     }
     return err;
 }
@@ -254,6 +254,10 @@ ErrorCode AudioCaptureFilter::Resume()
 ErrorCode AudioCaptureFilter::SendEos()
 {
     MEDIA_LOG_I("SendEos entered.");
+    auto buf = std::make_shared<AVBuffer>();
+    buf->flag |= BUFFER_FLAG_EOS;
+    SendBuffer(buf);
+    eos_ = true;
     return ErrorCode::SUCCESS;
 }
 
@@ -266,6 +270,9 @@ void AudioCaptureFilter::InitPorts()
 
 void AudioCaptureFilter::ReadLoop()
 {
+    if (eos_.load()) {
+        return;
+    }
     size_t bufferSize = 0;
     auto ret = plugin_->GetSize(bufferSize);
     if (ret != Status::OK || bufferSize <= 0) {
@@ -275,10 +282,10 @@ void AudioCaptureFilter::ReadLoop()
     AVBufferPtr bufferPtr = std::make_shared<AVBuffer>(BufferMetaType::AUDIO);
     ret = plugin_->Read(bufferPtr, bufferSize);
     if (ret != Status::OK) {
-        Stop();
+        SendEos();
         return;
     }
-    outPorts_[0]->PushData(bufferPtr, -1);
+    SendBuffer(bufferPtr);
 }
 
 ErrorCode AudioCaptureFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& info, const std::string& name,
@@ -430,6 +437,14 @@ ErrorCode AudioCaptureFilter::FindPlugin()
     }
     MEDIA_LOG_I("Cannot find any plugin");
     return ErrorCode::ERROR_UNSUPPORTED_FORMAT;
+}
+
+void AudioCaptureFilter::SendBuffer(const std::shared_ptr<AVBuffer>& buffer)
+{
+    OSAL::ScopedLock lock(pushDataMutex_);
+    if (!eos_) {
+        outPorts_[0]->PushData(buffer, -1);
+    }
 }
 } // namespace Pipeline
 } // namespace Media

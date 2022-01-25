@@ -126,11 +126,11 @@ bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr
     auto err = ConfigureToPreparePlugin(upstreamMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("sink configure error");
-        OnEvent({EVENT_ERROR, err});
+        OnEvent({name_, EventType::EVENT_ERROR, err});
         return false;
     }
     state_ = FilterState::READY;
-    OnEvent({EVENT_READY});
+    OnEvent({name_, EventType::EVENT_READY});
     MEDIA_LOG_I("audio sink send EVENT_READY");
     PROFILE_END("Audio sink configure end");
     return true;
@@ -165,7 +165,7 @@ ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const 
 void AudioSinkFilter::ReportCurrentPosition(int64_t pts)
 {
     if (plugin_) {
-        OnEvent({EVENT_AUDIO_PROGRESS, static_cast<int64_t>(pts)});
+        OnEvent({name_, EventType::EVENT_AUDIO_PROGRESS, static_cast<int64_t>(pts)});
     }
 }
 
@@ -195,7 +195,8 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
         constexpr int waitTimeForPlaybackCompleteMs = 60;
         OHOS::Media::OSAL::SleepFor(waitTimeForPlaybackCompleteMs);
         Event event{
-            .type = EVENT_AUDIO_COMPLETE,
+            .srcFilter = name_,
+            .type = EventType::EVENT_COMPLETE,
         };
         MEDIA_LOG_D("audio sink push data send event_complete");
         OnEvent(event);

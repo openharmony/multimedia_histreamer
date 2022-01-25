@@ -27,6 +27,7 @@ using namespace Pipeline;
 HiRecorderImpl::HiRecorderImpl() : fsm_(*this), curFsmState_(StateId::INIT)
 {
     MEDIA_LOG_I("hiRecorderImpl ctor");
+
     FilterFactory::Instance().Init();
     muxer_ = FilterFactory::Instance().CreateFilterWithType<MuxerFilter>(
             "builtin.recorder.muxer", "muxer");
@@ -57,6 +58,7 @@ ErrorCode HiRecorderImpl::Init()
     if (initialized_.load()) {
         return ErrorCode::SUCCESS;
     }
+    mediaStatStub_.Reset();
     pipeline_->Init(this, nullptr);
     ErrorCode ret = pipeline_->AddFilters({muxer_.get(), outputSink_.get()});
     if (ret == ErrorCode::SUCCESS) {
@@ -262,11 +264,11 @@ int32_t HiRecorderImpl::SetParameter(int32_t sourceId, const RecorderParam &recP
     return Configure(sourceId, recParam);
 }
 
-void HiRecorderImpl::OnEvent(Event event)
+void HiRecorderImpl::OnEvent(const Event& event)
 {
     MEDIA_LOG_D("[HiStreamer] OnEvent (%d)", event.type);
     switch (event.type) {
-        case EVENT_ERROR: {
+        case EventType::EVENT_ERROR: {
             fsm_.SendEventAsync(Intent::NOTIFY_ERROR, event.param);
             auto ptr = obs_.lock();
             if (ptr != nullptr) {
@@ -275,10 +277,16 @@ void HiRecorderImpl::OnEvent(Event event)
             }
             break;
         }
-        case EVENT_READY: {
+        case EventType::EVENT_READY: {
             fsm_.SendEventAsync(Intent::NOTIFY_READY);
             break;
         }
+        case EventType::EVENT_COMPLETE:
+            mediaStatStub_.ReceiveEvent(EventType::EVENT_COMPLETE, 0);
+            if (mediaStatStub_.IsEventCompleteAllReceived()) {
+                fsm_.SendEventAsync(Intent::NOTIFY_COMPLETE);
+            }
+            break;
         default:
             MEDIA_LOG_E("Unknown event(%d)", event.type);
     }
@@ -362,7 +370,7 @@ ErrorCode HiRecorderImpl::DoConfigure(const Plugin::Any &param) const
         case RecorderPublicParamType::OUT_PATH: {
             auto filePath = Plugin::AnyCast<OutFilePath>(any).path;
             if (IsDirectory(filePath)) {
-                std::string dirPath {filePath};
+                std::string dirPath{filePath};
                 if (!ConvertDirPathToFilePath(dirPath, outputFormatType_, filePath)) {
                     ret = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
                     break;
@@ -422,6 +430,7 @@ ErrorCode HiRecorderImpl::DoResume()
 ErrorCode HiRecorderImpl::DoStop(const Plugin::Any& param)
 {
     ErrorCode ret = ErrorCode::SUCCESS;
+    mediaStatStub_.Reset();
     if (Plugin::AnyCast<bool>(param)) {
        ret = audioCapture_->SendEos();
 #ifdef VIDEO_SUPPORT

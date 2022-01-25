@@ -36,6 +36,7 @@
 #include "pipeline/core/pipeline_core.h"
 #include "pipeline/filters/codec/audio_decoder/audio_decoder_filter.h"
 #include "pipeline/filters/sink/audio_sink/audio_sink_filter.h"
+#include "pipeline/pipeline_common/media_stat_stub.h"
 #include "play_executor.h"
 #include "utils/utils.h"
 
@@ -80,7 +81,7 @@ public:
     int32_t GetVideoHeight() override;
 
     // internal interfaces
-    void OnEvent(Event event) override;
+    void OnEvent(const Event& event) override;
     void OnStateChanged(StateId state) override;
     ErrorCode OnCallback(const Pipeline::FilterCallbackType& type, Pipeline::Filter* filter,
                          const Plugin::Any& parameter) override;
@@ -92,46 +93,12 @@ public:
     ErrorCode DoPause() override;
     ErrorCode DoResume() override;
     ErrorCode DoStop() override;
-    ErrorCode DoSeek(bool allowed, int32_t msec) override;
+    ErrorCode DoSeek(bool allowed, int64_t hstTime) override;
     ErrorCode DoOnReady() override;
     ErrorCode DoOnComplete() override;
     ErrorCode DoOnError(ErrorCode) override;
 
 private:
-    enum class MediaType : int32_t { AUDIO, VIDEO, BUTT };
-    struct MediaStat {
-        MediaType mediaType{MediaType::BUTT};
-        std::atomic<int32_t> currentPositionMs{0};
-        std::atomic<bool> completeEventReceived{false};
-        explicit MediaStat(MediaType mediaType) : mediaType(mediaType)
-        {
-        }
-        MediaStat(const MediaStat& other) : mediaType(other.mediaType)
-        {
-            currentPositionMs = other.currentPositionMs.load();
-            completeEventReceived = other.completeEventReceived.load();
-        }
-        MediaStat& operator=(const MediaStat& other)
-        {
-            currentPositionMs = other.currentPositionMs.load();
-            completeEventReceived = other.completeEventReceived.load();
-            return *this;
-        }
-    };
-
-    class MediaStats {
-    public:
-        MediaStats() = default;
-        void Reset();
-        void Append(MediaType mediaType);
-        void ReceiveEvent(EventType eventType, int64_t param = 0);
-        int32_t GetCurrentTime();
-        bool IsEventCompleteAllReceived();
-
-    private:
-        std::vector<MediaStat> mediaStats;
-    };
-
     ErrorCode StopAsync();
     ErrorCode SetVolume(float volume);
     Pipeline::PFilter CreateAudioDecoder(const std::string& desc);
@@ -156,7 +123,7 @@ private:
     std::weak_ptr<IPlayerEngineObs> obs_ {};
     float volume_;
     std::atomic<ErrorCode> errorCode_;
-    MediaStats mediaStats_;
+    MediaStatStub mediaStats_;
 
     std::shared_ptr<Pipeline::MediaSourceFilter> audioSource_;
     std::shared_ptr<Pipeline::DemuxerFilter> demuxer_;

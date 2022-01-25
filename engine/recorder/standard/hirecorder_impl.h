@@ -34,6 +34,7 @@
 #include "pipeline/filters/codec/video_encoder/video_encoder_filter.h"
 #include "pipeline/filters/muxer/muxer_filter.h"
 #include "pipeline/filters/sink/output_sink/output_sink_filter.h"
+#include "pipeline/pipeline_common/media_stat_stub.h"
 #include "recorder_executor.h"
 
 namespace OHOS {
@@ -66,7 +67,7 @@ public:
     int32_t Reset() override;
     int32_t SetParameter(int32_t sourceId, const RecorderParam& recParam) override;
     // internal interfaces from Pipeline::EventReceiver
-    void OnEvent(Event event) override;
+    void OnEvent(const Event& event) override;
     // internal interfaces from StateChangeCallback
     void OnStateChanged(StateId state) override;
 
@@ -89,6 +90,8 @@ private:
     std::atomic<StateId> curFsmState_;
     std::shared_ptr<Pipeline::PipelineCore> pipeline_;
     std::atomic<bool> initialized_ {false};
+
+    MediaStatStub mediaStatStub_ {};
 
     std::weak_ptr<IRecorderEngineObs> obs_ {};
     std::atomic<int32_t> sourceId_ {0};

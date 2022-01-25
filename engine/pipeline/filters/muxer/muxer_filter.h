@@ -25,7 +25,6 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class DataCollector;
 class DataSpliter;
 class MuxerFilter : public FilterBase {
 public:
@@ -63,6 +62,12 @@ private:
         MuxerFilter* muxerFilter_;
     };
 
+    struct TrackInfo {
+        int32_t trackId;
+        std::string inPort;
+        bool eos;
+    };
+
     int32_t GetTrackIdByInPort(const std::shared_ptr<InPort>& inPort);
     int32_t UpdateTrackIdOfInPort(const std::shared_ptr<InPort>& inPort, int32_t trackId);
 
@@ -71,8 +76,12 @@ private:
     ErrorCode ConfigureToStart();
     ErrorCode AddTrackThenConfigure(const std::pair<std::string, Plugin::Meta>& meta);
 
+    void SendBuffer(const std::shared_ptr<AVBuffer>& buffer, int64_t offset);
+    bool AllTracksEos();
+    void UpdateEosState(const std::string& inPort);
+
     std::string containerMime_{};
-    std::vector<std::pair<std::string, uint32_t>> portTrackIdMap_{};
+    std::vector<TrackInfo> trackInfos_{};
     std::shared_ptr<Plugin::Muxer> plugin_{};
     std::shared_ptr<Plugin::PluginInfo> targetPluginInfo_ {nullptr};
     std::shared_ptr<DataSpliter> dataSpliter_{};
@@ -80,6 +89,10 @@ private:
     std::vector<std::pair<std::string, Plugin::Meta>> metaCache_{};
     bool hasWriteHeader_{false};
     std::shared_ptr<MuxerDataSink> muxerDataSink_;
+
+    OSAL::Mutex pushDataMutex_;
+    std::atomic<bool> eos_ {false};
+    std::atomic<int> eosTrackCnt {0};
 };
 } // Pipeline
 } // Media

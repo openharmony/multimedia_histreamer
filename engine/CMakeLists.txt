@@ -68,6 +68,7 @@ file(GLOB_RECURSE HISTREAMER_BASE_SRCS
         ${TOP_DIR}/engine/recorder/internal/*.cpp
         ${TOP_DIR}/engine/foundation/*.cpp
         ${TOP_DIR}/engine/utils/*.cpp
+        ${TOP_DIR}/engine/engine_common/*.cpp
         )
 
 file(GLOB_RECURSE COMMON_PLUGIN_SRCS

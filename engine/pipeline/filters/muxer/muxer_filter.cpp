@@ -137,8 +137,7 @@ ErrorCode MuxerFilter::AddTrackThenConfigure(const std::pair<std::string, Plugin
         MEDIA_LOG_E("muxer plugin add track failed");
         return ret;
     }
-    portTrackIdMap_.emplace_back(std::make_pair(metaPair.first, trackId));
-
+    trackInfos_.emplace_back(TrackInfo{static_cast<int32_t>(trackId), metaPair.first, false});
     auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
         Plugin::ValueType outValue;
@@ -201,11 +200,11 @@ bool MuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<con
     auto ret = ConfigureToStart();
     if (ret != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("muxer filter configure and start error");
-        OnEvent({EVENT_ERROR, ret});
+        OnEvent({name_, EventType::EVENT_ERROR, ret});
         return false;
     }
     state_ = FilterState::READY;
-    OnEvent({EVENT_READY});
+    OnEvent({name_, EventType::EVENT_READY});
     MEDIA_LOG_I("muxer send EVENT_READY");
     return true;
 }
@@ -238,14 +237,48 @@ ErrorCode MuxerFilter::StartNextSegment()
 
 ErrorCode MuxerFilter::SendEos()
 {
+    MEDIA_LOG_I("SendEos entered.");
+    auto buf = std::make_shared<AVBuffer>();
+    buf->flag |= BUFFER_FLAG_EOS;
+    SendBuffer(buf, -1);
+    eos_ = true;
     return ErrorCode::SUCCESS;
+}
+
+void MuxerFilter::SendBuffer(const std::shared_ptr<AVBuffer>& buffer, int64_t offset)
+{
+    OSAL::ScopedLock lock(pushDataMutex_);
+    if (!eos_) {
+        outPorts_[0]->PushData(buffer, offset);
+    }
+}
+
+bool MuxerFilter::AllTracksEos()
+{
+    return eosTrackCnt.load() == trackInfos_.size();
+}
+void MuxerFilter::UpdateEosState(const std::string& inPort)
+{
+    int32_t eosCnt = 0;
+    for (auto& item : trackInfos_) {
+        if (item.inPort == inPort) {
+            item.eos = true;
+        }
+        if (item.eos) {
+            eosCnt++;
+        }
+    }
+    eosTrackCnt = eosCnt;
 }
 
 ErrorCode MuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
 {
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
-        MEDIA_LOG_W("pushing data to decoder when state is %d", static_cast<int>(state_.load()));
+        MEDIA_LOG_W("pushing data to muxer when state is %d", static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
+    }
+    if (eos_.load()) {
+        return ErrorCode::SUCCESS;
     }
     // todo we should consider more tracks
     if (!hasWriteHeader_) {
@@ -257,8 +290,12 @@ ErrorCode MuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer, i
     }
 
     if (buffer->flag & BUFFER_FLAG_EOS) {
+        UpdateEosState(inPort);
+    }
+    if (AllTracksEos()) {
         plugin_->WriteTrailer();
         hasWriteHeader_ = false;
+        SendEos();
     }
     return ErrorCode::SUCCESS;
 }

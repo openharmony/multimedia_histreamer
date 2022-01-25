@@ -188,11 +188,11 @@ bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_
     auto err = ConfigureToStartPluginLocked(thisMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("encoder configure error");
-        OnEvent({EVENT_ERROR, err});
+        OnEvent({name_, EventType::EVENT_ERROR, err});
         return false;
     }
     state_ = FilterState::READY;
-    OnEvent({EVENT_READY});
+    OnEvent({name_, EventType::EVENT_READY});
     MEDIA_LOG_I("audio encoder send EVENT_READY");
     PROFILE_END("Audio encoder configure end");
     return true;
@@ -236,7 +236,7 @@ ErrorCode AudioEncoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
     }
     rb->Init();
     cahceBuffer_ = std::make_shared<AVBuffer>(Plugin::BufferMetaType::AUDIO);
-    auto bufferMem = cahceBuffer_->AllocMemory(NULL, frameSize_);
+    auto bufferMem = cahceBuffer_->AllocMemory(nullptr, frameSize_);
     if (!bufferMem) {
         MEDIA_LOG_E("alloc cache frame buffer memory fail");
         return ErrorCode::ERROR_NO_MEMORY;
@@ -252,27 +252,23 @@ ErrorCode AudioEncoderFilter::PushData(const std::string &inPort, AVBufferPtr bu
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto inputMemory = buffer->GetMemory();
-    if (!inputMemory) {
-        MEDIA_LOG_E("invalid buffer memory");
-        return ErrorCode::ERROR_NO_MEMORY;
-    }
-    if (inputMemory->GetSize() > 0) {
+    if (inputMemory && inputMemory->GetSize() > 0) {
         rb->WriteBuffer(const_cast<uint8_t *>(inputMemory->GetReadOnlyData()), inputMemory->GetSize());
     }
-    auto totalSize = rb->GetSize();
-    bool isEos = false;
-    while ((totalSize >= frameSize_) || ((inputMemory->GetSize() == 0) && !isEos)) {
-        cahceBuffer_->GetMemory()->Reset();
-        cahceBuffer_->flag = 0;
-        auto frmSize = (totalSize >= frameSize_) ? frameSize_ : totalSize;
-        if (frmSize > 0) {
-            if (rb->ReadBuffer(cahceBuffer_->GetMemory()->GetWritableAddr(frmSize), frmSize) != frmSize) {
+    bool shouldDrainRb = buffer->flag & BUFFER_FLAG_EOS;
+    bool isRbDrained = false;
+    for (auto available = rb->GetSize(); (available >= frameSize_) || (shouldDrainRb && !isRbDrained);
+         available = rb->GetSize()) {
+        cahceBuffer_->Reset();
+        auto encodeSize = std::min(available, frameSize_);
+        if (encodeSize > 0) { // ring buffer has buffer available
+            if (rb->ReadBuffer(cahceBuffer_->GetMemory()->GetWritableAddr(encodeSize), encodeSize) != encodeSize) {
                 MEDIA_LOG_E("Read data from ring buffer fail");
                 return ErrorCode::ERROR_UNKNOWN;
             }
         } else { // EOS
-            cahceBuffer_->flag = BUFFER_FLAG_EOS;
-            isEos = true;
+            cahceBuffer_->flag |= BUFFER_FLAG_EOS;
+            isRbDrained = true;
         }
         ErrorCode handleFrameRes;
         int8_t retryCnt = 0;
@@ -287,7 +283,6 @@ ErrorCode AudioEncoderFilter::PushData(const std::string &inPort, AVBufferPtr bu
             }
             // if timed out or returns again we should try again
         } while (handleFrameRes == ErrorCode::ERROR_TIMED_OUT || handleFrameRes == ErrorCode::ERROR_AGAIN);
-        totalSize -= frmSize;
     }
     return ErrorCode::SUCCESS;
 }
@@ -343,13 +338,7 @@ ErrorCode AudioEncoderFilter::FinishFrame()
     }
     std::shared_ptr<AVBuffer> pcmFrame = nullptr;
     auto status = plugin_->DequeueOutputBuffer(pcmFrame, 0);
-    if (status != Plugin::Status::OK && status != Plugin::Status::END_OF_STREAM) {
-        if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
-            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %d", static_cast<int32_t>(status));
-        }
-        return TranslatePluginStatus(status);
-    }
-    if (pcmFrame) {
+    if ((status == Plugin::Status::OK || status == Plugin::Status::END_OF_STREAM) && pcmFrame != nullptr) {
         // push to port
         auto oPort = outPorts_[0];
         if (oPort->GetWorkMode() == WorkMode::PUSH) {
@@ -358,9 +347,11 @@ ErrorCode AudioEncoderFilter::FinishFrame()
             MEDIA_LOG_W("encoder out port works in pull mode");
         }
         pcmFrame.reset(); // 释放buffer 如果没有被缓存使其回到buffer pool 如果被sink缓存 则从buffer pool拿其他的buffer
+    } else if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
+        MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %d", static_cast<int32_t>(status));
     }
     MEDIA_LOG_D("end finish frame");
-    return ErrorCode::SUCCESS;
+    return TranslatePluginStatus(status);
 }
 } // OHOS
 } // Media

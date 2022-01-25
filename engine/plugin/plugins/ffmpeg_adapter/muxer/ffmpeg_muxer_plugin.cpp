@@ -213,26 +213,47 @@ Plugin::Status SetParameterOfSubTitleTrack(AVStream* stream, const Plugin::TagMa
     return Plugin::Status::ERROR_UNKNOWN;
 }
 
+void ResetCodecParameter (AVCodecParameters* par)
+{
+    av_freep(&par->extradata);
+    memset_s(par, sizeof(*par), 0, sizeof(*par));
+    par->codec_type = AVMEDIA_TYPE_UNKNOWN;
+    par->codec_id = AV_CODEC_ID_NONE;
+    par->format = -1;
+    par->profile = FF_PROFILE_UNKNOWN;
+    par->level = FF_LEVEL_UNKNOWN;
+    par->field_order = AV_FIELD_UNKNOWN;
+    par->color_range = AVCOL_RANGE_UNSPECIFIED;
+    par->color_primaries = AVCOL_PRI_UNSPECIFIED;
+    par->color_trc = AVCOL_TRC_UNSPECIFIED;
+    par->color_space = AVCOL_SPC_UNSPECIFIED;
+    par->chroma_location = AVCHROMA_LOC_UNSPECIFIED;
+    par->sample_aspect_ratio = AVRational {0,1};
+}
+
 Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const Plugin::TagMap& tagMap)
 {
     using namespace OHOS::Media::Plugin;
     if (stream == nullptr) {
         return Status::ERROR_INVALID_PARAMETER;
     }
+    ResetCodecParameter(stream->codecpar);
     // firstly mime
     auto ret = SetCodecOfTrack(fmt, stream, tagMap);
     if (ret != Status::OK) {
         return ret;
     }
-
     if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) { // audio
-        return SetParameterOfAuTrack(stream, tagMap);
+        ret = SetParameterOfAuTrack(stream, tagMap);
     } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) { // video
-        return SetParameterOfVdTrack(stream, tagMap);
+        ret = SetParameterOfVdTrack(stream, tagMap);
     } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_SUBTITLE) { // subtitle
-        return SetParameterOfSubTitleTrack(stream, tagMap);
+        ret = SetParameterOfSubTitleTrack(stream, tagMap);
     } else {
         MEDIA_LOG_W("unknown codec type of stream %d", stream->index);
+    }
+    if (ret != Status::OK) {
+        return ret;
     }
     // others
     ret = SetSingleParameter<int64_t, int64_t>(Tag::MEDIA_BITRATE, tagMap, stream->codecpar->bit_rate,
@@ -327,6 +348,8 @@ Status FFmpegMuxerPlugin::Init()
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     outputFormat_ = g_pluginOutputFmt[pluginName_];
+    auto pkt = av_packet_alloc();
+    cachePacket_ = std::shared_ptr<AVPacket> (pkt, [] (AVPacket* packet) {av_packet_free(&packet);});
     OSAL::ScopedLock lock(fmtMutex_);
     return InitFormatCtxLocked();
 }
@@ -464,22 +487,22 @@ Status FFmpegMuxerPlugin::WriteFrame(const std::shared_ptr<Plugin::Buffer>& buff
         return Status::ERROR_INVALID_PARAMETER;
     }
     uint32_t trackId = buffer->trackID;
-    if (trackId > formatContext_->nb_streams) {
+    if (trackId >= formatContext_->nb_streams) {
         return Status::ERROR_INVALID_PARAMETER;
     }
-    AVPacket pkt;
+    (void)memset_s(cachePacket_.get(), sizeof(AVPacket), 0, sizeof(AVPacket));
     auto memory = buffer->GetMemory();
-    pkt.data = const_cast<uint8_t*>(memory->GetReadOnlyData());
-    pkt.size = memory->GetSize();
-    pkt.stream_index = trackId;
-    pkt.pts = ConvertTimeToFFmpeg(buffer->pts, formatContext_->streams[trackId]->time_base);
-    pkt.dts = pkt.pts;
-    pkt.flags = 0;
+    cachePacket_->data = const_cast<uint8_t*>(memory->GetReadOnlyData());
+    cachePacket_->size = memory->GetSize();
+    cachePacket_->stream_index = trackId;
+    cachePacket_->pts = ConvertTimeToFFmpeg(buffer->pts, formatContext_->streams[trackId]->time_base);
+    cachePacket_->dts = cachePacket_->pts;
+    cachePacket_->flags = 0;
     if (buffer->flag & BUFFER_FLAG_KEY_FRAME) {
-        pkt.flags |= AV_PKT_FLAG_KEY;
+        cachePacket_->flags |= AV_PKT_FLAG_KEY;
     }
-    pkt.duration = ConvertTimeToFFmpeg(buffer->duration, formatContext_->streams[trackId]->time_base);
-    av_write_frame(formatContext_.get(), &pkt);
+    cachePacket_->duration = ConvertTimeToFFmpeg(buffer->duration, formatContext_->streams[trackId]->time_base);
+    av_write_frame(formatContext_.get(), cachePacket_.get());
     return Status::OK;
 }
 

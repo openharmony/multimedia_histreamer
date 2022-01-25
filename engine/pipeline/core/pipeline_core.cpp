@@ -263,9 +263,9 @@ ErrorCode PipelineCore::LinkPorts(std::shared_ptr<OutPort> port1, std::shared_pt
     return ErrorCode::SUCCESS;
 }
 
-void PipelineCore::OnEvent(Event event)
+void PipelineCore::OnEvent(const Event& event)
 {
-    if (event.type != EVENT_READY) {
+    if (event.type != EventType::EVENT_READY) {
         CALL_PTR_FUNC(eventReceiver_, OnEvent, event);
         return;
     }

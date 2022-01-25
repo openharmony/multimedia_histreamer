@@ -148,7 +148,7 @@ ErrorCode FilterBase::PullData(const std::string& outPort, uint64_t offset, size
     return ErrorCode::SUCCESS;
 }
 
-void FilterBase::OnEvent(Event event)
+void FilterBase::OnEvent(const Event& event)
 {
     // Receive event from port, pass it to pipeline
     if (eventReceiver_) {
@@ -273,7 +273,7 @@ template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::Outp
 
     void FilterBase::onError(int32_t errorType, int32_t errorCode)
     {
-        eventReceiver_->OnEvent({EventType::EVENT_ERROR, ErrorEvent{errorType, errorCode}});
+        eventReceiver_->OnEvent({name_, EventType::EVENT_ERROR, ErrorEvent{errorType, errorCode}});
     }
 } // namespace Pipeline
 } // namespace Media

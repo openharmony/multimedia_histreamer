@@ -94,11 +94,11 @@ bool OutputSinkFilter::Configure(const std::string& inPort, const std::shared_pt
 
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("Output sink configure error");
-        OnEvent({EVENT_ERROR, err});
+        OnEvent({name_, EventType::EVENT_ERROR, err});
         return false;
     }
     state_ = FilterState::READY;
-    OnEvent({EVENT_READY});
+    OnEvent({name_, EventType::EVENT_READY});
     MEDIA_LOG_I("Output sink send EVENT_READY");
     PROFILE_END("Output sink configure end");
     return true;
@@ -171,7 +171,8 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, AVBufferPtr buff
     if (buffer->flag & BUFFER_FLAG_EOS) {
         plugin_->Flush();
         Event event {
-            .type = EVENT_AUDIO_COMPLETE,
+            .srcFilter = name_,
+            .type = EventType::EVENT_COMPLETE,
         };
         MEDIA_LOG_D("file sink push data send event_complete");
         OnEvent(event);

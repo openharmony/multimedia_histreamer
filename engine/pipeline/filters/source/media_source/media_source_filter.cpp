@@ -127,7 +127,7 @@ ErrorCode MediaSourceFilter::Prepare()
     auto err = TranslatePluginStatus(plugin_->Prepare());
     if (err == ErrorCode::SUCCESS) {
         MEDIA_LOG_D("media source send EVENT_READY");
-        OnEvent(Event{EVENT_READY, {}});
+        OnEvent(Event{name_, EventType::EVENT_READY, {}});
     }
     return err;
 }

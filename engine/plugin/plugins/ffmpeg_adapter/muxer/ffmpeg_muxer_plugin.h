@@ -97,6 +97,8 @@ private:
     OSAL::Mutex fmtMutex_{};
     std::shared_ptr<AVFormatContext> formatContext_{};
 
+    std::shared_ptr<AVPacket> cachePacket_ {};
+
     IOContext ioContext_;
 };
 } // FFMux

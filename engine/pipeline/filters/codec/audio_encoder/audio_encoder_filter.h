@@ -70,7 +70,7 @@ private:
     std::shared_ptr<BufferPool<AVBuffer>> outBufferPool_ {};
     Capability capNegWithDownstream_;
     Capability capNegWithUpstream_;
-    uint32_t frameSize_;
+    size_t frameSize_;
     std::string mime_;
     std::shared_ptr<Plugin::Meta> encoderMeta_ {};
     std::unique_ptr<Histreamer::RingBuffer> rb {};
