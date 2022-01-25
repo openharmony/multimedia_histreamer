@@ -46,6 +46,7 @@ if (defined(ohos_lite)) {
       "engine/plugin:histreamer_plugin",
       "engine/utils:histreamer_utils",
     ]
+    relative_install_dir = "media"
     output_name = "media_engine_histreamer"
     output_extension = "z.so"
     subsystem_name = "multimedia"

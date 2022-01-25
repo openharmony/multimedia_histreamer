@@ -45,6 +45,7 @@ if (!defined(ohos_lite)) {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_AudioServerSink") {
     deps = [ ":audio_server_sink" ]
+    relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"
   }

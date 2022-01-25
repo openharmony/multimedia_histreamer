@@ -91,11 +91,13 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_FileFdSink") {
     deps = [ ":file_fd_sink" ]
+    relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"
   }
   ohos_shared_library("histreamer_plugin_FilePathSink") {
     deps = [ ":file_path_sink" ]
+    relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"
   }

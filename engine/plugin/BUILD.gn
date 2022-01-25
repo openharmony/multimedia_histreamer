@@ -120,7 +120,7 @@ source_set("histreamer_plugin_core") {
     ]
   } else {
     defines += [
-      "HST_PLUGIN_PATH=\"/system/lib/media\"",
+      "HST_PLUGIN_PATH=\"/system/lib/media/histreamer_plugins\"",
       "HST_PLUGIN_FILE_TAIL=\".z.so\"",
     ]
   }

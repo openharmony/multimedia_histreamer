@@ -189,21 +189,25 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_FFmpegAudioDecoders") {
     deps = [ ":ffmpeg_audio_decoders" ]
+    relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"
   }
   ohos_shared_library("histreamer_plugin_FFmpegDemuxer") {
     deps = [ ":ffmpeg_demuxers" ]
+    relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"
   }
   ohos_shared_library("histreamer_plugin_FFmpegAudioEncoders") {
     deps = [ ":ffmpeg_audio_encoders" ]
+    relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"
   }
   ohos_shared_library("histreamer_plugin_FFmpegMuxers") {
     deps = [ ":ffmpeg_muxers" ]
+    relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"
   }
