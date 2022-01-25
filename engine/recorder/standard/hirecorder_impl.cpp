@@ -146,8 +146,11 @@ sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
 
 int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
 {
-    containerMime_ = g_outputFormatToMimeMap.at(format);
-    ErrorCode ret = fsm_.SendEvent(Intent::SET_OUTPUT_FORMAT, containerMime_);
+    if (format == OutputFormatType::FORMAT_BUTT) {
+        return TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
+    }
+    outputFormatType_ = format;
+    ErrorCode ret = fsm_.SendEvent(Intent::SET_OUTPUT_FORMAT, outputFormatType_);
     if (ret != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("SetOutputFormat failed with error %d", static_cast<int>(ret));
     }
@@ -160,8 +163,12 @@ int32_t HiRecorderImpl::SetObs(const std::weak_ptr<IRecorderEngineObs>& obs)
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 
-int32_t HiRecorderImpl::Configure(int32_t sourceId,  const RecorderParam &recParam)
+int32_t HiRecorderImpl::Configure(int32_t sourceId, const RecorderParam& recParam)
 {
+    if (outputFormatType_ == OutputFormatType::FORMAT_BUTT) {
+        MEDIA_LOG_E("Output format not set, configure the pipeline is invalid!");
+        return TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION);
+    }
     Plugin::Any any;
     switch (recParam.type) {
         case RecorderPublicParamType::AUD_SAMPLERATE:
@@ -239,6 +246,7 @@ int32_t HiRecorderImpl::Resume()
 int32_t HiRecorderImpl::Stop(bool isDrainAll)
 {
     PROFILE_BEGIN();
+    outputFormatType_ = OutputFormatType::FORMAT_BUTT;
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::STOP, isDrainAll));
     PROFILE_END("Stop ret = %d", ret);
     return ret;
@@ -354,7 +362,11 @@ ErrorCode HiRecorderImpl::DoConfigure(const Plugin::Any &param) const
         case RecorderPublicParamType::OUT_PATH: {
             auto filePath = Plugin::AnyCast<OutFilePath>(any).path;
             if (IsDirectory(filePath)) {
-                filePath = ConvertDirPathToFilePath(filePath, containerMime_);
+                std::string dirPath {filePath};
+                if (!ConvertDirPathToFilePath(dirPath, outputFormatType_, filePath)) {
+                    ret = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+                    break;
+                }
             }
             ret = outputSink_->SetOutputPath(filePath);
             break;
@@ -370,9 +382,14 @@ ErrorCode HiRecorderImpl::DoConfigure(const Plugin::Any &param) const
 
 ErrorCode HiRecorderImpl::DoSetOutputFormat(const Plugin::Any& param) const
 {
-    ErrorCode ret  = ErrorCode::SUCCESS;
-    if (param.Type() == typeid(std::string)) {
-        ret = muxer_->SetOutputFormat(Plugin::AnyCast<std::string>(param));
+    ErrorCode ret {ErrorCode::SUCCESS};
+    if (param.Type() == typeid(OutputFormatType)) {
+        auto outputFormatType = Plugin::AnyCast<OutputFormatType>(param);
+        if (g_outputFormatToMimeMap.find(outputFormatType) != g_outputFormatToMimeMap.end()) {
+            ret = muxer_->SetOutputFormat(g_outputFormatToMimeMap.at(outputFormatType));
+        } else {
+            ret = ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
+        }
     } else {
         ret = ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
     }

@@ -30,7 +30,7 @@ Plugin::SrcInputType TransAudioInputType(OHOS::Media::AudioSourceType sourceType
 Plugin::SrcInputType TransVideoInputType(OHOS::Media::VideoSourceType sourceType);
 bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& encoderMeta);
 bool IsDirectory(const std::string& path);
-std::string ConvertDirPathToFilePath(const std::string& dirPath, const std::string& containerMime);
+bool ConvertDirPathToFilePath(const std::string& dirPath, OutputFormatType outputFormatType, std::string& filePath);
 
 struct RecordParam {
     int32_t sourceId;
@@ -41,7 +41,15 @@ struct RecordParam {
 const std::map<OutputFormatType, std::string> g_outputFormatToMimeMap = {
     {OutputFormatType::FORMAT_DEFAULT, MEDIA_MIME_AUDIO_MPEG},
     {OutputFormatType::FORMAT_MPEG_4, MEDIA_MIME_AUDIO_MPEG},
-    {OutputFormatType::FORMAT_M4A,  MEDIA_MIME_CONTAINER_MP4},
+    {OutputFormatType::FORMAT_M4A, MEDIA_MIME_CONTAINER_MP4},
+};
+
+#define CreateFileName(prefix, suffix)  std::string{prefix}.append("_%Y%m%d%H%M%S").append(suffix)
+
+const std::map<OutputFormatType, std::string> g_outputFormatToFormat = {
+    {OutputFormatType::FORMAT_DEFAULT, CreateFileName("audio", ".m4a")},
+    {OutputFormatType::FORMAT_MPEG_4, CreateFileName("video", ".mp4")},
+    {OutputFormatType::FORMAT_M4A, CreateFileName("audio", ".m4a")},
 };
 }  // namespace Record
 }  // namespace Media

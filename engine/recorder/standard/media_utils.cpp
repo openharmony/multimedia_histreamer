@@ -90,28 +90,22 @@ bool IsDirectory(const std::string& path)
     struct stat s;
     return  ((stat(path.c_str(), &s) == 0) && S_ISDIR(s.st_mode)) ? true :false;
 }
-std::string ConvertDirPathToFilePath(const std::string& dirPath, const std::string& containerMime)
+bool ConvertDirPathToFilePath(const std::string& dirPath, OutputFormatType outputFormatType, std::string& filePath)
 {
     std::regex reg("\\\\");
-    auto filePath = std::regex_replace(dirPath, reg, "/") ;
+    filePath = std::regex_replace(dirPath, reg, "/") ;
     if (filePath[filePath.size() - 1] != '/') {
         filePath += "/";
     }
-    auto currtime = time(nullptr);
-    auto p = localtime(&currtime);
-    char timeStamp[24] = { 0 }; /// magic number 24
-    sprintf_s(timeStamp, sizeof(timeStamp), "%d%02d%02d%02d%02d%02d", p->tm_year + 1900,
-              p->tm_mon + 1, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec);
-    if (containerMime == MEDIA_MIME_AUDIO_MPEG) {
-        filePath += "AUDIO_";
-        filePath += timeStamp;
-        filePath += ".mp3";
-    } else if (containerMime == MEDIA_MIME_CONTAINER_MP4) {
-        filePath += "VIDEO_";
-        filePath += timeStamp;
-        filePath += ".mp4";
+    char fileName[32] = { 0 }; /// magic number 32
+    if (g_outputFormatToFormat.find(outputFormatType) != g_outputFormatToFormat.end()) {
+        auto tm = time(nullptr);
+        strftime(fileName, sizeof(fileName), g_outputFormatToFormat.at(outputFormatType).c_str(), localtime(&tm));
+        filePath += fileName;
+        return true;
+    } else {
+        return false;
     }
-    return filePath;
 }
 }  // namespace Record
 }  // namespace Media
