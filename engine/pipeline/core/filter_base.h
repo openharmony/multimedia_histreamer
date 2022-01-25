@@ -23,7 +23,7 @@
 #include "filter.h"
 #include "foundation/error_code.h"
 #include "utils/constants.h"
-#include "pipeline/pipeline_common/event.h"
+#include "event.h"
 #include "utils/utils.h"
 #include "filter_type.h"
 #include "plugin/core/plugin_info.h"

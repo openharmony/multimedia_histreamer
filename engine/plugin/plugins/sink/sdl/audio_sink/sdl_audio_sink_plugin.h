@@ -94,7 +94,7 @@ private:
 
     std::vector<uint8_t> transformCache_ {};
     std::vector<uint8_t> mixCache_ {};
-    std::unique_ptr<Histreamer::RingBuffer> rb {};
+    std::unique_ptr<RingBuffer> rb {};
     size_t avFrameSize_ {};
     SDL_AudioSpec wantedSpec_ {};
     SDL_AudioDeviceID deviceId_ {};

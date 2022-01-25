@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_FOUNDATION_EVENT_H
-#define HISTREAMER_FOUNDATION_EVENT_H
+#ifndef HISTREAMER_PIPELINE_CORE_EVENT_H
+#define HISTREAMER_PIPELINE_CORE_EVENT_H
 
 #include "plugin/common/any.h"
 

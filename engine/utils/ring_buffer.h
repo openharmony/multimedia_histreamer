@@ -25,7 +25,6 @@
 
 namespace OHOS {
 namespace Media {
-namespace Histreamer {
 class RingBuffer {
 public:
     explicit RingBuffer(size_t bufferSize) : bufferSize_(bufferSize)
@@ -109,7 +108,6 @@ private:
     OSAL::ConditionVariable writeCondition_ {};
     bool isActive_ {true};
 };
-} // namespace Histreamer
 } // namespace Media
 } // namespace OHOS
 

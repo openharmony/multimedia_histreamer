@@ -73,7 +73,7 @@ private:
     size_t frameSize_;
     std::string mime_;
     std::shared_ptr<Plugin::Meta> encoderMeta_ {};
-    std::unique_ptr<Histreamer::RingBuffer> rb {};
+    std::unique_ptr<RingBuffer> rb {};
     AVBufferPtr cahceBuffer_ {nullptr};
 };
 } // OHOS

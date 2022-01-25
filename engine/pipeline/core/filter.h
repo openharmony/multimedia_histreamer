@@ -22,7 +22,7 @@
 #include "filter_callback.h"
 #include "foundation/error_code.h"
 #include "utils/constants.h"
-#include "pipeline/pipeline_common/event.h"
+#include "event.h"
 #include "utils/utils.h"
 #include "parameter.h"
 #include "port.h"
