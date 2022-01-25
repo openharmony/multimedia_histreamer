@@ -42,18 +42,10 @@ static std::string g_libFileHead = "libhistreamer_plugin_";
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 static std::string g_fileSeparator = "\\";
-static std::string g_libFileTail = ".dll";
 #else
 static std::string g_fileSeparator = "/";
-#if defined(OHOS_LITE)
-static std::string g_libFileTail = ".so";
-#elif defined(MEDIA_OHOS)
-// ohos standard
-static std::string g_libFileTail = ".z.so";
-#else
-static std::string g_libFileTail = ".so";
 #endif
-#endif
+static std::string g_libFileTail = HST_PLUGIN_FILE_TAIL;
 
 PluginRegister::~PluginRegister()
 {

@@ -22,6 +22,11 @@ ADD_DEFINITIONS(
         -D__STDC_FORMAT_MACROS
         -DHST_PLUGIN_PATH="./"
 )
+if (WIN32)
+add_definitions( -DHST_PLUGIN_FILE_TAIL=".dll" )
+else()
+add_definitions( -DHST_PLUGIN_FILE_TAIL=".so" )
+endif()
 
 IF (CMAKE_CL_64)
     ADD_DEFINITIONS(-DWIN64)
