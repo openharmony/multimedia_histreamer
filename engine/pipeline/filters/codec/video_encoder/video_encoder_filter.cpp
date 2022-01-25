@@ -222,7 +222,8 @@ bool VideoEncoderFilter::Configure(const std::string& inPort, const std::shared_
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("encoder configure error");
         Event event{
-            .type = EVENT_ERROR,
+            .srcFilter = name_,
+            .type = EventType::EVENT_ERROR,
             .param = err,
         };
         OnEvent(event);
@@ -230,7 +231,8 @@ bool VideoEncoderFilter::Configure(const std::string& inPort, const std::shared_
     }
     state_ = FilterState::READY;
     Event event {
-        .type = EVENT_READY,
+        .srcFilter = name_,
+        .type = EventType::EVENT_READY,
     };
     OnEvent(event);
     MEDIA_LOG_I("video encoder send EVENT_READY");

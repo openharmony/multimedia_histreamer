@@ -171,7 +171,8 @@ bool VideoSinkFilter::Configure(const std::string& inPort, const std::shared_ptr
     }
     state_ = FilterState::READY;
     Event event{
-        .type = EVENT_READY,
+        .srcFilter = name_,
+        .type = EventType::EVENT_READY,
     };
     OnEvent(event);
     MEDIA_LOG_I("video sink send EVENT_READY");
@@ -294,7 +295,8 @@ ErrorCode VideoSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
 
     if (buffer->GetMemory()->GetSize() == 0) {
         Event event{
-            .type = EVENT_VIDEO_COMPLETE,
+            .srcFilter = name_,
+            .type = EventType::EVENT_COMPLETE,
         };
         MEDIA_LOG_D("video sink push data send event_complete");
         OnEvent(event);

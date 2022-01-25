@@ -225,7 +225,8 @@ bool VideoDecoderFilter::Configure(const std::string& inPort, const std::shared_
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("decoder configure error");
         Event event{
-            .type = EVENT_ERROR,
+            .srcFilter = name_,
+            .type = EventType::EVENT_ERROR,
             .param = err,
         };
         OnEvent(event);
@@ -233,7 +234,8 @@ bool VideoDecoderFilter::Configure(const std::string& inPort, const std::shared_
     }
     state_ = FilterState::READY;
     Event event{
-            .type = EVENT_READY,
+        .srcFilter = name_,
+        .type = EventType::EVENT_READY,
     };
     OnEvent(event);
     MEDIA_LOG_I("video decoder send EVENT_READY");
