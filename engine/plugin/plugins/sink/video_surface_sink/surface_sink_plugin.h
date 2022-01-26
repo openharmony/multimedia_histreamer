@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_SURFACE_SINK_PLUGIN_H
 #define HISTREAMER_SURFACE_SINK_PLUGIN_H
 
-#ifdef VIDEO_SUPPORT
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
 #include <atomic>
 #include <memory>

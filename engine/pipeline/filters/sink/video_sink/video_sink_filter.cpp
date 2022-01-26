@@ -162,19 +162,11 @@ bool VideoSinkFilter::Configure(const std::string& inPort, const std::shared_ptr
     auto err = ConfigureNoLocked(upstreamMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("sink configure error");
-        Event event{
-            .type = EventType::EVENT_ERROR,
-            .param = err,
-        };
-        OnEvent(event);
+        OnEvent(Event{name_, EventType::EVENT_ERROR, {err}});
         return false;
     }
     state_ = FilterState::READY;
-    Event event{
-        .srcFilter = name_,
-        .type = EventType::EVENT_READY,
-    };
-    OnEvent(event);
+    OnEvent(Event{name_, EventType::EVENT_READY, {}});
     MEDIA_LOG_I("video sink send EVENT_READY");
     PROFILE_END("video sink configure end");
     return true;

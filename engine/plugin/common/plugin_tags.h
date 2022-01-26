@@ -126,6 +126,7 @@ enum struct Tag : uint32_t {
     VIDEO_WIDTH = SECTION_VIDEO_UNIVERSAL_START + 1, ///< uint32_t, video width
     VIDEO_HEIGHT,                                    ///< uint32_t, video height
     VIDEO_PIXEL_FORMAT,                              ///< uint32_t, video pixel format
+    VIDEO_FRAME_RATE,                                ///< uint64_t, video frame rate
     VIDEO_SURFACE,                                   ///< @see class Surface
     VIDEO_MAX_SURFACE_NUM,                           ///< uint32_t, max video surface num
 };

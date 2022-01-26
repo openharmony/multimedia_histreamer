@@ -13,18 +13,14 @@
  * limitations under the License.
  */
 
-#ifdef RECORDER_SUPPORT
+#if defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
 
-#define HST_LOG_TAG "AudioCaptureFilter"
+#define HST_LOG_TAG "VideoCaptureFilter"
 
 #include "video_capture_filter.h"
 #include "foundation/log.h"
-#include "compatible_check.h"
 #include "factory/filter_factory.h"
-#include "plugin/interface/source_plugin.h"
-#include "plugin/core/plugin_meta.h"
 #include "common/plugin_utils.h"
-#include "utils/type_define.h"
 
 namespace OHOS {
 namespace Media {
@@ -60,7 +56,7 @@ std::vector<WorkMode> VideoCaptureFilter::GetWorkModes()
     return {WorkMode::PUSH};
 }
 
-ErrorCode VideoCaptureFilter::InitPlugin()
+ErrorCode VideoCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& audioMeta)
 {
     MEDIA_LOG_D("IN");
     ErrorCode err = TranslatePluginStatus(plugin_->Init());
@@ -69,17 +65,88 @@ ErrorCode VideoCaptureFilter::InitPlugin()
     }
     plugin_->SetCallback(this);
     pluginAllocator_ = plugin_->GetAllocator();
-    return err;
+    err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_WIDTH, videoWidth_));
+    if (err != ErrorCode::SUCCESS) {
+        return err;
+    }
+    err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_HEIGHT, videoHeight_));
+    if (err != ErrorCode::SUCCESS) {
+        return err;
+    }
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode VideoCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value)
 {
+#define ASSIGN_PARAMETER_IF_MATCH(type, val, val1) \
+do { \
+    if (val.Type() == typeid(type)) { \
+        val1 = Plugin::AnyCast<type>(val); \
+    } \
+} while (0)
+
+    auto tag = static_cast<OHOS::Media::Plugin::Tag>(key);
+    switch (tag) {
+        case Tag::SRC_INPUT_TYPE:
+            ASSIGN_PARAMETER_IF_MATCH(Plugin::SrcInputType, value, inputType_);
+            break;
+        case Tag::VIDEO_WIDTH:
+            ASSIGN_PARAMETER_IF_MATCH(uint32_t, value, videoWidth_);
+            break;
+        case Tag::VIDEO_HEIGHT:
+            ASSIGN_PARAMETER_IF_MATCH(uint32_t, value, videoHeight_);
+            break;
+        case Tag::VIDEO_FRAME_RATE:
+            ASSIGN_PARAMETER_IF_MATCH(uint64_t, value, frameRate_);
+            break;
+        default:
+            MEDIA_LOG_W("Unknown key %d", OHOS::Media::to_underlying(tag));
+            break;
+    }
     return ErrorCode::SUCCESS;
+#undef ASSIGN_PARAMETER_IF_MATCH
 }
 
 ErrorCode VideoCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
 {
+    Tag tag = static_cast<Plugin::Tag>(key);
+    switch (tag) {
+        case Tag::SRC_INPUT_TYPE: {
+            value = inputType_;
+            break;
+        }
+        case Tag::VIDEO_WIDTH: {
+            value = videoWidth_;
+            break;
+        }
+        case Tag::VIDEO_HEIGHT: {
+            value = videoHeight_;
+            break;
+        }
+        case Tag::VIDEO_FRAME_RATE: {
+            value = frameRate_;
+            break;
+        }
+        default:
+            MEDIA_LOG_I("Unknown key %d", tag);
+            break;
+    }
     return ErrorCode::SUCCESS;
+}
+
+ErrorCode VideoCaptureFilter::DoConfigure()
+{
+    auto emptyMeta = std::make_shared<Plugin::Meta>();
+    auto audioMeta = std::make_shared<Plugin::Meta>();
+    if (!MergeMetaWithCapability(*emptyMeta, capNegWithDownstream_, *audioMeta)) {
+        MEDIA_LOG_E("cannot find available capability of plugin %s", pluginInfo_->name.c_str());
+        return ErrorCode::ERROR_UNKNOWN;
+    }
+    if (!outPorts_[0]->Configure(audioMeta)) {
+        MEDIA_LOG_E("Configure downstream fail");
+        return ErrorCode::ERROR_UNKNOWN;
+    }
+    return InitAndConfigPlugin(audioMeta);
 }
 
 ErrorCode VideoCaptureFilter::Prepare()
@@ -87,12 +154,19 @@ ErrorCode VideoCaptureFilter::Prepare()
     MEDIA_LOG_I("Prepare entered.");
     if (!taskPtr_) {
         taskPtr_ = std::make_shared<OSAL::Task>("DataReader");
-        taskPtr_->RegisterHandler(std::bind(&VideoCaptureFilter::ReadLoop, this));
+        taskPtr_->RegisterHandler([this] { ReadLoop(); });
     }
-    if (plugin_ == nullptr) {
-        return ErrorCode::ERROR_INVALID_OPERATION;
+    ErrorCode err = FindPlugin();
+    if (err != ErrorCode::SUCCESS || !plugin_) {
+        MEDIA_LOG_E("Find plugin fail");
+        return err;
     }
-    auto err = TranslatePluginStatus(plugin_->Prepare());
+    err = DoConfigure();
+    if (err != ErrorCode::SUCCESS) {
+        MEDIA_LOG_E("DoConfigure fail");
+        return err;
+    }
+    err = TranslatePluginStatus(plugin_->Prepare());
     if (err == ErrorCode::SUCCESS) {
         MEDIA_LOG_D("media source send EVENT_READY");
         OnEvent(Event{name_, EventType::EVENT_READY, {}});
@@ -122,9 +196,35 @@ ErrorCode VideoCaptureFilter::Stop()
     return ret;
 }
 
+ErrorCode VideoCaptureFilter::Pause()
+{
+    MEDIA_LOG_I("Pause entered.");
+    if (taskPtr_) {
+        taskPtr_->PauseAsync();
+    }
+    ErrorCode ret = ErrorCode::SUCCESS;
+    if (plugin_) {
+        ret = TranslatePluginStatus(plugin_->Stop());
+    }
+    return ret;
+}
+
+ErrorCode VideoCaptureFilter::Resume()
+{
+    MEDIA_LOG_I("Resume entered.");
+    if (taskPtr_) {
+        taskPtr_->Start();
+    }
+    return plugin_ ? TranslatePluginStatus(plugin_->Start()) : ErrorCode::ERROR_INVALID_OPERATION;
+}
+
 ErrorCode VideoCaptureFilter::SendEos()
 {
     MEDIA_LOG_I("SendEos entered.");
+    auto eosBuffer = std::make_shared<AVBuffer>();
+    eosBuffer->flag |= BUFFER_FLAG_EOS;
+    SendBuffer(eosBuffer);
+    isEos_ = true;
     return ErrorCode::SUCCESS;
 }
 
@@ -137,6 +237,22 @@ void VideoCaptureFilter::InitPorts()
 
 void VideoCaptureFilter::ReadLoop()
 {
+    if (isEos_.load()) {
+        return;
+    }
+    size_t bufferSize = 0;
+    auto ret = plugin_->GetSize(bufferSize);
+    if (ret != Status::OK || bufferSize <= 0) {
+        MEDIA_LOG_E("Get plugin buffer size fail");
+        return;
+    }
+    AVBufferPtr bufferPtr = std::make_shared<AVBuffer>(BufferMetaType::VIDEO);
+    ret = plugin_->Read(bufferPtr, bufferSize);
+    if (ret != Status::OK) {
+        SendEos();
+        return;
+    }
+    SendBuffer(bufferPtr);
 }
 
 ErrorCode VideoCaptureFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& info, const std::string& name,
@@ -160,8 +276,60 @@ ErrorCode VideoCaptureFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& in
     MEDIA_LOG_I("Create new plugin: \"%s\" success", pluginInfo_->name.c_str());
     return ErrorCode::SUCCESS;
 }
+
+bool VideoCaptureFilter::DoNegotiate(const CapabilitySet &outCaps)
+{
+    if (outCaps.empty()) {
+        MEDIA_LOG_E("audio capture plugin must have out caps");
+        return false;
+    }
+    for (const auto& outCap : outCaps) {
+        auto thisOut = std::make_shared<Plugin::Capability>();
+        *thisOut = outCap;
+        Plugin::TagMap upstreamParams;
+        Plugin::TagMap downstreamParams;
+        upstreamParams.emplace(std::make_pair(Tag::VIDEO_FRAME_RATE, frameRate_));
+        if (outPorts_[0]->Negotiate(thisOut, capNegWithDownstream_, upstreamParams, downstreamParams)) {
+            MEDIA_LOG_I("Negotiate success");
+            return true;
+        }
+    }
+    return false;
+}
+
+ErrorCode VideoCaptureFilter::FindPlugin()
+{
+    if (!inputTypeSpecified_) {
+        MEDIA_LOG_E("Must set input type first");
+        return ErrorCode::ERROR_INVALID_OPERATION;
+    }
+    PluginManager& pluginManager = PluginManager::Instance();
+    std::set<std::string> nameList = pluginManager.ListPlugins(PluginType::SOURCE);
+    for (const std::string& name : nameList) {
+        std::shared_ptr<PluginInfo> info = pluginManager.GetPluginInfo(PluginType::SOURCE, name);
+        MEDIA_LOG_I("name: %s, info->name: %s", name.c_str(), info->name.c_str());
+        auto val = info->extra[PLUGIN_INFO_EXTRA_INPUT_TYPE];
+        if (val.Type() == typeid(Plugin::SrcInputType)) {
+            auto supportInputType = OHOS::Media::Plugin::AnyCast<Plugin::SrcInputType>(val);
+            if (inputType_ == supportInputType && DoNegotiate(info->outCaps) &&
+                CreatePlugin(info, name, pluginManager) == ErrorCode::SUCCESS) {
+                MEDIA_LOG_I("CreatePlugin %s success", name_.c_str());
+                return ErrorCode::SUCCESS;
+            }
+        }
+    }
+    MEDIA_LOG_I("Cannot find any plugin");
+    return ErrorCode::ERROR_UNSUPPORTED_FORMAT;
+}
+
+void VideoCaptureFilter::SendBuffer(const std::shared_ptr<AVBuffer>& buffer)
+{
+    OSAL::ScopedLock lock(pushMutex_);
+    if (!isEos_.load()) {
+        outPorts_[0]->PushData(buffer, -1);
+    }
+}
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
-
 #endif

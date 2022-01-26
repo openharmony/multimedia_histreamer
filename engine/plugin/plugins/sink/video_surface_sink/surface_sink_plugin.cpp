@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#ifdef VIDEO_SUPPORT
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
 #define HST_LOG_TAG "SurfaceSinkPlugin"
 
