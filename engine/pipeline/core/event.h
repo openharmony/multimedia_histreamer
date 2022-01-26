@@ -16,6 +16,7 @@
 #ifndef HISTREAMER_PIPELINE_CORE_EVENT_H
 #define HISTREAMER_PIPELINE_CORE_EVENT_H
 
+#include <string>
 #include "plugin/common/any.h"
 
 namespace OHOS {
