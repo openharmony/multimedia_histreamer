@@ -537,7 +537,7 @@ int ConvertSeekModeToFFmpeg(SeekMode mode)
 
 int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource)
 {
-    if (pluginName.empty() || !dataSource) {
+    if (!pluginName.empty() || !dataSource) {
         MEDIA_LOG_E("Sniff failed due to empty plugin name or dataSource invalid.");
         return 0;
     }
