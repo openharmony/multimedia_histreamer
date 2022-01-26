@@ -352,7 +352,7 @@ void VideoCapturePlugin::OnBufferAvailable()
         readCond_.NotifyAll();
     }
 }
-#endif
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
+#endif
