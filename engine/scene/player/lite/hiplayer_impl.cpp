@@ -255,7 +255,7 @@ ErrorCode HiPlayerImpl::StopAsync()
 int32_t HiPlayerImpl::Rewind(int64_t mSeconds, int32_t mode)
 {
     int64_t hstTime = 0;
-    if (Plugin::Ms2HstTime(mSeconds, hstTime)) {
+    if (!Plugin::Ms2HstTime(mSeconds, hstTime)) {
         return to_underlying(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }
     return to_underlying(fsm_.SendEventAsync(Intent::SEEK, hstTime));
@@ -311,8 +311,7 @@ void HiPlayerImpl::OnEvent(const Event& event)
             }
             break;
         case EventType::EVENT_AUDIO_PROGRESS:
-            mediaStats_.ReceiveEvent(EventType::EVENT_AUDIO_PROGRESS,
-                                     Plugin::HstTime2Ms(Plugin::AnyCast<int64_t>(event.param)));
+            mediaStats_.ReceiveEvent(EventType::EVENT_AUDIO_PROGRESS,Plugin::AnyCast<int64_t>(event.param));
             break;
         default:
             MEDIA_LOG_E("Unknown event(%d)", event.type);
@@ -490,7 +489,7 @@ int32_t HiPlayerImpl::GetPlayerState(int32_t& state)
 
 int32_t HiPlayerImpl::GetCurrentPosition(int64_t& currentPositionMs)
 {
-    currentPositionMs = mediaStats_.GetCurrentPosition();
+    currentPositionMs = Plugin::HstTime2Ms(mediaStats_.GetCurrentPosition());
     return to_underlying(ErrorCode::SUCCESS);
 }
 

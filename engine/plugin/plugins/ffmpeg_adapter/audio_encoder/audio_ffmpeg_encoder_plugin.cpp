@@ -153,7 +153,7 @@ Status AudioFfmpegEncoderPlugin::Init()
     }
     OSAL::ScopedLock lock(avMutex_);
     avCodec_ = ite->second;
-    cachedFrame_ = av_frame_alloc();
+    cachedFrame_ = std::shared_ptr<AVFrame>(av_frame_alloc(), [](AVFrame* frame) { av_frame_free(&frame);});
     OSAL::ScopedLock lock1(parameterMutex_);
     audioParameter_[Tag::REQUIRED_OUT_BUFFER_CNT] = (uint32_t)BUFFER_QUEUE_SIZE;
     return Status::OK;
@@ -168,9 +168,9 @@ Status AudioFfmpegEncoderPlugin::Deinit()
 
 Status AudioFfmpegEncoderPlugin::DeInitLocked()
 {
-    avCodec_.reset();
-    av_frame_free(&cachedFrame_);
     ResetLocked();
+    avCodec_.reset();
+    cachedFrame_.reset();
     return Status::OK;
 }
 
@@ -284,7 +284,7 @@ Status AudioFfmpegEncoderPlugin::Reset()
 void AudioFfmpegEncoderPlugin::InitCacheFrame()
 {
     if (!cachedFrame_) {
-        cachedFrame_ = av_frame_alloc();
+        cachedFrame_ = std::shared_ptr<AVFrame>(av_frame_alloc(), [](AVFrame* frame) { av_frame_free(&frame);});
     }
     cachedFrame_->format = avCodecContext_->sample_fmt;
     cachedFrame_->sample_rate = avCodecContext_->sample_rate;
@@ -314,7 +314,7 @@ Status AudioFfmpegEncoderPlugin::Start()
         }
         needReformat_ = CheckReformat();
         if (needReformat_) {
-            sourceFmt_ = avCodecContext_->sample_fmt;
+            srcFmt_ = avCodecContext_->sample_fmt;
             // always use the first fmt
             avCodecContext_->sample_fmt = avCodec_->sample_fmts[0];
             SwrContext* swrContext = swr_alloc();
@@ -323,7 +323,7 @@ Status AudioFfmpegEncoderPlugin::Start()
                 return Status::ERROR_NO_MEMORY;
             }
             swrContext = swr_alloc_set_opts(swrContext, avCodecContext_->channel_layout, avCodecContext_->sample_fmt,
-                avCodecContext_->sample_rate, avCodecContext_->channel_layout, sourceFmt_, avCodecContext_->sample_rate,
+                avCodecContext_->sample_rate, avCodecContext_->channel_layout, srcFmt_, avCodecContext_->sample_rate,
                 0, nullptr);
             if (swr_init(swrContext) != 0) {
                 MEDIA_LOG_E("swr init error");
@@ -345,16 +345,16 @@ Status AudioFfmpegEncoderPlugin::Start()
             return Status::ERROR_UNKNOWN;
         }
         fullInputFrameSize_ = av_samples_get_buffer_size(nullptr, avCodecContext_->channels, avCodecContext_->frame_size,
-                                                         sourceFmt_, 1);
-        sourceBytesPerSample = av_get_bytes_per_sample(sourceFmt_) * avCodecContext_->channels;
+                                                         srcFmt_, 1);
+        srcBytesPerSample_ = av_get_bytes_per_sample(srcFmt_) * avCodecContext_->channels;
         if (needReformat_) {
             auto resampleSize = av_samples_get_buffer_size(nullptr, avCodecContext_->channels,
                                                            avCodecContext_->frame_size, avCodecContext_->sample_fmt, 0);
             resampleCache_ .reserve(resampleSize);
             resampleChannelAddr_.reserve(avCodecContext_->channels);
             auto tmp = resampleChannelAddr_.data();
-            av_samples_fill_arrays(tmp, nullptr, resampleCache_.data(), avCodecContext_->channels, avCodecContext_->frame_size,
-                                   avCodecContext_->sample_fmt, 0);
+            av_samples_fill_arrays(tmp, nullptr, resampleCache_.data(), avCodecContext_->channels,
+                                   avCodecContext_->frame_size, avCodecContext_->sample_fmt, 0);
         }
         SetParameter(Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(avCodecContext_->frame_size));
         InitCacheFrame();
@@ -449,7 +449,7 @@ void AudioFfmpegEncoderPlugin::FillInFrameCache(const std::shared_ptr<Memory>& m
     if (needReformat_) {
         std::vector<const uint8_t*> input(avCodecContext_->channels);
         input[0] = mem->GetReadOnlyData();
-        if (av_sample_fmt_is_planar(sourceFmt_)) {
+        if (av_sample_fmt_is_planar(srcFmt_)) {
             size_t lineSize = mem->GetSize() / avCodecContext_->channels;
             for (int i = 1; i < avCodecContext_->channels; ++i) {
                 input[i] = input[i-1] + lineSize;
@@ -468,11 +468,10 @@ void AudioFfmpegEncoderPlugin::FillInFrameCache(const std::shared_ptr<Memory>& m
     cachedFrame_->sample_rate = avCodecContext_->sample_rate;
     cachedFrame_->channels = avCodecContext_->channels;
     cachedFrame_->channel_layout = avCodecContext_->channel_layout;
-    cachedFrame_->nb_samples = mem->GetSize() / sourceBytesPerSample;
+    cachedFrame_->nb_samples = mem->GetSize() / srcBytesPerSample_;
     if (av_sample_fmt_is_planar(avCodecContext_->sample_fmt) && avCodecContext_->channels > 1) {
         if (avCodecContext_->channels > AV_NUM_DATA_POINTERS) {
             av_freep(cachedFrame_->extended_data);
-            // todo remember to free it
             cachedFrame_->extended_data = static_cast<uint8_t**>(av_malloc_array(avCodecContext_->channels,
                                                                                   sizeof(uint8_t *)));
         } else {
@@ -509,7 +508,7 @@ Status AudioFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
     }
     AVFrame* inputFrame = nullptr;
     if (!eos) {
-        inputFrame = cachedFrame_;
+        inputFrame = cachedFrame_.get();
     }
     auto ret = avcodec_send_frame(avCodecContext_.get(), inputFrame);
     if (!eos && inputFrame) {
@@ -528,7 +527,7 @@ Status AudioFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
 }
 
 Status AudioFfmpegEncoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>& ioInfo,
-                                                  std::shared_ptr<AVPacket> packet)
+                                                  const std::shared_ptr<AVPacket>& packet)
 {
     auto ioInfoMem = ioInfo->GetMemory();
     if (ioInfoMem->GetCapacity() < packet->size) {
@@ -564,7 +563,7 @@ Status AudioFfmpegEncoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
         MEDIA_LOG_E("audio encoder receive error: %s", AVStrError(ret).c_str());
         status = Status::ERROR_UNKNOWN;
     }
-    av_frame_unref(cachedFrame_);
+    av_frame_unref(cachedFrame_.get());
     return status;
 }
 

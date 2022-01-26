@@ -312,8 +312,9 @@ FFmpegMuxerPlugin::~FFmpegMuxerPlugin()
 }
 Status FFmpegMuxerPlugin::Release()
 {
-    formatContext_.reset();
     outputFormat_.reset();
+    cachePacket_.reset();
+    formatContext_.reset();
     return Status::OK;
 }
 
@@ -503,6 +504,7 @@ Status FFmpegMuxerPlugin::WriteFrame(const std::shared_ptr<Plugin::Buffer>& buff
     }
     cachePacket_->duration = ConvertTimeToFFmpeg(buffer->duration, formatContext_->streams[trackId]->time_base);
     av_write_frame(formatContext_.get(), cachePacket_.get());
+    av_packet_unref(cachePacket_.get());
     return Status::OK;
 }
 
@@ -515,6 +517,7 @@ Status FFmpegMuxerPlugin::WriteTrailer()
     if (formatContext_ == nullptr) {
         return Status::ERROR_WRONG_STATE;
     }
+    av_write_frame(formatContext_.get(), nullptr); // flush out cache data
     int ret = av_write_trailer(formatContext_.get());
     if (ret != 0) {
         MEDIA_LOG_E("failed to write trailer %s", AVStrError(ret).c_str());

@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#define HST_LOG_TAG ""
+#define HST_LOG_TAG "MediaStatStub"
 
 #include "media_stat_stub.h"
 
 #include <algorithm>
 #include "foundation/log.h"
-
 
 namespace OHOS {
 namespace Media {

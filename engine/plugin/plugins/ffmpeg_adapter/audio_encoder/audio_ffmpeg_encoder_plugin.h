@@ -98,7 +98,7 @@ private:
 
     Status SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer);
 
-    Status ReceiveFrameSucc(const std::shared_ptr<Buffer>& ioInfo, std::shared_ptr<AVPacket> packet);
+    Status ReceiveFrameSucc(const std::shared_ptr<Buffer>& ioInfo, const std::shared_ptr<AVPacket>& packet);
 
     Status ReceiveBuffer();
 
@@ -116,13 +116,13 @@ private:
     mutable OSAL::Mutex avMutex_ {};
     std::shared_ptr<const AVCodec> avCodec_ {nullptr};
     std::shared_ptr<AVCodecContext> avCodecContext_ {nullptr};
-    AVFrame* cachedFrame_ {nullptr};
+    std::shared_ptr<AVFrame> cachedFrame_ {nullptr};
     uint32_t fullInputFrameSize_ {0};
     std::shared_ptr<Buffer> outBuffer_ {nullptr};
     uint64_t prev_pts_;
     bool needReformat_ {false};
-    AVSampleFormat sourceFmt_ {AVSampleFormat::AV_SAMPLE_FMT_NONE};
-    uint32_t sourceBytesPerSample {0};
+    AVSampleFormat srcFmt_ {AVSampleFormat::AV_SAMPLE_FMT_NONE};
+    uint32_t srcBytesPerSample_ {0};
     std::shared_ptr<SwrContext> swrCtx_ {nullptr};
     std::vector<uint8_t> resampleCache_ {};
     std::vector<uint8_t*> resampleChannelAddr_ {};
