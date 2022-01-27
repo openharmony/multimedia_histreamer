@@ -39,16 +39,22 @@
 #define HST_LOG_TAG "NULL"
 #endif
 
+#if defined(MEDIA_OHOS)
+#define PUBLIC_OUTPUT "{public}"
+#else
+#define PUBLIC_OUTPUT ""
+#endif
+
 #ifdef MEDIA_OHOS
 #ifndef OHOS_DEBUG
 #define HST_DECORATOR_HILOG(op, fmt, args...) \
     do { \
-        op(LOG_CORE, "%s:" fmt, HST_LOG_TAG, ##args); \
+        op(LOG_CORE, "%" PUBLIC_OUTPUT "s:" fmt, HST_LOG_TAG, ##args); \
     } while (0)
 #else
 #define HST_DECORATOR_HILOG(op, fmt, args...)\
     do { \
-        op(LOG_CORE, "%s[%d]:" fmt, HST_LOG_TAG, __LINE__, ##args); \
+        op(LOG_CORE, "%" PUBLIC_OUTPUT "s[%" PUBLIC_OUTPUT "d]:" fmt, HST_LOG_TAG, __LINE__, ##args); \
     } while (0)
 #endif
 
@@ -76,7 +82,7 @@
     do {                                                                                                               \
         ErrorCode ret = (exec);                                                                                        \
         if (ret != ErrorCode::SUCCESS) {                                                                               \
-            MEDIA_LOG_E("FAIL_RETURN on ErrorCode(%d).", ret);                                                         \
+            MEDIA_LOG_E("FAIL_RETURN on ErrorCode(%" PUBLIC_OUTPUT "d).", ret);                                                         \
             return ret;                                                                                                \
         }                                                                                                              \
     } while (0)
@@ -87,7 +93,7 @@
     do {                                                                                                               \
         ErrorCode ret = (exec);                                                                                        \
         if (ret != ErrorCode::SUCCESS) {                                                                               \
-            MEDIA_LOG_E("FAIL_LOG on ErrorCode(%d).", ret);                                                            \
+            MEDIA_LOG_E("FAIL_LOG on ErrorCode(%" PUBLIC_OUTPUT "d).", ret);                                                            \
         }                                                                                                              \
     } while (0)
 #endif
@@ -129,7 +135,7 @@
     do {                                                                                                               \
         bool value = (exec);                                                                                           \
         if (!value) {                                                                                                  \
-            MEDIA_LOG_E("ASSERT_CONDITION(msg:%s) " #exec, msg);                                                       \
+            MEDIA_LOG_E("ASSERT_CONDITION(msg:%" PUBLIC_OUTPUT "s) " #exec, msg);                                                       \
         }                                                                                                              \
     } while (0)
 #endif
