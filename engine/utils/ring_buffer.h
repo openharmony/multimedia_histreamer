@@ -21,6 +21,7 @@
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
 #include "foundation/osal/thread/scoped_lock.h"
+#include "securec.h"
 #include "utils/memory_helper.h"
 
 namespace OHOS {

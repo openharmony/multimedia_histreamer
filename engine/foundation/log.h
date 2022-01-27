@@ -82,7 +82,7 @@
     do {                                                                                                               \
         ErrorCode ret = (exec);                                                                                        \
         if (ret != ErrorCode::SUCCESS) {                                                                               \
-            MEDIA_LOG_E("FAIL_RETURN on ErrorCode(%" PUBLIC_OUTPUT "d).", ret);                                                         \
+            MEDIA_LOG_E("FAIL_RETURN on ErrorCode(%" PUBLIC_OUTPUT "d).", ret);                                        \
             return ret;                                                                                                \
         }                                                                                                              \
     } while (0)
@@ -93,7 +93,28 @@
     do {                                                                                                               \
         ErrorCode ret = (exec);                                                                                        \
         if (ret != ErrorCode::SUCCESS) {                                                                               \
-            MEDIA_LOG_E("FAIL_LOG on ErrorCode(%" PUBLIC_OUTPUT "d).", ret);                                                            \
+            MEDIA_LOG_E("FAIL_LOG on ErrorCode(%" PUBLIC_OUTPUT "d).", ret);                                           \
+        }                                                                                                              \
+    } while (0)
+#endif
+
+#ifndef NOK_RETURN
+#define NOK_RETURN(exec)                                                                                               \
+    do {                                                                                                               \
+        Status ret = (exec);                                                                                           \
+        if (ret != Status::OK) {                                                                                       \
+            MEDIA_LOG_E("NOK_RETURN on Status(%" PUBLIC_OUTPUT "d).", ret);                                            \
+            return ret;                                                                                                \
+        }                                                                                                              \
+    } while (0)
+#endif
+
+#ifndef NOK_LOG
+#define NOK_LOG(exec)                                                                                                  \
+    do {                                                                                                               \
+        Status ret = (exec);                                                                                           \
+        if (ret != Status::OK) {                                                                                       \
+            MEDIA_LOG_E("NOK_LOG on Status(%" PUBLIC_OUTPUT "d).", ret);                                               \
         }                                                                                                              \
     } while (0)
 #endif
@@ -135,7 +156,7 @@
     do {                                                                                                               \
         bool value = (exec);                                                                                           \
         if (!value) {                                                                                                  \
-            MEDIA_LOG_E("ASSERT_CONDITION(msg:%" PUBLIC_OUTPUT "s) " #exec, msg);                                                       \
+            MEDIA_LOG_E("ASSERT_CONDITION(msg:%" PUBLIC_OUTPUT "s) " #exec, msg);                                      \
         }                                                                                                              \
     } while (0)
 #endif
