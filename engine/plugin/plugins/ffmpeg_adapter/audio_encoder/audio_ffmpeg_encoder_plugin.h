@@ -104,8 +104,6 @@ private:
 
     Status ReceiveBufferLocked(const std::shared_ptr<Buffer>& ioInfo);
 
-    void InitCacheFrame();
-
     bool CheckReformat();
 
     void FillInFrameCache(const std::shared_ptr<Memory>& mem);

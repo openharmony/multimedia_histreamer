@@ -281,17 +281,6 @@ Status AudioFfmpegEncoderPlugin::Reset()
     return ResetLocked();
 }
 
-void AudioFfmpegEncoderPlugin::InitCacheFrame()
-{
-    if (!cachedFrame_) {
-        cachedFrame_ = std::shared_ptr<AVFrame>(av_frame_alloc(), [](AVFrame* frame) { av_frame_free(&frame);});
-    }
-    cachedFrame_->format = avCodecContext_->sample_fmt;
-    cachedFrame_->sample_rate = avCodecContext_->sample_rate;
-    cachedFrame_->channels = avCodecContext_->channels;
-    cachedFrame_->channel_layout = avCodecContext_->channel_layout;
-}
-
 bool AudioFfmpegEncoderPlugin::CheckReformat()
 {
     if (avCodec_ == nullptr || avCodecContext_ == nullptr) {
@@ -357,7 +346,6 @@ Status AudioFfmpegEncoderPlugin::Start()
                                    avCodecContext_->frame_size, avCodecContext_->sample_fmt, 0);
         }
         SetParameter(Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(avCodecContext_->frame_size));
-        InitCacheFrame();
     }
     return Status::OK;
 }
@@ -446,6 +434,7 @@ Status AudioFfmpegEncoderPlugin::DequeueOutputBuffer(std::shared_ptr<Buffer>& ou
 void AudioFfmpegEncoderPlugin::FillInFrameCache(const std::shared_ptr<Memory>& mem)
 {
     uint8_t* sampleData = nullptr;
+    int32_t nbSamples = 0;
     if (needReformat_) {
         std::vector<const uint8_t*> input(avCodecContext_->channels);
         input[0] = mem->GetReadOnlyData();
@@ -459,16 +448,20 @@ void AudioFfmpegEncoderPlugin::FillInFrameCache(const std::shared_ptr<Memory>& m
                                input.data(), avCodecContext_->frame_size);
         if (res < 0) {
             MEDIA_LOG_E("resample input failed");
+            nbSamples = 0;
+        } else {
+            sampleData = resampleCache_.data();
+            nbSamples = res;
         }
-        sampleData = resampleCache_.data();
     } else {
         sampleData = const_cast<uint8_t*>(mem->GetReadOnlyData());
+        nbSamples = mem->GetSize() / srcBytesPerSample_;
     }
     cachedFrame_->format = avCodecContext_->sample_fmt;
     cachedFrame_->sample_rate = avCodecContext_->sample_rate;
     cachedFrame_->channels = avCodecContext_->channels;
     cachedFrame_->channel_layout = avCodecContext_->channel_layout;
-    cachedFrame_->nb_samples = mem->GetSize() / srcBytesPerSample_;
+    cachedFrame_->nb_samples = nbSamples;
     if (av_sample_fmt_is_planar(avCodecContext_->sample_fmt) && avCodecContext_->channels > 1) {
         if (avCodecContext_->channels > AV_NUM_DATA_POINTERS) {
             av_freep(cachedFrame_->extended_data);
@@ -478,14 +471,15 @@ void AudioFfmpegEncoderPlugin::FillInFrameCache(const std::shared_ptr<Memory>& m
             cachedFrame_->extended_data = cachedFrame_->data;
         }
         cachedFrame_->extended_data[0] = sampleData;
-        cachedFrame_->linesize[0] = mem->GetSize() / avCodecContext_->channels;
+        cachedFrame_->linesize[0] = nbSamples * av_get_bytes_per_sample(avCodecContext_->sample_fmt);
         for (int i = 1; i < avCodecContext_->channels; i++) {
             cachedFrame_->extended_data[i] = cachedFrame_->extended_data[i-1] + cachedFrame_->linesize[0];
         }
     } else {
         cachedFrame_->data[0] = sampleData;
         cachedFrame_->extended_data = cachedFrame_->data;
-        cachedFrame_->linesize[0] = mem->GetSize();
+        cachedFrame_->linesize[0] = nbSamples * av_get_bytes_per_sample(avCodecContext_->sample_fmt) *
+            avCodecContext_->channels;
     }
 }
 
