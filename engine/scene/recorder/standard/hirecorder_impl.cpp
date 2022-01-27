@@ -79,29 +79,16 @@ ErrorCode HiRecorderImpl::Init()
 int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId)
 {
     PROFILE_BEGIN("SetAudioSource begin");
-    auto ret = ErrorCode::SUCCESS;
-    audioCapture_ = FilterFactory::Instance().CreateFilterWithType<AudioCaptureFilter>(
-            "builtin.recorder.audiocapture", "audiocapture");
-    audioEncoder_ = FilterFactory::Instance().CreateFilterWithType<AudioEncoderFilter>(
-            "builtin.recorder.audioencoder", "audioencoder");
-    ret = pipeline_->AddFilters({audioCapture_.get(), audioEncoder_.get()});
+    sourceId = INVALID_SOURCE_ID;
+    FALSE_RETURN_V(source != AudioSourceType::AUDIO_SOURCE_INVALID,
+                   TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
+    FALSE_RETURN_V(audioCount_ < AUDIO_SOURCE_MAX_COUNT, TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
+    auto handle = HandleGenerator::GenerateAudioHandle(audioCount_);
+    auto ret = SetAudioSourceInternal(source, handle);
     if (ret == ErrorCode::SUCCESS) {
-        ret = pipeline_->LinkFilters({audioCapture_.get(), audioEncoder_.get()});
-    }
-    std::shared_ptr<InPort> muxerInPort {nullptr};
-    if (ret == ErrorCode::SUCCESS) {
-        ret = muxer_->AddTrack(muxerInPort);
-    }
-    if (ret == ErrorCode::SUCCESS) {
-        ret = pipeline_->LinkPorts(audioEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
-    }
-    if (ret == ErrorCode::SUCCESS) {
-        sourceId_++;
-        sourceId = sourceId_;
-        ret = fsm_.SendEvent(Intent::SET_AUDIO_SOURCE,
-                             std::pair<int32_t, Plugin::SrcInputType> (sourceId, TransAudioInputType(source)));
-    } else {
-        sourceId = -1;
+        audioCount_++;
+        audioSourceId_ = handle;
+        sourceId = audioSourceId_;
     }
     PROFILE_END("SetAudioSource end.");
     return TransErrorCode(ret);
@@ -111,29 +98,16 @@ int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId
 {
 #ifdef VIDEO_SUPPORT
     PROFILE_BEGIN("SetVideoSource begin");
-    ErrorCode ret {ErrorCode::SUCCESS};
-    videoCapture_ = FilterFactory::Instance().CreateFilterWithType<VideoCaptureFilter>(
-        "builtin.recorder.videocapture", "videocapture");
-    videoEncoder_ = FilterFactory::Instance().CreateFilterWithType<VideoEncoderFilter>(
-        "builtin.recorder.videoencoder", "videoencoder");
-    ret = pipeline_->AddFilters({videoCapture_.get(), videoEncoder_.get()});
+    sourceId = INVALID_SOURCE_ID;
+    FALSE_RETURN_V(source != VideoSourceType::VIDEO_SOURCE_BUTT,
+                   TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
+    FALSE_RETURN_V(videoCount_ < VIDEO_SOURCE_MAX_COUNT, TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
+    auto handle = HandleGenerator::GenerateVideoHandle(videoCount_);
+    auto ret = SetVideoSourceInternal(source, handle);
     if (ret == ErrorCode::SUCCESS) {
-        ret = pipeline_->LinkFilters({videoCapture_.get(), videoEncoder_.get()});
-    }
-    std::shared_ptr<InPort> muxerInPort {nullptr};
-    if (ret == ErrorCode::SUCCESS) {
-        ret =muxer_->AddTrack(muxerInPort);
-    }
-    if (ret == ErrorCode::SUCCESS) {
-        ret = pipeline_->LinkPorts(videoEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
-    }
-    if (ret == ErrorCode::SUCCESS) {
-        sourceId_++;
-        sourceId = sourceId_;
-        ret = fsm_.SendEvent(Intent::SET_VIDEO_SOURCE,
-                             std::pair<int32_t, Plugin::SrcInputType> (sourceId, TransVideoInputType(source)));
-    } else {
-        sourceId = -1;
+        videoCount_++;
+        videoSourceId_ = handle;
+        sourceId = videoSourceId_;
     }
     PROFILE_END("SetVideoSource end.");
     return TransErrorCode(ret);
@@ -148,11 +122,10 @@ sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
 
 int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
 {
-    if (format == OutputFormatType::FORMAT_BUTT) {
-        return TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
-    }
+    FALSE_RETURN_V(format != OutputFormatType::FORMAT_BUTT, TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
+    FALSE_RETURN_V((audioCount_+ videoCount_) > 0, TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
     outputFormatType_ = format;
-    ErrorCode ret = fsm_.SendEvent(Intent::SET_OUTPUT_FORMAT, outputFormatType_);
+    auto ret = fsm_.SendEvent(Intent::SET_OUTPUT_FORMAT, outputFormatType_);
     if (ret != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("SetOutputFormat failed with error %d", static_cast<int>(ret));
     }
@@ -167,35 +140,20 @@ int32_t HiRecorderImpl::SetObs(const std::weak_ptr<IRecorderEngineObs>& obs)
 
 int32_t HiRecorderImpl::Configure(int32_t sourceId, const RecorderParam& recParam)
 {
-    if (outputFormatType_ == OutputFormatType::FORMAT_BUTT) {
-        MEDIA_LOG_E("Output format not set, configure the pipeline is invalid!");
-        return TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION);
+    FALSE_RETURN_V(outputFormatType_ != OutputFormatType::FORMAT_BUTT,
+                   TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
+    FALSE_RETURN_V(CheckParamType(sourceId,recParam), TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
+    Plugin::Any recordParam;
+    auto configureStatus{true};
+    if (recParam.IsAudioParam()) {
+        configureStatus = ConfigureAudio(sourceId, recParam, recordParam);
+    } else if (recParam.IsVideoParam()) {
+        configureStatus = ConfigureVideo(sourceId, recParam, recordParam);
+    } else {
+        configureStatus = ConfigureOther(sourceId, recParam, recordParam);
     }
-    Plugin::Any any;
-    switch (recParam.type) {
-        case RecorderPublicParamType::AUD_SAMPLERATE:
-            any = RecordParam {sourceId, recParam.type, dynamic_cast<const AudSampleRate&>(recParam)};
-            break;
-        case RecorderPublicParamType::AUD_CHANNEL:
-            any = RecordParam {sourceId, recParam.type, dynamic_cast<const AudChannel&>(recParam)};
-            break;
-        case RecorderPublicParamType::AUD_BITRATE:
-            any = RecordParam {sourceId, recParam.type, dynamic_cast<const AudBitRate&>(recParam)};
-            break;
-        case RecorderPublicParamType::AUD_ENC_FMT:
-            any = RecordParam {sourceId, recParam.type, dynamic_cast<const AudEnc&>(recParam)};
-            break;
-        case RecorderPublicParamType::OUT_PATH:
-            any = RecordParam {sourceId, recParam.type, dynamic_cast<const OutFilePath&>(recParam)};
-            break;
-        case RecorderPublicParamType::OUT_FD:
-            any = RecordParam {sourceId, recParam.type, dynamic_cast<const OutFd&>(recParam)};
-            break;
-        default:
-            MEDIA_LOG_E("ignore RecorderPublicParamType %d", recParam.type);
-            return TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
-    }
-    auto ret = fsm_.SendEvent(Intent::CONFIGURE, any);
+    FALSE_RETURN_V(configureStatus, TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
+    auto ret = fsm_.SendEvent(Intent::CONFIGURE, recordParam);
     if (ret != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("Configure failed with error %d", static_cast<int>(ret));
     }
@@ -335,52 +293,31 @@ ErrorCode HiRecorderImpl::DoSetAudioSource(const Plugin::Any& param) const
 ErrorCode HiRecorderImpl::DoConfigure(const Plugin::Any &param) const
 {
     ErrorCode ret  = ErrorCode::SUCCESS;
-    int32_t sourceId;
     RecordParam recordParam;
-    Plugin::Any any;
     if (param.Type() == typeid(RecordParam)) {
         recordParam = Plugin::AnyCast<RecordParam>(param);
     } else {
         return ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
     }
-    sourceId =  recordParam.sourceId;
-    any = recordParam.any;
     switch (recordParam.type) {
         case RecorderPublicParamType::AUD_SAMPLERATE:
-            ret = audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_SAMPLE_RATE),
-                                              static_cast<uint32_t>(Plugin::AnyCast<AudSampleRate>(any).sampleRate));
-            break;
         case RecorderPublicParamType::AUD_CHANNEL:
-            ret = audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_CHANNELS),
-                                              static_cast<uint32_t>(Plugin::AnyCast<AudChannel>(any).channel));
-            break;
         case RecorderPublicParamType::AUD_BITRATE:
-            ret = audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
-                                              static_cast<int64_t>(Plugin::AnyCast<AudBitRate>(any).bitRate));
+        case RecorderPublicParamType::AUD_ENC_FMT:
+            ret = DoConfigureAudio(recordParam);
             break;
-        case RecorderPublicParamType::AUD_ENC_FMT: {
-            auto encoderMeta = std::make_shared<Plugin::Meta>();
-            if (!TransAudioEncoderFmt(Plugin::AnyCast<AudEnc>(any).encFmt, *encoderMeta)) {
-                ret = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
-                break;
-            }
-            ret = audioEncoder_->SetAudioEncoder(sourceId,encoderMeta);
+        case RecorderPublicParamType::VID_CAPTURERATE:
+        case RecorderPublicParamType::VID_RECTANGLE:
+        case RecorderPublicParamType::VID_BITRATE:
+        case RecorderPublicParamType::VID_FRAMERATE:
+        case RecorderPublicParamType::VID_ENC_FMT:
+            ret = DoConfigureVideo(recordParam);
             break;
-        }
-        case RecorderPublicParamType::OUT_PATH: {
-            auto filePath = Plugin::AnyCast<OutFilePath>(any).path;
-            if (IsDirectory(filePath)) {
-                std::string dirPath{filePath};
-                if (!ConvertDirPathToFilePath(dirPath, outputFormatType_, filePath)) {
-                    ret = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
-                    break;
-                }
-            }
-            ret = outputSink_->SetOutputPath(filePath);
-            break;
-        }
+        case RecorderPublicParamType::OUT_PATH:
         case RecorderPublicParamType::OUT_FD:
-            ret = outputSink_->SetFd(Plugin::AnyCast<OutFd>(any).fd);
+        case RecorderPublicParamType::VID_ORIENTATION_HINT:
+        case RecorderPublicParamType::GEO_LOCATION:
+            ret = DoConfigureOther(recordParam);
             break;
         default:
             break;
@@ -447,6 +384,231 @@ ErrorCode HiRecorderImpl::DoStop(const Plugin::Any& param)
 ErrorCode HiRecorderImpl::DoOnComplete()
 {
     return pipeline_->Stop();
+}
+
+ErrorCode HiRecorderImpl::SetAudioSourceInternal(AudioSourceType source, int handle)
+{
+    audioCapture_ = FilterFactory::Instance().CreateFilterWithType<AudioCaptureFilter>(
+            "builtin.recorder.audiocapture", "audiocapture");
+    audioEncoder_ = FilterFactory::Instance().CreateFilterWithType<AudioEncoderFilter>(
+            "builtin.recorder.audioencoder", "audioencoder");
+    auto ret = pipeline_->AddFilters({audioCapture_.get(), audioEncoder_.get()});
+    if (ret == ErrorCode::SUCCESS) {
+        ret = pipeline_->LinkFilters({audioCapture_.get(), audioEncoder_.get()});
+    }
+    std::shared_ptr<InPort> muxerInPort {nullptr};
+    if (ret == ErrorCode::SUCCESS) {
+        ret = muxer_->AddTrack(muxerInPort);
+    }
+    if (ret == ErrorCode::SUCCESS) {
+        ret = pipeline_->LinkPorts(audioEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
+    }
+    if (ret == ErrorCode::SUCCESS) {
+        ret = fsm_.SendEvent(Intent::SET_AUDIO_SOURCE, std::pair<int32_t, Plugin::SrcInputType>(
+                handle,TransAudioInputType(source)));
+    }
+    return ret;
+}
+
+ErrorCode HiRecorderImpl::SetVideoSourceInternal(VideoSourceType source, int handle)
+{
+#ifdef VIDEO_SUPPORT
+    videoCapture_ = FilterFactory::Instance().CreateFilterWithType<VideoCaptureFilter>(
+            "builtin.recorder.videocapture", "videocapture");
+    videoEncoder_ = FilterFactory::Instance().CreateFilterWithType<VideoEncoderFilter>(
+            "builtin.recorder.videoencoder", "videoencoder");
+    auto ret = pipeline_->AddFilters({videoCapture_.get(), videoEncoder_.get()});
+    if (ret == ErrorCode::SUCCESS) {
+        ret = pipeline_->LinkFilters({videoCapture_.get(), videoEncoder_.get()});
+    }
+    std::shared_ptr<InPort> muxerInPort {nullptr};
+    if (ret == ErrorCode::SUCCESS) {
+        ret =muxer_->AddTrack(muxerInPort);
+    }
+    if (ret == ErrorCode::SUCCESS) {
+        ret = pipeline_->LinkPorts(videoEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
+    }
+    if (ret == ErrorCode::SUCCESS) {
+        ret = fsm_.SendEvent(Intent::SET_AUDIO_SOURCE, std::pair<int32_t, Plugin::SrcInputType>(
+                handle,TransVideoInputType(source)));
+    }
+    return ret;
+#else
+    return ErrorCode::ERROR_UNIMPLEMENTED;
+#endif
+}
+
+bool HiRecorderImpl::ConfigureAudio(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recordParam)
+{
+    auto ret{true};
+    switch (recParam.type) {
+        case RecorderPublicParamType::AUD_SAMPLERATE:
+            recordParam = RecordParam{sourceId, recParam.type, dynamic_cast<const AudSampleRate&>(recParam)};
+            break;
+        case RecorderPublicParamType::AUD_CHANNEL:
+            recordParam = RecordParam{sourceId, recParam.type, dynamic_cast<const AudChannel&>(recParam)};
+            break;
+        case RecorderPublicParamType::AUD_BITRATE:
+            recordParam = RecordParam{sourceId, recParam.type, dynamic_cast<const AudBitRate&>(recParam)};
+            break;
+        case RecorderPublicParamType::AUD_ENC_FMT:
+            recordParam = RecordParam{sourceId, recParam.type, dynamic_cast<const AudEnc&>(recParam)};
+            break;
+        default:
+            ret = false;
+            break;
+    }
+    return ret;
+}
+
+bool HiRecorderImpl::ConfigureVideo(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recordParam)
+{
+    auto ret{true};
+    switch (recParam.type) {
+        case RecorderPublicParamType::VID_CAPTURERATE:
+            recordParam = RecordParam{sourceId, recParam.type, dynamic_cast<const CaptureRate&>(recParam)};
+            break;
+        case RecorderPublicParamType::VID_RECTANGLE:
+            recordParam = RecordParam{sourceId, recParam.type, dynamic_cast<const VidRectangle&>(recParam)};
+            break;
+        case RecorderPublicParamType::VID_BITRATE:
+            recordParam = RecordParam{sourceId, recParam.type, dynamic_cast<const VidBitRate&>(recParam)};
+            break;
+        case RecorderPublicParamType::VID_FRAMERATE:
+            recordParam = RecordParam{sourceId, recParam.type, dynamic_cast<const VidFrameRate&>(recParam)};
+            break;
+        case RecorderPublicParamType::VID_ENC_FMT:
+            recordParam = RecordParam{sourceId, recParam.type, dynamic_cast<const VidEnc&>(recParam)};
+            break;
+        default:
+            ret = false;
+            break;
+    }
+    return ret;
+}
+
+bool HiRecorderImpl::ConfigureOther(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recordParam)
+{
+    auto ret{true};
+    switch (recParam.type) {
+        case RecorderPublicParamType::OUT_PATH:
+            recordParam = RecordParam{sourceId, recParam.type, dynamic_cast<const OutFilePath&>(recParam)};
+            break;
+        case RecorderPublicParamType::OUT_FD:
+            recordParam = RecordParam{sourceId, recParam.type, dynamic_cast<const OutFd&>(recParam)};
+            break;
+        case RecorderPublicParamType::VID_ORIENTATION_HINT:
+            recordParam = RecordParam{sourceId, recParam.type, dynamic_cast<const RotationAngle&>(recParam)};
+            break;
+        case RecorderPublicParamType::GEO_LOCATION:
+            recordParam = RecordParam{sourceId, recParam.type, dynamic_cast<const GeoLocation&>(recParam)};
+            break;
+        default:
+            ret = false;
+            break;
+    }
+    return ret;
+}
+
+ErrorCode HiRecorderImpl::DoConfigureAudio(const RecordParam& param) const
+{
+    ErrorCode ret  = ErrorCode::SUCCESS;
+    Plugin::Any any{param.any};
+    switch (param.type) {
+        case RecorderPublicParamType::AUD_SAMPLERATE:
+            ret = audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_SAMPLE_RATE),
+                                              static_cast<uint32_t>(Plugin::AnyCast<AudSampleRate>(any).sampleRate));
+            break;
+        case RecorderPublicParamType::AUD_CHANNEL:
+            ret = audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_CHANNELS),
+                                              static_cast<uint32_t>(Plugin::AnyCast<AudChannel>(any).channel));
+            break;
+        case RecorderPublicParamType::AUD_BITRATE:
+            ret = audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
+                                              static_cast<int64_t>(Plugin::AnyCast<AudBitRate>(any).bitRate));
+            break;
+        case RecorderPublicParamType::AUD_ENC_FMT: {
+            auto encoderMeta = std::make_shared<Plugin::Meta>();
+            if (!TransAudioEncoderFmt(Plugin::AnyCast<AudEnc>(any).encFmt, *encoderMeta)) {
+                ret = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+                break;
+            }
+            ret = audioEncoder_->SetAudioEncoder(param.sourceId,encoderMeta);
+            break;
+        }
+        default:
+            break;
+    }
+    return ret;
+}
+
+ErrorCode HiRecorderImpl::DoConfigureVideo(const RecordParam& param) const
+{
+    ErrorCode ret  = ErrorCode::SUCCESS;
+    Plugin::Any any{param.any};
+    switch (param.type) {
+        case RecorderPublicParamType::VID_RECTANGLE: {
+            auto vidRectangle = Plugin::AnyCast<VidRectangle>(any);
+            ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_WIDTH),
+                                              static_cast<uint32_t>(vidRectangle.width));
+            if (ret != ErrorCode::SUCCESS) {
+                ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_HEIGHT),
+                                                  static_cast<uint32_t>(vidRectangle.height));
+            }
+            break;
+        }
+        case RecorderPublicParamType::VID_FRAMERATE:
+            ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_FRAME_RATE),
+                                              static_cast<uint64_t>(Plugin::AnyCast<VidFrameRate>(any).frameRate));
+            break;
+        case RecorderPublicParamType::VID_CAPTURERATE:
+        case RecorderPublicParamType::VID_BITRATE:
+        case RecorderPublicParamType::VID_ENC_FMT:
+            MEDIA_LOG_E("ignore RecorderPublicParamType %d", param.type);
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
+ErrorCode HiRecorderImpl::DoConfigureOther(const RecordParam& param) const
+{
+    ErrorCode ret  = ErrorCode::SUCCESS;
+    Plugin::Any any{param.any};
+    switch (param.type) {
+        case RecorderPublicParamType::OUT_PATH: {
+            auto filePath = Plugin::AnyCast<OutFilePath>(any).path;
+            if (IsDirectory(filePath)) {
+                std::string dirPath{filePath};
+                if (!ConvertDirPathToFilePath(dirPath, outputFormatType_, filePath)) {
+                    ret = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+                    break;
+                }
+            }
+            ret = outputSink_->SetOutputPath(filePath);
+            break;
+        }
+        case RecorderPublicParamType::OUT_FD:
+            ret = outputSink_->SetFd(Plugin::AnyCast<OutFd>(any).fd);
+            break;
+        case RecorderPublicParamType::VID_ORIENTATION_HINT:
+        case RecorderPublicParamType::GEO_LOCATION:
+            MEDIA_LOG_E("ignore RecorderPublicParamType %d", param.type);
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
+bool HiRecorderImpl::CheckParamType(int32_t sourceId, const RecorderParam& recParam) const
+{
+    FALSE_RETURN_V((HandleGenerator::IsAudio(sourceId) && recParam.IsAudioParam() && audioSourceId_ == sourceId) ||
+        (HandleGenerator::IsVideo(sourceId) && recParam.IsVideoParam() && videoSourceId_ == sourceId) ||
+        ((sourceId == DUMMY_SOURCE_ID) && !(recParam.IsAudioParam() || recParam.IsVideoParam())), false);
+
+    return true;
 }
 } // namespace Record
 } // namespace Media

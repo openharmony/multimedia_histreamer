@@ -98,8 +98,8 @@ bool ConvertDirPathToFilePath(const std::string& dirPath, OutputFormatType outpu
     if (filePath[filePath.size() - 1] != '/') {
         filePath += "/";
     }
-    char fileName[32] = { 0 }; /// magic number 32
     if (g_outputFormatToFormat.find(outputFormatType) != g_outputFormatToFormat.end()) {
+        char fileName[32] = { 0 }; /// magic number 32
         auto tm = time(nullptr);
         strftime(fileName, sizeof(fileName), g_outputFormatToFormat.at(outputFormatType).c_str(), localtime(&tm));
         filePath += fileName;

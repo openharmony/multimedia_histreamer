@@ -83,6 +83,21 @@ public:
     ErrorCode DoStop(const Plugin::Any& param) override;
     ErrorCode DoOnComplete() override;
 private:
+    ErrorCode SetAudioSourceInternal(AudioSourceType source, int handle);
+    ErrorCode SetVideoSourceInternal(VideoSourceType source, int handle);
+    bool ConfigureAudio(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recordParam);
+    bool ConfigureVideo(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recordParam );
+    bool ConfigureOther(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recordParam);
+    ErrorCode DoConfigureAudio(const RecordParam& param) const;
+    ErrorCode DoConfigureVideo(const RecordParam& param) const;
+    ErrorCode DoConfigureOther(const RecordParam& param) const;
+    bool CheckParamType(int32_t sourceId, const RecorderParam& recParam) const;
+
+    std::atomic<uint32_t> audioCount_ {0};
+    std::atomic<uint32_t> videoCount_ {0};
+    std::atomic<uint32_t> audioSourceId_ {0};
+    std::atomic<uint32_t> videoSourceId_ {0};
+
     OutputFormatType outputFormatType_ {OutputFormatType::FORMAT_BUTT};
     OSAL::Mutex stateMutex_ {};
     OSAL::ConditionVariable cond_ {};
@@ -94,7 +109,6 @@ private:
     MediaStatStub mediaStatStub_ {};
 
     std::weak_ptr<IRecorderEngineObs> obs_ {};
-    std::atomic<int32_t> sourceId_ {0};
     std::shared_ptr<Pipeline::MuxerFilter> muxer_;
     std::shared_ptr<Pipeline::OutputSinkFilter> outputSink_;
     std::shared_ptr<Pipeline::AudioCaptureFilter> audioCapture_;
