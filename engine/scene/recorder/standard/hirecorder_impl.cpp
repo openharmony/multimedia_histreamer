@@ -544,6 +544,7 @@ ErrorCode HiRecorderImpl::DoConfigureAudio(const RecordParam& param) const
 
 ErrorCode HiRecorderImpl::DoConfigureVideo(const RecordParam& param) const
 {
+#ifdef VIDEO_SUPPORT
     ErrorCode ret  = ErrorCode::SUCCESS;
     Plugin::Any any{param.any};
     switch (param.type) {
@@ -570,6 +571,9 @@ ErrorCode HiRecorderImpl::DoConfigureVideo(const RecordParam& param) const
             break;
     }
     return ret;
+#else
+    return ErrorCode::ERROR_UNIMPLEMENTED;
+#endif
 }
 
 ErrorCode HiRecorderImpl::DoConfigureOther(const RecordParam& param) const
