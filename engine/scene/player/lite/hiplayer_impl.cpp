@@ -417,7 +417,7 @@ ErrorCode HiPlayerImpl::DoOnComplete()
     if (!singleLoop_) {
         StopAsync();
     } else {
-        fsm_.SendEventAsync(Intent::SEEK, static_cast<int32_t>(0));
+        fsm_.SendEventAsync(Intent::SEEK, static_cast<int64_t>(0));
     }
     auto ptr = callback_.lock();
     if (ptr != nullptr) {
