@@ -1,0 +1,220 @@
+/*
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#define HST_LOG_TAG "StreamingExecutor"
+#include "streaming_executor.h"
+#include <functional>
+#include "securec.h"
+#include "foundation/log.h"
+#include "libcurl_client.h"
+#include "osal/utils/util.h"
+#include "steady_clock.h"
+#include "http_source.h"
+
+namespace OHOS {
+namespace Media {
+namespace Plugin {
+namespace HttpPlugin {
+constexpr int RING_BUFFER_SIZE = 5 * 48 * 1024;
+constexpr int PER_REQUEST_SIZE = 48 * 1024;
+
+StreamingExecutor::StreamingExecutor() noexcept
+{
+    buffer_ = std::make_shared<RingBuffer>(RING_BUFFER_SIZE);
+    buffer_->Init();
+    isDownloading = false;
+
+    task_ = std::make_shared<OSAL::Task>(std::string("StreamingExecutor"));
+    task_->RegisterHandler(std::bind(&StreamingExecutor::HttpDownloadThread, this));
+
+    memset_s(&headerInfo_, sizeof(HeaderInfo), 0x00, sizeof(HeaderInfo));
+    headerInfo_.fileContentLen = 0;
+    startPos_ = 0;
+}
+
+StreamingExecutor::~StreamingExecutor() {}
+
+UrlType StreamingExecutor::GetUrlType(const std::string &url)
+{
+    if (url.empty() || url.find("http") == url.npos) {
+        MEDIA_LOG_E("url is not http error");
+        return URL_UNKNOWN;
+    }
+    if (url.substr(url.length() - 5) == ".m3u8") {
+        return URL_HLS;
+    } else {
+        return URL_HTTP;
+    }
+}
+
+bool StreamingExecutor::Open(const std::string &url)
+{
+    MEDIA_LOG_D("Open in");
+    FALSE_RETURN_V(!url.empty(), false);
+
+    if (GetUrlType(url) == URL_HTTP) {
+        source_ = std::make_shared<HttpSource>();
+    } else {
+        // todo
+    }
+    FALSE_RETURN_V(source_ != nullptr, false);
+
+    source_->Init(&RxHeaderData, &RxBodyData, this);
+    source_->Open(url);
+
+    startPos_ = 0;
+    isEos_ = false;
+    task_->Start();
+    return true;
+}
+
+
+void StreamingExecutor::Close()
+{
+    task_->Stop();
+    startPos_ = 0;
+    if (source_ != nullptr) {
+        source_->Close();
+        source_ = nullptr;
+    }
+}
+
+bool StreamingExecutor::Read(unsigned char *buff, unsigned int wantReadLength, unsigned int &realReadLength, bool &isEos)
+{
+    FALSE_RETURN_V(buffer_ != nullptr, false);
+    isEos = false;
+    realReadLength = buffer_->ReadBuffer(buff, wantReadLength);
+    if (isEos_ && realReadLength == 0) {
+        isEos = true;
+    }
+    MEDIA_LOG_D("Read: wantReadLength %d, realReadLength %d, isEos %d", wantReadLength, realReadLength, isEos);
+    return true;
+}
+
+bool StreamingExecutor::Seek(int offset)
+{
+    FALSE_RETURN_V(buffer_ != nullptr, false);
+    MEDIA_LOG_I("Seek: buffer size %d, offset %d", buffer_->GetSize(), offset);
+    if (isEos_) {
+        startPos_ = offset;
+        task_->Start();
+        isEos_ = false;
+    }
+    return true;
+}
+
+unsigned int StreamingExecutor::GetContentLength() const
+{
+    return headerInfo_.fileContentLen;
+}
+
+bool StreamingExecutor::IsStreaming()
+{
+    return headerInfo_.isChunked;
+}
+
+void StreamingExecutor::HttpDownloadThread()
+{
+    int ret = source_->RequestData(startPos_, PER_REQUEST_SIZE);
+    FALSE_LOG(ret == 0);
+    if (headerInfo_.fileContentLen > 0 && startPos_ >= headerInfo_.fileContentLen) { // 检查是否播放结束
+        MEDIA_LOG_I("http download completed, startPos_ %d", startPos_);
+        isEos_ = true;
+        task_->Pause();
+    }
+}
+
+size_t StreamingExecutor::RxBodyData(void *buffer, size_t size, size_t nitems, void *userParam)
+{
+    auto executor = static_cast<StreamingExecutor *>(userParam);
+    HeaderInfo *header = &(executor->headerInfo_);
+    size_t dataLen = size * nitems;
+
+    if (header->fileContentLen == 0) {
+        if (header->contentLen > 0) {
+            MEDIA_LOG_W("Unsupported range, use content length as content file length");
+            header->fileContentLen = header->contentLen;
+        } else {
+            MEDIA_LOG_E("fileContentLen and contentLen are both zero.");
+            return 0;
+        }
+    }
+    if (!executor->isDownloading) {
+        executor->isDownloading = true;
+    }
+    executor->buffer_->WriteBuffer(buffer, dataLen);
+    executor->isDownloading = false;
+    executor->startPos_ = executor->startPos_ + dataLen;
+    MEDIA_LOG_I("RxBodyData: dataLen %d, startPos_ %d, buffer size %d", dataLen, executor->startPos_, executor->buffer_->GetSize());
+    return dataLen;
+}
+
+namespace {
+char *StringTrim(char *str) {
+    if (str == nullptr) {
+        return nullptr;
+    }
+    char *p = str;
+    char *p1 = p + strlen(str) - 1;
+
+    while (*p && isspace((int) *p)) {
+        p++;
+    }
+    while (p1 > p && isspace((int) *p1)) {
+        *p1-- = 0;
+    }
+    return p;
+}
+}
+
+size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems, void *userParam)
+{
+    auto executor = reinterpret_cast<StreamingExecutor *>(userParam);
+    HeaderInfo *info = &(executor->headerInfo_);
+    char *key = strtok(reinterpret_cast<char *>(buffer), ":");
+    if (!strncmp(key, "Content-Type", strlen("Content-Type"))) {
+        char *type = StringTrim(strtok(NULL, ":"));
+        memcpy_s(info->contentType, sizeof(info->contentType), type, sizeof(info->contentType));
+    }
+
+    if (!strncmp(key, "Content-Length", strlen("Content-Length")) || !strncmp(key, "content-length", strlen("content-length"))) {
+        char *contLen = StringTrim(strtok(NULL, ":"));
+        info->contentLen = atol(contLen);
+    }
+
+    if (!strncmp(key, "Transfer-Encoding", strlen("Transfer-Encoding")) || !strncmp(key, "transfer-encoding", strlen("transfer-encoding"))) {
+        char *transEncode = StringTrim(strtok(NULL, ":"));
+        if (!strncmp(transEncode, "chunked", strlen("chunked"))) {
+            info->isChunked = true;
+        }
+    }
+
+    if (!strncmp(key, "Content-Range", strlen("Content-Range")) || !strncmp(key, "content-range", strlen("content-range"))) {
+        char *strRange = StringTrim(strtok(NULL, ":"));
+        long start, end, fileLen;
+        sscanf_s(strRange, "bytes %ld-%ld/%ld", &start, &end, &fileLen);
+        if (info->fileContentLen > 0 && info->fileContentLen != fileLen) {
+            MEDIA_LOG_E("FileContentLen doesn't equal to fileLen");
+        }
+        if (info->fileContentLen == 0) {
+            info->fileContentLen = fileLen;
+        }
+    }
+    return size * nitems;
+}
+
+}
+}
+}
+}
