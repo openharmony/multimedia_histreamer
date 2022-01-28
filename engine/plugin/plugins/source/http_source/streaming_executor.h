@@ -57,7 +57,7 @@ private:
     UrlType GetUrlType(const std::string &url);
     void HttpDownloadThread();
     static size_t RxBodyData(void *buffer, size_t size, size_t nitems, void *userParam);
-    static size_t RxHeaderData(void *buffer, size_t size, size_t nitems, void *outStream);
+    static size_t RxHeaderData(void *buffer, size_t size, size_t nitems, void *userParam);
 
 private:
     std::shared_ptr<RingBuffer> buffer_;
