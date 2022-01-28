@@ -258,7 +258,7 @@ bool AACAudioConfigParser::CalculateProfile(int channelCnt, int pcu, int rcu)
             ret = 4;                         // 4
         }
     }
-    MEDIA_LOG_W("determined level: profile=%" PUBLIC_OUTPUT "u, sampleRate=%" PUBLIC_OUTPUT "u, channel_config=%" PUBLIC_OUTPUT "u, pcu=%d,rcu=%" PUBLIC_OUTPUT "d",
+    MEDIA_LOG_W("determined level: profile=%" PUBLIC_OUTPUT "u, sampleRate=%" PUBLIC_OUTPUT "u, channel_config=%" PUBLIC_OUTPUT "u, pcu=%" PUBLIC_OUTPUT "d,rcu=%" PUBLIC_OUTPUT "d",
                 audioConfig_.audioObjectType, audioConfig_.sampleRate, audioConfig_.channelConfig, pcu, rcu);
     audioConfig_.level = static_cast<uint32_t>(ret);
     return ret != -1;

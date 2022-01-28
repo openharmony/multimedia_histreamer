@@ -104,7 +104,7 @@ Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
         }
     }
     OnIntentExecuted(intent, nextAction, rtv);
-    PROFILE_END("ProcessIntent, curState: %s, intent: %d.", curState_->GetName().c_str(), intent);
+    PROFILE_END("ProcessIntent, curState: %" PUBLIC_OUTPUT "s, intent: %" PUBLIC_OUTPUT "d.", curState_->GetName().c_str(), intent);
     return (rtv == ErrorCode::SUCCESS) ? nextAction : Action::ACTION_BUTT;
 }
 

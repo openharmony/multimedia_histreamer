@@ -291,7 +291,7 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
 
         httpHandle_->GetHttpBufferRange(&read, &write);
 
-        MEDIA_LOG_I("read pos %d write pos %" PUBLIC_OUTPUT "d expectedLen %" PUBLIC_OUTPUT "d", read, write, expectedLen);
+        MEDIA_LOG_I("read pos %" PUBLIC_OUTPUT "d write pos %" PUBLIC_OUTPUT "d expectedLen %" PUBLIC_OUTPUT "d", read, write, expectedLen);
 
         expectedLen = std::min(static_cast<size_t>(write - read), expectedLen);
         expectedLen = std::min(bufData->GetCapacity(), expectedLen);

@@ -191,7 +191,7 @@ std::string TypeFinder::SniffMediaType()
             pluginName = plugin->name;
         }
     }
-    PROFILE_END("SniffMediaType end, sniffed plugin num = %d", cnt);
+    PROFILE_END("SniffMediaType end, sniffed plugin num = %" PUBLIC_OUTPUT "d", cnt);
     return pluginName;
 }
 

@@ -100,18 +100,18 @@ int LibcurlClient::RequestData(long startPos, int len)
     headers = curl_slist_append(headers, "Keep-Alive: timeout=120");
     curl_easy_setopt(easyHandle_, CURLOPT_HTTPHEADER, headers);
 
-    MEDIA_LOG_D("RequestData: startPos %d, len %d", startPos, len);
+    MEDIA_LOG_D("RequestData: startPos %" PUBLIC_OUTPUT "d, len %" PUBLIC_OUTPUT "d", startPos, len);
     CURLcode returnCode = curl_easy_perform(easyHandle_);
     if (headers != nullptr) {
         curl_slist_free_all(headers);
     }
     if(returnCode != CURLE_OK) {
-        MEDIA_LOG_E("Curl error %d", returnCode);
+        MEDIA_LOG_E("Curl error %" PUBLIC_OUTPUT "d", returnCode);
     } else{
         int httpCode = 0;
         curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
         if(httpCode >= 400){
-            MEDIA_LOG_E("Http error %d", httpCode);
+            MEDIA_LOG_E("Http error %" PUBLIC_OUTPUT "d", httpCode);
         }
     }
     return returnCode;

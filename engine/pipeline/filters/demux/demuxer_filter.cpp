@@ -400,7 +400,7 @@ bool DemuxerFilter::PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo)
             ++audioTrackCnt;
         }
         auto port = std::make_shared<OutPort>(this, NamePort(mime));
-        MEDIA_LOG_I("PrepareStreams, trackId: %" PUBLIC_OUTPUT "d, portName: %s" PUBLIC_OUTPUT "", i, port->GetName().c_str());
+        MEDIA_LOG_I("PrepareStreams, trackId: %" PUBLIC_OUTPUT "d, portName: %" PUBLIC_OUTPUT "s", i, port->GetName().c_str());
         outPorts_.push_back(port);
         portInfo.ports.push_back({port->GetName(), IsRawAudio(mime)});
         mediaMetaData_.trackInfos.emplace_back(trackId, std::move(port), true);

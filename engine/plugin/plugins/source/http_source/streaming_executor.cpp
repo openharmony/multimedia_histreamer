@@ -98,14 +98,14 @@ bool StreamingExecutor::Read(unsigned char *buff, unsigned int wantReadLength, u
     if (isEos_ && realReadLength == 0) {
         isEos = true;
     }
-    MEDIA_LOG_D("Read: wantReadLength %d, realReadLength %d, isEos %d", wantReadLength, realReadLength, isEos);
+    MEDIA_LOG_D("Read: wantReadLength %" PUBLIC_OUTPUT "d, realReadLength %" PUBLIC_OUTPUT "d, isEos %" PUBLIC_OUTPUT "d", wantReadLength, realReadLength, isEos);
     return true;
 }
 
 bool StreamingExecutor::Seek(int offset)
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
-    MEDIA_LOG_I("Seek: buffer size %d, offset %d", buffer_->GetSize(), offset);
+    MEDIA_LOG_I("Seek: buffer size %" PUBLIC_OUTPUT "d, offset %" PUBLIC_OUTPUT "d", buffer_->GetSize(), offset);
     if (isEos_) {
         startPos_ = offset;
         task_->Start();
@@ -129,7 +129,7 @@ void StreamingExecutor::HttpDownloadThread()
     int ret = source_->RequestData(startPos_, PER_REQUEST_SIZE);
     FALSE_LOG(ret == 0);
     if (headerInfo_.fileContentLen > 0 && startPos_ >= headerInfo_.fileContentLen) { // 检查是否播放结束
-        MEDIA_LOG_I("http download completed, startPos_ %d", startPos_);
+        MEDIA_LOG_I("http download completed, startPos_ %" PUBLIC_OUTPUT "d", startPos_);
         isEos_ = true;
         task_->Pause();
     }
@@ -156,7 +156,7 @@ size_t StreamingExecutor::RxBodyData(void *buffer, size_t size, size_t nitems, v
     executor->buffer_->WriteBuffer(buffer, dataLen);
     executor->isDownloading = false;
     executor->startPos_ = executor->startPos_ + dataLen;
-    MEDIA_LOG_I("RxBodyData: dataLen %d, startPos_ %d, buffer size %d", dataLen, executor->startPos_, executor->buffer_->GetSize());
+    MEDIA_LOG_I("RxBodyData: dataLen %" PUBLIC_OUTPUT "d, startPos_ %" PUBLIC_OUTPUT "d, buffer size %" PUBLIC_OUTPUT "d", dataLen, executor->startPos_, executor->buffer_->GetSize());
     return dataLen;
 }
 
@@ -203,7 +203,7 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
     if (!strncmp(key, "Content-Range", strlen("Content-Range")) || !strncmp(key, "content-range", strlen("content-range"))) {
         char *strRange = StringTrim(strtok(NULL, ":"));
         long start, end, fileLen;
-        sscanf_s(strRange, "bytes %ld-%ld/%ld", &start, &end, &fileLen);
+        sscanf_s(strRange, "bytes %" PUBLIC_OUTPUT "ld-%" PUBLIC_OUTPUT "ld/%" PUBLIC_OUTPUT "ld", &start, &end, &fileLen);
         if (info->fileContentLen > 0 && info->fileContentLen != fileLen) {
             MEDIA_LOG_E("FileContentLen doesn't equal to fileLen");
         }

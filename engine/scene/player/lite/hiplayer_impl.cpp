@@ -159,7 +159,7 @@ int32_t HiPlayerImpl::Play()
     } else {
         ret = fsm_.SendEvent(Intent::PLAY);
     }
-    PROFILE_END("Play ret = %d", to_underlying(ret));
+    PROFILE_END("Play ret = %" PUBLIC_OUTPUT "d", to_underlying(ret));
     return to_underlying(ret);
 }
 
@@ -172,7 +172,7 @@ int32_t HiPlayerImpl::Pause()
 {
     PROFILE_BEGIN();
     auto ret = to_underlying(fsm_.SendEvent(Intent::PAUSE));
-    PROFILE_END("Pause ret = %d", ret);
+    PROFILE_END("Pause ret = %" PUBLIC_OUTPUT "d", ret);
     return ret;
 }
 
@@ -180,7 +180,7 @@ ErrorCode HiPlayerImpl::Resume()
 {
     PROFILE_BEGIN();
     auto ret = fsm_.SendEvent(Intent::RESUME);
-    PROFILE_END("Resume ret = %d", ret);
+    PROFILE_END("Resume ret = %" PUBLIC_OUTPUT "d", ret);
     return ret;
 }
 
@@ -188,7 +188,7 @@ int32_t HiPlayerImpl::Stop()
 {
     PROFILE_BEGIN();
     auto ret = to_underlying(fsm_.SendEvent(Intent::STOP));
-    PROFILE_END("Stop ret = %d", ret);
+    PROFILE_END("Stop ret = %" PUBLIC_OUTPUT "d", ret);
     return ret;
 }
 
@@ -472,7 +472,7 @@ int32_t HiPlayerImpl::Release()
     demuxer_.reset();
     audioDecoderMap_.clear();
     audioSink_.reset();
-    PROFILE_END("Release ret = %d", ret);
+    PROFILE_END("Release ret = %" PUBLIC_OUTPUT "d", ret);
     return ret;
 }
 

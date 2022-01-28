@@ -195,7 +195,7 @@ inline Status AssignIfCastSuccess(T& lvalue, const Any& anyValue, const char* ta
         MEDIA_LOG_I("AssignIfCastSuccess found %" PUBLIC_OUTPUT "s", tagName);
         return Status::OK;
     } else {
-        MEDIA_LOG_W("tag:%s value type mismatch", tagName);
+        MEDIA_LOG_W("tag:%" PUBLIC_OUTPUT "s value type mismatch", tagName);
         return Status::ERROR_MISMATCHED_TYPE;
     }
 }

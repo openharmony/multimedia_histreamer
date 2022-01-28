@@ -183,7 +183,7 @@ int32_t HiRecorderImpl::Start()
     } else {
         ret = fsm_.SendEvent(Intent::START);
     }
-    PROFILE_END("Start ret = %d", TransErrorCode(ret));
+    PROFILE_END("Start ret = %" PUBLIC_OUTPUT "d", TransErrorCode(ret));
     return TransErrorCode(ret);
 }
 
@@ -191,7 +191,7 @@ int32_t HiRecorderImpl::Pause()
 {
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::PAUSE));
-    PROFILE_END("Pause ret = %d", ret);
+    PROFILE_END("Pause ret = %" PUBLIC_OUTPUT "d", ret);
     return ret;
 }
 
@@ -199,7 +199,7 @@ int32_t HiRecorderImpl::Resume()
 {
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::RESUME));
-    PROFILE_END("Resume ret = %d", ret);
+    PROFILE_END("Resume ret = %" PUBLIC_OUTPUT "d", ret);
     return ret;
 }
 
@@ -208,7 +208,7 @@ int32_t HiRecorderImpl::Stop(bool isDrainAll)
     PROFILE_BEGIN();
     outputFormatType_ = OutputFormatType::FORMAT_BUTT;
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::STOP, isDrainAll));
-    PROFILE_END("Stop ret = %d", ret);
+    PROFILE_END("Stop ret = %" PUBLIC_OUTPUT "d", ret);
     return ret;
 }
 
@@ -578,7 +578,7 @@ ErrorCode HiRecorderImpl::DoConfigureVideo(const RecorderParamInternal& recParam
         case RecorderPublicParamType::VID_CAPTURERATE:
         case RecorderPublicParamType::VID_BITRATE:
         case RecorderPublicParamType::VID_ENC_FMT:
-            MEDIA_LOG_E("ignore RecorderPublicParamType %d", recParamInternal.type);
+            MEDIA_LOG_E("ignore RecorderPublicParamType %" PUBLIC_OUTPUT "d", param.type);
             break;
         default:
             break;
@@ -611,7 +611,7 @@ ErrorCode HiRecorderImpl::DoConfigureOther(const RecorderParamInternal& recParam
             break;
         case RecorderPublicParamType::VID_ORIENTATION_HINT:
         case RecorderPublicParamType::GEO_LOCATION:
-            MEDIA_LOG_E("ignore RecorderPublicParamType %d", recParamInternal.type);
+            MEDIA_LOG_E("ignore RecorderPublicParamType %" PUBLIC_OUTPUT "d", recParamInternal.type);
             break;
         default:
             break;
