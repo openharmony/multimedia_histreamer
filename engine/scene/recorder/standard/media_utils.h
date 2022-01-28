@@ -36,36 +36,36 @@ constexpr uint8_t AUDIO_SOURCE_MAX_COUNT = 1;
 */
 constexpr int32_t INVALID_SOURCE_ID = -1;
 
-struct HandleGenerator {
+struct SourceIdGenerator {
     static const uint32_t SOURCE_MASK = 0xF00;
     static const uint32_t VIDEO_MASK = 0x100;
     static const uint32_t AUDIO_MASK = 0x200;
     static const uint32_t INDEX_MASK = 0xFF;
     /**
-      Handle is currently represented as int32_t, and internal descripted as source kind mask + index :
+      SourceId is currently represented as int32_t, and internal descripted as source kind mask + index :
       high 20bits(reserverd) + 4bits(source kind mask) + 8bits(index).
       The handle can uniquely identify the recorder source.
     */
-    static int32_t GenerateAudioHandle(uint32_t index)
+    static int32_t GenerateAudioSourceId(uint32_t index)
     {
         return static_cast<int32_t>(AUDIO_MASK + (INDEX_MASK & index));
     }
 
-    static int32_t GenerateVideoHandle(uint32_t index)
+    static int32_t GenerateVideoSourceId(uint32_t index)
     {
         return static_cast<int32_t>(VIDEO_MASK + (INDEX_MASK & index));
     }
 
-    static int32_t IsAudio(int32_t handle)
+    static int32_t IsAudio(int32_t sourceId)
     {
-        return ((handle > 0) &&
-                ((static_cast<uint32_t>(handle) & SOURCE_MASK) == AUDIO_MASK));
+        return ((sourceId > 0) &&
+                ((static_cast<uint32_t>(sourceId) & SOURCE_MASK) == AUDIO_MASK));
     }
 
-    static int32_t IsVideo(int32_t handle)
+    static int32_t IsVideo(int32_t sourceId)
     {
-        return ((handle > 0) &&
-                ((static_cast<uint32_t>(handle) & SOURCE_MASK) == VIDEO_MASK));
+        return ((sourceId > 0) &&
+                ((static_cast<uint32_t>(sourceId) & SOURCE_MASK) == VIDEO_MASK));
     }
 };
 

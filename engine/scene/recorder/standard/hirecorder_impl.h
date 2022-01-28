@@ -83,8 +83,8 @@ public:
     ErrorCode DoStop(const Plugin::Any& param) override;
     ErrorCode DoOnComplete() override;
 private:
-    ErrorCode SetAudioSourceInternal(AudioSourceType source, int handle);
-    ErrorCode SetVideoSourceInternal(VideoSourceType source, int handle);
+    ErrorCode SetAudioSourceInternal(AudioSourceType source, int32_t sourceId);
+    ErrorCode SetVideoSourceInternal(VideoSourceType source, int32_t sourceId);
     bool ConfigureAudio(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recParamInternal);
     bool ConfigureVideo(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recParamInternal);
     bool ConfigureOther(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recParamInternal);

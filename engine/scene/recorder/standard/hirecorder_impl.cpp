@@ -83,11 +83,11 @@ int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId
     FALSE_RETURN_V(source != AudioSourceType::AUDIO_SOURCE_INVALID,
                    TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
     FALSE_RETURN_V(audioCount_ < AUDIO_SOURCE_MAX_COUNT, TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
-    auto handle = HandleGenerator::GenerateAudioHandle(audioCount_);
-    auto ret = SetAudioSourceInternal(source, handle);
+    auto tempSourceId = SourceIdGenerator::GenerateAudioSourceId(audioCount_);
+    auto ret = SetAudioSourceInternal(source, tempSourceId);
     if (ret == ErrorCode::SUCCESS) {
         audioCount_++;
-        audioSourceId_ = handle;
+        audioSourceId_ = tempSourceId;
         sourceId = audioSourceId_;
     }
     PROFILE_END("SetAudioSource end.");
@@ -102,11 +102,11 @@ int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId
     FALSE_RETURN_V(source != VideoSourceType::VIDEO_SOURCE_BUTT,
                    TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
     FALSE_RETURN_V(videoCount_ < VIDEO_SOURCE_MAX_COUNT, TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
-    auto handle = HandleGenerator::GenerateVideoHandle(videoCount_);
-    auto ret = SetVideoSourceInternal(source, handle);
+    auto tempSourceId = SourceIdGenerator::GenerateVideoSourceId(videoCount_);
+    auto ret = SetVideoSourceInternal(source, tempSourceId);
     if (ret == ErrorCode::SUCCESS) {
         videoCount_++;
-        videoSourceId_ = handle;
+        videoSourceId_ = tempSourceId;
         sourceId = videoSourceId_;
     }
     PROFILE_END("SetVideoSource end.");
@@ -386,7 +386,7 @@ ErrorCode HiRecorderImpl::DoOnComplete()
     return pipeline_->Stop();
 }
 
-ErrorCode HiRecorderImpl::SetAudioSourceInternal(AudioSourceType source, int handle)
+ErrorCode HiRecorderImpl::SetAudioSourceInternal(AudioSourceType source, int32_t sourceId)
 {
     audioCapture_ = FilterFactory::Instance().CreateFilterWithType<AudioCaptureFilter>(
             "builtin.recorder.audiocapture", "audiocapture");
@@ -405,12 +405,12 @@ ErrorCode HiRecorderImpl::SetAudioSourceInternal(AudioSourceType source, int han
     }
     if (ret == ErrorCode::SUCCESS) {
         ret = fsm_.SendEvent(Intent::SET_AUDIO_SOURCE, std::pair<int32_t, Plugin::SrcInputType>(
-                handle,TransAudioInputType(source)));
+                sourceId, TransAudioInputType(source)));
     }
     return ret;
 }
 
-ErrorCode HiRecorderImpl::SetVideoSourceInternal(VideoSourceType source, int handle)
+ErrorCode HiRecorderImpl::SetVideoSourceInternal(VideoSourceType source, int32_t sourceId)
 {
 #ifdef VIDEO_SUPPORT
     videoCapture_ = FilterFactory::Instance().CreateFilterWithType<VideoCaptureFilter>(
@@ -430,7 +430,7 @@ ErrorCode HiRecorderImpl::SetVideoSourceInternal(VideoSourceType source, int han
     }
     if (ret == ErrorCode::SUCCESS) {
         ret = fsm_.SendEvent(Intent::SET_AUDIO_SOURCE, std::pair<int32_t, Plugin::SrcInputType>(
-                handle,TransVideoInputType(source)));
+                sourceId, TransVideoInputType(source)));
     }
     return ret;
 #else
@@ -621,8 +621,8 @@ ErrorCode HiRecorderImpl::DoConfigureOther(const RecorderParamInternal& recParam
 
 bool HiRecorderImpl::CheckParamType(int32_t sourceId, const RecorderParam& recParam) const
 {
-    FALSE_RETURN_V((HandleGenerator::IsAudio(sourceId) && recParam.IsAudioParam() && audioSourceId_ == sourceId) ||
-        (HandleGenerator::IsVideo(sourceId) && recParam.IsVideoParam() && videoSourceId_ == sourceId) ||
+    FALSE_RETURN_V((SourceIdGenerator::IsAudio(sourceId) && recParam.IsAudioParam() && audioSourceId_ == sourceId) ||
+        (SourceIdGenerator::IsVideo(sourceId) && recParam.IsVideoParam() && videoSourceId_ == sourceId) ||
         ((sourceId == DUMMY_SOURCE_ID) && !(recParam.IsAudioParam() || recParam.IsVideoParam())), false);
 
     return true;
