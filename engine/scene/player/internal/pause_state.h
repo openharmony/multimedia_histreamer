@@ -48,9 +48,8 @@ public:
     std::tuple<ErrorCode, Action> Seek(const Plugin::Any& param) override
     {
         MEDIA_LOG_D("Seek in pause state.");
-        if (param.Type() != typeid(int64_t)) {
-            return {ErrorCode::ERROR_INVALID_PARAMETER_TYPE, Action::ACTION_BUTT};
-        }
+        std::tuple<ErrorCode, Action> err {ErrorCode::ERROR_INVALID_PARAMETER_TYPE, Action::ACTION_BUTT};
+        FALSE_RETURN_V(param.Type() == typeid(int64_t), err);
         auto ret = executor_.DoSeek(true, Plugin::AnyCast<int64_t>(param));
         return {ret, Action::ACTION_BUTT};
     }
