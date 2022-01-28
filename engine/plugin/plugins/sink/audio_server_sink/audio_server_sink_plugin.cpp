@@ -359,13 +359,14 @@ bool AudioServerSinkPlugin::AssignSampleRateIfSupported(uint32_t sampleRate)
         MEDIA_LOG_E("GetSupportedSamplingRates() fail");
         return false;
     }
-    return std::any_of(supportedSampleRateList.begin(), supportedSampleRateList.end(),
-        [aRate, this] (const auto& rate) {
+    for (const auto& rate : supportedSampleRateList) {
         if (rate == aRate) {
             rendererParams_.sampleRate = rate;
+            MEDIA_LOG_D("sampleRate: %" PUBLIC_OUTPUT "u", rendererParams_.sampleRate);
+            return true;
         }
-        return rate == aRate;
-    });
+    }
+    return false;
 }
 
 bool AudioServerSinkPlugin::AssignChannelNumIfSupported(uint32_t channelNum)
@@ -384,13 +385,14 @@ bool AudioServerSinkPlugin::AssignChannelNumIfSupported(uint32_t channelNum)
         MEDIA_LOG_E("GetSupportedChannels() fail");
         return false;
     }
-    return std::any_of(supportedChannelsList.begin(), supportedChannelsList.end(),
-        [aChannel, this] (const auto& channel) {
+    for (const auto& channel : supportedChannelsList) {
         if (channel == aChannel) {
             rendererParams_.channelCount = channel;
+            MEDIA_LOG_D("channelCount: %" PUBLIC_OUTPUT "u", rendererParams_.channelCount);
+            return true;
         }
-        return channel == aChannel;
-    });
+    }
+    return false;
 }
 
 bool AudioServerSinkPlugin::AssignSampleFmtIfSupported(Plugin::AudioSampleFormat sampleFormat)
@@ -405,14 +407,14 @@ bool AudioServerSinkPlugin::AssignSampleFmtIfSupported(Plugin::AudioSampleFormat
         MEDIA_LOG_E("GetSupportedFormats() fail");
         return false;
     }
-    return std::any_of(supportedFormatsList.begin(), supportedFormatsList.end(),
-        [aFmt, this] (const auto& fmt) {
-        if (aFmt == fmt) {
+    for (const auto& fmt : supportedFormatsList) {
+        if (fmt == aFmt) {
             rendererParams_.sampleFormat = fmt;
-            MEDIA_LOG_D("audioSampleFormat: %" PUBLIC_OUTPUT "u", rendererParams_.audioSampleFormat);
+            MEDIA_LOG_D("sampleFormat: %" PUBLIC_OUTPUT "u", rendererParams_.sampleFormat);
+            return true;
         }
-        return aFmt == fmt;
-    });
+    }
+    return false;
 }
 
 Status AudioServerSinkPlugin::SetParameter(Tag tag, const ValueType& value)
