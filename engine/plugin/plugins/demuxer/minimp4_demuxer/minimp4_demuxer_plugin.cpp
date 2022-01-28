@@ -60,7 +60,7 @@ MiniMP4DemuxerPlugin::MiniMP4DemuxerPlugin(std::string name)
       sampleIndex_(0)
 {
     memset_s(&miniMP4_, sizeof(MP4D_demux_t), 0, sizeof(MP4D_demux_t));
-    MEDIA_LOG_I("MiniMP4DemuxerPlugin, plugin name: %s", pluginName_.c_str());
+    MEDIA_LOG_I("MiniMP4DemuxerPlugin, plugin name: %" PUBLIC_OUTPUT "s", pluginName_.c_str());
 }
 
 MiniMP4DemuxerPlugin::~MiniMP4DemuxerPlugin()
@@ -364,7 +364,7 @@ Status RegisterPlugins(const std::shared_ptr<Register> &reg)
     regInfo.sniffer = Sniff;
     auto ret = reg->AddPlugin(regInfo);
     if (ret != Status::OK) {
-        MEDIA_LOG_E("RegisterPlugin AddPlugin failed with return %d", static_cast<int>(ret));
+        MEDIA_LOG_E("RegisterPlugin AddPlugin failed with return %" PUBLIC_OUTPUT "d", static_cast<int>(ret));
     }
     return Status::OK;
 }

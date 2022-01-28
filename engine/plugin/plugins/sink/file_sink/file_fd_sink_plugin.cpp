@@ -81,7 +81,7 @@ Status FileFdSinkPlugin::SeekTo(uint64_t offset)
 #endif
         return Status::OK;
     }
-    MEDIA_LOG_E("Seek to %" PRIu64, offset);
+    MEDIA_LOG_E("Seek to %" PUBLIC_OUTPUT "" PRIu64, offset);
     return Status::ERROR_UNKNOWN;
 }
 

@@ -66,7 +66,7 @@ ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param)
     ErrorCode errorCode = ErrorCode::ERROR_TIMED_OUT;
     if (!intentSync_.WaitFor(
             intent, [this, intent, param] { SendEventAsync(intent, param); }, timeoutMs, errorCode)) {
-        MEDIA_LOG_E("SendEvent timeout, intent: %d", static_cast<int>(intent));
+        MEDIA_LOG_E("SendEvent timeout, intent: %" PUBLIC_OUTPUT "d", static_cast<int>(intent));
     }
     return errorCode;
 }
@@ -78,14 +78,14 @@ ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param) 
 
 ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param)
 {
-    MEDIA_LOG_D("SendEventAsync, intent: %d", static_cast<int>(intent));
+    MEDIA_LOG_D("SendEventAsync, intent: %" PUBLIC_OUTPUT "d", static_cast<int>(intent));
     jobs_.Push([this, intent, param]() -> Action { return ProcessIntent(intent, param); });
     return ErrorCode::SUCCESS;
 }
 
 Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
 {
-    MEDIA_LOG_D("ProcessIntent, curState: %s, intent: %d.", curState_->GetName().c_str(), intent);
+    MEDIA_LOG_D("ProcessIntent, curState: %" PUBLIC_OUTPUT "s, intent: %" PUBLIC_OUTPUT "d.", curState_->GetName().c_str(), intent);
     PROFILE_BEGIN("ProcessIntent, curState: %s, intent: %d.", curState_->GetName().c_str(), intent);
     OSAL::ScopedLock lock(mutex_);
     lastIntent = intent;
@@ -200,7 +200,7 @@ ErrorCode StateMachine::TransitionTo(const std::shared_ptr<State>& state)
 
 void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode result)
 {
-    MEDIA_LOG_D("OnIntentExecuted, curState: %s, intent: %d, action: %d, result: %d", curState_->GetName().c_str(),
+    MEDIA_LOG_D("OnIntentExecuted, curState: %" PUBLIC_OUTPUT "s, intent: %" PUBLIC_OUTPUT "d, action: %" PUBLIC_OUTPUT "d, result: %" PUBLIC_OUTPUT "d", curState_->GetName().c_str(),
                 static_cast<int>(intent), static_cast<int>(action), static_cast<int>(result));
     if (action == Action::ACTION_PENDING) {
         return;

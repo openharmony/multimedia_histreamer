@@ -125,7 +125,7 @@ ErrorCode PipelineCore::Pause()
     state_ = FilterState::PAUSED;
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
         if ((*it)->Pause() != ErrorCode::SUCCESS) {
-            MEDIA_LOG_I("pause filter: %s", (*it)->GetName().c_str());
+            MEDIA_LOG_I("pause filter: %" PUBLIC_OUTPUT "s", (*it)->GetName().c_str());
         }
     }
     return ErrorCode::SUCCESS;
@@ -134,7 +134,7 @@ ErrorCode PipelineCore::Pause()
 ErrorCode PipelineCore::Resume()
 {
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
-        MEDIA_LOG_I("Resume filter: %s", (*it)->GetName().c_str());
+        MEDIA_LOG_I("Resume filter: %" PUBLIC_OUTPUT "s", (*it)->GetName().c_str());
         auto rtv = (*it)->Resume();
         FALSE_RETURN_V(rtv == ErrorCode::SUCCESS, rtv);
     }
@@ -150,10 +150,10 @@ ErrorCode PipelineCore::Stop()
     filtersToRemove_.reserve(filters_.size());
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
         if (*it == nullptr) {
-            MEDIA_LOG_E("PipelineCore error: %zu", filters_.size());
+            MEDIA_LOG_E("PipelineCore error: %" PUBLIC_OUTPUT "zu", filters_.size());
             continue;
         }
-        MEDIA_LOG_I("Stop filter: %s", (*it)->GetName().c_str());
+        MEDIA_LOG_I("Stop filter: %" PUBLIC_OUTPUT "s", (*it)->GetName().c_str());
         PROFILE_BEGIN();
         auto rtv = (*it)->Stop();
         PROFILE_END("Stop finished for %s", (*it)->GetName().c_str());
@@ -162,14 +162,14 @@ ErrorCode PipelineCore::Stop()
     for (const auto& filter : filtersToRemove_) {
         RemoveFilter(filter);
     }
-    MEDIA_LOG_I("Stop finished, filter number: %zu", filters_.size());
+    MEDIA_LOG_I("Stop finished, filter number: %" PUBLIC_OUTPUT "zu", filters_.size());
     return ErrorCode::SUCCESS;
 }
 
 void PipelineCore::FlushStart()
 {
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
-        MEDIA_LOG_I("FlushStart for filter: %s", (*it)->GetName().c_str());
+        MEDIA_LOG_I("FlushStart for filter: %" PUBLIC_OUTPUT "s", (*it)->GetName().c_str());
         (*it)->FlushStart();
     }
 }
@@ -177,7 +177,7 @@ void PipelineCore::FlushStart()
 void PipelineCore::FlushEnd()
 {
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
-        MEDIA_LOG_I("FlushEnd for filter: %s", (*it)->GetName().c_str());
+        MEDIA_LOG_I("FlushEnd for filter: %" PUBLIC_OUTPUT "s", (*it)->GetName().c_str());
         (*it)->FlushEnd();
     }
 }
@@ -219,7 +219,7 @@ ErrorCode PipelineCore::RemoveFilter(Filter* filter)
     auto it = std::find_if(filters_.begin(), filters_.end(),
                            [&filter](const Filter* filterPtr) { return filterPtr == filter; });
     if (it != filters_.end()) {
-        MEDIA_LOG_I("RemoveFilter %s", (*it)->GetName().c_str());
+        MEDIA_LOG_I("RemoveFilter %" PUBLIC_OUTPUT "s", (*it)->GetName().c_str());
         filters_.erase(it);
     }
     return ErrorCode::SUCCESS;
@@ -271,7 +271,7 @@ void PipelineCore::OnEvent(const Event& event)
     }
 
     readyEventCnt_++;
-    MEDIA_LOG_I("OnEvent readyCnt: %zu / %zu", readyEventCnt_, filters_.size());
+    MEDIA_LOG_I("OnEvent readyCnt: %" PUBLIC_OUTPUT "zu / %" PUBLIC_OUTPUT "zu", readyEventCnt_, filters_.size());
     if (readyEventCnt_ == filters_.size()) {
         CALL_PTR_FUNC(eventReceiver_, OnEvent, event);
         readyEventCnt_ = 0;

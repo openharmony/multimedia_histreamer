@@ -50,7 +50,7 @@ Status LoadAndInitAdapter(AudioManager* audioManager, AudioAdapterDescriptor* de
     }
     if (audioManager->LoadAdapter(audioManager, descriptor, adapter) < 0) {
         *adapter = nullptr;
-        MEDIA_LOG_W("failed to load adapter %s", descriptor->adapterName);
+        MEDIA_LOG_W("failed to load adapter %" PUBLIC_OUTPUT "s", descriptor->adapterName);
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     if (*adapter == nullptr) {
@@ -65,10 +65,10 @@ Status LoadAndInitAdapter(AudioManager* audioManager, AudioAdapterDescriptor* de
         } else {
             break;
         }
-        MEDIA_LOG_I("retry init port on adapter %s", descriptor->adapterName);
+        MEDIA_LOG_I("retry init port on adapter %" PUBLIC_OUTPUT "s", descriptor->adapterName);
     } while (++retryCnt < MAX_RETRY_CNT);
     if (retryCnt >= MAX_RETRY_CNT) {
-        MEDIA_LOG_W("cannot init port on adapter %s after retry %d times", descriptor->adapterName, retryCnt);
+        MEDIA_LOG_W("cannot init port on adapter %" PUBLIC_OUTPUT "s after retry %" PUBLIC_OUTPUT "d times", descriptor->adapterName, retryCnt);
         audioManager->UnloadAdapter(audioManager, *adapter);
         *adapter = nullptr;
         return Status::ERROR_UNKNOWN;
@@ -150,9 +150,9 @@ void RegisterOutportOnAdapter(const std::shared_ptr<Register>& reg, const AudioA
     sinkPluginDef.rank = RANK100;
     if (reg->AddPlugin(sinkPluginDef) == Status::OK) {
         g_sinkInfos[sinkPluginDef.name] = std::make_pair(pIndex, usingDefaultCaps);
-        MEDIA_LOG_D("register plugin %s succ.", desc.adapterName);
+        MEDIA_LOG_D("register plugin %" PUBLIC_OUTPUT "s succ.", desc.adapterName);
     } else {
-        MEDIA_LOG_W("register plugin %s failed", desc.adapterName);
+        MEDIA_LOG_W("register plugin %" PUBLIC_OUTPUT "s failed", desc.adapterName);
     }
 }
 
@@ -192,7 +192,7 @@ inline Status AssignIfCastSuccess(T& lvalue, const Any& anyValue, const char* ta
 {
     if (typeid(T) == anyValue.Type()) {
         lvalue = AnyCast<const T&>(anyValue);
-        MEDIA_LOG_I("AssignIfCastSuccess found %s", tagName);
+        MEDIA_LOG_I("AssignIfCastSuccess found %" PUBLIC_OUTPUT "s", tagName);
         return Status::OK;
     } else {
         MEDIA_LOG_W("tag:%s value type mismatch", tagName);
@@ -249,7 +249,7 @@ Status HdiSink::Init()
         break;
     }
     if (audioAdapter_ == nullptr) {
-        MEDIA_LOG_E("cannot find adapter with name %s", pluginName_.c_str());
+        MEDIA_LOG_E("cannot find adapter with name %" PUBLIC_OUTPUT "s", pluginName_.c_str());
         return Status::ERROR_UNKNOWN;
     }
     return Status::OK;
@@ -360,8 +360,8 @@ Status HdiSink::Prepare()
     deviceDescriptor_.pins = PIN_OUT_SPEAKER;
     deviceDescriptor_.desc = nullptr;
 
-    MEDIA_LOG_I("create render: %s, port: %d:\ncategory %s,\nchannels %d, sampleRate %d,\n"
-                " audioChannelMask %x, format %d,\nisSignedData %d, interleaved %d,\nperiod %u, frameSize %u",
+    MEDIA_LOG_I("create render: %" PUBLIC_OUTPUT "s, port: %" PUBLIC_OUTPUT "d:\ncategory %" PUBLIC_OUTPUT "s,\nchannels %" PUBLIC_OUTPUT "d, sampleRate %" PUBLIC_OUTPUT "d,\n"
+                " audioChannelMask %" PUBLIC_OUTPUT "x, format %" PUBLIC_OUTPUT "d,\nisSignedData %" PUBLIC_OUTPUT "d, interleaved %" PUBLIC_OUTPUT "d,\nperiod %" PUBLIC_OUTPUT "u, frameSize %" PUBLIC_OUTPUT "u",
                 adapterDescriptor_.adapterName, deviceDescriptor_.portId,
                 (sampleAttributes_.type == AUDIO_IN_MEDIA) ? "media" : "communication", sampleAttributes_.channelCount,
                 sampleAttributes_.sampleRate, channelMask_, sampleAttributes_.format, sampleAttributes_.isSignedData,
@@ -370,7 +370,7 @@ Status HdiSink::Prepare()
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
         auto ret = audioAdapter_->CreateRender(audioAdapter_, &deviceDescriptor_, &sampleAttributes_, &audioRender_);
         if (ret != 0) {
-            MEDIA_LOG_E("cannot create render with error code %" PRIu64 "x", static_cast<uint64_t>(ret));
+            MEDIA_LOG_E("cannot create render with error code %" PUBLIC_OUTPUT " PRIu64 "x", static_cast<uint64_t>(ret));
             audioRender_ = nullptr;
             return Status::ERROR_UNKNOWN;
         }
@@ -503,7 +503,7 @@ Status HdiSink::SetVolume(float volume)
         MEDIA_LOG_E("set volume failed");
         return Status::ERROR_UNKNOWN;
     }
-    MEDIA_LOG_W("set volume to %.3f", relVolume);
+    MEDIA_LOG_W("set volume to %" PUBLIC_OUTPUT ".3f", relVolume);
     return Status::OK;
 }
 
@@ -707,7 +707,7 @@ void HdiSink::RenderFrame(const std::shared_ptr<Buffer>& input)
                 OSAL::ScopedLock lock(renderMutex_);
                 renderCond_.WaitFor(lock, timeoutMs, [this] { return processing_.load() == false; });
             } else {
-                MEDIA_LOG_E("renderFrame buffer error %d", ret);
+                MEDIA_LOG_E("renderFrame buffer error %" PUBLIC_OUTPUT "d", ret);
                 break;
             }
         }

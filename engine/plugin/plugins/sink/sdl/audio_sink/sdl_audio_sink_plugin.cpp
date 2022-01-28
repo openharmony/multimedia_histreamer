@@ -148,7 +148,7 @@ Status SdlAudioSinkPlugin::Prepare()
     wantedSpec_.silence = 0;
     wantedSpec_.callback = SDLAudioCallback;
     if (SDL_OpenAudio(&wantedSpec_, nullptr) < 0) {
-        MEDIA_LOG_E("sdl cannot open audio with error: %s", SDL_GetError());
+        MEDIA_LOG_E("sdl cannot open audio with error: %" PUBLIC_OUTPUT "s", SDL_GetError());
         return Status::ERROR_UNKNOWN;
     }
 
@@ -158,9 +158,9 @@ Status SdlAudioSinkPlugin::Prepare()
         return Status::ERROR_NO_MEMORY;
     }
     AVSampleFormat sampleFormat = TranslateFormat(audioFormat_);
-    MEDIA_LOG_I("configure swr with outChannelLayout 0x%lx, outSampleFmt %d, "
-                "outSampleRate %d inChannelLayout 0x%lx, "
-                "inSampleFormat %d, inSampleRate %d",
+    MEDIA_LOG_I("configure swr with outChannelLayout 0x%" PUBLIC_OUTPUT "lx, outSampleFmt %" PUBLIC_OUTPUT "d, "
+                "outSampleRate %" PUBLIC_OUTPUT "d inChannelLayout 0x%" PUBLIC_OUTPUT "lx, "
+                "inSampleFormat %" PUBLIC_OUTPUT "d, inSampleRate %" PUBLIC_OUTPUT "d",
                 outChannelLayout, outSampleFmt, sampleRate_, channelMask_, sampleFormat, sampleRate_);
     swrContext = swr_alloc_set_opts(swrContext, outChannelLayout, outSampleFmt, sampleRate_, channelMask_, sampleFormat,
                                     sampleRate_, 0, nullptr);
@@ -377,7 +377,7 @@ void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len)
     SDL_memset(stream, 0, len);
     SDL_MixAudio(stream, mixCache_.data(), realLen, volume_);
     SDL_PauseAudio(0);
-    MEDIA_LOG_D("sdl audio callback end with %zu", realLen);
+    MEDIA_LOG_D("sdl audio callback end with %" PUBLIC_OUTPUT "zu", realLen);
 }
 } // namespace Plugin
 } // namespace Media

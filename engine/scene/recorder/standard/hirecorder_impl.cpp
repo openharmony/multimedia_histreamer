@@ -127,7 +127,7 @@ int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
     outputFormatType_ = format;
     auto ret = fsm_.SendEvent(Intent::SET_OUTPUT_FORMAT, outputFormatType_);
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("SetOutputFormat failed with error %d", static_cast<int>(ret));
+        MEDIA_LOG_E("SetOutputFormat failed with error %" PUBLIC_OUTPUT "d", static_cast<int>(ret));
     }
     return TransErrorCode(ret);
 }
@@ -155,19 +155,19 @@ int32_t HiRecorderImpl::Configure(int32_t sourceId, const RecorderParam& recPara
     FALSE_RETURN_V(configureStatus, TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
     auto ret = fsm_.SendEvent(Intent::CONFIGURE, recordParam);
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("Configure failed with error %d", static_cast<int>(ret));
+        MEDIA_LOG_E("Configure failed with error %" PUBLIC_OUTPUT "d", static_cast<int>(ret));
     }
     return TransErrorCode(ret);
 }
 
 int32_t HiRecorderImpl::Prepare()
 {
-    MEDIA_LOG_D("Prepare entered, current fsm state: %s.", fsm_.GetCurrentState().c_str());
+    MEDIA_LOG_D("Prepare entered, current fsm state: %" PUBLIC_OUTPUT "s.", fsm_.GetCurrentState().c_str());
     PROFILE_BEGIN();
     auto ret = fsm_.SendEvent(Intent::PREPARE);
     if (ret != ErrorCode::SUCCESS) {
         PROFILE_END("Prepare failed,");
-        MEDIA_LOG_E("prepare failed with error %d", ret);
+        MEDIA_LOG_E("prepare failed with error %" PUBLIC_OUTPUT "d", ret);
     } else {
         PROFILE_END("Prepare successfully,");
     }
@@ -224,7 +224,7 @@ int32_t HiRecorderImpl::SetParameter(int32_t sourceId, const RecorderParam &recP
 
 void HiRecorderImpl::OnEvent(const Event& event)
 {
-    MEDIA_LOG_D("[HiStreamer] OnEvent (%d)", event.type);
+    MEDIA_LOG_D("[HiStreamer] OnEvent (%" PUBLIC_OUTPUT "d)", event.type);
     switch (event.type) {
         case EventType::EVENT_ERROR: {
             fsm_.SendEventAsync(Intent::NOTIFY_ERROR, event.param);
@@ -246,13 +246,13 @@ void HiRecorderImpl::OnEvent(const Event& event)
             }
             break;
         default:
-            MEDIA_LOG_E("Unknown event(%d)", event.type);
+            MEDIA_LOG_E("Unknown event(%" PUBLIC_OUTPUT "d)", event.type);
     }
 }
 
 void HiRecorderImpl::OnStateChanged(StateId state)
 {
-    MEDIA_LOG_I("OnStateChanged from %d to %d", curFsmState_.load(), state);
+    MEDIA_LOG_I("OnStateChanged from %" PUBLIC_OUTPUT "d to %" PUBLIC_OUTPUT "d", curFsmState_.load(), state);
     {
         OSAL::ScopedLock lock(stateMutex_);
         curFsmState_ = state;
@@ -339,7 +339,7 @@ ErrorCode HiRecorderImpl::DoSetOutputFormat(const Plugin::Any& param) const
         ret = ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
     }
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("SetOutputFormat failed with error %d", static_cast<int>(ret));
+        MEDIA_LOG_E("SetOutputFormat failed with error %" PUBLIC_OUTPUT "d", static_cast<int>(ret));
     }
     return ret;
 }

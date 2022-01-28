@@ -36,7 +36,7 @@ ErrorCode CodecFilterBase::ConfigureWithMetaLocked(const std::shared_ptr<const P
             keyPair.second.second(outValue)) {
             SetPluginParameterLocked(keyPair.first, outValue);
         } else {
-            MEDIA_LOG_W("parameter %s in meta is not found or type mismatch", keyPair.second.first.c_str());
+            MEDIA_LOG_W("parameter %" PUBLIC_OUTPUT "s in meta is not found or type mismatch", keyPair.second.first.c_str());
         }
     }
     return ErrorCode::SUCCESS;
@@ -54,7 +54,7 @@ ErrorCode CodecFilterBase::SetParameter(int32_t key, const Plugin::Any& value)
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
-        MEDIA_LOG_I("SetParameter key %d is out of boundary", key);
+        MEDIA_LOG_I("SetParameter key %" PUBLIC_OUTPUT "d is out of boundary", key);
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     RETURN_AGAIN_IF_NULL(plugin_);
@@ -68,7 +68,7 @@ ErrorCode CodecFilterBase::GetParameter(int32_t key, Plugin::Any& value)
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
-        MEDIA_LOG_I("GetParameter key %d is out of boundary", key);
+        MEDIA_LOG_I("GetParameter key %" PUBLIC_OUTPUT "d is out of boundary", key);
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     RETURN_AGAIN_IF_NULL(plugin_);

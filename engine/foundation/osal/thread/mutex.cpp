@@ -54,7 +54,7 @@ bool Mutex::TryLock()
     }
     int ret = pthread_mutex_trylock(&nativeHandle_);
     if (ret != 0) {
-        MEDIA_LOG_E("TryLock failed with ret = %d", ret);
+        MEDIA_LOG_E("TryLock failed with ret = %" PUBLIC_OUTPUT "d", ret);
     }
     return ret == 0;
 }

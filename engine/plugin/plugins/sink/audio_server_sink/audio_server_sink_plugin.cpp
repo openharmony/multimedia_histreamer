@@ -314,7 +314,7 @@ Status AudioServerSinkPlugin::GetParameter(Tag tag, ValueType& value)
     switch (tag) {
         case Tag::AUDIO_SAMPLE_RATE: {
             if (params.sampleRate != rendererParams_.sampleRate) {
-                MEDIA_LOG_W("samplingRate has changed from %u to %u",
+                MEDIA_LOG_W("samplingRate has changed from %" PUBLIC_OUTPUT "u to %" PUBLIC_OUTPUT "u",
                             rendererParams_.sampleRate, params.sampleRate);
             }
             value = params.sampleRate;
@@ -322,7 +322,7 @@ Status AudioServerSinkPlugin::GetParameter(Tag tag, ValueType& value)
         }
         case Tag::AUDIO_CHANNELS: {
             if (params.channelCount != rendererParams_.channelCount) {
-                MEDIA_LOG_W("channelCount has changed from %u to %u",
+                MEDIA_LOG_W("channelCount has changed from %" PUBLIC_OUTPUT "u to %" PUBLIC_OUTPUT "u",
                             rendererParams_.channelCount, params.channelCount);
             }
             value = params.channelCount;
@@ -334,7 +334,7 @@ Status AudioServerSinkPlugin::GetParameter(Tag tag, ValueType& value)
         }
         case Tag::AUDIO_SAMPLE_FORMAT: {
             if (params.sampleFormat != rendererParams_.sampleFormat) {
-                MEDIA_LOG_W("sampleFormat has changed from %u to %u",
+                MEDIA_LOG_W("sampleFormat has changed from %" PUBLIC_OUTPUT "u to %" PUBLIC_OUTPUT "u",
                             rendererParams_.sampleFormat, params.sampleFormat);
             }
             value = params.sampleFormat;
@@ -351,7 +351,7 @@ bool AudioServerSinkPlugin::AssignSampleRateIfSupported(uint32_t sampleRate)
 {
     AudioStandard::AudioSamplingRate aRate = AudioStandard::SAMPLE_RATE_8000;
     if (!SampleRateNum2Enum(sampleRate, aRate)) {
-        MEDIA_LOG_E("sample rate %" PRIu32 "not supported", sampleRate);
+        MEDIA_LOG_E("sample rate %" PUBLIC_OUTPUT PRIu32 "not supported", sampleRate);
         return false;
     }
     auto supportedSampleRateList = OHOS::AudioStandard::AudioRenderer::GetSupportedSamplingRates();
@@ -371,12 +371,12 @@ bool AudioServerSinkPlugin::AssignSampleRateIfSupported(uint32_t sampleRate)
 bool AudioServerSinkPlugin::AssignChannelNumIfSupported(uint32_t channelNum)
 {
     if (channelNum > 2) { // 2
-        MEDIA_LOG_E("Unsupported channelNum: %" PRIu32, channelNum);
+        MEDIA_LOG_E("Unsupported channelNum: %" PUBLIC_OUTPUT PRIu32, channelNum);
         return false;
     }
     AudioStandard::AudioChannel aChannel = AudioStandard::MONO;
     if (!ChannelNumNum2Enum(channelNum, aChannel)) {
-        MEDIA_LOG_E("sample rate %" PRIu32 "not supported", channelNum);
+        MEDIA_LOG_E("sample rate %" PUBLIC_OUTPUT PRIu32 "not supported", channelNum);
         return false;
     }
     auto supportedChannelsList = OHOS::AudioStandard::AudioRenderer::GetSupportedChannels();
@@ -397,7 +397,7 @@ bool AudioServerSinkPlugin::AssignSampleFmtIfSupported(Plugin::AudioSampleFormat
 {
     AudioStandard::AudioSampleFormat aFmt = AudioStandard::AudioSampleFormat::INVALID_WIDTH;
     if (!PluginFmt2SampleFmt(sampleFormat, aFmt)) {
-        MEDIA_LOG_E("sample format %hhu not supported", sampleFormat);
+        MEDIA_LOG_E("sample format %" PUBLIC_OUTPUT "hhu not supported", sampleFormat);
         return false;
     }
     auto supportedFormatsList = OHOS::AudioStandard::AudioRenderer::GetSupportedFormats();
@@ -409,7 +409,7 @@ bool AudioServerSinkPlugin::AssignSampleFmtIfSupported(Plugin::AudioSampleFormat
         [aFmt, this] (const auto& fmt) {
         if (aFmt == fmt) {
             rendererParams_.sampleFormat = fmt;
-            MEDIA_LOG_D("audioSampleFormat: %u", rendererParams_.audioSampleFormat);
+            MEDIA_LOG_D("audioSampleFormat: %" PUBLIC_OUTPUT "u", rendererParams_.audioSampleFormat);
         }
         return aFmt == fmt;
     });
@@ -440,7 +440,7 @@ Status AudioServerSinkPlugin::SetParameter(Tag tag, const ValueType& value)
         case Tag::MEDIA_BITRATE: {
             if (value.Type() == typeid(int64_t)) {
                 bitRate_ = Plugin::AnyCast<int64_t>(value);
-                MEDIA_LOG_D("bitRate_: %u", bitRate_);
+                MEDIA_LOG_D("bitRate_: %" PUBLIC_OUTPUT "u", bitRate_);
             }
             break;
         }

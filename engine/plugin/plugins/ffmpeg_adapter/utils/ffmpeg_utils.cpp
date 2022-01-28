@@ -270,7 +270,7 @@ AudioChannelLayout ConvertChannelLayoutFromFFmpeg(int channels, uint64_t ffChann
         if (it != g_fromFFMPEGChannelLayout.end()) {
             channelLayout |= static_cast<uint64_t>(it->second);
         } else {
-            MEDIA_LOG_W("unsupported audio channel layout: %" PRIu64, mask);
+            MEDIA_LOG_W("unsupported audio channel layout: %" PUBLIC_OUTPUT PRIu64, mask);
         }
     }
     auto ret = static_cast<AudioChannelLayout>(channelLayout);
@@ -289,7 +289,7 @@ uint64_t ConvertChannelLayoutToFFmpeg(AudioChannelLayout channelLayout)
 {
     auto it = g_toFFMPEGChannelLayout.find(channelLayout);
     if (it == g_toFFMPEGChannelLayout.end()) {
-        MEDIA_LOG_E("ConvertChannelLayoutToFFmpeg, unexpected audio channel layout: %" PRIu64,
+        MEDIA_LOG_E("ConvertChannelLayoutToFFmpeg, unexpected audio channel layout: %" PUBLIC_OUTPUT PRIu64,
                     OHOS::Media::to_underlying(channelLayout));
         return 0;
     }

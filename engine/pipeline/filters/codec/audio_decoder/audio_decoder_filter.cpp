@@ -117,7 +117,7 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
             }
             auto thisOut = std::make_shared<Plugin::Capability>();
             if (!MergeCapabilityKeys(*upstreamCap, outCap, *thisOut)) {
-                MEDIA_LOG_W("one of out cap of plugin %s does not match with upstream capability",
+                MEDIA_LOG_W("one of out cap of plugin %" PUBLIC_OUTPUT "s does not match with upstream capability",
                             candidate.first->name.c_str());
                 continue;
             }
@@ -126,7 +126,7 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
             if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_, upstreamParams, downstreamParams)) {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
-                MEDIA_LOG_I("choose plugin %s as working parameter", candidate.first->name.c_str());
+                MEDIA_LOG_I("choose plugin %" PUBLIC_OUTPUT "s as working parameter", candidate.first->name.c_str());
                 break;
             }
         }
@@ -228,11 +228,11 @@ ErrorCode AudioDecoderFilter::PushData(const std::string &inPort, AVBufferPtr bu
 {
     const static int8_t maxRetryCnt = 3; // max retry times of handling one frame
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
-        MEDIA_LOG_W("pushing data to decoder when state is %d", static_cast<int>(state_.load()));
+        MEDIA_LOG_W("pushing data to decoder when state is %" PUBLIC_OUTPUT "d", static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     if (isFlushing_) {
-        MEDIA_LOG_I("decoder is flushing, discarding this data from port %s", inPort.c_str());
+        MEDIA_LOG_I("decoder is flushing, discarding this data from port %" PUBLIC_OUTPUT "s", inPort.c_str());
         return ErrorCode::SUCCESS;
     }
     ErrorCode handleFrameRes;
@@ -299,7 +299,7 @@ ErrorCode AudioDecoderFilter::HandleFrame(const std::shared_ptr<AVBuffer>& buffe
     MEDIA_LOG_D("HandleFrame called");
     auto ret = TranslatePluginStatus(plugin_->QueueInputBuffer(buffer, 0));
     if (ret != ErrorCode::SUCCESS && ret != ErrorCode::ERROR_TIMED_OUT) {
-        MEDIA_LOG_E("Queue input buffer to plugin fail: %d", to_underlying(ret));
+        MEDIA_LOG_E("Queue input buffer to plugin fail: %" PUBLIC_OUTPUT "d", to_underlying(ret));
     }
     return ret;
 }
@@ -315,14 +315,14 @@ ErrorCode AudioDecoderFilter::FinishFrame()
     outBuffer->Reset();
     auto ret = TranslatePluginStatus(plugin_->QueueOutputBuffer(outBuffer, 0));
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("Queue out buffer to plugin fail: %d", to_underlying(ret));
+        MEDIA_LOG_E("Queue out buffer to plugin fail: %" PUBLIC_OUTPUT "d", to_underlying(ret));
         return ret;
     }
     std::shared_ptr<AVBuffer> pcmFrame = nullptr;
     auto status = plugin_->DequeueOutputBuffer(pcmFrame, 0);
     if (status != Plugin::Status::OK && status != Plugin::Status::END_OF_STREAM) {
         if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
-            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %d", static_cast<int32_t>((status)));
+            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %" PUBLIC_OUTPUT "d", static_cast<int32_t>((status)));
         }
         return TranslatePluginStatus(status);
     }

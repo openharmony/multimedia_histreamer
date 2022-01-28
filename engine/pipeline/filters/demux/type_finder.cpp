@@ -135,7 +135,7 @@ void TypeFinder::FindMediaTypeAsync(std::function<void(std::string)> typeFound)
 Plugin::Status TypeFinder::ReadAt(int64_t offset, std::shared_ptr<Plugin::Buffer>& buffer, size_t expectedLen)
 {
     if (!buffer || expectedLen == 0 || !IsOffsetValid(offset)) {
-        MEDIA_LOG_E("ReadAt failed, buffer empty: %d, expectedLen: %zu, offset: %" PRId64, !buffer, expectedLen,
+        MEDIA_LOG_E("ReadAt failed, buffer empty: %" PUBLIC_OUTPUT "d, expectedLen: %" PUBLIC_OUTPUT "zu, offset: %" PUBLIC_OUTPUT PRId64, !buffer, expectedLen,
                     offset);
         return Plugin::Status::ERROR_INVALID_PARAMETER;
     }
@@ -214,14 +214,14 @@ bool TypeFinder::IsOffsetValid(int64_t offset) const
 
 bool TypeFinder::GetPlugins()
 {
-    MEDIA_LOG_I("TypeFinder::GetPlugins : %d, empty: %d", (pluginRegistryChanged_ == true), plugins_.empty());
+    MEDIA_LOG_I("TypeFinder::GetPlugins : %" PUBLIC_OUTPUT "d, empty: %" PUBLIC_OUTPUT "d", (pluginRegistryChanged_ == true), plugins_.empty());
     if (pluginRegistryChanged_) {
         pluginRegistryChanged_ = false;
         auto pluginNames = Plugin::PluginManager::Instance().ListPlugins(Plugin::PluginType::DEMUXER);
         for (auto& pluginName : pluginNames) {
             auto pluginInfo = Plugin::PluginManager::Instance().GetPluginInfo(Plugin::PluginType::DEMUXER, pluginName);
             if (!pluginInfo) {
-                MEDIA_LOG_E("GetPlugins failed for plugin: %s", pluginName.c_str());
+                MEDIA_LOG_E("GetPlugins failed for plugin: %" PUBLIC_OUTPUT "s", pluginName.c_str());
                 continue;
             }
             plugins_.emplace_back(std::move(pluginInfo));

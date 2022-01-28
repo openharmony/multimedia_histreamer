@@ -52,7 +52,7 @@ Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
             continue;
         }
         if (g_supportedCodec.find(codec->id) == g_supportedCodec.end()) {
-            MEDIA_LOG_W("codec %s(%s) is not supported right now", codec->name, codec->long_name);
+            MEDIA_LOG_W("codec %" PUBLIC_OUTPUT "s(%" PUBLIC_OUTPUT "s) is not supported right now", codec->name, codec->long_name);
             continue;
         }
         CodecPluginDef definition;
@@ -64,7 +64,7 @@ Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
         // do not delete the codec in the deleter
         codecMap[definition.name] = std::shared_ptr<AVCodec>(const_cast<AVCodec*>(codec), [](void* ptr) {});
         if (reg->AddPlugin(definition) != Status::OK) {
-            MEDIA_LOG_W("register plugin %s(%s) failed", codec->name, codec->long_name);
+            MEDIA_LOG_W("register plugin %" PUBLIC_OUTPUT "s(%" PUBLIC_OUTPUT "s) failed", codec->name, codec->long_name);
         }
     }
     return Status::OK;
@@ -190,7 +190,7 @@ Status AudioFfmpegDecoderPlugin::Init()
 {
     auto ite = codecMap.find(pluginName_);
     if (ite == codecMap.end()) {
-        MEDIA_LOG_W("cannot find codec with name %s", pluginName_.c_str());
+        MEDIA_LOG_W("cannot find codec with name %" PUBLIC_OUTPUT "s", pluginName_.c_str());
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     OSAL::ScopedLock lock(avMutex_);
@@ -242,7 +242,7 @@ bool AudioFfmpegDecoderPlugin::FindInParameterMapThenAssignLocked(Tag tag, T& as
         assign = Plugin::AnyCast<T>(ite->second);
         return true;
     } else {
-        MEDIA_LOG_W("parameter %d is not found or type mismatch", static_cast<int32_t>(tag));
+        MEDIA_LOG_W("parameter %" PUBLIC_OUTPUT "d is not found or type mismatch", static_cast<int32_t>(tag));
         return false;
     }
 }
@@ -345,7 +345,7 @@ Status AudioFfmpegDecoderPlugin::Start()
         }
         auto res = avcodec_open2(avCodecContext_.get(), avCodec_.get(), nullptr);
         if (res != 0) {
-            MEDIA_LOG_E("avcodec open error %s when start decoder ", AVStrError(res).c_str());
+            MEDIA_LOG_E("avcodec open error %" PUBLIC_OUTPUT "s when start decoder ", AVStrError(res).c_str());
             return Status::ERROR_UNKNOWN;
         }
     }
@@ -360,7 +360,7 @@ Status AudioFfmpegDecoderPlugin::Stop()
         if (avCodecContext_ != nullptr) {
             auto res = avcodec_close(avCodecContext_.get());
             if (res != 0) {
-                MEDIA_LOG_E("avcodec close error %s when stop decoder", AVStrError(res).c_str());
+                MEDIA_LOG_E("avcodec close error %" PUBLIC_OUTPUT "s when stop decoder", AVStrError(res).c_str());
                 ret = Status::ERROR_UNKNOWN;
             }
             avCodecContext_.reset();
@@ -450,7 +450,7 @@ Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
             if (paddedBufferSize_ < bufferLength + AV_INPUT_BUFFER_PADDING_SIZE) {
                 paddedBufferSize_ = bufferLength + AV_INPUT_BUFFER_PADDING_SIZE;
                 paddedBuffer_.reserve(paddedBufferSize_);
-                MEDIA_LOG_I("increase padded buffer size to %zu", paddedBufferSize_);
+                MEDIA_LOG_I("increase padded buffer size to %" PUBLIC_OUTPUT "zu", paddedBufferSize_);
             }
             paddedBuffer_.assign(ptr, ptr + bufferLength);
             paddedBuffer_.insert(paddedBuffer_.end(), AV_INPUT_BUFFER_PADDING_SIZE, 0);
@@ -471,7 +471,7 @@ Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
     } else if (ret == AVERROR(EAGAIN)) {
         return Status::ERROR_AGAIN;
     } else {
-        MEDIA_LOG_E("send buffer error %s", AVStrError(ret).c_str());
+        MEDIA_LOG_E("send buffer error %" PUBLIC_OUTPUT "s", AVStrError(ret).c_str());
         return Status::ERROR_UNKNOWN;
     }
 }
@@ -515,7 +515,7 @@ Status AudioFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
     } else if (ret == AVERROR(EAGAIN)) {
         status = Status::ERROR_NOT_ENOUGH_DATA;
     } else {
-        MEDIA_LOG_E("audio decoder receive error: %s", AVStrError(ret).c_str());
+        MEDIA_LOG_E("audio decoder receive error: %" PUBLIC_OUTPUT "s", AVStrError(ret).c_str());
         status = Status::ERROR_UNKNOWN;
     }
     av_frame_unref(cachedFrame_.get());

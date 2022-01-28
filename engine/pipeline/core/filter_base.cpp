@@ -100,7 +100,7 @@ std::vector<Filter*> FilterBase::GetNextFilters()
     for (auto&& outPort : outPorts_) {
         auto peerPort = outPort->GetPeerPort();
         if (!peerPort) {
-            MEDIA_LOG_I("Filter %s outport %s has no peer port (%zu).", name_.c_str(), outPort->GetName().c_str(),
+            MEDIA_LOG_I("Filter %" PUBLIC_OUTPUT "s outport %" PUBLIC_OUTPUT "s has no peer port (%" PUBLIC_OUTPUT "zu).", name_.c_str(), outPort->GetName().c_str(),
                         outPorts_.size());
             continue;
         }
@@ -119,7 +119,7 @@ std::vector<Filter*> FilterBase::GetPreFilters()
     for (auto&& inPort : inPorts_) {
         auto peerPort = inPort->GetPeerPort();
         if (!peerPort) {
-            MEDIA_LOG_I("Filter %s inport %s has no peer port (%zu).", name_.c_str(), inPort->GetName().c_str(),
+            MEDIA_LOG_I("Filter %" PUBLIC_OUTPUT "s inport %" PUBLIC_OUTPUT "s has no peer port (%" PUBLIC_OUTPUT "zu).", name_.c_str(), inPort->GetName().c_str(),
                         inPorts_.size());
             continue;
         }
@@ -181,7 +181,7 @@ T FilterBase::FindPort(const std::vector<T>& list, const std::string& name)
     if (find != list.end()) {
         return *find;
     }
-    MEDIA_LOG_E("Find port(%s) failed.", name.c_str());
+    MEDIA_LOG_E("Find port(%" PUBLIC_OUTPUT "s) failed.", name.c_str());
     return nullptr;
 }
 
@@ -201,7 +201,7 @@ PInPort FilterBase::GetRouteInPort(const std::string& outPortName)
     auto ite = std::find_if(routeMap_.begin(), routeMap_.end(),
                             [&outPortName](const PairPort& pp) { return outPortName == pp.second; });
     if (ite == routeMap_.end()) {
-        MEDIA_LOG_W("out port %s has no route map port", outPortName.c_str());
+        MEDIA_LOG_W("out port %" PUBLIC_OUTPUT "s has no route map port", outPortName.c_str());
         return nullptr;
     }
     return GetInPort(ite->first);
@@ -212,7 +212,7 @@ POutPort FilterBase::GetRouteOutPort(const std::string& inPortName)
     auto ite = std::find_if(routeMap_.begin(), routeMap_.end(),
                             [&inPortName](const PairPort& pp) { return inPortName == pp.first; });
     if (ite == routeMap_.end()) {
-        MEDIA_LOG_W("in port %s has no route map port", inPortName.c_str());
+        MEDIA_LOG_W("in port %" PUBLIC_OUTPUT "s has no route map port", inPortName.c_str());
         return nullptr;
     }
     return GetOutPort(ite->second);
@@ -232,19 +232,19 @@ bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<T>& plugin, std::shar
             if (plugin->Reset() == Plugin::Status::OK) {
                 return true;
             }
-            MEDIA_LOG_W("reuse previous plugin %s failed, will create new plugin", pluginInfo->name.c_str());
+            MEDIA_LOG_W("reuse previous plugin %" PUBLIC_OUTPUT "s failed, will create new plugin", pluginInfo->name.c_str());
         }
         plugin->Deinit();
     }
 
     plugin = pluginCreator(selectedPluginInfo->name);
     if (plugin == nullptr) {
-        MEDIA_LOG_E("cannot create plugin %s", selectedPluginInfo->name.c_str());
+        MEDIA_LOG_E("cannot create plugin %" PUBLIC_OUTPUT "s", selectedPluginInfo->name.c_str());
         return false;
     }
     auto err = TranslatePluginStatus(plugin->Init());
     if (err != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("plugin %s init error", selectedPluginInfo->name.c_str());
+        MEDIA_LOG_E("plugin %" PUBLIC_OUTPUT "s init error", selectedPluginInfo->name.c_str());
         return false;
     }
     pluginInfo = selectedPluginInfo;

@@ -73,14 +73,14 @@ bool MuxerFilter::UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::Plugin
             if (plugin_->Reset() == Plugin::Status::OK) {
                 return true;
             }
-            MEDIA_LOG_W("reuse previous plugin %s failed, will create new plugin", targetPluginInfo_->name.c_str());
+            MEDIA_LOG_W("reuse previous plugin %" PUBLIC_OUTPUT "s failed, will create new plugin", targetPluginInfo_->name.c_str());
         }
         plugin_->Deinit();
     }
 
     plugin_ = Plugin::PluginManager::Instance().CreateMuxerPlugin(selectedPluginInfo->name);
     if (plugin_ == nullptr) {
-        MEDIA_LOG_E("cannot create plugin %s", selectedPluginInfo->name.c_str());
+        MEDIA_LOG_E("cannot create plugin %" PUBLIC_OUTPUT "s", selectedPluginInfo->name.c_str());
         return false;
     }
     auto err = TranslatePluginStatus(plugin_->Init());
@@ -145,7 +145,7 @@ ErrorCode MuxerFilter::AddTrackThenConfigure(const std::pair<std::string, Plugin
             keyPair.second.second(outValue)) {
             plugin_->SetTrackParameter(trackId, keyPair.first, outValue);
         } else {
-            MEDIA_LOG_W("parameter %s in meta is not found or type mismatch", keyPair.second.first.c_str());
+            MEDIA_LOG_W("parameter %" PUBLIC_OUTPUT "s in meta is not found or type mismatch", keyPair.second.first.c_str());
         }
     }
     return ErrorCode::SUCCESS;
@@ -157,7 +157,7 @@ ErrorCode MuxerFilter::ConfigureToStart()
     for (const auto& cache: metaCache_) {
         ret = AddTrackThenConfigure(cache);
         if (ret != ErrorCode::SUCCESS) {
-            MEDIA_LOG_E("add and configure for track from inPort %s failed", cache.first.c_str());
+            MEDIA_LOG_E("add and configure for track from inPort %" PUBLIC_OUTPUT "s failed", cache.first.c_str());
             return ret;
         }
     }
@@ -178,7 +178,7 @@ bool MuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<con
 {
     std::string tmp;
     if (!upstreamMeta->GetString(Plugin::MetaID::MIME, tmp)) {
-        MEDIA_LOG_E("stream meta must contain mime, which is not found in current stream from port %s", inPort.c_str());
+        MEDIA_LOG_E("stream meta must contain mime, which is not found in current stream from port %" PUBLIC_OUTPUT "s", inPort.c_str());
         return false;
     }
     metaCache_.emplace_back(std::make_pair(inPort, *upstreamMeta));
@@ -274,7 +274,7 @@ void MuxerFilter::UpdateEosState(const std::string& inPort)
 ErrorCode MuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
 {
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
-        MEDIA_LOG_W("pushing data to muxer when state is %d", static_cast<int>(state_.load()));
+        MEDIA_LOG_W("pushing data to muxer when state is %" PUBLIC_OUTPUT "d", static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     if (eos_.load()) {

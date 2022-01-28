@@ -108,7 +108,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
             }
             auto thisOut = std::make_shared<Plugin::Capability>();
             if (!MergeCapabilityKeys(*upstreamCap, outCap, *thisOut)) {
-                MEDIA_LOG_W("one of out cap of plugin %s does not match with upstream capability",
+                MEDIA_LOG_W("one of out cap of plugin %" PUBLIC_OUTPUT "s does not match with upstream capability",
                             candidate.first->name.c_str());
                 continue;
             }
@@ -117,7 +117,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
             if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_, upstreamParams, downstreamParams)) {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
-                MEDIA_LOG_I("choose plugin %s as working plugin", candidate.first->name.c_str());
+                MEDIA_LOG_I("choose plugin %" PUBLIC_OUTPUT "s as working plugin", candidate.first->name.c_str());
                 break;
             }
         }
@@ -248,7 +248,7 @@ ErrorCode AudioEncoderFilter::PushData(const std::string &inPort, AVBufferPtr bu
 {
     const static int8_t maxRetryCnt = 3; // max retry times of handling one frame
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
-        MEDIA_LOG_W("pushing data to encoder when state is %d", static_cast<int>(state_.load()));
+        MEDIA_LOG_W("pushing data to encoder when state is %" PUBLIC_OUTPUT "d", static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto inputMemory = buffer->GetMemory();
@@ -317,7 +317,7 @@ ErrorCode AudioEncoderFilter::HandleFrame(const std::shared_ptr<AVBuffer>& buffe
     MEDIA_LOG_D("HandleFrame called");
     auto ret = TranslatePluginStatus(plugin_->QueueInputBuffer(buffer, 0));
     if (ret != ErrorCode::SUCCESS && ret != ErrorCode::ERROR_TIMED_OUT) {
-        MEDIA_LOG_E("Queue input buffer to plugin fail: %d", ret);
+        MEDIA_LOG_E("Queue input buffer to plugin fail: %" PUBLIC_OUTPUT "d", ret);
     }
     return ret;
 }
@@ -333,7 +333,7 @@ ErrorCode AudioEncoderFilter::FinishFrame()
     outBuffer->Reset();
     auto ret = TranslatePluginStatus(plugin_->QueueOutputBuffer(outBuffer, 0));
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("Queue out buffer to plugin fail: %d", to_underlying(ret));
+        MEDIA_LOG_E("Queue out buffer to plugin fail: %" PUBLIC_OUTPUT "d", to_underlying(ret));
         return ret;
     }
     std::shared_ptr<AVBuffer> pcmFrame = nullptr;
@@ -348,7 +348,7 @@ ErrorCode AudioEncoderFilter::FinishFrame()
         }
         pcmFrame.reset(); // 释放buffer 如果没有被缓存使其回到buffer pool 如果被sink缓存 则从buffer pool拿其他的buffer
     } else if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
-        MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %d", static_cast<int32_t>(status));
+        MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %" PUBLIC_OUTPUT "d", static_cast<int32_t>(status));
     }
     MEDIA_LOG_D("end finish frame");
     return TranslatePluginStatus(status);

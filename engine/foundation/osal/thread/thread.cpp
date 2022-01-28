@@ -74,11 +74,11 @@ bool Thread::CreateThread(const std::function<void()>& func)
     pthread_attr_setschedparam(&attr, &sched);
 #if defined(THREAD_STACK_SIZE) and THREAD_STACK_SIZE > 0
     pthread_attr_setstacksize(&attr, THREAD_STACK_SIZE);
-    MEDIA_LOG_I("thread stack size set to %d", THREAD_STACK_SIZE);
+    MEDIA_LOG_I("thread stack size set to %" PUBLIC_OUTPUT "d", THREAD_STACK_SIZE);
 #endif
     int rtv = pthread_create(&id_, &attr, Thread::Run, state_.get());
     if (rtv == 0) {
-        MEDIA_LOG_I("thread %s create succ", name_.c_str());
+        MEDIA_LOG_I("thread %" PUBLIC_OUTPUT "s create succ", name_.c_str());
         SetNameInternal();
     } else {
         state_.reset();
@@ -93,7 +93,7 @@ void Thread::SetNameInternal()
     if (state_ && !name_.empty()) {
         constexpr int threadNameMaxSize = 15;
         if (name_.size() > threadNameMaxSize) {
-            MEDIA_LOG_W("task name %s exceed max size: %d", name_.c_str(), threadNameMaxSize);
+            MEDIA_LOG_W("task name %" PUBLIC_OUTPUT "s exceed max size: %" PUBLIC_OUTPUT "d", name_.c_str(), threadNameMaxSize);
             name_ = name_.substr(0, threadNameMaxSize);
         }
         pthread_setname_np(id_, name_.c_str());
@@ -107,7 +107,7 @@ void* Thread::Run(void* arg) // NOLINT: void*
     if (state && state->func) {
         state->func();
     }
-    MEDIA_LOG_W("Thread %s exited...", state->name.c_str());
+    MEDIA_LOG_W("Thread %" PUBLIC_OUTPUT "s exited...", state->name.c_str());
     return nullptr;
 }
 } // namespace OSAL

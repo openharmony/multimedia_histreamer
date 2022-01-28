@@ -145,7 +145,7 @@ Status FileSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     MEDIA_LOG_D("IN");
     auto err = ParseFileName(source->GetSourceUri());
     if (err != Status::OK) {
-        MEDIA_LOG_E("Parse file name from uri fail, uri: %s", source->GetSourceUri().c_str());
+        MEDIA_LOG_E("Parse file name from uri fail, uri: %" PUBLIC_OUTPUT "s", source->GetSourceUri().c_str());
         return err;
     }
     return OpenFile();
@@ -169,11 +169,11 @@ Status FileSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLe
     expectedLen = std::min(static_cast<size_t>(fileSize_ - position_), expectedLen);
     expectedLen = std::min(bufData->GetCapacity(), expectedLen);
 
-    MEDIA_LOG_D("buffer position %" PRIu64 ", expectedLen %zu", position_, expectedLen);
+    MEDIA_LOG_D("buffer position %" PUBLIC_OUTPUT PRIu64 ", expectedLen %" PUBLIC_OUTPUT "zu", position_, expectedLen);
     auto size = std::fread(bufData->GetWritableAddr(expectedLen), sizeof(char), expectedLen, fp_);
     bufData->UpdateDataSize(size);
     position_ += bufData->GetSize();
-    MEDIA_LOG_D("position_: %" PRIu64 ", readSize: %zu", position_, bufData->GetSize());
+    MEDIA_LOG_D("position_: %" PUBLIC_OUTPUT "" PRIu64 ", readSize: %" PUBLIC_OUTPUT "zu", position_, bufData->GetSize());
     return Status::OK;
 }
 
@@ -185,7 +185,7 @@ Status FileSourcePlugin::GetSize(size_t& size)
         return Status::ERROR_WRONG_STATE;
     }
     size = fileSize_;
-    MEDIA_LOG_D("fileSize_: %zu", size);
+    MEDIA_LOG_D("fileSize_: %" PUBLIC_OUTPUT "zu", size);
     return Status::OK;
 }
 
@@ -205,14 +205,14 @@ Status FileSourcePlugin::SeekTo(uint64_t offset)
     if (std::fseek(fp_, static_cast<long int>(offset), SEEK_SET) != 0) {
         std::clearerr(fp_);
         (void)std::fseek(fp_, static_cast<long int>(position_), SEEK_SET);
-        MEDIA_LOG_E("Seek to %" PRIu64, offset);
+        MEDIA_LOG_E("Seek to %" PUBLIC_OUTPUT PRIu64, offset);
         return Status::ERROR_UNKNOWN;
     }
     position_ = offset;
     if (std::feof(fp_)) {
         MEDIA_LOG_I("It is the end of file!");
     }
-    MEDIA_LOG_D("seek to position_: %" PRIu64 " success", position_);
+    MEDIA_LOG_D("seek to position_: %" PUBLIC_OUTPUT PRIu64 " success", position_);
     return Status::OK;
 }
 
@@ -222,15 +222,15 @@ Status FileSourcePlugin::ParseFileName(const std::string& uri)
         MEDIA_LOG_E("uri is empty");
         return Status::ERROR_INVALID_PARAMETER;
     }
-    MEDIA_LOG_D("uri: %s", uri.c_str());
+    MEDIA_LOG_D("uri: %" PUBLIC_OUTPUT "s", uri.c_str());
     if (uri.find("file:/") != std::string::npos) {
         if (uri.find('#') != std::string::npos) {
-            MEDIA_LOG_E("Invalid file uri format: %s", uri.c_str());
+            MEDIA_LOG_E("Invalid file uri format: %" PUBLIC_OUTPUT "s", uri.c_str());
             return Status::ERROR_INVALID_PARAMETER;
         }
         auto pos = uri.find("file:");
         if (pos == std::string::npos) {
-            MEDIA_LOG_E("Invalid file uri format: %s", uri.c_str());
+            MEDIA_LOG_E("Invalid file uri format: %" PUBLIC_OUTPUT "s", uri.c_str());
             return Status::ERROR_INVALID_PARAMETER;
         }
         pos += 5; // 5: offset
@@ -240,7 +240,7 @@ Status FileSourcePlugin::ParseFileName(const std::string& uri)
             pos += 2;                 // 2: offset
             pos = uri.find('/', pos); // skip host name
             if (pos == std::string::npos) {
-                MEDIA_LOG_E("Invalid file uri format: %s", uri.c_str());
+                MEDIA_LOG_E("Invalid file uri format: %" PUBLIC_OUTPUT "s", uri.c_str());
                 return Status::ERROR_INVALID_PARAMETER;
             }
             pos++;
@@ -249,7 +249,7 @@ Status FileSourcePlugin::ParseFileName(const std::string& uri)
     } else {
         fileName_ = uri;
     }
-    MEDIA_LOG_D("fileName_: %s", fileName_.c_str());
+    MEDIA_LOG_D("fileName_: %" PUBLIC_OUTPUT "s", fileName_.c_str());
     return Status::OK;
 }
 
@@ -257,15 +257,15 @@ Status FileSourcePlugin::CheckFileStat()
 {
     struct stat fileStat;
     if (stat(fileName_.c_str(), &fileStat) < 0) {
-        MEDIA_LOG_E("Cannot get info from %s", fileName_.c_str());
+        MEDIA_LOG_E("Cannot get info from %" PUBLIC_OUTPUT "s", fileName_.c_str());
         return Status::ERROR_NOT_EXISTED;
     }
     if (S_ISDIR(fileStat.st_mode)) {
-        MEDIA_LOG_E("%s is directory", fileName_.c_str());
+        MEDIA_LOG_E("%" PUBLIC_OUTPUT "s is directory", fileName_.c_str());
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     if (S_ISSOCK(fileStat.st_mode)){
-        MEDIA_LOG_E("%s is a socket", fileName_.c_str());
+        MEDIA_LOG_E("%" PUBLIC_OUTPUT "s is a socket", fileName_.c_str());
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     return Status::OK;
@@ -282,11 +282,11 @@ Status FileSourcePlugin::OpenFile()
     CloseFile();
     fp_ = std::fopen(fileName_.c_str(), "rb");
     if (fp_ == nullptr) {
-        MEDIA_LOG_E("Fail to load file from %s", fileName_.c_str());
+        MEDIA_LOG_E("Fail to load file from %" PUBLIC_OUTPUT "s", fileName_.c_str());
         return Status::ERROR_UNKNOWN;
     }
     fileSize_ = GetFileSize(fileName_.c_str());
-    MEDIA_LOG_D("fileName_: %s, fileSize_: %zu", fileName_.c_str(), fileSize_);
+    MEDIA_LOG_D("fileName_: %" PUBLIC_OUTPUT "s, fileSize_: %" PUBLIC_OUTPUT "zu", fileName_.c_str(), fileSize_);
     return Status::OK;
 }
 
