@@ -47,7 +47,7 @@ StreamingExecutor::~StreamingExecutor() {}
 
 UrlType StreamingExecutor::GetUrlType(const std::string &url)
 {
-    if (url.empty() || url.find("http") == url.npos) {
+    if (url.empty() || url.find("http") == std::string::npos) {
         MEDIA_LOG_E("url is not http error");
         return URL_UNKNOWN;
     }
@@ -98,7 +98,8 @@ bool StreamingExecutor::Read(unsigned char *buff, unsigned int wantReadLength, u
     if (isEos_ && realReadLength == 0) {
         isEos = true;
     }
-    MEDIA_LOG_D("Read: wantReadLength %" PUBLIC_OUTPUT "d, realReadLength %" PUBLIC_OUTPUT "d, isEos %" PUBLIC_OUTPUT "d", wantReadLength, realReadLength, isEos);
+    MEDIA_LOG_D("Read: wantReadLength %" PUBLIC_OUTPUT "d, realReadLength %" PUBLIC_OUTPUT "d, isEos %"
+                PUBLIC_OUTPUT "d", wantReadLength, realReadLength, isEos);
     return true;
 }
 
@@ -131,7 +132,7 @@ void StreamingExecutor::HttpDownloadThread()
     if (headerInfo_.fileContentLen > 0 && startPos_ >= headerInfo_.fileContentLen) { // 检查是否播放结束
         MEDIA_LOG_I("http download completed, startPos_ %" PUBLIC_OUTPUT "d", startPos_);
         isEos_ = true;
-        task_->Pause();
+        task_->PauseAsync();
     }
 }
 
