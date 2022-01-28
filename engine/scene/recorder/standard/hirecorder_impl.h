@@ -85,12 +85,12 @@ public:
 private:
     ErrorCode SetAudioSourceInternal(AudioSourceType source, int handle);
     ErrorCode SetVideoSourceInternal(VideoSourceType source, int handle);
-    bool ConfigureAudio(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recordParam);
-    bool ConfigureVideo(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recordParam );
-    bool ConfigureOther(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recordParam);
-    ErrorCode DoConfigureAudio(const RecordParam& param) const;
-    ErrorCode DoConfigureVideo(const RecordParam& param) const;
-    ErrorCode DoConfigureOther(const RecordParam& param) const;
+    bool ConfigureAudio(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recParamInternal);
+    bool ConfigureVideo(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recParamInternal);
+    bool ConfigureOther(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recParamInternal);
+    ErrorCode DoConfigureAudio(const RecorderParamInternal& recParamInternal) const;
+    ErrorCode DoConfigureVideo(const RecorderParamInternal& recParamInternal) const;
+    ErrorCode DoConfigureOther(const RecorderParamInternal& recParamInternal) const;
     bool CheckParamType(int32_t sourceId, const RecorderParam& recParam) const;
 
     std::atomic<uint32_t> audioCount_ {0};

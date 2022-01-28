@@ -132,7 +132,7 @@ Plugin::Status Error2Status(int32_t err)
             {OHOS::ERR_NO_INIT, Plugin::Status::ERROR_UNKNOWN},
             {OHOS::ERR_OVERFLOW, Plugin::Status::ERROR_UNKNOWN},
     };
-    if (transMap.count(err) == 0) {
+    if (transMap.count(err) != 0) {
         return transMap.at(err);
     }
     return Plugin::Status::ERROR_UNKNOWN;

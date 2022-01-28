@@ -69,7 +69,7 @@ struct HandleGenerator {
     }
 };
 
-struct RecordParam {
+struct RecorderParamInternal {
     int32_t sourceId;
     uint32_t type;
     Plugin::Any any;
