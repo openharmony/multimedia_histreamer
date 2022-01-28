@@ -38,6 +38,10 @@ source_set("std_audio_capture") {
   if (defined(ohos_lite)) {
     print("std audio capture plugin is not available on lite systems")
   } else {
+    include_dirs = [
+      "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiocommon/include",
+      "//utils/native/base/include/",
+    ]
     public_deps += [ "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiocapturer:audio_capturer" ]
     configs += [ "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiocapturer:audio_capturer_config" ]
     configs -= [

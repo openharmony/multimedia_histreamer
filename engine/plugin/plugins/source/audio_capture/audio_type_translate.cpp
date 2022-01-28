@@ -15,8 +15,10 @@
 
 #include "audio_type_translate.h"
 
+#include <map>
 #include <utility>
 
+#include "audio_errors.h"
 #include "errors.h"
 
 namespace {
@@ -114,32 +116,26 @@ bool ChannelNumNum2Enum(uint32_t numVal, OHOS::AudioStandard::AudioChannel& enum
 }
 Plugin::Status Error2Status(int32_t err)
 {
-    switch (err) {
-        case::ERR_OK:
-            return Plugin::Status::OK;
-        case::ERR_NO_MEMORY:
-            return Plugin::Status::ERROR_NO_MEMORY;
-        case::ERR_INVALID_OPERATION:
-            return Plugin::Status::ERROR_WRONG_STATE;
-        case::ERR_INVALID_VALUE:
-            return Plugin::Status::ERROR_INVALID_PARAMETER;
-        case::ERR_NAME_NOT_FOUND:
-            return Plugin::Status::ERROR_NOT_EXISTED;
-        case::ERR_PERMISSION_DENIED:
-            return Plugin::Status::ERROR_PERMISSION_DENIED;
-        case::ERR_ENOUGH_DATA:
-            return Plugin::Status::ERROR_NOT_ENOUGH_DATA;
-        case::ERR_WOULD_BLOCK:
-            return Plugin::Status::ERROR_AGAIN;
-        case::ERR_TIMED_OUT:
-            return Plugin::Status::ERROR_TIMED_OUT;
-        case::ERR_ALREADY_EXISTS:
-        case::ERR_DEAD_OBJECT:
-        case::ERR_NO_INIT:
-        case::ERR_OVERFLOW:
-        default:
-            return Plugin::Status::ERROR_UNKNOWN;
+    const static std::map<int32_t, Plugin::Status> transMap = {
+            {OHOS::AudioStandard::SUCCESS, Plugin::Status::OK},
+            {OHOS::ERR_OK, Plugin::Status::OK},
+            {OHOS::ERR_NO_MEMORY, Plugin::Status::ERROR_NO_MEMORY},
+            {OHOS::ERR_INVALID_OPERATION, Plugin::Status::ERROR_WRONG_STATE},
+            {OHOS::ERR_INVALID_VALUE, Plugin::Status::ERROR_INVALID_PARAMETER},
+            {OHOS::ERR_NAME_NOT_FOUND, Plugin::Status::ERROR_NOT_EXISTED},
+            {OHOS::ERR_PERMISSION_DENIED, Plugin::Status::ERROR_PERMISSION_DENIED},
+            {OHOS::ERR_ENOUGH_DATA, Plugin::Status::ERROR_NOT_ENOUGH_DATA},
+            {OHOS::ERR_WOULD_BLOCK, Plugin::Status::ERROR_AGAIN},
+            {OHOS::ERR_TIMED_OUT, Plugin::Status::ERROR_TIMED_OUT},
+            {OHOS::ERR_ALREADY_EXISTS, Plugin::Status::ERROR_UNKNOWN},
+            {OHOS::ERR_DEAD_OBJECT, Plugin::Status::ERROR_UNKNOWN},
+            {OHOS::ERR_NO_INIT, Plugin::Status::ERROR_UNKNOWN},
+            {OHOS::ERR_OVERFLOW, Plugin::Status::ERROR_UNKNOWN},
+    };
+    if (transMap.count(err) == 0) {
+        return transMap.at(err);
     }
+    return Plugin::Status::ERROR_UNKNOWN;
 }
 } // AuCapturePlugin
 } // Media

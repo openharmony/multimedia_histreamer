@@ -17,8 +17,8 @@
 #include "audio_capture_plugin.h"
 #include <algorithm>
 #include <cmath>
+#include "audio_errors.h"
 #include "audio_type_translate.h"
-#include "errors.h"
 #include "foundation/log.h"
 #include "plugin/common/plugin_time.h"
 #include "utils/utils.h"
@@ -115,7 +115,7 @@ using namespace OHOS::Media::Plugin;
 #define FAIL_LOG_RETURN(exec, msg) \
 do { \
     auto ret = exec; \
-    if (ret != ERR_OK) { \
+    if (ret != OHOS::AudioStandard::SUCCESS) { \
         MEDIA_LOG_E(msg " failed return %d", ret); \
         return Error2Status(ret); \
     } \
