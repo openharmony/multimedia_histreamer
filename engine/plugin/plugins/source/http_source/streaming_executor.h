@@ -19,7 +19,7 @@
 #include <string>
 #include <memory>
 #include "ring_buffer.h"
-#include "streaming_source.h"
+#include "network_client.h"
 #include "osal/thread/task.h"
 
 namespace OHOS {
@@ -61,7 +61,7 @@ private:
 
 private:
     std::shared_ptr<RingBuffer> buffer_;
-    std::shared_ptr<StreamingSource> source_;
+    std::shared_ptr<NetworkClient> client_;
     bool isEos_ {false}; // file download finished
     int64_t startPos_;
     HeaderInfo headerInfo_;

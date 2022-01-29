@@ -13,47 +13,42 @@
  * limitations under the License.
  */
 
-#define HST_LOG_TAG "HttpSource"
-#include "http_source.h"
-#include "foundation/log.h"
-#include "libcurl_client.h"
+#ifndef HISTREAMER_HTTP_CURL_CLIENT_H
+#define HISTREAMER_HTTP_CURL_CLIENT_H
+
+#include <string>
+#include "network_client.h"
+#include "curl/curl.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-using namespace std;
-HttpSource::HttpSource()
-{
-    MEDIA_LOG_D("IN");
-    client_ = std::make_shared<LibcurlClient>();
-}
+class HttpCurlClient : public NetworkClient {
+public:
+    HttpCurlClient();
 
-HttpSource::~HttpSource()
-{
-    MEDIA_LOG_D("IN");
-}
+    ~HttpCurlClient();
 
-int HttpSource::Init(RxHeader headCallback, RxBody bodyCallback, void *userParam)
-{
-    return client_->Init(headCallback, bodyCallback, userParam);
-}
+    int Init(RxHeader headCallback, RxBody bodyCallback, void *userParam) override;
 
-int HttpSource::RequestData(long startPos, int len)
-{
-    return client_->RequestData(startPos, len);
-}
+    int Open(const std::string& url) override;
 
-bool HttpSource::Open(const string &url)
-{
-    return client_->Open(url);
-}
+    int RequestData(long startPos, int len) override;
 
-void HttpSource::Close()
-{
-    client_->Close();
+    int Close() override;
+
+    void InitCurlEnvironment();
+
+private:
+    CURL* easyHandle_;
+    std::string url_;
+    RxBody rxBody_;
+    RxHeader rxHeader_;
+    void *userParam_;
+};
 }
 }
 }
 }
-}
+#endif

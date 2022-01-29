@@ -17,10 +17,9 @@
 #include <functional>
 #include "securec.h"
 #include "foundation/log.h"
-#include "libcurl_client.h"
+#include "http_curl_client.h"
 #include "osal/utils/util.h"
 #include "steady_clock.h"
-#include "http_source.h"
 
 namespace OHOS {
 namespace Media {
@@ -64,14 +63,14 @@ bool StreamingExecutor::Open(const std::string &url)
     FALSE_RETURN_V(!url.empty(), false);
 
     if (GetUrlType(url) == URL_HTTP) {
-        source_ = std::make_shared<HttpSource>();
+        client_ = std::make_shared<HttpCurlClient>();
     } else {
         // todo
     }
-    FALSE_RETURN_V(source_ != nullptr, false);
+    FALSE_RETURN_V(client_ != nullptr, false);
 
-    source_->Init(&RxHeaderData, &RxBodyData, this);
-    source_->Open(url);
+    client_->Init(&RxHeaderData, &RxBodyData, this);
+    client_->Open(url);
 
     startPos_ = 0;
     isEos_ = false;
@@ -84,9 +83,9 @@ void StreamingExecutor::Close()
 {
     task_->Stop();
     startPos_ = 0;
-    if (source_ != nullptr) {
-        source_->Close();
-        source_ = nullptr;
+    if (client_ != nullptr) {
+        client_->Close();
+        client_ = nullptr;
     }
 }
 
@@ -127,7 +126,7 @@ bool StreamingExecutor::IsStreaming()
 
 void StreamingExecutor::HttpDownloadThread()
 {
-    int ret = source_->RequestData(startPos_, PER_REQUEST_SIZE);
+    int ret = client_->RequestData(startPos_, PER_REQUEST_SIZE);
     FALSE_LOG(ret == 0);
     if (headerInfo_.fileContentLen > 0 && startPos_ >= headerInfo_.fileContentLen) { // 检查是否播放结束
         MEDIA_LOG_I("http download completed, startPos_ %" PUBLIC_OUTPUT "d", startPos_);

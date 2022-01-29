@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define HST_LOG_TAG "LibcurlClient"
-#include "libcurl_client.h"
+#define HST_LOG_TAG "HttpCurlClient"
+#include "http_curl_client.h"
 #include "foundation/log.h"
 
 namespace OHOS {
@@ -21,15 +21,15 @@ namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
 
-LibcurlClient::LibcurlClient()
+HttpCurlClient::HttpCurlClient()
 {
 }
 
-LibcurlClient::~LibcurlClient()
+HttpCurlClient::~HttpCurlClient()
 {
 }
 
-int LibcurlClient::Init(RxHeader headCallback, RxBody bodyCallback, void *userParam)
+int HttpCurlClient::Init(RxHeader headCallback, RxBody bodyCallback, void *userParam)
 {
     rxHeader_ = headCallback;
     rxBody_ = bodyCallback;
@@ -41,14 +41,14 @@ int LibcurlClient::Init(RxHeader headCallback, RxBody bodyCallback, void *userPa
     return 0;
 }
 
-int LibcurlClient::Open(const std::string& url)
+int HttpCurlClient::Open(const std::string& url)
 {
     url_ = url;
     InitCurlEnvironment();
     return 0;
 }
 
-int LibcurlClient::Close()
+int HttpCurlClient::Close()
 {
     MEDIA_LOG_I("Close client");
     curl_easy_setopt(easyHandle_, CURLOPT_TIMEOUT, 1);
@@ -60,7 +60,7 @@ int LibcurlClient::Close()
     return 0;
 }
 
-void LibcurlClient::InitCurlEnvironment() {
+void HttpCurlClient::InitCurlEnvironment() {
     curl_easy_setopt(easyHandle_, CURLOPT_URL, url_.c_str());
     curl_easy_setopt(easyHandle_, CURLOPT_HTTPGET, 1L);
 
@@ -82,7 +82,7 @@ void LibcurlClient::InitCurlEnvironment() {
     curl_easy_setopt(easyHandle_, CURLOPT_TCP_KEEPINTVL, 5L); // 心跳
 }
 
-int LibcurlClient::RequestData(long startPos, int len)
+int HttpCurlClient::RequestData(long startPos, int len)
 {
     FALSE_RETURN_V(easyHandle_ != nullptr, -1);
 
