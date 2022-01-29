@@ -171,6 +171,8 @@ void Minimp3DemuxerPlugin::FillInMediaInfo(MediaInfo& mediaInfo) const
     } else {
         mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::STEREO});
     }
+    int64_t durationHst;
+    Ms2HstTime(durationMs, durationHst);
     mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(mp3DemuxerRst_.frameSampleRate)});
     mediaInfo.tracks[0].insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(mp3DemuxerRst_.frameBitrateKbps)});
     mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(mp3DemuxerRst_.frameChannels)});
@@ -179,7 +181,7 @@ void Minimp3DemuxerPlugin::FillInMediaInfo(MediaInfo& mediaInfo) const
     mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(1)});
     mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_LAYER, static_cast<uint32_t>(mp3DemuxerRst_.audioLayer)});
     mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(mp3DemuxerRst_.samplesPerFrame)});
-    mediaInfo.tracks[0].insert({Tag::MEDIA_DURATION, static_cast<uint64_t>(durationMs)});
+    mediaInfo.tracks[0].insert({Tag::MEDIA_DURATION, static_cast<uint64_t>(durationHst)});
 }
 
 Status Minimp3DemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
