@@ -18,6 +18,7 @@
 
 #include <string>
 #include <memory>
+#include "client_factory.h"
 #include "ring_buffer.h"
 #include "network_client.h"
 #include "osal/thread/task.h"
@@ -34,13 +35,6 @@ struct HeaderInfo {
     bool isChunked {false};
 };
 
-enum UrlType {
-    URL_HTTP,
-    URL_HLS,
-    URL_WEBSOCKET,
-    URL_UNKNOWN
-};
-
 class StreamingExecutor {
 public:
     StreamingExecutor() noexcept;
@@ -54,13 +48,13 @@ public:
     bool IsStreaming();
 
 private:
-    UrlType GetUrlType(const std::string &url);
     void HttpDownloadThread();
     static size_t RxBodyData(void *buffer, size_t size, size_t nitems, void *userParam);
     static size_t RxHeaderData(void *buffer, size_t size, size_t nitems, void *userParam);
 
 private:
     std::shared_ptr<RingBuffer> buffer_;
+    std::shared_ptr<ClientFactory> factory_;
     std::shared_ptr<NetworkClient> client_;
     bool isEos_ {false}; // file download finished
     int64_t startPos_;

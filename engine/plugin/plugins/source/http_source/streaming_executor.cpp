@@ -32,7 +32,8 @@ StreamingExecutor::StreamingExecutor() noexcept
 {
     buffer_ = std::make_shared<RingBuffer>(RING_BUFFER_SIZE);
     buffer_->Init();
-    isDownloading = false;
+
+    factory_ = std::make_shared<ClientFactory>(&RxHeaderData, &RxBodyData, this);
 
     task_ = std::make_shared<OSAL::Task>(std::string("StreamingExecutor"));
     task_->RegisterHandler(std::bind(&StreamingExecutor::HttpDownloadThread, this));
@@ -40,36 +41,19 @@ StreamingExecutor::StreamingExecutor() noexcept
     memset_s(&headerInfo_, sizeof(HeaderInfo), 0x00, sizeof(HeaderInfo));
     headerInfo_.fileContentLen = 0;
     startPos_ = 0;
+    isDownloading = false;
 }
 
 StreamingExecutor::~StreamingExecutor() {}
-
-UrlType StreamingExecutor::GetUrlType(const std::string &url)
-{
-    if (url.empty() || url.find("http") == std::string::npos) {
-        MEDIA_LOG_E("url is not http error");
-        return URL_UNKNOWN;
-    }
-    if (url.substr(url.length() - 5) == ".m3u8") {
-        return URL_HLS;
-    } else {
-        return URL_HTTP;
-    }
-}
 
 bool StreamingExecutor::Open(const std::string &url)
 {
     MEDIA_LOG_D("Open in");
     FALSE_RETURN_V(!url.empty(), false);
 
-    if (GetUrlType(url) == URL_HTTP) {
-        client_ = std::make_shared<HttpCurlClient>();
-    } else {
-        // todo
-    }
+    client_ = factory_->CreateClient(url);
     FALSE_RETURN_V(client_ != nullptr, false);
 
-    client_->Init(&RxHeaderData, &RxBodyData, this);
     client_->Open(url);
 
     startPos_ = 0;
