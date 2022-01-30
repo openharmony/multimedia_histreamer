@@ -16,6 +16,7 @@
 #include "client_factory.h"
 #include "foundation/log.h"
 #include "http_curl_client.h"
+#include "https_curl_client.h"
 
 namespace OHOS {
 namespace Media {
@@ -29,38 +30,34 @@ ClientFactory::ClientFactory(RxHeader headCallback, RxBody bodyCallback, void *u
 
 ClientFactory::~ClientFactory()
 {
-    if (client_ != nullptr) {
-        client_->Deinit();
-        client_ = nullptr;
+    if (httpClient_ != nullptr) {
+        httpClient_->Deinit();
+        httpClient_ = nullptr;
     }
 }
 
 std::shared_ptr<NetworkClient> ClientFactory::CreateClient(const std::string& url)
 {
-    if (GetUrlType(url) == URL_HTTP) {
-        if (client_ == nullptr) {
-            client_ = std::make_shared<HttpCurlClient>(rxHeader_, rxBody_, userParam_);
-            client_->Init();
+    FALSE_RETURN_V(!url.empty(), nullptr);
+    if (url.find("http") == 0) {
+        if (httpClient_ == nullptr) {
+            httpClient_ = std::make_shared<HttpCurlClient>(rxHeader_, rxBody_, userParam_);
+            httpClient_->Init();
         }
-    } else {
-        // todo
+        return httpClient_;
+    } else if (url.find("https") == 0) {
+        if (httpClient_ == nullptr) {
+            httpClient_ = std::make_shared<HttpCurlClient>(rxHeader_, rxBody_, userParam_);
+            httpClient_->Init();
+        }
+        if (httpsClient_ == nullptr) {
+            httpsClient_ = std::make_shared<HttpsCurlClient>(httpClient_);
+            httpsClient_->Init();
+        }
+        return httpsClient_;
     }
-    return client_;
+    return nullptr;
 }
-
-UrlType ClientFactory::GetUrlType(const std::string &url)
-{
-    if (url.empty() || url.find("http") == std::string::npos) {
-        MEDIA_LOG_E("url is not http error");
-        return URL_UNKNOWN;
-    }
-    if (url.substr(url.length() - 5) == ".m3u8") {
-        return URL_HLS;
-    } else {
-        return URL_HTTP;
-    }
-}
-
 }
 }
 }

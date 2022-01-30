@@ -13,30 +13,36 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_CLIENT_FACTORY_H
-#define HISTREAMER_CLIENT_FACTORY_H
+#ifndef HISTREAMER_HTTPS_CURL_CLIENT_H
+#define HISTREAMER_HTTPS_CURL_CLIENT_H
 
 #include <memory>
 #include <string>
 #include "network_client.h"
+#include "curl/curl.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-class ClientFactory {
+class HttpsCurlClient : public NetworkClient {
 public:
-    ClientFactory(RxHeader headCallback, RxBody bodyCallback, void *userParam);
-    ~ClientFactory();
+    HttpsCurlClient(std::shared_ptr<NetworkClient> httpClient);
 
-    std::shared_ptr<NetworkClient> CreateClient(const std::string& url);
+    ~HttpsCurlClient();
+
+    int Init() override;
+
+    int Open(const std::string& url) override;
+
+    int RequestData(long startPos, int len) override;
+
+    int Close() override;
+
+    int Deinit() override;
 
 private:
-    RxBody rxBody_;
-    RxHeader rxHeader_;
-    void *userParam_;
     std::shared_ptr<NetworkClient> httpClient_;
-    std::shared_ptr<NetworkClient> httpsClient_;
 };
 }
 }
