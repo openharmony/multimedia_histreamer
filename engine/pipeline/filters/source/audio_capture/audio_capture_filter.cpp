@@ -100,7 +100,7 @@ ErrorCode AudioCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value
 {
 #define ASSIGN_PARAMETER_IF_MATCH(type, val, val1, val2) \
 do { \
-    if (val.Type() == typeid(type)) { \
+    if (val.SameTypeWith(typeid(type))) { \
         val1 = Plugin::AnyCast<type>(val); \
         val2 = true; \
     } \
@@ -317,7 +317,7 @@ bool AudioCaptureFilter::CheckSampleRate(const Plugin::Capability& cap)
     }
     for (const auto& pairKey : cap.keys) {
         if (pairKey.first != Capability::Key::AUDIO_SAMPLE_RATE ||
-            pairKey.second.Type() != typeid(DiscreteCapability<uint32_t>)) {
+            !pairKey.second.SameTypeWith(typeid(DiscreteCapability<uint32_t>))) {
             continue;
         }
         auto supportedSampleRateList = Plugin::AnyCast<DiscreteCapability<uint32_t>>(pairKey.second);
@@ -337,7 +337,7 @@ bool AudioCaptureFilter::CheckChannels(const Plugin::Capability& cap)
     }
     for (const auto& pairKey : cap.keys) {
         if (pairKey.first != Capability::Key::AUDIO_CHANNELS ||
-            pairKey.second.Type() != typeid(DiscreteCapability<uint32_t>)) {
+            !pairKey.second.SameTypeWith(typeid(DiscreteCapability<uint32_t>))) {
             continue;
         }
         auto supportedChannelsList = Plugin::AnyCast<DiscreteCapability<uint32_t>>(pairKey.second);
@@ -357,7 +357,7 @@ bool AudioCaptureFilter::CheckSampleFormat(const Plugin::Capability& cap)
     }
     for (const auto& pairKey : cap.keys) {
         if (pairKey.first != Capability::Key::AUDIO_SAMPLE_FORMAT ||
-            pairKey.second.Type() != typeid(DiscreteCapability<Plugin::AudioSampleFormat>)) {
+            !pairKey.second.SameTypeWith(typeid(DiscreteCapability<Plugin::AudioSampleFormat>))) {
             continue;
         }
         auto supportedSampleFormatList =
@@ -426,7 +426,7 @@ ErrorCode AudioCaptureFilter::FindPlugin()
         std::shared_ptr<PluginInfo> info = pluginManager.GetPluginInfo(PluginType::SOURCE, name);
         MEDIA_LOG_I("name: %" PUBLIC_OUTPUT "s, info->name: %" PUBLIC_OUTPUT "s", name.c_str(), info->name.c_str());
         auto val = info->extra[PLUGIN_INFO_EXTRA_INPUT_TYPE];
-        if (val.Type() == typeid(Plugin::SrcInputType)) {
+        if (val.SameTypeWith(typeid(Plugin::SrcInputType))) {
             auto supportInputType = OHOS::Media::Plugin::AnyCast<Plugin::SrcInputType>(val);
             if (inputType_ == supportInputType && DoNegotiate(info->outCaps) &&
                 CreatePlugin(info, name, pluginManager) == ErrorCode::SUCCESS) {

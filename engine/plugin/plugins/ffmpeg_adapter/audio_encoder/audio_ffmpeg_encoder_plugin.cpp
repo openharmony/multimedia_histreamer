@@ -196,7 +196,7 @@ template <typename T>
 bool AudioFfmpegEncoderPlugin::FindInParameterMapThenAssignLocked(Tag tag, T& assign)
 {
     auto ite = audioParameter_.find(tag);
-    if (ite != audioParameter_.end() && typeid(T) == ite->second.Type()) {
+    if (ite != audioParameter_.end() && ite->second.SameTypeWith(typeid(T))) {
         assign = Plugin::AnyCast<T>(ite->second);
         return true;
     } else {

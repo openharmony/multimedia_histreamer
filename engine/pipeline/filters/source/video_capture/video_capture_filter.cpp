@@ -80,7 +80,7 @@ ErrorCode VideoCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value
 {
 #define ASSIGN_PARAMETER_IF_MATCH(type, val, val1) \
 do { \
-    if (val.Type() == typeid(type)) { \
+    if (val.SampleTypeWith(typeid(type))) { \
         val1 = Plugin::AnyCast<type>(val); \
     } \
 } while (0)
@@ -309,7 +309,7 @@ ErrorCode VideoCaptureFilter::FindPlugin()
         std::shared_ptr<PluginInfo> info = pluginManager.GetPluginInfo(PluginType::SOURCE, name);
         MEDIA_LOG_I("name: %" PUBLIC_OUTPUT "s, info->name: %" PUBLIC_OUTPUT "s", name.c_str(), info->name.c_str());
         auto val = info->extra[PLUGIN_INFO_EXTRA_INPUT_TYPE];
-        if (val.Type() == typeid(Plugin::SrcInputType)) {
+        if (val.SampleTypeWith(typeid(Plugin::SrcInputType))) {
             auto supportInputType = OHOS::Media::Plugin::AnyCast<Plugin::SrcInputType>(val);
             if (inputType_ == supportInputType && DoNegotiate(info->outCaps) &&
                 CreatePlugin(info, name, pluginManager) == ErrorCode::SUCCESS) {

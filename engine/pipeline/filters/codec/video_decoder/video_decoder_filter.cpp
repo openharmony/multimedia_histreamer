@@ -250,7 +250,7 @@ std::shared_ptr<Allocator> VideoDecoderFilter::DecideOutPutAllocator()
     Plugin::Tag tag = Plugin::Tag::BUFFER_ALLOCATOR;
     auto ite = sinkParams_.find(tag);
     if (ite != std::end(sinkParams_)) {
-        if (ite->second.Type() == typeid(std::shared_ptr<Plugin::SurfaceAllocator>)) {
+        if (ite->second.SameTypeWith(typeid(std::shared_ptr<Plugin::SurfaceAllocator>))) {
             return Plugin::AnyCast<std::shared_ptr<Plugin::SurfaceAllocator>>(ite->second);
         }
     }

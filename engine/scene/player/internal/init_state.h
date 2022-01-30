@@ -37,7 +37,7 @@ public:
     {
         OSAL::ScopedLock lock(mutex_);
         std::shared_ptr<MediaSource> source;
-        if (param.Type() != typeid(std::shared_ptr<MediaSource>) ||
+        if (!param.SameTypeWith(typeid(std::shared_ptr<MediaSource>)) ||
             !(source = Plugin::AnyCast<std::shared_ptr<MediaSource>>(param))) {
             return {ErrorCode::ERROR_INVALID_PARAMETER_TYPE, Action::ACTION_BUTT};
         }

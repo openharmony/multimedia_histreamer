@@ -372,7 +372,7 @@ Status AudioCapturePlugin::SetParameter(Tag tag, const ValueType& value)
 {
     switch (tag) {
         case Tag::AUDIO_SAMPLE_RATE: {
-            if (value.Type() == typeid(uint32_t)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 if (!AssignSampleRateIfSupported(Plugin::AnyCast<uint32_t>(value))) {
                     MEDIA_LOG_E("sampleRate is not supported by audiocapturer");
                     return Status::ERROR_INVALID_PARAMETER;
@@ -381,7 +381,7 @@ Status AudioCapturePlugin::SetParameter(Tag tag, const ValueType& value)
             break;
         }
         case Tag::AUDIO_CHANNELS: {
-            if (value.Type() == typeid(uint32_t)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 if (!AssignChannelNumIfSupported(Plugin::AnyCast<uint32_t>(value))) {
                     MEDIA_LOG_E("channelNum is not supported by audiocapturer");
                     return Status::ERROR_INVALID_PARAMETER;
@@ -390,14 +390,14 @@ Status AudioCapturePlugin::SetParameter(Tag tag, const ValueType& value)
             break;
         }
         case Tag::MEDIA_BITRATE: {
-            if (value.Type() == typeid(int64_t)) {
+            if (value.SameTypeWith(typeid(int64_t))) {
                 bitRate_ = Plugin::AnyCast<int64_t>(value);
-                MEDIA_LOG_D("bitRate_: %" PUBLIC_OUTPUT "u", bitRate_);
+                MEDIA_LOG_D("bitRate_: %" PUBLIC_OUTPUT PRId64, bitRate_);
             }
             break;
         }
         case Tag::AUDIO_SAMPLE_FORMAT: {
-            if (value.Type() == typeid(AudioSampleFormat)) {
+            if (value.SameTypeWith(typeid(AudioSampleFormat))) {
                 if (!AssignSampleFmtIfSupported(Plugin::AnyCast<AudioSampleFormat>(value))) {
                     MEDIA_LOG_E("sampleFormat is not supported by audiocapturer");
                     return Status::ERROR_INVALID_PARAMETER;

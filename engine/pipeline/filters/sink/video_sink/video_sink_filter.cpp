@@ -100,7 +100,7 @@ void VideoSinkFilter::HandleNegotiateParams(const Plugin::TagMap& upstreamParams
     Plugin::Tag tag = Plugin::Tag::VIDEO_MAX_SURFACE_NUM;
     auto ite = upstreamParams.find(tag);
     if (ite != std::end(upstreamParams)) {
-        if (ite->second.Type() == typeid(uint32_t)) {
+        if (ite->second.SameTypeWith(typeid(uint32_t))) {
             auto ret = plugin_->SetParameter(tag, Plugin::AnyCast<uint32_t>(ite->second));
             if (ret != Plugin::Status::OK) {
                 MEDIA_LOG_W("Set max surface num to plugin fail");

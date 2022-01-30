@@ -274,21 +274,21 @@ Status SdlVideoSinkPlugin::SetParameter(Tag tag, const ValueType& value)
 {
     switch (tag) {
         case Tag::VIDEO_WIDTH: {
-            if (value.Type() == typeid(uint32_t)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 pixelWidth_ = Plugin::AnyCast<uint32_t>(value);
                 MEDIA_LOG_D("pixelWidth_: %" PUBLIC_OUTPUT "u", pixelWidth_);
             }
             break;
         }
         case Tag::VIDEO_HEIGHT: {
-            if (value.Type() == typeid(uint32_t)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 pixelHeight_ = Plugin::AnyCast<uint32_t>(value);
                 MEDIA_LOG_D("pixelHeight_: %" PUBLIC_OUTPUT "u", pixelHeight_);
             }
             break;
         }
         case Tag::VIDEO_PIXEL_FORMAT: {
-            if (value.Type() == typeid(VideoPixelFormat)) {
+            if (value.SameTypeWith(typeid(VideoPixelFormat))) {
                 VideoPixelFormat format = Plugin::AnyCast<VideoPixelFormat>(value);
                 pixelFormat_ = TranslatePixelFormat(format);
                 MEDIA_LOG_D("SDL pixelFormat: %" PUBLIC_OUTPUT "u", pixelFormat_);

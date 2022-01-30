@@ -147,7 +147,7 @@ Plugin::Status SetCodecOfTrack(const AVOutputFormat* fmt, AVStream* stream, cons
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     auto& value = tagMap.find(Tag::MIME)->second;
-    if (value.Type() != typeid(std::string)) {
+    if (!value.SameTypeWith(typeid(std::string))) {
         return Status::ERROR_MISMATCHED_TYPE;
     }
     // todo specially for audio/mpeg audio/mpeg we should check mpegversion and mpeglayer
@@ -160,7 +160,7 @@ Plugin::Status SetSingleParameter(Tag tag, const Plugin::TagMap& tagMap, U& targ
 {
     auto ite = tagMap.find(tag);
     if (ite != std::end(tagMap)) {
-        if (ite->second.Type() != typeid(T)) {
+        if (!ite->second.SameTypeWith(typeid(T))) {
             MEDIA_LOG_E("tag %" PUBLIC_OUTPUT "d type mismatched", tag);
             return Plugin::Status::ERROR_MISMATCHED_TYPE;
         }
@@ -265,7 +265,7 @@ Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const
     // extra data
     auto ite = tagMap.find(Tag::MEDIA_CODEC_CONFIG);
     if (ite != std::end(tagMap)) {
-        if (ite->second.Type() != typeid(std::vector<uint8_t>)) {
+        if (!ite->second.SameTypeWith(typeid(std::vector<uint8_t>))) {
             MEDIA_LOG_E("tag %" PUBLIC_OUTPUT "d type mismatched", Tag::MEDIA_CODEC_CONFIG);
             return Plugin::Status::ERROR_MISMATCHED_TYPE;
         }
@@ -289,10 +289,10 @@ Plugin::Status SetTagsOfGeneral(AVFormatContext* fmtCtx, const Plugin::TagMap& t
             MEDIA_LOG_I("tag %" PUBLIC_OUTPUT "d will not written as general meta", pair.first);
             continue;
         }
-        if (pair.second.Type() != typeid(std::string)) {
+        if (!pair.second.SameTypeWith(typeid(std::string))) {
             continue;
         }
-        std::string value = Plugin::AnyCast<std::string>(pair.second);
+        auto value = Plugin::AnyCast<std::string>(pair.second);
         av_dict_set(&fmtCtx->metadata, metaName.c_str(), value.c_str(), 0);
     }
     return Plugin::Status::OK;
@@ -476,7 +476,7 @@ Status FFmpegMuxerPlugin::WriteHeader()
     }
     int ret = avformat_write_header(formatContext_.get(), nullptr);
     if (ret < 0) {
-        MEDIA_LOG_E("failed to write header %" PUBLIC_OUTPUT "", AVStrError(ret).c_str());
+        MEDIA_LOG_E("failed to write header %" PUBLIC_OUTPUT "s", AVStrError(ret).c_str());
         return Status::ERROR_UNKNOWN;
     }
     return Status::OK;

@@ -178,28 +178,28 @@ Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
 {
     switch (tag) {
         case Tag::VIDEO_WIDTH: {
-            if (value.Type() == typeid(uint32_t)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 width_ = Plugin::AnyCast<uint32_t>(value);
                 MEDIA_LOG_D("pixelWidth_: %" PUBLIC_OUTPUT "u", pixelWidth_);
             }
             break;
         }
         case Tag::VIDEO_HEIGHT: {
-            if (value.Type() == typeid(uint32_t)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 height_ = Plugin::AnyCast<uint32_t>(value);
                 MEDIA_LOG_D("pixelHeight_: %" PUBLIC_OUTPUT "u", pixelHeight_);
             }
             break;
         }
         case Tag::VIDEO_PIXEL_FORMAT: {
-            if (value.Type() == typeid(VideoPixelFormat)) {
+            if (value.SameTypeWith(typeid(VideoPixelFormat))) {
                 pixelFormat_ = Plugin::AnyCast<VideoPixelFormat>(value);
                 MEDIA_LOG_D("pixelFormat: %" PUBLIC_OUTPUT "u", pixelFormat_);
             }
             break;
         }
         case Tag::VIDEO_SURFACE: {
-            if (value.Type() == typeid(sptr<Surface>)) {
+            if (value.SameTypeWith(typeid(sptr<Surface>))) {
                 surface_ = Plugin::AnyCast<sptr<Surface>>(value);
                 if (!surface_) {
                     MEDIA_LOG_E("surface is null");
@@ -210,7 +210,7 @@ Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
             break;
         }
         case Tag::VIDEO_MAX_SURFACE_NUM: {
-            if (value.Type() == typeid(uint32_t)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 maxSurfaceNum_ = Plugin::AnyCast<uint32_t>(value);
                 MEDIA_LOG_D("maxSurfaceNum_: %" PUBLIC_OUTPUT "u", maxSurfaceNum_);
             }

@@ -32,7 +32,7 @@ bool IsPluginSupportedExtension(Plugin::PluginInfo& pluginInfo, const std::strin
     }
     bool rtv = false;
     auto info = pluginInfo.extra[PLUGIN_INFO_EXTRA_EXTENSIONS];
-    if (info.HasValue() && info.Type() == typeid(std::vector<std::string>)) {
+    if (info.HasValue() && info.SameTypeWith(typeid(std::vector<std::string>))) {
         for (const auto& ext : Plugin::AnyCast<std::vector<std::string>&>(info)) {
             if (ext == extension) {
                 rtv = true;

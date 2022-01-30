@@ -29,7 +29,7 @@ const PluginParaAllowedMap g_emptyMap;
 template <typename T>
 static bool CheckParameterType(const Plugin::ValueType& value)
 {
-    return value.Type() == typeid(T);
+    return value.SameTypeWith(typeid(T));
 }
 
 const PluginParaAllowedMap& PluginParameterTable::FindAllowedParameterMap(FilterType category)

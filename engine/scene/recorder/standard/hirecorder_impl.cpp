@@ -268,7 +268,7 @@ ErrorCode HiRecorderImpl::DoSetVideoSource(const Plugin::Any& param) const
 {
 #ifdef VIDEO_SUPPORT
     using SrcInputPair = std::pair<int32_t, Plugin::SrcInputType>;
-    if (param.Type() == typeid(SrcInputPair)) {
+    if (param.SameTypeWith(typeid(SrcInputPair))) {
         auto srcType = Plugin::AnyCast<SrcInputPair>(param).second;
         return videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::SRC_INPUT_TYPE), srcType);
     } else {
@@ -282,7 +282,7 @@ ErrorCode HiRecorderImpl::DoSetVideoSource(const Plugin::Any& param) const
 ErrorCode HiRecorderImpl::DoSetAudioSource(const Plugin::Any& param) const
 {
     using SrcInputPair = std::pair<int32_t, Plugin::SrcInputType>;
-    if (param.Type() == typeid(SrcInputPair)) {
+    if (param.SameTypeWith(typeid(SrcInputPair))) {
         auto srcType = Plugin::AnyCast<SrcInputPair>(param).second;
         return audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::SRC_INPUT_TYPE), srcType);
     } else {
@@ -294,7 +294,7 @@ ErrorCode HiRecorderImpl::DoConfigure(const Plugin::Any &param) const
 {
     ErrorCode ret  = ErrorCode::SUCCESS;
     RecorderParamInternal recParamInternal;
-    if (param.Type() == typeid(RecorderParamInternal)) {
+    if (param.SameTypeWith(typeid(RecorderParamInternal))) {
         recParamInternal = Plugin::AnyCast<RecorderParamInternal>(param);
     } else {
         return ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
@@ -328,7 +328,7 @@ ErrorCode HiRecorderImpl::DoConfigure(const Plugin::Any &param) const
 ErrorCode HiRecorderImpl::DoSetOutputFormat(const Plugin::Any& param) const
 {
     ErrorCode ret {ErrorCode::SUCCESS};
-    if (param.Type() == typeid(OutputFormatType)) {
+    if (param.SameTypeWith(typeid(OutputFormatType))) {
         auto outputFormatType = Plugin::AnyCast<OutputFormatType>(param);
         if (g_outputFormatToMimeMap.find(outputFormatType) != g_outputFormatToMimeMap.end()) {
             ret = muxer_->SetOutputFormat(g_outputFormatToMimeMap.at(outputFormatType));

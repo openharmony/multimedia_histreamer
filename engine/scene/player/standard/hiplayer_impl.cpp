@@ -527,7 +527,7 @@ ErrorCode HiPlayerImpl::OnCallback(const FilterCallbackType& type, Filter* filte
 
 ErrorCode HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& parameter)
 {
-    if (parameter.Type() != typeid(PortInfo)) {
+    if (!parameter.SameTypeWith(typeid(PortInfo))) {
         return ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
     }
     ErrorCode rtv = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
@@ -563,7 +563,7 @@ ErrorCode HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& par
 #ifdef VIDEO_SUPPORT
 ErrorCode HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin::Any& parameter)
 {
-    if (parameter.Type() != typeid(PortInfo)) {
+    if (!parameter.SameTypeWith(typeid(PortInfo))) {
         return ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
     }
     auto param = Plugin::AnyCast<PortInfo>(parameter);

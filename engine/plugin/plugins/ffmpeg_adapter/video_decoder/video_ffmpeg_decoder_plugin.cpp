@@ -180,7 +180,7 @@ template <typename T>
 void VideoFfmpegDecoderPlugin::FindInParameterMapThenAssignLocked(Tag tag, T& assign)
 {
     auto iter = videoDecParams_.find(tag);
-    if (iter != videoDecParams_.end() && typeid(T) == iter->second.Type()) {
+    if (iter != videoDecParams_.end() && iter->second.SameTypeWith(typeid(T))) {
         assign = Plugin::AnyCast<T>(iter->second);
     } else {
         MEDIA_LOG_W("parameter %" PUBLIC_OUTPUT "d is not found or type mismatch", static_cast<int32_t>(tag));
@@ -251,7 +251,7 @@ void VideoFfmpegDecoderPlugin::DeinitCodecContext()
 void VideoFfmpegDecoderPlugin::SetCodecExtraData()
 {
     auto iter = videoDecParams_.find(Tag::MEDIA_CODEC_CONFIG);
-    if (iter == videoDecParams_.end() || iter->second.Type() != typeid(std::vector<uint8_t>)) {
+    if (iter == videoDecParams_.end() || !iter->second.SameTypeWith(typeid(std::vector<uint8_t>))) {
         return;
     }
     auto codecConfig = Plugin::AnyCast<std::vector<uint8_t>>(iter->second);

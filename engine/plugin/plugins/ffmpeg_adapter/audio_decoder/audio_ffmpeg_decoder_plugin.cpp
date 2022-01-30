@@ -238,7 +238,7 @@ template <typename T>
 bool AudioFfmpegDecoderPlugin::FindInParameterMapThenAssignLocked(Tag tag, T& assign)
 {
     auto ite = audioParameter_.find(tag);
-    if (ite != audioParameter_.end() && typeid(T) == ite->second.Type()) {
+    if (ite != audioParameter_.end() && ite->second.SameTypeWith(typeid(T))) {
         assign = Plugin::AnyCast<T>(ite->second);
         return true;
     } else {
@@ -305,7 +305,7 @@ void AudioFfmpegDecoderPlugin::InitCodecContextExtraDataLocked()
         return;
     }
     auto it = audioParameter_.find(Tag::MEDIA_CODEC_CONFIG);
-    if (it == audioParameter_.end() || it->second.Type() != typeid(std::vector<uint8_t>)) {
+    if (it == audioParameter_.end() || !it->second.SameTypeWith(typeid(std::vector<uint8_t>))) {
         return;
     }
     auto codecConfig = Plugin::AnyCast<std::vector<uint8_t>>(it->second);

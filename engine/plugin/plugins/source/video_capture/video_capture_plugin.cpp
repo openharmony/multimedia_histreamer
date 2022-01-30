@@ -211,13 +211,13 @@ Status VideoCapturePlugin::SetParameter(Tag tag, const ValueType& value)
 {
     switch (tag) {
         case Tag::VIDEO_HEIGHT: {
-            if (value.Type() == typeid(uint32_t)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 height_ = Plugin::AnyCast<uint32_t>(value);
             }
             break;
         }
         case Tag::VIDEO_WIDTH: {
-            if (value.Type() == typeid(uint32_t)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 width_ = Plugin::AnyCast<uint32_t>(value);
             }
             break;

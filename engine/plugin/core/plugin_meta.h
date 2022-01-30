@@ -113,7 +113,7 @@ public:
     bool GetData(Plugin::MetaID id, T& value) const
     {
         auto ite = items_.find(id);
-        if (ite == items_.end() || typeid(T) != ite->second.Type()) {
+        if (ite == items_.end() || !ite->second.SameTypeWith(typeid(T))) {
             return false;
         }
         value = Plugin::AnyCast<T>(ite->second);
