@@ -237,6 +237,7 @@ Status Minimp3DecoderPlugin::AudioDecoderMp3Process(std::shared_ptr<Buffer> inBu
     int16_t *pcmPtr = (int16_t *)outData->GetWritableAddr(probePcmLength, 0);
     int sampleCount = minimp3DecoderImpl_.decoderFrame(&mp3DecoderAttr_.mp3DecoderHandle, inData->GetReadOnlyData(),
                                                        inData->GetSize(), pcmPtr, &frameInfo);
+    outBuffer->pts = inBuffer->pts;
     if (sampleCount > 0) {
         if (frameInfo.frame_bytes) {
             return Status::OK;

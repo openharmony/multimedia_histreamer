@@ -65,6 +65,7 @@ Minimp3DemuxerPlugin::Minimp3DemuxerPlugin(std::string name)
       fileSize_(0),
       inIoBuffer_(nullptr),
       ioDataRemainSize_(0),
+      currentDemuxerPos_(0),
       durationMs_(0),
       ioContext_()
 {
@@ -198,11 +199,13 @@ Status Minimp3DemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
             case Status::ERROR_NOT_ENOUGH_DATA:
                 MEDIA_LOG_D("GetMediaInfo: need more data usedInputLength %" PRIu64, mp3DemuxerRst_.usedInputLength);
                 ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
+                currentDemuxerPos_ += mp3DemuxerRst_.usedInputLength;
                 processLoop = 1;
                 break;
             case Status::OK:
                 MEDIA_LOG_D("GetMediaInfo: OK usedInputLength %" PRIu64, mp3DemuxerRst_.usedInputLength);
                 ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
+                currentDemuxerPos_ += mp3DemuxerRst_.usedInputLength;
                 FillInMediaInfo(mediaInfo);
                 processLoop = 0;
                 break;
@@ -220,6 +223,13 @@ Status Minimp3DemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
     MEDIA_LOG_D("mp3DemuxerAttr_.bitRate %" PRIu32 "kbps durationMs %" PRIu32 " ms",
                 mp3DemuxerRst_.frameBitrateKbps, durationMs);
     return Status::OK;
+}
+
+uint64_t Minimp3DemuxerPlugin::GetCurrentPositionTimeS(void)
+{
+    uint64_t currentTime = (static_cast<uint64_t>(currentDemuxerPos_ - mp3DemuxerAttr_.id3v2Size) * 8 * HST_MSECOND) /
+        mp3DemuxerAttr_.bitRate;
+    return currentTime;
 }
 
 Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
@@ -246,12 +256,21 @@ Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
             if (mp3DemuxerRst_.frameLength) {
                 mp3FrameData->Write(mp3DemuxerRst_.frameBuffer, mp3DemuxerRst_.frameLength);
                 ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
+                currentDemuxerPos_ += mp3DemuxerRst_.usedInputLength;
             } else if (mp3DemuxerRst_.usedInputLength == 0) {
-                ioDataRemainSize_ = ioDataRemainSize_ > AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX ?
-                    (ioDataRemainSize_ - AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX): 0;
+                if (ioDataRemainSize_ > AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX) {
+                    ioDataRemainSize_ = ioDataRemainSize_ - AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX;
+                    currentDemuxerPos_ += AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX;
+                } else {
+                    currentDemuxerPos_ += ioDataRemainSize_;
+                    ioDataRemainSize_ = 0;
+                }
             } else {
                 ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
+                currentDemuxerPos_ += mp3DemuxerRst_.usedInputLength;
             }
+            outBuffer.pts = GetCurrentPositionTimeS();
+            MEDIA_LOG_D("ReadFrame: demuxer outbuffer pts %" PRIu64, outBuffer.pts);
             MEDIA_LOG_D("ReadFrame: mp3DemuxerRst_.frameLength %" PRIu32, mp3DemuxerRst_.frameLength);
             if (mp3DemuxerRst_.frameBuffer) {
                 free(mp3DemuxerRst_.frameBuffer);
@@ -260,6 +279,7 @@ Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
             break;
         case AUDIO_DEMUXER_PROCESS_NEED_MORE_DATA:
             ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
+            currentDemuxerPos_ += mp3DemuxerRst_.usedInputLength;
             MEDIA_LOG_D("ReadFrame: need more data usedInputLength %" PRIu64 " ioDataRemainSize_ %" PRIu32,
                         mp3DemuxerRst_.usedInputLength, ioDataRemainSize_);
             break;
@@ -279,10 +299,11 @@ Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
 Status Minimp3DemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
 {
     uint64_t pos = 0;
-    auto targetTtimeS = static_cast<uint32_t>(HstTime2Ms(hstTime));
-    if (AudioDemuxerMp3GetSeekPosition(targetTtimeS, &pos) == 0) {
+    uint32_t targetTimeMs = static_cast<uint32_t>(HstTime2Ms(hstTime));
+    if (AudioDemuxerMp3GetSeekPosition(targetTimeMs, &pos) == 0) {
         ioContext_.offset = pos;
         ioDataRemainSize_ = 0;
+        currentDemuxerPos_ = pos;
         MEDIA_LOG_D("ioContext_.offset %d", static_cast<uint32_t>(ioContext_.offset));
         memset_s(inIoBuffer_, inIoBufferSize_, 0x00, inIoBufferSize_);
     } else {
@@ -325,6 +346,7 @@ Status Minimp3DemuxerPlugin::Reset()
     ioContext_.dataSource.reset();
     ioContext_.offset = 0;
     ioDataRemainSize_ = 0;
+    currentDemuxerPos_ = 0;
     memset_s(inIoBuffer_, inIoBufferSize_, 0x00, inIoBufferSize_);
     return Status::OK;
 }
@@ -519,13 +541,13 @@ int Minimp3DemuxerPlugin::AudioDemuxerMp3Seek(uint32_t pos, uint8_t *buf, uint32
     return 0;
 }
 
-int Minimp3DemuxerPlugin::AudioDemuxerMp3GetSeekPosition(uint32_t targetTtimeS, uint64_t *pos)
+int Minimp3DemuxerPlugin::AudioDemuxerMp3GetSeekPosition(uint32_t targetTimeMs, uint64_t *pos)
 {
     if (!pos) {
         MEDIA_LOG_I("pos nullptr error");
         return AUDIO_DEMUXER_ERROR;
     }
-    uint32_t targetPos = targetTtimeS * mp3DemuxerAttr_.bitRate * 1000 / 8 + mp3DemuxerAttr_.id3v2Size;
+    uint32_t targetPos = targetTimeMs * mp3DemuxerAttr_.bitRate / 8 + mp3DemuxerAttr_.id3v2Size;
     if (targetPos > mp3DemuxerAttr_.fileSize) {
         *pos = 0;
         return -1;
