@@ -53,7 +53,7 @@ int HttpsCurlClient::Deinit()
     return 0; //httpClient_->Deinit();  // avoid re deinit http client
 }
 
-int HttpsCurlClient::RequestData(long startPos, int len)
+Status HttpsCurlClient::RequestData(long startPos, int len)
 {
     // Do more https RequestData things
     return httpClient_->RequestData(startPos, len);

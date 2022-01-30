@@ -110,8 +110,8 @@ bool StreamingExecutor::IsStreaming()
 
 void StreamingExecutor::HttpDownloadThread()
 {
-    int ret = client_->RequestData(startPos_, PER_REQUEST_SIZE);
-    FALSE_LOG(ret == 0);
+    Status ret = client_->RequestData(startPos_, PER_REQUEST_SIZE);
+    FALSE_LOG(ret == Status::OK);
     if (headerInfo_.fileContentLen > 0 && startPos_ >= headerInfo_.fileContentLen) { // 检查是否播放结束
         MEDIA_LOG_I("http download completed, startPos_ %" PUBLIC_OUTPUT "d", startPos_);
         isEos_ = true;

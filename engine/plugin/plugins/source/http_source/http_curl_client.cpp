@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #define HST_LOG_TAG "HttpCurlClient"
+
 #include "http_curl_client.h"
 #include "foundation/log.h"
 
@@ -84,9 +85,9 @@ void HttpCurlClient::InitCurlEnvironment() {
     curl_easy_setopt(easyHandle_, CURLOPT_TCP_KEEPINTVL, 5L); // 心跳
 }
 
-int HttpCurlClient::RequestData(long startPos, int len)
+Status HttpCurlClient::RequestData(long startPos, int len)
 {
-    FALSE_RETURN_V(easyHandle_ != nullptr, -1);
+    FALSE_RETURN_V(easyHandle_ != nullptr, Status::ERROR_NULL_POINTER);
 
     if (startPos >= 0) {
         char requestRange[128] = {0};
@@ -109,14 +110,16 @@ int HttpCurlClient::RequestData(long startPos, int len)
     }
     if(returnCode != CURLE_OK) {
         MEDIA_LOG_E("Curl error %" PUBLIC_OUTPUT "d", returnCode);
+        return Status::ERROR_CLIENT;
     } else{
         int httpCode = 0;
         curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
         if(httpCode >= 400){
             MEDIA_LOG_E("Http error %" PUBLIC_OUTPUT "d", httpCode);
+            return Status::ERROR_SERVER;
         }
     }
-    return returnCode;
+    return Status::OK;
 }
 }
 }

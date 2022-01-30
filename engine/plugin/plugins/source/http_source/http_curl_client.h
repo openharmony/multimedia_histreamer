@@ -34,7 +34,7 @@ public:
 
     int Open(const std::string& url) override;
 
-    int RequestData(long startPos, int len) override;
+    Status RequestData(long startPos, int len) override;
 
     int Close() override;
 
