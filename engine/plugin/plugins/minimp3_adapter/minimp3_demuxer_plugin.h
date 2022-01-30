@@ -108,6 +108,7 @@ public:
     Status UnselectTrack(int32_t trackId) override;
     Status GetSelectedTracks(std::vector<int32_t>& trackIds) override;
     Status GetDataFromSource();
+    uint64_t GetCurrentPositionTimeS(void);
 private:
     struct IOContext {
         std::shared_ptr<DataSource> dataSource {nullptr};
@@ -128,7 +129,7 @@ private:
     int AudioDemuxerMp3Process(uint8_t *buf, uint32_t len);
     int AudioDemuxerMp3FreeFrame(uint8_t *frame);
     int AudioDemuxerMp3Seek(uint32_t pos, uint8_t *buf, uint32_t len, AudioDemuxerRst *rst);
-    int AudioDemuxerMp3GetSeekPosition(uint32_t targetTtimeS, uint64_t *pos);
+    int AudioDemuxerMp3GetSeekPosition(uint32_t targetTimeMs, uint64_t *pos);
 
     void FillInMediaInfo(MediaInfo& mediaInfo) const;
 
@@ -136,6 +137,7 @@ private:
     size_t              fileSize_;
     uint8_t             *inIoBuffer_;
     uint32_t            ioDataRemainSize_;
+    uint64_t            currentDemuxerPos_;
     uint64_t            durationMs_;
     IOContext           ioContext_;
     AudioDemuxerRst     mp3DemuxerRst_{};
