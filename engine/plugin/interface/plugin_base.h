@@ -17,6 +17,7 @@
 #define HISTREAMER_PLUGIN_INTF_PLUGIN_BASE_H
 
 #include <memory>
+#include <common/plugin_event.h>
 #include "common/plugin_tags.h"
 #include "common/plugin_types.h"
 #include "common/plugin_buffer.h"
@@ -48,7 +49,7 @@ struct Callback {
      *
      * @param event Event ID.
      */
-    virtual void onEvent(int32_t event) = 0;
+    virtual void OnEvent(const PluginEvent &event) = 0;
 
     /**
      * @brief When an error occurs during plugin running,

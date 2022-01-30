@@ -137,7 +137,7 @@ protected:
 private:
     template <typename T>
     static T FindPort(const std::vector<T>& list, const std::string& name);
-    void onEvent(int32_t event) override;
+    void OnEvent(const Plugin::PluginEvent &event) override;
     void onError(int32_t errorType, int32_t errorCode) override;
 };
 } // namespace Pipeline

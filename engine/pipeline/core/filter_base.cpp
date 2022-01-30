@@ -267,7 +267,7 @@ template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::Outp
     const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
     const std::function<std::shared_ptr<Plugin::OutputSink>(const std::string&)>& pluginCreator);
 
-    void FilterBase::onEvent(int32_t event)
+    void FilterBase::OnEvent(const Plugin::PluginEvent &event)
     {
     }
 
