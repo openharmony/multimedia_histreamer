@@ -40,11 +40,6 @@ struct Event {
     EventType type;
     Plugin::Any param;
 };
-
-struct ErrorEvent {
-    int32_t errorType;
-    int32_t errorCode;
-};
 } // namespace Media
 } // namespace OHOS
 #endif
