@@ -34,7 +34,7 @@ enum UrlType {
 class ClientFactory {
 public:
     ClientFactory(RxHeader headCallback, RxBody bodyCallback, void *userParam);
-    ~ClientFactory() = default;
+    ~ClientFactory();
 
     std::shared_ptr<NetworkClient> CreateClient(const std::string& url);
 

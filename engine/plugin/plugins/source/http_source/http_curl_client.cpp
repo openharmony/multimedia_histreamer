@@ -21,7 +21,8 @@ namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
 
-HttpCurlClient::HttpCurlClient()
+HttpCurlClient::HttpCurlClient(RxHeader headCallback, RxBody bodyCallback, void *userParam) :
+    rxHeader_(headCallback), rxBody_(bodyCallback), userParam_(userParam)
 {
 }
 
@@ -29,12 +30,8 @@ HttpCurlClient::~HttpCurlClient()
 {
 }
 
-int HttpCurlClient::Init(RxHeader headCallback, RxBody bodyCallback, void *userParam)
+int HttpCurlClient::Init()
 {
-    rxHeader_ = headCallback;
-    rxBody_ = bodyCallback;
-    userParam_ = userParam;
-
     curl_global_init(CURL_GLOBAL_ALL);
     easyHandle_ = curl_easy_init();
     FALSE_RETURN_V(easyHandle_ != nullptr, -1);
@@ -52,6 +49,11 @@ int HttpCurlClient::Close()
 {
     MEDIA_LOG_I("Close client");
     curl_easy_setopt(easyHandle_, CURLOPT_TIMEOUT, 1);
+    return 0;
+}
+
+int HttpCurlClient::Deinit()
+{
     if (easyHandle_) {
         curl_easy_cleanup(easyHandle_);
         easyHandle_ = nullptr;

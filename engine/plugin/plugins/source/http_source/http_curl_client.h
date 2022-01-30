@@ -26,11 +26,11 @@ namespace Plugin {
 namespace HttpPlugin {
 class HttpCurlClient : public NetworkClient {
 public:
-    HttpCurlClient();
+    HttpCurlClient(RxHeader headCallback, RxBody bodyCallback, void *userParam);
 
     ~HttpCurlClient();
 
-    int Init(RxHeader headCallback, RxBody bodyCallback, void *userParam) override;
+    int Init() override;
 
     int Open(const std::string& url) override;
 
@@ -38,14 +38,17 @@ public:
 
     int Close() override;
 
+    int Deinit() override;
+
+private:
     void InitCurlEnvironment();
 
 private:
-    CURL* easyHandle_;
-    std::string url_;
-    RxBody rxBody_;
     RxHeader rxHeader_;
+    RxBody rxBody_;
     void *userParam_;
+    std::string url_;
+    CURL* easyHandle_;
 };
 }
 }

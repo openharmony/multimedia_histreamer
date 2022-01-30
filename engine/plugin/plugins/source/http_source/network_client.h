@@ -27,10 +27,11 @@ namespace HttpPlugin {
 class NetworkClient {
 public:
     virtual ~NetworkClient() = default;
-    virtual int Init(RxHeader headCallback, RxBody bodyCallback, void *userParam) = 0;
+    virtual int Init() = 0;
     virtual int Open(const std::string& url) = 0;
     virtual int RequestData(long startPos, int len) = 0;
     virtual int Close() = 0;
+    virtual int Deinit() = 0;
 };
 }
 }

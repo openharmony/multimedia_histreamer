@@ -27,12 +27,20 @@ ClientFactory::ClientFactory(RxHeader headCallback, RxBody bodyCallback, void *u
 {
 }
 
+ClientFactory::~ClientFactory()
+{
+    if (client_ != nullptr) {
+        client_->Deinit();
+        client_ = nullptr;
+    }
+}
+
 std::shared_ptr<NetworkClient> ClientFactory::CreateClient(const std::string& url)
 {
     if (GetUrlType(url) == URL_HTTP) {
         if (client_ == nullptr) {
-            client_ = std::make_shared<HttpCurlClient>();
-            client_->Init(rxHeader_, rxBody_, userParam_);
+            client_ = std::make_shared<HttpCurlClient>(rxHeader_, rxBody_, userParam_);
+            client_->Init();
         }
     } else {
         // todo
