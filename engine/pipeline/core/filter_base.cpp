@@ -269,6 +269,15 @@ template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::Outp
 
     void FilterBase::OnEvent(const Plugin::PluginEvent &event)
     {
+        if (eventReceiver_ != nullptr) {
+            if (event.type == Plugin::PluginEventType::CLIENT_ERROR ||
+                event.type == Plugin::PluginEventType::SERVER_ERROR ||
+                event.type == Plugin::PluginEventType::OTHER_ERROR) {
+                eventReceiver_->OnEvent({name_, EventType::EVENT_PLUGIN_ERROR, event});
+            } else {
+                eventReceiver_->OnEvent({name_, EventType::EVENT_PLUGIN_EVENT, event});
+            }
+        }
     }
 
     void FilterBase::onError(int32_t errorType, int32_t errorCode)
