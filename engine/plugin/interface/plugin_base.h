@@ -50,14 +50,6 @@ struct Callback {
      * @param event Event ID.
      */
     virtual void OnEvent(const PluginEvent &event) = 0;
-
-    /**
-     * @brief When an error occurs during plugin running,
-     * the plugin implementer invokes this interface to notify the plugin user.
-     *
-     * @param errorType Error type, For details, @see Status
-     */
-    virtual void onError(ErrorType errorType, int32_t errorCode) = 0;
 };
 
 /**

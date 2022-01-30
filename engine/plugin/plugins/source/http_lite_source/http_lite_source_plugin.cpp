@@ -264,7 +264,8 @@ Status HttpSourcePlugin::OnHttpEvent(void *priv, int errorType, int32_t errorCod
         return Status::ERROR_UNKNOWN;
     }
     auto plugin = reinterpret_cast<HttpSourcePlugin *>(priv);
-    plugin->callback_->onError((ErrorType)errorType, errorCode);
+    plugin->callback_->OnEvent(
+        PluginEvent{PluginEventType::OTHER_ERROR, errorCode, "http lite error"});
     return Status::OK;
 }
 

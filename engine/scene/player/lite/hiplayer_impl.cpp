@@ -313,6 +313,12 @@ void HiPlayerImpl::OnEvent(const Event& event)
         case EventType::EVENT_AUDIO_PROGRESS:
             mediaStats_.ReceiveEvent(EventType::EVENT_AUDIO_PROGRESS,Plugin::AnyCast<int64_t>(event.param));
             break;
+        case EventType::EVENT_PLUGIN_ERROR:
+            // TODO
+            break;
+        case EventType::EVENT_PLUGIN_EVENT:
+            // TODO
+            break;
         default:
             MEDIA_LOG_E("Unknown event(%" PUBLIC_OUTPUT "d)", event.type);
     }

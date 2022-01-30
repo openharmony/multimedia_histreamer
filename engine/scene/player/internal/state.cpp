@@ -87,9 +87,6 @@ std::tuple<ErrorCode, Action> State::OnError(const Plugin::Any& param)
     ErrorCode errorCode = ErrorCode::ERROR_UNKNOWN;
     if (param.SameTypeWith(typeid(ErrorCode))) {
         errorCode = Plugin::AnyCast<ErrorCode>(param);
-    } else if (param.SameTypeWith(typeid(ErrorEvent))) {
-        auto errorEvent = OHOS::Media::Plugin::AnyCast<ErrorEvent>(param);
-        MEDIA_LOG_I("errorEvent Type:%" PUBLIC_OUTPUT "d Code:%" PUBLIC_OUTPUT "d", errorEvent.errorType, errorEvent.errorCode);
     }
     executor_.DoOnError(errorCode);
     return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};

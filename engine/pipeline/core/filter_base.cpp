@@ -279,11 +279,6 @@ template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::Outp
             }
         }
     }
-
-    void FilterBase::onError(int32_t errorType, int32_t errorCode)
-    {
-        eventReceiver_->OnEvent({name_, EventType::EVENT_ERROR, ErrorEvent{errorType, errorCode}});
-    }
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
