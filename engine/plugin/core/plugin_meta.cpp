@@ -15,6 +15,7 @@
 
 #include "plugin_meta.h"
 
+#include <cinttypes>
 #include <cstring>
 #include <memory>
 #include <vector>
@@ -177,7 +178,7 @@ bool Meta::GetPointer(Plugin::MetaID id, void** ptr, size_t& size) const // NOLI
     }
 }
 
-std::string Meta::Dump()
+std::string Meta::Dump() const
 {
     std::string result = "MetaDump: ";
     for (auto& ptr : items_) {
@@ -190,6 +191,10 @@ std::string Meta::Dump()
             result = FormatString("%s {Meta: %d, AudioSampleFormat(%d)},",
                                   result.c_str(), ptr.first,
                                   Plugin::AnyCast<Plugin::AudioSampleFormat>(ptr.second));
+        } else if (ptr.second.SameTypeWith(typeid(uint64_t))) {
+            result = FormatString("%s {Meta: %d, uint64_t(%" PRIu64 ")},",
+                                  result.c_str(), ptr.first,
+                                  Plugin::AnyCast<uint64_t>(ptr.second));
         }
     }
     return result;
