@@ -140,7 +140,8 @@ size_t StreamingExecutor::RxBodyData(void *buffer, size_t size, size_t nitems, v
     executor->buffer_->WriteBuffer(buffer, dataLen);
     executor->isDownloading = false;
     executor->startPos_ = executor->startPos_ + dataLen;
-    MEDIA_LOG_I("RxBodyData: dataLen %" PUBLIC_OUTPUT "d, startPos_ %" PUBLIC_OUTPUT "d, buffer size %" PUBLIC_OUTPUT "d", dataLen, executor->startPos_, executor->buffer_->GetSize());
+    MEDIA_LOG_I("RxBodyData: dataLen %" PUBLIC_OUTPUT "d, next startPos_ %" PUBLIC_OUTPUT "d, buffer size %"
+                PUBLIC_OUTPUT "d", dataLen, executor->startPos_, executor->buffer_->GetSize());
     return dataLen;
 }
 
