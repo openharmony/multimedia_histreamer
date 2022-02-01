@@ -77,7 +77,7 @@ bool StreamingExecutor::Read(unsigned char *buff, unsigned int wantReadLength, u
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
     isEos = false;
-    realReadLength = buffer_->ReadBuffer(buff, wantReadLength);
+    realReadLength = buffer_->ReadBuffer(buff, wantReadLength, 2); // wait 2 times
     if (isEos_ && realReadLength == 0) {
         isEos = true;
     }
@@ -90,11 +90,15 @@ bool StreamingExecutor::Seek(int offset)
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
     MEDIA_LOG_I("Seek: buffer size %" PUBLIC_OUTPUT "d, offset %" PUBLIC_OUTPUT "d", buffer_->GetSize(), offset);
-    if (isEos_) {
-        startPos_ = offset;
-        task_->Start();
-        isEos_ = false;
+    if (buffer_->Seek(offset)) {
+        return true;
     }
+    buffer_->Clear(); // First clear buffer, avoid no available buffer then task pause never exit.
+    task_->Pause();
+    buffer_->Clear();
+    startPos_ = offset;
+    task_->Start();
+    isEos_ = false;
     return true;
 }
 
@@ -137,7 +141,7 @@ size_t StreamingExecutor::RxBodyData(void *buffer, size_t size, size_t nitems, v
     if (!executor->isDownloading) {
         executor->isDownloading = true;
     }
-    executor->buffer_->WriteBuffer(buffer, dataLen);
+    executor->buffer_->WriteBuffer(buffer, dataLen, executor->startPos_);
     executor->isDownloading = false;
     executor->startPos_ = executor->startPos_ + dataLen;
     MEDIA_LOG_I("RxBodyData: dataLen %" PUBLIC_OUTPUT "d, next startPos_ %" PUBLIC_OUTPUT "d, buffer size %"
@@ -198,7 +202,6 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
     }
     return size * nitems;
 }
-
 }
 }
 }

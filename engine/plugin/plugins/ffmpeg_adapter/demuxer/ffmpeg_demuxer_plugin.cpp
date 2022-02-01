@@ -310,7 +310,8 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mo
         }
     }
     auto newTime = ConvertTimeFromFFmpeg(ffTime, avStream->time_base);
-    MEDIA_LOG_I("SeekTo %" PUBLIC_OUTPUT PRIu64 " / %" PUBLIC_OUTPUT PRId64 ", ffTime: %" PUBLIC_OUTPUT PRId64, newTime, hstTime, ffTime);
+    MEDIA_LOG_I("SeekTo %" PUBLIC_OUTPUT PRIu64 " / %" PUBLIC_OUTPUT PRId64 ", ffTime: %" PUBLIC_OUTPUT PRId64,
+                newTime, hstTime, ffTime);
     auto rtv = av_seek_frame(formatContext_.get(), trackId, ffTime, ConvertSeekModeToFFmpeg(mode));
     if (rtv < 0) {
         MEDIA_LOG_E("seek failed, return value: %" PUBLIC_OUTPUT "d", rtv);
