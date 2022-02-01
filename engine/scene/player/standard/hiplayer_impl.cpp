@@ -189,7 +189,7 @@ ErrorCode HiPlayerImpl::StopAsync()
 int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
 {
     int64_t hstTime = 0;
-    if (!Plugin::Ms2HstTime(mSeconds, hstTime)) {
+    if (!Plugin::Sec2HstTime(mSeconds, hstTime)) {
         return TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }
     return TransErrorCode(fsm_.SendEventAsync(Intent::SEEK, hstTime));
