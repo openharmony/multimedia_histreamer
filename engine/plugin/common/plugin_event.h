@@ -17,6 +17,7 @@
 #define HISTREAMER_PLUGIN_EVENT_H
 
 #include <cstdint> // NOLINT: using int32_t in this file
+#include <string>
 #include "any.h"
 
 namespace OHOS {

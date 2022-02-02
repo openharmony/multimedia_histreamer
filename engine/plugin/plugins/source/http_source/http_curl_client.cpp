@@ -27,9 +27,7 @@ HttpCurlClient::HttpCurlClient(RxHeader headCallback, RxBody bodyCallback, void 
 {
 }
 
-HttpCurlClient::~HttpCurlClient()
-{
-}
+HttpCurlClient::~HttpCurlClient() = default;
 
 int HttpCurlClient::Init()
 {

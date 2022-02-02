@@ -25,9 +25,7 @@ HttpsCurlClient::HttpsCurlClient(std::shared_ptr<NetworkClient> httpClient) : ht
 {
 }
 
-HttpsCurlClient::~HttpsCurlClient()
-{
-}
+HttpsCurlClient::~HttpsCurlClient() = default;
 
 int HttpsCurlClient::Init()
 {

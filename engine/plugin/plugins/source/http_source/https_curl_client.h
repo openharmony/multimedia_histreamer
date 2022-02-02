@@ -27,9 +27,9 @@ namespace Plugin {
 namespace HttpPlugin {
 class HttpsCurlClient : public NetworkClient {
 public:
-    HttpsCurlClient(std::shared_ptr<NetworkClient> httpClient);
+    explicit HttpsCurlClient(std::shared_ptr<NetworkClient> httpClient);
 
-    ~HttpsCurlClient();
+    ~HttpsCurlClient() override;
 
     int Init() override;
 

@@ -28,7 +28,7 @@ class HttpCurlClient : public NetworkClient {
 public:
     HttpCurlClient(RxHeader headCallback, RxBody bodyCallback, void *userParam);
 
-    ~HttpCurlClient();
+    ~HttpCurlClient() override;
 
     int Init() override;
 
@@ -48,7 +48,7 @@ private:
     RxBody rxBody_;
     void *userParam_;
     std::string url_;
-    CURL* easyHandle_;
+    CURL* easyHandle_ {nullptr};
 };
 }
 }

@@ -157,10 +157,10 @@ char *StringTrim(char *str) {
     char *p = str;
     char *p1 = p + strlen(str) - 1;
 
-    while (*p && isspace((int) *p)) {
+    while (*p && isspace(static_cast<int>(*p))) {
         p++;
     }
-    while (p1 > p && isspace((int) *p1)) {
+    while (p1 > p && isspace(static_cast<int>(*p1))) {
         *p1-- = 0;
     }
     return p;

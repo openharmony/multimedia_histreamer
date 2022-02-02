@@ -56,8 +56,8 @@ Plugin::Status DemuxerFilter::DataSourceImpl::ReadAt(int64_t offset, std::shared
                                                      size_t expectedLen)
 {
     if (!buffer || buffer->IsEmpty() || expectedLen == 0 || !filter.IsOffsetValid(offset)) {
-        MEDIA_LOG_E("ReadAt failed, buffer empty: %" PUBLIC_OUTPUT "d, expectedLen: %" PUBLIC_OUTPUT "d, offset: %" PUBLIC_OUTPUT PRId64, !buffer,
-                    static_cast<int>(expectedLen), offset);
+        MEDIA_LOG_E("ReadAt failed, buffer empty: %" PUBLIC_OUTPUT "d, expectedLen: %" PUBLIC_OUTPUT
+                    "d, offset: %" PUBLIC_OUTPUT PRId64, !buffer, static_cast<int>(expectedLen), offset);
         return Plugin::Status::ERROR_UNKNOWN;
     }
     Plugin::Status rtv = Plugin::Status::OK;
@@ -420,7 +420,8 @@ bool DemuxerFilter::PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo)
             ++audioTrackCnt;
         }
         auto port = std::make_shared<OutPort>(this, NamePort(mime));
-        MEDIA_LOG_I("PrepareStreams, trackId: %" PUBLIC_OUTPUT "d, portName: %" PUBLIC_OUTPUT "s", i, port->GetName().c_str());
+        MEDIA_LOG_I("PrepareStreams, trackId: %" PUBLIC_OUTPUT "d, portName: %" PUBLIC_OUTPUT "s",
+                    i, port->GetName().c_str());
         outPorts_.push_back(port);
         portInfo.ports.push_back({port->GetName(), IsRawAudio(mime)});
         mediaMetaData_.trackInfos.emplace_back(trackId, std::move(port), true);

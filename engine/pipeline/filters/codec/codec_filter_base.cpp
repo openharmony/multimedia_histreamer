@@ -36,7 +36,8 @@ ErrorCode CodecFilterBase::ConfigureWithMetaLocked(const std::shared_ptr<const P
             keyPair.second.second(outValue)) {
             SetPluginParameterLocked(keyPair.first, outValue);
         } else {
-            MEDIA_LOG_W("parameter %" PUBLIC_OUTPUT "s in meta is not found or type mismatch", keyPair.second.first.c_str());
+            MEDIA_LOG_W("parameter %" PUBLIC_OUTPUT "s in meta is not found or type mismatch",
+                        keyPair.second.first.c_str());
         }
     }
     return ErrorCode::SUCCESS;

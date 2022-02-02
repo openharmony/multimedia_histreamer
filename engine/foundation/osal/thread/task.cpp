@@ -29,7 +29,8 @@ Task::Task(std::string name, ThreadPriority priority)
     loop_.SetName(name_);
 }
 
-Task::Task(std::string name, std::function<void()> handler, ThreadPriority priority) : Task(std::move(name), priority)
+Task::Task(std::string name, std::function<void()> handler, ThreadPriority priority)
+    : Task(std::move(name), priority)
 {
     MEDIA_LOG_D("task %" PUBLIC_OUTPUT "s ctor called", name_.c_str());
     handler_ = std::move(handler);
@@ -58,7 +59,8 @@ void Task::Start()
 
 void Task::Stop()
 {
-    MEDIA_LOG_W("task %" PUBLIC_OUTPUT "s stop entered, current state: %" PUBLIC_OUTPUT "d", name_.c_str(), runningState_.load());
+    MEDIA_LOG_W("task %" PUBLIC_OUTPUT "s stop entered, current state: %" PUBLIC_OUTPUT "d",
+                name_.c_str(), runningState_.load());
     OSAL::ScopedLock lock(stateMutex_);
     if (runningState_.load() != RunningState::STOPPED) {
         runningState_ = RunningState::STOPPING;
