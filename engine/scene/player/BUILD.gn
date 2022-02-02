@@ -62,10 +62,10 @@ source_set("histreamer_player") {
     public_deps += [ "//foundation/multimedia/utils/lite:media_common" ]
   } else {
     sources += [
-      "//foundation/multimedia/histreamer/engine/scene/standard/hst_engine_factory.cpp",
+      "//foundation/multimedia/histreamer/engine/scene/common/media_stat_stub.cpp",
       "//foundation/multimedia/histreamer/engine/scene/player/standard/hiplayer_impl.cpp",
       "//foundation/multimedia/histreamer/engine/scene/player/standard/media_utils.cpp",
-      "//foundation/multimedia/histreamer/engine/scene/common/media_stat_stub.cpp",
+      "//foundation/multimedia/histreamer/engine/scene/standard/hst_engine_factory.cpp",
     ]
     public_deps += [
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",

@@ -25,8 +25,8 @@ if (defined(ohos_lite)) {
     deps = [
       "engine/foundation:histreamer_foundation",
       "engine/pipeline:histreamer_pipeline",
-      "engine/scene/player:histreamer_player",
       "engine/plugin:histreamer_plugin",
+      "engine/scene/player:histreamer_player",
       "engine/utils:histreamer_utils",
     ]
     public_deps = [ "//foundation/multimedia/utils/lite:media_common" ]
@@ -42,8 +42,8 @@ if (defined(ohos_lite)) {
     deps = [
       "engine/foundation:histreamer_foundation",
       "engine/pipeline:histreamer_pipeline",
-      "engine/scene/player:histreamer_player",
       "engine/plugin:histreamer_plugin",
+      "engine/scene/player:histreamer_player",
       "engine/utils:histreamer_utils",
     ]
     relative_install_dir = "media"
