@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 #define HST_LOG_TAG "HttpCurlClient"
-
 #include "http_curl_client.h"
 #include "foundation/log.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-
-HttpCurlClient::HttpCurlClient(RxHeader headCallback, RxBody bodyCallback, void *userParam) :
-    rxHeader_(headCallback), rxBody_(bodyCallback), userParam_(userParam)
+HttpCurlClient::HttpCurlClient(RxHeader headCallback, RxBody bodyCallback, void *userParam)
+    : rxHeader_(headCallback), rxBody_(bodyCallback), userParam_(userParam)
 {
 }
 
@@ -61,7 +60,8 @@ int HttpCurlClient::Deinit()
     return 0;
 }
 
-void HttpCurlClient::InitCurlEnvironment() {
+void HttpCurlClient::InitCurlEnvironment()
+{
     curl_easy_setopt(easyHandle_, CURLOPT_URL, url_.c_str());
     curl_easy_setopt(easyHandle_, CURLOPT_HTTPGET, 1L);
 
@@ -74,13 +74,13 @@ void HttpCurlClient::InitCurlEnvironment() {
     curl_easy_setopt(easyHandle_, CURLOPT_HEADERFUNCTION, rxHeader_);
     curl_easy_setopt(easyHandle_, CURLOPT_HEADERDATA, userParam_);
 
-    curl_easy_setopt(easyHandle_, CURLOPT_LOW_SPEED_LIMIT, 2);
+    curl_easy_setopt(easyHandle_, CURLOPT_LOW_SPEED_LIMIT, 2); // 2
     curl_easy_setopt(easyHandle_, CURLOPT_LOW_SPEED_TIME, 5); // 连续5s下载速度低于2kb/s会触发timeout
 
-    curl_easy_setopt(easyHandle_, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_easy_setopt(easyHandle_, CURLOPT_CONNECTTIMEOUT, 5); // 5
 
     curl_easy_setopt(easyHandle_, CURLOPT_TCP_KEEPALIVE, 1L);
-    curl_easy_setopt(easyHandle_, CURLOPT_TCP_KEEPINTVL, 5L); // 心跳
+    curl_easy_setopt(easyHandle_, CURLOPT_TCP_KEEPINTVL, 5L); // 5 心跳
 }
 
 Status HttpCurlClient::RequestData(long startPos, int len)
@@ -90,9 +90,10 @@ Status HttpCurlClient::RequestData(long startPos, int len)
     if (startPos >= 0) {
         char requestRange[128] = {0};
         if (len > 0) {
-            snprintf(requestRange, sizeof(requestRange), "%ld-%ld", startPos, startPos + len -1);
+            snprintf_s(requestRange, sizeof(requestRange), sizeof(requestRange) - 1, "%ld-%ld",
+                       startPos, startPos + len -1);
         } else {
-            snprintf(requestRange, sizeof(requestRange), "%ld-", startPos);
+            snprintf_s(requestRange, sizeof(requestRange), sizeof(requestRange) - 1, "%ld-", startPos);
         }
         curl_easy_setopt(easyHandle_, CURLOPT_RANGE, requestRange);
     }
@@ -106,13 +107,13 @@ Status HttpCurlClient::RequestData(long startPos, int len)
     if (headers != nullptr) {
         curl_slist_free_all(headers);
     }
-    if(returnCode != CURLE_OK) {
+    if (returnCode != CURLE_OK) {
         MEDIA_LOG_E("Curl error %" PUBLIC_OUTPUT "d", returnCode);
         return Status::ERROR_CLIENT;
-    } else{
+    } else {
         int httpCode = 0;
         curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
-        if(httpCode >= 400){
+        if(httpCode >= 400) { // 400
             MEDIA_LOG_E("Http error %" PUBLIC_OUTPUT "d", httpCode);
             return Status::ERROR_SERVER;
         }

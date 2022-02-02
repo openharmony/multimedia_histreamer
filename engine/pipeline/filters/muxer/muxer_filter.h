@@ -80,14 +80,14 @@ private:
     bool AllTracksEos();
     void UpdateEosState(const std::string& inPort);
 
-    std::string containerMime_{};
-    std::vector<TrackInfo> trackInfos_{};
-    std::shared_ptr<Plugin::Muxer> plugin_{};
+    std::string containerMime_ {};
+    std::vector<TrackInfo> trackInfos_ {};
+    std::shared_ptr<Plugin::Muxer> plugin_ {};
     std::shared_ptr<Plugin::PluginInfo> targetPluginInfo_ {nullptr};
     std::shared_ptr<DataSpliter> dataSpliter_{};
-    std::vector<std::pair<std::string, Capability>> capabilityCache_{};
-    std::vector<std::pair<std::string, Plugin::Meta>> metaCache_{};
-    bool hasWriteHeader_{false};
+    std::vector<std::pair<std::string, Capability>> capabilityCache_ {};
+    std::vector<std::pair<std::string, Plugin::Meta>> metaCache_ {};
+    bool hasWriteHeader_ {false};
     std::shared_ptr<MuxerDataSink> muxerDataSink_;
 
     OSAL::Mutex pushDataMutex_;

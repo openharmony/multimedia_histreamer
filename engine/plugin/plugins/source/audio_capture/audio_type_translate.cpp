@@ -117,20 +117,20 @@ bool ChannelNumNum2Enum(uint32_t numVal, OHOS::AudioStandard::AudioChannel& enum
 Plugin::Status Error2Status(int32_t err)
 {
     const static std::map<int32_t, Plugin::Status> transMap = {
-            {OHOS::AudioStandard::SUCCESS, Plugin::Status::OK},
-            {OHOS::ERR_OK, Plugin::Status::OK},
-            {OHOS::ERR_NO_MEMORY, Plugin::Status::ERROR_NO_MEMORY},
-            {OHOS::ERR_INVALID_OPERATION, Plugin::Status::ERROR_WRONG_STATE},
-            {OHOS::ERR_INVALID_VALUE, Plugin::Status::ERROR_INVALID_PARAMETER},
-            {OHOS::ERR_NAME_NOT_FOUND, Plugin::Status::ERROR_NOT_EXISTED},
-            {OHOS::ERR_PERMISSION_DENIED, Plugin::Status::ERROR_PERMISSION_DENIED},
-            {OHOS::ERR_ENOUGH_DATA, Plugin::Status::ERROR_NOT_ENOUGH_DATA},
-            {OHOS::ERR_WOULD_BLOCK, Plugin::Status::ERROR_AGAIN},
-            {OHOS::ERR_TIMED_OUT, Plugin::Status::ERROR_TIMED_OUT},
-            {OHOS::ERR_ALREADY_EXISTS, Plugin::Status::ERROR_UNKNOWN},
-            {OHOS::ERR_DEAD_OBJECT, Plugin::Status::ERROR_UNKNOWN},
-            {OHOS::ERR_NO_INIT, Plugin::Status::ERROR_UNKNOWN},
-            {OHOS::ERR_OVERFLOW, Plugin::Status::ERROR_UNKNOWN},
+        {OHOS::AudioStandard::SUCCESS, Plugin::Status::OK},
+        {OHOS::ERR_OK, Plugin::Status::OK},
+        {OHOS::ERR_INVALID_OPERATION, Plugin::Status::ERROR_WRONG_STATE},
+        {OHOS::ERR_NO_MEMORY, Plugin::Status::ERROR_NO_MEMORY},
+        {OHOS::ERR_INVALID_VALUE, Plugin::Status::ERROR_INVALID_PARAMETER},
+        {OHOS::ERR_NAME_NOT_FOUND, Plugin::Status::ERROR_NOT_EXISTED},
+        {OHOS::ERR_PERMISSION_DENIED, Plugin::Status::ERROR_PERMISSION_DENIED},
+        {OHOS::ERR_ENOUGH_DATA, Plugin::Status::ERROR_NOT_ENOUGH_DATA},
+        {OHOS::ERR_WOULD_BLOCK, Plugin::Status::ERROR_AGAIN},
+        {OHOS::ERR_TIMED_OUT, Plugin::Status::ERROR_TIMED_OUT},
+        {OHOS::ERR_ALREADY_EXISTS, Plugin::Status::ERROR_UNKNOWN},
+        {OHOS::ERR_DEAD_OBJECT, Plugin::Status::ERROR_UNKNOWN},
+        {OHOS::ERR_NO_INIT, Plugin::Status::ERROR_UNKNOWN},
+        {OHOS::ERR_OVERFLOW, Plugin::Status::ERROR_UNKNOWN},
     };
     if (transMap.count(err) != 0) {
         return transMap.at(err);

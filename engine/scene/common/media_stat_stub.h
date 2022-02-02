@@ -28,9 +28,9 @@ class MediaStatStub {
 public:
     enum class MediaType : int32_t { AUDIO, VIDEO, BUTT };
     struct MediaStat {
-        MediaType mediaType{MediaType::BUTT};
-        std::atomic<int64_t> currentPosition{0};
-        std::atomic<bool> completeEventReceived{false};
+        MediaType mediaType {MediaType::BUTT};
+        std::atomic<int64_t> currentPosition {0};
+        std::atomic<bool> completeEventReceived {false};
         explicit MediaStat(MediaType mediaType) : mediaType(mediaType)
         {
         }
@@ -54,8 +54,8 @@ public:
     int64_t GetCurrentPosition();
     bool IsEventCompleteAllReceived();
 
-    private:
-        std::vector<MediaStat> mediaStats;
+private:
+    std::vector<MediaStat> mediaStats;
 };
 } // Media
 } // OHOS

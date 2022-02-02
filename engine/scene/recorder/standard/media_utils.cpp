@@ -62,8 +62,8 @@ Plugin::SrcInputType TransAudioInputType(OHOS::Media::AudioSourceType sourceType
 Plugin::SrcInputType TransVideoInputType(OHOS::Media::VideoSourceType sourceType)
 {
     const static std::pair<OHOS::Media::VideoSourceType, Plugin::SrcInputType> mapArray[] = {
-            {OHOS::Media::VideoSourceType::VIDEO_SOURCE_SURFACE_YUV, Plugin::SrcInputType::VID_SURFACE_YUV},
-            {OHOS::Media::VideoSourceType::VIDEO_SOURCE_SURFACE_ES, Plugin::SrcInputType::VID_SURFACE_ES},
+        {OHOS::Media::VideoSourceType::VIDEO_SOURCE_SURFACE_YUV, Plugin::SrcInputType::VID_SURFACE_YUV},
+        {OHOS::Media::VideoSourceType::VIDEO_SOURCE_SURFACE_ES, Plugin::SrcInputType::VID_SURFACE_ES},
     };
     for (const auto& item : mapArray) {
         if (item.first == sourceType) {

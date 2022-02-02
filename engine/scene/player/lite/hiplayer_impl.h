@@ -137,9 +137,9 @@ public:
 private:
     enum class MediaType : int32_t { AUDIO, VIDEO, BUTT };
     struct MediaStat {
-        MediaType mediaType{MediaType::BUTT};
-        std::atomic<int64_t> currentPositionMs{0};
-        std::atomic<bool> completeEventReceived{false};
+        MediaType mediaType {MediaType::BUTT};
+        std::atomic<int64_t> currentPositionMs {0};
+        std::atomic<bool> completeEventReceived {false};
         explicit MediaStat(MediaType mediaType) : mediaType(mediaType)
         {
         }
@@ -192,7 +192,7 @@ private:
 
     std::shared_ptr<Pipeline::PipelineCore> pipeline_;
     std::atomic<PlayerStates> pipelineStates_;
-    std::atomic<bool> initialized_{false};
+    std::atomic<bool> initialized_ {false};
 
     std::shared_ptr<Pipeline::MediaSourceFilter> audioSource_;
 
@@ -208,7 +208,7 @@ private:
 
     std::weak_ptr<Plugin::Meta> sourceMeta_;
     std::vector<std::weak_ptr<Plugin::Meta>> streamMeta_;
-    std::atomic<bool> singleLoop_{false};
+    std::atomic<bool> singleLoop_ {false};
 
     std::weak_ptr<PlayerCallback> callback_;
     float volume_;

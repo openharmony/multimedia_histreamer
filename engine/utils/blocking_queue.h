@@ -61,8 +61,8 @@ public:
             cvFull_.Wait(lock, [this] { return !isActive || que_.size() < capacity_; });
         }
         if (!isActive) {
-            MEDIA_LOG_D("blocking queue %" PUBLIC_OUTPUT "s: inactive: %" PUBLIC_OUTPUT "d, isFull: %" PUBLIC_OUTPUT "d", name_.c_str(), isActive.load(),
-                        que_.size() < capacity_);
+            MEDIA_LOG_D("blocking queue %" PUBLIC_OUTPUT "s: inactive: %" PUBLIC_OUTPUT "d, isFull: %" PUBLIC_OUTPUT
+                        "d", name_.c_str(), isActive.load(), que_.size() < capacity_);
             return false;
         }
         que_.push(value);
@@ -82,7 +82,8 @@ public:
             cvFull_.WaitFor(lock, timeoutMs, [this] { return !isActive || que_.size() < capacity_; });
         }
         if (!isActive || (que_.size() == capacity_)) {
-            MEDIA_LOG_D("blocking queue: inactive: %" PUBLIC_OUTPUT "d, isFull: %" PUBLIC_OUTPUT "d", isActive, que_.size() < capacity_);
+            MEDIA_LOG_D("blocking queue: inactive: %" PUBLIC_OUTPUT "d, isFull: %" PUBLIC_OUTPUT "d",
+                        isActive, que_.size() < capacity_);
             return false;
         }
         que_.push(value);

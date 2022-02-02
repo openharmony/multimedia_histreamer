@@ -144,7 +144,7 @@ int32_t HiRecorderImpl::Configure(int32_t sourceId, const RecorderParam& recPara
                    TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
     FALSE_RETURN_V(CheckParamType(sourceId,recParam), TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
     Plugin::Any recParamInternal;
-    auto configureStatus{true};
+    auto configureStatus {true};
     if (recParam.IsAudioParam()) {
         configureStatus = ConfigureAudio(sourceId, recParam, recParamInternal);
     } else if (recParam.IsVideoParam()) {
@@ -405,7 +405,7 @@ ErrorCode HiRecorderImpl::SetAudioSourceInternal(AudioSourceType source, int32_t
     }
     if (ret == ErrorCode::SUCCESS) {
         ret = fsm_.SendEvent(Intent::SET_AUDIO_SOURCE, std::pair<int32_t, Plugin::SrcInputType>(
-                sourceId, TransAudioInputType(source)));
+            sourceId, TransAudioInputType(source)));
     }
     return ret;
 }
@@ -430,7 +430,7 @@ ErrorCode HiRecorderImpl::SetVideoSourceInternal(VideoSourceType source, int32_t
     }
     if (ret == ErrorCode::SUCCESS) {
         ret = fsm_.SendEvent(Intent::SET_AUDIO_SOURCE, std::pair<int32_t, Plugin::SrcInputType>(
-                sourceId, TransVideoInputType(source)));
+            sourceId, TransVideoInputType(source)));
     }
     return ret;
 #else
@@ -467,27 +467,27 @@ bool HiRecorderImpl::ConfigureAudio(int32_t sourceId, const RecorderParam& recPa
 
 bool HiRecorderImpl::ConfigureVideo(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recParamInternal)
 {
-    auto ret{true};
+    auto ret {true};
     switch (recParam.type) {
         case RecorderPublicParamType::VID_CAPTURERATE:
-            recParamInternal = RecorderParamInternal{sourceId, recParam.type,
-                                                     dynamic_cast<const CaptureRate&>(recParam)};
+            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
+                                                      dynamic_cast<const CaptureRate&>(recParam)};
             break;
         case RecorderPublicParamType::VID_RECTANGLE:
-            recParamInternal = RecorderParamInternal{sourceId, recParam.type,
-                                                     dynamic_cast<const VidRectangle&>(recParam)};
+            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
+                                                      dynamic_cast<const VidRectangle&>(recParam)};
             break;
         case RecorderPublicParamType::VID_BITRATE:
-            recParamInternal = RecorderParamInternal{sourceId, recParam.type,
-                                                     dynamic_cast<const VidBitRate&>(recParam)};
+            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
+                                                      dynamic_cast<const VidBitRate&>(recParam)};
             break;
         case RecorderPublicParamType::VID_FRAMERATE:
-            recParamInternal = RecorderParamInternal{sourceId, recParam.type,
-                                                     dynamic_cast<const VidFrameRate&>(recParam)};
+            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
+                                                      dynamic_cast<const VidFrameRate&>(recParam)};
             break;
         case RecorderPublicParamType::VID_ENC_FMT:
-            recParamInternal = RecorderParamInternal{sourceId, recParam.type,
-                                                     dynamic_cast<const VidEnc&>(recParam)};
+            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
+                                                      dynamic_cast<const VidEnc&>(recParam)};
             break;
         default:
             ret = false;
@@ -526,7 +526,7 @@ bool HiRecorderImpl::ConfigureOther(int32_t sourceId, const RecorderParam& recPa
 ErrorCode HiRecorderImpl::DoConfigureAudio(const RecorderParamInternal& recParamInternal) const
 {
     ErrorCode ret  = ErrorCode::SUCCESS;
-    Plugin::Any any{recParamInternal.any};
+    Plugin::Any any {recParamInternal.any};
     switch (recParamInternal.type) {
         case RecorderPublicParamType::AUD_SAMPLERATE:
             ret = audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_SAMPLE_RATE),
@@ -592,12 +592,12 @@ ErrorCode HiRecorderImpl::DoConfigureVideo(const RecorderParamInternal& recParam
 ErrorCode HiRecorderImpl::DoConfigureOther(const RecorderParamInternal& recParamInternal) const
 {
     ErrorCode ret  = ErrorCode::SUCCESS;
-    Plugin::Any any{recParamInternal.any};
+    Plugin::Any any {recParamInternal.any};
     switch (recParamInternal.type) {
         case RecorderPublicParamType::OUT_PATH: {
             auto filePath = Plugin::AnyCast<OutFilePath>(any).path;
             if (IsDirectory(filePath)) {
-                std::string dirPath{filePath};
+                std::string dirPath {filePath};
                 if (!ConvertDirPathToFilePath(dirPath, outputFormatType_, filePath)) {
                     ret = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
                     break;

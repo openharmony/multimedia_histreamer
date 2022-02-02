@@ -337,7 +337,8 @@ Status VideoCapturePlugin::SeekTo(uint64_t offset)
     return Status::ERROR_UNIMPLEMENTED;
 }
 
-void VideoCapturePlugin::SurfaceConsumerListener::OnBufferAvailable() {
+void VideoCapturePlugin::SurfaceConsumerListener::OnBufferAvailable()
+{
     return owner_.OnBufferAvailable();
 }
 

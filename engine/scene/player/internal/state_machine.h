@@ -79,14 +79,14 @@ private:
 
     void OnIntentExecuted(Intent intent, Action action, ErrorCode result);
 
-    mutable OSAL::Mutex mutex_{};
+    mutable OSAL::Mutex mutex_ {};
     mutable OSAL::Synchronizer<Intent, ErrorCode> intentSync_;
-    mutable std::shared_ptr<State> curState_{nullptr};
-    mutable Intent lastIntent{Intent::INTENT_BUTT};
-    std::map<StateId, std::shared_ptr<State>> states_{};
+    mutable std::shared_ptr<State> curState_ {nullptr};
+    mutable Intent lastIntent {Intent::INTENT_BUTT};
+    std::map<StateId, std::shared_ptr<State>> states_ {};
     Media::BlockingQueue<Job> jobs_;
-    std::queue<Job> pendingJobs_{};
-    StateChangeCallback* callback_{nullptr};
+    std::queue<Job> pendingJobs_ {};
+    StateChangeCallback* callback_ {nullptr};
 };
 } // namespace Media
 } // namespace OHOS

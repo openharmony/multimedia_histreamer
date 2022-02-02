@@ -36,7 +36,6 @@ struct PluginEvent {
     Any param;
     std::string description;
 };
-
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

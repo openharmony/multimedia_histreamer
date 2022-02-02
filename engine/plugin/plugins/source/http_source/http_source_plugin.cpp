@@ -36,7 +36,7 @@ const Status HttpSourceRegister(std::shared_ptr<Register> reg)
     SourcePluginDef definition;
     definition.name = "HttpSource";
     definition.description = "Http source";
-    definition.rank = 100;
+    definition.rank = 100; // 100
     definition.protocol.emplace_back(ProtocolType::HTTP);
     definition.protocol.emplace_back(ProtocolType::HTTPS);
     definition.creator = HttpSourcePluginCreater;
@@ -189,7 +189,6 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
     bufData->UpdateDataSize(realReadSize);
     MEDIA_LOG_D("Read finished, read size = %" PUBLIC_OUTPUT "d, isEos %" PUBLIC_OUTPUT "d", bufData->GetSize(), isEos);
     return Status::OK;
-
 }
 
 Status HttpSourcePlugin::GetSize(size_t &size)

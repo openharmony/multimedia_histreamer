@@ -394,7 +394,7 @@ bool AudioCaptureFilter::DoNegotiate(const CapabilitySet &outCaps)
         }
         if (channelNum_ == 1) {
             thisOut->keys[Capability::Key::AUDIO_CHANNEL_LAYOUT] = AudioChannelLayout::MONO;
-        } else if (channelNum_ == 2) { // stereo
+        } else if (channelNum_ == 2) { // 2 stereo
             thisOut->keys[Capability::Key::AUDIO_CHANNEL_LAYOUT] = AudioChannelLayout::STEREO;
         } else if (channelLayoutSpecified_) {
             thisOut->keys[Capability::Key::AUDIO_CHANNEL_LAYOUT] = channelLayout_;

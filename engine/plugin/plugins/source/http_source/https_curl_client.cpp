@@ -30,7 +30,7 @@ HttpsCurlClient::~HttpsCurlClient() = default;
 int HttpsCurlClient::Init()
 {
     // Do more https init things
-    return 0; // httpClient_->Init(); // avoid re init http client
+    return 0; // httpClient_->Init(); avoid re init http client
 }
 
 int HttpsCurlClient::Open(const std::string& url)
@@ -48,7 +48,7 @@ int HttpsCurlClient::Close()
 int HttpsCurlClient::Deinit()
 {
     // Do more https Deinit things
-    return 0; //httpClient_->Deinit();  // avoid re deinit http client
+    return 0; // httpClient_->Deinit();  avoid re deinit http client
 }
 
 Status HttpsCurlClient::RequestData(long startPos, int len)

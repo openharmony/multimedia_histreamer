@@ -28,7 +28,6 @@
 namespace OHOS {
 namespace Media {
 namespace AuSrSinkPlugin {
-
 class AudioServerSinkPlugin : public Plugin::AudioSinkPlugin {
 public:
     explicit AudioServerSinkPlugin(std::string name);
@@ -47,37 +46,67 @@ public:
 
     Plugin::Status Stop() override;
 
-    bool IsParameterSupported(Plugin::Tag tag) override { return true; }
+    bool IsParameterSupported(Plugin::Tag tag) override
+    {
+        return true;
+    }
 
     Plugin::Status GetParameter(Plugin::Tag tag, Plugin::ValueType& value) override;
 
     Plugin::Status SetParameter(Plugin::Tag tag, const Plugin::ValueType& value) override;
 
-    std::shared_ptr<Plugin::Allocator> GetAllocator() override { return nullptr; }
+    std::shared_ptr<Plugin::Allocator> GetAllocator() override
+    {
+        return nullptr;
+    }
 
-    Plugin::Status SetCallback(Plugin::Callback* cb) override { return Plugin::Status::OK; }
+    Plugin::Status SetCallback(Plugin::Callback* cb) override
+    {
+        return Plugin::Status::OK;
+    }
 
-    Plugin::Status GetMute(bool& mute) override { return Plugin::Status::OK; }
+    Plugin::Status GetMute(bool& mute) override
+    {
+        return Plugin::Status::OK;
+    }
 
-    Plugin::Status SetMute(bool mute) override { return Plugin::Status::OK; }
+    Plugin::Status SetMute(bool mute) override
+    {
+        return Plugin::Status::OK;
+    }
 
     Plugin::Status GetVolume(float& volume) override;
 
     Plugin::Status SetVolume(float volume) override;
 
-    Plugin::Status GetSpeed(float& speed) override { return Plugin::Status::OK; }
+    Plugin::Status GetSpeed(float& speed) override
+    {
+        return Plugin::Status::OK;
+    }
 
-    Plugin::Status SetSpeed(float speed) override { return Plugin::Status::OK; }
+    Plugin::Status SetSpeed(float speed) override
+    {
+        return Plugin::Status::OK;
+    }
 
     Plugin::Status Pause() override;
 
-    Plugin::Status Resume() override { return Plugin::Status::OK; }
+    Plugin::Status Resume() override
+    {
+        return Plugin::Status::OK;
+    }
 
     Plugin::Status GetLatency(uint64_t& ms) override;
 
-    Plugin::Status GetFrameSize(size_t& size) override { return Plugin::Status::OK; }
+    Plugin::Status GetFrameSize(size_t& size) override
+    {
+        return Plugin::Status::OK;
+    }
 
-    Plugin::Status GetFrameCount(uint32_t& count) override { return Plugin::Status::OK; }
+    Plugin::Status GetFrameCount(uint32_t& count) override
+    {
+        return Plugin::Status::OK;
+    }
 
     Plugin::Status Write(const std::shared_ptr<Plugin::Buffer>& input) override;
 
@@ -87,7 +116,6 @@ private:
     bool AssignSampleRateIfSupported(uint32_t sampleRate);
     bool AssignChannelNumIfSupported(uint32_t channelNum);
     bool AssignSampleFmtIfSupported(Plugin::AudioSampleFormat sampleFormat);
-
 
     std::unique_ptr<AudioStandard::AudioRenderer> audioRenderer_;
     AudioStandard::AudioRendererParams rendererParams_ {};

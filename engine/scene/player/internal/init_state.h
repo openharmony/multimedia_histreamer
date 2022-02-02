@@ -59,7 +59,7 @@ public:
     }
 
 private:
-    OSAL::Mutex mutex_{};
+    OSAL::Mutex mutex_ {};
 };
 } // namespace Media
 } // namespace OHOS

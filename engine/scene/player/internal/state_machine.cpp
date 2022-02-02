@@ -65,7 +65,7 @@ ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param)
     constexpr int timeoutMs = 5000;
     ErrorCode errorCode = ErrorCode::ERROR_TIMED_OUT;
     if (!intentSync_.WaitFor(
-            intent, [this, intent, param] { SendEventAsync(intent, param); }, timeoutMs, errorCode)) {
+        intent, [this, intent, param] { SendEventAsync(intent, param); }, timeoutMs, errorCode)) {
         MEDIA_LOG_E("SendEvent timeout, intent: %" PUBLIC_OUTPUT "d", static_cast<int>(intent));
     }
     return errorCode;

@@ -36,4 +36,4 @@ Plugin::Status Error2Status(int32_t err);
 } // AuCapturePlugin
 } // Media
 } // OHOS
-#endif //HISTREAMER_AUDIO_CAPTURE_TYPE_TRANSLATE_H
+#endif // HISTREAMER_AUDIO_CAPTURE_TYPE_TRANSLATE_H

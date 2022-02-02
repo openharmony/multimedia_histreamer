@@ -24,7 +24,6 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-
 class NetworkClient {
 public:
     virtual ~NetworkClient() = default;

@@ -27,7 +27,6 @@ namespace Plugin {
 namespace HttpPlugin {
 constexpr int RING_BUFFER_SIZE = 5 * 48 * 1024;
 constexpr int PER_REQUEST_SIZE = 48 * 1024;
-
 StreamingExecutor::StreamingExecutor() noexcept
 {
     buffer_ = std::make_shared<RingBuffer>(RING_BUFFER_SIZE);
@@ -151,7 +150,8 @@ size_t StreamingExecutor::RxBodyData(void *buffer, size_t size, size_t nitems, v
 }
 
 namespace {
-char *StringTrim(char *str) {
+char *StringTrim(char *str)
+{
     if (str == nullptr) {
         return nullptr;
     }
@@ -173,20 +173,27 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
     auto executor = reinterpret_cast<StreamingExecutor *>(userParam);
     HeaderInfo *info = &(executor->headerInfo_);
     char *key = strtok(reinterpret_cast<char *>(buffer), ":");
+    FALSE_RETURN_V(key != nullptr, size * nitems);
     if (!strncmp(key, "Content-Type", strlen("Content-Type"))) {
-        char *type = StringTrim(strtok(NULL, ":"));
+        char *token = strtok(NULL, ":");
+        FALSE_RETURN_V(token != nullptr, size * nitems);
+        char *type = StringTrim(token);
         memcpy_s(info->contentType, sizeof(info->contentType), type, sizeof(info->contentType));
     }
 
     if (!strncmp(key, "Content-Length", strlen("Content-Length")) ||
         !strncmp(key, "content-length", strlen("content-length"))) {
-        char *contLen = StringTrim(strtok(NULL, ":"));
+        char *token = strtok(NULL, ":");
+        FALSE_RETURN_V(token != nullptr, size * nitems);
+        char *contLen = StringTrim(token);
         info->contentLen = atol(contLen);
     }
 
     if (!strncmp(key, "Transfer-Encoding", strlen("Transfer-Encoding")) ||
         !strncmp(key, "transfer-encoding", strlen("transfer-encoding"))) {
-        char *transEncode = StringTrim(strtok(NULL, ":"));
+        char *token = strtok(NULL, ":");
+        FALSE_RETURN_V(token != nullptr, size * nitems);
+        char *transEncode = StringTrim(token);
         if (!strncmp(transEncode, "chunked", strlen("chunked"))) {
             info->isChunked = true;
         }
@@ -194,7 +201,9 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
 
     if (!strncmp(key, "Content-Range", strlen("Content-Range")) ||
         !strncmp(key, "content-range", strlen("content-range"))) {
-        char *strRange = StringTrim(strtok(NULL, ":"));
+        char *token = strtok(NULL, ":");
+        FALSE_RETURN_V(token != nullptr, size * nitems);
+        char *strRange = StringTrim(token);
         long start, end, fileLen;
         sscanf_s(strRange, "bytes %" PUBLIC_OUTPUT "ld-%" PUBLIC_OUTPUT "ld/%" PUBLIC_OUTPUT "ld",
                  &start, &end, &fileLen);
