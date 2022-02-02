@@ -143,7 +143,8 @@ ErrorCode MediaSourceFilter::Start()
 
 ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data)
 {
-    MEDIA_LOG_D("IN, offset: %" PUBLIC_OUTPUT PRIu64 ", size: %" PUBLIC_OUTPUT "zu, outPort: %" PUBLIC_OUTPUT "s", offset, size, outPort.c_str());
+    MEDIA_LOG_D("IN, offset: %" PUBLIC_OUTPUT PRIu64 ", size: %" PUBLIC_OUTPUT "zu, outPort: %" PUBLIC_OUTPUT "s",
+                offset, size, outPort.c_str());
     if (!plugin_) {
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
@@ -153,7 +154,8 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
         size_t totalSize = 0;
         if ((plugin_->GetSize(totalSize) == Status::OK) && (totalSize != 0)) {
             if (offset >= totalSize) {
-                MEDIA_LOG_W("offset: %" PUBLIC_OUTPUT PRIu64 " is larger than totalSize: %" PUBLIC_OUTPUT "zu", offset, totalSize);
+                MEDIA_LOG_W("offset: %" PUBLIC_OUTPUT PRIu64 " is larger than totalSize: %" PUBLIC_OUTPUT "zu",
+                            offset, totalSize);
                 return ErrorCode::END_OF_STREAM;
             }
             if ((offset + readSize) > totalSize) {
@@ -358,7 +360,8 @@ ErrorCode MediaSourceFilter::FindPlugin(const std::shared_ptr<MediaSource>& sour
             for(auto supportProtocol : supportProtocols){
                 if (g_protocolStringToType[protocol_] == supportProtocol &&
                     CreatePlugin(info, name, pluginManager) == ErrorCode::SUCCESS) {
-                    MEDIA_LOG_I("supportProtocol:%" PUBLIC_OUTPUT "s CreatePlugin %" PUBLIC_OUTPUT "s success", protocol_.c_str(), name_.c_str());
+                    MEDIA_LOG_I("supportProtocol:%" PUBLIC_OUTPUT "s CreatePlugin %" PUBLIC_OUTPUT "s success",
+                                protocol_.c_str(), name_.c_str());
                     return ErrorCode::SUCCESS;
                 }
             }

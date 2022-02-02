@@ -52,7 +52,8 @@ Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
             continue;
         }
         if (g_supportedCodec.find(codec->id) == g_supportedCodec.end()) {
-            MEDIA_LOG_W("codec %" PUBLIC_OUTPUT "s(%" PUBLIC_OUTPUT "s) is not supported right now", codec->name, codec->long_name);
+            MEDIA_LOG_W("codec %" PUBLIC_OUTPUT "s(%" PUBLIC_OUTPUT "s) is not supported right now",
+                        codec->name, codec->long_name);
             continue;
         }
         CodecPluginDef definition;
@@ -64,7 +65,8 @@ Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
         // do not delete the codec in the deleter
         codecMap[definition.name] = std::shared_ptr<AVCodec>(const_cast<AVCodec*>(codec), [](void* ptr) {});
         if (reg->AddPlugin(definition) != Status::OK) {
-            MEDIA_LOG_W("register plugin %" PUBLIC_OUTPUT "s(%" PUBLIC_OUTPUT "s) failed", codec->name, codec->long_name);
+            MEDIA_LOG_W("register plugin %" PUBLIC_OUTPUT "s(%" PUBLIC_OUTPUT "s) failed",
+                        codec->name, codec->long_name);
         }
     }
     return Status::OK;

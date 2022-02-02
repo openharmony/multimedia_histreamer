@@ -133,8 +133,8 @@ std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin:
         default:
             break;
     }
-    MEDIA_LOG_D("DispatchIntent %" PUBLIC_OUTPUT "s, curState: %" PUBLIC_OUTPUT "s, nextState: %" PUBLIC_OUTPUT "s", intentDesc_.at(intent).c_str(), name_.c_str(),
-                actionDesc_.at(nextAction).c_str());
+    MEDIA_LOG_D("DispatchIntent %" PUBLIC_OUTPUT "s, curState: %" PUBLIC_OUTPUT "s, nextState: %" PUBLIC_OUTPUT "s",
+                intentDesc_.at(intent).c_str(), name_.c_str(), actionDesc_.at(nextAction).c_str());
     return {rtv, nextAction};
 }
 } // namespace Media

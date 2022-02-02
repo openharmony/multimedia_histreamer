@@ -578,7 +578,7 @@ ErrorCode HiRecorderImpl::DoConfigureVideo(const RecorderParamInternal& recParam
         case RecorderPublicParamType::VID_CAPTURERATE:
         case RecorderPublicParamType::VID_BITRATE:
         case RecorderPublicParamType::VID_ENC_FMT:
-            MEDIA_LOG_E("ignore RecorderPublicParamType %" PUBLIC_OUTPUT "d", param.type);
+            MEDIA_LOG_E("ignore RecorderPublicParamType %" PUBLIC_OUTPUT "d", recParamInternal.type);
             break;
         default:
             break;

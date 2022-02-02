@@ -131,7 +131,8 @@ Plugin::Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime
             matched = false;
     }
     if (!matched) {
-        MEDIA_LOG_E("codec of mime %" PUBLIC_OUTPUT "s is not matched with %" PUBLIC_OUTPUT "s muxer", mime.c_str(), fmt->name);
+        MEDIA_LOG_E("codec of mime %" PUBLIC_OUTPUT "s is not matched with %" PUBLIC_OUTPUT "s muxer",
+                    mime.c_str(), fmt->name);
         return Plugin::Status::ERROR_UNSUPPORTED_FORMAT;
     }
     stream->codecpar->codec_id = id;
@@ -571,11 +572,13 @@ int64_t FFmpegMuxerPlugin::IoSeek(void* opaque, int64_t offset, int whence)
         case SEEK_SET:
             newPos = static_cast<uint64_t>(offset);
             ioContext->pos_ = newPos;
-            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_OUTPUT "d, pos = %" PUBLIC_OUTPUT PRId64 ", newPos = %" PUBLIC_OUTPUT PRIu64, whence, offset, newPos);
+            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_OUTPUT "d, pos = %" PUBLIC_OUTPUT PRId64 ", newPos = %" PUBLIC_OUTPUT
+                        PRIu64, whence, offset, newPos);
             break;
         case SEEK_CUR:
             newPos = ioContext->pos_ + offset;
-            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_OUTPUT "d, pos = %" PUBLIC_OUTPUT PRId64 ", newPos = %" PUBLIC_OUTPUT PRIu64, whence, offset, newPos);
+            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_OUTPUT "d, pos = %" PUBLIC_OUTPUT PRId64 ", newPos = %" PUBLIC_OUTPUT
+                        PRIu64, whence, offset, newPos);
             break;
         case SEEK_END:
         case AVSEEK_SIZE:

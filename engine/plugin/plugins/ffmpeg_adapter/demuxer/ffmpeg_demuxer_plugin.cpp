@@ -199,8 +199,8 @@ Status FFmpegDemuxerPlugin::SelectTrack(int32_t trackId)
         return Status::ERROR_WRONG_STATE;
     }
     if (trackId < 0 || trackId >= static_cast<int32_t>(mediaInfo_->tracks.size())) {
-        MEDIA_LOG_E("SelectTrack called with invalid trackId: %" PUBLIC_OUTPUT "d, number of tracks: %" PUBLIC_OUTPUT "d", trackId,
-                    static_cast<int>(mediaInfo_->tracks.size()));
+        MEDIA_LOG_E("SelectTrack called with invalid trackId: %" PUBLIC_OUTPUT "d, number of tracks: %" PUBLIC_OUTPUT
+                    "d", trackId, static_cast<int>(mediaInfo_->tracks.size()));
         return Status::ERROR_INVALID_PARAMETER;
     }
     OSAL::ScopedLock lock(mutex_);
@@ -291,14 +291,16 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mo
         trackId = av_find_default_stream_index(formatContext_.get());
     }
     if (trackId < 0 || trackId >= static_cast<int32_t>(formatContext_->nb_streams)) {
-        MEDIA_LOG_E("SeekTo called with invalid trackid = %" PUBLIC_OUTPUT "d, nb_streams = %" PUBLIC_OUTPUT "d.", trackId, formatContext_->nb_streams);
+        MEDIA_LOG_E("SeekTo called with invalid trackid = %" PUBLIC_OUTPUT "d, nb_streams = %" PUBLIC_OUTPUT "d.",
+                    trackId, formatContext_->nb_streams);
         return Status::ERROR_INVALID_PARAMETER;
     }
     auto avStream = formatContext_->streams[trackId];
     int64_t ffTime = ConvertTimeToFFmpeg(hstTime, avStream->time_base);
     if (avStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
         int keyFrameIdx = av_index_search_timestamp(avStream, ffTime, ConvertSeekModeToFFmpeg(mode));
-        MEDIA_LOG_I("SeekTo %" PUBLIC_OUTPUT PRId64 "ns, ffTime: %" PUBLIC_OUTPUT PRId64 ", key frame index: %" PUBLIC_OUTPUT "d", hstTime, ffTime, keyFrameIdx);
+        MEDIA_LOG_I("SeekTo %" PUBLIC_OUTPUT PRId64 "ns, ffTime: %" PUBLIC_OUTPUT PRId64 ", key frame index: %"
+                    PUBLIC_OUTPUT "d", hstTime, ffTime, keyFrameIdx);
         if (keyFrameIdx >= 0) {
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(58, 78, 0)
             ffTime = avformat_index_get_entry(avStream, keyFrameIdx)->timestamp;
@@ -419,8 +421,8 @@ bool FFmpegDemuxerPlugin::ParseMediaData()
     auto formatContext = formatContext_.get();
     int ret = avformat_open_input(&formatContext, nullptr, pluginImpl_.get(), nullptr);
     if (ret != 0) {
-        MEDIA_LOG_E("avformat_open_input using plugin %" PUBLIC_OUTPUT "s failed with return = %" PUBLIC_OUTPUT "s", pluginImpl_->name,
-                    AVStrError(ret).c_str());
+        MEDIA_LOG_E("avformat_open_input using plugin %" PUBLIC_OUTPUT "s failed with return = %" PUBLIC_OUTPUT "s",
+                    pluginImpl_->name, AVStrError(ret).c_str());
         return false;
     }
     // retrieve stream information
@@ -486,18 +488,21 @@ int64_t FFmpegDemuxerPlugin::AVSeek(void* opaque, int64_t offset, int whence) //
         case SEEK_SET:
             newPos = static_cast<uint64_t>(offset);
             ioContext->offset = newPos;
-            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_OUTPUT "d, pos = %" PUBLIC_OUTPUT PRId64 ", newPos = %" PUBLIC_OUTPUT PRIu64, whence, offset, newPos);
+            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_OUTPUT "d, pos = %" PUBLIC_OUTPUT PRId64 ", newPos = %" PUBLIC_OUTPUT
+                        PRIu64, whence, offset, newPos);
             break;
         case SEEK_CUR:
             newPos = ioContext->offset + offset;
-            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_OUTPUT "d, pos = %" PUBLIC_OUTPUT PRId64 ", newPos = %" PUBLIC_OUTPUT PRIu64, whence, offset, newPos);
+            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_OUTPUT "d, pos = %" PUBLIC_OUTPUT PRId64 ", newPos = %" PUBLIC_OUTPUT
+                        PRIu64, whence, offset, newPos);
             break;
         case SEEK_END:
         case AVSEEK_SIZE: {
             size_t mediaDataSize = 0;
             if (ioContext->dataSource->GetSize(mediaDataSize) == Status::OK) {
                 newPos = mediaDataSize + offset;
-                MEDIA_LOG_I("AVSeek seek end whence: %" PUBLIC_OUTPUT "d, pos = %" PUBLIC_OUTPUT PRId64, whence, offset);
+                MEDIA_LOG_I("AVSeek seek end whence: %" PUBLIC_OUTPUT "d, pos = %" PUBLIC_OUTPUT PRId64,
+                            whence, offset);
             }
             break;
         }
@@ -508,7 +513,8 @@ int64_t FFmpegDemuxerPlugin::AVSeek(void* opaque, int64_t offset, int whence) //
     if (whence != AVSEEK_SIZE) {
         ioContext->offset = newPos;
     }
-    MEDIA_LOG_I("current offset: %" PUBLIC_OUTPUT PRId64 ", new pos: %" PUBLIC_OUTPUT PRIu64, ioContext->offset, newPos);
+    MEDIA_LOG_I("current offset: %" PUBLIC_OUTPUT PRId64 ", new pos: %" PUBLIC_OUTPUT PRIu64,
+                ioContext->offset, newPos);
     return newPos;
 }
 
@@ -530,7 +536,8 @@ int ConvertSeekModeToFFmpeg(SeekMode mode)
             seekFlag = AVSEEK_FLAG_ANY;
             break;
         default:
-            MEDIA_LOG_W("unsupported seekmode: %" PUBLIC_OUTPUT "d, using backward mode instead.", static_cast<int>(mode));
+            MEDIA_LOG_W("unsupported seekmode: %" PUBLIC_OUTPUT "d, using backward mode instead.",
+                        static_cast<int>(mode));
             break;
     }
     return seekFlag;
@@ -560,7 +567,8 @@ int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource)
         AVProbeData probeData{"", buff.data(), static_cast<int>(bufferInfo->GetMemory()->GetSize()), ""};
         confidence = plugin->read_probe(&probeData);
     }
-    MEDIA_LOG_D("Sniff: plugin pluginName = %" PUBLIC_OUTPUT "s, probability = %" PUBLIC_OUTPUT "d / 100 ...", plugin->name, confidence);
+    MEDIA_LOG_D("Sniff: plugin pluginName = %" PUBLIC_OUTPUT "s, probability = %" PUBLIC_OUTPUT "d / 100 ...",
+                plugin->name, confidence);
     return confidence;
 }
 
@@ -595,7 +603,8 @@ Status RegisterPlugins(const std::shared_ptr<Register>& reg)
     const AVInputFormat* plugin = nullptr;
     void* i = nullptr;
     while ((plugin = av_demuxer_iterate(&i))) {
-        MEDIA_LOG_D("Attempting to handle libav demuxer plugin %" PUBLIC_OUTPUT "s [%" PUBLIC_OUTPUT "s]", plugin->name, plugin->long_name);
+        MEDIA_LOG_D("Attempting to handle libav demuxer plugin %" PUBLIC_OUTPUT "s [%" PUBLIC_OUTPUT "s]",
+                    plugin->name, plugin->long_name);
         /* no emulators */
         if (plugin->long_name != nullptr) {
             if (!strncmp(plugin->long_name, "pcm ", 4)) { // 4

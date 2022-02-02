@@ -97,7 +97,8 @@ Status Minimp3DemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& so
 Status Minimp3DemuxerPlugin::GetDataFromSource()
 {
     uint32_t ioNeedReadSize = inIoBufferSize_ - ioDataRemainSize_;
-    MEDIA_LOG_D("ioDataRemainSize_ %" PUBLIC_OUTPUT "d ioNeedReadSize %" PUBLIC_OUTPUT "d", ioDataRemainSize_, ioNeedReadSize);
+    MEDIA_LOG_D("ioDataRemainSize_ %" PUBLIC_OUTPUT "d ioNeedReadSize %" PUBLIC_OUTPUT "d",
+                ioDataRemainSize_, ioNeedReadSize);
     if (ioDataRemainSize_) {
         // 将剩余数据移动到buffer的起始位置
         auto ret = memmove_s(inIoBuffer_,
@@ -126,8 +127,8 @@ Status Minimp3DemuxerPlugin::GetDataFromSource()
         auto buffer  = std::make_shared<Buffer>();
         auto bufData = buffer->AllocMemory(nullptr, ioNeedReadSize);
         int retryTimes = 0;
-        MEDIA_LOG_D("ioNeedReadSize %" PUBLIC_OUTPUT PRIu32 " inIoBufferSize_ %" PUBLIC_OUTPUT "d ioDataRemainSize_ %" PUBLIC_OUTPUT PRIu32, ioNeedReadSize,
-                    inIoBufferSize_, ioDataRemainSize_);
+        MEDIA_LOG_D("ioNeedReadSize %" PUBLIC_OUTPUT PRIu32 " inIoBufferSize_ %" PUBLIC_OUTPUT "d ioDataRemainSize_ %"
+                    PUBLIC_OUTPUT PRIu32, ioNeedReadSize, inIoBufferSize_, ioDataRemainSize_);
         do {
             auto result = ioContext_.dataSource->ReadAt(ioContext_.offset, buffer, static_cast<size_t>(ioNeedReadSize));
             MEDIA_LOG_D("ioContext_.offset %" PUBLIC_OUTPUT "d", static_cast<uint32_t>(ioContext_.offset));
@@ -197,7 +198,8 @@ Status Minimp3DemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
         status = AudioDemuxerMp3Prepare(&mp3DemuxerAttr_, inIoBuffer_, ioDataRemainSize_, &mp3DemuxerRst_);
         switch (status) {
             case Status::ERROR_NOT_ENOUGH_DATA:
-                MEDIA_LOG_D("GetMediaInfo: need more data usedInputLength %" PUBLIC_OUTPUT PRIu64, mp3DemuxerRst_.usedInputLength);
+                MEDIA_LOG_D("GetMediaInfo: need more data usedInputLength %" PUBLIC_OUTPUT PRIu64,
+                            mp3DemuxerRst_.usedInputLength);
                 ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
                 currentDemuxerPos_ += mp3DemuxerRst_.usedInputLength;
                 processLoop = 1;
@@ -280,8 +282,8 @@ Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
         case AUDIO_DEMUXER_PROCESS_NEED_MORE_DATA:
             ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
             currentDemuxerPos_ += mp3DemuxerRst_.usedInputLength;
-            MEDIA_LOG_D("ReadFrame: need more data usedInputLength %" PUBLIC_OUTPUT PRIu64 " ioDataRemainSize_ %" PUBLIC_OUTPUT PRIu32,
-                        mp3DemuxerRst_.usedInputLength, ioDataRemainSize_);
+            MEDIA_LOG_D("ReadFrame: need more data usedInputLength %" PUBLIC_OUTPUT PRIu64 " ioDataRemainSize_ %"
+                        PUBLIC_OUTPUT PRIu32, mp3DemuxerRst_.usedInputLength, ioDataRemainSize_);
             break;
         case AUDIO_DEMUXER_ERROR:
         default:
@@ -439,8 +441,8 @@ int Minimp3DemuxerPlugin::AudioDemuxerMp3IterateCallback(void *userData, const u
     } else {
         usedInputLength = 0;
     }
-    MEDIA_LOG_D("offset = %" PUBLIC_OUTPUT PRIu64 " internalRemainLen %" PUBLIC_OUTPUT PRIu32 " frameSize %" PUBLIC_OUTPUT "d", offset,
-                mp3Demuxer->internalRemainLen, frameSize);
+    MEDIA_LOG_D("offset = %" PUBLIC_OUTPUT PRIu64 " internalRemainLen %" PUBLIC_OUTPUT PRIu32 " frameSize %"
+                PUBLIC_OUTPUT "d", offset, mp3Demuxer->internalRemainLen, frameSize);
 
     if (frameSize == 0) {
         rst->usedInputLength = 0;
@@ -677,8 +679,9 @@ Status AudioDemuxerMp3Probe(AudioDemuxerMp3Attr *mp3DemuxerAttr, uint8_t *inputB
     if (mp3DemuxerRst->frameBitrateKbps != 0) {
         durationMs = static_cast<uint64_t>(fileSize * 8 / mp3DemuxerRst->frameBitrateKbps); // 8
     }
-    MEDIA_LOG_I("bitrate_kbps = %" PUBLIC_OUTPUT PRIu32 " info->channels = %" PUBLIC_OUTPUT PRIu8 " info->hz = %" PUBLIC_OUTPUT PRIu32,
-                mp3DemuxerRst->frameBitrateKbps, mp3DemuxerRst->frameChannels, mp3DemuxerRst->frameSampleRate);
+    MEDIA_LOG_I("bitrate_kbps = %" PUBLIC_OUTPUT PRIu32 " info->channels = %" PUBLIC_OUTPUT PRIu8 " info->hz = %"
+                PUBLIC_OUTPUT PRIu32, mp3DemuxerRst->frameBitrateKbps, mp3DemuxerRst->frameChannels,
+                mp3DemuxerRst->frameSampleRate);
     return Status::OK;
 }
 

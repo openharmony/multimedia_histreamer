@@ -345,7 +345,8 @@ ErrorCode VideoDecoderFilter::ConfigurePluginParams()
             MEDIA_LOG_W("Set bitrate to plugin fail");
         }
     }
-    MEDIA_LOG_D("ConfigurePluginParams success, mime: %" PUBLIC_OUTPUT "s, width: %" PUBLIC_OUTPUT "u, height: %" PUBLIC_OUTPUT "u, format: %" PUBLIC_OUTPUT "u, bitRate: %" PUBLIC_OUTPUT "u",
+    MEDIA_LOG_D("ConfigurePluginParams success, mime: %" PUBLIC_OUTPUT "s, width: %" PUBLIC_OUTPUT "u, height: %"
+                PUBLIC_OUTPUT "u, format: %" PUBLIC_OUTPUT "u, bitRate: %" PUBLIC_OUTPUT "u",
                 vdecFormat_.mime.c_str(), vdecFormat_.width, vdecFormat_.height, vdecFormat_.format,
                 vdecFormat_.bitRate);
     return ErrorCode::SUCCESS;

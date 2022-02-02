@@ -49,7 +49,8 @@ Status Base::Deinit()
     MEDIA_LOG_D("%" PUBLIC_OUTPUT "s Enter.", __FUNCTION__);
     OSAL::ScopedLock lock(stateChangeMutex_);
     if (pluginState_ == State::DESTROYED) {
-        MEDIA_LOG_I("plugin %" PUBLIC_OUTPUT "s already deinited, no need to destroy any more", plugin_->GetName().c_str());
+        MEDIA_LOG_I("plugin %" PUBLIC_OUTPUT "s already deinited, no need to destroy any more",
+                    plugin_->GetName().c_str());
         return Status::OK;
     }
     auto ret = plugin_->Deinit();
@@ -85,8 +86,8 @@ Status Base::Reset()
     RETURN_WRONG_STATE_IF_CON_TRUE(pluginState_ == State::RUNNING || pluginState_ == State::PAUSED ||
         pluginState_ == State::DESTROYED, plugin_, pluginState_.load());
     if (pluginState_ == State::CREATED || pluginState_ == State::INITIALIZED) {
-        MEDIA_LOG_I("plugin %" PUBLIC_OUTPUT "s no need to reset in state %" PUBLIC_OUTPUT "s", plugin_->GetName().c_str(),
-            GetStateString(pluginState_.load()));
+        MEDIA_LOG_I("plugin %" PUBLIC_OUTPUT "s no need to reset in state %" PUBLIC_OUTPUT "s",
+                    plugin_->GetName().c_str(), GetStateString(pluginState_.load()));
         return Status::OK;
     }
     auto ret = plugin_->Reset();

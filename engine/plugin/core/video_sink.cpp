@@ -34,8 +34,8 @@ Status VideoSink::Pause()
     MEDIA_LOG_I("%" PUBLIC_OUTPUT "s Enter.", __FUNCTION__);
     OSAL::ScopedLock lock(stateChangeMutex_);
     if (pluginState_ != State::RUNNING) {
-        MEDIA_LOG_I("plugin %" PUBLIC_OUTPUT "s pause in status %" PUBLIC_OUTPUT "s, ignore pause", plugin_->GetName().c_str(),
-                    GetStateString(pluginState_.load()));
+        MEDIA_LOG_I("plugin %" PUBLIC_OUTPUT "s pause in status %" PUBLIC_OUTPUT "s, ignore pause",
+                    plugin_->GetName().c_str(), GetStateString(pluginState_.load()));
         return Status::OK;
     }
     auto ret = videoSink->Pause();
@@ -52,8 +52,8 @@ Status VideoSink::Resume()
     MEDIA_LOG_I("%" PUBLIC_OUTPUT "s Enter.", __FUNCTION__);
     OSAL::ScopedLock lock(stateChangeMutex_);
     if (pluginState_ != State::PAUSED) {
-        MEDIA_LOG_I("plugin %" PUBLIC_OUTPUT "s resume in status %" PUBLIC_OUTPUT "s, ignore pause", plugin_->GetName().c_str(),
-                    GetStateString(pluginState_.load()));
+        MEDIA_LOG_I("plugin %" PUBLIC_OUTPUT "s resume in status %" PUBLIC_OUTPUT "s, ignore pause",
+                    plugin_->GetName().c_str(), GetStateString(pluginState_.load()));
         return Status::OK;
     }
     auto ret = videoSink->Resume();

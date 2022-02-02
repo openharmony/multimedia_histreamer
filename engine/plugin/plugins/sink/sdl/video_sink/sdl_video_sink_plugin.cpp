@@ -163,7 +163,9 @@ void SdlVideoSinkPlugin::UpdateTextureRect()
 
     textureRect_.x = (static_cast<int32_t>(windowWidth_) - textureRect_.w) / 2;  // 2
     textureRect_.y = (static_cast<int32_t>(windowHeight_) - textureRect_.h) / 2; // 2
-    MEDIA_LOG_D("pixelWH[%" PUBLIC_OUTPUT "u, %" PUBLIC_OUTPUT "u], windowWH[%" PUBLIC_OUTPUT "u, %" PUBLIC_OUTPUT "u], textureWH[%" PUBLIC_OUTPUT "u, %" PUBLIC_OUTPUT "u], textureXY[%" PUBLIC_OUTPUT "u, %" PUBLIC_OUTPUT "u]", pixelWidth_, pixelHeight_,
+    MEDIA_LOG_D("pixelWH[%" PUBLIC_OUTPUT "u, %" PUBLIC_OUTPUT "u], windowWH[%" PUBLIC_OUTPUT "u, %" PUBLIC_OUTPUT
+                "u], textureWH[%" PUBLIC_OUTPUT "u, %" PUBLIC_OUTPUT "u], textureXY[%" PUBLIC_OUTPUT "u, %"
+                PUBLIC_OUTPUT "u]", pixelWidth_, pixelHeight_,
                 windowWidth_, windowHeight_, textureRect_.w, textureRect_.h, textureRect_.x, textureRect_.y);
 }
 
@@ -361,7 +363,8 @@ Status SdlVideoSinkPlugin::VideoImageDisaplay(const std::shared_ptr<Buffer>& inp
         pixelFormat_ = frameFormat;
     }
     if ((videoMeta->width != pixelWidth_) || (videoMeta->height != pixelHeight_)) {
-        MEDIA_LOG_E("WH[%" PUBLIC_OUTPUT "u,%" PUBLIC_OUTPUT "u] change to WH[%" PUBLIC_OUTPUT "u,%" PUBLIC_OUTPUT "u]", pixelWidth_, pixelHeight_, videoMeta->width, videoMeta->height);
+        MEDIA_LOG_E("WH[%" PUBLIC_OUTPUT "u,%" PUBLIC_OUTPUT "u] change to WH[%" PUBLIC_OUTPUT "u,%" PUBLIC_OUTPUT "u]",
+                    pixelWidth_, pixelHeight_, videoMeta->width, videoMeta->height);
         // do something
     }
     int32_t ySize = 0;
@@ -370,7 +373,8 @@ Status SdlVideoSinkPlugin::VideoImageDisaplay(const std::shared_ptr<Buffer>& inp
     auto ptr = bufferMem->GetReadOnlyData();
     data[0] = ptr;
     lineSize[0] = static_cast<int32_t>(videoMeta->stride[0]);
-    MEDIA_LOG_D("Display one frame: WHS[%" PUBLIC_OUTPUT "u,%" PUBLIC_OUTPUT "u,%" PUBLIC_OUTPUT "u]", pixelWidth_, pixelHeight_, lineSize[0]);
+    MEDIA_LOG_D("Display one frame: WHS[%" PUBLIC_OUTPUT "u,%" PUBLIC_OUTPUT "u,%" PUBLIC_OUTPUT "u]",
+                pixelWidth_, pixelHeight_, lineSize[0]);
     if (IsFormatYUV()) {
         if (videoMeta->planes != 3) { // 3
             MEDIA_LOG_E("Invalid video buffer, planes: %" PUBLIC_OUTPUT "u", videoMeta->planes);
@@ -401,7 +405,8 @@ int32_t SdlVideoSinkPlugin::UpdateNVTexture(const uint8_t** data, int32_t* lineS
     int32_t ret;
     lineSize[1] = static_cast<int32_t>(videoMeta->stride[1]);
     ySize = lineSize[0] * static_cast<int32_t>(AlignUp(pixelHeight_, 16)); // 16
-    MEDIA_LOG_D("lineSize[0]: %" PUBLIC_OUTPUT "d, lineSize[1]: %" PUBLIC_OUTPUT "d, ySize: %" PUBLIC_OUTPUT "d", lineSize[0], lineSize[1], ySize);
+    MEDIA_LOG_D("lineSize[0]: %" PUBLIC_OUTPUT "d, lineSize[1]: %" PUBLIC_OUTPUT "d, ySize: %" PUBLIC_OUTPUT "d",
+                lineSize[0], lineSize[1], ySize);
     data[1] = ptr + ySize;
 #ifdef DUMP_RAW_DATA
     if (data[0] != nullptr && lineSize[0] != 0) {

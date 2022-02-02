@@ -157,7 +157,8 @@ bool AVCConfigDataParser::GetSpsOrPpsLen(uint32_t& len)
 bool AVCConfigDataParser::ParseNalHeader()
 {
     if (bitReader_.GetAvailableBits() < AVC_MIN_CONFIG_DATA_SIZE) {
-        MEDIA_LOG_E("Config data size is smaller than MIN: %" PUBLIC_OUTPUT "d", static_cast<int32_t>(AVC_MIN_CONFIG_DATA_SIZE));
+        MEDIA_LOG_E("Config data size is smaller than MIN: %" PUBLIC_OUTPUT "d",
+                    static_cast<int32_t>(AVC_MIN_CONFIG_DATA_SIZE));
         return false;
     }
     auto ret = bitReader_.ReadBits(1, version_); // configurationVersion = 1
@@ -217,7 +218,8 @@ bool AVCConfigDataParser::ParseSpsOrPps(const uint32_t mask)
             return false;
         }
         if (cfgSet.count >= AVC_MAX_CONFIG_ITEM) {
-            MEDIA_LOG_E("config set count is larger than: %" PUBLIC_OUTPUT "d", static_cast<int32_t>(AVC_MAX_CONFIG_ITEM));
+            MEDIA_LOG_E("config set count is larger than: %" PUBLIC_OUTPUT "d",
+                        static_cast<int32_t>(AVC_MAX_CONFIG_ITEM));
             return false;
         }
         if (!CreateConfigSetItem(len)) {

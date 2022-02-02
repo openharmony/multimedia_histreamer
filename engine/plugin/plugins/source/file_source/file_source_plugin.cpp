@@ -173,7 +173,8 @@ Status FileSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLe
     auto size = std::fread(bufData->GetWritableAddr(expectedLen), sizeof(char), expectedLen, fp_);
     bufData->UpdateDataSize(size);
     position_ += bufData->GetSize();
-    MEDIA_LOG_D("position_: %" PUBLIC_OUTPUT "" PRIu64 ", readSize: %" PUBLIC_OUTPUT "zu", position_, bufData->GetSize());
+    MEDIA_LOG_D("position_: %" PUBLIC_OUTPUT "" PRIu64 ", readSize: %" PUBLIC_OUTPUT "zu",
+                position_, bufData->GetSize());
     return Status::OK;
 }
 

@@ -65,7 +65,8 @@ bool OutputSinkFilter::Negotiate(const std::string &inPort,
         }
     }
     if (selectedPluginInfo == nullptr) {
-        MEDIA_LOG_W("no available output sink plugin with output type of %" PUBLIC_OUTPUT "d", static_cast<int32_t>(outputType_));
+        MEDIA_LOG_W("no available output sink plugin with output type of %" PUBLIC_OUTPUT "d",
+                    static_cast<int32_t>(outputType_));
         return false;
     }
     auto res = UpdateAndInitPluginByInfo<Plugin::OutputSink>(plugin_, pluginInfo_, selectedPluginInfo,
@@ -154,7 +155,8 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, AVBufferPtr buff
         } else {
             ret = TranslatePluginStatus(plugin_->SeekTo(offset));
             if (ret != ErrorCode::SUCCESS) {
-                MEDIA_LOG_E("plugin %" PUBLIC_OUTPUT "s seek to %" PUBLIC_OUTPUT PRId64 " failed", pluginInfo_->name.c_str(), offset);
+                MEDIA_LOG_E("plugin %" PUBLIC_OUTPUT "s seek to %" PUBLIC_OUTPUT PRId64 " failed",
+                            pluginInfo_->name.c_str(), offset);
                 return ErrorCode::ERROR_INVALID_OPERATION;
             }
             currentPos_ = offset;

@@ -73,7 +73,8 @@ void StreamingExecutor::Close()
     }
 }
 
-bool StreamingExecutor::Read(unsigned char *buff, unsigned int wantReadLength, unsigned int &realReadLength, bool &isEos)
+bool StreamingExecutor::Read(unsigned char *buff, unsigned int wantReadLength,
+                             unsigned int &realReadLength, bool &isEos)
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
     isEos = false;
@@ -177,22 +178,26 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
         memcpy_s(info->contentType, sizeof(info->contentType), type, sizeof(info->contentType));
     }
 
-    if (!strncmp(key, "Content-Length", strlen("Content-Length")) || !strncmp(key, "content-length", strlen("content-length"))) {
+    if (!strncmp(key, "Content-Length", strlen("Content-Length")) ||
+        !strncmp(key, "content-length", strlen("content-length"))) {
         char *contLen = StringTrim(strtok(NULL, ":"));
         info->contentLen = atol(contLen);
     }
 
-    if (!strncmp(key, "Transfer-Encoding", strlen("Transfer-Encoding")) || !strncmp(key, "transfer-encoding", strlen("transfer-encoding"))) {
+    if (!strncmp(key, "Transfer-Encoding", strlen("Transfer-Encoding")) ||
+        !strncmp(key, "transfer-encoding", strlen("transfer-encoding"))) {
         char *transEncode = StringTrim(strtok(NULL, ":"));
         if (!strncmp(transEncode, "chunked", strlen("chunked"))) {
             info->isChunked = true;
         }
     }
 
-    if (!strncmp(key, "Content-Range", strlen("Content-Range")) || !strncmp(key, "content-range", strlen("content-range"))) {
+    if (!strncmp(key, "Content-Range", strlen("Content-Range")) ||
+        !strncmp(key, "content-range", strlen("content-range"))) {
         char *strRange = StringTrim(strtok(NULL, ":"));
         long start, end, fileLen;
-        sscanf_s(strRange, "bytes %" PUBLIC_OUTPUT "ld-%" PUBLIC_OUTPUT "ld/%" PUBLIC_OUTPUT "ld", &start, &end, &fileLen);
+        sscanf_s(strRange, "bytes %" PUBLIC_OUTPUT "ld-%" PUBLIC_OUTPUT "ld/%" PUBLIC_OUTPUT "ld",
+                 &start, &end, &fileLen);
         if (info->fileContentLen > 0 && info->fileContentLen != fileLen) {
             MEDIA_LOG_E("FileContentLen doesn't equal to fileLen");
         }

@@ -190,7 +190,8 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Plu
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_PIXEL_FORMAT, pixelFormat));
         RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Set plugin pixel format fail");
     }
-    MEDIA_LOG_D("width: %" PUBLIC_OUTPUT "u, height: %" PUBLIC_OUTPUT "u, pixelFormat: %" PUBLIC_OUTPUT "u", width, height, pixelFormat);
+    MEDIA_LOG_D("width: %" PUBLIC_OUTPUT "u, height: %" PUBLIC_OUTPUT "u, pixelFormat: %" PUBLIC_OUTPUT "u",
+                width, height, pixelFormat);
     return err;
 }
 
@@ -244,7 +245,8 @@ void VideoSinkFilter::RenderFrame()
 
     Plugin::Status status = plugin_->GetLatency(latencyNano);
     if (status != Plugin::Status::OK) {
-        MEDIA_LOG_E("Video sink GetLatency fail errorcode = %" PUBLIC_OUTPUT "d", to_underlying(TranslatePluginStatus(status)));
+        MEDIA_LOG_E("Video sink GetLatency fail errorcode = %" PUBLIC_OUTPUT "d",
+                    to_underlying(TranslatePluginStatus(status)));
         return;
     }
 
@@ -280,8 +282,8 @@ ErrorCode VideoSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
         pushThreadIsBlocking_ = false;
     }
     if (isFlushing_ || state_.load() == FilterState::INITIALIZED) {
-        MEDIA_LOG_I("PushData return due to: isFlushing_ = %" PUBLIC_OUTPUT "d, state_ = %" PUBLIC_OUTPUT "d", isFlushing_,
-                    static_cast<int>(state_.load()));
+        MEDIA_LOG_I("PushData return due to: isFlushing_ = %" PUBLIC_OUTPUT "d, state_ = %" PUBLIC_OUTPUT "d",
+                    isFlushing_, static_cast<int>(state_.load()));
         return ErrorCode::SUCCESS;
     }
 

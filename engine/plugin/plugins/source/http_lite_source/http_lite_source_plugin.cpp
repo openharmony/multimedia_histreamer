@@ -221,7 +221,8 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     MEDIA_LOG_D("OpenUri success");
     unsigned int downloadPos = 0;
     httpHandle_->GetHttpBufferRange(&position_, &downloadPos);
-    MEDIA_LOG_D("position_ %" PUBLIC_OUTPUT "d downloadPos %" PUBLIC_OUTPUT "d", (uint32_t)position_, (uint32_t)downloadPos);
+    MEDIA_LOG_D("position_ %" PUBLIC_OUTPUT "d downloadPos %" PUBLIC_OUTPUT "d",
+                (uint32_t)position_, (uint32_t)downloadPos);
     int8_t retryTimes = 0;
     while (!needExit_ && position_ == downloadPos && retryTimes < 60) { // 60
         OHOS::Media::OSAL::SleepFor(200); // 200
@@ -292,7 +293,8 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
 
         httpHandle_->GetHttpBufferRange(&read, &write);
 
-        MEDIA_LOG_I("read pos %" PUBLIC_OUTPUT "d write pos %" PUBLIC_OUTPUT "d expectedLen %" PUBLIC_OUTPUT "d", read, write, expectedLen);
+        MEDIA_LOG_I("read pos %" PUBLIC_OUTPUT "d write pos %" PUBLIC_OUTPUT "d expectedLen %" PUBLIC_OUTPUT "d",
+                    read, write, expectedLen);
 
         expectedLen = std::min(static_cast<size_t>(write - read), expectedLen);
         expectedLen = std::min(bufData->GetCapacity(), expectedLen);
@@ -301,7 +303,8 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
         httpHandle_->HttpRead(bufData->GetWritableAddr(expectedLen), expectedLen, realReadSize, isEos);
         bufData->UpdateDataSize(realReadSize);
         httpHandle_->GetHttpBufferRange(&position_, &write);
-        MEDIA_LOG_D("position_ : %" PUBLIC_OUTPUT "d, readSize = %" PUBLIC_OUTPUT "d, isEos %" PUBLIC_OUTPUT "d", position_, bufData->GetSize(), isEos);
+        MEDIA_LOG_D("position_ : %" PUBLIC_OUTPUT "d, readSize = %" PUBLIC_OUTPUT "d, isEos %" PUBLIC_OUTPUT "d",
+                    position_, bufData->GetSize(), isEos);
         return Status::OK;
     }
 }
@@ -339,8 +342,8 @@ Status HttpSourcePlugin::SeekTo(uint64_t offset)
     }
     position_ = static_cast<unsigned int>(offset);
     httpHandle_->GetHttpBufferRange(&readPos, &writePos);
-    MEDIA_LOG_D("offset = %" PUBLIC_OUTPUT "d, after SeekTo readPos = %" PUBLIC_OUTPUT "d, writePos = %" PUBLIC_OUTPUT "d",
-                static_cast<uint32_t>(offset), readPos, writePos);
+    MEDIA_LOG_D("offset = %" PUBLIC_OUTPUT "d, after SeekTo readPos = %" PUBLIC_OUTPUT "d, writePos = %" PUBLIC_OUTPUT
+                "d", static_cast<uint32_t>(offset), readPos, writePos);
     MEDIA_LOG_D("seek to position_ %" PUBLIC_OUTPUT "d success", position_);
     return Status::OK;
 }

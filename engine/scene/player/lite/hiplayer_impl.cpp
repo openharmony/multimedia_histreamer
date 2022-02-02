@@ -227,7 +227,8 @@ void HiPlayerImpl::MediaStats::ReceiveEvent(EventType eventType, int64_t param)
             }
             break;
         default:
-            MEDIA_LOG_W("MediaStats::ReceiveEvent receive unexpected event %" PUBLIC_OUTPUT "d", static_cast<int>(eventType));
+            MEDIA_LOG_W("MediaStats::ReceiveEvent receive unexpected event %" PUBLIC_OUTPUT "d",
+                        static_cast<int>(eventType));
             break;
     }
 }

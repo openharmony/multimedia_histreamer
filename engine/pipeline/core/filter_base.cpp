@@ -100,8 +100,8 @@ std::vector<Filter*> FilterBase::GetNextFilters()
     for (auto&& outPort : outPorts_) {
         auto peerPort = outPort->GetPeerPort();
         if (!peerPort) {
-            MEDIA_LOG_I("Filter %" PUBLIC_OUTPUT "s outport %" PUBLIC_OUTPUT "s has no peer port (%" PUBLIC_OUTPUT "zu).", name_.c_str(), outPort->GetName().c_str(),
-                        outPorts_.size());
+            MEDIA_LOG_I("Filter %" PUBLIC_OUTPUT "s outport %" PUBLIC_OUTPUT "s has no peer port (%" PUBLIC_OUTPUT
+                        "zu).", name_.c_str(), outPort->GetName().c_str(), outPorts_.size());
             continue;
         }
         auto filter = const_cast<Filter*>(dynamic_cast<const Filter*>(peerPort->GetOwnerFilter()));
@@ -119,8 +119,8 @@ std::vector<Filter*> FilterBase::GetPreFilters()
     for (auto&& inPort : inPorts_) {
         auto peerPort = inPort->GetPeerPort();
         if (!peerPort) {
-            MEDIA_LOG_I("Filter %" PUBLIC_OUTPUT "s inport %" PUBLIC_OUTPUT "s has no peer port (%" PUBLIC_OUTPUT "zu).", name_.c_str(), inPort->GetName().c_str(),
-                        inPorts_.size());
+            MEDIA_LOG_I("Filter %" PUBLIC_OUTPUT "s inport %" PUBLIC_OUTPUT "s has no peer port (%" PUBLIC_OUTPUT
+                        "zu).", name_.c_str(), inPort->GetName().c_str(), inPorts_.size());
             continue;
         }
         auto filter = const_cast<Filter*>(dynamic_cast<const Filter*>(peerPort->GetOwnerFilter()));
@@ -232,7 +232,8 @@ bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<T>& plugin, std::shar
             if (plugin->Reset() == Plugin::Status::OK) {
                 return true;
             }
-            MEDIA_LOG_W("reuse previous plugin %" PUBLIC_OUTPUT "s failed, will create new plugin", pluginInfo->name.c_str());
+            MEDIA_LOG_W("reuse previous plugin %" PUBLIC_OUTPUT "s failed, will create new plugin",
+                        pluginInfo->name.c_str());
         }
         plugin->Deinit();
     }

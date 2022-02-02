@@ -144,7 +144,8 @@ ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Plugin:
         if (meta->GetData(static_cast<Plugin::MetaID>(keyPair.first), outValue) && keyPair.second.second(outValue)) {
             SetPluginParameter(keyPair.first, outValue);
         } else {
-            MEDIA_LOG_W("parameter %" PUBLIC_OUTPUT "s in meta is not found or type mismatch", keyPair.second.first.c_str());
+            MEDIA_LOG_W("parameter %" PUBLIC_OUTPUT "s in meta is not found or type mismatch",
+                        keyPair.second.first.c_str());
         }
     }
     return ErrorCode::SUCCESS;
@@ -185,7 +186,8 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
         pushThreadIsBlocking = false;
     }
     if (isFlushing || state_.load() == FilterState::INITIALIZED) {
-        MEDIA_LOG_I("PushData return due to: isFlushing = %" PUBLIC_OUTPUT "d, state = %" PUBLIC_OUTPUT "d", isFlushing, static_cast<int>(state_.load()));
+        MEDIA_LOG_I("PushData return due to: isFlushing = %" PUBLIC_OUTPUT "d, state = %" PUBLIC_OUTPUT "d",
+                    isFlushing, static_cast<int>(state_.load()));
         return ErrorCode::SUCCESS;
     }
     auto err = TranslatePluginStatus(plugin_->Write(buffer));
@@ -297,7 +299,8 @@ void AudioSinkFilter::FlushEnd()
 ErrorCode AudioSinkFilter::SetVolume(float volume)
 {
     if (state_ != FilterState::READY && state_ != FilterState::RUNNING && state_ != FilterState::PAUSED) {
-        MEDIA_LOG_E("audio sink filter cannot set volume in state %" PUBLIC_OUTPUT "d", static_cast<int32_t>(state_.load()));
+        MEDIA_LOG_E("audio sink filter cannot set volume in state %" PUBLIC_OUTPUT "d",
+                    static_cast<int32_t>(state_.load()));
         return ErrorCode::ERROR_AGAIN;
     }
     MEDIA_LOG_I("set volume %" PUBLIC_OUTPUT ".3f", volume);
@@ -310,7 +313,8 @@ ErrorCode AudioSinkFilter::UpdateLatestPts(int64_t pts)
     int64_t nowNs {0};
     Plugin::Status status = plugin_->GetLatency(latencyNano);
     if (status != Plugin::Status::OK) {
-        MEDIA_LOG_E("audio sink GetLatency fail errorcode = %" PUBLIC_OUTPUT "d", to_underlying(TranslatePluginStatus(status)));
+        MEDIA_LOG_E("audio sink GetLatency fail errorcode = %" PUBLIC_OUTPUT "d",
+                    to_underlying(TranslatePluginStatus(status)));
         return TranslatePluginStatus(status);
     }
     nowNs = SteadyClock::GetCurrentTimeNanoSec();

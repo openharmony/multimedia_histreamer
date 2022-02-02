@@ -68,7 +68,8 @@ Status LoadAndInitAdapter(AudioManager* audioManager, AudioAdapterDescriptor* de
         MEDIA_LOG_I("retry init port on adapter %" PUBLIC_OUTPUT "s", descriptor->adapterName);
     } while (++retryCnt < MAX_RETRY_CNT);
     if (retryCnt >= MAX_RETRY_CNT) {
-        MEDIA_LOG_W("cannot init port on adapter %" PUBLIC_OUTPUT "s after retry %" PUBLIC_OUTPUT "d times", descriptor->adapterName, retryCnt);
+        MEDIA_LOG_W("cannot init port on adapter %" PUBLIC_OUTPUT "s after retry %" PUBLIC_OUTPUT "d times",
+                    descriptor->adapterName, retryCnt);
         audioManager->UnloadAdapter(audioManager, *adapter);
         *adapter = nullptr;
         return Status::ERROR_UNKNOWN;
@@ -360,8 +361,10 @@ Status HdiSink::Prepare()
     deviceDescriptor_.pins = PIN_OUT_SPEAKER;
     deviceDescriptor_.desc = nullptr;
 
-    MEDIA_LOG_I("create render: %" PUBLIC_OUTPUT "s, port: %" PUBLIC_OUTPUT "d:\ncategory %" PUBLIC_OUTPUT "s,\nchannels %" PUBLIC_OUTPUT "d, sampleRate %" PUBLIC_OUTPUT "d,\n"
-                " audioChannelMask %" PUBLIC_OUTPUT "x, format %" PUBLIC_OUTPUT "d,\nisSignedData %" PUBLIC_OUTPUT "d, interleaved %" PUBLIC_OUTPUT "d,\nperiod %" PUBLIC_OUTPUT "u, frameSize %" PUBLIC_OUTPUT "u",
+    MEDIA_LOG_I("create render: %" PUBLIC_OUTPUT "s, port: %" PUBLIC_OUTPUT "d:\ncategory %" PUBLIC_OUTPUT
+                "s,\nchannels %" PUBLIC_OUTPUT "d, sampleRate %" PUBLIC_OUTPUT "d,\n"
+                " audioChannelMask %" PUBLIC_OUTPUT "x, format %" PUBLIC_OUTPUT "d,\nisSignedData %" PUBLIC_OUTPUT
+                "d, interleaved %" PUBLIC_OUTPUT "d,\nperiod %" PUBLIC_OUTPUT "u, frameSize %" PUBLIC_OUTPUT "u",
                 adapterDescriptor_.adapterName, deviceDescriptor_.portId,
                 (sampleAttributes_.type == AUDIO_IN_MEDIA) ? "media" : "communication", sampleAttributes_.channelCount,
                 sampleAttributes_.sampleRate, channelMask_, sampleAttributes_.format, sampleAttributes_.isSignedData,
@@ -370,7 +373,8 @@ Status HdiSink::Prepare()
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
         auto ret = audioAdapter_->CreateRender(audioAdapter_, &deviceDescriptor_, &sampleAttributes_, &audioRender_);
         if (ret != 0) {
-            MEDIA_LOG_E("cannot create render with error code %" PUBLIC_OUTPUT " PRIu64 "x", static_cast<uint64_t>(ret));
+            MEDIA_LOG_E("cannot create render with error code %" PUBLIC_OUTPUT PRIu64 "x",
+                        static_cast<uint64_t>(ret));
             audioRender_ = nullptr;
             return Status::ERROR_UNKNOWN;
         }

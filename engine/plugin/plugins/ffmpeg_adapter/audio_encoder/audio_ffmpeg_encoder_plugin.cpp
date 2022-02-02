@@ -335,7 +335,8 @@ Status AudioFfmpegEncoderPlugin::Start()
             MEDIA_LOG_E("frame_size unknown");
             return Status::ERROR_UNKNOWN;
         }
-        fullInputFrameSize_ = av_samples_get_buffer_size(nullptr, avCodecContext_->channels, avCodecContext_->frame_size,
+        fullInputFrameSize_ = av_samples_get_buffer_size(nullptr, avCodecContext_->channels,
+                                                         avCodecContext_->frame_size,
                                                          srcFmt_, 1);
         srcBytesPerSample_ = av_get_bytes_per_sample(srcFmt_) * avCodecContext_->channels;
         if (needReformat_) {
