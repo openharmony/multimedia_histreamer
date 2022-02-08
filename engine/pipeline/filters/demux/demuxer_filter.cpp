@@ -316,12 +316,13 @@ void DemuxerFilter::ActivatePullMode()
         dataPacker_ = std::make_shared<DataPacker>();
     }
     checkRange_ = [this](uint64_t offset, uint32_t size) {
-        if (dataPacker_->IsDataAvailable(offset, size)) {
+        uint64_t curOffset = offset;
+        if (dataPacker_->IsDataAvailable(offset, size, curOffset)) {
             return true;
         }
         AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
         bufferPtr->AllocMemory(pluginAllocator_, size);
-        if (inPorts_.front()->PullData(offset, size, bufferPtr) == ErrorCode::SUCCESS) {
+        if (inPorts_.front()->PullData(curOffset, size, bufferPtr) == ErrorCode::SUCCESS) {
             dataPacker_->PushData(std::move(bufferPtr));
             return true;
         }
@@ -350,7 +351,10 @@ void DemuxerFilter::ActivatePushMode()
     if (!dataPacker_) {
         dataPacker_ = std::make_shared<DataPacker>();
     }
-    checkRange_ = [this](uint64_t offset, uint32_t size) { return dataPacker_->IsDataAvailable(offset, size); };
+    checkRange_ = [this](uint64_t offset, uint32_t size) {
+        uint64_t curOffset = offset;
+        return dataPacker_->IsDataAvailable(offset, size, curOffset);
+    };
     peekRange_ = [this](uint64_t offset, size_t size, AVBufferPtr& bufferPtr) -> bool {
         return dataPacker_->PeekRange(offset, size, bufferPtr);
     };

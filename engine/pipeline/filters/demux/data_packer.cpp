@@ -77,33 +77,35 @@ void DataPacker::PushData(AVBufferPtr bufferPtr)
     que_.emplace_back(std::move(bufferPtr));
 }
 
-bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size)
+bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOffset)
 {
     MEDIA_LOG_D("DataPacker IsDataAvailable...");
     OSAL::ScopedLock lock(mutex_);
-    auto curOffset = bufferOffset_;
-    if (que_.empty() || offset < curOffset) {
+    auto curOffsetTemp = bufferOffset_;
+    if (que_.empty() || offset < curOffsetTemp) {
+        curOffset = offset;
         return false;
     }
     int bufCnt = que_.size();
     auto offsetEnd = offset + size;
     auto curOffsetEnd = AudioBufferSize(que_.front());
     if (bufCnt == 1) {
+        curOffset = curOffsetEnd;
         return offsetEnd <= curOffsetEnd;
     }
     auto preOffsetEnd = curOffsetEnd;
     for (auto i = 1; i < bufCnt; ++i) {
-        auto bufferOffset = 0;
-        if (preOffsetEnd != bufferOffset) {
-            return false;
-        }
-        curOffsetEnd = bufferOffset + AudioBufferSize(que_[i]);
+        curOffsetEnd = preOffsetEnd + AudioBufferSize(que_[i]);
         if (curOffsetEnd >= offsetEnd) {
             return true;
         } else {
             preOffsetEnd = curOffsetEnd;
         }
     }
+    if (preOffsetEnd >= offsetEnd) {
+        return true;
+    }
+    curOffset = preOffsetEnd;
     return false;
 }
 

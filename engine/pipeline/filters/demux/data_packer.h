@@ -38,7 +38,7 @@ public:
 
     void PushData(AVBufferPtr bufferPtr);
 
-    bool IsDataAvailable(uint64_t offset, uint32_t size);
+    bool IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOffset);
 
     bool PeekRange(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr);
 

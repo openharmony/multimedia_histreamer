@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #define HST_LOG_TAG "StreamingExecutor"
+
 #include "streaming_executor.h"
 #include <functional>
 #include "securec.h"
