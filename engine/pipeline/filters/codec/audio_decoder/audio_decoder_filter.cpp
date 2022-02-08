@@ -97,7 +97,6 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
         MEDIA_LOG_W("decoder filter is not in preparing when negotiate");
         return false;
     }
-
     auto targetOutPort = GetRouteOutPort(inPort);
     if (targetOutPort == nullptr) {
         MEDIA_LOG_E("decoder out port is not found");
@@ -112,13 +111,12 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
         }
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
             if (outCap.keys.count(Capability::Key::AUDIO_SAMPLE_FORMAT) == 0) {
-                MEDIA_LOG_W("decoder plugin should specify sample format in out caps");
+                MEDIA_LOG_W("decoder plugin must specify sample format in out caps");
                 continue;
             }
             auto thisOut = std::make_shared<Plugin::Capability>();
             if (!MergeCapabilityKeys(*upstreamCap, outCap, *thisOut)) {
-                MEDIA_LOG_W("one of out cap of plugin %" PUBLIC_OUTPUT "s does not match with upstream capability",
-                            candidate.first->name.c_str());
+                MEDIA_LOG_I("one cap of plugin %" PUBLIC_LOG_S " mismatch upstream cap", candidate.first->name.c_str());
                 continue;
             }
             atLeastOutCapMatched = true;
@@ -126,7 +124,9 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
             if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_, upstreamParams, downstreamParams)) {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
-                MEDIA_LOG_I("choose plugin %" PUBLIC_OUTPUT "s as working parameter", candidate.first->name.c_str());
+                MEDIA_LOG_I("use plugin %" PUBLIC_LOG_S, candidate.first->name.c_str());
+                MEDIA_LOG_I("neg upstream cap %" PUBLIC_LOG_S, Capability2String(capNegWithUpstream_).c_str());
+                MEDIA_LOG_I("neg downstream cap %" PUBLIC_LOG_S, Capability2String(capNegWithDownstream_).c_str());
                 break;
             }
         }
@@ -134,18 +134,13 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
             break;
         }
     }
-    if (!atLeastOutCapMatched) {
-        MEDIA_LOG_W("cannot find available decoder plugin");
-        return false;
-    }
-    if (selectedPluginInfo == nullptr) {
-        MEDIA_LOG_W("cannot find available downstream plugin");
+    if (!atLeastOutCapMatched || selectedPluginInfo == nullptr) {
+        MEDIA_LOG_W("can't find available decoder plugin with %" PUBLIC_LOG_S, Capability2String(*upstreamCap).c_str());
         return false;
     }
     auto res = UpdateAndInitPluginByInfo<Plugin::Codec>(plugin_, pluginInfo_, selectedPluginInfo,
-    [](const std::string& name)->
-        std::shared_ptr<Plugin::Codec> {
-            return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
+        [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
+                return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
         });
     plugin_->SetCallback(this);
     PROFILE_END("Audio Decoder Negotiate end");
@@ -155,6 +150,7 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
 bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
 {
     PROFILE_BEGIN("Audio decoder configure begin");
+    MEDIA_LOG_I("receive upstream meta %" PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
     if (plugin_ == nullptr || pluginInfo_ == nullptr) {
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
@@ -170,7 +166,7 @@ bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_
         return false;
     }
     if (!targetOutPort->Configure(thisMeta)) {
-        MEDIA_LOG_E("decoder filter downstream Configure failed");
+        MEDIA_LOG_E("decoderFilter configure downstream failed with %" PUBLIC_LOG_S, Meta2String(*thisMeta).c_str());
         return false;
     }
     auto err = ConfigureToStartPluginLocked(thisMeta);

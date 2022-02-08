@@ -17,6 +17,7 @@
 #define HISTREAMER_PIPELINE_FILTER_PLUGIN_SETTINGS_H
 
 #include <functional>
+#include <tuple>
 
 #include "pipeline/core/filter_type.h"
 #include "plugin/common/plugin_tags.h"
@@ -25,8 +26,10 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
+constexpr uint8_t PARAM_GET = 0x01;
+constexpr uint8_t PARAM_SET = 0x02;
 using PluginParaAllowedMap = std::map<Plugin::Tag,
-    std::pair<std::string, std::function<bool(const Plugin::ValueType&)>>>;
+    std::tuple<std::string, std::function<bool(const Plugin::ValueType&)>, uint8_t>>;
 
 struct PluginParameterTable {
     static const PluginParaAllowedMap& FindAllowedParameterMap(FilterType category);

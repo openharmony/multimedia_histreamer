@@ -21,6 +21,7 @@
 #include <functional>
 #include <map>
 
+#include "pipeline/core/plugin_attr_desc.h"
 #include "foundation/log.h"
 #include "utils/utils.h"
 
@@ -46,42 +47,25 @@ static inline bool IsDiscreteAllowed(uint8_t flags)
     return ALLOW_DISCRETE & flags;
 }
 
-using CapEntry = std::pair<CapabilityID, Plugin::ValueType>;
-
-template <typename T>
-bool NumericalCapabilityCheck(const CapEntry& tagEntry, const  Plugin::Meta& meta,
-                              uint8_t flags, std::function<int(T, T)> compareFunc);
-
-template <typename T>
-bool FixInvalDiscNumericalCheck(const CapEntry& capability, const  Plugin::Meta& meta)
-{
-    return NumericalCapabilityCheck<T>(capability, meta, ALLOW_FIXED | ALLOW_INTERVAL | ALLOW_DISCRETE,
-                                       [](T a, T b) { return a - b; });
-}
-
-template <typename T, typename U>
-bool FixDiscNumericalCheck(const CapEntry& capability, const  Plugin::Meta& meta)
-{
-    return NumericalCapabilityCheck<T>(capability, meta, ALLOW_FIXED | ALLOW_DISCRETE,
-                                       [](T a, T b) { return static_cast<U>(a) - static_cast<U>(b); });
-}
-
 template<typename T>
-bool CapabilityValueCheck(const Plugin::ValueType& val1, const Plugin::ValueType& val2, uint8_t flags,
-                              std::function<int(T,T)> cmpFunc, Plugin::ValueType& outValue);
+bool CapabilityValueCheck(CapabilityID key, const Plugin::ValueType& val1, const Plugin::ValueType& val2,
+                          uint8_t flags, std::function<int(T,T)> cmpFunc, Plugin::ValueType& outValue);
 
 template <typename T>
-bool FixInvalDiscCapValCheck(const Plugin::ValueType& val1, const Plugin::ValueType& val2, Plugin::ValueType& outValue)
+bool FixInvalDiscCapValCheck(CapabilityID key, const Plugin::ValueType& val1, const Plugin::ValueType& val2,
+                             Plugin::ValueType& outValue)
 {
-    return CapabilityValueCheck<T>(val1, val2, ALLOW_FIXED | ALLOW_INTERVAL | ALLOW_DISCRETE, [](T a, T b) {
+    return CapabilityValueCheck<T>(key, val1, val2, ALLOW_FIXED | ALLOW_INTERVAL | ALLOW_DISCRETE,
+        [](T a, T b) {
         return a - b;
-    }, outValue);
+        }, outValue);
 }
 
 template <typename T, typename U>
-bool FixDiscCapValCheck(const Plugin::ValueType& val1, const Plugin::ValueType& val2, Plugin::ValueType& outValue)
+bool FixDiscCapValCheck(CapabilityID key, const Plugin::ValueType& val1, const Plugin::ValueType& val2,
+                        Plugin::ValueType& outValue)
 {
-    return CapabilityValueCheck<T>(val1, val2, ALLOW_FIXED | ALLOW_DISCRETE, [](T a, T b) {
+    return CapabilityValueCheck<T>(key, val1, val2, ALLOW_FIXED | ALLOW_DISCRETE, [](T a, T b) {
         return static_cast<U>(a) - static_cast<U>(b);
     }, outValue);
 }
@@ -100,21 +84,6 @@ static std::vector<CapabilityID> g_allCapabilityId = {
     CapabilityID::MEDIA_BITRATE, // 10
 };
 
-
-static std::map<CapabilityID, std::function<bool(const CapEntry&, const  Plugin::Meta&)>> g_capabilityCheckMap = {
-    {g_allCapabilityId[0], FixInvalDiscNumericalCheck<uint32_t>}, // 0
-    {g_allCapabilityId[1], FixInvalDiscNumericalCheck<uint32_t>}, // 1
-    {g_allCapabilityId[2], FixDiscNumericalCheck<Plugin::AudioChannelLayout, uint64_t>}, // 2
-    {g_allCapabilityId[3], FixDiscNumericalCheck<Plugin::AudioSampleFormat, uint8_t>}, // 3
-    {g_allCapabilityId[4], FixInvalDiscNumericalCheck<uint32_t>}, // 4
-    {g_allCapabilityId[5], FixInvalDiscNumericalCheck<uint32_t>}, // 5
-    {g_allCapabilityId[6], FixDiscNumericalCheck<Plugin::AudioAacProfile, uint8_t>}, // 6
-    {g_allCapabilityId[7], FixInvalDiscNumericalCheck<uint32_t>}, // 7
-    {g_allCapabilityId[8], FixDiscNumericalCheck<Plugin::AudioAacStreamFormat, uint8_t>}, // 8
-    {g_allCapabilityId[9], FixDiscNumericalCheck<Plugin::VideoPixelFormat, uint32_t>}, // 9
-    {g_allCapabilityId[10], FixInvalDiscNumericalCheck<int64_t>}, // 10
-};
-
 template <typename T>
 bool ExtractFixedCap(const Plugin::ValueType& value, Plugin::ValueType& fixedValue);
 static std::map<CapabilityID, std::function<bool(const Plugin::ValueType&, Plugin::ValueType&)>> g_capExtrMap = {
@@ -130,10 +99,9 @@ static std::map<CapabilityID, std::function<bool(const Plugin::ValueType&, Plugi
     {g_allCapabilityId[9], ExtractFixedCap<Plugin::VideoPixelFormat>}, // 9
     {g_allCapabilityId[10], ExtractFixedCap<int64_t>}, // 10
 };
-
-static std::map<CapabilityID,
-    std::function<bool(const Plugin::ValueType& val1, const Plugin::ValueType& val2, Plugin::ValueType& outValue)>>
-    g_capabilityValueCheckMap = {
+using CheckFunc = std::function<bool(Capability::Key key, const Plugin::ValueType& val1, const Plugin::ValueType& val2,
+        Plugin::ValueType& outValue)>;
+static std::map<CapabilityID, CheckFunc> g_capabilityValueCheckMap = {
         {g_allCapabilityId[0], FixInvalDiscCapValCheck<uint32_t>}, // 0
         {g_allCapabilityId[1], FixInvalDiscCapValCheck<uint32_t>}, // 1
         {g_allCapabilityId[2], FixDiscCapValCheck<Plugin::AudioChannelLayout, uint64_t>}, // 2
@@ -187,39 +155,6 @@ bool IsSubsetMime(const std::string& subset, const std::string& universe)
         return false;
     }
     return true;
-}
-
-bool CompatibleWith(const Capability& capability, const Plugin::Meta& meta)
-{
-    // first check mime
-    std::string mimeInMeta;
-    if (!meta.GetString(Plugin::MetaID::MIME, mimeInMeta)) {
-        MEDIA_LOG_E("mime is not found in meta when check compatible");
-        return false;
-    }
-
-    if (!IsSubsetMime(mimeInMeta, capability.mime)) {
-        return false;
-    }
-
-    for (const auto& keyEntry : capability.keys) {
-        auto ite = g_capabilityCheckMap.find(keyEntry.first);
-        if (ite == g_capabilityCheckMap.end()) {
-            MEDIA_LOG_E("found one capability which cannot be checked");
-            return false;
-        }
-        if (!ite->second(keyEntry, meta)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool CompatibleWith(const CapabilitySet& capability, const  Plugin::Meta& meta)
-{
-    return std::any_of(capability.begin(), capability.end(), [&meta](const Plugin::Capability& cap) {
-        return CompatibleWith(cap, meta);
-    });
 }
 
 template <typename T>
@@ -338,8 +273,26 @@ bool DDCapabilityCheck(const Plugin::DiscreteCapability<T>& v1, const Plugin::Di
     return true;
 }
 
+void LogOutIncorrectType(CapabilityID key, uint8_t flags)
+{
+    if (g_tagInfoMap.count(static_cast<Tag>(key)) > 0 ) {
+        const auto& tuple = g_tagInfoMap.at(static_cast<Tag>(key));
+        const auto& typeName = std::get<2>(tuple);
+        MEDIA_LOG_E("type of %" PUBLIC_LOG_S " should be"
+        " %" PUBLIC_LOG_S "(%" PUBLIC_LOG_C ")"
+        " or Interval<%" PUBLIC_LOG_S ">(%" PUBLIC_LOG_C ")"
+        " or Discrete<%" PUBLIC_LOG_S ">(%" PUBLIC_LOG_C ")",
+        std::get<0>(tuple),
+        typeName, IsFixedAllowed(flags)? 'o': 'x',
+        typeName, IsFixedAllowed(flags)? 'o': 'x',
+        typeName, IsFixedAllowed(flags)? 'o': 'x');
+    } else {
+        MEDIA_LOG_E("capability %" PUBLIC_LOG_D32 "is not in the map, may be update the map? ", key);
+    }
+}
+
 template <typename T>
-bool FixedNumericalCapabilityCheck(const T& value2, const Plugin::ValueType& value1,
+bool FixedNumericalCapabilityCheck(CapabilityID key, const T& value2, const Plugin::ValueType& value1,
                                    uint8_t flags, std::function<int(T, T)> cmpFunc, Plugin::ValueType& outValue)
 {
     if (value1.SameTypeWith(typeid(T))) {
@@ -351,12 +304,13 @@ bool FixedNumericalCapabilityCheck(const T& value2, const Plugin::ValueType& val
     if (IsDiscreteAllowed(flags) && value1.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
         return FDCapabilityCheck(value2, Plugin::AnyCast<Plugin::DiscreteCapability<T>>(value1), cmpFunc, outValue);
     }
+    LogOutIncorrectType(key, flags);
     return false;
 }
 
 template <typename T>
-bool IntervalNumericalCapabilityCheck(const Plugin::IntervalCapability<T>& value2, const Plugin::ValueType& value1,
-                                      uint8_t flags, std::function<int(T, T)> cmpFunc, Plugin::ValueType& outValue)
+bool IntervalNumericalCapabilityCheck(CapabilityID key, const Plugin::IntervalCapability<T>& value2,
+    const Plugin::ValueType& value1, uint8_t flags, std::function<int(T, T)> cmpFunc, Plugin::ValueType& outValue)
 {
     if (IsFixedAllowed(flags) && value1.SameTypeWith(typeid(T))) {
         return FICapabilityCheck(Plugin::AnyCast<T>(value1), value2, cmpFunc, outValue);
@@ -367,12 +321,13 @@ bool IntervalNumericalCapabilityCheck(const Plugin::IntervalCapability<T>& value
     if (IsDiscreteAllowed(flags) && value1.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
         return IDCapabilityCheck(value2, Plugin::AnyCast<Plugin::DiscreteCapability<T>>(value1), cmpFunc, outValue);
     }
+    LogOutIncorrectType(key, flags);
     return false;
 }
 
 template <typename T>
-bool DiscreteNumericalCapabilityCheck(const Plugin::DiscreteCapability<T>& value2, const Plugin::ValueType& value1,
-                                      uint8_t flags, std::function<int(T, T)> cmpFunc, Plugin::ValueType& outValue)
+bool DiscreteNumericalCapabilityCheck(CapabilityID key, const Plugin::DiscreteCapability<T>& value2,
+    const Plugin::ValueType& value1, uint8_t flags, std::function<int(T, T)> cmpFunc, Plugin::ValueType& outValue)
 {
     if (IsFixedAllowed(flags) && value1.SameTypeWith(typeid(T))) {
         return FDCapabilityCheck(Plugin::AnyCast<T>(value1), value2, cmpFunc, outValue);
@@ -383,54 +338,27 @@ bool DiscreteNumericalCapabilityCheck(const Plugin::DiscreteCapability<T>& value
     if (value1.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
         return DDCapabilityCheck(Plugin::AnyCast<Plugin::DiscreteCapability<T>>(value1), value2, cmpFunc, outValue);
     }
-    return false;
-}
-
-template <typename T>
-bool NumericalCapabilityCheck(const std::pair<CapabilityID, Plugin::ValueType>& tagEntry, const  Plugin::Meta& meta,
-                              uint8_t flags, std::function<int(T, T)> compareFunc)
-{
-    T metaValue;
-    if (!meta.GetData<T>(static_cast<Plugin::MetaID>(tagEntry.first), metaValue)) {
-        return false;
-    }
-    if (IsFixedAllowed(flags) && tagEntry.second.SameTypeWith(typeid(T))) {
-        auto capabilityValue = Plugin::AnyCast<T>(tagEntry.second);
-        return metaValue == capabilityValue;
-    }
-    if (IsIntervalAllowed(flags) && tagEntry.second.SameTypeWith(typeid(Plugin::IntervalCapability<T>))) {
-        auto capabilityValueRange = Plugin::AnyCast<Plugin::IntervalCapability<T>>(tagEntry.second);
-        T max = std::max(capabilityValueRange.first, capabilityValueRange.second);
-        T min = std::min(capabilityValueRange.first, capabilityValueRange.second);
-        return compareFunc(metaValue, min) >= 0 && compareFunc(metaValue, max) <= 0;
-    }
-    if (IsDiscreteAllowed(flags) && tagEntry.second.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
-        auto capabilityValues = Plugin::AnyCast<Plugin::DiscreteCapability<T>>(tagEntry.second);
-        for (const auto& cap : capabilityValues) {
-            if (compareFunc(metaValue, cap) == 0) {
-                return true;
-            }
-        }
-    }
+    LogOutIncorrectType(key, flags);
     return false;
 }
 
 template<typename T>
-bool CapabilityValueCheck(const Plugin::ValueType& val1, const Plugin::ValueType& val2, uint8_t flags,
+bool CapabilityValueCheck(CapabilityID key, const Plugin::ValueType& val1, const Plugin::ValueType& val2, uint8_t flags,
                           std::function<int(T,T)> cmpFunc, Plugin::ValueType& outValue)
 {
     if (IsFixedAllowed(flags) && val1.SameTypeWith(typeid(Plugin::FixedCapability<T>))) {
-        return FixedNumericalCapabilityCheck<T>(Plugin::AnyCast<Plugin::FixedCapability<T>>(val1), val2, flags, cmpFunc,
-                                             outValue);
+        return FixedNumericalCapabilityCheck<T>(key, Plugin::AnyCast<Plugin::FixedCapability<T>>(val1), val2, flags,
+                                                cmpFunc,outValue);
     }
     if (IsIntervalAllowed(flags) && val1.SameTypeWith(typeid(Plugin::IntervalCapability<T>))) {
-        return IntervalNumericalCapabilityCheck(Plugin::AnyCast<Plugin::IntervalCapability<T>>(val1), val2, flags,
+        return IntervalNumericalCapabilityCheck(key, Plugin::AnyCast<Plugin::IntervalCapability<T>>(val1), val2, flags,
                                                 cmpFunc, outValue);
     }
     if (IsDiscreteAllowed(flags) && val1.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
-        return DiscreteNumericalCapabilityCheck(Plugin::AnyCast<Plugin::DiscreteCapability<T>>(val1), val2, flags,
+        return DiscreteNumericalCapabilityCheck(key, Plugin::AnyCast<Plugin::DiscreteCapability<T>>(val1), val2, flags,
                                                 cmpFunc, outValue);
     }
+    LogOutIncorrectType(key, flags);
     return false;
 }
 
@@ -445,14 +373,13 @@ bool MergeCapabilityKeys(const Capability& originCap, const Capability& otherCap
             continue;
         }
         // if key is in otherCap, calculate the intersections
-        auto funcIte = g_capabilityValueCheckMap.find(pairKey.first);
-        if (funcIte == g_capabilityValueCheckMap.end()) {
-            MEDIA_LOG_W("found one capability %" PUBLIC_OUTPUT "d cannot be applied",
+        if (g_capabilityValueCheckMap.count(pairKey.first) == 0) {
+            MEDIA_LOG_W("capability %" PUBLIC_LOG_D32 " cannot be applied, may be update the check map?",
                         static_cast<int32_t>(pairKey.first));
             continue;
         }
         Plugin::ValueType tmp;
-        if ((funcIte->second)(pairKey.second, oIte->second, tmp)) {
+        if (g_capabilityValueCheckMap.at(pairKey.first)(pairKey.first, pairKey.second, oIte->second, tmp)) {
             resCap.keys[pairKey.first] = tmp;
         } else {
             //  if no intersections return false

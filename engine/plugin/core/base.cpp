@@ -19,7 +19,7 @@
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
 #include "plugin/interface/plugin_base.h"
-#include "utils.h"
+#include "plugin_core_utils.h"
 
 using namespace OHOS::Media::Plugin;
 

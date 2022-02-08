@@ -20,7 +20,7 @@
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
 #include "interface/audio_sink_plugin.h"
-#include "utils.h"
+#include "plugin_core_utils.h"
 
 using namespace OHOS::Media::Plugin;
 

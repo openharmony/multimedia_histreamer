@@ -18,14 +18,12 @@
 #include <vector>
 #include "plugin/common/plugin_audio_tags.h"
 
-#define DECLARE_PARAMETER_ITEM(tag, type) \
-{tag, {#tag, CheckParameterType<type>}}
+#define DECLARE_PARAMETER_ITEM(tag, type, op) \
+{tag, {#tag, CheckParameterType<type>, op}}
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-const PluginParaAllowedMap g_emptyMap;
-
 template <typename T>
 static bool CheckParameterType(const Plugin::ValueType& value)
 {
@@ -34,46 +32,51 @@ static bool CheckParameterType(const Plugin::ValueType& value)
 
 const PluginParaAllowedMap& PluginParameterTable::FindAllowedParameterMap(FilterType category)
 {
+    static const PluginParaAllowedMap emptyMap;
     auto ite = table_.find(category);
     if (ite == table_.end()) {
-        return g_emptyMap;
+        return emptyMap;
     }
     return ite->second;
 }
 
+using namespace OHOS::Media::Plugin;
 const std::map<FilterType, PluginParaAllowedMap> PluginParameterTable::table_ = {
     {FilterType::AUDIO_DECODER, {
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_CHANNELS, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_RATE, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_BITRATE, int64_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_CODEC_CONFIG, std::vector<uint8_t>),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_CHANNELS, uint32_t, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_SAMPLE_RATE, uint32_t, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::MEDIA_BITRATE, int64_t, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::MEDIA_CODEC_CONFIG, std::vector<uint8_t>, PARAM_SET),
     }},
     {FilterType::AUDIO_SINK, {
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_CHANNELS, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_RATE, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_CHANNEL_LAYOUT, Plugin::AudioChannelLayout),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_CHANNELS, uint32_t, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_SAMPLE_RATE, uint32_t, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_CHANNEL_LAYOUT, Plugin::AudioChannelLayout, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t, PARAM_SET),
     }},
     {FilterType::MUXER, {
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::MIME, std::string),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_CHANNELS, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_RATE, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_BITRATE, int64_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_CODEC_CONFIG, std::vector<uint8_t>),
+        DECLARE_PARAMETER_ITEM(Tag::MIME, std::string, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_CHANNELS, uint32_t, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_SAMPLE_RATE, uint32_t, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::MEDIA_BITRATE, int64_t, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::MEDIA_CODEC_CONFIG, std::vector<uint8_t>, PARAM_SET),
     }},
     {FilterType::AUDIO_ENCODER, {
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_CHANNELS, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_RATE, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_BITRATE, int64_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_CHANNEL_LAYOUT, Plugin::AudioChannelLayout),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_CODEC_CONFIG, std::vector<uint8_t>),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_CHANNELS, uint32_t, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_SAMPLE_RATE, uint32_t, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::MEDIA_BITRATE, int64_t, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t, PARAM_SET | PARAM_GET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_CHANNEL_LAYOUT, Plugin::AudioChannelLayout, PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::MEDIA_CODEC_CONFIG, std::vector<uint8_t>,
+                               PARAM_SET | PARAM_GET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_AAC_PROFILE, uint32_t, PARAM_SET | PARAM_SET),
+        DECLARE_PARAMETER_ITEM(Tag::AUDIO_AAC_LEVEL, uint32_t, PARAM_SET | PARAM_SET),
     }},
 };
 }

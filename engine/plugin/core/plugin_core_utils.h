@@ -70,4 +70,4 @@ inline const char* GetStateString(OHOS::Media::Plugin::State state)
 }
 }
 }
-#endif //HISTREAMER_PLUGIN_CORE_UTILS_H
+#endif // HISTREAMER_PLUGIN_CORE_UTILS_H

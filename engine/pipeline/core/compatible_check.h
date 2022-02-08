@@ -23,9 +23,6 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-bool CompatibleWith(const Capability& capability, const Plugin::Meta& meta);
-bool CompatibleWith(const CapabilitySet& capability, const Plugin::Meta& meta);
-
 /**
  * merge otherCap keys with originCap keys:
  * 1. if key exists in only one Cap (e.g. only exists in originCap or otherCap), then put key into resCap directly

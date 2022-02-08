@@ -143,11 +143,12 @@ ErrorCode MuxerFilter::AddTrackThenConfigure(const std::pair<std::string, Plugin
     for (const auto& keyPair : parameterMap) {
         Plugin::ValueType outValue;
         if (metaPair.second.GetData(static_cast<Plugin::MetaID>(keyPair.first), outValue) &&
-            keyPair.second.second(outValue)) {
+            (std::get<2>(keyPair.second) & PARAM_SET) &&
+            std::get<1>(keyPair.second)(outValue)) {
             plugin_->SetTrackParameter(trackId, keyPair.first, outValue);
         } else {
             MEDIA_LOG_W("parameter %" PUBLIC_OUTPUT "s in meta is not found or type mismatch",
-                        keyPair.second.first.c_str());
+                        std::get<0>(keyPair.second).c_str());
         }
     }
     return ErrorCode::SUCCESS;

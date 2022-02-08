@@ -108,7 +108,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
             }
             auto thisOut = std::make_shared<Plugin::Capability>();
             if (!MergeCapabilityKeys(*upstreamCap, outCap, *thisOut)) {
-                MEDIA_LOG_W("one of out cap of plugin %" PUBLIC_OUTPUT "s does not match with upstream capability",
+                MEDIA_LOG_I("one outCap of plugin %" PUBLIC_LOG_S " does not match with upstream capability",
                             candidate.first->name.c_str());
                 continue;
             }
@@ -125,12 +125,8 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
             break;
         }
     }
-    if (!atLeastOutCapMatched) {
-        MEDIA_LOG_W("cannot find available encoder plugin");
-        return false;
-    }
-    if (selectedPluginInfo == nullptr) {
-        MEDIA_LOG_W("cannot find available downstream plugin");
+    if (!atLeastOutCapMatched || selectedPluginInfo == nullptr) {
+        MEDIA_LOG_W("can't find available encoder plugin with %" PUBLIC_LOG_S, Capability2String(*upstreamCap).c_str());
         return false;
     }
     auto res = UpdateAndInitPluginByInfo<Plugin::Codec>(plugin_, pluginInfo_, selectedPluginInfo,

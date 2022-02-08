@@ -176,7 +176,7 @@ ErrorCode AudioCaptureFilter::DoConfigure()
         return ErrorCode::ERROR_UNKNOWN;
     }
     if (!outPorts_[0]->Configure(audioMeta)) {
-        MEDIA_LOG_E("Configure downstream fail");
+        MEDIA_LOG_E("Configure downstream fail with %" PUBLIC_LOG_S, Meta2String(*audioMeta).c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
     return InitAndConfigPlugin(audioMeta);
@@ -424,13 +424,13 @@ ErrorCode AudioCaptureFilter::FindPlugin()
     std::set<std::string> nameList = pluginManager.ListPlugins(PluginType::SOURCE);
     for (const std::string& name : nameList) {
         std::shared_ptr<PluginInfo> info = pluginManager.GetPluginInfo(PluginType::SOURCE, name);
-        MEDIA_LOG_I("name: %" PUBLIC_OUTPUT "s, info->name: %" PUBLIC_OUTPUT "s", name.c_str(), info->name.c_str());
+        MEDIA_LOG_I("name: %" PUBLIC_LOG_S ", info->name: %" PUBLIC_LOG_S, name.c_str(), info->name.c_str());
         auto val = info->extra[PLUGIN_INFO_EXTRA_INPUT_TYPE];
         if (val.SameTypeWith(typeid(Plugin::SrcInputType))) {
             auto supportInputType = OHOS::Media::Plugin::AnyCast<Plugin::SrcInputType>(val);
             if (inputType_ == supportInputType && DoNegotiate(info->outCaps) &&
                 CreatePlugin(info, name, pluginManager) == ErrorCode::SUCCESS) {
-                MEDIA_LOG_I("CreatePlugin %" PUBLIC_OUTPUT "s success", name_.c_str());
+                MEDIA_LOG_I("CreatePlugin %" PUBLIC_LOG_S "success", name_.c_str());
                 return ErrorCode::SUCCESS;
             }
         }

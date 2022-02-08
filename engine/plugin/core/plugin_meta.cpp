@@ -178,26 +178,14 @@ bool Meta::GetPointer(Plugin::MetaID id, void** ptr, size_t& size) const // NOLI
     }
 }
 
-std::string Meta::Dump() const
+std::vector<MetaID> Meta::GetMetaIDs() const
 {
-    std::string result = "MetaDump: ";
-    for (auto& ptr : items_) {
-        if (ptr.second.SameTypeWith(typeid(PointerPair))) {
-            auto pointerPair = Plugin::AnyCast<PointerPair>(ptr.second);
-            result = FormatString("%s {Meta: %d, PointerPair(%x, %d)},",
-                                  result.c_str(), ptr.first,
-                                  pointerPair.first.get(), pointerPair.second);
-        } else if (ptr.second.SameTypeWith(typeid(Plugin::AudioSampleFormat))) {
-            result = FormatString("%s {Meta: %d, AudioSampleFormat(%d)},",
-                                  result.c_str(), ptr.first,
-                                  Plugin::AnyCast<Plugin::AudioSampleFormat>(ptr.second));
-        } else if (ptr.second.SameTypeWith(typeid(uint64_t))) {
-            result = FormatString("%s {Meta: %d, uint64_t(%" PRIu64 ")},",
-                                  result.c_str(), ptr.first,
-                                  Plugin::AnyCast<uint64_t>(ptr.second));
-        }
+    std::vector<MetaID> ret (items_.size());
+    int cnt = 0;
+    for (const auto& tmp : items_) {
+        ret[cnt++] = tmp.first;
     }
-    return result;
+    return ret;
 }
 } // namespace Plugin
 } // namespace Media

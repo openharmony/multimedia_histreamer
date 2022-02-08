@@ -33,11 +33,12 @@ ErrorCode CodecFilterBase::ConfigureWithMetaLocked(const std::shared_ptr<const P
     for (const auto& keyPair : parameterMap) {
         Plugin::ValueType outValue;
         if (meta->GetData(static_cast<Plugin::MetaID>(keyPair.first), outValue) &&
-            keyPair.second.second(outValue)) {
+            (std::get<2>(keyPair.second) & PARAM_SET) &&
+            std::get<1>(keyPair.second)(outValue)) {
             SetPluginParameterLocked(keyPair.first, outValue);
         } else {
             MEDIA_LOG_W("parameter %" PUBLIC_OUTPUT "s in meta is not found or type mismatch",
-                        keyPair.second.first.c_str());
+                        std::get<0>(keyPair.second).c_str());
         }
     }
     return ErrorCode::SUCCESS;

@@ -107,6 +107,8 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
         }
     }
     negotiatedCap = candidatePlugins[0].second;
+    MEDIA_LOG_I("use plugin %" PUBLIC_LOG_S " with negotiated %" PUBLIC_LOG_S, selectedPluginInfo->name.c_str(),
+                Capability2String(negotiatedCap).c_str());
     auto res = UpdateAndInitPluginByInfo<Plugin::AudioSink>(plugin_, pluginInfo_, selectedPluginInfo,
         [](const std::string& name) -> std::shared_ptr<Plugin::AudioSink> {
         return Plugin::PluginManager::Instance().CreateAudioSinkPlugin(name);
@@ -118,6 +120,7 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
 bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     PROFILE_BEGIN("Audio sink configure begin");
+    MEDIA_LOG_I("receive upstream meta %" PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
     if (plugin_ == nullptr || pluginInfo_ == nullptr) {
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
@@ -141,11 +144,13 @@ ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Plugin:
     auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
         Plugin::ValueType outValue;
-        if (meta->GetData(static_cast<Plugin::MetaID>(keyPair.first), outValue) && keyPair.second.second(outValue)) {
+        if (meta->GetData(static_cast<Plugin::MetaID>(keyPair.first), outValue) &&
+            (std::get<2>(keyPair.second) & PARAM_SET) &&
+            std::get<1>(keyPair.second)(outValue)) {
             SetPluginParameter(keyPair.first, outValue);
         } else {
             MEDIA_LOG_W("parameter %" PUBLIC_OUTPUT "s in meta is not found or type mismatch",
-                        keyPair.second.first.c_str());
+                        std::get<0>(keyPair.second).c_str());
         }
     }
     return ErrorCode::SUCCESS;
@@ -154,7 +159,7 @@ ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const 
 {
     auto err = ConfigureWithMeta(meta);
     if (err != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("sink configuration failed ");
+        MEDIA_LOG_E("sink configuration failed.");
         return err;
     }
     err = TranslatePluginStatus(plugin_->Prepare());
