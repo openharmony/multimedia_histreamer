@@ -29,7 +29,7 @@ namespace Pipeline {
 constexpr uint8_t PARAM_GET = 0x01;
 constexpr uint8_t PARAM_SET = 0x02;
 using PluginParaAllowedMap = std::map<Plugin::Tag,
-    std::tuple<std::string, std::function<bool(const Plugin::ValueType&)>, uint8_t>>;
+    std::pair<std::function<bool(Plugin::Tag, const Plugin::ValueType&)>, uint8_t>>;
 
 struct PluginParameterTable {
     static const PluginParaAllowedMap& FindAllowedParameterMap(FilterType category);

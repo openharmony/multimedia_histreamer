@@ -23,6 +23,7 @@
 #include "foundation/log.h"
 #include "common/plugin_settings.h"
 #include "common/plugin_utils.h"
+#include "pipeline/core/plugin_attr_desc.h"
 
 namespace OHOS {
 namespace Media {
@@ -141,14 +142,18 @@ ErrorCode MuxerFilter::AddTrackThenConfigure(const std::pair<std::string, Plugin
     trackInfos_.emplace_back(TrackInfo{static_cast<int32_t>(trackId), metaPair.first, false});
     auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
-        Plugin::ValueType outValue;
-        if (metaPair.second.GetData(static_cast<Plugin::MetaID>(keyPair.first), outValue) &&
-            (std::get<2>(keyPair.second) & PARAM_SET) &&
-            std::get<1>(keyPair.second)(outValue)) {
-            plugin_->SetTrackParameter(trackId, keyPair.first, outValue);
+        auto outValue = metaPair.second.GetData(static_cast<Plugin::MetaID>(keyPair.first));
+        if (outValue &&
+            (keyPair.second.second & PARAM_SET) &&
+            keyPair.second.first(keyPair.first, outValue)) {
+            plugin_->SetTrackParameter(trackId, keyPair.first, *outValue);
         } else {
-            MEDIA_LOG_W("parameter %" PUBLIC_OUTPUT "s in meta is not found or type mismatch",
-                        std::get<0>(keyPair.second).c_str());
+            if (g_tagInfoMap.count(keyPair.first) == 0) {
+                MEDIA_LOG_W("tag %" PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
+            } else {
+                MEDIA_LOG_W("parameter %" PUBLIC_LOG_S " in meta is not found or type mismatch",
+                    std::get<0>(g_tagInfoMap.at(keyPair.first)));
+            }
         }
     }
     return ErrorCode::SUCCESS;

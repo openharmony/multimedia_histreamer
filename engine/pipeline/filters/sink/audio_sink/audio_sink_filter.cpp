@@ -21,6 +21,7 @@
 #include "foundation/osal/utils/util.h"
 #include "pipeline/filters/common/plugin_settings.h"
 #include "pipeline/core/clock_manager.h"
+#include "pipeline/core/plugin_attr_desc.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/core/plugin_meta.h"
@@ -143,14 +144,18 @@ ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Plugin:
 {
     auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
-        Plugin::ValueType outValue;
-        if (meta->GetData(static_cast<Plugin::MetaID>(keyPair.first), outValue) &&
-            (std::get<2>(keyPair.second) & PARAM_SET) &&
-            std::get<1>(keyPair.second)(outValue)) {
-            SetPluginParameter(keyPair.first, outValue);
+        auto outValPtr = meta->GetData(static_cast<Plugin::MetaID>(keyPair.first));
+        if (outValPtr &&
+            (keyPair.second.second & PARAM_SET) &&
+            keyPair.second.first(keyPair.first, *outValPtr)) {
+            SetPluginParameter(keyPair.first, *outValPtr);
         } else {
-            MEDIA_LOG_W("parameter %" PUBLIC_OUTPUT "s in meta is not found or type mismatch",
-                        std::get<0>(keyPair.second).c_str());
+            if (g_tagInfoMap.count(keyPair.first) == 0) {
+                MEDIA_LOG_W("tag %" PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
+            } else {
+                MEDIA_LOG_W("parameter %" PUBLIC_LOG_S " in meta is not found or type mismatch",
+                            std::get<0>(g_tagInfoMap.at(keyPair.first)));
+            }
         }
     }
     return ErrorCode::SUCCESS;

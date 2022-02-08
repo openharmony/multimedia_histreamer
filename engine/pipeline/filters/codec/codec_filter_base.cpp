@@ -17,6 +17,7 @@
 
 #include "codec_filter_base.h"
 
+#include "pipeline/core/plugin_attr_desc.h"
 #include "pipeline/filters/common/plugin_settings.h"
 #include "utils/memory_helper.h"
 
@@ -31,14 +32,18 @@ ErrorCode CodecFilterBase::ConfigureWithMetaLocked(const std::shared_ptr<const P
 {
     auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
-        Plugin::ValueType outValue;
-        if (meta->GetData(static_cast<Plugin::MetaID>(keyPair.first), outValue) &&
-            (std::get<2>(keyPair.second) & PARAM_SET) &&
-            std::get<1>(keyPair.second)(outValue)) {
-            SetPluginParameterLocked(keyPair.first, outValue);
+        auto outValPtr = meta->GetData(static_cast<Plugin::MetaID>(keyPair.first));
+        if (outValPtr &&
+            (keyPair.second.second & PARAM_SET) &&
+            keyPair.second.first(keyPair.first, *outValPtr)) {
+            SetPluginParameterLocked(keyPair.first, *outValPtr);
         } else {
-            MEDIA_LOG_W("parameter %" PUBLIC_OUTPUT "s in meta is not found or type mismatch",
-                        std::get<0>(keyPair.second).c_str());
+            if (g_tagInfoMap.count(keyPair.first) == 0) {
+                MEDIA_LOG_W("tag %" PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
+            } else {
+                MEDIA_LOG_W("parameter %" PUBLIC_LOG_S " in meta is not found or type mismatch",
+                            std::get<0>(g_tagInfoMap.at(keyPair.first)));
+            }
         }
     }
     return ErrorCode::SUCCESS;

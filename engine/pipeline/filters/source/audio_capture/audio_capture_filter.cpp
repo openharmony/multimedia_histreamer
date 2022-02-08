@@ -430,7 +430,7 @@ ErrorCode AudioCaptureFilter::FindPlugin()
             auto supportInputType = OHOS::Media::Plugin::AnyCast<Plugin::SrcInputType>(val);
             if (inputType_ == supportInputType && DoNegotiate(info->outCaps) &&
                 CreatePlugin(info, name, pluginManager) == ErrorCode::SUCCESS) {
-                MEDIA_LOG_I("CreatePlugin %" PUBLIC_LOG_S "success", name_.c_str());
+                MEDIA_LOG_I("CreatePlugin %" PUBLIC_LOG_S " success", name_.c_str());
                 return ErrorCode::SUCCESS;
             }
         }

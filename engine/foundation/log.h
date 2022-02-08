@@ -155,12 +155,33 @@
     } while (0)
 #endif
 
+#ifndef FALSE_RETURN_MSG
+#define FALSE_RETURN_MSG(exec, ret, fmt, args...)                                                                      \
+    do {                                                                                                               \
+        bool value = (exec);                                                                                           \
+        if (!value) {                                                                                                  \
+            MEDIA_LOG_E(fmt, ##args);                                                                                  \
+            return ret;                                                                                                \
+        }                                                                                                              \
+    } while (0)
+#endif
+
 #ifndef FALSE_LOG
 #define FALSE_LOG(exec)                                                                                                \
     do {                                                                                                               \
         bool value = (exec);                                                                                           \
         if (!value) {                                                                                                  \
             MEDIA_LOG_E("FALSE_LOG: " #exec);                                                                          \
+        }                                                                                                              \
+    } while (0)
+#endif
+
+#ifndef FALSE_LOG_MSG
+#define FALSE_LOG_MSG(exec, fmt, args...)                                                                              \
+    do {                                                                                                               \
+        bool value = (exec);                                                                                           \
+        if (!value) {                                                                                                  \
+            MEDIA_LOG_E(fmt, ##args);                                                                                  \
         }                                                                                                              \
     } while (0)
 #endif
