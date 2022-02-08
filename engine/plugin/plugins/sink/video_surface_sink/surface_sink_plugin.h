@@ -35,6 +35,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace SurfaceSink {
 #define DEFAULT_WIDTH      640
 #define DEFAULT_HEIGHT     480
 #define DEFAULT_BUFFER_NUM 8
@@ -90,6 +91,7 @@ private:
     std::ofstream dumpData_;
 #endif
 };
+}
 }
 }
 }

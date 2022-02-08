@@ -82,6 +82,7 @@ struct AudioDemuxerMp3Attr {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Minimp3 {
 class Minimp3DemuxerPlugin : public DemuxerPlugin {
 public:
     explicit Minimp3DemuxerPlugin(std::string name);
@@ -144,6 +145,7 @@ private:
     Minimp3DemuxerOp    minimp3DemuxerImpl_{};
     AudioDemuxerMp3Attr mp3DemuxerAttr_{};
 };
+} // namespace Minimp3
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

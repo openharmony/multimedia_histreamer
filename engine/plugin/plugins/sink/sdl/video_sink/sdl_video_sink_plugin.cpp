@@ -28,6 +28,7 @@
 
 namespace {
 using namespace OHOS::Media::Plugin;
+using namespace Sdl;
 
 std::shared_ptr<VideoSinkPlugin> VideoSinkPluginCreator(const std::string& name)
 {

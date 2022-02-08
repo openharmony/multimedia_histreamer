@@ -23,6 +23,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace FileSource {
 class FileSourceAllocator : public Allocator {
 public:
     FileSourceAllocator() = default;
@@ -67,6 +68,7 @@ private:
     Status OpenFile();
     void CloseFile();
 };
+} // namespace FileSource
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

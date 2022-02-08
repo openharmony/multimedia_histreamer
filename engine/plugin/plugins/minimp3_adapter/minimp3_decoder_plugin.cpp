@@ -29,6 +29,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Minimp3 {
 namespace {
     constexpr uint32_t MP3_384_SAMPLES_PER_FRAME  = 384;
     constexpr uint32_t MP3_576_SAMPLES_PER_FRAME  = 576;
@@ -298,6 +299,7 @@ void UpdatePluginDefinition(CodecPluginDef& definition)
 }
 
 PLUGIN_DEFINITION(Minimp3Decoder, LicenseType::CC0, RegisterDecoderPlugin, [] {});
+} // namespace Minimp3
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

@@ -26,7 +26,7 @@
 
 namespace {
 using namespace OHOS::Media::Plugin;
-
+using namespace Sdl;
 constexpr int MAX_AUDIO_FRAME_SIZE = 192000;
 std::function<void(void*, uint8_t*, int)> g_audioCallback;
 
@@ -238,7 +238,7 @@ Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
         case Tag::AUDIO_CHANNEL_LAYOUT: {
             RETURN_ERROR_IF_CHECK_ERROR(AudioChannelLayout);
             auto channelLayout = Plugin::AnyCast<AudioChannelLayout>(value);
-            channelMask_ = ConvertChannelLayoutToFFmpeg(channelLayout);
+            channelMask_ = Ffmpeg::ConvertChannelLayoutToFFmpeg(channelLayout);
             break;
         }
         case Tag::AUDIO_SAMPLE_FORMAT: {

@@ -29,6 +29,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace StreamSource {
 using StreamCallback = OHOS::Media::StreamCallback;
 using StreamSource = OHOS::Media::StreamSource;
 
@@ -107,6 +108,7 @@ private:
         return ++idx_;
     }
 };
+} // namespace StreamSource
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

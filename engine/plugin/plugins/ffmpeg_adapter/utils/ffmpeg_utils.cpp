@@ -26,6 +26,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 // Internal definitions
 namespace {
 // Histreamer channel layout to ffmpeg channel layout
@@ -314,6 +315,7 @@ bool FindTagByAvMetaName(const std::string& metaName, Tag& tag)
     tag = ite->second;
     return true;
 }
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

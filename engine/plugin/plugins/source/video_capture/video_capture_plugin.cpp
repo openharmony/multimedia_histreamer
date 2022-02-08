@@ -28,7 +28,7 @@
 namespace {
 // register plugins
 using namespace OHOS::Media;
-
+using namespace VideoCapture;
 std::shared_ptr<Plugin::SourcePlugin> VideoCapturePluginCreater(const std::string &name)
 {
     return std::make_shared<Plugin::VideoCapturePlugin>(name);

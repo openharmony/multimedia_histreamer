@@ -26,6 +26,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace FileSink {
 std::shared_ptr<OutputSinkPlugin> FileFdSinkPluginCreator(const std::string& name)
 {
     return std::make_shared<FileFdSinkPlugin>(name);
@@ -101,6 +102,7 @@ Status FileFdSinkPlugin::Flush()
     MEDIA_LOG_D("OUT");
     return Status::OK;
 }
+} // namespace FileSink
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

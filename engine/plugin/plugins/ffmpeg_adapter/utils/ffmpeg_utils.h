@@ -33,6 +33,7 @@ extern "C" {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 std::string AVStrError(int errnum);
 
 /**
@@ -81,6 +82,7 @@ uint64_t ConvertChannelLayoutToFFmpeg(AudioChannelLayout channelLayout);
 
 bool FindAvMetaNameByTag(Tag tag, std::string& metaName);
 bool FindTagByAvMetaName(const std::string& metaName, Tag& tag);
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

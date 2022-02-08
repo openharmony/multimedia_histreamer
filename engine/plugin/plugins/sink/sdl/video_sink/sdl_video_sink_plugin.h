@@ -31,6 +31,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Sdl {
 class SdlVideoSinkPlugin : public VideoSinkPlugin, public std::enable_shared_from_this<SdlVideoSinkPlugin> {
 public:
     explicit SdlVideoSinkPlugin(std::string name);
@@ -102,6 +103,7 @@ private:
     int32_t UpdateNVTexture(const uint8_t **data, int32_t *lineSize, const std::shared_ptr<VideoBufferMeta> &videoMeta,
                     int32_t ySize, const uint8_t *ptr) const;
 };
+}
 }
 }
 }

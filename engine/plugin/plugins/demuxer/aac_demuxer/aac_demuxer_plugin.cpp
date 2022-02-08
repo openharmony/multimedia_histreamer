@@ -30,6 +30,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace AacDemuxer {
 namespace {
     constexpr uint32_t PROBE_READ_LENGTH = 2;
     constexpr uint32_t GET_INFO_READ_LEN = 7;
@@ -375,6 +376,7 @@ namespace {
 }
 
 PLUGIN_DEFINITION(AACDemuxer, LicenseType::APACHE_V2, RegisterPlugin, [] {});
+} // namespace AacDemuxer
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

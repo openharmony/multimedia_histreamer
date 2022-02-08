@@ -42,6 +42,7 @@ struct AudioDecoderMp3Attr {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Minimp3 {
 class Minimp3DecoderPlugin : public CodecPlugin {
 public:
     explicit Minimp3DecoderPlugin(std::string name);
@@ -105,6 +106,7 @@ private:
     std::shared_ptr<Buffer>     outputBuffer_ {nullptr};
     std::weak_ptr<DataCallback> dataCb_ {};
 };
+} // namespace Minimp3
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

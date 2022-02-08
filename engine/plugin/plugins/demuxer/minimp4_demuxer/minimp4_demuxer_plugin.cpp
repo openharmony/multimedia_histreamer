@@ -32,6 +32,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Minimp4 {
 namespace {
 std::vector<int> sampleRateVec {
     96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350
@@ -370,6 +371,7 @@ Status RegisterPlugins(const std::shared_ptr<Register> &reg)
 }
 }
 PLUGIN_DEFINITION(MiniMP4Demuxer, LicenseType::CC0, RegisterPlugins, [] {});
+} // namespace Minimp4
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

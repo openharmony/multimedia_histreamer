@@ -27,6 +27,7 @@
 
 namespace {
 using namespace OHOS::Media;
+using namespace Plugin::Ffmpeg;
 
 std::map<std::string, std::shared_ptr<AVOutputFormat>> g_pluginOutputFmt;
 
@@ -82,7 +83,7 @@ Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg
             }
         }
         std::string pluginName = "ffmpegMux_" + std::string(outputFormat->name);
-        Plugin::ReplaceDelimiter(".,|-<> ", '_', pluginName);
+        Plugin::Ffmpeg::ReplaceDelimiter(".,|-<> ", '_', pluginName);
         Plugin::MuxerPluginDef def;
         if (!UpdatePluginCapability(outputFormat, def)) {
             continue;
@@ -180,6 +181,7 @@ do { \
 } while (0)
 
     using namespace Plugin;
+    using namespace Ffmpeg;
     auto ret = SetSingleParameter<AudioSampleFormat, int32_t>(Tag::AUDIO_SAMPLE_FORMAT, tagMap,
                                                               stream->codecpar->format, Trans2FFmepgFormat);
     std::function<int32_t(uint32_t)> ui2iFunc = [](uint32_t i) {return i;};
@@ -286,7 +288,7 @@ Plugin::Status SetTagsOfGeneral(AVFormatContext* fmtCtx, const Plugin::TagMap& t
 {
     for (const auto& pair: tags) {
         std::string metaName;
-        if (!Plugin::FindAvMetaNameByTag(pair.first, metaName)) {
+        if (!Plugin::Ffmpeg::FindAvMetaNameByTag(pair.first, metaName)) {
             MEDIA_LOG_I("tag %" PUBLIC_OUTPUT "d will not written as general meta", pair.first);
             continue;
         }

@@ -22,6 +22,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 class BitReader {
 public:
     BitReader();
@@ -100,6 +101,7 @@ private:
     const uint8_t* end_;
     uint8_t availBits_{8};
 };
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

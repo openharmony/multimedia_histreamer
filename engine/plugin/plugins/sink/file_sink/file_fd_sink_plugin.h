@@ -20,6 +20,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace FileSink {
 class FileFdSinkPlugin : public OutputSinkPlugin {
 public:
     explicit FileFdSinkPlugin(std::string name);
@@ -36,6 +37,7 @@ private:
     size_t fileSize_{0};
     bool isSeekable_;
 };
+}
 }
 }
 }

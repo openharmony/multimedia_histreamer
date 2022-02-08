@@ -19,6 +19,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace FileSink {
 std::shared_ptr<OutputSinkPlugin> FilePathSinkPluginCreator(const std::string& name)
 {
     return std::make_shared<FilePathSinkPlugin>(name);
@@ -136,6 +137,7 @@ void FilePathSinkPlugin::CloseFile()
         fp_ = nullptr;
     }
 }
+} // namespace FileSink
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

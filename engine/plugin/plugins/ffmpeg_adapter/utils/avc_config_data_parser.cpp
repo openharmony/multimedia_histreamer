@@ -27,6 +27,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 #define AVC_MIN_CONFIG_DATA_SIZE 7
 #define AVC_NAL_HEADER_LEN 4
 
@@ -255,6 +256,7 @@ bool AVCConfigDataParser::ParseNal()
     }
     return true;
 }
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

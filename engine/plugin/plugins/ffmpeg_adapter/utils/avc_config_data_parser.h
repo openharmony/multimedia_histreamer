@@ -27,6 +27,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 #define AVC_MAX_CONFIG_ITEM 256
 
 class AVCConfigDataParser final {
@@ -74,6 +75,7 @@ private:
     bool ParseSpsOrPps(const uint32_t mask);
     bool ParseNal();
 };
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

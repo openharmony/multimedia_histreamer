@@ -37,6 +37,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 namespace {
 std::map<std::string, std::shared_ptr<AVInputFormat>> g_pluginInputFormat;
 
@@ -640,6 +641,7 @@ Status RegisterPlugins(const std::shared_ptr<Register>& reg)
 } // namespace
 
 PLUGIN_DEFINITION(FFmpegDemuxer, LicenseType::LGPL, RegisterPlugins, [] { g_pluginInputFormat.clear(); });
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

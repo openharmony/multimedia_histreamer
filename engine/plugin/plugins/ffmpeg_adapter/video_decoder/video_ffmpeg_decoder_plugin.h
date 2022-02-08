@@ -39,6 +39,7 @@ extern "C" {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 class VideoFfmpegDecoderPlugin : public CodecPlugin {
 public:
     explicit VideoFfmpegDecoderPlugin(std::string name);
@@ -138,6 +139,7 @@ private:
     OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufferQ_;
     std::shared_ptr<OHOS::Media::OSAL::Task> decodeTask_;
 };
+}
 }
 }
 }

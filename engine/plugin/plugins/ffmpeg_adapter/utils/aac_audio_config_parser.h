@@ -24,6 +24,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 class AACAudioConfigParser final {
 public:
     AACAudioConfigParser(const uint8_t* audioConfig, size_t len);
@@ -69,6 +70,7 @@ private:
     bool isConfigValid_;
     AudioSpecificConfig audioConfig_;
 };
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

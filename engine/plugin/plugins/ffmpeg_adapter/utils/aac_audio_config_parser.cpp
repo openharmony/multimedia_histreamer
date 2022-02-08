@@ -22,6 +22,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 AACAudioConfigParser::AACAudioConfigParser(const uint8_t* audioConfig, size_t len)
     : bitReader_(audioConfig, len), isConfigValid_(false)
 {
@@ -333,6 +334,7 @@ bool AACAudioConfigParser::ParseProfile()
     }
     return ret;
 }
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

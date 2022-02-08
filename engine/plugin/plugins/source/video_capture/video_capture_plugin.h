@@ -29,6 +29,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace VideoCapture {
 class VideoCaptureAllocator : public Plugin::Allocator {
 public:
     VideoCaptureAllocator() = default;
@@ -97,6 +98,7 @@ private:
     Rect damage_;
     int32_t isKeyFrame_ {0};
 };
+} // namespace VideoCapture
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

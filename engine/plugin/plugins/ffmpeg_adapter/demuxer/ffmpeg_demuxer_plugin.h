@@ -36,6 +36,7 @@ extern "C" {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 class FFmpegDemuxerPlugin : public DemuxerPlugin {
 public:
     explicit FFmpegDemuxerPlugin(std::string name);
@@ -106,6 +107,7 @@ private:
     std::vector<int32_t> selectedTrackIds_;
     OSAL::Mutex mutex_ {};
 };
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

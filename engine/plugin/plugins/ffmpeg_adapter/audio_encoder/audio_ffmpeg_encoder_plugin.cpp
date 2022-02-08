@@ -27,6 +27,7 @@
 namespace {
 // register plugins
 using namespace OHOS::Media::Plugin;
+using namespace Ffmpeg;
 void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition);
 
 std::map<std::string, std::shared_ptr<const AVCodec>> codecMap;
@@ -227,7 +228,7 @@ void AudioFfmpegEncoderPlugin::ConfigCodecLocked()
     }
     AudioChannelLayout audioChannelLayout = AudioChannelLayout::STEREO;
     if (FindInParameterMapThenAssignLocked(Tag::AUDIO_CHANNEL_LAYOUT, audioChannelLayout)) {
-        avCodecContext_->channel_layout = ConvertChannelLayoutToFFmpeg(audioChannelLayout);
+        avCodecContext_->channel_layout = Ffmpeg::ConvertChannelLayoutToFFmpeg(audioChannelLayout);
     }
 }
 

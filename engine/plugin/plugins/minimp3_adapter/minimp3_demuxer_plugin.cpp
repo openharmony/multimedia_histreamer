@@ -30,6 +30,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Minimp3 {
 namespace {
 constexpr uint32_t MAX_SAMPLES_PERFRAME    = 1152 * 2;
 constexpr uint32_t MP3_SEEK_DISCARD_ITEMS  = 2;
@@ -757,6 +758,7 @@ Status RegisterPlugin(const std::shared_ptr<Register>& reg)
 }
 
 PLUGIN_DEFINITION(Minimp3Demuxer, LicenseType::CC0, RegisterPlugin, [] {});
+} // namespace Minimp3
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

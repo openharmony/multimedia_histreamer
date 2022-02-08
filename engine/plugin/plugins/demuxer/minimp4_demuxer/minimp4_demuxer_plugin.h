@@ -31,6 +31,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Minimp4 {
 class MiniMP4DemuxerPlugin : public DemuxerPlugin {
 public:
     explicit MiniMP4DemuxerPlugin(std::string name);
@@ -71,6 +72,7 @@ private:
     uint32_t sampleIndex_;
     std::unique_ptr<MediaInfo> mediaInfo_;
 };
+} // namespace Minimp4
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

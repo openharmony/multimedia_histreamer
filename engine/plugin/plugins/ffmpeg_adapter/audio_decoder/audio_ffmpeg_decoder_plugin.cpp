@@ -29,6 +29,7 @@
 namespace {
 // register plugins
 using namespace OHOS::Media::Plugin;
+using namespace Ffmpeg;
 void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition);
 
 std::map<std::string, std::shared_ptr<const AVCodec>> codecMap;

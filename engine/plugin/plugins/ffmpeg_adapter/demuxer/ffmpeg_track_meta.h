@@ -32,6 +32,7 @@ extern "C" {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 void ConvertRawAudioStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
                                      TagMap& meta);
 
@@ -51,6 +52,7 @@ void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
 #endif
 
 void ConvertAVStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta);
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

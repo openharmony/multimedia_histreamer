@@ -32,6 +32,7 @@ extern "C" {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 class AudioFfmpegDecoderPlugin : public CodecPlugin {
 public:
     explicit AudioFfmpegDecoderPlugin(std::string name);
@@ -114,6 +115,7 @@ private:
     size_t paddedBufferSize_ {0};
     std::shared_ptr<Buffer> outBuffer_ {nullptr};
 };
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

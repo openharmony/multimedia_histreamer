@@ -23,6 +23,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace FileSource {
 std::shared_ptr<SourcePlugin> FileSourcePluginCreater(const std::string& name)
 {
     return std::make_shared<FileSourcePlugin>(name);
@@ -299,6 +300,7 @@ void FileSourcePlugin::CloseFile()
         fp_ = nullptr;
     }
 }
+} // namespace FileSource
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

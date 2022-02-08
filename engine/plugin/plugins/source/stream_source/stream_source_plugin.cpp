@@ -23,6 +23,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace StreamSource {
 std::shared_ptr<SourcePlugin> StreamSourcePluginCreater(const std::string& name)
 {
     return std::make_shared<StreamSourcePlugin>(name);
@@ -267,6 +268,7 @@ void StreamSourcePlugin::NotifyAvilableBufferLoop()
     std::shared_ptr<StreamSource> stream = streamSource_.lock();
     stream->OnBufferAvailable(idx, 0, bufferPtr->GetMemory()->GetCapacity());
 }
+} // namespace StreamSource
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
