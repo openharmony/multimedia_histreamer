@@ -54,7 +54,7 @@ public:
 
     Status Flush();
 
-    Status SetDataCallback(const std::weak_ptr<DataCallbackHelper> &dataCallback);
+    Status SetDataCallback(DataCallbackHelper* dataCallback);
 
 private:
     friend class PluginManager;

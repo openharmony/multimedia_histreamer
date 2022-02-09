@@ -33,7 +33,7 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class CodecFilterBase : public FilterBase {
+class CodecFilterBase : public FilterBase, public Plugin::DataCallbackHelper {
 public:
     explicit CodecFilterBase(const std::string &name);
     ~CodecFilterBase() override;
@@ -57,7 +57,11 @@ protected:
         }
         return err;
     }
+
     std::shared_ptr<Plugin::Codec> plugin_ {};
+
+    void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input) override;
+    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override;
 };
 } // namespace Pipeline
 } // namespace Media

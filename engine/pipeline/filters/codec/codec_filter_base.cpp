@@ -81,6 +81,16 @@ ErrorCode CodecFilterBase::GetParameter(int32_t key, Plugin::Any& value)
     RETURN_AGAIN_IF_NULL(plugin_);
     return TranslatePluginStatus(plugin_->GetParameter(tag, value));
 }
+
+void CodecFilterBase::OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input)
+{
+    MEDIA_LOG_I("CodecFilterBase::OnInputBufferDone");
+}
+
+void CodecFilterBase::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output)
+{
+    MEDIA_LOG_I("CodecFilterBase::OnOutputBufferDone");
+}
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

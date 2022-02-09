@@ -80,8 +80,9 @@ public:
 
     Status Flush() override;
 
-    Status SetDataCallback(const std::weak_ptr<DataCallback>& dataCallback) override
+    Status SetDataCallback(DataCallback* dataCallback) override
     {
+        dataCallback_ = dataCallback;
         return Status::OK;
     }
 
@@ -114,6 +115,7 @@ private:
     std::vector<uint8_t> paddedBuffer_ {};
     size_t paddedBufferSize_ {0};
     std::shared_ptr<Buffer> outBuffer_ {nullptr};
+    DataCallback* dataCallback_;
 };
 } // namespace Ffmpeg
 } // namespace Plugin

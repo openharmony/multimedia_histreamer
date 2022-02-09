@@ -83,7 +83,7 @@ public:
 
     Status Flush() override;
 
-    Status SetDataCallback(const std::weak_ptr<DataCallback>& dataCallback) override;
+    Status SetDataCallback(DataCallback* dataCallback) override;
 
 private:
 
@@ -104,7 +104,7 @@ private:
     std::map<Tag, ValueType>    mp3Parameter_ {};
     std::shared_ptr<Buffer>     inputBuffer_ {nullptr};
     std::shared_ptr<Buffer>     outputBuffer_ {nullptr};
-    std::weak_ptr<DataCallback> dataCb_ {};
+    DataCallback* dataCb_ {};
 };
 } // namespace Minimp3
 } // namespace Plugin

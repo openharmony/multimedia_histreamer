@@ -147,7 +147,7 @@ struct CodecPlugin : public PluginBase {
      * @return Execution status return
      * @retval OK: Plugin reset succeeded.
      */
-    virtual Status SetDataCallback(const std::weak_ptr<DataCallback>& dataCallback) = 0;
+    virtual Status SetDataCallback(DataCallback* dataCallback) = 0;
 };
 
 /// Codec plugin api major number.

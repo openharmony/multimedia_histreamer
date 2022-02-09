@@ -209,7 +209,7 @@ Status Minimp3DecoderPlugin::Flush()
     return Status::OK;
 }
 
-Status Minimp3DecoderPlugin::SetDataCallback(const std::weak_ptr<DataCallback>& dataCallback)
+Status Minimp3DecoderPlugin::SetDataCallback(DataCallback* dataCallback)
 {
     dataCb_ = dataCallback;
     return Status::OK;
