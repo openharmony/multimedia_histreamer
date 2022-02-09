@@ -15,10 +15,9 @@
 #define HST_LOG_TAG "StreamingExecutor"
 
 #include "streaming_executor.h"
+#include <algorithm>
 #include <functional>
 #include "securec.h"
-#include "foundation/log.h"
-#include "http_curl_client.h"
 #include "osal/utils/util.h"
 #include "steady_clock.h"
 
@@ -28,6 +27,8 @@ namespace Plugin {
 namespace HttpPlugin {
 constexpr int RING_BUFFER_SIZE = 5 * 48 * 1024;
 constexpr int PER_REQUEST_SIZE = 48 * 1024;
+constexpr int WATER_LINE = RING_BUFFER_SIZE * 0.1;
+
 StreamingExecutor::StreamingExecutor() noexcept
 {
     buffer_ = std::make_shared<RingBuffer>(RING_BUFFER_SIZE);
@@ -41,7 +42,7 @@ StreamingExecutor::StreamingExecutor() noexcept
     memset_s(&headerInfo_, sizeof(HeaderInfo), 0x00, sizeof(HeaderInfo));
     headerInfo_.fileContentLen = 0;
     startPos_ = 0;
-    isDownloading = false;
+    isDownloading_ = false;
 }
 
 StreamingExecutor::~StreamingExecutor() {}
@@ -56,6 +57,7 @@ bool StreamingExecutor::Open(const std::string &url)
 
     client_->Open(url);
 
+    requestSize_ = PER_REQUEST_SIZE;
     startPos_ = 0;
     isEos_ = false;
     task_->Start();
@@ -83,7 +85,7 @@ bool StreamingExecutor::Read(unsigned char *buff, unsigned int wantReadLength,
         isEos = true;
     }
     MEDIA_LOG_D("Read: wantReadLength %" PUBLIC_LOG "d, realReadLength %" PUBLIC_LOG "d, isEos %"
-                PUBLIC_LOG "d", wantReadLength, realReadLength, isEos);
+        PUBLIC_LOG "d", wantReadLength, realReadLength, isEos);
     return true;
 }
 
@@ -98,6 +100,9 @@ bool StreamingExecutor::Seek(int offset)
     task_->Pause();
     buffer_->Clear();
     startPos_ = offset;
+    int64_t temp = headerInfo_.fileContentLen - offset;
+    temp = temp >= 0 ? temp : PER_REQUEST_SIZE;
+    requestSize_ = static_cast<int>(std::min(temp, static_cast<int64_t>(PER_REQUEST_SIZE)));
     task_->Start();
     isEos_ = false;
     return true;
@@ -113,14 +118,46 @@ bool StreamingExecutor::IsStreaming()
     return headerInfo_.isChunked;
 }
 
+void StreamingExecutor::SetCallback(Callback* cb)
+{
+    callback_ = cb;
+}
+
 void StreamingExecutor::HttpDownloadThread()
 {
-    Status ret = client_->RequestData(startPos_, PER_REQUEST_SIZE);
+    PluginErrorCode errorCode = 0;
+    Status ret = client_->RequestData(startPos_, requestSize_, errorCode);
+    if (ret == Status::ERROR_CLIENT) {
+        MEDIA_LOG_I("Send http client error, code %" PUBLIC_LOG_D32, errorCode);
+        callback_->OnEvent({PluginEventType::CLIENT_ERROR, {errorCode}, "http"});
+    } else if (ret == Status::ERROR_SERVER) {
+        MEDIA_LOG_I("Send http server error, code %" PUBLIC_LOG_D32, errorCode);
+        callback_->OnEvent({PluginEventType::SERVER_ERROR, {errorCode}, "http"});
+    }
     FALSE_LOG(ret == Status::OK);
-    if (headerInfo_.fileContentLen > 0 && startPos_ >= headerInfo_.fileContentLen) { // 检查是否播放结束
-        MEDIA_LOG_I("http download completed, startPos_ %" PUBLIC_LOG "d", startPos_);
+
+    int size = buffer_->GetSize();
+    double ratio = (static_cast<double>(size)) / RING_BUFFER_SIZE;
+    if (size >= WATER_LINE && !aboveWaterline_) {
+        aboveWaterline_ = true;
+        MEDIA_LOG_I("Send http aboveWaterline event, ringbuffer ratio %" PUBLIC_LOG_F, ratio);
+        callback_->OnEvent({PluginEventType::ABOVE_LOW_WATERLINE, {ratio}, "http"});
+    } else if (size < WATER_LINE && aboveWaterline_) {
+        aboveWaterline_ = false;
+        MEDIA_LOG_I("Send http belowWaterline event, ringbuffer ratio %" PUBLIC_LOG_F, ratio);
+        callback_->OnEvent({PluginEventType::BELOW_LOW_WATERLINE, {ratio}, "http"});
+    }
+
+    int64_t remaining = headerInfo_.fileContentLen - startPos_;
+    if (headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
+        MEDIA_LOG_I("http transfer reach end, startPos_ %" PUBLIC_LOG "d", startPos_);
         isEos_ = true;
         task_->PauseAsync();
+        requestSize_ = PER_REQUEST_SIZE;
+        return;
+    }
+    if(remaining < PER_REQUEST_SIZE){
+        requestSize_ = remaining;
     }
 }
 
@@ -139,14 +176,14 @@ size_t StreamingExecutor::RxBodyData(void *buffer, size_t size, size_t nitems, v
             return 0;
         }
     }
-    if (!executor->isDownloading) {
-        executor->isDownloading = true;
+    if (!executor->isDownloading_) {
+        executor->isDownloading_ = true;
     }
     executor->buffer_->WriteBuffer(buffer, dataLen, executor->startPos_);
-    executor->isDownloading = false;
+    executor->isDownloading_ = false;
+    MEDIA_LOG_I("RxBodyData: dataLen %" PUBLIC_LOG "d, startPos_ %" PUBLIC_LOG "d, buffer size %"
+        PUBLIC_LOG "d", dataLen, executor->startPos_, executor->buffer_->GetSize());
     executor->startPos_ = executor->startPos_ + dataLen;
-    MEDIA_LOG_I("RxBodyData: dataLen %" PUBLIC_LOG "d, next startPos_ %" PUBLIC_LOG "d, buffer size %"
-                PUBLIC_LOG "d", dataLen, executor->startPos_, executor->buffer_->GetSize());
     return dataLen;
 }
 
@@ -206,8 +243,7 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
         FALSE_RETURN_V(token != nullptr, size * nitems);
         char *strRange = StringTrim(token);
         long start, end, fileLen;
-        sscanf_s(strRange, "bytes %" PUBLIC_LOG "ld-%" PUBLIC_LOG "ld/%" PUBLIC_LOG "ld",
-                 &start, &end, &fileLen);
+        sscanf_s(strRange, "bytes %ld-%ld/%ld", &start, &end, &fileLen);
         if (info->fileContentLen > 0 && info->fileContentLen != fileLen) {
             MEDIA_LOG_E("FileContentLen doesn't equal to fileLen");
         }

@@ -31,6 +31,8 @@ enum struct PluginEventType : int32_t {
     ABOVE_LOW_WATERLINE,
 };
 
+using PluginErrorCode = int;
+
 struct PluginEvent {
     PluginEventType type;
     Any param;

@@ -314,12 +314,21 @@ void HiPlayerImpl::OnEvent(const Event& event)
         case EventType::EVENT_AUDIO_PROGRESS:
             mediaStats_.ReceiveEvent(EventType::EVENT_AUDIO_PROGRESS,Plugin::AnyCast<int64_t>(event.param));
             break;
-        case EventType::EVENT_PLUGIN_ERROR:
-            // Add process here
+        case EventType::EVENT_PLUGIN_ERROR: {
+            Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
+            if (pluginEvent.param.SameTypeWith(typeid(Plugin::PluginErrorCode))) {
+                Plugin::PluginErrorCode errorCode = Plugin::AnyCast<Plugin::PluginErrorCode>(pluginEvent.param);
+                MEDIA_LOG_I("Receive plugin error, code %" PUBLIC_LOG_D32, errorCode);
+            } else {
+                MEDIA_LOG_I("Receive plugin error, code type is invalid");
+            }
             break;
-        case EventType::EVENT_PLUGIN_EVENT:
-            // Add process here
+        }
+        case EventType::EVENT_PLUGIN_EVENT: {
+            Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
+            MEDIA_LOG_I("Receive PLUGIN_EVENT, type %" PUBLIC_LOG_D32, pluginEvent.type);
             break;
+        }
         default:
             MEDIA_LOG_E("Unknown event(%" PUBLIC_LOG "d)", event.type);
     }

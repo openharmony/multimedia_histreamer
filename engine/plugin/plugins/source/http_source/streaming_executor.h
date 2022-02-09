@@ -22,6 +22,7 @@
 #include "ring_buffer.h"
 #include "network_client.h"
 #include "osal/thread/task.h"
+#include "plugin/interface/plugin_base.h"
 
 namespace OHOS {
 namespace Media {
@@ -30,7 +31,7 @@ namespace HttpPlugin {
 
 struct HeaderInfo {
     char contentType[32];
-    long fileContentLen;
+    int64_t fileContentLen;
     long contentLen;
     bool isChunked {false};
 };
@@ -46,7 +47,7 @@ public:
 
     unsigned int GetContentLength() const;
     bool IsStreaming();
-
+    void SetCallback(Callback* cb);
 private:
     void HttpDownloadThread();
     static size_t RxBodyData(void *buffer, size_t size, size_t nitems, void *userParam);
@@ -60,7 +61,10 @@ private:
     int64_t startPos_;
     HeaderInfo headerInfo_;
     std::shared_ptr<OSAL::Task> task_;
-    bool isDownloading;
+    bool isDownloading_;
+    int requestSize_;
+    Callback* callback_{nullptr};
+    bool aboveWaterline_{false};
 };
 }
 }

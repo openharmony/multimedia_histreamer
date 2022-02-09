@@ -31,15 +31,15 @@ public:
 
     ~HttpsCurlClient() override;
 
-    int Init() override;
+    Status Init() override;
 
-    int Open(const std::string& url) override;
+    Status Open(const std::string& url) override;
 
-    Status RequestData(long startPos, int len) override;
+    Status RequestData(long startPos, int len, PluginErrorCode &errorCode) override;
 
-    int Close() override;
+    Status Close() override;
 
-    int Deinit() override;
+    Status Deinit() override;
 
 private:
     std::shared_ptr<NetworkClient> httpClient_;

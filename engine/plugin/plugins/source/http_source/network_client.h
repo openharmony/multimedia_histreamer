@@ -17,6 +17,7 @@
 #define HISTREAMER_NETWORK_CLIENT_H
 
 #include <string>
+#include <common/plugin_event.h>
 #include "common/plugin_types.h"
 #include "network_typs.h"
 
@@ -27,11 +28,11 @@ namespace HttpPlugin {
 class NetworkClient {
 public:
     virtual ~NetworkClient() = default;
-    virtual int Init() = 0;
-    virtual int Open(const std::string& url) = 0;
-    virtual Status RequestData(long startPos, int len) = 0;
-    virtual int Close() = 0;
-    virtual int Deinit() = 0;
+    virtual Status Init() = 0;
+    virtual Status Open(const std::string& url) = 0;
+    virtual Status RequestData(long startPos, int len, PluginErrorCode &errorCode) = 0;
+    virtual Status Close() = 0;
+    virtual Status Deinit() = 0;
 };
 }
 }

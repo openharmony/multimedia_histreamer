@@ -148,6 +148,7 @@ Status HttpSourcePlugin::SetCallback(Callback* cb)
 {
     MEDIA_LOG_D("IN");
     callback_ = cb;
+    executor_->SetCallback(cb);
     return Status::OK;
 }
 

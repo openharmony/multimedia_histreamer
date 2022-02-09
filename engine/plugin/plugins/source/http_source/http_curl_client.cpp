@@ -28,36 +28,36 @@ HttpCurlClient::HttpCurlClient(RxHeader headCallback, RxBody bodyCallback, void 
 
 HttpCurlClient::~HttpCurlClient() = default;
 
-int HttpCurlClient::Init()
+Status HttpCurlClient::Init()
 {
     curl_global_init(CURL_GLOBAL_ALL);
     easyHandle_ = curl_easy_init();
-    FALSE_RETURN_V(easyHandle_ != nullptr, -1);
-    return 0;
+    FALSE_RETURN_V(easyHandle_ != nullptr, Status::ERROR_NULL_POINTER);
+    return Status::OK;
 }
 
-int HttpCurlClient::Open(const std::string& url)
+Status HttpCurlClient::Open(const std::string& url)
 {
     url_ = url;
     InitCurlEnvironment();
-    return 0;
+    return Status::OK;
 }
 
-int HttpCurlClient::Close()
+Status HttpCurlClient::Close()
 {
     MEDIA_LOG_I("Close client");
     curl_easy_setopt(easyHandle_, CURLOPT_TIMEOUT, 1);
-    return 0;
+    return Status::OK;
 }
 
-int HttpCurlClient::Deinit()
+Status HttpCurlClient::Deinit()
 {
     if (easyHandle_) {
         curl_easy_cleanup(easyHandle_);
         easyHandle_ = nullptr;
     }
     curl_global_cleanup();
-    return 0;
+    return Status::OK;
 }
 
 void HttpCurlClient::InitCurlEnvironment()
@@ -83,10 +83,9 @@ void HttpCurlClient::InitCurlEnvironment()
     curl_easy_setopt(easyHandle_, CURLOPT_TCP_KEEPINTVL, 5L); // 5 心跳
 }
 
-Status HttpCurlClient::RequestData(long startPos, int len)
+Status HttpCurlClient::RequestData(long startPos, int len, PluginErrorCode &errorCode)
 {
     FALSE_RETURN_V(easyHandle_ != nullptr, Status::ERROR_NULL_POINTER);
-
     if (startPos >= 0) {
         char requestRange[128] = {0};
         if (len > 0) {
@@ -109,12 +108,14 @@ Status HttpCurlClient::RequestData(long startPos, int len)
     }
     if (returnCode != CURLE_OK) {
         MEDIA_LOG_E("Curl error %" PUBLIC_LOG "d", returnCode);
+        errorCode = returnCode;
         return Status::ERROR_CLIENT;
     } else {
         int httpCode = 0;
         curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
         if(httpCode >= 400) { // 400
             MEDIA_LOG_E("Http error %" PUBLIC_LOG "d", httpCode);
+            errorCode = httpCode;
             return Status::ERROR_SERVER;
         }
     }

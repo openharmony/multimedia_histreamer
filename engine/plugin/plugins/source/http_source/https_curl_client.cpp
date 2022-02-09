@@ -27,34 +27,34 @@ HttpsCurlClient::HttpsCurlClient(std::shared_ptr<NetworkClient> httpClient) : ht
 
 HttpsCurlClient::~HttpsCurlClient() = default;
 
-int HttpsCurlClient::Init()
+Status HttpsCurlClient::Init()
 {
     // Do more https init things
-    return 0; // httpClient_->Init(); avoid re init http client
+    return Status::OK; // httpClient_->Init(); avoid re init http client
 }
 
-int HttpsCurlClient::Open(const std::string& url)
+Status HttpsCurlClient::Open(const std::string& url)
 {
     // Do more https open things
     return httpClient_->Open(url);
 }
 
-int HttpsCurlClient::Close()
+Status HttpsCurlClient::Close()
 {
     // Do more https close things
     return httpClient_->Close();
 }
 
-int HttpsCurlClient::Deinit()
+Status HttpsCurlClient::Deinit()
 {
     // Do more https Deinit things
-    return 0; // httpClient_->Deinit();  avoid re deinit http client
+    return Status::OK; // httpClient_->Deinit();  avoid re deinit http client
 }
 
-Status HttpsCurlClient::RequestData(long startPos, int len)
+Status HttpsCurlClient::RequestData(long startPos, int len, PluginErrorCode &errorCode)
 {
     // Do more https RequestData things
-    return httpClient_->RequestData(startPos, len);
+    return httpClient_->RequestData(startPos, len, errorCode);
 }
 }
 }
