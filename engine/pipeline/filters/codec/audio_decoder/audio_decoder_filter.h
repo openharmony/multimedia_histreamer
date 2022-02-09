@@ -30,8 +30,6 @@ public:
 
     ErrorCode Stop() override;
 
-    ErrorCode Prepare() override;
-
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,

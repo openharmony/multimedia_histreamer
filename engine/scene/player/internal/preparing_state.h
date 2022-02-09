@@ -34,7 +34,7 @@ public:
 
     std::tuple<ErrorCode, Action> Enter(Intent intent) override
     {
-        MEDIA_LOG_D("Enter state: %" PUBLIC_OUTPUT "s", name_.c_str());
+        MEDIA_LOG_D("Enter state: %" PUBLIC_LOG "s", name_.c_str());
         (void)intent;
         Action nextAction = Action::ACTION_BUTT;
         auto rtv = executor_.PrepareFilters();

@@ -61,7 +61,7 @@ ErrorCode CodecFilterBase::SetParameter(int32_t key, const Plugin::Any& value)
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
-        MEDIA_LOG_I("SetParameter key %" PUBLIC_OUTPUT "d is out of boundary", key);
+        MEDIA_LOG_I("SetParameter key %" PUBLIC_LOG "d is out of boundary", key);
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     RETURN_AGAIN_IF_NULL(plugin_);
@@ -75,7 +75,7 @@ ErrorCode CodecFilterBase::GetParameter(int32_t key, Plugin::Any& value)
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
-        MEDIA_LOG_I("GetParameter key %" PUBLIC_OUTPUT "d is out of boundary", key);
+        MEDIA_LOG_I("GetParameter key %" PUBLIC_LOG "d is out of boundary", key);
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     RETURN_AGAIN_IF_NULL(plugin_);

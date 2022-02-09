@@ -74,18 +74,6 @@ ErrorCode AudioDecoderFilter::Start()
     return FilterBase::Start();
 }
 
-ErrorCode AudioDecoderFilter::Prepare()
-{
-    MEDIA_LOG_I("audio decoder prepare called");
-    if (state_ != FilterState::INITIALIZED) {
-        MEDIA_LOG_W("decoder filter is not in init state");
-        return ErrorCode::ERROR_INVALID_OPERATION;
-    }
-    auto err = FilterBase::Prepare();
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Audio Decoder prepare error because of filter base prepare error");
-    return ErrorCode::SUCCESS;
-}
-
 bool AudioDecoderFilter::Negotiate(const std::string& inPort,
                                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                    Plugin::Capability& negotiatedCap,
@@ -93,22 +81,14 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
                                    Plugin::TagMap& downstreamParams)
 {
     PROFILE_BEGIN("Audio Decoder Negotiate begin");
-    if (state_ != FilterState::PREPARING) {
-        MEDIA_LOG_W("decoder filter is not in preparing when negotiate");
-        return false;
-    }
+    FALSE_RET_V_MSG_E(state_ == FilterState::PREPARING, false, "filter is not preparing when negotiate");
     auto targetOutPort = GetRouteOutPort(inPort);
-    if (targetOutPort == nullptr) {
-        MEDIA_LOG_E("decoder out port is not found");
-        return false;
-    }
+    FALSE_RET_V_MSG_E(targetOutPort != nullptr, false, "decoder out port is not found");
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
     bool atLeastOutCapMatched = false;
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::CODEC);
     for (const auto& candidate : candidatePlugins) {
-        if (candidate.first->outCaps.empty()) {
-            MEDIA_LOG_E("decoder plugin must have out caps");
-        }
+        FALSE_LOG_MSG_E(!candidate.first->outCaps.empty(), "decoder plugin must have out caps");
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
             if (outCap.keys.count(Capability::Key::AUDIO_SAMPLE_FORMAT) == 0) {
                 MEDIA_LOG_W("decoder plugin must specify sample format in out caps");
@@ -134,10 +114,8 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
             break;
         }
     }
-    if (!atLeastOutCapMatched || selectedPluginInfo == nullptr) {
-        MEDIA_LOG_W("can't find available decoder plugin with %" PUBLIC_LOG_S, Capability2String(*upstreamCap).c_str());
-        return false;
-    }
+    FALSE_RET_V_MSG_E(atLeastOutCapMatched && selectedPluginInfo != nullptr, false,
+                      "can't find available decoder plugin with %" PUBLIC_LOG_S, Capability2String(*upstreamCap).c_str());
     auto res = UpdateAndInitPluginByInfo<Plugin::Codec>(plugin_, pluginInfo_, selectedPluginInfo,
         [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
                 return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
@@ -151,24 +129,14 @@ bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_
 {
     PROFILE_BEGIN("Audio decoder configure begin");
     MEDIA_LOG_I("receive upstream meta %" PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
-    if (plugin_ == nullptr || pluginInfo_ == nullptr) {
-        MEDIA_LOG_E("cannot configure decoder when no plugin available");
-        return false;
-    }
+    FALSE_RET_V_MSG_E(plugin_ != nullptr && pluginInfo_ != nullptr, false,
+                      "can't configure decoder when no plugin available");
     auto thisMeta = std::make_shared<Plugin::Meta>();
-    if (!MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta)) {
-        MEDIA_LOG_E("cannot configure decoder plugin since meta is not compatible with negotiated caps");
-        return false;
-    }
+    FALSE_RET_V_MSG_E(MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta), false,
+                      "can't configure decoder plugin since meta is not compatible with negotiated caps");
     auto targetOutPort = GetRouteOutPort(inPort);
-    if (targetOutPort == nullptr) {
-        MEDIA_LOG_E("decoder out port is not found");
-        return false;
-    }
-    if (!targetOutPort->Configure(thisMeta)) {
-        MEDIA_LOG_E("decoderFilter configure downstream failed with %" PUBLIC_LOG_S, Meta2String(*thisMeta).c_str());
-        return false;
-    }
+    FALSE_RET_V_MSG_E(targetOutPort != nullptr, false, "encoder out port is not found");
+    FALSE_RET_V_MSG_E(targetOutPort->Configure(thisMeta), false, "fail to configure downstream");
     auto err = ConfigureToStartPluginLocked(thisMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("decoder configure error");
@@ -224,11 +192,11 @@ ErrorCode AudioDecoderFilter::PushData(const std::string &inPort, AVBufferPtr bu
 {
     const static int8_t maxRetryCnt = 3; // max retry times of handling one frame
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
-        MEDIA_LOG_W("pushing data to decoder when state is %" PUBLIC_OUTPUT "d", static_cast<int>(state_.load()));
+        MEDIA_LOG_W("pushing data to decoder when state is %" PUBLIC_LOG "d", static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     if (isFlushing_) {
-        MEDIA_LOG_I("decoder is flushing, discarding this data from port %" PUBLIC_OUTPUT "s", inPort.c_str());
+        MEDIA_LOG_I("decoder is flushing, discarding this data from port %" PUBLIC_LOG "s", inPort.c_str());
         return ErrorCode::SUCCESS;
     }
     ErrorCode handleFrameRes;
@@ -295,7 +263,7 @@ ErrorCode AudioDecoderFilter::HandleFrame(const std::shared_ptr<AVBuffer>& buffe
     MEDIA_LOG_D("HandleFrame called");
     auto ret = TranslatePluginStatus(plugin_->QueueInputBuffer(buffer, 0));
     if (ret != ErrorCode::SUCCESS && ret != ErrorCode::ERROR_TIMED_OUT) {
-        MEDIA_LOG_E("Queue input buffer to plugin fail: %" PUBLIC_OUTPUT "d", to_underlying(ret));
+        MEDIA_LOG_E("Queue input buffer to plugin fail: %" PUBLIC_LOG "d", to_underlying(ret));
     }
     return ret;
 }
@@ -311,14 +279,14 @@ ErrorCode AudioDecoderFilter::FinishFrame()
     outBuffer->Reset();
     auto ret = TranslatePluginStatus(plugin_->QueueOutputBuffer(outBuffer, 0));
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("Queue out buffer to plugin fail: %" PUBLIC_OUTPUT "d", to_underlying(ret));
+        MEDIA_LOG_E("Queue out buffer to plugin fail: %" PUBLIC_LOG "d", to_underlying(ret));
         return ret;
     }
     std::shared_ptr<AVBuffer> pcmFrame = nullptr;
     auto status = plugin_->DequeueOutputBuffer(pcmFrame, 0);
     if (status != Plugin::Status::OK && status != Plugin::Status::END_OF_STREAM) {
         if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
-            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %" PUBLIC_OUTPUT "d", static_cast<int32_t>((status)));
+            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %" PUBLIC_LOG "d", static_cast<int32_t>((status)));
         }
         return TranslatePluginStatus(status);
     }

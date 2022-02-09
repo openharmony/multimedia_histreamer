@@ -97,20 +97,20 @@ ErrorCode MediaSourceFilter::InitPlugin(const std::shared_ptr<MediaSource>& sour
 
 ErrorCode MediaSourceFilter::SetBufferSize(size_t size)
 {
-    MEDIA_LOG_I("SetBufferSize, size: %" PUBLIC_OUTPUT "zu", size);
+    MEDIA_LOG_I("SetBufferSize, size: %" PUBLIC_LOG "zu", size);
     bufferSize_ = size;
     return ErrorCode::SUCCESS;
 }
 
 bool MediaSourceFilter::IsSeekable() const
 {
-    MEDIA_LOG_D("IN, isSeekable_: %" PUBLIC_OUTPUT "d", static_cast<int32_t>(isSeekable_));
+    MEDIA_LOG_D("IN, isSeekable_: %" PUBLIC_LOG "d", static_cast<int32_t>(isSeekable_));
     return isSeekable_;
 }
 
 std::vector<WorkMode> MediaSourceFilter::GetWorkModes()
 {
-    MEDIA_LOG_D("IN, isSeekable_: %" PUBLIC_OUTPUT "d", static_cast<int32_t>(isSeekable_));
+    MEDIA_LOG_D("IN, isSeekable_: %" PUBLIC_LOG "d", static_cast<int32_t>(isSeekable_));
     if (isSeekable_) {
         return {WorkMode::PUSH, WorkMode::PULL};
     } else {
@@ -143,7 +143,7 @@ ErrorCode MediaSourceFilter::Start()
 
 ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data)
 {
-    MEDIA_LOG_D("IN, offset: %" PUBLIC_OUTPUT PRIu64 ", size: %" PUBLIC_OUTPUT "zu, outPort: %" PUBLIC_OUTPUT "s",
+    MEDIA_LOG_D("IN, offset: %" PUBLIC_LOG PRIu64 ", size: %" PUBLIC_LOG "zu, outPort: %" PUBLIC_LOG "s",
                 offset, size, outPort.c_str());
     if (!plugin_) {
         return ErrorCode::ERROR_INVALID_OPERATION;
@@ -154,7 +154,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
         size_t totalSize = 0;
         if ((plugin_->GetSize(totalSize) == Status::OK) && (totalSize != 0)) {
             if (offset >= totalSize) {
-                MEDIA_LOG_W("offset: %" PUBLIC_OUTPUT PRIu64 " is larger than totalSize: %" PUBLIC_OUTPUT "zu",
+                MEDIA_LOG_W("offset: %" PUBLIC_LOG PRIu64 " is larger than totalSize: %" PUBLIC_LOG "zu",
                             offset, totalSize);
                 return ErrorCode::END_OF_STREAM;
             }
@@ -165,12 +165,12 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
             if (readSize > realSize) {
                 readSize = realSize;
             }
-            MEDIA_LOG_D("totalSize_: %" PUBLIC_OUTPUT "zu", totalSize);
+            MEDIA_LOG_D("totalSize_: %" PUBLIC_LOG "zu", totalSize);
         }
         if (position_ != offset) {
             err = TranslatePluginStatus(plugin_->SeekTo(offset));
             if (err != ErrorCode::SUCCESS) {
-                MEDIA_LOG_E("Seek to %" PUBLIC_OUTPUT PRIu64 " fail", offset);
+                MEDIA_LOG_E("Seek to %" PUBLIC_LOG PRIu64 " fail", offset);
                 return err;
             }
             position_ = offset;
@@ -302,7 +302,7 @@ bool MediaSourceFilter::ParseProtocol(const std::shared_ptr<MediaSource>& source
 {
     bool ret = true;
     SourceType srcType = source->GetSourceType();
-    MEDIA_LOG_D("sourceType = %" PUBLIC_OUTPUT "d", OHOS::Media::to_underlying(srcType));
+    MEDIA_LOG_D("sourceType = %" PUBLIC_LOG "d", OHOS::Media::to_underlying(srcType));
     if (srcType == SourceType::SOURCE_TYPE_URI) {
         uri_ = source->GetSourceUri();
         ret = GetProtocolByUri();
@@ -313,7 +313,7 @@ bool MediaSourceFilter::ParseProtocol(const std::shared_ptr<MediaSource>& source
         protocol_.append("stream");
         uri_.append("stream://");
     }
-    MEDIA_LOG_I("protocol: %" PUBLIC_OUTPUT "s, uri: %" PUBLIC_OUTPUT "s", protocol_.c_str(), uri_.c_str());
+    MEDIA_LOG_I("protocol: %" PUBLIC_LOG "s, uri: %" PUBLIC_LOG "s", protocol_.c_str(), uri_.c_str());
     return ret;
 }
 
@@ -322,20 +322,20 @@ ErrorCode MediaSourceFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& inf
 {
     if ((plugin_ != nullptr) && (pluginInfo_ != nullptr)) {
         if (info->name == pluginInfo_->name && TranslatePluginStatus(plugin_->Reset()) == ErrorCode::SUCCESS) {
-            MEDIA_LOG_I("Reuse last plugin: %" PUBLIC_OUTPUT "s", name.c_str());
+            MEDIA_LOG_I("Reuse last plugin: %" PUBLIC_LOG "s", name.c_str());
             return ErrorCode::SUCCESS;
         }
         if (TranslatePluginStatus(plugin_->Deinit()) != ErrorCode::SUCCESS) {
-            MEDIA_LOG_E("Deinit last plugin: %" PUBLIC_OUTPUT "s error", pluginInfo_->name.c_str());
+            MEDIA_LOG_E("Deinit last plugin: %" PUBLIC_LOG "s error", pluginInfo_->name.c_str());
         }
     }
     plugin_ = manager.CreateSourcePlugin(name);
     if (plugin_ == nullptr) {
-        MEDIA_LOG_E("PluginManager CreatePlugin %" PUBLIC_OUTPUT "s fail", name.c_str());
+        MEDIA_LOG_E("PluginManager CreatePlugin %" PUBLIC_LOG "s fail", name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
     pluginInfo_ = info;
-    MEDIA_LOG_I("Create new plugin: \"%" PUBLIC_OUTPUT "s\" success", pluginInfo_->name.c_str());
+    MEDIA_LOG_I("Create new plugin: \"%" PUBLIC_LOG "s\" success", pluginInfo_->name.c_str());
     return ErrorCode::SUCCESS;
 }
 
@@ -353,14 +353,14 @@ ErrorCode MediaSourceFilter::FindPlugin(const std::shared_ptr<MediaSource>& sour
     std::set<std::string> nameList = pluginManager.ListPlugins(PluginType::SOURCE);
     for (const std::string& name : nameList) {
         std::shared_ptr<PluginInfo> info = pluginManager.GetPluginInfo(PluginType::SOURCE, name);
-        MEDIA_LOG_I("name: %" PUBLIC_OUTPUT "s, info->name: %" PUBLIC_OUTPUT "s", name.c_str(), info->name.c_str());
+        MEDIA_LOG_I("name: %" PUBLIC_LOG "s, info->name: %" PUBLIC_LOG "s", name.c_str(), info->name.c_str());
         auto val = info->extra[PLUGIN_INFO_EXTRA_PROTOCOL];
         if (val.SameTypeWith(typeid(std::vector<ProtocolType>))) {
             auto supportProtocols = OHOS::Media::Plugin::AnyCast<std::vector<ProtocolType>>(val);
             for(auto supportProtocol : supportProtocols){
                 if (g_protocolStringToType[protocol_] == supportProtocol &&
                     CreatePlugin(info, name, pluginManager) == ErrorCode::SUCCESS) {
-                    MEDIA_LOG_I("supportProtocol:%" PUBLIC_OUTPUT "s CreatePlugin %" PUBLIC_OUTPUT "s success",
+                    MEDIA_LOG_I("supportProtocol:%" PUBLIC_LOG "s CreatePlugin %" PUBLIC_LOG "s success",
                                 protocol_.c_str(), name_.c_str());
                     return ErrorCode::SUCCESS;
                 }

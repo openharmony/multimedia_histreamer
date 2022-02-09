@@ -74,7 +74,7 @@ FFmpegDemuxerPlugin::FFmpegDemuxerPlugin(std::string name)
       mediaInfo_(nullptr),
       selectedTrackIds_()
 {
-    MEDIA_LOG_I("ctor called, plugin name: %" PUBLIC_OUTPUT "s", pluginName_.c_str());
+    MEDIA_LOG_I("ctor called, plugin name: %" PUBLIC_LOG "s", pluginName_.c_str());
 }
 
 FFmpegDemuxerPlugin::~FFmpegDemuxerPlugin()
@@ -200,7 +200,7 @@ Status FFmpegDemuxerPlugin::SelectTrack(int32_t trackId)
         return Status::ERROR_WRONG_STATE;
     }
     if (trackId < 0 || trackId >= static_cast<int32_t>(mediaInfo_->tracks.size())) {
-        MEDIA_LOG_E("SelectTrack called with invalid trackId: %" PUBLIC_OUTPUT "d, number of tracks: %" PUBLIC_OUTPUT
+        MEDIA_LOG_E("SelectTrack called with invalid trackId: %" PUBLIC_LOG "d, number of tracks: %" PUBLIC_LOG
                     "d", trackId, static_cast<int>(mediaInfo_->tracks.size()));
         return Status::ERROR_INVALID_PARAMETER;
     }
@@ -250,7 +250,7 @@ bool FFmpegDemuxerPlugin::ConvertAVPacketToFrameInfo(const AVStream& avStream, c
         }
         frameSize = pkt.size;
     } else {
-        MEDIA_LOG_W("unsupported codec type: %" PUBLIC_OUTPUT "d", static_cast<int32_t>(avStream.codecpar->codec_type));
+        MEDIA_LOG_W("unsupported codec type: %" PUBLIC_LOG "d", static_cast<int32_t>(avStream.codecpar->codec_type));
         return false;
     }
     auto data = frameInfo.AllocMemory(allocator_, frameSize);
@@ -273,7 +273,7 @@ Status FFmpegDemuxerPlugin::ReadFrame(Buffer& info, int32_t timeOutMs)
     if (res == 0 && ConvertAVPacketToFrameInfo(*(formatContext_->streams[pkt.stream_index]), pkt, info)) {
         result = Status::OK;
     } else {
-        MEDIA_LOG_W("ReadFrame failed, rtv = %" PUBLIC_OUTPUT "s", AVStrError(res).c_str());
+        MEDIA_LOG_W("ReadFrame failed, rtv = %" PUBLIC_LOG "s", AVStrError(res).c_str());
     }
     av_packet_unref(&pkt);
     return (res != AVERROR_EOF) ? result : Status::END_OF_STREAM;
@@ -292,7 +292,7 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mo
         trackId = av_find_default_stream_index(formatContext_.get());
     }
     if (trackId < 0 || trackId >= static_cast<int32_t>(formatContext_->nb_streams)) {
-        MEDIA_LOG_E("SeekTo called with invalid trackid = %" PUBLIC_OUTPUT "d, nb_streams = %" PUBLIC_OUTPUT "d.",
+        MEDIA_LOG_E("SeekTo called with invalid trackid = %" PUBLIC_LOG "d, nb_streams = %" PUBLIC_LOG "d.",
                     trackId, formatContext_->nb_streams);
         return Status::ERROR_INVALID_PARAMETER;
     }
@@ -300,8 +300,8 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mo
     int64_t ffTime = ConvertTimeToFFmpeg(hstTime, avStream->time_base);
     if (avStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
         int keyFrameIdx = av_index_search_timestamp(avStream, ffTime, ConvertSeekModeToFFmpeg(mode));
-        MEDIA_LOG_I("SeekTo %" PUBLIC_OUTPUT PRId64 "ns, ffTime: %" PUBLIC_OUTPUT PRId64 ", key frame index: %"
-                    PUBLIC_OUTPUT "d", hstTime, ffTime, keyFrameIdx);
+        MEDIA_LOG_I("SeekTo %" PUBLIC_LOG PRId64 "ns, ffTime: %" PUBLIC_LOG PRId64 ", key frame index: %"
+                    PUBLIC_LOG "d", hstTime, ffTime, keyFrameIdx);
         if (keyFrameIdx >= 0) {
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(58, 78, 0)
             ffTime = avformat_index_get_entry(avStream, keyFrameIdx)->timestamp;
@@ -313,11 +313,11 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mo
         }
     }
     auto newTime = ConvertTimeFromFFmpeg(ffTime, avStream->time_base);
-    MEDIA_LOG_I("SeekTo %" PUBLIC_OUTPUT PRIu64 " / %" PUBLIC_OUTPUT PRId64 ", ffTime: %" PUBLIC_OUTPUT PRId64,
+    MEDIA_LOG_I("SeekTo %" PUBLIC_LOG PRIu64 " / %" PUBLIC_LOG PRId64 ", ffTime: %" PUBLIC_LOG PRId64,
                 newTime, hstTime, ffTime);
     auto rtv = av_seek_frame(formatContext_.get(), trackId, ffTime, ConvertSeekModeToFFmpeg(mode));
     if (rtv < 0) {
-        MEDIA_LOG_E("seek failed, return value: %" PUBLIC_OUTPUT "d", rtv);
+        MEDIA_LOG_E("seek failed, return value: %" PUBLIC_LOG "d", rtv);
     }
     return (rtv >= 0) ? Status::OK : Status::ERROR_UNKNOWN;
 }
@@ -355,7 +355,7 @@ std::shared_ptr<AVCodecContext> FFmpegDemuxerPlugin::InitCodecContext(const AVSt
     }
     int ret = avcodec_parameters_to_context(codecContext.get(), avStream.codecpar);
     if (ret < 0) {
-        MEDIA_LOG_E("avcodec_parameters_to_context failed with return = %" PUBLIC_OUTPUT "s", AVStrError(ret).c_str());
+        MEDIA_LOG_E("avcodec_parameters_to_context failed with return = %" PUBLIC_LOG "s", AVStrError(ret).c_str());
         return nullptr;
     }
     codecContext->workaround_bugs = static_cast<uint32_t>(codecContext->workaround_bugs) | FF_BUG_AUTODETECT;
@@ -422,7 +422,7 @@ bool FFmpegDemuxerPlugin::ParseMediaData()
     auto formatContext = formatContext_.get();
     int ret = avformat_open_input(&formatContext, nullptr, pluginImpl_.get(), nullptr);
     if (ret != 0) {
-        MEDIA_LOG_E("avformat_open_input using plugin %" PUBLIC_OUTPUT "s failed with return = %" PUBLIC_OUTPUT "s",
+        MEDIA_LOG_E("avformat_open_input using plugin %" PUBLIC_LOG "s failed with return = %" PUBLIC_LOG "s",
                     pluginImpl_->name, AVStrError(ret).c_str());
         return false;
     }
@@ -455,7 +455,7 @@ int FFmpegDemuxerPlugin::AVReadPacket(void* opaque, uint8_t* buf, int bufSize) /
         auto buffer = std::make_shared<Buffer>();
         auto bufData = buffer->WrapMemory(buf, bufSize, bufSize);
         auto result = ioContext->dataSource->ReadAt(ioContext->offset, buffer, static_cast<size_t>(bufSize));
-        MEDIA_LOG_D("AVReadPacket read data size = %" PUBLIC_OUTPUT "d", static_cast<int>(bufData->GetSize()));
+        MEDIA_LOG_D("AVReadPacket read data size = %" PUBLIC_LOG "d", static_cast<int>(bufData->GetSize()));
         if (result == Status::OK) {
             ioContext->offset += buffer->GetMemory()->GetSize();
             rtv = buffer->GetMemory()->GetSize();
@@ -463,7 +463,7 @@ int FFmpegDemuxerPlugin::AVReadPacket(void* opaque, uint8_t* buf, int bufSize) /
             ioContext->eos = true;
             rtv = AVERROR_EOF;
         } else {
-            MEDIA_LOG_E("AVReadPacket failed with rtv = %" PUBLIC_OUTPUT "d", static_cast<int>(result));
+            MEDIA_LOG_E("AVReadPacket failed with rtv = %" PUBLIC_LOG "d", static_cast<int>(result));
         }
     }
     return rtv;
@@ -489,12 +489,12 @@ int64_t FFmpegDemuxerPlugin::AVSeek(void* opaque, int64_t offset, int whence) //
         case SEEK_SET:
             newPos = static_cast<uint64_t>(offset);
             ioContext->offset = newPos;
-            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_OUTPUT "d, pos = %" PUBLIC_OUTPUT PRId64 ", newPos = %" PUBLIC_OUTPUT
+            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_LOG "d, pos = %" PUBLIC_LOG PRId64 ", newPos = %" PUBLIC_LOG
                         PRIu64, whence, offset, newPos);
             break;
         case SEEK_CUR:
             newPos = ioContext->offset + offset;
-            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_OUTPUT "d, pos = %" PUBLIC_OUTPUT PRId64 ", newPos = %" PUBLIC_OUTPUT
+            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_LOG "d, pos = %" PUBLIC_LOG PRId64 ", newPos = %" PUBLIC_LOG
                         PRIu64, whence, offset, newPos);
             break;
         case SEEK_END:
@@ -502,19 +502,19 @@ int64_t FFmpegDemuxerPlugin::AVSeek(void* opaque, int64_t offset, int whence) //
             size_t mediaDataSize = 0;
             if (ioContext->dataSource->GetSize(mediaDataSize) == Status::OK) {
                 newPos = mediaDataSize + offset;
-                MEDIA_LOG_I("AVSeek seek end whence: %" PUBLIC_OUTPUT "d, pos = %" PUBLIC_OUTPUT PRId64,
+                MEDIA_LOG_I("AVSeek seek end whence: %" PUBLIC_LOG "d, pos = %" PUBLIC_LOG PRId64,
                             whence, offset);
             }
             break;
         }
         default:
-            MEDIA_LOG_E("AVSeek unexpected whence: %" PUBLIC_OUTPUT "d", whence);
+            MEDIA_LOG_E("AVSeek unexpected whence: %" PUBLIC_LOG "d", whence);
             break;
     }
     if (whence != AVSEEK_SIZE) {
         ioContext->offset = newPos;
     }
-    MEDIA_LOG_I("current offset: %" PUBLIC_OUTPUT PRId64 ", new pos: %" PUBLIC_OUTPUT PRIu64,
+    MEDIA_LOG_I("current offset: %" PUBLIC_LOG PRId64 ", new pos: %" PUBLIC_LOG PRIu64,
                 ioContext->offset, newPos);
     return newPos;
 }
@@ -537,7 +537,7 @@ int ConvertSeekModeToFFmpeg(SeekMode mode)
             seekFlag = AVSEEK_FLAG_ANY;
             break;
         default:
-            MEDIA_LOG_W("unsupported seekmode: %" PUBLIC_OUTPUT "d, using backward mode instead.",
+            MEDIA_LOG_W("unsupported seekmode: %" PUBLIC_LOG "d, using backward mode instead.",
                         static_cast<int>(mode));
             break;
     }
@@ -552,7 +552,7 @@ int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource)
     }
     auto plugin = g_pluginInputFormat[pluginName];
     if (!plugin || !plugin->read_probe) {
-        MEDIA_LOG_D("Sniff failed due to invalid plugin for %" PUBLIC_OUTPUT "s.", pluginName.c_str());
+        MEDIA_LOG_D("Sniff failed due to invalid plugin for %" PUBLIC_LOG "s.", pluginName.c_str());
         return 0;
     }
     size_t bufferSize = 4096;
@@ -568,7 +568,7 @@ int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource)
         AVProbeData probeData{"", buff.data(), static_cast<int>(bufferInfo->GetMemory()->GetSize()), ""};
         confidence = plugin->read_probe(&probeData);
     }
-    MEDIA_LOG_D("Sniff: plugin pluginName = %" PUBLIC_OUTPUT "s, probability = %" PUBLIC_OUTPUT "d / 100 ...",
+    MEDIA_LOG_D("Sniff: plugin pluginName = %" PUBLIC_LOG "s, probability = %" PUBLIC_LOG "d / 100 ...",
                 plugin->name, confidence);
     return confidence;
 }
@@ -604,7 +604,7 @@ Status RegisterPlugins(const std::shared_ptr<Register>& reg)
     const AVInputFormat* plugin = nullptr;
     void* i = nullptr;
     while ((plugin = av_demuxer_iterate(&i))) {
-        MEDIA_LOG_D("Attempting to handle libav demuxer plugin %" PUBLIC_OUTPUT "s [%" PUBLIC_OUTPUT "s]",
+        MEDIA_LOG_D("Attempting to handle libav demuxer plugin %" PUBLIC_LOG "s [%" PUBLIC_LOG "s]",
                     plugin->name, plugin->long_name);
         /* no emulators */
         if (plugin->long_name != nullptr) {
@@ -633,7 +633,7 @@ Status RegisterPlugins(const std::shared_ptr<Register>& reg)
         regInfo.sniffer = Sniff;
         auto rtv = reg->AddPlugin(regInfo);
         if (rtv != Status::OK) {
-            MEDIA_LOG_E("RegisterPlugins AddPlugin failed with return %" PUBLIC_OUTPUT "d", static_cast<int>(rtv));
+            MEDIA_LOG_E("RegisterPlugins AddPlugin failed with return %" PUBLIC_LOG "d", static_cast<int>(rtv));
         }
     }
     return Status::OK;

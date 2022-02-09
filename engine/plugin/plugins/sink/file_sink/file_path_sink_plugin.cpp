@@ -85,7 +85,7 @@ Status FilePathSinkPlugin::SeekTo(uint64_t offset)
         return Status::OK;
     }
     std::clearerr(fp_);
-    MEDIA_LOG_E("Seek to %" PUBLIC_OUTPUT PRIu64, offset);
+    MEDIA_LOG_E("Seek to %" PUBLIC_LOG PRIu64, offset);
     return Status::ERROR_UNKNOWN;
 }
 
@@ -115,7 +115,7 @@ Status FilePathSinkPlugin::OpenFile()
     fp_ = std::fopen(fileName_.c_str(), "w+");
     if (fp_ == nullptr) {
         int32_t err = errno;
-        MEDIA_LOG_E("Fail to load file due to %" PUBLIC_OUTPUT "s", strerror(err));
+        MEDIA_LOG_E("Fail to load file due to %" PUBLIC_LOG "s", strerror(err));
         switch (err) {
             case EPERM:
                 return Status::ERROR_PERMISSION_DENIED;
@@ -125,7 +125,7 @@ Status FilePathSinkPlugin::OpenFile()
                 return Status::ERROR_UNKNOWN;
         }
     }
-    MEDIA_LOG_D("fileName_: %" PUBLIC_OUTPUT "s", fileName_.c_str());
+    MEDIA_LOG_D("fileName_: %" PUBLIC_LOG "s", fileName_.c_str());
     return Status::OK;
 }
 

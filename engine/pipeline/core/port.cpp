@@ -60,7 +60,7 @@ ErrorCode InPort::Activate(const std::vector<WorkMode>& modes, WorkMode& outMode
         outMode = workMode;
         return ErrorCode::SUCCESS;
     }
-    MEDIA_LOG_E("[Filter %" PUBLIC_OUTPUT "s] InPort %" PUBLIC_OUTPUT "s Activate error: prevPort destructed",
+    MEDIA_LOG_E("[Filter %" PUBLIC_LOG "s] InPort %" PUBLIC_LOG "s Activate error: prevPort destructed",
                 filter->GetName().c_str(), name.c_str());
     return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
 }

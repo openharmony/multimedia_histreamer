@@ -102,19 +102,19 @@ Status HttpCurlClient::RequestData(long startPos, int len)
     headers = curl_slist_append(headers, "Keep-Alive: timeout=120");
     curl_easy_setopt(easyHandle_, CURLOPT_HTTPHEADER, headers);
 
-    MEDIA_LOG_D("RequestData: startPos %" PUBLIC_OUTPUT "d, len %" PUBLIC_OUTPUT "d", startPos, len);
+    MEDIA_LOG_D("RequestData: startPos %" PUBLIC_LOG "d, len %" PUBLIC_LOG "d", startPos, len);
     CURLcode returnCode = curl_easy_perform(easyHandle_);
     if (headers != nullptr) {
         curl_slist_free_all(headers);
     }
     if (returnCode != CURLE_OK) {
-        MEDIA_LOG_E("Curl error %" PUBLIC_OUTPUT "d", returnCode);
+        MEDIA_LOG_E("Curl error %" PUBLIC_LOG "d", returnCode);
         return Status::ERROR_CLIENT;
     } else {
         int httpCode = 0;
         curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
         if(httpCode >= 400) { // 400
-            MEDIA_LOG_E("Http error %" PUBLIC_OUTPUT "d", httpCode);
+            MEDIA_LOG_E("Http error %" PUBLIC_LOG "d", httpCode);
             return Status::ERROR_SERVER;
         }
     }

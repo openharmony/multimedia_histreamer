@@ -55,7 +55,7 @@ void ConditionVariable::NotifyOne() noexcept
 {
     int ret = pthread_cond_signal(&cond_);
     if (ret != 0) {
-        MEDIA_LOG_E("NotifyOne failed with errno = %" PUBLIC_OUTPUT "d", ret);
+        MEDIA_LOG_E("NotifyOne failed with errno = %" PUBLIC_LOG "d", ret);
     }
 }
 
@@ -63,7 +63,7 @@ void ConditionVariable::NotifyAll() noexcept
 {
     int ret = pthread_cond_broadcast(&cond_);
     if (ret != 0) {
-        MEDIA_LOG_E("NotifyAll failed with errno = %" PUBLIC_OUTPUT "d", ret);
+        MEDIA_LOG_E("NotifyAll failed with errno = %" PUBLIC_LOG "d", ret);
     }
 }
 
@@ -75,7 +75,7 @@ void ConditionVariable::Wait(ScopedLock& lock) noexcept
 bool ConditionVariable::WaitFor(ScopedLock& lock, int timeoutMs)
 {
     if (timeoutMs < 0) {
-        MEDIA_LOG_E("ConditionVariable WaitUntil invalid timeoutMs: %" PUBLIC_OUTPUT "d", timeoutMs);
+        MEDIA_LOG_E("ConditionVariable WaitUntil invalid timeoutMs: %" PUBLIC_LOG "d", timeoutMs);
         return false;
     }
     struct timespec timeout = {0, 0};

@@ -82,15 +82,15 @@ bool StreamingExecutor::Read(unsigned char *buff, unsigned int wantReadLength,
     if (isEos_ && realReadLength == 0) {
         isEos = true;
     }
-    MEDIA_LOG_D("Read: wantReadLength %" PUBLIC_OUTPUT "d, realReadLength %" PUBLIC_OUTPUT "d, isEos %"
-                PUBLIC_OUTPUT "d", wantReadLength, realReadLength, isEos);
+    MEDIA_LOG_D("Read: wantReadLength %" PUBLIC_LOG "d, realReadLength %" PUBLIC_LOG "d, isEos %"
+                PUBLIC_LOG "d", wantReadLength, realReadLength, isEos);
     return true;
 }
 
 bool StreamingExecutor::Seek(int offset)
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
-    MEDIA_LOG_I("Seek: buffer size %" PUBLIC_OUTPUT "d, offset %" PUBLIC_OUTPUT "d", buffer_->GetSize(), offset);
+    MEDIA_LOG_I("Seek: buffer size %" PUBLIC_LOG "d, offset %" PUBLIC_LOG "d", buffer_->GetSize(), offset);
     if (buffer_->Seek(offset)) {
         return true;
     }
@@ -118,7 +118,7 @@ void StreamingExecutor::HttpDownloadThread()
     Status ret = client_->RequestData(startPos_, PER_REQUEST_SIZE);
     FALSE_LOG(ret == Status::OK);
     if (headerInfo_.fileContentLen > 0 && startPos_ >= headerInfo_.fileContentLen) { // 检查是否播放结束
-        MEDIA_LOG_I("http download completed, startPos_ %" PUBLIC_OUTPUT "d", startPos_);
+        MEDIA_LOG_I("http download completed, startPos_ %" PUBLIC_LOG "d", startPos_);
         isEos_ = true;
         task_->PauseAsync();
     }
@@ -145,8 +145,8 @@ size_t StreamingExecutor::RxBodyData(void *buffer, size_t size, size_t nitems, v
     executor->buffer_->WriteBuffer(buffer, dataLen, executor->startPos_);
     executor->isDownloading = false;
     executor->startPos_ = executor->startPos_ + dataLen;
-    MEDIA_LOG_I("RxBodyData: dataLen %" PUBLIC_OUTPUT "d, next startPos_ %" PUBLIC_OUTPUT "d, buffer size %"
-                PUBLIC_OUTPUT "d", dataLen, executor->startPos_, executor->buffer_->GetSize());
+    MEDIA_LOG_I("RxBodyData: dataLen %" PUBLIC_LOG "d, next startPos_ %" PUBLIC_LOG "d, buffer size %"
+                PUBLIC_LOG "d", dataLen, executor->startPos_, executor->buffer_->GetSize());
     return dataLen;
 }
 
@@ -206,7 +206,7 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
         FALSE_RETURN_V(token != nullptr, size * nitems);
         char *strRange = StringTrim(token);
         long start, end, fileLen;
-        sscanf_s(strRange, "bytes %" PUBLIC_OUTPUT "ld-%" PUBLIC_OUTPUT "ld/%" PUBLIC_OUTPUT "ld",
+        sscanf_s(strRange, "bytes %" PUBLIC_LOG "ld-%" PUBLIC_LOG "ld/%" PUBLIC_LOG "ld",
                  &start, &end, &fileLen);
         if (info->fileContentLen > 0 && info->fileContentLen != fileLen) {
             MEDIA_LOG_E("FileContentLen doesn't equal to fileLen");

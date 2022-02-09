@@ -67,14 +67,14 @@ ErrorCode AudioCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::
     pluginAllocator_ = plugin_->GetAllocator();
     uint32_t tmp = 0;
     if (audioMeta->GetUint32(MetaID::AUDIO_SAMPLE_RATE, tmp)) {
-        MEDIA_LOG_I("configure plugin with sample rate %" PUBLIC_OUTPUT PRIu32, tmp);
+        MEDIA_LOG_I("configure plugin with sample rate %" PUBLIC_LOG PRIu32, tmp);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_RATE, tmp));
         if (err != ErrorCode::SUCCESS) {
             return err;
         }
     }
     if (audioMeta->GetUint32(MetaID::AUDIO_CHANNELS, tmp)) {
-        MEDIA_LOG_I("configure plugin with channel %" PUBLIC_OUTPUT PRIu32, tmp);
+        MEDIA_LOG_I("configure plugin with channel %" PUBLIC_LOG PRIu32, tmp);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_CHANNELS, channelNum_));
         if (err != ErrorCode::SUCCESS) {
             return err;
@@ -82,7 +82,7 @@ ErrorCode AudioCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::
     }
     int64_t bitRate = 0;
     if (audioMeta->GetInt64(MetaID::AUDIO_CHANNELS, bitRate)) {
-        MEDIA_LOG_I("configure plugin with channel %" PUBLIC_OUTPUT PRId64, bitRate);
+        MEDIA_LOG_I("configure plugin with channel %" PUBLIC_LOG PRId64, bitRate);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::MEDIA_BITRATE, bitRate));
         if (err != ErrorCode::SUCCESS) {
             return err;
@@ -90,7 +90,7 @@ ErrorCode AudioCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::
     }
     Plugin::AudioSampleFormat sampleFormat = Plugin::AudioSampleFormat::S16;
     if (audioMeta->GetData<Plugin::AudioSampleFormat>(MetaID::AUDIO_SAMPLE_FORMAT, sampleFormat)) {
-        MEDIA_LOG_I("configure plugin with sampleFormat %" PUBLIC_OUTPUT PRIu8, sampleFormat);
+        MEDIA_LOG_I("configure plugin with sampleFormat %" PUBLIC_LOG PRIu8, sampleFormat);
         return TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat));
     }
     return ErrorCode::SUCCESS;
@@ -129,7 +129,7 @@ do { \
                                       channelLayoutSpecified_);
             break;
         default:
-            MEDIA_LOG_W("Unknown key %" PUBLIC_OUTPUT "d", OHOS::Media::to_underlying(tag));
+            MEDIA_LOG_W("Unknown key %" PUBLIC_LOG "d", OHOS::Media::to_underlying(tag));
             break;
     }
     return ErrorCode::SUCCESS;
@@ -161,7 +161,7 @@ ErrorCode AudioCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
             break;
         }
         default:
-            MEDIA_LOG_I("Unknown key %" PUBLIC_OUTPUT "d", tag);
+            MEDIA_LOG_I("Unknown key %" PUBLIC_LOG "d", tag);
             break;
     }
     return ErrorCode::SUCCESS;
@@ -172,7 +172,7 @@ ErrorCode AudioCaptureFilter::DoConfigure()
     auto emptyMeta = std::make_shared<Plugin::Meta>();
     auto audioMeta = std::make_shared<Plugin::Meta>();
     if (!MergeMetaWithCapability(*emptyMeta, capNegWithDownstream_, *audioMeta)) {
-        MEDIA_LOG_E("cannot find available capability of plugin %" PUBLIC_OUTPUT "s", pluginInfo_->name.c_str());
+        MEDIA_LOG_E("cannot find available capability of plugin %" PUBLIC_LOG "s", pluginInfo_->name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
     if (!outPorts_[0]->Configure(audioMeta)) {
@@ -293,20 +293,20 @@ ErrorCode AudioCaptureFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& in
 {
     if ((plugin_ != nullptr) && (pluginInfo_ != nullptr)) {
         if (info->name == pluginInfo_->name && TranslatePluginStatus(plugin_->Reset()) == ErrorCode::SUCCESS) {
-            MEDIA_LOG_I("Reuse last plugin: %" PUBLIC_OUTPUT "s", name.c_str());
+            MEDIA_LOG_I("Reuse last plugin: %" PUBLIC_LOG "s", name.c_str());
             return ErrorCode::SUCCESS;
         }
         if (TranslatePluginStatus(plugin_->Deinit()) != ErrorCode::SUCCESS) {
-            MEDIA_LOG_E("Deinit last plugin: %" PUBLIC_OUTPUT "s error", pluginInfo_->name.c_str());
+            MEDIA_LOG_E("Deinit last plugin: %" PUBLIC_LOG "s error", pluginInfo_->name.c_str());
         }
     }
     plugin_ = manager.CreateSourcePlugin(name);
     if (plugin_ == nullptr) {
-        MEDIA_LOG_E("PluginManager CreatePlugin %" PUBLIC_OUTPUT "s fail", name.c_str());
+        MEDIA_LOG_E("PluginManager CreatePlugin %" PUBLIC_LOG "s fail", name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
     pluginInfo_ = info;
-    MEDIA_LOG_I("Create new plugin: \"%" PUBLIC_OUTPUT "s\" success", pluginInfo_->name.c_str());
+    MEDIA_LOG_I("Create new plugin: \"%" PUBLIC_LOG "s\" success", pluginInfo_->name.c_str());
     return ErrorCode::SUCCESS;
 }
 

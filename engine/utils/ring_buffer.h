@@ -125,8 +125,8 @@ public:
     bool Seek(uint64_t offset)
     {
         OSAL::ScopedLock lck(writeMutex_);
-        MEDIA_LOG_I("Seek: buffer size %" PUBLIC_OUTPUT "d, offset %" PUBLIC_OUTPUT PRIu64
-                    ", mediaOffset_ %" PUBLIC_OUTPUT PRIu64, GetSize(), offset, mediaOffset_);
+        MEDIA_LOG_I("Seek: buffer size %" PUBLIC_LOG "d, offset %" PUBLIC_LOG PRIu64
+                    ", mediaOffset_ %" PUBLIC_LOG PRIu64, GetSize(), offset, mediaOffset_);
         bool result = false;
         if (offset >= mediaOffset_ && offset - mediaOffset_ < GetSize()) {
             head_ += offset - mediaOffset_;

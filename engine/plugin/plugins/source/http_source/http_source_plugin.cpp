@@ -160,7 +160,7 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     FALSE_RETURN_V(executor_->Open(uri), Status::ERROR_FUNCTION_CALL);
     isSeekable_ = !executor_->IsStreaming();
     fileSize_ = isSeekable_ ? executor_->GetContentLength() : -1;
-    MEDIA_LOG_I("SetSource(%" PUBLIC_OUTPUT "s), seekable: %" PUBLIC_OUTPUT "d, file size: %" PUBLIC_OUTPUT "d",
+    MEDIA_LOG_I("SetSource(%" PUBLIC_LOG "s), seekable: %" PUBLIC_LOG "d, file size: %" PUBLIC_LOG "d",
                 uri.c_str(), isSeekable_, fileSize_);
     return Status::OK;
 }
@@ -187,7 +187,7 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
     unsigned int realReadSize = 0;
     executor_->Read(bufData->GetWritableAddr(expectedLen), expectedLen, realReadSize, isEos);
     bufData->UpdateDataSize(realReadSize);
-    MEDIA_LOG_D("Read finished, read size = %" PUBLIC_OUTPUT "d, isEos %" PUBLIC_OUTPUT "d", bufData->GetSize(), isEos);
+    MEDIA_LOG_D("Read finished, read size = %" PUBLIC_LOG "d, isEos %" PUBLIC_LOG "d", bufData->GetSize(), isEos);
     return Status::OK;
 }
 
