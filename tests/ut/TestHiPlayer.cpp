@@ -22,7 +22,7 @@
 #include <test_helper.h>
 #include "pipeline/filters/codec/audio_decoder/audio_decoder_filter.h"
 #include "pipeline/filters/sink/audio_sink/audio_sink_filter.h"
-#include "player/lite/hiplayer_impl.h"
+#include "scene/player/lite/hiplayer_impl.h"
 
 using namespace OHOS::Media::Pipeline;
 

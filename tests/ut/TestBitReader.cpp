@@ -35,7 +35,7 @@ public:
     void TearDown() override
     {
     }
-    BitReader bitReader;
+    Ffmpeg::BitReader bitReader;
 };
 
 TEST_F(TestBitReader, test_read_bits)

@@ -18,8 +18,8 @@
 #define protected public
 
 #include "osal/utils/util.h"
-#include "player/internal/state_machine.h"
-#include "player/play_executor.h"
+#include "scene/player/internal/state_machine.h"
+#include "scene/player/play_executor.h"
 
 namespace OHOS {
 namespace Media {

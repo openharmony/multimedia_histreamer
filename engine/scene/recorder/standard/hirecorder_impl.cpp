@@ -118,6 +118,7 @@ int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId
 
 sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
 {
+    return nullptr;
 }
 
 int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)

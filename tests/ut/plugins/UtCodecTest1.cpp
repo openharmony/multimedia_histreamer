@@ -49,7 +49,7 @@ Status UtCodecTest1::Flush()
     return Status::OK;
 }
 
-Status UtCodecTest1::SetDataCallback(const std::weak_ptr<DataCallback> &dataCallback)
+Status UtCodecTest1::SetDataCallback(DataCallback* dataCallback)
 {
     return Status::OK;
 }

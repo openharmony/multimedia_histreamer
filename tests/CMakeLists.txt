@@ -6,6 +6,12 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
+include_directories(
+    ${TOP_DIR}/../3rdparty/ohos/foundation/multimedia/media_lite/interfaces/innerkits
+    ${TOP_DIR}/../3rdparty/ohos/foundation/multimedia/utils/lite/interfaces/kits
+    ${TOP_DIR}/engine/scene/player/lite
+)
+
 # Must comment out these two lines to compile standard player
 # But must uncomment them to compile histreamer_tests
 #unset(PLAYER_LITE CACHE)
