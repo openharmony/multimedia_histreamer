@@ -61,7 +61,7 @@ private:
 };
 
 VideoEncoderFilter::VideoEncoderFilter(const std::string& name)
-    : CodecFilterBase(name), dataCallback_(std::make_shared<DataCallbackImpl>(*this))
+    : CodecFilterBase(name), dataCallback_(new DataCallbackImpl(*this))
 {
     MEDIA_LOG_I("video encoder ctor called");
     vdecFormat_.width = 0;
@@ -91,6 +91,10 @@ VideoEncoderFilter::~VideoEncoderFilter()
     if (outBufQue_) {
         outBufQue_->SetActive(false);
         outBufQue_.reset();
+    }
+    if (dataCallback_) {
+        delete dataCallback_;
+        dataCallback_ = nullptr;
     }
 }
 

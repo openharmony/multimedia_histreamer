@@ -95,7 +95,7 @@ private:
     Capability capNegWithDownstream_;
     Capability capNegWithUpstream_;
     VideoDecoderFormat vdecFormat_;
-    std::shared_ptr<DataCallbackImpl> dataCallback_ {nullptr};
+    DataCallbackImpl* dataCallback_ {nullptr};
 
     std::shared_ptr<OHOS::Media::OSAL::Task> handleFrameTask_ {nullptr};
     std::shared_ptr<OHOS::Media::OSAL::Task> pushTask_ {nullptr};

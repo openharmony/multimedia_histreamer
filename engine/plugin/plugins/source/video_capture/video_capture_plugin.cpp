@@ -27,27 +27,27 @@
 
 namespace {
 // register plugins
-using namespace OHOS::Media;
+using namespace OHOS::Media::Plugin;
 using namespace VideoCapture;
-std::shared_ptr<Plugin::SourcePlugin> VideoCapturePluginCreater(const std::string &name)
+std::shared_ptr<SourcePlugin> VideoCapturePluginCreater(const std::string &name)
 {
-    return std::make_shared<Plugin::VideoCapturePlugin>(name);
+    return std::make_shared<VideoCapturePlugin>(name);
 }
 
-Plugin::Status VideoCaptureRegister(const std::shared_ptr<Plugin::Register> &reg)
+Status VideoCaptureRegister(const std::shared_ptr<Register> &reg)
 {
-    Plugin::SourcePluginDef definition;
+    SourcePluginDef definition;
     definition.name = "AudioCapture";
     definition.description = "Video capture from audio service";
     definition.rank = 100; // 100: max rank
-    definition.inputType = Plugin::SrcInputType::VID_SURFACE_YUV;
+    definition.inputType = SrcInputType::VID_SURFACE_YUV;
     definition.creator = VideoCapturePluginCreater;
-    Plugin::Capability outCaps(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
+    Capability outCaps(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
     definition.outCaps.push_back(outCaps);
     // add es outCaps later
     return reg->AddPlugin(definition);
 }
-PLUGIN_DEFINITION(StdVideoCapture, Plugin::LicenseType::APACHE_V2, VideoCaptureRegister, [] {});
+PLUGIN_DEFINITION(StdVideoCapture, LicenseType::APACHE_V2, VideoCaptureRegister, [] {});
 }
 
 namespace OHOS {
