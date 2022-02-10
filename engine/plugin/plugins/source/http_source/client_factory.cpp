@@ -38,13 +38,7 @@ ClientFactory::~ClientFactory()
 std::shared_ptr<NetworkClient> ClientFactory::CreateClient(const std::string& url)
 {
     FALSE_RETURN_V(!url.empty(), nullptr);
-    if (url.find("http") == 0) {
-        if (httpClient_ == nullptr) {
-            httpClient_ = std::make_shared<HttpCurlClient>(rxHeader_, rxBody_, userParam_);
-            httpClient_->Init();
-        }
-        return httpClient_;
-    } else if (url.find("https") == 0) {
+    if (url.find("https") == 0) {
         if (httpClient_ == nullptr) {
             httpClient_ = std::make_shared<HttpCurlClient>(rxHeader_, rxBody_, userParam_);
             httpClient_->Init();
@@ -54,6 +48,12 @@ std::shared_ptr<NetworkClient> ClientFactory::CreateClient(const std::string& ur
             httpsClient_->Init();
         }
         return httpsClient_;
+    } else if (url.find("http") == 0) {
+        if (httpClient_ == nullptr) {
+            httpClient_ = std::make_shared<HttpCurlClient>(rxHeader_, rxBody_, userParam_);
+            httpClient_->Init();
+        }
+        return httpClient_;
     }
     return nullptr;
 }
