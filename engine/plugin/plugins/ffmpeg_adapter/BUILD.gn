@@ -102,6 +102,7 @@ source_set("ffmpeg_demuxers") {
 source_set("ffmpeg_audio_encoders") {
   sources = [
     "audio_encoder/audio_ffmpeg_encoder_plugin.cpp",
+    "audio_encoder/ffmpeg_au_enc_config.cpp",
     "utils/ffmpeg_utils.cpp",
   ]
   public_configs = [ ":plugin_ffmpeg_adapter_config" ]

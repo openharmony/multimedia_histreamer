@@ -34,6 +34,7 @@ extern "C" {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 class AudioFfmpegEncoderPlugin : public CodecPlugin {
 public:
     explicit AudioFfmpegEncoderPlugin(std::string name);
@@ -91,11 +92,6 @@ private:
 
     Status DeInitLocked();
 
-    template <typename T>
-    bool FindInParameterMapThenAssignLocked(Tag tag, T& assign);
-
-    void ConfigCodecLocked();
-
     Status SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer);
 
     Status ReceiveFrameSucc(const std::shared_ptr<Buffer>& ioInfo, const std::shared_ptr<AVPacket>& packet);
@@ -125,6 +121,7 @@ private:
     std::vector<uint8_t> resampleCache_ {};
     std::vector<uint8_t*> resampleChannelAddr_ {};
 };
+} // Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

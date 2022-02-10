@@ -58,8 +58,6 @@ public:
 private:
     ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta);
 
-    ErrorCode UpdateMetaAccordingToPlugin(Plugin::Meta& meta);
-
     ErrorCode HandleFrame(const std::shared_ptr<AVBuffer>& buffer);
 
     ErrorCode FinishFrame();

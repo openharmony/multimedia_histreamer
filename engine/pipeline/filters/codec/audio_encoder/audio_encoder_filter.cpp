@@ -160,10 +160,7 @@ bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_
     PROFILE_END("Audio encoder configure end");
     return true;
 }
-ErrorCode AudioEncoderFilter::UpdateMetaAccordingToPlugin(Plugin::Meta& meta)
-{
-    return ErrorCode::SUCCESS;
-}
+
 ErrorCode AudioEncoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     FAIL_RET_ERR_CODE_MSG_E(ConfigureWithMetaLocked(meta), "configure encoder plugin error");
@@ -300,7 +297,7 @@ ErrorCode AudioEncoderFilter::FinishFrame()
     MEDIA_LOG_D("end finish frame");
     return TranslatePluginStatus(status);
 }
-} // OHOS
-} // Media
 } // Pipeline
+} // Media
+} // OHOS
 #endif

@@ -269,17 +269,17 @@ Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const
     auto ite = tagMap.find(Tag::MEDIA_CODEC_CONFIG);
     if (ite != std::end(tagMap)) {
         if (!ite->second.SameTypeWith(typeid(std::vector<uint8_t>))) {
-            MEDIA_LOG_E("tag %" PUBLIC_LOG "d type mismatched", Tag::MEDIA_CODEC_CONFIG);
+            MEDIA_LOG_E("tag %" PUBLIC_LOG_D32 " type mismatched", Tag::MEDIA_CODEC_CONFIG);
             return Plugin::Status::ERROR_MISMATCHED_TYPE;
         }
-        auto extraData = Plugin::AnyCast<std::vector<uint8_t>>(ite->second);
+        const auto* extraData = Plugin::AnyCast<std::vector<uint8_t>>(&(ite->second));
         stream->codecpar->extradata = static_cast<uint8_t *>(av_mallocz(
-            extraData.size() + AV_INPUT_BUFFER_PADDING_SIZE));
+            extraData->size() + AV_INPUT_BUFFER_PADDING_SIZE));
         if (stream->codecpar->extradata == nullptr) {
             return Status::ERROR_NO_MEMORY;
         }
-        memcpy_s(stream->codecpar->extradata, extraData.size(), extraData.data(), extraData.size());
-        stream->codecpar->extradata_size = extraData.size();
+        memcpy_s(stream->codecpar->extradata, extraData->size(), extraData->data(), extraData->size());
+        stream->codecpar->extradata_size = extraData->size();
     }
     return Status::OK;
 }

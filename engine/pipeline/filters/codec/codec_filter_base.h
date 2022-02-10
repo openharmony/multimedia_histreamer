@@ -38,14 +38,20 @@ public:
     explicit CodecFilterBase(const std::string &name);
     ~CodecFilterBase() override;
 
-    ErrorCode SetParameter(int32_t key, const Plugin::Any &value) override;
+    ErrorCode SetParameter(int32_t key, const Plugin::Any& value) override;
 
-    ErrorCode GetParameter(int32_t key, Plugin::Any &value) override;
+    ErrorCode GetParameter(int32_t key, Plugin::Any& outVal) override;
+
+    void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input) override;
+
+    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override;
 
 protected:
-    ErrorCode ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta> &meta);
+    ErrorCode ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta>& meta);
 
-    ErrorCode SetPluginParameterLocked(Tag tag, const Plugin::ValueType &value);
+    ErrorCode UpdateMetaAccordingToPlugin(Plugin::Meta& meta);
+
+    ErrorCode SetPluginParameterLocked(Tag tag, const Plugin::ValueType& value);
 
     template<typename T>
     ErrorCode GetPluginParameterLocked(Tag tag, T& value)
@@ -59,9 +65,6 @@ protected:
     }
 
     std::shared_ptr<Plugin::Codec> plugin_ {};
-
-    void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input) override;
-    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override;
 };
 } // namespace Pipeline
 } // namespace Media

@@ -179,7 +179,7 @@
     do {                                                                                                               \
         bool value = (exec);                                                                                           \
         if (!value) {                                                                                                  \
-            MEDIA_LOG_E(fmt, ##args);                                                                                  \
+            loglevel(fmt, ##args);                                                                                     \
             return ret;                                                                                                \
         }                                                                                                              \
     } while (0)
@@ -227,7 +227,7 @@
     do {                                                                                                               \
         bool value = (exec);                                                                                           \
         if (!value) {                                                                                                  \
-            MEDIA_LOG_E("ASSERT_CONDITION(msg:%" PUBLIC_LOG "s) " #exec, msg);                                      \
+            MEDIA_LOG_E("ASSERT_CONDITION(msg:%" PUBLIC_LOG_S ") " #exec, msg);                                        \
         }                                                                                                              \
     } while (0)
 #endif

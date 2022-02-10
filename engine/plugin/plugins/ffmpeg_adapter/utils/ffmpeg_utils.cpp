@@ -84,7 +84,7 @@ std::map<uint64_t, AudioChannelMasks> g_fromFFMPEGChannelLayout = {
     {AV_CH_STEREO_LEFT, AudioChannelMasks::STEREO_LEFT},
     {AV_CH_STEREO_RIGHT, AudioChannelMasks::STEREO_RIGHT},
 };
-const std::map<std::string, Tag> TAG_MAP = {
+const std::map<std::string, Tag> g_tagMap = {
     {"title", Tag::MEDIA_TITLE},
     {"artist", Tag::MEDIA_ARTIST},
     {"lyricist", Tag::MEDIA_LYRICIST},
@@ -97,6 +97,16 @@ const std::map<std::string, Tag> TAG_MAP = {
     {"language", Tag::MEDIA_LANGUAGE},
     {"description", Tag::MEDIA_DESCRIPTION},
     {"lyrics", Tag::MEDIA_LYRICS},
+};
+const std::vector<std::pair<AudioAacProfile, int32_t>> g_AacProfileMap = {
+    {AudioAacProfile::MAIN, FF_PROFILE_AAC_MAIN},
+    {AudioAacProfile::LC, FF_PROFILE_AAC_LOW},
+    {AudioAacProfile::SSR, FF_PROFILE_AAC_SSR},
+    {AudioAacProfile::LTP, FF_PROFILE_AAC_LTP},
+    {AudioAacProfile::HE, FF_PROFILE_AAC_HE},
+    {AudioAacProfile::HE_PS, FF_PROFILE_AAC_HE_V2},
+    {AudioAacProfile::LD, FF_PROFILE_AAC_LD},
+    {AudioAacProfile::ELD, FF_PROFILE_AAC_ELD},
 };
 } // namespace
 
@@ -298,7 +308,7 @@ uint64_t ConvertChannelLayoutToFFmpeg(AudioChannelLayout channelLayout)
 }
 bool FindAvMetaNameByTag(Tag tag, std::string& metaName)
 {
-    for (const auto& pair : TAG_MAP) {
+    for (const auto& pair : g_tagMap) {
         if (pair.second == tag) {
             metaName = pair.first;
             return true;
@@ -308,12 +318,28 @@ bool FindAvMetaNameByTag(Tag tag, std::string& metaName)
 }
 bool FindTagByAvMetaName(const std::string& metaName, Tag& tag)
 {
-    auto ite = TAG_MAP.find(metaName);
-    if (ite == std::end(TAG_MAP)) {
+    auto ite = g_tagMap.find(metaName);
+    if (ite == std::end(g_tagMap)) {
         return false;
     }
     tag = ite->second;
     return true;
+}
+AudioAacProfile ConvAacProfileFromFfmpeg (int32_t ffmpegProfile)
+{
+    auto ite = std::find_if(g_AacProfileMap.begin(), g_AacProfileMap.end(),
+        [&] (const std::pair<AudioAacProfile, int32_t>& tmp) -> bool {
+        return tmp.second == ffmpegProfile;
+    });
+    return ite == g_AacProfileMap.end() ? AudioAacProfile::NONE : ite->first;
+}
+int32_t ConvAacProfileToFfmpeg (AudioAacProfile profile)
+{
+    auto ite = std::find_if(g_AacProfileMap.begin(), g_AacProfileMap.end(),
+        [&] (const std::pair<AudioAacProfile, int32_t>& tmp) -> bool {
+        return tmp.first == profile;
+    });
+    return ite == g_AacProfileMap.end() ? FF_PROFILE_UNKNOWN : ite->second;
 }
 } // namespace Ffmpeg
 } // namespace Plugin
