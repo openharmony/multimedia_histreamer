@@ -81,7 +81,7 @@ Status HttpSourcePlugin::Deinit()
 Status HttpSourcePlugin::Prepare()
 {
     MEDIA_LOG_D("IN");
-    return Status::OK;
+    return Status::ERROR_DELAY_READY;
 }
 
 Status HttpSourcePlugin::Reset()

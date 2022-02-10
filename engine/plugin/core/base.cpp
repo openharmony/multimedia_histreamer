@@ -72,7 +72,7 @@ Status Base::Prepare()
     }
     auto ret = plugin_->Prepare();
     LOG_WARN_IF_NOT_OK(plugin_, ret);
-    if (ret == Status::OK) {
+    if (ret == Status::OK || ret == Status::ERROR_DELAY_READY) {
         pluginState_ = State::PREPARED;
     }
     MEDIA_LOG_D("%" PUBLIC_LOG "s Exit.", __FUNCTION__);

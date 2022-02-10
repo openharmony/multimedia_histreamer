@@ -136,18 +136,6 @@ void StreamingExecutor::HttpDownloadThread()
     }
     FALSE_LOG(ret == Status::OK);
 
-    int size = buffer_->GetSize();
-    double ratio = (static_cast<double>(size)) / RING_BUFFER_SIZE;
-    if (size >= WATER_LINE && !aboveWaterline_) {
-        aboveWaterline_ = true;
-        MEDIA_LOG_I("Send http aboveWaterline event, ringbuffer ratio %" PUBLIC_LOG_F, ratio);
-        callback_->OnEvent({PluginEventType::ABOVE_LOW_WATERLINE, {ratio}, "http"});
-    } else if (size < WATER_LINE && aboveWaterline_) {
-        aboveWaterline_ = false;
-        MEDIA_LOG_I("Send http belowWaterline event, ringbuffer ratio %" PUBLIC_LOG_F, ratio);
-        callback_->OnEvent({PluginEventType::BELOW_LOW_WATERLINE, {ratio}, "http"});
-    }
-
     int64_t remaining = headerInfo_.fileContentLen - startPos_;
     if (headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
         MEDIA_LOG_I("http transfer reach end, startPos_ %" PUBLIC_LOG "d", startPos_);
@@ -184,6 +172,19 @@ size_t StreamingExecutor::RxBodyData(void *buffer, size_t size, size_t nitems, v
     MEDIA_LOG_I("RxBodyData: dataLen %" PUBLIC_LOG "d, startPos_ %" PUBLIC_LOG "d, buffer size %"
         PUBLIC_LOG "d", dataLen, executor->startPos_, executor->buffer_->GetSize());
     executor->startPos_ = executor->startPos_ + dataLen;
+
+    int bufferSize = executor->buffer_->GetSize();
+    double ratio = (static_cast<double>(bufferSize)) / RING_BUFFER_SIZE;
+    if (bufferSize >= WATER_LINE && !executor->aboveWaterline_) {
+        executor->aboveWaterline_ = true;
+        MEDIA_LOG_I("Send http aboveWaterline event, ringbuffer ratio %" PUBLIC_LOG_F, ratio);
+        executor->callback_->OnEvent({PluginEventType::ABOVE_LOW_WATERLINE, {ratio}, "http"});
+    } else if (bufferSize < WATER_LINE && executor->aboveWaterline_) {
+        executor->aboveWaterline_ = false;
+        MEDIA_LOG_I("Send http belowWaterline event, ringbuffer ratio %" PUBLIC_LOG_F, ratio);
+        executor->callback_->OnEvent({PluginEventType::BELOW_LOW_WATERLINE, {ratio}, "http"});
+    }
+
     return dataLen;
 }
 

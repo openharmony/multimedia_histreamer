@@ -119,6 +119,7 @@ protected:
         const std::function<std::shared_ptr<T>(const std::string&)>& pluginCreator);
 
 protected:
+    void OnEvent(const Plugin::PluginEvent &event) override;
     std::string name_;
     std::atomic<FilterState> state_;
     EventReceiver* eventReceiver_;
@@ -137,7 +138,6 @@ protected:
 private:
     template <typename T>
     static T FindPort(const std::vector<T>& list, const std::string& name);
-    void OnEvent(const Plugin::PluginEvent &event) override;
 };
 } // namespace Pipeline
 } // namespace Media

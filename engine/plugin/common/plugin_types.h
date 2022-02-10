@@ -85,6 +85,7 @@ enum struct Status : int32_t {
     ERROR_FUNCTION_CALL = -18,      ///< Call some function failed.
     ERROR_CLIENT = -19,             ///< Http client error
     ERROR_SERVER = -20,             ///< Http server error
+    ERROR_DELAY_READY = -21,        ///< Delay ready event
 };
 
 /**

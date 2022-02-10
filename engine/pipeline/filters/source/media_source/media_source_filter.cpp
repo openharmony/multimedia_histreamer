@@ -124,11 +124,20 @@ ErrorCode MediaSourceFilter::Prepare()
     if (plugin_ == nullptr) {
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
-    auto err = TranslatePluginStatus(plugin_->Prepare());
-    if (err == ErrorCode::SUCCESS) {
+    Status ret = plugin_->Prepare();
+    if (ret == Status::OK) {
         MEDIA_LOG_D("media source send EVENT_READY");
-        OnEvent(Event{name_, EventType::EVENT_READY, {}});
+        FilterBase::OnEvent(Event{name_, EventType::EVENT_READY, {}});
+    } else if (ret == Status::ERROR_DELAY_READY) {
+        isPluginReady_ = true;
+        if (isAboveWaterline_ && isPluginReady_) {
+            MEDIA_LOG_D("media source send EVENT_READY");
+            FilterBase::OnEvent(Event{name_, EventType::EVENT_READY, {}});
+            isPluginReady_= false;
+            isAboveWaterline_= false;
+        }
     }
+    auto err = TranslatePluginStatus(ret);
     return err;
 }
 
@@ -369,6 +378,19 @@ ErrorCode MediaSourceFilter::FindPlugin(const std::shared_ptr<MediaSource>& sour
     }
     MEDIA_LOG_I("Cannot find any plugin");
     return ErrorCode::ERROR_UNSUPPORTED_FORMAT;
+}
+
+void MediaSourceFilter::OnEvent(const Plugin::PluginEvent &event)
+{
+    if (event.type == PluginEventType::ABOVE_LOW_WATERLINE) {
+        isAboveWaterline_ = true;
+        if (isPluginReady_ && isAboveWaterline_) {
+            FilterBase::OnEvent(Event{name_, EventType::EVENT_READY, {}});
+            isAboveWaterline_ = false;
+            isPluginReady_ = false;
+        }
+    }
+    FilterBase::OnEvent(event);
 }
 } // namespace Pipeline
 } // namespace Media
