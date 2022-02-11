@@ -78,8 +78,9 @@ bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOf
 {
     OSAL::ScopedLock lock(mutex_);
     auto curOffsetTemp = bufferOffset_;
-    if (que_.empty() || offset < curOffsetTemp) {
+    if (que_.empty() || offset < curOffsetTemp || offset >= curOffsetTemp + size_) { // 原有数据无法命中, 则删除原有数据
         curOffset = offset;
+        FlushInternal();
         MEDIA_LOG_D("IsDataAvailable false, offset < bufferOffset_");
         return false;
     }
@@ -236,6 +237,12 @@ void DataPacker::Flush()
 {
     MEDIA_LOG_I("DataPacker Flush called.");
     OSAL::ScopedLock lock(mutex_);
+    FlushInternal();
+}
+
+void DataPacker::FlushInternal()
+{
+    MEDIA_LOG_D("DataPacker FlushInternal called.");
     que_.clear();
     size_ = 0;
     bufferOffset_ = 0;

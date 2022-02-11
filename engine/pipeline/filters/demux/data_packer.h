@@ -55,6 +55,8 @@ private:
 
     bool PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr);
 
+    void FlushInternal();
+
     OSAL::Mutex mutex_;
     std::deque<AVBufferPtr> que_;  // buffer队列
     std::vector<uint8_t> assembler_;
