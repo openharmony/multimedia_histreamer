@@ -19,8 +19,9 @@
 #include "interface/codec_plugin.h"
 #include "utils/utils.h"
 
-using namespace OHOS::Media::Plugin;
-
+namespace OHOS {
+namespace Media {
+namespace Plugin {
 Codec::Codec(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<CodecPlugin> plugin)
     : Base(pkgVer, apiVer, plugin), codec_(std::move(plugin))
 {
@@ -52,22 +53,23 @@ Status Codec::Flush()
 }
 
 struct DataCallbackWrapper : DataCallback {
-    DataCallbackWrapper(uint32_t pkgVersion, DataCallbackHelper* dataCallback)
-            : version(pkgVersion), dataCallbackHelper(dataCallback)
-    {
-    }
+DataCallbackWrapper(uint32_t pkgVersion, DataCallbackHelper* dataCallback)
+    : version(pkgVersion), dataCallbackHelper(dataCallback)
+{
+}
 
-    ~DataCallbackWrapper() override = default;
+~DataCallbackWrapper() override = default;
 
-    void OnInputBufferDone(std::shared_ptr<Buffer>& input) override
-    {
-        dataCallbackHelper->OnInputBufferDone(input);
-    }
+void OnInputBufferDone(std::shared_ptr<Buffer>& input) override
+{
+    dataCallbackHelper->OnInputBufferDone(input);
+}
 
-    void OnOutputBufferDone(std::shared_ptr<Buffer>& output) override
-    {
-        dataCallbackHelper->OnOutputBufferDone(output);
-    }
+void OnOutputBufferDone(std::shared_ptr<Buffer>& output) override
+{
+    dataCallbackHelper->OnOutputBufferDone(output);
+}
+
 private:
     MEDIA_UNUSED uint32_t version;
     DataCallbackHelper* dataCallbackHelper;
@@ -78,3 +80,6 @@ Status Codec::SetDataCallback(DataCallbackHelper* helper)
     dataCallback_ = std::make_shared<DataCallbackWrapper>(pkgVersion_, helper);
     return codec_->SetDataCallback(dataCallback_.get());
 }
+} // namespace Plugin
+} // namespace Media
+} // namespace OHOS

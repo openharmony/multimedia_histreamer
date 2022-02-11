@@ -138,6 +138,35 @@ const std::map<Plugin::AudioChannelLayout, const char*> g_auChannelLayoutStrMap 
     {Plugin::AudioChannelLayout::HEXADECAGONAL, "HEXADECAGONAL"},
     {Plugin::AudioChannelLayout::STEREO_DOWNMIX, "STEREO_DOWNMIX"},
 };
+
+inline bool HasTagInfo(Plugin::Tag tag)
+{
+    return g_tagInfoMap.count(tag) != 0;
+}
+
+inline const char* GetTagStrName(Plugin::Tag tag)
+{
+    if (!HasTagInfo(tag)) {
+        return nullptr;
+    }
+    return std::get<0>(g_tagInfoMap.at(tag));
+}
+
+inline const char* GetTagTypeStrName(Plugin::Tag tag)
+{
+    if (!HasTagInfo(tag)) {
+        return nullptr;
+    }
+    return std::get<2>(g_tagInfoMap.at(tag));
+}
+
+inline const Plugin::ValueType* GetTagDefValue(Plugin::Tag tag)
+{
+    if (!HasTagInfo(tag)) {
+        return nullptr;
+    }
+    return &std::get<1>(g_tagInfoMap.at(tag));
+}
 } // Pipeline
 } // Media
 } // OHOS

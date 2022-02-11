@@ -16,6 +16,8 @@
 #ifndef HISTREAMER_PLUGIN_CORE_UTILS_H
 #define HISTREAMER_PLUGIN_CORE_UTILS_H
 
+#include "plugin/common/plugin_types.h"
+
 namespace OHOS {
 namespace Media {
 namespace Plugin {
@@ -47,27 +49,8 @@ do { \
     } \
 } while (0)
 
-inline const char* GetStateString(OHOS::Media::Plugin::State state)
-{
-    using namespace OHOS::Media::Plugin;
-    switch (state) {
-        case State::CREATED:
-            return "Created";
-        case State::INITIALIZED:
-            return "Initialized";
-        case State::DESTROYED:
-            return "Destroyed";
-        case State::PREPARED:
-            return "Prepared";
-        case State::RUNNING:
-            return "Running";
-        case State::PAUSED:
-            return "Paused";
-        default:
-            return "Invalid";
-    }
-}
-}
-}
-}
+const char* GetStateString(State state);
+} // Plugin
+} // Media
+} // OHOS
 #endif // HISTREAMER_PLUGIN_CORE_UTILS_H

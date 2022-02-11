@@ -95,26 +95,55 @@ Status Minimp3DemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& so
     return Status::OK;
 }
 
+Status Minimp3DemuxerPlugin::DoReadFromSource(uint32_t readSize)
+{
+    auto buffer = std::make_shared<Buffer>();
+    auto bufData = buffer->AllocMemory(nullptr, readSize);
+    int retryTimes = 0;
+    MEDIA_LOG_D("ioNeedReadSize %" PUBLIC_LOG_U32 " inIoBufferSize_ %" PUBLIC_LOG_D32 " ioDataRemainSize_ %"
+        PUBLIC_LOG_U32, ioNeedReadSize, inIoBufferSize_, ioDataRemainSize_);
+    do {
+        auto res = ioContext_.dataSource->ReadAt(ioContext_.offset, buffer, static_cast<size_t>(readSize));
+        FALSE_RET_V_MSG_W(res == Status::OK, res, "read data from source error %" PUBLIC_LOG_D32, (int)res);
+        if (bufData->GetSize() == 0 && retryTimes < 200 && ioDataRemainSize_ == 0) { // 200
+            MEDIA_LOG_D("bufData->GetSize() == 0 retryTimes = %" PUBLIC_LOG "d", retryTimes);
+            OSAL::SleepFor(30); // 30
+            retryTimes++;
+            continue;
+        }
+        FALSE_RET_V_MSG_E(retryTimes < 200, Status::ERROR_NOT_ENOUGH_DATA, // 200 times
+                          "not eof, but doesn't have enough data");
+        MEDIA_LOG_D("bufData->GetSize() %" PUBLIC_LOG "d", bufData->GetSize());
+        if (bufData->GetSize() > 0) {
+            if (readSize < bufData->GetSize()) {
+                MEDIA_LOG_E("Error: ioNeedReadSize < bufData->GetSize()");
+                return Status::ERROR_UNKNOWN;
+            }
+            auto ret = memcpy_s(inIoBuffer_ + ioDataRemainSize_, readSize,
+                                const_cast<uint8_t *>(bufData->GetReadOnlyData()), bufData->GetSize());
+            if (ret != EOK) {
+                MEDIA_LOG_W("memcpy into buffer failed with code %" PUBLIC_LOG_D32, ret);
+                return Status::ERROR_UNKNOWN;
+            }
+            ioContext_.offset += bufData->GetSize();
+            ioDataRemainSize_ += bufData->GetSize();
+        }
+        break;
+    } while (true);
+    return Status::OK;
+}
+
 Status Minimp3DemuxerPlugin::GetDataFromSource()
 {
     uint32_t ioNeedReadSize = inIoBufferSize_ - ioDataRemainSize_;
-    MEDIA_LOG_D("ioDataRemainSize_ %" PUBLIC_LOG "d ioNeedReadSize %" PUBLIC_LOG "d",
-                ioDataRemainSize_, ioNeedReadSize);
+    MEDIA_LOG_D("remain size_ %" PUBLIC_LOG "d need read size %" PUBLIC_LOG "d", ioDataRemainSize_, ioNeedReadSize);
     if (ioDataRemainSize_) {
         // 将剩余数据移动到buffer的起始位置
-        auto ret = memmove_s(inIoBuffer_,
-                             ioDataRemainSize_,
-                             inIoBuffer_ + mp3DemuxerRst_.usedInputLength,
-                             ioDataRemainSize_);
-        if (ret != 0) {
-            MEDIA_LOG_E("copy buffer error(%" PUBLIC_LOG "d)", ret);
-            return Status::ERROR_UNKNOWN;
-        }
+        auto ret = memmove_s(inIoBuffer_, ioDataRemainSize_, inIoBuffer_ + mp3DemuxerRst_.usedInputLength,
+            ioDataRemainSize_);
+        FALSE_RET_V_MSG_W(ret == 0, Status::ERROR_UNKNOWN, "copy buffer error %" PUBLIC_LOG_D32, ret);
         ret = memset_s(inIoBuffer_ + ioDataRemainSize_, ioNeedReadSize, 0x00, ioNeedReadSize);
-        if (ret != 0) {
-            MEDIA_LOG_E("memset_s buffer error(%" PUBLIC_LOG "d)", ret);
-            return Status::ERROR_UNKNOWN;
-        }
+        FALSE_RET_V_MSG_W(ret == 0, Status::ERROR_UNKNOWN, "memset_s buffer error %" PUBLIC_LOG_D32, ret);
     }
     if (ioContext_.offset >= fileSize_ && ioDataRemainSize_ == 0) {
         ioContext_.eos = true;
@@ -123,47 +152,10 @@ Status Minimp3DemuxerPlugin::GetDataFromSource()
     if (ioContext_.offset + ioNeedReadSize > fileSize_) {
         ioNeedReadSize = fileSize_ - ioContext_.offset; // 在读取文件即将结束时，剩余数据不足，更新读取长度
     }
-
-    if (ioNeedReadSize) {
-        auto buffer  = std::make_shared<Buffer>();
-        auto bufData = buffer->AllocMemory(nullptr, ioNeedReadSize);
-        int retryTimes = 0;
-        MEDIA_LOG_D("ioNeedReadSize %" PUBLIC_LOG PRIu32 " inIoBufferSize_ %" PUBLIC_LOG "d ioDataRemainSize_ %"
-                    PUBLIC_LOG PRIu32, ioNeedReadSize, inIoBufferSize_, ioDataRemainSize_);
-        do {
-            auto result = ioContext_.dataSource->ReadAt(ioContext_.offset, buffer, static_cast<size_t>(ioNeedReadSize));
-            MEDIA_LOG_D("ioContext_.offset %" PUBLIC_LOG "d", static_cast<uint32_t>(ioContext_.offset));
-            if (result != Status::OK) {
-                MEDIA_LOG_W("read data from source warning %" PUBLIC_LOG "d", (int)result);
-                return result;
-            }
-            if (bufData->GetSize() == 0 && retryTimes < 200 && ioDataRemainSize_ == 0) { // 200
-                MEDIA_LOG_D("bufData->GetSize() == 0 retryTimes = %" PUBLIC_LOG "d", retryTimes);
-                OSAL::SleepFor(30); // 30
-                retryTimes++;
-                continue;
-            }
-            if (retryTimes >= 200) { // 200
-                MEDIA_LOG_E("Warning: not end of file, but do not have enough data");
-                return Status::ERROR_NOT_ENOUGH_DATA;
-            }
-            MEDIA_LOG_D("bufData->GetSize() %" PUBLIC_LOG "d", bufData->GetSize());
-            if (bufData->GetSize() > 0) {
-                if (ioNeedReadSize >= bufData->GetSize()) {
-                    memcpy_s(inIoBuffer_ + ioDataRemainSize_, ioNeedReadSize,
-                        const_cast<uint8_t *>(bufData->GetReadOnlyData()), bufData->GetSize());
-                } else {
-                    MEDIA_LOG_E("Error: ioNeedReadSize < bufData->GetSize()");
-                    return Status::ERROR_UNKNOWN;
-                }
-                ioContext_.offset += bufData->GetSize();
-                ioDataRemainSize_  += bufData->GetSize();
-            }
-            break;
-        } while (true);
+    if (ioNeedReadSize == 0) {
+        return Status::OK;
     }
-
-    return Status::OK;
+    return DoReadFromSource(ioNeedReadSize);
 }
 
 void Minimp3DemuxerPlugin::FillInMediaInfo(MediaInfo& mediaInfo) const
@@ -628,14 +620,10 @@ int AudioDemuxerMp3IterateCallbackForProbe(void *userData, const uint8_t *frame,
     return 1;
 }
 
-Status AudioDemuxerMp3Probe(AudioDemuxerMp3Attr *mp3DemuxerAttr, uint8_t *inputBuffer, uint32_t inputLength,
-                            AudioDemuxerRst *mp3DemuxerRst)
+Status AudioDemuxerMp3Probe(AudioDemuxerMp3Attr* mp3DemuxerAttr, uint8_t* inputBuffer, uint32_t inputLength,
+                            AudioDemuxerRst* mp3DemuxerRst)
 {
-    if ((inputBuffer == nullptr) || (inputLength < 0)) {
-        MEDIA_LOG_I("%" PUBLIC_LOG "s arg error", __func__);
-        return Status::ERROR_INVALID_PARAMETER;
-    }
-
+    FALSE_RET_V_MSG_W(inputBuffer != nullptr && inputLength >= 0, Status::ERROR_INVALID_PARAMETER, "invalid parameter");
     if (inputLength == 0) {
         return Status::ERROR_NOT_ENOUGH_DATA;
     }

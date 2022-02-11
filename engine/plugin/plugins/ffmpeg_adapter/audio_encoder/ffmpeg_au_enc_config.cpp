@@ -79,8 +79,8 @@ void ConfigAacCodec(AVCodecContext& codecContext, const std::map<Tag, ValueType>
 }
 using ConfigFunc = std::function<void(AVCodecContext&, const std::map<Tag, ValueType>&)>;
 std::map<AVCodecID, ConfigFunc> g_ConfigFuncMap = {
-        {AV_CODEC_ID_AAC, ConfigAacCodec},
-        {AV_CODEC_ID_AAC_LATM, ConfigAacCodec}
+    {AV_CODEC_ID_AAC, ConfigAacCodec},
+    {AV_CODEC_ID_AAC_LATM, ConfigAacCodec}
 };
 
 void GetAudioCommonAttr(const AVCodecContext& codecContext, Tag tag, ValueType& outVal)
@@ -93,6 +93,7 @@ void GetAudioCommonAttr(const AVCodecContext& codecContext, Tag tag, ValueType& 
             std::vector<uint8_t> extra(codecContext.extradata_size);
             extra.assign(codecContext.extradata, codecContext.extradata + codecContext.extradata_size);
             outVal = extra;
+            break;
         }
         default:
             break;
@@ -115,8 +116,8 @@ void GetAacAttr(const AVCodecContext& codecContext, Tag tag, ValueType& outVal)
 
 using GetAttrFunc = std::function<void(const AVCodecContext&, Tag, ValueType&)>;
 std::map<AVCodecID, GetAttrFunc> g_GetAttrFuncMap = {
-        {AV_CODEC_ID_AAC, GetAacAttr},
-        {AV_CODEC_ID_AAC_LATM, GetAacAttr}
+    {AV_CODEC_ID_AAC, GetAacAttr},
+    {AV_CODEC_ID_AAC_LATM, GetAacAttr}
 };
 }
 

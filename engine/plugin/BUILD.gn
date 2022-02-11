@@ -102,6 +102,7 @@ source_set("histreamer_plugin_core") {
     "core/demuxer.cpp",
     "core/muxer.cpp",
     "core/output_sink.cpp",
+    "core/plugin_core_utils.cpp",
     "core/plugin_manager.cpp",
     "core/plugin_meta.cpp",
     "core/plugin_register.cpp",

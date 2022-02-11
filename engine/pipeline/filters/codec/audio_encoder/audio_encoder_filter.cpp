@@ -104,7 +104,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
         }
     }
     FALSE_RET_V_MSG_E(atLeastOutCapMatched && selectedPluginInfo != nullptr, false,
-                      "can't find available encoder plugin with %" PUBLIC_LOG_S, Capability2String(*upstreamCap).c_str());
+        "can't find available encoder plugin with %" PUBLIC_LOG_S, Capability2String(*upstreamCap).c_str());
     auto res = UpdateAndInitPluginByInfo<Plugin::Codec>(plugin_, pluginInfo_, selectedPluginInfo,
         [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
         return Plugin::PluginManager::Instance().CreateCodecPlugin(name);

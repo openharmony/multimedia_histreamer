@@ -18,9 +18,31 @@
 #define HST_LOG_TAG "AudioCaptureFilter"
 
 #include "audio_capture_filter.h"
+#include "common/plugin_utils.h"
 #include "foundation/log.h"
 #include "factory/filter_factory.h"
-#include "common/plugin_utils.h"
+#include "pipeline/core/plugin_attr_desc.h"
+
+namespace {
+using namespace OHOS::Media::Plugin;
+template<typename T>
+inline bool ASSIGN_PARAMETER_IF_MATCH(Tag tag, T& ret, const ValueType& val)
+{
+    using namespace OHOS::Media::Pipeline;
+    if (HasTagInfo(tag)) {
+        if (val.SameTypeWith(*GetTagDefValue(tag)) && val.SameTypeWith(typeid(T))) {
+            ret = AnyCast<T>(val);
+            return true;
+        } else {
+            MEDIA_LOG_I("type of %" PUBLIC_LOG_S " mismatch, should be %" PUBLIC_LOG_S,
+                        GetTagStrName(tag), GetTagTypeStrName(tag));
+        }
+    } else {
+        MEDIA_LOG_I("tag %" PUBLIC_LOG_D32 "is not in map, may be update it?", tag);
+    }
+    return false;
+}
+}
 
 namespace OHOS {
 namespace Media {
@@ -98,35 +120,25 @@ ErrorCode AudioCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::
 
 ErrorCode AudioCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value)
 {
-#define ASSIGN_PARAMETER_IF_MATCH(type, val, val1, val2) \
-do { \
-    if (val.SameTypeWith(typeid(type))) { \
-        val1 = Plugin::AnyCast<type>(val); \
-        val2 = true; \
-    } \
-} while (0)
-
     auto tag = static_cast<OHOS::Media::Plugin::Tag>(key);
     switch (tag) {
         case Tag::SRC_INPUT_TYPE:
-            ASSIGN_PARAMETER_IF_MATCH(Plugin::SrcInputType, value, inputType_, inputTypeSpecified_);
+            inputTypeSpecified_ = ASSIGN_PARAMETER_IF_MATCH(Tag::SRC_INPUT_TYPE, inputType_, value);
             break;
         case Tag::AUDIO_SAMPLE_RATE:
-            ASSIGN_PARAMETER_IF_MATCH(uint32_t, value, sampleRate_, sampleRateSpecified_);
+            sampleRateSpecified_ = ASSIGN_PARAMETER_IF_MATCH(Tag::AUDIO_SAMPLE_RATE, sampleRate_, value);
             break;
         case Tag::AUDIO_CHANNELS:
-            ASSIGN_PARAMETER_IF_MATCH(uint32_t, value, channelNum_, channelNumSpecified_);
+            channelNumSpecified_ = ASSIGN_PARAMETER_IF_MATCH(Tag::AUDIO_CHANNELS, channelNum_, value);
             break;
         case Tag::MEDIA_BITRATE:
-            ASSIGN_PARAMETER_IF_MATCH(int64_t, value, bitRate_, bitRateSpecified_);
+            bitRateSpecified_ =  ASSIGN_PARAMETER_IF_MATCH(Tag::MEDIA_BITRATE, bitRate_, value);
             break;
         case Tag::AUDIO_SAMPLE_FORMAT:
-            ASSIGN_PARAMETER_IF_MATCH(OHOS::Media::Plugin::AudioSampleFormat, value, sampleFormat_,
-                                      sampleRateSpecified_);
+            sampleRateSpecified_ = ASSIGN_PARAMETER_IF_MATCH(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat_, value);
             break;
         case Tag::AUDIO_CHANNEL_LAYOUT:
-            ASSIGN_PARAMETER_IF_MATCH(OHOS::Media::Plugin::AudioChannelLayout, value, channelLayout_,
-                                      channelLayoutSpecified_);
+            channelLayoutSpecified_ = ASSIGN_PARAMETER_IF_MATCH(Tag::AUDIO_CHANNEL_LAYOUT, channelLayout_, value);
             break;
         default:
             MEDIA_LOG_W("Unknown key %" PUBLIC_LOG "d", OHOS::Media::to_underlying(tag));

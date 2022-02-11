@@ -75,8 +75,8 @@ private:
     size_t bufferSize_;
     std::shared_ptr<Plugin::Source> plugin_;
     std::shared_ptr<Allocator> pluginAllocator_;
-    bool isPluginReady_{false};
-    bool isAboveWaterline_{false};
+    bool isPluginReady_ {false};
+    bool isAboveWaterline_ {false};
 };
 } // namespace Pipeline
 } // namespace Media

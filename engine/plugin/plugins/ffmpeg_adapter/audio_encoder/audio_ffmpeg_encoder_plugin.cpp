@@ -397,7 +397,7 @@ void AudioFfmpegEncoderPlugin::FillInFrameCache(const std::shared_ptr<Memory>& m
         if (avCodecContext_->channels > AV_NUM_DATA_POINTERS) {
             av_freep(cachedFrame_->extended_data);
             cachedFrame_->extended_data = static_cast<uint8_t**>(av_malloc_array(avCodecContext_->channels,
-                                                                                  sizeof(uint8_t *)));
+                sizeof(uint8_t *)));
         } else {
             cachedFrame_->extended_data = cachedFrame_->data;
         }

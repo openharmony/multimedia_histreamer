@@ -178,7 +178,7 @@ public:
     std::vector<MetaID> GetMetaIDs() const;
 
 private:
-    std::map<MetaID, Plugin::ValueType> items_{};
+    std::map<MetaID, Plugin::ValueType> items_ {};
 };
 } // namespace Plugin
 } // namespace Media

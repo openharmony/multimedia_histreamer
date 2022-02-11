@@ -143,7 +143,7 @@ int32_t HiRecorderImpl::Configure(int32_t sourceId, const RecorderParam& recPara
 {
     FALSE_RETURN_V(outputFormatType_ != OutputFormatType::FORMAT_BUTT,
                    TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
-    FALSE_RETURN_V(CheckParamType(sourceId,recParam), TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
+    FALSE_RETURN_V(CheckParamType(sourceId, recParam), TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
     Plugin::Any recParamInternal;
     auto configureStatus {true};
     if (recParam.IsAudioParam()) {

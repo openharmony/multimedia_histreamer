@@ -85,9 +85,9 @@ ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param)
 
 Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
 {
-    MEDIA_LOG_D("ProcessIntent, curState: %" PUBLIC_LOG "s, intent: %" PUBLIC_LOG "d.",
+    MEDIA_LOG_D("ProcessIntent, curState: %" PUBLIC_LOG_S ", intent: %" PUBLIC_LOG_D32,
                 curState_->GetName().c_str(), intent);
-    PROFILE_BEGIN("ProcessIntent, curState: %" PUBLIC_LOG "s, intent: %" PUBLIC_LOG "d.",
+    PROFILE_BEGIN("ProcessIntent, curState: %" PUBLIC_LOG_S ", intent: %" PUBLIC_LOG_D32,
                   curState_->GetName().c_str(), intent);
     OSAL::ScopedLock lock(mutex_);
     lastIntent = intent;
@@ -102,7 +102,7 @@ Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
         }
     }
     OnIntentExecuted(intent, nextAction, rtv);
-    PROFILE_END("ProcessIntent, curState: %" PUBLIC_LOG "s, intent: %" PUBLIC_LOG "d.",
+    PROFILE_END("ProcessIntent, curState: %" PUBLIC_LOG_S ", intent: %" PUBLIC_LOG_D32,
                 curState_->GetName().c_str(), intent);
     return (rtv == ErrorCode::SUCCESS) ? nextAction : Action::ACTION_BUTT;
 }

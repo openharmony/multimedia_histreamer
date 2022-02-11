@@ -231,7 +231,7 @@ void ResetCodecParameter (AVCodecParameters* par)
     par->color_trc = AVCOL_TRC_UNSPECIFIED;
     par->color_space = AVCOL_SPC_UNSPECIFIED;
     par->chroma_location = AVCHROMA_LOC_UNSPECIFIED;
-    par->sample_aspect_ratio = AVRational {0,1};
+    par->sample_aspect_ratio = AVRational {0, 1};
 }
 
 Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const Plugin::TagMap& tagMap)

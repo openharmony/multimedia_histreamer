@@ -27,13 +27,15 @@
 namespace {
 using namespace OHOS::Media::Plugin;
 using namespace SurfaceSink;
-
+constexpr size_t DEFAULT_WIDTH = 640;
+constexpr size_t DEFAULT_HEIGHT = 480;
+constexpr size_t DEFAULT_BUFFER_NUM = 8;
 std::shared_ptr<VideoSinkPlugin> VideoSinkPluginCreator(const std::string& name)
 {
     return std::make_shared<SurfaceSinkPlugin>(name);
 }
 
-const Status SurfaceSinkRegister(const std::shared_ptr<Register>& reg)
+Status SurfaceSinkRegister(const std::shared_ptr<Register>& reg)
 {
     VideoSinkPluginDef definition;
     definition.name = "surface_sink";
@@ -95,12 +97,11 @@ static uint32_t TranslatePixelFormat(const VideoPixelFormat pixelFormat)
     return surfaceFormat;
 }
 
-SurfaceSinkPlugin::SurfaceSinkPlugin(std::string name)
-    : VideoSinkPlugin(std::move(name)),
-      width_(DEFAULT_WIDTH),
-      height_(DEFAULT_HEIGHT),
-      pixelFormat_(VideoPixelFormat::NV21),
-      maxSurfaceNum_(DEFAULT_BUFFER_NUM)
+SurfaceSinkPlugin::SurfaceSinkPlugin(std::string name) : VideoSinkPlugin(std::move(name)),
+    width_(DEFAULT_WIDTH),
+    height_(DEFAULT_HEIGHT),
+    pixelFormat_(VideoPixelFormat::NV21),
+    maxSurfaceNum_(DEFAULT_BUFFER_NUM)
 {
 }
 

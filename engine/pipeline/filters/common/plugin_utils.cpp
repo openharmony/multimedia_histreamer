@@ -23,8 +23,7 @@
 #include "pipeline/core/plugin_attr_desc.h"
 
 namespace {
-constexpr int32_t MAX_BUF_LEN = 256;
-
+constexpr int32_t MAX_BUF_LEN = 512;
 #define RETURN_IF_FAILED(exec, errVal, retVal) \
 do { \
     auto res = exec; \
@@ -39,7 +38,7 @@ do { \
 do { \
     snPrintRet = exec; \
     if ((snPrintRet) == -1) { \
-        MEDIA_LOG_W("stringiness failed due to %" PUBLIC_LOG_S, strerror(errno)); \
+        MEDIA_LOG_W("stringiness failed due to %" PUBLIC_LOG_S " or truncated.", strerror(errno)); \
         return retVal; \
     } \
 } while (0)
@@ -50,7 +49,7 @@ inline int32_t SnPrintf(char* buf, size_t maxLen, const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    auto ret = vsnprintf_s(buf, maxLen, SECUREC_STRING_MAX_LEN, fmt, args);
+    auto ret = vsnprintf_s(buf, maxLen, SECUREC_STRING_MAX_LEN - 1, fmt, args);
     va_end(args);
     if (ret < 0) {
         return ret;

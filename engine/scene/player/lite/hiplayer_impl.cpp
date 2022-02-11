@@ -312,7 +312,7 @@ void HiPlayerImpl::OnEvent(const Event& event)
             }
             break;
         case EventType::EVENT_AUDIO_PROGRESS:
-            mediaStats_.ReceiveEvent(EventType::EVENT_AUDIO_PROGRESS,Plugin::AnyCast<int64_t>(event.param));
+            mediaStats_.ReceiveEvent(EventType::EVENT_AUDIO_PROGRESS, Plugin::AnyCast<int64_t>(event.param));
             break;
         case EventType::EVENT_PLUGIN_ERROR: {
             Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);

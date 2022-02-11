@@ -278,15 +278,14 @@ ErrorCode AudioDecoderFilter::FinishFrame()
         return ErrorCode::ERROR_NO_MEMORY;
     }
     outBuffer->Reset();
-    auto ret = TranslatePluginStatus(plugin_->QueueOutputBuffer(outBuffer, 0));
-    if (ret != ErrorCode::SUCCESS) {
-        if (ret != ErrorCode::ERROR_UNKNOWN) {
-            MEDIA_LOG_E("Queue out buffer to plugin fail: %" PUBLIC_LOG "d", to_underlying(ret));
+    auto status = plugin_->QueueOutputBuffer(outBuffer, 0);
+    if (status != Plugin::Status::OK && status != Plugin::Status::END_OF_STREAM) {
+        if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
+            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %" PUBLIC_LOG_D32, static_cast<int32_t>((status)));
         }
-        return ret;
     }
     MEDIA_LOG_D("end finish frame");
-    return ErrorCode::SUCCESS;
+    return TranslatePluginStatus(status);
 }
 
 void AudioDecoderFilter::OnInputBufferDone(std::shared_ptr<Plugin::Buffer>& input)
@@ -297,7 +296,6 @@ void AudioDecoderFilter::OnInputBufferDone(std::shared_ptr<Plugin::Buffer>& inpu
 void AudioDecoderFilter::OnOutputBufferDone(std::shared_ptr<Plugin::Buffer>& output)
 {
     MEDIA_LOG_D("begin");
-
     // push to port
     auto oPort = outPorts_[0];
     if (oPort->GetWorkMode() == WorkMode::PUSH) {
@@ -305,7 +303,6 @@ void AudioDecoderFilter::OnOutputBufferDone(std::shared_ptr<Plugin::Buffer>& out
     } else {
        MEDIA_LOG_W("decoder out port works in pull mode");
     }
-
     // 释放buffer 如果没有被缓存使其回到buffer pool 如果被sink缓存 则从buffer pool拿其他的buffer
     output.reset();
     MEDIA_LOG_D("end");

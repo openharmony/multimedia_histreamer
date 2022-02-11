@@ -36,9 +36,9 @@ const std::pair<ErrorCode, int32_t> g_errorCodePair[] = {
     {ErrorCode::ERROR_INVALID_STATE, MSERR_INVALID_STATE},
 };
 const std::map<OutputFormatType, std::string> g_outputFormatToFormat = {
-        {OutputFormatType::FORMAT_DEFAULT, std::string("audio_%Y%m%d%H%M%S.m4a")},
-        {OutputFormatType::FORMAT_MPEG_4, std::string("video_%Y%m%d%H%M%S.mp4")},
-        {OutputFormatType::FORMAT_M4A, std::string("audio_%Y%m%d%H%M%S.m4a")},
+    {OutputFormatType::FORMAT_DEFAULT, std::string("audio_%Y%m%d%H%M%S.m4a")},
+    {OutputFormatType::FORMAT_MPEG_4, std::string("video_%Y%m%d%H%M%S.mp4")},
+    {OutputFormatType::FORMAT_M4A, std::string("audio_%Y%m%d%H%M%S.m4a")},
 };
 }  // namespace
 namespace Record {
@@ -54,8 +54,8 @@ int TransErrorCode(ErrorCode errorCode)
 Plugin::SrcInputType TransAudioInputType(OHOS::Media::AudioSourceType sourceType)
 {
     const static std::pair<OHOS::Media::AudioSourceType, Plugin::SrcInputType> mapArray[] = {
-            {OHOS::Media::AudioSourceType::AUDIO_MIC, Plugin::SrcInputType::AUD_MIC},
-            {OHOS::Media::AudioSourceType::AUDIO_SOURCE_DEFAULT, Plugin::SrcInputType::AUD_MIC},
+        {OHOS::Media::AudioSourceType::AUDIO_MIC, Plugin::SrcInputType::AUD_MIC},
+        {OHOS::Media::AudioSourceType::AUDIO_SOURCE_DEFAULT, Plugin::SrcInputType::AUD_MIC},
     };
     for (const auto& item : mapArray) {
         if (item.first == sourceType) {
