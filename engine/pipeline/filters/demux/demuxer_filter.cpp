@@ -200,7 +200,7 @@ ErrorCode DemuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer,
 {
     MEDIA_LOG_D("PushData for port: %" PUBLIC_LOG "s", inPort.c_str());
     if (dataPacker_) {
-        dataPacker_->PushData(std::move(buffer));
+        dataPacker_->PushData(std::move(buffer), offset);
     }
     return ErrorCode::SUCCESS;
 }
@@ -323,7 +323,7 @@ void DemuxerFilter::ActivatePullMode()
         AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
         bufferPtr->AllocMemory(pluginAllocator_, size);
         if (inPorts_.front()->PullData(curOffset, size, bufferPtr) == ErrorCode::SUCCESS) {
-            dataPacker_->PushData(std::move(bufferPtr));
+            dataPacker_->PushData(std::move(bufferPtr), curOffset);
             return true;
         }
         return false;
