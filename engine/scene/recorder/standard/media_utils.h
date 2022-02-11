@@ -81,14 +81,6 @@ const std::map<OutputFormatType, std::string> g_outputFormatToMimeMap = {
     {OutputFormatType::FORMAT_M4A, MEDIA_MIME_CONTAINER_MP4},
 };
 
-#define CREATE_FILE_NAME_FORMAT(prefix, suffix) std::string{prefix}.append("_%Y%m%d%H%M%S").append(suffix)
-
-const std::map<OutputFormatType, std::string> g_outputFormatToFormat = {
-    {OutputFormatType::FORMAT_DEFAULT, CREATE_FILE_NAME_FORMAT("audio", ".m4a")},
-    {OutputFormatType::FORMAT_MPEG_4, CREATE_FILE_NAME_FORMAT("video", ".mp4")},
-    {OutputFormatType::FORMAT_M4A, CREATE_FILE_NAME_FORMAT("audio", ".m4a")},
-};
-
 int TransErrorCode(ErrorCode errorCode);
 Plugin::SrcInputType TransAudioInputType(OHOS::Media::AudioSourceType sourceType);
 Plugin::SrcInputType TransVideoInputType(OHOS::Media::VideoSourceType sourceType);

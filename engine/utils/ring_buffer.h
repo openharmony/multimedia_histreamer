@@ -48,7 +48,7 @@ public:
             return 0;
         }
         auto available = tail_ - head_;
-        while (waitTimes > 0 && available == 0 ) {
+        while (waitTimes > 0 && available == 0) {
             writeCondition_.Wait(lck);
             if (!isActive_) {
                 return 0;

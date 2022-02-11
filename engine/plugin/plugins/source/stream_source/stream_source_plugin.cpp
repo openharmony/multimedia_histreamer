@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace StreamSource {
-std::shared_ptr<SourcePlugin> StreamSourcePluginCreater(const std::string& name)
+std::shared_ptr<SourcePlugin> StreamSourcePluginCreator(const std::string& name)
 {
     return std::make_shared<StreamSourcePlugin>(name);
 }
@@ -36,7 +36,7 @@ const Status StreamSourceRegister(const std::shared_ptr<Register>& reg)
     definition.description = "Stream source";
     definition.rank = 100; // 100: max rank
     definition.protocol.emplace_back(ProtocolType::STREAM);
-    definition.creator = StreamSourcePluginCreater;
+    definition.creator = StreamSourcePluginCreator;
     return reg->AddPlugin(definition);
 }
 
@@ -47,7 +47,7 @@ void* StreamSourceAllocator::Alloc(size_t size)
     if (size == 0) {
         return nullptr;
     }
-    return reinterpret_cast<void*>(new (std::nothrow) uint8_t[size]);
+    return static_cast<void*>(new (std::nothrow) uint8_t[size]);
 }
 
 void StreamSourceAllocator::Free(void* ptr) // NOLINT: void*

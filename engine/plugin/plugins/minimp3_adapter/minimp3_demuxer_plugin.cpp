@@ -510,8 +510,8 @@ int Minimp3DemuxerPlugin::AudioDemuxerMp3Process(uint8_t *buf, uint32_t len)
     int ret = 0;
     uint32_t processLen = len;
     AudioDemuxerMp3IgnoreTailZero(buf, &processLen);
-    (void)memset_s(&mp3DemuxerRst_, sizeof(mp3DemuxerRst_),
-                   0x00, sizeof(AudioDemuxerRst));
+    // this memset_s will always success
+    memset_s(&mp3DemuxerRst_, sizeof(AudioDemuxerRst), 0x00, sizeof(AudioDemuxerRst));
     mp3DemuxerAttr_.rst = &mp3DemuxerRst_;
     mp3DemuxerAttr_.internalRemainLen = processLen;
     ret = minimp3DemuxerImpl_.iterateBuf(buf, processLen, AudioDemuxerMp3IterateCallback, &mp3DemuxerAttr_);

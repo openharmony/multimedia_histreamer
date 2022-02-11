@@ -25,18 +25,16 @@
 #include "utils/constants.h"
 
 namespace {
-// register plugins
 using namespace OHOS::Media;
+constexpr size_t MAX_CAPTURE_BUFFER_SIZE = 100000;
+constexpr size_t TIME_SEC_TO_NS = 1000000000;
 
-#define MAX_CAPTURE_BUFFER_SIZE 100000
-#define TIME_SEC_TO_NS  1000000000
-
-std::shared_ptr<Plugin::SourcePlugin> AudioCapturePluginCreater(const std::string &name)
+std::shared_ptr<Plugin::SourcePlugin> AudioCapturePluginCreator(const std::string& name)
 {
     return std::make_shared<OHOS::Media::AuCapturePlugin::AudioCapturePlugin>(name);
 }
 
-void UpdateSupportedSampleRate(Plugin::Capability &outCaps)
+void UpdateSupportedSampleRate(Plugin::Capability& outCaps)
 {
     auto supportedSampleRateList = OHOS::AudioStandard::AudioCapturer::GetSupportedSamplingRates();
     if (!supportedSampleRateList.empty()) {
@@ -53,7 +51,7 @@ void UpdateSupportedSampleRate(Plugin::Capability &outCaps)
     }
 }
 
-void UpdateSupportedChannels(Plugin::Capability &outCaps)
+void UpdateSupportedChannels(Plugin::Capability& outCaps)
 {
     auto supportedChannelsList = OHOS::AudioStandard::AudioCapturer::GetSupportedChannels();
     if (!supportedChannelsList.empty()) {
@@ -70,7 +68,7 @@ void UpdateSupportedChannels(Plugin::Capability &outCaps)
     }
 }
 
-void UpdateSupportedSampleFormat(Plugin::Capability &outCaps)
+void UpdateSupportedSampleFormat(Plugin::Capability& outCaps)
 {
     auto supportedFormatsList = OHOS::AudioStandard::AudioCapturer::GetSupportedFormats();
     if (!supportedFormatsList.empty()) {
@@ -95,7 +93,7 @@ Plugin::Status AudioCaptureRegister(const std::shared_ptr<Plugin::Register> &reg
     definition.description = "Audio capture from audio service";
     definition.rank = 100; // 100: max rank
     definition.inputType = Plugin::SrcInputType::AUD_MIC;
-    definition.creator = AudioCapturePluginCreater;
+    definition.creator = AudioCapturePluginCreator;
     Plugin::Capability outCaps(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
     UpdateSupportedSampleRate(outCaps);
     UpdateSupportedChannels(outCaps);
@@ -116,7 +114,7 @@ using namespace OHOS::Media::Plugin;
 do { \
     auto ret = exec; \
     if (ret != OHOS::AudioStandard::SUCCESS) { \
-        MEDIA_LOG_E(msg " failed return %" PUBLIC_LOG "d", ret); \
+        MEDIA_LOG_E(msg " failed return %" PUBLIC_LOG_D32, ret); \
         return Error2Status(ret); \
     } \
 } while (0)

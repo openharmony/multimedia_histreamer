@@ -24,11 +24,10 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-
 class HttpSourcePlugin : public SourcePlugin {
 public:
-    explicit HttpSourcePlugin(const std::string name) noexcept;
-    ~HttpSourcePlugin();
+    explicit HttpSourcePlugin(std::string name) noexcept;
+    ~HttpSourcePlugin() override;
     Status Init() override;
     Status Deinit() override;
     Status Prepare() override;
@@ -60,5 +59,4 @@ private:
 } // namespace Plugin 
 } // namespace Media 
 } // namespace OHOS
-
 #endif

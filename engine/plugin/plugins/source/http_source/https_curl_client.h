@@ -45,8 +45,8 @@ public:
 private:
     std::shared_ptr<NetworkClient> httpClient_;
 };
-}
-}
-}
-}
-#endif
+} // HttpPlugin
+} // Plugin
+} // Media
+} // OHOS
+#endif // HISTREAMER_HTTPS_CURL_CLIENT_H

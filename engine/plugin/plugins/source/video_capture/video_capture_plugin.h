@@ -38,9 +38,6 @@ public:
     void* Alloc(size_t size) override;
     void Free(void* ptr) override; // NOLINT: void*
 };
-
-
-
 class VideoCapturePlugin : public Plugin::SourcePlugin {
 public:
     explicit VideoCapturePlugin(std::string name);

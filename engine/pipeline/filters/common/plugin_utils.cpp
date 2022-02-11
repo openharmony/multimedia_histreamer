@@ -35,13 +35,22 @@ do { \
     } \
 } while (0)
 
+#define RETURN_IF_SNPRI_FAILED(exec, snPrintRet, retVal) \
+do { \
+    snPrintRet = exec; \
+    if ((snPrintRet) == -1) { \
+        MEDIA_LOG_W("stringiness failed due to %" PUBLIC_LOG_S, strerror(errno)); \
+        return retVal; \
+    } \
+} while (0)
+
 using namespace OHOS::Media;
 
 inline int32_t SnPrintf(char* buf, size_t maxLen, const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    auto ret = vsnprintf(buf, maxLen, fmt, args);
+    auto ret = vsnprintf_s(buf, maxLen, SECUREC_STRING_MAX_LEN, fmt, args);
     va_end(args);
     if (ret < 0) {
         return ret;
@@ -362,14 +371,6 @@ uint8_t GetBytesPerSample(Plugin::AudioSampleFormat fmt)
 
 std::string Capability2String(const Capability& capability)
 {
-#define RETURN_IF_SNPRI_FAILED(exec, snPrintRet, retVal) \
-do { \
-    snPrintRet = exec; \
-    if (snPrintRet == -1) { \
-        MEDIA_LOG_W("capability to string failed due to %" PUBLIC_LOG_S, strerror(errno)); \
-        return retVal; \
-    } \
-} while (0)
     const static std::map<Capability::Key,CapStrnessFunc> capStrnessMap = {
         {Capability::Key::MEDIA_BITRATE, CapKeyStringiness<int64_t>},
         {Capability::Key::AUDIO_SAMPLE_RATE, CapKeyStringiness<uint32_t>},
@@ -414,19 +415,10 @@ do { \
         SnPrintf(buffer + pos, MAX_BUF_LEN + 1 - pos, "}");
     }
     return buffer;
-#undef RETURN_IF_SNPRI_FAILED
 }
 
 std::string Meta2String(const Plugin::Meta& meta)
 {
-#define RETURN_IF_SNPRI_FAILED(exec, snPrintRet, retVal) \
-do { \
-    snPrintRet = exec; \
-    if (snPrintRet == -1) { \
-        MEDIA_LOG_W("capability to string failed due to %" PUBLIC_LOG_S, strerror(errno)); \
-        return retVal; \
-    } \
-} while (0)
     char buffer[MAX_BUF_LEN + 1] = {0}; // one more is for \0
     int pos = 0;
     int32_t ret = 0;
@@ -461,8 +453,8 @@ do { \
         SnPrintf(buffer + pos, MAX_BUF_LEN + 1 - pos, "}");
     }
     return buffer;
-#undef RETURN_IF_SNPRI_FAILED
 }
+#undef RETURN_IF_SNPRI_FAILED
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

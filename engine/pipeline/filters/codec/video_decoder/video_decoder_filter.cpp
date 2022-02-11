@@ -144,15 +144,9 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
                                    Plugin::TagMap& downstreamParams)
 {
     PROFILE_BEGIN("video decoder negotiate start");
-    if (state_ != FilterState::PREPARING) {
-        MEDIA_LOG_W("decoder filter is not in preparing when negotiate");
-        return false;
-    }
+    FALSE_RET_V_MSG_W(state_ == FilterState::PREPARING, false, "filter is not preparing when negotiate");
     auto targetOutPort = GetRouteOutPort(inPort);
-    if (targetOutPort == nullptr) {
-        MEDIA_LOG_E("decoder out port is not found");
-        return false;
-    }
+    FALSE_RET_V_MSG_W(targetOutPort != nullptr, false, "outPort is not found");
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
     bool atLeastOutCapMatched = false;
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::CODEC);
@@ -160,13 +154,12 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
     Plugin::TagMap proposeParams = upstreamParams;
     proposeParams.insert({Plugin::Tag::VIDEO_MAX_SURFACE_NUM, static_cast<uint32_t>(DEFAULT_OUT_BUFFER_POOL_SIZE)});
     for (const auto& candidate : candidatePlugins) {
-        if (candidate.first->outCaps.empty()) {
-            MEDIA_LOG_E("decoder plugin must have out caps");
-        }
+        FALSE_LOG_MSG_E(!candidate.first->outCaps.empty(),
+                        "plugin %" PUBLIC_LOG_S " has no out caps", candidate.first->name.c_str());
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
             auto thisOut = std::make_shared<Plugin::Capability>();
             if (!MergeCapabilityKeys(*upstreamCap, outCap, *thisOut)) {
-                MEDIA_LOG_W("one of out cap of plugin %" PUBLIC_LOG "s does not match with upstream capability",
+                MEDIA_LOG_W("one of out cap of plugin %" PUBLIC_LOG_S " does not match with upstream capability",
                             candidate.first->name.c_str());
                 continue;
             }
@@ -176,7 +169,7 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
                 sinkParams_ = downstreamParams;
-                MEDIA_LOG_I("choose plugin %" PUBLIC_LOG "s as working parameter", candidate.first->name.c_str());
+                MEDIA_LOG_I("use plugin %" PUBLIC_LOG_S, candidate.first->name.c_str());
                 break;
             }
         }
@@ -184,14 +177,8 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
             break;
         }
     }
-    if (!atLeastOutCapMatched) {
-        MEDIA_LOG_W("cannot find available decoder plugin");
-        return false;
-    }
-    if (selectedPluginInfo == nullptr) {
-        MEDIA_LOG_W("cannot find available downstream plugin");
-        return false;
-    }
+    FALSE_RET_V_MSG_E(atLeastOutCapMatched && selectedPluginInfo != nullptr, false,
+        "can't find available decoder plugin with %" PUBLIC_LOG_S, Capability2String(*upstreamCap).c_str());
 
     auto res = UpdateAndInitPluginByInfo<Plugin::Codec>(plugin_, pluginInfo_, selectedPluginInfo,
         [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {

@@ -41,7 +41,7 @@ const std::map<Plugin::Tag, std::tuple<const char*, const Plugin::ValueType&, co
     {Plugin::Tag::TRACK_ID, {"track_id",                       g_u32Def,           "uin32_t"}},
     {Plugin::Tag::REQUIRED_OUT_BUFFER_CNT, {"req_out_buf_cnt", g_u32Def,           "uin32_t"}},
     {Plugin::Tag::BUFFER_ALLOCATOR, {"buf_allocator",          g_unknown,          "shared_ptr<Allocator>"}},
-    {Plugin::Tag::BUFFERING_SIZE, {"bufing_size",              g_u32Def ,          "uin32_t"}},
+    {Plugin::Tag::BUFFERING_SIZE, {"bufing_size",              g_u32Def,           "uin32_t"}},
     {Plugin::Tag::WATERLINE_HIGH, {"waterline_h",              g_u32Def,           "uint32_t"}},
     {Plugin::Tag::WATERLINE_LOW, {"waterline_l",               g_u32Def,           "uint32_t"}},
     {Plugin::Tag::SRC_INPUT_TYPE, {"src_input_typ",            g_srcInputTypedef,  "SrcInputType"}},

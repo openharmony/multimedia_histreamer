@@ -271,18 +271,18 @@ template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::Outp
     const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
     const std::function<std::shared_ptr<Plugin::OutputSink>(const std::string&)>& pluginCreator);
 
-    void FilterBase::OnEvent(const Plugin::PluginEvent &event)
-    {
-        if (eventReceiver_ != nullptr) {
-            if (event.type == Plugin::PluginEventType::CLIENT_ERROR ||
-                event.type == Plugin::PluginEventType::SERVER_ERROR ||
-                event.type == Plugin::PluginEventType::OTHER_ERROR) {
-                eventReceiver_->OnEvent({name_, EventType::EVENT_PLUGIN_ERROR, event});
-            } else {
-                eventReceiver_->OnEvent({name_, EventType::EVENT_PLUGIN_EVENT, event});
-            }
+void FilterBase::OnEvent(const Plugin::PluginEvent &event)
+{
+    if (eventReceiver_ != nullptr) {
+        if (event.type == Plugin::PluginEventType::CLIENT_ERROR ||
+            event.type == Plugin::PluginEventType::SERVER_ERROR ||
+            event.type == Plugin::PluginEventType::OTHER_ERROR) {
+            eventReceiver_->OnEvent({name_, EventType::EVENT_PLUGIN_ERROR, event});
+        } else {
+            eventReceiver_->OnEvent({name_, EventType::EVENT_PLUGIN_EVENT, event});
         }
     }
+}
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

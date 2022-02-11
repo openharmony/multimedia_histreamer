@@ -108,12 +108,12 @@ bool StreamingExecutor::Seek(int offset)
     return true;
 }
 
-unsigned int StreamingExecutor::GetContentLength() const
+size_t StreamingExecutor::GetContentLength() const
 {
     return headerInfo_.fileContentLen;
 }
 
-bool StreamingExecutor::IsStreaming()
+bool StreamingExecutor::IsStreaming() const
 {
     return headerInfo_.isChunked;
 }

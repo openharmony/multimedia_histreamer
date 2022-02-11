@@ -14,14 +14,15 @@
  */
 #define HST_LOG_TAG "HttpsCurlClient"
 #include "https_curl_client.h"
+
+#include <utility>
 #include "foundation/log.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-
-HttpsCurlClient::HttpsCurlClient(std::shared_ptr<NetworkClient> httpClient) : httpClient_(httpClient)
+HttpsCurlClient::HttpsCurlClient(std::shared_ptr<NetworkClient> httpClient) : httpClient_(std::move(httpClient))
 {
 }
 
@@ -57,7 +58,7 @@ Status HttpsCurlClient::RequestData(long startPos, int len, NetworkServerErrorCo
     // Do more https RequestData things
     return httpClient_->RequestData(startPos, len, serverCode, clientCode);
 }
-}
-}
-}
-}
+} // HttpPlugin
+} // Plugin
+} // Media
+} // OHOS

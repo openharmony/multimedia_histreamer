@@ -30,8 +30,8 @@ namespace Plugin {
 namespace HttpPlugin {
 
 struct HeaderInfo {
-    char contentType[32];
-    int64_t fileContentLen;
+    char contentType[32]; // 32 chars
+    size_t fileContentLen;
     long contentLen;
     bool isChunked {false};
 };
@@ -45,8 +45,8 @@ public:
     bool Read(unsigned char *buff, unsigned int wantReadLength, unsigned int &realReadLength, bool &isEos);
     bool Seek(int offset);
 
-    unsigned int GetContentLength() const;
-    bool IsStreaming();
+    size_t GetContentLength() const;
+    bool IsStreaming() const;
     void SetCallback(Callback* cb);
 private:
     void HttpDownloadThread();
@@ -63,8 +63,8 @@ private:
     std::shared_ptr<OSAL::Task> task_;
     bool isDownloading_;
     int requestSize_;
-    Callback* callback_{nullptr};
-    bool aboveWaterline_{false};
+    Callback* callback_ {nullptr};
+    bool aboveWaterline_ {false};
 };
 }
 }

@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace FileSource {
-std::shared_ptr<SourcePlugin> FileSourcePluginCreater(const std::string& name)
+std::shared_ptr<SourcePlugin> FileSourcePluginCreator(const std::string& name)
 {
     return std::make_shared<FileSourcePlugin>(name);
 }
@@ -36,7 +36,7 @@ Status FileSourceRegister(const std::shared_ptr<Register>& reg)
     definition.description = "File source";
     definition.rank = 100; // 100: max rank
     definition.protocol.emplace_back(ProtocolType::FILE);
-    definition.creator = FileSourcePluginCreater;
+    definition.creator = FileSourcePluginCreator;
     return reg->AddPlugin(definition);
 }
 
@@ -47,7 +47,7 @@ void* FileSourceAllocator::Alloc(size_t size)
     if (size == 0) {
         return nullptr;
     }
-    return reinterpret_cast<void*>(new (std::nothrow) uint8_t[size]); // NOLINT: cast
+    return static_cast<void*>(new (std::nothrow) uint8_t[size]);
 }
 
 void FileSourceAllocator::Free(void* ptr) // NOLINT: void*
