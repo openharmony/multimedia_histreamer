@@ -114,12 +114,12 @@ ErrorCode CodecFilterBase::GetParameter(int32_t key, Plugin::Any& outVal)
     return TranslatePluginStatus(plugin_->GetParameter(tag, outVal));
 }
 
-void CodecFilterBase::OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input)
+void CodecFilterBase::OnInputBufferDone(std::shared_ptr<Plugin::Buffer>& input)
 {
     MEDIA_LOG_I("CodecFilterBase::OnInputBufferDone");
 }
 
-void CodecFilterBase::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output)
+void CodecFilterBase::OnOutputBufferDone(std::shared_ptr<Plugin::Buffer>& output)
 {
     MEDIA_LOG_I("CodecFilterBase::OnOutputBufferDone");
 }

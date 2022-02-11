@@ -104,6 +104,8 @@ private:
 
     Status ReceiveBufferLocked(const std::shared_ptr<Buffer>& ioInfo);
 
+    Status SendOutputBuffer();
+
     mutable OSAL::Mutex parameterMutex_ {};
     std::map<Tag, ValueType> audioParameter_ {};
 

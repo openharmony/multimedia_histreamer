@@ -121,6 +121,7 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
                 return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
         });
     plugin_->SetCallback(this);
+    plugin_->SetDataCallback(this);
     PROFILE_END("Audio Decoder Negotiate end");
     return res;
 }
@@ -279,29 +280,35 @@ ErrorCode AudioDecoderFilter::FinishFrame()
     outBuffer->Reset();
     auto ret = TranslatePluginStatus(plugin_->QueueOutputBuffer(outBuffer, 0));
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("Queue out buffer to plugin fail: %" PUBLIC_LOG "d", to_underlying(ret));
+        if (ret != ErrorCode::ERROR_UNKNOWN) {
+            MEDIA_LOG_E("Queue out buffer to plugin fail: %" PUBLIC_LOG "d", to_underlying(ret));
+        }
         return ret;
-    }
-    std::shared_ptr<AVBuffer> pcmFrame = nullptr;
-    auto status = plugin_->DequeueOutputBuffer(pcmFrame, 0);
-    if (status != Plugin::Status::OK && status != Plugin::Status::END_OF_STREAM) {
-        if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
-            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %" PUBLIC_LOG "d", static_cast<int32_t>((status)));
-        }
-        return TranslatePluginStatus(status);
-    }
-    if (pcmFrame) {
-        // push to port
-        auto oPort = outPorts_[0];
-        if (oPort->GetWorkMode() == WorkMode::PUSH) {
-            oPort->PushData(pcmFrame, -1);
-        } else {
-            MEDIA_LOG_W("decoder out port works in pull mode");
-        }
-        pcmFrame.reset(); // 释放buffer 如果没有被缓存使其回到buffer pool 如果被sink缓存 则从buffer pool拿其他的buffer
     }
     MEDIA_LOG_D("end finish frame");
     return ErrorCode::SUCCESS;
+}
+
+void AudioDecoderFilter::OnInputBufferDone(std::shared_ptr<Plugin::Buffer>& input)
+{
+    MEDIA_LOG_I("AudioDecoderFilter::OnInputBufferDone");
+}
+
+void AudioDecoderFilter::OnOutputBufferDone(std::shared_ptr<Plugin::Buffer>& output)
+{
+    MEDIA_LOG_D("begin");
+
+    // push to port
+    auto oPort = outPorts_[0];
+    if (oPort->GetWorkMode() == WorkMode::PUSH) {
+       oPort->PushData(output, -1);
+    } else {
+       MEDIA_LOG_W("decoder out port works in pull mode");
+    }
+
+    // 释放buffer 如果没有被缓存使其回到buffer pool 如果被sink缓存 则从buffer pool拿其他的buffer
+    output.reset();
+    MEDIA_LOG_D("end");
 }
 } // Pipeline
 } // Media

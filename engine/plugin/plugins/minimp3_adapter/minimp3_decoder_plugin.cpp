@@ -163,24 +163,27 @@ Status Minimp3DecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& ou
         return Status::ERROR_INVALID_PARAMETER;
     }
     outputBuffer_ = outputBuffers;
-    return Status::OK;
+    return SendOutputBuffer();
 }
 
-Status Minimp3DecoderPlugin::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
+Status Minimp3DecoderPlugin::SendOutputBuffer()
 {
-    MEDIA_LOG_D("dequeue output buffer");
-    (void)timeoutMs;
+    MEDIA_LOG_D("send output buffer");
     OSAL::ScopedLock lock(ioMutex_);
     Status status = GetPcmDataProcess(inputBuffer_, outputBuffer_);
     inputBuffer_.reset();
     inputBuffer_ = nullptr;
-    outputBuffers.reset();
     if (status == Status::OK || status == Status::END_OF_STREAM) {
-        outputBuffers = outputBuffer_;
+        dataCb_->OnOutputBufferDone(outputBuffer_);
     }
     outputBuffer_.reset();
     outputBuffer_ = nullptr;
     return status;
+}
+
+Status Minimp3DecoderPlugin::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
+{
+    return Status::ERROR_INVALID_OPERATION;
 }
 
 Status Minimp3DecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)

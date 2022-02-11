@@ -420,20 +420,23 @@ Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>
         return Status::ERROR_INVALID_PARAMETER;
     }
     outBuffer_ = outputBuffer;
-    return Status::OK;
+    return SendOutputBuffer();
+}
+
+Status AudioFfmpegDecoderPlugin::SendOutputBuffer()
+{
+    MEDIA_LOG_D("send output buffer");
+    Status status = ReceiveBuffer();
+    if (status == Status::OK || status == Status::END_OF_STREAM) {
+        dataCallback_->OnOutputBufferDone(outBuffer_);
+    }
+    outBuffer_.reset();
+    return status;
 }
 
 Status AudioFfmpegDecoderPlugin::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
 {
-    MEDIA_LOG_D("dequeue output buffer");
-    (void)timeoutMs;
-    Status status = ReceiveBuffer();
-    outputBuffers.reset();
-    if (status == Status::OK || status == Status::END_OF_STREAM) {
-        outputBuffers = outBuffer_;
-    }
-    outBuffer_.reset();
-    return status;
+    return Status::ERROR_INVALID_OPERATION;
 }
 
 Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer)

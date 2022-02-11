@@ -60,6 +60,8 @@ private:
 
     ErrorCode Release();
 
+    void OnInputBufferDone(std::shared_ptr<Plugin::Buffer>& input) override;
+    void OnOutputBufferDone(std::shared_ptr<Plugin::Buffer>& output) override;
 private:
     std::shared_ptr<BufferPool<AVBuffer>> outBufferPool_ {};
     bool isFlushing_ {false};

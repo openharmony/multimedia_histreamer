@@ -95,6 +95,8 @@ private:
 
     int  AudioDecoderMp3FreePacket(uint8_t *packet);
 
+    Status SendOutputBuffer();
+
     mutable OSAL::Mutex         ioMutex_{};
     uint32_t                    samplesPerFrame_;
     uint32_t                    channels_;
