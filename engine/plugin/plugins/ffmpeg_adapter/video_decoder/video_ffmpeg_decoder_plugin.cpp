@@ -613,14 +613,14 @@ void VideoFfmpegDecoderPlugin::ReceiveBuffer()
 void VideoFfmpegDecoderPlugin::NotifyInputBufferDone(const std::shared_ptr<Buffer>& input)
 {
     if (dataCb_ != nullptr) {
-        dataCb_->OnInputBufferDone(input);
+        dataCb_->OnInputBufferDone(const_cast<std::shared_ptr<Buffer>&>(input));
     }
 }
 
 void VideoFfmpegDecoderPlugin::NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output)
 {
     if (dataCb_ != nullptr) {
-        dataCb_->OnOutputBufferDone(output);
+        dataCb_->OnOutputBufferDone(const_cast<std::shared_ptr<Buffer>&>(output));
     }
 }
 
