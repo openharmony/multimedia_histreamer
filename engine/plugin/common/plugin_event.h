@@ -31,7 +31,13 @@ enum struct PluginEventType : int32_t {
     ABOVE_LOW_WATERLINE,
 };
 
-using PluginErrorCode = int;
+enum NetworkClientErrorCode : int32_t{
+    ERROR_OK,
+    ERROR_TIME_OUT,
+    ERROR_UNKNOWN,
+};
+
+using NetworkServerErrorCode = int;
 
 struct PluginEvent {
     PluginEventType type;

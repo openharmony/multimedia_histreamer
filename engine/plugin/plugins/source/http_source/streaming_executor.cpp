@@ -125,14 +125,16 @@ void StreamingExecutor::SetCallback(Callback* cb)
 
 void StreamingExecutor::HttpDownloadThread()
 {
-    PluginErrorCode errorCode = 0;
-    Status ret = client_->RequestData(startPos_, requestSize_, errorCode);
+    NetworkClientErrorCode clientCode;
+    NetworkServerErrorCode serverCode;
+    Status ret = client_->RequestData(startPos_, requestSize_, serverCode, clientCode);
+
     if (ret == Status::ERROR_CLIENT) {
-        MEDIA_LOG_I("Send http client error, code %" PUBLIC_LOG_D32, errorCode);
-        callback_->OnEvent({PluginEventType::CLIENT_ERROR, {errorCode}, "http"});
+        MEDIA_LOG_I("Send http client error, code %" PUBLIC_LOG_D32, clientCode);
+        callback_->OnEvent({PluginEventType::CLIENT_ERROR, {clientCode}, "http"});
     } else if (ret == Status::ERROR_SERVER) {
-        MEDIA_LOG_I("Send http server error, code %" PUBLIC_LOG_D32, errorCode);
-        callback_->OnEvent({PluginEventType::SERVER_ERROR, {errorCode}, "http"});
+        MEDIA_LOG_I("Send http server error, code %" PUBLIC_LOG_D32, serverCode);
+        callback_->OnEvent({PluginEventType::SERVER_ERROR, {serverCode}, "http"});
     }
     FALSE_LOG(ret == Status::OK);
 

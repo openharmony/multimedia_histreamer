@@ -83,7 +83,8 @@ void HttpCurlClient::InitCurlEnvironment()
     curl_easy_setopt(easyHandle_, CURLOPT_TCP_KEEPINTVL, 5L); // 5 心跳
 }
 
-Status HttpCurlClient::RequestData(long startPos, int len, PluginErrorCode &errorCode)
+Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCode& serverCode,
+                                   NetworkClientErrorCode& clientCode)
 {
     FALSE_RETURN_V(easyHandle_ != nullptr, Status::ERROR_NULL_POINTER);
     if (startPos >= 0) {
@@ -106,16 +107,22 @@ Status HttpCurlClient::RequestData(long startPos, int len, PluginErrorCode &erro
     if (headers != nullptr) {
         curl_slist_free_all(headers);
     }
+    clientCode = NetworkClientErrorCode::ERROR_OK;
+    serverCode = 0;
     if (returnCode != CURLE_OK) {
         MEDIA_LOG_E("Curl error %" PUBLIC_LOG "d", returnCode);
-        errorCode = returnCode;
+        if(returnCode == CURLE_COULDNT_CONNECT || returnCode == CURLE_OPERATION_TIMEDOUT){
+            clientCode = NetworkClientErrorCode::ERROR_TIME_OUT;
+        } else {
+            clientCode = NetworkClientErrorCode::ERROR_UNKNOWN;
+        }
         return Status::ERROR_CLIENT;
     } else {
         int httpCode = 0;
         curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
         if(httpCode >= 400) { // 400
             MEDIA_LOG_E("Http error %" PUBLIC_LOG "d", httpCode);
-            errorCode = httpCode;
+            serverCode = httpCode;
             return Status::ERROR_SERVER;
         }
     }

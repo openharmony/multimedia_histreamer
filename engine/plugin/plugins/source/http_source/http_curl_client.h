@@ -34,7 +34,8 @@ public:
 
     Status Open(const std::string& url) override;
 
-    Status RequestData(long startPos, int len, PluginErrorCode &errorCode) override;
+    Status RequestData(long startPos, int len, NetworkServerErrorCode& serverCode,
+                       NetworkClientErrorCode& clientCode) override;
 
     Status Close() override;
 

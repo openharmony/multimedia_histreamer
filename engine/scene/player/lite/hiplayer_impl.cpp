@@ -316,12 +316,6 @@ void HiPlayerImpl::OnEvent(const Event& event)
             break;
         case EventType::EVENT_PLUGIN_ERROR: {
             Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
-            if (pluginEvent.param.SameTypeWith(typeid(Plugin::PluginErrorCode))) {
-                Plugin::PluginErrorCode errorCode = Plugin::AnyCast<Plugin::PluginErrorCode>(pluginEvent.param);
-                MEDIA_LOG_I("Receive plugin error, code %" PUBLIC_LOG_D32, errorCode);
-            } else {
-                MEDIA_LOG_I("Receive plugin error, code type is invalid");
-            }
             break;
         }
         case EventType::EVENT_PLUGIN_EVENT: {

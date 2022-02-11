@@ -30,7 +30,8 @@ public:
     virtual ~NetworkClient() = default;
     virtual Status Init() = 0;
     virtual Status Open(const std::string& url) = 0;
-    virtual Status RequestData(long startPos, int len, PluginErrorCode &errorCode) = 0;
+    virtual Status RequestData(long startPos, int len, NetworkServerErrorCode& serverCode,
+                               NetworkClientErrorCode& clientCode) = 0;
     virtual Status Close() = 0;
     virtual Status Deinit() = 0;
 };

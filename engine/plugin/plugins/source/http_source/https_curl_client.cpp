@@ -51,10 +51,11 @@ Status HttpsCurlClient::Deinit()
     return Status::OK; // httpClient_->Deinit();  avoid re deinit http client
 }
 
-Status HttpsCurlClient::RequestData(long startPos, int len, PluginErrorCode &errorCode)
+Status HttpsCurlClient::RequestData(long startPos, int len, NetworkServerErrorCode& serverCode,
+                                    NetworkClientErrorCode& clientCode)
 {
     // Do more https RequestData things
-    return httpClient_->RequestData(startPos, len, errorCode);
+    return httpClient_->RequestData(startPos, len, serverCode, clientCode);
 }
 }
 }
