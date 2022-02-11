@@ -111,7 +111,7 @@ Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCod
     serverCode = 0;
     if (returnCode != CURLE_OK) {
         MEDIA_LOG_E("Curl error %" PUBLIC_LOG "d", returnCode);
-        if(returnCode == CURLE_COULDNT_CONNECT || returnCode == CURLE_OPERATION_TIMEDOUT){
+        if (returnCode == CURLE_COULDNT_CONNECT || returnCode == CURLE_OPERATION_TIMEDOUT) {
             clientCode = NetworkClientErrorCode::ERROR_TIME_OUT;
         } else {
             clientCode = NetworkClientErrorCode::ERROR_UNKNOWN;
