@@ -266,8 +266,8 @@ void DataPacker::FlushInternal()
 void DataPacker::RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t removeSize) {
     auto memory = buffer->GetMemory();
     auto copySize = memory->GetSize() - removeSize;
-    memmove_s(memory->GetWritableAddr(copySize), memory->GetCapacity(),
-              memory->GetReadOnlyData(removeSize), copySize);
+    FALSE_LOG_MSG_E(memmove_s(memory->GetWritableAddr(copySize), memory->GetCapacity(),
+              memory->GetReadOnlyData(removeSize), copySize) == EOK, "memmove failed.");
 }
 } // namespace Media
 } // namespace OHOS
