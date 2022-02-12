@@ -101,7 +101,7 @@ Status Minimp3DemuxerPlugin::DoReadFromSource(uint32_t readSize)
     auto bufData = buffer->AllocMemory(nullptr, readSize);
     int retryTimes = 0;
     MEDIA_LOG_D("ioNeedReadSize %" PUBLIC_LOG_U32 " inIoBufferSize_ %" PUBLIC_LOG_D32 " ioDataRemainSize_ %"
-        PUBLIC_LOG_U32, ioNeedReadSize, inIoBufferSize_, ioDataRemainSize_);
+        PUBLIC_LOG_U32, readSize, inIoBufferSize_, ioDataRemainSize_);
     do {
         auto res = ioContext_.dataSource->ReadAt(ioContext_.offset, buffer, static_cast<size_t>(readSize));
         FALSE_RET_V_MSG_W(res == Status::OK, res, "read data from source error %" PUBLIC_LOG_D32, (int)res);
