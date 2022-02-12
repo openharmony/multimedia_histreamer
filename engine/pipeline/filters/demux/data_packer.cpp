@@ -60,8 +60,8 @@ inline static const uint8_t* AudioBufferReadOnlyData(AVBufferPtr& ptr)
 
 void DataPacker::PushData(AVBufferPtr bufferPtr, uint64_t offset)
 {
-    MEDIA_LOG_D("DataPacker PushData begin... buffer (size %" PUBLIC_LOG_U32 ", offset %" PUBLIC_LOG_U64 ")",
-                AudioBufferSize(bufferPtr), offset);
+    MEDIA_LOG_D("DataPacker PushData begin... buffer (offset %" PUBLIC_LOG_U64 ", size %" PUBLIC_LOG_U32 ")",
+                offset, AudioBufferSize(bufferPtr));
     OSAL::ScopedLock lock(mutex_);
     size_ += AudioBufferSize(bufferPtr);
     if (que_.empty()) {
@@ -70,8 +70,8 @@ void DataPacker::PushData(AVBufferPtr bufferPtr, uint64_t offset)
         pts_ = bufferPtr->pts;
     }
     que_.emplace_back(std::move(bufferPtr));
-    MEDIA_LOG_D("DataPacker PushData end... dataPacker (size %" PUBLIC_LOG_U32, "  offset %" PUBLIC_LOG_U64,
-                size_.load(), bufferOffset_);
+    MEDIA_LOG_D("DataPacker PushData end... dataPacker (offset %" PUBLIC_LOG_U64 ", size %" PUBLIC_LOG_U32 ")",
+                bufferOffset_, size_.load());
 }
 
 bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOffset)
@@ -81,7 +81,7 @@ bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOf
     if (que_.empty() || offset < curOffsetTemp || offset >= curOffsetTemp + size_) { // 原有数据无法命中, 则删除原有数据
         curOffset = offset;
         FlushInternal();
-        MEDIA_LOG_D("IsDataAvailable false, offset < bufferOffset_");
+        MEDIA_LOG_D("IsDataAvailable false, offset not in cached data, clear it.");
         return false;
     }
     int bufCnt = que_.size();
@@ -139,34 +139,46 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr& 
         LOG_WARN_IF_FAIL(memcpy_s(dstPtr, size,
             AudioBufferReadOnlyData(que_[0]) + offset - bufferOffset_, size), "failed to memcpy");
     } else { // 0号buffer不够用
-        // 拷贝0号buffer需要的内容
-        auto srcSize = AudioBufferSize(que_[0]) - (offset - bufferOffset_);
+        // 拷贝第一个buffer需要的内容(多数时候是0号buffer)
+        // 找到第一个要拷贝的Buffer
+        size_t index = 0;
+        uint64_t prevOffset = bufferOffset_;
+        do {
+            if (offset >= prevOffset && offset - prevOffset < AudioBufferSize(que_[index])) {
+                break;
+            }
+            prevOffset += AudioBufferSize(que_[index]);
+            index++;
+        } while (index < que_.size());
+        FALSE_RET_V_MSG_E(index < que_.size(), false, "Can not find first buffer to copy.");
+        auto srcSize = AudioBufferSize(que_[index]) - (offset - prevOffset);
         dstPtr = AudioBufferWritableData(bufferPtr, srcSize);
         RETURN_FALSE_IF_NULL(dstPtr);
         LOG_WARN_IF_FAIL(memcpy_s(dstPtr, srcSize,
-            AudioBufferReadOnlyData(que_[0]) + offset - bufferOffset_, srcSize),
-            "failed to memcpy");
+            AudioBufferReadOnlyData(que_[index]) + offset - prevOffset, srcSize),
+            "failed to copy memory");
 
-        // 数据不足的部分，从1/2/...号buffer拷贝
-        auto prevMediaOffsetEnd = bufferOffset_ + AudioBufferSize(que_[0]);
+        // 数据不足的部分，从后续buffer(多数时候是1/2/3...号)拷贝
+        auto prevMediaOffsetEnd = prevOffset + AudioBufferSize(que_[index]);
         dstPtr += srcSize;
         size -= srcSize;
-        for (size_t i = 1; i < que_.size(); ++i) {
+        for (size_t i = index + 1; i < que_.size(); ++i) {
             curOffsetEnd = prevMediaOffsetEnd + AudioBufferSize(que_[i]);
             if (curOffsetEnd >= offsetEnd) {
                 LOG_WARN_IF_FAIL(memcpy_s(dstPtr, size, AudioBufferReadOnlyData(que_[i]), size),
-                                 "failed to memcpy");
+                                 "failed to copy memory");
                 break;
             } else {
                 srcSize = AudioBufferSize(que_[i]);
                 LOG_WARN_IF_FAIL(memcpy_s(dstPtr, srcSize, AudioBufferReadOnlyData(que_[i]), srcSize),
-                                 "failed to memcpy");
+                                 "failed to copy memory");
                 dstPtr += srcSize;
                 size -= srcSize;
                 prevMediaOffsetEnd += srcSize;
             }
         }
     }
+    FALSE_LOG_MSG_W(curOffsetEnd >= offsetEnd, "Processed all cached buffers, still not meet offsetEnd.");
     WrapAssemblerBuffer(offset).swap(bufferPtr);
     return true;
 }
@@ -174,6 +186,7 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr& 
 // 单个buffer不足以存储请求的数据，需要合并多个buffer从而组成目标buffer
 bool DataPacker::RepackBuffers(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr)
 {
+    // 可能的改进点: 即使是GetRange, 也会先Peek数据，从而发生拷贝, 有可能可以减少拷贝
     FALSE_RETURN_V(PeekRangeInternal(offset, size, bufferPtr), false);
 
     // 删除已经拿走的数据
