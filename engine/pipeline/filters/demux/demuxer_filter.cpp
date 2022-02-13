@@ -312,34 +312,13 @@ void DemuxerFilter::ActivatePullMode()
         task_ = std::make_shared<OSAL::Task>("DemuxerFilter");
     }
     task_->RegisterHandler([this] { DemuxerLoop(); });
-    if (!dataPacker_) {
-        dataPacker_ = std::make_shared<DataPacker>();
-    }
     checkRange_ = [this](uint64_t offset, uint32_t size) {
-        uint64_t curOffset = offset;
-        if (dataPacker_->IsDataAvailable(offset, size, curOffset)) {
-            return true;
-        }
-        AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
-        bufferPtr->AllocMemory(pluginAllocator_, size);
-        if (inPorts_.front()->PullData(curOffset, size, bufferPtr) == ErrorCode::SUCCESS) {
-            dataPacker_->PushData(std::move(bufferPtr), curOffset);
-            return true;
-        }
-        return false;
+        return (offset < mediaDataSize_) && (size <= mediaDataSize_) && (offset <= (mediaDataSize_ - size));
     };
     peekRange_ = [this](uint64_t offset, size_t size, AVBufferPtr& bufferPtr) -> bool {
-        if (checkRange_(offset, size)) {
-            return dataPacker_->PeekRange(offset, size, bufferPtr);
-        }
-        return false;
+        return inPorts_.front()->PullData(offset, size, bufferPtr) == ErrorCode::SUCCESS;
     };
-    getRange_ = [this](uint64_t offset, size_t size, AVBufferPtr& bufferPtr) -> bool {
-        if (checkRange_(offset, size)) {
-            return dataPacker_->GetRange(offset, size, bufferPtr);
-        }
-        return false;
-    };
+    getRange_ = peekRange_;
     typeFinder_->Init(uriSuffix_, mediaDataSize_, checkRange_, peekRange_);
     MediaTypeFound(typeFinder_->FindMediaType());
 }
