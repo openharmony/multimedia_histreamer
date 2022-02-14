@@ -119,21 +119,6 @@ do { \
     } \
 } while (0)
 
-void* AudioCaptureAllocator::Alloc(size_t size)
-{
-    if (size == 0) {
-        return nullptr;
-    }
-    return reinterpret_cast<void*>(new (std::nothrow) uint8_t[size]); // NOLINT: cast
-}
-
-void AudioCaptureAllocator::Free(void* ptr) // NOLINT: void*
-{
-    if (ptr != nullptr) {
-        delete[](uint8_t*) ptr;
-    }
-}
-
 AudioCapturePlugin::AudioCapturePlugin(std::string name) : SourcePlugin(std::move(name))
 {
     MEDIA_LOG_D("IN");
@@ -147,7 +132,6 @@ AudioCapturePlugin::~AudioCapturePlugin()
 Status AudioCapturePlugin::Init()
 {
     MEDIA_LOG_D("IN");
-    mAllocator_ = std::make_shared<AudioCaptureAllocator>();
     if (audioCapturer_ == nullptr) {
         audioCapturer_ = AudioStandard::AudioCapturer::Create(AudioStandard::AudioStreamType::STREAM_MUSIC);
         if (audioCapturer_ == nullptr) {
@@ -413,7 +397,7 @@ Status AudioCapturePlugin::SetParameter(Tag tag, const ValueType& value)
 std::shared_ptr<Allocator> AudioCapturePlugin::GetAllocator()
 {
     MEDIA_LOG_D("IN");
-    return mAllocator_;
+    return nullptr;
 }
 
 Status AudioCapturePlugin::SetCallback(Callback* cb)

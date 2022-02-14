@@ -23,15 +23,6 @@
 namespace OHOS {
 namespace Media {
 namespace AuCapturePlugin {
-class AudioCaptureAllocator : public Plugin::Allocator {
-public:
-    AudioCaptureAllocator() = default;
-    ~AudioCaptureAllocator() override = default;
-
-    void* Alloc(size_t size) override;
-    void Free(void* ptr) override; // NOLINT: void*
-};
-
 class AudioCapturePlugin : public Plugin::SourcePlugin {
 public:
     explicit AudioCapturePlugin(std::string name);
@@ -60,7 +51,6 @@ private:
     bool AssignSampleFmtIfSupported(OHOS::Media::Plugin::AudioSampleFormat sampleFormat);
     Plugin::Status GetAudioTime(uint64_t &audioTimeNs);
 
-    std::shared_ptr<AudioCaptureAllocator> mAllocator_ {nullptr};
     std::shared_ptr<OHOS::AudioStandard::AudioCapturer> audioCapturer_ {nullptr};
     AudioStandard::AudioCapturerParams capturerParams_ {};
     bool isStop_ {false};
