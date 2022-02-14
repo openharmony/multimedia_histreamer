@@ -66,7 +66,7 @@ void* PluginLoader::LoadPluginFile(const std::string& path)
     if (pathStr) {
         auto ptr = ::dlopen(pathStr, RTLD_NOW);
         if (ptr == nullptr) {
-            MEDIA_LOG_E("dlopen failed due to %s", ::dlerror());
+            MEDIA_LOG_E("dlopen failed due to %" PUBLIC_LOG "s", ::dlerror());
         }
         return ptr;
     }
@@ -94,7 +94,7 @@ std::shared_ptr<PluginLoader> PluginLoader::CheckSymbol(void* handler, const std
             loader->unregisterFunc_ = unregisterFunc;
             return loader;
         } else {
-            MEDIA_LOG_W("register or unregister found is not found in %s", name.c_str());
+            MEDIA_LOG_W("register or unregister found is not found in %" PUBLIC_LOG "s", name.c_str());
         }
     }
     return {};

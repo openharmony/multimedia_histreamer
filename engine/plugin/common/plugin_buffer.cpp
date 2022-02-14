@@ -184,14 +184,23 @@ std::shared_ptr<Memory> Buffer::WrapMemoryPtr(std::shared_ptr<uint8_t> data, siz
 std::shared_ptr<Memory> Buffer::AllocMemory(std::shared_ptr<Allocator> allocator, size_t capacity, size_t align)
 {
     auto type = (allocator != nullptr) ? allocator->GetMemoryType() : MemoryType::VIRTUAL_ADDR;
-    std::shared_ptr<Memory> memory = (type == MemoryType::VIRTUAL_ADDR ?
-        std::shared_ptr<Memory>(new Memory(capacity, allocator, align)) :
+    std::shared_ptr<Memory> memory = nullptr;
+    switch (type) {
+        case MemoryType::VIRTUAL_ADDR: {
+            memory = std::shared_ptr<Memory>(new Memory(capacity, allocator, align));
+            break;
+        }
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
-        ((type == MemoryType::SURFACE_BUFFER) ?
-        std::shared_ptr<Memory>(new SurfaceMemory(capacity, allocator, align)) : nullptr));
-#else
-        nullptr);
+        case MemoryType::SURFACE_BUFFER: {
+            memory = std::shared_ptr<Memory>(new SurfaceMemory(capacity, allocator, align));
+            break;
+        }
 #endif
+        case MemoryType::SHARE_MEMORY:
+            break;
+        default:
+            break;
+    }
     if (memory == nullptr) {
         return nullptr;
     }

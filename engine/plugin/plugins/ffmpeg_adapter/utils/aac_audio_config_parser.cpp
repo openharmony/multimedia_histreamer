@@ -22,6 +22,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 AACAudioConfigParser::AACAudioConfigParser(const uint8_t* audioConfig, size_t len)
     : bitReader_(audioConfig, len), isConfigValid_(false)
 {
@@ -178,7 +179,7 @@ bool AACAudioConfigParser::ExtractChannelElements(int& sceCnt, int& cpeCnt, int&
             lfeCnt = 1;
             break;
         default:
-            MEDIA_LOG_W("Unknown channel config in header: %d", audioConfig_.channelConfig);
+            MEDIA_LOG_W("Unknown channel config in header: %" PUBLIC_LOG "d", audioConfig_.channelConfig);
             return false;
     }
     return true;
@@ -258,7 +259,8 @@ bool AACAudioConfigParser::CalculateProfile(int channelCnt, int pcu, int rcu)
             ret = 4;                         // 4
         }
     }
-    MEDIA_LOG_W("determined level: profile=%u, sampleRate=%u, channel_config=%u, pcu=%d,rcu=%d",
+    MEDIA_LOG_W("determined level: profile=%" PUBLIC_LOG "u, sampleRate=%" PUBLIC_LOG "u, channel_config=%"
+                PUBLIC_LOG "u, pcu=%" PUBLIC_LOG "d,rcu=%" PUBLIC_LOG "d",
                 audioConfig_.audioObjectType, audioConfig_.sampleRate, audioConfig_.channelConfig, pcu, rcu);
     audioConfig_.level = static_cast<uint32_t>(ret);
     return ret != -1;
@@ -326,11 +328,13 @@ bool AACAudioConfigParser::ParseProfile()
             break;
         default:
             audioConfig_.profile = AudioAacProfile::NONE;
-            MEDIA_LOG_W("ParseProfile failed due to invalid profile index: %u", audioConfig_.audioObjectType);
+            MEDIA_LOG_W("ParseProfile failed due to invalid profile index: %" PUBLIC_LOG "u",
+                        audioConfig_.audioObjectType);
             break;
     }
     return ret;
 }
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

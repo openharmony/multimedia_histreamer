@@ -23,7 +23,8 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-std::shared_ptr<SourcePlugin> StreamSourcePluginCreater(const std::string& name)
+namespace StreamSource {
+std::shared_ptr<SourcePlugin> StreamSourcePluginCreator(const std::string& name)
 {
     return std::make_shared<StreamSourcePlugin>(name);
 }
@@ -35,7 +36,7 @@ const Status StreamSourceRegister(const std::shared_ptr<Register>& reg)
     definition.description = "Stream source";
     definition.rank = 100; // 100: max rank
     definition.protocol.emplace_back(ProtocolType::STREAM);
-    definition.creator = StreamSourcePluginCreater;
+    definition.creator = StreamSourcePluginCreator;
     return reg->AddPlugin(definition);
 }
 
@@ -46,7 +47,7 @@ void* StreamSourceAllocator::Alloc(size_t size)
     if (size == 0) {
         return nullptr;
     }
-    return reinterpret_cast<void*>(new (std::nothrow) uint8_t[size]);
+    return static_cast<void*>(new (std::nothrow) uint8_t[size]);
 }
 
 void StreamSourceAllocator::Free(void* ptr) // NOLINT: void*
@@ -192,13 +193,14 @@ Status StreamSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
 {
     AVBufferPtr bufPtr_ = bufferQueue_.Pop(); // the cached buffer
     auto availSize = bufPtr_->GetMemory()->GetSize();
-    MEDIA_LOG_D("availSize: %zu, expectedLen: %zu\n", availSize, expectedLen);
+    MEDIA_LOG_D("availSize: %" PUBLIC_LOG "zu, expectedLen: %" PUBLIC_LOG "zu", availSize, expectedLen);
     if (buffer->IsEmpty()) { // No buffer provided, use the cached buffer.
         buffer = bufPtr_;
         return Status::OK;
     } else { // Buffer provided, copy it.
         if (buffer->GetMemory()->GetCapacity() < availSize) {
-            MEDIA_LOG_D("buffer->length: %zu is smaller than %zu\n", buffer->GetMemory()->GetCapacity(), availSize);
+            MEDIA_LOG_D("buffer->length: %" PUBLIC_LOG "zu is smaller than %" PUBLIC_LOG "zu",
+                        buffer->GetMemory()->GetCapacity(), availSize);
             return Status::ERROR_NO_MEMORY;
         }
         buffer->GetMemory()->Write(bufPtr_->GetMemory()->GetReadOnlyData(), availSize);
@@ -266,6 +268,7 @@ void StreamSourcePlugin::NotifyAvilableBufferLoop()
     std::shared_ptr<StreamSource> stream = streamSource_.lock();
     stream->OnBufferAvailable(idx, 0, bufferPtr->GetMemory()->GetCapacity());
 }
+} // namespace StreamSource
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

@@ -25,19 +25,20 @@ namespace OSAL {
 Task::Task(std::string name, ThreadPriority priority)
     : name_(std::move(name)), runningState_(RunningState::PAUSED), loop_(priority)
 {
-    MEDIA_LOG_D("task %s ctor called", name_.c_str());
+    MEDIA_LOG_D("task %" PUBLIC_LOG "s ctor called", name_.c_str());
     loop_.SetName(name_);
 }
 
-Task::Task(std::string name, std::function<void()> handler, ThreadPriority priority) : Task(std::move(name), priority)
+Task::Task(std::string name, std::function<void()> handler, ThreadPriority priority)
+    : Task(std::move(name), priority)
 {
-    MEDIA_LOG_D("task %s ctor called", name_.c_str());
+    MEDIA_LOG_D("task %" PUBLIC_LOG "s ctor called", name_.c_str());
     handler_ = std::move(handler);
 }
 
 Task::~Task()
 {
-    MEDIA_LOG_D("task %s dtor called", name_.c_str());
+    MEDIA_LOG_D("task %" PUBLIC_LOG "s dtor called", name_.c_str());
     runningState_ = RunningState::STOPPED;
     syncCond_.NotifyAll();
 }
@@ -48,29 +49,30 @@ void Task::Start()
     OSAL::ScopedLock lock(stateMutex_);
     runningState_ = RunningState::STARTED;
     if (!loop_ && !loop_.CreateThread([this] { Run(); })) {
-        MEDIA_LOG_E("task %s create failed", name_.c_str());
+        MEDIA_LOG_E("task %" PUBLIC_LOG "s create failed", name_.c_str());
     } else {
         syncCond_.NotifyAll();
     }
-    MEDIA_LOG_D("task %s start called", name_.c_str());
+    MEDIA_LOG_D("task %" PUBLIC_LOG "s start called", name_.c_str());
 #endif
 }
 
 void Task::Stop()
 {
-    MEDIA_LOG_W("task %s stop entered, current state: %d", name_.c_str(), runningState_.load());
+    MEDIA_LOG_W("task %" PUBLIC_LOG "s stop entered, current state: %" PUBLIC_LOG "d",
+                name_.c_str(), runningState_.load());
     OSAL::ScopedLock lock(stateMutex_);
     if (runningState_.load() != RunningState::STOPPED) {
         runningState_ = RunningState::STOPPING;
         syncCond_.NotifyAll();
         syncCond_.Wait(lock, [this] { return runningState_.load() == RunningState::STOPPED; });
     }
-    MEDIA_LOG_W("task %s stop exited", name_.c_str());
+    MEDIA_LOG_W("task %" PUBLIC_LOG "s stop exited", name_.c_str());
 }
 
 void Task::Pause()
 {
-    MEDIA_LOG_D("task %s Pause called", name_.c_str());
+    MEDIA_LOG_D("task %" PUBLIC_LOG "s Pause called", name_.c_str());
     OSAL::ScopedLock lock(stateMutex_);
     switch (runningState_.load()) {
         case RunningState::STARTED: {
@@ -91,12 +93,12 @@ void Task::Pause()
         default:
             break;
     }
-    MEDIA_LOG_D("task %s Pause done.", name_.c_str());
+    MEDIA_LOG_D("task %" PUBLIC_LOG "s Pause done.", name_.c_str());
 }
 
 void Task::PauseAsync()
 {
-    MEDIA_LOG_D("task %s PauseAsync called", name_.c_str());
+    MEDIA_LOG_D("task %" PUBLIC_LOG "s PauseAsync called", name_.c_str());
     OSAL::ScopedLock lock(stateMutex_);
     if (runningState_.load() == RunningState::STARTED) {
         runningState_ = RunningState::PAUSING;
@@ -105,13 +107,13 @@ void Task::PauseAsync()
 
 void Task::RegisterHandler(std::function<void()> handler)
 {
-    MEDIA_LOG_D("task %s RegisterHandler called", name_.c_str());
+    MEDIA_LOG_D("task %" PUBLIC_LOG "s RegisterHandler called", name_.c_str());
     handler_ = std::move(handler);
 }
 
 void Task::DoTask()
 {
-    MEDIA_LOG_D("task %s not override DoTask...", name_.c_str());
+    MEDIA_LOG_D("task %" PUBLIC_LOG "s not override DoTask...", name_.c_str());
 }
 
 void Task::Run()

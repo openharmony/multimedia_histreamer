@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #include "surface_allocator.h"
 #include "foundation/log.h"
@@ -65,7 +66,6 @@ void SurfaceAllocator::Config(int32_t width, int32_t height, int32_t usage, int3
             width, height, strideAlign, format,
             usage | HBM_USE_CPU_READ | HBM_USE_CPU_WRITE | HBM_USE_MEM_DMA, 0
     };
-    bufferCnt_ = 0;
 }
 } // namespace Plugin
 } // namespace Media

@@ -60,6 +60,7 @@ private:
     bool CheckChannels(const Plugin::Capability& cap);
     bool CheckSampleFormat(const Plugin::Capability& cap);
     ErrorCode DoConfigure();
+    void SendBuffer(const std::shared_ptr<AVBuffer>& buffer);
 
     std::shared_ptr<OSAL::Task> taskPtr_ {nullptr};
     std::shared_ptr<Plugin::Source> plugin_ {nullptr};
@@ -75,7 +76,12 @@ private:
     bool bitRateSpecified_ {false};
     Plugin::AudioSampleFormat sampleFormat_ {OHOS::Media::Plugin::AudioSampleFormat::S16};
     bool sampleFormatSpecified_ {false};
+    Plugin::AudioChannelLayout channelLayout_ {OHOS::Media::Plugin::AudioChannelLayout::STEREO};
+    bool channelLayoutSpecified_ {false};
     Capability capNegWithDownstream_ {};
+
+    std::atomic<bool> eos_ {false};
+    OSAL::Mutex pushDataMutex_ {};
 };
 } // namespace Pipeline
 } // namespace Media

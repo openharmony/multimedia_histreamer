@@ -16,6 +16,8 @@
 #ifndef HISTREAMER_PLUGIN_META_H
 #define HISTREAMER_PLUGIN_META_H
 
+#include <vector>
+
 #include "common/plugin_tags.h"
 #include "common/plugin_types.h"
 
@@ -113,7 +115,7 @@ public:
     bool GetData(Plugin::MetaID id, T& value) const
     {
         auto ite = items_.find(id);
-        if (ite == items_.end() || typeid(T) != ite->second.Type()) {
+        if (ite == items_.end() || !ite->second.SameTypeWith(typeid(T))) {
             return false;
         }
         value = Plugin::AnyCast<T>(ite->second);
@@ -128,6 +130,15 @@ public:
         }
         value = ite->second;
         return true;
+    }
+
+    const Plugin::ValueType* GetData(MetaID id) const
+    {
+        auto ite = items_.find(id);
+        if (ite == items_.end()) {
+            return nullptr;
+        }
+        return &(ite->second);
     }
 
     void Clear();
@@ -164,10 +175,10 @@ public:
         return true;
     }
 
-    std::string Dump();
+    std::vector<MetaID> GetMetaIDs() const;
 
 private:
-    std::map<Plugin::MetaID, Plugin::ValueType> items_{};
+    std::map<MetaID, Plugin::ValueType> items_ {};
 };
 } // namespace Plugin
 } // namespace Media

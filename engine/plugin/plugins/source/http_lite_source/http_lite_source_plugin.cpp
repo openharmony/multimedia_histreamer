@@ -212,7 +212,7 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
         return Status::ERROR_UNKNOWN;
     }
     auto uri = source->GetSourceUri();
-    MEDIA_LOG_D("%s", uri.c_str());
+    MEDIA_LOG_D("%" PUBLIC_LOG "s", uri.c_str());
     Status ret = OpenUri(uri);
     if (ret != Status::OK) {
         MEDIA_LOG_D("OpenUri error");
@@ -221,14 +221,15 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     MEDIA_LOG_D("OpenUri success");
     unsigned int downloadPos = 0;
     httpHandle_->GetHttpBufferRange(&position_, &downloadPos);
-    MEDIA_LOG_D("position_ %d downloadPos %d", (uint32_t)position_, (uint32_t)downloadPos);
+    MEDIA_LOG_D("position_ %" PUBLIC_LOG "d downloadPos %" PUBLIC_LOG "d",
+                (uint32_t)position_, (uint32_t)downloadPos);
     int8_t retryTimes = 0;
     while (!needExit_ && position_ == downloadPos && retryTimes < 60) { // 60
         OHOS::Media::OSAL::SleepFor(200); // 200
         httpHandle_->GetHttpBufferRange(&position_, &downloadPos);
         retryTimes++;
     }
-    MEDIA_LOG_D("position_ %d downloadPos %d", position_, downloadPos);
+    MEDIA_LOG_D("position_ %" PUBLIC_LOG "d downloadPos %" PUBLIC_LOG "d", position_, downloadPos);
     if (position_ == downloadPos) {
         MEDIA_LOG_D("position_ == downloadPos");
         httpHandle_->HttpClose();
@@ -236,7 +237,7 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     }
     isSeekable_ = httpHandle_->IsStreaming();
     fileSize_ = isSeekable_ ? httpHandle_->GetContentLength() : -1;
-    MEDIA_LOG_D("SetSource OUT fileSize_ %d", fileSize_);
+    MEDIA_LOG_D("SetSource OUT fileSize_ %" PUBLIC_LOG "d", fileSize_);
     return Status::OK;
 }
 
@@ -248,7 +249,7 @@ std::shared_ptr<Allocator> HttpSourcePlugin::GetAllocator()
 
 void HttpSourcePlugin::OnError(int httpError, int localError, void *param, int support_retry)
 {
-    MEDIA_LOG_D("httpError %d localError %d", httpError, localError);
+    MEDIA_LOG_D("httpError %" PUBLIC_LOG "d localError %" PUBLIC_LOG "d", httpError, localError);
     auto plugin = reinterpret_cast<HttpSourcePlugin *>(param);
     if (plugin == nullptr) {
         return;
@@ -264,7 +265,8 @@ Status HttpSourcePlugin::OnHttpEvent(void *priv, int errorType, int32_t errorCod
         return Status::ERROR_UNKNOWN;
     }
     auto plugin = reinterpret_cast<HttpSourcePlugin *>(priv);
-    plugin->callback_->onError((ErrorType)errorType, errorCode);
+    plugin->callback_->OnEvent(
+        PluginEvent{PluginEventType::OTHER_ERROR, errorCode, "http lite error"});
     return Status::OK;
 }
 
@@ -291,16 +293,18 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
 
         httpHandle_->GetHttpBufferRange(&read, &write);
 
-        MEDIA_LOG_I("read pos %d write pos %d expectedLen %d", read, write, expectedLen);
+        MEDIA_LOG_I("read pos %" PUBLIC_LOG "d write pos %" PUBLIC_LOG "d expectedLen %" PUBLIC_LOG "d",
+                    read, write, expectedLen);
 
         expectedLen = std::min(static_cast<size_t>(write - read), expectedLen);
         expectedLen = std::min(bufData->GetCapacity(), expectedLen);
 
-        MEDIA_LOG_I("bufData->GetCapacity() %d", bufData->GetCapacity());
+        MEDIA_LOG_I("bufData->GetCapacity() %" PUBLIC_LOG "d", bufData->GetCapacity());
         httpHandle_->HttpRead(bufData->GetWritableAddr(expectedLen), expectedLen, realReadSize, isEos);
         bufData->UpdateDataSize(realReadSize);
         httpHandle_->GetHttpBufferRange(&position_, &write);
-        MEDIA_LOG_D("position_ : %d, readSize = %d, isEos %d", position_, bufData->GetSize(), isEos);
+        MEDIA_LOG_D("position_ : %" PUBLIC_LOG "d, readSize = %" PUBLIC_LOG "d, isEos %" PUBLIC_LOG "d",
+                    position_, bufData->GetSize(), isEos);
         return Status::OK;
     }
 }
@@ -333,14 +337,14 @@ Status HttpSourcePlugin::SeekTo(uint64_t offset)
         return Status::ERROR_INVALID_PARAMETER;
     }
     if (!httpHandle_->HttpSeek(offset)) {
-        MEDIA_LOG_D("seek to position_ %d failed", position_);
+        MEDIA_LOG_D("seek to position_ %" PUBLIC_LOG "d failed", position_);
         return Status::ERROR_UNKNOWN;
     }
     position_ = static_cast<unsigned int>(offset);
     httpHandle_->GetHttpBufferRange(&readPos, &writePos);
-    MEDIA_LOG_D("offset = %d, after SeekTo readPos = %d, writePos = %d",
-                static_cast<uint32_t>(offset), readPos, writePos);
-    MEDIA_LOG_D("seek to position_ %d success", position_);
+    MEDIA_LOG_D("offset = %" PUBLIC_LOG "d, after SeekTo readPos = %" PUBLIC_LOG "d, writePos = %" PUBLIC_LOG
+                "d", static_cast<uint32_t>(offset), readPos, writePos);
+    MEDIA_LOG_D("seek to position_ %" PUBLIC_LOG "d success", position_);
     return Status::OK;
 }
 
@@ -357,7 +361,7 @@ Status HttpSourcePlugin::OpenUri(std::string &url)
     httpAttr.bufferSize = bufferSize_;
     httpAttr.pluginHandle = this;
     httpAttr.callbackFunc = OnError;
-    MEDIA_LOG_D("OpenUri httpAttr.pluginHandle %p httpAttr.callbackFunc %p",
+    MEDIA_LOG_D("OpenUri httpAttr.pluginHandle %" PUBLIC_LOG "p httpAttr.callbackFunc %" PUBLIC_LOG "p",
                 httpAttr.pluginHandle, httpAttr.callbackFunc);
     return httpHandle_->HttpOpen(url, httpAttr) ? Status::OK : Status::ERROR_UNKNOWN;
 }

@@ -39,8 +39,11 @@ public:
 
     void FlushEnd() override;
 
-    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                   Capability& upstreamNegotiatedCap) override;
+    bool Negotiate(const std::string& inPort,
+                   const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Plugin::Capability& negotiatedCap,
+                   const Plugin::TagMap& upstreamParams,
+                   Plugin::TagMap& downstreamParams) override;
 
     bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
@@ -71,6 +74,8 @@ private:
 
     ErrorCode SetVideoDecoderFormat(const std::shared_ptr<const Plugin::Meta>& meta);
 
+    std::shared_ptr<Allocator> DecideOutPutAllocator();
+
     ErrorCode AllocateOutputBuffers();
 
     ErrorCode ConfigurePluginOutputBuffers();
@@ -90,8 +95,9 @@ private:
     bool isFlushing_ {false};
     Capability capNegWithDownstream_;
     Capability capNegWithUpstream_;
+    Plugin::TagMap sinkParams_;
     VideoDecoderFormat vdecFormat_;
-    std::shared_ptr<DataCallbackImpl> dataCallback_ {nullptr};
+    DataCallbackImpl* dataCallback_ {nullptr};
 
     std::shared_ptr<OHOS::Media::OSAL::Task> handleFrameTask_ {nullptr};
     std::shared_ptr<OHOS::Media::OSAL::Task> pushTask_ {nullptr};

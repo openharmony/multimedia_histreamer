@@ -29,6 +29,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Minimp3 {
 namespace {
     constexpr uint32_t MP3_384_SAMPLES_PER_FRAME  = 384;
     constexpr uint32_t MP3_576_SAMPLES_PER_FRAME  = 576;
@@ -45,12 +46,12 @@ Minimp3DecoderPlugin::Minimp3DecoderPlugin(std::string name)
 {
     FALSE_LOG(memset_s(&mp3DecoderAttr_, sizeof(mp3DecoderAttr_), 0x00, sizeof(AudioDecoderMp3Attr)) == 0);
     FALSE_LOG(memset_s(&minimp3DecoderImpl_, sizeof(minimp3DecoderImpl_), 0x00, sizeof(Minimp3DemuxerOp)) == 0);
-    MEDIA_LOG_I("Minimp3DecoderPlugin, plugin name: %s", pluginName_.c_str());
+    MEDIA_LOG_I("Minimp3DecoderPlugin, plugin name: %" PUBLIC_LOG "s", pluginName_.c_str());
 }
 
 Minimp3DecoderPlugin::~Minimp3DecoderPlugin()
 {
-    MEDIA_LOG_I("~Minimp3DecoderPlugin, plugin name: %s", pluginName_.c_str());
+    MEDIA_LOG_I("~Minimp3DecoderPlugin, plugin name: %" PUBLIC_LOG "s", pluginName_.c_str());
 }
 
 Status Minimp3DecoderPlugin::Init()
@@ -98,7 +99,7 @@ Status Minimp3DecoderPlugin::Prepare()
         return Status::ERROR_INVALID_PARAMETER;
     }
 
-    MEDIA_LOG_I("channels_ = %d samplesPerFrame_ = %d", channels_, samplesPerFrame_);
+    MEDIA_LOG_I("channels_ = %" PUBLIC_LOG "d samplesPerFrame_ = %" PUBLIC_LOG "d", channels_, samplesPerFrame_);
 
     return Status::OK;
 }
@@ -162,24 +163,27 @@ Status Minimp3DecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& ou
         return Status::ERROR_INVALID_PARAMETER;
     }
     outputBuffer_ = outputBuffers;
-    return Status::OK;
+    return SendOutputBuffer();
 }
 
-Status Minimp3DecoderPlugin::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
+Status Minimp3DecoderPlugin::SendOutputBuffer()
 {
-    MEDIA_LOG_D("dequeue output buffer");
-    (void)timeoutMs;
+    MEDIA_LOG_D("send output buffer");
     OSAL::ScopedLock lock(ioMutex_);
     Status status = GetPcmDataProcess(inputBuffer_, outputBuffer_);
     inputBuffer_.reset();
     inputBuffer_ = nullptr;
-    outputBuffers.reset();
     if (status == Status::OK || status == Status::END_OF_STREAM) {
-        outputBuffers = outputBuffer_;
+        dataCb_->OnOutputBufferDone(outputBuffer_);
     }
     outputBuffer_.reset();
     outputBuffer_ = nullptr;
     return status;
+}
+
+Status Minimp3DecoderPlugin::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
+{
+    return Status::ERROR_INVALID_OPERATION;
 }
 
 Status Minimp3DecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
@@ -208,7 +212,7 @@ Status Minimp3DecoderPlugin::Flush()
     return Status::OK;
 }
 
-Status Minimp3DecoderPlugin::SetDataCallback(const std::weak_ptr<DataCallback>& dataCallback)
+Status Minimp3DecoderPlugin::SetDataCallback(DataCallback* dataCallback)
 {
     dataCb_ = dataCallback;
     return Status::OK;
@@ -298,6 +302,7 @@ void UpdatePluginDefinition(CodecPluginDef& definition)
 }
 
 PLUGIN_DEFINITION(Minimp3Decoder, LicenseType::CC0, RegisterDecoderPlugin, [] {});
+} // namespace Minimp3
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

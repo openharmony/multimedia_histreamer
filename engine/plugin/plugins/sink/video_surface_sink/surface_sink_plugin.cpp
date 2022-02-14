@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#ifdef VIDEO_SUPPORT
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
 #define HST_LOG_TAG "SurfaceSinkPlugin"
 
@@ -26,13 +26,16 @@
 
 namespace {
 using namespace OHOS::Media::Plugin;
-
+using namespace SurfaceSink;
+constexpr size_t DEFAULT_WIDTH = 640;
+constexpr size_t DEFAULT_HEIGHT = 480;
+constexpr size_t DEFAULT_BUFFER_NUM = 8;
 std::shared_ptr<VideoSinkPlugin> VideoSinkPluginCreator(const std::string& name)
 {
     return std::make_shared<SurfaceSinkPlugin>(name);
 }
 
-const Status SurfaceSinkRegister(const std::shared_ptr<Register>& reg)
+Status SurfaceSinkRegister(const std::shared_ptr<Register>& reg)
 {
     VideoSinkPluginDef definition;
     definition.name = "surface_sink";
@@ -94,12 +97,11 @@ static uint32_t TranslatePixelFormat(const VideoPixelFormat pixelFormat)
     return surfaceFormat;
 }
 
-SurfaceSinkPlugin::SurfaceSinkPlugin(std::string name)
-    : VideoSinkPlugin(std::move(name)),
-      width_(DEFAULT_WIDTH),
-      height_(DEFAULT_HEIGHT),
-      pixelFormat_(VideoPixelFormat::NV21),
-      maxSurfaceNum_(DEFAULT_BUFFER_NUM)
+SurfaceSinkPlugin::SurfaceSinkPlugin(std::string name) : VideoSinkPlugin(std::move(name)),
+    width_(DEFAULT_WIDTH),
+    height_(DEFAULT_HEIGHT),
+    pixelFormat_(VideoPixelFormat::NV21),
+    maxSurfaceNum_(DEFAULT_BUFFER_NUM)
 {
 }
 
@@ -136,7 +138,7 @@ Status SurfaceSinkPlugin::Prepare()
     const constexpr int32_t strideAlign = 8; // 8
     auto format = TranslatePixelFormat(pixelFormat_);
     if (format == PixelFormat::PIXEL_FMT_BUTT) {
-        MEDIA_LOG_E("surface can not support pixel format: %u", pixelFormat_);
+        MEDIA_LOG_E("surface can not support pixel format: %" PUBLIC_LOG "u", pixelFormat_);
         return Status::ERROR_UNKNOWN;
     }
     mAllocator_->Config(static_cast<int32_t>(width_), static_cast<int32_t>(height_), 0, format,
@@ -178,28 +180,28 @@ Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
 {
     switch (tag) {
         case Tag::VIDEO_WIDTH: {
-            if (value.Type() == typeid(uint32_t)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 width_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("pixelWidth_: %u", pixelWidth_);
+                MEDIA_LOG_D("pixelWidth_: %" PUBLIC_LOG "u", pixelWidth_);
             }
             break;
         }
         case Tag::VIDEO_HEIGHT: {
-            if (value.Type() == typeid(uint32_t)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 height_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("pixelHeight_: %u", pixelHeight_);
+                MEDIA_LOG_D("pixelHeight_: %" PUBLIC_LOG "u", pixelHeight_);
             }
             break;
         }
         case Tag::VIDEO_PIXEL_FORMAT: {
-            if (value.Type() == typeid(VideoPixelFormat)) {
+            if (value.SameTypeWith(typeid(VideoPixelFormat))) {
                 pixelFormat_ = Plugin::AnyCast<VideoPixelFormat>(value);
-                MEDIA_LOG_D("pixelFormat: %u", pixelFormat_);
+                MEDIA_LOG_D("pixelFormat: %" PUBLIC_LOG "u", pixelFormat_);
             }
             break;
         }
         case Tag::VIDEO_SURFACE: {
-            if (value.Type() == typeid(sptr<Surface>)) {
+            if (value.SameTypeWith(typeid(sptr<Surface>))) {
                 surface_ = Plugin::AnyCast<sptr<Surface>>(value);
                 if (!surface_) {
                     MEDIA_LOG_E("surface is null");
@@ -210,9 +212,9 @@ Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
             break;
         }
         case Tag::VIDEO_MAX_SURFACE_NUM: {
-            if (value.Type() == typeid(uint32_t)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 maxSurfaceNum_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("maxSurfaceNum_: %u", maxSurfaceNum_);
+                MEDIA_LOG_D("maxSurfaceNum_: %" PUBLIC_LOG "u", maxSurfaceNum_);
             }
             break;
         }

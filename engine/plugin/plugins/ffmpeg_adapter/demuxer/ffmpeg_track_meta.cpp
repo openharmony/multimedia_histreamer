@@ -26,6 +26,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 namespace {
 using ConvertFunc = void (*)(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta);
 
@@ -185,8 +186,9 @@ void ConvertAVStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<A
             return;
         }
     }
-    MEDIA_LOG_E("unsupported codec id: %d", codecId);
+    MEDIA_LOG_E("unsupported codec id: %" PUBLIC_LOG "d", codecId);
 }
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

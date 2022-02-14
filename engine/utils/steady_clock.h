@@ -42,15 +42,15 @@ private:
 #if defined(PROFILE)
 #define PROFILE_BEGIN(message, ...)                                                                                    \
     do {                                                                                                               \
-        MEDIA_LOG_W(message ", timestamp(ms): %" PRId64, ##__VA_ARGS__, SteadyClock::GetCurrentTimeMs());              \
+        MEDIA_LOG_I(message ", timestamp(ms): %" PUBLIC_LOG_D64, ##__VA_ARGS__, SteadyClock::GetCurrentTimeMs());      \
     } while (0);                                                                                                       \
     OHOS::Media::SteadyClock _steadyClock;
 #define PROFILE_RESET() _steadyClock.Reset()
 
 #define PROFILE_END(message, ...)                                                                                      \
     do {                                                                                                               \
-        MEDIA_LOG_W(message ", timestamp(ms): %" PRId64 ", duration(ms): %" PRId64, ##__VA_ARGS__,                     \
-                SteadyClock::GetCurrentTimeMs(), _steadyClock.ElapsedMilliseconds());                                  \
+        MEDIA_LOG_I(message ", timestamp(ms): %" PUBLIC_LOG_D64 ", duration(ms): %" PUBLIC_LOG_D64,                    \
+                    ##__VA_ARGS__, SteadyClock::GetCurrentTimeMs(), _steadyClock.ElapsedMilliseconds());               \
     } while (0)
 
 #else

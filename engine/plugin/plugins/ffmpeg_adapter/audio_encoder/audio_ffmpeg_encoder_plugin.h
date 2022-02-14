@@ -26,6 +26,7 @@
 extern "C" {
 #endif
 #include "libavcodec/avcodec.h"
+#include "libswresample/swresample.h"
 #ifdef __cplusplus
 };
 #endif
@@ -33,6 +34,7 @@ extern "C" {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 class AudioFfmpegEncoderPlugin : public CodecPlugin {
 public:
     explicit AudioFfmpegEncoderPlugin(std::string name);
@@ -80,7 +82,7 @@ public:
 
     Status Flush() override;
 
-    Status SetDataCallback(const std::weak_ptr<DataCallback>& dataCallback) override
+    Status SetDataCallback(DataCallback* dataCallback) override
     {
         return Status::OK;
     }
@@ -90,20 +92,17 @@ private:
 
     Status DeInitLocked();
 
-    template <typename T>
-    bool FindInParameterMapThenAssignLocked(Tag tag, T& assign);
-
-    void InitInputFrame();
-
     Status SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer);
 
-    Status ReceiveFrameSucc(const std::shared_ptr<Buffer>& ioInfo, std::shared_ptr<AVPacket> packet);
+    Status ReceiveFrameSucc(const std::shared_ptr<Buffer>& ioInfo, const std::shared_ptr<AVPacket>& packet);
 
     Status ReceiveBuffer();
 
     Status ReceiveBufferLocked(const std::shared_ptr<Buffer>& ioInfo);
 
-    void InitCacheFrame();
+    bool CheckReformat();
+
+    void FillInFrameCache(const std::shared_ptr<Memory>& mem);
 
     mutable OSAL::Mutex parameterMutex_ {};
     std::map<Tag, ValueType> audioParameter_ {};
@@ -111,11 +110,18 @@ private:
     mutable OSAL::Mutex avMutex_ {};
     std::shared_ptr<const AVCodec> avCodec_ {nullptr};
     std::shared_ptr<AVCodecContext> avCodecContext_ {nullptr};
-    std::shared_ptr<Buffer> cachedBuffer_ {nullptr};
-    AVFrame* cachedFrame_ {nullptr};
+    std::shared_ptr<AVFrame> cachedFrame_ {nullptr};
+    uint32_t fullInputFrameSize_ {0};
     std::shared_ptr<Buffer> outBuffer_ {nullptr};
     uint64_t prev_pts_;
+    bool needReformat_ {false};
+    AVSampleFormat srcFmt_ {AVSampleFormat::AV_SAMPLE_FMT_NONE};
+    uint32_t srcBytesPerSample_ {0};
+    std::shared_ptr<SwrContext> swrCtx_ {nullptr};
+    std::vector<uint8_t> resampleCache_ {};
+    std::vector<uint8_t*> resampleChannelAddr_ {};
 };
+} // Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

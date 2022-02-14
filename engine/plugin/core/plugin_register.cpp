@@ -41,12 +41,11 @@ static std::map<PluginType, int> g_apiVersionMap = {
 static std::string g_libFileHead = "libhistreamer_plugin_";
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
-static std::string g_libFileTail = ".dll";
 static std::string g_fileSeparator = "\\";
 #else
-static std::string g_libFileTail = ".so";
 static std::string g_fileSeparator = "/";
 #endif
+static std::string g_libFileTail = HST_PLUGIN_FILE_TAIL;
 
 PluginRegister::~PluginRegister()
 {

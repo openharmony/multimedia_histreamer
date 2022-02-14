@@ -22,6 +22,11 @@ ADD_DEFINITIONS(
         -D__STDC_FORMAT_MACROS
         -DHST_PLUGIN_PATH="./"
 )
+if (WIN32)
+add_definitions( -DHST_PLUGIN_FILE_TAIL=".dll" )
+else()
+add_definitions( -DHST_PLUGIN_FILE_TAIL=".so" )
+endif()
 
 IF (CMAKE_CL_64)
     ADD_DEFINITIONS(-DWIN64)
@@ -30,11 +35,9 @@ ENDIF (CMAKE_CL_64)
 ######################################################
 # include directories
 include_directories(
-        ${TOP_DIR}/interface
         ${TOP_DIR}/engine
-        ${TOP_DIR}/engine/external
-        ${TOP_DIR}/engine/player
-        ${TOP_DIR}/engine/recorder
+        ${TOP_DIR}/engine/scene/player
+        ${TOP_DIR}/engine/scene/recorder
         ${TOP_DIR}/engine/pipeline
         ${TOP_DIR}/engine/pipeline/core
         ${TOP_DIR}/engine/foundation
@@ -59,8 +62,9 @@ file(GLOB_RECURSE HISTREAMER_BASE_SRCS
         ${TOP_DIR}/engine/plugin/common/*.cpp
         ${TOP_DIR}/engine/plugin/core/*.cpp
         ${TOP_DIR}/engine/plugin/types/*.cpp
-        ${TOP_DIR}/engine/player/internal/*.cpp
-        ${TOP_DIR}/engine/recorder/internal/*.cpp
+        ${TOP_DIR}/engine/scene/player/internal/*.cpp
+        ${TOP_DIR}/engine/scene/recorder/internal/*.cpp
+        ${TOP_DIR}/engine/scene/common/*.cpp
         ${TOP_DIR}/engine/foundation/*.cpp
         ${TOP_DIR}/engine/utils/*.cpp
         )
@@ -72,34 +76,39 @@ file(GLOB_RECURSE COMMON_PLUGIN_SRCS
         ${TOP_DIR}/engine/plugin/plugins/source/file_source/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/minimp3_adapter/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/minimp3_adapter/*.c
+        ${TOP_DIR}/engine/plugin/plugins/source/http_source/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/source/http_source_test/*.cpp
 )
 
 if (OHOS_LITE)
     message(STATUS "#1 player lite source")
     file(GLOB_RECURSE PLAYER_SRCS
-            ${TOP_DIR}/engine/player/lite/*.cpp
+            ${TOP_DIR}/engine/scene/lite/*.cpp
+            ${TOP_DIR}/engine/scene/player/lite/*.cpp
             )
     message(STATUS "#1 recorder lite source")
     file(GLOB_RECURSE RECORDER_SRCS
-            ${TOP_DIR}/engine/recorder/lite/*.cpp
+            ${TOP_DIR}/engine/scene/lite/*.cpp
+            ${TOP_DIR}/engine/scene/recorder/lite/*.cpp
             )
     file(GLOB_RECURSE PLAT_PLUGIN_SRCS
             ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
-            ${TOP_DIR}/engine/plugin/plugins/source/http_source/*.cpp
             )
 else ()
     message(STATUS "player standard source")
     file(GLOB_RECURSE PLAYER_SRCS
-            ${TOP_DIR}/engine/player/standard/*.cpp
-            ${TOP_DIR}/engine/factory/*.cpp
+            ${TOP_DIR}/engine/scene/standard/*.cpp
+            ${TOP_DIR}/engine/scene/player/standard/*.cpp
             )
     message(STATUS "recorder standard source")
     file(GLOB_RECURSE RECORDER_SRCS
-            ${TOP_DIR}/engine/recorder/standard/*.cpp
-            ${TOP_DIR}/engine/factory/*.cpp
+            ${TOP_DIR}/engine/scene/standard/*.cpp
+            ${TOP_DIR}/engine/scene/recorder/standard/*.cpp
             )
     file(GLOB_RECURSE PLAT_PLUGIN_SRCS
             ${TOP_DIR}/engine/plugin/plugins/source/audio_capture/*.cpp
+            ${TOP_DIR}/engine/plugin/plugins/source/video_capture/*.cpp
+            ${TOP_DIR}/engine/plugin/plugins/sink/audio_server_sink/*.cpp
             ${TOP_DIR}/engine/plugin/plugins/sink/video_surface_sink/*.cpp
             )
 endif ()
@@ -143,5 +152,5 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_SHARED_LIBRARY_PREFIX "libmedia_engine_")
 set(CMAKE_SHARED_LIBRARY_SUFFIX ".z.so")
 
-add_library(${PROJECT_NAME} SHARED ${HISTREAMER_SRCS} ${PLUGINS_STATIC_BUILD_SRCS}
+add_library(${PROJECT_NAME} SHARED ${HISTREAMER_SRCS} ${PLUGINS_STATIC_BUILD_SRCS} ${SECURE_C_SRCS}
         ${3RDPARTY_SRCS})

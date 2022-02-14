@@ -55,6 +55,9 @@ std::shared_ptr<OutPort> FilterBase::GetOutPort(const std::string& name)
 
 ErrorCode FilterBase::Prepare()
 {
+    MEDIA_LOG_I("prepare called");
+    FALSE_RET_V_MSG_W(state_ == FilterState::INITIALIZED, ErrorCode::ERROR_INVALID_OPERATION,
+                      "filter is not in init state");
     state_ = FilterState::PREPARING;
 
     // Filter默认InPort按Push方式获取数据
@@ -100,8 +103,8 @@ std::vector<Filter*> FilterBase::GetNextFilters()
     for (auto&& outPort : outPorts_) {
         auto peerPort = outPort->GetPeerPort();
         if (!peerPort) {
-            MEDIA_LOG_I("Filter %s outport %s has no peer port (%zu).", name_.c_str(), outPort->GetName().c_str(),
-                        outPorts_.size());
+            MEDIA_LOG_I("Filter %" PUBLIC_LOG "s outport %" PUBLIC_LOG "s has no peer port (%" PUBLIC_LOG
+                        "zu).", name_.c_str(), outPort->GetName().c_str(), outPorts_.size());
             continue;
         }
         auto filter = const_cast<Filter*>(dynamic_cast<const Filter*>(peerPort->GetOwnerFilter()));
@@ -119,8 +122,8 @@ std::vector<Filter*> FilterBase::GetPreFilters()
     for (auto&& inPort : inPorts_) {
         auto peerPort = inPort->GetPeerPort();
         if (!peerPort) {
-            MEDIA_LOG_I("Filter %s inport %s has no peer port (%zu).", name_.c_str(), inPort->GetName().c_str(),
-                        inPorts_.size());
+            MEDIA_LOG_I("Filter %" PUBLIC_LOG "s inport %" PUBLIC_LOG "s has no peer port (%" PUBLIC_LOG
+                        "zu).", name_.c_str(), inPort->GetName().c_str(), inPorts_.size());
             continue;
         }
         auto filter = const_cast<Filter*>(dynamic_cast<const Filter*>(peerPort->GetOwnerFilter()));
@@ -148,7 +151,7 @@ ErrorCode FilterBase::PullData(const std::string& outPort, uint64_t offset, size
     return ErrorCode::SUCCESS;
 }
 
-void FilterBase::OnEvent(Event event)
+void FilterBase::OnEvent(const Event& event)
 {
     // Receive event from port, pass it to pipeline
     if (eventReceiver_) {
@@ -181,7 +184,7 @@ T FilterBase::FindPort(const std::vector<T>& list, const std::string& name)
     if (find != list.end()) {
         return *find;
     }
-    MEDIA_LOG_E("Find port(%s) failed.", name.c_str());
+    MEDIA_LOG_E("Find port(%" PUBLIC_LOG "s) failed.", name.c_str());
     return nullptr;
 }
 
@@ -201,7 +204,7 @@ PInPort FilterBase::GetRouteInPort(const std::string& outPortName)
     auto ite = std::find_if(routeMap_.begin(), routeMap_.end(),
                             [&outPortName](const PairPort& pp) { return outPortName == pp.second; });
     if (ite == routeMap_.end()) {
-        MEDIA_LOG_W("out port %s has no route map port", outPortName.c_str());
+        MEDIA_LOG_W("out port %" PUBLIC_LOG "s has no route map port", outPortName.c_str());
         return nullptr;
     }
     return GetInPort(ite->first);
@@ -212,7 +215,7 @@ POutPort FilterBase::GetRouteOutPort(const std::string& inPortName)
     auto ite = std::find_if(routeMap_.begin(), routeMap_.end(),
                             [&inPortName](const PairPort& pp) { return inPortName == pp.first; });
     if (ite == routeMap_.end()) {
-        MEDIA_LOG_W("in port %s has no route map port", inPortName.c_str());
+        MEDIA_LOG_W("in port %" PUBLIC_LOG "s has no route map port", inPortName.c_str());
         return nullptr;
     }
     return GetOutPort(ite->second);
@@ -232,19 +235,20 @@ bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<T>& plugin, std::shar
             if (plugin->Reset() == Plugin::Status::OK) {
                 return true;
             }
-            MEDIA_LOG_W("reuse previous plugin %s failed, will create new plugin", pluginInfo->name.c_str());
+            MEDIA_LOG_W("reuse previous plugin %" PUBLIC_LOG "s failed, will create new plugin",
+                        pluginInfo->name.c_str());
         }
         plugin->Deinit();
     }
 
     plugin = pluginCreator(selectedPluginInfo->name);
     if (plugin == nullptr) {
-        MEDIA_LOG_E("cannot create plugin %s", selectedPluginInfo->name.c_str());
+        MEDIA_LOG_E("cannot create plugin %" PUBLIC_LOG "s", selectedPluginInfo->name.c_str());
         return false;
     }
     auto err = TranslatePluginStatus(plugin->Init());
     if (err != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("plugin %s init error", selectedPluginInfo->name.c_str());
+        MEDIA_LOG_E("plugin %" PUBLIC_LOG "s init error", selectedPluginInfo->name.c_str());
         return false;
     }
     pluginInfo = selectedPluginInfo;
@@ -267,14 +271,18 @@ template bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<Plugin::Outp
     const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo,
     const std::function<std::shared_ptr<Plugin::OutputSink>(const std::string&)>& pluginCreator);
 
-    void FilterBase::onEvent(int32_t event)
-    {
+void FilterBase::OnEvent(const Plugin::PluginEvent &event)
+{
+    if (eventReceiver_ != nullptr) {
+        if (event.type == Plugin::PluginEventType::CLIENT_ERROR ||
+            event.type == Plugin::PluginEventType::SERVER_ERROR ||
+            event.type == Plugin::PluginEventType::OTHER_ERROR) {
+            eventReceiver_->OnEvent({name_, EventType::EVENT_PLUGIN_ERROR, event});
+        } else {
+            eventReceiver_->OnEvent({name_, EventType::EVENT_PLUGIN_EVENT, event});
+        }
     }
-
-    void FilterBase::onError(int32_t errorType, int32_t errorCode)
-    {
-        eventReceiver_->OnEvent({EventType::EVENT_ERROR, ErrorEvent{errorType, errorCode}});
-    }
+}
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

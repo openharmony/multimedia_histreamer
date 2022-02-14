@@ -32,6 +32,7 @@ extern "C" {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 class AudioFfmpegDecoderPlugin : public CodecPlugin {
 public:
     explicit AudioFfmpegDecoderPlugin(std::string name);
@@ -79,8 +80,9 @@ public:
 
     Status Flush() override;
 
-    Status SetDataCallback(const std::weak_ptr<DataCallback>& dataCallback) override
+    Status SetDataCallback(DataCallback* dataCallback) override
     {
+        dataCallback_ = dataCallback;
         return Status::OK;
     }
 
@@ -102,6 +104,8 @@ private:
 
     Status ReceiveBufferLocked(const std::shared_ptr<Buffer>& ioInfo);
 
+    Status SendOutputBuffer();
+
     mutable OSAL::Mutex parameterMutex_ {};
     std::map<Tag, ValueType> audioParameter_ {};
 
@@ -113,7 +117,9 @@ private:
     std::vector<uint8_t> paddedBuffer_ {};
     size_t paddedBufferSize_ {0};
     std::shared_ptr<Buffer> outBuffer_ {nullptr};
+    DataCallback* dataCallback_;
 };
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

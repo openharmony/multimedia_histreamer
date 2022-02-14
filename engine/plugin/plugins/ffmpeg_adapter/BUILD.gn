@@ -24,6 +24,12 @@ group("plugin_ffmpeg_adapter") {
       ":histreamer_plugin_FFmpegDemuxer",
     ]
   }
+  if (!defined(ohos_lite)) {
+    deps += [
+      ":histreamer_plugin_FFmpegAudioEncoders",
+      ":histreamer_plugin_FFmpegMuxers",
+    ]
+  }
 }
 config("plugin_ffmpeg_adapter_config") {
   include_dirs = [ "//third_party/ffmpeg" ]
@@ -93,6 +99,70 @@ source_set("ffmpeg_demuxers") {
   cflags_cc = cflags
 }
 
+source_set("ffmpeg_audio_encoders") {
+  sources = [
+    "audio_encoder/audio_ffmpeg_encoder_plugin.cpp",
+    "audio_encoder/ffmpeg_au_enc_config.cpp",
+    "utils/ffmpeg_utils.cpp",
+  ]
+  public_configs = [ ":plugin_ffmpeg_adapter_config" ]
+  public_deps = [
+    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+  ]
+  cflags = [
+    "-fPIC",
+    "-Wall",
+  ]
+  if (defined(ohos_lite)) {
+    print("histreamer audio encoder plugin only supports standard system")
+  } else {
+    public_deps += [ "//third_party/ffmpeg:libohosffmpeg" ]
+    configs -= [
+      "//build/config/compiler:no_rtti",
+      "//build/config/compiler:no_exceptions",
+    ]
+    cflags += [
+      "-frtti",
+      "-fexceptions",
+    ]
+  }
+  cflags_cc = cflags
+}
+
+source_set("ffmpeg_muxers") {
+  sources = [
+    "muxer/ffmpeg_muxer_plugin.cpp",
+    "utils/ffmpeg_codec_map.cpp",
+    "utils/ffmpeg_utils.cpp",
+  ]
+  public_configs = [ ":plugin_ffmpeg_adapter_config" ]
+  public_deps = [
+    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+  ]
+  cflags = [
+    "-fPIC",
+    "-Wall",
+  ]
+  if (defined(ohos_lite)) {
+    print("histreamer ffmpeg muxer plugin only supports standard system")
+  } else {
+    public_deps += [ "//third_party/ffmpeg:libohosffmpeg" ]
+    configs -= [
+      "//build/config/compiler:no_rtti",
+      "//build/config/compiler:no_exceptions",
+    ]
+    cflags += [
+      "-frtti",
+      "-fexceptions",
+    ]
+  }
+  cflags_cc = cflags
+}
+
 if (defined(ohos_lite)) {
   # lite
   import("//build/lite/config/component/lite_component.gni")
@@ -120,11 +190,25 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_FFmpegAudioDecoders") {
     deps = [ ":ffmpeg_audio_decoders" ]
+    relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"
   }
   ohos_shared_library("histreamer_plugin_FFmpegDemuxer") {
     deps = [ ":ffmpeg_demuxers" ]
+    relative_install_dir = "media/histreamer_plugins"
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
+  }
+  ohos_shared_library("histreamer_plugin_FFmpegAudioEncoders") {
+    deps = [ ":ffmpeg_audio_encoders" ]
+    relative_install_dir = "media/histreamer_plugins"
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
+  }
+  ohos_shared_library("histreamer_plugin_FFmpegMuxers") {
+    deps = [ ":ffmpeg_muxers" ]
+    relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"
   }

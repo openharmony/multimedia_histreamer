@@ -37,8 +37,11 @@ void OutputSinkFilter::Init(EventReceiver *receiver, FilterCallback *callback)
     FilterBase::Init(receiver, callback);
     outPorts_.clear();
 }
-bool OutputSinkFilter::Negotiate(const std::string &inPort, const std::shared_ptr<const Capability> &upstreamCap,
-                                 Capability &upstreamNegotiatedCap)
+bool OutputSinkFilter::Negotiate(const std::string &inPort,
+                                 const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                                 Plugin::Capability& negotiatedCap,
+                                 const Plugin::TagMap& upstreamParams,
+                                 Plugin::TagMap& downstreamParams)
 {
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::OUTPUT_SINK);
     if (candidatePlugins.empty()) {
@@ -48,21 +51,22 @@ bool OutputSinkFilter::Negotiate(const std::string &inPort, const std::shared_pt
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
     for (const auto& candidate : candidatePlugins) {
         const auto& tmp = candidate.first->extra[PLUGIN_INFO_EXTRA_OUTPUT_TYPE];
-        if (tmp.Type() != typeid(Plugin::OutputType)) {
+        if (!tmp.SameTypeWith(typeid(Plugin::OutputType))) {
             continue;
         }
         if (Plugin::AnyCast<Plugin::OutputType>(tmp) == outputType_) {
             if (selectedPluginInfo == nullptr) {
                 selectedPluginInfo = candidate.first;
-                upstreamNegotiatedCap = candidate.second;
+                negotiatedCap = candidate.second;
             } else if (candidate.first->rank > selectedPluginInfo->rank) {
                 selectedPluginInfo = candidate.first;
-                upstreamNegotiatedCap = candidate.second;
+                negotiatedCap = candidate.second;
             }
         }
     }
     if (selectedPluginInfo == nullptr) {
-        MEDIA_LOG_W("no available output sink plugin with output type of %d", static_cast<int32_t>(outputType_));
+        MEDIA_LOG_W("no available output sink plugin with output type of %" PUBLIC_LOG "d",
+                    static_cast<int32_t>(outputType_));
         return false;
     }
     auto res = UpdateAndInitPluginByInfo<Plugin::OutputSink>(plugin_, pluginInfo_, selectedPluginInfo,
@@ -91,11 +95,11 @@ bool OutputSinkFilter::Configure(const std::string& inPort, const std::shared_pt
 
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("Output sink configure error");
-        OnEvent({EVENT_ERROR, err});
+        OnEvent({name_, EventType::EVENT_ERROR, err});
         return false;
     }
     state_ = FilterState::READY;
-    OnEvent({EVENT_READY});
+    OnEvent({name_, EventType::EVENT_READY});
     MEDIA_LOG_I("Output sink send EVENT_READY");
     PROFILE_END("Output sink configure end");
     return true;
@@ -146,12 +150,13 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, AVBufferPtr buff
     auto ret = ErrorCode::SUCCESS;
     if (offset >= 0 && offset != currentPos_) {
         if (!plugin_->IsSeekable()) {
-            MEDIA_LOG_E("plugin %s does not support seekable", pluginInfo_->name.c_str());
+            MEDIA_LOG_E("plugin %" PUBLIC_LOG "s does not support seekable", pluginInfo_->name.c_str());
             return ErrorCode::ERROR_INVALID_OPERATION;
         } else {
             ret = TranslatePluginStatus(plugin_->SeekTo(offset));
             if (ret != ErrorCode::SUCCESS) {
-                MEDIA_LOG_E("plugin %s seek to %" PRId64 " failed", pluginInfo_->name.c_str(), offset);
+                MEDIA_LOG_E("plugin %" PUBLIC_LOG "s seek to %" PUBLIC_LOG PRId64 " failed",
+                            pluginInfo_->name.c_str(), offset);
                 return ErrorCode::ERROR_INVALID_OPERATION;
             }
             currentPos_ = offset;
@@ -160,7 +165,7 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, AVBufferPtr buff
     if (!buffer->IsEmpty()) {
         ret = TranslatePluginStatus(plugin_->Write(buffer));
         if (ret != ErrorCode::SUCCESS) {
-            MEDIA_LOG_E("write to plugin failed with error code %d", to_underlying(ret));
+            MEDIA_LOG_E("write to plugin failed with error code %" PUBLIC_LOG "d", to_underlying(ret));
             return ret;
         }
         currentPos_ += buffer->GetMemory()->GetSize();
@@ -168,7 +173,8 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, AVBufferPtr buff
     if (buffer->flag & BUFFER_FLAG_EOS) {
         plugin_->Flush();
         Event event {
-            .type = EVENT_AUDIO_COMPLETE,
+            .srcFilter = name_,
+            .type = EventType::EVENT_COMPLETE,
         };
         MEDIA_LOG_D("file sink push data send event_complete");
         OnEvent(event);

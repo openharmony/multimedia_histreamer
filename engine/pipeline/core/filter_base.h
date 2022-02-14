@@ -23,7 +23,7 @@
 #include "filter.h"
 #include "foundation/error_code.h"
 #include "utils/constants.h"
-#include "utils/event.h"
+#include "event.h"
 #include "utils/utils.h"
 #include "filter_type.h"
 #include "plugin/core/plugin_info.h"
@@ -90,7 +90,7 @@ public:
     }
 
     // Port调用此方法向Filter报告事件
-    void OnEvent(Event event) override;
+    void OnEvent(const Event& event) override;
 
 protected:
     virtual void InitPorts();
@@ -119,6 +119,7 @@ protected:
         const std::function<std::shared_ptr<T>(const std::string&)>& pluginCreator);
 
 protected:
+    void OnEvent(const Plugin::PluginEvent &event) override;
     std::string name_;
     std::atomic<FilterState> state_;
     EventReceiver* eventReceiver_;
@@ -137,8 +138,6 @@ protected:
 private:
     template <typename T>
     static T FindPort(const std::vector<T>& list, const std::string& name);
-    void onEvent(int32_t event) override;
-    void onError(int32_t errorType, int32_t errorCode) override;
 };
 } // namespace Pipeline
 } // namespace Media

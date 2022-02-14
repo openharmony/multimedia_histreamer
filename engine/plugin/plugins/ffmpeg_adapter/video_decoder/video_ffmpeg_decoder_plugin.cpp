@@ -32,6 +32,7 @@
 namespace {
 // register plugins
 using namespace OHOS::Media::Plugin;
+using namespace Ffmpeg;
 void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition);
 
 std::map<std::string, std::shared_ptr<const AVCodec>> codecMap;
@@ -55,7 +56,8 @@ Status RegisterVideoDecoderPlugins(const std::shared_ptr<Register>& reg)
             continue;
         }
         if (supportedCodec.find(codec->id) == supportedCodec.end()) {
-            MEDIA_LOG_D("codec %s(%s) is not supported right now", codec->name, codec->long_name);
+            MEDIA_LOG_D("codec %" PUBLIC_LOG "s(%" PUBLIC_LOG "s) is not supported right now",
+                        codec->name, codec->long_name);
             continue;
         }
         CodecPluginDef definition;
@@ -67,7 +69,8 @@ Status RegisterVideoDecoderPlugins(const std::shared_ptr<Register>& reg)
         // do not delete the codec in the deleter
         codecMap[definition.name] = std::shared_ptr<AVCodec>(const_cast<AVCodec*>(codec), [](void* ptr) {});
         if (reg->AddPlugin(definition) != Status::OK) {
-            MEDIA_LOG_W("register plugin %s(%s) failed", codec->name, codec->long_name);
+            MEDIA_LOG_W("register plugin %" PUBLIC_LOG "s(%" PUBLIC_LOG "s) failed",
+                        codec->name, codec->long_name);
         }
     }
     return Status::OK;
@@ -95,7 +98,7 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
     outputCaps.AppendDiscreteKeys<VideoPixelFormat>(
         Capability::Key::VIDEO_PIXEL_FORMAT,
         {VideoPixelFormat::YUV420P, VideoPixelFormat::NV12, VideoPixelFormat::NV21});
-    MEDIA_LOG_E("Capability VIDEO_PIXEL_FORMAT: %u", Capability::Key::VIDEO_PIXEL_FORMAT);
+    MEDIA_LOG_E("Capability VIDEO_PIXEL_FORMAT: %" PUBLIC_LOG "u", Capability::Key::VIDEO_PIXEL_FORMAT);
     definition.outCaps.push_back(outputCaps);
 }
 } // namespace
@@ -129,7 +132,7 @@ Status VideoFfmpegDecoderPlugin::Init()
     OSAL::ScopedLock l(avMutex_);
     auto iter = codecMap.find(pluginName_);
     if (iter == codecMap.end()) {
-        MEDIA_LOG_W("cannot find codec with name %s", pluginName_.c_str());
+        MEDIA_LOG_W("cannot find codec with name %" PUBLIC_LOG "s", pluginName_.c_str());
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     avCodec_ = iter->second;
@@ -180,10 +183,10 @@ template <typename T>
 void VideoFfmpegDecoderPlugin::FindInParameterMapThenAssignLocked(Tag tag, T& assign)
 {
     auto iter = videoDecParams_.find(tag);
-    if (iter != videoDecParams_.end() && typeid(T) == iter->second.Type()) {
+    if (iter != videoDecParams_.end() && iter->second.SameTypeWith(typeid(T))) {
         assign = Plugin::AnyCast<T>(iter->second);
     } else {
-        MEDIA_LOG_W("parameter %d is not found or type mismatch", static_cast<int32_t>(tag));
+        MEDIA_LOG_W("parameter %" PUBLIC_LOG "d is not found or type mismatch", static_cast<int32_t>(tag));
     }
 }
 
@@ -214,8 +217,8 @@ void VideoFfmpegDecoderPlugin::InitCodecContext()
     FindInParameterMapThenAssignLocked<std::uint32_t>(Tag::VIDEO_WIDTH, width_);
     FindInParameterMapThenAssignLocked<std::uint32_t>(Tag::VIDEO_HEIGHT, height_);
     FindInParameterMapThenAssignLocked<Plugin::VideoPixelFormat>(Tag::VIDEO_PIXEL_FORMAT, pixelFormat_);
-    MEDIA_LOG_D("bitRate: %" PRId64 ", width: %u, height: %u, pixelFormat: %u", avCodecContext_->bit_rate, width_,
-                height_, pixelFormat_);
+    MEDIA_LOG_D("bitRate: %" PUBLIC_LOG PRId64 ", width: %" PUBLIC_LOG "u, height: %" PUBLIC_LOG
+                "u, pixelFormat: %" PUBLIC_LOG "u", avCodecContext_->bit_rate, width_, height_, pixelFormat_);
     SetCodecExtraData();
     // Reset coded_width/_height to prevent it being reused from last time when
     // the codec is opened again, causing a mismatch and possible segfault/corruption.
@@ -251,7 +254,7 @@ void VideoFfmpegDecoderPlugin::DeinitCodecContext()
 void VideoFfmpegDecoderPlugin::SetCodecExtraData()
 {
     auto iter = videoDecParams_.find(Tag::MEDIA_CODEC_CONFIG);
-    if (iter == videoDecParams_.end() || iter->second.Type() != typeid(std::vector<uint8_t>)) {
+    if (iter == videoDecParams_.end() || !iter->second.SameTypeWith(typeid(std::vector<uint8_t>))) {
         return;
     }
     auto codecConfig = Plugin::AnyCast<std::vector<uint8_t>>(iter->second);
@@ -269,13 +272,13 @@ Status VideoFfmpegDecoderPlugin::OpenCodecContext()
 {
     AVCodec* vdec = avcodec_find_decoder(avCodecContext_->codec_id);
     if (vdec == nullptr) {
-        MEDIA_LOG_E("Codec: %d is not found", static_cast<int32_t>(avCodecContext_->codec_id));
+        MEDIA_LOG_E("Codec: %" PUBLIC_LOG "d is not found", static_cast<int32_t>(avCodecContext_->codec_id));
         DeinitCodecContext();
         return Status::ERROR_INVALID_PARAMETER;
     }
     auto res = avcodec_open2(avCodecContext_.get(), avCodec_.get(), nullptr);
     if (res != 0) {
-        MEDIA_LOG_E("avcodec open error %s when start decoder ", AVStrError(res).c_str());
+        MEDIA_LOG_E("avcodec open error %" PUBLIC_LOG "s when start decoder ", AVStrError(res).c_str());
         DeinitCodecContext();
         return Status::ERROR_UNKNOWN;
     }
@@ -290,7 +293,7 @@ Status VideoFfmpegDecoderPlugin::CloseCodecContext()
         auto res = avcodec_close(avCodecContext_.get());
         if (res != 0) {
             DeinitCodecContext();
-            MEDIA_LOG_E("avcodec close error %s when stop decoder", AVStrError(res).c_str());
+            MEDIA_LOG_E("avcodec close error %" PUBLIC_LOG "s when stop decoder", AVStrError(res).c_str());
             ret = Status::ERROR_UNKNOWN;
         }
         avCodecContext_.reset();
@@ -441,7 +444,7 @@ Status VideoFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
             if (paddedBufferSize_ < bufferLength + AV_INPUT_BUFFER_PADDING_SIZE) {
                 paddedBufferSize_ = bufferLength + AV_INPUT_BUFFER_PADDING_SIZE;
                 paddedBuffer_.reserve(paddedBufferSize_);
-                MEDIA_LOG_I("increase padded buffer size to %zu", paddedBufferSize_);
+                MEDIA_LOG_I("increase padded buffer size to %" PUBLIC_LOG "zu", paddedBufferSize_);
             }
             paddedBuffer_.assign(ptr, ptr + bufferLength);
             paddedBuffer_.insert(paddedBuffer_.end(), AV_INPUT_BUFFER_PADDING_SIZE, 0);
@@ -458,7 +461,7 @@ Status VideoFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
     }
     auto ret = avcodec_send_packet(avCodecContext_.get(), packetPtr);
     if (ret < 0) {
-        MEDIA_LOG_D("send buffer error %s", AVStrError(ret).c_str());
+        MEDIA_LOG_D("send buffer error %" PUBLIC_LOG "s", AVStrError(ret).c_str());
         return Status::ERROR_NO_MEMORY;
     }
     return Status::OK;
@@ -467,8 +470,8 @@ Status VideoFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
 void VideoFfmpegDecoderPlugin::CheckResolutionChange()
 {
     if ((width_ > 0) && (height_ > 0) && ((cachedFrame_->width != width_) || (cachedFrame_->height != height_))) {
-        MEDIA_LOG_W("Demuxer's W&H&S: [%u %u] diff from FFMPEG's [%d %d]", width_, height_, cachedFrame_->width,
-                    cachedFrame_->height);
+        MEDIA_LOG_W("Demuxer's W&H&S: [%" PUBLIC_LOG "u %" PUBLIC_LOG "u] diff from FFMPEG's [%" PUBLIC_LOG
+                    "d %" PUBLIC_LOG "d]", width_, height_, cachedFrame_->width, cachedFrame_->height);
         // need to reallocte output buffers
     }
 }
@@ -512,20 +515,22 @@ void VideoFfmpegDecoderPlugin::CalculateFrameSizes(size_t& ySize, size_t& uvSize
 
 Status VideoFfmpegDecoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& frameBuffer)
 {
-    MEDIA_LOG_D("receive one frame: %d, picture type: %d, pixel format: %d, packet size: %d", cachedFrame_->key_frame,
+    MEDIA_LOG_D("receive one frame: %" PUBLIC_LOG "d, picture type: %" PUBLIC_LOG "d, pixel format: %"
+                PUBLIC_LOG "d, packet size: %" PUBLIC_LOG "d", cachedFrame_->key_frame,
                 static_cast<int32_t>(cachedFrame_->pict_type), static_cast<int32_t>(cachedFrame_->format),
                 cachedFrame_->pkt_size);
     if (cachedFrame_->flags & AV_FRAME_FLAG_CORRUPT ||
         g_pixelFormatMap[static_cast<AVPixelFormat>(cachedFrame_->format)] != pixelFormat_) {
-        MEDIA_LOG_W("format: %d unsupported, pixelFormat_: %u", cachedFrame_->format, pixelFormat_);
+        MEDIA_LOG_W("format: %" PUBLIC_LOG "d unsupported, pixelFormat_: %" PUBLIC_LOG "u",
+                    cachedFrame_->format, pixelFormat_);
         return Status::ERROR_INVALID_DATA;
     }
     CheckResolutionChange();
 #ifdef DUMP_RAW_DATA
     DumpVideoRawOutData();
 #endif
-    MEDIA_LOG_D("linesize: %d, %d, %d", cachedFrame_->linesize[0], cachedFrame_->linesize[1],
-                cachedFrame_->linesize[2]); // 2
+    MEDIA_LOG_D("linesize: %" PUBLIC_LOG "d, %" PUBLIC_LOG "d, %" PUBLIC_LOG "d", cachedFrame_->linesize[0],
+                cachedFrame_->linesize[1], cachedFrame_->linesize[2]); // 2
     auto bufferMeta = frameBuffer->GetBufferMeta();
     if (bufferMeta != nullptr && bufferMeta->GetType() == BufferMetaType::VIDEO) {
         std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
@@ -543,7 +548,8 @@ Status VideoFfmpegDecoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& 
     CalculateFrameSizes(ySize, uvSize, frameSize);
     auto frameBufferMem = frameBuffer->GetMemory();
     if (frameBufferMem->GetCapacity() < frameSize) {
-        MEDIA_LOG_W("output buffer size is not enough: real[%zu], need[%zu]", frameBufferMem->GetCapacity(), frameSize);
+        MEDIA_LOG_W("output buffer size is not enough: real[%" PUBLIC_LOG "zu], need[%" PUBLIC_LOG "zu]",
+                    frameBufferMem->GetCapacity(), frameSize);
         return Status::ERROR_NO_MEMORY;
     }
     if (cachedFrame_->format == AV_PIX_FMT_YUV420P) {
@@ -554,7 +560,7 @@ Status VideoFfmpegDecoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& 
         frameBufferMem->Write(cachedFrame_->data[0], ySize);
         frameBufferMem->Write(cachedFrame_->data[1], uvSize);
     } else {
-        MEDIA_LOG_E("Unsupported pixel format: %d", cachedFrame_->format);
+        MEDIA_LOG_E("Unsupported pixel format: %" PUBLIC_LOG "d", cachedFrame_->format);
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     frameBuffer->pts = static_cast<uint64_t>(cachedFrame_->pts);
@@ -577,7 +583,7 @@ Status VideoFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
         avcodec_flush_buffers(avCodecContext_.get());
         status = Status::END_OF_STREAM;
     } else {
-        MEDIA_LOG_D("video decoder receive error: %s", AVStrError(ret).c_str());
+        MEDIA_LOG_D("video decoder receive error: %" PUBLIC_LOG "s", AVStrError(ret).c_str());
         status = Status::ERROR_TIMED_OUT;
     }
     av_frame_unref(cachedFrame_.get());
@@ -606,17 +612,15 @@ void VideoFfmpegDecoderPlugin::ReceiveBuffer()
 
 void VideoFfmpegDecoderPlugin::NotifyInputBufferDone(const std::shared_ptr<Buffer>& input)
 {
-    auto ptr = dataCb_.lock();
-    if (ptr != nullptr) {
-        ptr->OnInputBufferDone(input);
+    if (dataCb_ != nullptr) {
+        dataCb_->OnInputBufferDone(const_cast<std::shared_ptr<Buffer>&>(input));
     }
 }
 
 void VideoFfmpegDecoderPlugin::NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output)
 {
-    auto ptr = dataCb_.lock();
-    if (ptr != nullptr) {
-        ptr->OnOutputBufferDone(output);
+    if (dataCb_ != nullptr) {
+        dataCb_->OnOutputBufferDone(const_cast<std::shared_ptr<Buffer>&>(output));
     }
 }
 

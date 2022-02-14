@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef MEDIA_PIPELINE_VIDEO_CAPTURE_FILTER_H
 #define MEDIA_PIPELINE_VIDEO_CAPTURE_FILTER_H
-#ifdef RECORDER_SUPPORT
+
+#if defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
+
 #include <memory>
 #include <string>
 
@@ -44,21 +45,42 @@ public:
     ErrorCode Prepare() override;
     ErrorCode Start() override;
     ErrorCode Stop() override;
+    ErrorCode Pause() override;
+    ErrorCode Resume() override;
     ErrorCode SendEos();
 private:
     void InitPorts() override;
-    ErrorCode InitPlugin();
+    ErrorCode InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& audioMeta);
     void ReadLoop();
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);
+    ErrorCode FindPlugin();
+    bool DoNegotiate(const CapabilitySet& outCaps);
+    bool CheckSampleRate(const Plugin::Capability& cap);
+    bool CheckChannels(const Plugin::Capability& cap);
+    bool CheckSampleFormat(const Plugin::Capability& cap);
+    ErrorCode DoConfigure();
+    void SendBuffer(const std::shared_ptr<AVBuffer>& buffer);
 
     std::shared_ptr<OSAL::Task> taskPtr_ {nullptr};
     std::shared_ptr<Plugin::Source> plugin_ {nullptr};
     std::shared_ptr<Allocator> pluginAllocator_ {nullptr};
     std::shared_ptr<Plugin::PluginInfo> pluginInfo_ {nullptr};
+    Plugin::SrcInputType inputType_ {};
+    bool inputTypeSpecified_ {false};
+    uint32_t videoWidth_ {0};
+    bool videoWidthSpecified_ {false};
+    uint32_t videoHeight_ {0};
+    bool videoHeightSpecified_ {false};
+    uint64_t frameRate_ {0};
+    bool frameRateSpecified_ {false};
+    Capability capNegWithDownstream_ {};
+    std::atomic<bool> isEos_ {false};
+    OSAL::Mutex pushMutex_ {};
 };
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
 #endif
-#endif
+#endif // MEDIA_PIPELINE_VIDEO_CAPTURE_FILTER_H
+

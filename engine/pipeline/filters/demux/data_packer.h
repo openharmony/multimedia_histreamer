@@ -36,30 +36,32 @@ public:
 
     DataPacker& operator=(const DataPacker& other) = delete;
 
-    void PushData(AVBufferPtr bufferPtr);
+    void PushData(AVBufferPtr bufferPtr, uint64_t offset);
 
-    bool IsDataAvailable(uint64_t offset, uint32_t size);
+    bool IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOffset);
 
     bool PeekRange(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr);
 
     bool GetRange(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr);
 
-    AVBufferPtr GetRange(uint64_t offset, uint32_t size);
-
     void Flush();
 
 private:
-    static AVBufferPtr MakeAliasBuffer(AVBufferPtr bufferPtr, uint32_t offset, uint32_t size);
-
     AVBufferPtr WrapAssemblerBuffer(uint64_t offset);
 
     bool RepackBuffers(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr);
 
+    void RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t removeSize);
+
+    bool PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr);
+
+    void FlushInternal();
+
     OSAL::Mutex mutex_;
-    std::deque<AVBufferPtr> que_;
+    std::deque<AVBufferPtr> que_;  // buffer队列
     std::vector<uint8_t> assembler_;
     std::atomic<uint32_t> size_;
-    uint32_t bufferOffset_;
+    uint32_t bufferOffset_; // 当前 DataPacker缓存数据的第一个字节 对应 到 媒体文件中的 offset
     uint64_t pts_;
     uint64_t dts_;
 };

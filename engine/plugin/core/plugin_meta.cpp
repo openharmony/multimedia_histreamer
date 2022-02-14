@@ -15,6 +15,7 @@
 
 #include "plugin_meta.h"
 
+#include <cinttypes>
 #include <cstring>
 #include <memory>
 #include <vector>
@@ -72,12 +73,11 @@ bool Meta::GetString(Plugin::MetaID id, std::string& value) const
     if (ite == items_.end()) {
         return false;
     }
-    const std::type_info& type = ite->second.Type();
-    if (type == typeid(const char*)) {
+    if (ite->second.SameTypeWith(typeid(const char*))) {
         value = Plugin::AnyCast<const char*>(ite->second);
-    } else if (type == typeid(std::string)) {
+    } else if (ite->second.SameTypeWith(typeid(std::string))) {
         value = Plugin::AnyCast<std::string>(ite->second);
-    } else if (type == typeid(char*)) {
+    } else if (ite->second.SameTypeWith(typeid(char*))) {
         value = Plugin::AnyCast<char*>(ite->second);
     } else {
         return false;
@@ -129,7 +129,7 @@ void Meta::Update(const Meta& meta)
 {
     for (auto& ptr : meta.items_) {
         // we need to copy memory for pointers
-        if (ptr.second.Type() == typeid(PointerPair)) {
+        if (ptr.second.SameTypeWith(typeid(PointerPair))) {
             auto pointerPair = Plugin::AnyCast<PointerPair>(ptr.second);
             SetPointer(ptr.first, pointerPair.first.get(), pointerPair.second);
         } else {
@@ -178,22 +178,14 @@ bool Meta::GetPointer(Plugin::MetaID id, void** ptr, size_t& size) const // NOLI
     }
 }
 
-std::string Meta::Dump()
+std::vector<MetaID> Meta::GetMetaIDs() const
 {
-    std::string result = "MetaDump: ";
-    for (auto& ptr : items_) {
-        if (ptr.second.Type() == typeid(PointerPair)) {
-            auto pointerPair = Plugin::AnyCast<PointerPair>(ptr.second);
-            result = FormatString("%s {Meta: %d, PointerPair(%x, %d)},",
-                                  result.c_str(), ptr.first,
-                                  pointerPair.first.get(), pointerPair.second);
-        } else if (ptr.second.Type() == typeid(Plugin::AudioSampleFormat)) {
-            result = FormatString("%s {Meta: %d, AudioSampleFormat(%d)},",
-                                  result.c_str(), ptr.first,
-                                  Plugin::AnyCast<Plugin::AudioSampleFormat>(ptr.second));
-        }
+    std::vector<MetaID> ret (items_.size());
+    int cnt = 0;
+    for (const auto& tmp : items_) {
+        ret[cnt++] = tmp.first;
     }
-    return result;
+    return ret;
 }
 } // namespace Plugin
 } // namespace Media

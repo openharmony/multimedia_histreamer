@@ -27,6 +27,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace AacDemuxer {
 struct AudioDemuxerUserArg {
     uint32_t fileSize;
     void *priv;
@@ -91,6 +92,7 @@ private:
     IOContext ioContext_;
     size_t fileSize_;
 };
+} // namespace AacDemuxer
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

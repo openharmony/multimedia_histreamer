@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_SURFACE_SINK_PLUGIN_H
 #define HISTREAMER_SURFACE_SINK_PLUGIN_H
 
-#ifdef VIDEO_SUPPORT
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
 #include <atomic>
 #include <memory>
@@ -35,10 +35,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-#define DEFAULT_WIDTH      640
-#define DEFAULT_HEIGHT     480
-#define DEFAULT_BUFFER_NUM 8
-
+namespace SurfaceSink {
 class SurfaceSinkPlugin : public VideoSinkPlugin, public std::enable_shared_from_this<SurfaceSinkPlugin> {
 public:
     explicit SurfaceSinkPlugin(std::string name);
@@ -77,7 +74,6 @@ public:
     Status GetLatency(uint64_t &nanoSec) override;
 
 private:
-
     uint32_t width_;
     uint32_t height_;
     uint32_t stride_;
@@ -90,10 +86,9 @@ private:
     std::ofstream dumpData_;
 #endif
 };
-}
-}
-}
-
+} // SurfaceSink
+} // Plugin
+} // Media
+} // OHOS
 #endif
-
 #endif // MEDIA_PIPELINE_SDL_VIDEO_SINK_PLUGIN_H

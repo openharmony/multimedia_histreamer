@@ -22,7 +22,7 @@
 #include "filter_callback.h"
 #include "foundation/error_code.h"
 #include "utils/constants.h"
-#include "utils/event.h"
+#include "event.h"
 #include "utils/utils.h"
 #include "parameter.h"
 #include "port.h"
@@ -55,7 +55,7 @@ enum class FilterState {
 class EventReceiver {
 public:
     virtual ~EventReceiver() = default;
-    virtual void OnEvent(Event event) = 0;
+    virtual void OnEvent(const Event& event) = 0;
 };
 
 // InfoTransfer:
@@ -66,8 +66,11 @@ public:
     virtual std::vector<WorkMode> GetWorkModes() = 0; // OutPort调用
 
     // InPort调用此接口确定是否要继续往后协商
-    virtual bool Negotiate(const std::string& inPort, const std::shared_ptr<const Capability>& upstreamCap,
-                           Capability& upstreamNegotiatedCap)
+    virtual bool Negotiate(const std::string& inPort,
+                           const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                           Plugin::Capability& negotiatedCap,
+                           const Plugin::TagMap& upstreamParams,
+                           Plugin::TagMap& downstreamParams)
     {
         return false;
     }

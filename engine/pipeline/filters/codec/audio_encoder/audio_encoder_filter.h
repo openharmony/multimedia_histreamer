@@ -36,10 +36,11 @@ public:
 
     ErrorCode Stop() override;
 
-    ErrorCode Prepare() override;
-
-    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                   Capability& upstreamNegotiatedCap) override;
+    bool Negotiate(const std::string& inPort,
+                   const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Plugin::Capability& negotiatedCap,
+                   const Plugin::TagMap& upstreamParams,
+                   Plugin::TagMap& downstreamParams) override;
 
     uint32_t CalculateBufferSize(const std::shared_ptr<const Plugin::Meta> &meta);
 
@@ -55,7 +56,7 @@ public:
     ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer, int64_t offset) override;
 
 private:
-    ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta> &meta);
+    ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta);
 
     ErrorCode HandleFrame(const std::shared_ptr<AVBuffer>& buffer);
 
@@ -67,10 +68,10 @@ private:
     std::shared_ptr<BufferPool<AVBuffer>> outBufferPool_ {};
     Capability capNegWithDownstream_;
     Capability capNegWithUpstream_;
-    uint32_t frameSize_;
+    size_t frameSize_;
     std::string mime_;
     std::shared_ptr<Plugin::Meta> encoderMeta_ {};
-    std::unique_ptr<Plugin::RingBuffer> rb {};
+    std::unique_ptr<RingBuffer> rb_ {};
     AVBufferPtr cahceBuffer_ {nullptr};
 };
 } // OHOS

@@ -19,6 +19,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace FileSink {
 std::shared_ptr<OutputSinkPlugin> FilePathSinkPluginCreator(const std::string& name)
 {
     return std::make_shared<FilePathSinkPlugin>(name);
@@ -53,7 +54,7 @@ Status FilePathSinkPlugin::Stop()
 Status FilePathSinkPlugin::SetSink(const Plugin::ValueType& sink)
 {
     MEDIA_LOG_D("OUT");
-    if (sink.Type() != typeid(std::string)) {
+    if (!sink.SameTypeWith(typeid(std::string))) {
         MEDIA_LOG_E("Invalid parameter to file_path_sink plugin");
         return Status::ERROR_INVALID_PARAMETER;
     }
@@ -71,7 +72,7 @@ Status FilePathSinkPlugin::SeekTo(uint64_t offset)
 {
     if (fp_ == nullptr ||
         std::fseek(fp_, 0L, SEEK_END) != 0 ||
-        (std::feof(fp_) && (fileSize_ = std::ftell(fp_)) == -1) ||
+        (fileSize_ = std::ftell(fp_)) == -1 ||
         (fileSize_ != -1 && offset > fileSize_)) {
         MEDIA_LOG_E("Invalid operation");
         return Status::ERROR_WRONG_STATE;
@@ -84,7 +85,7 @@ Status FilePathSinkPlugin::SeekTo(uint64_t offset)
         return Status::OK;
     }
     std::clearerr(fp_);
-    MEDIA_LOG_E("Seek to %" PRIu64, offset);
+    MEDIA_LOG_E("Seek to %" PUBLIC_LOG PRIu64, offset);
     return Status::ERROR_UNKNOWN;
 }
 
@@ -114,7 +115,7 @@ Status FilePathSinkPlugin::OpenFile()
     fp_ = std::fopen(fileName_.c_str(), "w+");
     if (fp_ == nullptr) {
         int32_t err = errno;
-        MEDIA_LOG_E("Fail to load file due to %s", strerror(err));
+        MEDIA_LOG_E("Fail to load file due to %" PUBLIC_LOG "s", strerror(err));
         switch (err) {
             case EPERM:
                 return Status::ERROR_PERMISSION_DENIED;
@@ -124,7 +125,7 @@ Status FilePathSinkPlugin::OpenFile()
                 return Status::ERROR_UNKNOWN;
         }
     }
-    MEDIA_LOG_D("fileName_: %s", fileName_.c_str());
+    MEDIA_LOG_D("fileName_: %" PUBLIC_LOG "s", fileName_.c_str());
     return Status::OK;
 }
 
@@ -136,6 +137,7 @@ void FilePathSinkPlugin::CloseFile()
         fp_ = nullptr;
     }
 }
+} // namespace FileSink
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

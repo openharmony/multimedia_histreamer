@@ -54,7 +54,11 @@ std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>>
 std::vector<std::shared_ptr<Plugin::PluginInfo>> FindAvailablePluginsByOutputMime(const std::string& outputMime,
                                                                                   Plugin::PluginType pluginType);
 uint8_t GetBytesPerSample(Plugin::AudioSampleFormat fmt);
-}
-}
-}
+
+std::string Capability2String(const Capability& capability);
+
+std::string Meta2String(const Plugin::Meta& meta);
+} // Pipeline
+} // Media
+} // OHOS
 #endif // HISTREAMER_PIPELINE_FILTER_PLUGIN_UTILS_H

@@ -17,13 +17,16 @@
 #define HISTREAMER_RING_BUFFER_H
 
 #include <atomic>
-#include <condition_variable>
 #include <memory>
+#include "foundation/log.h"
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/osal/thread/scoped_lock.h"
+#include "securec.h"
 #include "utils/memory_helper.h"
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
 class RingBuffer {
 public:
     explicit RingBuffer(size_t bufferSize) : bufferSize_(bufferSize)
@@ -38,13 +41,21 @@ public:
         return buffer_ != nullptr;
     }
 
-    size_t ReadBuffer(void* ptr, size_t readSize)
+    size_t ReadBuffer(void* ptr, size_t readSize, int waitTimes = 0)
     {
-        std::unique_lock<std::mutex> lck(writeMutex_);
+        OSAL::ScopedLock lck(writeMutex_);
         if (!isActive_) {
             return 0;
         }
         auto available = tail_ - head_;
+        while (waitTimes > 0 && available == 0) {
+            writeCondition_.Wait(lck);
+            if (!isActive_) {
+                return 0;
+            }
+            available = tail_ - head_;
+            waitTimes--;
+        }
         available = (available > readSize) ? readSize : available;
         size_t index = head_ % bufferSize_;
         if (index + available < bufferSize_) {
@@ -55,18 +66,19 @@ public:
                            available - (bufferSize_ - index));
         }
         head_ += available;
-        writeCondition_.notify_one();
+        mediaOffset_ += available;
+        writeCondition_.NotifyOne();
         return available;
     }
 
-    void WriteBuffer(void* ptr, size_t writeSize)
+    void WriteBuffer(void* ptr, size_t writeSize, uint64_t mediaOffset = 0)
     {
-        std::unique_lock<std::mutex> lck(writeMutex_);
+        OSAL::ScopedLock lck(writeMutex_);
         if (!isActive_) {
             return;
         }
         while (writeSize + tail_ > head_ + bufferSize_) {
-            writeCondition_.wait(lck);
+            writeCondition_.Wait(lck);
             if (!isActive_) {
                 return;
             }
@@ -80,16 +92,20 @@ public:
                            writeSize - (bufferSize_ - index));
         }
         tail_ += writeSize;
+        if (head_ == 0) {
+            mediaOffset_ = mediaOffset;
+        }
+        writeCondition_.NotifyOne();
     }
 
     void SetActive(bool active)
     {
-        std::unique_lock<std::mutex> lck(writeMutex_);
+        OSAL::ScopedLock lck(writeMutex_);
         isActive_ = active;
         if (!active) {
             head_ = 0;
             tail_ = 0;
-            writeCondition_.notify_one();
+            writeCondition_.NotifyOne();
         }
     }
 
@@ -98,17 +114,38 @@ public:
         return (tail_ - head_);
     }
 
+    void Clear()
+    {
+        OSAL::ScopedLock lck(writeMutex_);
+        head_ = 0;
+        tail_ = 0;
+        writeCondition_.NotifyOne();
+    }
+
+    bool Seek(uint64_t offset)
+    {
+        OSAL::ScopedLock lck(writeMutex_);
+        MEDIA_LOG_I("Seek: buffer size %" PUBLIC_LOG "d, offset %" PUBLIC_LOG PRIu64
+                    ", mediaOffset_ %" PUBLIC_LOG PRIu64, GetSize(), offset, mediaOffset_);
+        bool result = false;
+        if (offset >= mediaOffset_ && offset - mediaOffset_ < GetSize()) {
+            head_ += offset - mediaOffset_;
+            result = true;
+        }
+        writeCondition_.NotifyOne();
+        return result;
+    }
 private:
     const size_t bufferSize_;
     std::unique_ptr<uint8_t[]> buffer_;
     size_t head_ {0}; // head
     size_t tail_ {0}; // tail
-    std::mutex writeMutex_ {};
-    std::condition_variable writeCondition_ {};
+    OSAL::Mutex writeMutex_ {};
+    OSAL::ConditionVariable writeCondition_ {};
     bool isActive_ {true};
+    uint64_t mediaOffset_ {0};
 };
-} // namespace Plugin
 } // namespace Media
 } // namespace OHOS
 
-#endif // MEDIA_PIPELINE_RING_BUFFER_H
+#endif // HISTREAMER_RING_BUFFER_H

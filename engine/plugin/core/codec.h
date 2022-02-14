@@ -28,8 +28,8 @@ namespace Media {
 namespace Plugin {
 struct DataCallbackHelper {
     virtual ~DataCallbackHelper() = default;
-    virtual void OnInputBufferDone(const std::shared_ptr<Buffer> &input) = 0;
-    virtual void OnOutputBufferDone(const std::shared_ptr<Buffer> &output) = 0;
+    virtual void OnInputBufferDone(std::shared_ptr<Buffer> &input) = 0;
+    virtual void OnOutputBufferDone(std::shared_ptr<Buffer> &output) = 0;
 };
 
 struct CodecPlugin;
@@ -54,7 +54,7 @@ public:
 
     Status Flush();
 
-    Status SetDataCallback(const std::weak_ptr<DataCallbackHelper> &dataCallback);
+    Status SetDataCallback(DataCallbackHelper* dataCallback);
 
 private:
     friend class PluginManager;

@@ -26,6 +26,7 @@ extern "C" {
 #endif
 #include "libavutil/error.h"
 #include "libavutil/frame.h"
+#include "libavcodec/avcodec.h"
 #ifdef __cplusplus
 };
 #endif
@@ -33,19 +34,20 @@ extern "C" {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 std::string AVStrError(int errnum);
 
 /**
- * Convert time from ffmpeg to time in us.
+ * Convert time from ffmpeg to time in HST_TIME_BASE.
  * @param pts ffmpeg time
  * @param base ffmpeg time_base
- * @return time in milliseconds
+ * @return time in HST_TIME_BASE
  */
 uint64_t ConvertTimeFromFFmpeg(int64_t pts, AVRational base);
 
 /**
- * Convert time in milliseconds to ffmpeg time.
- * @param time time in milliseconds
+ * Convert time in HST_TIME_BASE to ffmpeg time.
+ * @param time time in HST_TIME_BASE
  * @param base ffmpeg time_base
  * @return time in ffmpeg.
  */
@@ -81,6 +83,10 @@ uint64_t ConvertChannelLayoutToFFmpeg(AudioChannelLayout channelLayout);
 
 bool FindAvMetaNameByTag(Tag tag, std::string& metaName);
 bool FindTagByAvMetaName(const std::string& metaName, Tag& tag);
+
+AudioAacProfile ConvAacProfileFromFfmpeg (int32_t ffmpegProfile);
+int32_t ConvAacProfileToFfmpeg (AudioAacProfile profile);
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

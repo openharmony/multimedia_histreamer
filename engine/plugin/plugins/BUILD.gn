@@ -30,6 +30,9 @@ print(
 print(
     "histreamer plugin config:multimedia_histreamer_enable_plugin_stream_source =",
     multimedia_histreamer_enable_plugin_stream_source)
+print(
+    "histreamer plugin config:multimedia_histreamer_enable_plugin_audio_server_sink =",
+    multimedia_histreamer_enable_plugin_audio_server_sink)
 
 group("histreamer_plugin_store") {
   deps = []
@@ -63,6 +66,18 @@ group("histreamer_plugin_store") {
 
   if (multimedia_histreamer_enable_plugin_http_lite_source) {
     deps += [ "source/http_lite_source:plugin_http_lite_source" ]
+  }
+
+  if (multimedia_histreamer_enable_plugin_std_audio_capture) {
+    deps += [ "source/audio_capture:plugin_standard_audio_capture" ]
+  }
+
+  if (multimedia_histreamer_enable_plugin_audio_server_sink) {
+    deps += [ "sink/audio_server_sink:plugin_audio_server_sink" ]
+  }
+
+  if (multimedia_histreamer_enable_plugin_file_sink) {
+    deps += [ "sink/file_sink:plugin_file_sink" ]
   }
 }
 
@@ -116,6 +131,13 @@ action("gen_plugin_static_header") {
 
     if (multimedia_histreamer_enable_plugin_http_lite_source) {
       args += [ "HttpLiteSource" ]
+    }
+
+    if (multimedia_histreamer_enable_plugin_file_sink) {
+      args += [
+        "FileFdSink",
+        "FilePathSink",
+      ]
     }
   }
 

@@ -26,6 +26,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace FileSink {
 std::shared_ptr<OutputSinkPlugin> FileFdSinkPluginCreator(const std::string& name)
 {
     return std::make_shared<FileFdSinkPlugin>(name);
@@ -53,7 +54,7 @@ FileFdSinkPlugin::FileFdSinkPlugin(std::string name)
 Status FileFdSinkPlugin::SetSink(const Plugin::ValueType& sink)
 {
     MEDIA_LOG_D("OUT");
-    if (sink.Type() != typeid(int32_t)) {
+    if (!sink.SameTypeWith(typeid(int32_t))) {
         MEDIA_LOG_E("Invalid parameter to file_fd_sink plugin");
         return Status::ERROR_INVALID_PARAMETER;
     }
@@ -81,7 +82,7 @@ Status FileFdSinkPlugin::SeekTo(uint64_t offset)
 #endif
         return Status::OK;
     }
-    MEDIA_LOG_E("Seek to %" PRIu64, offset);
+    MEDIA_LOG_E("Seek to %" PUBLIC_LOG "" PRIu64, offset);
     return Status::ERROR_UNKNOWN;
 }
 
@@ -101,6 +102,7 @@ Status FileFdSinkPlugin::Flush()
     MEDIA_LOG_D("OUT");
     return Status::OK;
 }
+} // namespace FileSink
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

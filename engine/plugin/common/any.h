@@ -27,9 +27,10 @@
 #include <array>
 #include <cstring>
 #include <type_traits>
-#include <typeinfo>
 
 #include "securec.h"
+
+#include "type_cast_ext.h"
 
 namespace {
 template <typename T>
@@ -244,6 +245,16 @@ public:
         return functionTable_->type();
     }
 
+    bool SameTypeWith(const std::type_info& otherInfo) const noexcept
+    {
+        return IsSameType(functionTable_->type(), otherInfo);
+    }
+
+    bool SameTypeWith(const Any& other) const noexcept
+    {
+        return IsSameType(functionTable_->type(), other.Type());
+    }
+
 private:
     template <typename T>
     friend const T* AnyCast(const Any* operand) noexcept;
@@ -282,7 +293,8 @@ private:
 
         static void Copy(Storage& dest, const Storage& source) noexcept
         {
-            (void)memcpy_s(GetPtr(dest), STACK_STORAGE_SIZE, GetConstPtr(source), STACK_STORAGE_SIZE);
+            // memcpy_s will always success in this function
+            memcpy_s(GetPtr(dest), sizeof(Storage), GetConstPtr(source), sizeof(Storage));
         }
 
         static void Move(Storage& dest, Storage& source) noexcept
@@ -422,7 +434,7 @@ private:
     ValueType* Cast() noexcept
     {
         using DecayedValueType = decay_t<ValueType>;
-        if (!IsFunctionTableValid() || functionTable_->type() != typeid(DecayedValueType)) {
+        if (!IsFunctionTableValid() || !SameTypeWith(typeid(DecayedValueType))) {
             return nullptr;
         }
         return IsTrivialStackStorable<DecayedValueType>::value
@@ -435,7 +447,7 @@ private:
     const ValueType* Cast() const noexcept
     {
         using DecayedValueType = decay_t<ValueType>;
-        if (!IsFunctionTableValid() || functionTable_->type() != typeid(DecayedValueType)) {
+        if (!IsFunctionTableValid() || !SameTypeWith(typeid(DecayedValueType))) {
             return nullptr;
         }
         return IsTrivialStackStorable<DecayedValueType>::value

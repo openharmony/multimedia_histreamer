@@ -22,8 +22,9 @@
 #include "audio_sink.h"
 #include "codec.h"
 #include "demuxer.h"
-#include "output_sink.h"
 #include "muxer.h"
+#include "output_sink.h"
+#include "plugin/common/type_cast_ext.h"
 #include "source.h"
 #include "video_sink.h"
 
@@ -73,7 +74,7 @@ private:
         if (!regInfo) {
             return {};
         }
-        std::shared_ptr<U> plugin = std::dynamic_pointer_cast<U>(regInfo->creator(name));
+        auto plugin = ReinterpretPointerCast<U>(regInfo->creator(name));
         if (!plugin) {
             return {};
         }

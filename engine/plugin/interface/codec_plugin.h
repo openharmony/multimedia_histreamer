@@ -40,7 +40,7 @@ struct DataCallback {
      *
      * @param input Indicates the pointer to the input data.
      */
-    virtual void OnInputBufferDone(const std::shared_ptr<Buffer>& input) = 0;
+    virtual void OnInputBufferDone(std::shared_ptr<Buffer>& input) = 0;
 
     /**
      * @brief When the out buffer has been produced inside the plugin.
@@ -49,7 +49,7 @@ struct DataCallback {
      *
      * @param output Indicates the pointer to the output data.
      */
-    virtual void OnOutputBufferDone(const std::shared_ptr<Buffer>& output) = 0;
+    virtual void OnOutputBufferDone(std::shared_ptr<Buffer>& output) = 0;
 };
 
 /**
@@ -147,7 +147,7 @@ struct CodecPlugin : public PluginBase {
      * @return Execution status return
      * @retval OK: Plugin reset succeeded.
      */
-    virtual Status SetDataCallback(const std::weak_ptr<DataCallback>& dataCallback) = 0;
+    virtual Status SetDataCallback(DataCallback* dataCallback) = 0;
 };
 
 /// Codec plugin api major number.

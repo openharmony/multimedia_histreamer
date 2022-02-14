@@ -34,6 +34,7 @@ extern "C" {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Sdl {
 class SdlAudioSinkPlugin : public std::enable_shared_from_this<SdlAudioSinkPlugin>, public AudioSinkPlugin {
 public:
     explicit SdlAudioSinkPlugin(std::string name);
@@ -106,6 +107,7 @@ private:
     std::shared_ptr<SwrContext> swrCtx_ {nullptr};
     int volume_;
 };
+}
 }
 }
 }

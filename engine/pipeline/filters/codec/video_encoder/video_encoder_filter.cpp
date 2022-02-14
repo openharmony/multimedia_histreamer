@@ -46,12 +46,12 @@ public:
 
     ~DataCallbackImpl() override = default;
 
-    void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input) override
+    void OnInputBufferDone(std::shared_ptr<Plugin::Buffer>& input) override
     {
         decFilter_.OnInputBufferDone(input);
     }
 
-    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override
+    void OnOutputBufferDone(std::shared_ptr<Plugin::Buffer>& output) override
     {
         decFilter_.OnOutputBufferDone(output);
     }
@@ -61,7 +61,7 @@ private:
 };
 
 VideoEncoderFilter::VideoEncoderFilter(const std::string& name)
-    : CodecFilterBase(name), dataCallback_(std::make_shared<DataCallbackImpl>(*this))
+    : CodecFilterBase(name), dataCallback_(new DataCallbackImpl(*this))
 {
     MEDIA_LOG_I("video encoder ctor called");
     vdecFormat_.width = 0;
@@ -91,6 +91,10 @@ VideoEncoderFilter::~VideoEncoderFilter()
     if (outBufQue_) {
         outBufQue_->SetActive(false);
         outBufQue_.reset();
+    }
+    if (dataCallback_) {
+        delete dataCallback_;
+        dataCallback_ = nullptr;
     }
 }
 
@@ -139,7 +143,9 @@ ErrorCode VideoEncoderFilter::SetVideoEncoder(int32_t sourceId, OHOS::Media::Plu
 
 bool VideoEncoderFilter::Negotiate(const std::string& inPort,
                                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                                   Capability& upstreamNegotiatedCap)
+                                   Plugin::Capability& negotiatedCap,
+                                   const Plugin::TagMap& upstreamParams,
+                                   Plugin::TagMap& downstreamParams)
 {
     PROFILE_BEGIN("video encoder negotiate start");
     if (state_ != FilterState::PREPARING) {
@@ -158,16 +164,16 @@ bool VideoEncoderFilter::Negotiate(const std::string& inPort,
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
             auto thisOut = std::make_shared<Plugin::Capability>();
             if (!MergeCapabilityKeys(*upstreamCap, outCap, *thisOut)) {
-                MEDIA_LOG_W("one of out cap of plugin %s does not match with upstream capability",
+                MEDIA_LOG_W("one of out cap of plugin %" PUBLIC_LOG "s does not match with upstream capability",
                             candidate.first->name.c_str());
                 continue;
             }
             atLeastOutCapMatched = true;
             thisOut->mime = outCap.mime;
-            if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_)) {
+            if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_, upstreamParams, downstreamParams)) {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
-                MEDIA_LOG_I("choose plugin %s as working parameter", candidate.first->name.c_str());
+                MEDIA_LOG_I("choose plugin %" PUBLIC_LOG "s as working parameter", candidate.first->name.c_str());
                 break;
             }
         }
@@ -200,7 +206,7 @@ bool VideoEncoderFilter::Configure(const std::string& inPort, const std::shared_
         return false;
     }
     if (upstreamMeta->GetString(Plugin::MetaID::MIME, vdecFormat_.mime)) {
-        MEDIA_LOG_D("mime: %s", vdecFormat_.mime.c_str());
+        MEDIA_LOG_D("mime: %" PUBLIC_LOG "s", vdecFormat_.mime.c_str());
     }
     auto thisMeta = std::make_shared<Plugin::Meta>();
     if (!MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta)) {
@@ -220,7 +226,8 @@ bool VideoEncoderFilter::Configure(const std::string& inPort, const std::shared_
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("encoder configure error");
         Event event{
-            .type = EVENT_ERROR,
+            .srcFilter = name_,
+            .type = EventType::EVENT_ERROR,
             .param = err,
         };
         OnEvent(event);
@@ -228,7 +235,8 @@ bool VideoEncoderFilter::Configure(const std::string& inPort, const std::shared_
     }
     state_ = FilterState::READY;
     Event event {
-        .type = EVENT_READY,
+        .srcFilter = name_,
+        .type = EventType::EVENT_READY,
     };
     OnEvent(event);
     MEDIA_LOG_I("video encoder send EVENT_READY");
@@ -251,10 +259,10 @@ ErrorCode VideoEncoderFilter::AllocateOutputBuffers()
         vdecFormat_.format == Plugin::VideoPixelFormat::NV12) {
         bufferSize = static_cast<uint32_t>(Plugin::AlignUp(stride, VIDEO_ALIGN_SIZE) *
                                            Plugin::AlignUp(vdecFormat_.height, VIDEO_ALIGN_SIZE) * VIDEO_PIX_DEPTH);
-        MEDIA_LOG_D("Output buffer size: %u", bufferSize);
+        MEDIA_LOG_D("Output buffer size: %" PUBLIC_LOG "u", bufferSize);
     } else {
         // need to check video sink support and calc buffer size
-        MEDIA_LOG_E("Unsupported video pixel format: %u", vdecFormat_.format);
+        MEDIA_LOG_E("Unsupported video pixel format: %" PUBLIC_LOG "u", vdecFormat_.format);
         return ErrorCode::ERROR_UNIMPLEMENTED;
     }
     auto outAllocator = plugin_->GetAllocator(); // zero copy need change to use sink allocator
@@ -322,7 +330,8 @@ ErrorCode VideoEncoderFilter::ConfigurePluginParams()
             MEDIA_LOG_W("Set bitrate to plugin fail");
         }
     }
-    MEDIA_LOG_D("ConfigurePluginParams success, mime: %s, width: %u, height: %u, format: %u, bitRate: %u",
+    MEDIA_LOG_D("ConfigurePluginParams success, mime: %" PUBLIC_LOG "s, width: %" PUBLIC_LOG "u, height: %"
+                PUBLIC_LOG "u, format: %" PUBLIC_LOG "u, bitRate: %" PUBLIC_LOG "u",
                 vdecFormat_.mime.c_str(), vdecFormat_.width, vdecFormat_.height, vdecFormat_.format,
                 vdecFormat_.bitRate);
     return ErrorCode::SUCCESS;
@@ -373,11 +382,11 @@ ErrorCode VideoEncoderFilter::ConfigureNoLocked(const std::shared_ptr<const Plug
 ErrorCode VideoEncoderFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
 {
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
-        MEDIA_LOG_W("pushing data to encoder when state_ is %d", static_cast<int>(state_.load()));
+        MEDIA_LOG_W("pushing data to encoder when state_ is %" PUBLIC_LOG "d", static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     if (isFlushing_) {
-        MEDIA_LOG_I("encoder is flushing, discarding this data from port %s", inPort.c_str());
+        MEDIA_LOG_I("encoder is flushing, discarding this data from port %" PUBLIC_LOG "s", inPort.c_str());
         return ErrorCode::SUCCESS;
     }
     inBufQue_->Push(buffer);
@@ -464,7 +473,7 @@ void VideoEncoderFilter::HandleOneFrame(const std::shared_ptr<AVBuffer>& data)
         if (ret == Plugin::Status::OK) {
             break;
         }
-        MEDIA_LOG_D("Send data to plugin error: %d", ret);
+        MEDIA_LOG_D("Send data to plugin error: %" PUBLIC_LOG "d", ret);
         OSAL::SleepFor(DEFAULT_TRY_DECODE_TIME);
     } while (1);
 }

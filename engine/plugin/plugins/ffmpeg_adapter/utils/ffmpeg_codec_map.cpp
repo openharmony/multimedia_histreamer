@@ -14,7 +14,7 @@
  */
 
 #include "ffmpeg_codec_map.h"
-#include "constants.h"
+#include "utils/constants.h"
 
 namespace OHOS {
 namespace Media {

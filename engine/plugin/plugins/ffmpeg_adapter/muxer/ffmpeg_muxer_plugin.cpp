@@ -27,6 +27,7 @@
 
 namespace {
 using namespace OHOS::Media;
+using namespace Plugin::Ffmpeg;
 
 std::map<std::string, std::shared_ptr<AVOutputFormat>> g_pluginOutputFmt;
 
@@ -53,7 +54,7 @@ bool UpdatePluginInCapability(AVCodecID codecId, CapabilitySet& capSet)
 bool UpdatePluginCapability(const AVOutputFormat* oFmt, Plugin::MuxerPluginDef& pluginDef)
 {
     if (!FFCodecMap::FormatName2Cap(oFmt->name, pluginDef.outCaps)) {
-        MEDIA_LOG_D("%s is not supported now", oFmt->name);
+        MEDIA_LOG_D("%" PUBLIC_LOG "s is not supported now", oFmt->name);
         return false;
     }
     UpdatePluginInCapability(oFmt->audio_codec, pluginDef.inCaps);
@@ -72,7 +73,7 @@ Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg
     const AVOutputFormat* outputFormat = nullptr;
     void* ite = nullptr;
     while ((outputFormat = av_muxer_iterate(&ite))) {
-        MEDIA_LOG_D("check ffmpeg muxer %s", outputFormat->name);
+        MEDIA_LOG_D("check ffmpeg muxer %" PUBLIC_LOG "s", outputFormat->name);
         if (!IsMuxerSupported(outputFormat->name)) {
             continue;
         }
@@ -82,7 +83,7 @@ Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg
             }
         }
         std::string pluginName = "ffmpegMux_" + std::string(outputFormat->name);
-        Plugin::ReplaceDelimiter(".,|-<> ", '_', pluginName);
+        Plugin::Ffmpeg::ReplaceDelimiter(".,|-<> ", '_', pluginName);
         Plugin::MuxerPluginDef def;
         if (!UpdatePluginCapability(outputFormat, def)) {
             continue;
@@ -94,7 +95,7 @@ Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg
             return std::make_shared<FFMux::FFmpegMuxerPlugin>(name);
         };
         if (reg->AddPlugin(def) != Plugin::Status::OK) {
-            MEDIA_LOG_W("fail to add plugin %s", pluginName.c_str());
+            MEDIA_LOG_W("fail to add plugin %" PUBLIC_LOG "s", pluginName.c_str());
             continue;
         }
         g_pluginOutputFmt[pluginName] = std::shared_ptr<AVOutputFormat>(const_cast<AVOutputFormat*>(outputFormat),
@@ -102,18 +103,18 @@ Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg
     }
     return Plugin::Status::OK;
 }
-PLUGIN_DEFINITION(FFMpegMuxers, Plugin::LicenseType::LGPL, RegisterMuxerPlugins, [] {g_pluginOutputFmt.clear();})
+PLUGIN_DEFINITION(FFmpegMuxers, Plugin::LicenseType::LGPL, RegisterMuxerPlugins, [] {g_pluginOutputFmt.clear();})
 
 Plugin::Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime, AVStream* stream)
 {
     AVCodecID id = AV_CODEC_ID_NONE;
     if (!FFCodecMap::Mime2CodecId(mime, id)) {
-        MEDIA_LOG_E("mime %s has no corresponding codec id", mime.c_str());
+        MEDIA_LOG_E("mime %" PUBLIC_LOG "s has no corresponding codec id", mime.c_str());
         return Plugin::Status::ERROR_UNSUPPORTED_FORMAT;
     }
     auto ptr = avcodec_find_encoder(id);
     if (ptr == nullptr) {
-        MEDIA_LOG_E("codec of mime %s is not founder as encoder", mime.c_str());
+        MEDIA_LOG_E("codec of mime %" PUBLIC_LOG "s is not founder as encoder", mime.c_str());
         return Plugin::Status::ERROR_UNSUPPORTED_FORMAT;
     }
     bool matched = true;
@@ -131,7 +132,8 @@ Plugin::Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime
             matched = false;
     }
     if (!matched) {
-        MEDIA_LOG_E("codec of mime %s is not matched with %s muxer", mime.c_str(), fmt->name);
+        MEDIA_LOG_E("codec of mime %" PUBLIC_LOG "s is not matched with %" PUBLIC_LOG "s muxer",
+                    mime.c_str(), fmt->name);
         return Plugin::Status::ERROR_UNSUPPORTED_FORMAT;
     }
     stream->codecpar->codec_id = id;
@@ -147,7 +149,7 @@ Plugin::Status SetCodecOfTrack(const AVOutputFormat* fmt, AVStream* stream, cons
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     auto& value = tagMap.find(Tag::MIME)->second;
-    if (value.Type() != typeid(std::string)) {
+    if (!value.SameTypeWith(typeid(std::string))) {
         return Status::ERROR_MISMATCHED_TYPE;
     }
     // todo specially for audio/mpeg audio/mpeg we should check mpegversion and mpeglayer
@@ -160,8 +162,8 @@ Plugin::Status SetSingleParameter(Tag tag, const Plugin::TagMap& tagMap, U& targ
 {
     auto ite = tagMap.find(tag);
     if (ite != std::end(tagMap)) {
-        if (ite->second.Type() != typeid(T)) {
-            MEDIA_LOG_E("tag %d type mismatched", tag);
+        if (!ite->second.SameTypeWith(typeid(T))) {
+            MEDIA_LOG_E("tag %" PUBLIC_LOG "d type mismatched", tag);
             return Plugin::Status::ERROR_MISMATCHED_TYPE;
         }
         target = func(Plugin::AnyCast<T>(ite->second));
@@ -179,6 +181,7 @@ do { \
 } while (0)
 
     using namespace Plugin;
+    using namespace Ffmpeg;
     auto ret = SetSingleParameter<AudioSampleFormat, int32_t>(Tag::AUDIO_SAMPLE_FORMAT, tagMap,
                                                               stream->codecpar->format, Trans2FFmepgFormat);
     std::function<int32_t(uint32_t)> ui2iFunc = [](uint32_t i) {return i;};
@@ -213,26 +216,47 @@ Plugin::Status SetParameterOfSubTitleTrack(AVStream* stream, const Plugin::TagMa
     return Plugin::Status::ERROR_UNKNOWN;
 }
 
+void ResetCodecParameter (AVCodecParameters* par)
+{
+    av_freep(&par->extradata);
+    memset_s(par, sizeof(*par), 0, sizeof(*par));
+    par->codec_type = AVMEDIA_TYPE_UNKNOWN;
+    par->codec_id = AV_CODEC_ID_NONE;
+    par->format = -1;
+    par->profile = FF_PROFILE_UNKNOWN;
+    par->level = FF_LEVEL_UNKNOWN;
+    par->field_order = AV_FIELD_UNKNOWN;
+    par->color_range = AVCOL_RANGE_UNSPECIFIED;
+    par->color_primaries = AVCOL_PRI_UNSPECIFIED;
+    par->color_trc = AVCOL_TRC_UNSPECIFIED;
+    par->color_space = AVCOL_SPC_UNSPECIFIED;
+    par->chroma_location = AVCHROMA_LOC_UNSPECIFIED;
+    par->sample_aspect_ratio = AVRational {0, 1};
+}
+
 Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const Plugin::TagMap& tagMap)
 {
     using namespace OHOS::Media::Plugin;
     if (stream == nullptr) {
         return Status::ERROR_INVALID_PARAMETER;
     }
+    ResetCodecParameter(stream->codecpar);
     // firstly mime
     auto ret = SetCodecOfTrack(fmt, stream, tagMap);
     if (ret != Status::OK) {
         return ret;
     }
-
     if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) { // audio
-        return SetParameterOfAuTrack(stream, tagMap);
+        ret = SetParameterOfAuTrack(stream, tagMap);
     } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) { // video
-        return SetParameterOfVdTrack(stream, tagMap);
+        ret = SetParameterOfVdTrack(stream, tagMap);
     } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_SUBTITLE) { // subtitle
-        return SetParameterOfSubTitleTrack(stream, tagMap);
+        ret = SetParameterOfSubTitleTrack(stream, tagMap);
     } else {
-        MEDIA_LOG_W("unknown codec type of stream %d", stream->index);
+        MEDIA_LOG_W("unknown codec type of stream %" PUBLIC_LOG "d", stream->index);
+    }
+    if (ret != Status::OK) {
+        return ret;
     }
     // others
     ret = SetSingleParameter<int64_t, int64_t>(Tag::MEDIA_BITRATE, tagMap, stream->codecpar->bit_rate,
@@ -244,18 +268,18 @@ Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const
     // extra data
     auto ite = tagMap.find(Tag::MEDIA_CODEC_CONFIG);
     if (ite != std::end(tagMap)) {
-        if (ite->second.Type() != typeid(std::vector<uint8_t>)) {
-            MEDIA_LOG_E("tag %d type mismatched", Tag::MEDIA_CODEC_CONFIG);
+        if (!ite->second.SameTypeWith(typeid(std::vector<uint8_t>))) {
+            MEDIA_LOG_E("tag %" PUBLIC_LOG_D32 " type mismatched", Tag::MEDIA_CODEC_CONFIG);
             return Plugin::Status::ERROR_MISMATCHED_TYPE;
         }
-        auto extraData = Plugin::AnyCast<std::vector<uint8_t>>(ite->second);
+        const auto* extraData = Plugin::AnyCast<std::vector<uint8_t>>(&(ite->second));
         stream->codecpar->extradata = static_cast<uint8_t *>(av_mallocz(
-            extraData.size() + AV_INPUT_BUFFER_PADDING_SIZE));
+            extraData->size() + AV_INPUT_BUFFER_PADDING_SIZE));
         if (stream->codecpar->extradata == nullptr) {
             return Status::ERROR_NO_MEMORY;
         }
-        memcpy_s(stream->codecpar->extradata, extraData.size(), extraData.data(), extraData.size());
-        stream->codecpar->extradata_size = extraData.size();
+        memcpy_s(stream->codecpar->extradata, extraData->size(), extraData->data(), extraData->size());
+        stream->codecpar->extradata_size = extraData->size();
     }
     return Status::OK;
 }
@@ -264,14 +288,14 @@ Plugin::Status SetTagsOfGeneral(AVFormatContext* fmtCtx, const Plugin::TagMap& t
 {
     for (const auto& pair: tags) {
         std::string metaName;
-        if (!Plugin::FindAvMetaNameByTag(pair.first, metaName)) {
-            MEDIA_LOG_I("tag %d will not written as general meta", pair.first);
+        if (!Plugin::Ffmpeg::FindAvMetaNameByTag(pair.first, metaName)) {
+            MEDIA_LOG_I("tag %" PUBLIC_LOG "d will not written as general meta", pair.first);
             continue;
         }
-        if (pair.second.Type() != typeid(std::string)) {
+        if (!pair.second.SameTypeWith(typeid(std::string))) {
             continue;
         }
-        std::string value = Plugin::AnyCast<std::string>(pair.second);
+        auto value = Plugin::AnyCast<std::string>(pair.second);
         av_dict_set(&fmtCtx->metadata, metaName.c_str(), value.c_str(), 0);
     }
     return Plugin::Status::OK;
@@ -291,8 +315,9 @@ FFmpegMuxerPlugin::~FFmpegMuxerPlugin()
 }
 Status FFmpegMuxerPlugin::Release()
 {
-    formatContext_.reset();
     outputFormat_.reset();
+    cachePacket_.reset();
+    formatContext_.reset();
     return Status::OK;
 }
 
@@ -308,6 +333,7 @@ Status FFmpegMuxerPlugin::InitFormatCtxLocked()
             return Status::ERROR_NO_MEMORY;
         }
         fmt->pb = ioCtx;
+        fmt->oformat = outputFormat_.get();
         fmt->flags = static_cast<uint32_t>(fmt->flags) | static_cast<uint32_t>(AVFMT_FLAG_CUSTOM_IO);
         formatContext_ = std::shared_ptr<AVFormatContext>(fmt, [](AVFormatContext* ptr) {
             if (ptr) {
@@ -326,6 +352,8 @@ Status FFmpegMuxerPlugin::Init()
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     outputFormat_ = g_pluginOutputFmt[pluginName_];
+    auto pkt = av_packet_alloc();
+    cachePacket_ = std::shared_ptr<AVPacket> (pkt, [] (AVPacket* packet) {av_packet_free(&packet);});
     OSAL::ScopedLock lock(fmtMutex_);
     return InitFormatCtxLocked();
 }
@@ -451,7 +479,7 @@ Status FFmpegMuxerPlugin::WriteHeader()
     }
     int ret = avformat_write_header(formatContext_.get(), nullptr);
     if (ret < 0) {
-        MEDIA_LOG_E("failed to write header %s", AVStrError(ret).c_str());
+        MEDIA_LOG_E("failed to write header %" PUBLIC_LOG "s", AVStrError(ret).c_str());
         return Status::ERROR_UNKNOWN;
     }
     return Status::OK;
@@ -463,22 +491,23 @@ Status FFmpegMuxerPlugin::WriteFrame(const std::shared_ptr<Plugin::Buffer>& buff
         return Status::ERROR_INVALID_PARAMETER;
     }
     uint32_t trackId = buffer->trackID;
-    if (trackId > formatContext_->nb_streams) {
+    if (trackId >= formatContext_->nb_streams) {
         return Status::ERROR_INVALID_PARAMETER;
     }
-    AVPacket pkt;
+    (void)memset_s(cachePacket_.get(), sizeof(AVPacket), 0, sizeof(AVPacket));
     auto memory = buffer->GetMemory();
-    pkt.data = const_cast<uint8_t*>(memory->GetReadOnlyData());
-    pkt.size = memory->GetSize();
-    pkt.stream_index = trackId;
-    pkt.pts = ConvertTimeToFFmpeg(buffer->pts, formatContext_->streams[trackId]->time_base);
-    pkt.dts = pkt.pts;
-    pkt.flags = 0;
+    cachePacket_->data = const_cast<uint8_t*>(memory->GetReadOnlyData());
+    cachePacket_->size = memory->GetSize();
+    cachePacket_->stream_index = trackId;
+    cachePacket_->pts = ConvertTimeToFFmpeg(buffer->pts, formatContext_->streams[trackId]->time_base);
+    cachePacket_->dts = cachePacket_->pts;
+    cachePacket_->flags = 0;
     if (buffer->flag & BUFFER_FLAG_KEY_FRAME) {
-        pkt.flags |= AV_PKT_FLAG_KEY;
+        cachePacket_->flags |= AV_PKT_FLAG_KEY;
     }
-    pkt.duration = ConvertTimeToFFmpeg(buffer->duration, formatContext_->streams[trackId]->time_base);
-    av_write_frame(formatContext_.get(), &pkt);
+    cachePacket_->duration = ConvertTimeToFFmpeg(buffer->duration, formatContext_->streams[trackId]->time_base);
+    av_write_frame(formatContext_.get(), cachePacket_.get());
+    av_packet_unref(cachePacket_.get());
     return Status::OK;
 }
 
@@ -491,9 +520,10 @@ Status FFmpegMuxerPlugin::WriteTrailer()
     if (formatContext_ == nullptr) {
         return Status::ERROR_WRONG_STATE;
     }
+    av_write_frame(formatContext_.get(), nullptr); // flush out cache data
     int ret = av_write_trailer(formatContext_.get());
     if (ret != 0) {
-        MEDIA_LOG_E("failed to write trailer %s", AVStrError(ret).c_str());
+        MEDIA_LOG_E("failed to write trailer %" PUBLIC_LOG "s", AVStrError(ret).c_str());
     }
     avio_flush(formatContext_->pb);
     return Status::OK;
@@ -544,25 +574,27 @@ int64_t FFmpegMuxerPlugin::IoSeek(void* opaque, int64_t offset, int whence)
         case SEEK_SET:
             newPos = static_cast<uint64_t>(offset);
             ioContext->pos_ = newPos;
-            MEDIA_LOG_I("AVSeek whence: %d, pos = %" PRId64 ", newPos = %" PRIu64, whence, offset, newPos);
+            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_LOG "d, pos = %" PUBLIC_LOG PRId64 ", newPos = %" PUBLIC_LOG
+                        PRIu64, whence, offset, newPos);
             break;
         case SEEK_CUR:
             newPos = ioContext->pos_ + offset;
-            MEDIA_LOG_I("AVSeek whence: %d, pos = %" PRId64 ", newPos = %" PRIu64, whence, offset, newPos);
+            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_LOG "d, pos = %" PUBLIC_LOG PRId64 ", newPos = %" PUBLIC_LOG
+                        PRIu64, whence, offset, newPos);
             break;
         case SEEK_END:
         case AVSEEK_SIZE:
             newPos = ioContext->end_ + offset;
-            MEDIA_LOG_I("AVSeek seek end whence: %d, pos = %" PRId64, whence, offset);
+            MEDIA_LOG_I("AVSeek seek end whence: %" PUBLIC_LOG "d, pos = %" PUBLIC_LOG PRId64, whence, offset);
             break;
         default:
-            MEDIA_LOG_E("AVSeek unexpected whence: %d", whence);
+            MEDIA_LOG_E("AVSeek unexpected whence: %" PUBLIC_LOG "d", whence);
             break;
     }
     if (whence != AVSEEK_SIZE) {
         ioContext->pos_ = newPos;
     }
-    MEDIA_LOG_I("current offset: %" PRId64 ", new pos: %" PRIu64, ioContext->pos_, newPos);
+    MEDIA_LOG_I("current offset: %" PUBLIC_LOG PRId64 ", new pos: %" PUBLIC_LOG PRIu64, ioContext->pos_, newPos);
     return newPos;
 }
 } // FFMux

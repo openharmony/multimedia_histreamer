@@ -82,6 +82,7 @@ struct AudioDemuxerMp3Attr {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Minimp3 {
 class Minimp3DemuxerPlugin : public DemuxerPlugin {
 public:
     explicit Minimp3DemuxerPlugin(std::string name);
@@ -108,7 +109,7 @@ public:
     Status UnselectTrack(int32_t trackId) override;
     Status GetSelectedTracks(std::vector<int32_t>& trackIds) override;
     Status GetDataFromSource();
-    uint64_t GetCurrentPositionTimeS(void);
+    uint64_t GetCurrentPositionTimeS();
 private:
     struct IOContext {
         std::shared_ptr<DataSource> dataSource {nullptr};
@@ -131,6 +132,8 @@ private:
     int AudioDemuxerMp3Seek(uint32_t pos, uint8_t *buf, uint32_t len, AudioDemuxerRst *rst);
     int AudioDemuxerMp3GetSeekPosition(uint32_t targetTimeMs, uint64_t *pos);
 
+    Status DoReadFromSource(uint32_t readSize);
+
     void FillInMediaInfo(MediaInfo& mediaInfo) const;
 
     int                 inIoBufferSize_;
@@ -140,10 +143,11 @@ private:
     uint64_t            currentDemuxerPos_;
     uint64_t            durationMs_;
     IOContext           ioContext_;
-    AudioDemuxerRst     mp3DemuxerRst_{};
-    Minimp3DemuxerOp    minimp3DemuxerImpl_{};
-    AudioDemuxerMp3Attr mp3DemuxerAttr_{};
+    AudioDemuxerRst     mp3DemuxerRst_ {};
+    Minimp3DemuxerOp    minimp3DemuxerImpl_ {};
+    AudioDemuxerMp3Attr mp3DemuxerAttr_ {};
 };
+} // namespace Minimp3
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

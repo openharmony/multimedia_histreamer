@@ -59,8 +59,7 @@ constexpr T AlignUp(T num, U alignment)
 enum struct MemoryType : uint8_t {
     VIRTUAL_ADDR = 0,  ///< Virtual address
     SURFACE_BUFFER,    ///< Surface
-    SHARE_MEMORY_FD,   ///< Share Memory fd
-    HANDLE,            ///< Physical address
+    SHARE_MEMORY,   ///< Share Memory fd
 };
 
 /**

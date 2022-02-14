@@ -90,7 +90,7 @@ public:
     ErrorCode LinkFilters(std::initializer_list<Filter*> filters) override;
     ErrorCode LinkPorts(std::shared_ptr<OutPort> port1, std::shared_ptr<InPort> port2) override;
 
-    void OnEvent(Event event) override;
+    void OnEvent(const Event& event) override;
 
     void UnlinkPrevFilters() override
     {

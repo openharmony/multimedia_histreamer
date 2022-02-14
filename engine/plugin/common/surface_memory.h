@@ -31,7 +31,11 @@ public:
 
     sptr<SurfaceBuffer> GetSurfaceBuffer();
 
+    void SetFenceFd(int32_t& fd);
+
     int32_t GetFenceFd();
+
+    BufferHandle *GetBufferHandle();
 
 private:
     explicit SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr, size_t align = 1);
@@ -40,13 +44,10 @@ private:
 
 private:
     /// Surface buffer
-    sptr<SurfaceBuffer> surfaceBuffer;
+    sptr<SurfaceBuffer> surfaceBuffer_;
 
     /// the fence fd for Surface
-    int32_t fenceFd {-1};
-
-    /// the buffer handle for SurfaceBuffer
-    intptr_t handle {0};
+    int32_t fenceFd_ {-1};
 
     friend class Buffer;
 };

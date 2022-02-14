@@ -30,10 +30,11 @@ public:
 
     ErrorCode Stop() override;
 
-    ErrorCode Prepare() override;
-
-    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                   Capability& upstreamNegotiatedCap) override;
+    bool Negotiate(const std::string& inPort,
+                   const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Plugin::Capability& negotiatedCap,
+                   const Plugin::TagMap& upstreamParams,
+                   Plugin::TagMap& downstreamParams) override;
 
     bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
@@ -59,6 +60,8 @@ private:
 
     ErrorCode Release();
 
+    void OnInputBufferDone(std::shared_ptr<Plugin::Buffer>& input) override;
+    void OnOutputBufferDone(std::shared_ptr<Plugin::Buffer>& output) override;
 private:
     std::shared_ptr<BufferPool<AVBuffer>> outBufferPool_ {};
     bool isFlushing_ {false};

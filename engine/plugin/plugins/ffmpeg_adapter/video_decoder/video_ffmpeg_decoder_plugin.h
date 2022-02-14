@@ -39,6 +39,7 @@ extern "C" {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 class VideoFfmpegDecoderPlugin : public CodecPlugin {
 public:
     explicit VideoFfmpegDecoderPlugin(std::string name);
@@ -76,7 +77,7 @@ public:
 
     Status Flush() override;
 
-    Status SetDataCallback(const std::weak_ptr<DataCallback> &dataCallback) override
+    Status SetDataCallback(DataCallback* dataCallback) override
     {
         dataCb_ = dataCallback;
         return Status::OK;
@@ -126,7 +127,7 @@ private:
     std::vector<uint8_t> paddedBuffer_;
     size_t paddedBufferSize_ {0};
     std::shared_ptr<AVFrame> cachedFrame_;
-    std::weak_ptr<DataCallback> dataCb_ {};
+    DataCallback* dataCb_ {};
 
     uint32_t width_;
     uint32_t height_;
@@ -138,6 +139,7 @@ private:
     OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufferQ_;
     std::shared_ptr<OHOS::Media::OSAL::Task> decodeTask_;
 };
+}
 }
 }
 }

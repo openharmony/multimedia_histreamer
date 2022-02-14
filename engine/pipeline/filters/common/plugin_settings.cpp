@@ -13,66 +13,84 @@
  * limitations under the License.
  */
 
+#define HST_LOG_TAG "PluginSettings"
+
 #include "plugin_settings.h"
 
 #include <vector>
+#include "foundation/log.h"
 #include "plugin/common/plugin_audio_tags.h"
-
-#define DECLARE_PARAMETER_ITEM(tag, type) \
-{tag, {#tag, CheckParameterType<type>}}
+#include "pipeline/core/plugin_attr_desc.h"
+#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-const PluginParaAllowedMap g_emptyMap;
-
-template <typename T>
-static bool CheckParameterType(const Plugin::ValueType& value)
+bool CommonParameterChecker (Plugin::Tag tag, const Plugin::ValueType& val)
 {
-    return value.Type() == typeid(T);
+    // return true if not in tag in case of specially key used by plugin
+    FALSE_RET_V_MSG_E(g_tagInfoMap.count(tag) != 0, true,
+                      "%" PUBLIC_LOG_D32 "is not found in map, may be update it?", tag);
+    const auto& tuple = g_tagInfoMap.at(tag);
+    return std::get<1>(tuple).SameTypeWith(val);
+}
+
+// TypedParameterType is used for Surface etc. which has g_unknown default value in g_tagInfoMap
+template <typename T>
+MEDIA_UNUSED static bool TypedParameterType(const Plugin::ValueType& value)
+{
+    return value.SameTypeWith(typeid(T));
 }
 
 const PluginParaAllowedMap& PluginParameterTable::FindAllowedParameterMap(FilterType category)
 {
+    static const PluginParaAllowedMap emptyMap;
     auto ite = table_.find(category);
     if (ite == table_.end()) {
-        return g_emptyMap;
+        return emptyMap;
     }
     return ite->second;
 }
 
+using namespace OHOS::Media::Plugin;
 const std::map<FilterType, PluginParaAllowedMap> PluginParameterTable::table_ = {
     {FilterType::AUDIO_DECODER, {
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_CHANNELS, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_RATE, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_BITRATE, int64_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_CODEC_CONFIG, std::vector<uint8_t>),
+        {Tag::AUDIO_CHANNELS, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_SAMPLE_RATE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::MEDIA_BITRATE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_SAMPLE_FORMAT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_SAMPLE_PER_FRAME, {CommonParameterChecker, PARAM_SET}},
+        {Tag::MEDIA_CODEC_CONFIG, {CommonParameterChecker, PARAM_SET}},
     }},
     {FilterType::AUDIO_SINK, {
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_CHANNELS, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_RATE, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_CHANNEL_LAYOUT, Plugin::AudioChannelLayout),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t),
+        {Tag::AUDIO_CHANNELS, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_SAMPLE_RATE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_SAMPLE_FORMAT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_CHANNEL_LAYOUT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_SAMPLE_PER_FRAME, {CommonParameterChecker, PARAM_SET}},
     }},
     {FilterType::MUXER, {
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::MIME, std::string),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_CHANNELS, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_RATE, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_BITRATE, int64_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_CODEC_CONFIG, std::vector<uint8_t>),
+        {Tag::MIME, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_CHANNELS, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_CHANNEL_LAYOUT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_SAMPLE_RATE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::MEDIA_BITRATE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_SAMPLE_FORMAT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_SAMPLE_PER_FRAME, {CommonParameterChecker, PARAM_SET}},
+        {Tag::MEDIA_CODEC_CONFIG, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_AAC_PROFILE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_AAC_LEVEL, {CommonParameterChecker, PARAM_SET}},
     }},
     {FilterType::AUDIO_ENCODER, {
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_CHANNELS, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_RATE, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_BITRATE, int64_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, uint32_t),
-        DECLARE_PARAMETER_ITEM(Plugin::Tag::MEDIA_CODEC_CONFIG, std::vector<uint8_t>),
+        {Tag::AUDIO_CHANNELS, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_SAMPLE_RATE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::MEDIA_BITRATE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_SAMPLE_FORMAT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_SAMPLE_PER_FRAME, {CommonParameterChecker, PARAM_GET}},
+        {Tag::AUDIO_CHANNEL_LAYOUT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::MEDIA_CODEC_CONFIG, {CommonParameterChecker, PARAM_GET}},
+        {Tag::AUDIO_AAC_PROFILE, {CommonParameterChecker, PARAM_SET | PARAM_GET}},
+        {Tag::AUDIO_AAC_LEVEL, {CommonParameterChecker, PARAM_SET | PARAM_GET}},
     }},
 };
 }

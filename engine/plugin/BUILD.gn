@@ -102,6 +102,7 @@ source_set("histreamer_plugin_core") {
     "core/demuxer.cpp",
     "core/muxer.cpp",
     "core/output_sink.cpp",
+    "core/plugin_core_utils.cpp",
     "core/plugin_manager.cpp",
     "core/plugin_meta.cpp",
     "core/plugin_register.cpp",
@@ -114,9 +115,15 @@ source_set("histreamer_plugin_core") {
     defines += [ "DYNAMIC_PLUGINS" ]
   }
   if (defined(ohos_lite)) {
-    defines += [ "HST_PLUGIN_PATH=\"/usr/lib\"" ]
+    defines += [
+      "HST_PLUGIN_PATH=\"/usr/lib\"",
+      "HST_PLUGIN_FILE_TAIL=\".so\"",
+    ]
   } else {
-    defines += [ "HST_PLUGIN_PATH=\"/system/lib/media\"" ]
+    defines += [
+      "HST_PLUGIN_PATH=\"/system/lib/media/histreamer_plugins\"",
+      "HST_PLUGIN_FILE_TAIL=\".z.so\"",
+    ]
   }
   public_configs = [ ":hst_plugin_core_config" ]
   public_deps = [

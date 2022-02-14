@@ -42,7 +42,6 @@ public:
 private:
     sptr<Surface> surface_ {nullptr};
     BufferRequestConfig requestConfig_;
-    uint32_t bufferCnt_ {0};
 };
 } // namespace Plugin
 } // namespace Media

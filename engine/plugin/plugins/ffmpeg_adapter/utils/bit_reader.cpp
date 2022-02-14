@@ -18,6 +18,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Ffmpeg {
 BitReader::BitReader() : begin_(nullptr), cur_(nullptr), end_(nullptr)
 {
 }
@@ -84,6 +85,7 @@ void BitReader::Reset(const uint8_t* begin, const uint8_t* end)
     end_ = end;
     availBits_ = 8; // 8
 }
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

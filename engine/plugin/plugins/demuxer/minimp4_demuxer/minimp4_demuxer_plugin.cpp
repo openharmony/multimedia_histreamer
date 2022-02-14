@@ -32,6 +32,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Minimp4 {
 namespace {
 std::vector<int> sampleRateVec {
     96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350
@@ -60,7 +61,7 @@ MiniMP4DemuxerPlugin::MiniMP4DemuxerPlugin(std::string name)
       sampleIndex_(0)
 {
     memset_s(&miniMP4_, sizeof(MP4D_demux_t), 0, sizeof(MP4D_demux_t));
-    MEDIA_LOG_I("MiniMP4DemuxerPlugin, plugin name: %s", pluginName_.c_str());
+    MEDIA_LOG_I("MiniMP4DemuxerPlugin, plugin name: %" PUBLIC_LOG "s", pluginName_.c_str());
 }
 
 MiniMP4DemuxerPlugin::~MiniMP4DemuxerPlugin()
@@ -364,12 +365,13 @@ Status RegisterPlugins(const std::shared_ptr<Register> &reg)
     regInfo.sniffer = Sniff;
     auto ret = reg->AddPlugin(regInfo);
     if (ret != Status::OK) {
-        MEDIA_LOG_E("RegisterPlugin AddPlugin failed with return %d", static_cast<int>(ret));
+        MEDIA_LOG_E("RegisterPlugin AddPlugin failed with return %" PUBLIC_LOG "d", static_cast<int>(ret));
     }
     return Status::OK;
 }
 }
 PLUGIN_DEFINITION(MiniMP4Demuxer, LicenseType::CC0, RegisterPlugins, [] {});
+} // namespace Minimp4
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

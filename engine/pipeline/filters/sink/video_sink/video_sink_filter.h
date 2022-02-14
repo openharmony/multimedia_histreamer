@@ -49,8 +49,11 @@ public:
 
     ErrorCode GetParameter(int32_t key, Plugin::Any& value) override;
 
-    bool Negotiate(const std::string& inPort, const std::shared_ptr<const Plugin::Capability>& upstreamCap,
-                   Capability& upstreamNegotiatedCap) override;
+    bool Negotiate(const std::string& inPort,
+                   const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                   Plugin::Capability& negotiatedCap,
+                   const Plugin::TagMap& upstreamParams,
+                   Plugin::TagMap& downstreamParams) override;
 
     bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
@@ -79,6 +82,7 @@ public:
 private:
     ErrorCode ConfigurePluginParams(const std::shared_ptr<const Plugin::Meta>& meta);
     ErrorCode ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta);
+    void HandleNegotiateParams(const Plugin::TagMap& upstreamParams, Plugin::TagMap& downstreamParams);
     void RenderFrame();
     bool DoSync(int64_t pts) const;
     std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQueue_ {nullptr};

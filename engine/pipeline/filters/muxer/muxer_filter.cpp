@@ -23,6 +23,7 @@
 #include "foundation/log.h"
 #include "common/plugin_settings.h"
 #include "common/plugin_utils.h"
+#include "pipeline/core/plugin_attr_desc.h"
 
 namespace OHOS {
 namespace Media {
@@ -73,14 +74,15 @@ bool MuxerFilter::UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::Plugin
             if (plugin_->Reset() == Plugin::Status::OK) {
                 return true;
             }
-            MEDIA_LOG_W("reuse previous plugin %s failed, will create new plugin", targetPluginInfo_->name.c_str());
+            MEDIA_LOG_W("reuse previous plugin %" PUBLIC_LOG "s failed, will create new plugin",
+                        targetPluginInfo_->name.c_str());
         }
         plugin_->Deinit();
     }
 
     plugin_ = Plugin::PluginManager::Instance().CreateMuxerPlugin(selectedPluginInfo->name);
     if (plugin_ == nullptr) {
-        MEDIA_LOG_E("cannot create plugin %s", selectedPluginInfo->name.c_str());
+        MEDIA_LOG_E("cannot create plugin %" PUBLIC_LOG "s", selectedPluginInfo->name.c_str());
         return false;
     }
     auto err = TranslatePluginStatus(plugin_->Init());
@@ -93,8 +95,11 @@ bool MuxerFilter::UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::Plugin
     return true;
 }
 
-bool MuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<const Capability>& upstreamCap,
-                            Capability& upstreamNegotiatedCap)
+bool MuxerFilter::Negotiate(const std::string& inPort,
+                            const std::shared_ptr<const Plugin::Capability>& upstreamCap,
+                            Plugin::Capability& negotiatedCap,
+                            const Plugin::TagMap& upstreamParams,
+                            Plugin::TagMap& downstreamParams)
 {
     if (state_ != FilterState::PREPARING) {
         MEDIA_LOG_W("decoder filter is not in preparing when negotiate");
@@ -119,7 +124,7 @@ bool MuxerFilter::Negotiate(const std::string& inPort, const std::shared_ptr<con
     }
     auto muxerCap = std::make_shared<Capability>(containerMime_);
     Capability downCap;
-    if (!outPorts_[0]->Negotiate(muxerCap, downCap)) {
+    if (!outPorts_[0]->Negotiate(muxerCap, downCap, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("downstream of muxer filter negotiate failed");
         return false;
     }
@@ -134,16 +139,21 @@ ErrorCode MuxerFilter::AddTrackThenConfigure(const std::pair<std::string, Plugin
         MEDIA_LOG_E("muxer plugin add track failed");
         return ret;
     }
-    portTrackIdMap_.emplace_back(std::make_pair(metaPair.first, trackId));
-
+    trackInfos_.emplace_back(TrackInfo{static_cast<int32_t>(trackId), metaPair.first, false});
     auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
-        Plugin::ValueType outValue;
-        if (metaPair.second.GetData(static_cast<Plugin::MetaID>(keyPair.first), outValue) &&
-            keyPair.second.second(outValue)) {
-            plugin_->SetTrackParameter(trackId, keyPair.first, outValue);
+        auto outValue = metaPair.second.GetData(static_cast<Plugin::MetaID>(keyPair.first));
+        if (outValue &&
+            (keyPair.second.second & PARAM_SET) &&
+            keyPair.second.first(keyPair.first, *outValue)) {
+            plugin_->SetTrackParameter(trackId, keyPair.first, *outValue);
         } else {
-            MEDIA_LOG_W("parameter %s in meta is not found or type mismatch", keyPair.second.first.c_str());
+            if (g_tagInfoMap.count(keyPair.first) == 0) {
+                MEDIA_LOG_W("tag %" PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
+            } else {
+                MEDIA_LOG_W("parameter %" PUBLIC_LOG_S " in meta is not found or type mismatch",
+                    std::get<0>(g_tagInfoMap.at(keyPair.first)));
+            }
         }
     }
     return ErrorCode::SUCCESS;
@@ -155,7 +165,7 @@ ErrorCode MuxerFilter::ConfigureToStart()
     for (const auto& cache: metaCache_) {
         ret = AddTrackThenConfigure(cache);
         if (ret != ErrorCode::SUCCESS) {
-            MEDIA_LOG_E("add and configure for track from inPort %s failed", cache.first.c_str());
+            MEDIA_LOG_E("add and configure for track from inPort %" PUBLIC_LOG "s failed", cache.first.c_str());
             return ret;
         }
     }
@@ -176,7 +186,8 @@ bool MuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<con
 {
     std::string tmp;
     if (!upstreamMeta->GetString(Plugin::MetaID::MIME, tmp)) {
-        MEDIA_LOG_E("stream meta must contain mime, which is not found in current stream from port %s", inPort.c_str());
+        MEDIA_LOG_E("stream meta must contain mime, which is not found in current stream from port %" PUBLIC_LOG "s",
+                    inPort.c_str());
         return false;
     }
     metaCache_.emplace_back(std::make_pair(inPort, *upstreamMeta));
@@ -198,11 +209,11 @@ bool MuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<con
     auto ret = ConfigureToStart();
     if (ret != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("muxer filter configure and start error");
-        OnEvent({EVENT_ERROR, ret});
+        OnEvent({name_, EventType::EVENT_ERROR, ret});
         return false;
     }
     state_ = FilterState::READY;
-    OnEvent({EVENT_READY});
+    OnEvent({name_, EventType::EVENT_READY});
     MEDIA_LOG_I("muxer send EVENT_READY");
     return true;
 }
@@ -235,14 +246,48 @@ ErrorCode MuxerFilter::StartNextSegment()
 
 ErrorCode MuxerFilter::SendEos()
 {
+    MEDIA_LOG_I("SendEos entered.");
+    auto buf = std::make_shared<AVBuffer>();
+    buf->flag |= BUFFER_FLAG_EOS;
+    SendBuffer(buf, -1);
+    eos_ = true;
     return ErrorCode::SUCCESS;
+}
+
+void MuxerFilter::SendBuffer(const std::shared_ptr<AVBuffer>& buffer, int64_t offset)
+{
+    OSAL::ScopedLock lock(pushDataMutex_);
+    if (!eos_) {
+        outPorts_[0]->PushData(buffer, offset);
+    }
+}
+
+bool MuxerFilter::AllTracksEos()
+{
+    return eosTrackCnt.load() == trackInfos_.size();
+}
+void MuxerFilter::UpdateEosState(const std::string& inPort)
+{
+    int32_t eosCnt = 0;
+    for (auto& item : trackInfos_) {
+        if (item.inPort == inPort) {
+            item.eos = true;
+        }
+        if (item.eos) {
+            eosCnt++;
+        }
+    }
+    eosTrackCnt = eosCnt;
 }
 
 ErrorCode MuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
 {
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
-        MEDIA_LOG_W("pushing data to decoder when state is %d", static_cast<int>(state_.load()));
+        MEDIA_LOG_W("pushing data to muxer when state is %" PUBLIC_LOG "d", static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
+    }
+    if (eos_.load()) {
+        return ErrorCode::SUCCESS;
     }
     // todo we should consider more tracks
     if (!hasWriteHeader_) {
@@ -254,8 +299,12 @@ ErrorCode MuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer, i
     }
 
     if (buffer->flag & BUFFER_FLAG_EOS) {
+        UpdateEosState(inPort);
+    }
+    if (AllTracksEos()) {
         plugin_->WriteTrailer();
         hasWriteHeader_ = false;
+        SendEos();
     }
     return ErrorCode::SUCCESS;
 }

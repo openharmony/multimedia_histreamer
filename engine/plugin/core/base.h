@@ -33,21 +33,14 @@ struct PluginBase;
 struct CallbackWrap {
     virtual ~CallbackWrap() = default;
 
-    virtual void onEvent(int32_t event) = 0;
-
-    virtual void onError(int32_t errorType, int32_t errorCode) = 0;
+    virtual void OnEvent(const PluginEvent &event) = 0;
 };
 
 class CallbackImpl : public Plugin::Callback {
 public:
-    void onEvent(int32_t event) override
+    void OnEvent(const PluginEvent &event) override
     {
-        callbackWrap_->onEvent(event);
-    }
-
-    void onError(ErrorType errorType, int32_t errorCode) override
-    {
-        callbackWrap_->onError(static_cast<int32_t>(errorType), errorCode);
+        callbackWrap_->OnEvent(event);
     }
 
     void SetCallbackWrap(CallbackWrap* callbackWrap)
