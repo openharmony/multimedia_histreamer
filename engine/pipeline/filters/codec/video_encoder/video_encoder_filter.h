@@ -15,7 +15,9 @@
 
 #ifndef HISTREAMER_PIPELINE_VIDEO_ENCODER_FILTER_H
 #define HISTREAMER_PIPELINE_VIDEO_ENCODER_FILTER_H
+
 #if defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
+
 #include "utils/type_define.h"
 #include "filters/codec/codec_filter_base.h"
 #include "plugin/common/plugin_tags.h"
@@ -28,7 +30,7 @@ public:
     explicit VideoEncoderFilter(const std::string &name);
     ~VideoEncoderFilter() override;
 
-    virtual ErrorCode SetVideoEncoder(int32_t sourceId, OHOS::Media::Plugin::VideoFormat encoder);
+    virtual ErrorCode SetVideoEncoder(int32_t sourceId, std::shared_ptr<Plugin::Meta> encoderMeta);
 
     ErrorCode Prepare() override;
 
@@ -64,16 +66,18 @@ public:
 private:
     class DataCallbackImpl;
 
-    struct VideoDecoderFormat {
+    struct VideoEncoderFormat {
         std::string mime;
         uint32_t width;
         uint32_t height;
         int64_t bitRate;
+        uint64_t frameRate;
         Plugin::VideoPixelFormat format;
         std::vector<uint8_t> codecConfig;
+        std::shared_ptr<Plugin::Meta> codecMeta;
     };
 
-    ErrorCode SetVideoDecoderFormat(const std::shared_ptr<const Plugin::Meta>& meta);
+    ErrorCode SetVideoEncoderFormat(const std::shared_ptr<const Plugin::Meta>& meta);
 
     ErrorCode AllocateOutputBuffers();
 
@@ -94,7 +98,7 @@ private:
     bool isFlushing_ {false};
     Capability capNegWithDownstream_;
     Capability capNegWithUpstream_;
-    VideoDecoderFormat vdecFormat_;
+    VideoEncoderFormat vencFormat_;
     DataCallbackImpl* dataCallback_ {nullptr};
 
     std::shared_ptr<OHOS::Media::OSAL::Task> handleFrameTask_ {nullptr};

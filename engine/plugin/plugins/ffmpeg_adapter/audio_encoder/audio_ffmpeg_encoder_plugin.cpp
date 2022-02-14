@@ -173,7 +173,7 @@ Status AudioFfmpegEncoderPlugin::GetParameter(Tag tag, ValueType& value)
     if (avCodecContext_ == nullptr) {
         return Status::ERROR_WRONG_STATE;
     }
-    return GetParamFromCodecContext(*avCodecContext_, tag, value);
+    return GetAudioEncoderParameters(*avCodecContext_, tag, value);
 }
 
 Status AudioFfmpegEncoderPlugin::Prepare()
@@ -196,7 +196,7 @@ Status AudioFfmpegEncoderPlugin::Prepare()
         });
         {
             OSAL::ScopedLock lock1(parameterMutex_);
-            ConfigCodec(*avCodecContext_, audioParameter_);
+            ConfigAudioEncoder(*avCodecContext_, audioParameter_);
         }
 
         if (!avCodecContext_->time_base.den) {

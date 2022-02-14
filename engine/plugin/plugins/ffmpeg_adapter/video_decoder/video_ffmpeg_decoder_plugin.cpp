@@ -21,12 +21,7 @@
 #include <cstring>
 #include <map>
 #include <set>
-#include "foundation/log.h"
-#include "utils/constants.h"
 #include "utils/memory_helper.h"
-#include "plugin/common/plugin_buffer.h"
-#include "plugin/common/plugin_video_tags.h"
-#include "plugin/interface/codec_plugin.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
 namespace {
@@ -108,20 +103,6 @@ PLUGIN_DEFINITION(FFmpegVideoDecoders, LicenseType::LGPL, RegisterVideoDecoderPl
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-namespace {
-std::map<AVPixelFormat, VideoPixelFormat> g_pixelFormatMap = {
-    {AV_PIX_FMT_YUV420P, VideoPixelFormat::YUV420P},     {AV_PIX_FMT_YUYV422, VideoPixelFormat::YUV420P},
-    {AV_PIX_FMT_RGB24, VideoPixelFormat::RGB24},         {AV_PIX_FMT_BGR24, VideoPixelFormat::BGR24},
-    {AV_PIX_FMT_YUV422P, VideoPixelFormat::YUV422P},     {AV_PIX_FMT_YUV444P, VideoPixelFormat::YUV444P},
-    {AV_PIX_FMT_YUV410P, VideoPixelFormat::YUV410P},     {AV_PIX_FMT_YUV411P, VideoPixelFormat::YUV411P},
-    {AV_PIX_FMT_GRAY8, VideoPixelFormat::GRAY8},         {AV_PIX_FMT_MONOWHITE, VideoPixelFormat::MONOWHITE},
-    {AV_PIX_FMT_MONOBLACK, VideoPixelFormat::MONOBLACK}, {AV_PIX_FMT_PAL8, VideoPixelFormat::PAL8},
-    {AV_PIX_FMT_YUVJ420P, VideoPixelFormat::YUVJ420P},   {AV_PIX_FMT_YUVJ422P, VideoPixelFormat::YUVJ422P},
-    {AV_PIX_FMT_YUVJ444P, VideoPixelFormat::YUVJ444P},   {AV_PIX_FMT_NV12, VideoPixelFormat::NV12},
-    {AV_PIX_FMT_NV21, VideoPixelFormat::NV21},
-};
-} // namespace
-
 VideoFfmpegDecoderPlugin::VideoFfmpegDecoderPlugin(std::string name)
     : CodecPlugin(std::move(name)), outBufferQ_("vdecPluginQueue", BUFFER_QUEUE_SIZE)
 {
@@ -520,7 +501,7 @@ Status VideoFfmpegDecoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& 
                 static_cast<int32_t>(cachedFrame_->pict_type), static_cast<int32_t>(cachedFrame_->format),
                 cachedFrame_->pkt_size);
     if (cachedFrame_->flags & AV_FRAME_FLAG_CORRUPT ||
-        g_pixelFormatMap[static_cast<AVPixelFormat>(cachedFrame_->format)] != pixelFormat_) {
+        ConvertPixelFormatFromFFmpeg(static_cast<AVPixelFormat>(cachedFrame_->format)) != pixelFormat_) {
         MEDIA_LOG_W("format: %" PUBLIC_LOG "d unsupported, pixelFormat_: %" PUBLIC_LOG "u",
                     cachedFrame_->format, pixelFormat_);
         return Status::ERROR_INVALID_DATA;
@@ -534,7 +515,7 @@ Status VideoFfmpegDecoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& 
     auto bufferMeta = frameBuffer->GetBufferMeta();
     if (bufferMeta != nullptr && bufferMeta->GetType() == BufferMetaType::VIDEO) {
         std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
-        videoMeta->videoPixelFormat = g_pixelFormatMap[static_cast<AVPixelFormat>(cachedFrame_->format)];
+        videoMeta->videoPixelFormat = ConvertPixelFormatFromFFmpeg(static_cast<AVPixelFormat>(cachedFrame_->format));
         videoMeta->height = cachedFrame_->height;
         videoMeta->width = cachedFrame_->width;
         for (int i = 0; cachedFrame_->linesize[i] > 0; ++i) {

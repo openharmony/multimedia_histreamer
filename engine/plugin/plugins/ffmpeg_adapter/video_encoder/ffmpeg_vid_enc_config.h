@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_FFMPEG_AU_ENC_CONFIG_H
-#define HISTREAMER_FFMPEG_AU_ENC_CONFIG_H
+#ifndef HISTREAMER_FFMPEG_VID_ENC_CONFIG_H
+#define HISTREAMER_FFMPEG_VID_ENC_CONFIG_H
+
+#if defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,10 +33,12 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace Ffmpeg {
-void ConfigAudioEncoder(AVCodecContext& codecContext, const std::map<Tag, ValueType>& source);
-Status GetAudioEncoderParameters(const AVCodecContext& codecContext, Tag tag, Plugin::ValueType& outVal);
-} // Ffmpeg
+void ConfigVideoEncoder(AVCodecContext& codecContext, const std::map<Tag, ValueType>& source);
+Status GetVideoEncoderParameters(const AVCodecContext& codecContext, Tag tag, Plugin::ValueType& outVal);
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-#endif // HISTREAMER_FFMPEG_AU_ENC_CONFIG_H
+
+#endif
+#endif // HISTREAMER_FFMPEG_VID_ENC_CONFIG_H

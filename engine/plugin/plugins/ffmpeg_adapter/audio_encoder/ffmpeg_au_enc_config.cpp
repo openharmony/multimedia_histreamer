@@ -125,14 +125,14 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace Ffmpeg {
-void ConfigCodec(AVCodecContext& codecContext, const std::map<Tag, ValueType>& tagStore)
+void ConfigAudioEncoder(AVCodecContext& codecContext, const std::map<Tag, ValueType>& tagStore)
 {
     ConfigAudioCommonAttr(codecContext, tagStore);
     if (g_ConfigFuncMap.count(codecContext.codec_id) != 0) {
         g_ConfigFuncMap.at(codecContext.codec_id)(codecContext, tagStore);
     }
 }
-Status GetParamFromCodecContext(const AVCodecContext& codecContext, Tag tag, Plugin::ValueType& outVal)
+Status GetAudioEncoderParameters(const AVCodecContext& codecContext, Tag tag, Plugin::ValueType& outVal)
 {
     outVal.Reset();
     GetAudioCommonAttr(codecContext, tag, outVal);

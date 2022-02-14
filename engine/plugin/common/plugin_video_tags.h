@@ -47,6 +47,23 @@ enum struct VideoPixelFormat : uint32_t {
     YUVJ422P,  ///< planar YUV 4:2:2, 16bpp, full scale (JPEG)
     YUVJ444P,  ///< planar YUV 4:4:4, 24bpp, full scale (JPEG)
 };
+
+/**
+ * @enum Video H264/AVC profile.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+enum struct VideoH264Profile : uint32_t {
+    UNKNOWN,
+    BASELINE,  ///< Baseline profile
+    MAIN,      ///< Main profile
+    EXTENDED,  ///< Extended profile
+    HIGH,      ///< High profile
+    HIGH10,    ///< High 10 profile
+    HIGH422,   ///< High 4:2:2 profile
+    HIGH444,   ///< High 4:4:4 profile
+};
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

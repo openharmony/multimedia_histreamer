@@ -44,6 +44,8 @@ enum struct VideoFormat : uint8_t {
 
 #define MAKE_AUDIO_SPECIFIC_START(format) (SECTION_AUDIO_SPECIFIC_START | (static_cast<uint8_t>(format) << 8U))
 
+#define MAKE_VIDEO_SPECIFIC_START(format) (SECTION_VIDEO_SPECIFIC_START | (static_cast<uint8_t>(format) << 8U))
+
 /**
  * @brief Tag is a key-value pair used to settings or transfer information.
  *
@@ -129,6 +131,11 @@ enum struct Tag : uint32_t {
     VIDEO_FRAME_RATE,                                ///< uint64_t, video frame rate
     VIDEO_SURFACE,                                   ///< @see class Surface
     VIDEO_MAX_SURFACE_NUM,                           ///< uint32_t, max video surface num
+
+    /* -------------------- video specific tag -------------------- */
+    AUDIO_SPECIFIC_H264_START = MAKE_VIDEO_SPECIFIC_START(VideoFormat::H264),
+    VIDEO_H264_PROFILE,      ///< @see VideoH264Profile
+    VIDEO_H264_LEVEL,        ///< uint32_t, h264 level
 };
 
 using ValueType = Any;

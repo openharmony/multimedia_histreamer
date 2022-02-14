@@ -26,6 +26,7 @@ extern "C" {
 #endif
 #include "libavutil/error.h"
 #include "libavutil/frame.h"
+#include "libavutil/pixdesc.h"
 #include "libavcodec/avcodec.h"
 #ifdef __cplusplus
 };
@@ -82,10 +83,24 @@ AudioChannelLayout ConvertChannelLayoutFromFFmpeg(int channels, uint64_t ffChann
 uint64_t ConvertChannelLayoutToFFmpeg(AudioChannelLayout channelLayout);
 
 bool FindAvMetaNameByTag(Tag tag, std::string& metaName);
+
 bool FindTagByAvMetaName(const std::string& metaName, Tag& tag);
 
 AudioAacProfile ConvAacProfileFromFfmpeg (int32_t ffmpegProfile);
+
 int32_t ConvAacProfileToFfmpeg (AudioAacProfile profile);
+
+VideoPixelFormat ConvertPixelFormatFromFFmpeg(int32_t ffmpegPixelFormat);
+
+AVPixelFormat ConvertPixelFormatToFFmpeg(VideoPixelFormat pixelFormat);
+
+bool IsYuvFormat(AVPixelFormat format);
+
+bool IsRgbFormat(AVPixelFormat format);
+
+VideoH264Profile ConvH264ProfileFromFfmpeg (int32_t ffmpegProfile);
+
+int32_t ConvH264ProfileToFfmpeg(VideoH264Profile profile);
 } // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
