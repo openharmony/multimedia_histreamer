@@ -46,14 +46,12 @@ FilePathSinkPlugin::FilePathSinkPlugin(std::string name)
 
 Status FilePathSinkPlugin::Stop()
 {
-    MEDIA_LOG_D("OUT");
     CloseFile();
     return Status::OK;
 }
 
 Status FilePathSinkPlugin::SetSink(const Plugin::ValueType& sink)
 {
-    MEDIA_LOG_D("OUT");
     if (!sink.SameTypeWith(typeid(std::string))) {
         MEDIA_LOG_E("Invalid parameter to file_path_sink plugin");
         return Status::ERROR_INVALID_PARAMETER;
@@ -64,7 +62,6 @@ Status FilePathSinkPlugin::SetSink(const Plugin::ValueType& sink)
 
 bool FilePathSinkPlugin::IsSeekable()
 {
-    MEDIA_LOG_D("OUT");
     return isSeekable_;
 }
 
@@ -74,24 +71,24 @@ Status FilePathSinkPlugin::SeekTo(uint64_t offset)
         std::fseek(fp_, 0L, SEEK_END) != 0 ||
         (fileSize_ = std::ftell(fp_)) == -1 ||
         (fileSize_ != -1 && offset > fileSize_)) {
-        MEDIA_LOG_E("Invalid operation");
+        MEDIA_LOG_E("SeekTo failed.");
         return Status::ERROR_WRONG_STATE;
     }
     std::clearerr(fp_);
     if ((std::fseek(fp_, 0L, SEEK_SET) == 0) && (std::fseek(fp_, offset, SEEK_SET) == 0)) {
         if (std::feof(fp_)) {
-            MEDIA_LOG_I("It is the end of file!");
+            MEDIA_LOG_I("Eof reached!");
         }
         return Status::OK;
     }
     std::clearerr(fp_);
-    MEDIA_LOG_E("Seek to %" PUBLIC_LOG PRIu64, offset);
+    MEDIA_LOG_I("Seek to %" PUBLIC_LOG_U64, offset);
     return Status::ERROR_UNKNOWN;
 }
 
 Status FilePathSinkPlugin::Write(const std::shared_ptr<Buffer>& buffer)
 {
-    MEDIA_LOG_D("FilePathSink write begin");
+    MEDIA_LOG_D("Write begin");
     if (buffer == nullptr || buffer->IsEmpty()) {
         return Status::OK;
     }
@@ -102,7 +99,6 @@ Status FilePathSinkPlugin::Write(const std::shared_ptr<Buffer>& buffer)
 
 Status FilePathSinkPlugin::Flush()
 {
-    MEDIA_LOG_D("OUT");
     if (fp_) {
         MEDIA_LOG_I("flush file");
         std::fflush(fp_);
@@ -112,10 +108,10 @@ Status FilePathSinkPlugin::Flush()
 
 Status FilePathSinkPlugin::OpenFile()
 {
-    fp_ = std::fopen(fileName_.c_str(), "w+");
+    fp_ = std::fopen(fileName_.c_str(), "wb");
     if (fp_ == nullptr) {
         int32_t err = errno;
-        MEDIA_LOG_E("Fail to load file due to %" PUBLIC_LOG "s", strerror(err));
+        MEDIA_LOG_E("Fail to open file due to %" PUBLIC_LOG_S, strerror(err));
         switch (err) {
             case EPERM:
                 return Status::ERROR_PERMISSION_DENIED;
@@ -125,7 +121,7 @@ Status FilePathSinkPlugin::OpenFile()
                 return Status::ERROR_UNKNOWN;
         }
     }
-    MEDIA_LOG_D("fileName_: %" PUBLIC_LOG "s", fileName_.c_str());
+    MEDIA_LOG_D("fileName_: %s", fileName_.c_str()); // file name is privacy
     return Status::OK;
 }
 

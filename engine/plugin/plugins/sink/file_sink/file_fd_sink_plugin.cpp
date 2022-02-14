@@ -53,7 +53,6 @@ FileFdSinkPlugin::FileFdSinkPlugin(std::string name)
 
 Status FileFdSinkPlugin::SetSink(const Plugin::ValueType& sink)
 {
-    MEDIA_LOG_D("OUT");
     if (!sink.SameTypeWith(typeid(int32_t))) {
         MEDIA_LOG_E("Invalid parameter to file_fd_sink plugin");
         return Status::ERROR_INVALID_PARAMETER;
@@ -64,14 +63,13 @@ Status FileFdSinkPlugin::SetSink(const Plugin::ValueType& sink)
 
 bool FileFdSinkPlugin::IsSeekable()
 {
-    MEDIA_LOG_D("OUT");
     return isSeekable_;
 }
 
 Status FileFdSinkPlugin::SeekTo(uint64_t offset)
 {
     if (fd_ == -1 || (fileSize_ = lseek(fd_, 0L, SEEK_END)) == -1 || offset > fileSize_) {
-        MEDIA_LOG_E("Invalid operation");
+        MEDIA_LOG_E("SeekTo failed.");
         return Status::ERROR_WRONG_STATE;
     }
     if (lseek(fd_, 0L, SEEK_SET) != -1 && lseek(fd_, offset, SEEK_SET) != -1) {
@@ -82,13 +80,13 @@ Status FileFdSinkPlugin::SeekTo(uint64_t offset)
 #endif
         return Status::OK;
     }
-    MEDIA_LOG_E("Seek to %" PUBLIC_LOG "" PRIu64, offset);
+    MEDIA_LOG_I("Seek to %" PUBLIC_LOG_U64, offset);
     return Status::ERROR_UNKNOWN;
 }
 
 Status FileFdSinkPlugin::Write(const std::shared_ptr<Buffer>& buffer)
 {
-    MEDIA_LOG_D("FileFdSink write begin");
+    MEDIA_LOG_D("Write begin");
     if (buffer == nullptr || buffer->IsEmpty()) {
         return Status::OK;
     }
