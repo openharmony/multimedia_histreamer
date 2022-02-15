@@ -42,9 +42,9 @@ public:
 
     ErrorCode GetParameter(int32_t key, Plugin::Any& outVal) override;
 
-    void OnInputBufferDone(std::shared_ptr<Plugin::Buffer>& input) override;
+    void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input) override;
 
-    void OnOutputBufferDone(std::shared_ptr<Plugin::Buffer>& output) override;
+    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override;
 
 protected:
     ErrorCode ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta>& meta);

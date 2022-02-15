@@ -40,7 +40,7 @@ struct DataCallback {
      *
      * @param input Indicates the pointer to the input data.
      */
-    virtual void OnInputBufferDone(std::shared_ptr<Buffer>& input) = 0;
+    virtual void OnInputBufferDone(const std::shared_ptr<Buffer>& input) = 0;
 
     /**
      * @brief When the out buffer has been produced inside the plugin.
@@ -49,7 +49,7 @@ struct DataCallback {
      *
      * @param output Indicates the pointer to the output data.
      */
-    virtual void OnOutputBufferDone(std::shared_ptr<Buffer>& output) = 0;
+    virtual void OnOutputBufferDone(const std::shared_ptr<Buffer>& output) = 0;
 };
 
 /**

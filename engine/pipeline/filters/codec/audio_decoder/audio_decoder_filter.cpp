@@ -288,14 +288,15 @@ ErrorCode AudioDecoderFilter::FinishFrame()
     return TranslatePluginStatus(status);
 }
 
-void AudioDecoderFilter::OnInputBufferDone(std::shared_ptr<Plugin::Buffer>& input)
+void AudioDecoderFilter::OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input)
 {
     MEDIA_LOG_I("AudioDecoderFilter::OnInputBufferDone");
 }
 
-void AudioDecoderFilter::OnOutputBufferDone(std::shared_ptr<Plugin::Buffer>& output)
+void AudioDecoderFilter::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output)
 {
     MEDIA_LOG_D("begin");
+
     // push to port
     auto oPort = outPorts_[0];
     if (oPort->GetWorkMode() == WorkMode::PUSH) {
@@ -303,8 +304,9 @@ void AudioDecoderFilter::OnOutputBufferDone(std::shared_ptr<Plugin::Buffer>& out
     } else {
        MEDIA_LOG_W("decoder out port works in pull mode");
     }
+
     // 释放buffer 如果没有被缓存使其回到buffer pool 如果被sink缓存 则从buffer pool拿其他的buffer
-    output.reset();
+    std::const_pointer_cast<Plugin::Buffer>(output).reset();
     MEDIA_LOG_D("end");
 }
 } // Pipeline

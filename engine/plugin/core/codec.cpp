@@ -60,12 +60,12 @@ DataCallbackWrapper(uint32_t pkgVersion, DataCallbackHelper* dataCallback)
 
 ~DataCallbackWrapper() override = default;
 
-void OnInputBufferDone(std::shared_ptr<Buffer>& input) override
+void OnInputBufferDone(const std::shared_ptr<Buffer>& input) override
 {
     dataCallbackHelper->OnInputBufferDone(input);
 }
 
-void OnOutputBufferDone(std::shared_ptr<Buffer>& output) override
+void OnOutputBufferDone(const std::shared_ptr<Buffer>& output) override
 {
     dataCallbackHelper->OnOutputBufferDone(output);
 }

@@ -56,9 +56,9 @@ public:
      */
     ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer, int64_t offset) override;
 
-    void OnInputBufferDone(const std::shared_ptr<AVBuffer> &buffer);
+    void OnInputBufferDone(const std::shared_ptr<AVBuffer> &buffer) override;
 
-    void OnOutputBufferDone(const std::shared_ptr<AVBuffer> &buffer);
+    void OnOutputBufferDone(const std::shared_ptr<AVBuffer> &buffer) override;
 
 private:
     class DataCallbackImpl;

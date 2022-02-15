@@ -46,12 +46,12 @@ public:
 
     ~DataCallbackImpl() override = default;
 
-    void OnInputBufferDone(std::shared_ptr<Plugin::Buffer>& input) override
+    void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input) override
     {
         encFilter_.OnInputBufferDone(input);
     }
 
-    void OnOutputBufferDone(std::shared_ptr<Plugin::Buffer>& output) override
+    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override
     {
         encFilter_.OnOutputBufferDone(output);
     }
