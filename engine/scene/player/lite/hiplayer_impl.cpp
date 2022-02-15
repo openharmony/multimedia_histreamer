@@ -316,11 +316,26 @@ void HiPlayerImpl::OnEvent(const Event& event)
             break;
         case EventType::EVENT_PLUGIN_ERROR: {
             Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
+            MEDIA_LOG_I("Receive PLUGIN_ERROR, type:  %" PUBLIC_LOG_D32, to_underlying(pluginEvent.type));
+            int32_t errorCode {-1};
+            if (pluginEvent.type == Plugin::PluginEventType::CLIENT_ERROR &&
+                pluginEvent.param.SameTypeWith(typeid(Plugin::NetworkClientErrorCode))&&
+                Plugin::AnyCast<Plugin::NetworkClientErrorCode>(pluginEvent.param)
+                    == Plugin::NetworkClientErrorCode::ERROR_TIME_OUT) {
+                errorCode = to_underlying(Plugin::NetworkClientErrorCode::ERROR_TIME_OUT);
+            }
+            auto ptr = callback_.lock();
+            if (ptr != nullptr) {
+                ptr->OnError(PlayerCallback::PlayerErrorType::PLAYER_ERROR_UNKNOWN, errorCode);
+            }
             break;
         }
         case EventType::EVENT_PLUGIN_EVENT: {
             Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
-            MEDIA_LOG_I("Receive PLUGIN_EVENT, type %" PUBLIC_LOG_D32, pluginEvent.type);
+            if (pluginEvent.type == Plugin::PluginEventType::BELOW_LOW_WATERLINE ||
+                pluginEvent.type == Plugin::PluginEventType::ABOVE_LOW_WATERLINE) {
+                MEDIA_LOG_I("Receive PLUGIN_EVENT, type:  %" PUBLIC_LOG_D32, to_underlying(pluginEvent.type));
+            }
             break;
         }
         default:

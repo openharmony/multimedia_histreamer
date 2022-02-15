@@ -20,16 +20,11 @@
 
 #include "common/plugin_tags.h"
 #include "common/plugin_types.h"
+#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-template <typename E>
-constexpr typename std::underlying_type<E>::type to_underlying(E e) noexcept
-{
-    return static_cast<typename std::underlying_type<E>::type>(e);
-}
-
 /**
  * Meta ID is used to describe the metadata of media files or data streams.
  * All Meta ID must come from Tag.

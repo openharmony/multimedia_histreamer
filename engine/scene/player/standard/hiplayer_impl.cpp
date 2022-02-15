@@ -24,6 +24,7 @@
 #include "plugin/core/plugin_meta.h"
 #include "utils/steady_clock.h"
 #include "utils/utils.h"
+#include "media_errors.h"
 
 namespace {
 const float MAX_MEDIA_VOLUME = 100.0f;
@@ -265,11 +266,29 @@ void HiPlayerImpl::OnEvent(const Event& event)
             break;
         case EventType::EVENT_PLUGIN_ERROR: {
             Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
+            MEDIA_LOG_I("Receive PLUGIN_ERROR, type:  %" PUBLIC_LOG_D32, to_underlying(pluginEvent.type));
+            if (pluginEvent.type == Plugin::PluginEventType::CLIENT_ERROR &&
+                pluginEvent.param.SameTypeWith(typeid(Plugin::NetworkClientErrorCode))) {
+                auto netClientErrorCode= Plugin::AnyCast<Plugin::NetworkClientErrorCode>(pluginEvent.param);
+                auto errorType {PlayerErrorType::PLAYER_ERROR_UNKNOWN};
+                auto serviceErrCode { MSERR_UNKNOWN };
+                if (netClientErrorCode == Plugin::NetworkClientErrorCode::ERROR_TIME_OUT) {
+                    errorType = PlayerErrorType::PLAYER_ERROR;
+                    serviceErrCode = MSERR_NETWORK_TIMEOUT;
+                }
+                auto ptr = obs_.lock();
+                if (ptr != nullptr) {
+                    ptr->OnError(errorType, serviceErrCode);
+                }
+            }
             break;
         }
         case EventType::EVENT_PLUGIN_EVENT: {
             Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
-            MEDIA_LOG_I("Receive PLUGIN_EVENT, type %" PUBLIC_LOG_D32, pluginEvent.type);
+            if (pluginEvent.type == Plugin::PluginEventType::BELOW_LOW_WATERLINE ||
+                pluginEvent.type == Plugin::PluginEventType::ABOVE_LOW_WATERLINE) {
+                MEDIA_LOG_I("Receive PLUGIN_EVENT, type:  %" PUBLIC_LOG_D32, to_underlying(pluginEvent.type));
+            }
             break;
         }
         default:
