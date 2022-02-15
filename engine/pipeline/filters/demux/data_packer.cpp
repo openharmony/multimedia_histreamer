@@ -84,19 +84,19 @@ bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOf
         MEDIA_LOG_D("IsDataAvailable false, offset not in cached data, clear it.");
         return false;
     }
-    int bufCnt = que_.size();
-    auto offsetEnd = offset + size;
-    auto curOffsetEnd = bufferOffset_ + AudioBufferSize(que_.front());
+    size_t bufCnt = que_.size();
+    uint64_t offsetEnd = offset + size;
+    uint64_t curOffsetEnd = bufferOffset_ + AudioBufferSize(que_.front());
     if (bufCnt == 1) {
         curOffset = curOffsetEnd;
         MEDIA_LOG_D("IsDataAvailable bufCnt == 1, result %" PUBLIC_LOG_D32, offsetEnd <= curOffsetEnd);
         return offsetEnd <= curOffsetEnd;
     }
     auto preOffsetEnd = curOffsetEnd;
-    for (auto i = 1; i < bufCnt; ++i) {
+    for (size_t i = 1; i < bufCnt; ++i) {
         curOffsetEnd = preOffsetEnd + AudioBufferSize(que_[i]);
         if (curOffsetEnd >= offsetEnd) {
-            MEDIA_LOG_D("IsDataAvailable true, last buffer index %" PUBLIC_LOG_U32 ", offsetEnd %" PUBLIC_LOG_U64
+            MEDIA_LOG_D("IsDataAvailable true, last buffer index %" PUBLIC_LOG_ZU ", offsetEnd %" PUBLIC_LOG_U64
                 ", curOffsetEnd %" PUBLIC_LOG_U64, i, offsetEnd, curOffsetEnd);
             return true;
         } else {
@@ -104,7 +104,7 @@ bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOf
         }
     }
     if (preOffsetEnd >= offsetEnd) {
-        MEDIA_LOG_D("IsDataAvailable true, use all buffers, last buffer index %" PUBLIC_LOG_U32 ", offsetEnd %"
+        MEDIA_LOG_D("IsDataAvailable true, use all buffers, last buffer index %" PUBLIC_LOG_ZU ", offsetEnd %"
             PUBLIC_LOG_U64 ", curOffsetEnd %" PUBLIC_LOG_U64, bufCnt - 1, offsetEnd, curOffsetEnd);
         return true;
     }

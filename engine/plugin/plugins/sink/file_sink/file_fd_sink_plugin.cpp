@@ -68,19 +68,13 @@ bool FileFdSinkPlugin::IsSeekable()
 
 Status FileFdSinkPlugin::SeekTo(uint64_t offset)
 {
-    if (fd_ == -1 || (fileSize_ = lseek(fd_, 0L, SEEK_END)) == -1 || offset > fileSize_) {
-        MEDIA_LOG_E("SeekTo failed.");
-        return Status::ERROR_WRONG_STATE;
+    FALSE_RET_V_MSG_E(fd_ != -1, Status::ERROR_WRONG_STATE, "no valid fd.");
+    int64_t ret = lseek(fd_, offset, SEEK_SET);
+    if (ret != -1) {
+        MEDIA_LOG_I("now seek to %" PUBLIC_LOG_D64, ret);
+    } else {
+        MEDIA_LOG_E("seek to %" PUBLIC_LOG_U64 " failed due to %" PUBLIC_LOG_S, offset, strerror(errno));
     }
-    if (lseek(fd_, 0L, SEEK_SET) != -1 && lseek(fd_, offset, SEEK_SET) != -1) {
-#ifdef WIN32
-        if (eof(fd_)) {
-            MEDIA_LOG_I("It is the end of file!");
-        }
-#endif
-        return Status::OK;
-    }
-    MEDIA_LOG_I("Seek to %" PUBLIC_LOG_U64, offset);
     return Status::ERROR_UNKNOWN;
 }
 

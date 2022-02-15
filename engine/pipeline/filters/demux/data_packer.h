@@ -61,7 +61,7 @@ private:
     std::deque<AVBufferPtr> que_;  // buffer队列
     std::vector<uint8_t> assembler_;
     std::atomic<uint32_t> size_;
-    uint32_t bufferOffset_; // 当前 DataPacker缓存数据的第一个字节 对应 到 媒体文件中的 offset
+    uint64_t bufferOffset_; // 当前 DataPacker缓存数据的第一个字节 对应 到 媒体文件中的 offset
     uint64_t pts_;
     uint64_t dts_;
 };

@@ -34,7 +34,6 @@ public:
     Status Flush() override;
 private:
     int32_t fd_;
-    size_t fileSize_{0};
     bool isSeekable_;
 };
 }

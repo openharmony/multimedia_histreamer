@@ -67,22 +67,13 @@ bool FilePathSinkPlugin::IsSeekable()
 
 Status FilePathSinkPlugin::SeekTo(uint64_t offset)
 {
-    if (fp_ == nullptr ||
-        std::fseek(fp_, 0L, SEEK_END) != 0 ||
-        (fileSize_ = std::ftell(fp_)) == -1 ||
-        (fileSize_ != -1 && offset > fileSize_)) {
-        MEDIA_LOG_E("SeekTo failed.");
-        return Status::ERROR_WRONG_STATE;
-    }
-    std::clearerr(fp_);
-    if ((std::fseek(fp_, 0L, SEEK_SET) == 0) && (std::fseek(fp_, offset, SEEK_SET) == 0)) {
-        if (std::feof(fp_)) {
-            MEDIA_LOG_I("Eof reached!");
-        }
+    FALSE_RET_V_MSG_E(fp_ != nullptr, Status::ERROR_WRONG_STATE, "no files have been opened.");
+    if (std::fseek(fp_, offset, SEEK_SET) == 0) {
         return Status::OK;
+    } else {
+        MEDIA_LOG_W("Seek to %" PUBLIC_LOG_U64 " failed due to %" PUBLIC_LOG_S, offset, strerror(errno));
+        std::clearerr(fp_);
     }
-    std::clearerr(fp_);
-    MEDIA_LOG_I("Seek to %" PUBLIC_LOG_U64, offset);
     return Status::ERROR_UNKNOWN;
 }
 
@@ -121,7 +112,7 @@ Status FilePathSinkPlugin::OpenFile()
                 return Status::ERROR_UNKNOWN;
         }
     }
-    MEDIA_LOG_D("fileName_: %s", fileName_.c_str()); // file name is privacy
+    MEDIA_LOG_D("open file %s", fileName_.c_str()); // file name is privacy
     return Status::OK;
 }
 
