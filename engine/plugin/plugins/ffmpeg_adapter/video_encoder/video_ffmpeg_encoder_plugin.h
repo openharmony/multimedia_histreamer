@@ -102,6 +102,8 @@ private:
     template<typename T>
     void FindInParameterMapThenAssignLocked(Tag tag, T &assign);
 
+    Status FillAvFrame(const std::shared_ptr<Buffer>& inputBuffer);
+
     Status SendBufferLocked(const std::shared_ptr<Buffer> &inputBuffer);
 
     Status FillFrameBuffer(const std::shared_ptr<Buffer> &packetBuffer);
@@ -112,7 +114,6 @@ private:
 
 #ifdef DUMP_RAW_DATA
     std::ofstream dumpData_;
-    void DumpVideoRawOutData();
 #endif
 
     void NotifyInputBufferDone(const std::shared_ptr<Buffer> &input);

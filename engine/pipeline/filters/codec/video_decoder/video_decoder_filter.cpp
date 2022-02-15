@@ -67,7 +67,6 @@ VideoDecoderFilter::VideoDecoderFilter(const std::string& name)
     MEDIA_LOG_I("video decoder ctor called");
     vdecFormat_.width = 0;
     vdecFormat_.height = 0;
-    vdecFormat_.bitRate = -1;
 }
 
 VideoDecoderFilter::~VideoDecoderFilter()
@@ -300,9 +299,6 @@ ErrorCode VideoDecoderFilter::SetVideoDecoderFormat(const std::shared_ptr<const 
         MEDIA_LOG_E("Get video width height");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    if (!meta->GetInt64(Plugin::MetaID::MEDIA_BITRATE, vdecFormat_.bitRate)) {
-        MEDIA_LOG_D("Do not have codec bit rate");
-    }
     // Optional: codec extra data
     if (!meta->GetData<std::vector<uint8_t>>(Plugin::MetaID::MEDIA_CODEC_CONFIG, vdecFormat_.codecConfig)) {
         MEDIA_LOG_D("Do not have codec extra data");
@@ -324,11 +320,6 @@ ErrorCode VideoDecoderFilter::ConfigurePluginParams()
         MEDIA_LOG_W("Set pixel format to plugin fail");
         return ErrorCode::ERROR_UNKNOWN;
     }
-    if (vdecFormat_.bitRate != -1) {
-        if (SetPluginParameterLocked(Tag::MEDIA_BITRATE, vdecFormat_.bitRate) != ErrorCode::SUCCESS) {
-            MEDIA_LOG_W("Set bitrate to plugin fail");
-        }
-    }
     // Optional: codec extra data
     if (vdecFormat_.codecConfig.size() > 0) {
         if (SetPluginParameterLocked(Tag::MEDIA_CODEC_CONFIG, std::move(vdecFormat_.codecConfig)) !=
@@ -337,9 +328,8 @@ ErrorCode VideoDecoderFilter::ConfigurePluginParams()
         }
     }
     MEDIA_LOG_D("ConfigurePluginParams success, mime: %" PUBLIC_LOG "s, width: %" PUBLIC_LOG "u, height: %"
-                PUBLIC_LOG "u, format: %" PUBLIC_LOG "u, bitRate: %" PUBLIC_LOG "u",
-                vdecFormat_.mime.c_str(), vdecFormat_.width, vdecFormat_.height, vdecFormat_.format,
-                vdecFormat_.bitRate);
+                PUBLIC_LOG "u, format: %" PUBLIC_LOG "u",
+                vdecFormat_.mime.c_str(), vdecFormat_.width, vdecFormat_.height, vdecFormat_.format);
     return ErrorCode::SUCCESS;
 }
 

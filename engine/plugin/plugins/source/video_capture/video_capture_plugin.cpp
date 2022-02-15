@@ -43,6 +43,8 @@ Status VideoCaptureRegister(const std::shared_ptr<Register> &reg)
     definition.inputType = SrcInputType::VID_SURFACE_YUV;
     definition.creator = VideoCapturePluginCreater;
     Capability outCaps(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
+    outCaps.AppendDiscreteKeys<VideoPixelFormat>(
+        Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21});
     definition.outCaps.push_back(outCaps);
     // add es outCaps later
     return reg->AddPlugin(definition);
@@ -59,21 +61,7 @@ constexpr int32_t DEFAULT_SURFACE_QUEUE_SIZE = 6;
 constexpr int32_t DEFAULT_SURFACE_SIZE = 1024 * 1024;
 constexpr int32_t DEFAULT_VIDEO_WIDTH = 1920;
 constexpr int32_t DEFAULT_VIDEO_HEIGHT = 1080;
-
-void* VideoCaptureAllocator::Alloc(size_t size)
-{
-    if (size == 0) {
-        return nullptr;
-    }
-    return reinterpret_cast<void*>(new (std::nothrow) uint8_t[size]); // NOLINT: cast
-}
-
-void VideoCaptureAllocator::Free(void* ptr) // NOLINT: void*
-{
-    if (ptr != nullptr) {
-        delete[](uint8_t*) ptr;
-    }
-}
+constexpr int32_t DEFAULT_STRIDE_ALIGN = 16;
 
 VideoCapturePlugin::VideoCapturePlugin(std::string name)
     : SourcePlugin(std::move(name)),
@@ -222,6 +210,12 @@ Status VideoCapturePlugin::SetParameter(Tag tag, const ValueType& value)
             }
             break;
         }
+        case Tag::VIDEO_CAPTURE_RATE: {
+            if (value.SameTypeWith(typeid(double))) {
+                captureRate_ = Plugin::AnyCast<uint32_t>(value);
+            }
+            break;
+        }
         default:
             MEDIA_LOG_I("Unknown key");
             break;
@@ -232,7 +226,7 @@ Status VideoCapturePlugin::SetParameter(Tag tag, const ValueType& value)
 std::shared_ptr<Allocator> VideoCapturePlugin::GetAllocator()
 {
     MEDIA_LOG_D("IN");
-    return mAllocator_;
+    return nullptr;
 }
 
 Status VideoCapturePlugin::SetCallback(Callback* cb)
@@ -278,6 +272,22 @@ Status VideoCapturePlugin::AcquireSurfaceBuffer()
     return Status::OK;
 }
 
+void VideoCapturePlugin::SetVideoBufferMeta(std::shared_ptr<BufferMeta>& bufferMeta)
+{
+    std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
+    videoMeta->width = width_;
+    videoMeta->height = height_;
+    videoMeta->videoPixelFormat = VideoPixelFormat::NV21;
+    size_t lineSize = AlignUp(width_, DEFAULT_STRIDE_ALIGN);
+    if ((lineSize / 2) % DEFAULT_STRIDE_ALIGN) { // 2
+        lineSize = AlignUp(width_, DEFAULT_STRIDE_ALIGN * 2); // 2
+    }
+    videoMeta->stride.emplace_back(lineSize); // lineSize[0]
+    videoMeta->stride.emplace_back(lineSize / 2); // lineSize[1], 2
+    videoMeta->stride.emplace_back(lineSize / 2); // lineSize[2], 2
+    videoMeta->planes = videoMeta->stride.size();
+}
+
 Status VideoCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
 {
     OHOS::Media::OSAL::ScopedLock lock(mutex_);
@@ -312,6 +322,7 @@ Status VideoCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
         return Status::ERROR_UNKNOWN;
     }
     Ns2HstTime(curTimestampNs_ - totalPauseTimeNs_, reinterpret_cast<int64_t &>(buffer->pts));
+    SetVideoBufferMeta(bufferMeta);
     bufferCnt_--;
     return Status::OK;
 }

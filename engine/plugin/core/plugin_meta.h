@@ -74,6 +74,8 @@ enum struct MetaID : uint32_t {
     VIDEO_HEIGHT = to_underlying(Tag::VIDEO_HEIGHT),
     VIDEO_PIXEL_FORMAT = to_underlying(Tag::VIDEO_PIXEL_FORMAT),
     VIDEO_FRAME_RATE = to_underlying(Tag::VIDEO_FRAME_RATE),
+    VIDEO_H264_PROFILE = to_underlying(Tag::VIDEO_H264_PROFILE),
+    VIDEO_H264_LEVEL = to_underlying(Tag::VIDEO_H264_LEVEL),
 };
 
 class Meta {

@@ -67,7 +67,6 @@ private:
         std::string mime;
         uint32_t width;
         uint32_t height;
-        int64_t bitRate;
         Plugin::VideoPixelFormat format;
         std::vector<uint8_t> codecConfig;
     };

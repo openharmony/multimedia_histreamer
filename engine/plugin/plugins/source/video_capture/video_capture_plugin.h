@@ -30,14 +30,6 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace VideoCapture {
-class VideoCaptureAllocator : public Plugin::Allocator {
-public:
-    VideoCaptureAllocator() = default;
-    ~VideoCaptureAllocator() override = default;
-
-    void* Alloc(size_t size) override;
-    void Free(void* ptr) override; // NOLINT: void*
-};
 class VideoCapturePlugin : public Plugin::SourcePlugin {
 public:
     explicit VideoCapturePlugin(std::string name);
@@ -74,15 +66,18 @@ private:
     void ConfigSurfaceConsumer();
     Status AcquireSurfaceBuffer();
     void OnBufferAvailable();
+    void SetVideoBufferMeta(std::shared_ptr<BufferMeta>& bufferMeta);
 
     OHOS::Media::OSAL::Mutex mutex_ {};
     OSAL::ConditionVariable readCond_;
-    std::shared_ptr<VideoCaptureAllocator> mAllocator_ {nullptr};
     sptr<Surface> surfaceConsumer_ {nullptr};
     sptr<Surface> surfaceProducer_ {nullptr};
     std::atomic<bool> isStop_ {false};
     uint32_t width_ {0};
     uint32_t height_ {0};
+    double captureRate_ {0.0};
+    VideoPixelFormat pixelFormat_;
+
     uint32_t bufferCnt_ {0};
     uint64_t curTimestampNs_ {0};
     uint64_t stopTimestampNs_ {0};

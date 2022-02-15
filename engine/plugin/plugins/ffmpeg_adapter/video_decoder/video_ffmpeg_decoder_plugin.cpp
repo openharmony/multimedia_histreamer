@@ -81,7 +81,7 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
     Capability inputCaps("video/unknown");
     switch (codec->id) {
         case AV_CODEC_ID_H264:
-            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_AVC);
+            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
             break;
         default:
             MEDIA_LOG_I("codec is not supported right now");

@@ -85,6 +85,7 @@ int TransErrorCode(ErrorCode errorCode);
 Plugin::SrcInputType TransAudioInputType(OHOS::Media::AudioSourceType sourceType);
 Plugin::SrcInputType TransVideoInputType(OHOS::Media::VideoSourceType sourceType);
 bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& encoderMeta);
+bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::Meta& encoderMeta);
 bool IsDirectory(const std::string& path);
 bool ConvertDirPathToFilePath(const std::string& dirPath, OutputFormatType outputFormatType, std::string& filePath);
 }  // namespace Record

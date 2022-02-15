@@ -56,7 +56,7 @@ std::vector<WorkMode> VideoCaptureFilter::GetWorkModes()
     return {WorkMode::PUSH};
 }
 
-ErrorCode VideoCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& audioMeta)
+ErrorCode VideoCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& videoMeta)
 {
     MEDIA_LOG_D("IN");
     ErrorCode err = TranslatePluginStatus(plugin_->Init());
@@ -70,6 +70,10 @@ ErrorCode VideoCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::
         return err;
     }
     err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_HEIGHT, videoHeight_));
+    if (err != ErrorCode::SUCCESS) {
+        return err;
+    }
+    err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_CAPTURE_RATE, captureRate_));
     if (err != ErrorCode::SUCCESS) {
         return err;
     }
@@ -96,8 +100,8 @@ do { \
         case Tag::VIDEO_HEIGHT:
             ASSIGN_PARAMETER_IF_MATCH(uint32_t, value, videoHeight_);
             break;
-        case Tag::VIDEO_FRAME_RATE:
-            ASSIGN_PARAMETER_IF_MATCH(uint64_t, value, frameRate_);
+        case Tag::VIDEO_CAPTURE_RATE:
+            ASSIGN_PARAMETER_IF_MATCH(double, value, captureRate_);
             break;
         default:
             MEDIA_LOG_W("Unknown key %" PUBLIC_LOG "d", OHOS::Media::to_underlying(tag));
@@ -123,8 +127,8 @@ ErrorCode VideoCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
             value = videoHeight_;
             break;
         }
-        case Tag::VIDEO_FRAME_RATE: {
-            value = frameRate_;
+        case Tag::VIDEO_CAPTURE_RATE: {
+            value = captureRate_;
             break;
         }
         default:
@@ -137,16 +141,18 @@ ErrorCode VideoCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
 ErrorCode VideoCaptureFilter::DoConfigure()
 {
     auto emptyMeta = std::make_shared<Plugin::Meta>();
-    auto audioMeta = std::make_shared<Plugin::Meta>();
-    if (!MergeMetaWithCapability(*emptyMeta, capNegWithDownstream_, *audioMeta)) {
+    auto videoMeta = std::make_shared<Plugin::Meta>();
+    if (!MergeMetaWithCapability(*emptyMeta, capNegWithDownstream_, *videoMeta)) {
         MEDIA_LOG_E("cannot find available capability of plugin %" PUBLIC_LOG "s", pluginInfo_->name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
-    if (!outPorts_[0]->Configure(audioMeta)) {
+    videoMeta->SetUint32(Plugin::MetaID::VIDEO_WIDTH, videoWidth_);
+    videoMeta->SetUint32(Plugin::MetaID::VIDEO_HEIGHT, videoHeight_);
+    if (!outPorts_[0]->Configure(videoMeta)) {
         MEDIA_LOG_E("Configure downstream fail");
         return ErrorCode::ERROR_UNKNOWN;
     }
-    return InitAndConfigPlugin(audioMeta);
+    return InitAndConfigPlugin(videoMeta);
 }
 
 ErrorCode VideoCaptureFilter::Prepare()
@@ -285,10 +291,9 @@ bool VideoCaptureFilter::DoNegotiate(const CapabilitySet &outCaps)
     }
     for (const auto& outCap : outCaps) {
         auto thisOut = std::make_shared<Plugin::Capability>();
-        *thisOut = outCap;
+        *thisOut = outCap; // pixel format
         Plugin::TagMap upstreamParams;
         Plugin::TagMap downstreamParams;
-        upstreamParams.emplace(std::make_pair(Tag::VIDEO_FRAME_RATE, frameRate_));
         if (outPorts_[0]->Negotiate(thisOut, capNegWithDownstream_, upstreamParams, downstreamParams)) {
             MEDIA_LOG_I("Negotiate success");
             return true;

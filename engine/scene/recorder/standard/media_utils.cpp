@@ -18,6 +18,8 @@
 #include <sys/stat.h>
 #include "media_errors.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "plugin/common/plugin_video_tags.h"
+
 namespace OHOS {
 namespace Media {
 namespace {
@@ -89,6 +91,24 @@ bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& e
             break;
     }
     return false;
+}
+
+bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::Meta& encoderMeta)
+{
+    bool ret = true;
+    switch (vFormat) {
+        case OHOS::Media::VideoCodecFormat::H264:
+            encoderMeta.SetString(Plugin::MetaID::MIME, MEDIA_MIME_VIDEO_H264);
+            encoderMeta.SetData(Plugin::MetaID::VIDEO_H264_PROFILE, Plugin::VideoH264Profile::BASELINE);
+            break;
+        case OHOS::Media::VideoCodecFormat::MPEG4:
+            encoderMeta.SetString(Plugin::MetaID::MIME, MEDIA_MIME_VIDEO_MPEG4);
+            break;
+        default:
+            ret = false;
+            break;
+    }
+    return ret;
 }
 
 bool IsDirectory(const std::string& path)

@@ -50,7 +50,7 @@ public:
     ErrorCode SendEos();
 private:
     void InitPorts() override;
-    ErrorCode InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& audioMeta);
+    ErrorCode InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& videoMeta);
     void ReadLoop();
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);
@@ -72,7 +72,7 @@ private:
     bool videoWidthSpecified_ {false};
     uint32_t videoHeight_ {0};
     bool videoHeightSpecified_ {false};
-    uint64_t frameRate_ {0};
+    double captureRate_ {0};
     bool frameRateSpecified_ {false};
     Capability capNegWithDownstream_ {};
     std::atomic<bool> isEos_ {false};

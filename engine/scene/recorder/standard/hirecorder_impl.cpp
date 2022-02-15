@@ -559,7 +559,7 @@ ErrorCode HiRecorderImpl::DoConfigureAudio(const RecorderParamInternal& recParam
 ErrorCode HiRecorderImpl::DoConfigureVideo(const RecorderParamInternal& recParamInternal) const
 {
 #ifdef VIDEO_SUPPORT
-    ErrorCode ret  = ErrorCode::SUCCESS;
+    ErrorCode ret = ErrorCode::SUCCESS;
     Plugin::Any any {recParamInternal.any};
     switch (recParamInternal.type) {
         case RecorderPublicParamType::VID_RECTANGLE: {
@@ -572,15 +572,32 @@ ErrorCode HiRecorderImpl::DoConfigureVideo(const RecorderParamInternal& recParam
             }
             break;
         }
-        case RecorderPublicParamType::VID_FRAMERATE:
-            ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_FRAME_RATE),
-                                              static_cast<uint64_t>(Plugin::AnyCast<VidFrameRate>(any).frameRate));
+        case RecorderPublicParamType::VID_CAPTURERATE: {
+            ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_CAPTURE_RATE),
+                                              static_cast<double>(Plugin::AnyCast<CaptureRate>(any).capRate));
             break;
-        case RecorderPublicParamType::VID_CAPTURERATE:
-        case RecorderPublicParamType::VID_BITRATE:
-        case RecorderPublicParamType::VID_ENC_FMT:
-            MEDIA_LOG_E("ignore RecorderPublicParamType %" PUBLIC_LOG "d", recParamInternal.type);
+        }
+        case RecorderPublicParamType::VID_BITRATE: {
+            int32_t bitRate = Plugin::AnyCast<VidBitRate>(any).bitRate;
+            ret = videoEncoder_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
+                                              static_cast<uint64_t>((bitRate >= 0) ? bitRate : 0));
             break;
+        }
+        case RecorderPublicParamType::VID_FRAMERATE: {
+            int32_t frameRate = Plugin::AnyCast<VidFrameRate>(any).frameRate;
+            ret = videoEncoder_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_FRAME_RATE),
+                                              static_cast<uint64_t>((frameRate >= 0) ? frameRate : 0));
+            break;
+        }
+        case RecorderPublicParamType::VID_ENC_FMT: {
+            auto encoderMeta = std::make_shared<Plugin::Meta>();
+            if (!TransVideoEncoderFmt(Plugin::AnyCast<VidEnc>(any).encFmt, *encoderMeta)) {
+                ret = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+                break;
+            }
+            ret = videoEncoder_->SetVideoEncoder(recParamInternal.sourceId, encoderMeta);
+            break;
+        }
         default:
             break;
     }

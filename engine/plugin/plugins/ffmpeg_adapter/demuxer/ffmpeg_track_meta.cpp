@@ -155,7 +155,7 @@ void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_
 #ifdef VIDEO_SUPPORT
 void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta)
 {
-    meta.insert({Tag::MIME, std::string(MEDIA_MIME_VIDEO_AVC)});
+    meta.insert({Tag::MIME, std::string(MEDIA_MIME_VIDEO_H264)});
     meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
     meta.insert({Tag::MEDIA_BITRATE, context->bit_rate});
     meta.insert({Tag::VIDEO_WIDTH, static_cast<uint32_t>(context->width)});

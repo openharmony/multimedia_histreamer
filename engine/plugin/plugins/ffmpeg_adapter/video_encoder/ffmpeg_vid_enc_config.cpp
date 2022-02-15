@@ -179,7 +179,7 @@ void ConfigH264Codec(AVCodecContext& codecContext, const std::map<Tag, ValueType
 }
 using ConfigFunc = std::function<void(AVCodecContext&, const std::map<Tag, ValueType>&)>;
 std::map<AVCodecID, ConfigFunc> g_videoConfigFuncMap = {
-        {AV_CODEC_ID_H264, ConfigH264Codec}
+    {AV_CODEC_ID_H264, ConfigH264Codec},
 };
 
 void GetVideoCommonAttr(const AVCodecContext& codecContext, Tag tag, ValueType& outVal)
@@ -211,7 +211,7 @@ void GetH264Attr(const AVCodecContext& codecContext, Tag tag, ValueType& outVal)
 
 using GetAttrFunc = std::function<void(const AVCodecContext&, Tag, ValueType&)>;
 std::map<AVCodecID, GetAttrFunc> g_getVideoAttrFuncMap = {
-        {AV_CODEC_ID_H264, GetH264Attr},
+    {AV_CODEC_ID_H264, GetH264Attr},
 };
 }
 

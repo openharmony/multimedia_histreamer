@@ -39,7 +39,9 @@ enum struct AudioFormat : uint8_t {
 };
 
 enum struct VideoFormat : uint8_t {
+    UNKNOWN = 0,
     H264 = 1,
+    MPEG4 = 2,
 };
 
 #define MAKE_AUDIO_SPECIFIC_START(format) (SECTION_AUDIO_SPECIFIC_START | (static_cast<uint8_t>(format) << 8U))
@@ -131,6 +133,7 @@ enum struct Tag : uint32_t {
     VIDEO_FRAME_RATE,                                ///< uint64_t, video frame rate
     VIDEO_SURFACE,                                   ///< @see class Surface
     VIDEO_MAX_SURFACE_NUM,                           ///< uint32_t, max video surface num
+    VIDEO_CAPTURE_RATE,                              ///< double, video capture rate
 
     /* -------------------- video specific tag -------------------- */
     AUDIO_SPECIFIC_H264_START = MAKE_VIDEO_SPECIFIC_START(VideoFormat::H264),

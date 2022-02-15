@@ -91,14 +91,15 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
         }
     } else {
         inputCaps.AppendDiscreteKeys<VideoPixelFormat>(
-                Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21});
+            Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21}
+        );
     }
     definition.inCaps.push_back(inputCaps);
 
     Capability outputCaps("video/unknown");
     switch (codec->id) {
         case AV_CODEC_ID_H264:
-            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_AVC);
+            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
             break;
         default:
             MEDIA_LOG_I("codec is not supported right now");
@@ -388,10 +389,8 @@ Status VideoFfmpegEncoderPlugin::Flush()
 Status VideoFfmpegEncoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
 {
     MEDIA_LOG_D("queue input buffer");
-    if (inputBuffer->IsEmpty() && !(inputBuffer->flag & BUFFER_FLAG_EOS)) {
-        MEDIA_LOG_E("encoder does not support fd buffer");
-        return Status::ERROR_INVALID_DATA;
-    }
+    FALSE_RET_V_MSG_E(!inputBuffer->IsEmpty() || (inputBuffer->flag & BUFFER_FLAG_EOS),
+                      Status::ERROR_INVALID_DATA, "encoder does not support fd buffer");
     Status ret = Status::OK;
     {
         OSAL::ScopedLock l(avMutex_);
@@ -407,78 +406,55 @@ Status VideoFfmpegEncoderPlugin::DequeueInputBuffer(std::shared_ptr<Buffer>& inp
     return Status::OK;
 }
 
-#ifdef DUMP_RAW_DATA
-void VideoFfmpegEncoderPlugin::DumpVideoRawOutData()
+Status VideoFfmpegEncoderPlugin::FillAvFrame(const std::shared_ptr<Buffer>& inputBuffer)
 {
-    if (cachedFrame_->format == AV_PIX_FMT_YUV420P) {
-        if (cachedFrame_->data[0] != nullptr && cachedFrame_->linesize[0] != 0) {
-            dumpData_.write((char*)cachedFrame_->data[0], cachedFrame_->linesize[0] * cachedFrame_->height);
-        }
-        if (cachedFrame_->data[1] != nullptr && cachedFrame_->linesize[1] != 0) {
-            dumpData_.write((char*)cachedFrame_->data[1], cachedFrame_->linesize[1] * cachedFrame_->height / 2); // 2
-        }
-        if (cachedFrame_->data[2] != nullptr && cachedFrame_->linesize[2] != 0) {                                // 2
-            dumpData_.write((char*)cachedFrame_->data[2], cachedFrame_->linesize[2] * cachedFrame_->height / 2); // 2
-        }
-    } else if (cachedFrame_->format == AV_PIX_FMT_NV12 || cachedFrame_->format == AV_PIX_FMT_NV21) {
-        if (cachedFrame_->data[0] != nullptr && cachedFrame_->linesize[0] != 0) {
-            dumpData_.write((char*)cachedFrame_->data[0], cachedFrame_->linesize[0] * cachedFrame_->height);
-        }
-        if (cachedFrame_->data[1] != nullptr && cachedFrame_->linesize[1] != 0) {
-            dumpData_.write((char*)cachedFrame_->data[1], cachedFrame_->linesize[1] * cachedFrame_->height / 2); // 2
+    auto inputMemory = inputBuffer->GetMemory();
+    const uint8_t *data = inputMemory->GetReadOnlyData();
+    auto bufferMeta = inputBuffer->GetBufferMeta();
+    FALSE_RET_V_MSG_W(bufferMeta != nullptr && bufferMeta->GetType() == BufferMetaType::VIDEO,
+                      Status::ERROR_INVALID_PARAMETER, "invalid buffer meta");
+    std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
+    FALSE_RET_V_MSG_W(pixelFormat_ == videoMeta->videoPixelFormat, Status::ERROR_INVALID_PARAMETER,
+                      "pixel format change");
+    cachedFrame_->format = ConvertPixelFormatToFFmpeg(videoMeta->videoPixelFormat);
+    cachedFrame_->width = videoMeta->width;
+    cachedFrame_->height = videoMeta->height;
+    if (!videoMeta->stride.empty()) {
+        for (auto i = 0; i < videoMeta->planes; i++) {
+            cachedFrame_->linesize[i] = videoMeta->stride[i];
         }
     }
+    int32_t ySize = cachedFrame_->linesize[0] * AlignUp(cachedFrame_->height, DEFAULT_ALIGN);
+    // AV_PIX_FMT_YUV420P: linesize[0] = linesize[1] * 2, AV_PIX_FMT_NV12: linesize[0] = linesize[1]
+    int32_t uvSize = cachedFrame_->linesize[1] * AlignUp(cachedFrame_->height, DEFAULT_ALIGN) / 2; // 2
+    if (cachedFrame_->format == AV_PIX_FMT_YUV420P) {
+        cachedFrame_->data[0] = const_cast<uint8_t *>(data);
+        cachedFrame_->data[1] = cachedFrame_->data[0] + ySize;
+        cachedFrame_->data[2] = cachedFrame_->data[1] + uvSize; // 2: plane 2
+    } else if ((cachedFrame_->format == AV_PIX_FMT_NV12) || (cachedFrame_->format == AV_PIX_FMT_NV21)) {
+        cachedFrame_->data[0] = const_cast<uint8_t *>(data);
+        cachedFrame_->data[1] = cachedFrame_->data[0] + ySize;
+    } else {
+        MEDIA_LOG_E("Unsupported pixel format: %d", cachedFrame_->format);
+        return Status::ERROR_UNSUPPORTED_FORMAT;
+    }
+    AVRational bq = {1, HST_SECOND};
+    cachedFrame_->pts = ConvertTimeToFFmpeg(
+            static_cast<uint64_t>(inputBuffer->pts) / avCodecContext_->ticks_per_frame,
+            avCodecContext_->time_base);
 }
-#endif
 
 Status VideoFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer)
 {
-    if (state_ != State::RUNNING) {
-        MEDIA_LOG_W("queue input buffer in wrong state");
-        return Status::ERROR_WRONG_STATE;
-    }
+    FALSE_RET_V_MSG_E(state_ == State::RUNNING,
+                      Status::ERROR_WRONG_STATE, "queue input buffer in wrong state");
     bool isEos = false;
     if (inputBuffer == nullptr || (inputBuffer->flag & BUFFER_FLAG_EOS) != 0) {
         isEos = true;
     } else {
-        auto inputMemory = inputBuffer->GetMemory();
-        const uint8_t *data = inputMemory->GetReadOnlyData();
-        auto bufferMeta = inputBuffer->GetBufferMeta();
-        if (bufferMeta != nullptr && bufferMeta->GetType() == BufferMetaType::VIDEO) {
-            std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
-            if (pixelFormat_ != videoMeta->videoPixelFormat) {
-                MEDIA_LOG_E("pixel format change");
-            }
-            // FIXME: if width/height of input frame have change after start, need to re-configure encoder
-            cachedFrame_->format = ConvertPixelFormatToFFmpeg(videoMeta->videoPixelFormat);
-            cachedFrame_->width = videoMeta->width;
-            cachedFrame_->height = videoMeta->height;
-            if (!videoMeta->stride.empty()) {
-                for (auto i = 0; i < videoMeta->planes; i++) {
-                    cachedFrame_->linesize[i] = videoMeta->stride[i];
-                }
-            }
-            int32_t ySize = cachedFrame_->linesize[0] * AlignUp(cachedFrame_->height, DEFAULT_ALIGN);
-            // AV_PIX_FMT_YUV420P: linesize[0] = linesize[1] * 2, AV_PIX_FMT_NV12: linesize[0] = linesize[1]
-            int32_t uvSize = cachedFrame_->linesize[1] * AlignUp(cachedFrame_->height, DEFAULT_ALIGN) / 2; // 2
-            if (cachedFrame_->format == AV_PIX_FMT_YUV420P) {
-                cachedFrame_->data[0] = const_cast<uint8_t *>(data);
-                cachedFrame_->data[1] = cachedFrame_->data[0] + ySize;
-                cachedFrame_->data[2] = cachedFrame_->data[1] + uvSize;
-            } else if ((cachedFrame_->format == AV_PIX_FMT_NV12) || (cachedFrame_->format == AV_PIX_FMT_NV21)) {
-                cachedFrame_->data[0] = const_cast<uint8_t *>(data);
-                cachedFrame_->data[1] = cachedFrame_->data[0] + ySize;
-            } else {
-                MEDIA_LOG_E("Unsupported pixel format: %d", cachedFrame_->format);
-                return Status::ERROR_UNSUPPORTED_FORMAT;
-            }
-#ifdef DUMP_RAW_DATA
-            DumpVideoRawOutData();
-#endif
-            AVRational bq = {1, HST_SECOND};
-            cachedFrame_->pts = ConvertTimeToFFmpeg(
-                    static_cast<uint64_t>(inputBuffer->pts) / avCodecContext_->ticks_per_frame,
-                    avCodecContext_->time_base);
+        auto res = FillAvFrame(inputBuffer);
+        if (res != Status::OK) {
+            return res;
         }
     }
     AVFrame *frame = nullptr;
@@ -488,10 +464,7 @@ Status VideoFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
     auto ret = avcodec_send_frame(avCodecContext_.get(), frame);
     if (ret < 0) {
         MEDIA_LOG_D("send buffer error %s", AVStrError(ret).c_str());
-        if (ret == AVERROR_EOF) {
-            return Status::END_OF_STREAM;
-        }
-        return Status::ERROR_NO_MEMORY;
+        return (ret == AVERROR_EOF) ? Status::END_OF_STREAM : Status::ERROR_NO_MEMORY;
     }
     if (frame) {
         av_frame_unref(cachedFrame_.get());
@@ -501,15 +474,11 @@ Status VideoFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
 
 Status VideoFfmpegEncoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& packetBuffer)
 {
-    if (cachedPacket_->data == nullptr) {
-        MEDIA_LOG_E("avcodec_receive_packet() packet data is empty");
-        return Status::ERROR_UNKNOWN;
-    }
+    FALSE_RET_V_MSG_E(cachedPacket_->data != nullptr, Status::ERROR_UNKNOWN,
+                      "avcodec_receive_packet() packet data is empty");
     auto frameBufferMem = packetBuffer->GetMemory();
-    if (frameBufferMem->Write(cachedPacket_->data, cachedPacket_->size, 0) != cachedPacket_->size) {
-        MEDIA_LOG_E("copy packet data to buffer fail");
-        return Status::ERROR_UNKNOWN;
-    }
+    FALSE_RET_V_MSG_E(frameBufferMem->Write(cachedPacket_->data, cachedPacket_->size, 0) == cachedPacket_->size,
+                      Status::ERROR_UNKNOWN, "copy packet data to buffer fail");
     if (cachedPacket_->flags & AV_PKT_FLAG_KEY) {
         MEDIA_LOG_D("It is key frame");
     }
@@ -517,15 +486,16 @@ Status VideoFfmpegEncoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& 
             static_cast<uint64_t>(ConvertTimeFromFFmpeg(cachedPacket_->pts, avCodecContext_->time_base));
     packetBuffer->dts =
             static_cast<uint64_t>(ConvertTimeFromFFmpeg(cachedPacket_->dts, avCodecContext_->time_base));
+#ifdef DUMP_RAW_DATA
+    dumpData_.write((char*)cachedPacket_->data, cachedPacket_->size);
+#endif
     return Status::OK;
 }
 
 Status VideoFfmpegEncoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffer>& packetBuffer)
 {
-    if (state_ != State::RUNNING) {
-        MEDIA_LOG_W("queue input buffer in wrong state");
-        return Status::ERROR_WRONG_STATE;
-    }
+    FALSE_RET_V_MSG_E(state_ == State::RUNNING,
+                      Status::ERROR_WRONG_STATE, "encode task in wrong state");
     Status status;
     auto ret = avcodec_receive_packet(avCodecContext_.get(), cachedPacket_.get());
     if (ret >= 0) {
