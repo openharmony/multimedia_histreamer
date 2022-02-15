@@ -23,7 +23,7 @@
 #include "pipeline/core/plugin_attr_desc.h"
 
 namespace {
-constexpr int32_t MAX_BUF_LEN = 512;
+constexpr int32_t MAX_BUF_LEN = 256;
 #define RETURN_IF_FAILED(exec, errVal, retVal) \
 do { \
     auto res = exec; \
@@ -49,7 +49,7 @@ inline int32_t SnPrintf(char* buf, size_t maxLen, const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    auto ret = vsnprintf_s(buf, maxLen, SECUREC_STRING_MAX_LEN - 1, fmt, args);
+    auto ret = vsnprintf_truncated_s(buf, maxLen, fmt, args);
     va_end(args);
     if (ret < 0) {
         return ret;
