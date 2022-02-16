@@ -14,25 +14,20 @@
 
 import("//foundation/multimedia/histreamer/config.gni")
 
-if (!defined(ohos_lite)) {
+if (!hst_is_lite_sys) {
   ohos_kernel_type = ""
 }
 
-print(
-    "histreamer plugin config:multimedia_histreamer_enable_plugin_ffmpeg_adapter =",
-    multimedia_histreamer_enable_plugin_ffmpeg_adapter)
-print(
-    "histreamer plugin config:multimedia_histreamer_enable_plugin_hdi_adapter =",
-    multimedia_histreamer_enable_plugin_hdi_adapter)
-print(
-    "histreamer plugin config:multimedia_histreamer_enable_plugin_file_source =",
-    multimedia_histreamer_enable_plugin_file_source)
-print(
-    "histreamer plugin config:multimedia_histreamer_enable_plugin_stream_source =",
-    multimedia_histreamer_enable_plugin_stream_source)
-print(
-    "histreamer plugin config:multimedia_histreamer_enable_plugin_audio_server_sink =",
-    multimedia_histreamer_enable_plugin_audio_server_sink)
+print("histreamer plugin: ffmpeg_adapter =",
+      multimedia_histreamer_enable_plugin_ffmpeg_adapter)
+print("histreamer plugin: hdi_adapter =",
+      multimedia_histreamer_enable_plugin_hdi_adapter)
+print("histreamer plugin: file_source =",
+      multimedia_histreamer_enable_plugin_file_source)
+print("histreamer plugin: stream_source =",
+      multimedia_histreamer_enable_plugin_stream_source)
+print("histreamer plugin: audio_server_sink =",
+      multimedia_histreamer_enable_plugin_audio_server_sink)
 
 group("histreamer_plugin_store") {
   deps = []

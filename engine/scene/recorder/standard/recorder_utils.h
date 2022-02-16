@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_MEDIA_UTILS_H
-#define HISTREAMER_MEDIA_UTILS_H
+#ifndef HISTREAMER_SCENE_RECORDER_MEDIA_UTILS_H
+#define HISTREAMER_SCENE_RECORDER_MEDIA_UTILS_H
 
 #include "i_recorder_engine.h"
 #include "foundation/error_code.h"
@@ -92,4 +92,4 @@ bool ConvertDirPathToFilePath(const std::string& dirPath, OutputFormatType outpu
 }  // namespace Media
 }  // namespace OHOS
 
-#endif  // HISTREAMER_MEDIA_UTILS_H
+#endif  // HISTREAMER_SCENE_RECORDER_MEDIA_UTILS_H

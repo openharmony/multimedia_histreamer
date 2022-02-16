@@ -439,4 +439,4 @@ void AudioCaptureFilter::SendBuffer(const std::shared_ptr<AVBuffer>& buffer)
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
-#endif
+#endif // RECORDER_SUPPORT

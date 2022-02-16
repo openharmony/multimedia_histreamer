@@ -15,8 +15,6 @@
 #ifndef HISTREAMER_AUDIO_FFMPEG_ENCODER_PLUGIN_H
 #define HISTREAMER_AUDIO_FFMPEG_ENCODER_PLUGIN_H
 
-#ifdef RECORDER_SUPPORT
-
 #include <functional>
 #include <map>
 #include "utils/blocking_queue.h"
@@ -126,5 +124,4 @@ private:
 } // namespace Media
 } // namespace OHOS
 
-#endif
 #endif // HISTREAMER_AUDIO_FFMPEG_ENCODER_PLUGIN_H

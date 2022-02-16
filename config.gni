@@ -29,4 +29,10 @@ declare_args() {
   # configuration for histreamer created thread's stack size.
   # 0 means using system default thread stack size, other positive values will be accepted.
   config_ohos_multimedia_histreamer_stack_size = 0
+  hst_is_lite_sys = false
+}
+if (!defined(ohos_lite) || !ohos_lite) {
+  hst_is_lite_sys = false
+} else {
+  hst_is_lite_sys = true
 }

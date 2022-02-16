@@ -319,4 +319,4 @@ Plugin::Status MuxerFilter::MuxerDataSink::WriteAt(int64_t offset, const std::sh
 } // Pipeline
 } // Media
 } // OHOS
-#endif
+#endif // RECORDER_SUPPORT

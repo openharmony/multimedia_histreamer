@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import("//foundation/multimedia/histreamer/config.gni")
 config("histreamer_utils_config") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine",
@@ -19,7 +19,6 @@ config("histreamer_utils_config") {
     "//foundation/multimedia/histreamer/engine/plugin",
   ]
   defines = [
-    "MEDIA_OHOS",
     #"PROFILE",
   ]
 }
@@ -30,11 +29,18 @@ source_set("histreamer_utils") {
     "steady_clock.cpp",
     "utils.cpp",
   ]
-  public_configs = [ ":histreamer_utils_config" ]
-  public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
-  cflags = [
-    "-fPIC",
-    "-O2",
+  if (hst_is_lite_sys) {
+    if (ohos_kernel_type == "liteos_m") {
+      deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    } else {
+      deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+    }
+  } else {
+    deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  }
+  public_configs = [
+    ":histreamer_utils_config",
+    "//foundation/multimedia/histreamer:histreamer_presets",
   ]
-  cflags_cc = cflags
+  public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
 }

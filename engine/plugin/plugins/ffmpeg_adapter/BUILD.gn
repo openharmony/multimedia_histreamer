@@ -11,8 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import("//foundation/multimedia/histreamer/config.gni")
 
-if (!defined(ohos_lite)) {
+if (!hst_is_lite_sys) {
   ohos_kernel_type = ""
 }
 
@@ -24,7 +25,7 @@ group("plugin_ffmpeg_adapter") {
       ":histreamer_plugin_FFmpegDemuxer",
     ]
   }
-  if (!defined(ohos_lite)) {
+  if (!hst_is_lite_sys) {
     deps += [
       ":histreamer_plugin_FFmpegAudioEncoders",
       ":histreamer_plugin_FFmpegMuxers",
@@ -40,30 +41,20 @@ source_set("ffmpeg_audio_decoders") {
     "audio_decoder/audio_ffmpeg_decoder_plugin.cpp",
     "utils/ffmpeg_utils.cpp",
   ]
-  public_configs = [ ":plugin_ffmpeg_adapter_config" ]
+  public_configs = [
+    ":plugin_ffmpeg_adapter_config",
+    "//foundation/multimedia/histreamer:histreamer_presets",
+  ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
-  cflags = [
-    "-fPIC",
-    "-Wall",
-  ]
-  if (defined(ohos_lite)) {
+  if (hst_is_lite_sys) {
     # deps on lite
   } else {
     public_deps += [ "//third_party/ffmpeg:libohosffmpeg" ]
-    configs -= [
-      "//build/config/compiler:no_rtti",
-      "//build/config/compiler:no_exceptions",
-    ]
-    cflags += [
-      "-frtti",
-      "-fexceptions",
-    ]
   }
-  cflags_cc = cflags
 }
 source_set("ffmpeg_demuxers") {
   sources = [
@@ -73,30 +64,21 @@ source_set("ffmpeg_demuxers") {
     "utils/bit_reader.cpp",
     "utils/ffmpeg_utils.cpp",
   ]
-  public_configs = [ ":plugin_ffmpeg_adapter_config" ]
+  public_configs = [
+    ":plugin_ffmpeg_adapter_config",
+    "//foundation/multimedia/histreamer:histreamer_presets",
+  ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
-  cflags = [
-    "-fPIC",
-    "-Wall",
-  ]
-  if (defined(ohos_lite)) {
+
+  if (hst_is_lite_sys) {
     # deps on lite
   } else {
     public_deps += [ "//third_party/ffmpeg:libohosffmpeg" ]
-    configs -= [
-      "//build/config/compiler:no_rtti",
-      "//build/config/compiler:no_exceptions",
-    ]
-    cflags += [
-      "-frtti",
-      "-fexceptions",
-    ]
   }
-  cflags_cc = cflags
 }
 
 source_set("ffmpeg_audio_encoders") {
@@ -105,30 +87,20 @@ source_set("ffmpeg_audio_encoders") {
     "audio_encoder/ffmpeg_au_enc_config.cpp",
     "utils/ffmpeg_utils.cpp",
   ]
-  public_configs = [ ":plugin_ffmpeg_adapter_config" ]
+  public_configs = [
+    ":plugin_ffmpeg_adapter_config",
+    "//foundation/multimedia/histreamer:histreamer_presets",
+  ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
-  cflags = [
-    "-fPIC",
-    "-Wall",
-  ]
-  if (defined(ohos_lite)) {
+  if (hst_is_lite_sys) {
     print("histreamer audio encoder plugin only supports standard system")
   } else {
     public_deps += [ "//third_party/ffmpeg:libohosffmpeg" ]
-    configs -= [
-      "//build/config/compiler:no_rtti",
-      "//build/config/compiler:no_exceptions",
-    ]
-    cflags += [
-      "-frtti",
-      "-fexceptions",
-    ]
   }
-  cflags_cc = cflags
 }
 
 source_set("ffmpeg_muxers") {
@@ -137,33 +109,23 @@ source_set("ffmpeg_muxers") {
     "utils/ffmpeg_codec_map.cpp",
     "utils/ffmpeg_utils.cpp",
   ]
-  public_configs = [ ":plugin_ffmpeg_adapter_config" ]
+  public_configs = [
+    ":plugin_ffmpeg_adapter_config",
+    "//foundation/multimedia/histreamer:histreamer_presets",
+  ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
-  cflags = [
-    "-fPIC",
-    "-Wall",
-  ]
-  if (defined(ohos_lite)) {
+  if (hst_is_lite_sys) {
     print("histreamer ffmpeg muxer plugin only supports standard system")
   } else {
     public_deps += [ "//third_party/ffmpeg:libohosffmpeg" ]
-    configs -= [
-      "//build/config/compiler:no_rtti",
-      "//build/config/compiler:no_exceptions",
-    ]
-    cflags += [
-      "-frtti",
-      "-fexceptions",
-    ]
   }
-  cflags_cc = cflags
 }
 
-if (defined(ohos_lite)) {
+if (hst_is_lite_sys) {
   # lite
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {

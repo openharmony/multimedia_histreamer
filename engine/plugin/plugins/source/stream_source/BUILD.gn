@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-if (!defined(ohos_lite)) {
+import("//foundation/multimedia/histreamer/config.gni")
+if (!hst_is_lite_sys) {
   ohos_kernel_type = ""
 }
 
@@ -34,7 +34,8 @@ target(target_type, "histreamer_plugin_StreamSource") {
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
-  if (defined(ohos_lite)) {
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
+  if (hst_is_lite_sys) {
     public_deps += [ "//foundation/multimedia/utils/lite:media_common" ]
   }
 }

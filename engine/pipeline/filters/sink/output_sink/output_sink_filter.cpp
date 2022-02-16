@@ -192,4 +192,4 @@ ErrorCode OutputSinkFilter::Stop()
 } // Pipeline
 } // Media
 } // OHOS
-#endif
+#endif // RECORDER_SUPPORT

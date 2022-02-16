@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_PIPELINE_FILTER_AUDIO_DECODER_H
 #define HISTREAMER_PIPELINE_FILTER_AUDIO_DECODER_H
 
-#include "filters/codec/codec_filter_base.h"
+#include "pipeline/filters/codec/codec_filter_base.h"
 
 namespace OHOS {
 namespace Media {

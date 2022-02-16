@@ -20,10 +20,8 @@
 #include <unordered_map>
 
 #include "common/any.h"
-#include "i_recorder_engine.h"
 #include "foundation/error_code.h"
-#include "media_utils.h"
-#include "scene/recorder/internal/state_machine.h"
+#include "i_recorder_engine.h"
 #include "osal/thread/condition_variable.h"
 #include "osal/thread/mutex.h"
 #include "pipeline/core/pipeline.h"
@@ -34,8 +32,10 @@
 #include "pipeline/filters/codec/video_encoder/video_encoder_filter.h"
 #include "pipeline/filters/muxer/muxer_filter.h"
 #include "pipeline/filters/sink/output_sink/output_sink_filter.h"
+#include "recorder_utils.h"
 #include "scene/common/media_stat_stub.h"
-#include "recorder_executor.h"
+#include "scene/recorder/internal/state_machine.h"
+#include "scene/recorder/recorder_executor.h"
 
 namespace OHOS {
 namespace Media {

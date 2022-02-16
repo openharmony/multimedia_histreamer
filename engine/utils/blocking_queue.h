@@ -19,19 +19,20 @@
 #include <atomic>
 #include <queue>
 #include <string>
+#include <utility>
 #include "constants.h"
 #include "foundation/log.h"
-#include "osal/thread/condition_variable.h"
-#include "osal/thread/mutex.h"
-#include "osal/thread/scoped_lock.h"
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/osal/thread/scoped_lock.h"
 
 namespace OHOS {
 namespace Media {
 template <typename T>
 class BlockingQueue {
 public:
-    explicit BlockingQueue(const std::string& name, size_t capacity = DEFAULT_QUEUE_SIZE)
-        : name_(name), capacity_(capacity), isActive(true)
+    explicit BlockingQueue(std::string name, size_t capacity = DEFAULT_QUEUE_SIZE)
+        : name_(std::move(name)), capacity_(capacity), isActive(true)
     {
     }
     ~BlockingQueue() = default;

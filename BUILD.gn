@@ -11,8 +11,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import("//foundation/multimedia/histreamer/config.gni")
+config("histreamer_presets") {
+  include_dirs = [ "//foundation/multimedia/histreamer/engine" ]
+  defines = [ "MEDIA_OHOS" ]
+  cflags = [
+    "-O2",
+    "-fPIC",
+    "-Wall",
+    "-frtti",
+    "-fexceptions",
+  ]
+  cflags_cc = cflags
+}
 
-if (defined(ohos_lite)) {
+if (hst_is_lite_sys) {
   import("//build/lite/config/component/lite_component.gni")
   lite_library("histreamer") {
     if (ohos_kernel_type == "liteos_m") {
@@ -43,7 +56,7 @@ if (defined(ohos_lite)) {
       "engine/foundation:histreamer_foundation",
       "engine/pipeline:histreamer_pipeline",
       "engine/plugin:histreamer_plugin",
-      "engine/scene/player:histreamer_player",
+      "engine/scene:std_engine_factory",
       "engine/utils:histreamer_utils",
     ]
     relative_install_dir = "media"

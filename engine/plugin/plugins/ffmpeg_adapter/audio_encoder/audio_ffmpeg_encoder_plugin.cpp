@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#ifdef RECORDER_SUPPORT
-
 #define HST_LOG_TAG "Ffmpeg_Au_Encoder"
 
 #include "audio_ffmpeg_encoder_plugin.h"
@@ -513,4 +511,3 @@ std::shared_ptr<Allocator> AudioFfmpegEncoderPlugin::GetAllocator()
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-#endif

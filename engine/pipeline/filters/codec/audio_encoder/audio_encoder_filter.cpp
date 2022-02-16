@@ -300,4 +300,4 @@ ErrorCode AudioEncoderFilter::FinishFrame()
 } // Pipeline
 } // Media
 } // OHOS
-#endif
+#endif // RECORDER_SUPPORT

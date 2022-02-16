@@ -22,8 +22,8 @@
 #include <string>
 
 #include "foundation/log.h"
-#include "thread/condition_variable.h"
-#include "thread/mutex.h"
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
 
 namespace OHOS {
 namespace Media {

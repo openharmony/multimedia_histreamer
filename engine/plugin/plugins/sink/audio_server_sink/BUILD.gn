@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-if (!defined(ohos_lite)) {
+import("//foundation/multimedia/histreamer/config.gni")
+if (!hst_is_lite_sys) {
   group("plugin_audio_server_sink") {
     deps = [ ":histreamer_plugin_AudioServerSink" ]
   }
@@ -25,20 +25,10 @@ if (!defined(ohos_lite)) {
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
       "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
     ]
-    configs += [ "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiorenderer:audio_renderer_config" ]
-    configs -= [
-      "//build/config/compiler:no_rtti",
-      "//build/config/compiler:no_exceptions",
+    public_configs = [
+      "//foundation/multimedia/histreamer:histreamer_presets",
+      "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiorenderer:audio_renderer_config",
     ]
-    cflags = [
-      "-fPIC",
-      "-Wall",
-    ]
-    cflags += [
-      "-frtti",
-      "-fexceptions",
-    ]
-    cflags_cc = cflags
   }
 
   # only for standard
