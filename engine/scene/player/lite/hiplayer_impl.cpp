@@ -256,7 +256,7 @@ ErrorCode HiPlayerImpl::StopAsync()
 int32_t HiPlayerImpl::Rewind(int64_t mSeconds, int32_t mode)
 {
     int64_t hstTime = 0;
-    if (!Plugin::Sec2HstTime(mSeconds, hstTime)) {
+    if (!Plugin::Ms2HstTime(mSeconds, hstTime)) {
         return to_underlying(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }
     return to_underlying(fsm_.SendEventAsync(Intent::SEEK, hstTime));
