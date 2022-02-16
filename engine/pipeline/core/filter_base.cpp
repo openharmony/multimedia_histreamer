@@ -134,7 +134,7 @@ std::vector<Filter*> FilterBase::GetPreFilters()
     return preFilters;
 }
 
-ErrorCode FilterBase::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
+ErrorCode FilterBase::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     UNUSED_VARIABLE(inPort);
     UNUSED_VARIABLE(buffer);

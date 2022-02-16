@@ -174,7 +174,7 @@ void AudioSinkFilter::ReportCurrentPosition(int64_t pts)
     }
 }
 
-ErrorCode AudioSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
+ErrorCode AudioSinkFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     MEDIA_LOG_D("audio sink push data started, state: %" PUBLIC_LOG_D32, state_.load());
     if (isFlushing || state_.load() == FilterState::INITIALIZED) {

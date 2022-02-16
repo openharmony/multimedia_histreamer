@@ -196,7 +196,7 @@ ErrorCode DemuxerFilter::Prepare()
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode DemuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
+ErrorCode DemuxerFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     MEDIA_LOG_D("PushData for port: %" PUBLIC_LOG "s", inPort.c_str());
     if (dataPacker_) {

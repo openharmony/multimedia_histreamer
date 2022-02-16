@@ -59,7 +59,7 @@ public:
      * @param offset means the offset from the start of the stream between Filter.Start and Filter.Stop. -1 means ignore
      * this parameter.
      */
-    virtual void PushData(AVBufferPtr buffer, int64_t offset) = 0;
+    virtual void PushData(const AVBufferPtr& buffer, int64_t offset) = 0;
     virtual ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) = 0;
 
 protected:
@@ -84,7 +84,7 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer, int64_t offset) override;
+    void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:
@@ -105,7 +105,7 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer, int64_t offset) override;
+    void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:
@@ -130,7 +130,7 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer, int64_t offset) override;
+    void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:
@@ -152,7 +152,7 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer, int64_t offset) override;
+    void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:

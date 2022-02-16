@@ -84,7 +84,7 @@ bool InPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 }
 
 
-void InPort::PushData(AVBufferPtr buffer, int64_t offset)
+void InPort::PushData(const AVBufferPtr& buffer, int64_t offset)
 {
     if (filter) {
         filter->PushData(name, buffer, offset);
@@ -168,7 +168,7 @@ bool OutPort::Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
     return nextPort->Configure(upstreamMeta);
 }
 
-void OutPort::PushData(AVBufferPtr buffer, int64_t offset)
+void OutPort::PushData(const AVBufferPtr& buffer, int64_t offset)
 {
     nextPort->PushData(buffer, offset);
 }
@@ -217,7 +217,7 @@ bool EmptyInPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamM
     return false;
 }
 
-void EmptyInPort::PushData(AVBufferPtr buffer, int64_t offset)
+void EmptyInPort::PushData(const AVBufferPtr& buffer, int64_t offset)
 {
     UNUSED_VARIABLE(buffer);
     UNUSED_VARIABLE(offset);
@@ -265,7 +265,7 @@ bool EmptyOutPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstream
     return false;
 }
 
-void EmptyOutPort::PushData(AVBufferPtr buffer, int64_t offset)
+void EmptyOutPort::PushData(const AVBufferPtr& buffer, int64_t offset)
 {
     UNUSED_VARIABLE(buffer);
     UNUSED_VARIABLE(offset);

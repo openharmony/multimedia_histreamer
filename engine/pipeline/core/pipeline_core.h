@@ -103,7 +103,7 @@ public:
     {
         return {};
     }
-    ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) override
+    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override
     {
         UNUSED_VARIABLE(inPort);
         UNUSED_VARIABLE(buffer);

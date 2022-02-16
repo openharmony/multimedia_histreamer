@@ -375,7 +375,7 @@ ErrorCode VideoDecoderFilter::ConfigureNoLocked(const std::shared_ptr<const Plug
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode VideoDecoderFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
+ErrorCode VideoDecoderFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
         MEDIA_LOG_W("pushing data to decoder when state_ is %" PUBLIC_LOG "d", static_cast<int>(state_.load()));

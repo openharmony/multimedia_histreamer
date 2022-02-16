@@ -280,7 +280,7 @@ void MuxerFilter::UpdateEosState(const std::string& inPort)
     eosTrackCnt = eosCnt;
 }
 
-ErrorCode MuxerFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
+ErrorCode MuxerFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
         MEDIA_LOG_W("pushing data to muxer when state is %" PUBLIC_LOG "d", static_cast<int>(state_.load()));

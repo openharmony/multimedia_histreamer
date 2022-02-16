@@ -145,7 +145,7 @@ ErrorCode OutputSinkFilter::SetFd(int32_t fd)
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode OutputSinkFilter::PushData(const std::string &inPort, AVBufferPtr buffer, int64_t offset)
+ErrorCode OutputSinkFilter::PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     auto ret = ErrorCode::SUCCESS;
     if (offset >= 0 && offset != currentPos_) {

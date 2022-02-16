@@ -59,7 +59,7 @@ public:
      * @param offset always ignore this parameter
      * @return
      */
-    ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) override;
+    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,

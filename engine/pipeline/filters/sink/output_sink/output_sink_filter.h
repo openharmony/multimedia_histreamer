@@ -42,7 +42,7 @@ public:
     ErrorCode SetOutputPath(const std::string& path);
     ErrorCode SetFd(int32_t fd);
 
-    ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer, int64_t offset) override;
+    ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
 private:
     std::shared_ptr<Plugin::OutputSink> plugin_;
