@@ -37,7 +37,7 @@ std::shared_ptr<SourcePlugin> VideoCapturePluginCreater(const std::string &name)
 Status VideoCaptureRegister(const std::shared_ptr<Register> &reg)
 {
     SourcePluginDef definition;
-    definition.name = "AudioCapture";
+    definition.name = "VideoCapture";
     definition.description = "Video capture from audio service";
     definition.rank = 100; // 100: max rank
     definition.inputType = SrcInputType::VID_SURFACE_YUV;
@@ -185,7 +185,7 @@ Status VideoCapturePlugin::GetParameter(Tag tag, ValueType& value)
     MEDIA_LOG_D("IN");
     switch (tag) {
         case Tag::VIDEO_SURFACE: {
-            value = surfaceProducer_.GetRefPtr();
+            value = surfaceProducer_;
             break;
         }
         default:

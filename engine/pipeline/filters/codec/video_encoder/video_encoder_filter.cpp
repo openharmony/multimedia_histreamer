@@ -36,7 +36,7 @@ const float VIDEO_PIX_DEPTH = 1.5;
 static uint32_t VIDEO_ALIGN_SIZE = 16;
 static uint32_t DEFAULT_TRY_DECODE_TIME = 10;
 
-static AutoRegisterFilter<VideoEncoderFilter> g_registerFilterHelper("builtin.recorder.videoEncoder");
+static AutoRegisterFilter<VideoEncoderFilter> g_registerFilterHelper("builtin.recorder.videoencoder");
 
 class VideoEncoderFilter::DataCallbackImpl : public Plugin::DataCallbackHelper {
 public:

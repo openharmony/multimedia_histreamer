@@ -136,7 +136,7 @@ enum struct Tag : uint32_t {
     VIDEO_CAPTURE_RATE,                              ///< double, video capture rate
 
     /* -------------------- video specific tag -------------------- */
-    AUDIO_SPECIFIC_H264_START = MAKE_VIDEO_SPECIFIC_START(VideoFormat::H264),
+    VIDEO_SPECIFIC_H264_START = MAKE_VIDEO_SPECIFIC_START(VideoFormat::H264),
     VIDEO_H264_PROFILE,      ///< @see VideoH264Profile
     VIDEO_H264_LEVEL,        ///< uint32_t, h264 level
 };

@@ -69,11 +69,8 @@ private:
     Plugin::SrcInputType inputType_ {};
     bool inputTypeSpecified_ {false};
     uint32_t videoWidth_ {0};
-    bool videoWidthSpecified_ {false};
     uint32_t videoHeight_ {0};
-    bool videoHeightSpecified_ {false};
     double captureRate_ {0};
-    bool frameRateSpecified_ {false};
     Capability capNegWithDownstream_ {};
     std::atomic<bool> isEos_ {false};
     OSAL::Mutex pushMutex_ {};

@@ -118,7 +118,16 @@ int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId
 
 sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
 {
+#ifdef VIDEO_SUPPORT
+    FALSE_RETURN_V(SourceIdGenerator::IsVideo(sourceId) && sourceId == videoSourceId_ &&
+                   videoCapture_ != nullptr, nullptr);
+    Plugin::Any any;
+    FALSE_RETURN_V(videoCapture_ ->GetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_SURFACE), any)
+                   != ErrorCode::SUCCESS, nullptr);
+    return any.SameTypeWith(typeid(sptr<Surface>)) ? Plugin::AnyCast<sptr<Surface>>(any) : nullptr;
+#else
     return nullptr;
+#endif
 }
 
 int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
@@ -430,7 +439,7 @@ ErrorCode HiRecorderImpl::SetVideoSourceInternal(VideoSourceType source, int32_t
         ret = pipeline_->LinkPorts(videoEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
     }
     if (ret == ErrorCode::SUCCESS) {
-        ret = fsm_.SendEvent(Intent::SET_AUDIO_SOURCE, std::pair<int32_t, Plugin::SrcInputType>(
+        ret = fsm_.SendEvent(Intent::SET_VIDEO_SOURCE, std::pair<int32_t, Plugin::SrcInputType>(
             sourceId, TransVideoInputType(source)));
     }
     return ret;
@@ -574,7 +583,7 @@ ErrorCode HiRecorderImpl::DoConfigureVideo(const RecorderParamInternal& recParam
         }
         case RecorderPublicParamType::VID_CAPTURERATE: {
             ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_CAPTURE_RATE),
-                                              static_cast<double>(Plugin::AnyCast<CaptureRate>(any).capRate));
+                                              Plugin::AnyCast<CaptureRate>(any).capRate);
             break;
         }
         case RecorderPublicParamType::VID_BITRATE: {

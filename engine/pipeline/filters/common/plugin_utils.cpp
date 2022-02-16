@@ -252,6 +252,30 @@ std::map<Plugin::MetaID, CapStrnessFunc> g_metaStrnessMap = {
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
+template<typename T>
+bool AssignParameterIfMatch(Tag tag, T& ret, const Plugin::ValueType& val)
+{
+    if (HasTagInfo(tag)) {
+        if (val.SameTypeWith(*GetTagDefValue(tag)) && val.SameTypeWith(typeid(T))) {
+            ret = Plugin::AnyCast<T>(val);
+            return true;
+        } else {
+            MEDIA_LOG_I("type of %" PUBLIC_LOG_S " mismatch, should be %" PUBLIC_LOG_S,
+                        GetTagStrName(tag), GetTagTypeStrName(tag));
+        }
+    } else {
+        MEDIA_LOG_I("tag %" PUBLIC_LOG_D32 "is not in map, may be update it?", tag);
+    }
+    return false;
+}
+
+template bool AssignParameterIfMatch(Tag tag, Plugin::SrcInputType& ret, const Plugin::ValueType& val);
+template bool AssignParameterIfMatch(Tag tag, uint32_t& ret, const Plugin::ValueType& val);
+template bool AssignParameterIfMatch(Tag tag, int64_t& ret, const Plugin::ValueType& val);
+template bool AssignParameterIfMatch(Tag tag, double& ret, const Plugin::ValueType& val);
+template bool AssignParameterIfMatch(Tag tag, Plugin::AudioSampleFormat& ret, const Plugin::ValueType& val);
+template bool AssignParameterIfMatch(Tag tag, Plugin::AudioChannelLayout& ret, const Plugin::ValueType& val);
+
 /**
  * translate plugin error into pipeline error code
  * @param pluginError
