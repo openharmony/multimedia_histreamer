@@ -68,6 +68,11 @@ void HttpCurlClient::InitCurlEnvironment()
     curl_easy_setopt(easyHandle_, CURLOPT_FORBID_REUSE, 0L);
     curl_easy_setopt(easyHandle_, CURLOPT_FOLLOWLOCATION, 1L);
 
+    curl_easy_setopt(easyHandle_, CURLOPT_VERBOSE, 1);
+
+    curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYPEER, 1L);
+    curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYHOST, 2L);
+
     curl_easy_setopt(easyHandle_, CURLOPT_WRITEFUNCTION, rxBody_);
     curl_easy_setopt(easyHandle_, CURLOPT_WRITEDATA, userParam_);
 

@@ -16,7 +16,6 @@
 #include "client_factory.h"
 #include "foundation/log.h"
 #include "http_curl_client.h"
-#include "https_curl_client.h"
 
 namespace OHOS {
 namespace Media {
@@ -38,17 +37,7 @@ ClientFactory::~ClientFactory()
 std::shared_ptr<NetworkClient> ClientFactory::CreateClient(const std::string& url)
 {
     FALSE_RETURN_V(!url.empty(), nullptr);
-    if (url.find("https") == 0) {
-        if (httpClient_ == nullptr) {
-            httpClient_ = std::make_shared<HttpCurlClient>(rxHeader_, rxBody_, userParam_);
-            httpClient_->Init();
-        }
-        if (httpsClient_ == nullptr) {
-            httpsClient_ = std::make_shared<HttpsCurlClient>(httpClient_);
-            httpsClient_->Init();
-        }
-        return httpsClient_;
-    } else if (url.find("http") == 0) {
+    if (url.find("http") == 0) {
         if (httpClient_ == nullptr) {
             httpClient_ = std::make_shared<HttpCurlClient>(rxHeader_, rxBody_, userParam_);
             httpClient_->Init();
