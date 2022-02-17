@@ -91,8 +91,7 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
         }
     } else {
         inputCaps.AppendDiscreteKeys<VideoPixelFormat>(
-            Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21}
-        );
+            Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21});
     }
     definition.inCaps.push_back(inputCaps);
 
@@ -440,8 +439,8 @@ Status VideoFfmpegEncoderPlugin::FillAvFrame(const std::shared_ptr<Buffer>& inpu
     }
     AVRational bq = {1, HST_SECOND};
     cachedFrame_->pts = ConvertTimeToFFmpeg(
-            static_cast<uint64_t>(inputBuffer->pts) / avCodecContext_->ticks_per_frame,
-            avCodecContext_->time_base);
+        static_cast<uint64_t>(inputBuffer->pts) / avCodecContext_->ticks_per_frame,
+        avCodecContext_->time_base);
 }
 
 Status VideoFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer)

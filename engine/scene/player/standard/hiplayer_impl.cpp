@@ -269,7 +269,7 @@ void HiPlayerImpl::OnEvent(const Event& event)
             MEDIA_LOG_I("Receive PLUGIN_ERROR, type:  %" PUBLIC_LOG_D32, to_underlying(pluginEvent.type));
             if (pluginEvent.type == Plugin::PluginEventType::CLIENT_ERROR &&
                 pluginEvent.param.SameTypeWith(typeid(Plugin::NetworkClientErrorCode))) {
-                auto netClientErrorCode= Plugin::AnyCast<Plugin::NetworkClientErrorCode>(pluginEvent.param);
+                auto netClientErrorCode = Plugin::AnyCast<Plugin::NetworkClientErrorCode>(pluginEvent.param);
                 auto errorType {PlayerErrorType::PLAYER_ERROR_UNKNOWN};
                 auto serviceErrCode { MSERR_UNKNOWN };
                 if (netClientErrorCode == Plugin::NetworkClientErrorCode::ERROR_TIME_OUT) {
