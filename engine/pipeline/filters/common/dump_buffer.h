@@ -24,6 +24,9 @@ namespace Pipeline {
 // Modify DUMP_BUFFER2FILE_ENABLE to 1 to dump buffer to file.
 #define DUMP_BUFFER2FILE_ENABLE 0
 
+// Modify DUMP_BUFFER2LOG_ENABLE to 1 to dump buffer first 10 bytes to log.
+#define DUMP_BUFFER2LOG_ENABLE 0
+
 #if DUMP_BUFFER2FILE_ENABLE
 #define DUMP_BUFFER2FILE(fileName, buffer) OHOS::Media::Pipeline::DumpBufferToFile(fileName, buffer)
 #define DUMP_BUFFER2FILE_PREPARE() OHOS::Media::Pipeline::PrepareDumpDir()
@@ -32,9 +35,18 @@ namespace Pipeline {
 #define DUMP_BUFFER2FILE_PREPARE()
 #endif
 
-void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin::Buffer>& buffer);
-void PrepareDumpDir();
+#define DUMP_BUFFER2LOG_SIZE 10 // Dump first 10 bytes of buffer.
+#if DUMP_BUFFER2LOG_ENABLE
+#define DUMP_BUFFER2LOG(desc, buffer, offset) \
+    OHOS::Media::Pipeline::DumpBufferToLog(desc, buffer, offset, DUMP_BUFFER2LOG_SIZE)
+#else
+#define DUMP_BUFFER2LOG(desc, buffer, offset)
+#endif
 
+extern void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin::Buffer>& buffer);
+extern void PrepareDumpDir();
+extern void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugin::Buffer>& buffer,
+                            uint64_t offset, size_t size);
 } // Pipeline
 } // Media
 } // OHOS

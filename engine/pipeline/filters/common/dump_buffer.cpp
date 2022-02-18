@@ -47,7 +47,8 @@ void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin:
     fclose(filePtr);
 }
 
-void RemoveFilesInDir(const std::string& path) {
+void RemoveFilesInDir(const std::string& path)
+{
     DIR *directory;
     struct dirent *info;
     if ((directory = opendir(path.c_str())) != nullptr) {
@@ -72,6 +73,22 @@ void PrepareDumpDir()
         _mkdir(fileDir);
     }
 }
+
+void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugin::Buffer>& buffer, uint64_t offset, size_t dumpSize)
+{
+    size_t bufferSize = buffer->GetMemory()->GetSize();
+    size_t realDumpSize = std::min(dumpSize, bufferSize);
+    realDumpSize = std::min(realDumpSize, static_cast<size_t>(DUMP_BUFFER2LOG_SIZE)); // max DUMP_BUFFER2LOG_SIZE bytes
+    char tmpStr[2 * DUMP_BUFFER2LOG_SIZE + 1] = {0}; // 字符串长度是打印的buffer长度的2倍 + 1 (字符串结束符)
+    char* dstPtr = tmpStr;
+    const uint8_t* p = buffer->GetMemory()->GetReadOnlyData();
+    for (int i = 0; i < realDumpSize; i++) {
+        dstPtr += snprintf_s(dstPtr, 3, 2, "%02x", p[i]); // 3, 2
+    }
+    MEDIA_LOG_I("%" PUBLIC_LOG_S " Buffer(offset %" PUBLIC_LOG_D64 ", size %" PUBLIC_LOG_D32 ") : %"
+        PUBLIC_LOG_S, desc, offset, bufferSize, tmpStr);
+}
+
 } // Pipeline
 } // Media
 } // OHOS

@@ -77,6 +77,7 @@ Plugin::Status DemuxerFilter::DataSourceImpl::ReadAt(int64_t offset, std::shared
         }
         case DemuxerState::DEMUXER_STATE_PARSE_FRAME: {
             if (filter.getRange_(static_cast<uint64_t>(offset), expectedLen, buffer)) {
+                DUMP_BUFFER2LOG("Demuxer GetRange", buffer, offset);
                 DUMP_BUFFER2FILE("demuxer_input_get.data", buffer);
             } else {
                 rtv = Plugin::Status::END_OF_STREAM;
@@ -496,6 +497,7 @@ void DemuxerFilter::DemuxerLoop()
         uint32_t streamIndex = 0;
         auto rtv = ReadFrame(*bufferPtr, streamIndex);
         if (rtv == ErrorCode::SUCCESS) {
+            DUMP_BUFFER2LOG("Demuxer Output", bufferPtr, 0);
             DUMP_BUFFER2FILE("demuxer_output.data", bufferPtr);
             HandleFrame(bufferPtr, streamIndex);
         } else {
