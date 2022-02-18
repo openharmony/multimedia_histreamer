@@ -311,7 +311,54 @@ bool DemuxerFilter::InitPlugin(std::string pluginName)
     pluginState_ = DemuxerState::DEMUXER_STATE_PARSE_HEADER;
     return plugin_->Prepare() == Plugin::Status::OK;
 }
-
+#if 1
+void DemuxerFilter::ActivatePullMode()
+{
+    MEDIA_LOG_D("ActivatePullMode called");
+    InitTypeFinder();
+    if (!task_) {
+        task_ = std::make_shared<OSAL::Task>("DemuxerFilter");
+    }
+    task_->RegisterHandler([this] { DemuxerLoop(); });
+    if (!dataPacker_) {
+        dataPacker_ = std::make_shared<DataPacker>();
+    }
+    checkRange_ = [this](uint64_t offset, uint32_t size) {
+        uint64_t curOffset = offset;
+        if (dataPacker_->IsDataAvailable(offset, size, curOffset)) {
+            return true;
+        }
+        MEDIA_LOG_I("IsDataAvailable false, require offset %" PUBLIC_LOG_D64 ", curOffset %" PUBLIC_LOG_D64,
+                    offset, curOffset);
+        if (curOffset < offset) { // datapacker buffer��offset end ��С, ȫ�����, ������
+            dataPacker_->Flush();
+            curOffset = offset; // �´���ȡ���ݴ� offset λ�ÿ�ʼ
+        }
+        AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
+        bufferPtr->AllocMemory(pluginAllocator_, size);
+        if (inPorts_.front()->PullData(curOffset, size, bufferPtr) == ErrorCode::SUCCESS) {
+            dataPacker_->PushData(std::move(bufferPtr), curOffset);
+            return true;
+        }
+        return false;
+    };
+    peekRange_ = [this](uint64_t offset, size_t size, AVBufferPtr& bufferPtr) -> bool {
+        if (checkRange_(offset, size)) {
+            return dataPacker_->PeekRange(offset, size, bufferPtr);
+        }
+        return false;
+    };
+    getRange_ = [this](uint64_t offset, size_t size, AVBufferPtr& bufferPtr) -> bool {
+        if (checkRange_(offset, size)) {
+            auto ret = dataPacker_->GetRange(offset, size, bufferPtr);
+            return ret;
+        }
+        return false;
+    };
+    typeFinder_->Init(uriSuffix_, mediaDataSize_, checkRange_, peekRange_);
+    MediaTypeFound(typeFinder_->FindMediaType());
+}
+#else
 void DemuxerFilter::ActivatePullMode()
 {
     MEDIA_LOG_D("ActivatePullMode called");
@@ -330,6 +377,7 @@ void DemuxerFilter::ActivatePullMode()
     typeFinder_->Init(uriSuffix_, mediaDataSize_, checkRange_, peekRange_);
     MediaTypeFound(typeFinder_->FindMediaType());
 }
+#endif
 
 void DemuxerFilter::ActivatePushMode()
 {

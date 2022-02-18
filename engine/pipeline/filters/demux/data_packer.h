@@ -47,19 +47,27 @@ public:
     void Flush();
 
 private:
-    AVBufferPtr WrapAssemblerBuffer(uint64_t offset);
+    AVBufferPtr WrapAssemblerBuffer(uint64_t offset, size_t size, uint32_t startIndex);
 
-    bool RepackBuffers(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr);
+    void UpdateRemoveItemIndex(uint32_t queueSize, uint32_t firstUsedIndex, uint32_t usedCount,
+                               uint32_t& startIndex, uint32_t& endIndex);
 
     void RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t removeSize);
 
-    bool PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr);
+    void RemoveBuffers(uint64_t offset, size_t size, uint32_t startIndex, uint32_t endIndex);
+
+    bool PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr, uint32_t &startIndex,
+                           uint32_t &endIndex);
 
     void FlushInternal();
+
+    std::string ToString();
 
     OSAL::Mutex mutex_;
     std::deque<AVBufferPtr> que_;  // buffer队列
     std::vector<uint8_t> assembler_;
+    uint8_t* assemblerPtr_;
+    size_t assemblerSize_;
     std::atomic<uint32_t> size_;
     uint64_t bufferOffset_; // 当前 DataPacker缓存数据的第一个字节 对应 到 媒体文件中的 offset
     uint64_t pts_;

@@ -12,10 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define HST_LOG_TAG "DataPacker"
+#define MEDIA_LOG_DEBUG 0
+
 #include "data_packer.h"
 #include <cstring>
 #include "foundation/log.h"
-#include "plugin/common/plugin_buffer.h"
+#include "filters/common/dump_buffer.h"
 
 namespace OHOS {
 namespace Media {
@@ -33,7 +36,8 @@ namespace Media {
         }                                                                                                              \
     } while (0)
 
-DataPacker::DataPacker() : mutex_(), que_(), assembler_(), size_(0), bufferOffset_(0), pts_(0), dts_(0)
+DataPacker::DataPacker() : mutex_(), que_(), assembler_(),
+    assemblerPtr_(nullptr), assemblerSize_(0), size_(0), bufferOffset_(0), pts_(0), dts_(0)
 {
     MEDIA_LOG_I("DataPacker ctor...");
 }
@@ -62,6 +66,7 @@ void DataPacker::PushData(AVBufferPtr bufferPtr, uint64_t offset)
 {
     MEDIA_LOG_D("DataPacker PushData begin... buffer (offset %" PUBLIC_LOG_U64 ", size %" PUBLIC_LOG_U32 ")",
                 offset, AudioBufferSize(bufferPtr));
+    DUMP_BUFFER2LOG("DataPacker Push", bufferPtr, offset);
     OSAL::ScopedLock lock(mutex_);
     size_ += AudioBufferSize(bufferPtr);
     if (que_.empty()) {
@@ -76,9 +81,12 @@ void DataPacker::PushData(AVBufferPtr bufferPtr, uint64_t offset)
 
 bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOffset)
 {
+    MEDIA_LOG_D("dataPacker (offset %" PUBLIC_LOG_U64 ", size %" PUBLIC_LOG_U32 "), curOffsetEnd is %" PUBLIC_LOG_U64,
+                bufferOffset_, size_.load(), bufferOffset_ + size_.load());
+    MEDIA_LOG_D("%" PUBLIC_LOG_S, ToString().c_str());
     OSAL::ScopedLock lock(mutex_);
     auto curOffsetTemp = bufferOffset_;
-    if (que_.empty() || offset < curOffsetTemp || offset >= curOffsetTemp + size_) { // 原有数据无法命中, 则删除原有数据
+    if (que_.empty() || offset < curOffsetTemp || offset > curOffsetTemp + size_) { // 原有数据无法命中, 则删除原有数据
         curOffset = offset;
         FlushInternal();
         MEDIA_LOG_D("IsDataAvailable false, offset not in cached data, clear it.");
@@ -110,27 +118,33 @@ bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOf
     }
     curOffset = preOffsetEnd;
     MEDIA_LOG_D("IsDataAvailable false, offsetEnd %" PUBLIC_LOG_U64 ", curOffsetEnd %" PUBLIC_LOG_U64,
-                offsetEnd, curOffsetEnd);
+                offsetEnd, preOffsetEnd);
     return false;
 }
 
 bool DataPacker::PeekRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr)
 {
     OSAL::ScopedLock lock(mutex_);
-    return PeekRangeInternal(offset, size, bufferPtr);
+    uint32_t startIndex, endIndex;
+    return PeekRangeInternal(offset, size, bufferPtr, startIndex, endIndex);
 }
 
 // 在调用当前接口前需要先调用IsDataAvailable()
 // offset - 要peek的数据起始位置 在media file文件 中的 offset
 // size - 要读取的长度
 // bufferPtr - 出参
-bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr)
+bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr, uint32_t &startIndex,
+                                   uint32_t &endIndex)
 {
     MEDIA_LOG_D("DataPacker PeekRange(offset, size) = (%" PUBLIC_LOG PRIu64 ", %"
                 PUBLIC_LOG PRIu32 ")...", offset, size);
     FALSE_RETURN_V(bufferPtr != nullptr, false);
-    assembler_.resize(size);
-    uint8_t* dstPtr = assembler_.data();
+    //assembler_.resize(size);
+    size_t index = 0; // start use index
+    uint32_t usedCount = 0;
+    assemblerSize_ = size;
+    assemblerPtr_ = new uint8_t[size];
+    uint8_t* dstPtr = assemblerPtr_; //assembler_.data();
     auto offsetEnd = offset + size;
     auto curOffsetEnd = bufferOffset_ + AudioBufferSize(que_[0]);
     if (offsetEnd <= curOffsetEnd) { // 0号buffer够用
@@ -138,10 +152,12 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr& 
         RETURN_FALSE_IF_NULL(dstPtr);
         LOG_WARN_IF_FAIL(memcpy_s(dstPtr, size,
             AudioBufferReadOnlyData(que_[0]) + offset - bufferOffset_, size), "failed to memcpy");
+        startIndex = 0;
+        endIndex = 0;
+        return true;
     } else { // 0号buffer不够用
         // 拷贝第一个buffer需要的内容(多数时候是0号buffer)
         // 找到第一个要拷贝的Buffer
-        size_t index = 0;
         uint64_t prevOffset = bufferOffset_;
         do {
             if (offset >= prevOffset && offset - prevOffset < AudioBufferSize(que_[index])) {
@@ -152,8 +168,6 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr& 
         } while (index < que_.size());
         FALSE_RET_V_MSG_E(index < que_.size(), false, "Can not find first buffer to copy.");
         auto srcSize = AudioBufferSize(que_[index]) - (offset - prevOffset);
-        dstPtr = AudioBufferWritableData(bufferPtr, srcSize);
-        RETURN_FALSE_IF_NULL(dstPtr);
         LOG_WARN_IF_FAIL(memcpy_s(dstPtr, srcSize,
             AudioBufferReadOnlyData(que_[index]) + offset - prevOffset, srcSize),
             "failed to copy memory");
@@ -162,11 +176,22 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr& 
         auto prevMediaOffsetEnd = prevOffset + AudioBufferSize(que_[index]);
         dstPtr += srcSize;
         size -= srcSize;
+        usedCount = 1;
+        if (size == 0) { // index对应buffer被使用，并且已足够
+            WrapAssemblerBuffer(offset, assemblerSize_, index).swap(bufferPtr);
+            UpdateRemoveItemIndex(que_.size(), index, usedCount, startIndex, endIndex);
+            return true;
+        }
         for (size_t i = index + 1; i < que_.size(); ++i) {
             curOffsetEnd = prevMediaOffsetEnd + AudioBufferSize(que_[i]);
             if (curOffsetEnd >= offsetEnd) {
                 LOG_WARN_IF_FAIL(memcpy_s(dstPtr, size, AudioBufferReadOnlyData(que_[i]), size),
                                  "failed to copy memory");
+                if (curOffsetEnd == offsetEnd) { // 刚好用完
+                    usedCount++;
+                } else {
+                    RemoveBufferContent(que_[i], size);
+                }
                 break;
             } else {
                 srcSize = AudioBufferSize(que_[i]);
@@ -175,46 +200,13 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr& 
                 dstPtr += srcSize;
                 size -= srcSize;
                 prevMediaOffsetEnd += srcSize;
+                usedCount++;
             }
         }
     }
     FALSE_LOG_MSG_W(curOffsetEnd >= offsetEnd, "Processed all cached buffers, still not meet offsetEnd.");
-    WrapAssemblerBuffer(offset).swap(bufferPtr);
-    return true;
-}
-
-// 单个buffer不足以存储请求的数据，需要合并多个buffer从而组成目标buffer
-bool DataPacker::RepackBuffers(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr)
-{
-    // 可能的改进点: 即使是GetRange, 也会先Peek数据，从而发生拷贝, 有可能可以减少拷贝
-    FALSE_RETURN_V(PeekRangeInternal(offset, size, bufferPtr), false);
-
-    // 删除已经拿走的数据
-    auto offsetEnd = offset + size;
-    size_ -= size;
-    while (!que_.empty()) {
-        auto& buf = que_.front();
-        auto curOffsetEnd = bufferOffset_ + AudioBufferSize(buf);
-        if (curOffsetEnd < offsetEnd) {
-            que_.pop_front();
-            bufferOffset_ = curOffsetEnd;
-            continue;
-        } else if (curOffsetEnd == offsetEnd) {
-            que_.pop_front();
-            bufferOffset_ = curOffsetEnd;
-            if (!que_.empty()) {
-                dts_ = que_.front()->dts;
-                pts_ = que_.front()->pts;
-            }
-        } else {
-            auto removeSize = AudioBufferSize(que_.front()) - (curOffsetEnd - offsetEnd);
-            RemoveBufferContent(que_.front(), removeSize);
-            bufferOffset_ = offsetEnd;
-            dts_ = buf->dts;
-            pts_ = buf->pts;
-        }
-        break;
-    }
+    UpdateRemoveItemIndex(que_.size(), index, usedCount, startIndex, endIndex);
+    WrapAssemblerBuffer(offset, assemblerSize_ - size, index).swap(bufferPtr); // 真正的size:assemblerSize_-size
     return true;
 }
 
@@ -223,26 +215,51 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
 {
     MEDIA_LOG_D("DataPacker GetRange(offset, size) = (%" PUBLIC_LOG PRIu64 ", %"
                 PUBLIC_LOG PRIu32 ")...", offset, size);
+    FALSE_RETURN_V(!que_.empty(), false);
     OSAL::ScopedLock lock(mutex_);
+
+    // 刚好0号buffer就是要获取的
+    if (offset == bufferOffset_ && AudioBufferSize(que_[0]) == size) {
+        bufferPtr = que_.front();
+        que_.pop_front();
+        MEDIA_LOG_I("DataPacker's first buffer is the one to get, directly get it.");
+        return true;
+    }
+    // TODO: 刚好最后一个buffer是要取的，则可以直接返回它并删除
+    size_t lastBufferSize = que_.back()->GetMemory()->GetSize();
+    uint64_t lastBufferOffset = bufferOffset_ + size_ - lastBufferSize;
+    if (offset == lastBufferOffset && lastBufferSize == size) {
+        bufferPtr = que_.back();
+        que_.pop_back();
+        MEDIA_LOG_I("DataPacker's last buffer is the one to get, directly get it.");
+        return true;
+    }
+
     if (!bufferPtr) {
         bufferPtr = std::make_shared<AVBuffer>();
     }
-    if (RepackBuffers(offset, size, bufferPtr)) {
-        return true;
-    }
-    MEDIA_LOG_E("GetRange peek data failed, have you called IsDataAvailable() first?");
-    return false;
+
+    uint32_t startIndex = 0, endIndex = 0;
+    FALSE_RETURN_V(PeekRangeInternal(offset, size, bufferPtr, startIndex, endIndex), false);
+    RemoveBuffers(offset, size, startIndex, endIndex);
+    MEDIA_LOG_D("RemoveBuffers called (offset, size, startIndex, endIndex) = (%" PUBLIC_LOG_U64 ", %"
+                PUBLIC_LOG_U32 ", %" PUBLIC_LOG_U32 ", %" PUBLIC_LOG_U32 ")", offset, size, startIndex, endIndex);
+    MEDIA_LOG_D("%" PUBLIC_LOG_S, ToString().c_str());
+    return true;
 }
 
-AVBufferPtr DataPacker::WrapAssemblerBuffer(uint64_t offset)
+AVBufferPtr DataPacker::WrapAssemblerBuffer(uint64_t offset, size_t size, uint32_t startIndex)
 {
     MEDIA_LOG_D("DataPacker WrapAssemblerBuffer, offset = %" PUBLIC_LOG PRIu64, offset);
     (void)offset;
     auto bufferPtr = std::make_shared<AVBuffer>();
-    auto dataPtr = std::shared_ptr<uint8_t>(assembler_.data(), [this](void* ptr) { assembler_.resize(0); });
-    auto bufferData = bufferPtr->WrapMemoryPtr(dataPtr, assembler_.size(), assembler_.size());
-    bufferPtr->dts = dts_;
-    bufferPtr->pts = pts_;
+    //auto dataPtr = std::shared_ptr<uint8_t>(assembler_.data(), [this](void* ptr) { assembler_.resize(0); });
+    //auto bufferData = bufferPtr->WrapMemoryPtr(dataPtr, assembler_.size(), assembler_.size());
+    auto dataPtr = std::shared_ptr<uint8_t>(assemblerPtr_, [this](void* ptr) { delete [] ptr; });
+    auto bufferData = bufferPtr->WrapMemoryPtr(dataPtr, assemblerSize_, size);
+    FALSE_RETURN_V(startIndex < que_.size(), bufferPtr);
+    bufferPtr->dts = que_[startIndex]->dts;
+    bufferPtr->pts = que_[startIndex]->pts;
     return bufferPtr;
 }
 
@@ -263,11 +280,67 @@ void DataPacker::FlushInternal()
     pts_ = 0;
 }
 
-void DataPacker::RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t removeSize) {
+void DataPacker::RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t removeSize)
+{
     auto memory = buffer->GetMemory();
     auto copySize = memory->GetSize() - removeSize;
     FALSE_LOG_MSG_E(memmove_s(memory->GetWritableAddr(copySize), memory->GetCapacity(),
-              memory->GetReadOnlyData(removeSize), copySize) == EOK, "memmove failed.");
+        memory->GetReadOnlyData(removeSize), copySize) == EOK, "memmove failed.");
+}
+
+// Remove items between startIndex and endIndex, startIndex / endIndex are included.
+void DataPacker::RemoveBuffers(uint64_t offset, size_t size, uint32_t startIndex, uint32_t endIndex)
+{
+    auto beginIt = que_.begin();
+    for(uint32_t i = 0; i < startIndex;i++) {
+        beginIt++;
+    }
+    auto endIt = que_.begin();
+    for(uint32_t i = 0; i < endIndex;i++) {
+        endIt++;
+    }
+    que_.erase(beginIt, endIt);
+
+    if (que_.empty()) {
+        bufferOffset_ = 0;
+        pts_ = 0;
+        dts_ = 0;
+    } else if (startIndex == 0) {
+        bufferOffset_ += size;
+        pts_ = que_[0]->pts;
+        dts_ = que_[0]->dts;
+    }
+    size_ -= size;
+}
+
+void DataPacker::UpdateRemoveItemIndex(uint32_t queueSize, uint32_t firstUsedIndex, uint32_t usedCount,
+                           uint32_t& startIndex, uint32_t& endIndex)
+{
+    if (firstUsedIndex == 0) {
+        startIndex = 0;
+        endIndex = firstUsedIndex + usedCount - 1;
+        return;
+    }
+    if (firstUsedIndex + usedCount == queueSize) {
+        startIndex = firstUsedIndex;
+        endIndex = queueSize - 1;
+        return;
+    }
+    uint32_t leftRemainCount = firstUsedIndex;
+    uint32_t rightRemainCount = queueSize - (firstUsedIndex + usedCount);
+    if (leftRemainCount < rightRemainCount) {
+        startIndex = 0;
+        endIndex = firstUsedIndex + usedCount - 1;
+    } else {
+        startIndex = firstUsedIndex;
+        endIndex = queueSize - 1;
+    }
+}
+
+std::string DataPacker::ToString()
+{
+    return "DataPacker (offset " + std::to_string(bufferOffset_) + ", size " + std::to_string(size_) +
+        ", buffer count " + std::to_string(que_.size()) + ")";
 }
 } // namespace Media
 } // namespace OHOS
