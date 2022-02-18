@@ -24,6 +24,7 @@
 #include "plugin/common/plugin_time.h"
 #include "utils/constants.h"
 #include "utils/steady_clock.h"
+#include "filters/common/dump_buffer.h"
 
 namespace OHOS {
 namespace Media {
@@ -67,13 +68,17 @@ Plugin::Status DemuxerFilter::DataSourceImpl::ReadAt(int64_t offset, std::shared
             MEDIA_LOG_E("ReadAt error due to DEMUXER_STATE_NULL");
             break;
         case DemuxerState::DEMUXER_STATE_PARSE_HEADER: {
-            if (!filter.peekRange_(static_cast<uint64_t>(offset), expectedLen, buffer)) {
+            if (filter.peekRange_(static_cast<uint64_t>(offset), expectedLen, buffer)) {
+                DUMP_BUFFER2FILE("demuxer_input_peek.data", buffer);
+            } else {
                 rtv = Plugin::Status::ERROR_NOT_ENOUGH_DATA;
             }
             break;
         }
         case DemuxerState::DEMUXER_STATE_PARSE_FRAME: {
-            if (!filter.getRange_(static_cast<uint64_t>(offset), expectedLen, buffer)) {
+            if (filter.getRange_(static_cast<uint64_t>(offset), expectedLen, buffer)) {
+                DUMP_BUFFER2FILE("demuxer_input_get.data", buffer);
+            } else {
                 rtv = Plugin::Status::END_OF_STREAM;
             }
             break;
@@ -184,6 +189,8 @@ void DemuxerFilter::FlushEnd()
 ErrorCode DemuxerFilter::Prepare()
 {
     MEDIA_LOG_I("Prepare called");
+    DUMP_BUFFER2FILE_PREPARE();
+
     pluginState_ = DemuxerState::DEMUXER_STATE_NULL;
     Pipeline::WorkMode mode;
     GetInPort(PORT_NAME_DEFAULT)->Activate({Pipeline::WorkMode::PULL, Pipeline::WorkMode::PUSH}, mode);
@@ -489,6 +496,7 @@ void DemuxerFilter::DemuxerLoop()
         uint32_t streamIndex = 0;
         auto rtv = ReadFrame(*bufferPtr, streamIndex);
         if (rtv == ErrorCode::SUCCESS) {
+            DUMP_BUFFER2FILE("demuxer_output.data", bufferPtr);
             HandleFrame(bufferPtr, streamIndex);
         } else {
             SendEventEos();

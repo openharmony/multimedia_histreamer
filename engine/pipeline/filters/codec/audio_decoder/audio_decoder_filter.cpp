@@ -23,6 +23,7 @@
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/core/plugin_manager.h"
 #include "utils/steady_clock.h"
+#include "filters/common/dump_buffer.h"
 
 namespace {
 constexpr int32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 5;
@@ -200,6 +201,9 @@ ErrorCode AudioDecoderFilter::PushData(const std::string &inPort, const AVBuffer
         MEDIA_LOG_I("decoder is flushing, discarding this data from port %" PUBLIC_LOG "s", inPort.c_str());
         return ErrorCode::SUCCESS;
     }
+
+    DUMP_BUFFER2FILE("decoder_input.data", buffer);
+
     ErrorCode handleFrameRes;
     int8_t retryCnt = 0;
     do {
@@ -300,6 +304,7 @@ void AudioDecoderFilter::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer
     // push to port
     auto oPort = outPorts_[0];
     if (oPort->GetWorkMode() == WorkMode::PUSH) {
+        DUMP_BUFFER2FILE("decoder_output.data", output);
        oPort->PushData(output, -1);
     } else {
        MEDIA_LOG_W("decoder out port works in pull mode");

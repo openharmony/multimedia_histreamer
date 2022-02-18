@@ -174,6 +174,17 @@
     } while (0)
 #endif
 
+#ifndef FALSE_RET_MSG
+#define FALSE_RET_MSG(exec, fmt, args...)                                                                              \
+    do {                                                                                                               \
+        bool ret = (exec);                                                                                             \
+        if (!ret) {                                                                                                    \
+            MEDIA_LOG_E(fmt, ##args);                                                                                  \
+            return;                                                                                                    \
+        }                                                                                                              \
+    } while (0)
+#endif
+
 #ifndef FALSE_RET_V_MSG
 #define FALSE_RET_V_MSG(loglevel, exec, ret, fmt, args...)                                                             \
     do {                                                                                                               \

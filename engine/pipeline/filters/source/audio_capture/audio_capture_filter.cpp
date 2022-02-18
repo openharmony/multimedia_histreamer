@@ -243,11 +243,13 @@ ErrorCode AudioCaptureFilter::Start()
 ErrorCode AudioCaptureFilter::Stop()
 {
     MEDIA_LOG_I("Stop entered.");
+
     // stop task firstly
     if (taskPtr_) {
         taskPtr_->Stop();
     }
-    // sop plugin secondly
+
+    // stop plugin secondly
     ErrorCode ret = ErrorCode::SUCCESS;
     if (plugin_) {
         ret = TranslatePluginStatus(plugin_->Stop());
