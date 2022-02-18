@@ -412,7 +412,7 @@ bool IsRgbFormat(AVPixelFormat format)
 VideoH264Profile ConvH264ProfileFromFfmpeg(int32_t ffmpegProfile)
 {
     auto iter = std::find_if(g_H264ProfileMap.begin(), g_H264ProfileMap.end(),
-        [&] (const std::pair<VideoH264Profile, int32_t>& tmp) -> bool {
+                             [&] (const std::pair<VideoH264Profile, int32_t>& tmp) -> bool {
         return tmp.second == ffmpegProfile;
     });
     return (iter == g_H264ProfileMap.end()) ? VideoH264Profile::UNKNOWN : iter->first;
@@ -421,7 +421,7 @@ VideoH264Profile ConvH264ProfileFromFfmpeg(int32_t ffmpegProfile)
 int32_t ConvH264ProfileToFfmpeg(VideoH264Profile profile)
 {
     auto iter = std::find_if(g_H264ProfileMap.begin(), g_H264ProfileMap.end(),
-        [&] (const std::pair<VideoH264Profile, int32_t>& tmp) -> bool {
+                             [&] (const std::pair<VideoH264Profile, int32_t>& tmp) -> bool {
         return tmp.first == profile;
     });
     return (iter == g_H264ProfileMap.end()) ? FF_PROFILE_UNKNOWN : iter->second;

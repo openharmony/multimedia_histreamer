@@ -126,7 +126,7 @@ bool ConvertDirPathToFilePath(const std::string& dirPath, OutputFormatType outpu
     if (g_outputFormatToFormat.count(outputFormatType) != 0) {
         char fileName[32] = { 0 }; /// magic number 32
         auto tm = time(nullptr);
-        (void)strftime(fileName, sizeof(fileName), g_outputFormatToFormat.at(outputFormatType).c_str(), localtime(&tm));
+        strftime(fileName, sizeof(fileName), g_outputFormatToFormat.at(outputFormatType).c_str(), localtime(&tm));
         filePath += fileName;
         return true;
     } else {
