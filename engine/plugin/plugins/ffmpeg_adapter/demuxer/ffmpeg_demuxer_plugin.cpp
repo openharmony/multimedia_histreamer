@@ -453,7 +453,7 @@ int FFmpegDemuxerPlugin::AVReadPacket(void* opaque, uint8_t* buf, int bufSize) /
     auto ioContext = static_cast<IOContext*>(opaque);
     if (ioContext && ioContext->dataSource) {
         auto buffer = std::make_shared<Buffer>();
-        auto bufData = buffer->WrapMemory(buf, bufSize, bufSize);
+        auto bufData = buffer->WrapMemory(buf, bufSize, 0);
         auto result = ioContext->dataSource->ReadAt(ioContext->offset, buffer, static_cast<size_t>(bufSize));
         MEDIA_LOG_D("AVReadPacket read data size = %" PUBLIC_LOG "d", static_cast<int>(bufData->GetSize()));
         if (result == Status::OK) {
