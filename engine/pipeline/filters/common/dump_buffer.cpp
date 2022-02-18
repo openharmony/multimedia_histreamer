@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
+#include "dump_buffer.h"
 #include <cstdio>
 #include <direct.h>
 #include <dirent.h>
-#include "dump_buffer.h"
 #include "foundation/log.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-
 // Specify the dump file dir in BUILD.gn
 #ifndef DUMP_FILE_DIR
 #define DUMP_FILE_DIR ""
@@ -43,8 +42,8 @@ void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin:
     std::string filePath = GetDumpFileDir() + fileName;
     errno_t error = fopen_s(&filePtr, filePath.c_str(), "ab+");
     FALSE_RET_MSG(error == 0, "Open file(%" PUBLIC_LOG_S ") failed(%" PUBLIC_LOG_D32 ").", filePath.c_str(), error);
-    fwrite(reinterpret_cast<const char*>(buffer->GetMemory()->GetReadOnlyData()), bufferSize, 1, filePtr);
-    fclose(filePtr);
+    (void)fwrite(reinterpret_cast<const char*>(buffer->GetMemory()->GetReadOnlyData()), bufferSize, 1, filePtr);
+    (void)fclose(filePtr);
 }
 
 void RemoveFilesInDir(const std::string& path)
@@ -88,7 +87,6 @@ void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugin::Buffer>& bu
     MEDIA_LOG_I("%" PUBLIC_LOG_S " Buffer(offset %" PUBLIC_LOG_D64 ", size %" PUBLIC_LOG_D32 ") : %"
         PUBLIC_LOG_S, desc, offset, bufferSize, tmpStr);
 }
-
 } // Pipeline
 } // Media
 } // OHOS
