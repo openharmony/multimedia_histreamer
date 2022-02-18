@@ -17,6 +17,8 @@
 
 #include "hirecorder_impl.h"
 #include "pipeline/factory/filter_factory.h"
+#include "plugin/common/plugin_time.h"
+#include "recorder_utils.h"
 #include "utils/steady_clock.h"
 
 namespace OHOS {
@@ -153,17 +155,10 @@ int32_t HiRecorderImpl::Configure(int32_t sourceId, const RecorderParam& recPara
     FALSE_RETURN_V(outputFormatType_ != OutputFormatType::FORMAT_BUTT,
                    TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
     FALSE_RETURN_V(CheckParamType(sourceId, recParam), TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
-    Plugin::Any recParamInternal;
-    auto configureStatus {true};
-    if (recParam.IsAudioParam()) {
-        configureStatus = ConfigureAudio(sourceId, recParam, recParamInternal);
-    } else if (recParam.IsVideoParam()) {
-        configureStatus = ConfigureVideo(sourceId, recParam, recParamInternal);
-    } else {
-        configureStatus = ConfigureOther(sourceId, recParam, recParamInternal);
-    }
-    FALSE_RETURN_V(configureStatus, TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
-    auto ret = fsm_.SendEvent(Intent::CONFIGURE, recParamInternal);
+    HstRecParam hstRecParam;
+    auto castRet  = CastRecorderParam(sourceId, recParam, hstRecParam);
+    FALSE_RETURN_V(castRet, TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
+    auto ret = fsm_.SendEvent(Intent::CONFIGURE, hstRecParam);
     if (ret != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("Configure failed with error %" PUBLIC_LOG "d", static_cast<int>(ret));
     }
@@ -302,32 +297,30 @@ ErrorCode HiRecorderImpl::DoSetAudioSource(const Plugin::Any& param) const
 
 ErrorCode HiRecorderImpl::DoConfigure(const Plugin::Any &param) const
 {
-    ErrorCode ret  = ErrorCode::SUCCESS;
-    RecorderParamInternal recParamInternal;
-    if (param.SameTypeWith(typeid(RecorderParamInternal))) {
-        recParamInternal = Plugin::AnyCast<RecorderParamInternal>(param);
-    } else {
+    if (!param.SameTypeWith(typeid(HstRecParam))) {
         return ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
     }
-    switch (recParamInternal.type) {
+    ErrorCode ret  = ErrorCode::SUCCESS;
+    const auto* hstParam = Plugin::AnyCast<HstRecParam>(&param);
+    switch (hstParam->stdParamType) {
         case RecorderPublicParamType::AUD_SAMPLERATE:
         case RecorderPublicParamType::AUD_CHANNEL:
         case RecorderPublicParamType::AUD_BITRATE:
         case RecorderPublicParamType::AUD_ENC_FMT:
-            ret = DoConfigureAudio(recParamInternal);
+            ret = DoConfigureAudio(*hstParam);
             break;
         case RecorderPublicParamType::VID_CAPTURERATE:
         case RecorderPublicParamType::VID_RECTANGLE:
         case RecorderPublicParamType::VID_BITRATE:
         case RecorderPublicParamType::VID_FRAMERATE:
         case RecorderPublicParamType::VID_ENC_FMT:
-            ret = DoConfigureVideo(recParamInternal);
+            ret = DoConfigureVideo(*hstParam);
             break;
         case RecorderPublicParamType::OUT_PATH:
         case RecorderPublicParamType::OUT_FD:
         case RecorderPublicParamType::VID_ORIENTATION_HINT:
         case RecorderPublicParamType::GEO_LOCATION:
-            ret = DoConfigureOther(recParamInternal);
+            ret = DoConfigureOther(*hstParam);
             break;
         default:
             break;
@@ -448,202 +441,129 @@ ErrorCode HiRecorderImpl::SetVideoSourceInternal(VideoSourceType source, int32_t
 #endif
 }
 
-bool HiRecorderImpl::ConfigureAudio(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recParamInternal)
+ErrorCode HiRecorderImpl::DoConfigureAudio(const HstRecParam& param) const
 {
-    auto ret {true};
-    switch (recParam.type) {
-        case RecorderPublicParamType::AUD_SAMPLERATE:
-            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
-                                                      dynamic_cast<const AudSampleRate&>(recParam)};
-            break;
-        case RecorderPublicParamType::AUD_CHANNEL:
-            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
-                                                      dynamic_cast<const AudChannel&>(recParam)};
-            break;
-        case RecorderPublicParamType::AUD_BITRATE:
-            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
-                                                      dynamic_cast<const AudBitRate&>(recParam)};
-            break;
-        case RecorderPublicParamType::AUD_ENC_FMT:
-            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
-                                                      dynamic_cast<const AudEnc&>(recParam)};
-            break;
-        default:
-            ret = false;
-            break;
-    }
-    return ret;
-}
-
-bool HiRecorderImpl::ConfigureVideo(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recParamInternal)
-{
-    auto ret {true};
-    switch (recParam.type) {
-        case RecorderPublicParamType::VID_CAPTURERATE:
-            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
-                                                      dynamic_cast<const CaptureRate&>(recParam)};
-            break;
-        case RecorderPublicParamType::VID_RECTANGLE:
-            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
-                                                      dynamic_cast<const VidRectangle&>(recParam)};
-            break;
-        case RecorderPublicParamType::VID_BITRATE:
-            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
-                                                      dynamic_cast<const VidBitRate&>(recParam)};
-            break;
-        case RecorderPublicParamType::VID_FRAMERATE:
-            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
-                                                      dynamic_cast<const VidFrameRate&>(recParam)};
-            break;
-        case RecorderPublicParamType::VID_ENC_FMT:
-            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
-                                                      dynamic_cast<const VidEnc&>(recParam)};
-            break;
-        default:
-            ret = false;
-            break;
-    }
-    return ret;
-}
-
-bool HiRecorderImpl::ConfigureOther(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recParamInternal)
-{
-    auto ret {true};
-    switch (recParam.type) {
-        case RecorderPublicParamType::OUT_PATH:
-            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
-                                                      dynamic_cast<const OutFilePath&>(recParam)};
-            break;
-        case RecorderPublicParamType::OUT_FD:
-            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
-                                                      dynamic_cast<const OutFd&>(recParam)};
-            break;
-        case RecorderPublicParamType::VID_ORIENTATION_HINT:
-            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
-                                                      dynamic_cast<const RotationAngle&>(recParam)};
-            break;
-        case RecorderPublicParamType::GEO_LOCATION:
-            recParamInternal = RecorderParamInternal {sourceId, recParam.type,
-                                                      dynamic_cast<const GeoLocation&>(recParam)};
-            break;
-        default:
-            ret = false;
-            break;
-    }
-    return ret;
-}
-
-ErrorCode HiRecorderImpl::DoConfigureAudio(const RecorderParamInternal& recParamInternal) const
-{
-    ErrorCode ret  = ErrorCode::SUCCESS;
-    Plugin::Any any {recParamInternal.any};
-    switch (recParamInternal.type) {
-        case RecorderPublicParamType::AUD_SAMPLERATE:
-            ret = audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_SAMPLE_RATE),
-                                              static_cast<uint32_t>(Plugin::AnyCast<AudSampleRate>(any).sampleRate));
-            break;
-        case RecorderPublicParamType::AUD_CHANNEL:
-            ret = audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_CHANNELS),
-                                              static_cast<uint32_t>(Plugin::AnyCast<AudChannel>(any).channel));
-            break;
-        case RecorderPublicParamType::AUD_BITRATE:
-            ret = audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
-                                              static_cast<int64_t>(Plugin::AnyCast<AudBitRate>(any).bitRate));
-            break;
+    switch (param.stdParamType) {
+        case RecorderPublicParamType::AUD_SAMPLERATE: {
+            auto ptr = param.GetValPtr<AudSampleRate>();
+            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            return audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_SAMPLE_RATE),
+                                               static_cast<uint32_t>(ptr->sampleRate));
+        }
+        case RecorderPublicParamType::AUD_CHANNEL: {
+            auto ptr = param.GetValPtr<AudChannel>();
+            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            return audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_CHANNELS),
+                                               static_cast<uint32_t>(ptr->channel));
+        }
+        case RecorderPublicParamType::AUD_BITRATE: {
+            auto ptr = param.GetValPtr<AudBitRate>();
+            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            return audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
+                                               static_cast<int64_t>(ptr->bitRate));
+        }
         case RecorderPublicParamType::AUD_ENC_FMT: {
+            auto ptr = param.GetValPtr<AudEnc>();
+            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             auto encoderMeta = std::make_shared<Plugin::Meta>();
-            if (!TransAudioEncoderFmt(Plugin::AnyCast<AudEnc>(any).encFmt, *encoderMeta)) {
-                ret = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
-                break;
+            if (!TransAudioEncoderFmt(ptr->encFmt, *encoderMeta)) {
+                return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
             }
-            ret = audioEncoder_->SetAudioEncoder(recParamInternal.sourceId, encoderMeta);
-            break;
+            return audioEncoder_->SetAudioEncoder(param.srcId, encoderMeta);
         }
         default:
-            break;
+            MEDIA_LOG_W("RecorderPublicParamType %" PUBLIC_LOG_U32 " not supported", param.stdParamType);
+            return ErrorCode::SUCCESS;
     }
-    return ret;
 }
 
-ErrorCode HiRecorderImpl::DoConfigureVideo(const RecorderParamInternal& recParamInternal) const
+ErrorCode HiRecorderImpl::DoConfigureVideo(const HstRecParam& param) const
 {
 #ifdef VIDEO_SUPPORT
-    ErrorCode ret = ErrorCode::SUCCESS;
-    Plugin::Any any {recParamInternal.any};
-    switch (recParamInternal.type) {
+    switch (param.stdParamType) {
         case RecorderPublicParamType::VID_RECTANGLE: {
-            auto vidRectangle = Plugin::AnyCast<VidRectangle>(any);
-            ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_WIDTH),
-                                              static_cast<uint32_t>(vidRectangle.width));
-            if (ret != ErrorCode::SUCCESS) {
+            auto ptr = param.GetValPtr<VidRectangle>();
+            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            auto ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_WIDTH),
+                                                   static_cast<uint32_t>(ptr->width));
+            if (ret == ErrorCode::SUCCESS) {
                 ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_HEIGHT),
-                                                  static_cast<uint32_t>(vidRectangle.height));
+                                                  static_cast<uint32_t>(ptr->height));
             }
-            break;
+            return ret;
         }
         case RecorderPublicParamType::VID_CAPTURERATE: {
-            ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_CAPTURE_RATE),
-                                              Plugin::AnyCast<CaptureRate>(any).capRate);
-            break;
+            auto ptr = param.GetValPtr<CaptureRate>();
+            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            return videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_CAPTURE_RATE), ptr->capRate);
         }
         case RecorderPublicParamType::VID_BITRATE: {
-            int32_t bitRate = Plugin::AnyCast<VidBitRate>(any).bitRate;
-            ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
-                                              static_cast<int64_t>((bitRate >= 0) ? bitRate : 0));
-            break;
+            auto ptr = param.GetValPtr<VidBitRate>();
+            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            return videoEncoder_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
+                static_cast<int64_t>((ptr->bitRate >= 0) ? ptr->bitRate : 0));
         }
         case RecorderPublicParamType::VID_FRAMERATE: {
-            int32_t frameRate = Plugin::AnyCast<VidFrameRate>(any).frameRate;
-            ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_FRAME_RATE),
-                                              static_cast<uint32_t>((frameRate >= 0) ? frameRate : 0));
-            break;
+            auto ptr = param.GetValPtr<VidFrameRate>();
+            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            return videoEncoder_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_FRAME_RATE),
+                static_cast<uint32_t>((ptr->frameRate >= 0) ? ptr->frameRate : 0));
         }
         case RecorderPublicParamType::VID_ENC_FMT: {
+            auto ptr = param.GetValPtr<VidEnc>();
+            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             auto encoderMeta = std::make_shared<Plugin::Meta>();
-            if (!TransVideoEncoderFmt(Plugin::AnyCast<VidEnc>(any).encFmt, *encoderMeta)) {
-                ret = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
-                break;
+            if (!TransVideoEncoderFmt(ptr->encFmt, *encoderMeta)) {
+                return  ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
             }
-            ret = videoEncoder_->SetVideoEncoder(recParamInternal.sourceId, encoderMeta);
-            break;
+            return videoEncoder_->SetVideoEncoder(param.srcId, encoderMeta);
         }
         default:
-            break;
+            MEDIA_LOG_W("ignore RecorderPublicParamType %" PUBLIC_LOG_U32, param.stdParamType);
+            return ErrorCode::SUCCESS;
     }
-    return ret;
 #else
     return ErrorCode::ERROR_UNIMPLEMENTED;
 #endif
 }
 
-ErrorCode HiRecorderImpl::DoConfigureOther(const RecorderParamInternal& recParamInternal) const
+ErrorCode HiRecorderImpl::DoConfigureOther(const HstRecParam& param) const
 {
-    ErrorCode ret  = ErrorCode::SUCCESS;
-    Plugin::Any any {recParamInternal.any};
-    switch (recParamInternal.type) {
+    switch (param.stdParamType) {
         case RecorderPublicParamType::OUT_PATH: {
-            auto filePath = Plugin::AnyCast<OutFilePath>(any).path;
+            auto ptr = param.GetValPtr<OutFilePath>();
+            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            auto filePath = ptr->path;
             if (IsDirectory(filePath)) {
                 std::string dirPath {filePath};
-                if (!ConvertDirPathToFilePath(dirPath, outputFormatType_, filePath)) {
-                    ret = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
-                    break;
-                }
+                FALSE_RET_V_MSG_E(GenerateFilePath(dirPath, outputFormatType_, filePath),
+                                  ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "generate file path error");
             }
-            ret = outputSink_->SetOutputPath(filePath);
-            break;
+            return outputSink_->SetOutputPath(filePath);
         }
-        case RecorderPublicParamType::OUT_FD:
-            ret = outputSink_->SetFd(Plugin::AnyCast<OutFd>(any).fd);
-            break;
+        case RecorderPublicParamType::OUT_FD: {
+            auto ptr = param.GetValPtr<OutFd>();
+            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            return outputSink_->SetFd(ptr->fd);
+        }
+        case RecorderPublicParamType::MAX_DURATION: {
+            auto ptr = param.GetValPtr<MaxDuration>();
+            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            int64_t hstTime = 0;
+            Plugin::Sec2HstTime(ptr->duration, hstTime);
+            return muxer_->SetMaxDuration(hstTime > 0 ? hstTime : 0);
+        }
+        case RecorderPublicParamType::MAX_SIZE: {
+            auto ptr = param.GetValPtr<MaxFileSize>();
+            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            return muxer_->SetMaxSize(ptr->size > 0 ? ptr->size : 0);
+        }
         case RecorderPublicParamType::VID_ORIENTATION_HINT:
         case RecorderPublicParamType::GEO_LOCATION:
-            MEDIA_LOG_E("ignore RecorderPublicParamType %" PUBLIC_LOG "d", recParamInternal.type);
-            break;
         default:
-            break;
+            MEDIA_LOG_W("ignore RecorderPublicParamType %" PUBLIC_LOG_U32, param.stdParamType);
+            return ErrorCode::SUCCESS;
     }
-    return ret;
 }
 
 bool HiRecorderImpl::CheckParamType(int32_t sourceId, const RecorderParam& recParam) const
@@ -651,7 +571,6 @@ bool HiRecorderImpl::CheckParamType(int32_t sourceId, const RecorderParam& recPa
     FALSE_RETURN_V((SourceIdGenerator::IsAudio(sourceId) && recParam.IsAudioParam() && audioSourceId_ == sourceId) ||
         (SourceIdGenerator::IsVideo(sourceId) && recParam.IsVideoParam() && videoSourceId_ == sourceId) ||
         ((sourceId == DUMMY_SOURCE_ID) && !(recParam.IsAudioParam() || recParam.IsVideoParam())), false);
-
     return true;
 }
 } // namespace Record

@@ -277,7 +277,7 @@ void LogOutIncorrectType(CapabilityID key, uint8_t flags)
 {
     if (HasTagInfo(static_cast<Tag>(key))) {
         const auto& tuple = g_tagInfoMap.at(static_cast<Tag>(key));
-        const auto& typeName = std::get<2>(tuple);
+        const auto& typeName = std::get<2>(tuple); // secondary
         MEDIA_LOG_E("type of %" PUBLIC_LOG_S " should be"
         " %" PUBLIC_LOG_S "(%" PUBLIC_LOG_C ")"
         " or Interval<%" PUBLIC_LOG_S ">(%" PUBLIC_LOG_C ")"

@@ -17,7 +17,7 @@
 #define HISTREAMER_HIRECORDER_INIT_STATE_H
 
 #include "foundation/error_code.h"
-#include "osal/thread/mutex.h"
+#include "foundation/osal/thread/mutex.h"
 #include "recorder_executor.h"
 #include "state.h"
 

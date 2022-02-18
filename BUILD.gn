@@ -23,6 +23,9 @@ config("histreamer_presets") {
     "-fexceptions",
   ]
   cflags_cc = cflags
+  if (multimedia_histreamer_enable_recorder) {
+    defines += [ "RECORDER_SUPPORT" ]
+  }
 }
 
 if (hst_is_lite_sys) {
@@ -36,12 +39,12 @@ if (hst_is_lite_sys) {
     }
     sources = []
     deps = [
-      "engine/foundation:histreamer_foundation",
-      "engine/pipeline:histreamer_pipeline",
-      "engine/plugin:histreamer_plugin",
+      "engine/plugin/plugins:histreamer_plugin_store",
       "engine/scene/player:histreamer_player",
-      "engine/utils:histreamer_utils",
     ]
+    if (multimedia_histreamer_enable_recorder) {
+      deps += [ "engine/scene/recorder:histreamer_recorder" ]
+    }
     public_deps = [ "//foundation/multimedia/utils/lite:media_common" ]
     public_configs = [ ":hiplayer_external_library_config" ]
   }
@@ -53,11 +56,8 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer") {
     sources = []
     deps = [
-      "engine/foundation:histreamer_foundation",
-      "engine/pipeline:histreamer_pipeline",
-      "engine/plugin:histreamer_plugin",
+      "engine/plugin/plugins:histreamer_plugin_store",
       "engine/scene:std_engine_factory",
-      "engine/utils:histreamer_utils",
     ]
     relative_install_dir = "media"
     output_name = "media_engine_histreamer"

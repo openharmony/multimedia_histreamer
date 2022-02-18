@@ -148,11 +148,11 @@ ErrorCode MuxerFilter::AddTrackThenConfigure(const std::pair<std::string, Plugin
             keyPair.second.first(keyPair.first, *outValue)) {
             plugin_->SetTrackParameter(trackId, keyPair.first, *outValue);
         } else {
-            if (g_tagInfoMap.count(keyPair.first) == 0) {
+            if (!HasTagInfo(keyPair.first)) {
                 MEDIA_LOG_W("tag %" PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
             } else {
                 MEDIA_LOG_W("parameter %" PUBLIC_LOG_S " in meta is not found or type mismatch",
-                    std::get<0>(g_tagInfoMap.at(keyPair.first)));
+                    GetTagStrName(keyPair.first));
             }
         }
     }
@@ -234,7 +234,12 @@ ErrorCode MuxerFilter::AddTrack(std::shared_ptr<InPort> &trackPort)
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode MuxerFilter::SetMaxDurationUs(uint64_t maxDurationUs)
+ErrorCode MuxerFilter::SetMaxDuration(uint64_t maxDuration)
+{
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode MuxerFilter::SetMaxSize(uint64_t maxSize)
 {
     return ErrorCode::SUCCESS;
 }

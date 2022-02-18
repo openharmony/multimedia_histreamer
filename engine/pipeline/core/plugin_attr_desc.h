@@ -157,7 +157,7 @@ inline const char* GetTagTypeStrName(Plugin::Tag tag)
     if (!HasTagInfo(tag)) {
         return nullptr;
     }
-    return std::get<2>(g_tagInfoMap.at(tag));
+    return std::get<2>(g_tagInfoMap.at(tag)); // secondary parameter
 }
 
 inline const Plugin::ValueType* GetTagDefValue(Plugin::Tag tag)
@@ -166,6 +166,32 @@ inline const Plugin::ValueType* GetTagDefValue(Plugin::Tag tag)
         return nullptr;
     }
     return &std::get<1>(g_tagInfoMap.at(tag));
+}
+
+inline bool HasAudSampleFmtInfo(Plugin::AudioSampleFormat fmt)
+{
+    return g_auSampleFmtStrMap.count(fmt) != 0;
+}
+
+inline const char* GetAudSampleFmtNameStr(Plugin::AudioSampleFormat fmt)
+{
+    if (!HasAudSampleFmtInfo(fmt)) {
+        return nullptr;
+    }
+    return g_auSampleFmtStrMap.at(fmt);
+}
+
+inline bool HasAudChanLyInfo(Plugin::AudioChannelLayout layout)
+{
+    return g_auChannelLayoutStrMap.count(layout) != 0;
+}
+
+inline const char* GetAudChanLyNameStr(Plugin::AudioChannelLayout layout)
+{
+    if (!HasAudChanLyInfo(layout)) {
+        return nullptr;
+    }
+    return g_auChannelLayoutStrMap.at(layout);
 }
 } // Pipeline
 } // Media

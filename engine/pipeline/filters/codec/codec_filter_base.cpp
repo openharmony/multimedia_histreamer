@@ -39,11 +39,11 @@ ErrorCode CodecFilterBase::ConfigureWithMetaLocked(const std::shared_ptr<const P
         if (outValPtr && keyPair.second.first(keyPair.first, *outValPtr)) {
             SetPluginParameterLocked(keyPair.first, *outValPtr);
         } else {
-            if (g_tagInfoMap.count(keyPair.first) == 0) {
+            if (!HasTagInfo(keyPair.first)) {
                 MEDIA_LOG_W("tag %" PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
             } else {
                 MEDIA_LOG_W("parameter %" PUBLIC_LOG_S " in meta is not found or type mismatch",
-                            std::get<0>(g_tagInfoMap.at(keyPair.first)));
+                            GetTagStrName(keyPair.first));
             }
         }
     }
@@ -60,9 +60,9 @@ ErrorCode CodecFilterBase::UpdateMetaAccordingToPlugin(Plugin::Meta& meta)
         Plugin::ValueType tmpVal;
         auto ret = TranslatePluginStatus(plugin_->GetParameter(keyPair.first, tmpVal));
         if (ret != ErrorCode::SUCCESS) {
-            if (g_tagInfoMap.count(keyPair.first) != 0) {
+            if (HasTagInfo(keyPair.first)) {
                 MEDIA_LOG_I("GetParameter %" PUBLIC_LOG_S " from plugin %" PUBLIC_LOG_S "failed with code %"
-                    PUBLIC_LOG_D32, std::get<0>(g_tagInfoMap.at(keyPair.first)), pluginInfo_->name.c_str(), ret);
+                    PUBLIC_LOG_D32, GetTagStrName(keyPair.first), pluginInfo_->name.c_str(), ret);
             } else {
                 MEDIA_LOG_I("Tag %" PUBLIC_LOG_D32 " is not is map, may be update it?", keyPair.first);
                 MEDIA_LOG_I("GetParameter %" PUBLIC_LOG_D32 " from plugin %" PUBLIC_LOG_S " failed with code %"
@@ -71,9 +71,9 @@ ErrorCode CodecFilterBase::UpdateMetaAccordingToPlugin(Plugin::Meta& meta)
             continue;
         }
         if (!keyPair.second.first(keyPair.first, tmpVal)) {
-            if (g_tagInfoMap.count(keyPair.first) != 0) {
+            if (HasTagInfo(keyPair.first)) {
                 MEDIA_LOG_I("Type of Tag %" PUBLIC_LOG_S " should be %" PUBLIC_LOG_S,
-                            std::get<0>(g_tagInfoMap.at(keyPair.first)), std::get<2>(g_tagInfoMap.at(keyPair.first)));
+                            GetTagStrName(keyPair.first), std::get<2>(g_tagInfoMap.at(keyPair.first)));
             } else {
                 MEDIA_LOG_I("Tag %" PUBLIC_LOG_D32 " is not is map, may be update it?", keyPair.first);
                 MEDIA_LOG_I("Type of Tag %" PUBLIC_LOG_D32 "mismatch", keyPair.first);

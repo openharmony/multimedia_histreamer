@@ -18,7 +18,7 @@
 
 #ifdef RECORDER_SUPPORT
 
-#include "filters/codec/codec_filter_base.h"
+#include "pipeline/filters/codec/codec_filter_base.h"
 #include "plugin/common/plugin_tags.h"
 #include "utils/ring_buffer.h"
 

@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_SCENE_RECORDER_MEDIA_UTILS_H
-#define HISTREAMER_SCENE_RECORDER_MEDIA_UTILS_H
+#ifndef HISTREAMER_SCENE_RECORDER_STD_REC_UTILS_H
+#define HISTREAMER_SCENE_RECORDER_STD_REC_UTILS_H
 
 #include "i_recorder_engine.h"
 #include "foundation/error_code.h"
+#include "hst_recorder_param.h"
 #include "plugin/common/plugin_source_tags.h"
 #include "plugin/core/plugin_meta.h"
 #include "utils/constants.h"
@@ -69,12 +70,6 @@ struct SourceIdGenerator {
     }
 };
 
-struct RecorderParamInternal {
-    int32_t sourceId;
-    uint32_t type;
-    Plugin::Any any;
-};
-
 const std::map<OutputFormatType, std::string> g_outputFormatToMimeMap = {
     {OutputFormatType::FORMAT_DEFAULT, MEDIA_MIME_CONTAINER_MP4},
     {OutputFormatType::FORMAT_MPEG_4, MEDIA_MIME_CONTAINER_MP4},
@@ -87,9 +82,10 @@ Plugin::SrcInputType TransVideoInputType(OHOS::Media::VideoSourceType sourceType
 bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& encoderMeta);
 bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::Meta& encoderMeta);
 bool IsDirectory(const std::string& path);
-bool ConvertDirPathToFilePath(const std::string& dirPath, OutputFormatType outputFormatType, std::string& filePath);
+bool GenerateFilePath(const std::string& dirPath, OutputFormatType outputFormatType, std::string& filePath);
+bool CastRecorderParam(int32_t sourceId, const RecorderParam& param, HstRecParam& out);
 }  // namespace Record
 }  // namespace Media
 }  // namespace OHOS
 
-#endif  // HISTREAMER_SCENE_RECORDER_MEDIA_UTILS_H
+#endif  // HISTREAMER_SCENE_RECORDER_STD_REC_UTILS_H

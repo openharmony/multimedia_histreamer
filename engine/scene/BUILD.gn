@@ -26,11 +26,9 @@ source_set("std_engine_factory") {
     public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
     sources = [ "standard/hst_engine_factory.cpp" ]
     deps = [ "player:histreamer_player" ]
-    if (defined(hst_recorder) && hst_recorder) {
-      deps += []
+    if (multimedia_histreamer_enable_recorder) {
+      deps += [ "recorder:histreamer_recorder" ]
     }
-  } else {
-    print("std engine factory is not supported on lite systems")
   }
 }
 

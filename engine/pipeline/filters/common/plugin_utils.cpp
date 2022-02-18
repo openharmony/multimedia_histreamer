@@ -419,13 +419,13 @@ std::string Capability2String(const Capability& capability)
             needEtc = true;
             break;
         }
-        if (capStrnessMap.count(cap.first) == 0 || g_tagInfoMap.count(static_cast<Tag>(cap.first)) == 0) {
+        if (capStrnessMap.count(cap.first) == 0 || !HasTagInfo(static_cast<Tag>(cap.first))) {
             MEDIA_LOG_W("%" PUBLIC_LOG_D32 " is not in map, may be new key which is not contained?", cap.first);
             continue;
         }
         const auto& info = g_tagInfoMap.at(static_cast<Tag>(cap.first));
         RETURN_IF_SNPRI_FAILED(capStrnessMap.at(cap.first)(buffer + pos, MAX_BUF_LEN - pos, std::get<0>(info),
-                                                           std::get<2>(info), cap.second), ret, buffer);
+            std::get<2>(info), cap.second), ret, buffer); // secondary parameter
         pos += ret;
         RETURN_IF_SNPRI_FAILED(SnPrintf(buffer + pos, MAX_BUF_LEN - pos, ", "), ret, buffer);
         pos += ret;
@@ -454,7 +454,7 @@ std::string Meta2String(const Plugin::Meta& meta)
             needEtc = true;
             break;
         }
-        if (g_tagInfoMap.count(static_cast<Tag>(item)) == 0 || g_metaStrnessMap.count(item) == 0) {
+        if (!HasTagInfo(static_cast<Tag>(item)) || g_metaStrnessMap.count(item) == 0) {
             MEDIA_LOG_W("meta id %" PUBLIC_LOG_D32 "is not is map, may be update the info map?", item);
             continue;
         }
@@ -462,7 +462,7 @@ std::string Meta2String(const Plugin::Meta& meta)
         const auto& tuple = g_tagInfoMap.at(static_cast<Tag>(item));
         if (tmp) {
             RETURN_IF_SNPRI_FAILED(g_metaStrnessMap.at(item)(buffer + pos, MAX_BUF_LEN - pos,
-                    std::get<0>(tuple), std::get<2>(tuple), *tmp), ret, buffer);
+                std::get<0>(tuple), std::get<2>(tuple), *tmp), ret, buffer); // secondary parameter
             pos += ret;
             RETURN_IF_SNPRI_FAILED(SnPrintf(buffer + pos, MAX_BUF_LEN - pos, ", "), ret, buffer);
             pos += ret;

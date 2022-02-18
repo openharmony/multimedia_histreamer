@@ -22,9 +22,9 @@
 #include <tuple>
 #include "foundation/error_code.h"
 #include "foundation/log.h"
-#include "osal/base/synchronizer.h"
-#include "osal/thread/mutex.h"
-#include "osal/thread/task.h"
+#include "foundation/osal/base/synchronizer.h"
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/osal/thread/task.h"
 #include "utils/blocking_queue.h"
 #include "plugin/common/any.h"
 #include "error_state.h"

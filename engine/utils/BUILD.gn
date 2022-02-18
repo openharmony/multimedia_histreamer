@@ -29,18 +29,18 @@ source_set("histreamer_utils") {
     "steady_clock.cpp",
     "utils.cpp",
   ]
+  public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
   if (hst_is_lite_sys) {
     if (ohos_kernel_type == "liteos_m") {
-      deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+      public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
     } else {
-      deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+      public_deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
     }
   } else {
-    deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
   }
   public_configs = [
     ":histreamer_utils_config",
     "//foundation/multimedia/histreamer:histreamer_presets",
   ]
-  public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
 }

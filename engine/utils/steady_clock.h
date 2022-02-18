@@ -17,7 +17,9 @@
 #define HISTREAMER_STEADY_CLOCK_H
 
 #include <chrono>
+#if defined(PROFILE)
 #include "foundation/log.h"
+#endif
 
 namespace OHOS {
 namespace Media {

@@ -150,11 +150,11 @@ ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Plugin:
             keyPair.second.first(keyPair.first, *outValPtr)) {
             SetPluginParameter(keyPair.first, *outValPtr);
         } else {
-            if (g_tagInfoMap.count(keyPair.first) == 0) {
+            if (!HasTagInfo(keyPair.first)) {
                 MEDIA_LOG_W("tag %" PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
             } else {
                 MEDIA_LOG_W("parameter %" PUBLIC_LOG_S " in meta is not found or type mismatch",
-                            std::get<0>(g_tagInfoMap.at(keyPair.first)));
+                    GetTagStrName(keyPair.first));
             }
         }
     }

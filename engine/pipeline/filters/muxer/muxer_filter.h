@@ -43,7 +43,8 @@ public:
 
     ErrorCode SetOutputFormat(std::string containerMime);
     ErrorCode AddTrack(std::shared_ptr<InPort>& trackPort);
-    ErrorCode SetMaxDurationUs(uint64_t maxDurationUs);
+    ErrorCode SetMaxDuration(uint64_t maxDuration);
+    ErrorCode SetMaxSize(uint64_t maxSize);
     ErrorCode StartNextSegment();
     ErrorCode SendEos();
 

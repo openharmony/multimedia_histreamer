@@ -19,11 +19,11 @@
 #include <memory>
 #include <unordered_map>
 
-#include "common/any.h"
 #include "foundation/error_code.h"
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
+#include "hst_recorder_param.h"
 #include "i_recorder_engine.h"
-#include "osal/thread/condition_variable.h"
-#include "osal/thread/mutex.h"
 #include "pipeline/core/pipeline.h"
 #include "pipeline/core/pipeline_core.h"
 #include "pipeline/filters/source/audio_capture/audio_capture_filter.h"
@@ -32,7 +32,7 @@
 #include "pipeline/filters/codec/video_encoder/video_encoder_filter.h"
 #include "pipeline/filters/muxer/muxer_filter.h"
 #include "pipeline/filters/sink/output_sink/output_sink_filter.h"
-#include "recorder_utils.h"
+#include "plugin/common/any.h"
 #include "scene/common/media_stat_stub.h"
 #include "scene/recorder/internal/state_machine.h"
 #include "scene/recorder/recorder_executor.h"
@@ -85,12 +85,9 @@ public:
 private:
     ErrorCode SetAudioSourceInternal(AudioSourceType source, int32_t sourceId);
     ErrorCode SetVideoSourceInternal(VideoSourceType source, int32_t sourceId);
-    bool ConfigureAudio(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recParamInternal);
-    bool ConfigureVideo(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recParamInternal);
-    bool ConfigureOther(int32_t sourceId, const RecorderParam& recParam, Plugin::Any& recParamInternal);
-    ErrorCode DoConfigureAudio(const RecorderParamInternal& recParamInternal) const;
-    ErrorCode DoConfigureVideo(const RecorderParamInternal& recParamInternal) const;
-    ErrorCode DoConfigureOther(const RecorderParamInternal& recParamInternal) const;
+    ErrorCode DoConfigureAudio(const HstRecParam& param) const;
+    ErrorCode DoConfigureVideo(const HstRecParam& param) const;
+    ErrorCode DoConfigureOther(const HstRecParam& param) const;
     bool CheckParamType(int32_t sourceId, const RecorderParam& recParam) const;
 
     std::atomic<uint32_t> audioCount_ {0};

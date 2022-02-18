@@ -91,7 +91,7 @@ ErrorCode AudioCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::
     }
     Plugin::AudioSampleFormat sampleFormat = Plugin::AudioSampleFormat::S16;
     if (audioMeta->GetData<Plugin::AudioSampleFormat>(MetaID::AUDIO_SAMPLE_FORMAT, sampleFormat)) {
-        MEDIA_LOG_I("configure plugin with sampleFormat %" PUBLIC_LOG_U8, sampleFormat);
+        MEDIA_LOG_I("configure plugin with sampleFormat %" PUBLIC_LOG_S, GetAudSampleFmtNameStr(sampleFormat));
         return TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat));
     }
     return ErrorCode::SUCCESS;
@@ -120,7 +120,7 @@ ErrorCode AudioCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value
             channelLayoutSpecified_ = AssignParameterIfMatch(tag, channelLayout_, value);
             break;
         default:
-            MEDIA_LOG_W("Unknown key %" PUBLIC_LOG_S, GetTagStrName(tag));
+            MEDIA_LOG_W("SetParameter: unknown key %" PUBLIC_LOG_S "(%" PUBLIC_LOG_D32 ")", GetTagStrName(tag), key);
             break;
     }
     return ErrorCode::SUCCESS;
