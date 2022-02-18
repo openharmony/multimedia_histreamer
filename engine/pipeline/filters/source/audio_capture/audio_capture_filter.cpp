@@ -169,7 +169,7 @@ std::shared_ptr<Plugin::Meta> AudioCaptureFilter::PickPreferParameter()
             pickPreferFmt = true;
         } else if (candidates.SameTypeWith(typeid(DiscreteCapability<AudioSampleFormat>))) {
             const auto* fmts = Plugin::AnyCast<DiscreteCapability<AudioSampleFormat>>(&candidates);
-            if (std::any_of(fmts->begin(), fmts->end(), [&](AudioSampleFormat tmp) -> bool {
+            if (AnyOf(fmts->begin(), fmts->end(), [&](AudioSampleFormat tmp) -> bool {
                 return preferFmt == tmp;
             })) {
                 pickPreferFmt = true;

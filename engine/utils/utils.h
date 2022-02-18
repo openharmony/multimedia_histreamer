@@ -61,6 +61,19 @@ constexpr typename std::underlying_type<E>::type to_underlying(E e) noexcept
     return static_cast<typename std::underlying_type<E>::type>(e);
 }
 
+template<class Iterator, class UnaryPredicate>
+constexpr bool AnyOf(Iterator first, Iterator last, UnaryPredicate p) // implementation of std::any_of used on c++11
+{
+    Iterator it = first;
+    do {
+        if (p(*it)) {
+            return true;
+        }
+        it++;
+    } while (it != last);
+    return false;
+}
+
 size_t GetFileSize(const char* fileName);
 } // namespace Media
 } // namespace OHOS
