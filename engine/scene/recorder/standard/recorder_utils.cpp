@@ -136,7 +136,6 @@ bool GenerateFilePath(const std::string& dirPath, OutputFormatType outputFormatT
 namespace {
 #define CAST_TO_ASSIGN(type, param, any) \
 (any) = static_cast<const type&>(param)
-using HstRecorderParam = std::tuple<int32_t, RecorderPublicParamType, Plugin::ValueType>;
 bool CastAudRecorderParam(const RecorderParam& param, Plugin::ValueType& val)
 {
     auto ret = true;

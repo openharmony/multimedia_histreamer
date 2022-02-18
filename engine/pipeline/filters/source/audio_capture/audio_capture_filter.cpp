@@ -157,11 +157,36 @@ ErrorCode AudioCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
     return ErrorCode::SUCCESS;
 }
 
+std::shared_ptr<Plugin::Meta> AudioCaptureFilter::PickPreferParameter()
+{
+    auto preferMeta = std::make_shared<Plugin::Meta>();
+    static constexpr AudioSampleFormat preferFmt = AudioSampleFormat::S16;
+    bool pickPreferFmt = false;
+    if (capNegWithDownstream_.keys.count(Capability::Key::AUDIO_SAMPLE_FORMAT)) {
+        const auto& candidates = capNegWithDownstream_.keys.at(Capability::Key::AUDIO_SAMPLE_FORMAT);
+        if (candidates.SameTypeWith(typeid(FixedCapability<AudioSampleFormat>)) &&
+            preferFmt == Plugin::AnyCast<FixedCapability<AudioSampleFormat>>(candidates)) {
+            pickPreferFmt = true;
+        } else if (candidates.SameTypeWith(typeid(DiscreteCapability<AudioSampleFormat>))) {
+            const auto* fmts = Plugin::AnyCast<DiscreteCapability<AudioSampleFormat>>(&candidates);
+            if (std::any_of(fmts->begin(), fmts->end(), [&](AudioSampleFormat tmp) -> bool {
+                return preferFmt == tmp;
+            })) {
+                pickPreferFmt = true;
+            }
+        }
+    }
+    if (pickPreferFmt) {
+        preferMeta->SetData(MetaID::AUDIO_SAMPLE_FORMAT, preferFmt);
+    }
+    return preferMeta;
+}
+
 ErrorCode AudioCaptureFilter::DoConfigure()
 {
-    auto emptyMeta = std::make_shared<Plugin::Meta>();
+    auto preferMeta = PickPreferParameter();
     auto audioMeta = std::make_shared<Plugin::Meta>();
-    if (!MergeMetaWithCapability(*emptyMeta, capNegWithDownstream_, *audioMeta)) {
+    if (!MergeMetaWithCapability(*preferMeta, capNegWithDownstream_, *audioMeta)) {
         MEDIA_LOG_E("cannot find available capability of plugin %" PUBLIC_LOG_S, pluginInfo_->name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
@@ -200,18 +225,29 @@ ErrorCode AudioCaptureFilter::Prepare()
 ErrorCode AudioCaptureFilter::Start()
 {
     MEDIA_LOG_I("Start entered.");
+    auto res = ErrorCode::SUCCESS;
+    // start plugin firstly
+    if (plugin_) {
+        res = TranslatePluginStatus(plugin_->Start());
+    } else {
+        res = ErrorCode::ERROR_INVALID_OPERATION;
+    }
+    FALSE_RET_V_MSG_E(res == ErrorCode::SUCCESS, res, "start plugin failed");
+    // start task secondly
     if (taskPtr_) {
         taskPtr_->Start();
     }
-    return plugin_ ? TranslatePluginStatus(plugin_->Start()) : ErrorCode::ERROR_INVALID_OPERATION;
+    return res;
 }
 
 ErrorCode AudioCaptureFilter::Stop()
 {
     MEDIA_LOG_I("Stop entered.");
+    // stop task firstly
     if (taskPtr_) {
         taskPtr_->Stop();
     }
+    // sop plugin secondly
     ErrorCode ret = ErrorCode::SUCCESS;
     if (plugin_) {
         ret = TranslatePluginStatus(plugin_->Stop());

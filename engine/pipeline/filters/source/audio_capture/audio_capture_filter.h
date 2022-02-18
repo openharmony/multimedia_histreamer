@@ -61,6 +61,7 @@ private:
     bool CheckSampleFormat(const Plugin::Capability& cap);
     ErrorCode DoConfigure();
     void SendBuffer(const std::shared_ptr<AVBuffer>& buffer);
+    std::shared_ptr<Plugin::Meta> PickPreferParameter();
 
     std::shared_ptr<OSAL::Task> taskPtr_ {nullptr};
     std::shared_ptr<Plugin::Source> plugin_ {nullptr};

@@ -252,6 +252,10 @@ ErrorCode MuxerFilter::StartNextSegment()
 ErrorCode MuxerFilter::SendEos()
 {
     MEDIA_LOG_I("SendEos entered.");
+    if (plugin_) {
+        plugin_->WriteTrailer();
+    }
+    hasWriteHeader_ = false;
     auto buf = std::make_shared<AVBuffer>();
     buf->flag |= BUFFER_FLAG_EOS;
     SendBuffer(buf, -1);
@@ -307,8 +311,6 @@ ErrorCode MuxerFilter::PushData(const std::string& inPort, const AVBufferPtr& bu
         UpdateEosState(inPort);
     }
     if (AllTracksEos()) {
-        plugin_->WriteTrailer();
-        hasWriteHeader_ = false;
         SendEos();
     }
     return ErrorCode::SUCCESS;
