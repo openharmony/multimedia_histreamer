@@ -300,8 +300,11 @@ ErrorCode VideoEncoderFilter::SetVideoEncoderFormat(const std::shared_ptr<const 
     if (!meta->GetInt64(Plugin::MetaID::MEDIA_BITRATE, vencFormat_.bitRate)) {
         MEDIA_LOG_D("Do not have codec bit rate");
     }
-    if (!meta->GetUint64(Plugin::MetaID::VIDEO_FRAME_RATE, vencFormat_.frameRate)) {
+    if (!meta->GetUint32(Plugin::MetaID::VIDEO_FRAME_RATE, vencFormat_.frameRate)) {
         MEDIA_LOG_D("Do not have codec frame rate");
+    }
+    if (!meta->GetData(Plugin::MetaID::VIDEO_PIXEL_FORMAT, vencFormat_.format)) {
+        MEDIA_LOG_D("Do not have codec video pixel format");
     }
     // Optional: codec extra data
     if (!meta->GetData<std::vector<uint8_t>>(Plugin::MetaID::MEDIA_CODEC_CONFIG, vencFormat_.codecConfig)) {

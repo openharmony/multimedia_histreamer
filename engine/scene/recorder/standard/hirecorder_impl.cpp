@@ -588,14 +588,14 @@ ErrorCode HiRecorderImpl::DoConfigureVideo(const RecorderParamInternal& recParam
         }
         case RecorderPublicParamType::VID_BITRATE: {
             int32_t bitRate = Plugin::AnyCast<VidBitRate>(any).bitRate;
-            ret = videoEncoder_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
-                                              static_cast<uint64_t>((bitRate >= 0) ? bitRate : 0));
+            ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
+                                              static_cast<int64_t>((bitRate >= 0) ? bitRate : 0));
             break;
         }
         case RecorderPublicParamType::VID_FRAMERATE: {
             int32_t frameRate = Plugin::AnyCast<VidFrameRate>(any).frameRate;
-            ret = videoEncoder_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_FRAME_RATE),
-                                              static_cast<uint64_t>((frameRate >= 0) ? frameRate : 0));
+            ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_FRAME_RATE),
+                                              static_cast<uint32_t>((frameRate >= 0) ? frameRate : 0));
             break;
         }
         case RecorderPublicParamType::VID_ENC_FMT: {

@@ -216,6 +216,12 @@ Status VideoCapturePlugin::SetParameter(Tag tag, const ValueType& value)
             }
             break;
         }
+        case Tag::VIDEO_PIXEL_FORMAT: {
+            if (value.SameTypeWith(typeid(VideoPixelFormat))) {
+                pixelFormat_ = Plugin::AnyCast<VideoPixelFormat>(value);
+            }
+            break;
+        }
         default:
             MEDIA_LOG_I("Unknown key");
             break;

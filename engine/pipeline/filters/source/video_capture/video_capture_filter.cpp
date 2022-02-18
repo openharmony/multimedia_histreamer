@@ -78,6 +78,10 @@ ErrorCode VideoCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::
     if (err != ErrorCode::SUCCESS) {
         return err;
     }
+    err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_PIXEL_FORMAT, pixelFormat_));
+    if (err != ErrorCode::SUCCESS) {
+        return err;
+    }
     return ErrorCode::SUCCESS;
 }
 
@@ -96,6 +100,12 @@ ErrorCode VideoCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value
             break;
         case Tag::VIDEO_CAPTURE_RATE:
             (void)AssignParameterIfMatch(tag, captureRate_, value);
+            break;
+        case Tag::MEDIA_BITRATE:
+            (void)AssignParameterIfMatch(tag, bitRate_, value);
+            break;
+        case Tag::VIDEO_FRAME_RATE:
+            (void)AssignParameterIfMatch(tag, frameRate_, value);
             break;
         default:
             MEDIA_LOG_W("Unknown key %" PUBLIC_LOG_S, GetTagStrName(tag));
@@ -147,6 +157,9 @@ ErrorCode VideoCaptureFilter::DoConfigure()
     }
     videoMeta->SetUint32(Plugin::MetaID::VIDEO_WIDTH, videoWidth_);
     videoMeta->SetUint32(Plugin::MetaID::VIDEO_HEIGHT, videoHeight_);
+    videoMeta->SetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate_);
+    videoMeta->SetUint32(Plugin::MetaID::VIDEO_FRAME_RATE, frameRate_);
+    videoMeta->SetData(Plugin::MetaID::VIDEO_PIXEL_FORMAT, pixelFormat_);
     if (!outPorts_[0]->Configure(videoMeta)) {
         MEDIA_LOG_E("Configure downstream fail");
         return ErrorCode::ERROR_UNKNOWN;

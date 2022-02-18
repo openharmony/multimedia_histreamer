@@ -76,8 +76,8 @@ struct RecorderParamInternal {
 };
 
 const std::map<OutputFormatType, std::string> g_outputFormatToMimeMap = {
-    {OutputFormatType::FORMAT_DEFAULT, MEDIA_MIME_AUDIO_MPEG},
-    {OutputFormatType::FORMAT_MPEG_4, MEDIA_MIME_AUDIO_MPEG},
+    {OutputFormatType::FORMAT_DEFAULT, MEDIA_MIME_CONTAINER_MP4},
+    {OutputFormatType::FORMAT_MPEG_4, MEDIA_MIME_CONTAINER_MP4},
     {OutputFormatType::FORMAT_M4A, MEDIA_MIME_CONTAINER_MP4},
 };
 
