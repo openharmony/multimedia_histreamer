@@ -47,6 +47,16 @@ public:
     void Flush();
 
 private:
+    struct Position {
+        int32_t index; // Buffer index, -1 means this Position is invalid
+        uint32_t bufferOffset; // Offset in the buffer
+        uint64_t mediaOffset;  // Offset in the media file
+    };
+
+    // first - start position;
+    // second - end position, not include offsetInBuffer byte.
+    using PositionPair = std::pair<Position, Position>;
+
     void UpdateRemoveItemIndex(uint32_t queueSize, uint32_t firstUsedIndex, uint32_t usedCount,
                                uint32_t& startIndex, uint32_t& endIndex);
 
@@ -55,7 +65,7 @@ private:
     void RemoveBuffers(uint64_t offset, size_t size, uint32_t startIndex, uint32_t endIndex);
 
     bool PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr, uint32_t &startIndex,
-                           uint32_t &endIndex);
+                           uint32_t &endIndex, bool isGet = false);
 
     void FlushInternal();
 
@@ -67,6 +77,10 @@ private:
     uint64_t bufferOffset_; // 当前 DataPacker缓存数据的第一个字节 对应 到 媒体文件中的 offset
     uint64_t pts_;
     uint64_t dts_;
+
+    // The position in prev GetRange
+    PositionPair prevGet {{-1, 0, 0}, {-1, 0, 0}};
+    PositionPair currentGet {{-1, 0, 0}, {-1, 0, 0}};
 };
 } // namespace Media
 } // namespace OHOS
