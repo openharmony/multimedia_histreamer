@@ -57,17 +57,15 @@ private:
     // second - end position, not include bufferOffset byte.
     using PositionPair = std::pair<Position, Position>;
 
-    void UpdateRemoveItemIndex(uint32_t queueSize, uint32_t firstUsedIndex, uint32_t usedCount,
-                               uint32_t& startIndex, uint32_t& endIndex);
-
     void RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t removeSize);
 
     void RemoveBuffers(uint64_t offset, size_t size, uint32_t startIndex, uint32_t endIndex);
 
-    bool PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr, uint32_t &startIndex,
-                           uint32_t &endIndex, bool isGet = false);
+    bool PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr, bool isGet);
 
     void FlushInternal();
+
+    bool FindFirstBufferToCopy(uint64_t offset, int32_t &startIndex, uint64_t &prevOffset);
 
     std::string ToString();
 

@@ -117,21 +117,19 @@ bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOf
 bool DataPacker::PeekRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr)
 {
     OSAL::ScopedLock lock(mutex_);
-    uint32_t startIndex, endIndex;
-    return PeekRangeInternal(offset, size, bufferPtr, startIndex, endIndex);
+    return PeekRangeInternal(offset, size, bufferPtr, false);
 }
 
 // 在调用当前接口前需要先调用IsDataAvailable()
 // offset - 要peek的数据起始位置 在media file文件 中的 offset
 // size - 要读取的长度
 // bufferPtr - 出参
-bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr, uint32_t &startIndex,
-                                   uint32_t &endIndex, bool isGet)
+bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr, bool isGet)
 {
     MEDIA_LOG_D("DataPacker PeekRange(offset, size) = (%" PUBLIC_LOG PRIu64 ", %"
                 PUBLIC_LOG PRIu32 ")...", offset, size);
     uint32_t needCopySize = size;
-    int32_t index = 0; // start use index
+    int32_t startIndex = 0; // The index of buffer that we first use
     int32_t usedCount = 0;
     uint32_t firstBufferOffset = 0;
     uint32_t lastBufferOffsetEnd = 0;
@@ -139,52 +137,41 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
     FALSE_RETURN_V(dstPtr != nullptr, false);
 
     auto offsetEnd = offset + needCopySize;
-    auto curOffsetEnd = mediaOffset_ + AudioBufferSize(que_[0]);
-    if (offsetEnd <= curOffsetEnd) { // 0号buffer够用
+    auto curOffsetEnd = mediaOffset_ + AudioBufferSize(que_[startIndex]);
+    if (offsetEnd <= curOffsetEnd) { // first buffer is enough
         NZERO_LOG(memcpy_s(dstPtr, needCopySize,
-                           AudioBufferReadOnlyData(que_[0]) + offset - mediaOffset_, needCopySize));
-        bufferPtr->pts = que_[0]->pts;
-        bufferPtr->dts = que_[0]->dts;
-        startIndex = 0;
-        endIndex = 0;
+                           AudioBufferReadOnlyData(que_[startIndex]) + offset - mediaOffset_, needCopySize));
+        bufferPtr->pts = que_[startIndex]->pts;
+        bufferPtr->dts = que_[startIndex]->dts;
         firstBufferOffset = offset - mediaOffset_;
         lastBufferOffsetEnd = firstBufferOffset + needCopySize;
-        EXEC_WHEN_GET(isGet, currentGet = std::make_pair(Position{0, firstBufferOffset, offset},
-            Position{0, lastBufferOffsetEnd, offset + size}));
+        EXEC_WHEN_GET(isGet, currentGet = std::make_pair(Position{startIndex, firstBufferOffset, offset},
+            Position{startIndex, lastBufferOffsetEnd, offset + size}));
         return true;
-    } else { // 0号buffer不够用
-        // 拷贝第一个buffer需要的内容(多数时候是0号buffer)
-        // 找到第一个要拷贝的Buffer
-        uint64_t prevOffset = mediaOffset_;
-        do {
-            if (offset >= prevOffset && offset - prevOffset < AudioBufferSize(que_[index])) {
-                break;
-            }
-            prevOffset += AudioBufferSize(que_[index]);
-            index++;
-        } while (index < que_.size());
-        FALSE_RET_V_MSG_E(index < que_.size(), false, "Can not find first buffer to copy.");
-        auto srcSize = AudioBufferSize(que_[index]) - (offset - prevOffset);
+    } else { // first buffer not enough
+        // Find the first buffer that should copy
+        uint64_t prevOffset; // The media offset of the startIndex buffer start byte
+        FALSE_RETURN_V(FindFirstBufferToCopy(offset, startIndex, prevOffset), false);
+        auto srcSize = AudioBufferSize(que_[startIndex]) - (offset - prevOffset);
         NZERO_LOG(memcpy_s(dstPtr, srcSize,
-            AudioBufferReadOnlyData(que_[index]) + offset - prevOffset, srcSize));
+                           AudioBufferReadOnlyData(que_[startIndex]) + offset - prevOffset, srcSize));
 
-        bufferPtr->pts = que_[index]->pts;
-        bufferPtr->dts = que_[index]->dts;
+        bufferPtr->pts = que_[startIndex]->pts;
+        bufferPtr->dts = que_[startIndex]->dts;
         firstBufferOffset = offset - prevOffset;
 
         // 数据不足的部分，从后续buffer(多数时候是1/2/3...号)拷贝
-        auto prevMediaOffsetEnd = prevOffset + AudioBufferSize(que_[index]);
+        auto prevMediaOffsetEnd = prevOffset + AudioBufferSize(que_[startIndex]);
         dstPtr += srcSize;
         needCopySize -= srcSize;
         usedCount = 1;
         if (needCopySize == 0) { // index对应buffer被使用，并且已足够
-            UpdateRemoveItemIndex(que_.size(), index, usedCount, startIndex, endIndex);
             lastBufferOffsetEnd = firstBufferOffset + srcSize;
-            EXEC_WHEN_GET(isGet, currentGet = std::make_pair(Position{index, firstBufferOffset, offset},
-                Position{index, lastBufferOffsetEnd, offset + size}));
+            EXEC_WHEN_GET(isGet, currentGet = std::make_pair(Position{startIndex, firstBufferOffset, offset},
+                Position{startIndex, lastBufferOffsetEnd, offset + size}));
             return true;
         }
-        for (size_t i = index + 1; i < que_.size(); ++i) {
+        for (size_t i = startIndex + 1; i < que_.size(); ++i) {
             curOffsetEnd = prevMediaOffsetEnd + AudioBufferSize(que_[i]);
             if (curOffsetEnd >= offsetEnd) {
                 NZERO_LOG(memcpy_s(dstPtr, needCopySize, AudioBufferReadOnlyData(que_[i]), needCopySize));
@@ -203,9 +190,8 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
     }
     FALSE_LOG_MSG_W(curOffsetEnd >= offsetEnd,
                     "Processed all cached buffers, still not meet offsetEnd, maybe EOS reached.");
-    UpdateRemoveItemIndex(que_.size(), index, usedCount, startIndex, endIndex);
-    EXEC_WHEN_GET(isGet, currentGet = std::make_pair(Position{index, firstBufferOffset, offset},
-        Position{index + usedCount - 1, lastBufferOffsetEnd, offset + size}));
+    EXEC_WHEN_GET(isGet, currentGet = std::make_pair(Position{startIndex, firstBufferOffset, offset},
+        Position{startIndex + usedCount - 1, lastBufferOffsetEnd, offset + size}));
 
     // Update to the real size, especially at the end.
     bufferPtr->GetMemory()->UpdateDataSize(size - needCopySize);
@@ -223,10 +209,10 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
 
     OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(!que_.empty(), false);
+    prevGet = currentGet; // store last get position to prevGet
 
-    uint32_t startIndex = 0, endIndex = 0;
-    FALSE_RETURN_V(PeekRangeInternal(offset, size, bufferPtr, startIndex, endIndex, true), false);
-    RemoveBuffers(offset, size, startIndex, endIndex);
+    FALSE_RETURN_V(PeekRangeInternal(offset, size, bufferPtr, true), false);
+    RemoveBuffers(offset, size, currentGet.first.index, currentGet.second.index);
     MEDIA_LOG_D("RemoveBuffers called (offset, size, startIndex, endIndex) = (%" PUBLIC_LOG_U64 ", %"
                 PUBLIC_LOG_U32 ", %" PUBLIC_LOG_U32 ", %" PUBLIC_LOG_U32 ")", offset, size, startIndex, endIndex);
     MEDIA_LOG_D("%" PUBLIC_LOG_S, ToString().c_str());
@@ -259,6 +245,7 @@ void DataPacker::RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t r
 }
 
 // Remove items between startIndex and endIndex, startIndex / endIndex are included.
+// Currently, not make the remaining buffer continuous.
 void DataPacker::RemoveBuffers(uint64_t offset, size_t size, uint32_t startIndex, uint32_t endIndex)
 {
     auto beginIt = que_.begin();
@@ -286,28 +273,18 @@ void DataPacker::RemoveBuffers(uint64_t offset, size_t size, uint32_t startIndex
     size_ -= size;
 }
 
-void DataPacker::UpdateRemoveItemIndex(uint32_t queueSize, uint32_t firstUsedIndex, uint32_t usedCount,
-                           uint32_t& startIndex, uint32_t& endIndex)
+bool DataPacker::FindFirstBufferToCopy(uint64_t offset, int32_t &startIndex, uint64_t &prevOffset)
 {
-    if (firstUsedIndex == 0) {
-        startIndex = 0;
-        endIndex = firstUsedIndex + usedCount - 1;
-        return;
-    }
-    if (firstUsedIndex + usedCount == queueSize) {
-        startIndex = firstUsedIndex;
-        endIndex = queueSize - 1;
-        return;
-    }
-    uint32_t leftRemainCount = firstUsedIndex;
-    uint32_t rightRemainCount = queueSize - (firstUsedIndex + usedCount);
-    if (leftRemainCount < rightRemainCount) {
-        startIndex = 0;
-        endIndex = firstUsedIndex + usedCount - 1;
-    } else {
-        startIndex = firstUsedIndex;
-        endIndex = queueSize - 1;
-    }
+    startIndex = 0;
+    prevOffset= mediaOffset_;
+    do {
+        if (offset >= prevOffset && offset - prevOffset < AudioBufferSize(que_[startIndex])) {
+            return true;
+        }
+        prevOffset += AudioBufferSize(que_[startIndex]);
+        startIndex++;
+    } while (startIndex < que_.size());
+    return false;
 }
 
 std::string DataPacker::ToString()
