@@ -54,7 +54,7 @@ private:
     };
 
     // first - start position;
-    // second - end position, not include offsetInBuffer byte.
+    // second - end position, not include bufferOffset byte.
     using PositionPair = std::pair<Position, Position>;
 
     void UpdateRemoveItemIndex(uint32_t queueSize, uint32_t firstUsedIndex, uint32_t usedCount,
@@ -72,13 +72,13 @@ private:
     std::string ToString();
 
     OSAL::Mutex mutex_;
-    std::deque<AVBufferPtr> que_;  // buffer队列
+    std::deque<AVBufferPtr> que_;
     std::atomic<uint32_t> size_;
-    uint64_t bufferOffset_; // 当前 DataPacker缓存数据的第一个字节 对应 到 媒体文件中的 offset
+    uint64_t mediaOffset_; // The media file offset of the first byte in data packer
     uint64_t pts_;
     uint64_t dts_;
 
-    // The position in prev GetRange
+    // The position in prev GetRange / current GetRange
     PositionPair prevGet {{-1, 0, 0}, {-1, 0, 0}};
     PositionPair currentGet {{-1, 0, 0}, {-1, 0, 0}};
 };
