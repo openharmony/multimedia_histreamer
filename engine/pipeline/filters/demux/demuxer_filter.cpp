@@ -328,11 +328,11 @@ void DemuxerFilter::ActivatePullMode()
         if (dataPacker_->IsDataAvailable(offset, size, curOffset)) {
             return true;
         }
-        MEDIA_LOG_I("IsDataAvailable false, require offset %" PUBLIC_LOG_D64 ", curOffset %" PUBLIC_LOG_D64,
+        MEDIA_LOG_D("IsDataAvailable false, require offset %" PUBLIC_LOG_D64 ", curOffset %" PUBLIC_LOG_D64,
                     offset, curOffset);
-        if (curOffset < offset) { // datapacker buffer��offset end ��С, ȫ�����, ������
+        if (curOffset < offset) { // datapacker buffer's offset end < offset, then clear all buffers
             dataPacker_->Flush();
-            curOffset = offset; // �´���ȡ���ݴ� offset λ�ÿ�ʼ
+            curOffset = offset; // next time get data from offset
         }
         AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
         bufferPtr->AllocMemory(pluginAllocator_, size);

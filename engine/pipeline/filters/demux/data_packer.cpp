@@ -138,20 +138,20 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
 {
     MEDIA_LOG_D("DataPacker PeekRange(offset, size) = (%" PUBLIC_LOG PRIu64 ", %"
                 PUBLIC_LOG PRIu32 ")...", offset, size);
-    FALSE_RETURN_V(bufferPtr != nullptr, false);
     //assembler_.resize(size);
+    uint32_t original_size = size;
     size_t index = 0; // start use index
     uint32_t usedCount = 0;
-    assemblerSize_ = size;
-    assemblerPtr_ = new uint8_t[size];
-    uint8_t* dstPtr = assemblerPtr_; //assembler_.data();
+    uint8_t* dstPtr = AudioBufferWritableData(bufferPtr, size);
+    FALSE_RETURN_V(dstPtr != nullptr, false);
+
     auto offsetEnd = offset + size;
     auto curOffsetEnd = bufferOffset_ + AudioBufferSize(que_[0]);
     if (offsetEnd <= curOffsetEnd) { // 0号buffer够用
-        dstPtr = AudioBufferWritableData(bufferPtr, size);
-        RETURN_FALSE_IF_NULL(dstPtr);
         LOG_WARN_IF_FAIL(memcpy_s(dstPtr, size,
             AudioBufferReadOnlyData(que_[0]) + offset - bufferOffset_, size), "failed to memcpy");
+        bufferPtr->pts = que_[0]->pts;
+        bufferPtr->dts = que_[0]->dts;
         startIndex = 0;
         endIndex = 0;
         return true;
@@ -172,13 +172,15 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
             AudioBufferReadOnlyData(que_[index]) + offset - prevOffset, srcSize),
             "failed to copy memory");
 
+        bufferPtr->pts = que_[index]->pts;
+        bufferPtr->dts = que_[index]->dts;
+
         // 数据不足的部分，从后续buffer(多数时候是1/2/3...号)拷贝
         auto prevMediaOffsetEnd = prevOffset + AudioBufferSize(que_[index]);
         dstPtr += srcSize;
         size -= srcSize;
         usedCount = 1;
         if (size == 0) { // index对应buffer被使用，并且已足够
-            WrapAssemblerBuffer(offset, assemblerSize_, index, bufferPtr);
             UpdateRemoveItemIndex(que_.size(), index, usedCount, startIndex, endIndex);
             return true;
         }
@@ -206,7 +208,7 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
     }
     FALSE_LOG_MSG_W(curOffsetEnd >= offsetEnd, "Processed all cached buffers, still not meet offsetEnd.");
     UpdateRemoveItemIndex(que_.size(), index, usedCount, startIndex, endIndex);
-    WrapAssemblerBuffer(offset, assemblerSize_ - size, index, bufferPtr); // 真正的size:assemblerSize_-size
+    bufferPtr->GetMemory()->UpdateDataSize(original_size - size); // 真正的size:original_size_-size
     return true;
 }
 
@@ -229,16 +231,6 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
                 PUBLIC_LOG_U32 ", %" PUBLIC_LOG_U32 ", %" PUBLIC_LOG_U32 ")", offset, size, startIndex, endIndex);
     MEDIA_LOG_D("%" PUBLIC_LOG_S, ToString().c_str());
     return true;
-}
-
-AVBufferPtr DataPacker::WrapAssemblerBuffer(uint64_t offset, size_t size, uint32_t startIndex, AVBufferPtr& outBuffer)
-{
-    MEDIA_LOG_D("DataPacker WrapAssemblerBuffer, offset = %" PUBLIC_LOG PRIu64, offset);
-    (void)offset;
-    outBuffer->GetMemory()->Write(assemblerPtr_, size);
-    outBuffer->dts = que_[startIndex]->dts;
-    outBuffer->pts = que_[startIndex]->pts;
-    return outBuffer;
 }
 
 void DataPacker::Flush()

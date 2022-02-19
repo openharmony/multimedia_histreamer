@@ -47,8 +47,6 @@ public:
     void Flush();
 
 private:
-    AVBufferPtr WrapAssemblerBuffer(uint64_t offset, size_t size, uint32_t startIndex, AVBufferPtr& outBuffer);
-
     void UpdateRemoveItemIndex(uint32_t queueSize, uint32_t firstUsedIndex, uint32_t usedCount,
                                uint32_t& startIndex, uint32_t& endIndex);
 
