@@ -178,7 +178,7 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
         size -= srcSize;
         usedCount = 1;
         if (size == 0) { // index对应buffer被使用，并且已足够
-            WrapAssemblerBuffer(offset, assemblerSize_, index).swap(bufferPtr);
+            WrapAssemblerBuffer(offset, assemblerSize_, index, bufferPtr);
             UpdateRemoveItemIndex(que_.size(), index, usedCount, startIndex, endIndex);
             return true;
         }
@@ -206,7 +206,7 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
     }
     FALSE_LOG_MSG_W(curOffsetEnd >= offsetEnd, "Processed all cached buffers, still not meet offsetEnd.");
     UpdateRemoveItemIndex(que_.size(), index, usedCount, startIndex, endIndex);
-    WrapAssemblerBuffer(offset, assemblerSize_ - size, index).swap(bufferPtr); // 真正的size:assemblerSize_-size
+    WrapAssemblerBuffer(offset, assemblerSize_ - size, index, bufferPtr); // 真正的size:assemblerSize_-size
     return true;
 }
 
@@ -215,29 +215,12 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
 {
     MEDIA_LOG_D("DataPacker GetRange(offset, size) = (%" PUBLIC_LOG PRIu64 ", %"
                 PUBLIC_LOG PRIu32 ")...", offset, size);
-    FALSE_RETURN_V(!que_.empty(), false);
+    DUMP_BUFFER2LOG("GetRange Input", bufferPtr, 0);
+    FALSE_RET_V_MSG_E(bufferPtr && (!bufferPtr->IsEmpty()) && bufferPtr->GetMemory()->GetCapacity() >= size, false,
+                      "GetRange input bufferPtr empty or size not enough.");
+
     OSAL::ScopedLock lock(mutex_);
-
-    // 刚好0号buffer就是要获取的
-    if (offset == bufferOffset_ && AudioBufferSize(que_[0]) == size) {
-        bufferPtr = que_.front();
-        que_.pop_front();
-        MEDIA_LOG_I("DataPacker's first buffer is the one to get, directly get it.");
-        return true;
-    }
-    // TODO: 刚好最后一个buffer是要取的，则可以直接返回它并删除
-    size_t lastBufferSize = que_.back()->GetMemory()->GetSize();
-    uint64_t lastBufferOffset = bufferOffset_ + size_ - lastBufferSize;
-    if (offset == lastBufferOffset && lastBufferSize == size) {
-        bufferPtr = que_.back();
-        que_.pop_back();
-        MEDIA_LOG_I("DataPacker's last buffer is the one to get, directly get it.");
-        return true;
-    }
-
-    if (!bufferPtr) {
-        bufferPtr = std::make_shared<AVBuffer>();
-    }
+    FALSE_RETURN_V(!que_.empty(), false);
 
     uint32_t startIndex = 0, endIndex = 0;
     FALSE_RETURN_V(PeekRangeInternal(offset, size, bufferPtr, startIndex, endIndex), false);
@@ -248,19 +231,14 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
     return true;
 }
 
-AVBufferPtr DataPacker::WrapAssemblerBuffer(uint64_t offset, size_t size, uint32_t startIndex)
+AVBufferPtr DataPacker::WrapAssemblerBuffer(uint64_t offset, size_t size, uint32_t startIndex, AVBufferPtr& outBuffer)
 {
     MEDIA_LOG_D("DataPacker WrapAssemblerBuffer, offset = %" PUBLIC_LOG PRIu64, offset);
     (void)offset;
-    auto bufferPtr = std::make_shared<AVBuffer>();
-    //auto dataPtr = std::shared_ptr<uint8_t>(assembler_.data(), [this](void* ptr) { assembler_.resize(0); });
-    //auto bufferData = bufferPtr->WrapMemoryPtr(dataPtr, assembler_.size(), assembler_.size());
-    auto dataPtr = std::shared_ptr<uint8_t>(assemblerPtr_, [this](void* ptr) { delete [] ptr; });
-    auto bufferData = bufferPtr->WrapMemoryPtr(dataPtr, assemblerSize_, size);
-    FALSE_RETURN_V(startIndex < que_.size(), bufferPtr);
-    bufferPtr->dts = que_[startIndex]->dts;
-    bufferPtr->pts = que_[startIndex]->pts;
-    return bufferPtr;
+    outBuffer->GetMemory()->Write(assemblerPtr_, size);
+    outBuffer->dts = que_[startIndex]->dts;
+    outBuffer->pts = que_[startIndex]->pts;
+    return outBuffer;
 }
 
 void DataPacker::Flush()
@@ -295,12 +273,15 @@ void DataPacker::RemoveBuffers(uint64_t offset, size_t size, uint32_t startIndex
     for(uint32_t i = 0; i < startIndex;i++) {
         beginIt++;
     }
-    auto endIt = que_.begin();
-    for(uint32_t i = 0; i < endIndex;i++) {
-        endIt++;
+    if (startIndex == endIndex) {
+        que_.erase(beginIt);
+    } else {
+        auto endIt = que_.begin();
+        for (uint32_t i = 0; i < endIndex; i++) {
+            endIt++;
+        }
+        que_.erase(beginIt, endIt);
     }
-    que_.erase(beginIt, endIt);
-
     if (que_.empty()) {
         bufferOffset_ = 0;
         pts_ = 0;

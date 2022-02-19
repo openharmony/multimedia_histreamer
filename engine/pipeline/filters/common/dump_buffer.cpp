@@ -75,6 +75,7 @@ void PrepareDumpDir()
 
 void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugin::Buffer>& buffer, uint64_t offset, size_t dumpSize)
 {
+    FALSE_RET_MSG(buffer && (!buffer->IsEmpty()), "%" PUBLIC_LOG_S " Buffer(null or empty)", desc);
     size_t bufferSize = buffer->GetMemory()->GetSize();
     size_t realDumpSize = std::min(dumpSize, bufferSize);
     realDumpSize = std::min(realDumpSize, static_cast<size_t>(DUMP_BUFFER2LOG_SIZE)); // max DUMP_BUFFER2LOG_SIZE bytes
@@ -84,8 +85,8 @@ void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugin::Buffer>& bu
     for (int i = 0; i < realDumpSize; i++) {
         dstPtr += snprintf_s(dstPtr, 3, 2, "%02x", p[i]); // 3, 2
     }
-    MEDIA_LOG_I("%" PUBLIC_LOG_S " Buffer(offset %" PUBLIC_LOG_D64 ", size %" PUBLIC_LOG_D32 ") : %"
-        PUBLIC_LOG_S, desc, offset, bufferSize, tmpStr);
+    MEDIA_LOG_I("%" PUBLIC_LOG_S " Buffer(offset %" PUBLIC_LOG_D64 ", size %" PUBLIC_LOG_ZU ", capacity %"
+        PUBLIC_LOG_ZU ") : %" PUBLIC_LOG_S, desc, offset, bufferSize, buffer->GetMemory()->GetCapacity(), tmpStr);
 }
 } // Pipeline
 } // Media
