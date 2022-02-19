@@ -63,9 +63,6 @@ private:
 
     OSAL::Mutex mutex_;
     std::deque<AVBufferPtr> que_;  // buffer队列
-    std::vector<uint8_t> assembler_;
-    uint8_t* assemblerPtr_;
-    size_t assemblerSize_;
     std::atomic<uint32_t> size_;
     uint64_t bufferOffset_; // 当前 DataPacker缓存数据的第一个字节 对应 到 媒体文件中的 offset
     uint64_t pts_;

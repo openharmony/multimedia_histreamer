@@ -22,22 +22,7 @@
 
 namespace OHOS {
 namespace Media {
-#define LOG_WARN_IF_FAIL(errorNo, errorMsg)                                                                            \
-    do {                                                                                                               \
-        if ((errorNo) != EOK) {                                                                                        \
-            MEDIA_LOG_W(errorMsg);                                                                                     \
-        }                                                                                                              \
-    } while (0)
-
-#define RETURN_FALSE_IF_NULL(ptr)                                                                                      \
-    do {                                                                                                               \
-        if ((ptr) == nullptr) {                                                                                        \
-            return false;                                                                                              \
-        }                                                                                                              \
-    } while (0)
-
-DataPacker::DataPacker() : mutex_(), que_(), assembler_(),
-    assemblerPtr_(nullptr), assemblerSize_(0), size_(0), bufferOffset_(0), pts_(0), dts_(0)
+DataPacker::DataPacker() : mutex_(), que_(), size_(0), bufferOffset_(0), pts_(0), dts_(0)
 {
     MEDIA_LOG_I("DataPacker ctor...");
 }
@@ -138,18 +123,17 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
 {
     MEDIA_LOG_D("DataPacker PeekRange(offset, size) = (%" PUBLIC_LOG PRIu64 ", %"
                 PUBLIC_LOG PRIu32 ")...", offset, size);
-    //assembler_.resize(size);
-    uint32_t original_size = size;
+    uint32_t needCopySize = size;
     size_t index = 0; // start use index
     uint32_t usedCount = 0;
-    uint8_t* dstPtr = AudioBufferWritableData(bufferPtr, size);
+    uint8_t* dstPtr = AudioBufferWritableData(bufferPtr, needCopySize);
     FALSE_RETURN_V(dstPtr != nullptr, false);
 
-    auto offsetEnd = offset + size;
+    auto offsetEnd = offset + needCopySize;
     auto curOffsetEnd = bufferOffset_ + AudioBufferSize(que_[0]);
     if (offsetEnd <= curOffsetEnd) { // 0号buffer够用
-        LOG_WARN_IF_FAIL(memcpy_s(dstPtr, size,
-            AudioBufferReadOnlyData(que_[0]) + offset - bufferOffset_, size), "failed to memcpy");
+        NZERO_LOG(memcpy_s(dstPtr, needCopySize,
+            AudioBufferReadOnlyData(que_[0]) + offset - bufferOffset_, needCopySize));
         bufferPtr->pts = que_[0]->pts;
         bufferPtr->dts = que_[0]->dts;
         startIndex = 0;
@@ -168,9 +152,8 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
         } while (index < que_.size());
         FALSE_RET_V_MSG_E(index < que_.size(), false, "Can not find first buffer to copy.");
         auto srcSize = AudioBufferSize(que_[index]) - (offset - prevOffset);
-        LOG_WARN_IF_FAIL(memcpy_s(dstPtr, srcSize,
-            AudioBufferReadOnlyData(que_[index]) + offset - prevOffset, srcSize),
-            "failed to copy memory");
+        NZERO_LOG(memcpy_s(dstPtr, srcSize,
+            AudioBufferReadOnlyData(que_[index]) + offset - prevOffset, srcSize));
 
         bufferPtr->pts = que_[index]->pts;
         bufferPtr->dts = que_[index]->dts;
@@ -178,29 +161,27 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
         // 数据不足的部分，从后续buffer(多数时候是1/2/3...号)拷贝
         auto prevMediaOffsetEnd = prevOffset + AudioBufferSize(que_[index]);
         dstPtr += srcSize;
-        size -= srcSize;
+        needCopySize -= srcSize;
         usedCount = 1;
-        if (size == 0) { // index对应buffer被使用，并且已足够
+        if (needCopySize == 0) { // index对应buffer被使用，并且已足够
             UpdateRemoveItemIndex(que_.size(), index, usedCount, startIndex, endIndex);
             return true;
         }
         for (size_t i = index + 1; i < que_.size(); ++i) {
             curOffsetEnd = prevMediaOffsetEnd + AudioBufferSize(que_[i]);
             if (curOffsetEnd >= offsetEnd) {
-                LOG_WARN_IF_FAIL(memcpy_s(dstPtr, size, AudioBufferReadOnlyData(que_[i]), size),
-                                 "failed to copy memory");
+                NZERO_LOG(memcpy_s(dstPtr, needCopySize, AudioBufferReadOnlyData(que_[i]), needCopySize));
                 if (curOffsetEnd == offsetEnd) { // 刚好用完
                     usedCount++;
                 } else {
-                    RemoveBufferContent(que_[i], size);
+                    RemoveBufferContent(que_[i], needCopySize);
                 }
                 break;
             } else {
                 srcSize = AudioBufferSize(que_[i]);
-                LOG_WARN_IF_FAIL(memcpy_s(dstPtr, srcSize, AudioBufferReadOnlyData(que_[i]), srcSize),
-                                 "failed to copy memory");
+                NZERO_LOG(memcpy_s(dstPtr, srcSize, AudioBufferReadOnlyData(que_[i]), srcSize));
                 dstPtr += srcSize;
-                size -= srcSize;
+                needCopySize -= srcSize;
                 prevMediaOffsetEnd += srcSize;
                 usedCount++;
             }
@@ -208,7 +189,7 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
     }
     FALSE_LOG_MSG_W(curOffsetEnd >= offsetEnd, "Processed all cached buffers, still not meet offsetEnd.");
     UpdateRemoveItemIndex(que_.size(), index, usedCount, startIndex, endIndex);
-    bufferPtr->GetMemory()->UpdateDataSize(original_size - size); // 真正的size:original_size_-size
+    bufferPtr->GetMemory()->UpdateDataSize(size - needCopySize); // Update to the real size, especially at the end.
     return true;
 }
 

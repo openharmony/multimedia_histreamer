@@ -136,7 +136,7 @@
     do {                                                                                                               \
         Status ret = (exec);                                                                                           \
         if (ret != Status::OK) {                                                                                       \
-            MEDIA_LOG_E("NOK_RETURN on Status(%" PUBLIC_LOG "d).", ret);                                            \
+            MEDIA_LOG_E("NOK_RETURN on Status(%" PUBLIC_LOG "d).", ret);                                               \
             return ret;                                                                                                \
         }                                                                                                              \
     } while (0)
@@ -147,7 +147,18 @@
     do {                                                                                                               \
         Status ret = (exec);                                                                                           \
         if (ret != Status::OK) {                                                                                       \
-            MEDIA_LOG_E("NOK_LOG on Status(%" PUBLIC_LOG "d).", ret);                                               \
+            MEDIA_LOG_E("NOK_LOG on Status(%" PUBLIC_LOG "d).", ret);                                                  \
+        }                                                                                                              \
+    } while (0)
+#endif
+
+// If exec not return zero, then record the error code, especially when call system C function.
+#ifndef NZERO_LOG
+#define NZERO_LOG(exec)                                                                                                \
+    do {                                                                                                               \
+        int ret = (exec);                                                                                              \
+        if (ret != 0) {                                                                                                \
+            MEDIA_LOG_E("NZERO_LOG when call (" #exec "), return %" PUBLIC_LOG_D32, ret);                              \
         }                                                                                                              \
     } while (0)
 #endif
