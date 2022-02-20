@@ -51,6 +51,20 @@ private:
         int32_t index; // Buffer index, -1 means this Position is invalid
         uint32_t bufferOffset; // Offset in the buffer
         uint64_t mediaOffset;  // Offset in the media file
+
+        bool operator < (const Position& other) const
+        {
+            if (index < 0 || other.index < 0) { // Position invalid
+                return false;
+            }
+            return mediaOffset < other.mediaOffset;
+        }
+
+        std::string ToString() const
+        {
+            return "Position (index " + std::to_string(index) + ", bufferOffset " + std::to_string(bufferOffset) +
+                ", mediaOffset " + std::to_string(mediaOffset);
+        }
     };
 
     // first - start position;
@@ -58,8 +72,6 @@ private:
     using PositionPair = std::pair<Position, Position>;
 
     void RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t removeSize);
-
-    void RemoveBuffers(uint64_t offset, size_t size, uint32_t startIndex, uint32_t endIndex);
 
     bool PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr, bool isGet);
 
@@ -73,7 +85,13 @@ private:
     int32_t CopyFromSuccessiveBuffer(uint64_t prevOffset, uint64_t offsetEnd, int32_t startIndex, uint8_t *dstPtr,
                                      uint32_t &needCopySize, uint32_t &lastBufferOffsetEnd);
 
-    std::string ToString();
+    void RemoveOldData();
+
+    bool RemoveTo(const Position& position);
+
+    bool UpdateWhenFrontDataRemoved(size_t removeSize);
+
+    std::string ToString() const;
 
     OSAL::Mutex mutex_;
     std::deque<AVBufferPtr> que_;

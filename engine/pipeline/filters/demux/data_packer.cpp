@@ -189,10 +189,7 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
     prevGet = currentGet; // store last get position to prevGet
 
     FALSE_RETURN_V(PeekRangeInternal(offset, size, bufferPtr, true), false);
-    RemoveBuffers(offset, size, currentGet.first.index, currentGet.second.index);
-    MEDIA_LOG_D("RemoveBuffers called (offset, size, startIndex, endIndex) = (%" PUBLIC_LOG_U64 ", %"
-                PUBLIC_LOG_U32 ", %" PUBLIC_LOG_U32 ", %" PUBLIC_LOG_U32 ")", offset, size, startIndex, endIndex);
-    MEDIA_LOG_D("%" PUBLIC_LOG_S, ToString().c_str());
+    RemoveOldData();
     return true;
 }
 
@@ -215,39 +212,73 @@ void DataPacker::FlushInternal()
 
 void DataPacker::RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t removeSize)
 {
+    if (removeSize == 0) {
+        return;
+    }
     auto memory = buffer->GetMemory();
+    FALSE_RETURN(removeSize < memory->GetSize());
     auto copySize = memory->GetSize() - removeSize;
     FALSE_LOG_MSG_E(memmove_s(memory->GetWritableAddr(copySize), memory->GetCapacity(),
         memory->GetReadOnlyData(removeSize), copySize) == EOK, "memmove failed.");
+    FALSE_RETURN(UpdateWhenFrontDataRemoved(removeSize));
 }
 
-// Remove items between startIndex and endIndex, startIndex / endIndex are included.
-// Currently, not make the remaining buffer continuous.
-void DataPacker::RemoveBuffers(uint64_t offset, size_t size, uint32_t startIndex, uint32_t endIndex)
+// Remove consumed data, and make the remaining data continuous
+// Consumed data - between prevGet.first and currentGet.first
+// In order to make remaining data continuous, also remove the data before prevGet.first
+void DataPacker::RemoveOldData()
 {
-    auto beginIt = que_.begin();
-    for(uint32_t i = 0; i < startIndex;i++) {
-        beginIt++;
-    }
-    if (startIndex == endIndex) {
-        que_.erase(beginIt);
-    } else {
-        auto endIt = que_.begin();
-        for (uint32_t i = 0; i < endIndex; i++) {
-            endIt++;
-        }
-        que_.erase(beginIt, endIt);
-    }
+    // If prevGet.first >= currentGet.first, return
+    FALSE_RETURN_W(prevGet.first < currentGet.first);
+    MEDIA_LOG_D("Before RemoveOldData %" PUBLIC_LOG_S, ToString().c_str());
+    FALSE_LOG(RemoveTo(currentGet.first));
     if (que_.empty()) {
         mediaOffset_ = 0;
+        size_ = 0;
         pts_ = 0;
         dts_ = 0;
-    } else if (startIndex == 0) {
-        mediaOffset_ += size;
-        pts_ = que_[0]->pts;
-        dts_ = que_[0]->dts;
+    } else {
+        pts_ = que_.front()->pts;
+        dts_ = que_.front()->dts;
     }
-    size_ -= size;
+    MEDIA_LOG_D("After RemoveOldData %" PUBLIC_LOG_S, ToString().c_str());
+}
+
+bool DataPacker::RemoveTo(const Position& position)
+{
+    MEDIA_LOG_D("Remove to %" PUBLIC_LOG_S, position.ToString().c_str());
+    size_t removeSize;
+    int32_t i = 0;
+    while (i < position.index && !que_.empty()) { // Remove all whole buffer before position.index
+        removeSize = AudioBufferSize(que_.front());
+        FALSE_RETURN_V(UpdateWhenFrontDataRemoved(removeSize), false);
+        que_.pop_front();
+        i++;
+    }
+    FALSE_RETURN_V(!que_.empty(), false);
+
+    // The last buffer
+    removeSize = AudioBufferSize(que_.front());
+
+    // 1. If whole buffer should be removed
+    if (position.bufferOffset >= removeSize) {
+        FALSE_RETURN_V(UpdateWhenFrontDataRemoved(removeSize), false);
+        que_.pop_front();
+        return true;
+    }
+
+    // 2. Remove the front part of the buffer data
+    RemoveBufferContent(que_.front(), position.bufferOffset);
+    return true;
+}
+
+bool DataPacker::UpdateWhenFrontDataRemoved(size_t removeSize)
+{
+    mediaOffset_ += removeSize;
+    FALSE_RET_V_MSG_E(size_.load() >= removeSize, false, "Total size(size_ %" PUBLIC_LOG_U32
+            ") smaller than removeSize(%" PUBLIC_LOG_ZU ")", size_.load(), removeSize);
+    size_ -= removeSize;
+    return true;
 }
 
 bool DataPacker::FindFirstBufferToCopy(uint64_t offset, int32_t &startIndex, uint64_t &prevOffset)
@@ -304,7 +335,7 @@ int32_t DataPacker::CopyFromSuccessiveBuffer(uint64_t prevOffset, uint64_t offse
     return usedCount;
 }
 
-std::string DataPacker::ToString()
+std::string DataPacker::ToString() const
 {
     return "DataPacker (offset " + std::to_string(mediaOffset_) + ", size " + std::to_string(size_) +
            ", buffer count " + std::to_string(que_.size()) + ")";

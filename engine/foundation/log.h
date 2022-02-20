@@ -174,6 +174,17 @@
     } while (0)
 #endif
 
+#ifndef FALSE_RETURN_W
+#define FALSE_RETURN_W(exec)                                                                                           \
+    do {                                                                                                               \
+        bool ret = (exec);                                                                                             \
+        if (!ret) {                                                                                                    \
+            MEDIA_LOG_W("FALSE_RETURN " #exec);                                                                        \
+            return;                                                                                                    \
+        }                                                                                                              \
+    } while (0)
+#endif
+
 #ifndef FALSE_RETURN_V
 #define FALSE_RETURN_V(exec, ret)                                                                                      \
     do {                                                                                                               \
