@@ -67,6 +67,12 @@ private:
 
     bool FindFirstBufferToCopy(uint64_t offset, int32_t &startIndex, uint64_t &prevOffset);
 
+    size_t CopyFirstBuffer(uint64_t offset, size_t size, int32_t index, uint64_t startOffset, uint8_t *dstPtr,
+                           AVBufferPtr& dstBufferPtr, uint32_t &startBufferOffset);
+
+    int32_t CopyFromSuccessiveBuffer(uint64_t prevOffset, uint64_t offsetEnd, int32_t startIndex, uint8_t *dstPtr,
+                                     uint32_t &needCopySize, uint32_t &lastBufferOffsetEnd);
+
     std::string ToString();
 
     OSAL::Mutex mutex_;
