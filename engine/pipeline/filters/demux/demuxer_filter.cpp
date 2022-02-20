@@ -311,7 +311,7 @@ bool DemuxerFilter::InitPlugin(std::string pluginName)
     pluginState_ = DemuxerState::DEMUXER_STATE_PARSE_HEADER;
     return plugin_->Prepare() == Plugin::Status::OK;
 }
-#if 1
+
 void DemuxerFilter::ActivatePullMode()
 {
     MEDIA_LOG_D("ActivatePullMode called");
@@ -358,26 +358,6 @@ void DemuxerFilter::ActivatePullMode()
     typeFinder_->Init(uriSuffix_, mediaDataSize_, checkRange_, peekRange_);
     MediaTypeFound(typeFinder_->FindMediaType());
 }
-#else
-void DemuxerFilter::ActivatePullMode()
-{
-    MEDIA_LOG_D("ActivatePullMode called");
-    InitTypeFinder();
-    if (!task_) {
-        task_ = std::make_shared<OSAL::Task>("DemuxerFilter");
-    }
-    task_->RegisterHandler([this] { DemuxerLoop(); });
-    checkRange_ = [this](uint64_t offset, uint32_t size) {
-        return (offset < mediaDataSize_) && (size <= mediaDataSize_) && (offset <= (mediaDataSize_ - size));
-    };
-    peekRange_ = [this](uint64_t offset, size_t size, AVBufferPtr& bufferPtr) -> bool {
-        return inPorts_.front()->PullData(offset, size, bufferPtr) == ErrorCode::SUCCESS;
-    };
-    getRange_ = peekRange_;
-    typeFinder_->Init(uriSuffix_, mediaDataSize_, checkRange_, peekRange_);
-    MediaTypeFound(typeFinder_->FindMediaType());
-}
-#endif
 
 void DemuxerFilter::ActivatePushMode()
 {
