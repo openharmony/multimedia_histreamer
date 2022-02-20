@@ -24,25 +24,24 @@
 namespace OHOS {
 namespace Media {
 namespace Test {
-TEST(AnyOfTest, any_of_should_return_true_if_int_item_exists)
+TEST(TestAnyOf, any_of_should_return_true_if_int_item_exists)
 {
     std::vector<int> vec {1, 2, 3, 4};
     ASSERT_EQ(true, AnyOf(std::begin(vec), std::end(vec), [](int item) { return item == 3; }));
 }
 
-TEST(AnyOfTest, any_of_should_return_true_if_string_item_exists)
+TEST(TestAnyOf, any_of_should_return_true_if_string_item_exists)
 {
     std::vector<std::string> vec {"one", "two", "three"};
     ASSERT_EQ(true, AnyOf(std::begin(vec), std::end(vec),
               [](const std::string& item) { return item == "two"; }));
 }
 
-TEST(AnyOfTest, any_of_should_return_false_if_item_not_exists)
+TEST(TestAnyOf, any_of_should_return_false_if_item_not_exists)
 {
     std::vector<int> vec {1, 2, 3, 4};
     ASSERT_EQ(false, AnyOf(std::begin(vec), std::end(vec), [](int item) { return item == 8; }));
 }
-
 } // namespace Test
 } // namespace Media
 } // namespace OHOS

@@ -47,6 +47,7 @@ public:
     void Flush();
 
 private:
+    // Record the position that GerRange copy start or end.
     struct Position {
         int32_t index; // Buffer index, -1 means this Position is invalid
         uint32_t bufferOffset; // Offset in the buffer
@@ -67,8 +68,8 @@ private:
         }
     };
 
-    // first - start position;
-    // second - end position, not include bufferOffset byte.
+    // first  : start position;
+    // second : end position, not include bufferOffset byte.
     using PositionPair = std::pair<Position, Position>;
 
     void RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t removeSize);
@@ -79,8 +80,8 @@ private:
 
     bool FindFirstBufferToCopy(uint64_t offset, int32_t &startIndex, uint64_t &prevOffset);
 
-    size_t CopyFirstBuffer(uint64_t offset, size_t size, int32_t index, uint64_t startOffset, uint8_t *dstPtr,
-                           AVBufferPtr& dstBufferPtr, uint32_t &startBufferOffset);
+    size_t CopyFirstBuffer(size_t size, int32_t index, uint8_t *dstPtr, AVBufferPtr &dstBufferPtr,
+                           int32_t bufferOffset);
 
     int32_t CopyFromSuccessiveBuffer(uint64_t prevOffset, uint64_t offsetEnd, int32_t startIndex, uint8_t *dstPtr,
                                      uint32_t &needCopySize, uint32_t &lastBufferOffsetEnd);
@@ -101,8 +102,8 @@ private:
     uint64_t dts_;
 
     // The position in prev GetRange / current GetRange
-    PositionPair prevGet {{-1, 0, 0}, {-1, 0, 0}};
-    PositionPair currentGet {{-1, 0, 0}, {-1, 0, 0}};
+    PositionPair prevGet_ {{-1, 0, 0}, {-1, 0, 0}};
+    PositionPair currentGet_ {{-1, 0, 0}, {-1, 0, 0}};
 };
 } // namespace Media
 } // namespace OHOS
