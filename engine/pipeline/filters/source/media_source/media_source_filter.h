@@ -71,6 +71,7 @@ private:
     std::string uri_;
     bool isSeekable_;
     uint64_t position_;
+    uint64_t mediaOffset_ {0}; // offset used in push mode
     size_t bufferSize_;
     std::shared_ptr<Plugin::Source> plugin_;
     std::shared_ptr<Allocator> pluginAllocator_;

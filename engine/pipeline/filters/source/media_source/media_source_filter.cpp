@@ -28,6 +28,8 @@ namespace Media {
 namespace Pipeline {
 using namespace Plugin;
 
+static constexpr size_t DEFAULT_READ_SIZE = 4096;  // default read size for push mode
+
 static AutoRegisterFilter<MediaSourceFilter> g_registerFilterHelper("builtin.player.mediasource");
 
 static std::map<std::string, ProtocolType> g_protocolStringToType = {
@@ -201,6 +203,7 @@ ErrorCode MediaSourceFilter::Stop()
     if (taskPtr_) {
         taskPtr_->Stop();
     }
+    mediaOffset_ = 0;
     protocol_.clear();
     uri_.clear();
     ErrorCode ret = ErrorCode::SUCCESS;
@@ -234,6 +237,7 @@ void MediaSourceFilter::ActivateMode()
     if (!isSeekable_) {
         taskPtr_ = std::make_shared<OSAL::Task>("DataReader");
         taskPtr_->RegisterHandler(std::bind(&MediaSourceFilter::ReadLoop, this));
+        taskPtr_->Start();
     }
 }
 
@@ -279,12 +283,13 @@ void MediaSourceFilter::ReadLoop()
 {
     MEDIA_LOG_D("IN");
     AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
-    ErrorCode ret = TranslatePluginStatus(plugin_->Read(bufferPtr, 4096)); // 4096: default push data size
+    ErrorCode ret = TranslatePluginStatus(plugin_->Read(bufferPtr, DEFAULT_READ_SIZE));
     if (ret == ErrorCode::END_OF_STREAM) {
         Stop();
-        return;
+        bufferPtr->flag |= BUFFER_FLAG_EOS;
     }
-    outPorts_[0]->PushData(bufferPtr, -1);
+    outPorts_[0]->PushData(bufferPtr, mediaOffset_);
+    mediaOffset_ += DEFAULT_READ_SIZE;
 }
 
 bool MediaSourceFilter::GetProtocolByUri()
