@@ -130,6 +130,7 @@ private:
 
     std::string uriSuffix_;
     uint64_t mediaDataSize_;
+    bool isLivePlayFinished_ {false};  // for push mode live play
     std::shared_ptr<OSAL::Task> task_;
     std::shared_ptr<TypeFinder> typeFinder_;
     std::shared_ptr<DataPacker> dataPacker_;

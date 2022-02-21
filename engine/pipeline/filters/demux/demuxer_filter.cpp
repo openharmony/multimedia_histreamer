@@ -61,6 +61,9 @@ Plugin::Status DemuxerFilter::DataSourceImpl::ReadAt(int64_t offset, std::shared
                     "d, offset: %" PUBLIC_LOG PRId64, !buffer, static_cast<int>(expectedLen), offset);
         return Plugin::Status::ERROR_UNKNOWN;
     }
+    if (filter.isLivePlayFinished_) {
+        return Plugin::Status::END_OF_STREAM;
+    }
     Plugin::Status rtv = Plugin::Status::OK;
     switch (filter.pluginState_.load()) {
         case DemuxerState::DEMUXER_STATE_NULL:
@@ -193,6 +196,7 @@ ErrorCode DemuxerFilter::Prepare()
     DUMP_BUFFER2FILE_PREPARE();
 
     pluginState_ = DemuxerState::DEMUXER_STATE_NULL;
+    isLivePlayFinished_ = false;
     Pipeline::WorkMode mode;
     GetInPort(PORT_NAME_DEFAULT)->Activate({Pipeline::WorkMode::PULL, Pipeline::WorkMode::PUSH}, mode);
     if (mode == Pipeline::WorkMode::PULL) {
@@ -207,8 +211,13 @@ ErrorCode DemuxerFilter::Prepare()
 ErrorCode DemuxerFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     MEDIA_LOG_D("PushData for port: %" PUBLIC_LOG "s", inPort.c_str());
-    if (dataPacker_) {
-        dataPacker_->PushData(std::move(buffer), offset);
+    if (buffer->flag & BUFFER_FLAG_EOS) {
+        FALSE_LOG_MSG_W(buffer->IsEmpty(), "EOS buffer is not empty");
+        isLivePlayFinished_ = true;
+    } else {
+        if (dataPacker_) {
+            dataPacker_->PushData(std::move(buffer), offset);
+        }
     }
     return ErrorCode::SUCCESS;
 }
