@@ -20,11 +20,11 @@
 #include <list>
 #include <memory>
 
+#include "foundation/pre_defines.h"
 #include "filter.h"
-#include "foundation/error_code.h"
+#include "error_code.h"
 #include "utils/constants.h"
 #include "event.h"
-#include "utils/utils.h"
 #include "filter_type.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/base.h"

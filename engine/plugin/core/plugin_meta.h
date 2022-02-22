@@ -20,7 +20,7 @@
 
 #include "common/plugin_tags.h"
 #include "common/plugin_types.h"
-#include "utils/utils.h"
+#include "foundation/cpp_ext/type_traits_ext.h"
 
 namespace OHOS {
 namespace Media {
@@ -32,45 +32,45 @@ namespace Plugin {
  * For details about the definition and usage, to see enum Tag in file plugin_tags.h.
  */
 enum struct MetaID : uint32_t {
-    MIME = to_underlying(Tag::MIME),
-    TRACK_ID = to_underlying(Tag::TRACK_ID),
-    MEDIA_CODEC_CONFIG = to_underlying(Tag::MEDIA_CODEC_CONFIG),
+    MIME = CppExt::to_underlying(Tag::MIME),
+    TRACK_ID = CppExt::to_underlying(Tag::TRACK_ID),
+    MEDIA_CODEC_CONFIG = CppExt::to_underlying(Tag::MEDIA_CODEC_CONFIG),
 
-    AUDIO_CHANNELS = to_underlying(Tag::AUDIO_CHANNELS),
-    AUDIO_SAMPLE_RATE = to_underlying(Tag::AUDIO_SAMPLE_RATE),
-    AUDIO_SAMPLE_FORMAT = to_underlying(Tag::AUDIO_SAMPLE_FORMAT),
-    AUDIO_SAMPLE_PER_FRAME = to_underlying(Tag::AUDIO_SAMPLE_PER_FRAME),
-    AUDIO_CHANNEL_LAYOUT = to_underlying(Tag::AUDIO_CHANNEL_LAYOUT),
+    AUDIO_CHANNELS = CppExt::to_underlying(Tag::AUDIO_CHANNELS),
+    AUDIO_SAMPLE_RATE = CppExt::to_underlying(Tag::AUDIO_SAMPLE_RATE),
+    AUDIO_SAMPLE_FORMAT = CppExt::to_underlying(Tag::AUDIO_SAMPLE_FORMAT),
+    AUDIO_SAMPLE_PER_FRAME = CppExt::to_underlying(Tag::AUDIO_SAMPLE_PER_FRAME),
+    AUDIO_CHANNEL_LAYOUT = CppExt::to_underlying(Tag::AUDIO_CHANNEL_LAYOUT),
 
-    MEDIA_TITLE = to_underlying(Tag::MEDIA_TITLE),
-    MEDIA_ARTIST = to_underlying(Tag::MEDIA_ARTIST),
-    MEDIA_LYRICIST = to_underlying(Tag::MEDIA_LYRICIST),
-    MEDIA_ALBUM = to_underlying(Tag::MEDIA_ALBUM),
-    MEDIA_ALBUM_ARTIST = to_underlying(Tag::MEDIA_ALBUM_ARTIST),
-    MEDIA_DATE = to_underlying(Tag::MEDIA_DATE),
-    MEDIA_COMMENT = to_underlying(Tag::MEDIA_COMMENT),
-    MEDIA_GENRE = to_underlying(Tag::MEDIA_GENRE),
-    MEDIA_DESCRIPTION = to_underlying(Tag::MEDIA_DESCRIPTION),
-    MEDIA_COPYRIGHT = to_underlying(Tag::MEDIA_COPYRIGHT),
-    MEDIA_LANGUAGE = to_underlying(Tag::MEDIA_LANGUAGE),
-    MEDIA_LYRICS = to_underlying(Tag::MEDIA_LYRICS),
-    MEDIA_DURATION = to_underlying(Tag::MEDIA_DURATION),
-    MEDIA_BITRATE = to_underlying(Tag::MEDIA_BITRATE),
-    MEDIA_FILE_EXTENSION = to_underlying(Tag::MEDIA_FILE_EXTENSION),
-    MEDIA_FILE_SIZE = to_underlying(Tag::MEDIA_FILE_SIZE),
+    MEDIA_TITLE = CppExt::to_underlying(Tag::MEDIA_TITLE),
+    MEDIA_ARTIST = CppExt::to_underlying(Tag::MEDIA_ARTIST),
+    MEDIA_LYRICIST = CppExt::to_underlying(Tag::MEDIA_LYRICIST),
+    MEDIA_ALBUM = CppExt::to_underlying(Tag::MEDIA_ALBUM),
+    MEDIA_ALBUM_ARTIST = CppExt::to_underlying(Tag::MEDIA_ALBUM_ARTIST),
+    MEDIA_DATE = CppExt::to_underlying(Tag::MEDIA_DATE),
+    MEDIA_COMMENT = CppExt::to_underlying(Tag::MEDIA_COMMENT),
+    MEDIA_GENRE = CppExt::to_underlying(Tag::MEDIA_GENRE),
+    MEDIA_DESCRIPTION = CppExt::to_underlying(Tag::MEDIA_DESCRIPTION),
+    MEDIA_COPYRIGHT = CppExt::to_underlying(Tag::MEDIA_COPYRIGHT),
+    MEDIA_LANGUAGE = CppExt::to_underlying(Tag::MEDIA_LANGUAGE),
+    MEDIA_LYRICS = CppExt::to_underlying(Tag::MEDIA_LYRICS),
+    MEDIA_DURATION = CppExt::to_underlying(Tag::MEDIA_DURATION),
+    MEDIA_BITRATE = CppExt::to_underlying(Tag::MEDIA_BITRATE),
+    MEDIA_FILE_EXTENSION = CppExt::to_underlying(Tag::MEDIA_FILE_EXTENSION),
+    MEDIA_FILE_SIZE = CppExt::to_underlying(Tag::MEDIA_FILE_SIZE),
 
-    AUDIO_MPEG_VERSION = to_underlying(Tag::AUDIO_MPEG_VERSION),
-    AUDIO_MPEG_LAYER = to_underlying(Tag::AUDIO_MPEG_LAYER),
-    AUDIO_AAC_PROFILE = to_underlying(Tag::AUDIO_AAC_PROFILE),
-    AUDIO_AAC_LEVEL = to_underlying(Tag::AUDIO_AAC_LEVEL),
-    AUDIO_AAC_STREAM_FORMAT = to_underlying(Tag::AUDIO_AAC_STREAM_FORMAT),
+    AUDIO_MPEG_VERSION = CppExt::to_underlying(Tag::AUDIO_MPEG_VERSION),
+    AUDIO_MPEG_LAYER = CppExt::to_underlying(Tag::AUDIO_MPEG_LAYER),
+    AUDIO_AAC_PROFILE = CppExt::to_underlying(Tag::AUDIO_AAC_PROFILE),
+    AUDIO_AAC_LEVEL = CppExt::to_underlying(Tag::AUDIO_AAC_LEVEL),
+    AUDIO_AAC_STREAM_FORMAT = CppExt::to_underlying(Tag::AUDIO_AAC_STREAM_FORMAT),
 
-    VIDEO_WIDTH = to_underlying(Tag::VIDEO_WIDTH),
-    VIDEO_HEIGHT = to_underlying(Tag::VIDEO_HEIGHT),
-    VIDEO_PIXEL_FORMAT = to_underlying(Tag::VIDEO_PIXEL_FORMAT),
-    VIDEO_FRAME_RATE = to_underlying(Tag::VIDEO_FRAME_RATE),
-    VIDEO_H264_PROFILE = to_underlying(Tag::VIDEO_H264_PROFILE),
-    VIDEO_H264_LEVEL = to_underlying(Tag::VIDEO_H264_LEVEL),
+    VIDEO_WIDTH = CppExt::to_underlying(Tag::VIDEO_WIDTH),
+    VIDEO_HEIGHT = CppExt::to_underlying(Tag::VIDEO_HEIGHT),
+    VIDEO_PIXEL_FORMAT = CppExt::to_underlying(Tag::VIDEO_PIXEL_FORMAT),
+    VIDEO_FRAME_RATE = CppExt::to_underlying(Tag::VIDEO_FRAME_RATE),
+    VIDEO_H264_PROFILE = CppExt::to_underlying(Tag::VIDEO_H264_PROFILE),
+    VIDEO_H264_LEVEL = CppExt::to_underlying(Tag::VIDEO_H264_LEVEL),
 };
 
 class Meta {

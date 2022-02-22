@@ -19,12 +19,11 @@
 #include <cstring>
 #include <map>
 #include <set>
-#include "utils/constants.h"
-#include "utils/memory_helper.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/interface/codec_plugin.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
+#include "utils/constants.h"
 
 namespace {
 // register plugins

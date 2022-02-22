@@ -21,7 +21,6 @@
 #include <cstring>
 #include <map>
 #include <set>
-#include "utils/memory_helper.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
 namespace {

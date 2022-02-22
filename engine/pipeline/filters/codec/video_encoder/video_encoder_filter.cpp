@@ -18,14 +18,14 @@
 #define HST_LOG_TAG "VideoEncoderFilter"
 
 #include "video_encoder_filter.h"
+#include "foundation/cpp_ext/memory_ext.h"
+#include "factory/filter_factory.h"
 #include "foundation/log.h"
 #include "osal/utils/util.h"
-#include "utils/constants.h"
-#include "utils/memory_helper.h"
-#include "utils/steady_clock.h"
-#include "factory/filter_factory.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
+#include "utils/constants.h"
+#include "utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {
@@ -275,7 +275,7 @@ ErrorCode VideoEncoderFilter::AllocateOutputBuffers()
     } else {
         MEDIA_LOG_I("using plugin output allocator");
         for (size_t cnt = 0; cnt < bufferCnt; cnt++) {
-            auto buf = MemoryHelper::make_unique<AVBuffer>(Plugin::BufferMetaType::VIDEO);
+            auto buf = CppExt::make_unique<AVBuffer>(Plugin::BufferMetaType::VIDEO);
             buf->AllocMemory(outAllocator, bufferSize);
             outBufPool_->Append(std::move(buf));
         }

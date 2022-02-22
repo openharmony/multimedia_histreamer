@@ -17,12 +17,13 @@
 
 #include "sdl_audio_sink_plugin.h"
 #include <functional>
+#include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/log.h"
+#include "foundation/pre_defines.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "utils/constants.h"
-#include "utils/utils.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;
@@ -138,7 +139,7 @@ Status SdlAudioSinkPlugin::Prepare()
     int outChannels = av_get_channel_layout_nb_channels(outChannelLayout);
     avFrameSize_ = av_samples_get_buffer_size(nullptr, outChannels, samplesPerFrame_, outSampleFmt, 1);
 
-    rb = MemoryHelper::make_unique<RingBuffer>(avFrameSize_ * 10); // 最大缓存10帧
+    rb = CppExt::make_unique<RingBuffer>(avFrameSize_ * 10); // 最大缓存10帧
     rb->Init();
 
     wantedSpec_.freq = sampleRate_;

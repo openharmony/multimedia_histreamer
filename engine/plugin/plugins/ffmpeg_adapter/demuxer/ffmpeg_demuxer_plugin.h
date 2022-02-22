@@ -19,9 +19,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "osal/thread/mutex.h"
-#include "utils/type_define.h"
-#include "plugin/core/plugin_register.h"
+#include "foundation/osal/thread/mutex.h"
 #include "plugin/interface/demuxer_plugin.h"
 
 #ifdef __cplusplus

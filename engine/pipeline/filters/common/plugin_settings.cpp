@@ -19,9 +19,9 @@
 
 #include <vector>
 #include "foundation/log.h"
+#include "foundation/pre_defines.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "pipeline/core/plugin_attr_desc.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {

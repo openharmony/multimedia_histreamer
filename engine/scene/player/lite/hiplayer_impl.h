@@ -26,18 +26,17 @@
 #endif
 #include "filters/demux/demuxer_filter.h"
 #include "filters/source/media_source/media_source_filter.h"
-#include "foundation/error_code.h"
-#include "scene/lite/hiplayer.h"
 #include "internal/state_machine.h"
 #include "osal/thread/condition_variable.h"
 #include "osal/thread/mutex.h"
+#include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_callback.h"
 #include "pipeline/core/pipeline.h"
 #include "pipeline/core/pipeline_core.h"
 #include "pipeline/filters/codec/audio_decoder/audio_decoder_filter.h"
 #include "pipeline/filters/sink/audio_sink/audio_sink_filter.h"
 #include "play_executor.h"
-#include "utils/utils.h"
+#include "scene/lite/hiplayer.h"
 
 namespace OHOS {
 namespace Media {
@@ -77,23 +76,23 @@ public:
     int32_t GetDuration(int64_t& outDurationMs) override;
     int32_t GetVideoWidth(int32_t& videoWidth) override
     {
-        return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
+        return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
     }
     int32_t GetVideoHeight(int32_t& videoHeight) override
     {
-        return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
+        return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
     }
     int32_t SetPlaybackSpeed(float speed) override
     {
-        return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
+        return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
     }
     int32_t GetPlaybackSpeed(float& speed) override
     {
-        return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
+        return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
     }
     int32_t SetAudioStreamType(int32_t type) override
     {
-        return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
+        return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
     }
     void GetAudioStreamType(int32_t& type) override
     {
@@ -102,7 +101,7 @@ public:
 
     int32_t SetParameter(const Format& params) override
     {
-        return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
+        return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
     }
 
     void OnEvent(const Event& event) override;

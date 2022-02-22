@@ -22,7 +22,7 @@
 
 #include "osal/thread/mutex.h"
 #include "osal/thread/scoped_lock.h"
-#include "utils/type_define.h"
+#include "pipeline/core/type_define.h"
 
 namespace OHOS {
 namespace Media {

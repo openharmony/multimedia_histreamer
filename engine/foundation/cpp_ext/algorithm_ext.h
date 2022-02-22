@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,23 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-
-#define private public
-#define protected public
-
-#include "plugin/core/plugin_manager.h"
-
-#include "plugins/UtSourceTest1.h"
-#include "plugins/UtSourceTest2.h"
-
+#ifndef HISTREAMER_FOUNDATION_CPP_EXT_ALGO_EXT_H
+#define HISTREAMER_FOUNDATION_CPP_EXT_ALGO_EXT_H
 namespace OHOS {
 namespace Media {
-namespace Test {
-using namespace OHOS::Media::Plugin;
-
-TEST(TestPluginManagerNoPlugin, ListPlugins_case1)
+namespace CppExt {
+template<class Iterator, class UnaryPredicate>
+inline bool AnyOf(Iterator first, Iterator last, UnaryPredicate p) // implementation of std::any_of used on c++11
 {
+    while (first != last) {
+        if (p(*first)) {
+            return true;
+        }
+        ++first;
+    }
+    return false;
 }
-} // namespace Test
-} // namespace Media
-} // namespace OHOS
+} // CppExt
+} // Media
+} // OHOS
+#endif // HISTREAMER_FOUNDATION_CPP_EXT_ALGO_EXT_H

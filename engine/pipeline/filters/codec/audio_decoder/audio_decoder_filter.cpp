@@ -16,14 +16,14 @@
 #define HST_LOG_TAG "AudioDecoderFilter"
 
 #include "audio_decoder_filter.h"
-#include "utils/constants.h"
-#include "utils/memory_helper.h"
-#include "factory/filter_factory.h"
 #include "common/plugin_utils.h"
+#include "foundation/cpp_ext/memory_ext.h"
+#include "factory/filter_factory.h"
+#include "filters/common/dump_buffer.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/core/plugin_manager.h"
 #include "utils/steady_clock.h"
-#include "filters/common/dump_buffer.h"
+#include "utils/constants.h"
 
 namespace {
 constexpr int32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 5;
@@ -176,7 +176,7 @@ ErrorCode AudioDecoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
     } else {
         MEDIA_LOG_I("using plugin output allocator");
         for (size_t cnt = 0; cnt < bufferCnt; cnt++) {
-            auto buf = MemoryHelper::make_unique<AVBuffer>();
+            auto buf = CppExt::make_unique<AVBuffer>();
             buf->AllocMemory(outAllocator, bufferSize);
             outBufferPool_->Append(std::move(buf));
         }
@@ -268,7 +268,7 @@ ErrorCode AudioDecoderFilter::HandleFrame(const std::shared_ptr<AVBuffer>& buffe
     MEDIA_LOG_D("HandleFrame called");
     auto ret = TranslatePluginStatus(plugin_->QueueInputBuffer(buffer, 0));
     if (ret != ErrorCode::SUCCESS && ret != ErrorCode::ERROR_TIMED_OUT) {
-        MEDIA_LOG_E("Queue input buffer to plugin fail: %" PUBLIC_LOG "d", to_underlying(ret));
+        MEDIA_LOG_E("Queue input buffer to plugin fail: %" PUBLIC_LOG "d", CppExt::to_underlying(ret));
     }
     return ret;
 }

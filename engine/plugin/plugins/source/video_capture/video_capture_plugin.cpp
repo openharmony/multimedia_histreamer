@@ -21,8 +21,8 @@
 #include <algorithm>
 #include <cmath>
 #include "foundation/log.h"
+#include "foundation/pre_defines.h"
 #include "plugin/common/plugin_time.h"
-#include "utils/utils.h"
 #include "utils/constants.h"
 
 namespace {

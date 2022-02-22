@@ -262,18 +262,25 @@ ErrorCode PipelineCore::LinkPorts(std::shared_ptr<OutPort> port1, std::shared_pt
     FAIL_RETURN(port2->Connect(port1));
     return ErrorCode::SUCCESS;
 }
-
+void PipelineCore::NotifyEvent(const Event& event)
+{
+    if (eventReceiver_) {
+        eventReceiver_->OnEvent(event);
+    } else {
+        MEDIA_LOG_I("no event receiver when receive type %" PUBLIC_LOG_D32, event.type);
+    }
+}
 void PipelineCore::OnEvent(const Event& event)
 {
     if (event.type != EventType::EVENT_READY) {
-        CALL_PTR_FUNC(eventReceiver_, OnEvent, event);
+        NotifyEvent(event);
         return;
     }
 
     readyEventCnt_++;
     MEDIA_LOG_I("OnEvent readyCnt: %" PUBLIC_LOG "zu / %" PUBLIC_LOG "zu", readyEventCnt_, filters_.size());
     if (readyEventCnt_ == filters_.size()) {
-        CALL_PTR_FUNC(eventReceiver_, OnEvent, event);
+        NotifyEvent(event);
         readyEventCnt_ = 0;
     }
 }

@@ -246,7 +246,7 @@ void VideoSinkFilter::RenderFrame()
     Plugin::Status status = plugin_->GetLatency(latencyNano);
     if (status != Plugin::Status::OK) {
         MEDIA_LOG_E("Video sink GetLatency fail errorcode = %" PUBLIC_LOG "d",
-                    to_underlying(TranslatePluginStatus(status)));
+                    CppExt::to_underlying(TranslatePluginStatus(status)));
         return;
     }
 

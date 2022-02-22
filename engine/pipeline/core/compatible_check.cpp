@@ -23,7 +23,6 @@
 
 #include "pipeline/core/plugin_attr_desc.h"
 #include "foundation/log.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {

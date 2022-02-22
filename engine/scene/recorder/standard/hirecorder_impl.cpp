@@ -265,7 +265,7 @@ void HiRecorderImpl::OnStateChanged(StateId state)
     }
     auto ptr = obs_.lock();
     if (ptr != nullptr) {
-        ptr->OnInfo(IRecorderEngineObs::InfoType::INTERNEL_WARNING, to_underlying(state));
+        ptr->OnInfo(IRecorderEngineObs::InfoType::INTERNEL_WARNING, CppExt::to_underlying(state));
     }
 }
 

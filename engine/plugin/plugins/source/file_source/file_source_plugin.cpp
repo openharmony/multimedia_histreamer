@@ -18,12 +18,24 @@
 #include "file_source_plugin.h"
 #include <sys/stat.h>
 #include "foundation/log.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace FileSource {
+namespace {
+size_t GetFileSize(const std::string& fileName)
+{
+    size_t fileSize = 0;
+    if (!fileName.empty()) {
+        struct stat fileStatus {};
+        if (stat(fileName.c_str(), &fileStatus) == 0) {
+            fileSize = static_cast<size_t>(fileStatus.st_size);
+        }
+    }
+    return fileSize;
+}
+}
 std::shared_ptr<SourcePlugin> FileSourcePluginCreator(const std::string& name)
 {
     return std::make_shared<FileSourcePlugin>(name);
@@ -287,7 +299,7 @@ Status FileSourcePlugin::OpenFile()
         MEDIA_LOG_E("Fail to load file from %" PUBLIC_LOG "s", fileName_.c_str());
         return Status::ERROR_UNKNOWN;
     }
-    fileSize_ = GetFileSize(fileName_.c_str());
+    fileSize_ = GetFileSize(fileName_);
     MEDIA_LOG_D("fileName_: %" PUBLIC_LOG "s, fileSize_: %" PUBLIC_LOG "zu", fileName_.c_str(), fileSize_);
     return Status::OK;
 }

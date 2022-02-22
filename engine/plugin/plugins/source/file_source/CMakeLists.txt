@@ -12,7 +12,7 @@ include_directories(
 set(BUILD_PLUGIN_FILE_SOURCE_SHARED ON)
 
 if (BUILD_PLUGIN_FILE_SOURCE_SHARED)
-    add_library(plugin_filesource SHARED ./file_source_plugin.cpp ../../../common/plugin_buffer.cpp ../../../../utils/utils.cpp)
+    add_library(plugin_filesource SHARED ./file_source_plugin.cpp ../../../common/plugin_buffer.cpp)
 else()
     add_library(plugin_filesource STATIC ./file_source_plugin.cpp ../../../common/plugin_buffer.cpp)
 endif()

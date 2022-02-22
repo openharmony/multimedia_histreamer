@@ -16,12 +16,12 @@
 #define HST_LOG_TAG "MediaSourceFilter"
 
 #include "media_source_filter.h"
+#include "common/plugin_utils.h"
 #include "compatible_check.h"
 #include "factory/filter_factory.h"
+#include "pipeline/core/type_define.h"
 #include "plugin/interface/source_plugin.h"
 #include "plugin/core/plugin_meta.h"
-#include "common/plugin_utils.h"
-#include "utils/type_define.h"
 
 namespace OHOS {
 namespace Media {
@@ -311,7 +311,7 @@ bool MediaSourceFilter::ParseProtocol(const std::shared_ptr<MediaSource>& source
 {
     bool ret = true;
     SourceType srcType = source->GetSourceType();
-    MEDIA_LOG_D("sourceType = %" PUBLIC_LOG "d", OHOS::Media::to_underlying(srcType));
+    MEDIA_LOG_D("sourceType = %" PUBLIC_LOG "d", CppExt::to_underlying(srcType));
     if (srcType == SourceType::SOURCE_TYPE_URI) {
         uri_ = source->GetSourceUri();
         ret = GetProtocolByUri();

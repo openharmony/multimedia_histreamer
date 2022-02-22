@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,15 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef HISTREAMER_FOUNDATION_MEMORY_HELPER_H
-#define HISTREAMER_FOUNDATION_MEMORY_HELPER_H
-
-#include <memory>
-
+#ifndef HISTREAMER_FOUNDATION_CPP_EXT_MEMORY_EXT_H
+#define HISTREAMER_FOUNDATION_CPP_EXT_MEMORY_EXT_H
 namespace OHOS {
 namespace Media {
-namespace MemoryHelper {
+namespace CppExt {
 template<class T> struct _unique_ptr_if {
     typedef std::unique_ptr<T> _single_object;
 };
@@ -48,7 +44,7 @@ typename _unique_ptr_if<T>::_unknown_bound_array make_unique(size_t n)
 
 template<class T, class... Args>
 typename _unique_ptr_if<T>::_known_bound_array make_unique(Args&&...) = delete;
-}
-}
-}
-#endif // HISTREAMER_FOUNDATION_MEMORY_HELPER_H
+} // CppExt
+} // Media
+} // OHOS
+#endif // HISTREAMER_FOUNDATION_CPP_EXT_MEMORY_EXT_H

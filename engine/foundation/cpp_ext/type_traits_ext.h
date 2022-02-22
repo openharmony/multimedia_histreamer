@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_FOUNDATION_SINGLETON_H
-#define HISTREAMER_FOUNDATION_SINGLETON_H
-
+#ifndef HISTREAMER_FOUNDATION_CPP_EXT_TYPE_TRAITS_EXT_H
+#define HISTREAMER_FOUNDATION_CPP_EXT_TYPE_TRAITS_EXT_H
 namespace OHOS {
 namespace Media {
-template <typename T>
-class Singleton : public T {
-public:
-    static T& Instance()
-    {
-        static T instance;
-        return instance;
-    }
-    ~Singleton();
-    Singleton(const Singleton&) = delete;
-    Singleton operator=(const Singleton&) = delete;
-
-private:
-    Singleton() = default;
-};
-} // namespace Media
-} // namespace OHOS
-#endif // HISTREAMER_FOUNDATION_SINGLETON_H
+namespace CppExt {
+template <typename E>
+inline constexpr typename std::underlying_type<E>::type to_underlying(E e) noexcept
+{
+    return static_cast<typename std::underlying_type<E>::type>(e);
+}
+} // CppExt
+} // Media
+} // OHOS
+#endif // HISTREAMER_FOUNDATION_CPP_EXT_TYPE_TRAITS_EXT_H

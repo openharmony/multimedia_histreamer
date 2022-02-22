@@ -17,7 +17,7 @@
 #define MEDIA_PIPELINE_PLAYER_EXECUTOR_H
 
 #include <memory>
-#include "foundation/error_code.h"
+#include "pipeline/core/error_code.h"
 #include "plugin/common/media_source.h"
 
 namespace OHOS {

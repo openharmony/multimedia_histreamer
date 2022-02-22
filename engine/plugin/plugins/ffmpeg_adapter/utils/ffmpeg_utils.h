@@ -18,8 +18,10 @@
 
 #include <string>
 #include <type_traits>
-#include "utils/type_define.h"
+#include <vector>
+#include "plugin/common/plugin_tags.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "plugin/common/plugin_video_tags.h"
 
 #ifdef __cplusplus
 extern "C" {

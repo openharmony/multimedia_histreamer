@@ -17,8 +17,8 @@
 #define HISTREAMER_SCENE_RECORDER_STD_REC_UTILS_H
 
 #include "i_recorder_engine.h"
-#include "foundation/error_code.h"
 #include "hst_recorder_param.h"
+#include "pipeline/core/error_code.h"
 #include "plugin/common/plugin_source_tags.h"
 #include "plugin/core/plugin_meta.h"
 #include "utils/constants.h"

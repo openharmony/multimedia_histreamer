@@ -17,11 +17,6 @@
 #define HISTREAMER_FOUNDATION_LOG_H
 
 #include <cinttypes>
-#include <pthread.h>
-#include <string>
-#include <vector>
-
-#include "error_code.h"
 
 #ifdef MEDIA_OHOS
 #ifndef LOG_DOMAIN
@@ -96,7 +91,7 @@
     do {                                                                                                               \
         ErrorCode ret = (exec);                                                                                        \
         if (ret != ErrorCode::SUCCESS) {                                                                               \
-            MEDIA_LOG_E("FAIL_RETURN on ErrorCode(%" PUBLIC_LOG "d).", ret);                                        \
+            MEDIA_LOG_E("FAIL_RETURN on ErrorCode(%" PUBLIC_LOG "d).", ret);                                           \
             return ret;                                                                                                \
         }                                                                                                              \
     } while (0)
@@ -126,7 +121,7 @@
     do {                                                                                                               \
         ErrorCode ret = (exec);                                                                                        \
         if (ret != ErrorCode::SUCCESS) {                                                                               \
-            MEDIA_LOG_E("FAIL_LOG on ErrorCode(%" PUBLIC_LOG "d).", ret);                                           \
+            MEDIA_LOG_E("FAIL_LOG on ErrorCode(%" PUBLIC_LOG "d).", ret);                                              \
         }                                                                                                              \
     } while (0)
 #endif

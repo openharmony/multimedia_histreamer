@@ -20,8 +20,8 @@
 #include "audio_errors.h"
 #include "audio_type_translate.h"
 #include "foundation/log.h"
+#include "foundation/pre_defines.h"
 #include "plugin/common/plugin_time.h"
-#include "utils/utils.h"
 #include "utils/constants.h"
 
 namespace {

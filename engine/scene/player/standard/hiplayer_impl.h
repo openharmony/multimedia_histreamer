@@ -22,10 +22,10 @@
 #include "i_player_engine.h"
 #include "filters/demux/demuxer_filter.h"
 #include "filters/source/media_source/media_source_filter.h"
-#include "foundation/error_code.h"
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
 #include "internal/state_machine.h"
+#include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_callback.h"
 #include "pipeline/core/pipeline.h"
 #include "pipeline/core/pipeline_core.h"
@@ -37,7 +37,6 @@
 #include "pipeline/filters/sink/audio_sink/audio_sink_filter.h"
 #include "scene/common/media_stat_stub.h"
 #include "play_executor.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {

@@ -27,7 +27,6 @@ source_set("histreamer_utils") {
   sources = [
     "constants.cpp",
     "steady_clock.cpp",
-    "utils.cpp",
   ]
   public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
   if (hst_is_lite_sys) {

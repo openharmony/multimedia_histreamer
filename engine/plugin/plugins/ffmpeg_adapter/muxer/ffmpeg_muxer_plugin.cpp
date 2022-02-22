@@ -21,6 +21,7 @@
 #include <set>
 
 #include "foundation/log.h"
+#include "foundation/osal/thread/scoped_lock.h"
 #include "plugin/interface/plugin_definition.h"
 #include "plugin/plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "plugin/plugins/ffmpeg_adapter/utils/ffmpeg_codec_map.h"
@@ -38,10 +39,10 @@ bool IsMuxerSupported(const char* name)
     return g_supportedMuxer.count(name) == 1;
 }
 
-bool UpdatePluginInCapability(AVCodecID codecId, CapabilitySet& capSet)
+bool UpdatePluginInCapability(AVCodecID codecId, Plugin::CapabilitySet& capSet)
 {
     if (codecId != AV_CODEC_ID_NONE) {
-        Capability cap;
+        Plugin::Capability cap;
         if (!FFCodecMap::CodecId2Cap(codecId, true, cap)) {
             return false;
         } else {
@@ -158,7 +159,7 @@ Plugin::Status SetCodecOfTrack(const AVOutputFormat* fmt, AVStream* stream, cons
 }
 
 template<typename T, typename U>
-Plugin::Status SetSingleParameter(Tag tag, const Plugin::TagMap& tagMap, U& target, std::function<U(T)> func)
+Plugin::Status SetSingleParameter(Plugin::Tag tag, const Plugin::TagMap& tagMap, U& target, std::function<U(T)> func)
 {
     auto ite = tagMap.find(tag);
     if (ite != std::end(tagMap)) {

@@ -21,7 +21,7 @@
 #include <memory>
 #include <string>
 #include "osal/thread/task.h"
-#include "utils/type_define.h"
+#include "pipeline/core/type_define.h"
 #include "plugin/interface/plugin_base.h"
 #include "plugin/core/plugin_manager.h"
 

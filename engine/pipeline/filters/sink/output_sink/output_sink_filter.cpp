@@ -165,7 +165,7 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, const AVBufferPt
     if (!buffer->IsEmpty()) {
         ret = TranslatePluginStatus(plugin_->Write(buffer));
         if (ret != ErrorCode::SUCCESS) {
-            MEDIA_LOG_E("write to plugin failed with error code %" PUBLIC_LOG "d", to_underlying(ret));
+            MEDIA_LOG_E("write to plugin failed with error code %" PUBLIC_LOG "d", CppExt::to_underlying(ret));
             return ret;
         }
         currentPos_ += buffer->GetMemory()->GetSize();

@@ -19,17 +19,16 @@
 #include <memory>
 #include <string>
 
-#include "foundation/error_code.h"
-#include "osal/thread/task.h"
-#include "osal/utils/util.h"
-#include "utils/blocking_queue.h"
-#include "utils/constants.h"
-#include "utils/type_define.h"
-#include "utils/utils.h"
+#include "pipeline/core/error_code.h"
+#include "foundation/osal/thread/task.h"
+#include "foundation/osal/utils/util.h"
 #include "pipeline/core/filter_base.h"
+#include "pipeline/core/type_define.h"
 #include "plugin/common/media_source.h"
 #include "plugin/core/plugin_manager.h"
 #include "plugin/interface/source_plugin.h"
+#include "utils/blocking_queue.h"
+#include "utils/constants.h"
 
 namespace OHOS {
 namespace Media {

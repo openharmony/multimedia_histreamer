@@ -19,6 +19,7 @@
 #include <algorithm>
 #include "filter.h"
 #include "foundation/log.h"
+#include "foundation/pre_defines.h"
 
 namespace OHOS {
 namespace Media {
@@ -182,9 +183,9 @@ ErrorCode OutPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
     return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
 }
 
-ErrorCode EmptyInPort::Connect(const std::shared_ptr<Port> &port)
+ErrorCode EmptyInPort::Connect(const std::shared_ptr<Port>& another)
 {
-    UNUSED_VARIABLE(port);
+    UNUSED_VARIABLE(another);
     MEDIA_LOG_E("Connect in EmptyInPort");
     return ErrorCode::SUCCESS;
 }
@@ -232,9 +233,9 @@ ErrorCode EmptyInPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
     return ErrorCode::ERROR_UNIMPLEMENTED;
 }
 
-ErrorCode EmptyOutPort::Connect(const std::shared_ptr<Port> &port)
+ErrorCode EmptyOutPort::Connect(const std::shared_ptr<Port>& another)
 {
-    UNUSED_VARIABLE(port);
+    UNUSED_VARIABLE(another);
     MEDIA_LOG_E("Connect in EmptyOutPort");
     return ErrorCode::SUCCESS;
 }

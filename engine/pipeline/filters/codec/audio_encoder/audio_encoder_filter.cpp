@@ -18,8 +18,9 @@
 #define HST_LOG_TAG "AudioEncoderFilter"
 
 #include "audio_encoder_filter.h"
-#include "osal/utils/util.h"
 #include "factory/filter_factory.h"
+#include "foundation/cpp_ext/memory_ext.h"
+#include "osal/utils/util.h"
 #include "utils/steady_clock.h"
 
 #define DEFAULT_OUT_BUFFER_POOL_SIZE 5
@@ -185,12 +186,12 @@ ErrorCode AudioEncoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
     } else {
         MEDIA_LOG_I("using plugin output allocator");
         for (size_t cnt = 0; cnt < bufferCnt; cnt++) {
-            auto buf = MemoryHelper::make_unique<AVBuffer>();
+            auto buf = CppExt::make_unique<AVBuffer>();
             buf->AllocMemory(outAllocator, frameSize_);
             outBufferPool_->Append(std::move(buf));
         }
     }
-    rb_ = MemoryHelper::make_unique<RingBuffer>(frameSize_ * 10); // 最大缓存10帧
+    rb_ = CppExt::make_unique<RingBuffer>(frameSize_ * 10); // 最大缓存10帧
     FALSE_RET_V_MSG_E(rb_ != nullptr, ErrorCode::ERROR_NO_MEMORY, "create ring buffer failed");
     rb_->Init();
     cahceBuffer_ = std::make_shared<AVBuffer>(Plugin::BufferMetaType::AUDIO);

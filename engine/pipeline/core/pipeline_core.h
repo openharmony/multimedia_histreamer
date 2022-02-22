@@ -26,9 +26,8 @@
 #include <stack>
 
 #include "filter_base.h"
-#include "foundation/error_code.h"
+#include "error_code.h"
 #include "osal/thread/mutex.h"
-#include "utils/utils.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/core/plugin_meta.h"
 #include "pipeline.h"
@@ -84,7 +83,7 @@ public:
 
     FilterState GetState();
 
-    ErrorCode AddFilters(std::initializer_list<Filter*> filters) override;
+    ErrorCode AddFilters(std::initializer_list<Filter*> filtersIn) override;
     ErrorCode RemoveFilter(Filter* filter) override;
     ErrorCode RemoveFilterChain(Filter* firstFilter) override;
     ErrorCode LinkFilters(std::initializer_list<Filter*> filters) override;
@@ -156,6 +155,8 @@ public:
 
 private:
     void ReorderFilters();
+
+    void NotifyEvent(const Event& event);
 
     std::string name_;
     size_t readyEventCnt_ {0};

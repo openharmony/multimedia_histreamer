@@ -16,10 +16,10 @@
 #ifndef HISTREAMER_PLUGIN_INTF_OUTPUT_SINK_PLUGIN_H
 #define HISTREAMER_PLUGIN_INTF_OUTPUT_SINK_PLUGIN_H
 
+#include "foundation/pre_defines.h"
 #include "plugin_base.h"
 #include "plugin_definition.h"
 #include "plugin/common/plugin_caps.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {

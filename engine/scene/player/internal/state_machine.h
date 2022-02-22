@@ -20,19 +20,18 @@
 #include <memory>
 #include <queue>
 #include <tuple>
-#include "foundation/error_code.h"
 #include "foundation/log.h"
 #include "osal/base/synchronizer.h"
 #include "osal/thread/mutex.h"
 #include "osal/thread/task.h"
-#include "utils/blocking_queue.h"
-#include "plugin/common/any.h"
-#include "init_state.h"
 #include "pause_state.h"
+#include "pipeline/core/error_code.h"
 #include "play_executor.h"
 #include "playing_state.h"
+#include "plugin/common/any.h"
 #include "preparing_state.h"
 #include "ready_state.h"
+#include "utils/blocking_queue.h"
 
 namespace OHOS {
 namespace Media {

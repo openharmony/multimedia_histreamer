@@ -16,8 +16,8 @@
 #include "codec.h"
 
 #include <utility>
+#include "foundation/pre_defines.h"
 #include "interface/codec_plugin.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {

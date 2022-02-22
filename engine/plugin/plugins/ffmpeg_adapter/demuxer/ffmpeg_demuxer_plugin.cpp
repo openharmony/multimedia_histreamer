@@ -22,13 +22,13 @@
 #include <cstring>
 #include <new>
 #include "ffmpeg_track_meta.h"
+#include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/log.h"
 #include "osal/thread/scoped_lock.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_manager.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
-#include "utils/memory_helper.h"
 
 #if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 78, 0) and LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(58, 64, 100)
 #include "libavformat/internal.h"
@@ -430,7 +430,7 @@ bool FFmpegDemuxerPlugin::ParseMediaData()
     avformat_find_stream_info(formatContext, nullptr);
     av_dump_format(formatContext, 0, nullptr, false);
 
-    MemoryHelper::make_unique<MediaInfo>().swap(mediaInfo_);
+    CppExt::make_unique<MediaInfo>().swap(mediaInfo_);
     size_t streamCnt = formatContext_->nb_streams;
     mediaInfo_->general.clear();
     mediaInfo_->tracks.resize(streamCnt);

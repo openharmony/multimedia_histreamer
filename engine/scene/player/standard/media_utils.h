@@ -17,7 +17,7 @@
 #define HISTREAMER_MEDIA_UTILS_H
 
 #include "i_player_engine.h"
-#include "foundation/error_code.h"
+#include "pipeline/core/error_code.h"
 #include "scene/player/internal/state.h"
 
 namespace OHOS {

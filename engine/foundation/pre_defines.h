@@ -13,21 +13,14 @@
  * limitations under the License.
  */
 
-#include "utils.h"
-#include <sys/stat.h>
+#ifndef HISTREAMER_FOUNDATION_PRE_DEFINES_H
+#define HISTREAMER_FOUNDATION_PRE_DEFINES_H
 
-namespace OHOS {
-namespace Media {
-size_t GetFileSize(const char* fileName)
-{
-    size_t fileSize = 0;
-    if (fileName != nullptr) {
-        struct stat fileStatus {};
-        if (stat(fileName, &fileStatus) == 0) {
-            fileSize = static_cast<size_t>(fileStatus.st_size);
-        }
-    }
-    return fileSize;
-}
-} // namespace Media
-} // namespace OHOS
+#define UNUSED_VARIABLE(v) ((void)(v))
+
+#if (defined(__GNUC__) || defined(__clang__)) && (!defined(WIN32))
+#define MEDIA_UNUSED __attribute__((unused))
+#else
+#define MEDIA_UNUSED
+#endif
+#endif // HISTREAMER_FOUNDATION_PRE_DEFINES_H

@@ -20,16 +20,15 @@
 #include <memory>
 #include <string>
 
-#include "foundation/error_code.h"
 #include "osal/thread/task.h"
 #include "osal/utils/util.h"
 #include "utils/constants.h"
-#include "utils/type_define.h"
-#include "utils/utils.h"
+#include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_base.h"
 #include "plugin/common/plugin_video_tags.h"
 #include "plugin/core/plugin_manager.h"
 #include "plugin/interface/source_plugin.h"
+#include "pipeline/core/type_define.h"
 
 namespace OHOS {
 namespace Media {

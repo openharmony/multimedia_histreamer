@@ -16,6 +16,7 @@
 #define HST_LOG_TAG "StateMachine"
 
 #include "state_machine.h"
+#include "init_state.h"
 #include "utils/steady_clock.h"
 
 namespace OHOS {

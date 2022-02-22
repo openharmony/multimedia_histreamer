@@ -21,7 +21,6 @@
 #include <set>
 #include "ffmpeg_au_enc_config.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
-#include "utils/memory_helper.h"
 
 namespace {
 // register plugins

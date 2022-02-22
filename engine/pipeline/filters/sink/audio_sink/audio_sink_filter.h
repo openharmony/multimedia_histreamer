@@ -18,14 +18,13 @@
 
 #include <atomic>
 
-#include "foundation/error_code.h"
 #include "osal/thread/condition_variable.h"
 #include "osal/thread/mutex.h"
 #include "pipeline/core/clock_provider.h"
+#include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_base.h"
 #include "plugin/core/audio_sink.h"
 #include "plugin/core/plugin_info.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {

@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_HIRECORDER_PAUSE_STATE_H
 #define HISTREAMER_HIRECORDER_PAUSE_STATE_H
 
-#include "foundation/error_code.h"
+#include "pipeline/core/error_code.h"
 #include "recorder_executor.h"
 #include "state.h"
 

@@ -21,11 +21,11 @@
 #include <cstring>
 #include <new>
 #include "foundation/log.h"
-#include "utils/memory_helper.h"
 #include "osal/thread/scoped_lock.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_time.h"
 #include "osal/utils/util.h"
+#include "utils/constants.h"
 
 namespace OHOS {
 namespace Media {

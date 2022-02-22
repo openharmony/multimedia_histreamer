@@ -17,7 +17,7 @@
 #define HISTREAMER_HIRECORDER_READY_STATE_H
 
 #include <memory>
-#include "foundation/error_code.h"
+#include "pipeline/core/error_code.h"
 #include "recorder_executor.h"
 #include "state.h"
 

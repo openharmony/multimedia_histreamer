@@ -21,7 +21,6 @@
 #include "libavutil/channel_layout.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_time.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
@@ -332,8 +331,7 @@ uint64_t ConvertChannelLayoutToFFmpeg(AudioChannelLayout channelLayout)
 {
     auto it = g_toFFMPEGChannelLayout.find(channelLayout);
     if (it == g_toFFMPEGChannelLayout.end()) {
-        MEDIA_LOG_E("ConvertChannelLayoutToFFmpeg, unexpected audio channel layout: %" PUBLIC_LOG PRIu64,
-                    OHOS::Media::to_underlying(channelLayout));
+        MEDIA_LOG_E("ConvertChannelLayoutToFFmpeg: unknown audio channel layout: %" PUBLIC_LOG PRIu64, channelLayout);
         return 0;
     }
     return it->second;

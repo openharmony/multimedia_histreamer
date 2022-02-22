@@ -25,8 +25,7 @@
 #include <vector>
 
 #include "filter.h"
-#include "foundation/error_code.h"
-#include "utils/utils.h"
+#include "error_code.h"
 
 namespace OHOS {
 namespace Media {

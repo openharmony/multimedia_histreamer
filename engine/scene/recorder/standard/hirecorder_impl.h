@@ -19,11 +19,11 @@
 #include <memory>
 #include <unordered_map>
 
-#include "foundation/error_code.h"
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
 #include "hst_recorder_param.h"
 #include "i_recorder_engine.h"
+#include "pipeline/core/error_code.h"
 #include "pipeline/core/pipeline.h"
 #include "pipeline/core/pipeline_core.h"
 #include "pipeline/filters/source/audio_capture/audio_capture_filter.h"

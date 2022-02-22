@@ -20,10 +20,9 @@
 #include <memory>
 
 #include "filter_callback.h"
-#include "foundation/error_code.h"
+#include "error_code.h"
 #include "utils/constants.h"
 #include "event.h"
-#include "utils/utils.h"
 #include "parameter.h"
 #include "port.h"
 #include "plugin/core/plugin_meta.h"

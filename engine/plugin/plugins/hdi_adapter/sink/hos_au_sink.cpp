@@ -22,11 +22,11 @@
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
 #include "foundation/osal/utils/util.h"
+#include "foundation/pre_defines.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugins/hdi_adapter/utils/hdi_au_utils.h"
 #include "securec.h"
 #include "utils/constants.h"
-#include "utils/utils.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;

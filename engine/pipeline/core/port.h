@@ -20,10 +20,9 @@
 #include <string>
 #include <utility>
 
-#include "foundation/error_code.h"
+#include "error_code.h"
 #include "utils/constants.h"
-#include "utils/type_define.h"
-#include "utils/utils.h"
+#include "type_define.h"
 #include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
@@ -123,7 +122,7 @@ public:
     }
     EmptyInPort() : InPort(nullptr, "emptyInPort") {}
     ~EmptyInPort() override = default;
-    ErrorCode Connect(const std::shared_ptr<Port>& port) override;
+    ErrorCode Connect(const std::shared_ptr<Port>& another) override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
@@ -145,7 +144,7 @@ public:
     }
     EmptyOutPort() : OutPort(nullptr, "emptyOutPort") {}
     ~EmptyOutPort() override = default;
-    ErrorCode Connect(const std::shared_ptr<Port>& port) override;
+    ErrorCode Connect(const std::shared_ptr<Port>& another) override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,

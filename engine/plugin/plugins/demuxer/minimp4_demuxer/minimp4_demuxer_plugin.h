@@ -21,10 +21,8 @@
 #include <vector>
 #include <set>
 
-#include "utils/type_define.h"
-#include "core/plugin_register.h"
 #include "interface/demuxer_plugin.h"
-#include "thread/mutex.h"
+#include "foundation/osal/thread/mutex.h"
 #include "minimp4.h"
 
 

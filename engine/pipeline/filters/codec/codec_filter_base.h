@@ -18,17 +18,16 @@
 
 #include <string>
 
-#include "utils/blocking_queue.h"
-#include "utils/buffer_pool.h"
-#include "utils/type_define.h"
-#include "utils/utils.h"
+#include "common/plugin_utils.h"
 #include "foundation/osal/thread/task.h"
-#include "pipeline/core/filter_base.h"
 #include "plugin/common/plugin_tags.h"
+#include "pipeline/core/filter_base.h"
+#include "pipeline/core/type_define.h"
 #include "plugin/core/codec.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/plugin_meta.h"
-#include "common/plugin_utils.h"
+#include "utils/blocking_queue.h"
+#include "utils/buffer_pool.h"
 
 namespace OHOS {
 namespace Media {

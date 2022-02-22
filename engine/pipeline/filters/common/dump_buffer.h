@@ -43,10 +43,9 @@ namespace Pipeline {
 #define DUMP_BUFFER2LOG(desc, buffer, offset)
 #endif
 
-extern void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin::Buffer>& buffer);
-extern void PrepareDumpDir();
-extern void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugin::Buffer>& buffer,
-                            uint64_t offset, size_t size);
+void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin::Buffer>& buffer);
+void PrepareDumpDir();
+void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugin::Buffer>& buffer, uint64_t offset, size_t size);
 } // Pipeline
 } // Media
 } // OHOS

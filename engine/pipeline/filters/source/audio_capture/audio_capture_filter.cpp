@@ -20,6 +20,7 @@
 #include "audio_capture_filter.h"
 #include "common/plugin_utils.h"
 #include "factory/filter_factory.h"
+#include "foundation/cpp_ext/algorithm_ext.h"
 #include "foundation/log.h"
 #include <plugin_attr_desc.h>
 
@@ -157,34 +158,36 @@ ErrorCode AudioCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
     return ErrorCode::SUCCESS;
 }
 
-std::shared_ptr<Plugin::Meta> AudioCaptureFilter::PickPreferParameter()
+void AudioCaptureFilter::PickPreferSampleFmt(const std::shared_ptr<Plugin::Meta>& meta, const Plugin::ValueType& val)
 {
-    auto preferMeta = std::make_shared<Plugin::Meta>();
     static constexpr AudioSampleFormat preferFmt = AudioSampleFormat::S16;
     bool pickPreferFmt = false;
-    if (capNegWithDownstream_.keys.count(Capability::Key::AUDIO_SAMPLE_FORMAT)) {
-        const auto& candidates = capNegWithDownstream_.keys.at(Capability::Key::AUDIO_SAMPLE_FORMAT);
-        if (candidates.SameTypeWith(typeid(FixedCapability<AudioSampleFormat>)) &&
-            preferFmt == Plugin::AnyCast<FixedCapability<AudioSampleFormat>>(candidates)) {
-            pickPreferFmt = true;
-        } else if (candidates.SameTypeWith(typeid(DiscreteCapability<AudioSampleFormat>))) {
-            const auto* fmts = Plugin::AnyCast<DiscreteCapability<AudioSampleFormat>>(&candidates);
-            if (AnyOf(fmts->begin(), fmts->end(), [&](AudioSampleFormat tmp) -> bool {
-                return preferFmt == tmp;
-            })) {
-                pickPreferFmt = true;
-            }
-        }
+    if (val.SameTypeWith(typeid(FixedCapability<AudioSampleFormat>)) &&
+        preferFmt == Plugin::AnyCast<FixedCapability<AudioSampleFormat>>(val)) {
+        pickPreferFmt = true;
+    } else if (val.SameTypeWith(typeid(DiscreteCapability<AudioSampleFormat>))) {
+        const auto* fmts = Plugin::AnyCast<DiscreteCapability<AudioSampleFormat>>(&val);
+        pickPreferFmt = CppExt::AnyOf(fmts->begin(), fmts->end(), [&](AudioSampleFormat tmp) -> bool {
+            return preferFmt == tmp;
+        });
     }
     if (pickPreferFmt) {
-        preferMeta->SetData(MetaID::AUDIO_SAMPLE_FORMAT, preferFmt);
+        meta->SetData(MetaID::AUDIO_SAMPLE_FORMAT, preferFmt);
+    }
+}
+
+std::shared_ptr<Plugin::Meta> AudioCaptureFilter::PickPreferParameters()
+{
+    auto preferMeta = std::make_shared<Plugin::Meta>();
+    if (capNegWithDownstream_.keys.count(Capability::Key::AUDIO_SAMPLE_FORMAT)) {
+        PickPreferSampleFmt(preferMeta, capNegWithDownstream_.keys.at(Capability::Key::AUDIO_SAMPLE_FORMAT));
     }
     return preferMeta;
 }
 
 ErrorCode AudioCaptureFilter::DoConfigure()
 {
-    auto preferMeta = PickPreferParameter();
+    auto preferMeta = PickPreferParameters();
     auto audioMeta = std::make_shared<Plugin::Meta>();
     if (!MergeMetaWithCapability(*preferMeta, capNegWithDownstream_, *audioMeta)) {
         MEDIA_LOG_E("cannot find available capability of plugin %" PUBLIC_LOG_S, pluginInfo_->name.c_str());

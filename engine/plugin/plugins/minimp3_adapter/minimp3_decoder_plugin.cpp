@@ -20,7 +20,6 @@
 #include <map>
 #include <set>
 #include "utils/constants.h"
-#include "utils/memory_helper.h"
 
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_buffer.h"

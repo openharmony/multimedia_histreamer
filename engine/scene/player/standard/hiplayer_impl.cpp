@@ -23,7 +23,6 @@
 #include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_meta.h"
 #include "utils/steady_clock.h"
-#include "utils/utils.h"
 #include "media_errors.h"
 
 namespace {
@@ -266,7 +265,7 @@ void HiPlayerImpl::OnEvent(const Event& event)
             break;
         case EventType::EVENT_PLUGIN_ERROR: {
             Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
-            MEDIA_LOG_I("Receive PLUGIN_ERROR, type:  %" PUBLIC_LOG_D32, to_underlying(pluginEvent.type));
+            MEDIA_LOG_I("Receive PLUGIN_ERROR, type:  %" PUBLIC_LOG_D32, CppExt::to_underlying(pluginEvent.type));
             if (pluginEvent.type == Plugin::PluginEventType::CLIENT_ERROR &&
                 pluginEvent.param.SameTypeWith(typeid(Plugin::NetworkClientErrorCode))) {
                 auto netClientErrorCode = Plugin::AnyCast<Plugin::NetworkClientErrorCode>(pluginEvent.param);
@@ -287,7 +286,7 @@ void HiPlayerImpl::OnEvent(const Event& event)
             Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
             if (pluginEvent.type == Plugin::PluginEventType::BELOW_LOW_WATERLINE ||
                 pluginEvent.type == Plugin::PluginEventType::ABOVE_LOW_WATERLINE) {
-                MEDIA_LOG_I("Receive PLUGIN_EVENT, type:  %" PUBLIC_LOG_D32, to_underlying(pluginEvent.type));
+                MEDIA_LOG_I("Receive PLUGIN_EVENT, type:  %" PUBLIC_LOG_D32, CppExt::to_underlying(pluginEvent.type));
             }
             break;
         }
@@ -452,7 +451,7 @@ int32_t HiPlayerImpl::SetLooping(bool loop)
 
 int32_t HiPlayerImpl::SetParameter(const Format& params)
 {
-    return to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
+    return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
 }
 
 int32_t HiPlayerImpl::SetObs(const std::weak_ptr<IPlayerEngineObs>& obs)
@@ -564,10 +563,10 @@ ErrorCode HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& par
     if (filter == demuxer_.get() && param.type == PortType::OUT) {
         MEDIA_LOG_I("new port found on demuxer %" PUBLIC_LOG "zu", param.ports.size());
         for (const auto& portDesc : param.ports) {
-            if (!StringStartsWith(portDesc.name, "audio")) {
+            if (portDesc.name.rfind("audio", 0) != 0) {
                 continue;
             }
-            MEDIA_LOG_I("port name %" PUBLIC_LOG "s", portDesc.name.c_str());
+            MEDIA_LOG_I("port name %" PUBLIC_LOG_S, portDesc.name.c_str());
             auto fromPort = filter->GetOutPort(portDesc.name);
             if (portDesc.isPcm) {
                 pipeline_->AddFilters({audioSink_.get()});
@@ -601,7 +600,7 @@ ErrorCode HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin::Any& par
     }
     std::vector<Filter*> newFilters;
     for (const auto& portDesc : param.ports) {
-        if (StringStartsWith(portDesc.name, "video")) {
+        if (portDesc.name.rfind("video", 0) == 0) {
             MEDIA_LOG_I("port name %" PUBLIC_LOG "s", portDesc.name.c_str());
             videoDecoder_ = FilterFactory::Instance().CreateFilterWithType<VideoDecoderFilter>(
                 "builtin.player.videodecoder", "videodecoder-" + portDesc.name);

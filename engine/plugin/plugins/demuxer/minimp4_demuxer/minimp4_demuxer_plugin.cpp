@@ -23,11 +23,11 @@
 
 #include <securec.h>
 #include "core/plugin_manager.h"
+#include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/log.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_time.h"
 #include "utils/constants.h"
-#include "utils/memory_helper.h"
 
 namespace OHOS {
 namespace Media {
@@ -175,7 +175,7 @@ Status MiniMP4DemuxerPlugin::GetMediaInfo(MediaInfo &mediaInfo)
     if (fileSize_ == 0 || ioContext_.dataSource == nullptr) {
         return Status::ERROR_UNKNOWN;
     }
-    MemoryHelper::make_unique<MediaInfo>().swap(mediaInfo_);
+    CppExt::make_unique<MediaInfo>().swap(mediaInfo_);
     mediaInfo_->general.clear();
     mediaInfo_->tracks.clear();
 

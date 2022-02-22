@@ -19,7 +19,6 @@
 
 #include "pipeline/core/plugin_attr_desc.h"
 #include "pipeline/filters/common/plugin_settings.h"
-#include "utils/memory_helper.h"
 
 namespace OHOS {
 namespace Media {

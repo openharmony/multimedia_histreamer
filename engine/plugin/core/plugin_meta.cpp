@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "plugin/common/plugin_audio_tags.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {

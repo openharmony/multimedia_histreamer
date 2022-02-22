@@ -22,7 +22,6 @@
 #include "interface/muxer_plugin.h"
 #include "interface/plugin_base.h"
 #include "muxer.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {

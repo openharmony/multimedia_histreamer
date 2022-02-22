@@ -21,7 +21,6 @@
 #include <cstring>
 #include <map>
 #include <set>
-#include "utils/memory_helper.h"
 #include "plugin/common/plugin_time.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "ffmpeg_vid_enc_config.h"

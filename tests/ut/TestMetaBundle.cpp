@@ -14,7 +14,6 @@
  */
 
 #include <gtest/gtest.h>
-#include "utils/utils.h"
 
 #define private public
 #define protected public
