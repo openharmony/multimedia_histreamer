@@ -283,13 +283,21 @@ void MediaSourceFilter::ReadLoop()
 {
     MEDIA_LOG_D("IN");
     AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
-    ErrorCode ret = TranslatePluginStatus(plugin_->Read(bufferPtr, DEFAULT_READ_SIZE));
-    if (ret == ErrorCode::END_OF_STREAM) {
+    bufferPtr->AllocMemory(nullptr, DEFAULT_READ_SIZE);
+    ErrorCode result = TranslatePluginStatus(plugin_->Read(bufferPtr, DEFAULT_READ_SIZE));
+    if (result == ErrorCode::END_OF_STREAM) {
         Stop();
         bufferPtr->flag |= BUFFER_FLAG_EOS;
+    } else if (result == ErrorCode::SUCCESS) {
+        auto memory = bufferPtr->GetMemory();
+        FALSE_RETURN(memory != nullptr);
+        auto size = memory->GetSize();
+        FALSE_RET_MSG(size > 0, "Read data size zero.");
+        outPorts_[0]->PushData(bufferPtr, mediaOffset_);
+        mediaOffset_ += size;
+    } else {
+        MEDIA_LOG_E("Read data failed (%" PUBLIC_LOG_D32 ")", result);
     }
-    outPorts_[0]->PushData(bufferPtr, mediaOffset_);
-    mediaOffset_ += DEFAULT_READ_SIZE;
 }
 
 bool MediaSourceFilter::GetProtocolByUri()
