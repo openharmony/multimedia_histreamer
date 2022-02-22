@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2022Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,4 +32,4 @@ public:
 } // namespace Media
 } // namespace OHOS
 
-#endif //HISTREAMER_FILESYSTEM_H
+#endif // HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILESYSTEM_H

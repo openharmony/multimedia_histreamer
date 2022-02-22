@@ -15,7 +15,11 @@
 
 #include "dump_buffer.h"
 #include <cstdio>
+#ifdef _WIN32
 #include <direct.h>
+#else
+#include <unistd.h>
+#endif
 #include <dirent.h>
 #include "foundation/log.h"
 #include "foundation/osal/filesystem/filesystem.h"
@@ -39,10 +43,10 @@ void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin:
     size_t bufferSize = buffer->GetMemory()->GetSize();
     FALSE_RETURN(bufferSize != 0);
 
-    FILE* filePtr = nullptr;
     std::string filePath = GetDumpFileDir() + fileName;
-    errno_t error = fopen_s(&filePtr, filePath.c_str(), "ab+");
-    FALSE_RET_MSG(error == 0, "Open file(%" PUBLIC_LOG_S ") failed(%" PUBLIC_LOG_D32 ").", filePath.c_str(), error);
+    auto filePtr = fopen(filePath.c_str(), "ab+");
+    FALSE_RET_MSG(filePtr != nullptr, "Open file(%" PUBLIC_LOG_S ") failed(%" PUBLIC_LOG_S ").", filePath.c_str(),
+                  strerror(errno));
     (void)fwrite(reinterpret_cast<const char*>(buffer->GetMemory()->GetReadOnlyData()), bufferSize, 1, filePtr);
     (void)fclose(filePtr);
 }

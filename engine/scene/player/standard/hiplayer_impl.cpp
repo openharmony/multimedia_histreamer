@@ -563,7 +563,7 @@ ErrorCode HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& par
     if (filter == demuxer_.get() && param.type == PortType::OUT) {
         MEDIA_LOG_I("new port found on demuxer %" PUBLIC_LOG "zu", param.ports.size());
         for (const auto& portDesc : param.ports) {
-            if (portDesc.name.rfind("audio", 0) != 0) {
+            if (portDesc.name.compare(0, 5, "audio") != 0) { // 5 is length of "audio"
                 continue;
             }
             MEDIA_LOG_I("port name %" PUBLIC_LOG_S, portDesc.name.c_str());
@@ -600,7 +600,7 @@ ErrorCode HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin::Any& par
     }
     std::vector<Filter*> newFilters;
     for (const auto& portDesc : param.ports) {
-        if (portDesc.name.rfind("video", 0) == 0) {
+        if (portDesc.name.compare(0, 5, "video") == 0) { // 5 is length of "video"
             MEDIA_LOG_I("port name %" PUBLIC_LOG "s", portDesc.name.c_str());
             videoDecoder_ = FilterFactory::Instance().CreateFilterWithType<VideoDecoderFilter>(
                 "builtin.player.videodecoder", "videodecoder-" + portDesc.name);

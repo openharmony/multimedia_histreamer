@@ -63,13 +63,3 @@ Status UtCodecTest1::SetCallback(Callback* cb)
 {
     return Status::OK;
 }
-
-Status UtCodecTest1::DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
-{
-    return Status::OK;
-}
-
-Status UtCodecTest1::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
-{
-    return Status::OK;
-}
