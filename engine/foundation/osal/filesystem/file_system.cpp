@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define HST_LOG_TAG "FileSystem"
+
 #include "file_system.h"
 #ifdef _WIN32
 #include <direct.h>
