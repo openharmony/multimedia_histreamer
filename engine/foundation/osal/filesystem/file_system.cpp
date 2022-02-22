@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2022Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "filesystem.h"
+#include "file_system.h"
 #ifdef _WIN32
 #include <direct.h>
 #else
 #include <sys/types.h>
 #include <unistd.h>
 #endif
+#include <string.h>
 #include <sys/stat.h>
 #include <log.h>
 
@@ -51,7 +52,7 @@ bool FileSystem::MakeDir(const std::string& path)
         return false;
     }
 #else
-    oldMask = umask(0);
+    auto oldMask = umask(0);
     if (mkdir(path.c_str(), 755) == -1) { // 755 directory access permissions
         MEDIA_LOG_E("Fail to create dir %" PUBLIC_LOG_S " due to %" PUBLIC_LOG_S, path.c_str(), strerror(errno));
         umask(oldMask);
@@ -67,7 +68,7 @@ bool FileSystem::MakeMultipleDir(const std::string& path)
     FALSE_RETURN_V(!IsExists(path), true);
     // pos is 1, not 0  example: D:/a/b, /local/tmp/
     // Avoid Linux root path before is empty string, which makes it impossible to judge whether the path exists
-    int index = path.find("/", 1);
+    auto index = path.find("/", 1);
     while (index != std::string::npos) {
         std::string tPath = path.substr(0, index);
         FALSE_RETURN_V(IsExists(tPath) || MakeDir(tPath), false);

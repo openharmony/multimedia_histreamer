@@ -17,7 +17,7 @@
 
 #include "hirecorder_impl.h"
 #include <regex>
-#include "foundation/osal/filesystem/filesystem.h"
+#include "foundation/osal/filesystem/file_system.h"
 #include "pipeline/factory/filter_factory.h"
 #include "plugin/common/plugin_time.h"
 #include "recorder_utils.h"

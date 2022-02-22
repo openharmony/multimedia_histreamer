@@ -22,7 +22,7 @@
 #endif
 #include <dirent.h>
 #include "foundation/log.h"
-#include "foundation/osal/filesystem/filesystem.h"
+#include "foundation/osal/filesystem/file_system.h"
 
 namespace OHOS {
 namespace Media {

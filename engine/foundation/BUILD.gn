@@ -28,6 +28,7 @@ config("histreamer_foundation_config") {
 
 source_set("histreamer_foundation") {
   sources = [
+    "osal/filesystem/file_system.cpp",
     "osal/thread/condition_variable.cpp",
     "osal/thread/mutex.cpp",
     "osal/thread/scoped_lock.cpp",

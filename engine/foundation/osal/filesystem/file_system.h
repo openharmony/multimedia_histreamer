@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILESYSTEM_H
-#define HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILESYSTEM_H
+#ifndef HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILE_SYSTEM_H
+#define HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILE_SYSTEM_H
 
 #include <string>
 
@@ -31,5 +31,4 @@ public:
 } // namespace OSAL
 } // namespace Media
 } // namespace OHOS
-
-#endif // HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILESYSTEM_H
+#endif //HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILE_SYSTEM_H
