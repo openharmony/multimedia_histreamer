@@ -114,6 +114,7 @@ DemuxerFilter::DemuxerFilter(std::string name)
       mediaMetaData_()
 {
     filterType_ = FilterType::DEMUXER;
+    dataPacker_ = std::make_shared<DataPacker>();
     MEDIA_LOG_D("ctor called");
 }
 
@@ -177,9 +178,7 @@ ErrorCode DemuxerFilter::Pause()
 void DemuxerFilter::FlushStart()
 {
     MEDIA_LOG_I("FlushStart entered");
-    if (dataPacker_) {
-        dataPacker_->Flush();
-    }
+    dataPacker_->Flush();
     if (task_) {
         task_->Pause();
     }
@@ -215,9 +214,7 @@ ErrorCode DemuxerFilter::PushData(const std::string& inPort, const AVBufferPtr& 
         FALSE_LOG_MSG_W(buffer->IsEmpty(), "EOS buffer is not empty");
         isLivePlayFinished_ = true;
     } else {
-        if (dataPacker_) {
-            dataPacker_->PushData(std::move(buffer), offset);
-        }
+        dataPacker_->PushData(std::move(buffer), offset);
     }
     return ErrorCode::SUCCESS;
 }
@@ -329,9 +326,6 @@ void DemuxerFilter::ActivatePullMode()
         task_ = std::make_shared<OSAL::Task>("DemuxerFilter");
     }
     task_->RegisterHandler([this] { DemuxerLoop(); });
-    if (!dataPacker_) {
-        dataPacker_ = std::make_shared<DataPacker>();
-    }
     checkRange_ = [this](uint64_t offset, uint32_t size) {
         uint64_t curOffset = offset;
         if (dataPacker_->IsDataAvailable(offset, size, curOffset)) {
@@ -372,9 +366,6 @@ void DemuxerFilter::ActivatePushMode()
 {
     MEDIA_LOG_D("ActivatePushMode called");
     InitTypeFinder();
-    if (!dataPacker_) {
-        dataPacker_ = std::make_shared<DataPacker>();
-    }
     checkRange_ = [this](uint64_t offset, uint32_t size) {
         uint64_t curOffset = offset;
         return dataPacker_->IsDataAvailable(offset, size, curOffset);
