@@ -19,7 +19,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #endif
-#include <string.h>
+#include <errno.h>
+#include <string>
 #include <sys/stat.h>
 #include "foundation/log.h"
 
