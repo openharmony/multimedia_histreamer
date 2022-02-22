@@ -23,7 +23,7 @@
 #include "core/plugin_register.h"
 #include "minimp3_wrapper.h"
 #include "plugin/interface/demuxer_plugin.h"
-#include "thread/mutex.h"
+#include "osal/thread/mutex.h"
 #include "utils/type_define.h"
 
 using Mp3DemuxerHandle     = Minimp3WrapperMp3dec;
