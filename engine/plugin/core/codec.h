@@ -46,11 +46,7 @@ public:
 
     Status QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs);
 
-    Status DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs);
-
     Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs);
-
-    Status DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs);
 
     Status Flush();
 

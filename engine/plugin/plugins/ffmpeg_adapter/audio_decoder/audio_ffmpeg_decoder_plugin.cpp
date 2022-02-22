@@ -405,13 +405,6 @@ Status AudioFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
     return ret;
 }
 
-Status AudioFfmpegDecoderPlugin::DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
-{
-    MEDIA_LOG_D("dequeue input buffer");
-    (void)timeoutMs;
-    return Status::OK;
-}
-
 Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs)
 {
     MEDIA_LOG_D("queue output buffer");
@@ -432,11 +425,6 @@ Status AudioFfmpegDecoderPlugin::SendOutputBuffer()
     }
     outBuffer_.reset();
     return status;
-}
-
-Status AudioFfmpegDecoderPlugin::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
-{
-    return Status::ERROR_INVALID_OPERATION;
 }
 
 Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer)

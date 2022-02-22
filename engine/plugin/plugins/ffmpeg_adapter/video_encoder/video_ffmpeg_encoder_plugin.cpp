@@ -370,12 +370,6 @@ Status VideoFfmpegEncoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>
     return Status::ERROR_INVALID_PARAMETER;
 }
 
-Status VideoFfmpegEncoderPlugin::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
-{
-    (void)timeoutMs;
-    return Status::OK;
-}
-
 Status VideoFfmpegEncoderPlugin::Flush()
 {
     OSAL::ScopedLock l(avMutex_);
@@ -397,12 +391,6 @@ Status VideoFfmpegEncoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
     }
     NotifyInputBufferDone(inputBuffer);
     return ret;
-}
-
-Status VideoFfmpegEncoderPlugin::DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
-{
-    (void)timeoutMs;
-    return Status::OK;
 }
 
 Status VideoFfmpegEncoderPlugin::FillAvFrame(const std::shared_ptr<Buffer>& inputBuffer)

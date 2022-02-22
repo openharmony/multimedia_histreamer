@@ -110,6 +110,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
         return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
     });
     negotiatedCap = *upstreamCap;
+    plugin_->SetDataCallback(this);
     PROFILE_END("audio encoder negotiate end");
     return res;
 }
@@ -278,24 +279,35 @@ ErrorCode AudioEncoderFilter::FinishFrame()
     auto outBuffer = outBufferPool_->AllocateAppendBufferNonBlocking();
     FALSE_RET_V_MSG_E(outBuffer != nullptr, ErrorCode::ERROR_NO_MEMORY, "Get out buffer from buffer pool fail");
     outBuffer->Reset();
-    auto err = TranslatePluginStatus(plugin_->QueueOutputBuffer(outBuffer, 0));
-    FAIL_RET_ERR_CODE_MSG_E(err, "Queue out buffer to plugin fail: %" PUBLIC_LOG_D32, to_underlying(err));
-    std::shared_ptr<AVBuffer> pcmFrame = nullptr;
-    auto status = plugin_->DequeueOutputBuffer(pcmFrame, 0);
-    if ((status == Plugin::Status::OK || status == Plugin::Status::END_OF_STREAM) && pcmFrame != nullptr) {
-        // push to port
-        auto oPort = outPorts_[0];
-        if (oPort->GetWorkMode() == WorkMode::PUSH) {
-            oPort->PushData(pcmFrame, -1);
-        } else {
-            MEDIA_LOG_W("encoder out port works in pull mode");
+    auto status = plugin_->QueueOutputBuffer(outBuffer, 0);
+    if (status != Plugin::Status::OK && status != Plugin::Status::END_OF_STREAM) {
+        if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
+            MEDIA_LOG_E("Queue output buffer to plugin fail: %" PUBLIC_LOG_D32, static_cast<int32_t>((status)));
         }
-        pcmFrame.reset(); // 释放buffer 如果没有被缓存使其回到buffer pool 如果被sink缓存 则从buffer pool拿其他的buffer
-    } else if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
-        MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %" PUBLIC_LOG_D32, static_cast<int32_t>(status));
     }
     MEDIA_LOG_D("end finish frame");
     return TranslatePluginStatus(status);
+}
+
+void AudioEncoderFilter::OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input)
+{
+    MEDIA_LOG_D("AudioEncoderFilter::OnInputBufferDone");
+}
+
+void AudioEncoderFilter::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output)
+{
+    FALSE_RETURN(output != nullptr);
+
+    // push to port
+    auto oPort = outPorts_[0];
+    if (oPort->GetWorkMode() == WorkMode::PUSH) {
+        oPort->PushData(output, -1);
+    } else {
+        MEDIA_LOG_W("encoder out port works in pull mode");
+    }
+
+    // 释放buffer 如果没有被缓存使其回到buffer pool 如果被sink缓存 则从buffer pool拿其他的buffer
+    std::const_pointer_cast<Plugin::Buffer>(output).reset();
 }
 } // Pipeline
 } // Media

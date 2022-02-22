@@ -285,7 +285,7 @@ ErrorCode AudioDecoderFilter::FinishFrame()
     auto status = plugin_->QueueOutputBuffer(outBuffer, 0);
     if (status != Plugin::Status::OK && status != Plugin::Status::END_OF_STREAM) {
         if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
-            MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %" PUBLIC_LOG_D32, static_cast<int32_t>((status)));
+            MEDIA_LOG_E("Queue output buffer to plugin fail: %" PUBLIC_LOG_D32, static_cast<int32_t>((status)));
         }
     }
     MEDIA_LOG_D("end finish frame");
@@ -294,12 +294,13 @@ ErrorCode AudioDecoderFilter::FinishFrame()
 
 void AudioDecoderFilter::OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input)
 {
-    MEDIA_LOG_I("AudioDecoderFilter::OnInputBufferDone");
+    MEDIA_LOG_D("AudioDecoderFilter::OnInputBufferDone");
 }
 
 void AudioDecoderFilter::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output)
 {
     MEDIA_LOG_D("begin");
+    FALSE_RETURN(output != nullptr);
 
     // push to port
     auto oPort = outPorts_[0];

@@ -72,11 +72,7 @@ public:
 
     Status QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
 
-    Status DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
-
     Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs) override;
-
-    Status DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs) override;
 
     Status Flush() override;
 

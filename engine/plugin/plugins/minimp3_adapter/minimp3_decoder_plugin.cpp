@@ -181,11 +181,6 @@ Status Minimp3DecoderPlugin::SendOutputBuffer()
     return status;
 }
 
-Status Minimp3DecoderPlugin::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
-{
-    return Status::ERROR_INVALID_OPERATION;
-}
-
 Status Minimp3DecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
 {
     MEDIA_LOG_D("queue input buffer");
@@ -197,14 +192,6 @@ Status Minimp3DecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>& inp
         inputBuffer_ = inputBuffer;
         return Status::OK;
     }
-}
-
-Status Minimp3DecoderPlugin::DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
-{
-    MEDIA_LOG_D("dequeue input buffer");
-    (void)timeoutMs;
-    inputBuffer = inputBuffer_;
-    return Status::OK;
 }
 
 Status Minimp3DecoderPlugin::Flush()

@@ -72,11 +72,7 @@ public:
 
     Status QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
 
-    Status DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
-
     Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs) override;
-
-    Status DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs) override;
 
     Status Flush() override;
 
@@ -117,7 +113,7 @@ private:
     std::vector<uint8_t> paddedBuffer_ {};
     size_t paddedBufferSize_ {0};
     std::shared_ptr<Buffer> outBuffer_ {nullptr};
-    DataCallback* dataCallback_;
+    DataCallback* dataCallback_ {nullptr};
 };
 } // namespace Ffmpeg
 } // namespace Plugin

@@ -116,12 +116,12 @@ ErrorCode CodecFilterBase::GetParameter(int32_t key, Plugin::Any& outVal)
 
 void CodecFilterBase::OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input)
 {
-    MEDIA_LOG_I("CodecFilterBase::OnInputBufferDone");
+    MEDIA_LOG_D("CodecFilterBase::OnInputBufferDone");
 }
 
 void CodecFilterBase::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output)
 {
-    MEDIA_LOG_I("CodecFilterBase::OnOutputBufferDone");
+    MEDIA_LOG_D("CodecFilterBase::OnOutputBufferDone");
 }
 } // namespace Pipeline
 } // namespace Media

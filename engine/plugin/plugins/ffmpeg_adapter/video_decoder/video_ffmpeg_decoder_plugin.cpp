@@ -365,12 +365,6 @@ Status VideoFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>
     return Status::OK;
 }
 
-Status VideoFfmpegDecoderPlugin::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
-{
-    (void)timeoutMs;
-    return Status::OK;
-}
-
 Status VideoFfmpegDecoderPlugin::Flush()
 {
     OSAL::ScopedLock l(avMutex_);
@@ -394,12 +388,6 @@ Status VideoFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
     }
     NotifyInputBufferDone(inputBuffer);
     return ret;
-}
-
-Status VideoFfmpegDecoderPlugin::DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
-{
-    (void)timeoutMs;
-    return Status::OK;
 }
 
 Status VideoFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer)
