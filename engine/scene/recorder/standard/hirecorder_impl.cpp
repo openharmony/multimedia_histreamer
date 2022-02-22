@@ -16,6 +16,8 @@
 #define HST_LOG_TAG "HiRecorderImpl"
 
 #include "hirecorder_impl.h"
+#include <regex>
+#include "foundation/osal/filesystem/filesystem.h"
 #include "pipeline/factory/filter_factory.h"
 #include "plugin/common/plugin_time.h"
 #include "recorder_utils.h"
@@ -533,12 +535,14 @@ ErrorCode HiRecorderImpl::DoConfigureOther(const HstRecParam& param) const
         case RecorderPublicParamType::OUT_PATH: {
             auto ptr = param.GetValPtr<OutFilePath>();
             FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
-            auto filePath = ptr->path;
-            if (IsDirectory(filePath)) {
-                std::string dirPath {filePath};
-                FALSE_RET_V_MSG_E(GenerateFilePath(dirPath, outputFormatType_, filePath),
-                                  ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "generate file path error");
-            }
+            auto dirPath = ptr->path;
+            std::regex reg("\\\\");
+            dirPath= std::regex_replace(dirPath, reg, "/");
+            FALSE_RET_V_MSG_E(!OSAL::FileSystem::IsRegularFile(dirPath) && OSAL::FileSystem::MakeMultipleDir(dirPath),
+                              ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "OutFilePath is not a valid directory path");
+            std::string filePath;
+            FALSE_RET_V_MSG_E(GenerateFilePath(dirPath, outputFormatType_, filePath),
+                              ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "generate file path error");
             return outputSink_->SetOutputPath(filePath);
         }
         case RecorderPublicParamType::OUT_FD: {

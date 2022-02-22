@@ -18,6 +18,7 @@
 #include <direct.h>
 #include <dirent.h>
 #include "foundation/log.h"
+#include "foundation/osal/filesystem/filesystem.h"
 
 namespace OHOS {
 namespace Media {
@@ -69,7 +70,7 @@ void PrepareDumpDir()
     if (access(fileDir, 0) == 0) { // 目录存在
         RemoveFilesInDir(fileDir);
     } else {
-        _mkdir(fileDir);
+        (void)OSAL::FileSystem::MakeMultipleDir(fileDir);
     }
 }
 

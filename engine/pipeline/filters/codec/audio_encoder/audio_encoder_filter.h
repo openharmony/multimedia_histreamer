@@ -27,7 +27,7 @@ namespace Media {
 namespace Pipeline {
 class AudioEncoderFilter : public CodecFilterBase {
 public:
-    explicit AudioEncoderFilter(const std::string &name);
+    explicit AudioEncoderFilter(const std::string& name);
     ~AudioEncoderFilter() override;
 
     virtual ErrorCode SetAudioEncoder(int32_t sourceId, std::shared_ptr<Plugin::Meta> encoderMeta);
@@ -42,7 +42,7 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
 
-    uint32_t CalculateBufferSize(const std::shared_ptr<const Plugin::Meta> &meta);
+    uint32_t CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta);
 
     bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
@@ -53,7 +53,7 @@ public:
      * @param offset always ignore this parameter
      * @return
      */
-    ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
+    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
 private:
     ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta);
@@ -72,7 +72,7 @@ private:
     std::shared_ptr<BufferPool<AVBuffer>> outBufferPool_ {};
     Capability capNegWithDownstream_;
     Capability capNegWithUpstream_;
-    size_t frameSize_;
+    size_t frameSize_ {0};
     std::string mime_;
     std::shared_ptr<Plugin::Meta> encoderMeta_ {};
     std::unique_ptr<RingBuffer> rb_ {};

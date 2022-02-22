@@ -31,7 +31,7 @@ namespace Media {
 namespace Pipeline {
 static AutoRegisterFilter<AudioEncoderFilter> g_registerFilterHelper("builtin.recorder.audioencoder");
 
-AudioEncoderFilter::AudioEncoderFilter(const std::string &name) : CodecFilterBase(name)
+AudioEncoderFilter::AudioEncoderFilter(const std::string& name) : CodecFilterBase(name)
 {
     filterType_ = FilterType::AUDIO_ENCODER;
     MEDIA_LOG_D("audio encoder ctor called");
@@ -116,7 +116,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
     return res;
 }
 
-uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<const Plugin::Meta> &meta)
+uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     Plugin::ValueType value;
     if (plugin_->GetParameter(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, value) != Plugin::Status::OK ||
@@ -136,7 +136,7 @@ uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<const Plu
     return GetBytesPerSample(format) * samplesPerFrame * channels;
 }
 
-bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
+bool AudioEncoderFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     PROFILE_BEGIN("Audio encoder configure begin");
     MEDIA_LOG_I("receive upstream meta %" PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
@@ -200,7 +200,7 @@ ErrorCode AudioEncoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode AudioEncoderFilter::PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset)
+ErrorCode AudioEncoderFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     const static int8_t maxRetryCnt = 3; // max retry times of handling one frame
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {

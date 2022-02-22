@@ -81,7 +81,6 @@ Plugin::SrcInputType TransAudioInputType(OHOS::Media::AudioSourceType sourceType
 Plugin::SrcInputType TransVideoInputType(OHOS::Media::VideoSourceType sourceType);
 bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& encoderMeta);
 bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::Meta& encoderMeta);
-bool IsDirectory(const std::string& path);
 bool GenerateFilePath(const std::string& dirPath, OutputFormatType outputFormatType, std::string& filePath);
 bool CastRecorderParam(int32_t sourceId, const RecorderParam& param, HstRecParam& out);
 }  // namespace Record

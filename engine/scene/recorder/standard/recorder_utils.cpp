@@ -14,8 +14,6 @@
  */
 
 #include "recorder_utils.h"
-#include <regex>
-#include <sys/stat.h>
 #include "media_errors.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_video_tags.h"
@@ -111,15 +109,9 @@ bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::Meta& e
     return ret;
 }
 
-bool IsDirectory(const std::string& path)
-{
-    struct stat s {};
-    return ((stat(path.c_str(), &s) == 0) && S_ISDIR(s.st_mode));
-}
 bool GenerateFilePath(const std::string& dirPath, OutputFormatType outputFormatType, std::string& filePath)
 {
-    std::regex reg("\\\\");
-    filePath = std::regex_replace(dirPath, reg, "/") ;
+    filePath = dirPath;
     if (filePath[filePath.size() - 1] != '/') {
         filePath += "/";
     }

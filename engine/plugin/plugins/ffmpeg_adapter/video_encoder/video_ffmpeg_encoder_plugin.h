@@ -123,10 +123,10 @@ private:
     std::shared_ptr<AVPacket> cachedPacket_;
     DataCallback* dataCb_ {};
 
-    uint32_t width_;
-    uint32_t height_;
-    uint64_t frameRate_;
-    VideoPixelFormat pixelFormat_;
+    uint32_t width_ {0};
+    uint32_t height_ {0};
+    uint64_t frameRate_ {0};
+    VideoPixelFormat pixelFormat_ {};
 
     mutable OSAL::Mutex avMutex_ {};
     State state_ {State::CREATED};

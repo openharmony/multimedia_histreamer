@@ -37,7 +37,7 @@ ClientFactory::~ClientFactory()
 std::shared_ptr<NetworkClient> ClientFactory::CreateClient(const std::string& url)
 {
     FALSE_RETURN_V(!url.empty(), nullptr);
-    if (url.find("http") == 0) {
+    if (url.compare(0, 4, "http") == 0) { // 0 : position, 4: count
         if (httpClient_ == nullptr) {
             httpClient_ = std::make_shared<HttpCurlClient>(rxHeader_, rxBody_, userParam_);
             httpClient_->Init();

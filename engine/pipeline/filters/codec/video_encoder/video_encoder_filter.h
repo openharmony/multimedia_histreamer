@@ -27,7 +27,7 @@ namespace Media {
 namespace Pipeline {
 class VideoEncoderFilter : public CodecFilterBase {
 public:
-    explicit VideoEncoderFilter(const std::string &name);
+    explicit VideoEncoderFilter(const std::string& name);
     ~VideoEncoderFilter() override;
 
     virtual ErrorCode SetVideoEncoder(int32_t sourceId, std::shared_ptr<Plugin::Meta> encoderMeta);
@@ -57,11 +57,11 @@ public:
      * @param offset always ignore this parameter
      * @return
      */
-    ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
+    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
-    void OnInputBufferDone(const std::shared_ptr<AVBuffer> &buffer);
+    void OnInputBufferDone(const std::shared_ptr<AVBuffer>& buffer);
 
-    void OnOutputBufferDone(const std::shared_ptr<AVBuffer> &buffer);
+    void OnOutputBufferDone(const std::shared_ptr<AVBuffer>& buffer);
 
 private:
     class DataCallbackImpl;
@@ -91,7 +91,7 @@ private:
 
     void HandleFrame();
 
-    void HandleOneFrame(const std::shared_ptr<AVBuffer> &data);
+    void HandleOneFrame(const std::shared_ptr<AVBuffer>& data);
 
     void FinishFrame();
 
