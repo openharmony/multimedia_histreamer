@@ -211,7 +211,6 @@ ErrorCode DemuxerFilter::PushData(const std::string& inPort, const AVBufferPtr& 
 {
     MEDIA_LOG_D("PushData for port: %" PUBLIC_LOG "s", inPort.c_str());
     if (buffer->flag & BUFFER_FLAG_EOS) {
-        FALSE_LOG_MSG_W(buffer->IsEmpty(), "EOS buffer is not empty");
         isLivePlayFinished_ = true;
     } else {
         dataPacker_->PushData(std::move(buffer), offset);
