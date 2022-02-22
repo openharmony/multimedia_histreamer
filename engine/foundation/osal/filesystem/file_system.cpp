@@ -21,7 +21,7 @@
 #endif
 #include <string.h>
 #include <sys/stat.h>
-#include <log.h>
+#include "foundation/log.h"
 
 namespace OHOS {
 namespace Media {
@@ -66,6 +66,7 @@ bool FileSystem::MakeDir(const std::string& path)
 bool FileSystem::MakeMultipleDir(const std::string& path)
 {
     FALSE_RETURN_V(!IsExists(path), true);
+
     // pos is 1, not 0  example: D:/a/b, /local/tmp/
     // Avoid Linux root path before is empty string, which makes it impossible to judge whether the path exists
     auto index = path.find("/", 1);
