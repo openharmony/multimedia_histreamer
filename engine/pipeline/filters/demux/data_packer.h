@@ -67,6 +67,7 @@ private:
                 ", mediaOffset " + std::to_string(mediaOffset);
         }
     };
+    static constexpr Position INVALID_POSITION = {-1, 0, 0};
 
     // first  : start position;
     // second : end position, not include bufferOffset byte.
@@ -100,10 +101,11 @@ private:
     uint64_t mediaOffset_; // The media file offset of the first byte in data packer
     uint64_t pts_;
     uint64_t dts_;
+    bool meetEos_ {false};
 
     // The position in prev GetRange / current GetRange
-    PositionPair prevGet_ {{-1, 0, 0}, {-1, 0, 0}};
-    PositionPair currentGet_ {{-1, 0, 0}, {-1, 0, 0}};
+    PositionPair prevGet_ {INVALID_POSITION, INVALID_POSITION};
+    PositionPair currentGet_ {INVALID_POSITION, INVALID_POSITION};
 };
 } // namespace Media
 } // namespace OHOS

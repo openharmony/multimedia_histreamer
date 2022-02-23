@@ -191,7 +191,11 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
     prevGet_ = currentGet_; // store last get position to prevGet_
 
     FALSE_RETURN_V(PeekRangeInternal(offset, size, bufferPtr, true), false);
-    RemoveOldData();
+    if (meetEos_) {
+        FlushInternal();
+    } else {
+        RemoveOldData();
+    }
     return true;
 }
 
@@ -210,6 +214,9 @@ void DataPacker::FlushInternal()
     mediaOffset_ = 0;
     dts_ = 0;
     pts_ = 0;
+    meetEos_ = false;
+    prevGet_ = {INVALID_POSITION, INVALID_POSITION};
+    currentGet_ = {INVALID_POSITION, INVALID_POSITION};
 }
 
 // Remove first removeSize data in the buffer
@@ -346,6 +353,7 @@ int32_t DataPacker::CopyFromSuccessiveBuffer(uint64_t prevOffset, uint64_t offse
         }
     }
     MEDIA_LOG_W("Processed all cached buffers, still not meet offsetEnd, maybe EOS reached.");
+    meetEos_ = true;
     return usedCount;
 }
 
