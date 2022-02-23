@@ -105,6 +105,10 @@ private:
     // The position in prev GetRange / current GetRange
     PositionPair prevGet_ ;
     PositionPair currentGet_ ;
+
+    OSAL::ConditionVariable cvFull_;
+    OSAL::ConditionVariable cvEmpty_;
+    const size_t capacity_;
 };
 } // namespace Media
 } // namespace OHOS

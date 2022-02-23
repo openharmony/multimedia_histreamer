@@ -32,7 +32,7 @@ namespace Media {
 static constexpr DataPacker::Position INVALID_POSITION = {-1, 0, 0};
 
 DataPacker::DataPacker() : mutex_(), que_(), size_(0), mediaOffset_(0), pts_(0), dts_(0),
-        prevGet_{INVALID_POSITION, INVALID_POSITION}, currentGet_ {INVALID_POSITION, INVALID_POSITION}
+        prevGet_{INVALID_POSITION, INVALID_POSITION}, currentGet_ {INVALID_POSITION, INVALID_POSITION}, capacity_(30)
 {
     MEDIA_LOG_I("DataPacker ctor...");
 }
@@ -63,6 +63,11 @@ void DataPacker::PushData(AVBufferPtr bufferPtr, uint64_t offset)
                 offset, AudioBufferSize(bufferPtr));
     DUMP_BUFFER2LOG("DataPacker Push", bufferPtr, offset);
     OSAL::ScopedLock lock(mutex_);
+    if (que_.size() >= capacity_) {
+        MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s is full, waiting for pop.", name_.c_str());
+        cvFull_.Wait(lock, [this] { return que_.size() < capacity_; });
+    }
+
     size_ += AudioBufferSize(bufferPtr);
     if (que_.empty()) {
         mediaOffset_ = offset;
@@ -70,6 +75,8 @@ void DataPacker::PushData(AVBufferPtr bufferPtr, uint64_t offset)
         pts_ = bufferPtr->pts;
     }
     que_.emplace_back(std::move(bufferPtr));
+
+    cvEmpty_.NotifyOne();
     MEDIA_LOG_D("DataPacker PushData end... %" PUBLIC_LOG_S, ToString().c_str());
 }
 
@@ -120,6 +127,11 @@ bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOf
 bool DataPacker::PeekRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr)
 {
     OSAL::ScopedLock lock(mutex_);
+    if (que_.empty()) {
+        MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s is empty, waiting for push", name_.c_str());
+        cvEmpty_.Wait(lock, [this] { return !que_.empty(); });
+    }
+
     return PeekRangeInternal(offset, size, bufferPtr, false);
 }
 
@@ -190,6 +202,11 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
                       "GetRange input bufferPtr empty or capacity not enough.");
 
     OSAL::ScopedLock lock(mutex_);
+    if (que_.empty()) {
+        MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s is empty, waiting for push", name_.c_str());
+        cvEmpty_.Wait(lock, [this] { return !que_.empty(); });
+    }
+
     FALSE_RETURN_V(!que_.empty(), false);
     prevGet_ = currentGet_; // store last get position to prevGet_
 
@@ -198,6 +215,10 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
         FlushInternal();
     } else {
         RemoveOldData();
+    }
+
+    if (que_.size() < capacity_){
+        cvFull_.NotifyOne();
     }
     return true;
 }
