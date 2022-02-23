@@ -29,7 +29,10 @@ namespace Media {
         }                              \
     } while (0)
 
-DataPacker::DataPacker() : mutex_(), que_(), size_(0), mediaOffset_(0), pts_(0), dts_(0)
+static constexpr DataPacker::Position INVALID_POSITION = {-1, 0, 0};
+
+DataPacker::DataPacker() : mutex_(), que_(), size_(0), mediaOffset_(0), pts_(0), dts_(0),
+        prevGet_{INVALID_POSITION, INVALID_POSITION}, currentGet_ {INVALID_POSITION, INVALID_POSITION}
 {
     MEDIA_LOG_I("DataPacker ctor...");
 }

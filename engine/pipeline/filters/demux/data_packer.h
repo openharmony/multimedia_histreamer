@@ -46,7 +46,6 @@ public:
 
     void Flush();
 
-private:
     // Record the position that GerRange copy start or end.
     struct Position {
         int32_t index; // Buffer index, -1 means this Position is invalid
@@ -67,8 +66,8 @@ private:
                 ", mediaOffset " + std::to_string(mediaOffset);
         }
     };
-    static constexpr Position INVALID_POSITION = {-1, 0, 0};
 
+private:
     // first  : start position;
     // second : end position, not include bufferOffset byte.
     using PositionPair = std::pair<Position, Position>;
@@ -104,8 +103,8 @@ private:
     bool meetEos_ {false};
 
     // The position in prev GetRange / current GetRange
-    PositionPair prevGet_ {INVALID_POSITION, INVALID_POSITION};
-    PositionPair currentGet_ {INVALID_POSITION, INVALID_POSITION};
+    PositionPair prevGet_ ;
+    PositionPair currentGet_ ;
 };
 } // namespace Media
 } // namespace OHOS
