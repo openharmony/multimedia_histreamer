@@ -71,7 +71,7 @@ Status FilePathSinkPlugin::SeekTo(uint64_t offset)
     if (std::fseek(fp_, offset, SEEK_SET) == 0) {
         return Status::OK;
     } else {
-        MEDIA_LOG_W("Seek to %" PUBLIC_LOG_U64 " failed due to %" PUBLIC_LOG_S, offset, strerror(errno));
+        MEDIA_LOG_W("Seek to " PUBLIC_LOG_U64 " failed due to " PUBLIC_LOG_S, offset, strerror(errno));
         std::clearerr(fp_);
     }
     return Status::ERROR_UNKNOWN;
@@ -102,7 +102,7 @@ Status FilePathSinkPlugin::OpenFile()
     fp_ = std::fopen(fileName_.c_str(), "wb");
     if (fp_ == nullptr) {
         int32_t err = errno;
-        MEDIA_LOG_E("Fail to open file due to %" PUBLIC_LOG_S, strerror(err));
+        MEDIA_LOG_E("Fail to open file due to " PUBLIC_LOG_S, strerror(err));
         switch (err) {
             case EPERM:
                 return Status::ERROR_PERMISSION_DENIED;

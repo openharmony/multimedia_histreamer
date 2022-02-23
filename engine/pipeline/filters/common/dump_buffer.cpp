@@ -45,7 +45,7 @@ void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin:
 
     std::string filePath = GetDumpFileDir() + fileName;
     auto filePtr = fopen(filePath.c_str(), "ab+");
-    FALSE_RET_MSG(filePtr != nullptr, "Open file(%" PUBLIC_LOG_S ") failed(%" PUBLIC_LOG_S ").", filePath.c_str(),
+    FALSE_RET_MSG(filePtr != nullptr, "Open file(" PUBLIC_LOG_S ") failed(" PUBLIC_LOG_S ").", filePath.c_str(),
                   strerror(errno));
     (void)fwrite(reinterpret_cast<const char*>(buffer->GetMemory()->GetReadOnlyData()), bufferSize, 1, filePtr);
     (void)fclose(filePtr);
@@ -80,7 +80,7 @@ void PrepareDumpDir()
 
 void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugin::Buffer>& buffer, uint64_t offset, size_t dumpSize)
 {
-    FALSE_RET_MSG(buffer && (!buffer->IsEmpty()), "%" PUBLIC_LOG_S " Buffer(null or empty)", desc);
+    FALSE_RET_MSG(buffer && (!buffer->IsEmpty()),  PUBLIC_LOG_S " Buffer(null or empty)", desc);
     size_t bufferSize = buffer->GetMemory()->GetSize();
     size_t realDumpSize = std::min(dumpSize, bufferSize);
     realDumpSize = std::min(realDumpSize, static_cast<size_t>(DUMP_BUFFER2LOG_SIZE)); // max DUMP_BUFFER2LOG_SIZE bytes
@@ -90,11 +90,11 @@ void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugin::Buffer>& bu
     const uint8_t* p = buffer->GetMemory()->GetReadOnlyData();
     for (int i = 0; i < realDumpSize; i++) {
         len = snprintf_s(dstPtr, 3, 2, "%02x", p[i]); // max write 3 bytes, string len 2
-        FALSE_RET_MSG(len > 0 && len <= 2, "snprintf_s returned unexpected value %" PUBLIC_LOG_D32, len); // max len 2
+        FALSE_RET_MSG(len > 0 && len <= 2, "snprintf_s returned unexpected value " PUBLIC_LOG_D32, len); // max len 2
         dstPtr += len;
     }
-    MEDIA_LOG_I("%" PUBLIC_LOG_S " Buffer(offset %" PUBLIC_LOG_D64 ", size %" PUBLIC_LOG_ZU ", capacity %"
-        PUBLIC_LOG_ZU ") : %" PUBLIC_LOG_S, desc, offset, bufferSize, buffer->GetMemory()->GetCapacity(), tmpStr);
+    MEDIA_LOG_I(PUBLIC_LOG_S " Buffer(offset " PUBLIC_LOG_D64 ", size " PUBLIC_LOG_ZU ", capacity "
+        PUBLIC_LOG_ZU ") : " PUBLIC_LOG_S, desc, offset, bufferSize, buffer->GetMemory()->GetCapacity(), tmpStr);
 }
 } // Pipeline
 } // Media

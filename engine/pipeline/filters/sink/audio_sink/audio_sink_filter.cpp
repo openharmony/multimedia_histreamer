@@ -65,7 +65,7 @@ ErrorCode AudioSinkFilter::SetParameter(int32_t key, const Plugin::Any& value)
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
-        MEDIA_LOG_I("SetParameter key %" PUBLIC_LOG "d is out of boundary", key);
+        MEDIA_LOG_I("SetParameter key " PUBLIC_LOG "d is out of boundary", key);
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     RETURN_AGAIN_IF_NULL(plugin_);
@@ -79,7 +79,7 @@ ErrorCode AudioSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
-        MEDIA_LOG_I("GetParameter key %" PUBLIC_LOG "d is out of boundary", key);
+        MEDIA_LOG_I("GetParameter key " PUBLIC_LOG "d is out of boundary", key);
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     RETURN_AGAIN_IF_NULL(plugin_);
@@ -108,7 +108,7 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
         }
     }
     negotiatedCap = candidatePlugins[0].second;
-    MEDIA_LOG_I("use plugin %" PUBLIC_LOG_S " with negotiated %" PUBLIC_LOG_S, selectedPluginInfo->name.c_str(),
+    MEDIA_LOG_I("use plugin " PUBLIC_LOG_S " with negotiated " PUBLIC_LOG_S, selectedPluginInfo->name.c_str(),
                 Capability2String(negotiatedCap).c_str());
     auto res = UpdateAndInitPluginByInfo<Plugin::AudioSink>(plugin_, pluginInfo_, selectedPluginInfo,
         [](const std::string& name) -> std::shared_ptr<Plugin::AudioSink> {
@@ -121,7 +121,7 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
 bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     PROFILE_BEGIN("Audio sink configure begin");
-    MEDIA_LOG_I("receive upstream meta %" PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
+    MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
     if (plugin_ == nullptr || pluginInfo_ == nullptr) {
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
@@ -151,9 +151,9 @@ ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Plugin:
             SetPluginParameter(keyPair.first, *outValPtr);
         } else {
             if (!HasTagInfo(keyPair.first)) {
-                MEDIA_LOG_W("tag %" PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
+                MEDIA_LOG_W("tag " PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
             } else {
-                MEDIA_LOG_W("parameter %" PUBLIC_LOG_S " in meta is not found or type mismatch",
+                MEDIA_LOG_W("parameter " PUBLIC_LOG_S " in meta is not found or type mismatch",
                     GetTagStrName(keyPair.first));
             }
         }
@@ -176,7 +176,7 @@ void AudioSinkFilter::ReportCurrentPosition(int64_t pts)
 
 ErrorCode AudioSinkFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
-    MEDIA_LOG_D("audio sink push data started, state: %" PUBLIC_LOG_D32, state_.load());
+    MEDIA_LOG_D("audio sink push data started, state: " PUBLIC_LOG_D32, state_.load());
     if (isFlushing || state_.load() == FilterState::INITIALIZED) {
         MEDIA_LOG_I("audio sink is flushing ignore this buffer");
         return ErrorCode::SUCCESS;
@@ -190,7 +190,7 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
         pushThreadIsBlocking = false;
     }
     if (isFlushing || state_.load() == FilterState::INITIALIZED) {
-        MEDIA_LOG_I("PushData return due to: isFlushing = %" PUBLIC_LOG_D32 ", state = %" PUBLIC_LOG_D32,
+        MEDIA_LOG_I("PushData return due to: isFlushing = " PUBLIC_LOG_D32 ", state = " PUBLIC_LOG_D32,
                     isFlushing, static_cast<int>(state_.load()));
         return ErrorCode::SUCCESS;
     }
@@ -219,7 +219,7 @@ ErrorCode AudioSinkFilter::Start()
 {
     MEDIA_LOG_I("start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
-        MEDIA_LOG_W("sink is not ready when start, state: %" PUBLIC_LOG "d", static_cast<int32_t>(state_.load()));
+        MEDIA_LOG_W("sink is not ready when start, state: " PUBLIC_LOG "d", static_cast<int32_t>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto err = FilterBase::Start();
@@ -302,11 +302,11 @@ void AudioSinkFilter::FlushEnd()
 ErrorCode AudioSinkFilter::SetVolume(float volume)
 {
     if (state_ != FilterState::READY && state_ != FilterState::RUNNING && state_ != FilterState::PAUSED) {
-        MEDIA_LOG_E("audio sink filter cannot set volume in state %" PUBLIC_LOG "d",
+        MEDIA_LOG_E("audio sink filter cannot set volume in state " PUBLIC_LOG "d",
                     static_cast<int32_t>(state_.load()));
         return ErrorCode::ERROR_AGAIN;
     }
-    MEDIA_LOG_I("set volume %" PUBLIC_LOG ".3f", volume);
+    MEDIA_LOG_I("set volume " PUBLIC_LOG ".3f", volume);
     return TranslatePluginStatus(plugin_->SetVolume(volume));
 }
 
@@ -316,7 +316,7 @@ ErrorCode AudioSinkFilter::UpdateLatestPts(int64_t pts)
     int64_t nowNs {0};
     Plugin::Status status = plugin_->GetLatency(latencyNano);
     if (status != Plugin::Status::OK) {
-        MEDIA_LOG_E("audio sink GetLatency fail errorcode = %" PUBLIC_LOG "d",
+        MEDIA_LOG_E("audio sink GetLatency fail errorcode = " PUBLIC_LOG "d",
                     CppExt::to_underlying(TranslatePluginStatus(status)));
         return TranslatePluginStatus(status);
     }

@@ -277,16 +277,16 @@ void LogOutIncorrectType(CapabilityID key, uint8_t flags)
     if (HasTagInfo(static_cast<Tag>(key))) {
         const auto& tuple = g_tagInfoMap.at(static_cast<Tag>(key));
         const auto& typeName = std::get<2>(tuple); // secondary
-        MEDIA_LOG_E("type of %" PUBLIC_LOG_S " should be"
-        " %" PUBLIC_LOG_S "(%" PUBLIC_LOG_C ")"
-        " or Interval<%" PUBLIC_LOG_S ">(%" PUBLIC_LOG_C ")"
-        " or Discrete<%" PUBLIC_LOG_S ">(%" PUBLIC_LOG_C ")",
+        MEDIA_LOG_E("type of " PUBLIC_LOG_S " should be"
+        " " PUBLIC_LOG_S "(" PUBLIC_LOG_C ")"
+        " or Interval<" PUBLIC_LOG_S ">(" PUBLIC_LOG_C ")"
+        " or Discrete<" PUBLIC_LOG_S ">(" PUBLIC_LOG_C ")",
         std::get<0>(tuple),
         typeName, IsFixedAllowed(flags)? 'o': 'x',
         typeName, IsFixedAllowed(flags)? 'o': 'x',
         typeName, IsFixedAllowed(flags)? 'o': 'x');
     } else {
-        MEDIA_LOG_E("capability %" PUBLIC_LOG_D32 "is not in the map, may be update the map?", key);
+        MEDIA_LOG_E("capability " PUBLIC_LOG_D32 "is not in the map, may be update the map?", key);
     }
 }
 
@@ -373,7 +373,7 @@ bool MergeCapabilityKeys(const Capability& originCap, const Capability& otherCap
         }
         // if key is in otherCap, calculate the intersections
         if (g_capabilityValueCheckMap.count(pairKey.first) == 0) {
-            MEDIA_LOG_W("capability %" PUBLIC_LOG_D32 " cannot be applied, may be update the check map?",
+            MEDIA_LOG_W("capability " PUBLIC_LOG_D32 " cannot be applied, may be update the check map?",
                         static_cast<int32_t>(pairKey.first));
             continue;
         }
@@ -456,7 +456,7 @@ std::shared_ptr<Capability> MetaToCapability(const Plugin::Meta& meta)
     return ret;
 }
 
-bool MergeMetaWithCapability(const  Plugin::Meta& meta, const Capability& cap,  Plugin::Meta& resMeta)
+bool MergeMetaWithCapability(const Plugin::Meta& meta, const Capability& cap,  Plugin::Meta& resMeta)
 {
     resMeta.Clear();
     // change meta into capability firstly

@@ -108,7 +108,7 @@ ErrorCode VideoCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value
             (void)AssignParameterIfMatch(tag, frameRate_, value);
             break;
         default:
-            MEDIA_LOG_W("Unknown key %" PUBLIC_LOG_S, GetTagStrName(tag));
+            MEDIA_LOG_W("Unknown key " PUBLIC_LOG_S, GetTagStrName(tag));
             break;
     }
     return ErrorCode::SUCCESS;
@@ -141,7 +141,7 @@ ErrorCode VideoCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
             break;
         }
         default:
-            MEDIA_LOG_W("Unknown key %" PUBLIC_LOG_S, GetTagStrName(tag));
+            MEDIA_LOG_W("Unknown key " PUBLIC_LOG_S, GetTagStrName(tag));
             break;
     }
     return ErrorCode::SUCCESS;
@@ -152,7 +152,7 @@ ErrorCode VideoCaptureFilter::DoConfigure()
     auto emptyMeta = std::make_shared<Plugin::Meta>();
     auto videoMeta = std::make_shared<Plugin::Meta>();
     if (!MergeMetaWithCapability(*emptyMeta, capNegWithDownstream_, *videoMeta)) {
-        MEDIA_LOG_E("cannot find available capability of plugin %" PUBLIC_LOG_S, pluginInfo_->name.c_str());
+        MEDIA_LOG_E("cannot find available capability of plugin " PUBLIC_LOG_S, pluginInfo_->name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
     videoMeta->SetUint32(Plugin::MetaID::VIDEO_WIDTH, videoWidth_);
@@ -278,20 +278,20 @@ ErrorCode VideoCaptureFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& in
 {
     if ((plugin_ != nullptr) && (pluginInfo_ != nullptr)) {
         if (info->name == pluginInfo_->name && TranslatePluginStatus(plugin_->Reset()) == ErrorCode::SUCCESS) {
-            MEDIA_LOG_I("Reuse last plugin: %" PUBLIC_LOG_S, name.c_str());
+            MEDIA_LOG_I("Reuse last plugin: " PUBLIC_LOG_S, name.c_str());
             return ErrorCode::SUCCESS;
         }
         if (TranslatePluginStatus(plugin_->Deinit()) != ErrorCode::SUCCESS) {
-            MEDIA_LOG_E("Deinit last plugin: %" PUBLIC_LOG_S " error", pluginInfo_->name.c_str());
+            MEDIA_LOG_E("Deinit last plugin: " PUBLIC_LOG_S " error", pluginInfo_->name.c_str());
         }
     }
     plugin_ = manager.CreateSourcePlugin(name);
     if (plugin_ == nullptr) {
-        MEDIA_LOG_E("PluginManager CreatePlugin %" PUBLIC_LOG_S " fail", name.c_str());
+        MEDIA_LOG_E("PluginManager CreatePlugin " PUBLIC_LOG_S " fail", name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
     pluginInfo_ = info;
-    MEDIA_LOG_I("Create new plugin: %" PUBLIC_LOG_S " success", pluginInfo_->name.c_str());
+    MEDIA_LOG_I("Create new plugin: " PUBLIC_LOG_S " success", pluginInfo_->name.c_str());
     return ErrorCode::SUCCESS;
 }
 
@@ -324,13 +324,13 @@ ErrorCode VideoCaptureFilter::FindPlugin()
     std::set<std::string> nameList = pluginManager.ListPlugins(PluginType::SOURCE);
     for (const std::string& name : nameList) {
         std::shared_ptr<PluginInfo> info = pluginManager.GetPluginInfo(PluginType::SOURCE, name);
-        MEDIA_LOG_I("name: %" PUBLIC_LOG "s, info->name: %" PUBLIC_LOG_S, name.c_str(), info->name.c_str());
+        MEDIA_LOG_I("name: " PUBLIC_LOG "s, info->name: " PUBLIC_LOG_S, name.c_str(), info->name.c_str());
         auto val = info->extra[PLUGIN_INFO_EXTRA_INPUT_TYPE];
         if (val.SameTypeWith(typeid(Plugin::SrcInputType))) {
             auto supportInputType = OHOS::Media::Plugin::AnyCast<Plugin::SrcInputType>(val);
             if (inputType_ == supportInputType && DoNegotiate(info->outCaps) &&
                 CreatePlugin(info, name, pluginManager) == ErrorCode::SUCCESS) {
-                MEDIA_LOG_I("CreatePlugin %" PUBLIC_LOG_S " success", name_.c_str());
+                MEDIA_LOG_I("CreatePlugin " PUBLIC_LOG_S " success", name_.c_str());
                 return ErrorCode::SUCCESS;
             }
         }

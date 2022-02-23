@@ -84,7 +84,7 @@ bool StreamingExecutor::Read(unsigned char *buff, unsigned int wantReadLength,
     if (isEos_ && realReadLength == 0) {
         isEos = true;
     }
-    MEDIA_LOG_D("Read: wantReadLength %" PUBLIC_LOG "d, realReadLength %" PUBLIC_LOG "d, isEos %"
+    MEDIA_LOG_D("Read: wantReadLength " PUBLIC_LOG "d, realReadLength " PUBLIC_LOG "d, isEos "
         PUBLIC_LOG "d", wantReadLength, realReadLength, isEos);
     return true;
 }
@@ -92,7 +92,7 @@ bool StreamingExecutor::Read(unsigned char *buff, unsigned int wantReadLength,
 bool StreamingExecutor::Seek(int offset)
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
-    MEDIA_LOG_I("Seek: buffer size %" PUBLIC_LOG "d, offset %" PUBLIC_LOG "d", buffer_->GetSize(), offset);
+    MEDIA_LOG_I("Seek: buffer size " PUBLIC_LOG "d, offset " PUBLIC_LOG "d", buffer_->GetSize(), offset);
     if (buffer_->Seek(offset)) {
         return true;
     }
@@ -130,17 +130,17 @@ void StreamingExecutor::HttpDownloadThread()
     Status ret = client_->RequestData(startPos_, requestSize_, serverCode, clientCode);
 
     if (ret == Status::ERROR_CLIENT) {
-        MEDIA_LOG_I("Send http client error, code %" PUBLIC_LOG_D32, clientCode);
+        MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, clientCode);
         callback_->OnEvent({PluginEventType::CLIENT_ERROR, {clientCode}, "http"});
     } else if (ret == Status::ERROR_SERVER) {
-        MEDIA_LOG_I("Send http server error, code %" PUBLIC_LOG_D32, serverCode);
+        MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32, serverCode);
         callback_->OnEvent({PluginEventType::SERVER_ERROR, {serverCode}, "http"});
     }
     FALSE_LOG(ret == Status::OK);
 
     int64_t remaining = headerInfo_.fileContentLen - startPos_;
     if (headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
-        MEDIA_LOG_I("http transfer reach end, startPos_ %" PUBLIC_LOG "d", startPos_);
+        MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG "d", startPos_);
         isEos_ = true;
         task_->PauseAsync();
         requestSize_ = PER_REQUEST_SIZE;
@@ -171,7 +171,7 @@ size_t StreamingExecutor::RxBodyData(void *buffer, size_t size, size_t nitems, v
     }
     executor->buffer_->WriteBuffer(buffer, dataLen, executor->startPos_);
     executor->isDownloading_ = false;
-    MEDIA_LOG_I("RxBodyData: dataLen %" PUBLIC_LOG "d, startPos_ %" PUBLIC_LOG "d, buffer size %"
+    MEDIA_LOG_I("RxBodyData: dataLen " PUBLIC_LOG "d, startPos_ " PUBLIC_LOG "d, buffer size "
         PUBLIC_LOG "d", dataLen, executor->startPos_, executor->buffer_->GetSize());
     executor->startPos_ = executor->startPos_ + dataLen;
 
@@ -179,11 +179,11 @@ size_t StreamingExecutor::RxBodyData(void *buffer, size_t size, size_t nitems, v
     double ratio = (static_cast<double>(bufferSize)) / RING_BUFFER_SIZE;
     if (bufferSize >= WATER_LINE && !executor->aboveWaterline_) {
         executor->aboveWaterline_ = true;
-        MEDIA_LOG_I("Send http aboveWaterline event, ringbuffer ratio %" PUBLIC_LOG_F, ratio);
+        MEDIA_LOG_I("Send http aboveWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
         executor->callback_->OnEvent({PluginEventType::ABOVE_LOW_WATERLINE, {ratio}, "http"});
     } else if (bufferSize < WATER_LINE && executor->aboveWaterline_) {
         executor->aboveWaterline_ = false;
-        MEDIA_LOG_I("Send http belowWaterline event, ringbuffer ratio %" PUBLIC_LOG_F, ratio);
+        MEDIA_LOG_I("Send http belowWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
         executor->callback_->OnEvent({PluginEventType::BELOW_LOW_WATERLINE, {ratio}, "http"});
     }
 

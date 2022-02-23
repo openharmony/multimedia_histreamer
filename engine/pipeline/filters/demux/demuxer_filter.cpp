@@ -57,8 +57,8 @@ Plugin::Status DemuxerFilter::DataSourceImpl::ReadAt(int64_t offset, std::shared
                                                      size_t expectedLen)
 {
     if (!buffer || buffer->IsEmpty() || expectedLen == 0 || !filter.IsOffsetValid(offset)) {
-        MEDIA_LOG_E("ReadAt failed, buffer empty: %" PUBLIC_LOG "d, expectedLen: %" PUBLIC_LOG
-                    "d, offset: %" PUBLIC_LOG PRId64, !buffer, static_cast<int>(expectedLen), offset);
+        MEDIA_LOG_E("ReadAt failed, buffer empty: " PUBLIC_LOG "d, expectedLen: " PUBLIC_LOG
+                    "d, offset: " PUBLIC_LOG PRId64, !buffer, static_cast<int>(expectedLen), offset);
         return Plugin::Status::ERROR_UNKNOWN;
     }
     if (filter.isLivePlayFinished_) {
@@ -209,7 +209,7 @@ ErrorCode DemuxerFilter::Prepare()
 
 ErrorCode DemuxerFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
-    MEDIA_LOG_D("PushData for port: %" PUBLIC_LOG "s", inPort.c_str());
+    MEDIA_LOG_D("PushData for port: " PUBLIC_LOG "s", inPort.c_str());
     if (buffer->flag & BUFFER_FLAG_EOS) {
         isLivePlayFinished_ = true;
     } else {
@@ -250,7 +250,7 @@ ErrorCode DemuxerFilter::SeekTo(int64_t pos)
             task_->Start();
         }
     } else {
-        MEDIA_LOG_E("SeekTo failed with return value: %" PUBLIC_LOG "d", static_cast<int>(rtv));
+        MEDIA_LOG_E("SeekTo failed with return value: " PUBLIC_LOG "d", static_cast<int>(rtv));
     }
     return rtv;
 }
@@ -286,7 +286,7 @@ bool DemuxerFilter::CreatePlugin(std::string pluginName)
     }
     plugin_ = Plugin::PluginManager::Instance().CreateDemuxerPlugin(pluginName);
     if (!plugin_ || plugin_->Init() != Plugin::Status::OK) {
-        MEDIA_LOG_E("CreatePlugin %" PUBLIC_LOG "s failed.", pluginName.c_str());
+        MEDIA_LOG_E("CreatePlugin " PUBLIC_LOG "s failed.", pluginName.c_str());
         return false;
     }
     plugin_->SetCallback(this);
@@ -311,7 +311,7 @@ bool DemuxerFilter::InitPlugin(std::string pluginName)
             }
         }
     }
-    MEDIA_LOG_I("InitPlugin, %" PUBLIC_LOG "s used.", pluginName_.c_str());
+    MEDIA_LOG_I("InitPlugin, " PUBLIC_LOG "s used.", pluginName_.c_str());
     (void)plugin_->SetDataSource(std::dynamic_pointer_cast<Plugin::DataSourceHelper>(dataSource_));
     pluginState_ = DemuxerState::DEMUXER_STATE_PARSE_HEADER;
     return plugin_->Prepare() == Plugin::Status::OK;
@@ -330,7 +330,7 @@ void DemuxerFilter::ActivatePullMode()
         if (dataPacker_->IsDataAvailable(offset, size, curOffset)) {
             return true;
         }
-        MEDIA_LOG_D("IsDataAvailable false, require offset %" PUBLIC_LOG_D64 ", curOffset %" PUBLIC_LOG_D64,
+        MEDIA_LOG_D("IsDataAvailable false, require offset " PUBLIC_LOG_D64 ", curOffset " PUBLIC_LOG_D64,
                     offset, curOffset);
         if (curOffset < offset) { // datapacker buffer's offset end < offset, then clear all buffers
             dataPacker_->Flush();
@@ -419,7 +419,7 @@ bool DemuxerFilter::PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo)
     int audioTrackCnt = 0;
     for (int i = 0; i < streamCnt; ++i) {
         if (mediaInfo.trackMeta[i].Empty()) {
-            MEDIA_LOG_E("PrepareStreams, unsupported stream with trackId = %" PUBLIC_LOG "d", i);
+            MEDIA_LOG_E("PrepareStreams, unsupported stream with trackId = " PUBLIC_LOG "d", i);
             continue;
         }
         std::string mime;
@@ -430,15 +430,15 @@ bool DemuxerFilter::PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo)
             continue;
         }
         if (IsAudioMime(mime)) {
-            MEDIA_LOG_D("PrepareStreams, audio stream with trackId = %" PUBLIC_LOG "u.", trackId);
+            MEDIA_LOG_D("PrepareStreams, audio stream with trackId = " PUBLIC_LOG "u.", trackId);
             if (audioTrackCnt == 1) {
-                MEDIA_LOG_E("PrepareStreams, discard audio track: %" PUBLIC_LOG "d.", trackId);
+                MEDIA_LOG_E("PrepareStreams, discard audio track: " PUBLIC_LOG "d.", trackId);
                 continue;
             }
             ++audioTrackCnt;
         }
         auto port = std::make_shared<OutPort>(this, NamePort(mime));
-        MEDIA_LOG_I("PrepareStreams, trackId: %" PUBLIC_LOG "d, portName: %" PUBLIC_LOG "s",
+        MEDIA_LOG_I("PrepareStreams, trackId: " PUBLIC_LOG "d, portName: " PUBLIC_LOG "s",
                     i, port->GetName().c_str());
         outPorts_.push_back(port);
         portInfo.ports.push_back({port->GetName(), IsRawAudio(mime)});
@@ -464,7 +464,7 @@ ErrorCode DemuxerFilter::ReadFrame(AVBuffer& buffer, uint32_t& trackId)
         trackId = buffer.trackID;
         result = ErrorCode::SUCCESS;
     }
-    MEDIA_LOG_D("ReadFrame return with rtv = %" PUBLIC_LOG "d", static_cast<int32_t>(rtv));
+    MEDIA_LOG_D("ReadFrame return with rtv = " PUBLIC_LOG "d", static_cast<int32_t>(rtv));
     return (rtv != Plugin::Status::END_OF_STREAM) ? result : ErrorCode::END_OF_STREAM;
 }
 
@@ -500,7 +500,7 @@ void DemuxerFilter::NegotiateDownstream()
     for (auto& stream : mediaMetaData_.trackInfos) {
         if (stream.needNegoCaps) {
             Capability caps;
-            MEDIA_LOG_I("demuxer negotiate with trackId: %" PUBLIC_LOG "u", stream.trackId);
+            MEDIA_LOG_I("demuxer negotiate with trackId: " PUBLIC_LOG "u", stream.trackId);
             auto streamMeta = GetTrackMeta(stream.trackId);
             auto tmpCap = MetaToCapability(*streamMeta);
             Plugin::TagMap upstreamParams;
@@ -531,7 +531,7 @@ void DemuxerFilter::DemuxerLoop()
             SendEventEos();
             task_->PauseAsync();
             if (rtv != ErrorCode::END_OF_STREAM) {
-                MEDIA_LOG_E("ReadFrame failed with rtv = %" PUBLIC_LOG "d", CppExt::to_underlying(rtv));
+                MEDIA_LOG_E("ReadFrame failed with rtv = " PUBLIC_LOG "d", CppExt::to_underlying(rtv));
             }
         }
     } else {

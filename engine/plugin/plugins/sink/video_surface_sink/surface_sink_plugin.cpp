@@ -138,7 +138,7 @@ Status SurfaceSinkPlugin::Prepare()
     const constexpr int32_t strideAlign = 8; // 8
     auto format = TranslatePixelFormat(pixelFormat_);
     if (format == PixelFormat::PIXEL_FMT_BUTT) {
-        MEDIA_LOG_E("surface can not support pixel format: %" PUBLIC_LOG "u", pixelFormat_);
+        MEDIA_LOG_E("surface can not support pixel format: " PUBLIC_LOG "u", pixelFormat_);
         return Status::ERROR_UNKNOWN;
     }
     mAllocator_->Config(static_cast<int32_t>(width_), static_cast<int32_t>(height_), 0, format,
@@ -182,21 +182,21 @@ Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
         case Tag::VIDEO_WIDTH: {
             if (value.SameTypeWith(typeid(uint32_t))) {
                 width_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("pixelWidth_: %" PUBLIC_LOG "u", pixelWidth_);
+                MEDIA_LOG_D("pixelWidth_: " PUBLIC_LOG "u", pixelWidth_);
             }
             break;
         }
         case Tag::VIDEO_HEIGHT: {
             if (value.SameTypeWith(typeid(uint32_t))) {
                 height_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("pixelHeight_: %" PUBLIC_LOG "u", pixelHeight_);
+                MEDIA_LOG_D("pixelHeight_: " PUBLIC_LOG "u", pixelHeight_);
             }
             break;
         }
         case Tag::VIDEO_PIXEL_FORMAT: {
             if (value.SameTypeWith(typeid(VideoPixelFormat))) {
                 pixelFormat_ = Plugin::AnyCast<VideoPixelFormat>(value);
-                MEDIA_LOG_D("pixelFormat: %" PUBLIC_LOG "u", pixelFormat_);
+                MEDIA_LOG_D("pixelFormat: " PUBLIC_LOG "u", pixelFormat_);
             }
             break;
         }
@@ -214,7 +214,7 @@ Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
         case Tag::VIDEO_MAX_SURFACE_NUM: {
             if (value.SameTypeWith(typeid(uint32_t))) {
                 maxSurfaceNum_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("maxSurfaceNum_: %" PUBLIC_LOG "u", maxSurfaceNum_);
+                MEDIA_LOG_D("maxSurfaceNum_: " PUBLIC_LOG "u", maxSurfaceNum_);
             }
             break;
         }

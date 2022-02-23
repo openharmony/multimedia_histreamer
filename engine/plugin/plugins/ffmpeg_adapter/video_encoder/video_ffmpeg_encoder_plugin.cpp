@@ -218,7 +218,7 @@ void VideoFfmpegEncoderPlugin::InitCodecContext()
     FindInParameterMapThenAssignLocked<std::uint32_t>(Tag::VIDEO_HEIGHT, height_);
     FindInParameterMapThenAssignLocked<uint64_t>(Tag::VIDEO_FRAME_RATE, frameRate_);
     FindInParameterMapThenAssignLocked<Plugin::VideoPixelFormat>(Tag::VIDEO_PIXEL_FORMAT, pixelFormat_);
-    MEDIA_LOG_D("width: %u, height: %u, pixelFormat: %u, frameRate_: %" PUBLIC_LOG_U64,
+    MEDIA_LOG_D("width: %u, height: %u, pixelFormat: %u, frameRate_: " PUBLIC_LOG_U64,
                 width_, height_, pixelFormat_, frameRate_);
     ConfigVideoEncoder(*avCodecContext_, vencParams_);
 }

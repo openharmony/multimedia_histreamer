@@ -55,13 +55,13 @@ bool FileSystem::MakeDir(const std::string& path)
 {
 #ifdef _WIN32
     if (mkdir(path.c_str()) == -1) {
-        MEDIA_LOG_E("Fail to create dir %" PUBLIC_LOG_S " due to %" PUBLIC_LOG_S, path.c_str(), std::strerror(errno));
+        MEDIA_LOG_E("Fail to create dir " PUBLIC_LOG_S " due to " PUBLIC_LOG_S, path.c_str(), std::strerror(errno));
         return false;
     }
 #else
     auto oldMask = umask(0);
     if (mkdir(path.c_str(), 755) == -1) { // 755 directory access permissions
-        MEDIA_LOG_E("Fail to create dir %" PUBLIC_LOG_S " due to %" PUBLIC_LOG_S, path.c_str(), std::strerror(errno));
+        MEDIA_LOG_E("Fail to create dir " PUBLIC_LOG_S " due to " PUBLIC_LOG_S, path.c_str(), std::strerror(errno));
         umask(oldMask);
         return false;
     }

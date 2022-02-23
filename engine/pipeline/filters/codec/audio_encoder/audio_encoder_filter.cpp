@@ -86,7 +86,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
             }
             auto thisOut = std::make_shared<Plugin::Capability>();
             if (!MergeCapabilityKeys(*upstreamCap, outCap, *thisOut)) {
-                MEDIA_LOG_I("one cap of plugin %" PUBLIC_LOG_S " mismatch upstream cap", candidate.first->name.c_str());
+                MEDIA_LOG_I("one cap of plugin " PUBLIC_LOG_S " mismatch upstream cap", candidate.first->name.c_str());
                 continue;
             }
             atLeastOutCapMatched = true;
@@ -94,9 +94,9 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
             if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_, upstreamParams, downstreamParams)) {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
-                MEDIA_LOG_I("use plugin %" PUBLIC_LOG_S, candidate.first->name.c_str());
-                MEDIA_LOG_I("neg upstream cap %" PUBLIC_LOG_S, Capability2String(capNegWithUpstream_).c_str());
-                MEDIA_LOG_I("neg downstream cap %" PUBLIC_LOG_S, Capability2String(capNegWithDownstream_).c_str());
+                MEDIA_LOG_I("use plugin " PUBLIC_LOG_S, candidate.first->name.c_str());
+                MEDIA_LOG_I("neg upstream cap " PUBLIC_LOG_S, Capability2String(capNegWithUpstream_).c_str());
+                MEDIA_LOG_I("neg downstream cap " PUBLIC_LOG_S, Capability2String(capNegWithDownstream_).c_str());
                 break;
             }
         }
@@ -105,7 +105,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
         }
     }
     FALSE_RET_V_MSG_E(atLeastOutCapMatched && selectedPluginInfo != nullptr, false,
-        "can't find available encoder plugin with %" PUBLIC_LOG_S, Capability2String(*upstreamCap).c_str());
+        "can't find available encoder plugin with " PUBLIC_LOG_S, Capability2String(*upstreamCap).c_str());
     auto res = UpdateAndInitPluginByInfo<Plugin::Codec>(plugin_, pluginInfo_, selectedPluginInfo,
         [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
         return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
@@ -139,7 +139,7 @@ uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<const Plu
 bool AudioEncoderFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     PROFILE_BEGIN("Audio encoder configure begin");
-    MEDIA_LOG_I("receive upstream meta %" PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
+    MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
     FALSE_RET_V_MSG_E(plugin_ != nullptr && pluginInfo_ != nullptr, false,
                       "can't configure encoder when no plugin available");
     auto thisMeta = std::make_shared<Plugin::Meta>();
@@ -204,7 +204,7 @@ ErrorCode AudioEncoderFilter::PushData(const std::string& inPort, const AVBuffer
 {
     const static int8_t maxRetryCnt = 3; // max retry times of handling one frame
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
-        MEDIA_LOG_W("pushing data to encoder when state is %" PUBLIC_LOG_D32, static_cast<int>(state_.load()));
+        MEDIA_LOG_W("pushing data to encoder when state is " PUBLIC_LOG_D32, static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto inputMemory = buffer->GetMemory();
@@ -270,7 +270,7 @@ ErrorCode AudioEncoderFilter::HandleFrame(const std::shared_ptr<AVBuffer>& buffe
     MEDIA_LOG_D("HandleFrame called");
     auto ret = TranslatePluginStatus(plugin_->QueueInputBuffer(buffer, 0));
     FALSE_LOG_MSG_E(ret == ErrorCode::SUCCESS || ret == ErrorCode::ERROR_TIMED_OUT,
-                    "Queue input buffer to plugin fail: %" PUBLIC_LOG_D32, ret);
+                    "Queue input buffer to plugin fail: " PUBLIC_LOG_D32, ret);
     return ret;
 }
 
@@ -283,7 +283,7 @@ ErrorCode AudioEncoderFilter::FinishFrame()
     auto status = plugin_->QueueOutputBuffer(outBuffer, 0);
     if (status != Plugin::Status::OK && status != Plugin::Status::END_OF_STREAM) {
         if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
-            MEDIA_LOG_E("Queue output buffer to plugin fail: %" PUBLIC_LOG_D32, static_cast<int32_t>((status)));
+            MEDIA_LOG_E("Queue output buffer to plugin fail: " PUBLIC_LOG_D32, static_cast<int32_t>((status)));
         }
     }
     MEDIA_LOG_D("end finish frame");

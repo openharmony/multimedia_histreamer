@@ -55,7 +55,7 @@ bool UpdatePluginInCapability(AVCodecID codecId, Plugin::CapabilitySet& capSet)
 bool UpdatePluginCapability(const AVOutputFormat* oFmt, Plugin::MuxerPluginDef& pluginDef)
 {
     if (!FFCodecMap::FormatName2Cap(oFmt->name, pluginDef.outCaps)) {
-        MEDIA_LOG_D("%" PUBLIC_LOG "s is not supported now", oFmt->name);
+        MEDIA_LOG_D(PUBLIC_LOG "s is not supported now", oFmt->name);
         return false;
     }
     UpdatePluginInCapability(oFmt->audio_codec, pluginDef.inCaps);
@@ -74,7 +74,7 @@ Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg
     const AVOutputFormat* outputFormat = nullptr;
     void* ite = nullptr;
     while ((outputFormat = av_muxer_iterate(&ite))) {
-        MEDIA_LOG_D("check ffmpeg muxer %" PUBLIC_LOG "s", outputFormat->name);
+        MEDIA_LOG_D("check ffmpeg muxer " PUBLIC_LOG "s", outputFormat->name);
         if (!IsMuxerSupported(outputFormat->name)) {
             continue;
         }
@@ -96,7 +96,7 @@ Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg
             return std::make_shared<FFMux::FFmpegMuxerPlugin>(name);
         };
         if (reg->AddPlugin(def) != Plugin::Status::OK) {
-            MEDIA_LOG_W("fail to add plugin %" PUBLIC_LOG "s", pluginName.c_str());
+            MEDIA_LOG_W("fail to add plugin " PUBLIC_LOG "s", pluginName.c_str());
             continue;
         }
         g_pluginOutputFmt[pluginName] = std::shared_ptr<AVOutputFormat>(const_cast<AVOutputFormat*>(outputFormat),
@@ -110,12 +110,12 @@ Plugin::Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime
 {
     AVCodecID id = AV_CODEC_ID_NONE;
     if (!FFCodecMap::Mime2CodecId(mime, id)) {
-        MEDIA_LOG_E("mime %" PUBLIC_LOG "s has no corresponding codec id", mime.c_str());
+        MEDIA_LOG_E("mime " PUBLIC_LOG "s has no corresponding codec id", mime.c_str());
         return Plugin::Status::ERROR_UNSUPPORTED_FORMAT;
     }
     auto ptr = avcodec_find_encoder(id);
     if (ptr == nullptr) {
-        MEDIA_LOG_E("codec of mime %" PUBLIC_LOG "s is not founder as encoder", mime.c_str());
+        MEDIA_LOG_E("codec of mime " PUBLIC_LOG "s is not founder as encoder", mime.c_str());
         return Plugin::Status::ERROR_UNSUPPORTED_FORMAT;
     }
     bool matched = true;
@@ -133,7 +133,7 @@ Plugin::Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime
             matched = false;
     }
     if (!matched) {
-        MEDIA_LOG_E("codec of mime %" PUBLIC_LOG "s is not matched with %" PUBLIC_LOG "s muxer",
+        MEDIA_LOG_E("codec of mime " PUBLIC_LOG "s is not matched with " PUBLIC_LOG "s muxer",
                     mime.c_str(), fmt->name);
         return Plugin::Status::ERROR_UNSUPPORTED_FORMAT;
     }
@@ -164,7 +164,7 @@ Plugin::Status SetSingleParameter(Plugin::Tag tag, const Plugin::TagMap& tagMap,
     auto ite = tagMap.find(tag);
     if (ite != std::end(tagMap)) {
         if (!ite->second.SameTypeWith(typeid(T))) {
-            MEDIA_LOG_E("tag %" PUBLIC_LOG "d type mismatched", tag);
+            MEDIA_LOG_E("tag " PUBLIC_LOG "d type mismatched", tag);
             return Plugin::Status::ERROR_MISMATCHED_TYPE;
         }
         target = func(Plugin::AnyCast<T>(ite->second));
@@ -254,7 +254,7 @@ Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const
     } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_SUBTITLE) { // subtitle
         ret = SetParameterOfSubTitleTrack(stream, tagMap);
     } else {
-        MEDIA_LOG_W("unknown codec type of stream %" PUBLIC_LOG "d", stream->index);
+        MEDIA_LOG_W("unknown codec type of stream " PUBLIC_LOG "d", stream->index);
     }
     if (ret != Status::OK) {
         return ret;
@@ -270,7 +270,7 @@ Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const
     auto ite = tagMap.find(Tag::MEDIA_CODEC_CONFIG);
     if (ite != std::end(tagMap)) {
         if (!ite->second.SameTypeWith(typeid(std::vector<uint8_t>))) {
-            MEDIA_LOG_E("tag %" PUBLIC_LOG_D32 " type mismatched", Tag::MEDIA_CODEC_CONFIG);
+            MEDIA_LOG_E("tag " PUBLIC_LOG_D32 " type mismatched", Tag::MEDIA_CODEC_CONFIG);
             return Plugin::Status::ERROR_MISMATCHED_TYPE;
         }
         const auto* extraData = Plugin::AnyCast<std::vector<uint8_t>>(&(ite->second));
@@ -290,7 +290,7 @@ Plugin::Status SetTagsOfGeneral(AVFormatContext* fmtCtx, const Plugin::TagMap& t
     for (const auto& pair: tags) {
         std::string metaName;
         if (!Plugin::Ffmpeg::FindAvMetaNameByTag(pair.first, metaName)) {
-            MEDIA_LOG_I("tag %" PUBLIC_LOG "d will not written as general meta", pair.first);
+            MEDIA_LOG_I("tag " PUBLIC_LOG "d will not written as general meta", pair.first);
             continue;
         }
         if (!pair.second.SameTypeWith(typeid(std::string))) {
@@ -480,7 +480,7 @@ Status FFmpegMuxerPlugin::WriteHeader()
     }
     int ret = avformat_write_header(formatContext_.get(), nullptr);
     if (ret < 0) {
-        MEDIA_LOG_E("failed to write header %" PUBLIC_LOG "s", AVStrError(ret).c_str());
+        MEDIA_LOG_E("failed to write header " PUBLIC_LOG "s", AVStrError(ret).c_str());
         return Status::ERROR_UNKNOWN;
     }
     return Status::OK;
@@ -524,7 +524,7 @@ Status FFmpegMuxerPlugin::WriteTrailer()
     av_write_frame(formatContext_.get(), nullptr); // flush out cache data
     int ret = av_write_trailer(formatContext_.get());
     if (ret != 0) {
-        MEDIA_LOG_E("failed to write trailer %" PUBLIC_LOG "s", AVStrError(ret).c_str());
+        MEDIA_LOG_E("failed to write trailer " PUBLIC_LOG "s", AVStrError(ret).c_str());
     }
     avio_flush(formatContext_->pb);
     return Status::OK;
@@ -575,27 +575,27 @@ int64_t FFmpegMuxerPlugin::IoSeek(void* opaque, int64_t offset, int whence)
         case SEEK_SET:
             newPos = static_cast<uint64_t>(offset);
             ioContext->pos_ = newPos;
-            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_LOG "d, pos = %" PUBLIC_LOG PRId64 ", newPos = %" PUBLIC_LOG
+            MEDIA_LOG_I("AVSeek whence: " PUBLIC_LOG "d, pos = " PUBLIC_LOG PRId64 ", newPos = " PUBLIC_LOG
                         PRIu64, whence, offset, newPos);
             break;
         case SEEK_CUR:
             newPos = ioContext->pos_ + offset;
-            MEDIA_LOG_I("AVSeek whence: %" PUBLIC_LOG "d, pos = %" PUBLIC_LOG PRId64 ", newPos = %" PUBLIC_LOG
+            MEDIA_LOG_I("AVSeek whence: " PUBLIC_LOG "d, pos = " PUBLIC_LOG PRId64 ", newPos = " PUBLIC_LOG
                         PRIu64, whence, offset, newPos);
             break;
         case SEEK_END:
         case AVSEEK_SIZE:
             newPos = ioContext->end_ + offset;
-            MEDIA_LOG_I("AVSeek seek end whence: %" PUBLIC_LOG "d, pos = %" PUBLIC_LOG PRId64, whence, offset);
+            MEDIA_LOG_I("AVSeek seek end whence: " PUBLIC_LOG "d, pos = " PUBLIC_LOG PRId64, whence, offset);
             break;
         default:
-            MEDIA_LOG_E("AVSeek unexpected whence: %" PUBLIC_LOG "d", whence);
+            MEDIA_LOG_E("AVSeek unexpected whence: " PUBLIC_LOG "d", whence);
             break;
     }
     if (whence != AVSEEK_SIZE) {
         ioContext->pos_ = newPos;
     }
-    MEDIA_LOG_I("current offset: %" PUBLIC_LOG PRId64 ", new pos: %" PUBLIC_LOG PRIu64, ioContext->pos_, newPos);
+    MEDIA_LOG_I("current offset: " PUBLIC_LOG PRId64 ", new pos: " PUBLIC_LOG PRIu64, ioContext->pos_, newPos);
     return newPos;
 }
 } // FFMux

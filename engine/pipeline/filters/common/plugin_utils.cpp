@@ -38,7 +38,7 @@ do { \
 do { \
     snPrintRet = exec; \
     if ((snPrintRet) == -1) { \
-        MEDIA_LOG_W("stringiness failed due to %" PUBLIC_LOG_S " or truncated.", strerror(errno)); \
+        MEDIA_LOG_W("stringiness failed due to " PUBLIC_LOG_S " or truncated.", strerror(errno)); \
         return retVal; \
     } \
 } while (0)
@@ -61,7 +61,7 @@ inline int32_t SnPrintf(char* buf, size_t maxLen, const char* fmt, ...)
 template <typename T>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const T& val)
 {
-    MEDIA_LOG_I("no cap trans function for %" PUBLIC_LOG_S " may be update?", name);
+    MEDIA_LOG_I("no cap trans function for " PUBLIC_LOG_S " may be update?", name);
     return 0;
 }
 
@@ -139,7 +139,7 @@ int32_t CapKeyStringiness(char* buf, size_t maxLen, const char* name, const char
     } else if (val.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
         return DiscreteCapKeyStringiness<T>(buf, maxLen, name, typeName, val);
     } else {
-        MEDIA_LOG_W("cap %" PUBLIC_LOG_S "type mismatches when cast to string, which should be %" PUBLIC_LOG_S,
+        MEDIA_LOG_W("cap " PUBLIC_LOG_S "type mismatches when cast to string, which should be " PUBLIC_LOG_S,
                     name, typeName);
     }
     return -1;
@@ -184,7 +184,7 @@ template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::AudioSampleFormat& val)
 {
     if (Pipeline::g_auSampleFmtStrMap.count(val) == 0) {
-        MEDIA_LOG_W("audio sample format %" PUBLIC_LOG_D32 " is unknown", static_cast<int32_t>(val));
+        MEDIA_LOG_W("audio sample format " PUBLIC_LOG_D32 " is unknown", static_cast<int32_t>(val));
         return 0;
     }
     return SnPrintf(buf, maxLen, "%s", Pipeline::g_auSampleFmtStrMap.at(val));
@@ -194,7 +194,7 @@ template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::AudioChannelLayout& val)
 {
     if (Pipeline::g_auChannelLayoutStrMap.count(val) == 0) {
-        MEDIA_LOG_W("audio channel layout %" PUBLIC_LOG_U64 " is unknown", static_cast<uint64_t>(val));
+        MEDIA_LOG_W("audio channel layout " PUBLIC_LOG_U64 " is unknown", static_cast<uint64_t>(val));
         return 0;
     }
     return SnPrintf(buf, maxLen, "%s", Pipeline::g_auChannelLayoutStrMap.at(val));
@@ -207,7 +207,7 @@ int32_t MetaIDStringiness(char* buf, size_t maxLen, const char* name, const char
     if (val.SameTypeWith(typeid(T))) {
         return FixedCapKeyStringiness<T>(buf, maxLen, name, typeName, val);
     } else {
-        MEDIA_LOG_W("meta %" PUBLIC_LOG_S " type mismatches when cast to string", name);
+        MEDIA_LOG_W("meta " PUBLIC_LOG_S " type mismatches when cast to string", name);
     }
     return -1;
 }
@@ -260,11 +260,11 @@ bool AssignParameterIfMatch(Tag tag, T& ret, const Plugin::ValueType& val)
             ret = Plugin::AnyCast<T>(val);
             return true;
         } else {
-            MEDIA_LOG_I("type of %" PUBLIC_LOG_S " mismatch, should be %" PUBLIC_LOG_S,
+            MEDIA_LOG_I("type of " PUBLIC_LOG_S " mismatch, should be " PUBLIC_LOG_S,
                         GetTagStrName(tag), GetTagTypeStrName(tag));
         }
     } else {
-        MEDIA_LOG_I("tag %" PUBLIC_LOG_D32 "is not in map, may be update it?", tag);
+        MEDIA_LOG_I("tag " PUBLIC_LOG_D32 "is not in map, may be update it?", tag);
     }
     return false;
 }
@@ -420,7 +420,7 @@ std::string Capability2String(const Capability& capability)
             break;
         }
         if (capStrnessMap.count(cap.first) == 0 || !HasTagInfo(static_cast<Tag>(cap.first))) {
-            MEDIA_LOG_W("%" PUBLIC_LOG_D32 " is not in map, may be new key which is not contained?", cap.first);
+            MEDIA_LOG_W( PUBLIC_LOG_D32 " is not in map, may be new key which is not contained?", cap.first);
             continue;
         }
         const auto& info = g_tagInfoMap.at(static_cast<Tag>(cap.first));
@@ -455,7 +455,7 @@ std::string Meta2String(const Plugin::Meta& meta)
             break;
         }
         if (!HasTagInfo(static_cast<Tag>(item)) || g_metaStrnessMap.count(item) == 0) {
-            MEDIA_LOG_W("meta id %" PUBLIC_LOG_D32 "is not is map, may be update the info map?", item);
+            MEDIA_LOG_W("meta id " PUBLIC_LOG_D32 "is not is map, may be update the info map?", item);
             continue;
         }
         const Plugin::ValueType* tmp = meta.GetData(item);

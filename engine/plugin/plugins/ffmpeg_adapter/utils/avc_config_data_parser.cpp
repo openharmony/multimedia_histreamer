@@ -134,7 +134,7 @@ bool AVCConfigDataParser::ParseNalUnitSizeLen()
     nalUnitLen_ = (sizeLen_ & 0x3) + 1; // lengthSize Minus One
     if ((nalUnitLen_ != AVC_NAL_SIZE_LEN_1) && (nalUnitLen_ != AVC_NAL_SIZE_LEN_2) &&
         (nalUnitLen_ != AVC_NAL_SIZE_LEN_4)) {
-        MEDIA_LOG_I("Unsupported config data, nalUnitLen_: %" PUBLIC_LOG "u", nalUnitLen_);
+        MEDIA_LOG_I("Unsupported config data, nalUnitLen_: " PUBLIC_LOG "u", nalUnitLen_);
         return false;
     }
 
@@ -149,7 +149,7 @@ bool AVCConfigDataParser::GetSpsOrPpsLen(uint32_t& len)
     }
     len = ((tmp1 << 8) | tmp2) & 0xFFFF;  // 8
     if (len > bitReader_.GetAvailableBits()) {
-        MEDIA_LOG_E("len: %" PUBLIC_LOG "u is too large", len);
+        MEDIA_LOG_E("len: " PUBLIC_LOG "u is too large", len);
         return false;
     }
     return true;
@@ -158,14 +158,14 @@ bool AVCConfigDataParser::GetSpsOrPpsLen(uint32_t& len)
 bool AVCConfigDataParser::ParseNalHeader()
 {
     if (bitReader_.GetAvailableBits() < AVC_MIN_CONFIG_DATA_SIZE) {
-        MEDIA_LOG_E("Config data size is smaller than MIN: %" PUBLIC_LOG "d",
+        MEDIA_LOG_E("Config data size is smaller than MIN: " PUBLIC_LOG "d",
                     static_cast<int32_t>(AVC_MIN_CONFIG_DATA_SIZE));
         return false;
     }
     auto ret = bitReader_.ReadBits(1, version_); // configurationVersion = 1
     if ((ret == false) || (version_ != 1)) {
         // Some parser has parser config data, so just return
-        MEDIA_LOG_I("Unsupported config data, version: %" PUBLIC_LOG "u", version_);
+        MEDIA_LOG_I("Unsupported config data, version: " PUBLIC_LOG "u", version_);
         return false;
     }
     if (!bitReader_.ReadBits(1, profile_)) { // AVCProfileIndication
@@ -219,7 +219,7 @@ bool AVCConfigDataParser::ParseSpsOrPps(const uint32_t mask)
             return false;
         }
         if (cfgSet.count >= AVC_MAX_CONFIG_ITEM) {
-            MEDIA_LOG_E("config set count is larger than: %" PUBLIC_LOG "d",
+            MEDIA_LOG_E("config set count is larger than: " PUBLIC_LOG "d",
                         static_cast<int32_t>(AVC_MAX_CONFIG_ITEM));
             return false;
         }

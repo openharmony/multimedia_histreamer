@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Media {
 std::shared_ptr<Media::PlayerInterface> CreateHiPlayer()
 {
-    MEDIA_LOG_W("Histreamer compile time: %" PUBLIC_LOG "s %" PUBLIC_LOG "s", __DATE__, __TIME__);
+    MEDIA_LOG_W("Histreamer compile time: " PUBLIC_LOG "s " PUBLIC_LOG "s", __DATE__, __TIME__);
     return HiPlayerImpl::CreateHiPlayerImpl();
 }
 } // namespace Media

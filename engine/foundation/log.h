@@ -35,9 +35,9 @@
 #endif
 
 #if defined(MEDIA_OHOS)
-#define PUBLIC_LOG "{public}"
+#define PUBLIC_LOG "%{public}"
 #else
-#define PUBLIC_LOG ""
+#define PUBLIC_LOG "%"
 #endif
 
 #define PUBLIC_LOG_C PUBLIC_LOG "c"
@@ -58,12 +58,12 @@
 #ifndef OHOS_DEBUG
 #define HST_DECORATOR_HILOG(op, fmt, args...) \
     do { \
-        op(LOG_CORE, "%" PUBLIC_LOG "s:" fmt, HST_LOG_TAG, ##args); \
+        op(LOG_CORE, PUBLIC_LOG "s:" fmt, HST_LOG_TAG, ##args); \
     } while (0)
 #else
 #define HST_DECORATOR_HILOG(op, fmt, args...)\
     do { \
-        op(LOG_CORE, "%" PUBLIC_LOG "s[%" PUBLIC_LOG "d]:" fmt, HST_LOG_TAG, __LINE__, ##args); \
+        op(LOG_CORE, PUBLIC_LOG "s[" PUBLIC_LOG "d]:" fmt, HST_LOG_TAG, __LINE__, ##args); \
     } while (0)
 #endif
 
@@ -91,7 +91,7 @@
     do {                                                                                                               \
         ErrorCode ret = (exec);                                                                                        \
         if (ret != ErrorCode::SUCCESS) {                                                                               \
-            MEDIA_LOG_E("FAIL_RETURN on ErrorCode(%" PUBLIC_LOG "d).", ret);                                           \
+            MEDIA_LOG_E("FAIL_RETURN on ErrorCode(" PUBLIC_LOG "d).", ret);                                           \
             return ret;                                                                                                \
         }                                                                                                              \
     } while (0)
@@ -121,7 +121,7 @@
     do {                                                                                                               \
         ErrorCode ret = (exec);                                                                                        \
         if (ret != ErrorCode::SUCCESS) {                                                                               \
-            MEDIA_LOG_E("FAIL_LOG on ErrorCode(%" PUBLIC_LOG "d).", ret);                                              \
+            MEDIA_LOG_E("FAIL_LOG on ErrorCode(" PUBLIC_LOG "d).", ret);                                              \
         }                                                                                                              \
     } while (0)
 #endif
@@ -131,7 +131,7 @@
     do {                                                                                                               \
         Status ret = (exec);                                                                                           \
         if (ret != Status::OK) {                                                                                       \
-            MEDIA_LOG_E("NOK_RETURN on Status(%" PUBLIC_LOG "d).", ret);                                               \
+            MEDIA_LOG_E("NOK_RETURN on Status(" PUBLIC_LOG "d).", ret);                                               \
             return ret;                                                                                                \
         }                                                                                                              \
     } while (0)
@@ -142,7 +142,7 @@
     do {                                                                                                               \
         Status ret = (exec);                                                                                           \
         if (ret != Status::OK) {                                                                                       \
-            MEDIA_LOG_E("NOK_LOG on Status(%" PUBLIC_LOG "d).", ret);                                                  \
+            MEDIA_LOG_E("NOK_LOG on Status(" PUBLIC_LOG "d).", ret);                                                  \
         }                                                                                                              \
     } while (0)
 #endif
@@ -153,7 +153,7 @@
     do {                                                                                                               \
         int ret = (exec);                                                                                              \
         if (ret != 0) {                                                                                                \
-            MEDIA_LOG_E("NZERO_LOG when call (" #exec "), return %" PUBLIC_LOG_D32, ret);                              \
+            MEDIA_LOG_E("NZERO_LOG when call (" #exec "), return " PUBLIC_LOG_D32, ret);                              \
         }                                                                                                              \
     } while (0)
 #endif
@@ -255,7 +255,7 @@
     do {                                                                                                               \
         bool value = (exec);                                                                                           \
         if (!value) {                                                                                                  \
-            MEDIA_LOG_E("ASSERT_CONDITION(msg:%" PUBLIC_LOG_S ") " #exec, msg);                                        \
+            MEDIA_LOG_E("ASSERT_CONDITION(msg:" PUBLIC_LOG_S ") " #exec, msg);                                        \
         }                                                                                                              \
     } while (0)
 #endif

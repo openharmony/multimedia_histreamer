@@ -118,14 +118,14 @@ int32_t HiPlayerImpl::SetSource(const Source& source)
 
 int32_t HiPlayerImpl::Prepare()
 {
-    MEDIA_LOG_D("Prepare entered, current fsm state: %" PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
+    MEDIA_LOG_D("Prepare entered, current fsm state: " PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
     OSAL::ScopedLock lock(stateMutex_);
     PROFILE_BEGIN();
     if (curFsmState_ == StateId::PREPARING) {
         errorCode_ = ErrorCode::SUCCESS;
         cond_.Wait(lock, [this] { return curFsmState_ == StateId::READY || curFsmState_ == StateId::INIT; });
     }
-    MEDIA_LOG_D("Prepare finished, current fsm state: %" PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
+    MEDIA_LOG_D("Prepare finished, current fsm state: " PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
     if (curFsmState_ == StateId::READY) {
         PROFILE_END("Prepare successfully,");
         return CppExt::to_underlying(ErrorCode::SUCCESS);
@@ -159,7 +159,7 @@ int32_t HiPlayerImpl::Play()
     } else {
         ret = fsm_.SendEvent(Intent::PLAY);
     }
-    PROFILE_END("Play ret = %" PUBLIC_LOG_D32, CppExt::to_underlying(ret));
+    PROFILE_END("Play ret = " PUBLIC_LOG_D32, CppExt::to_underlying(ret));
     return CppExt::to_underlying(ret);
 }
 
@@ -172,7 +172,7 @@ int32_t HiPlayerImpl::Pause()
 {
     PROFILE_BEGIN();
     auto ret = CppExt::to_underlying(fsm_.SendEvent(Intent::PAUSE));
-    PROFILE_END("Pause ret = %" PUBLIC_LOG "d", ret);
+    PROFILE_END("Pause ret = " PUBLIC_LOG "d", ret);
     return ret;
 }
 
@@ -180,7 +180,7 @@ ErrorCode HiPlayerImpl::Resume()
 {
     PROFILE_BEGIN();
     auto ret = fsm_.SendEvent(Intent::RESUME);
-    PROFILE_END("Resume ret = %" PUBLIC_LOG "d", ret);
+    PROFILE_END("Resume ret = " PUBLIC_LOG "d", ret);
     return ret;
 }
 
@@ -188,7 +188,7 @@ int32_t HiPlayerImpl::Stop()
 {
     PROFILE_BEGIN();
     auto ret = CppExt::to_underlying(fsm_.SendEvent(Intent::STOP));
-    PROFILE_END("Stop ret = %" PUBLIC_LOG "d", ret);
+    PROFILE_END("Stop ret = " PUBLIC_LOG "d", ret);
     return ret;
 }
 
@@ -227,7 +227,7 @@ void HiPlayerImpl::MediaStats::ReceiveEvent(EventType eventType, int64_t param)
             }
             break;
         default:
-            MEDIA_LOG_W("MediaStats::ReceiveEvent receive unexpected event %" PUBLIC_LOG "d",
+            MEDIA_LOG_W("MediaStats::ReceiveEvent receive unexpected event " PUBLIC_LOG "d",
                         static_cast<int>(eventType));
             break;
     }
@@ -296,7 +296,7 @@ ErrorCode HiPlayerImpl::SetBufferSize(size_t size)
 
 void HiPlayerImpl::OnEvent(const Event& event)
 {
-    MEDIA_LOG_D("[HiStreamer] OnEvent (%" PUBLIC_LOG "d)", event.type);
+    MEDIA_LOG_D("[HiStreamer] OnEvent (" PUBLIC_LOG "d)", event.type);
     switch (event.type) {
         case EventType::EVENT_ERROR: {
             fsm_.SendEventAsync(Intent::NOTIFY_ERROR, event.param);
@@ -316,7 +316,7 @@ void HiPlayerImpl::OnEvent(const Event& event)
             break;
         case EventType::EVENT_PLUGIN_ERROR: {
             Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
-            MEDIA_LOG_I("Receive PLUGIN_ERROR, type:  %" PUBLIC_LOG_D32, CppExt::to_underlying(pluginEvent.type));
+            MEDIA_LOG_I("Receive PLUGIN_ERROR, type:  " PUBLIC_LOG_D32, CppExt::to_underlying(pluginEvent.type));
             int32_t errorCode {-1};
             if (pluginEvent.type == Plugin::PluginEventType::CLIENT_ERROR &&
                 pluginEvent.param.SameTypeWith(typeid(Plugin::NetworkClientErrorCode))&&
@@ -334,12 +334,12 @@ void HiPlayerImpl::OnEvent(const Event& event)
             Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
             if (pluginEvent.type == Plugin::PluginEventType::BELOW_LOW_WATERLINE ||
                 pluginEvent.type == Plugin::PluginEventType::ABOVE_LOW_WATERLINE) {
-                MEDIA_LOG_I("Receive PLUGIN_EVENT, type:  %" PUBLIC_LOG_D32, CppExt::to_underlying(pluginEvent.type));
+                MEDIA_LOG_I("Receive PLUGIN_EVENT, type:  " PUBLIC_LOG_D32, CppExt::to_underlying(pluginEvent.type));
             }
             break;
         }
         default:
-            MEDIA_LOG_E("Unknown event(%" PUBLIC_LOG "d)", event.type);
+            MEDIA_LOG_E("Unknown event(" PUBLIC_LOG "d)", event.type);
     }
 }
 
@@ -438,7 +438,7 @@ ErrorCode HiPlayerImpl::DoOnReady()
 
 ErrorCode HiPlayerImpl::DoOnComplete()
 {
-    MEDIA_LOG_W("OnComplete looping: %" PUBLIC_LOG "d.", singleLoop_.load());
+    MEDIA_LOG_W("OnComplete looping: " PUBLIC_LOG "d.", singleLoop_.load());
     if (!singleLoop_) {
         StopAsync();
     } else {
@@ -497,7 +497,7 @@ int32_t HiPlayerImpl::Release()
     demuxer_.reset();
     audioDecoderMap_.clear();
     audioSink_.reset();
-    PROFILE_END("Release ret = %" PUBLIC_LOG "d", ret);
+    PROFILE_END("Release ret = " PUBLIC_LOG "d", ret);
     return ret;
 }
 
@@ -559,11 +559,11 @@ ErrorCode HiPlayerImpl::SetVolume(float volume)
     }
     ErrorCode ret = ErrorCode::SUCCESS;
     if (volume > 0) {
-        MEDIA_LOG_I("set volume %" PUBLIC_LOG ".3f", volume);
+        MEDIA_LOG_I("set volume " PUBLIC_LOG ".3f", volume);
         ret = audioSink_->SetVolume(volume);
     }
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("SetVolume failed with error %" PUBLIC_LOG "d", static_cast<int>(ret));
+        MEDIA_LOG_E("SetVolume failed with error " PUBLIC_LOG "d", static_cast<int>(ret));
     }
     return ret;
 }
@@ -626,12 +626,12 @@ ErrorCode HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& par
     ErrorCode rtv = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     auto param = Plugin::AnyCast<PortInfo>(parameter);
     if (filter == demuxer_.get() && param.type == PortType::OUT) {
-        MEDIA_LOG_I("new port found on demuxer %" PUBLIC_LOG "zu", param.ports.size());
+        MEDIA_LOG_I("new port found on demuxer " PUBLIC_LOG "zu", param.ports.size());
         for (const auto& portDesc : param.ports) {
             if (portDesc.name.compare(0, 5, "audio") != 0) { // 5 is length of "audio"
                 continue;
             }
-            MEDIA_LOG_I("port name %" PUBLIC_LOG "s", portDesc.name.c_str());
+            MEDIA_LOG_I("port name " PUBLIC_LOG "s", portDesc.name.c_str());
             auto fromPort = filter->GetOutPort(portDesc.name);
             if (portDesc.isPcm) {
                 pipeline_->AddFilters({audioSink_.get()});
@@ -666,7 +666,7 @@ ErrorCode HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin::Any& par
     std::vector<Filter*> newFilters;
     for (const auto& portDesc : param.ports) {
         if (portDesc.name.compare(0, 5, "video") == 0) { // 5 is length of "video"
-            MEDIA_LOG_I("port name %" PUBLIC_LOG "s", portDesc.name.c_str());
+            MEDIA_LOG_I("port name " PUBLIC_LOG "s", portDesc.name.c_str());
             videoDecoder = FilterFactory::Instance().CreateFilterWithType<VideoDecoderFilter>(
                 "builtin.player.videodecoder", "videodecoder-" + portDesc.name);
             if (pipeline_->AddFilters({videoDecoder.get()}) == ErrorCode::SUCCESS) {
@@ -702,7 +702,7 @@ ErrorCode HiPlayerImpl::RemoveFilterChains(Filter* filter, const Plugin::Any& pa
         return ret;
     }
     for (const auto& portDesc : param.ports) {
-        MEDIA_LOG_I("remove filter chain for port: %" PUBLIC_LOG "s", portDesc.name.c_str());
+        MEDIA_LOG_I("remove filter chain for port: " PUBLIC_LOG "s", portDesc.name.c_str());
         auto peerPort = filter->GetOutPort(portDesc.name)->GetPeerPort();
         if (peerPort) {
             auto nextFilter = const_cast<Filter*>(dynamic_cast<const Filter*>(peerPort->GetOwnerFilter()));

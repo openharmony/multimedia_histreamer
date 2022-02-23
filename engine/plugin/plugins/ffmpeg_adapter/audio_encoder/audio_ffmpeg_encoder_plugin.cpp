@@ -47,7 +47,7 @@ Status RegisterAudioEncoderPlugins(const std::shared_ptr<Register>& reg)
             continue;
         }
         if (g_supportedCodec.find(codec->id) == g_supportedCodec.end()) {
-            MEDIA_LOG_W("codec %" PUBLIC_LOG "s(%" PUBLIC_LOG "s) is not supported right now",
+            MEDIA_LOG_W("codec " PUBLIC_LOG "s(" PUBLIC_LOG "s) is not supported right now",
                         codec->name, codec->long_name);
             continue;
         }
@@ -60,7 +60,7 @@ Status RegisterAudioEncoderPlugins(const std::shared_ptr<Register>& reg)
         // do not delete the codec in the deleter
         codecMap[definition.name] = std::shared_ptr<AVCodec>(const_cast<AVCodec*>(codec), [](void* ptr) {});
         if (reg->AddPlugin(definition) != Status::OK) {
-            MEDIA_LOG_W("register plugin %" PUBLIC_LOG "s(%" PUBLIC_LOG "s) failed",
+            MEDIA_LOG_W("register plugin " PUBLIC_LOG "s(" PUBLIC_LOG "s) failed",
                         codec->name, codec->long_name);
         }
     }
@@ -129,7 +129,7 @@ Status AudioFfmpegEncoderPlugin::Init()
 {
     auto ite = codecMap.find(pluginName_);
     if (ite == codecMap.end()) {
-        MEDIA_LOG_W("cannot find codec with name %" PUBLIC_LOG "s", pluginName_.c_str());
+        MEDIA_LOG_W("cannot find codec with name " PUBLIC_LOG "s", pluginName_.c_str());
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     OSAL::ScopedLock lock(avMutex_);
@@ -260,7 +260,7 @@ Status AudioFfmpegEncoderPlugin::Start()
             });
         }
         auto res = avcodec_open2(avCodecContext_.get(), avCodec_.get(), nullptr);
-        FALSE_RET_V_MSG_E(res == 0, Status::ERROR_UNKNOWN, "avcodec open error %" PUBLIC_LOG_S " when start encoder",
+        FALSE_RET_V_MSG_E(res == 0, Status::ERROR_UNKNOWN, "avcodec open error " PUBLIC_LOG_S " when start encoder",
                           AVStrError(res).c_str());
         FALSE_RET_V_MSG_E(avCodecContext_->frame_size > 0, Status::ERROR_UNKNOWN, "frame_size unknown");
         fullInputFrameSize_ = av_samples_get_buffer_size(nullptr, avCodecContext_->channels,
@@ -288,7 +288,7 @@ Status AudioFfmpegEncoderPlugin::Stop()
         if (avCodecContext_ != nullptr) {
             auto res = avcodec_close(avCodecContext_.get());
             FALSE_RET_V_MSG_E(res == 0, Status::ERROR_UNKNOWN,
-                              "avcodec close error %" PUBLIC_LOG_S " when stop encoder", AVStrError(res).c_str());
+                              "avcodec close error " PUBLIC_LOG_S " when stop encoder", AVStrError(res).c_str());
             avCodecContext_.reset();
         }
         if (outBuffer_) {
@@ -412,7 +412,7 @@ Status AudioFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
     } else {
         auto inputMemory = inputBuffer->GetMemory();
         FALSE_RET_V_MSG_W(inputMemory->GetSize() == fullInputFrameSize_, Status::ERROR_NOT_ENOUGH_DATA,
-            "Not enough data, input: %" PUBLIC_LOG_ZU ", fullInputFrameSize: %" PUBLIC_LOG_U32,
+            "Not enough data, input: " PUBLIC_LOG_ZU ", fullInputFrameSize: " PUBLIC_LOG_U32,
             inputMemory->GetSize(), fullInputFrameSize_);
         FillInFrameCache(inputMemory);
     }
@@ -431,7 +431,7 @@ Status AudioFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
     } else if (ret == AVERROR(EAGAIN)) {
         return Status::ERROR_AGAIN;
     } else {
-        MEDIA_LOG_E("send buffer error %" PUBLIC_LOG "s", AVStrError(ret).c_str());
+        MEDIA_LOG_E("send buffer error " PUBLIC_LOG "s", AVStrError(ret).c_str());
         return Status::ERROR_UNKNOWN;
     }
 }
@@ -467,7 +467,7 @@ Status AudioFfmpegEncoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
     } else if (ret == AVERROR(EAGAIN)) {
         status = Status::ERROR_NOT_ENOUGH_DATA;
     } else {
-        MEDIA_LOG_E("audio encoder receive error: %" PUBLIC_LOG "s", AVStrError(ret).c_str());
+        MEDIA_LOG_E("audio encoder receive error: " PUBLIC_LOG "s", AVStrError(ret).c_str());
         status = Status::ERROR_UNKNOWN;
     }
     av_frame_unref(cachedFrame_.get());

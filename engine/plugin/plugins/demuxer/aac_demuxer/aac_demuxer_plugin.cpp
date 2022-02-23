@@ -49,7 +49,7 @@ AACDemuxerPlugin::AACDemuxerPlugin(std::string name)
       fileSize_(0)
 {
     FALSE_LOG(memset_s(&aacDemuxerRst_, sizeof(aacDemuxerRst_), 0x00, sizeof(AACDemuxerRst)) == 0);
-    MEDIA_LOG_I("AACDemuxerPlugin, plugin name: %" PUBLIC_LOG "s", pluginName_.c_str());
+    MEDIA_LOG_I("AACDemuxerPlugin, plugin name: " PUBLIC_LOG "s", pluginName_.c_str());
 }
 
 AACDemuxerPlugin::~AACDemuxerPlugin()
@@ -63,7 +63,7 @@ Status AACDemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& source
     if (ioContext_.dataSource != nullptr) {
         ioContext_.dataSource->GetSize(fileSize_);
     }
-    MEDIA_LOG_I("fileSize_ %" PUBLIC_LOG "d", fileSize_);
+    MEDIA_LOG_I("fileSize_ " PUBLIC_LOG "d", fileSize_);
     return Status::OK;
 }
 
@@ -109,7 +109,7 @@ Status AACDemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
     if (result != Status::OK) {
         ioContext_.eos = true;
         ioContext_.offset = 0;
-        MEDIA_LOG_I("result is %" PUBLIC_LOG "d", result);
+        MEDIA_LOG_I("result is " PUBLIC_LOG "d", result);
         return result;
     }
 
@@ -260,7 +260,7 @@ int AACDemuxerPlugin::AudioDemuxerAACPrepare(const uint8_t *buf, uint32_t len, A
         rst->frameChannels = channelCount;
         rst->frameSampleRate = sample;
         rst->mpegVersion = mpegVersion;
-        MEDIA_LOG_D("channel %" PUBLIC_LOG "d sample %" PUBLIC_LOG "d", rst->frameChannels, rst->frameSampleRate);
+        MEDIA_LOG_D("channel " PUBLIC_LOG "d sample " PUBLIC_LOG "d", rst->frameChannels, rst->frameSampleRate);
         return 0;
     } else {
         MEDIA_LOG_D("Err:IsAACPattern");
@@ -302,10 +302,10 @@ int AACDemuxerPlugin::AudioDemuxerAACProcess(const uint8_t *buffer, uint32_t buf
                 rst->frameLength = length;
                 rst->usedInputLength = length;
             } else {
-                MEDIA_LOG_E("malloc error, length %" PUBLIC_LOG "d\n", length);
+                MEDIA_LOG_E("malloc error, length " PUBLIC_LOG "d\n", length);
             }
         } else {
-            MEDIA_LOG_D("can't find next aac, length %" PUBLIC_LOG "d is error\n", length);
+            MEDIA_LOG_D("can't find next aac, length " PUBLIC_LOG "d is error\n", length);
             break;
         }
 
@@ -369,7 +369,7 @@ namespace {
         regInfo.sniffer = Sniff;
         auto rtv = reg->AddPlugin(regInfo);
         if (rtv != Status::OK) {
-            MEDIA_LOG_I("RegisterPlugin AddPlugin failed with return %" PUBLIC_LOG "d", static_cast<int>(rtv));
+            MEDIA_LOG_I("RegisterPlugin AddPlugin failed with return " PUBLIC_LOG "d", static_cast<int>(rtv));
         }
         return Status::OK;
     }

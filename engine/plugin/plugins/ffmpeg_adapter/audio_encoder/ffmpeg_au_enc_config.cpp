@@ -39,7 +39,7 @@ const T* FindTagInMap(Tag tag, const std::map<Tag, ValueType>& tagStore)
     if (ite != tagStore.end() && ite->second.SameTypeWith(typeid(T))) {
         return AnyCast<T>(&ite->second);
     } else {
-        MEDIA_LOG_W("parameter %" PUBLIC_LOG_D32 " is not found or type mismatch", static_cast<int32_t>(tag));
+        MEDIA_LOG_W("parameter " PUBLIC_LOG_D32 " is not found or type mismatch", static_cast<int32_t>(tag));
         return nullptr;
     }
 }

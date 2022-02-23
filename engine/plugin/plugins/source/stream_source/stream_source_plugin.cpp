@@ -193,13 +193,13 @@ Status StreamSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
 {
     auto bufPtr_ = bufferQueue_.Pop(); // the cached buffer
     auto availSize = bufPtr_->GetMemory()->GetSize();
-    MEDIA_LOG_D("availSize: %" PUBLIC_LOG "zu, expectedLen: %" PUBLIC_LOG "zu", availSize, expectedLen);
+    MEDIA_LOG_D("availSize: " PUBLIC_LOG "zu, expectedLen: " PUBLIC_LOG "zu", availSize, expectedLen);
     if (buffer->IsEmpty()) { // No buffer provided, use the cached buffer.
         buffer = bufPtr_;
         return Status::OK;
     } else { // Buffer provided, copy it.
         if (buffer->GetMemory()->GetCapacity() < availSize) {
-            MEDIA_LOG_D("buffer->length: %" PUBLIC_LOG "zu is smaller than %" PUBLIC_LOG "zu",
+            MEDIA_LOG_D("buffer->length: " PUBLIC_LOG "zu is smaller than " PUBLIC_LOG "zu",
                         buffer->GetMemory()->GetCapacity(), availSize);
             return Status::ERROR_NO_MEMORY;
         }

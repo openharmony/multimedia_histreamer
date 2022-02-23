@@ -71,9 +71,9 @@ Status FileFdSinkPlugin::SeekTo(uint64_t offset)
     FALSE_RET_V_MSG_E(fd_ != -1, Status::ERROR_WRONG_STATE, "no valid fd.");
     int64_t ret = lseek(fd_, offset, SEEK_SET);
     if (ret != -1) {
-        MEDIA_LOG_I("now seek to %" PUBLIC_LOG_D64, ret);
+        MEDIA_LOG_I("now seek to " PUBLIC_LOG_D64, ret);
     } else {
-        MEDIA_LOG_E("seek to %" PUBLIC_LOG_U64 " failed due to %" PUBLIC_LOG_S, offset, strerror(errno));
+        MEDIA_LOG_E("seek to " PUBLIC_LOG_U64 " failed due to " PUBLIC_LOG_S, offset, strerror(errno));
     }
     return Status::ERROR_UNKNOWN;
 }
