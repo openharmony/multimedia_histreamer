@@ -110,6 +110,13 @@ bool StreamingExecutor::Seek(int offset)
 
 size_t StreamingExecutor::GetContentLength() const
 {
+    int times = 0;
+    while (headerInfo_.fileContentLen == 0 && times < 4) { // Wait fileContentLen updated
+        OSAL::SleepFor(50);
+        times++;
+    }
+    MEDIA_LOG_D("headerInfo_.fileContentLen " PUBLIC_LOG_ZU ", times " PUBLIC_LOG_D32,
+                headerInfo_.fileContentLen, times);
     return headerInfo_.fileContentLen;
 }
 
