@@ -24,6 +24,7 @@
 #include "foundation/osal/utils/util.h"
 #include "foundation/pre_defines.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "plugin/common/plugin_time.h"
 #include "plugins/hdi_adapter/utils/hdi_au_utils.h"
 #include "securec.h"
 #include "utils/constants.h"
@@ -564,7 +565,7 @@ Status HdiSink::Resume()
     return Status::OK;
 }
 
-Status HdiSink::GetLatency(uint64_t& ms)
+Status HdiSink::GetLatency(uint64_t& hstTime)
 {
     OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
@@ -576,8 +577,14 @@ Status HdiSink::GetLatency(uint64_t& ms)
         MEDIA_LOG_E("get latency failed");
         return Status::ERROR_UNKNOWN;
     }
-    ms = tmp;
-    return Status::OK;
+    int64_t latency = 0;
+    if (Ms2HstTime(tmp, latency)) {
+        hstTime = latency;
+        return Status::OK;
+    } else {
+        MEDIA_LOG_E("time convert overflow");
+        return Status::ERROR_UNKNOWN;
+    }
 }
 
 Status HdiSink::GetFrameSize(size_t& size)

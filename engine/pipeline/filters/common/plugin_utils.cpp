@@ -420,7 +420,7 @@ std::string Capability2String(const Capability& capability)
             break;
         }
         if (capStrnessMap.count(cap.first) == 0 || !HasTagInfo(static_cast<Tag>(cap.first))) {
-            MEDIA_LOG_W( PUBLIC_LOG_D32 " is not in map, may be new key which is not contained?", cap.first);
+            MEDIA_LOG_W(PUBLIC_LOG_D32 " is not in map, may be new key which is not contained?", cap.first);
             continue;
         }
         const auto& info = g_tagInfoMap.at(static_cast<Tag>(cap.first));

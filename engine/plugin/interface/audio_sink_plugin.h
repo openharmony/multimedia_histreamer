@@ -132,11 +132,11 @@ struct AudioSinkPlugin : public PluginBase {
      *
      * The function is valid only in the after PREPARED state.
      *
-     * @param nanoSec    Indicates the pointer to the latency (in milliseconds) to be obtained.
+     * @param hstTime  latency times based on {@link HST_TIME_BASE}.
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
      */
-    virtual Status GetLatency(uint64_t& nanoSec) = 0;
+    virtual Status GetLatency(uint64_t& hstTime) = 0;
 
     /**
      * @brief Get the audio frame size, that is, the length (in bytes) of a frame.

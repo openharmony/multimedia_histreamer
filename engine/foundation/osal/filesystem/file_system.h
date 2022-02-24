@@ -31,4 +31,4 @@ public:
 } // namespace OSAL
 } // namespace Media
 } // namespace OHOS
-#endif //HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILE_SYSTEM_H
+#endif // HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILE_SYSTEM_H

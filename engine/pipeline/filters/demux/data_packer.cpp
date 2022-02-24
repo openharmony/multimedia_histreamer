@@ -32,7 +32,9 @@ namespace Media {
 static constexpr DataPacker::Position INVALID_POSITION = {-1, 0, 0};
 
 DataPacker::DataPacker() : mutex_(), que_(), size_(0), mediaOffset_(0), pts_(0), dts_(0),
-        prevGet_{INVALID_POSITION, INVALID_POSITION}, currentGet_ {INVALID_POSITION, INVALID_POSITION}, capacity_(30)
+    prevGet_{INVALID_POSITION, INVALID_POSITION},
+    currentGet_ {INVALID_POSITION, INVALID_POSITION},
+    capacity_(30) // capacity 30
 {
     MEDIA_LOG_I("DataPacker ctor...");
 }
@@ -159,7 +161,7 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
         FALSE_LOG_MSG_E(needCopySize == 0, "First buffer is enough, but copySize is not enough");
         lastBufferOffsetEnd = firstBufferOffset + size;
         EXEC_WHEN_GET(isGet, currentGet_ = std::make_pair(Position{startIndex, firstBufferOffset, offset},
-                                                          Position{startIndex, lastBufferOffsetEnd, offset + size}));
+            Position{startIndex, lastBufferOffsetEnd, offset + size}));
         return true;
     } else { // first buffer not enough
         // Find the first buffer that should copy
@@ -174,7 +176,7 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
         if (needCopySize == 0) { // First buffer is enough
             lastBufferOffsetEnd = firstBufferOffset + copySize;
             EXEC_WHEN_GET(isGet, currentGet_ = std::make_pair(Position{startIndex, firstBufferOffset, offset},
-                                                              Position{startIndex, lastBufferOffsetEnd, offset + size}));
+                Position{startIndex, lastBufferOffsetEnd, offset + size}));
             return true;
         }
         dstPtr += copySize;
@@ -184,7 +186,7 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
                                               lastBufferOffsetEnd);
     }
     EXEC_WHEN_GET(isGet, currentGet_ = std::make_pair(Position{startIndex, firstBufferOffset, offset},
-                                                      Position{startIndex + usedCount - 1, lastBufferOffsetEnd, offset + size}));
+        Position{startIndex + usedCount - 1, lastBufferOffsetEnd, offset + size}));
 
     // Update to the real size, especially at the end.
     bufferPtr->GetMemory()->UpdateDataSize(size - needCopySize);
@@ -216,7 +218,7 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
         RemoveOldData();
     }
 
-    if (que_.size() < capacity_){
+    if (que_.size() < capacity_) {
         cvFull_.NotifyOne();
     }
     return true;

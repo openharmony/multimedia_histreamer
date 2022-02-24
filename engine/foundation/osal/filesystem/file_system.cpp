@@ -22,7 +22,7 @@
 #include <unistd.h>
 #endif
 #include <cstring>
-#include <errno.h>
+#include <cerrno>
 #include <sys/stat.h>
 #include "foundation/log.h"
 

@@ -77,7 +77,7 @@ public:
 
     Media::Plugin::Status Resume() override;
 
-    Media::Plugin::Status GetLatency(uint64_t& ms) override;
+    Media::Plugin::Status GetLatency(uint64_t& hstTime) override;
 
     Media::Plugin::Status GetFrameSize(size_t& size) override;
 
