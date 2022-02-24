@@ -368,6 +368,7 @@ int32_t DataPacker::CopyFromSuccessiveBuffer(uint64_t prevOffset, uint64_t offse
         if (curOffsetEnd >= offsetEnd) { // This buffer is enough
             NZERO_LOG(memcpy_s(dstPtr, needCopySize, AudioBufferReadOnlyData(que_[i]), needCopySize));
             lastBufferOffsetEnd = needCopySize;
+            needCopySize = 0;
             return usedCount; // Finished copy buffer
         } else {
             copySize = AudioBufferSize(que_[i]);

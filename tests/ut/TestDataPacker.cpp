@@ -151,6 +151,20 @@ TEST_F(TestDataPacker, remove_old_data_after_second_get_range_when_two_buffers_i
     dataPacker->GetRange(11, 2, bufferOut);
     ASSERT_STREQ("DataPacker (offset 11, size 3, buffer count 1)", dataPacker->ToString().c_str());
 }
+TEST_F(TestDataPacker, can_get_data_from_two_buffers)
+{
+    auto bufferPtr = CreateBuffer(10);
+    dataPacker->PushData(bufferPtr, 0);
+    uint64_t curOffset = 0;
+    ASSERT_FALSE(dataPacker->IsDataAvailable(0, 15, curOffset));
+    ASSERT_EQ(curOffset, 10);
+    auto bufferPtr2 = CreateBuffer(10, curOffset);
+    dataPacker->PushData(bufferPtr2, curOffset);
+    auto bufferOut = CreateEmptyBuffer(16);
+    ASSERT_TRUE(dataPacker->GetRange(0, 15, bufferOut));
+    ASSERT_EQ(15, bufferOut->GetMemory()->GetSize());
+    ASSERT_STREQ("1234567890abcde", (const char*)(bufferOut->GetMemory()->GetReadOnlyData()));
+}
 } // namespace Test
 } // namespace Media
 } // namespace OHOS
