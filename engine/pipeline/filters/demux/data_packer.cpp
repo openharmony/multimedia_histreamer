@@ -61,12 +61,15 @@ inline static const uint8_t* AudioBufferReadOnlyData(AVBufferPtr& ptr)
 
 void DataPacker::PushData(AVBufferPtr bufferPtr, uint64_t offset)
 {
-    MEDIA_LOG_D("DataPacker PushData begin... buffer (offset " PUBLIC_LOG_U64 ", size " PUBLIC_LOG_U32 ")",
-                offset, AudioBufferSize(bufferPtr));
+    size_t bufferSize = AudioBufferSize(bufferPtr);
+    MEDIA_LOG_D("DataPacker PushData begin... buffer (offset " PUBLIC_LOG_U64 ", size " PUBLIC_LOG_ZU ")",
+                offset, bufferSize);
     DUMP_BUFFER2LOG("DataPacker Push", bufferPtr, offset);
+    FALSE_RET_MSG(bufferSize > 0, "Can not push zero length buffer.");
+
     OSAL::ScopedLock lock(mutex_);
     if (que_.size() >= capacity_) {
-        MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s is full, waiting for pop.", name_.c_str());
+        MEDIA_LOG_D("DataPacker is full, waiting for pop.");
         cvFull_.Wait(lock, [this] { return que_.size() < capacity_; });
     }
 
@@ -129,7 +132,7 @@ bool DataPacker::PeekRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPt
 {
     OSAL::ScopedLock lock(mutex_);
     if (que_.empty()) {
-        MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s is empty, waiting for push", name_.c_str());
+        MEDIA_LOG_D("DataPacker is empty, waiting for push.");
         cvEmpty_.Wait(lock, [this] { return !que_.empty(); });
     }
 
@@ -204,7 +207,7 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
 
     OSAL::ScopedLock lock(mutex_);
     if (que_.empty()) {
-        MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s is empty, waiting for push", name_.c_str());
+        MEDIA_LOG_D("DataPacker is empty, waiting for push");
         cvEmpty_.Wait(lock, [this] { return !que_.empty(); });
     }
 
