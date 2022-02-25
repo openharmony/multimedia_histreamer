@@ -502,13 +502,13 @@ ErrorCode HiRecorderImpl::DoConfigureVideo(const HstRecParam& param) const
         case RecorderPublicParamType::VID_BITRATE: {
             auto ptr = param.GetValPtr<VidBitRate>();
             FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
-            return videoEncoder_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
+            return videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
                 static_cast<int64_t>((ptr->bitRate >= 0) ? ptr->bitRate : 0));
         }
         case RecorderPublicParamType::VID_FRAMERATE: {
             auto ptr = param.GetValPtr<VidFrameRate>();
             FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
-            return videoEncoder_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_FRAME_RATE),
+            return videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_FRAME_RATE),
                 static_cast<uint32_t>((ptr->frameRate >= 0) ? ptr->frameRate : 0));
         }
         case RecorderPublicParamType::VID_ENC_FMT: {

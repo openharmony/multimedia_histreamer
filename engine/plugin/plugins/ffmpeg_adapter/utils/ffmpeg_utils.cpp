@@ -19,6 +19,7 @@
 
 #include "foundation/log.h"
 #include "libavutil/channel_layout.h"
+#include "libavutil/pixfmt.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_time.h"
 
@@ -111,23 +112,23 @@ const std::vector<std::pair<AudioAacProfile, int32_t>> g_AacProfileMap = {
 
 // Histreamer pixel format to ffmpeg pixel format
 std::map<VideoPixelFormat, AVPixelFormat> g_pixelFormatMap = {
-    {VideoPixelFormat::YUV420P, AV_PIX_FMT_YUV420P},
-    {VideoPixelFormat::YUV420P, AV_PIX_FMT_YUYV422},
-    {VideoPixelFormat::RGB24, AV_PIX_FMT_RGB24},
-    {VideoPixelFormat::BGR24, AV_PIX_FMT_BGR24},
-    {VideoPixelFormat::YUV422P, AV_PIX_FMT_YUV422P},
-    {VideoPixelFormat::YUV444P, AV_PIX_FMT_YUV444P},
     {VideoPixelFormat::YUV410P, AV_PIX_FMT_YUV410P},
     {VideoPixelFormat::YUV411P, AV_PIX_FMT_YUV411P},
+    {VideoPixelFormat::YUV420P, AV_PIX_FMT_YUV420P},
+    {VideoPixelFormat::NV12, AV_PIX_FMT_NV12},
+    {VideoPixelFormat::NV21, AV_PIX_FMT_NV21},
+    {VideoPixelFormat::YUYV422, AV_PIX_FMT_YUYV422},
+    {VideoPixelFormat::YUV422P, AV_PIX_FMT_YUV422P},
+    {VideoPixelFormat::YUV444P, AV_PIX_FMT_YUV444P},
+    {VideoPixelFormat::RGB24, AV_PIX_FMT_RGB24},
+    {VideoPixelFormat::BGR24, AV_PIX_FMT_BGR24},
+    {VideoPixelFormat::PAL8, AV_PIX_FMT_PAL8},
     {VideoPixelFormat::GRAY8, AV_PIX_FMT_GRAY8},
     {VideoPixelFormat::MONOWHITE, AV_PIX_FMT_MONOWHITE},
     {VideoPixelFormat::MONOBLACK, AV_PIX_FMT_MONOBLACK},
-    {VideoPixelFormat::PAL8, AV_PIX_FMT_PAL8},
     {VideoPixelFormat::YUVJ420P, AV_PIX_FMT_YUVJ420P},
     {VideoPixelFormat::YUVJ422P, AV_PIX_FMT_YUVJ422P},
     {VideoPixelFormat::YUVJ444P, AV_PIX_FMT_YUVJ444P},
-    {VideoPixelFormat::NV12, AV_PIX_FMT_NV12},
-    {VideoPixelFormat::NV21, AV_PIX_FMT_NV21},
 };
 
 std::map<VideoH264Profile, int32_t> g_H264ProfileMap = {

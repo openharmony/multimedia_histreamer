@@ -64,6 +64,7 @@ private:
     std::shared_ptr<Plugin::PluginInfo> pluginInfo_ {nullptr};
     Plugin::SrcInputType inputType_ {};
     bool inputTypeSpecified_ {false};
+    std::string mime_ {"video/raw"};
     uint32_t videoWidth_ {0};
     uint32_t videoHeight_ {0};
     double captureRate_ {0};

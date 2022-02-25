@@ -159,6 +159,7 @@ ErrorCode VideoCaptureFilter::DoConfigure()
     videoMeta->SetUint32(Plugin::MetaID::VIDEO_HEIGHT, videoHeight_);
     videoMeta->SetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate_);
     videoMeta->SetUint32(Plugin::MetaID::VIDEO_FRAME_RATE, frameRate_);
+    videoMeta->SetData(Plugin::MetaID::MIME, mime_);
     videoMeta->SetData(Plugin::MetaID::VIDEO_PIXEL_FORMAT, pixelFormat_);
     if (!outPorts_[0]->Configure(videoMeta)) {
         MEDIA_LOG_E("Configure downstream fail");
@@ -303,6 +304,7 @@ bool VideoCaptureFilter::DoNegotiate(const CapabilitySet &outCaps)
     }
     for (const auto& outCap : outCaps) {
         auto thisOut = std::make_shared<Plugin::Capability>();
+        mime_ = outCap.mime;
         *thisOut = outCap; // pixel format
         Plugin::TagMap upstreamParams;
         Plugin::TagMap downstreamParams;

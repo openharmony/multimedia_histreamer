@@ -29,11 +29,13 @@ extern "C" {
 
 namespace OHOS {
 namespace Media {
-namespace FFMux {
+namespace Plugin {
+namespace Ffmpeg {
 class FFmpegMuxerPlugin : public Plugin::MuxerPlugin {
 public:
     explicit FFmpegMuxerPlugin(std::string name);
-    ~ FFmpegMuxerPlugin() override;
+
+    ~FFmpegMuxerPlugin() override;
 
     Plugin::Status Init() override;
 
@@ -43,21 +45,21 @@ public:
 
     Plugin::Status SetCallback(Plugin::Callback* cb) override;
 
-    Plugin::Status GetParameter(Plugin::Tag tag, Plugin::ValueType &value) override;
+    Plugin::Status GetParameter(Plugin::Tag tag, Plugin::ValueType& value) override;
 
-    Plugin::Status SetParameter(Plugin::Tag tag, const Plugin::ValueType &value) override;
+    Plugin::Status SetParameter(Plugin::Tag tag, const Plugin::ValueType& value) override;
 
     Plugin::Status Prepare() override;
 
     Plugin::Status Reset() override;
 
-    Plugin::Status AddTrack(uint32_t &trackId) override;
+    Plugin::Status AddTrack(uint32_t& trackId) override;
 
     Plugin::Status SetTrackParameter(uint32_t trackId, Plugin::Tag tag, const Plugin::ValueType& value) override;
 
     Plugin::Status GetTrackParameter(uint32_t trackId, Plugin::Tag tag, Plugin::ValueType& value) override;
 
-    Plugin::Status SetDataSink(const std::shared_ptr<Plugin::DataSink> &dataSink) override;
+    Plugin::Status SetDataSink(const std::shared_ptr<Plugin::DataSink>& dataSink) override;
 
     Plugin::Status WriteHeader() override;
 
@@ -67,7 +69,7 @@ public:
 
 private:
     struct IOContext {
-        std::shared_ptr<Plugin::DataSink> dataSink_{};
+        std::shared_ptr<Plugin::DataSink> dataSink_ {};
         int64_t pos_ {0};
         int64_t end_ {0};
     };
@@ -101,7 +103,8 @@ private:
 
     IOContext ioContext_;
 };
-} // FFMux
+} // Ffmpeg
+} // Plugin
 } // Media
 } // OHOS
 #endif // HISTREAMER_FFMPEG_MUXER_PLUGIN_H

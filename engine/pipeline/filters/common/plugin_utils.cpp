@@ -200,6 +200,36 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::Au
     return SnPrintf(buf, maxLen, "%s", Pipeline::g_auChannelLayoutStrMap.at(val));
 }
 
+template<>
+int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::VideoPixelFormat& val)
+{
+    if (Pipeline::g_videoPixelFormatStrMap.count(val) == 0) {
+        MEDIA_LOG_W("video pixel format " PUBLIC_LOG_U32 " is unknown", static_cast<uint32_t>(val));
+        return 0;
+    }
+    return SnPrintf(buf, maxLen, "%s", Pipeline::g_videoPixelFormatStrMap.at(val));
+}
+
+template<>
+int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::AudioAacProfile& val)
+{
+    if (Pipeline::g_auAacProfileNameStrMap.count(val) == 0) {
+        MEDIA_LOG_W("audio aac profile name " PUBLIC_LOG_U8 " is unknown", static_cast<uint8_t>(val));
+        return 0;
+    }
+    return SnPrintf(buf, maxLen, "%s", Pipeline::g_auAacProfileNameStrMap.at(val));
+}
+
+template<>
+int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::AudioAacStreamFormat& val)
+{
+    if (Pipeline::g_auAacStreamFormatNameStrMap.count(val) == 0) {
+        MEDIA_LOG_W("audio aac stream format name " PUBLIC_LOG_U8 " is unknown", static_cast<uint8_t>(val));
+        return 0;
+    }
+    return SnPrintf(buf, maxLen, "%s", Pipeline::g_auAacStreamFormatNameStrMap.at(val));
+}
+
 template<typename T>
 int32_t MetaIDStringiness(char* buf, size_t maxLen, const char* name, const char* typeName,
                           const Plugin::ValueType& val)
@@ -245,6 +275,7 @@ std::map<Plugin::MetaID, CapStrnessFunc> g_metaStrnessMap = {
     {Plugin::MetaID::AUDIO_AAC_STREAM_FORMAT, MetaIDStringiness<Plugin::AudioAacStreamFormat>},
     {Plugin::MetaID::VIDEO_WIDTH, MetaIDStringiness<uint32_t>},
     {Plugin::MetaID::VIDEO_HEIGHT, MetaIDStringiness<uint32_t>},
+    {Plugin::MetaID::VIDEO_FRAME_RATE, MetaIDStringiness<uint32_t>},
     {Plugin::MetaID::VIDEO_PIXEL_FORMAT, MetaIDStringiness<Plugin::VideoPixelFormat>},
 };
 }

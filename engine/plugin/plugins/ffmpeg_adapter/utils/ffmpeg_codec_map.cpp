@@ -38,6 +38,9 @@ bool CodecId2Cap(AVCodecID codecId, bool encoder, Plugin::Capability& cap)
         case AV_CODEC_ID_AAC_LATM:
             cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM);
             return true;
+        case AV_CODEC_ID_H264:
+            cap.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
+            return true;
         default:
             break;
     }
@@ -48,6 +51,8 @@ bool FormatName2Cap(const std::string& fmtName, Plugin::CapabilitySet& outCaps)
     if (fmtName == "mp4") {
         outCaps.emplace_back(Plugin::Capability(MEDIA_MIME_CONTAINER_MP4));
         return true;
+    } else if (fmtName == "h264") {
+        outCaps.emplace_back(Plugin::Capability(MEDIA_MIME_VIDEO_H264));
     }
     return false;
 }
@@ -55,6 +60,9 @@ bool Mime2CodecId(const std::string& mime, AVCodecID& codecId)
 {
     if (mime == MEDIA_MIME_AUDIO_AAC) {
         codecId = AV_CODEC_ID_AAC;
+        return true;
+    } else if (mime == MEDIA_MIME_VIDEO_H264) {
+        codecId = AV_CODEC_ID_H264;
         return true;
     }
     return false;

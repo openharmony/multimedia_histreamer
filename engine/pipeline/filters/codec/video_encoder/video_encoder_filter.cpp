@@ -26,6 +26,7 @@
 #include "plugin/common/plugin_video_tags.h"
 #include "utils/constants.h"
 #include "utils/steady_clock.h"
+#include "pipeline/core/plugin_attr_desc.h"
 
 namespace OHOS {
 namespace Media {
@@ -262,10 +263,10 @@ ErrorCode VideoEncoderFilter::AllocateOutputBuffers()
         vencFormat_.format == Plugin::VideoPixelFormat::NV12) {
         bufferSize = static_cast<uint32_t>(Plugin::AlignUp(stride, VIDEO_ALIGN_SIZE) *
                                            Plugin::AlignUp(vencFormat_.height, VIDEO_ALIGN_SIZE) * VIDEO_PIX_DEPTH);
-        MEDIA_LOG_D("Output buffer size: " PUBLIC_LOG "u", bufferSize);
+        MEDIA_LOG_D("Output buffer size: " PUBLIC_LOG_U32, bufferSize);
     } else {
         // need to check video sink support and calc buffer size
-        MEDIA_LOG_E("Unsupported video pixel format: " PUBLIC_LOG "u", vencFormat_.format);
+        MEDIA_LOG_E("Unsupported video pixel format: " PUBLIC_LOG_S, GetVideoPixelFormatNameStr(vencFormat_.format));
         return ErrorCode::ERROR_UNIMPLEMENTED;
     }
     auto outAllocator = plugin_->GetAllocator(); // zero copy need change to use sink allocator
@@ -303,6 +304,9 @@ ErrorCode VideoEncoderFilter::SetVideoEncoderFormat(const std::shared_ptr<const 
     if (!meta->GetUint32(Plugin::MetaID::VIDEO_FRAME_RATE, vencFormat_.frameRate)) {
         MEDIA_LOG_D("Do not have codec frame rate");
     }
+    if (!meta->GetData(Plugin::MetaID::MIME, vencFormat_.mime)) {
+        MEDIA_LOG_D("Do not have codec mime");
+    }
     if (!meta->GetData(Plugin::MetaID::VIDEO_PIXEL_FORMAT, vencFormat_.format)) {
         MEDIA_LOG_D("Do not have codec video pixel format");
     }
@@ -315,18 +319,12 @@ ErrorCode VideoEncoderFilter::SetVideoEncoderFormat(const std::shared_ptr<const 
 
 ErrorCode VideoEncoderFilter::ConfigurePluginParams()
 {
-    if (SetPluginParameterLocked(Tag::VIDEO_WIDTH, vencFormat_.width) != ErrorCode::SUCCESS) {
-        MEDIA_LOG_W("Set width to plugin fail");
-        return ErrorCode::ERROR_UNKNOWN;
-    }
-    if (SetPluginParameterLocked(Tag::VIDEO_HEIGHT, vencFormat_.height) != ErrorCode::SUCCESS) {
-        MEDIA_LOG_W("Set height to plugin fail");
-        return ErrorCode::ERROR_UNKNOWN;
-    }
-    if (SetPluginParameterLocked(Tag::VIDEO_PIXEL_FORMAT, vencFormat_.format) != ErrorCode::SUCCESS) {
-        MEDIA_LOG_W("Set pixel format to plugin fail");
-        return ErrorCode::ERROR_UNKNOWN;
-    }
+    FALSE_RET_V_MSG_W(SetPluginParameterLocked(Tag::VIDEO_WIDTH, vencFormat_.width) == ErrorCode::SUCCESS,
+                      ErrorCode::ERROR_UNKNOWN, "Set width to plugin fail");
+    FALSE_RET_V_MSG_W(SetPluginParameterLocked(Tag::VIDEO_HEIGHT, vencFormat_.height) == ErrorCode::SUCCESS,
+                      ErrorCode::ERROR_UNKNOWN, "Set height to plugin fail");
+    FALSE_RET_V_MSG_W(SetPluginParameterLocked(Tag::VIDEO_PIXEL_FORMAT, vencFormat_.format) == ErrorCode::SUCCESS,
+                      ErrorCode::ERROR_UNKNOWN, "Set pixel format to plugin fail");
     if (vencFormat_.bitRate != -1) {
         if (SetPluginParameterLocked(Tag::MEDIA_BITRATE, vencFormat_.bitRate) != ErrorCode::SUCCESS) {
             MEDIA_LOG_W("Set bitrate to plugin fail");
@@ -344,10 +342,10 @@ ErrorCode VideoEncoderFilter::ConfigurePluginParams()
             MEDIA_LOG_W("Set bitrate to plugin fail");
         }
     }
-    MEDIA_LOG_D("ConfigurePluginParams success, mime: " PUBLIC_LOG "s, width: " PUBLIC_LOG "u, height: "
-                PUBLIC_LOG "u, format: " PUBLIC_LOG "u, bitRate: " PUBLIC_LOG "u",
-                vencFormat_.mime.c_str(), vencFormat_.width, vencFormat_.height, vencFormat_.format,
-                vencFormat_.bitRate);
+    MEDIA_LOG_D("ConfigurePluginParams success, mime: " PUBLIC_LOG_S ", width: " PUBLIC_LOG_U32 ", height: "
+                PUBLIC_LOG_U32 ", format: " PUBLIC_LOG_S ", bitRate: " PUBLIC_LOG_D64,
+                vencFormat_.mime.c_str(), vencFormat_.width, vencFormat_.height,
+                GetVideoPixelFormatNameStr(vencFormat_.format), vencFormat_.bitRate);
     return ErrorCode::SUCCESS;
 }
 
@@ -396,11 +394,11 @@ ErrorCode VideoEncoderFilter::ConfigureNoLocked(const std::shared_ptr<const Plug
 ErrorCode VideoEncoderFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
-        MEDIA_LOG_W("pushing data to encoder when state_ is " PUBLIC_LOG "d", static_cast<int>(state_.load()));
+        MEDIA_LOG_W("pushing data to encoder when state_ is " PUBLIC_LOG_D32, static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     if (isFlushing_) {
-        MEDIA_LOG_I("encoder is flushing, discarding this data from port " PUBLIC_LOG "s", inPort.c_str());
+        MEDIA_LOG_I("encoder is flushing, discarding this data from port " PUBLIC_LOG_S, inPort.c_str());
         return ErrorCode::SUCCESS;
     }
     inBufQue_->Push(buffer);
@@ -487,7 +485,7 @@ void VideoEncoderFilter::HandleOneFrame(const std::shared_ptr<AVBuffer>& data)
         if (ret == Plugin::Status::OK) {
             break;
         }
-        MEDIA_LOG_D("Send data to plugin error: " PUBLIC_LOG "d", ret);
+        MEDIA_LOG_D("Send data to plugin error: " PUBLIC_LOG_D32, ret);
         OSAL::SleepFor(DEFAULT_TRY_DECODE_TIME);
     } while (1);
 }
