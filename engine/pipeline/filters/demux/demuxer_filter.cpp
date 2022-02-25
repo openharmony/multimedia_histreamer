@@ -112,6 +112,7 @@ DemuxerFilter::DemuxerFilter(std::string name)
 {
     filterType_ = FilterType::DEMUXER;
     dataPacker_ = std::make_shared<DataPacker>();
+    task_ = std::make_shared<OSAL::Task>("DemuxerFilter");
     MEDIA_LOG_D("ctor called");
 }
 
@@ -192,6 +193,7 @@ ErrorCode DemuxerFilter::Prepare()
     DUMP_BUFFER2FILE_PREPARE();
 
     pluginState_ = DemuxerState::DEMUXER_STATE_NULL;
+    task_->RegisterHandler([this] { DemuxerLoop(); });
     Pipeline::WorkMode mode;
     GetInPort(PORT_NAME_DEFAULT)->Activate({Pipeline::WorkMode::PULL, Pipeline::WorkMode::PUSH}, mode);
     if (mode == Pipeline::WorkMode::PULL) {
@@ -317,10 +319,6 @@ void DemuxerFilter::ActivatePullMode()
 {
     MEDIA_LOG_D("ActivatePullMode called");
     InitTypeFinder();
-    if (!task_) {
-        task_ = std::make_shared<OSAL::Task>("DemuxerFilter");
-    }
-    task_->RegisterHandler([this] { DemuxerLoop(); });
     checkRange_ = [this](uint64_t offset, uint32_t size) {
         uint64_t curOffset = offset;
         if (dataPacker_->IsDataAvailable(offset, size, curOffset)) {

@@ -167,7 +167,7 @@ void TypeFinder::DoTask()
         }
         sniffNeeded_ = false;
     }
-    task_->Pause();
+    task_->PauseAsync();
     typeFound_(pluginName_);
 }
 

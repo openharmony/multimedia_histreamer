@@ -219,7 +219,7 @@ bool VideoSinkFilter::DoSync(int64_t pts) const
     if (delta > 0) {
         tempOut = Plugin::HstTime2Ms(delta);
         if (tempOut > 100) { // 100ms
-            MEDIA_LOG_E("DoSync early " PUBLIC_LOG PRId64 " ms", tempOut);
+            MEDIA_LOG_D("DoSync early " PUBLIC_LOG_D64 " ms", tempOut);
             OHOS::Media::OSAL::SleepFor(tempOut);
             return true;
         }
