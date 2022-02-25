@@ -29,12 +29,11 @@ namespace Media {
         }                              \
     } while (0)
 
-static constexpr DataPacker::Position INVALID_POSITION = {-1, 0, 0};
+static const DataPacker::Position INVALID_POSITION = DataPacker::Position(-1, 0, 0);
+static constexpr size_t MAX_BUFFER_NUMBER_IN_DATA_PACKER = 30;
 
 DataPacker::DataPacker() : mutex_(), que_(), size_(0), mediaOffset_(0), pts_(0), dts_(0),
-    prevGet_{INVALID_POSITION, INVALID_POSITION},
-    currentGet_ {INVALID_POSITION, INVALID_POSITION},
-    capacity_(30) // capacity 30
+    prevGet_(INVALID_POSITION), currentGet_(INVALID_POSITION), capacity_(MAX_BUFFER_NUMBER_IN_DATA_PACKER)
 {
     MEDIA_LOG_I("DataPacker ctor...");
 }
@@ -162,9 +161,7 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
         copySize = CopyFirstBuffer(size, startIndex, dstPtr, bufferPtr, bufferOffset);
         needCopySize -= copySize;
         FALSE_LOG_MSG_E(needCopySize == 0, "First buffer is enough, but copySize is not enough");
-        lastBufferOffsetEnd = firstBufferOffset + size;
-        EXEC_WHEN_GET(isGet, currentGet_ = std::make_pair(Position{startIndex, firstBufferOffset, offset},
-            Position{startIndex, lastBufferOffsetEnd, offset + size}));
+        EXEC_WHEN_GET(isGet, currentGet_ = Position(startIndex, firstBufferOffset, offset));
         return true;
     } else { // first buffer not enough
         // Find the first buffer that should copy
@@ -177,9 +174,7 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
 
         needCopySize -= copySize;
         if (needCopySize == 0) { // First buffer is enough
-            lastBufferOffsetEnd = firstBufferOffset + copySize;
-            EXEC_WHEN_GET(isGet, currentGet_ = std::make_pair(Position{startIndex, firstBufferOffset, offset},
-                Position{startIndex, lastBufferOffsetEnd, offset + size}));
+            EXEC_WHEN_GET(isGet, currentGet_ = Position(startIndex, firstBufferOffset, offset));
             return true;
         }
         dstPtr += copySize;
@@ -188,8 +183,7 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
         usedCount += CopyFromSuccessiveBuffer(prevOffset, offsetEnd, startIndex, dstPtr, needCopySize,
                                               lastBufferOffsetEnd);
     }
-    EXEC_WHEN_GET(isGet, currentGet_ = std::make_pair(Position{startIndex, firstBufferOffset, offset},
-        Position{startIndex + usedCount - 1, lastBufferOffsetEnd, offset + size}));
+    EXEC_WHEN_GET(isGet, currentGet_ = Position(startIndex, firstBufferOffset, offset));
 
     // Update to the real size, especially at the end.
     bufferPtr->GetMemory()->UpdateDataSize(size - needCopySize);
@@ -215,7 +209,7 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
     prevGet_ = currentGet_; // store last get position to prevGet_
 
     FALSE_RETURN_V(PeekRangeInternal(offset, size, bufferPtr, true), false);
-    if (meetEos_) {
+    if (isEos_) {
         FlushInternal();
     } else {
         RemoveOldData();
@@ -234,6 +228,21 @@ void DataPacker::Flush()
     FlushInternal();
 }
 
+void DataPacker::SetEos()
+{
+    MEDIA_LOG_I("DataPacker SetEos called.");
+    OSAL::ScopedLock lock(mutex_);
+    if (size_ > 0) { // Set isEos_ if there is some data in data packer.
+        isEos_ = true;
+    }
+}
+
+bool DataPacker::IsEmpty()
+{
+    OSAL::ScopedLock lock(mutex_);
+    return size_ > 0;
+}
+
 void DataPacker::FlushInternal()
 {
     MEDIA_LOG_D("DataPacker FlushInternal called.");
@@ -242,9 +251,9 @@ void DataPacker::FlushInternal()
     mediaOffset_ = 0;
     dts_ = 0;
     pts_ = 0;
-    meetEos_ = false;
-    prevGet_ = {INVALID_POSITION, INVALID_POSITION};
-    currentGet_ = {INVALID_POSITION, INVALID_POSITION};
+    isEos_ = false;
+    prevGet_ = INVALID_POSITION;
+    currentGet_ = INVALID_POSITION;
 }
 
 // Remove first removeSize data in the buffer
@@ -267,9 +276,9 @@ void DataPacker::RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t r
 void DataPacker::RemoveOldData()
 {
     // If prevGet_.first >= currentGet_.first, return
-    FALSE_RETURN_W(prevGet_.first < currentGet_.first);
+    FALSE_RETURN_W(prevGet_ < currentGet_);
     MEDIA_LOG_D("Before RemoveOldData " PUBLIC_LOG_S, ToString().c_str());
-    FALSE_LOG(RemoveTo(currentGet_.first));
+    FALSE_LOG(RemoveTo(currentGet_));
     if (que_.empty()) {
         mediaOffset_ = 0;
         size_ = 0;
@@ -382,7 +391,6 @@ int32_t DataPacker::CopyFromSuccessiveBuffer(uint64_t prevOffset, uint64_t offse
         }
     }
     MEDIA_LOG_W("Processed all cached buffers, still not meet offsetEnd, maybe EOS reached.");
-    meetEos_ = true;
     return usedCount;
 }
 

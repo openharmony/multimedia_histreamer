@@ -61,9 +61,6 @@ Plugin::Status DemuxerFilter::DataSourceImpl::ReadAt(int64_t offset, std::shared
                     "d, offset: " PUBLIC_LOG PRId64, !buffer, static_cast<int>(expectedLen), offset);
         return Plugin::Status::ERROR_UNKNOWN;
     }
-    if (filter.isLivePlayFinished_) {
-        return Plugin::Status::END_OF_STREAM;
-    }
     Plugin::Status rtv = Plugin::Status::OK;
     switch (filter.pluginState_.load()) {
         case DemuxerState::DEMUXER_STATE_NULL:
@@ -195,7 +192,6 @@ ErrorCode DemuxerFilter::Prepare()
     DUMP_BUFFER2FILE_PREPARE();
 
     pluginState_ = DemuxerState::DEMUXER_STATE_NULL;
-    isLivePlayFinished_ = false;
     Pipeline::WorkMode mode;
     GetInPort(PORT_NAME_DEFAULT)->Activate({Pipeline::WorkMode::PULL, Pipeline::WorkMode::PUSH}, mode);
     if (mode == Pipeline::WorkMode::PULL) {
@@ -211,7 +207,7 @@ ErrorCode DemuxerFilter::PushData(const std::string& inPort, const AVBufferPtr& 
 {
     MEDIA_LOG_D("PushData for port: " PUBLIC_LOG "s", inPort.c_str());
     if (buffer->flag & BUFFER_FLAG_EOS) {
-        isLivePlayFinished_ = true;
+        dataPacker_->SetEos();
     } else {
         dataPacker_->PushData(std::move(buffer), offset);
     }
@@ -330,17 +326,24 @@ void DemuxerFilter::ActivatePullMode()
         if (dataPacker_->IsDataAvailable(offset, size, curOffset)) {
             return true;
         }
-        MEDIA_LOG_D("IsDataAvailable false, require offset " PUBLIC_LOG_D64 ", curOffset " PUBLIC_LOG_D64,
-                    offset, curOffset);
-        if (curOffset < offset) { // datapacker buffer's offset end < offset, then clear all buffers
-            dataPacker_->Flush();
-            curOffset = offset; // next time get data from offset
-        }
+        MEDIA_LOG_D("IsDataAvailable false, require offset " PUBLIC_LOG_D64 ", DataPacker data offset end - curOffset "
+            PUBLIC_LOG_D64, offset, curOffset);
         AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
         bufferPtr->AllocMemory(pluginAllocator_, size);
-        if (inPorts_.front()->PullData(curOffset, size, bufferPtr) == ErrorCode::SUCCESS) {
+        auto ret = inPorts_.front()->PullData(curOffset, size, bufferPtr);
+        if (ret == ErrorCode::SUCCESS) {
             dataPacker_->PushData(std::move(bufferPtr), curOffset);
             return true;
+        } else if (ret == ErrorCode::END_OF_STREAM) {
+            bool hasDataToRead = offset < curOffset;   // Ture if there is some data in data packer can be read.
+            if (hasDataToRead && !dataPacker_->IsEmpty()) {
+                dataPacker_->SetEos();
+            } else {
+                dataPacker_->Flush();
+            }
+            return hasDataToRead;
+        } else {
+            MEDIA_LOG_E("PullData from source filter failed " PUBLIC_LOG_D32, ret);
         }
         return false;
     };

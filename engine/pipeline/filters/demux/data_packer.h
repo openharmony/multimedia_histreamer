@@ -46,11 +46,22 @@ public:
 
     void Flush();
 
+    void SetEos();
+
+    bool IsEmpty();
+
     // Record the position that GerRange copy start or end.
     struct Position {
         int32_t index; // Buffer index, -1 means this Position is invalid
         uint32_t bufferOffset; // Offset in the buffer
         uint64_t mediaOffset;  // Offset in the media file
+
+        Position(int32_t index, uint32_t bufferOffset, uint64_t mediaOffset)
+        {
+            this->index = index;
+            this->bufferOffset = bufferOffset;
+            this->mediaOffset = mediaOffset;
+        }
 
         bool operator < (const Position& other) const
         {
@@ -68,10 +79,6 @@ public:
     };
 
 private:
-    // first  : start position;
-    // second : end position, not include bufferOffset byte.
-    using PositionPair = std::pair<Position, Position>;
-
     void RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t removeSize);
 
     bool PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr, bool isGet);
@@ -100,11 +107,11 @@ private:
     uint64_t mediaOffset_; // The media file offset of the first byte in data packer
     uint64_t pts_;
     uint64_t dts_;
-    bool meetEos_ {false};
+    bool isEos_ {false};
 
     // The position in prev GetRange / current GetRange
-    PositionPair prevGet_ ;
-    PositionPair currentGet_ ;
+    Position prevGet_ ;
+    Position currentGet_ ;
 
     OSAL::ConditionVariable cvFull_;
     OSAL::ConditionVariable cvEmpty_;
