@@ -25,9 +25,13 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
+namespace {
 constexpr int RING_BUFFER_SIZE = 5 * 48 * 1024;
 constexpr int PER_REQUEST_SIZE = 48 * 1024;
 constexpr int WATER_LINE = RING_BUFFER_SIZE * 0.1;
+constexpr unsigned int SLEEP_TIME = 5;    // Sleep 5ms
+constexpr unsigned int RETRY_TIMES = 20;  // Retry 20 times
+}
 
 StreamingExecutor::StreamingExecutor() noexcept
 {
@@ -111,10 +115,11 @@ bool StreamingExecutor::Seek(int offset)
 size_t StreamingExecutor::GetContentLength() const
 {
     int times = 0;
-    while (headerInfo_.fileContentLen == 0 && times < 4) { // Wait fileContentLen updated
-        OSAL::SleepFor(50);
+    while (headerInfo_.fileContentLen == 0 && times < RETRY_TIMES) { // Wait fileContentLen updated
+        OSAL::SleepFor(SLEEP_TIME);
         times++;
     }
+    FALSE_RET_V_MSG_E(headerInfo_.fileContentLen > 0, 0, "Could not get content length.");
     MEDIA_LOG_D("headerInfo_.fileContentLen " PUBLIC_LOG_ZU ", times " PUBLIC_LOG_D32,
                 headerInfo_.fileContentLen, times);
     return headerInfo_.fileContentLen;
@@ -223,7 +228,7 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
     char *key = strtok(reinterpret_cast<char *>(buffer), ":");
     FALSE_RETURN_V(key != nullptr, size * nitems);
     if (!strncmp(key, "Content-Type", strlen("Content-Type"))) {
-        char *token = strtok(NULL, ":");
+        char *token = strtok(nullptr, ":");
         FALSE_RETURN_V(token != nullptr, size * nitems);
         char *type = StringTrim(token);
         memcpy_s(info->contentType, sizeof(info->contentType), type, sizeof(info->contentType));
@@ -231,7 +236,7 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
 
     if (!strncmp(key, "Content-Length", strlen("Content-Length")) ||
         !strncmp(key, "content-length", strlen("content-length"))) {
-        char *token = strtok(NULL, ":");
+        char *token = strtok(nullptr, ":");
         FALSE_RETURN_V(token != nullptr, size * nitems);
         char *contLen = StringTrim(token);
         info->contentLen = atol(contLen);
@@ -239,7 +244,7 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
 
     if (!strncmp(key, "Transfer-Encoding", strlen("Transfer-Encoding")) ||
         !strncmp(key, "transfer-encoding", strlen("transfer-encoding"))) {
-        char *token = strtok(NULL, ":");
+        char *token = strtok(nullptr, ":");
         FALSE_RETURN_V(token != nullptr, size * nitems);
         char *transEncode = StringTrim(token);
         if (!strncmp(transEncode, "chunked", strlen("chunked"))) {
@@ -249,7 +254,7 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
 
     if (!strncmp(key, "Content-Range", strlen("Content-Range")) ||
         !strncmp(key, "content-range", strlen("content-range"))) {
-        char *token = strtok(NULL, ":");
+        char *token = strtok(nullptr, ":");
         FALSE_RETURN_V(token != nullptr, size * nitems);
         char *strRange = StringTrim(token);
         long start, end, fileLen;

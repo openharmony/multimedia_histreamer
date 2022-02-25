@@ -16,16 +16,10 @@
 #ifndef HISTREAMER_PIPELINE_CORE_PIPELINE_H
 #define HISTREAMER_PIPELINE_CORE_PIPELINE_H
 
-#include <algorithm>
-#include <atomic>
-#include <functional>
 #include <initializer_list>
 #include <memory>
-#include <string>
-#include <vector>
 
 #include "filter.h"
-#include "error_code.h"
 
 namespace OHOS {
 namespace Media {
