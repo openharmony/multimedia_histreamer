@@ -333,8 +333,9 @@ void DemuxerFilter::ActivatePullMode()
             dataPacker_->PushData(std::move(bufferPtr), curOffset);
             return true;
         } else if (ret == ErrorCode::END_OF_STREAM) {
-            bool hasDataToRead = offset < curOffset;   // Ture if there is some data in data packer can be read.
-            if (hasDataToRead && !dataPacker_->IsEmpty()) {
+            // hasDataToRead is ture if there is some data in data packer can be read.
+            bool hasDataToRead = offset < curOffset && (!dataPacker_->IsEmpty());
+            if (hasDataToRead) {
                 dataPacker_->SetEos();
             } else {
                 dataPacker_->Flush();

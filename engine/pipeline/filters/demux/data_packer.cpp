@@ -146,9 +146,9 @@ bool DataPacker::PeekRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPt
 bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr, bool isGet)
 {
     MEDIA_LOG_D("PeekRangeInternal (offset, size) = (" PUBLIC_LOG_U64 ", " PUBLIC_LOG_U32 ")...", offset, size);
-    int32_t usedCount = 1, startIndex = 0; // The index of buffer that we first use
+    int32_t startIndex = 0; // The index of buffer that we first use
     size_t copySize = 0;
-    uint32_t needCopySize = size, firstBufferOffset = 0, lastBufferOffsetEnd = 0;
+    uint32_t needCopySize = size, firstBufferOffset = 0;
     uint8_t* dstPtr = AudioBufferWritableData(bufferPtr, needCopySize);
     FALSE_RETURN_V(dstPtr != nullptr, false);
 
@@ -180,8 +180,7 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
         dstPtr += copySize;
 
         // First buffer is not enough, copy from successive buffers
-        usedCount += CopyFromSuccessiveBuffer(prevOffset, offsetEnd, startIndex, dstPtr, needCopySize,
-                                              lastBufferOffsetEnd);
+        (void)CopyFromSuccessiveBuffer(prevOffset, offsetEnd, startIndex, dstPtr, needCopySize);
     }
     EXEC_WHEN_GET(isGet, currentGet_ = Position(startIndex, firstBufferOffset, offset));
 
@@ -366,9 +365,8 @@ size_t DataPacker::CopyFirstBuffer(size_t size, int32_t index, uint8_t *dstPtr, 
 // startIndex : the index start copy data for this GetRange. CopyFromSuccessiveBuffer process from startIndex + 1.
 // dstPtr : copy data to here
 // needCopySize : in and out, indicate how many bytes still need to copy.
-// lastBufferOffsetEnd : the last buffer's buffer offset, that before it are copied to dstPtr.
 int32_t DataPacker::CopyFromSuccessiveBuffer(uint64_t prevOffset, uint64_t offsetEnd, int32_t startIndex,
-                                             uint8_t *dstPtr, uint32_t &needCopySize, uint32_t &lastBufferOffsetEnd)
+                                             uint8_t *dstPtr, uint32_t &needCopySize)
 {
     size_t copySize;
     int32_t usedCount = 0;
@@ -379,7 +377,6 @@ int32_t DataPacker::CopyFromSuccessiveBuffer(uint64_t prevOffset, uint64_t offse
         curOffsetEnd = prevOffset + AudioBufferSize(que_[i]);
         if (curOffsetEnd >= offsetEnd) { // This buffer is enough
             NZERO_LOG(memcpy_s(dstPtr, needCopySize, AudioBufferReadOnlyData(que_[i]), needCopySize));
-            lastBufferOffsetEnd = needCopySize;
             needCopySize = 0;
             return usedCount; // Finished copy buffer
         } else {

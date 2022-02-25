@@ -91,7 +91,7 @@ private:
                            int32_t bufferOffset);
 
     int32_t CopyFromSuccessiveBuffer(uint64_t prevOffset, uint64_t offsetEnd, int32_t startIndex, uint8_t *dstPtr,
-                                     uint32_t &needCopySize, uint32_t &lastBufferOffsetEnd);
+                                     uint32_t &needCopySize);
 
     void RemoveOldData();
 
