@@ -71,7 +71,7 @@ Plugin::Status DemuxerFilter::DataSourceImpl::ReadAt(int64_t offset, std::shared
             MEDIA_LOG_E("ReadAt error due to DEMUXER_STATE_NULL");
             break;
         case DemuxerState::DEMUXER_STATE_PARSE_HEADER: {
-            if (filter.peekRange_(static_cast<uint64_t>(offset), expectedLen, buffer)) {
+            if (filter.getRange_(static_cast<uint64_t>(offset), expectedLen, buffer)) {
                 DUMP_BUFFER2FILE("demuxer_input_peek.data", buffer);
             } else {
                 rtv = Plugin::Status::ERROR_NOT_ENOUGH_DATA;
