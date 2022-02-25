@@ -25,6 +25,7 @@ declare_args() {
   multimedia_histreamer_enable_plugin_std_audio_capture = false
   multimedia_histreamer_enable_plugin_file_sink = false
   multimedia_histreamer_enable_plugin_audio_server_sink = false
+  multimedia_histreamer_enable_plugin_lite_aac_decoder = false
 
   multimedia_histreamer_enable_recorder = false
 

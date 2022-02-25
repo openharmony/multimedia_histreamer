@@ -22,9 +22,7 @@
 #include <set>
 
 #include "interface/demuxer_plugin.h"
-#include "foundation/osal/thread/mutex.h"
 #include "minimp4.h"
-
 
 namespace OHOS {
 namespace Media {
@@ -38,13 +36,12 @@ public:
     Status Deinit() override;
     Status Prepare() override;
     Status Reset() override;
-    Status Start() override;
     Status Stop() override;
     bool IsParameterSupported(Tag tag) override;
     Status GetParameter(Tag tag, ValueType& value) override;
     Status SetParameter(Tag tag, const ValueType& value) override;
     std::shared_ptr<Allocator> GetAllocator() override;
-    Status SetCallback(const std::shared_ptr<Callback>& cb) override;
+    Status SetCallback(Callback* cb) override;
     Status SetDataSource(const std::shared_ptr<DataSource>& source) override;
     Status GetMediaInfo(MediaInfo& mediaInfo) override;
     Status ReadFrame(Buffer& info, int32_t timeOutMs) override;
@@ -56,8 +53,11 @@ public:
     size_t GetFileSize();
     std::shared_ptr<DataSource> GetInputBuffer();
     Status AudioAdapterForDecoder();
+    Status DoReadFromSource(uint32_t ioNeedReadSize);
+    Status GetDataFromSource();
 private:
-    void FillADTSHead(std::shared_ptr<Memory> &data, uint32_t frameSize);
+    void FillADTSHead(std::shared_ptr<Memory> &data, unsigned int frameSize);
+    static int ReadCallback(int64_t offset, void *buffer, size_t size, void *token);
     struct IOContext {
         std::shared_ptr<DataSource> dataSource {nullptr};
         int64_t offset {0};
@@ -67,8 +67,11 @@ private:
     std::shared_ptr<Callback> callback_ {nullptr};
     MP4D_demux_t miniMP4_;
     size_t fileSize_;
-    uint32_t sampleIndex_;
+    unsigned int sampleIndex_;
     std::unique_ptr<MediaInfo> mediaInfo_;
+    unsigned char *inIoBuffer_;
+    unsigned int  ioDataRemainSize_;
+    int           inIoBufferSize_;
 };
 } // namespace Minimp4
 } // namespace Plugin

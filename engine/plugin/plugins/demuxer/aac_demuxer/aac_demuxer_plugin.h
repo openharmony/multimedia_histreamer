@@ -20,9 +20,7 @@
 #include <string>
 #include <vector>
 
-#include "core/plugin_register.h"
 #include "interface/demuxer_plugin.h"
-#include "thread/mutex.h"
 
 namespace OHOS {
 namespace Media {
@@ -61,7 +59,7 @@ public:
     Status GetParameter(Tag tag, ValueType& value) override;
     Status SetParameter(Tag tag, const ValueType& value) override;
     std::shared_ptr<Allocator> GetAllocator() override;
-    Status SetCallback(const std::shared_ptr<Callback>& cb) override;
+    Status SetCallback(Callback* cb) override;
 
     Status SetDataSource(const std::shared_ptr<DataSource>& source) override;
     Status GetMediaInfo(MediaInfo& mediaInfo) override;

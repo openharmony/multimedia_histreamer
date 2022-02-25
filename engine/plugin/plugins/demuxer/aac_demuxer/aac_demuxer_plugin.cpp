@@ -21,7 +21,6 @@
 #include <cstring>
 #include <new>
 #include <securec.h>
-#include "core/plugin_manager.h"
 #include "foundation/log.h"
 #include "osal/thread/scoped_lock.h"
 #include "plugin/common/plugin_buffer.h"
@@ -35,11 +34,11 @@ namespace {
     constexpr uint32_t PROBE_READ_LENGTH = 2;
     constexpr uint32_t GET_INFO_READ_LEN = 7;
     constexpr uint32_t MEDIA_IO_SIZE = 2048;
+    constexpr uint32_t MAX_RANK = 100;
     int samplingRateMap[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350};
     int IsAACPattern(const uint8_t *data);
     int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource);
     Status RegisterPlugin(const std::shared_ptr<Register>& reg);
-    void UpdatePluginDefinition(CodecPluginDef& definition);
 }
 
 AACDemuxerPlugin::AACDemuxerPlugin(std::string name)
@@ -74,7 +73,7 @@ Status AACDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
     auto bufData = buffer->AllocMemory(nullptr, GET_INFO_READ_LEN);
     uint8_t *inputDataPtr = nullptr;
     auto result = ioContext_.dataSource->ReadAt(ioContext_.offset, buffer, static_cast<size_t>(GET_INFO_READ_LEN));
-    inputDataPtr = (uint8_t *)bufData->GetReadOnlyData();
+    inputDataPtr = const_cast<uint8_t *>(bufData->GetReadOnlyData());
     int ret = AudioDemuxerAACPrepare(inputDataPtr, bufData->GetSize(), &aacDemuxerRst_);
     if (ret == 0) {
         mediaInfo.tracks.resize(1);
@@ -83,14 +82,14 @@ Status AACDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
         } else {
             mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::STEREO});
         }
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_RATE, (uint32_t)aacDemuxerRst_.frameSampleRate});
-        mediaInfo.tracks[0].insert({Tag::MEDIA_BITRATE, (uint32_t)aacDemuxerRst_.frameBitrateKbps});
-        mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNELS, (uint32_t)aacDemuxerRst_.frameChannels});
-        mediaInfo.tracks[0].insert({Tag::TRACK_ID, (uint32_t)0});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(aacDemuxerRst_.frameSampleRate)});
+        mediaInfo.tracks[0].insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(aacDemuxerRst_.frameBitrateKbps)});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(aacDemuxerRst_.frameChannels)});
+        mediaInfo.tracks[0].insert({Tag::TRACK_ID, static_cast<uint32_t>(0)});
         mediaInfo.tracks[0].insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_AAC)});
-        mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_VERSION, (uint32_t)aacDemuxerRst_.mpegVersion});
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::S16P});
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_PER_FRAME, (uint32_t)(1024)});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(aacDemuxerRst_.mpegVersion)});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::S16});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(1024)});   // 1024
         mediaInfo.tracks[0].insert({Tag::AUDIO_AAC_PROFILE, AudioAacProfile::LC});
         mediaInfo.tracks[0].insert({Tag::AUDIO_AAC_STREAM_FORMAT, AudioAacStreamFormat::MP4ADTS});
         return Status::OK;
@@ -113,7 +112,7 @@ Status AACDemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
         return result;
     }
 
-    uint8_t *inputPtr = (uint8_t *)bufData->GetReadOnlyData();
+    uint8_t *inputPtr = const_cast<uint8_t *>(bufData->GetReadOnlyData());
     status = AudioDemuxerAACProcess(inputPtr, bufData->GetSize(), &aacDemuxerRst_);
 
     if (outBuffer.IsEmpty()) {
@@ -199,7 +198,7 @@ std::shared_ptr<Allocator> AACDemuxerPlugin::GetAllocator()
     return nullptr;
 }
 
-Status AACDemuxerPlugin::SetCallback(const std::shared_ptr<Callback>& cb)
+Status AACDemuxerPlugin::SetCallback(Callback* cb)
 {
     return Status::OK;
 }
@@ -226,7 +225,7 @@ Status AACDemuxerPlugin::GetSelectedTracks(std::vector<int32_t>& trackIds)
 
 int AACDemuxerPlugin::getFrameLength(const uint8_t *data)
 {
-    return ((data[3] & 0x03) << 11) | (data[4] << 3) | ((data[5] & 0xE0) >> 5);
+    return ((data[3] & 0x03) << 11) | (data[4] << 3) | ((data[5] & 0xE0) >> 5); // 根据协议计算帧长
 }
 
 int AACDemuxerPlugin::AudioDemuxerAACOpen(AudioDemuxerUserArg *userArg)
@@ -242,7 +241,7 @@ int AACDemuxerPlugin::AudioDemuxerAACClose()
 int AACDemuxerPlugin::AudioDemuxerAACPrepare(const uint8_t *buf, uint32_t len, AACDemuxerRst *rst)
 {
     if (IsAACPattern(buf)) {
-        int mpegVersionIndex  = ((buf[1] & 0x0F) >> 3);
+        int mpegVersionIndex  = ((buf[1] & 0x0F) >> 3); // 根据协议计算 mpegVersionIndex
         int mpegVersion = -1;
         if (mpegVersionIndex == 0) {
             mpegVersion = 4; // 4
@@ -252,8 +251,8 @@ int AACDemuxerPlugin::AudioDemuxerAACPrepare(const uint8_t *buf, uint32_t len, A
             return -1;
         }
 
-        int sampleIndex = ((buf[2] & 0x3C) >> 2);
-        int channelCount = ((buf[2] & 0x01) << 2) | ((buf[3] & 0xC0) >> 6);
+        int sampleIndex = ((buf[2] & 0x3C) >> 2); // 根据协议计算 sampleIndex
+        int channelCount = ((buf[2] & 0x01) << 2) | ((buf[3] & 0xC0) >> 6); // 根据协议计算 channelCount
 
         int sample = samplingRateMap[sampleIndex];
 
@@ -296,7 +295,7 @@ int AACDemuxerPlugin::AudioDemuxerAACProcess(const uint8_t *buffer, uint32_t buf
         }
 
         if (IsAACPattern(buffer + length)) {
-            rst->frameBuffer = (uint8_t *)malloc(length);
+            rst->frameBuffer = static_cast<uint8_t *>(malloc(length));
             if (rst->frameBuffer) {
                 FALSE_LOG(memcpy_s(rst->frameBuffer, length, buffer, length) == 0);
                 rst->frameLength = length;
@@ -327,7 +326,7 @@ int AACDemuxerPlugin::AudioDemuxerAACFreeFrame(uint8_t *frame)
 namespace {
     int IsAACPattern(const uint8_t *data)
     {
-        return data[0] == 0xff && (data[1] & 0xf0) == 0xf0 && (data[1] & 0x06) == 0x00;
+        return data[0] == 0xff && (data[1] & 0xf0) == 0xf0 && (data[1] & 0x06) == 0x00; // 根据协议判断是否为AAC帧
     }
 
     int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource)
@@ -342,19 +341,20 @@ namespace {
             return 0;
         }
 
-        inputDataPtr = (uint8_t *)bufData->GetReadOnlyData();
+        inputDataPtr = const_cast<uint8_t *>(bufData->GetReadOnlyData());
         if (IsAACPattern(inputDataPtr) == 0) {
+            MEDIA_LOG_W("Not AAC format");
             return 0;
         }
 
-        return 100; // 100
+        return MAX_RANK;
     }
 
     Status RegisterPlugin(const std::shared_ptr<Register>& reg)
     {
         MEDIA_LOG_I("RegisterPlugin called.");
         if (!reg) {
-            MEDIA_LOG_I("RegisterPlugin failed due to nullptr pointer for reg.");
+            MEDIA_LOG_E("RegisterPlugin failed due to nullptr pointer for reg.");
             return Status::ERROR_INVALID_PARAMETER;
         }
 
@@ -362,7 +362,7 @@ namespace {
         DemuxerPluginDef regInfo;
         regInfo.name = pluginName;
         regInfo.description = "adapter for aac demuxer plugin";
-        regInfo.rank = 100; // 100
+        regInfo.rank = MAX_RANK;
         regInfo.creator = [](const std::string &name) -> std::shared_ptr<DemuxerPlugin> {
             return std::make_shared<AACDemuxerPlugin>(name);
         };

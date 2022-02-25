@@ -28,6 +28,8 @@ print("histreamer plugin: stream_source =",
       multimedia_histreamer_enable_plugin_stream_source)
 print("histreamer plugin: audio_server_sink =",
       multimedia_histreamer_enable_plugin_audio_server_sink)
+print("histreamer plugin:lite_aac_decoder =",
+      multimedia_histreamer_enable_plugin_lite_aac_decoder)
 
 group("histreamer_plugin_store") {
   deps = []
@@ -45,6 +47,10 @@ group("histreamer_plugin_store") {
 
   if (multimedia_histreamer_enable_plugin_aac_demuxer) {
     deps += [ "demuxer/aac_demuxer:plugin_aac_demuxer" ]
+  }
+
+  if (multimedia_histreamer_enable_plugin_lite_aac_decoder) {
+    deps += [ "lite_aac_decoder:plugin_lite_aac_decoder_adapter" ]
   }
 
   if (multimedia_histreamer_enable_plugin_file_source) {
@@ -106,6 +112,10 @@ action("gen_plugin_static_header") {
 
     if (multimedia_histreamer_enable_plugin_minimp4_demuxer) {
       args += [ "MiniMP4Demuxer" ]
+    }
+
+    if (multimedia_histreamer_enable_plugin_lite_aac_decoder) {
+      args += [ "LiteAACDecoder" ]
     }
 
     if (multimedia_histreamer_enable_plugin_aac_demuxer) {
