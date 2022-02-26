@@ -51,14 +51,6 @@ public:
 
     Status Stop() override;
 
-    bool IsParameterSupported(Tag tag) override
-    {
-        if (tag == Tag::REQUIRED_OUT_BUFFER_CNT) {
-            return true;
-        }
-        return false;
-    }
-
     Status GetParameter(Tag tag, ValueType& value) override;
 
     Status SetParameter(Tag tag, const ValueType& value) override;
@@ -83,14 +75,20 @@ public:
     }
 
 private:
-    void InitCodecContextExtraDataLocked();
+    Status AssignExtraDataIfExistsLocked(const std::shared_ptr<AVCodecContext>& ctx);
+
+    Status OpenCtxLocked();
+
+    Status CloseCtxLocked();
+
+    Status StopLocked();
 
     Status ResetLocked();
 
     Status DeInitLocked();
 
     template <typename T>
-    bool FindInParameterMapThenAssignLocked(Tag tag, T& assign);
+    Status FindInParameterMapThenAssignLocked(Tag tag, T& assign);
 
     Status SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer);
 

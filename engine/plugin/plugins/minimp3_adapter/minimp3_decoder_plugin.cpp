@@ -119,12 +119,6 @@ Status Minimp3DecoderPlugin::Stop()
     return Status::OK;
 }
 
-bool Minimp3DecoderPlugin::IsParameterSupported(Tag tag)
-{
-    (void)tag;
-    return false;
-}
-
 std::shared_ptr<Allocator> Minimp3DecoderPlugin::GetAllocator()
 {
     return nullptr;

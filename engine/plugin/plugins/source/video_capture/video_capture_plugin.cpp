@@ -174,12 +174,6 @@ Status VideoCapturePlugin::Stop()
     return Status::OK;
 }
 
-bool VideoCapturePlugin::IsParameterSupported(Tag tag)
-{
-    MEDIA_LOG_D("IN");
-    return false;
-}
-
 Status VideoCapturePlugin::GetParameter(Tag tag, ValueType& value)
 {
     MEDIA_LOG_D("IN");

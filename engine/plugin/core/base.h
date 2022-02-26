@@ -72,8 +72,6 @@ public:
 
     virtual Status Stop();
 
-    virtual bool IsParameterSupported(Tag tag);
-
     virtual Status GetParameter(Tag tag, ValueType &value);
 
     virtual Status SetParameter(Tag tag, const ValueType &value);

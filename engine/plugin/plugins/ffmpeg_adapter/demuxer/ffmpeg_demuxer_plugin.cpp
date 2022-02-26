@@ -116,26 +116,6 @@ Status FFmpegDemuxerPlugin::Reset()
     return Status::OK;
 }
 
-Status FFmpegDemuxerPlugin::Start()
-{
-    return Status::OK;
-}
-
-Status FFmpegDemuxerPlugin::Stop()
-{
-    return Status::OK;
-}
-
-/**
- * IsParameterSupported no need supported by demuxer
- * @return return false always.
- */
-bool FFmpegDemuxerPlugin::IsParameterSupported(Tag tag)
-{
-    (void)tag;
-    return false;
-}
-
 /**
  * GetParameter no need supported by demuxer
  * @return return ERROR_UNIMPLEMENTED always.

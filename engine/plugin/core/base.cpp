@@ -133,11 +133,6 @@ Status Base::Stop()
     return ret;
 }
 
-bool Base::IsParameterSupported(Tag tag)
-{
-    return plugin_->IsParameterSupported(tag);
-}
-
 Status Base::GetParameter(Tag tag, ValueType& value)
 {
     return plugin_->GetParameter(tag, value);

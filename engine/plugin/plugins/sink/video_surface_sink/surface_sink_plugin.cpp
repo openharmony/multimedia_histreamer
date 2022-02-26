@@ -166,11 +166,6 @@ Status SurfaceSinkPlugin::Stop()
     return Status::OK;
 }
 
-bool SurfaceSinkPlugin::IsParameterSupported(Tag tag)
-{
-    return false;
-}
-
 Status SurfaceSinkPlugin::GetParameter(Tag tag, ValueType& value)
 {
     return Status::ERROR_UNIMPLEMENTED;

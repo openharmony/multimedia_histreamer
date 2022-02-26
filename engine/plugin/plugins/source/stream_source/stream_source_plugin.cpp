@@ -142,12 +142,6 @@ Status StreamSourcePlugin::Stop()
     return Status::OK;
 }
 
-bool StreamSourcePlugin::IsParameterSupported(Tag tag)
-{
-    MEDIA_LOG_D("IN");
-    return true;
-}
-
 Status StreamSourcePlugin::GetParameter(Tag tag, ValueType& value)
 {
     MEDIA_LOG_D("IN");

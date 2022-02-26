@@ -51,8 +51,6 @@ public:
 
     Media::Plugin::Status Stop() override;
 
-    bool IsParameterSupported(Media::Plugin::Tag tag) override;
-
     Media::Plugin::Status GetParameter(Media::Plugin::Tag tag, Media::Plugin::ValueType& value) override;
 
     Media::Plugin::Status SetParameter(Media::Plugin::Tag tag, const Media::Plugin::ValueType& value) override;

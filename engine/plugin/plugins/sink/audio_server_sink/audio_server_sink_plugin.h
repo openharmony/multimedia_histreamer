@@ -56,11 +56,6 @@ public:
 
     Plugin::Status Stop() override;
 
-    bool IsParameterSupported(Plugin::Tag tag) override
-    {
-        return true;
-    }
-
     Plugin::Status GetParameter(Plugin::Tag tag, Plugin::ValueType& para) override;
 
     Plugin::Status SetParameter(Plugin::Tag tag, const Plugin::ValueType& para) override;

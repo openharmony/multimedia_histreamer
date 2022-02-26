@@ -18,6 +18,7 @@
 
 #include <map> // NOLINT
 #include <string>
+#include <vector> // NOLINT
 #include "any.h" // NOLINT
 
 namespace OHOS {
@@ -147,6 +148,7 @@ using ValueType = Any;
  * The tag content is stored in key-value format.
  */
 using TagMap = std::map<Tag, ValueType>;
+using CodecConfig = std::vector<uint8_t>;
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

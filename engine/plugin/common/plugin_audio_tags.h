@@ -113,6 +113,7 @@ enum struct AudioChannelLayout : uint64_t {
  * @version 1.0
  */
 enum struct AudioSampleFormat : uint8_t {
+    NONE,
     /* 8 bit */
     S8, U8, S8P, U8P,
     /* 16 bit */

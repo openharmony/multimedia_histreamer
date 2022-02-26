@@ -172,14 +172,6 @@ Status LiteAACDecoderPlugin::Stop()
     return Status::OK;
 }
 
-bool LiteAACDecoderPlugin::IsParameterSupported(Tag tag)
-{
-    if (tag == Tag::REQUIRED_OUT_BUFFER_CNT) {
-        return true;
-    }
-    return false;
-}
-
 std::shared_ptr<Allocator> LiteAACDecoderPlugin::GetAllocator()
 {
     return nullptr;

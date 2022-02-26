@@ -41,7 +41,6 @@ public:
     Plugin::Status Reset() override;
     Plugin::Status Start() override;
     Plugin::Status Stop() override;
-    bool IsParameterSupported(Plugin::Tag tag) override;
     Plugin::Status GetParameter(Plugin::Tag tag, Plugin::ValueType& value) override;
     Plugin::Status SetParameter(Plugin::Tag tag, const Plugin::ValueType& value) override;
     std::shared_ptr<Plugin::Allocator> GetAllocator() override;

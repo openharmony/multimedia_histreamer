@@ -108,8 +108,6 @@ else ()
     file(GLOB_RECURSE PLAT_PLUGIN_SRCS
             ${TOP_DIR}/engine/plugin/plugins/source/audio_capture/*.cpp
             ${TOP_DIR}/engine/plugin/plugins/source/video_capture/*.cpp
-            ${TOP_DIR}/engine/plugin/plugins/sink/audio_server_sink/*.cpp
-            ${TOP_DIR}/engine/plugin/plugins/sink/video_surface_sink/*.cpp
             )
 endif ()
 

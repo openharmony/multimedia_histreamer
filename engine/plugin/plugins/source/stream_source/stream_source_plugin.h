@@ -70,7 +70,6 @@ public:
     Status Reset() override;
     Status Start() override;
     Status Stop() override;
-    bool IsParameterSupported(Tag tag) override;
     Status GetParameter(Tag tag, ValueType& value) override;
     Status SetParameter(Tag tag, const ValueType& value) override;
     std::shared_ptr<Allocator> GetAllocator() override;

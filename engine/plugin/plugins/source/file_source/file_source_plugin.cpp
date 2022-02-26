@@ -111,24 +111,6 @@ Status FileSourcePlugin::Reset()
     return Status::OK;
 }
 
-Status FileSourcePlugin::Start()
-{
-    MEDIA_LOG_D("IN");
-    return Status::OK;
-}
-
-Status FileSourcePlugin::Stop()
-{
-    MEDIA_LOG_D("IN");
-    return Status::OK;
-}
-
-bool FileSourcePlugin::IsParameterSupported(Tag tag)
-{
-    MEDIA_LOG_D("IN");
-    return false;
-}
-
 Status FileSourcePlugin::GetParameter(Tag tag, ValueType& value)
 {
     MEDIA_LOG_D("IN");

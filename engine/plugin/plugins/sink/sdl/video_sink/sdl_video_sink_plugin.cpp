@@ -263,11 +263,6 @@ Status SdlVideoSinkPlugin::Stop()
     return Status::OK;
 }
 
-bool SdlVideoSinkPlugin::IsParameterSupported(Tag tag)
-{
-    return false;
-}
-
 Status SdlVideoSinkPlugin::GetParameter(Tag tag, ValueType& value)
 {
     return Status::ERROR_UNIMPLEMENTED;

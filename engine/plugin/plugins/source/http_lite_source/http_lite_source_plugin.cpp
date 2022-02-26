@@ -155,15 +155,6 @@ Status HttpSourcePlugin::Stop()
     }
 }
 
-bool HttpSourcePlugin::IsParameterSupported(Tag tag)
-{
-    MEDIA_LOG_D("IN");
-    if (tag == Tag::BUFFERING_SIZE || tag == Tag::WATERLINE_HIGH) {
-        return true;
-    }
-    return false;
-}
-
 Status HttpSourcePlugin::GetParameter(Tag tag, ValueType &value)
 {
     OSAL::ScopedLock lock(httpMutex_);

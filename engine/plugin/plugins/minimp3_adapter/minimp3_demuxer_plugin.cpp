@@ -356,11 +356,6 @@ Status Minimp3DemuxerPlugin::Stop()
     return Status::OK;
 }
 
-bool Minimp3DemuxerPlugin::IsParameterSupported(Tag tag)
-{
-    return false;
-}
-
 Status Minimp3DemuxerPlugin::GetParameter(Tag tag, ValueType &value)
 {
     return Status::ERROR_UNIMPLEMENTED;

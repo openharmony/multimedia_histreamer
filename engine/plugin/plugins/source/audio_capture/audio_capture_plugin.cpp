@@ -248,12 +248,6 @@ Status AudioCapturePlugin::Stop()
     return Status::OK;
 }
 
-bool AudioCapturePlugin::IsParameterSupported(Tag tag)
-{
-    MEDIA_LOG_D("IN");
-    return false;
-}
-
 Status AudioCapturePlugin::GetParameter(Tag tag, ValueType& value)
 {
     MEDIA_LOG_D("IN");

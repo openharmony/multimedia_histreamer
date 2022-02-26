@@ -435,12 +435,6 @@ Status HdiSink::Stop()
     return Status::OK;
 }
 
-bool HdiSink::IsParameterSupported(Tag tag)
-{
-    UNUSED_VARIABLE(tag);
-    return false;
-}
-
 std::shared_ptr<Allocator> HdiSink::GetAllocator()
 {
     return nullptr;

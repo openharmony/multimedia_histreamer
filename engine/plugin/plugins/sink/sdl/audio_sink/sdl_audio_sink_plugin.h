@@ -52,8 +52,6 @@ public:
 
     Status Stop() override;
 
-    bool IsParameterSupported(Tag tag) override;
-
     Status GetParameter(Tag tag, ValueType &value) override;
 
     Status SetParameter(Tag tag, const ValueType &value) override;

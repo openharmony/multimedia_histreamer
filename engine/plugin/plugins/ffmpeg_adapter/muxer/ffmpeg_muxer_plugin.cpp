@@ -184,7 +184,7 @@ do { \
     using namespace Plugin;
     using namespace Ffmpeg;
     auto ret = SetSingleParameter<AudioSampleFormat, int32_t>(Tag::AUDIO_SAMPLE_FORMAT, tagMap,
-                                                              stream->codecpar->format, Trans2FFmepgFormat);
+                                                              stream->codecpar->format, ConvP2FfSampleFmt);
     std::function<int32_t(uint32_t)> ui2iFunc = [](uint32_t i) {return i;};
 
     RETURN_IF_NOT_OK(ret);

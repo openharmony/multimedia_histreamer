@@ -178,11 +178,6 @@ Status AACDemuxerPlugin::Stop()
     return Status::OK;
 }
 
-bool AACDemuxerPlugin::IsParameterSupported(Tag tag)
-{
-    return false;
-}
-
 Status AACDemuxerPlugin::GetParameter(Tag tag, ValueType &value)
 {
     return Status::ERROR_UNIMPLEMENTED;

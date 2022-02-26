@@ -72,7 +72,7 @@ void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream, const std::sha
             samplesPerFrame = static_cast<uint32_t>(context->frame_size);
         }
         meta.insert({Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame});
-        meta.insert({Tag::AUDIO_SAMPLE_FORMAT, Trans2Format(context->sample_fmt)});
+        meta.insert({Tag::AUDIO_SAMPLE_FORMAT, ConvFf2PSampleFmt(context->sample_fmt)});
         meta.insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(context->bit_rate)});
     }
 }
@@ -141,7 +141,7 @@ void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_
     if (context->channels != -1) {
         meta.insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(context->sample_rate)});
         meta.insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(context->channels)});
-        meta.insert({Tag::AUDIO_SAMPLE_FORMAT, Trans2Format(context->sample_fmt)});
+        meta.insert({Tag::AUDIO_SAMPLE_FORMAT, ConvFf2PSampleFmt(context->sample_fmt)});
         meta.insert(
             {Tag::AUDIO_CHANNEL_LAYOUT, ConvertChannelLayoutFromFFmpeg(context->channels, context->channel_layout)});
         meta.insert({Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(context->frame_size)});

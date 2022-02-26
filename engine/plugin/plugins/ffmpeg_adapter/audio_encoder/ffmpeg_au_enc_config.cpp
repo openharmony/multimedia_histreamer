@@ -51,7 +51,7 @@ void ConfigAudioCommonAttr(AVCodecContext& codecContext, const std::map<Tag, Val
     ASSIGN_IF_NOT_NULL(FindTagInMap<int64_t>(Tag::MEDIA_BITRATE, tagStore), codecContext.bit_rate);
     auto audioSampleFmtPtr = FindTagInMap<AudioSampleFormat>(Tag::AUDIO_SAMPLE_FORMAT, tagStore);
     if (audioSampleFmtPtr != nullptr) {
-        auto ffFmt = Trans2FFmepgFormat(*audioSampleFmtPtr);
+        auto ffFmt = ConvP2FfSampleFmt(*audioSampleFmtPtr);
         if (ffFmt != AV_SAMPLE_FMT_NONE) {
             codecContext.sample_fmt = ffFmt;
         }

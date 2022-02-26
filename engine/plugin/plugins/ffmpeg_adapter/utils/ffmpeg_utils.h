@@ -76,9 +76,9 @@ std::vector<std::string> SplitString(const char* str, char delimiter);
 
 std::vector<std::string> SplitString(const std::string& string, char delimiter);
 
-AudioSampleFormat Trans2Format(AVSampleFormat sampleFormat);
+AudioSampleFormat ConvFf2PSampleFmt(AVSampleFormat sampleFormat);
 
-AVSampleFormat Trans2FFmepgFormat(AudioSampleFormat sampleFormat);
+AVSampleFormat ConvP2FfSampleFmt(AudioSampleFormat sampleFormat);
 
 AudioChannelLayout ConvertChannelLayoutFromFFmpeg(int channels, uint64_t ffChannelLayout);
 

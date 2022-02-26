@@ -103,15 +103,6 @@ Status HttpSourcePlugin::Stop()
     return Status::OK;
 }
 
-bool HttpSourcePlugin::IsParameterSupported(Tag tag)
-{
-    MEDIA_LOG_D("IN");
-    if (tag == Tag::BUFFERING_SIZE || tag == Tag::WATERLINE_HIGH) {
-        return true;
-    }
-    return false;
-}
-
 #undef ERROR_INVALID_PARAMETER
 
 Status HttpSourcePlugin::GetParameter(Tag tag, ValueType &value)

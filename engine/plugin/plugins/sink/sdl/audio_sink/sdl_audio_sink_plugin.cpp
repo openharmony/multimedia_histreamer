@@ -200,12 +200,6 @@ Status SdlAudioSinkPlugin::Stop()
     return Status::OK;
 }
 
-bool SdlAudioSinkPlugin::IsParameterSupported(Tag tag)
-{
-    UNUSED_VARIABLE(tag);
-    return false;
-}
-
 Status SdlAudioSinkPlugin::GetParameter(Tag tag, ValueType& value)
 {
     UNUSED_VARIABLE(tag);

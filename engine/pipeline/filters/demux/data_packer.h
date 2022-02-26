@@ -56,7 +56,7 @@ public:
         uint32_t bufferOffset; // Offset in the buffer
         uint64_t mediaOffset;  // Offset in the media file
 
-        Position(int32_t index, uint32_t bufferOffset, uint64_t mediaOffset)
+        Position(int32_t index, uint32_t bufferOffset, uint64_t mediaOffset) noexcept
         {
             this->index = index;
             this->bufferOffset = bufferOffset;

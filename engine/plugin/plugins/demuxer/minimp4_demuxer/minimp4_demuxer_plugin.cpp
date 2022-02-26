@@ -119,12 +119,6 @@ Status MiniMP4DemuxerPlugin::Stop()
     return Status::OK;
 }
 
-bool MiniMP4DemuxerPlugin::IsParameterSupported(Tag tag)
-{
-    (void)tag;
-    return false;
-}
-
 Status MiniMP4DemuxerPlugin::GetParameter(Tag tag, ValueType &value)
 {
     (void)tag;

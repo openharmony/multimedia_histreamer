@@ -76,11 +76,11 @@ bool FileSystem::MakeMultipleDir(const std::string& path)
 
     // pos is 1, not 0  example: D:/a/b, /local/tmp/
     // Avoid Linux root path before is empty string, which makes it impossible to judge whether the path exists
-    auto index = path.find("/", 1);
+    auto index = path.find('/', 1);
     while (index != std::string::npos) {
         std::string tPath = path.substr(0, index);
         FALSE_RETURN_V(IsExists(tPath) || MakeDir(tPath), false);
-        index = path.find("/", index + 1);
+        index = path.find('/', index + 1);
     }
     return path[path.size() - 1] == '/' || MakeDir(path);
 }

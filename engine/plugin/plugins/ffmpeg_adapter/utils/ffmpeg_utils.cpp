@@ -140,6 +140,20 @@ std::map<VideoH264Profile, int32_t> g_H264ProfileMap = {
     {VideoH264Profile::HIGH422, FF_PROFILE_H264_HIGH_422},
     {VideoH264Profile::HIGH444, FF_PROFILE_H264_HIGH_444}
 };
+std::vector<std::pair<AudioSampleFormat, AVSampleFormat>> g_pFfSampleFmtMap = {
+    {AudioSampleFormat::U8,  AVSampleFormat::AV_SAMPLE_FMT_U8},
+    {AudioSampleFormat::U8P, AVSampleFormat::AV_SAMPLE_FMT_U8P},
+    {AudioSampleFormat::S16, AVSampleFormat::AV_SAMPLE_FMT_S16},
+    {AudioSampleFormat::S16P, AVSampleFormat::AV_SAMPLE_FMT_S16P},
+    {AudioSampleFormat::S32, AVSampleFormat::AV_SAMPLE_FMT_S32},
+    {AudioSampleFormat::S32P, AVSampleFormat::AV_SAMPLE_FMT_S32P},
+    {AudioSampleFormat::F32, AVSampleFormat::AV_SAMPLE_FMT_FLT},
+    {AudioSampleFormat::F32P, AVSampleFormat::AV_SAMPLE_FMT_FLTP},
+    {AudioSampleFormat::F64, AVSampleFormat::AV_SAMPLE_FMT_DBL},
+    {AudioSampleFormat::F64P, AVSampleFormat::AV_SAMPLE_FMT_DBLP},
+    {AudioSampleFormat::S64, AVSampleFormat::AV_SAMPLE_FMT_S64},
+    {AudioSampleFormat::S64P, AVSampleFormat::AV_SAMPLE_FMT_S64P},
+};
 } // namespace
 
 std::string AVStrError(int errnum)
@@ -243,60 +257,28 @@ std::vector<std::string> SplitString(const std::string& str, char delimiter)
     return rtv;
 }
 
-AudioSampleFormat Trans2Format(AVSampleFormat sampleFormat)
+AudioSampleFormat ConvFf2PSampleFmt(AVSampleFormat sampleFormat)
 {
-    switch (sampleFormat) {
-        case AV_SAMPLE_FMT_U8:
-            return AudioSampleFormat::U8;
-        case AV_SAMPLE_FMT_U8P:
-            return AudioSampleFormat::U8P;
-        case AV_SAMPLE_FMT_S16:
-            return AudioSampleFormat::S16;
-        case AV_SAMPLE_FMT_S16P:
-            return AudioSampleFormat::S16P;
-        case AV_SAMPLE_FMT_S32:
-            return AudioSampleFormat::S32;
-        case AV_SAMPLE_FMT_S32P:
-            return AudioSampleFormat::S32P;
-        case AV_SAMPLE_FMT_FLT:
-            return AudioSampleFormat::F32;
-        case AV_SAMPLE_FMT_FLTP:
-            return AudioSampleFormat::F32P;
-        case AV_SAMPLE_FMT_DBL:
-            return AudioSampleFormat::F64;
-        case AV_SAMPLE_FMT_DBLP:
-            return AudioSampleFormat::F64P;
-        default:
-            return AudioSampleFormat::S16;
+    auto ite = std::find_if(g_pFfSampleFmtMap.begin(), g_pFfSampleFmtMap.end(),
+        [&sampleFormat] (const std::pair<AudioSampleFormat, AVSampleFormat>& item) ->bool {
+        return item.second == sampleFormat;
+    });
+    if (ite == g_pFfSampleFmtMap.end()) {
+        return AudioSampleFormat::NONE;
     }
+    return ite->first;
 }
 
-AVSampleFormat Trans2FFmepgFormat(AudioSampleFormat sampleFormat)
+AVSampleFormat ConvP2FfSampleFmt(AudioSampleFormat sampleFormat)
 {
-    switch (sampleFormat) {
-        case AudioSampleFormat::U8:
-            return AVSampleFormat::AV_SAMPLE_FMT_U8;
-        case AudioSampleFormat::U8P:
-            return AVSampleFormat::AV_SAMPLE_FMT_U8P;
-        case AudioSampleFormat::S16:
-            return AVSampleFormat::AV_SAMPLE_FMT_S16;
-        case AudioSampleFormat::S16P:
-            return AVSampleFormat::AV_SAMPLE_FMT_S16P;
-        case AudioSampleFormat::S32:
-            return AVSampleFormat::AV_SAMPLE_FMT_S32;
-        case AudioSampleFormat::S32P:
-            return AVSampleFormat::AV_SAMPLE_FMT_S32P;
-        case AudioSampleFormat::F32:
-            return AVSampleFormat::AV_SAMPLE_FMT_FLT;
-        case AudioSampleFormat::F32P:
-            return AVSampleFormat::AV_SAMPLE_FMT_FLTP;
-        case AudioSampleFormat::F64:
-            return AVSampleFormat::AV_SAMPLE_FMT_DBL;
-        case AudioSampleFormat::F64P:
-            return AVSampleFormat::AV_SAMPLE_FMT_DBLP;
-        default:
-            return AV_SAMPLE_FMT_NONE;
+    auto ite = std::find_if(g_pFfSampleFmtMap.begin(), g_pFfSampleFmtMap.end(),
+        [&sampleFormat] (const std::pair<AudioSampleFormat, AVSampleFormat>& item) ->bool {
+        return item.first == sampleFormat;
+    });
+    if (ite == g_pFfSampleFmtMap.end()) {
+        return AV_SAMPLE_FMT_NONE;
     }
+    return ite->second;
 }
 
 AudioChannelLayout ConvertChannelLayoutFromFFmpeg(int channels, uint64_t ffChannelLayout)

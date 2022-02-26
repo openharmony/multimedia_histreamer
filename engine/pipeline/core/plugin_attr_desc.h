@@ -204,7 +204,7 @@ inline const char* GetTagTypeStrName(Plugin::Tag tag)
     if (!HasTagInfo(tag)) {
         return nullptr;
     }
-    return std::get<2>(g_tagInfoMap.at(tag)); // secondary parameter
+    return std::get<2>(g_tagInfoMap.at(tag)); // secondary parameter 2
 }
 
 inline const Plugin::ValueType* GetTagDefValue(Plugin::Tag tag)
@@ -223,7 +223,7 @@ inline bool HasAudSampleFmtInfo(Plugin::AudioSampleFormat fmt)
 inline const char* GetAudSampleFmtNameStr(Plugin::AudioSampleFormat fmt)
 {
     if (!HasAudSampleFmtInfo(fmt)) {
-        return nullptr;
+        return "null";
     }
     return g_auSampleFmtStrMap.at(fmt);
 }
@@ -236,7 +236,7 @@ inline bool HasAudChanLyInfo(Plugin::AudioChannelLayout layout)
 inline const char* GetAudChanLyNameStr(Plugin::AudioChannelLayout layout)
 {
     if (!HasAudChanLyInfo(layout)) {
-        return nullptr;
+        return "null";
     }
     return g_auChannelLayoutStrMap.at(layout);
 }
