@@ -64,6 +64,7 @@ bool StreamingExecutor::Open(const std::string &url)
     requestSize_ = PER_REQUEST_SIZE;
     startPos_ = 0;
     isEos_ = false;
+    isHeaderUpdated = false;
     task_->Start();
     return true;
 }
@@ -114,25 +115,31 @@ bool StreamingExecutor::Seek(int offset)
 
 size_t StreamingExecutor::GetContentLength() const
 {
-    int times = 0;
-    while (headerInfo_.fileContentLen == 0 && times < RETRY_TIMES) { // Wait fileContentLen updated
-        OSAL::SleepFor(SLEEP_TIME);
-        times++;
-    }
+    WaitHeaderUpdated();
     FALSE_RET_V_MSG_E(headerInfo_.fileContentLen > 0, 0, "Could not get content length.");
-    MEDIA_LOG_D("headerInfo_.fileContentLen " PUBLIC_LOG_ZU ", times " PUBLIC_LOG_D32,
-                headerInfo_.fileContentLen, times);
     return headerInfo_.fileContentLen;
 }
 
 bool StreamingExecutor::IsStreaming() const
 {
+    WaitHeaderUpdated();
     return headerInfo_.isChunked;
 }
 
 void StreamingExecutor::SetCallback(Callback* cb)
 {
     callback_ = cb;
+}
+
+void StreamingExecutor::WaitHeaderUpdated() const
+{
+    int times = 0;
+    while (!isHeaderUpdated && times < RETRY_TIMES) { // Wait Header(fileContentLen etc.) updated
+        OSAL::SleepFor(SLEEP_TIME);
+        times++;
+    }
+    MEDIA_LOG_D("isHeaderUpdated " PUBLIC_LOG_D32 ", times " PUBLIC_LOG_D32,
+                isHeaderUpdated, times);
 }
 
 void StreamingExecutor::HttpDownloadThread()
@@ -267,6 +274,7 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
             info->fileContentLen = fileLen;
         }
     }
+    executor->isHeaderUpdated = true;
     return size * nitems;
 }
 }

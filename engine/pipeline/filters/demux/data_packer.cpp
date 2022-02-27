@@ -208,7 +208,7 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
     prevGet_ = currentGet_; // store last get position to prevGet_
 
     FALSE_RETURN_V(PeekRangeInternal(offset, size, bufferPtr, true), false);
-    if (isEos_) {
+    if (isEos_ && size_ <= size) { // Is EOS, and this time get all the data.
         FlushInternal();
     } else {
         RemoveOldData();
