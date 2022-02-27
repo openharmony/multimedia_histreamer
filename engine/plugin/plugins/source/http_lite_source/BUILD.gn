@@ -27,7 +27,7 @@ if (hst_is_lite_sys) {
     include_dirs = [
       "http_lite_source",
       "//foundation/multimedia/histreamer/engine/utils",
-      "//foundation/multimedia/histreamer/engine/foundation/osal/utils",
+      "//foundation/multimedia/histreamer/engine/foundation/",
     ]
   }
 
