@@ -211,9 +211,57 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
     if (isEos_ && size_ <= size) { // Is EOS, and this time get all the data.
         FlushInternal();
     } else {
-        RemoveOldData();
+        if (prevGet_ < currentGet_) {
+            RemoveOldData(currentGet_);
+        }
     }
 
+    if (que_.size() < capacity_) {
+        cvFull_.NotifyOne();
+    }
+    return true;
+}
+
+// GetRange in live play mode:
+//  1. not use offset
+//  2. remove the data have been read
+bool DataPacker::GetRange(uint32_t size, AVBufferPtr& bufferPtr) {
+    MEDIA_LOG_D("DataPacker live play GetRange(size) = (" PUBLIC_LOG_U32 ")...", size);
+    FALSE_RET_V_MSG_E(bufferPtr && (!bufferPtr->IsEmpty()) && bufferPtr->GetMemory()->GetCapacity() >= size, false,
+                      "Live play GetRange input bufferPtr empty or capacity not enough.");
+
+    OSAL::ScopedLock lock(mutex_);
+    if (que_.empty()) {
+        MEDIA_LOG_D("DataPacker is empty, live play GetRange waiting for push");
+        cvEmpty_.Wait(lock, [this] { return !que_.empty(); });
+    }
+
+    FALSE_RETURN_V(!que_.empty(), false);
+
+    int32_t needCopySize = static_cast<int32_t>(size);
+    int32_t currCopySize = 0;
+    int32_t index = 0;
+    uint32_t lastBufferOffsetEnd = 0;
+
+    uint8_t* dstPtr = AudioBufferWritableData(bufferPtr, size);
+    FALSE_RETURN_V(dstPtr != nullptr, false);
+
+    while (index < que_.size()) {
+        AVBufferPtr& buffer = que_[index];
+        size_t bufferSize = AudioBufferSize(buffer);
+        currCopySize = std::min(static_cast<int32_t>(bufferSize), needCopySize);
+        currCopySize = CopyFirstBuffer(currCopySize, index, dstPtr, bufferPtr, 0);
+        lastBufferOffsetEnd = currCopySize;
+        dstPtr += currCopySize;
+        needCopySize -= currCopySize;
+        if (needCopySize <= 0) { // it is enough
+            break;
+        }
+        index++;
+    }
+
+    auto endPosition = Position(index, lastBufferOffsetEnd, mediaOffset_ + size);
+    RemoveOldData(endPosition); // Live play, remove the got data
     if (que_.size() < capacity_) {
         cvFull_.NotifyOne();
     }
@@ -272,12 +320,12 @@ void DataPacker::RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t r
 // Remove consumed data, and make the remaining data continuous
 // Consumed data - between prevGet_.first and currentGet_.first
 // In order to make remaining data continuous, also remove the data before prevGet_.first
-void DataPacker::RemoveOldData()
+// Update:
+// Remove the data before position
+void DataPacker::RemoveOldData(const Position& position)
 {
-    // If prevGet_.first >= currentGet_.first, return
-    FALSE_RETURN_W(prevGet_ < currentGet_);
     MEDIA_LOG_D("Before RemoveOldData " PUBLIC_LOG_S, ToString().c_str());
-    FALSE_LOG(RemoveTo(currentGet_));
+    FALSE_LOG(RemoveTo(position));
     if (que_.empty()) {
         mediaOffset_ = 0;
         size_ = 0;

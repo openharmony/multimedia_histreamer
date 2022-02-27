@@ -368,14 +368,14 @@ void DemuxerFilter::ActivatePushMode()
     MEDIA_LOG_D("ActivatePushMode called");
     InitTypeFinder();
     checkRange_ = [this](uint64_t offset, uint32_t size) {
-        uint64_t curOffset = offset;
-        return dataPacker_->IsDataAvailable(offset, size, curOffset);
+        return !dataPacker_->IsEmpty(); // True if there is some data
     };
     peekRange_ = [this](uint64_t offset, size_t size, AVBufferPtr& bufferPtr) -> bool {
         return dataPacker_->PeekRange(offset, size, bufferPtr);
     };
     getRange_ = [this](uint64_t offset, size_t size, AVBufferPtr& bufferPtr) -> bool {
-        return dataPacker_->GetRange(offset, size, bufferPtr);
+        // In push mode, ignore offset, always get data from the start of the data packer.
+        return dataPacker_->GetRange(size, bufferPtr);
     };
     typeFinder_->Init(uriSuffix_, mediaDataSize_, checkRange_, peekRange_);
     typeFinder_->FindMediaTypeAsync([this](std::string pluginName) { MediaTypeFound(std::move(pluginName)); });

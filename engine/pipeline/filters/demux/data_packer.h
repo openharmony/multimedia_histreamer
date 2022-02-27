@@ -44,6 +44,8 @@ public:
 
     bool GetRange(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr);
 
+    bool GetRange(uint32_t size, AVBufferPtr &bufferPtr); // For live play
+
     void Flush();
 
     void SetEos();
@@ -68,7 +70,10 @@ public:
             if (index < 0 || other.index < 0) { // Position invalid
                 return false;
             }
-            return mediaOffset < other.mediaOffset;
+            if (index != other.index) {
+                return index < other.index;
+            }
+            return bufferOffset < other.bufferOffset; // use bufferOffset, maybe live play mediaOffset is invalid
         }
 
         std::string ToString() const
@@ -93,7 +98,7 @@ private:
     int32_t CopyFromSuccessiveBuffer(uint64_t prevOffset, uint64_t offsetEnd, int32_t startIndex, uint8_t *dstPtr,
                                      uint32_t &needCopySize);
 
-    void RemoveOldData();
+    void RemoveOldData(const Position& position);
 
     bool RemoveTo(const Position& position);
 
