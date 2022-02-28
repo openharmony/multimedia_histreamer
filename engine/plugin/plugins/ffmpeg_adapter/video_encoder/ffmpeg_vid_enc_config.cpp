@@ -67,7 +67,7 @@ Status SetVideoResolution(AVCodecContext& codecContext, const std::map<Tag, Valu
     return Status::OK;
 }
 
-void SetVideoTimeBase(AVCodecContext& codecContext, const std::map<Tag, ValueType>& tagStore)
+void SetVideoFrameRateAndTimeBase(AVCodecContext& codecContext, const std::map<Tag, ValueType>& tagStore)
 {
     uint64_t frameRate = 0;
     ASSIGN_IF_NOT_NULL(FindTagInMap<uint64_t>(Tag::VIDEO_FRAME_RATE, tagStore), frameRate);
@@ -88,10 +88,8 @@ Status SetVideoPixelFormat(AVCodecContext& codecContext, const std::map<Tag, Val
 {
     VideoPixelFormat pixelFormat = VideoPixelFormat::UNKNOWN;
     ASSIGN_IF_NOT_NULL(FindTagInMap<VideoPixelFormat>(Tag::VIDEO_PIXEL_FORMAT, tagStore), pixelFormat);
-    if (pixelFormat == VideoPixelFormat::UNKNOWN) {
-        MEDIA_LOG_E("pixel format is invalid");
-        return Status::ERROR_INVALID_PARAMETER;
-    }
+    FALSE_RET_V_MSG_E(pixelFormat != VideoPixelFormat::UNKNOWN,
+                      Status::ERROR_INVALID_PARAMETER,  "pixel format is invalid");
     codecContext.pix_fmt = ConvertPixelFormatToFFmpeg(pixelFormat);
     int32_t bpp = 0;
     const AVPixFmtDescriptor* desc = av_pix_fmt_desc_get(codecContext.pix_fmt);
@@ -102,6 +100,9 @@ Status SetVideoPixelFormat(AVCodecContext& codecContext, const std::map<Tag, Val
     }
     codecContext.bits_per_coded_sample = (bpp > 0) ? bpp : DEFAULT_BIT_PER_CODED_SAMPLE;
     codecContext.ticks_per_frame = 1;
+    if (codecContext.codec_id == AV_CODEC_ID_H264) {
+        codecContext.ticks_per_frame = 2; // Default 1, e.g., H.264/MPEG-2 set it to 2.
+    }
     // pixel aspect ratio
     codecContext.sample_aspect_ratio.num = 1;
     codecContext.sample_aspect_ratio.den = 1;
@@ -153,16 +154,10 @@ void SetDefaultEncodeParams(AVCodecContext& codecContext, const std::map<Tag, Va
 Status ConfigVideoCommonAttr(AVCodecContext& codecContext, const std::map<Tag, ValueType>& tagStore)
 {
     auto ret = SetVideoResolution(codecContext, tagStore);
-    if (ret != Status::OK) {
-        MEDIA_LOG_E("SetVideoResolution() fail");
-        return ret;
-    }
+    FALSE_RET_V_MSG_E(ret == Status::OK, ret, "SetVideoResolution() fail");
     ret = SetVideoPixelFormat(codecContext, tagStore);
-    if (ret != Status::OK) {
-        MEDIA_LOG_E("SetVideoResolution() fail");
-        return ret;
-    }
-    SetVideoTimeBase(codecContext, tagStore);
+    FALSE_RET_V_MSG_E(ret == Status::OK, ret, "SetVideoPixelFormat() fail");
+    SetVideoFrameRateAndTimeBase(codecContext, tagStore);
     SetDefaultEncodeParams(codecContext, tagStore);
 }
 

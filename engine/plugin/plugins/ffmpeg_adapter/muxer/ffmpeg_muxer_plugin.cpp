@@ -67,10 +67,8 @@ bool UpdatePluginCapability(const AVOutputFormat* oFmt, Plugin::MuxerPluginDef& 
 Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg)
 {
     MEDIA_LOG_D("register muxer plugins.");
-    if (!reg) {
-        MEDIA_LOG_E("RegisterPlugins failed due to null pointer for reg.");
-        return Plugin::Status::ERROR_INVALID_PARAMETER;
-    }
+    FALSE_RET_V_MSG_E(reg != nullptr, Plugin::Status::ERROR_INVALID_PARAMETER,
+                      "RegisterPlugins failed due to null pointer for reg.");
     const AVOutputFormat* outputFormat = nullptr;
     void* ite = nullptr;
     while ((outputFormat = av_muxer_iterate(&ite))) {
@@ -109,15 +107,11 @@ PLUGIN_DEFINITION(FFmpegMuxers, Plugin::LicenseType::LGPL, RegisterMuxerPlugins,
 Plugin::Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime, AVStream* stream)
 {
     AVCodecID id = AV_CODEC_ID_NONE;
-    if (!FFCodecMap::Mime2CodecId(mime, id)) {
-        MEDIA_LOG_E("mime " PUBLIC_LOG_S " has no corresponding codec id", mime.c_str());
-        return Plugin::Status::ERROR_UNSUPPORTED_FORMAT;
-    }
+    FALSE_RET_V_MSG_E(FFCodecMap::Mime2CodecId(mime, id), Plugin::Status::ERROR_UNSUPPORTED_FORMAT,
+                      "mime " PUBLIC_LOG_S " has no corresponding codec id", mime.c_str());
     auto ptr = avcodec_find_encoder(id);
-    if (ptr == nullptr) {
-        MEDIA_LOG_E("codec of mime " PUBLIC_LOG_S " is not founder as encoder", mime.c_str());
-        return Plugin::Status::ERROR_UNSUPPORTED_FORMAT;
-    }
+    FALSE_RET_V_MSG_E(ptr != nullptr, Plugin::Status::ERROR_UNSUPPORTED_FORMAT,
+                      "codec of mime " PUBLIC_LOG_S " is not founder as encoder", mime.c_str());
     bool matched = true;
     switch (ptr->type) {
         case AVMEDIA_TYPE_VIDEO:
@@ -132,11 +126,8 @@ Plugin::Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime
         default:
             matched = false;
     }
-    if (!matched) {
-        MEDIA_LOG_E("codec of mime " PUBLIC_LOG_S " is not matched with " PUBLIC_LOG "s muxer",
-                    mime.c_str(), fmt->name);
-        return Plugin::Status::ERROR_UNSUPPORTED_FORMAT;
-    }
+    FALSE_RET_V_MSG_E(matched, Plugin::Status::ERROR_UNSUPPORTED_FORMAT,  "codec of mime " PUBLIC_LOG_S
+        " is not matched with " PUBLIC_LOG_S " muxer", mime.c_str(), fmt->name);
     stream->codecpar->codec_id = id;
     stream->codecpar->codec_type = ptr->type;
     return Plugin::Status::OK;
@@ -144,18 +135,12 @@ Plugin::Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime
 
 Plugin::Status SetCodecOfTrack(const AVOutputFormat* fmt, AVStream* stream, const Plugin::TagMap& tagMap)
 {
-    using namespace OHOS::Media::Plugin;
-    if (tagMap.count(Tag::MIME) == 0) {
-        MEDIA_LOG_E("mime is missing!");
-        return Status::ERROR_UNSUPPORTED_FORMAT;
-    }
-    auto& value = tagMap.find(Tag::MIME)->second;
-    if (!value.SameTypeWith(typeid(std::string))) {
-        return Status::ERROR_MISMATCHED_TYPE;
-    }
+    auto ite = tagMap.find(Plugin::Tag::MIME);
+    FALSE_RET_V_MSG_E(ite != std::end(tagMap), Plugin::Status::ERROR_UNSUPPORTED_FORMAT, "mime is missing!");
+    FALSE_RETURN_V(ite->second.SameTypeWith(typeid(std::string)), Plugin::Status::ERROR_MISMATCHED_TYPE);
     // todo specially for audio/mpeg audio/mpeg we should check mpegversion and mpeglayer
 
-    return SetCodecByMime(fmt, Plugin::AnyCast<std::string>(value), stream);
+    return SetCodecByMime(fmt, Plugin::AnyCast<std::string>(ite->second), stream);
 }
 
 template<typename T, typename U>
@@ -163,10 +148,9 @@ Plugin::Status SetSingleParameter(Plugin::Tag tag, const Plugin::TagMap& tagMap,
 {
     auto ite = tagMap.find(tag);
     if (ite != std::end(tagMap)) {
-        if (!ite->second.SameTypeWith(typeid(T))) {
-            MEDIA_LOG_E("tag " PUBLIC_LOG_U32 " type mismatched", tag);
-            return Plugin::Status::ERROR_MISMATCHED_TYPE;
-        }
+        FALSE_RET_V_MSG_E(ite->second.SameTypeWith(typeid(T)), Plugin::Status::ERROR_MISMATCHED_TYPE,
+                          "tag " PUBLIC_LOG_U32 " type mismatched", tag);
+
         target = func(Plugin::AnyCast<T>(ite->second));
     }
     return Plugin::Status::OK;
@@ -237,16 +221,11 @@ void ResetCodecParameter (AVCodecParameters* par)
 
 Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const Plugin::TagMap& tagMap)
 {
-    using namespace OHOS::Media::Plugin;
-    if (stream == nullptr) {
-        return Status::ERROR_INVALID_PARAMETER;
-    }
+    FALSE_RETURN_V(stream != nullptr, Plugin::Status::ERROR_INVALID_PARAMETER);
     ResetCodecParameter(stream->codecpar);
     // firstly mime
     auto ret = SetCodecOfTrack(fmt, stream, tagMap);
-    if (ret != Status::OK) {
-        return ret;
-    }
+    FALSE_RETURN_V(ret == Plugin::Status::OK, ret);
     if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) { // audio
         ret = SetParameterOfAuTrack(stream, tagMap);
     } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) { // video
@@ -256,33 +235,25 @@ Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const
     } else {
         MEDIA_LOG_W("unknown codec type of stream " PUBLIC_LOG_D32, stream->index);
     }
-    if (ret != Status::OK) {
-        return ret;
-    }
+    FALSE_RETURN_V(ret == Plugin::Status::OK, ret);
     // others
-    ret = SetSingleParameter<int64_t, int64_t>(Tag::MEDIA_BITRATE, tagMap, stream->codecpar->bit_rate,
+    ret = SetSingleParameter<int64_t, int64_t>(Plugin::Tag::MEDIA_BITRATE, tagMap, stream->codecpar->bit_rate,
          [](int64_t rate) {return rate;});
-    if (ret != Status::OK) {
-        return ret;
-    }
+    FALSE_RETURN_V(ret == Plugin::Status::OK, ret);
 
     // extra data
-    auto ite = tagMap.find(Tag::MEDIA_CODEC_CONFIG);
+    auto ite = tagMap.find(Plugin::Tag::MEDIA_CODEC_CONFIG);
     if (ite != std::end(tagMap)) {
-        if (!ite->second.SameTypeWith(typeid(std::vector<uint8_t>))) {
-            MEDIA_LOG_E("tag " PUBLIC_LOG_D32 " type mismatched", Tag::MEDIA_CODEC_CONFIG);
-            return Plugin::Status::ERROR_MISMATCHED_TYPE;
-        }
+        FALSE_RET_V_MSG_E(ite->second.SameTypeWith(typeid(std::vector<uint8_t>)), Plugin::Status::ERROR_MISMATCHED_TYPE,
+                          "tag " PUBLIC_LOG_D32 " type mismatched", Plugin::Tag::MEDIA_CODEC_CONFIG);
         const auto* extraData = Plugin::AnyCast<std::vector<uint8_t>>(&(ite->second));
         stream->codecpar->extradata = static_cast<uint8_t *>(av_mallocz(
             extraData->size() + AV_INPUT_BUFFER_PADDING_SIZE));
-        if (stream->codecpar->extradata == nullptr) {
-            return Status::ERROR_NO_MEMORY;
-        }
+        FALSE_RETURN_V(stream->codecpar->extradata != nullptr, Plugin::Status::ERROR_NO_MEMORY);
         memcpy_s(stream->codecpar->extradata, extraData->size(), extraData->data(), extraData->size());
         stream->codecpar->extradata_size = extraData->size();
     }
-    return Status::OK;
+    return Plugin::Status::OK;
 }
 
 Plugin::Status SetTagsOfGeneral(AVFormatContext* fmtCtx, const Plugin::TagMap& tags)
@@ -325,13 +296,9 @@ Status FFmpegMuxerPlugin::InitFormatCtxLocked()
 {
     if (formatContext_ == nullptr) {
         auto ioCtx = InitAvIoCtx();
-        if (ioCtx == nullptr) {
-            return Status::ERROR_NO_MEMORY;
-        }
+        FALSE_RETURN_V(ioCtx != nullptr, Status::ERROR_NO_MEMORY);
         auto fmt = avformat_alloc_context();
-        if (fmt == nullptr) {
-            return Status::ERROR_NO_MEMORY;
-        }
+        FALSE_RETURN_V(fmt != nullptr, Status::ERROR_NO_MEMORY);
         fmt->pb = ioCtx;
         fmt->oformat = outputFormat_.get();
         fmt->flags = static_cast<uint32_t>(fmt->flags) | static_cast<uint32_t>(AVFMT_FLAG_CUSTOM_IO);
@@ -348,9 +315,7 @@ Status FFmpegMuxerPlugin::InitFormatCtxLocked()
 Status FFmpegMuxerPlugin::Init()
 {
     MEDIA_LOG_D("Init entered.");
-    if (g_pluginOutputFmt.count(pluginName_) == 0) {
-        return Status::ERROR_UNSUPPORTED_FORMAT;
-    }
+    FALSE_RETURN_V(g_pluginOutputFmt.count(pluginName_) != 0, Status::ERROR_UNSUPPORTED_FORMAT);
     outputFormat_ = g_pluginOutputFmt[pluginName_];
     auto pkt = av_packet_alloc();
     cachePacket_ = std::shared_ptr<AVPacket> (pkt, [] (AVPacket* packet) {av_packet_free(&packet);});
@@ -367,10 +332,7 @@ AVIOContext* FFmpegMuxerPlugin::InitAvIoCtx()
 {
     constexpr int bufferSize = 4096; // 4096
     auto buffer = static_cast<unsigned char*>(av_malloc(bufferSize));
-    if (buffer == nullptr) {
-        MEDIA_LOG_E("AllocAVIOContext failed to av_malloc...");
-        return nullptr;
-    }
+    FALSE_RET_V_MSG_E(buffer != nullptr, nullptr,  "AllocAVIOContext failed to av_malloc...");
     AVIOContext* avioContext = avio_alloc_context(buffer, bufferSize, AVIO_FLAG_WRITE, static_cast<void*>(&ioContext_),
                                                   IoRead, IoWrite, IoSeek);
     if (avioContext == nullptr) {
@@ -436,9 +398,7 @@ Status FFmpegMuxerPlugin::SetParameter(Tag tag, const ValueType& value)
 
 Status FFmpegMuxerPlugin::SetTrackParameter(uint32_t trackId, Tag tag, const Plugin::ValueType& value)
 {
-    if (trackId >= formatContext_->nb_streams) {
-        return Status::ERROR_INVALID_PARAMETER;
-    }
+    FALSE_RETURN_V(trackId < formatContext_->nb_streams, Status::ERROR_INVALID_PARAMETER);
     if (trackParameters_.count(trackId) == 0) {
         trackParameters_.insert({trackId, Plugin::TagMap()});
     }
@@ -449,13 +409,9 @@ Status FFmpegMuxerPlugin::SetTrackParameter(uint32_t trackId, Tag tag, const Plu
 Status FFmpegMuxerPlugin::AddTrack(uint32_t &trackId)
 {
     OSAL::ScopedLock lock(fmtMutex_);
-    if (formatContext_ == nullptr) {
-        return Status::ERROR_WRONG_STATE;
-    }
+    FALSE_RETURN_V(formatContext_ != nullptr, Status::ERROR_WRONG_STATE);
     auto st = avformat_new_stream(formatContext_.get(), nullptr);
-    if (st == nullptr) {
-        return Status::ERROR_NO_MEMORY;
-    }
+    FALSE_RETURN_V(st != nullptr, Status::ERROR_NO_MEMORY);
     st->codecpar->codec_type = AVMEDIA_TYPE_UNKNOWN;
     st->codecpar->codec_id = AV_CODEC_ID_NONE;
     trackId = st->index;
@@ -470,30 +426,19 @@ Status FFmpegMuxerPlugin::SetDataSink(const std::shared_ptr<DataSink>& dataSink)
 
 Status FFmpegMuxerPlugin::WriteHeader()
 {
-    if (ioContext_.dataSink_ == nullptr || outputFormat_ == nullptr) {
-        return Status::ERROR_WRONG_STATE;
-    }
+    FALSE_RETURN_V(ioContext_.dataSink_ != nullptr && outputFormat_ != nullptr, Status::ERROR_WRONG_STATE);
     OSAL::ScopedLock lock(fmtMutex_);
-    if (formatContext_ == nullptr) {
-        return Status::ERROR_WRONG_STATE;
-    }
+    FALSE_RETURN_V(formatContext_ != nullptr, Status::ERROR_WRONG_STATE);
     int ret = avformat_write_header(formatContext_.get(), nullptr);
-    if (ret < 0) {
-        MEDIA_LOG_E("failed to write header " PUBLIC_LOG_S, AVStrError(ret).c_str());
-        return Status::ERROR_UNKNOWN;
-    }
+    FALSE_RET_V_MSG_E(ret >= 0, Status::ERROR_UNKNOWN, "failed to write header " PUBLIC_LOG_S, AVStrError(ret).c_str());
     return Status::OK;
 }
 
 Status FFmpegMuxerPlugin::WriteFrame(const std::shared_ptr<Plugin::Buffer>& buffer)
 {
-    if (buffer == nullptr || buffer->IsEmpty()) {
-        return Status::ERROR_INVALID_PARAMETER;
-    }
+    FALSE_RETURN_V(buffer != nullptr && !buffer->IsEmpty(), Status::ERROR_INVALID_PARAMETER);
     uint32_t trackId = buffer->trackID;
-    if (trackId >= formatContext_->nb_streams) {
-        return Status::ERROR_INVALID_PARAMETER;
-    }
+    FALSE_RETURN_V(trackId < formatContext_->nb_streams, Status::ERROR_INVALID_PARAMETER);
     (void)memset_s(cachePacket_.get(), sizeof(AVPacket), 0, sizeof(AVPacket));
     auto memory = buffer->GetMemory();
     cachePacket_->data = const_cast<uint8_t*>(memory->GetReadOnlyData());
@@ -513,13 +458,9 @@ Status FFmpegMuxerPlugin::WriteFrame(const std::shared_ptr<Plugin::Buffer>& buff
 
 Status FFmpegMuxerPlugin::WriteTrailer()
 {
-    if (ioContext_.dataSink_ == nullptr || outputFormat_ == nullptr) {
-        return Status::ERROR_WRONG_STATE;
-    }
+    FALSE_RETURN_V(ioContext_.dataSink_ != nullptr && outputFormat_ != nullptr, Status::ERROR_WRONG_STATE);
     OSAL::ScopedLock lock(fmtMutex_);
-    if (formatContext_ == nullptr) {
-        return Status::ERROR_WRONG_STATE;
-    }
+    FALSE_RETURN_V(formatContext_ != nullptr, Status::ERROR_WRONG_STATE);
     av_write_frame(formatContext_.get(), nullptr); // flush out cache data
     int ret = av_write_trailer(formatContext_.get());
     if (ret != 0) {

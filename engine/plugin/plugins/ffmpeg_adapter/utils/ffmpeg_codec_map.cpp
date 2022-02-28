@@ -53,6 +53,7 @@ bool FormatName2Cap(const std::string& fmtName, Plugin::CapabilitySet& outCaps)
         return true;
     } else if (fmtName == "h264") {
         outCaps.emplace_back(Plugin::Capability(MEDIA_MIME_VIDEO_H264));
+        return true;
     }
     return false;
 }

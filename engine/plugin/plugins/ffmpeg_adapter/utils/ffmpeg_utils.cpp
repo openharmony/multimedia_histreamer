@@ -341,7 +341,7 @@ bool FindTagByAvMetaName(const std::string& metaName, Tag& tag)
     return true;
 }
 
-AudioAacProfile ConvAacProfileFromFfmpeg (int32_t ffmpegProfile)
+AudioAacProfile ConvAacProfileFromFfmpeg(int32_t ffmpegProfile)
 {
     auto ite = std::find_if(g_AacProfileMap.begin(), g_AacProfileMap.end(),
         [&] (const std::pair<AudioAacProfile, int32_t>& tmp) -> bool {
@@ -350,7 +350,7 @@ AudioAacProfile ConvAacProfileFromFfmpeg (int32_t ffmpegProfile)
     return ite == g_AacProfileMap.end() ? AudioAacProfile::NONE : ite->first;
 }
 
-int32_t ConvAacProfileToFfmpeg (AudioAacProfile profile)
+int32_t ConvAacProfileToFfmpeg(AudioAacProfile profile)
 {
     auto ite = std::find_if(g_AacProfileMap.begin(), g_AacProfileMap.end(),
         [&] (const std::pair<AudioAacProfile, int32_t>& tmp) -> bool {
