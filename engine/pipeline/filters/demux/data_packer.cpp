@@ -222,10 +222,11 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
     return true;
 }
 
-// GetRange in live play mode:
+// GetRange in live play mode
 //  1. not use offset
 //  2. remove the data have been read
-bool DataPacker::GetRange(uint32_t size, AVBufferPtr& bufferPtr) {
+bool DataPacker::GetRange(uint32_t size, AVBufferPtr& bufferPtr)
+{
     MEDIA_LOG_D("DataPacker live play GetRange(size) = (" PUBLIC_LOG_U32 ")...", size);
     FALSE_RET_V_MSG_E(bufferPtr && (!bufferPtr->IsEmpty()) && bufferPtr->GetMemory()->GetCapacity() >= size, false,
                       "Live play GetRange input bufferPtr empty or capacity not enough.");
@@ -320,8 +321,7 @@ void DataPacker::RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t r
 // Remove consumed data, and make the remaining data continuous
 // Consumed data - between prevGet_.first and currentGet_.first
 // In order to make remaining data continuous, also remove the data before prevGet_.first
-// Update:
-// Remove the data before position
+// Update to support live play mode, Remove the data before position
 void DataPacker::RemoveOldData(const Position& position)
 {
     MEDIA_LOG_D("Before RemoveOldData " PUBLIC_LOG_S, ToString().c_str());
