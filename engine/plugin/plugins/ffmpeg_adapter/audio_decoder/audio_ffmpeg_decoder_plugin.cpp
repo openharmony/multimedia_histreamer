@@ -21,6 +21,7 @@
 #include <set>
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_buffer.h"
+#include "plugin/common/plugin_caps_builder.h"
 #include "plugin/interface/codec_plugin.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "utils/constants.h"
@@ -72,23 +73,23 @@ void UnRegisterAudioDecoderPlugin()
     codecMap.clear();
 }
 
-void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
+void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
 {
-    Capability inputCaps("audio/unknown");
+    CapabilityBuilder capBuilder;
     switch (codec->id) {
         case AV_CODEC_ID_MP3:
-            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_MPEG)
-                .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 1)
-                .AppendIntervalKey<uint32_t>(Capability::Key::AUDIO_MPEG_LAYER, 1, 3); // 3
+            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_MPEG)
+                    .SetAudioMpegVersion(1)
+                    .SetAudioMpegLayerRange(1, 3); // 3
             break;
         case AV_CODEC_ID_FLAC:
-            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_FLAC);
+            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_FLAC);
             break;
         case AV_CODEC_ID_AAC:
-            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC);
+            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC);
             break;
         case AV_CODEC_ID_AAC_LATM:
-            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM);
+            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM);
             break;
         default:
             MEDIA_LOG_I("codec is not supported right now");
@@ -101,7 +102,7 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
             values.push_back(codec->supported_samplerates[index]);
         }
         if (index) {
-            inputCaps.AppendDiscreteKeys(Capability::Key::AUDIO_SAMPLE_RATE, values);
+            capBuilder.SetAudioSampleRateList(values);
         }
     }
 
@@ -111,22 +112,33 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
             values.push_back(AudioChannelLayout(codec->channel_layouts[index]));
         }
         if (index) {
-            inputCaps.AppendDiscreteKeys<AudioChannelLayout>(Capability::Key::AUDIO_CHANNEL_LAYOUT, values);
+            capBuilder.SetAudioChannelLayoutList(values);
         }
     }
-    definition.inCaps.push_back(inputCaps);
+    definition.inCaps.push_back(capBuilder.Build());
+}
 
-    Capability outputCaps(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
+void UpdateOutCaps(const AVCodec* codec, CodecPluginDef& definition)
+{
+    CapabilityBuilder capBuilder;
+    capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
+    size_t index = 0;
     if (codec->sample_fmts != nullptr) {
         DiscreteCapability<AudioSampleFormat> values;
         for (index = 0; codec->sample_fmts[index] != AV_SAMPLE_FMT_NONE; ++index) {
             values.push_back(ConvFf2PSampleFmt(codec->sample_fmts[index]));
         }
         if (index) {
-            outputCaps.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, values);
+            capBuilder.SetAudioSampleFormatList(values);
         }
     }
-    definition.outCaps.push_back(outputCaps);
+    definition.outCaps.push_back(capBuilder.Build());
+}
+
+void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
+{
+    UpdateInCaps(codec, definition);
+    UpdateOutCaps(codec, definition);
 }
 } // namespace
 PLUGIN_DEFINITION(FFmpegAudioDecoders, LicenseType::LGPL, RegisterAudioDecoderPlugins, UnRegisterAudioDecoderPlugin);
