@@ -242,11 +242,13 @@ Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const TagMap&
         FALSE_RET_V_MSG_E(ite->second.SameTypeWith(typeid(CodecConfig)), Status::ERROR_MISMATCHED_TYPE,
                           "tag " PUBLIC_LOG_D32 " type mismatched", Tag::MEDIA_CODEC_CONFIG);
         auto codecConfig = AnyCast<CodecConfig>(ite->second);
-        auto extraSize = codecConfig.size();
-        stream->codecpar->extradata = static_cast<uint8_t *>(av_mallocz(extraSize + AV_INPUT_BUFFER_PADDING_SIZE));
-        FALSE_RETURN_V(stream->codecpar->extradata != nullptr, Status::ERROR_NO_MEMORY);
-        memcpy_s(stream->codecpar->extradata, extraSize, codecConfig.data(), extraSize);
-        stream->codecpar->extradata_size = extraSize;
+        if (!codecConfig.empty()) {
+            auto extraSize = codecConfig.size();
+            stream->codecpar->extradata = static_cast<uint8_t *>(av_mallocz(extraSize + AV_INPUT_BUFFER_PADDING_SIZE));
+            FALSE_RETURN_V(stream->codecpar->extradata != nullptr, Status::ERROR_NO_MEMORY);
+            memcpy_s(stream->codecpar->extradata, extraSize, codecConfig.data(), extraSize);
+            stream->codecpar->extradata_size = extraSize;
+        }
     }
     return Status::OK;
 }

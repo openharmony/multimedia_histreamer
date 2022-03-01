@@ -124,7 +124,7 @@ private:
     State state_ {State::CREATED};
     std::shared_ptr<AVCodecContext> avCodecContext_ {};
     OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufferQ_;
-    std::shared_ptr<OHOS::Media::OSAL::Task> encodeTask_;
+    std::shared_ptr<OSAL::Task> encodeTask_;
 };
 } // namespace Ffmpeg
 } // namespace Plugin

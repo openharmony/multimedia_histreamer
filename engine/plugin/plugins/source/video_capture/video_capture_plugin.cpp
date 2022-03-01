@@ -53,6 +53,7 @@ PLUGIN_DEFINITION(StdVideoCapture, LicenseType::APACHE_V2, VideoCaptureRegister,
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace VideoCapture {
 constexpr int32_t DEFAULT_SURFACE_QUEUE_SIZE = 6;
 constexpr int32_t DEFAULT_SURFACE_SIZE = 1024 * 1024;
 constexpr int32_t DEFAULT_VIDEO_WIDTH = 1920;
@@ -359,6 +360,7 @@ void VideoCapturePlugin::OnBufferAvailable()
     if (bufferCnt_ == 1) {
         readCond_.NotifyAll();
     }
+}
 } // namespace VideoCapture
 } // namespace Plugin
 } // namespace Media
