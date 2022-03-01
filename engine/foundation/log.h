@@ -120,9 +120,9 @@
 #ifndef FAIL_LOG
 #define FAIL_LOG(exec)                                                                                                 \
     do {                                                                                                               \
-        ErrorCode ret = (exec);                                                                                        \
-        if (ret != ErrorCode::SUCCESS) {                                                                               \
-            MEDIA_LOG_E("FAIL_LOG on ErrorCode(" PUBLIC_LOG "d).", ret);                                              \
+        ErrorCode returnValue = (exec);                                                                                \
+        if (returnValue != ErrorCode::SUCCESS) {                                                                       \
+            MEDIA_LOG_E("FAIL_LOG on ErrorCode(" PUBLIC_LOG_D32 ").", returnValue);                                    \
         }                                                                                                              \
     } while (0)
 #endif
@@ -130,10 +130,10 @@
 #ifndef NOK_RETURN
 #define NOK_RETURN(exec)                                                                                               \
     do {                                                                                                               \
-        Status ret = (exec);                                                                                           \
-        if (ret != Status::OK) {                                                                                       \
-            MEDIA_LOG_E("NOK_RETURN on Status(" PUBLIC_LOG "d).", ret);                                               \
-            return ret;                                                                                                \
+        Status returnValue = (exec);                                                                                   \
+        if (returnValue != Status::OK) {                                                                               \
+            MEDIA_LOG_E("NOK_RETURN on Status(" PUBLIC_LOG_D32 ").", returnValue);                                     \
+            return returnValue;                                                                                        \
         }                                                                                                              \
     } while (0)
 #endif
@@ -141,9 +141,9 @@
 #ifndef NOK_LOG
 #define NOK_LOG(exec)                                                                                                  \
     do {                                                                                                               \
-        Status ret = (exec);                                                                                           \
-        if (ret != Status::OK) {                                                                                       \
-            MEDIA_LOG_E("NOK_LOG on Status(" PUBLIC_LOG "d).", ret);                                                  \
+        Status returnValue = (exec);                                                                                   \
+        if (returnValue != Status::OK) {                                                                               \
+            MEDIA_LOG_E("NOK_LOG on Status(" PUBLIC_LOG_D32 ").", returnValue);                                        \
         }                                                                                                              \
     } while (0)
 #endif
@@ -152,9 +152,9 @@
 #ifndef NZERO_LOG
 #define NZERO_LOG(exec)                                                                                                \
     do {                                                                                                               \
-        int ret = (exec);                                                                                              \
-        if (ret != 0) {                                                                                                \
-            MEDIA_LOG_E("NZERO_LOG when call (" #exec "), return " PUBLIC_LOG_D32, ret);                              \
+        int returnValue = (exec);                                                                                      \
+        if (returnValue != 0) {                                                                                        \
+            MEDIA_LOG_E("NZERO_LOG when call (" #exec "), return " PUBLIC_LOG_D32, returnValue);                       \
         }                                                                                                              \
     } while (0)
 #endif
