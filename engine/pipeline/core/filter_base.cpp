@@ -17,8 +17,10 @@
 
 #include "filter_base.h"
 #include <algorithm>
+#include "common/plugin_settings.h"
 #include "common/plugin_utils.h"
 #include "foundation/log.h"
+#include "plugin_attr_desc.h"
 
 namespace OHOS {
 namespace Media {
@@ -186,6 +188,30 @@ T FilterBase::FindPort(const std::vector<T>& list, const std::string& name)
     }
     MEDIA_LOG_E("Find port(" PUBLIC_LOG "s) failed.", name.c_str());
     return nullptr;
+}
+
+ErrorCode FilterBase::ConfigPluginWithMeta(Plugin::Base& plugin, const Plugin::Meta& meta)
+{
+    auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
+    for (const auto& keyPair : parameterMap) {
+        if ((keyPair.second.second & PARAM_SET) == 0) {
+            continue;
+        }
+        auto outValPtr = meta.GetData(static_cast<Plugin::MetaID>(keyPair.first));
+        if (outValPtr && keyPair.second.first(keyPair.first, *outValPtr)) {
+            if (plugin.SetParameter(keyPair.first, *outValPtr) != Plugin::Status::OK) {
+                MEDIA_LOG_W("set parameter " PUBLIC_LOG_S "(" PUBLIC_LOG_D32 ") on plugin " PUBLIC_LOG_S " failed",
+                            GetTagStrName(keyPair.first), keyPair.first, plugin.GetName().c_str());
+            }
+        } else {
+            if (!HasTagInfo(keyPair.first)) {
+                MEDIA_LOG_W("tag " PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
+            }
+            MEDIA_LOG_W("parameter " PUBLIC_LOG_S " in meta is not found or type mismatch",
+                        GetTagStrName(keyPair.first));
+        }
+    }
+    return ErrorCode::SUCCESS;
 }
 
 std::string FilterBase::NamePort(const std::string& mime)

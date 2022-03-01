@@ -74,7 +74,6 @@ public:
 private:
     ErrorCode SetPluginParameter(Tag tag, const Plugin::ValueType& value);
     ErrorCode ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta);
-    ErrorCode ConfigureWithMeta(const std::shared_ptr<const Plugin::Meta>& meta);
     void ReportCurrentPosition(int64_t pts);
 
     ErrorCode UpdateLatestPts(int64_t pts);

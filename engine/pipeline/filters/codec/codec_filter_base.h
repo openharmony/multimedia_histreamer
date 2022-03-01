@@ -46,7 +46,6 @@ public:
     void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override;
 
 protected:
-    ErrorCode ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta>& meta);
 
     ErrorCode UpdateMetaAccordingToPlugin(Plugin::Meta& meta);
 

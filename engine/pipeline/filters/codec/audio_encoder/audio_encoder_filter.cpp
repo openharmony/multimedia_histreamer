@@ -165,7 +165,7 @@ bool AudioEncoderFilter::Configure(const std::string& inPort, const std::shared_
 
 ErrorCode AudioEncoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
-    FAIL_RET_ERR_CODE_MSG_E(ConfigureWithMetaLocked(meta), "configure encoder plugin error");
+    FAIL_RET_ERR_CODE_MSG_E(ConfigPluginWithMeta(*plugin_, *meta), "configure encoder plugin error");
     FAIL_RET_ERR_CODE_MSG_E(TranslatePluginStatus(plugin_->Prepare()), "encoder prepare failed");
     FAIL_RET_ERR_CODE_MSG_E(TranslatePluginStatus(plugin_->Start()), "encoder start failed");
 

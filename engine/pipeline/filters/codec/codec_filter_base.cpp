@@ -27,28 +27,6 @@ CodecFilterBase::CodecFilterBase(const std::string &name): FilterBase(name) {}
 
 CodecFilterBase::~CodecFilterBase() = default;
 
-ErrorCode CodecFilterBase::ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta>& meta)
-{
-    auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
-    for (const auto& keyPair : parameterMap) {
-        if ((keyPair.second.second & PARAM_SET) == 0) {
-            continue;
-        }
-        auto outValPtr = meta->GetData(static_cast<Plugin::MetaID>(keyPair.first));
-        if (outValPtr && keyPair.second.first(keyPair.first, *outValPtr)) {
-            SetPluginParameterLocked(keyPair.first, *outValPtr);
-        } else {
-            if (!HasTagInfo(keyPair.first)) {
-                MEDIA_LOG_W("tag " PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
-            } else {
-                MEDIA_LOG_W("parameter " PUBLIC_LOG_S " in meta is not found or type mismatch",
-                            GetTagStrName(keyPair.first));
-            }
-        }
-    }
-    return ErrorCode::SUCCESS;
-}
-
 ErrorCode CodecFilterBase::UpdateMetaAccordingToPlugin(Plugin::Meta& meta)
 {
     auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);

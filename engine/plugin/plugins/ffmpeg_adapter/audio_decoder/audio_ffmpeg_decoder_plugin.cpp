@@ -79,8 +79,8 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
     switch (codec->id) {
         case AV_CODEC_ID_MP3:
             capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_MPEG)
-                    .SetAudioMpegVersion(1)
-                    .SetAudioMpegLayerRange(1, 3); // 3
+                .SetAudioMpegVersion(1)
+                .SetAudioMpegLayerRange(1, 3); // 3
             break;
         case AV_CODEC_ID_FLAC:
             capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_FLAC);

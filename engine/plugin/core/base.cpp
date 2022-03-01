@@ -159,3 +159,8 @@ Status Base::SetCallback(CallbackWrap* cb)
     pluginCallback_.SetCallbackWrap(cb);
     return plugin_->SetCallback(&pluginCallback_);
 }
+
+std::string Base::GetName()
+{
+    return plugin_->GetName();
+}

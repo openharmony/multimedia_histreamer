@@ -82,6 +82,8 @@ public:
 
     virtual Status SetCallback(CallbackWrap* cb);
 
+    std::string GetName();
+
 protected:
     friend class PluginManager;
 

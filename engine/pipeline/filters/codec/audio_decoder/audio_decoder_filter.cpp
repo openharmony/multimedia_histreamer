@@ -154,7 +154,7 @@ bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_
 
 ErrorCode AudioDecoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
-    auto err = ConfigureWithMetaLocked(meta);
+    auto err = ConfigPluginWithMeta(*plugin_, *meta);
     RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "configure decoder plugin error");
 
     uint32_t bufferCnt = 0;

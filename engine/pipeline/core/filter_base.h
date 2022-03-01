@@ -95,6 +95,8 @@ public:
 protected:
     virtual void InitPorts();
 
+    ErrorCode ConfigPluginWithMeta(Plugin::Base& plugin, const Plugin::Meta& meta);
+
     std::string NamePort(const std::string& mime);
 
     /**

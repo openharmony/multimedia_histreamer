@@ -140,29 +140,9 @@ bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr
     return true;
 }
 
-ErrorCode AudioSinkFilter::ConfigureWithMeta(const std::shared_ptr<const Plugin::Meta>& meta)
-{
-    auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
-    for (const auto& keyPair : parameterMap) {
-        auto outValPtr = meta->GetData(static_cast<Plugin::MetaID>(keyPair.first));
-        if (outValPtr &&
-            (keyPair.second.second & PARAM_SET) &&
-            keyPair.second.first(keyPair.first, *outValPtr)) {
-            SetPluginParameter(keyPair.first, *outValPtr);
-        } else {
-            if (!HasTagInfo(keyPair.first)) {
-                MEDIA_LOG_W("tag " PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
-            } else {
-                MEDIA_LOG_W("parameter " PUBLIC_LOG_S " in meta is not found or type mismatch",
-                    GetTagStrName(keyPair.first));
-            }
-        }
-    }
-    return ErrorCode::SUCCESS;
-}
 ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta)
 {
-    FAIL_RET_ERR_CODE_MSG_E(ConfigureWithMeta(meta), "sink configuration failed.");
+    FAIL_RET_ERR_CODE_MSG_E(ConfigPluginWithMeta(*plugin_, *meta), "sink configuration failed.");
     FAIL_RET_ERR_CODE_MSG_E(TranslatePluginStatus(plugin_->Prepare()), "sink prepare failed");
     return ErrorCode::SUCCESS;
 }

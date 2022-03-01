@@ -194,7 +194,7 @@ inline bool HasTagInfo(Plugin::Tag tag)
 inline const char* GetTagStrName(Plugin::Tag tag)
 {
     if (!HasTagInfo(tag)) {
-        return nullptr;
+        return "null";
     }
     return std::get<0>(g_tagInfoMap.at(tag));
 }
@@ -202,7 +202,7 @@ inline const char* GetTagStrName(Plugin::Tag tag)
 inline const char* GetTagTypeStrName(Plugin::Tag tag)
 {
     if (!HasTagInfo(tag)) {
-        return nullptr;
+        return "null";
     }
     return std::get<2>(g_tagInfoMap.at(tag)); // secondary parameter 2
 }
