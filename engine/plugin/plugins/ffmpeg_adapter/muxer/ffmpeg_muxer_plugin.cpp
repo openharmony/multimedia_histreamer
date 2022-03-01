@@ -180,13 +180,13 @@ Status SetParameterOfVdTrack(AVStream* stream, const TagMap& tagMap)
 {
     MEDIA_LOG_E("should add vd tack parameter setter");
     auto ret = SetSingleParameter<VideoPixelFormat, int32_t>(Tag::VIDEO_PIXEL_FORMAT, tagMap,
-                                                        stream->codecpar->format, ConvertPixelFormatToFFmpeg);
+        stream->codecpar->format, ConvertPixelFormatToFFmpeg);
     NOK_RETURN(ret);
     ret = SetSingleParameter<uint32_t, int32_t>(Tag::VIDEO_WIDTH, tagMap, stream->codecpar->width,
-                                               ui2iFunc);
+                                                ui2iFunc);
     NOK_RETURN(ret);
     ret = SetSingleParameter<uint32_t, int32_t>(Tag::VIDEO_HEIGHT, tagMap, stream->codecpar->height,
-                                               ui2iFunc);
+                                                ui2iFunc);
     return ret;
 }
 
