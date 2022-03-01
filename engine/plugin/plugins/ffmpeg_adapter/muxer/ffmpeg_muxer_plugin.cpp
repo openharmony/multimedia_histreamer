@@ -27,8 +27,10 @@
 #include "plugin/plugins/ffmpeg_adapter/utils/ffmpeg_codec_map.h"
 
 namespace {
-using namespace OHOS::Media;
-using namespace Plugin::Ffmpeg;
+using namespace OHOS::Media::Plugin;
+using namespace Ffmpeg;
+
+std::function<int32_t(uint32_t)> ui2iFunc = [](uint32_t i) {return i;};
 
 std::map<std::string, std::shared_ptr<AVOutputFormat>> g_pluginOutputFmt;
 
@@ -39,10 +41,10 @@ bool IsMuxerSupported(const char* name)
     return g_supportedMuxer.count(name) == 1;
 }
 
-bool UpdatePluginInCapability(AVCodecID codecId, Plugin::CapabilitySet& capSet)
+bool UpdatePluginInCapability(AVCodecID codecId, CapabilitySet& capSet)
 {
     if (codecId != AV_CODEC_ID_NONE) {
-        Plugin::Capability cap;
+        Capability cap;
         if (!FFCodecMap::CodecId2Cap(codecId, true, cap)) {
             return false;
         } else {
@@ -52,7 +54,7 @@ bool UpdatePluginInCapability(AVCodecID codecId, Plugin::CapabilitySet& capSet)
     return true;
 }
 
-bool UpdatePluginCapability(const AVOutputFormat* oFmt, Plugin::MuxerPluginDef& pluginDef)
+bool UpdatePluginCapability(const AVOutputFormat* oFmt, MuxerPluginDef& pluginDef)
 {
     if (!FFCodecMap::FormatName2Cap(oFmt->name, pluginDef.outCaps)) {
         MEDIA_LOG_D(PUBLIC_LOG_S " is not supported now", oFmt->name);
@@ -64,10 +66,10 @@ bool UpdatePluginCapability(const AVOutputFormat* oFmt, Plugin::MuxerPluginDef& 
     return true;
 }
 
-Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg)
+Status RegisterMuxerPlugins(const std::shared_ptr<Register>& reg)
 {
     MEDIA_LOG_D("register muxer plugins.");
-    FALSE_RET_V_MSG_E(reg != nullptr, Plugin::Status::ERROR_INVALID_PARAMETER,
+    FALSE_RET_V_MSG_E(reg != nullptr, Status::ERROR_INVALID_PARAMETER,
                       "RegisterPlugins failed due to null pointer for reg.");
     const AVOutputFormat* outputFormat = nullptr;
     void* ite = nullptr;
@@ -82,35 +84,35 @@ Plugin::Status RegisterMuxerPlugins(const std::shared_ptr<Plugin::Register>& reg
             }
         }
         std::string pluginName = "ffmpegMux_" + std::string(outputFormat->name);
-        Plugin::Ffmpeg::ReplaceDelimiter(".,|-<> ", '_', pluginName);
-        Plugin::MuxerPluginDef def;
+        ReplaceDelimiter(".,|-<> ", '_', pluginName);
+        MuxerPluginDef def;
         if (!UpdatePluginCapability(outputFormat, def)) {
             continue;
         }
         def.name = pluginName;
         def.description = "ffmpeg muxer";
         def.rank = 100; // 100
-        def.creator = [](const std::string& name) -> std::shared_ptr<Plugin::MuxerPlugin> {
+        def.creator = [](const std::string& name) -> std::shared_ptr<MuxerPlugin> {
             return std::make_shared<FFmpegMuxerPlugin>(name);
         };
-        if (reg->AddPlugin(def) != Plugin::Status::OK) {
+        if (reg->AddPlugin(def) != Status::OK) {
             MEDIA_LOG_W("fail to add plugin " PUBLIC_LOG_S, pluginName.c_str());
             continue;
         }
         g_pluginOutputFmt[pluginName] = std::shared_ptr<AVOutputFormat>(const_cast<AVOutputFormat*>(outputFormat),
                                                                         [](AVOutputFormat* ptr) {}); // do not delete
     }
-    return Plugin::Status::OK;
+    return Status::OK;
 }
-PLUGIN_DEFINITION(FFmpegMuxers, Plugin::LicenseType::LGPL, RegisterMuxerPlugins, [] {g_pluginOutputFmt.clear();})
+PLUGIN_DEFINITION(FFmpegMuxers, LicenseType::LGPL, RegisterMuxerPlugins, [] {g_pluginOutputFmt.clear();})
 
-Plugin::Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime, AVStream* stream)
+Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime, AVStream* stream)
 {
     AVCodecID id = AV_CODEC_ID_NONE;
-    FALSE_RET_V_MSG_E(FFCodecMap::Mime2CodecId(mime, id), Plugin::Status::ERROR_UNSUPPORTED_FORMAT,
+    FALSE_RET_V_MSG_E(FFCodecMap::Mime2CodecId(mime, id), Status::ERROR_UNSUPPORTED_FORMAT,
                       "mime " PUBLIC_LOG_S " has no corresponding codec id", mime.c_str());
     auto ptr = avcodec_find_encoder(id);
-    FALSE_RET_V_MSG_E(ptr != nullptr, Plugin::Status::ERROR_UNSUPPORTED_FORMAT,
+    FALSE_RET_V_MSG_E(ptr != nullptr, Status::ERROR_UNSUPPORTED_FORMAT,
                       "codec of mime " PUBLIC_LOG_S " is not founder as encoder", mime.c_str());
     bool matched = true;
     switch (ptr->type) {
@@ -126,82 +128,76 @@ Plugin::Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime
         default:
             matched = false;
     }
-    FALSE_RET_V_MSG_E(matched, Plugin::Status::ERROR_UNSUPPORTED_FORMAT,  "codec of mime " PUBLIC_LOG_S
+    FALSE_RET_V_MSG_E(matched, Status::ERROR_UNSUPPORTED_FORMAT,  "codec of mime " PUBLIC_LOG_S
         " is not matched with " PUBLIC_LOG_S " muxer", mime.c_str(), fmt->name);
     stream->codecpar->codec_id = id;
     stream->codecpar->codec_type = ptr->type;
-    return Plugin::Status::OK;
+    return Status::OK;
 }
 
-Plugin::Status SetCodecOfTrack(const AVOutputFormat* fmt, AVStream* stream, const Plugin::TagMap& tagMap)
+Status SetCodecOfTrack(const AVOutputFormat* fmt, AVStream* stream, const TagMap& tagMap)
 {
-    auto ite = tagMap.find(Plugin::Tag::MIME);
-    FALSE_RET_V_MSG_E(ite != std::end(tagMap), Plugin::Status::ERROR_UNSUPPORTED_FORMAT, "mime is missing!");
-    FALSE_RETURN_V(ite->second.SameTypeWith(typeid(std::string)), Plugin::Status::ERROR_MISMATCHED_TYPE);
+    auto ite = tagMap.find(Tag::MIME);
+    FALSE_RET_V_MSG_E(ite != std::end(tagMap), Status::ERROR_UNSUPPORTED_FORMAT, "mime is missing!");
+    FALSE_RETURN_V(ite->second.SameTypeWith(typeid(std::string)), Status::ERROR_MISMATCHED_TYPE);
     // todo specially for audio/mpeg audio/mpeg we should check mpegversion and mpeglayer
 
-    return SetCodecByMime(fmt, Plugin::AnyCast<std::string>(ite->second), stream);
+    return SetCodecByMime(fmt, AnyCast<std::string>(ite->second), stream);
 }
 
 template<typename T, typename U>
-Plugin::Status SetSingleParameter(Plugin::Tag tag, const Plugin::TagMap& tagMap, U& target, std::function<U(T)> func)
+Status SetSingleParameter(Tag tag, const TagMap& tagMap, U& target, std::function<U(T)> func)
 {
     auto ite = tagMap.find(tag);
     if (ite != std::end(tagMap)) {
-        FALSE_RET_V_MSG_E(ite->second.SameTypeWith(typeid(T)), Plugin::Status::ERROR_MISMATCHED_TYPE,
+        FALSE_RET_V_MSG_E(ite->second.SameTypeWith(typeid(T)), Status::ERROR_MISMATCHED_TYPE,
                           "tag " PUBLIC_LOG_U32 " type mismatched", tag);
-
-        target = func(Plugin::AnyCast<T>(ite->second));
+        target = func(AnyCast<T>(ite->second));
     }
-    return Plugin::Status::OK;
+    return Status::OK;
 }
 
-Plugin::Status SetParameterOfAuTrack(AVStream* stream, const Plugin::TagMap& tagMap)
+Status SetParameterOfAuTrack(AVStream* stream, const TagMap& tagMap)
 {
-#define RETURN_IF_NOT_OK(ret) \
-do { \
-    if ((ret) != Status::OK) { \
-        return ret; \
-    } \
-} while (0)
-
-    using namespace Plugin;
-    using namespace Ffmpeg;
     auto ret = SetSingleParameter<AudioSampleFormat, int32_t>(Tag::AUDIO_SAMPLE_FORMAT, tagMap,
                                                               stream->codecpar->format, ConvP2FfSampleFmt);
-    std::function<int32_t(uint32_t)> ui2iFunc = [](uint32_t i) {return i;};
-
-    RETURN_IF_NOT_OK(ret);
+    NOK_RETURN(ret);
     ret = SetSingleParameter<uint32_t, int32_t>(Tag::AUDIO_CHANNELS, tagMap, stream->codecpar->channels,
                                                 ui2iFunc);
-    RETURN_IF_NOT_OK(ret);
+    NOK_RETURN(ret);
     ret = SetSingleParameter<uint32_t, int32_t>(Tag::AUDIO_SAMPLE_RATE, tagMap, stream->codecpar->sample_rate,
                                                 ui2iFunc);
-    RETURN_IF_NOT_OK(ret);
+    NOK_RETURN(ret);
     ret = SetSingleParameter<uint32_t, int32_t>(Tag::AUDIO_SAMPLE_PER_FRAME, tagMap, stream->codecpar->frame_size,
                                                 ui2iFunc);
-    RETURN_IF_NOT_OK(ret);
+    NOK_RETURN(ret);
     ret = SetSingleParameter<AudioChannelLayout, uint64_t>(Tag::AUDIO_CHANNEL_LAYOUT, tagMap,
         stream->codecpar->channel_layout, [](AudioChannelLayout layout) {return (uint64_t)layout;});
     return ret;
-#undef RETURN_IF_NOT_OK
 }
 
-Plugin::Status SetParameterOfVdTrack(AVStream* stream, const Plugin::TagMap& tagMap)
+Status SetParameterOfVdTrack(AVStream* stream, const TagMap& tagMap)
 {
-    // todo add video
     MEDIA_LOG_E("should add vd tack parameter setter");
-    return Plugin::Status::ERROR_UNKNOWN;
+    auto ret = SetSingleParameter<VideoPixelFormat, int32_t>(Tag::VIDEO_PIXEL_FORMAT, tagMap,
+                                                        stream->codecpar->format, ConvertPixelFormatToFFmpeg);
+    NOK_RETURN(ret);
+    ret = SetSingleParameter<uint32_t, int32_t>(Tag::VIDEO_WIDTH, tagMap, stream->codecpar->width,
+                                               ui2iFunc);
+    NOK_RETURN(ret);
+    ret = SetSingleParameter<uint32_t, int32_t>(Tag::VIDEO_HEIGHT, tagMap, stream->codecpar->height,
+                                               ui2iFunc);
+    return ret;
 }
 
-Plugin::Status SetParameterOfSubTitleTrack(AVStream* stream, const Plugin::TagMap& tagMap)
+Status SetParameterOfSubTitleTrack(AVStream* stream, const TagMap& tagMap)
 {
     // todo add subtitle
     MEDIA_LOG_E("should add subtitle tack parameter setter");
-    return Plugin::Status::ERROR_UNKNOWN;
+    return Status::ERROR_UNKNOWN;
 }
 
-void ResetCodecParameter (AVCodecParameters* par)
+void ResetCodecParameter(AVCodecParameters* par)
 {
     av_freep(&par->extradata);
     memset_s(par, sizeof(*par), 0, sizeof(*par));
@@ -219,13 +215,13 @@ void ResetCodecParameter (AVCodecParameters* par)
     par->sample_aspect_ratio = AVRational {0, 1};
 }
 
-Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const Plugin::TagMap& tagMap)
+Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const TagMap& tagMap)
 {
-    FALSE_RETURN_V(stream != nullptr, Plugin::Status::ERROR_INVALID_PARAMETER);
+    FALSE_RETURN_V(stream != nullptr, Status::ERROR_INVALID_PARAMETER);
     ResetCodecParameter(stream->codecpar);
     // firstly mime
     auto ret = SetCodecOfTrack(fmt, stream, tagMap);
-    FALSE_RETURN_V(ret == Plugin::Status::OK, ret);
+    NOK_RETURN(ret);
     if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) { // audio
         ret = SetParameterOfAuTrack(stream, tagMap);
     } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) { // video
@@ -235,42 +231,41 @@ Plugin::Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const
     } else {
         MEDIA_LOG_W("unknown codec type of stream " PUBLIC_LOG_D32, stream->index);
     }
-    FALSE_RETURN_V(ret == Plugin::Status::OK, ret);
+    NOK_RETURN(ret);
     // others
-    ret = SetSingleParameter<int64_t, int64_t>(Plugin::Tag::MEDIA_BITRATE, tagMap, stream->codecpar->bit_rate,
+    ret = SetSingleParameter<int64_t, int64_t>(Tag::MEDIA_BITRATE, tagMap, stream->codecpar->bit_rate,
          [](int64_t rate) {return rate;});
-    FALSE_RETURN_V(ret == Plugin::Status::OK, ret);
-
+    NOK_RETURN(ret);
     // extra data
-    auto ite = tagMap.find(Plugin::Tag::MEDIA_CODEC_CONFIG);
+    auto ite = tagMap.find(Tag::MEDIA_CODEC_CONFIG);
     if (ite != std::end(tagMap)) {
-        FALSE_RET_V_MSG_E(ite->second.SameTypeWith(typeid(std::vector<uint8_t>)), Plugin::Status::ERROR_MISMATCHED_TYPE,
-                          "tag " PUBLIC_LOG_D32 " type mismatched", Plugin::Tag::MEDIA_CODEC_CONFIG);
-        const auto* extraData = Plugin::AnyCast<std::vector<uint8_t>>(&(ite->second));
-        stream->codecpar->extradata = static_cast<uint8_t *>(av_mallocz(
-            extraData->size() + AV_INPUT_BUFFER_PADDING_SIZE));
-        FALSE_RETURN_V(stream->codecpar->extradata != nullptr, Plugin::Status::ERROR_NO_MEMORY);
-        memcpy_s(stream->codecpar->extradata, extraData->size(), extraData->data(), extraData->size());
-        stream->codecpar->extradata_size = extraData->size();
+        FALSE_RET_V_MSG_E(ite->second.SameTypeWith(typeid(CodecConfig)), Status::ERROR_MISMATCHED_TYPE,
+                          "tag " PUBLIC_LOG_D32 " type mismatched", Tag::MEDIA_CODEC_CONFIG);
+        auto codecConfig = AnyCast<CodecConfig>(ite->second);
+        auto extraSize = codecConfig.size();
+        stream->codecpar->extradata = static_cast<uint8_t *>(av_mallocz(extraSize + AV_INPUT_BUFFER_PADDING_SIZE));
+        FALSE_RETURN_V(stream->codecpar->extradata != nullptr, Status::ERROR_NO_MEMORY);
+        memcpy_s(stream->codecpar->extradata, extraSize, codecConfig.data(), extraSize);
+        stream->codecpar->extradata_size = extraSize;
     }
-    return Plugin::Status::OK;
+    return Status::OK;
 }
 
-Plugin::Status SetTagsOfGeneral(AVFormatContext* fmtCtx, const Plugin::TagMap& tags)
+Status SetTagsOfGeneral(AVFormatContext* fmtCtx, const TagMap& tags)
 {
     for (const auto& pair: tags) {
         std::string metaName;
-        if (!Plugin::Ffmpeg::FindAvMetaNameByTag(pair.first, metaName)) {
+        if (!FindAvMetaNameByTag(pair.first, metaName)) {
             MEDIA_LOG_I("tag " PUBLIC_LOG_U32 " will not written as general meta", pair.first);
             continue;
         }
         if (!pair.second.SameTypeWith(typeid(std::string))) {
             continue;
         }
-        auto value = Plugin::AnyCast<std::string>(pair.second);
+        auto value = AnyCast<std::string>(pair.second);
         av_dict_set(&fmtCtx->metadata, metaName.c_str(), value.c_str(), 0);
     }
-    return Plugin::Status::OK;
+    return Status::OK;
 }
 }
 

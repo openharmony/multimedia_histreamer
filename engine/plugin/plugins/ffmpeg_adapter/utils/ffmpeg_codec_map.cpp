@@ -18,41 +18,40 @@
 
 namespace OHOS {
 namespace Media {
+namespace Plugin {
 namespace FFCodecMap {
-using namespace OHOS::Media;
-
 bool CodecId2Cap(AVCodecID codecId, bool encoder, Plugin::Capability& cap)
 {
     switch (codecId) {
         case AV_CODEC_ID_MP3:
-            cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_MPEG)
-                .AppendFixedKey<uint32_t>(Plugin::Capability::Key::AUDIO_MPEG_VERSION, 1)
-                .AppendIntervalKey<uint32_t>(Plugin::Capability::Key::AUDIO_MPEG_LAYER, 1, 3); // 3
+            cap.SetMime(MEDIA_MIME_AUDIO_MPEG)
+                .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 1)
+                .AppendIntervalKey<uint32_t>(Capability::Key::AUDIO_MPEG_LAYER, 1, 3); // 3
             return true;
         case AV_CODEC_ID_FLAC:
-            cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_FLAC);
+            cap.SetMime(MEDIA_MIME_AUDIO_FLAC);
             return true;
         case AV_CODEC_ID_AAC:
-            cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC);
+            cap.SetMime(MEDIA_MIME_AUDIO_AAC);
             return true;
         case AV_CODEC_ID_AAC_LATM:
-            cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM);
+            cap.SetMime(MEDIA_MIME_AUDIO_AAC_LATM);
             return true;
         case AV_CODEC_ID_H264:
-            cap.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
+            cap.SetMime(MEDIA_MIME_VIDEO_H264);
             return true;
         default:
             break;
     }
     return false;
 }
-bool FormatName2Cap(const std::string& fmtName, Plugin::CapabilitySet& outCaps)
+bool FormatName2Cap(const std::string& fmtName, CapabilitySet& outCaps)
 {
     if (fmtName == "mp4") {
-        outCaps.emplace_back(Plugin::Capability(MEDIA_MIME_CONTAINER_MP4));
+        outCaps.emplace_back(Capability(MEDIA_MIME_CONTAINER_MP4));
         return true;
     } else if (fmtName == "h264") {
-        outCaps.emplace_back(Plugin::Capability(MEDIA_MIME_VIDEO_H264));
+        outCaps.emplace_back(Capability(MEDIA_MIME_VIDEO_H264));
         return true;
     }
     return false;
@@ -69,5 +68,6 @@ bool Mime2CodecId(const std::string& mime, AVCodecID& codecId)
     return false;
 }
 } // FFCodecMap
+} // Plugin
 } // Media
 } // OHOS

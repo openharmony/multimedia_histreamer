@@ -38,11 +38,6 @@ const size_t DEFAULT_ALIGN = 16;
 
 std::set<AVCodecID> supportedCodec = {AV_CODEC_ID_H264};
 
-std::shared_ptr<CodecPlugin> VideoFfmpegEncoderCreator(const std::string& name)
-{
-    return std::make_shared<VideoFfmpegEncoderPlugin>(name);
-}
-
 Status RegisterVideoEncoderPlugins(const std::shared_ptr<Register>& reg)
 {
     const AVCodec* codec = nullptr;
@@ -60,7 +55,9 @@ Status RegisterVideoEncoderPlugins(const std::shared_ptr<Register>& reg)
         definition.name = "video_encoder_" + std::string(codec->name);
         definition.codecType = CodecType::VIDEO_ENCODER;
         definition.rank = 100; // 100
-        definition.creator = VideoFfmpegEncoderCreator;
+        definition.creator = [](const std::string& name) -> std::shared_ptr<CodecPlugin> {
+            return std::make_shared<VideoFfmpegEncoderPlugin>(name);
+        };
         UpdatePluginDefinition(codec, definition);
         // do not delete the codec in the deleter
         codecMap[definition.name] = std::shared_ptr<AVCodec>(const_cast<AVCodec*>(codec), [](void* ptr) {});
@@ -81,11 +78,10 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
     Capability inputCaps(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
     if (codec->pix_fmts != nullptr) {
         DiscreteCapability<VideoPixelFormat> values;
-        size_t index = 0;
-        for (index = 0; codec->pix_fmts[index] != -1; ++index) {
+        for (auto index = 0; codec->pix_fmts[index] != -1; ++index) {
             values.push_back(ConvertPixelFormatFromFFmpeg(codec->pix_fmts[index]));
         }
-        if (index) {
+        if (!values.empty()) {
             inputCaps.AppendDiscreteKeys(Capability::Key::VIDEO_PIXEL_FORMAT, values);
         }
     } else {

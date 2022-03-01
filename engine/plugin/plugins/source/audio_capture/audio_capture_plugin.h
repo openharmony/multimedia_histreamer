@@ -22,33 +22,34 @@
 
 namespace OHOS {
 namespace Media {
+namespace Plugin {
 namespace AuCapturePlugin {
-class AudioCapturePlugin : public Plugin::SourcePlugin {
+class AudioCapturePlugin : public SourcePlugin {
 public:
     explicit AudioCapturePlugin(std::string name);
     ~AudioCapturePlugin() override;
 
-    Plugin::Status Init() override;
-    Plugin::Status Deinit() override;
-    Plugin::Status Prepare() override;
-    Plugin::Status Reset() override;
-    Plugin::Status Start() override;
-    Plugin::Status Stop() override;
-    Plugin::Status GetParameter(Plugin::Tag tag, Plugin::ValueType& value) override;
-    Plugin::Status SetParameter(Plugin::Tag tag, const Plugin::ValueType& value) override;
-    std::shared_ptr<Plugin::Allocator> GetAllocator() override;
-    Plugin::Status SetCallback(Plugin::Callback* cb) override;
-    Plugin::Status SetSource(std::shared_ptr<Plugin::MediaSource> source) override;
-    Plugin::Status Read(std::shared_ptr<Plugin::Buffer>& buffer, size_t expectedLen) override;
-    Plugin::Status GetSize(size_t& size) override;
+    Status Init() override;
+    Status Deinit() override;
+    Status Prepare() override;
+    Status Reset() override;
+    Status Start() override;
+    Status Stop() override;
+    Status GetParameter(Tag tag, ValueType& value) override;
+    Status SetParameter(Tag tag, const ValueType& value) override;
+    std::shared_ptr<Allocator> GetAllocator() override;
+    Status SetCallback(Callback* cb) override;
+    Status SetSource(std::shared_ptr<MediaSource> source) override;
+    Status Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen) override;
+    Status GetSize(size_t& size) override;
     bool IsSeekable() override;
-    Plugin::Status SeekTo(uint64_t offset) override;
+    Status SeekTo(uint64_t offset) override;
 
 private:
     bool AssignSampleRateIfSupported(uint32_t sampleRate);
     bool AssignChannelNumIfSupported(uint32_t channelNum);
-    bool AssignSampleFmtIfSupported(OHOS::Media::Plugin::AudioSampleFormat sampleFormat);
-    Plugin::Status GetAudioTime(uint64_t &audioTimeNs);
+    bool AssignSampleFmtIfSupported(AudioSampleFormat sampleFormat);
+    Plugin::Status GetAudioTime(uint64_t& audioTimeNs);
 
     std::shared_ptr<OHOS::AudioStandard::AudioCapturer> audioCapturer_ {nullptr};
     AudioStandard::AudioCapturerParams capturerParams_ {};
@@ -60,6 +61,7 @@ private:
     uint64_t totalPauseTimeNs_ {0};
 };
 } // namespace AuCapturePlugin
+} // namespace Plugin
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_AUDIO_CAPTURE_PLUGIN_H

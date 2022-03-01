@@ -53,6 +53,7 @@
 #define PUBLIC_LOG_F PUBLIC_LOG "f"
 #define PUBLIC_LOG_P PUBLIC_LOG "p"
 #define PUBLIC_LOG_ZU PUBLIC_LOG "zu"
+#define PUBLIC_LOG_HU PUBLIC_LOG "hu"
 
 #ifdef MEDIA_OHOS
 #ifndef OHOS_DEBUG

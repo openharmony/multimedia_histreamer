@@ -29,10 +29,6 @@ namespace {
 // register plugins
 using namespace OHOS::Media::Plugin;
 using namespace VideoCapture;
-std::shared_ptr<SourcePlugin> VideoCapturePluginCreater(const std::string &name)
-{
-    return std::make_shared<VideoCapturePlugin>(name);
-}
 
 Status VideoCaptureRegister(const std::shared_ptr<Register> &reg)
 {
@@ -41,7 +37,9 @@ Status VideoCaptureRegister(const std::shared_ptr<Register> &reg)
     definition.description = "Video capture from audio service";
     definition.rank = 100; // 100: max rank
     definition.inputType = SrcInputType::VID_SURFACE_YUV;
-    definition.creator = VideoCapturePluginCreater;
+    definition.creator = [](const std::string& name) -> std::shared_ptr<SourcePlugin> {
+        return std::make_shared<VideoCapturePlugin>(name);
+    };
     Capability outCaps(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
     outCaps.AppendDiscreteKeys<VideoPixelFormat>(
         Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21});
@@ -55,8 +53,6 @@ PLUGIN_DEFINITION(StdVideoCapture, LicenseType::APACHE_V2, VideoCaptureRegister,
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-using namespace OHOS::Media::Plugin;
-
 constexpr int32_t DEFAULT_SURFACE_QUEUE_SIZE = 6;
 constexpr int32_t DEFAULT_SURFACE_SIZE = 1024 * 1024;
 constexpr int32_t DEFAULT_VIDEO_WIDTH = 1920;
@@ -152,7 +148,7 @@ Status VideoCapturePlugin::Reset()
 Status VideoCapturePlugin::Start()
 {
     MEDIA_LOG_D("IN");
-    OHOS::Media::OSAL::ScopedLock lock(mutex_);
+    OSAL::ScopedLock lock(mutex_);
     if (isStop_.load()) {
         if (curTimestampNs_ < stopTimestampNs_) {
             MEDIA_LOG_E("Get wrong audio time");
@@ -166,7 +162,7 @@ Status VideoCapturePlugin::Start()
 Status VideoCapturePlugin::Stop()
 {
     MEDIA_LOG_D("IN");
-    OHOS::Media::OSAL::ScopedLock lock(mutex_);
+    OSAL::ScopedLock lock(mutex_);
     if (!isStop_.load()) {
         stopTimestampNs_ = curTimestampNs_;
         isStop_ = true;
@@ -358,12 +354,12 @@ void VideoCapturePlugin::OnBufferAvailable()
     if (!surfaceConsumer_) {
         return;
     }
-    OHOS::Media::OSAL::ScopedLock lock(mutex_);
+    OSAL::ScopedLock lock(mutex_);
     bufferCnt_++;
     if (bufferCnt_ == 1) {
         readCond_.NotifyAll();
     }
-}
+} // namespace VideoCapture
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

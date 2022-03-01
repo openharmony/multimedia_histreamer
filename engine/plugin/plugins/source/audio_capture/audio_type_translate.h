@@ -23,17 +23,19 @@
 
 namespace OHOS {
 namespace Media {
+namespace Plugin {
 namespace AuCapturePlugin {
 bool SampleRateEnum2Num (OHOS::AudioStandard::AudioSamplingRate enumVal, uint32_t& numVal);
 bool SampleRateNum2Enum (uint32_t numVal, OHOS::AudioStandard::AudioSamplingRate& enumVal);
 
-bool SampleFmt2PluginFmt(OHOS::AudioStandard::AudioSampleFormat aFmt, OHOS::Media::Plugin::AudioSampleFormat& pFmt);
-bool PluginFmt2SampleFmt(OHOS::Media::Plugin::AudioSampleFormat pFmt, OHOS::AudioStandard::AudioSampleFormat& aFmt);
+bool SampleFmt2PluginFmt(OHOS::AudioStandard::AudioSampleFormat aFmt, AudioSampleFormat& pFmt);
+bool PluginFmt2SampleFmt(AudioSampleFormat pFmt, OHOS::AudioStandard::AudioSampleFormat& aFmt);
 
 bool ChannelNumEnum2Num(OHOS::AudioStandard::AudioChannel enumVal, uint32_t& numVal);
 bool ChannelNumNum2Enum(uint32_t numVal, OHOS::AudioStandard::AudioChannel& enumVal);
-Plugin::Status Error2Status(int32_t err);
-} // AuCapturePlugin
-} // Media
-} // OHOS
+Status Error2Status(int32_t err);
+} // namespace AuCapturePlugin
+} // namespace Plugin
+} // namespace Media
+} // namespace OHOS
 #endif // HISTREAMER_AUDIO_CAPTURE_TYPE_TRANSLATE_H

@@ -73,7 +73,7 @@ private:
         int64_t bitRate;
         uint32_t frameRate;
         Plugin::VideoPixelFormat format;
-        std::vector<uint8_t> codecConfig;
+        Plugin::CodecConfig codecConfig;
         std::shared_ptr<Plugin::Meta> codecMeta;
     };
 
