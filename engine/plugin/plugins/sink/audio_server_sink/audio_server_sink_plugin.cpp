@@ -612,22 +612,23 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
         }
     }
     MEDIA_LOG_D("write data size " PUBLIC_LOG_ZU, length);
-    OSAL::ScopedLock lock(renderMutex_);
+    int32_t ret = -1;
     {
+        OSAL::ScopedLock lock(renderMutex_);
         if (audioRenderer_ == nullptr) {
             MEDIA_LOG_E("audioRenderer_ invalid.");
             return Status::ERROR_WRONG_STATE;
         }
-        int32_t ret = audioRenderer_->Write(buffer, length);
-        MEDIA_LOG_D("written data size " PUBLIC_LOG_D32, ret);
-        if (ret >= 0) {
-            // todo deal with ret < length
-            return Status::OK;
-        } else {
-            MEDIA_LOG_E("write to render error code " PUBLIC_LOG_D32, ret);
-            return Status::ERROR_UNKNOWN;
+        if (length > 0) {
+            ret = audioRenderer_->Write(buffer, length);
         }
+        MEDIA_LOG_D("written data size " PUBLIC_LOG_D32, ret);
     }
+    if (input->flag & BUFFER_FLAG_EOS) {
+        audioRenderer_->Drain();
+    }
+    return ret >= 0 ? Status::OK : Status::ERROR_UNKNOWN;
+
 }
 
 Status AudioServerSinkPlugin::Flush()
