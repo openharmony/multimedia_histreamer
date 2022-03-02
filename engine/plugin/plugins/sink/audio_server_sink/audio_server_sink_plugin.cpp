@@ -544,6 +544,12 @@ Status AudioServerSinkPlugin::SetVolume(float volume)
     return Status::ERROR_WRONG_STATE;
 }
 
+Status AudioServerSinkPlugin::Resume()
+{
+    MEDIA_LOG_I("Resume entered.");
+    return Start();
+}
+
 Status AudioServerSinkPlugin::Pause()
 {
     MEDIA_LOG_I("Pause entered.");

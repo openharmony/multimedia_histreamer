@@ -96,10 +96,7 @@ public:
 
     Plugin::Status Pause() override;
 
-    Plugin::Status Resume() override
-    {
-        return Plugin::Status::OK;
-    }
+    Plugin::Status Resume() override;
 
     Plugin::Status GetLatency(uint64_t& hstTime) override;
 
