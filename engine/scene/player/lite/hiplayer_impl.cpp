@@ -259,7 +259,8 @@ int32_t HiPlayerImpl::Rewind(int64_t mSeconds, int32_t mode)
     if (!Plugin::Ms2HstTime(mSeconds, hstTime)) {
         return CppExt::to_underlying(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }
-    return CppExt::to_underlying(fsm_.SendEventAsync(Intent::SEEK, hstTime));
+    auto smode = Transform2SeekMode((PlayerSeekMode)mode);
+    return CppExt::to_underlying(fsm_.SendEventAsync(Intent::SEEK, SeekInfo{hstTime, smode}));
 }
 
 int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
@@ -396,7 +397,7 @@ ErrorCode HiPlayerImpl::DoStop()
     return ret;
 }
 
-ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime)
+ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode)
 {
     PROFILE_BEGIN();
     auto rtv = allowed && hstTime >= 0 ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_OPERATION;
@@ -407,7 +408,7 @@ ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime)
         pipeline_->FlushEnd();
         PROFILE_END("Flush end");
         PROFILE_RESET();
-        rtv = demuxer_->SeekTo(hstTime);
+        rtv = demuxer_->SeekTo(hstTime, mode);
         if (rtv == ErrorCode::SUCCESS) {
             mediaStats_.ReceiveEvent(EventType::EVENT_AUDIO_PROGRESS, hstTime);
             mediaStats_.ReceiveEvent(EventType::EVENT_VIDEO_PROGRESS, hstTime);
@@ -442,7 +443,7 @@ ErrorCode HiPlayerImpl::DoOnComplete()
     if (!singleLoop_) {
         StopAsync();
     } else {
-        fsm_.SendEventAsync(Intent::SEEK, static_cast<int64_t>(0));
+        fsm_.SendEventAsync(Intent::SEEK, SeekInfo{0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC});
     }
     auto ptr = callback_.lock();
     if (ptr != nullptr) {
@@ -720,5 +721,20 @@ void HiPlayerImpl::ActiveFilters(const std::vector<Filter*>& filters)
         (*it)->Prepare();
     }
 }
+
+Plugin::SeekMode HiPlayerImpl::Transform2SeekMode(PlayerSeekMode mode)
+{
+    switch (mode) {
+        case PlayerSeekMode::PLAYER_SEEK_NEXT_SYNC:
+            return Plugin::SeekMode::SEEK_NEXT_SYNC;
+        case PlayerSeekMode::PLAYER_SEEK_PREVIOUS_SYNC:
+            return Plugin::SeekMode::SEEK_PREVIOUS_SYNC;
+        case PlayerSeekMode::PLAYER_SEEK_CLOSEST_SYNC:
+            return Plugin::SeekMode::SEEK_CLOSEST_SYNC;
+        case PlayerSeekMode::PLAYER_SEEK_CLOSEST:
+            return Plugin::SeekMode::SEEK_CLOSEST;
+    }
+}
+
 } // namespace Media
 } // namespace OHOS

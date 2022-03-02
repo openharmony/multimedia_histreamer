@@ -22,7 +22,8 @@
 
 namespace OHOS {
 namespace Media {
-namespace HosLitePlugin {
+namespace Plugin {
+namespace HosLite {
 bool PluginAuFormat2HdiAttrs(OHOS::Media::Plugin::AudioSampleFormat pFormat, AudioSampleAttributes& attrs);
 bool HdiAuFormat2PluginFormat(::AudioSampleFormat hdiAudioFormat, OHOS::Media::Plugin::AudioSampleFormat& pluginFormat);
 bool HdiAttrs2PluginAuFormat(AudioSampleAttributes attrs, OHOS::Media::Plugin::AudioSampleFormat& pFormat);
@@ -35,7 +36,8 @@ bool PluginChannelLayout2HdiMask(OHOS::Media::Plugin::AudioChannelLayout layout,
 bool HdiMask2PluginChannelLayout(AudioChannelMask mask, OHOS::Media::Plugin::AudioChannelLayout& layout);
 
 int32_t GetPcmBytes(AudioFormat format);
-} // namespace HosLitePlugin
+} // namespace HosLite
+} // namespace Plugin
 } // namespace Media
 } // namespace OHOS
 #endif

@@ -24,6 +24,7 @@ namespace OHOS {
 namespace Media {
 int TransErrorCode(ErrorCode errorCode);
 PlayerStates TransStateId2PlayerState(StateId state);
+Plugin::SeekMode Transform2SeekMode(PlayerSeekMode mode);
 }  // namespace Media
 }  // namespace OHOS
 

@@ -236,13 +236,13 @@ bool DemuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<c
     return upstreamMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_);
 }
 
-ErrorCode DemuxerFilter::SeekTo(int64_t pos)
+ErrorCode DemuxerFilter::SeekTo(int64_t pos, Plugin::SeekMode mode)
 {
     if (!plugin_) {
         MEDIA_LOG_E("SeekTo failed due to no valid plugin");
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
-    auto rtv = TranslatePluginStatus(plugin_->SeekTo(-1, pos, Plugin::SeekMode::BACKWARD));
+    auto rtv = TranslatePluginStatus(plugin_->SeekTo(-1, pos, mode));
     if (rtv == ErrorCode::SUCCESS) {
         if (task_) {
             task_->Start();

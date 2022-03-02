@@ -24,6 +24,11 @@ namespace OHOS {
 namespace Media {
 using MediaSource = Plugin::MediaSource;
 
+struct SeekInfo {
+    int64_t hstTime;
+    Plugin::SeekMode mode;
+};
+
 class PlayExecutor {
 public:
     virtual ~PlayExecutor()
@@ -61,10 +66,11 @@ public:
         return ErrorCode::SUCCESS;
     }
 
-    virtual ErrorCode DoSeek(bool allowed, int64_t hstTime)
+    virtual ErrorCode DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode)
     {
         (void)allowed;
         (void)hstTime;
+        (void)mode;
         return ErrorCode::SUCCESS;
     }
 

@@ -504,17 +504,13 @@ int ConvertSeekModeToFFmpeg(SeekMode mode)
 {
     int seekFlag = AVSEEK_FLAG_BACKWARD;
     switch (mode) {
-        case SeekMode::BACKWARD:
+        case SeekMode::SEEK_PREVIOUS_SYNC:
             seekFlag = AVSEEK_FLAG_BACKWARD;
             break;
-        case SeekMode::FORWARD:
+        case SeekMode::SEEK_NEXT_SYNC:
+        case SeekMode::SEEK_CLOSEST_SYNC:
+        case SeekMode::SEEK_CLOSEST:
             seekFlag = 0;
-            break;
-        case SeekMode::FRAME:
-            seekFlag = AVSEEK_FLAG_FRAME;
-            break;
-        case SeekMode::ANY:
-            seekFlag = AVSEEK_FLAG_ANY;
             break;
         default:
             MEDIA_LOG_W("unsupported seekmode: " PUBLIC_LOG "d, using backward mode instead.",

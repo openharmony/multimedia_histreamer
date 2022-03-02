@@ -73,5 +73,20 @@ PlayerStates TransStateId2PlayerState(StateId state)
     }
     return playerState;
 }
+
+Plugin::SeekMode Transform2SeekMode(PlayerSeekMode mode)
+{
+    switch (mode) {
+        case PlayerSeekMode::SEEK_NEXT_SYNC:
+            return Plugin::SeekMode::SEEK_NEXT_SYNC;
+        case PlayerSeekMode::SEEK_PREVIOUS_SYNC:
+            return Plugin::SeekMode::SEEK_PREVIOUS_SYNC;
+        case PlayerSeekMode::SEEK_CLOSEST_SYNC:
+            return Plugin::SeekMode::SEEK_CLOSEST_SYNC;
+        case PlayerSeekMode::SEEK_CLOSEST:
+            return Plugin::SeekMode::SEEK_CLOSEST;
+    }
+}
+
 }  // namespace Media
 }  // namespace OHOS

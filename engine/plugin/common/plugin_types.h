@@ -47,11 +47,10 @@ enum struct State : int32_t {
  * @version 1.0
  */
 enum struct SeekMode : uint32_t {
-    FORWARD,  ///< Seeks forwards for the keyframe closest to specified position
-    BACKWARD, ///< Seeks backwards for the keyframe closest to specified position
-    BYTE,     ///< Seeks based on position in bytes
-    ANY,      ///< Seeks to any frame, even non-keyframes
-    FRAME,    ///< Seeks seeking based on frame number
+    SEEK_NEXT_SYNC = 0,     ///> sync to keyframes after the time point.
+    SEEK_PREVIOUS_SYNC,     ///> sync to keyframes before the time point.
+    SEEK_CLOSEST_SYNC,      ///> sync to closest keyframes.
+    SEEK_CLOSEST,           ///> seek to frames closest the time point.
 };
 
 /**

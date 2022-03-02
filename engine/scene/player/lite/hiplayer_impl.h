@@ -128,13 +128,16 @@ public:
     ErrorCode DoPause() override;
     ErrorCode DoResume() override;
     ErrorCode DoStop() override;
-    ErrorCode DoSeek(bool allowed, int64_t hstTime) override;
+    ErrorCode DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode) override;
     ErrorCode DoOnReady() override;
     ErrorCode DoOnComplete() override;
     ErrorCode DoOnError(ErrorCode) override;
 
 private:
     enum class MediaType : int32_t { AUDIO, VIDEO, BUTT };
+
+    static Plugin::SeekMode Transform2SeekMode(PlayerSeekMode mode);
+
     struct MediaStat {
         MediaType mediaType {MediaType::BUTT};
         std::atomic<int64_t> currentPositionMs {0};

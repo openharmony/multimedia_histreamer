@@ -30,7 +30,8 @@ struct AudioRender;
 struct AudioPort;
 namespace OHOS {
 namespace Media {
-namespace HosLitePlugin {
+namespace Plugin {
+namespace HosLite {
 class RingBuffer;
 
 class HdiSink : public std::enable_shared_from_this<HdiSink>, public OHOS::Media::Plugin::AudioSinkPlugin {
@@ -116,7 +117,8 @@ private:
     std::atomic<bool> processing_;
     OSAL::ConditionVariable renderCond_;
 };
-} // namespace HosLitePlugin
+} // namespace HosLite
+} // namespace Plugin
 } // namespace Media
 } // namespace OHOS
 #endif

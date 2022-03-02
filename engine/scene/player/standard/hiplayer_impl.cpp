@@ -192,7 +192,8 @@ int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
     if (!Plugin::Ms2HstTime(mSeconds, hstTime)) {
         return TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }
-    return TransErrorCode(fsm_.SendEventAsync(Intent::SEEK, hstTime));
+    auto smode = Transform2SeekMode(mode);
+    return TransErrorCode(fsm_.SendEventAsync(Intent::SEEK, SeekInfo{hstTime, smode}));
 }
 
 int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
@@ -348,7 +349,7 @@ ErrorCode HiPlayerImpl::DoStop()
     return ret;
 }
 
-ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime)
+ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode)
 {
     PROFILE_BEGIN();
     auto rtv = allowed && hstTime >= 0 ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_OPERATION;
@@ -359,7 +360,7 @@ ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime)
         pipeline_->FlushEnd();
         PROFILE_END("Flush end");
         PROFILE_RESET();
-        rtv = demuxer_->SeekTo(hstTime);
+        rtv = demuxer_->SeekTo(hstTime, mode);
         if (rtv == ErrorCode::SUCCESS) {
             mediaStats_.ReceiveEvent(EventType::EVENT_AUDIO_PROGRESS, hstTime);
             mediaStats_.ReceiveEvent(EventType::EVENT_VIDEO_PROGRESS, hstTime);
@@ -395,7 +396,7 @@ ErrorCode HiPlayerImpl::DoOnComplete()
     if (!singleLoop_) {
         StopAsync();
     } else {
-        fsm_.SendEventAsync(Intent::SEEK, static_cast<int64_t>(0));
+        fsm_.SendEventAsync(Intent::SEEK, SeekInfo{0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC});
     }
     auto ptr = obs_.lock();
     if (ptr != nullptr) {

@@ -91,7 +91,7 @@ public:
     ErrorCode DoPause() override;
     ErrorCode DoResume() override;
     ErrorCode DoStop() override;
-    ErrorCode DoSeek(bool allowed, int64_t hstTime) override;
+    ErrorCode DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode) override;
     ErrorCode DoOnReady() override;
     ErrorCode DoOnComplete() override;
     ErrorCode DoOnError(ErrorCode) override;

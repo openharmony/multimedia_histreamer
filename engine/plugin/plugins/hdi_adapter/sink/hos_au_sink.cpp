@@ -30,7 +30,7 @@
 #include "utils/constants.h"
 
 namespace {
-using namespace OHOS::Media::Plugin;
+using namespace OHOS::Media::Plugin::HosLite;
 using PluginSampleFmt = OHOS::Media::Plugin::AudioSampleFormat;
 constexpr int32_t MAX_RETRY_CNT = 3;
 constexpr int32_t RETRY_INTERVAL = 100; // 100ms
@@ -83,7 +83,7 @@ void UpdatePluginCapWithPortCap(const AudioPortCapability& portCap, Capability& 
     std::vector<PluginSampleFmt> sampleFormats;
     for (size_t cnt = 0; cnt < portCap.supportSampleFormatNum; cnt++) {
         PluginSampleFmt tmp;
-        if (OHOS::Media::HosLitePlugin::HdiAuFormat2PluginFormat(portCap.supportSampleFormats[cnt], tmp)) {
+        if (OHOS::Media::Plugin::HosLite::HdiAuFormat2PluginFormat(portCap.supportSampleFormats[cnt], tmp)) {
             sampleFormats.emplace_back(tmp);
         }
     }
@@ -94,7 +94,7 @@ void UpdatePluginCapWithPortCap(const AudioPortCapability& portCap, Capability& 
             pluginCap.AppendDiscreteKeys<PluginSampleFmt>(Capability::Key::AUDIO_SAMPLE_FORMAT, sampleFormats);
         }
     }
-    auto pluginSampleRates = OHOS::Media::HosLitePlugin::HdiSampleRatesMask2PluginRates(portCap.sampleRateMasks);
+    auto pluginSampleRates = OHOS::Media::Plugin::HosLite::HdiSampleRatesMask2PluginRates(portCap.sampleRateMasks);
     if (!pluginSampleRates.empty()) {
         if (pluginSampleRates.size() == 1) {
             pluginCap.AppendFixedKey<uint32_t>(Capability::Key::AUDIO_SAMPLE_RATE, pluginSampleRates[0]);
@@ -103,7 +103,7 @@ void UpdatePluginCapWithPortCap(const AudioPortCapability& portCap, Capability& 
         }
     }
     AudioChannelLayout pluginLayout;
-    if (OHOS::Media::HosLitePlugin::HdiMask2PluginChannelLayout(portCap.channelMasks, pluginLayout)) {
+    if (OHOS::Media::Plugin::HosLite::HdiMask2PluginChannelLayout(portCap.channelMasks, pluginLayout)) {
         pluginCap.AppendFixedKey(Capability::Key::AUDIO_CHANNEL_LAYOUT, pluginLayout);
     }
     if (portCap.channelCount > 0) {
@@ -113,7 +113,7 @@ void UpdatePluginCapWithPortCap(const AudioPortCapability& portCap, Capability& 
 
 std::shared_ptr<AudioSinkPlugin> AudioSinkPluginCreator(const std::string& name)
 {
-    return std::make_shared<OHOS::Media::HosLitePlugin::HdiSink>(name);
+    return std::make_shared<OHOS::Media::Plugin::HosLite::HdiSink>(name);
 }
 
 void RegisterOutportOnAdapter(const std::shared_ptr<Register>& reg, const AudioAdapterDescriptor& desc,
@@ -211,7 +211,8 @@ PLUGIN_DEFINITION(HdiAuSink, LicenseType::APACHE_V2, RegisterHdiSinkPlugins, UnR
 } // namespace
 namespace OHOS {
 namespace Media {
-namespace HosLitePlugin {
+namespace Plugin {
+namespace HosLite {
 using namespace OHOS::Media::Plugin;
 
 HdiSink::HdiSink(std::string name)
@@ -720,6 +721,7 @@ void HdiSink::RenderFrame(const std::shared_ptr<Buffer>& input)
         remainingBytes -= renderSize;
     }
 }
-} // namespace HosLitePlugin
+} // namespace HosLite
+} // namespace Plugin
 } // namespace Media
 } // namespace OHOS

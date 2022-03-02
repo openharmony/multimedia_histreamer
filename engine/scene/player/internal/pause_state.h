@@ -49,8 +49,9 @@ public:
     {
         MEDIA_LOG_D("Seek in pause state.");
         std::tuple<ErrorCode, Action> err {ErrorCode::ERROR_INVALID_PARAMETER_TYPE, Action::ACTION_BUTT};
-        FALSE_RETURN_V(param.SameTypeWith(typeid(int64_t)), err);
-        auto ret = executor_.DoSeek(true, Plugin::AnyCast<int64_t>(param));
+        FALSE_RETURN_V(param.SameTypeWith(typeid(SeekInfo)), err);
+        auto info = Plugin::AnyCast<SeekInfo>(param);
+        auto ret = executor_.DoSeek(true, info.hstTime, info.mode);
         return {ret, Action::ACTION_BUTT};
     }
 
