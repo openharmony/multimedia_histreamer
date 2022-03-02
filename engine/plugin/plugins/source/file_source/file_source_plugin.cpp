@@ -231,7 +231,7 @@ Status FileSourcePlugin::ParseFileName(const std::string& uri)
         }
         pos += 5; // 5: offset
         if (uri.find("///", pos) != std::string::npos) {
-            pos += 3; // 3: offset
+            pos += 2; // 2: offset
         } else if (uri.find("//", pos) != std::string::npos) {
             pos += 2;                 // 2: offset
             pos = uri.find('/', pos); // skip host name
