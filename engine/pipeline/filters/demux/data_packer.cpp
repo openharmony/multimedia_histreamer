@@ -259,9 +259,15 @@ bool DataPacker::GetRange(uint32_t size, AVBufferPtr& bufferPtr)
             break;
         }
         index++;
+        lastBufferOffsetEnd = 0;
     }
+    FALSE_LOG(needCopySize >= 0);
+    if (needCopySize < 0) {
+        needCopySize = 0;
+    }
+    bufferPtr->GetMemory()->UpdateDataSize(size - needCopySize);
 
-    auto endPosition = Position(index, lastBufferOffsetEnd, mediaOffset_ + size);
+    auto endPosition = Position(index, lastBufferOffsetEnd, mediaOffset_ + size - needCopySize);
     RemoveOldData(endPosition); // Live play, remove the got data
     if (que_.size() < capacity_) {
         cvFull_.NotifyOne();
@@ -349,7 +355,7 @@ bool DataPacker::RemoveTo(const Position& position)
         que_.pop_front();
         i++;
     }
-    FALSE_RETURN_V(!que_.empty(), false);
+    FALSE_RETURN_V_W(!que_.empty(), true);
 
     // The last buffer
     removeSize = AudioBufferSize(que_.front());

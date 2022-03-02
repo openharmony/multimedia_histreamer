@@ -90,10 +90,10 @@
 #ifndef FAIL_RETURN
 #define FAIL_RETURN(exec)                                                                                              \
     do {                                                                                                               \
-        ErrorCode ret = (exec);                                                                                        \
-        if (ret != ErrorCode::SUCCESS) {                                                                               \
-            MEDIA_LOG_E("FAIL_RETURN on ErrorCode(" PUBLIC_LOG "d).", ret);                                           \
-            return ret;                                                                                                \
+        ErrorCode returnValue = (exec);                                                                                \
+        if (returnValue != ErrorCode::SUCCESS) {                                                                       \
+            MEDIA_LOG_E("FAIL_RETURN on ErrorCode(" PUBLIC_LOG "d).", returnValue);                                    \
+            return returnValue;                                                                                        \
         }                                                                                                              \
     } while (0)
 #endif
@@ -101,10 +101,10 @@
 #ifndef FAIL_RET_ERR_CODE_MSG
 #define FAIL_RET_ERR_CODE_MSG(loglevel, exec, fmt, args...)                                                            \
     do {                                                                                                               \
-        ErrorCode ret = (exec);                                                                                        \
-        if (ret != ErrorCode::SUCCESS) {                                                                               \
+        ErrorCode returnValue = (exec);                                                                                \
+        if (returnValue != ErrorCode::SUCCESS) {                                                                       \
             loglevel(fmt, ##args);                                                                                     \
-            return ret;                                                                                                \
+            return returnValue;                                                                                        \
         }                                                                                                              \
     } while (0)
 #endif
@@ -162,8 +162,8 @@
 #ifndef FALSE_RETURN
 #define FALSE_RETURN(exec)                                                                                             \
     do {                                                                                                               \
-        bool ret = (exec);                                                                                             \
-        if (!ret) {                                                                                                    \
+        bool returnValue = (exec);                                                                                     \
+        if (!returnValue) {                                                                                            \
             MEDIA_LOG_E("FALSE_RETURN " #exec);                                                                        \
             return;                                                                                                    \
         }                                                                                                              \
@@ -173,8 +173,8 @@
 #ifndef FALSE_RETURN_W
 #define FALSE_RETURN_W(exec)                                                                                           \
     do {                                                                                                               \
-        bool ret = (exec);                                                                                             \
-        if (!ret) {                                                                                                    \
+        bool returnValue = (exec);                                                                                     \
+        if (!returnValue) {                                                                                            \
             MEDIA_LOG_W("FALSE_RETURN " #exec);                                                                        \
             return;                                                                                                    \
         }                                                                                                              \
@@ -184,9 +184,20 @@
 #ifndef FALSE_RETURN_V
 #define FALSE_RETURN_V(exec, ret)                                                                                      \
     do {                                                                                                               \
-        bool value = (exec);                                                                                           \
-        if (!value) {                                                                                                  \
+        bool returnValue = (exec);                                                                                     \
+        if (!returnValue) {                                                                                            \
             MEDIA_LOG_E("FALSE_RETURN_V " #exec);                                                                      \
+            return ret;                                                                                                \
+        }                                                                                                              \
+    } while (0)
+#endif
+
+#ifndef FALSE_RETURN_V_W
+#define FALSE_RETURN_V_W(exec, ret)                                                                                    \
+    do {                                                                                                               \
+        bool returnValue = (exec);                                                                                     \
+        if (!returnValue) {                                                                                            \
+            MEDIA_LOG_W("FALSE_RETURN_V_W " #exec);                                                                    \
             return ret;                                                                                                \
         }                                                                                                              \
     } while (0)
@@ -195,8 +206,8 @@
 #ifndef FALSE_RET_MSG
 #define FALSE_RET_MSG(exec, fmt, args...)                                                                              \
     do {                                                                                                               \
-        bool ret = (exec);                                                                                             \
-        if (!ret) {                                                                                                    \
+        bool returnValue = (exec);                                                                                     \
+        if (!returnValue) {                                                                                            \
             MEDIA_LOG_E(fmt, ##args);                                                                                  \
             return;                                                                                                    \
         }                                                                                                              \
@@ -206,8 +217,8 @@
 #ifndef FALSE_RET_V_MSG
 #define FALSE_RET_V_MSG(loglevel, exec, ret, fmt, args...)                                                             \
     do {                                                                                                               \
-        bool value = (exec);                                                                                           \
-        if (!value) {                                                                                                  \
+        bool returnValue = (exec);                                                                                     \
+        if (!returnValue) {                                                                                            \
             loglevel(fmt, ##args);                                                                                     \
             return ret;                                                                                                \
         }                                                                                                              \
@@ -225,8 +236,8 @@
 #ifndef FALSE_LOG
 #define FALSE_LOG(exec)                                                                                                \
     do {                                                                                                               \
-        bool value = (exec);                                                                                           \
-        if (!value) {                                                                                                  \
+        bool returnValue = (exec);                                                                                     \
+        if (!returnValue) {                                                                                            \
             MEDIA_LOG_E("FALSE_LOG: " #exec);                                                                          \
         }                                                                                                              \
     } while (0)
@@ -235,8 +246,8 @@
 #ifndef FALSE_LOG_MSG
 #define FALSE_LOG_MSG(loglevel, exec, fmt, args...)                                                                    \
     do {                                                                                                               \
-        bool value = (exec);                                                                                           \
-        if (!value) {                                                                                                  \
+        bool returnValue = (exec);                                                                                     \
+        if (!returnValue) {                                                                                            \
             loglevel(fmt, ##args);                                                                                     \
         }                                                                                                              \
     } while (0)
@@ -254,9 +265,9 @@
 #ifndef ASSERT_CONDITION
 #define ASSERT_CONDITION(exec, msg)                                                                                    \
     do {                                                                                                               \
-        bool value = (exec);                                                                                           \
-        if (!value) {                                                                                                  \
-            MEDIA_LOG_E("ASSERT_CONDITION(msg:" PUBLIC_LOG_S ") " #exec, msg);                                        \
+        bool returnValue = (exec);                                                                                     \
+        if (!returnValue) {                                                                                            \
+            MEDIA_LOG_E("ASSERT_CONDITION(msg:" PUBLIC_LOG_S ") " #exec, msg);                                         \
         }                                                                                                              \
     } while (0)
 #endif
