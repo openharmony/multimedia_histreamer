@@ -70,7 +70,7 @@ HttpSourcePlugin::HttpSourcePlugin(const std::string name) noexcept
       bufferSize_(DEFAULT_BUFFER_SIZE),
       position_(0),
       waterline_(0),
-      fileSize_(-1),
+      fileSize_(0),
       httpHandle_(nullptr),
       mAllocator_(nullptr),
       httpMutex_()
@@ -217,7 +217,7 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     isStream_ = httpHandle_->IsStreaming();
     waterline_ = 20; // 20
     httpHandle_->SetWaterline(waterline_, 0);
-    fileSize_ = isStream_ ? -1 : httpHandle_->GetContentLength();
+    fileSize_ = isStream_ ? 0 : httpHandle_->GetContentLength();
     MEDIA_LOG_D("SetSource OUT fileSize_ " PUBLIC_LOG_ZU, fileSize_);
     return Status::OK;
 }

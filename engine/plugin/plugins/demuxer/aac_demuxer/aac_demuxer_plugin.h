@@ -64,7 +64,6 @@ public:
     Status GetMediaInfo(MediaInfo& mediaInfo) override;
     Status ReadFrame(Buffer& outBuffer, int32_t timeOutMs) override;
     Status SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode) override;
-
     size_t GetTrackCount() override;
     Status SelectTrack(int32_t trackId) override;
     Status UnselectTrack(int32_t trackId) override;
@@ -76,18 +75,22 @@ private:
         int64_t offset {0};
         bool eos {false};
     };
-
-    int getFrameLength(const uint8_t *data);
+    Status DoReadFromSource(uint32_t readSize);
+    Status GetDataFromSource();
+    int GetFrameLength(const uint8_t *data);
     int AudioDemuxerAACOpen(AudioDemuxerUserArg *userArg);
     int AudioDemuxerAACClose();
     int AudioDemuxerAACPrepare(const uint8_t *buf, uint32_t len, AACDemuxerRst *rst);
     int AudioDemuxerAACProcess(const uint8_t *buffer, uint32_t bufferLen, AACDemuxerRst *rst);
     int AudioDemuxerAACFreeFrame(uint8_t *frame);
 
-    uint32_t mediaIOSize_;
     AACDemuxerRst aacDemuxerRst_;
     IOContext ioContext_;
     size_t fileSize_;
+    bool isSeekable_;
+    unsigned char *inIoBuffer_;
+    unsigned int ioDataRemainSize_;
+    int inIoBufferSize_;
 };
 } // namespace AacDemuxer
 } // namespace Plugin
