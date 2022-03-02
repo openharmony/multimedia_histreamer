@@ -30,6 +30,7 @@
 #include "utils/constants.h"
 
 namespace {
+using namespace OHOS::Media::Plugin;
 using namespace OHOS::Media::Plugin::HosLite;
 using PluginSampleFmt = OHOS::Media::Plugin::AudioSampleFormat;
 constexpr int32_t MAX_RETRY_CNT = 3;

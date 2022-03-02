@@ -35,7 +35,7 @@ bool HdiRate2PluginSampleRate(AudioSampleRatesMask mask, uint32_t& pRate);
 bool PluginChannelLayout2HdiMask(OHOS::Media::Plugin::AudioChannelLayout layout, AudioChannelMask& mask);
 bool HdiMask2PluginChannelLayout(AudioChannelMask mask, OHOS::Media::Plugin::AudioChannelLayout& layout);
 
-int32_t GetPcmBytes(AudioFormat format);
+int32_t GetPcmBytes(::AudioFormat format);
 } // namespace HosLite
 } // namespace Plugin
 } // namespace Media
