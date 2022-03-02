@@ -634,7 +634,6 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
         audioRenderer_->Drain();
     }
     return ret >= 0 ? Status::OK : Status::ERROR_UNKNOWN;
-
 }
 
 Status AudioServerSinkPlugin::Flush()

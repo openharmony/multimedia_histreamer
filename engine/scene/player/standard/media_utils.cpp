@@ -87,6 +87,5 @@ Plugin::SeekMode Transform2SeekMode(PlayerSeekMode mode)
             return Plugin::SeekMode::SEEK_CLOSEST;
     }
 }
-
 }  // namespace Media
 }  // namespace OHOS
