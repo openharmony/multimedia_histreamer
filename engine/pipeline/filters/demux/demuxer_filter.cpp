@@ -176,10 +176,8 @@ ErrorCode DemuxerFilter::Pause()
 void DemuxerFilter::FlushStart()
 {
     MEDIA_LOG_I("FlushStart entered");
+    task_->Pause();
     dataPacker_->Flush();
-    if (task_) {
-        task_->Pause();
-    }
 }
 
 void DemuxerFilter::FlushEnd()
