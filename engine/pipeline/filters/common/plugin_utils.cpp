@@ -230,6 +230,16 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::Au
     return SnPrintf(buf, maxLen, "%s", Pipeline::g_auAacStreamFormatNameStrMap.at(val));
 }
 
+template<>
+int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::ThreadMode& val)
+{
+    if (!Pipeline::HasThreadModeNameStr(val)) {
+        MEDIA_LOG_W("Thread Mode " PUBLIC_LOG_U8 " is unknown", static_cast<uint8_t>(val));
+        return 0;
+    }
+    return SnPrintf(buf, maxLen, "%s", Pipeline::GetThreadModeNameStr(val));
+}
+
 template<typename T>
 int32_t MetaIDStringiness(char* buf, size_t maxLen, const char* name, const char* typeName,
                           const Plugin::ValueType& val)
@@ -437,6 +447,7 @@ std::string Capability2String(const Capability& capability)
         {Capability::Key::AUDIO_AAC_LEVEL, CapKeyStringiness<uint32_t>},
         {Capability::Key::AUDIO_AAC_STREAM_FORMAT, CapKeyStringiness<Plugin::AudioAacStreamFormat>},
         {Capability::Key::VIDEO_PIXEL_FORMAT, CapKeyStringiness<Plugin::VideoPixelFormat>},
+        {Capability::Key::THREAD_MODE, CapKeyStringiness<Plugin::ThreadMode>},
     };
     char buffer[MAX_BUF_LEN + 1] = {0}; // one more is for \0
     int pos = 0;

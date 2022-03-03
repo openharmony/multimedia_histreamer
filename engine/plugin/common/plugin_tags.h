@@ -89,6 +89,7 @@ enum struct Tag : uint32_t {
     WATERLINE_HIGH,                   ///< uint32_t, high waterline
     WATERLINE_LOW,                    ///< uint32_t, low waterline
     SRC_INPUT_TYPE,                   ///< @see SrcInputType
+    THREAD_MODE,                      ///< @see ThreadMode, Threads run in sync or async mode
 
     /* -------------------- media tag -------------------- */
     MEDIA_TITLE = SECTION_MEDIA_START + 1, ///< string

@@ -115,6 +115,9 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
             capBuilder.SetAudioChannelLayoutList(values);
         }
     }
+
+    capBuilder.SetThreadModeList({ThreadMode::ASYNC, ThreadMode::SYNC});
+
     definition.inCaps.push_back(capBuilder.Build());
 }
 

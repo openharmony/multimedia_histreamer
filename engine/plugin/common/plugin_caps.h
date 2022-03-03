@@ -63,6 +63,7 @@ struct Capability {
         AUDIO_AAC_LEVEL = static_cast<uint32_t>(Tag::AUDIO_AAC_LEVEL),
         AUDIO_AAC_STREAM_FORMAT = static_cast<uint32_t>(Tag::AUDIO_AAC_STREAM_FORMAT),
         VIDEO_PIXEL_FORMAT = static_cast<uint32_t>(Tag::VIDEO_PIXEL_FORMAT),
+        THREAD_MODE = static_cast<uint32_t>(Tag::THREAD_MODE),
     };
 
     /// Used to store the capability in the key-value format.

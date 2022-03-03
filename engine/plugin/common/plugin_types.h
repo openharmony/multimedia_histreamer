@@ -103,6 +103,17 @@ enum struct PluginType : int32_t {
     MUXER,             ///< reference MuxerPlugin
     OUTPUT_SINK,       ///< reference OutputSinkPlugin
 };
+
+/**
+ * @enum Thread Running Mode.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+enum struct ThreadMode : uint8_t {
+    SYNC,         ///< Synchronous mode
+    ASYNC,        ///< Asynchronous mode
+};
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
