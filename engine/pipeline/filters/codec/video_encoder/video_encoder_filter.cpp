@@ -123,16 +123,16 @@ ErrorCode VideoEncoderFilter::Prepare()
         outBufQue_->SetActive(true);
     }
     if (!pushTask_) {
-        pushTask_ = std::make_shared<OHOS::Media::OSAL::Task>("vdecPushThread");
+        pushTask_ = std::make_shared<OSAL::Task>("vecPushThread");
         pushTask_->RegisterHandler([this] { FinishFrame(); });
     }
     if (!inBufQue_) {
-        inBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("vdecFilterInBufQue", DEFAULT_IN_BUFFER_POOL_SIZE);
+        inBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("vecFilterInBufQue", DEFAULT_IN_BUFFER_POOL_SIZE);
     } else {
         inBufQue_->SetActive(true);
     }
     if (!handleFrameTask_) {
-        handleFrameTask_ = std::make_shared<OHOS::Media::OSAL::Task>("decHandleFrameThread");
+        handleFrameTask_ = std::make_shared<OSAL::Task>("vecHandleFrameThread");
         handleFrameTask_->RegisterHandler([this] { HandleFrame(); });
     }
     return FilterBase::Prepare();
@@ -213,7 +213,7 @@ bool VideoEncoderFilter::Configure(const std::string& inPort, const std::shared_
         return false;
     }
     auto thisMeta = std::make_shared<Plugin::Meta>();
-    if (!MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta)) {
+    if (!MergeMetaWithCapability(*upstreamMeta, pluginInfo_->outCaps[0], *thisMeta)) {
         MEDIA_LOG_E("cannot configure encoder plugin since meta is not compatible with negotiated caps");
         return false;
     }

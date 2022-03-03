@@ -121,7 +121,7 @@ ErrorCode VideoDecoderFilter::Prepare()
         outBufQue_->SetActive(true);
     }
     if (!pushTask_) {
-        pushTask_ = std::make_shared<OHOS::Media::OSAL::Task>("vdecPushThread");
+        pushTask_ = std::make_shared<OSAL::Task>("vdecPushThread");
         pushTask_->RegisterHandler([this] { FinishFrame(); });
     }
     if (!inBufQue_) {
@@ -130,7 +130,7 @@ ErrorCode VideoDecoderFilter::Prepare()
         inBufQue_->SetActive(true);
     }
     if (!handleFrameTask_) {
-        handleFrameTask_ = std::make_shared<OHOS::Media::OSAL::Task>("decHandleFrameThread");
+        handleFrameTask_ = std::make_shared<OSAL::Task>("vdecHandleFrameThread");
         handleFrameTask_->RegisterHandler([this] { HandleFrame(); });
     }
     return FilterBase::Prepare();

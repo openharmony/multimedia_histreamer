@@ -401,7 +401,6 @@ Status VideoFfmpegEncoderPlugin::FillAvFrame(const std::shared_ptr<Buffer>& inpu
         MEDIA_LOG_E("Unsupported pixel format: " PUBLIC_LOG_D32, cachedFrame_->format);
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
-    AVRational bq = {1, HST_SECOND};
     cachedFrame_->pts = ConvertTimeToFFmpeg(
         static_cast<uint64_t>(inputBuffer->pts) / avCodecContext_->ticks_per_frame,
         avCodecContext_->time_base);

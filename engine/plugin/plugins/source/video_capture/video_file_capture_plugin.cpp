@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-#if !defined(OHOS_LITE) && defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
+#include "video_file_capture_plugin.h"
+
+#if !defined(OHOS_LITE) && defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT) && defined(VIDEO_FILE_CAPTURE_SUPPORT)
 
 #define HST_LOG_TAG "VideoCapturePlugin"
 
@@ -21,6 +23,7 @@
 #include <algorithm>
 #include <cmath>
 #include "foundation/log.h"
+#include "foundation/osal/utils/util.h"
 #include "foundation/pre_defines.h"
 #include "plugin/common/plugin_time.h"
 #include "utils/constants.h"
@@ -29,25 +32,26 @@ namespace {
 // register plugins
 using namespace OHOS::Media::Plugin;
 using namespace VideoCapture;
+const size_t DATA_SIZE = 25344; // 25344=176*144 the size of yuv file
 
-Status VideoCaptureRegister(const std::shared_ptr<Register> &reg)
+Status VideoFileCaptureRegister(const std::shared_ptr<Register> &reg)
 {
     SourcePluginDef definition;
-    definition.name = "VideoCapture";
+    definition.name = "VideoFileCapture";
     definition.description = "Video capture from audio service";
     definition.rank = 100; // 100: max rank
     definition.inputType = SrcInputType::VID_SURFACE_YUV;
     definition.creator = [](const std::string& name) -> std::shared_ptr<SourcePlugin> {
-        return std::make_shared<VideoCapturePlugin>(name);
+        return std::make_shared<VideoFileCapturePlugin>(name);
     };
     Capability outCaps(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
     outCaps.AppendDiscreteKeys<VideoPixelFormat>(
-        Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21});
+            Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21});
     definition.outCaps.push_back(outCaps);
     // add es outCaps later
     return reg->AddPlugin(definition);
 }
-PLUGIN_DEFINITION(StdVideoCapture, LicenseType::APACHE_V2, VideoCaptureRegister, [] {});
+PLUGIN_DEFINITION(StdVideoFileCapture, LicenseType::APACHE_V2, VideoFileCaptureRegister, [] {});
 }
 
 namespace OHOS {
@@ -60,93 +64,52 @@ constexpr int32_t DEFAULT_VIDEO_WIDTH = 1920;
 constexpr int32_t DEFAULT_VIDEO_HEIGHT = 1080;
 constexpr int32_t DEFAULT_STRIDE_ALIGN = 16;
 
-VideoCapturePlugin::VideoCapturePlugin(std::string name)
-    : SourcePlugin(std::move(name)),
-      width_(DEFAULT_VIDEO_WIDTH),
-      height_(DEFAULT_VIDEO_HEIGHT)
+VideoFileCapturePlugin::VideoFileCapturePlugin(std::string name)
+        : SourcePlugin(std::move(name)),
+          width_(DEFAULT_VIDEO_WIDTH),
+          height_(DEFAULT_VIDEO_HEIGHT)
 {
     MEDIA_LOG_D("IN");
 }
 
-VideoCapturePlugin::~VideoCapturePlugin()
+VideoFileCapturePlugin::~VideoFileCapturePlugin()
 {
     MEDIA_LOG_D("IN");
 }
 
-Status VideoCapturePlugin::Init()
-{
-    MEDIA_LOG_D("IN");
-    return Status::OK;
-}
-
-Status VideoCapturePlugin::Deinit()
+Status VideoFileCapturePlugin::Init()
 {
     MEDIA_LOG_D("IN");
     return Status::OK;
 }
 
-void VideoCapturePlugin::ConfigSurfaceConsumer()
-{
-    auto ret = surfaceConsumer_->SetUserData("video_width", std::to_string(width_));
-    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        MEDIA_LOG_E("set video width fail");
-    }
-    ret = surfaceConsumer_->SetUserData("video_height", std::to_string(height_));
-    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        MEDIA_LOG_E("set video height fail");
-    }
-    ret = surfaceConsumer_->SetQueueSize(DEFAULT_SURFACE_QUEUE_SIZE);
-    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        MEDIA_LOG_E("set queue size fail");
-    }
-    ret = surfaceConsumer_->SetUserData("surface_size", std::to_string(DEFAULT_SURFACE_SIZE));
-    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        MEDIA_LOG_E("set surface size fail");
-    }
-    ret = surfaceConsumer_->SetDefaultWidthAndHeight(width_, height_);
-    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        MEDIA_LOG_E("set surface width and height fail");
-    }
-}
-
-Status VideoCapturePlugin::Prepare()
-{
-    MEDIA_LOG_D("IN");
-    surfaceConsumer_ = Surface::CreateSurfaceAsConsumer();
-    if (!surfaceConsumer_) {
-        MEDIA_LOG_E("CreateSurfaceAsConsumer() fail");
-        return Status::ERROR_UNKNOWN;
-    }
-    sptr<IBufferConsumerListener> consumerListener = new (std::nothrow) SurfaceConsumerListener(*this);
-    if (!consumerListener) {
-        MEDIA_LOG_E("Malloc SurfaceConsumerListener fail");
-        return Status::ERROR_NO_MEMORY;
-    }
-    if (surfaceConsumer_->RegisterConsumerListener(consumerListener) != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        MEDIA_LOG_E("RegisterConsumerListener() fail");
-        return Status::ERROR_UNKNOWN;
-    }
-    sptr<IBufferProducer> bufferProducer = surfaceConsumer_->GetProducer();
-    if (!bufferProducer) {
-        MEDIA_LOG_E("Malloc GetProducer fail");
-        return Status::ERROR_UNKNOWN;
-    }
-    surfaceProducer_ = Surface::CreateSurfaceAsProducer(bufferProducer);
-    if (!surfaceProducer_) {
-        MEDIA_LOG_E("CreateSurfaceAsProducer() fail");
-        return Status::ERROR_UNKNOWN;
-    }
-    ConfigSurfaceConsumer();
-    return Status::OK;
-}
-
-Status VideoCapturePlugin::Reset()
+Status VideoFileCapturePlugin::Deinit()
 {
     MEDIA_LOG_D("IN");
     return Status::OK;
 }
 
-Status VideoCapturePlugin::Start()
+Status VideoFileCapturePlugin::Prepare()
+{
+    MEDIA_LOG_D("IN");
+    std::string filePath = "VideoData.yuv";
+    std::string fullPath;
+    if (OSAL::ConvertFullPath(filePath, fullPath) && !fullPath.empty()) {
+        filePath = fullPath;
+    }
+    fp_ = fopen(filePath.c_str(), "rb");
+    FALSE_RETURN_V(fp_ != nullptr, Status::ERROR_NULL_POINTER);
+    bufferSize_ = DATA_SIZE;
+    return Status::OK;
+}
+
+Status VideoFileCapturePlugin::Reset()
+{
+    MEDIA_LOG_D("IN");
+    return Status::OK;
+}
+
+Status VideoFileCapturePlugin::Start()
 {
     MEDIA_LOG_D("IN");
     OSAL::ScopedLock lock(mutex_);
@@ -160,9 +123,14 @@ Status VideoCapturePlugin::Start()
     return Status::OK;
 }
 
-Status VideoCapturePlugin::Stop()
+Status VideoFileCapturePlugin::Stop()
 {
     MEDIA_LOG_D("IN");
+    if (fp_ != nullptr) {
+        fclose(fp_);
+        fp_ = nullptr;
+    }
+    bufferSize_ = 0;
     OSAL::ScopedLock lock(mutex_);
     if (!isStop_.load()) {
         stopTimestampNs_ = curTimestampNs_;
@@ -171,12 +139,12 @@ Status VideoCapturePlugin::Stop()
     return Status::OK;
 }
 
-Status VideoCapturePlugin::GetParameter(Tag tag, ValueType& value)
+Status VideoFileCapturePlugin::GetParameter(Tag tag, ValueType& value)
 {
     MEDIA_LOG_D("IN");
     switch (tag) {
         case Tag::VIDEO_SURFACE: {
-            value = surfaceProducer_;
+            value = nullptr;
             break;
         }
         default:
@@ -186,7 +154,7 @@ Status VideoCapturePlugin::GetParameter(Tag tag, ValueType& value)
     return Status::OK;
 }
 
-Status VideoCapturePlugin::SetParameter(Tag tag, const ValueType& value)
+Status VideoFileCapturePlugin::SetParameter(Tag tag, const ValueType& value)
 {
     switch (tag) {
         case Tag::VIDEO_HEIGHT: {
@@ -220,56 +188,26 @@ Status VideoCapturePlugin::SetParameter(Tag tag, const ValueType& value)
     return Status::OK;
 }
 
-std::shared_ptr<Allocator> VideoCapturePlugin::GetAllocator()
+std::shared_ptr<Allocator> VideoFileCapturePlugin::GetAllocator()
 {
     MEDIA_LOG_D("IN");
     return nullptr;
 }
 
-Status VideoCapturePlugin::SetCallback(Callback* cb)
+Status VideoFileCapturePlugin::SetCallback(Callback* cb)
 {
     MEDIA_LOG_D("IN");
     UNUSED_VARIABLE(cb);
     return Status::ERROR_UNIMPLEMENTED;
 }
 
-Status VideoCapturePlugin::SetSource(std::shared_ptr<MediaSource> source)
+Status VideoFileCapturePlugin::SetSource(std::shared_ptr<MediaSource> source)
 {
     UNUSED_VARIABLE(source);
     return Status::ERROR_UNIMPLEMENTED;
 }
 
-Status VideoCapturePlugin::AcquireSurfaceBuffer()
-{
-    auto ret = surfaceConsumer_->AcquireBuffer(surfaceBuffer_, fence_, timestamp_, damage_);
-    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        MEDIA_LOG_E("surfaceConsumer AcquireBuffer() fail: " PUBLIC_LOG "u", ret);
-        return Status::ERROR_UNKNOWN;
-    }
-    ret = surfaceBuffer_->ExtraGet("dataSize", bufferSize_);
-    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK || bufferSize_ <= 0) {
-        MEDIA_LOG_E("surfaceBuffer get data size fail: " PUBLIC_LOG "u", ret);
-        return Status::ERROR_UNKNOWN;
-    }
-    ret = surfaceBuffer_->ExtraGet("isKeyFrame", isKeyFrame_);
-    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        MEDIA_LOG_E("surfaceBuffer get isKeyFrame fail: " PUBLIC_LOG "u", ret);
-        return Status::ERROR_UNKNOWN;
-    }
-    int64_t pts;
-    ret = surfaceBuffer_->ExtraGet("timeStamp", pts);
-    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK || pts < 0) {
-        MEDIA_LOG_E("surfaceBuffer get data size fail: " PUBLIC_LOG "u", ret);
-        return Status::ERROR_UNKNOWN;
-    }
-    if (pts < curTimestampNs_) {
-        MEDIA_LOG_W("Get wrong timestamp from surface buffer");
-    }
-    curTimestampNs_ = static_cast<uint64_t>(pts);
-    return Status::OK;
-}
-
-void VideoCapturePlugin::SetVideoBufferMeta(std::shared_ptr<BufferMeta>& bufferMeta)
+void VideoFileCapturePlugin::SetVideoBufferMeta(std::shared_ptr<BufferMeta>& bufferMeta)
 {
     std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
     videoMeta->width = width_;
@@ -285,14 +223,14 @@ void VideoCapturePlugin::SetVideoBufferMeta(std::shared_ptr<BufferMeta>& bufferM
     videoMeta->planes = videoMeta->stride.size();
 }
 
-Status VideoCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
+Status VideoFileCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
 {
-    OHOS::Media::OSAL::ScopedLock lock(mutex_);
+    OSAL::ScopedLock lock(mutex_);
     if (!buffer) {
         return Status::ERROR_INVALID_PARAMETER;
     }
     auto bufferMeta = buffer->GetBufferMeta();
-    if (!bufferMeta || bufferMeta->GetType() != BufferMetaType::VIDEO || surfaceConsumer_ == nullptr) {
+    if (!bufferMeta || bufferMeta->GetType() != BufferMetaType::VIDEO || fp_ == nullptr) {
         return Status::ERROR_INVALID_PARAMETER;
     }
     std::shared_ptr<Memory> bufData;
@@ -309,12 +247,9 @@ Status VideoCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
         MEDIA_LOG_I("flush or EOS, skip read buffer");
         return Status::END_OF_STREAM;
     }
-    auto ret = AcquireSurfaceBuffer();
-    if (ret != Status::OK) {
-        MEDIA_LOG_E("AcquireSurfaceBuffer fail: " PUBLIC_LOG "d", ret);
-        return ret;
-    }
-    if (bufData->Write(static_cast<const uint8_t*>(surfaceBuffer_->GetVirAddr()), bufferSize_) != bufferSize_) {
+    uint8_t fileData[DATA_SIZE+1] = { 0 };
+    fread(fileData, DATA_SIZE, 1, fp_);
+    if (bufData->Write(static_cast<const uint8_t*>(fileData), bufferSize_) != bufferSize_) {
         MEDIA_LOG_E("write buffer data fail");
         return Status::ERROR_UNKNOWN;
     }
@@ -324,42 +259,30 @@ Status VideoCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
     return Status::OK;
 }
 
-Status VideoCapturePlugin::GetSize(size_t& size)
+Status VideoFileCapturePlugin::GetSize(size_t& size)
 {
     if (bufferSize_ == 0) {
         return Status::ERROR_INVALID_PARAMETER;
     }
     size = bufferSize_;
-    MEDIA_LOG_D("bufferSize_: " PUBLIC_LOG "zu", size);
-    return Status::OK;
-}
-
-bool VideoCapturePlugin::IsSeekable()
-{
-    return false;
-}
-
-Status VideoCapturePlugin::SeekTo(uint64_t offset)
-{
-    UNUSED_VARIABLE(offset);
-    return Status::ERROR_UNIMPLEMENTED;
-}
-
-void VideoCapturePlugin::SurfaceConsumerListener::OnBufferAvailable()
-{
-    return owner_.OnBufferAvailable();
-}
-
-void VideoCapturePlugin::OnBufferAvailable()
-{
-    if (!surfaceConsumer_) {
-        return;
-    }
     OSAL::ScopedLock lock(mutex_);
     bufferCnt_++;
     if (bufferCnt_ == 1) {
         readCond_.NotifyAll();
     }
+    MEDIA_LOG_D("bufferSize_: " PUBLIC_LOG_ZU, size);
+    return Status::OK;
+}
+
+bool VideoFileCapturePlugin::IsSeekable()
+{
+    return false;
+}
+
+Status VideoFileCapturePlugin::SeekTo(uint64_t offset)
+{
+    UNUSED_VARIABLE(offset);
+    return Status::ERROR_UNIMPLEMENTED;
 }
 } // namespace VideoCapture
 } // namespace Plugin

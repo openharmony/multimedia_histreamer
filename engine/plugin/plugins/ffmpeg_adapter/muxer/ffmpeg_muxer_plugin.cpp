@@ -162,8 +162,7 @@ Status SetParameterOfAuTrack(AVStream* stream, const TagMap& tagMap)
     auto ret = SetSingleParameter<AudioSampleFormat, int32_t>(Tag::AUDIO_SAMPLE_FORMAT, tagMap,
                                                               stream->codecpar->format, ConvP2FfSampleFmt);
     NOK_RETURN(ret);
-    ret = SetSingleParameter<uint32_t, int32_t>(Tag::AUDIO_CHANNELS, tagMap, stream->codecpar->channels,
-                                                ui2iFunc);
+    ret = SetSingleParameter<uint32_t, int32_t>(Tag::AUDIO_CHANNELS, tagMap, stream->codecpar->channels, ui2iFunc);
     NOK_RETURN(ret);
     ret = SetSingleParameter<uint32_t, int32_t>(Tag::AUDIO_SAMPLE_RATE, tagMap, stream->codecpar->sample_rate,
                                                 ui2iFunc);
@@ -178,15 +177,12 @@ Status SetParameterOfAuTrack(AVStream* stream, const TagMap& tagMap)
 
 Status SetParameterOfVdTrack(AVStream* stream, const TagMap& tagMap)
 {
-    MEDIA_LOG_E("should add vd tack parameter setter");
     auto ret = SetSingleParameter<VideoPixelFormat, int32_t>(Tag::VIDEO_PIXEL_FORMAT, tagMap,
         stream->codecpar->format, ConvertPixelFormatToFFmpeg);
     NOK_RETURN(ret);
-    ret = SetSingleParameter<uint32_t, int32_t>(Tag::VIDEO_WIDTH, tagMap, stream->codecpar->width,
-                                                ui2iFunc);
+    ret = SetSingleParameter<uint32_t, int32_t>(Tag::VIDEO_WIDTH, tagMap, stream->codecpar->width, ui2iFunc);
     NOK_RETURN(ret);
-    ret = SetSingleParameter<uint32_t, int32_t>(Tag::VIDEO_HEIGHT, tagMap, stream->codecpar->height,
-                                                ui2iFunc);
+    ret = SetSingleParameter<uint32_t, int32_t>(Tag::VIDEO_HEIGHT, tagMap, stream->codecpar->height, ui2iFunc);
     return ret;
 }
 

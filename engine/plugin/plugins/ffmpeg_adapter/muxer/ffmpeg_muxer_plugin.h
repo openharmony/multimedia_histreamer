@@ -69,7 +69,7 @@ public:
 
 private:
     struct IOContext {
-        std::shared_ptr<Plugin::DataSink> dataSink_ {};
+        std::shared_ptr<DataSink> dataSink_ {};
         int64_t pos_ {0};
         int64_t end_ {0};
     };
