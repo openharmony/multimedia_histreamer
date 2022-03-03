@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_VIDEO_FILE_CAPTURE_PLUGIN_H
 #define HISTREAMER_VIDEO_FILE_CAPTURE_PLUGIN_H
 
-#if !defined(OHOS_LITE) && defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT) && defined(VIDEO_FILE_CAPTURE_SUPPORT)
+#if !defined(OHOS_LITE) && defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
 
 #include <atomic>
 #include "foundation/osal/thread/condition_variable.h"

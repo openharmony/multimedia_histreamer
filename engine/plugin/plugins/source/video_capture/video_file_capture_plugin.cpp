@@ -15,7 +15,7 @@
 
 #include "video_file_capture_plugin.h"
 
-#if !defined(OHOS_LITE) && defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT) && defined(VIDEO_FILE_CAPTURE_SUPPORT)
+#if !defined(OHOS_LITE) && defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
 
 #define HST_LOG_TAG "VideoCapturePlugin"
 
@@ -51,7 +51,7 @@ Status VideoFileCaptureRegister(const std::shared_ptr<Register> &reg)
     // add es outCaps later
     return reg->AddPlugin(definition);
 }
-PLUGIN_DEFINITION(StdVideoFileCapture, LicenseType::APACHE_V2, VideoFileCaptureRegister, [] {});
+PLUGIN_DEFINITION(StubVideoCapture, LicenseType::APACHE_V2, VideoFileCaptureRegister, [] {});
 }
 
 namespace OHOS {
@@ -65,9 +65,7 @@ constexpr int32_t DEFAULT_VIDEO_HEIGHT = 1080;
 constexpr int32_t DEFAULT_STRIDE_ALIGN = 16;
 
 VideoFileCapturePlugin::VideoFileCapturePlugin(std::string name)
-        : SourcePlugin(std::move(name)),
-          width_(DEFAULT_VIDEO_WIDTH),
-          height_(DEFAULT_VIDEO_HEIGHT)
+    : SourcePlugin(std::move(name)), width_(DEFAULT_VIDEO_WIDTH), height_(DEFAULT_VIDEO_HEIGHT)
 {
     MEDIA_LOG_D("IN");
 }
