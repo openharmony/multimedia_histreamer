@@ -16,7 +16,6 @@
 #define HST_LOG_TAG "DataStreamImpl"
 
 #include "data_stream_impl.h"
-
 #include "foundation/log.h"
 
 namespace OHOS {
@@ -26,7 +25,9 @@ DataStreamImpl::DataStreamImpl(size_t size, size_t count, MemoryType type)
 {
     FALSE_LOG(type == MemoryType::MEMORY_VIRTUAL);
     for (size_t i = 0; i < count; ++i) {
-        emptyBuffers_.push(std::make_shared<VirtualDataBuffer>(size));
+        auto buffer = std::make_shared<VirtualDataBuffer>(size);
+        emptyBuffers_.push(buffer);
+        allBuffers_.emplace_back(buffer);
     }
 }
 
@@ -46,6 +47,20 @@ bool DataStreamImpl::QueueEmptyBuffer(const std::shared_ptr<DataBuffer>& buffer)
     emptyBuffers_.push(buffer);
     emptyCondition_.NotifyAll();
     return true;
+}
+
+bool DataStreamImpl::QueueEmptyBuffer(uint8_t* address)
+{
+    OSAL::ScopedLock lock(emptyMutex_);
+    for (size_t i = 0; i < allBuffers_.size(); i++) {
+        if (allBuffers_[i]->GetAddress() == address) {
+            emptyBuffers_.push(allBuffers_[i]);
+            emptyCondition_.NotifyAll();
+            return true;
+        }
+    }
+    MEDIA_LOG_E("Queue empty buffer address not in DataStream.");
+    return false;
 }
 
 bool DataStreamImpl::GetEmptyBuffer(std::shared_ptr<DataBuffer>& buffer, int timeout)

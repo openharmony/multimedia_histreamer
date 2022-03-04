@@ -50,6 +50,7 @@ public:
     virtual ~DataConsumer() = default;
     virtual bool GetDataBuffer(std::shared_ptr<DataBuffer>& buffer, int timeout = -1) = 0; // timeout - millisecond
     virtual bool QueueEmptyBuffer(const std::shared_ptr<DataBuffer>& buffer) = 0;
+    virtual bool QueueEmptyBuffer(uint8_t* address) = 0;
 };
 
 class DataStream : public DataConsumer, DataProducer{
