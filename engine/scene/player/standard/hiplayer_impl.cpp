@@ -26,7 +26,7 @@
 #include "media_errors.h"
 
 namespace {
-const float MAX_MEDIA_VOLUME = 100.0f;
+const float MAX_MEDIA_VOLUME = 1.0f; // standard interface volume is between 0 to 1.
 }
 
 namespace OHOS {
