@@ -24,6 +24,7 @@
 #include "plugin/common/plugin_time.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "ffmpeg_vid_enc_config.h"
+#include "pipeline/core/plugin_attr_desc.h"
 
 namespace {
 // register plugins
@@ -78,7 +79,7 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
     Capability inputCaps(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
     if (codec->pix_fmts != nullptr) {
         DiscreteCapability<VideoPixelFormat> values;
-        for (auto index = 0; codec->pix_fmts[index] != -1; ++index) {
+        for (uint32_t index = 0; codec->pix_fmts[index] != -1; ++index) {
             values.push_back(ConvertPixelFormatFromFFmpeg(codec->pix_fmts[index]));
         }
         if (!values.empty()) {
@@ -207,7 +208,7 @@ void VideoFfmpegEncoderPlugin::InitCodecContext()
     FindInParameterMapThenAssignLocked<uint64_t>(Tag::VIDEO_FRAME_RATE, frameRate_);
     FindInParameterMapThenAssignLocked<Plugin::VideoPixelFormat>(Tag::VIDEO_PIXEL_FORMAT, pixelFormat_);
     MEDIA_LOG_D("width: " PUBLIC_LOG_U32 ", height: " PUBLIC_LOG_U32 ", pixelFormat: " PUBLIC_LOG_S ", frameRate_: "
-        PUBLIC_LOG_U64, width_, height_, GetVideoPixelFormatNameStr(pixelFormat_), frameRate_);
+        PUBLIC_LOG_U64, width_, height_, Pipeline::GetVideoPixelFormatNameStr(pixelFormat_), frameRate_);
     ConfigVideoEncoder(*avCodecContext_, vencParams_);
 }
 
@@ -276,7 +277,7 @@ Status VideoFfmpegEncoderPlugin::Prepare()
             InitCodecContext();
         }
 #ifdef DUMP_RAW_DATA
-        dumpData_.open("./enc_out.dat", std::ios::out | std::ios::binary);
+        dumpFd_ = fopen("./enc_out.es", "w");
 #endif
         state_ = State::PREPARED;
     }
@@ -294,7 +295,10 @@ Status VideoFfmpegEncoderPlugin::ResetLocked()
     avCodecContext_.reset();
     outBufferQ_.Clear();
 #ifdef DUMP_RAW_DATA
-    dumpData_.close();
+    if (dumpFd_) {
+        std::fclose(dumpFd_);
+        dumpFd_ = nullptr;
+    }
 #endif
     state_ = State::INITIALIZED;
     return Status::OK;
@@ -327,7 +331,10 @@ Status VideoFfmpegEncoderPlugin::Stop()
         OSAL::ScopedLock lock(avMutex_);
         ret = CloseCodecContext();
 #ifdef DUMP_RAW_DATA
-        dumpData_.close();
+        if (dumpFd_) {
+            std::fclose(dumpFd_);
+            dumpFd_ = nullptr;
+        }
 #endif
         state_ = State::INITIALIZED;
     }
@@ -383,7 +390,7 @@ Status VideoFfmpegEncoderPlugin::FillAvFrame(const std::shared_ptr<Buffer>& inpu
     cachedFrame_->width = videoMeta->width;
     cachedFrame_->height = videoMeta->height;
     if (!videoMeta->stride.empty()) {
-        for (auto i = 0; i < videoMeta->planes; i++) {
+        for (uint32_t i = 0; i < videoMeta->planes; i++) {
             cachedFrame_->linesize[i] = videoMeta->stride[i];
         }
     }
@@ -404,6 +411,7 @@ Status VideoFfmpegEncoderPlugin::FillAvFrame(const std::shared_ptr<Buffer>& inpu
     cachedFrame_->pts = ConvertTimeToFFmpeg(
         static_cast<uint64_t>(inputBuffer->pts) / avCodecContext_->ticks_per_frame,
         avCodecContext_->time_base);
+    return Status::OK;
 }
 
 Status VideoFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer)
@@ -437,8 +445,9 @@ Status VideoFfmpegEncoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& 
     FALSE_RET_V_MSG_E(cachedPacket_->data != nullptr, Status::ERROR_UNKNOWN,
                       "avcodec_receive_packet() packet data is empty");
     auto frameBufferMem = packetBuffer->GetMemory();
-    FALSE_RET_V_MSG_E(frameBufferMem->Write(cachedPacket_->data, cachedPacket_->size, 0) == cachedPacket_->size,
-                      Status::ERROR_UNKNOWN, "copy packet data to buffer fail");
+    FALSE_RET_V_MSG_E(frameBufferMem->Write(cachedPacket_->data, cachedPacket_->size, 0) ==
+                      static_cast<size_t>(cachedPacket_->size), Status::ERROR_UNKNOWN,
+                      "copy packet data to buffer fail");
     if (cachedPacket_->flags & AV_PKT_FLAG_KEY) {
         MEDIA_LOG_D("It is key frame");
     }
@@ -447,7 +456,9 @@ Status VideoFfmpegEncoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& 
     packetBuffer->dts =
             static_cast<uint64_t>(ConvertTimeFromFFmpeg(cachedPacket_->dts, avCodecContext_->time_base));
 #ifdef DUMP_RAW_DATA
-    dumpData_.write((char*)cachedPacket_->data, cachedPacket_->size);
+    if (dumpFd_) {
+        std::fwrite(reinterpret_cast<const char *>(cachedPacket_->data), cachedPacket_->size, 1, dumpFd_);
+    }
 #endif
     return Status::OK;
 }

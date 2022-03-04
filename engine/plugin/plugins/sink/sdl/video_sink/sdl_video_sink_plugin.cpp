@@ -119,7 +119,7 @@ Status SdlVideoSinkPlugin::Init()
     SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
     SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 #ifdef DUMP_RAW_DATA
-    dumpData_.open("./vsink_out.dat", std::ios::out | std::ios::binary);
+    dumpFd_ = std::fopen("./vsink_out.dat", "w");
 #endif
     return Status::OK;
 }
@@ -128,7 +128,10 @@ Status SdlVideoSinkPlugin::Deinit()
 {
     SDL_Quit();
 #ifdef DUMP_RAW_DATA
-    dumpData_.close();
+    if (dumpFd_) {
+        std::fclose(dumpFd_);
+        dumpFd_ = nullptr;
+    }
 #endif
     return Status::OK;
 }
@@ -246,7 +249,10 @@ Status SdlVideoSinkPlugin::Reset()
     texture_ = nullptr;
     SDL_memset(static_cast<void*>(&rendererInfo_), sizeof(SDL_RendererInfo), 0);
 #ifdef DUMP_RAW_DATA
-    dumpData_.close();
+    if (dumpFd_) {
+        std::fclose(dumpFd_);
+        dumpFd_ = nullptr;
+    }
 #endif
     return Status::OK;
 }
@@ -405,11 +411,13 @@ int32_t SdlVideoSinkPlugin::UpdateNVTexture(const uint8_t** data, int32_t* lineS
                 lineSize[0], lineSize[1], ySize);
     data[1] = ptr + ySize;
 #ifdef DUMP_RAW_DATA
-    if (data[0] != nullptr && lineSize[0] != 0) {
-        dumpData_.write((char*)data[0], lineSize[0] * pixelHeight_);
+    if (dumpFd_ && data[0] != nullptr && lineSize[0] != 0) {
+        std::fwrite(reinterpret_cast<const char*>(data[0]), lineSize[0] * pixelHeight_,
+                    1, dumpFd_);
     }
-    if (data[1] != nullptr && lineSize[1] != 0) {
-        dumpData_.write((char*)data[1], lineSize[1] * pixelHeight_ / 2); // 2
+    if (dumpFd_ && data[1] != nullptr && lineSize[1] != 0) {
+        std::fwrite(reinterpret_cast<const char*>(data[1]), lineSize[1] * pixelHeight_ / 2, // 2
+                    1, dumpFd_);
     }
 #endif
     ret = SDL_UpdateTexture(texture_.get(), NULL, data[0], lineSize[0]);
@@ -428,14 +436,17 @@ int32_t SdlVideoSinkPlugin::UpdateYUVTexture(const uint8_t** data, int32_t* line
     data[1] = data[0] + ySize;
     data[2] = data[1] + uvSize; // 2
 #ifdef DUMP_RAW_DATA
-    if (data[0] != nullptr && lineSize[0] != 0) {
-        dumpData_.write((char*)data[0], lineSize[0] * pixelHeight_);
+    if (dumpFd_ && data[0] != nullptr && lineSize[0] != 0) {
+        std::fwrite(reinterpret_cast<const char*>(data[0]), lineSize[0] * pixelHeight_,
+                    1, dumpFd_);
     }
-    if (data[1] != nullptr && lineSize[1] != 0) {
-        dumpData_.write((char*)data[1], lineSize[1] * pixelHeight_ / 2); // 2
+    if (dumpFd_ && data[1] != nullptr && lineSize[1] != 0) {
+        std::fwrite(reinterpret_cast<const char*>(data[1]), lineSize[1] * pixelHeight_ / 2, // 2
+                    1, dumpFd_);
     }
-    if (data[2] != nullptr && lineSize[2] != 0) {                        // 2
-        dumpData_.write((char*)data[2], lineSize[2] * pixelHeight_ / 2); // 2
+    if (dumpFd_ && data[2] != nullptr && lineSize[2] != 0) {                        // 2
+        std::fwrite(reinterpret_cast<const char*>(data[2]), lineSize[2] * pixelHeight_ / 2, // 2
+                    1, dumpFd_);
     }
 #endif
     ret = SDL_UpdateYUVTexture(texture_.get(), NULL, data[0], lineSize[0], data[1], lineSize[1], data[2], // 2

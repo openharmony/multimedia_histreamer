@@ -30,6 +30,10 @@ print("histreamer plugin: audio_server_sink =",
       multimedia_histreamer_enable_plugin_audio_server_sink)
 print("histreamer plugin:lite_aac_decoder =",
       multimedia_histreamer_enable_plugin_lite_aac_decoder)
+print("histreamer plugin:std_video_surface_sink =",
+      multimedia_histreamer_enable_plugin_std_video_surface_sink)
+print("histreamer plugin:std_video_capture =",
+      multimedia_histreamer_enable_plugin_std_video_capture)
 
 group("histreamer_plugin_store") {
   deps = []
@@ -79,6 +83,14 @@ group("histreamer_plugin_store") {
 
   if (multimedia_histreamer_enable_plugin_file_sink) {
     deps += [ "sink/file_sink:plugin_file_sink" ]
+  }
+
+  if (multimedia_histreamer_enable_plugin_std_video_surface_sink) {
+    deps += [ "sink/video_surface_sink:plugin_standard_video_surface_sink" ]
+  }
+
+  if (multimedia_histreamer_enable_plugin_std_video_capture) {
+    deps += [ "source/video_capture:plugin_standard_video_capture" ]
   }
 }
 

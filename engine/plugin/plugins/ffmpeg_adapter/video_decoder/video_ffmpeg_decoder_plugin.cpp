@@ -294,7 +294,7 @@ Status VideoFfmpegDecoderPlugin::Prepare()
         }
         InitCodecContext();
 #ifdef DUMP_RAW_DATA
-        dumpData_.open("./vdec_out.dat", std::ios::out | std::ios::binary);
+        dumpFd_ = std::fopen("./vdec_out.yuv", "w");
 #endif
         state_ = State::PREPARED;
     }
@@ -309,7 +309,10 @@ Status VideoFfmpegDecoderPlugin::ResetLocked()
     avCodecContext_.reset();
     outBufferQ_.Clear();
 #ifdef DUMP_RAW_DATA
-    dumpData_.close();
+    if (dumpFd_) {
+        std::fclose(dumpFd_);
+        dumpFd_ = nullptr;
+    }
 #endif
     state_ = State::INITIALIZED;
     return Status::OK;
@@ -347,7 +350,10 @@ Status VideoFfmpegDecoderPlugin::Stop()
         OSAL::ScopedLock l(avMutex_);
         ret = CloseCodecContext();
 #ifdef DUMP_RAW_DATA
-        dumpData_.close();
+        if (dumpFd_) {
+            std::fclose(dumpFd_);
+            dumpFd_ = nullptr;
+        }
 #endif
         state_ = State::INITIALIZED;
     }
@@ -447,22 +453,30 @@ void VideoFfmpegDecoderPlugin::CheckResolutionChange()
 #ifdef DUMP_RAW_DATA
 void VideoFfmpegDecoderPlugin::DumpVideoRawOutData()
 {
+    if (dumpFd_ == nullptr) {
+        return;
+    }
     if (cachedFrame_->format == AV_PIX_FMT_YUV420P) {
         if (cachedFrame_->data[0] != nullptr && cachedFrame_->linesize[0] != 0) {
-            dumpData_.write((char*)cachedFrame_->data[0], cachedFrame_->linesize[0] * cachedFrame_->height);
+            std::fwrite(reinterpret_cast<const char*>(cachedFrame_->data[0]),
+                        cachedFrame_->linesize[0] * cachedFrame_->height, 1, dumpFd_);
         }
         if (cachedFrame_->data[1] != nullptr && cachedFrame_->linesize[1] != 0) {
-            dumpData_.write((char*)cachedFrame_->data[1], cachedFrame_->linesize[1] * cachedFrame_->height / 2); // 2
+            std::fwrite(reinterpret_cast<const char*>(cachedFrame_->data[1]),
+                        cachedFrame_->linesize[1] * cachedFrame_->height / 2, 1, dumpFd_); // 2
         }
         if (cachedFrame_->data[2] != nullptr && cachedFrame_->linesize[2] != 0) {                                // 2
-            dumpData_.write((char*)cachedFrame_->data[2], cachedFrame_->linesize[2] * cachedFrame_->height / 2); // 2
+            std::fwrite(reinterpret_cast<const char*>(cachedFrame_->data[2]),
+                        cachedFrame_->linesize[2] * cachedFrame_->height / 2, 1, dumpFd_); // 2
         }
     } else if (cachedFrame_->format == AV_PIX_FMT_NV12 || cachedFrame_->format == AV_PIX_FMT_NV21) {
         if (cachedFrame_->data[0] != nullptr && cachedFrame_->linesize[0] != 0) {
-            dumpData_.write((char*)cachedFrame_->data[0], cachedFrame_->linesize[0] * cachedFrame_->height);
+            std::fwrite(reinterpret_cast<const char*>(cachedFrame_->data[0]),
+                        cachedFrame_->linesize[0] * cachedFrame_->height, 1, dumpFd_);
         }
         if (cachedFrame_->data[1] != nullptr && cachedFrame_->linesize[1] != 0) {
-            dumpData_.write((char*)cachedFrame_->data[1], cachedFrame_->linesize[1] * cachedFrame_->height / 2); // 2
+            std::fwrite(reinterpret_cast<const char*>(cachedFrame_->data[1]),
+                        cachedFrame_->linesize[1] * cachedFrame_->height / 2, 1, dumpFd_); // 2
         }
     }
 }

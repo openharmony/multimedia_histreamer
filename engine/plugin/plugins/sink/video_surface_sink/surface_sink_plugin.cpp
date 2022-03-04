@@ -49,12 +49,13 @@ Status SurfaceSinkRegister(const std::shared_ptr<Register>& reg)
     return reg->AddPlugin(definition);
 }
 
-PLUGIN_DEFINITION(SurfaceSink, LicenseType::APACHE_V2, SurfaceSinkRegister, [] {});
+PLUGIN_DEFINITION(StdVideoSurfaceSink, LicenseType::APACHE_V2, SurfaceSinkRegister, [] {});
 } // namespace
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace SurfaceSinkPlugin {
 static uint32_t TranslatePixelFormat(const VideoPixelFormat pixelFormat)
 {
     uint32_t surfaceFormat = PixelFormat::PIXEL_FMT_BUTT;
@@ -109,20 +110,25 @@ Status SurfaceSinkPlugin::Init()
 {
     std::weak_ptr<SurfaceSinkPlugin> weakPtr(shared_from_this());
 #ifdef DUMP_RAW_DATA
-    dumpData_.open("./vsink_out.dat", std::ios::out | std::ios::binary);
+    dumpFd_ = std::fopen("./vsink_out.dat", "w");
 #endif
-
+    if (surface_ == nullptr) {
+        OSAL::ScopedLock lock(mutex_);
+        surfaceCond_.Wait(lock, [this] { return surface_ != nullptr });
+    }
     return Status::OK;
 }
 
 Status SurfaceSinkPlugin::Deinit()
 {
 #ifdef DUMP_RAW_DATA
-    dumpData_.close();
+    if (dumpFd_) {
+        std::fclose(dumpFd_);
+        dumpFd_ = nullptr;
+    }
 #endif
     return Status::OK;
 }
-
 
 Status SurfaceSinkPlugin::Prepare()
 {
@@ -138,18 +144,23 @@ Status SurfaceSinkPlugin::Prepare()
     const constexpr int32_t strideAlign = 8; // 8
     auto format = TranslatePixelFormat(pixelFormat_);
     if (format == PixelFormat::PIXEL_FMT_BUTT) {
-        MEDIA_LOG_E("surface can not support pixel format: " PUBLIC_LOG "u", pixelFormat_);
+        MEDIA_LOG_E("surface can not support pixel format: " PUBLIC_LOG_U32, pixelFormat_);
         return Status::ERROR_UNKNOWN;
     }
-    mAllocator_->Config(static_cast<int32_t>(width_), static_cast<int32_t>(height_), 0, format,
-                        strideAlign);
+    if (mAllocator_) {
+        mAllocator_->Config(static_cast<int32_t>(width_), static_cast<int32_t>(height_), 0, format,
+                            strideAlign);
+    }
     return Status::OK;
 }
 
 Status SurfaceSinkPlugin::Reset()
 {
 #ifdef DUMP_RAW_DATA
-    dumpData_.close();
+    if (dumpFd_) {
+        std::fclose(dumpFd_);
+        dumpFd_ = nullptr;
+    }
 #endif
     return Status::OK;
 }
@@ -173,25 +184,26 @@ Status SurfaceSinkPlugin::GetParameter(Tag tag, ValueType& value)
 
 Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
 {
+    OSAL::ScopedLock lock(mutex_);
     switch (tag) {
         case Tag::VIDEO_WIDTH: {
             if (value.SameTypeWith(typeid(uint32_t))) {
                 width_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("pixelWidth_: " PUBLIC_LOG "u", pixelWidth_);
+                MEDIA_LOG_D("width_: " PUBLIC_LOG_U32, width_);
             }
             break;
         }
         case Tag::VIDEO_HEIGHT: {
             if (value.SameTypeWith(typeid(uint32_t))) {
                 height_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("pixelHeight_: " PUBLIC_LOG "u", pixelHeight_);
+                MEDIA_LOG_D("height_: " PUBLIC_LOG_U32, height_);
             }
             break;
         }
         case Tag::VIDEO_PIXEL_FORMAT: {
             if (value.SameTypeWith(typeid(VideoPixelFormat))) {
                 pixelFormat_ = Plugin::AnyCast<VideoPixelFormat>(value);
-                MEDIA_LOG_D("pixelFormat: " PUBLIC_LOG "u", pixelFormat_);
+                MEDIA_LOG_D("pixelFormat: " PUBLIC_LOG_U32, static_cast<uint32_t>(pixelFormat_));
             }
             break;
         }
@@ -203,13 +215,14 @@ Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
                     return Status::ERROR_INVALID_PARAMETER;
                 }
                 mAllocator_ = std::make_shared<SurfaceAllocator>(surface_);
+                surfaceCond_.NotifyAll();
             }
             break;
         }
         case Tag::VIDEO_MAX_SURFACE_NUM: {
             if (value.SameTypeWith(typeid(uint32_t))) {
                 maxSurfaceNum_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("maxSurfaceNum_: " PUBLIC_LOG "u", maxSurfaceNum_);
+                MEDIA_LOG_D("maxSurfaceNum_: " PUBLIC_LOG_U32, maxSurfaceNum_);
             }
             break;
         }
@@ -251,6 +264,12 @@ Status SurfaceSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
     FALSE_RETURN_V(memory->GetMemoryType() == MemoryType::SURFACE_BUFFER, Status::ERROR_INVALID_PARAMETER);
     std::shared_ptr<SurfaceMemory> surfaceMemory = std::dynamic_pointer_cast<SurfaceMemory>(memory);
     auto surfaceBuffer = surfaceMemory->GetSurfaceBuffer();
+#ifdef DUMP_RAW_DATA
+    if (dumpFd_ && surfaceBuffer->GetVirAddr()) {
+        std::fwrite(reinterpret_cast<const char*>(surfaceBuffer->GetVirAddr()),
+                    surfaceBuffer->GetSize(), 1, dumpFd_);
+    }
+#endif
     FALSE_RETURN_V(surfaceBuffer != nullptr, Status::ERROR_NULL_POINTER);
     OHOS::BufferFlushConfig flushConfig = {
         {0, 0, static_cast<int32_t>(width_), static_cast<int32_t>(height_)},
@@ -270,6 +289,7 @@ Status SurfaceSinkPlugin::GetLatency(uint64_t& nanoSec)
     nanoSec = 10; // 10 ns
     return Status::OK;
 }
+} // namespace SurfaceSinkPlugin
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

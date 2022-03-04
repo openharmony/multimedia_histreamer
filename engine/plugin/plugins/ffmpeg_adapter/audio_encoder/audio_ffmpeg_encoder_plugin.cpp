@@ -439,7 +439,8 @@ Status AudioFfmpegEncoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>&
                                                   const std::shared_ptr<AVPacket>& packet)
 {
     auto ioInfoMem = ioInfo->GetMemory();
-    FALSE_RET_V_MSG_W(ioInfoMem->GetCapacity() >= packet->size, Status::ERROR_NO_MEMORY, "buffer size is not enough");
+    FALSE_RET_V_MSG_W(ioInfoMem->GetCapacity() >= static_cast<size_t>(packet->size),
+                      Status::ERROR_NO_MEMORY, "buffer size is not enough");
     ioInfoMem->Write(packet->data, packet->size);
     // how get perfect pts with upstream pts ?
     ioInfo->duration = ConvertTimeFromFFmpeg(packet->duration, avCodecContext_->time_base);

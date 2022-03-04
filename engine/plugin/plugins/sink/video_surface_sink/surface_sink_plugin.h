@@ -23,19 +23,22 @@
 #include "refbase.h"
 #include "surface/surface.h"
 #include "display_type.h"
+#include "sync_fence.h"
 #include "common/graphic_common.h"
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
 #include "plugin/common/surface_allocator.h"
 #include "plugin/common/plugin_video_tags.h"
 #include "plugin/interface/video_sink_plugin.h"
 
 #ifdef DUMP_RAW_DATA
-#include <fstream>
+#include <cstdio>
 #endif
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-namespace SurfaceSink {
+namespace SurfaceSinkPlugin {
 class SurfaceSinkPlugin : public VideoSinkPlugin, public std::enable_shared_from_this<SurfaceSinkPlugin> {
 public:
     explicit SurfaceSinkPlugin(std::string name);
@@ -72,19 +75,20 @@ public:
     Status GetLatency(uint64_t &nanoSec) override;
 
 private:
+    OSAL::Mutex mutex_ {};
+    OSAL::ConditionVariable surfaceCond_;
     uint32_t width_;
     uint32_t height_;
-    uint32_t stride_;
     VideoPixelFormat pixelFormat_;
     sptr<Surface> surface_ {nullptr};
     std::shared_ptr<SurfaceAllocator> mAllocator_ {nullptr};
     uint32_t maxSurfaceNum_;
 
 #ifdef DUMP_RAW_DATA
-    std::ofstream dumpData_;
+    std::FILE* dumpFd_;
 #endif
 };
-} // SurfaceSink
+} // SurfaceSinkPlugin
 } // Plugin
 } // Media
 } // OHOS

@@ -262,7 +262,7 @@ Status VideoCapturePlugin::AcquireSurfaceBuffer()
         MEDIA_LOG_E("surfaceBuffer get data size fail: " PUBLIC_LOG "u", ret);
         return Status::ERROR_UNKNOWN;
     }
-    if (pts < curTimestampNs_) {
+    if (static_cast<uint64_t>(pts) < curTimestampNs_) {
         MEDIA_LOG_W("Get wrong timestamp from surface buffer");
     }
     curTimestampNs_ = static_cast<uint64_t>(pts);
@@ -314,7 +314,8 @@ Status VideoCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
         MEDIA_LOG_E("AcquireSurfaceBuffer fail: " PUBLIC_LOG "d", ret);
         return ret;
     }
-    if (bufData->Write(static_cast<const uint8_t*>(surfaceBuffer_->GetVirAddr()), bufferSize_) != bufferSize_) {
+    auto writeSize = bufData->Write(static_cast<const uint8_t*>(surfaceBuffer_->GetVirAddr()), bufferSize_);
+    if (static_cast<int32_t>(writeSize) != bufferSize_) {
         MEDIA_LOG_E("write buffer data fail");
         return Status::ERROR_UNKNOWN;
     }

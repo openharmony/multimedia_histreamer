@@ -195,7 +195,7 @@ bool VideoDecoderFilter::Configure(const std::string& inPort, const std::shared_
         return false;
     }
     if (upstreamMeta->GetString(Plugin::MetaID::MIME, vdecFormat_.mime)) {
-        MEDIA_LOG_D("mime: " PUBLIC_LOG "s", vdecFormat_.mime.c_str());
+        MEDIA_LOG_D("mime: " PUBLIC_LOG_S, vdecFormat_.mime.c_str());
     }
     auto thisMeta = std::make_shared<Plugin::Meta>();
     if (!MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta)) {
@@ -263,10 +263,10 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
         vdecFormat_.format == Plugin::VideoPixelFormat::NV12) {
         bufferSize = static_cast<uint32_t>(Plugin::AlignUp(stride, VIDEO_ALIGN_SIZE) *
                                            Plugin::AlignUp(vdecFormat_.height, VIDEO_ALIGN_SIZE) * VIDEO_PIX_DEPTH);
-        MEDIA_LOG_D("Output buffer size: " PUBLIC_LOG "u", bufferSize);
+        MEDIA_LOG_D("Output buffer size: " PUBLIC_LOG_U32, bufferSize);
     } else {
         // need to check video sink support and calc buffer size
-        MEDIA_LOG_E("Unsupported video pixel format: " PUBLIC_LOG "u", vdecFormat_.format);
+        MEDIA_LOG_E("Unsupported video pixel format: " PUBLIC_LOG_U32, vdecFormat_.format);
         return ErrorCode::ERROR_UNIMPLEMENTED;
     }
 
@@ -327,8 +327,8 @@ ErrorCode VideoDecoderFilter::ConfigurePluginParams()
             MEDIA_LOG_W("Set bitrate to plugin fail");
         }
     }
-    MEDIA_LOG_D("ConfigurePluginParams success, mime: " PUBLIC_LOG "s, width: " PUBLIC_LOG "u, height: "
-                PUBLIC_LOG "u, format: " PUBLIC_LOG "u",
+    MEDIA_LOG_D("ConfigurePluginParams success, mime: " PUBLIC_LOG_S ", width: " PUBLIC_LOG_U32 ", height: "
+                PUBLIC_LOG_U32 ", format: " PUBLIC_LOG_U32,
                 vdecFormat_.mime.c_str(), vdecFormat_.width, vdecFormat_.height, vdecFormat_.format);
     return ErrorCode::SUCCESS;
 }
@@ -378,11 +378,11 @@ ErrorCode VideoDecoderFilter::ConfigureNoLocked(const std::shared_ptr<const Plug
 ErrorCode VideoDecoderFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
-        MEDIA_LOG_W("pushing data to decoder when state_ is " PUBLIC_LOG "d", static_cast<int>(state_.load()));
+        MEDIA_LOG_W("pushing data to decoder when state_ is " PUBLIC_LOG_D32, static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     if (isFlushing_) {
-        MEDIA_LOG_I("decoder is flushing, discarding this data from port " PUBLIC_LOG "s", inPort.c_str());
+        MEDIA_LOG_I("decoder is flushing, discarding this data from port " PUBLIC_LOG_S, inPort.c_str());
         return ErrorCode::SUCCESS;
     }
     inBufQue_->Push(buffer);
@@ -469,7 +469,7 @@ void VideoDecoderFilter::HandleOneFrame(const std::shared_ptr<AVBuffer>& data)
         if (ret == Plugin::Status::OK) {
             break;
         }
-        MEDIA_LOG_D("Send data to plugin error: " PUBLIC_LOG "d", ret);
+        MEDIA_LOG_D("Send data to plugin error: " PUBLIC_LOG_D32, ret);
         OSAL::SleepFor(DEFAULT_TRY_DECODE_TIME);
     } while (1);
 }

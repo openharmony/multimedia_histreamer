@@ -325,12 +325,12 @@ ErrorCode VideoEncoderFilter::ConfigurePluginParams()
                       ErrorCode::ERROR_UNKNOWN, "Set height to plugin fail");
     FALSE_RET_V_MSG_W(SetPluginParameterLocked(Tag::VIDEO_PIXEL_FORMAT, vencFormat_.format) == ErrorCode::SUCCESS,
                       ErrorCode::ERROR_UNKNOWN, "Set pixel format to plugin fail");
-    if (vencFormat_.bitRate != -1) {
+    if (vencFormat_.bitRate > 0) {
         if (SetPluginParameterLocked(Tag::MEDIA_BITRATE, vencFormat_.bitRate) != ErrorCode::SUCCESS) {
             MEDIA_LOG_W("Set bitrate to plugin fail");
         }
     }
-    if (vencFormat_.frameRate != -1) {
+    if (vencFormat_.frameRate > 0) {
         if (SetPluginParameterLocked(Tag::VIDEO_FRAME_RATE, vencFormat_.frameRate) != ErrorCode::SUCCESS) {
             MEDIA_LOG_W("Set framerate to plugin fail");
         }
@@ -511,12 +511,12 @@ void VideoEncoderFilter::FinishFrame()
     MEDIA_LOG_D("end finish frame");
 }
 
-void VideoEncoderFilter::OnInputBufferDone(const std::shared_ptr<AVBuffer>& buffer)
+void VideoEncoderFilter::OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& buffer)
 {
     // do nothing since we has no input buffer pool
 }
 
-void VideoEncoderFilter::OnOutputBufferDone(const std::shared_ptr<AVBuffer>& buffer)
+void VideoEncoderFilter::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& buffer)
 {
     outBufQue_->Push(buffer);
 }

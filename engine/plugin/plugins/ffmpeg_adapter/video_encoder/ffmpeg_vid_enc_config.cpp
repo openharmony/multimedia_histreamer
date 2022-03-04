@@ -159,6 +159,7 @@ Status ConfigVideoCommonAttr(AVCodecContext& codecContext, const std::map<Tag, V
     FALSE_RET_V_MSG_E(ret == Status::OK, ret, "SetVideoPixelFormat() fail");
     SetVideoFrameRateAndTimeBase(codecContext, tagStore);
     SetDefaultEncodeParams(codecContext, tagStore);
+    return ret;
 }
 
 void ConfigH264Codec(AVCodecContext& codecContext, const std::map<Tag, ValueType>& tagStore)
@@ -184,6 +185,7 @@ void GetVideoCommonAttr(const AVCodecContext& codecContext, Tag tag, ValueType& 
             std::vector<uint8_t> extra(codecContext.extradata_size);
             extra.assign(codecContext.extradata, codecContext.extradata + codecContext.extradata_size);
             outVal = extra;
+            break;
         }
         default:
             break;

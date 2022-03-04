@@ -94,7 +94,7 @@ std::shared_ptr<PluginLoader> PluginLoader::CheckSymbol(void* handler, const std
             loader->unregisterFunc_ = unregisterFunc;
             return loader;
         } else {
-            MEDIA_LOG_W("register or unregister found is not found in " PUBLIC_LOG "s", name.c_str());
+            MEDIA_LOG_W("register or unregister found is not found in " PUBLIC_LOG_S, name.c_str());
         }
     }
     return {};

@@ -81,6 +81,7 @@ public:
 private:
     ErrorCode ConfigurePluginParams(const std::shared_ptr<const Plugin::Meta>& meta);
     ErrorCode ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta);
+    bool CreateVideoSinkPlugin(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo);
     void HandleNegotiateParams(const Plugin::TagMap& upstreamParams, Plugin::TagMap& downstreamParams);
     void RenderFrame();
     bool DoSync(int64_t pts) const;
@@ -90,6 +91,7 @@ private:
     bool isFlushing_ {false};
     OSAL::ConditionVariable startWorkingCondition_ {};
     OSAL::Mutex mutex_;
+    sptr<Surface> surface_;
 
     std::shared_ptr<Plugin::VideoSink> plugin_ {nullptr};
 

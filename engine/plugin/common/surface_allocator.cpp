@@ -17,6 +17,7 @@
 #include "surface_allocator.h"
 #include "foundation/log.h"
 #include "display_type.h"
+#include "sync_fence.h"
 
 namespace OHOS {
 namespace Media {
@@ -28,6 +29,10 @@ SurfaceAllocator::SurfaceAllocator(sptr<Surface> surface) : Allocator(MemoryType
 
 sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer(size_t size)
 {
+    if (surface_ == nullptr) {
+        MEDIA_LOG_E("surface is nullptr");
+        return nullptr;
+    }
     OHOS::sptr<OHOS::SurfaceBuffer> surfaceBuffer = nullptr;
     int32_t fence = -1;
     auto ret = surface_->RequestBuffer(surfaceBuffer, fence, requestConfig_);
@@ -35,9 +40,13 @@ sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer(size_t size)
         if (ret == OHOS::SurfaceError::SURFACE_ERROR_NO_BUFFER) {
             MEDIA_LOG_E("buffer queue is no more buffers");
         } else {
-            MEDIA_LOG_E("surface RequestBuffer fail");
+            MEDIA_LOG_E("surface RequestBuffer fail, ret: " PUBLIC_LOG_U64, static_cast<uint64_t>(ret));
         }
         return nullptr;
+    }
+    sptr<SyncFence> autoFence = new(std::nothrow) SyncFence(fence);
+    if (autoFence != nullptr) {
+        autoFence->Wait(100); // 100ms
     }
     return surfaceBuffer;
 }
