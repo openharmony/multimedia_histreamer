@@ -17,6 +17,7 @@
 #define MEDIA_DATA_STREAM_IMPL
 
 #include <queue>
+#include <vector>
 #include "data_stream.h"
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
@@ -28,6 +29,7 @@ public:
     DataStreamImpl(size_t size, size_t count, MemoryType type);
     bool GetDataBuffer(std::shared_ptr<DataBuffer>& buffer, int timeout) override;
     bool QueueEmptyBuffer(const std::shared_ptr<DataBuffer>& buffer) override;
+    bool QueueEmptyBuffer(uint8_t* address) override;
 
     bool GetEmptyBuffer(std::shared_ptr<DataBuffer>& buffer, int timeout) override;
     bool QueueDataBuffer(const std::shared_ptr<DataBuffer>& buffer) override;
@@ -39,6 +41,7 @@ private:
     OSAL::ConditionVariable dataCondition_ {};
     std::queue<std::shared_ptr<DataBuffer>> emptyBuffers_ {};
     std::queue<std::shared_ptr<DataBuffer>> dataBuffers_ {};
+    std::vector<std::shared_ptr<DataBuffer>> allBuffers_ {}; // keep all buffers
 };
 
 class VirtualDataBuffer : public DataBuffer {

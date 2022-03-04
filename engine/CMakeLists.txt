@@ -78,6 +78,7 @@ file(GLOB_RECURSE COMMON_PLUGIN_SRCS
         ${TOP_DIR}/engine/plugin/plugins/minimp3_adapter/*.c
         ${TOP_DIR}/engine/plugin/plugins/source/http_source/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/source/http_source_test/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
 )
 
 if (OHOS_LITE)
@@ -90,9 +91,6 @@ if (OHOS_LITE)
     file(GLOB_RECURSE RECORDER_SRCS
             ${TOP_DIR}/engine/scene/lite/*.cpp
             ${TOP_DIR}/engine/scene/recorder/lite/*.cpp
-            )
-    file(GLOB_RECURSE PLAT_PLUGIN_SRCS
-            ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
             )
 else ()
     message(STATUS "player standard source")

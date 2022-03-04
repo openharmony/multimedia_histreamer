@@ -19,6 +19,7 @@
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_source_tags.h"
 #include "plugin/core/plugin_manager.h"
+#include "foundation/log.h"
 
 namespace OHOS {
 namespace Media {
@@ -42,48 +43,9 @@ const Status StreamSourceRegister(const std::shared_ptr<Register>& reg)
 
 PLUGIN_DEFINITION(StreamSource, LicenseType::APACHE_V2, StreamSourceRegister, [] {});
 
-void* StreamSourceAllocator::Alloc(size_t size)
-{
-    if (size == 0) {
-        return nullptr;
-    }
-    return static_cast<void*>(new (std::nothrow) uint8_t[size]);
-}
-
-void StreamSourceAllocator::Free(void* ptr) // NOLINT: void*
-{
-    if (ptr != nullptr) {
-        delete[](uint8_t*) ptr;
-    }
-}
-
-StreamSourceCallback::StreamSourceCallback(std::shared_ptr<StreamSourcePlugin> dataSource,
-                                           std::shared_ptr<StreamSource>& stream)
-    : dataSource_(dataSource), streamSource_(stream)
-{
-}
-
-uint8_t* StreamSourceCallback::GetBuffer(size_t index)
-{
-    auto bufferPtr = dataSource_->FindBuffer(index);
-    return bufferPtr->GetMemory()->GetWritableAddr(bufferPtr->GetMemory()->GetCapacity());
-}
-
-void StreamSourceCallback::QueueBuffer(size_t index, size_t offset, size_t size, int64_t timestampUs, uint32_t flags)
-{
-    auto bufferPtr = dataSource_->FindBuffer(index);
-    dataSource_->EraseBuffer(index);
-    bufferPtr->GetMemory()->UpdateDataSize(size);
-    dataSource_->EnqueBuffer(bufferPtr);
-}
 
 StreamSourcePlugin::StreamSourcePlugin(std::string name)
-    : SourcePlugin(std::move(name)),
-      bufferPool_(0),
-      state_(State::CREATED),
-      isSeekable_(false),
-      waitBuffers_(),
-      bufferQueue_("SourceBuffQue")
+    : SourcePlugin(std::move(name))
 {
     MEDIA_LOG_D("ctor called");
 }
@@ -91,54 +53,41 @@ StreamSourcePlugin::StreamSourcePlugin(std::string name)
 StreamSourcePlugin::~StreamSourcePlugin()
 {
     MEDIA_LOG_D("dtor called");
-    state_ = State::DESTROYED;
 }
 
 Status StreamSourcePlugin::Init()
 {
     MEDIA_LOG_D("IN");
-    bufferPool_.Init(DEFAULT_FRAME_SIZE);
-    mAllocator_ = std::make_shared<StreamSourceAllocator>();
-    state_ = State::INITIALIZED;
     return Status::OK;
 }
 
 Status StreamSourcePlugin::Deinit()
 {
     MEDIA_LOG_D("IN");
-    state_ = State::DESTROYED;
     return Status::OK;
 }
 
 Status StreamSourcePlugin::Prepare()
 {
     MEDIA_LOG_D("IN");
-    state_ = State::PREPARED;
     return Status::OK;
 }
 
 Status StreamSourcePlugin::Reset()
 {
     MEDIA_LOG_D("IN");
-    state_ = State::INITIALIZED;
     return Status::OK;
 }
 
 Status StreamSourcePlugin::Start()
 {
     MEDIA_LOG_D("IN");
-    bufferPool_.SetActive(true);
-    taskPtr_->Start();
-    state_ = State::RUNNING;
     return Status::OK;
 }
 
 Status StreamSourcePlugin::Stop()
 {
     MEDIA_LOG_D("IN");
-    bufferQueue_.SetActive(false);
-    taskPtr_->Stop();
-    state_ = State::PREPARED;
     return Status::OK;
 }
 
@@ -154,12 +103,6 @@ Status StreamSourcePlugin::SetParameter(Tag tag, const ValueType& value)
     return Status::OK;
 }
 
-std::shared_ptr<Allocator> StreamSourcePlugin::GetAllocator()
-{
-    MEDIA_LOG_D("IN");
-    return mAllocator_;
-}
-
 Status StreamSourcePlugin::SetCallback(Callback* cb)
 {
     MEDIA_LOG_D("IN");
@@ -168,44 +111,37 @@ Status StreamSourcePlugin::SetCallback(Callback* cb)
 
 Status StreamSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 {
-    auto source_ = std::make_shared<OHOS::Media::Source>("");
-    std::shared_ptr<StreamSource> stream_ = source_->GetSourceStream();
-    if (stream_ == nullptr) {
-        MEDIA_LOG_E("Get StreamSource fail");
-        return Status::ERROR_INVALID_PARAMETER;
-    }
-
-    streamCallback_ = std::make_shared<StreamSourceCallback>(shared_from_this(), stream_);
-    stream_->SetStreamCallback(streamCallback_);
-    streamSource_ = stream_;
-    taskPtr_ = std::make_shared<OSAL::Task>("StreamSource");
-    taskPtr_->RegisterHandler(std::bind(&StreamSourcePlugin::NotifyAvilableBufferLoop, this));
+    stream_ = source->GetDataStream();
+    FALSE_RETURN_V(stream_ != nullptr, Status::ERROR_INVALID_PARAMETER);
     return Status::OK;
 }
 
+std::shared_ptr<Buffer> StreamSourcePlugin::WrapDataBuffer(const std::shared_ptr<DataBuffer>& dataBuffer)
+{
+    std::shared_ptr<Buffer> buffer = std::make_shared<Buffer>();
+    auto deleter = [this](uint8_t* ptr) {  FALSE_LOG(stream_->QueueEmptyBuffer(ptr));  };
+    std::shared_ptr<uint8_t> address = std::shared_ptr<uint8_t>(dataBuffer->GetAddress(), deleter);
+    buffer->WrapMemoryPtr(address, dataBuffer->GetCapacity(), dataBuffer->GetSize());
+    return buffer;
+}
+
+// stream source is non-seekable
+// so this read is called by MediaSourceFilter::ReadLoop
+// ReadLoop always not provider buffer, so no need copy here, and no need to care about buffer count/length.
+// We always process buffer count/length in DemuxerFitler's DataPacker.
 Status StreamSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
 {
-    auto bufPtr_ = bufferQueue_.Pop(); // the cached buffer
-    auto availSize = bufPtr_->GetMemory()->GetSize();
-    MEDIA_LOG_D("availSize: " PUBLIC_LOG "zu, expectedLen: " PUBLIC_LOG "zu", availSize, expectedLen);
-    if (buffer->IsEmpty()) { // No buffer provided, use the cached buffer.
-        buffer = bufPtr_;
-        return Status::OK;
-    } else { // Buffer provided, copy it.
-        if (buffer->GetMemory()->GetCapacity() < availSize) {
-            MEDIA_LOG_D("buffer->length: " PUBLIC_LOG "zu is smaller than " PUBLIC_LOG "zu",
-                        buffer->GetMemory()->GetCapacity(), availSize);
-            return Status::ERROR_NO_MEMORY;
-        }
-        buffer->GetMemory()->Write(bufPtr_->GetMemory()->GetReadOnlyData(), availSize);
-    }
+    FALSE_RETURN_V(buffer->IsEmpty(), Status::ERROR_INVALID_PARAMETER);
+    std::shared_ptr<DataBuffer> dataBuffer;
+    FALSE_RETURN_V(stream_->GetDataBuffer(dataBuffer), Status::ERROR_TIMED_OUT);
+    buffer = WrapDataBuffer(dataBuffer);
     return Status::OK;
 }
 
 Status StreamSourcePlugin::GetSize(size_t& size)
 {
     MEDIA_LOG_D("IN");
-    size = -1;
+    size = 0;
     return Status::ERROR_WRONG_STATE;
 }
 
@@ -219,48 +155,6 @@ Status StreamSourcePlugin::SeekTo(uint64_t offset)
 {
     MEDIA_LOG_D("IN");
     return Status::ERROR_UNIMPLEMENTED;
-}
-
-std::shared_ptr<Plugin::Buffer> StreamSourcePlugin::AllocateBuffer()
-{
-    return bufferPool_.AllocateBuffer();
-}
-
-std::shared_ptr<Plugin::Buffer> StreamSourcePlugin::FindBuffer(size_t idx)
-{
-    OSAL::ScopedLock lock(mutex_);
-    auto it = waitBuffers_.find(idx);
-    if (it != waitBuffers_.end()) {
-        return it->second;
-    }
-    return nullptr;
-}
-
-void StreamSourcePlugin::EraseBuffer(size_t idx)
-{
-    OSAL::ScopedLock lock(mutex_);
-    waitBuffers_.erase(idx);
-}
-
-void StreamSourcePlugin::EnqueBuffer(std::shared_ptr<Plugin::Buffer>& bufferPtr)
-{
-    bufferQueue_.Push(bufferPtr);
-}
-
-void StreamSourcePlugin::NotifyAvilableBufferLoop()
-{
-    auto bufferPtr = AllocateBuffer();
-    if (bufferPtr == nullptr) {
-        MEDIA_LOG_E("Alloc buffer fail");
-        return;
-    }
-    size_t idx = GetUniqueIdx();
-    {
-        OSAL::ScopedLock lock(mutex_);
-        waitBuffers_[idx] = bufferPtr;
-    }
-    std::shared_ptr<StreamSource> stream = streamSource_.lock();
-    stream->OnBufferAvailable(idx, 0, bufferPtr->GetMemory()->GetCapacity());
 }
 } // namespace StreamSource
 } // namespace Plugin

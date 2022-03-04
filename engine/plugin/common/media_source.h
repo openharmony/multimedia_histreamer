@@ -20,6 +20,7 @@
 #include <memory>
 #include "plugin_buffer.h"
 #include "plugin_types.h" // NOLINT: used it
+#include "scene/common/data_stream.h"
 
 namespace OHOS {
 namespace Media {
@@ -37,33 +38,6 @@ enum class SourceType : int32_t {
     SOURCE_TYPE_FD,
     /** Stream data */
     SOURCE_TYPE_STREAM,
-};
-
-class DataStream {
-    /**
-     * @brief Read data from data source.
-     *
-     * The function is valid only after RUNNING state.
-     *
-     * @param buffer Storage of the read data
-     * @param expectedLen   Expected data size to be read
-     * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_NOT_ENOUGH_DATA: Data not enough
-     *  @retval END_OF_STREAM: End of stream
-     */
-    virtual Status Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen) = 0;
-
-    /**
-     * @brief Get data source size.
-     *
-     * The function is valid only after INITIALIZED state.
-     *
-     * @param size data source size.
-     * @return  Execution status return.
-     *  @retval OK: Plugin reset succeeded.
-     */
-    virtual Status GetSize(size_t& size) = 0;
 };
 
 class MediaSource {
