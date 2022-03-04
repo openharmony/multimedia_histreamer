@@ -40,6 +40,9 @@ bool CodecId2Cap(AVCodecID codecId, bool encoder, Plugin::Capability& cap)
         case AV_CODEC_ID_H264:
             cap.SetMime(MEDIA_MIME_VIDEO_H264);
             return true;
+        case AV_CODEC_ID_VORBIS:
+            cap.SetMime(MEDIA_MIME_AUDIO_VORBIS);
+            return true;
         default:
             break;
     }

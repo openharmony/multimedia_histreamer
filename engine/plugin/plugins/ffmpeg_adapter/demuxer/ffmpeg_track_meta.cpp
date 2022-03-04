@@ -45,6 +45,7 @@ StreamConvertor g_streamConvertors[] = {{AV_CODEC_ID_PCM_S16LE, ConvertRawAudioS
                                         {AV_CODEC_ID_MP3, ConvertMP3StreamToMetaInfo},
                                         {AV_CODEC_ID_AAC, ConvertAACStreamToMetaInfo},
                                         {AV_CODEC_ID_AAC_LATM, ConvertAACLatmStreamToMetaInfo},
+                                        {AV_CODEC_ID_VORBIS, ConvertVorbisStreamToMetaInfo},
 #ifdef VIDEO_SUPPORT
                                         {AV_CODEC_ID_H264, ConvertAVCStreamToMetaInfo}
 #endif
@@ -68,12 +69,17 @@ void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream, const std::sha
             {Tag::AUDIO_CHANNEL_LAYOUT, ConvertChannelLayoutFromFFmpeg(context->channels, context->channel_layout)});
         // ffmpeg defaults to 1024 samples per frame for planar PCM in each buffer (one for each channel).
         uint32_t samplesPerFrame = 1024;
-        if (!IsPcmStream(avStream)) {
+        if (!IsPcmStream(avStream) && context->frame_size != 0) {
             samplesPerFrame = static_cast<uint32_t>(context->frame_size);
         }
         meta.insert({Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame});
         meta.insert({Tag::AUDIO_SAMPLE_FORMAT, ConvFf2PSampleFmt(context->sample_fmt)});
         meta.insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(context->bit_rate)});
+    }
+    if (context->extradata_size > 0) {
+        CodecConfig codecConfig;
+        codecConfig.assign(context->extradata, context->extradata + context->extradata_size);
+        meta.insert({Tag::MEDIA_CODEC_CONFIG, std::move(codecConfig)});
     }
 }
 } // namespace
@@ -131,6 +137,14 @@ void ConvertAACStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
     } else {
         meta.insert({Tag::AUDIO_AAC_STREAM_FORMAT, AudioAacStreamFormat::MP4ADTS});
     }
+}
+
+void ConvertVorbisStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta)
+{
+    MEDIA_LOG_I("ConvertOggStreamToMetaInfo Called");
+    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_VORBIS)});
+    ConvertCommonAudioStreamToMetaInfo(avStream, context, meta);
+    meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
 }
 
 void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,

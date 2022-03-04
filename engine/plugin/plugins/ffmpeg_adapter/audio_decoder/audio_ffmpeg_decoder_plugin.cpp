@@ -35,7 +35,7 @@ std::map<std::string, std::shared_ptr<const AVCodec>> codecMap;
 
 const size_t BUFFER_QUEUE_SIZE = 6;
 
-const std::set<AVCodecID> g_supportedCodec = {AV_CODEC_ID_MP3, AV_CODEC_ID_FLAC, AV_CODEC_ID_AAC, AV_CODEC_ID_AAC_LATM};
+const std::set<AVCodecID> g_supportedCodec = {AV_CODEC_ID_MP3, AV_CODEC_ID_FLAC, AV_CODEC_ID_AAC, AV_CODEC_ID_AAC_LATM, AV_CODEC_ID_VORBIS};
 
 Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
 {
@@ -90,6 +90,9 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
             break;
         case AV_CODEC_ID_AAC_LATM:
             capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM);
+            break;
+        case AV_CODEC_ID_VORBIS:
+            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_VORBIS);
             break;
         default:
             MEDIA_LOG_I("codec is not supported right now");
