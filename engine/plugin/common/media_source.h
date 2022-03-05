@@ -20,7 +20,7 @@
 #include <memory>
 #include "plugin_buffer.h"
 #include "plugin_types.h" // NOLINT: used it
-#include "scene/common/data_stream.h"
+#include "data_stream.h"
 
 namespace OHOS {
 namespace Media {

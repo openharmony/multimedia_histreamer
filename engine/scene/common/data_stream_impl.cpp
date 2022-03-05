@@ -23,7 +23,7 @@ namespace Media {
 
 DataStreamImpl::DataStreamImpl(size_t size, size_t count, MemoryType type)
 {
-    FALSE_LOG(type == MemoryType::MEMORY_VIRTUAL);
+    FALSE_LOG(type == MemoryType::VIRTUAL_ADDR);
     for (size_t i = 0; i < count; ++i) {
         auto buffer = std::make_shared<VirtualDataBuffer>(size);
         emptyBuffers_.push(buffer);

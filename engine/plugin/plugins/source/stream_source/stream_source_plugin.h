@@ -19,7 +19,7 @@
 #include "foundation/osal/thread/task.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
-#include "scene/common/data_stream.h"
+#include "data_stream.h"
 
 namespace OHOS {
 namespace Media {
