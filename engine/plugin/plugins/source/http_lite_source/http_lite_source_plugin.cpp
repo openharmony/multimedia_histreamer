@@ -254,9 +254,12 @@ Status HttpSourcePlugin::OnHttpEvent(void *priv, int errorType, int32_t errorCod
 Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLen)
 {
     MEDIA_LOG_D("Read in");
-    if (httpHandle_ == nullptr || buffer == nullptr) {
+    if (httpHandle_ == nullptr) {
         MEDIA_LOG_D("Read error");
         return Status::ERROR_INVALID_PARAMETER;
+    }
+    if (buffer == nullptr) {
+        buffer = std::make_shared<Buffer>();
     }
     {
         OSAL::ScopedLock lock(httpMutex_);

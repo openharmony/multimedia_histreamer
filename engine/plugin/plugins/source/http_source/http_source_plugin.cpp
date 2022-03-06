@@ -166,7 +166,11 @@ std::shared_ptr<Allocator> HttpSourcePlugin::GetAllocator()
 Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLen)
 {
     MEDIA_LOG_D("Read in");
-    FALSE_RETURN_V(executor_ != nullptr && buffer != nullptr, Status::ERROR_NULL_POINTER);
+    FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
+
+    if (buffer == nullptr) {
+        buffer = std::make_shared<Buffer>();
+    }
 
     std::shared_ptr<Memory>bufData;
     if (buffer->IsEmpty()) {

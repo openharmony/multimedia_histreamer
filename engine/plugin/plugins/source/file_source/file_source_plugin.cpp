@@ -152,6 +152,9 @@ Status FileSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLe
         MEDIA_LOG_W("It is the end of file!");
         return Status::END_OF_STREAM;
     }
+    if (buffer == nullptr) {
+        buffer = std::make_shared<Buffer>();
+    }
 
     std::shared_ptr<Memory> bufData;
 
