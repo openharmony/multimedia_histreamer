@@ -60,13 +60,13 @@ public:
 
     const std::map<std::string, std::string> &GetSourceHeader() const;
 
-    std::shared_ptr<DataConsumer> GetDataStreamConsumer() const;
+    std::shared_ptr<DataConsumer> GetDataConsumer() const;
 
 private:
     std::string uri_ {};
     SourceType type_ {};
     std::map<std::string, std::string> header_ {};
-    std::shared_ptr<DataConsumer> dataStream_ {};
+    std::shared_ptr<DataConsumer> dataConsumer_ {};
 };
 } // namespace Plugin
 } // namespace Media
