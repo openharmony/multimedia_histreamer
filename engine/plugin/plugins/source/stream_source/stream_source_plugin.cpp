@@ -111,7 +111,7 @@ Status StreamSourcePlugin::SetCallback(Callback* cb)
 
 Status StreamSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 {
-    stream_ = source->GetDataStream();
+    stream_ = source->GetDataStreamConsumer();
     FALSE_RETURN_V(stream_ != nullptr, Status::ERROR_INVALID_PARAMETER);
     return Status::OK;
 }
