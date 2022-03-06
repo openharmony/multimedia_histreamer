@@ -131,10 +131,6 @@ std::shared_ptr<Buffer> StreamSourcePlugin::WrapDataBuffer(const std::shared_ptr
 // We always process buffer count/length in DemuxerFitler's DataPacker.
 Status StreamSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
 {
-    if (buffer == nullptr) {
-        buffer = std::make_shared<Buffer>();
-    }
-    FALSE_RETURN_V(buffer->IsEmpty(), Status::ERROR_INVALID_PARAMETER); // fwk pass empty buffer to avoid copy
     std::shared_ptr<DataBuffer> dataBuffer;
     FALSE_RETURN_V(stream_->GetDataBuffer(dataBuffer), Status::ERROR_TIMED_OUT);
     buffer = WrapDataBuffer(dataBuffer);
