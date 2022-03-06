@@ -283,8 +283,7 @@ std::string MediaSourceFilter::GetUriSuffix(const std::string& uri)
 void MediaSourceFilter::ReadLoop()
 {
     MEDIA_LOG_D("IN");
-    AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
-    bufferPtr->AllocMemory(nullptr, DEFAULT_READ_SIZE);
+    AVBufferPtr bufferPtr = nullptr;
     ErrorCode result = TranslatePluginStatus(plugin_->Read(bufferPtr, DEFAULT_READ_SIZE));
     if (result == ErrorCode::END_OF_STREAM) {
         Stop();
