@@ -112,7 +112,7 @@ int32_t HiPlayerImpl::SetSource(const Source& source)
     }
     std::shared_ptr<MediaSource> mediaSource = std::make_shared<MediaSource>(source.GetSourceUri());
     if (source.GetSourceType() == OHOS::Media::SourceType::SOURCE_TYPE_STREAM) {
-        mediaSource = std::make_shared<MediaSource>(source.GetDataStream());
+        mediaSource = std::make_shared<MediaSource>(source.GetDataStreamConsumer());
     }
     ret = CppExt::to_underlying(fsm_.SendEvent(Intent::SET_SOURCE, mediaSource));
     PROFILE_END("SetSource end.");

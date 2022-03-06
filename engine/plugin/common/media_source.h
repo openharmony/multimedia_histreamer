@@ -45,7 +45,7 @@ public:
     /// Construct an a specified URI.
     explicit MediaSource(std::string uri);
 
-    explicit MediaSource(std::shared_ptr<DataStream> dataStream);
+    explicit MediaSource(std::shared_ptr<DataConsumer> dataStream);
 
     MediaSource(std::string uri, std::map<std::string, std::string> header);
 
@@ -60,13 +60,13 @@ public:
 
     const std::map<std::string, std::string> &GetSourceHeader() const;
 
-    std::shared_ptr<DataStream> GetDataStream() const;
+    std::shared_ptr<DataConsumer> GetDataStreamConsumer() const;
 
 private:
     std::string uri_ {};
     SourceType type_ {};
     std::map<std::string, std::string> header_ {};
-    std::shared_ptr<DataStream> dataStream_ {};
+    std::shared_ptr<DataConsumer> dataStream_ {};
 };
 } // namespace Plugin
 } // namespace Media
