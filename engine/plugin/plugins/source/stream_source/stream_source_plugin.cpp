@@ -122,6 +122,9 @@ std::shared_ptr<Buffer> StreamSourcePlugin::WrapDataBuffer(const std::shared_ptr
     auto deleter = [this](uint8_t* ptr) {  FALSE_LOG(stream_->QueueEmptyBuffer(ptr));  };
     std::shared_ptr<uint8_t> address = std::shared_ptr<uint8_t>(dataBuffer->GetAddress(), deleter);
     buffer->WrapMemoryPtr(address, dataBuffer->GetCapacity(), dataBuffer->GetSize());
+    if (dataBuffer->IsEos()) {
+        buffer->flag |= BUFFER_FLAG_EOS;
+    }
     return buffer;
 }
 
