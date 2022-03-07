@@ -119,7 +119,7 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
         }
     }
 
-    capBuilder.SetThreadModeList({ThreadMode::ASYNC, ThreadMode::SYNC});
+    capBuilder.SetThreadModeList({ThreadMode::SYNC});
 
     definition.inCaps.push_back(capBuilder.Build());
 }
