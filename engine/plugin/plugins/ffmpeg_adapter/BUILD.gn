@@ -25,9 +25,7 @@ group("plugin_ffmpeg_adapter") {
       ":histreamer_plugin_FFmpegDemuxer",
     ]
     if (multimedia_histreamer_enable_video) {
-      deps += [
-        ":histreamer_plugin_FFmpegVideoDecoders",
-      ]
+      deps += [ ":histreamer_plugin_FFmpegVideoDecoders" ]
     }
   }
   if (!hst_is_lite_sys && multimedia_histreamer_enable_recorder) {
@@ -36,9 +34,7 @@ group("plugin_ffmpeg_adapter") {
       ":histreamer_plugin_FFmpegMuxers",
     ]
     if (multimedia_histreamer_enable_video) {
-      deps += [
-        ":histreamer_plugin_FFmpegVideoEncoders",
-      ]
+      deps += [ ":histreamer_plugin_FFmpegVideoEncoders" ]
     }
   }
 }
@@ -118,8 +114,8 @@ source_set("ffmpeg_audio_encoders") {
 
 source_set("ffmpeg_video_decoders") {
   sources = [
-    "video_decoder/video_ffmpeg_decoder_plugin.cpp",
     "utils/ffmpeg_utils.cpp",
+    "video_decoder/video_ffmpeg_decoder_plugin.cpp",
   ]
   public_configs = [
     ":plugin_ffmpeg_adapter_config",
@@ -139,9 +135,9 @@ source_set("ffmpeg_video_decoders") {
 
 source_set("ffmpeg_video_encoders") {
   sources = [
-    "video_encoder/video_ffmpeg_encoder_plugin.cpp",
-    "video_encoder/ffmpeg_vid_enc_config.cpp",
     "utils/ffmpeg_utils.cpp",
+    "video_encoder/ffmpeg_vid_enc_config.cpp",
+    "video_encoder/video_ffmpeg_encoder_plugin.cpp",
   ]
   public_configs = [
     ":plugin_ffmpeg_adapter_config",

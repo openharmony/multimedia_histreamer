@@ -22,9 +22,7 @@ group("plugin_standard_video_capture") {
 }
 
 source_set("std_video_capture") {
-  sources = [
-    "video_capture_plugin.cpp",
-  ]
+  sources = [ "video_capture_plugin.cpp" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",

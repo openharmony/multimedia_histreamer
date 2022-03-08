@@ -14,7 +14,6 @@
 
 # build plugin interface
 import("//foundation/multimedia/histreamer/config.gni")
-
 config("histreamer_pipeline_config") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine/pipeline",
@@ -53,8 +52,8 @@ source_set("histreamer_pipeline") {
     ]
     if (multimedia_histreamer_enable_recorder) {
       sources += [
-        "filters/source/video_capture/video_capture_filter.cpp",
         "filters/codec/video_encoder/video_encoder_filter.cpp",
+        "filters/source/video_capture/video_capture_filter.cpp",
       ]
     }
   }

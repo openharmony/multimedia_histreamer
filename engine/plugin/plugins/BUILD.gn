@@ -24,6 +24,8 @@ print("histreamer plugin: hdi_adapter =",
       multimedia_histreamer_enable_plugin_hdi_adapter)
 print("histreamer plugin: file_source =",
       multimedia_histreamer_enable_plugin_file_source)
+print("histreamer plugin: http_source =",
+      multimedia_histreamer_enable_plugin_http_source)
 print("histreamer plugin: stream_source =",
       multimedia_histreamer_enable_plugin_stream_source)
 print("histreamer plugin: audio_server_sink =",
@@ -59,6 +61,10 @@ group("histreamer_plugin_store") {
 
   if (multimedia_histreamer_enable_plugin_file_source) {
     deps += [ "source/file_source:plugin_file_source" ]
+  }
+
+  if (multimedia_histreamer_enable_plugin_http_source) {
+    deps += [ "source/http_source:plugin_http_source" ]
   }
 
   if (multimedia_histreamer_enable_plugin_hdi_adapter) {
@@ -136,6 +142,10 @@ action("gen_plugin_static_header") {
 
     if (multimedia_histreamer_enable_plugin_file_source) {
       args += [ "FileSource" ]
+    }
+
+    if (multimedia_histreamer_enable_plugin_http_source) {
+      args += [ "HttpSource" ]
     }
 
     if (multimedia_histreamer_enable_plugin_hdi_adapter) {
