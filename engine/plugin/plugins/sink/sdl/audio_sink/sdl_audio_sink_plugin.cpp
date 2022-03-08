@@ -108,10 +108,9 @@ PLUGIN_DEFINITION(SdlAudioSink, LicenseType::LGPL, SdlAudioRegister, [] {});
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+namespace Sdl {
 SdlAudioSinkPlugin::SdlAudioSinkPlugin(std::string name)
     : AudioSinkPlugin(std::move(name)),
-      transformCache_((MAX_AUDIO_FRAME_SIZE * 3) / 2), // 3, 2
-      mixCache_((MAX_AUDIO_FRAME_SIZE * 3) / 2),       // 3, 2
       volume_(SDL_MIX_MAXVOLUME)
 {
 }
@@ -134,17 +133,16 @@ Status SdlAudioSinkPlugin::Deinit()
 
 Status SdlAudioSinkPlugin::Prepare()
 {
-    AVSampleFormat outSampleFmt = AV_SAMPLE_FMT_S16;
-    uint64_t outChannelLayout = AV_CH_LAYOUT_STEREO;
-    int outChannels = av_get_channel_layout_nb_channels(outChannelLayout);
-    avFrameSize_ = av_samples_get_buffer_size(nullptr, outChannels, samplesPerFrame_, outSampleFmt, 1);
-
-    rb = CppExt::make_unique<RingBuffer>(avFrameSize_ * 10); // 最大缓存10帧
+    reSrcFfFmt_ = TranslateFormat(audioFormat_);
+    srcFrameSize_ = av_samples_get_buffer_size(nullptr, channels_, samplesPerFrame_, reSrcFfFmt_, 1);
+    rb = CppExt::make_unique<RingBuffer>(srcFrameSize_ * 10); // 最大缓存10帧
     rb->Init();
-
+    if (reSrcFfFmt_ != reFfDestFmt_) {
+        needResample_ = true;
+    }
     wantedSpec_.freq = sampleRate_;
     wantedSpec_.format = AUDIO_S16SYS;
-    wantedSpec_.channels = outChannels;
+    wantedSpec_.channels = channels_;
     wantedSpec_.samples = samplesPerFrame_;
     wantedSpec_.silence = 0;
     wantedSpec_.callback = SDLAudioCallback;
@@ -153,27 +151,30 @@ Status SdlAudioSinkPlugin::Prepare()
         return Status::ERROR_UNKNOWN;
     }
 
-    SwrContext* swrContext = swr_alloc();
-    if (swrContext == nullptr) {
-        MEDIA_LOG_E("cannot allocate swr context");
-        return Status::ERROR_NO_MEMORY;
-    }
-    AVSampleFormat sampleFormat = TranslateFormat(audioFormat_);
-    MEDIA_LOG_I("configure swr with outChannelLayout 0x" PUBLIC_LOG "lx, outSampleFmt " PUBLIC_LOG "d, "
-                "outSampleRate " PUBLIC_LOG "d inChannelLayout 0x" PUBLIC_LOG "lx, "
-                "inSampleFormat " PUBLIC_LOG "d, inSampleRate " PUBLIC_LOG "d",
-                outChannelLayout, outSampleFmt, sampleRate_, channelMask_, sampleFormat, sampleRate_);
-    swrContext = swr_alloc_set_opts(swrContext, outChannelLayout, outSampleFmt, sampleRate_, channelMask_, sampleFormat,
-                                    sampleRate_, 0, nullptr);
-    if (swr_init(swrContext) != 0) {
-        MEDIA_LOG_E("swr init error");
-        return Status::ERROR_UNKNOWN;
-    }
-    swrCtx_ = std::shared_ptr<SwrContext>(swrContext, [](SwrContext* ptr) {
-        if (ptr) {
-            swr_free(&ptr);
+    if (needResample_) {
+        auto destFrameSize = av_samples_get_buffer_size(nullptr, channels_, samplesPerFrame_, reFfDestFmt_, 0);
+        resampleCache_.reserve(destFrameSize);
+        resampleChannelAddr_.reserve(channels_);
+        auto tmp = resampleChannelAddr_.data();
+        av_samples_fill_arrays(tmp, nullptr, resampleCache_.data(), channels_, samplesPerFrame_, reFfDestFmt_, 0);
+        SwrContext *swrContext = swr_alloc();
+        if (swrContext == nullptr) {
+            MEDIA_LOG_E("cannot allocate swr context");
+            return Status::ERROR_NO_MEMORY;
         }
-    });
+        MEDIA_LOG_I("configure swr outSampleFmt " PUBLIC_LOG_U8, static_cast<uint8_t>(audioFormat_));
+        swrContext = swr_alloc_set_opts(swrContext, channelLayout_, reFfDestFmt_, sampleRate_, channelLayout_,
+                                        reSrcFfFmt_, sampleRate_, 0, nullptr);
+        if (swr_init(swrContext) != 0) {
+            MEDIA_LOG_E("swr init error");
+            return Status::ERROR_UNKNOWN;
+        }
+        swrCtx_ = std::shared_ptr<SwrContext>(swrContext, [](SwrContext *ptr) {
+            if (ptr) {
+                swr_free(&ptr);
+            }
+        });
+    }
     return Status::OK;
 }
 
@@ -233,7 +234,7 @@ Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
         case Tag::AUDIO_CHANNEL_LAYOUT: {
             RETURN_ERROR_IF_CHECK_ERROR(AudioChannelLayout);
             auto channelLayout = Plugin::AnyCast<AudioChannelLayout>(value);
-            channelMask_ = Ffmpeg::ConvertChannelLayoutToFFmpeg(channelLayout);
+            channelLayout_ = Ffmpeg::ConvertChannelLayoutToFFmpeg(channelLayout);
             break;
         }
         case Tag::AUDIO_SAMPLE_FORMAT: {
@@ -336,19 +337,30 @@ Status SdlAudioSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
     if (inputInfo == nullptr || inputInfo->IsEmpty()) {
         return Status::OK;
     }
-    auto bufferData = inputInfo->GetMemory();
-    auto dataPtr = transformCache_.data();
-    std::vector<const uint8_t*> input(channels_);
-    input[0] = static_cast<const uint8_t*>(bufferData->GetReadOnlyData());
-    if (IsPlanes(audioFormat_)) {
-        size_t planeSize = bufferData->GetSize() / channels_;
-        for (auto i = 1; i < channels_; ++i) {
-            input[i] = input[i - 1] + planeSize;
+    auto mem = inputInfo->GetMemory();
+    auto* buffer = const_cast<uint8_t*>(mem->GetReadOnlyData());
+    size_t length = mem->GetSize();
+    if (needResample_) {
+        size_t lineSize = mem->GetSize() / channels_;
+        std::vector<const uint8_t*> tmpInput(channels_);
+        tmpInput[0] = mem->GetReadOnlyData();
+        if (av_sample_fmt_is_planar(reSrcFfFmt_)) {
+            for (int i = 1; i < channels_; ++i) {
+                tmpInput[i] = tmpInput[i-1] + lineSize;
+            }
+        }
+        auto samples = lineSize / av_get_bytes_per_sample(reSrcFfFmt_);
+        auto res = swr_convert(swrCtx_.get(), resampleChannelAddr_.data(), samples, tmpInput.data(), samples);
+        if (res < 0) {
+            MEDIA_LOG_E("resample input failed");
+            length = 0;
+        } else {
+            buffer = resampleCache_.data();
+            length = res * av_get_bytes_per_sample(reFfDestFmt_) * channels_;
         }
     }
-    swr_convert(swrCtx_.get(), &dataPtr, MAX_AUDIO_FRAME_SIZE, (const uint8_t**)input.data(), samplesPerFrame_);
     MEDIA_LOG_D("SdlSink Write before ring buffer");
-    rb->WriteBuffer(transformCache_.data(), avFrameSize_);
+    rb->WriteBuffer(buffer, length);
     MEDIA_LOG_D("SdlSink Write end");
     return Status::OK;
 }
@@ -364,6 +376,9 @@ void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len)
 {
     UNUSED_VARIABLE(userdata);
     MEDIA_LOG_D("sdl audio callback begin");
+    if (mixCache_.capacity() < len) {
+        mixCache_.reserve(len);
+    }
     auto realLen = rb->ReadBuffer(mixCache_.data(), len);
     if (realLen == 0) {
         MEDIA_LOG_D("sdl audio callback end with 0");
@@ -374,6 +389,7 @@ void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len)
     SDL_PauseAudio(0);
     MEDIA_LOG_D("sdl audio callback end with " PUBLIC_LOG "zu", realLen);
 }
+} // namespace Sdl
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

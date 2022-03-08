@@ -91,22 +91,25 @@ public:
 private:
     void AudioCallback(void* userdata, uint8_t* stream, int len); // NOLINT: void*
 
-    std::vector<uint8_t> transformCache_ {};
+    bool needResample_ {false};
+    std::vector<uint8_t> resampleCache_ {};
+    std::vector<uint8_t*> resampleChannelAddr_ {};
     std::vector<uint8_t> mixCache_ {};
     std::unique_ptr<RingBuffer> rb {};
-    size_t avFrameSize_ {};
+    size_t srcFrameSize_ {};
     SDL_AudioSpec wantedSpec_ {};
-    SDL_AudioDeviceID deviceId_ {};
-    int32_t channels_ {-1};
-    int32_t sampleRate_ {-1};
-    int32_t samplesPerFrame_ {-1};
-    int64_t channelMask_ {0};
-    AudioSampleFormat audioFormat_ {AudioSampleFormat::U8};
+    uint32_t channels_ {0};
+    uint32_t sampleRate_ {0};
+    uint32_t samplesPerFrame_ {0};
+    uint64_t channelLayout_ {0};
+    AudioSampleFormat audioFormat_ {AudioSampleFormat::NONE};
     std::shared_ptr<SwrContext> swrCtx_ {nullptr};
     int volume_;
+    const AVSampleFormat reFfDestFmt_ {AV_SAMPLE_FMT_S16};
+    AVSampleFormat reSrcFfFmt_ {AV_SAMPLE_FMT_NONE};
 };
-}
-}
-}
-}
-#endif // MEDIA_PIPELINE_SDL_AU_SINK_PLUGIN_H
+} // namespace Sdl
+} // namespace Plugin
+} // namespace Media
+} // namespace OHOS
+#endif // HISTREAMER_SDL_AU_SINK_PLUGIN_H
