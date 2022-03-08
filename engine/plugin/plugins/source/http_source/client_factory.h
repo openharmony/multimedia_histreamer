@@ -32,8 +32,8 @@ public:
     std::shared_ptr<NetworkClient> CreateClient(const std::string& url);
 
 private:
-    RxBody rxBody_;
     RxHeader rxHeader_;
+    RxBody rxBody_;
     void *userParam_;
     std::shared_ptr<NetworkClient> httpClient_;
     std::shared_ptr<NetworkClient> httpsClient_;

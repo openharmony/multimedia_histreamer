@@ -31,7 +31,7 @@ std::shared_ptr<SourcePlugin> HttpSourcePluginCreater(const std::string &name)
     return std::make_shared<HttpSourcePlugin>(name);
 }
 
-const Status HttpSourceRegister(std::shared_ptr<Register> reg)
+Status HttpSourceRegister(std::shared_ptr<Register> reg)
 {
     SourcePluginDef definition;
     definition.name = "HttpSource";

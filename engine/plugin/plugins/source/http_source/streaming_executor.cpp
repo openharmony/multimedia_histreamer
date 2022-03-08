@@ -159,7 +159,7 @@ void StreamingExecutor::HttpDownloadThread()
 
     int64_t remaining = headerInfo_.fileContentLen - startPos_;
     if (headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
-        MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG "d", startPos_);
+        MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64, startPos_);
         isEos_ = true;
         task_->PauseAsync();
         requestSize_ = PER_REQUEST_SIZE;
@@ -190,8 +190,8 @@ size_t StreamingExecutor::RxBodyData(void *buffer, size_t size, size_t nitems, v
     }
     executor->buffer_->WriteBuffer(buffer, dataLen, executor->startPos_);
     executor->isDownloading_ = false;
-    MEDIA_LOG_I("RxBodyData: dataLen " PUBLIC_LOG "d, startPos_ " PUBLIC_LOG "d, buffer size "
-        PUBLIC_LOG "d", dataLen, executor->startPos_, executor->buffer_->GetSize());
+    MEDIA_LOG_I("RxBodyData: dataLen " PUBLIC_LOG_ZU ", startPos_ " PUBLIC_LOG_D64 ", buffer size "
+        PUBLIC_LOG_ZU, dataLen, executor->startPos_, executor->buffer_->GetSize());
     executor->startPos_ = executor->startPos_ + dataLen;
 
     int bufferSize = executor->buffer_->GetSize();
