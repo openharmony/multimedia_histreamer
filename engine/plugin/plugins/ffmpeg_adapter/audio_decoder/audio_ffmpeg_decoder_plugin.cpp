@@ -35,7 +35,13 @@ std::map<std::string, std::shared_ptr<const AVCodec>> codecMap;
 
 const size_t BUFFER_QUEUE_SIZE = 6;
 
-const std::set<AVCodecID> g_supportedCodec = {AV_CODEC_ID_MP3, AV_CODEC_ID_FLAC, AV_CODEC_ID_AAC, AV_CODEC_ID_AAC_LATM, AV_CODEC_ID_VORBIS};
+const std::set<AVCodecID> g_supportedCodec = {
+    AV_CODEC_ID_MP3,
+    AV_CODEC_ID_FLAC,
+    AV_CODEC_ID_AAC,
+    AV_CODEC_ID_AAC_LATM,
+    AV_CODEC_ID_VORBIS
+};
 
 Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
 {

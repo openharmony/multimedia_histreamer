@@ -139,7 +139,8 @@ void ConvertAACStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
     }
 }
 
-void ConvertVorbisStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta)
+void ConvertVorbisStreamToMetaInfo(const AVStream& avStream,
+                                   const std::shared_ptr<AVCodecContext>& context, TagMap& meta)
 {
     MEDIA_LOG_I("ConvertOggStreamToMetaInfo Called");
     meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_VORBIS)});

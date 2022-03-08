@@ -46,7 +46,7 @@ Status VideoFileCaptureRegister(const std::shared_ptr<Register> &reg)
     };
     Capability outCaps(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
     outCaps.AppendDiscreteKeys<VideoPixelFormat>(
-            Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21});
+        Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21});
     definition.outCaps.push_back(outCaps);
     // add es outCaps later
     return reg->AddPlugin(definition);

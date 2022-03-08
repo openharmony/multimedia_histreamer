@@ -76,4 +76,4 @@ private:
 } // namespace Media
 } // namespace OHOS
 #endif
-#endif //HISTREAMER_VIDEO_FILE_CAPTURE_PLUGIN_H
+#endif // HISTREAMER_VIDEO_FILE_CAPTURE_PLUGIN_H

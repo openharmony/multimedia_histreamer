@@ -329,7 +329,7 @@ bool AudioCapturePlugin::AssignSampleFmtIfSupported(AudioSampleFormat sampleForm
 {
     AudioStandard::AudioSampleFormat aFmt = AudioStandard::AudioSampleFormat::INVALID_WIDTH;
     if (!AuCapturePlugin::PluginFmt2SampleFmt(sampleFormat, aFmt)) {
-        MEDIA_LOG_E("sample format " PUBLIC_LOG_HU " not supported", sampleFormat);
+        MEDIA_LOG_E("sample format " PUBLIC_LOG_U8 " not supported", static_cast<uint8_t>(sampleFormat));
         return false;
     }
     for (const auto& fmt : AudioStandard::AudioCapturer::GetSupportedFormats()) {

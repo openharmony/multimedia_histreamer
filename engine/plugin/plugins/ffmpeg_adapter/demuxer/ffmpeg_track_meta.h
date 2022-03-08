@@ -47,7 +47,8 @@ void ConvertAACStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
 void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
                                     TagMap& meta);
 
-void ConvertVorbisStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta);
+void ConvertVorbisStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
+                                   TagMap& meta);
 
 #ifdef VIDEO_SUPPORT
 void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta);
