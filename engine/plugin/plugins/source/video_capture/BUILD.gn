@@ -15,7 +15,7 @@ import("//foundation/multimedia/histreamer/config.gni")
 group("plugin_standard_video_capture") {
   deps = []
   if (hst_is_lite_sys) {
-    print("std audio capture plugin is not available on lite systems")
+    print("std video capture plugin is not available on lite systems")
   } else {
     deps += [ ":histreamer_plugin_StdVideoCapture" ]
   }

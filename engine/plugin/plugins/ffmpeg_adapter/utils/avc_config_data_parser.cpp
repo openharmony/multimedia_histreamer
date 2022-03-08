@@ -42,9 +42,6 @@ AVCConfigDataParser::AVCConfigDataParser(const uint8_t* cfgData, const size_t cf
     : bitReader_(cfgData, cfgDataSize),
       cfgData_(cfgData),
       cfgDataSize_(cfgDataSize),
-      newCfgData_(nullptr),
-      newCfgDataSize_(0),
-      nalUnitLen_(AVC_NAL_SIZE_LEN_4),
       version_(1),
       profile_(0),
       profile_compat_(0),
@@ -52,6 +49,9 @@ AVCConfigDataParser::AVCConfigDataParser(const uint8_t* cfgData, const size_t cf
       needAddFrameHeader_(false)
 {
     cfgSet.count = 0;
+    newCfgData_ = nullptr;
+    newCfgDataSize_ = 0;
+    nalUnitLen_ = AVC_NAL_SIZE_LEN_4;
 }
 
 AVCConfigDataParser::~AVCConfigDataParser()
@@ -82,7 +82,7 @@ bool AVCConfigDataParser::ParseConfigData()
     if (cfgSet.count == 0) {
         return false;
     }
-    for (auto i = 0; i < cfgSet.count; ++i) {
+    for (uint32_t i = 0; i < cfgSet.count; ++i) {
         newCfgDataSize_ += (cfgSet.items[i]->len & 0xFFF);
     }
     newCfgData_ = std::shared_ptr<uint8_t>(new uint8_t[newCfgDataSize_], std::default_delete<uint8_t[]>());
@@ -91,7 +91,7 @@ bool AVCConfigDataParser::ParseConfigData()
         return false;
     }
     uint32_t usedLen = 0;
-    for (auto i = 0; i < cfgSet.count; ++i) {
+    for (uint32_t i = 0; i < cfgSet.count; ++i) {
         (void)memcpy_s(newCfgData_.get() + usedLen, cfgSet.items[i]->len, cfgSet.items[i]->SpsOrPps,
                        cfgSet.items[i]->len);
         usedLen += cfgSet.items[i]->len;
@@ -117,7 +117,7 @@ bool AVCConfigDataParser::GetNewConfigData(std::shared_ptr<uint8_t>& newCfgData,
 
 void AVCConfigDataParser::ClearConfigSet()
 {
-    for (auto i = 0; i < cfgSet.count; i++) {
+    for (uint32_t i = 0; i < cfgSet.count; i++) {
         if (cfgSet.items[i]) {
             delete[] reinterpret_cast<uint8_t*>(cfgSet.items[i]);
         }
@@ -208,7 +208,7 @@ bool AVCConfigDataParser::ParseSpsOrPps(const uint32_t mask)
         return false;
     }
     setCount &= mask;
-    for (auto idx = 0; idx < setCount; ++idx) {
+    for (uint32_t idx = 0; idx < setCount; ++idx) {
         if (bitReader_.GetAvailableBits() < 2) { // 2
             MEDIA_LOG_E("Sps data err");
             return false;

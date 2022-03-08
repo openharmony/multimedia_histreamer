@@ -38,7 +38,7 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-namespace SurfaceSinkPlugin {
+namespace VidSurfaceSinkPlugin {
 class SurfaceSinkPlugin : public VideoSinkPlugin, public std::enable_shared_from_this<SurfaceSinkPlugin> {
 public:
     explicit SurfaceSinkPlugin(std::string name);

@@ -26,7 +26,7 @@
 
 namespace {
 using namespace OHOS::Media::Plugin;
-using namespace SurfaceSink;
+using namespace VidSurfaceSinkPlugin;
 constexpr size_t DEFAULT_WIDTH = 640;
 constexpr size_t DEFAULT_HEIGHT = 480;
 constexpr size_t DEFAULT_BUFFER_NUM = 8;
@@ -55,10 +55,10 @@ PLUGIN_DEFINITION(StdVideoSurfaceSink, LicenseType::APACHE_V2, SurfaceSinkRegist
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-namespace SurfaceSinkPlugin {
-static uint32_t TranslatePixelFormat(const VideoPixelFormat pixelFormat)
+namespace VidSurfaceSinkPlugin {
+static PixelFormat TranslatePixelFormat(const VideoPixelFormat pixelFormat)
 {
-    uint32_t surfaceFormat = PixelFormat::PIXEL_FMT_BUTT;
+    PixelFormat surfaceFormat = PixelFormat::PIXEL_FMT_BUTT;
     switch (pixelFormat) {
         case VideoPixelFormat::YUV420P:
             surfaceFormat = PixelFormat::PIXEL_FMT_YCBCR_420_P;
@@ -114,7 +114,7 @@ Status SurfaceSinkPlugin::Init()
 #endif
     if (surface_ == nullptr) {
         OSAL::ScopedLock lock(mutex_);
-        surfaceCond_.Wait(lock, [this] { return surface_ != nullptr });
+        surfaceCond_.Wait(lock, [this] { return surface_ != nullptr; });
     }
     return Status::OK;
 }
@@ -289,7 +289,7 @@ Status SurfaceSinkPlugin::GetLatency(uint64_t& nanoSec)
     nanoSec = 10; // 10 ns
     return Status::OK;
 }
-} // namespace SurfaceSinkPlugin
+} // namespace VidSurfaceSinkPlugin
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
