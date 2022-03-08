@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #define HST_LOG_TAG "DataPacker"
-#define MEDIA_LOG_DEBUG 0
 
 #include "data_packer.h"
 #include <cstring>
@@ -233,6 +232,7 @@ bool DataPacker::GetRange(uint32_t size, AVBufferPtr& bufferPtr)
 
     OSAL::ScopedLock lock(mutex_);
     if (que_.empty()) {
+        FALSE_RETURN_V_W(!isEos_, false);
         MEDIA_LOG_D("DataPacker is empty, live play GetRange waiting for push");
         cvEmpty_.Wait(lock, [this] { return !que_.empty(); });
     }
@@ -286,9 +286,7 @@ void DataPacker::SetEos()
 {
     MEDIA_LOG_I("DataPacker SetEos called.");
     OSAL::ScopedLock lock(mutex_);
-    if (size_ > 0) { // Set isEos_ if there is some data in data packer.
-        isEos_ = true;
-    }
+    isEos_ = true;
 }
 
 bool DataPacker::IsEmpty()

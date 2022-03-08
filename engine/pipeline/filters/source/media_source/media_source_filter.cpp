@@ -292,7 +292,7 @@ void MediaSourceFilter::ReadLoop()
         auto memory = bufferPtr->GetMemory();
         FALSE_RETURN(memory != nullptr);
         auto size = memory->GetSize();
-        FALSE_RET_MSG(size > 0, "Read data size zero.");
+        FALSE_RET_MSG(size > 0 || (bufferPtr->flag & BUFFER_FLAG_EOS), "Read data size zero.");
         outPorts_[0]->PushData(bufferPtr, mediaOffset_);
         mediaOffset_ += size;
     } else {
