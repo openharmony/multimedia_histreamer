@@ -17,9 +17,9 @@
 #define HISTREAMER_HIPLAYER_INIT_STATE_H
 
 #include <memory>
-#include "foundation/error_code.h"
 #include "foundation/log.h"
 #include "osal/thread/mutex.h"
+#include "pipeline/core/error_code.h"
 #include "play_executor.h"
 #include "state.h"
 

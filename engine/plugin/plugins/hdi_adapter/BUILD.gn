@@ -11,17 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import("//foundation/multimedia/histreamer/config.gni")
 
 group("plugin_hdi_adapter") {
   deps = []
-  if (defined(ohos_lite)) {
+  if (hst_is_lite_sys) {
     deps += [ ":histreamer_plugin_HdiAuSink" ]
   } else {
     print("plugin_hdi_adapter is not available on standard systems")
   }
 }
 
-if (defined(ohos_lite)) {
+if (hst_is_lite_sys) {
   import("//build/lite/config/component/lite_component.gni")
   plugin_hdi_adapter_src = [
     "sink/hos_au_sink.cpp",
@@ -39,7 +40,10 @@ if (defined(ohos_lite)) {
       target_type = "shared_library"
     }
     sources = plugin_hdi_adapter_src
-    public_configs = [ ":plugin_hdi_adapter_config" ]
+    public_configs = [
+      ":plugin_hdi_adapter_config",
+      "//foundation/multimedia/histreamer:histreamer_presets",
+    ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",

@@ -20,7 +20,7 @@
 #include <atomic>
 #include <vector>
 
-#include "event.h"
+#include "pipeline/core/event.h"
 
 namespace OHOS {
 namespace Media {

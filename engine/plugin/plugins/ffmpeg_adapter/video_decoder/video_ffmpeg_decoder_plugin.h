@@ -33,7 +33,7 @@ extern "C" {
 #endif
 
 #ifdef DUMP_RAW_DATA
-#include <fstream>
+#include <cstdio>
 #endif
 
 namespace OHOS {
@@ -51,12 +51,6 @@ public:
     Status Reset() override;
     Status Start() override;
     Status Stop() override;
-
-    bool IsParameterSupported(Tag tag) override
-    {
-        return true;
-    }
-
     Status GetParameter(Tag tag, ValueType &value) override;
     Status SetParameter(Tag tag, const ValueType &value) override;
 
@@ -69,11 +63,7 @@ public:
 
     Status QueueInputBuffer(const std::shared_ptr<Buffer> &inputBuffer, int32_t timeoutMs) override;
 
-    Status DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
-
     Status QueueOutputBuffer(const std::shared_ptr<Buffer> &outputBuffers, int32_t timeoutMs) override;
-
-    Status DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) override;
 
     Status Flush() override;
 
@@ -114,7 +104,7 @@ private:
     void ReceiveBuffer();
 
 #ifdef DUMP_RAW_DATA
-    std::ofstream dumpData_;
+    std::FILE* dumpFd_;
     void DumpVideoRawOutData();
 #endif
 

@@ -61,8 +61,6 @@ public:
 
     Status Stop() override;
 
-    bool IsParameterSupported(Tag tag) override;
-
     Status GetParameter(Tag tag, ValueType& value) override;
 
     Status SetParameter(Tag tag, const ValueType& value) override;
@@ -75,11 +73,7 @@ public:
 
     Status QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
 
-    Status DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
-
     Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) override;
-
-    Status DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) override;
 
     Status Flush() override;
 

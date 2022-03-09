@@ -169,19 +169,6 @@ struct PluginBase {
     }
 
     /**
-     * @brief Determines whether the current plugin supports the specified parameter.
-     *
-     * This function can be called in any state except DESTROYED and INVALID.
-     *
-     * @param tag   Plugin parameter type, which is described by tag.
-     * @return  true is supported, otherwise, false.
-     */
-    virtual bool IsParameterSupported(Tag tag)
-    {
-        return false;
-    }
-
-    /**
      * @brief Get the value of a specified parameter.
      *
      * This function can be called in any state except DESTROYED and INVALID.
@@ -221,7 +208,10 @@ struct PluginBase {
      *
      * @return Obtains the allocator object or NULL if the plugin does not have requirements for memory.
      */
-    virtual std::shared_ptr<Allocator> GetAllocator() = 0;
+    virtual std::shared_ptr<Allocator> GetAllocator()
+    {
+        return nullptr;
+    }
 
     /**
      * @brief Sets the plugin callback message to notify the plugin user.

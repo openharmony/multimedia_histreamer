@@ -31,7 +31,7 @@ std::shared_ptr<SourcePlugin> HttpSourcePluginCreater(const std::string &name)
     return std::make_shared<HttpSourcePlugin>(name);
 }
 
-const Status HttpSourceRegister(std::shared_ptr<Register> reg)
+Status HttpSourceRegister(std::shared_ptr<Register> reg)
 {
     SourcePluginDef definition;
     definition.name = "HttpSource";
@@ -103,15 +103,6 @@ Status HttpSourcePlugin::Stop()
     return Status::OK;
 }
 
-bool HttpSourcePlugin::IsParameterSupported(Tag tag)
-{
-    MEDIA_LOG_D("IN");
-    if (tag == Tag::BUFFERING_SIZE || tag == Tag::WATERLINE_HIGH) {
-        return true;
-    }
-    return false;
-}
-
 #undef ERROR_INVALID_PARAMETER
 
 Status HttpSourcePlugin::GetParameter(Tag tag, ValueType &value)
@@ -161,7 +152,7 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     FALSE_RETURN_V(executor_->Open(uri), Status::ERROR_FUNCTION_CALL);
     isSeekable_ = !executor_->IsStreaming();
     fileSize_ = isSeekable_ ? executor_->GetContentLength() : -1;
-    MEDIA_LOG_I("SetSource(%" PUBLIC_LOG "s), seekable: %" PUBLIC_LOG "d, file size: %" PUBLIC_LOG "d",
+    MEDIA_LOG_I("SetSource(" PUBLIC_LOG "s), seekable: " PUBLIC_LOG "d, file size: " PUBLIC_LOG "d",
                 uri.c_str(), isSeekable_, fileSize_);
     return Status::OK;
 }
@@ -188,7 +179,7 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
     unsigned int realReadSize = 0;
     executor_->Read(bufData->GetWritableAddr(expectedLen), expectedLen, realReadSize, isEos);
     bufData->UpdateDataSize(realReadSize);
-    MEDIA_LOG_D("Read finished, read size = %" PUBLIC_LOG "d, isEos %" PUBLIC_LOG "d", bufData->GetSize(), isEos);
+    MEDIA_LOG_D("Read finished, read size = " PUBLIC_LOG "d, isEos " PUBLIC_LOG "d", bufData->GetSize(), isEos);
     return Status::OK;
 }
 

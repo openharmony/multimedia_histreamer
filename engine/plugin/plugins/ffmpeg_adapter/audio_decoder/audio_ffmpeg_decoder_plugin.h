@@ -51,14 +51,6 @@ public:
 
     Status Stop() override;
 
-    bool IsParameterSupported(Tag tag) override
-    {
-        if (tag == Tag::REQUIRED_OUT_BUFFER_CNT) {
-            return true;
-        }
-        return false;
-    }
-
     Status GetParameter(Tag tag, ValueType& value) override;
 
     Status SetParameter(Tag tag, const ValueType& value) override;
@@ -72,11 +64,7 @@ public:
 
     Status QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
 
-    Status DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
-
     Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs) override;
-
-    Status DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs) override;
 
     Status Flush() override;
 
@@ -87,14 +75,20 @@ public:
     }
 
 private:
-    void InitCodecContextExtraDataLocked();
+    Status AssignExtraDataIfExistsLocked(const std::shared_ptr<AVCodecContext>& ctx);
+
+    Status OpenCtxLocked();
+
+    Status CloseCtxLocked();
+
+    Status StopLocked();
 
     Status ResetLocked();
 
     Status DeInitLocked();
 
     template <typename T>
-    bool FindInParameterMapThenAssignLocked(Tag tag, T& assign);
+    Status FindInParameterMapThenAssignLocked(Tag tag, T& assign);
 
     Status SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer);
 
@@ -117,7 +111,7 @@ private:
     std::vector<uint8_t> paddedBuffer_ {};
     size_t paddedBufferSize_ {0};
     std::shared_ptr<Buffer> outBuffer_ {nullptr};
-    DataCallback* dataCallback_;
+    DataCallback* dataCallback_ {nullptr};
 };
 } // namespace Ffmpeg
 } // namespace Plugin

@@ -19,26 +19,24 @@
 #include <memory>
 #include <unordered_map>
 
-#include "common/any.h"
-#ifdef VIDEO_SUPPORT
-#include "filters/codec/video_decoder/video_decoder_filter.h"
-#include "filters/sink/video_sink/video_sink_filter.h"
-#endif
 #include "i_player_engine.h"
 #include "filters/demux/demuxer_filter.h"
 #include "filters/source/media_source/media_source_filter.h"
-#include "foundation/error_code.h"
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
 #include "internal/state_machine.h"
-#include "osal/thread/condition_variable.h"
-#include "osal/thread/mutex.h"
+#include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_callback.h"
 #include "pipeline/core/pipeline.h"
 #include "pipeline/core/pipeline_core.h"
 #include "pipeline/filters/codec/audio_decoder/audio_decoder_filter.h"
+#ifdef VIDEO_SUPPORT
+#include "pipeline/filters/codec/video_decoder/video_decoder_filter.h"
+#include "pipeline/filters/sink/video_sink/video_sink_filter.h"
+#endif
 #include "pipeline/filters/sink/audio_sink/audio_sink_filter.h"
 #include "scene/common/media_stat_stub.h"
 #include "play_executor.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
@@ -93,7 +91,7 @@ public:
     ErrorCode DoPause() override;
     ErrorCode DoResume() override;
     ErrorCode DoStop() override;
-    ErrorCode DoSeek(bool allowed, int64_t hstTime) override;
+    ErrorCode DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode) override;
     ErrorCode DoOnReady() override;
     ErrorCode DoOnComplete() override;
     ErrorCode DoOnError(ErrorCode) override;

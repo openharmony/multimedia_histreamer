@@ -15,30 +15,29 @@
 
 #ifndef HISTREAMER_HTTP_LITE_PLUGIN_HTTP_MANAGER_H
 #define HISTREAMER_HTTP_LITE_PLUGIN_HTTP_MANAGER_H
-
-#include <cstdio>
 #include <string>
 #include <memory>
 
+namespace OHOS {
+namespace Media {
+namespace Plugin {
+namespace HttpLitePlugin {
 using OnError = void(*)(int httpError, int localError, void *param, int supportRetry);
-constexpr unsigned int DEFAULT_SOURCE_SIZE = 20 * 1024;
-constexpr unsigned int DEFAULT_PRIORITY = 32;
-
 struct HttpLiteAttr {
-    std::string certFile;
     OnError callbackFunc;
     void *pluginHandle;
     int bufferSize;
     int priority;
+    std::string certFile;
 };
 
 enum HttpLiteStatus {
-    HTTP_STATUS_IDLE = 0,
-    HTTP_STATUS_PLAY,
-    HTTP_STATUS_PAUSE,
-    HTTP_STATUS_SEEK,
-    HTTP_STATUS_END,
-    HTTP_STATUS_STOP
+    HTTP_LITE_STATUS_IDLE = 0,
+    HTTP_LITE_STATUS_PLAY,
+    HTTP_LITE_STATUS_PAUSE,
+    HTTP_LITE_STATUS_SEEK,
+    HTTP_LITE_STATUS_END,
+    HTTP_LITE_STATUS_STOP
 };
 
 struct HttpLiteRunningInfo {
@@ -62,17 +61,17 @@ public:
     virtual ~HttpLiteManager();
     bool HttpOpen(std::string &url, HttpLiteAttr &attr);
     void HttpClose();
-    bool HttpRead(unsigned char *buff, unsigned int wantReadLength, unsigned int &realReadLength, bool &flag);
+    bool HttpRead(unsigned char *buff, unsigned int wantReadLength, unsigned int &realReadLength, int &flag);
     bool HttpPeek(unsigned char *buff, unsigned int wantReadLength, unsigned int &realReadLength);
     bool HttpSeek(int offset);
     bool HttpPause();
     bool HttpReset();
-    unsigned int GetContentLength() const;
-    HttpLiteStatus GetHttpStatus() const;
-    unsigned int GetLastReadTime() const;
+    unsigned int GetContentLength();
+    HttpLiteStatus GetHttpStatus();
+    unsigned int GetLastReadTime();
     void GetHttpBufferRange(unsigned int *read, unsigned int *write);
     void SetWaterline(int high, int low);
-    bool IsStreaming();
+    int IsStreaming();
     HttpLiteUrlType IsHlsSource(std::string &url);
     void GetHttpRunningInfo(HttpLiteRunningInfo &info);
     void SetHttpRunningInfo(bool isRetry);
@@ -82,12 +81,17 @@ private:
     friend void OnFinished(void *priv);
     friend void OnFailed(int httpError, int localError, void *priv, int supportRetry);
     bool IsNeedRetry(int localError, int supportRetry);
-    HttpLiteAttr httpAttr_ {"", nullptr, nullptr, DEFAULT_SOURCE_SIZE, DEFAULT_PRIORITY};
-    HttpLiteStatus status_ {HTTP_STATUS_IDLE};
+    HttpLiteAttr httpAttr_ {nullptr, nullptr, 0, 0, {}};
+    HttpLiteStatus status_ {HTTP_LITE_STATUS_IDLE};
     unsigned int lastReadTime_ {0};
     bool isRetry_ {false};
     int retryTimes_ {0};
+    void *httpHandle_;
+    long sourceLen_;
 };
+} // HttpLitePlugin
+} // Plugin
+} // Media
+} // OHOS
 
-
-#endif
+#endif // HISTREAMER_HTTP_LITE_PLUGIN_HTTP_MANAGER_H

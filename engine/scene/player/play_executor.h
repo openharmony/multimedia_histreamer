@@ -17,12 +17,17 @@
 #define MEDIA_PIPELINE_PLAYER_EXECUTOR_H
 
 #include <memory>
-#include "foundation/error_code.h"
+#include "pipeline/core/error_code.h"
 #include "plugin/common/media_source.h"
 
 namespace OHOS {
 namespace Media {
 using MediaSource = Plugin::MediaSource;
+
+struct SeekInfo {
+    int64_t hstTime;
+    Plugin::SeekMode mode;
+};
 
 class PlayExecutor {
 public:
@@ -61,10 +66,11 @@ public:
         return ErrorCode::SUCCESS;
     }
 
-    virtual ErrorCode DoSeek(bool allowed, int64_t hstTime)
+    virtual ErrorCode DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode)
     {
         (void)allowed;
         (void)hstTime;
+        (void)mode;
         return ErrorCode::SUCCESS;
     }
 

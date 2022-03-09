@@ -20,9 +20,9 @@
 #include <memory>
 #include <string>
 #include <tuple>
-#include "common/any.h"
-#include "foundation/error_code.h"
 #include "foundation/log.h"
+#include "pipeline/core/error_code.h"
+#include "plugin/common/any.h"
 #include "recorder_executor.h"
 
 namespace OHOS {

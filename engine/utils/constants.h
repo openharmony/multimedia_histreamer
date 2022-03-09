@@ -49,7 +49,8 @@ extern const char* const MEDIA_MIME_AUDIO_AMR_WB;
 
 // video mime
 extern const char* const MEDIA_MIME_VIDEO_RAW;
-extern const char* const MEDIA_MIME_VIDEO_AVC;
+extern const char* const MEDIA_MIME_VIDEO_H264;
+extern const char* const MEDIA_MIME_VIDEO_MPEG4;
 
 // container mime
 extern const char* const MEDIA_MIME_CONTAINER_MP4;

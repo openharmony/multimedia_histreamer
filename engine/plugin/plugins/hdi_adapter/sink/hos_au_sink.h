@@ -30,7 +30,8 @@ struct AudioRender;
 struct AudioPort;
 namespace OHOS {
 namespace Media {
-namespace HosLitePlugin {
+namespace Plugin {
+namespace HosLite {
 class RingBuffer;
 
 class HdiSink : public std::enable_shared_from_this<HdiSink>, public OHOS::Media::Plugin::AudioSinkPlugin {
@@ -50,8 +51,6 @@ public:
     Media::Plugin::Status Start() override;
 
     Media::Plugin::Status Stop() override;
-
-    bool IsParameterSupported(Media::Plugin::Tag tag) override;
 
     Media::Plugin::Status GetParameter(Media::Plugin::Tag tag, Media::Plugin::ValueType& value) override;
 
@@ -77,7 +76,7 @@ public:
 
     Media::Plugin::Status Resume() override;
 
-    Media::Plugin::Status GetLatency(uint64_t& ms) override;
+    Media::Plugin::Status GetLatency(uint64_t& hstTime) override;
 
     Media::Plugin::Status GetFrameSize(size_t& size) override;
 
@@ -118,7 +117,8 @@ private:
     std::atomic<bool> processing_;
     OSAL::ConditionVariable renderCond_;
 };
-} // namespace HosLitePlugin
+} // namespace HosLite
+} // namespace Plugin
 } // namespace Media
 } // namespace OHOS
 #endif

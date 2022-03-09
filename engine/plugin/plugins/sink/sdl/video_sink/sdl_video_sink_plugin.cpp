@@ -113,13 +113,13 @@ Status SdlVideoSinkPlugin::Init()
 {
     std::weak_ptr<SdlVideoSinkPlugin> weakPtr(shared_from_this());
     if (SDL_Init(SDL_INIT_VIDEO)) {
-        MEDIA_LOG_E("Init SDL fail: %" PUBLIC_LOG "s", SDL_GetError());
+        MEDIA_LOG_E("Init SDL fail: " PUBLIC_LOG "s", SDL_GetError());
         return Status::ERROR_UNKNOWN;
     }
     SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
     SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 #ifdef DUMP_RAW_DATA
-    dumpData_.open("./vsink_out.dat", std::ios::out | std::ios::binary);
+    dumpFd_ = std::fopen("./vsink_out.yuv", "w");
 #endif
     return Status::OK;
 }
@@ -128,7 +128,10 @@ Status SdlVideoSinkPlugin::Deinit()
 {
     SDL_Quit();
 #ifdef DUMP_RAW_DATA
-    dumpData_.close();
+    if (dumpFd_) {
+        std::fclose(dumpFd_);
+        dumpFd_ = nullptr;
+    }
 #endif
     return Status::OK;
 }
@@ -164,8 +167,8 @@ void SdlVideoSinkPlugin::UpdateTextureRect()
 
     textureRect_.x = (static_cast<int32_t>(windowWidth_) - textureRect_.w) / 2;  // 2
     textureRect_.y = (static_cast<int32_t>(windowHeight_) - textureRect_.h) / 2; // 2
-    MEDIA_LOG_D("pixelWH[%" PUBLIC_LOG "u, %" PUBLIC_LOG "u], windowWH[%" PUBLIC_LOG "u, %" PUBLIC_LOG
-                "u], textureWH[%" PUBLIC_LOG "u, %" PUBLIC_LOG "u], textureXY[%" PUBLIC_LOG "u, %"
+    MEDIA_LOG_D("pixelWH[" PUBLIC_LOG "u, " PUBLIC_LOG "u], windowWH[" PUBLIC_LOG "u, " PUBLIC_LOG
+                "u], textureWH[" PUBLIC_LOG "u, " PUBLIC_LOG "u], textureXY[" PUBLIC_LOG "u, "
                 PUBLIC_LOG "u]", pixelWidth_, pixelHeight_,
                 windowWidth_, windowHeight_, textureRect_.w, textureRect_.h, textureRect_.x, textureRect_.y);
 }
@@ -180,7 +183,7 @@ Status SdlVideoSinkPlugin::CreateSdlDispContext()
         SDL_CreateWindow("SDL2 Video Sink", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                          static_cast<int32_t>(windowWidth_), static_cast<int32_t>(windowHeight_), sdlFlags);
     if (screen == nullptr) {
-        MEDIA_LOG_E("Create window fail: %" PUBLIC_LOG "s", SDL_GetError());
+        MEDIA_LOG_E("Create window fail: " PUBLIC_LOG "s", SDL_GetError());
         return Status::ERROR_UNKNOWN;
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
@@ -195,11 +198,11 @@ Status SdlVideoSinkPlugin::CreateSdlDispContext()
             SDL_RENDERER_PRESENTVSYNC); // flags: SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
     if (renderer != nullptr) {
         if (!SDL_GetRendererInfo(renderer, &rendererInfo_)) {
-            MEDIA_LOG_I("Init %" PUBLIC_LOG "s renderer success", rendererInfo_.name);
+            MEDIA_LOG_I("Init " PUBLIC_LOG "s renderer success", rendererInfo_.name);
         }
     }
     if ((renderer == nullptr) || (!rendererInfo_.num_texture_formats)) {
-        MEDIA_LOG_E("Create renderer fail: %" PUBLIC_LOG "s", SDL_GetError());
+        MEDIA_LOG_E("Create renderer fail: " PUBLIC_LOG "s", SDL_GetError());
         return Status::ERROR_UNKNOWN;
     }
     renderer_ = std::shared_ptr<SDL_Renderer>(renderer, [](SDL_Renderer* ptr) {
@@ -215,7 +218,7 @@ Status SdlVideoSinkPlugin::CreateSdlDispTexture()
     SDL_Texture* texture =
         SDL_CreateTexture(renderer_.get(), pixelFormat_, SDL_TEXTUREACCESS_STREAMING, pixelWidth_, pixelHeight_);
     if (texture == nullptr) {
-        MEDIA_LOG_E("Create texture fail: %" PUBLIC_LOG "s", SDL_GetError());
+        MEDIA_LOG_E("Create texture fail: " PUBLIC_LOG "s", SDL_GetError());
         return Status::ERROR_UNKNOWN;
     }
     texture_ = std::shared_ptr<SDL_Texture>(texture, [](SDL_Texture* ptr) {
@@ -246,7 +249,10 @@ Status SdlVideoSinkPlugin::Reset()
     texture_ = nullptr;
     SDL_memset(static_cast<void*>(&rendererInfo_), sizeof(SDL_RendererInfo), 0);
 #ifdef DUMP_RAW_DATA
-    dumpData_.close();
+    if (dumpFd_) {
+        std::fclose(dumpFd_);
+        dumpFd_ = nullptr;
+    }
 #endif
     return Status::OK;
 }
@@ -263,11 +269,6 @@ Status SdlVideoSinkPlugin::Stop()
     return Status::OK;
 }
 
-bool SdlVideoSinkPlugin::IsParameterSupported(Tag tag)
-{
-    return false;
-}
-
 Status SdlVideoSinkPlugin::GetParameter(Tag tag, ValueType& value)
 {
     return Status::ERROR_UNIMPLEMENTED;
@@ -279,14 +280,14 @@ Status SdlVideoSinkPlugin::SetParameter(Tag tag, const ValueType& value)
         case Tag::VIDEO_WIDTH: {
             if (value.SameTypeWith(typeid(uint32_t))) {
                 pixelWidth_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("pixelWidth_: %" PUBLIC_LOG "u", pixelWidth_);
+                MEDIA_LOG_D("pixelWidth_: " PUBLIC_LOG "u", pixelWidth_);
             }
             break;
         }
         case Tag::VIDEO_HEIGHT: {
             if (value.SameTypeWith(typeid(uint32_t))) {
                 pixelHeight_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("pixelHeight_: %" PUBLIC_LOG "u", pixelHeight_);
+                MEDIA_LOG_D("pixelHeight_: " PUBLIC_LOG "u", pixelHeight_);
             }
             break;
         }
@@ -294,7 +295,7 @@ Status SdlVideoSinkPlugin::SetParameter(Tag tag, const ValueType& value)
             if (value.SameTypeWith(typeid(VideoPixelFormat))) {
                 VideoPixelFormat format = Plugin::AnyCast<VideoPixelFormat>(value);
                 pixelFormat_ = TranslatePixelFormat(format);
-                MEDIA_LOG_D("SDL pixelFormat: %" PUBLIC_LOG "u", pixelFormat_);
+                MEDIA_LOG_D("SDL pixelFormat: " PUBLIC_LOG "u", pixelFormat_);
             }
             break;
         }
@@ -360,11 +361,11 @@ Status SdlVideoSinkPlugin::VideoImageDisaplay(const std::shared_ptr<Buffer>& inp
     std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
     uint32_t frameFormat = TranslatePixelFormat(videoMeta->videoPixelFormat);
     if (frameFormat != pixelFormat_) {
-        MEDIA_LOG_I("pixel format change from %" PUBLIC_LOG "u to %" PUBLIC_LOG "u", pixelFormat_, frameFormat);
+        MEDIA_LOG_I("pixel format change from " PUBLIC_LOG "u to " PUBLIC_LOG "u", pixelFormat_, frameFormat);
         pixelFormat_ = frameFormat;
     }
     if ((videoMeta->width != pixelWidth_) || (videoMeta->height != pixelHeight_)) {
-        MEDIA_LOG_E("WH[%" PUBLIC_LOG "u,%" PUBLIC_LOG "u] change to WH[%" PUBLIC_LOG "u,%" PUBLIC_LOG "u]",
+        MEDIA_LOG_E("WH[" PUBLIC_LOG "u," PUBLIC_LOG "u] change to WH[" PUBLIC_LOG "u," PUBLIC_LOG "u]",
                     pixelWidth_, pixelHeight_, videoMeta->width, videoMeta->height);
         // do something
     }
@@ -374,17 +375,17 @@ Status SdlVideoSinkPlugin::VideoImageDisaplay(const std::shared_ptr<Buffer>& inp
     auto ptr = bufferMem->GetReadOnlyData();
     data[0] = ptr;
     lineSize[0] = static_cast<int32_t>(videoMeta->stride[0]);
-    MEDIA_LOG_D("Display one frame: WHS[%" PUBLIC_LOG "u,%" PUBLIC_LOG "u,%" PUBLIC_LOG "u]",
+    MEDIA_LOG_D("Display one frame: WHS[" PUBLIC_LOG "u," PUBLIC_LOG "u," PUBLIC_LOG "u]",
                 pixelWidth_, pixelHeight_, lineSize[0]);
     if (IsFormatYUV()) {
         if (videoMeta->planes != 3) { // 3
-            MEDIA_LOG_E("Invalid video buffer, planes: %" PUBLIC_LOG "u", videoMeta->planes);
+            MEDIA_LOG_E("Invalid video buffer, planes: " PUBLIC_LOG "u", videoMeta->planes);
             return Status::ERROR_INVALID_DATA;
         }
         ret = UpdateYUVTexture(data, lineSize, videoMeta, ySize, uvSize);
     } else if (IsFormatNV()) {
         if (videoMeta->planes != 2) { // 2
-            MEDIA_LOG_E("Invalid video buffer, planes: %" PUBLIC_LOG "u", videoMeta->planes);
+            MEDIA_LOG_E("Invalid video buffer, planes: " PUBLIC_LOG "u", videoMeta->planes);
             return Status::ERROR_INVALID_DATA;
         }
         ret = UpdateNVTexture(data, lineSize, videoMeta, ySize, ptr);
@@ -406,15 +407,17 @@ int32_t SdlVideoSinkPlugin::UpdateNVTexture(const uint8_t** data, int32_t* lineS
     int32_t ret;
     lineSize[1] = static_cast<int32_t>(videoMeta->stride[1]);
     ySize = lineSize[0] * static_cast<int32_t>(AlignUp(pixelHeight_, 16)); // 16
-    MEDIA_LOG_D("lineSize[0]: %" PUBLIC_LOG "d, lineSize[1]: %" PUBLIC_LOG "d, ySize: %" PUBLIC_LOG "d",
+    MEDIA_LOG_D("lineSize[0]: " PUBLIC_LOG "d, lineSize[1]: " PUBLIC_LOG "d, ySize: " PUBLIC_LOG "d",
                 lineSize[0], lineSize[1], ySize);
     data[1] = ptr + ySize;
 #ifdef DUMP_RAW_DATA
-    if (data[0] != nullptr && lineSize[0] != 0) {
-        dumpData_.write((char*)data[0], lineSize[0] * pixelHeight_);
+    if (dumpFd_ && data[0] != nullptr && lineSize[0] != 0) {
+        std::fwrite(reinterpret_cast<const char*>(data[0]), lineSize[0] * pixelHeight_,
+                    1, dumpFd_);
     }
-    if (data[1] != nullptr && lineSize[1] != 0) {
-        dumpData_.write((char*)data[1], lineSize[1] * pixelHeight_ / 2); // 2
+    if (dumpFd_ && data[1] != nullptr && lineSize[1] != 0) {
+        std::fwrite(reinterpret_cast<const char*>(data[1]), lineSize[1] * pixelHeight_ / 2, // 2
+                    1, dumpFd_);
     }
 #endif
     ret = SDL_UpdateTexture(texture_.get(), NULL, data[0], lineSize[0]);
@@ -433,14 +436,17 @@ int32_t SdlVideoSinkPlugin::UpdateYUVTexture(const uint8_t** data, int32_t* line
     data[1] = data[0] + ySize;
     data[2] = data[1] + uvSize; // 2
 #ifdef DUMP_RAW_DATA
-    if (data[0] != nullptr && lineSize[0] != 0) {
-        dumpData_.write((char*)data[0], lineSize[0] * pixelHeight_);
+    if (dumpFd_ && data[0] != nullptr && lineSize[0] != 0) {
+        std::fwrite(reinterpret_cast<const char*>(data[0]), lineSize[0] * pixelHeight_,
+                    1, dumpFd_);
     }
-    if (data[1] != nullptr && lineSize[1] != 0) {
-        dumpData_.write((char*)data[1], lineSize[1] * pixelHeight_ / 2); // 2
+    if (dumpFd_ && data[1] != nullptr && lineSize[1] != 0) {
+        std::fwrite(reinterpret_cast<const char*>(data[1]), lineSize[1] * pixelHeight_ / 2, // 2
+                    1, dumpFd_);
     }
-    if (data[2] != nullptr && lineSize[2] != 0) {                        // 2
-        dumpData_.write((char*)data[2], lineSize[2] * pixelHeight_ / 2); // 2
+    if (dumpFd_ && data[2] != nullptr && lineSize[2] != 0) {                        // 2
+        std::fwrite(reinterpret_cast<const char*>(data[2]), lineSize[2] * pixelHeight_ / 2, // 2
+                    1, dumpFd_);
     }
 #endif
     ret = SDL_UpdateYUVTexture(texture_.get(), NULL, data[0], lineSize[0], data[1], lineSize[1], data[2], // 2

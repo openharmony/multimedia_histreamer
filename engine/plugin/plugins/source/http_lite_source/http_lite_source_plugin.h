@@ -41,9 +41,7 @@ public:
     Status Deinit() override;
     Status Prepare() override;
     Status Reset() override;
-    Status Start() override;
     Status Stop() override;
-    bool   IsParameterSupported(Tag tag) override;
     Status GetParameter(Tag tag, ValueType &value) override;
     Status SetParameter(Tag tag, const ValueType &value) override;
     std::shared_ptr<Allocator> GetAllocator() override;
@@ -59,12 +57,12 @@ public:
 private:
     std::string url_;
     std::string certFile_;
-    bool needExit_;
-    bool isSeekable_;
-    uint32_t bufferSize_;
-    unsigned int position_;
-    uint32_t waterline_;
-    size_t   fileSize_;
+    bool needExit_ {false};
+    bool isStream_ {false};
+    uint32_t bufferSize_ {0};
+    unsigned int position_ {0};
+    uint32_t waterline_ {0};
+    size_t   fileSize_ {0};
     Callback* callback_ {};
     std::shared_ptr<HttpLiteManager> httpHandle_;
     std::shared_ptr<HttpSourceAllocator> mAllocator_;

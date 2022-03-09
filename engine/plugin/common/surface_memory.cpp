@@ -59,6 +59,7 @@ BufferHandle *SurfaceMemory::GetBufferHandle()
     if (surfaceBuffer_) {
         return surfaceBuffer_->GetBufferHandle();
     }
+    return nullptr;
 }
 
 uint8_t* SurfaceMemory::GetRealAddr() const

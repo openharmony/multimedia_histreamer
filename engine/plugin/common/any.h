@@ -247,6 +247,9 @@ public:
 
     bool SameTypeWith(const std::type_info& otherInfo) const noexcept
     {
+        if (functionTable_ == nullptr) {
+            return false;
+        }
         return IsSameType(functionTable_->type(), otherInfo);
     }
 

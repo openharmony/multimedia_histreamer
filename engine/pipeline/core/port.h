@@ -20,10 +20,9 @@
 #include <string>
 #include <utility>
 
-#include "foundation/error_code.h"
+#include "error_code.h"
 #include "utils/constants.h"
-#include "utils/type_define.h"
-#include "utils/utils.h"
+#include "type_define.h"
 #include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
@@ -59,7 +58,7 @@ public:
      * @param offset means the offset from the start of the stream between Filter.Start and Filter.Stop. -1 means ignore
      * this parameter.
      */
-    virtual void PushData(AVBufferPtr buffer, int64_t offset) = 0;
+    virtual void PushData(const AVBufferPtr& buffer, int64_t offset) = 0;
     virtual ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) = 0;
 
 protected:
@@ -84,7 +83,7 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer, int64_t offset) override;
+    void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:
@@ -105,7 +104,7 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer, int64_t offset) override;
+    void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:
@@ -123,14 +122,14 @@ public:
     }
     EmptyInPort() : InPort(nullptr, "emptyInPort") {}
     ~EmptyInPort() override = default;
-    ErrorCode Connect(const std::shared_ptr<Port>& port) override;
+    ErrorCode Connect(const std::shared_ptr<Port>& another) override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer, int64_t offset) override;
+    void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:
@@ -145,14 +144,14 @@ public:
     }
     EmptyOutPort() : OutPort(nullptr, "emptyOutPort") {}
     ~EmptyOutPort() override = default;
-    ErrorCode Connect(const std::shared_ptr<Port>& port) override;
+    ErrorCode Connect(const std::shared_ptr<Port>& another) override;
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
     bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-    void PushData(AVBufferPtr buffer, int64_t offset) override;
+    void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
 private:

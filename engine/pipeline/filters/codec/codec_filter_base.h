@@ -18,17 +18,16 @@
 
 #include <string>
 
-#include "utils/blocking_queue.h"
-#include "utils/buffer_pool.h"
-#include "utils/type_define.h"
-#include "utils/utils.h"
+#include "common/plugin_utils.h"
 #include "foundation/osal/thread/task.h"
-#include "pipeline/core/filter_base.h"
 #include "plugin/common/plugin_tags.h"
+#include "pipeline/core/filter_base.h"
+#include "pipeline/core/type_define.h"
 #include "plugin/core/codec.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/plugin_meta.h"
-#include "common/plugin_utils.h"
+#include "utils/blocking_queue.h"
+#include "utils/buffer_pool.h"
 
 namespace OHOS {
 namespace Media {
@@ -42,12 +41,11 @@ public:
 
     ErrorCode GetParameter(int32_t key, Plugin::Any& outVal) override;
 
-    void OnInputBufferDone(std::shared_ptr<Plugin::Buffer>& input) override;
+    void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input) override;
 
-    void OnOutputBufferDone(std::shared_ptr<Plugin::Buffer>& output) override;
+    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override;
 
 protected:
-    ErrorCode ConfigureWithMetaLocked(const std::shared_ptr<const Plugin::Meta>& meta);
 
     ErrorCode UpdateMetaAccordingToPlugin(Plugin::Meta& meta);
 

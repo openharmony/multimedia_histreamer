@@ -17,13 +17,14 @@
 #define HISTREAMER_MEDIA_UTILS_H
 
 #include "i_player_engine.h"
-#include "foundation/error_code.h"
+#include "pipeline/core/error_code.h"
 #include "scene/player/internal/state.h"
 
 namespace OHOS {
 namespace Media {
 int TransErrorCode(ErrorCode errorCode);
 PlayerStates TransStateId2PlayerState(StateId state);
+Plugin::SeekMode Transform2SeekMode(PlayerSeekMode mode);
 }  // namespace Media
 }  // namespace OHOS
 

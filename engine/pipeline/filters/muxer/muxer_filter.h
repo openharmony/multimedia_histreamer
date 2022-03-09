@@ -43,7 +43,8 @@ public:
 
     ErrorCode SetOutputFormat(std::string containerMime);
     ErrorCode AddTrack(std::shared_ptr<InPort>& trackPort);
-    ErrorCode SetMaxDurationUs(uint64_t maxDurationUs);
+    ErrorCode SetMaxDuration(uint64_t maxDuration);
+    ErrorCode SetMaxSize(uint64_t maxSize);
     ErrorCode StartNextSegment();
     ErrorCode SendEos();
 
@@ -51,10 +52,10 @@ public:
      *
      * @param inPort
      * @param buffer
-     * @param offset always ignore is parameter
+     * @param offset always ignore this parameter
      * @return
      */
-    ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) override;
+    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
 private:
     class MuxerDataSink : public Plugin::DataSinkHelper {
     public:

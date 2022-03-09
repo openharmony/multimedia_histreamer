@@ -13,28 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_FOUNDATION_OSAL_BASE_COMMON_H
-#define HISTREAMER_FOUNDATION_OSAL_BASE_COMMON_H
+#ifndef HISTREAMER_FOUNDATION_PRE_DEFINES_H
+#define HISTREAMER_FOUNDATION_PRE_DEFINES_H
 
-#include <cstdio>
-#include <cstdlib>
+#define UNUSED_VARIABLE(v) ((void)(v))
 
-namespace OHOS {
-namespace Media {
-namespace OSAL {
-inline void Assert(const char* file, int line)
-{
-    (void)fprintf(stderr, "assertion failed for: %s, at line: %d", file, line);
-    abort();
-}
-} // namespace OSAL
-} // namespace Media
-} // namespace OHOS
-
-#ifdef NDEBUG
-#define ASSERT(_expr) ((void)0)
+#if (defined(__GNUC__) || defined(__clang__)) && (!defined(WIN32))
+#define MEDIA_UNUSED __attribute__((unused))
 #else
-#define ASSERT(_expr) ((_expr) ? ((void)0) : OHOS::Media::OSAL::Assert(__FILE__, __LINE__))
+#define MEDIA_UNUSED
 #endif
-
-#endif // HISTREAMER_FOUNDATION_OSAL_BASE_COMMON_H
+#endif // HISTREAMER_FOUNDATION_PRE_DEFINES_H

@@ -20,16 +20,15 @@
 #include <memory>
 #include <string>
 
-#include "foundation/error_code.h"
 #include "osal/thread/task.h"
 #include "osal/utils/util.h"
-#include "utils/constants.h"
-#include "utils/type_define.h"
-#include "utils/utils.h"
+#include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_base.h"
 #include "plugin/core/plugin_manager.h"
+#include "pipeline/core/type_define.h"
 #include "plugin/interface/source_plugin.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "utils/constants.h"
 
 namespace OHOS {
 namespace Media {
@@ -61,6 +60,8 @@ private:
     bool CheckSampleFormat(const Plugin::Capability& cap);
     ErrorCode DoConfigure();
     void SendBuffer(const std::shared_ptr<AVBuffer>& buffer);
+    void PickPreferSampleFmt(const std::shared_ptr<Plugin::Meta>& meta, const Plugin::ValueType& val);
+    std::shared_ptr<Plugin::Meta> PickPreferParameters();
 
     std::shared_ptr<OSAL::Task> taskPtr_ {nullptr};
     std::shared_ptr<Plugin::Source> plugin_ {nullptr};

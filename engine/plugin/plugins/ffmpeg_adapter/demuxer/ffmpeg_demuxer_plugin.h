@@ -19,9 +19,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "osal/thread/mutex.h"
-#include "utils/type_define.h"
-#include "plugin/core/plugin_register.h"
+#include "foundation/osal/thread/mutex.h"
 #include "plugin/interface/demuxer_plugin.h"
 
 #ifdef __cplusplus
@@ -46,9 +44,6 @@ public:
     Status Deinit() override;
     Status Prepare() override;
     Status Reset() override;
-    Status Start() override;
-    Status Stop() override;
-    bool IsParameterSupported(Tag tag) override;
     Status GetParameter(Tag tag, ValueType& value) override;
     Status SetParameter(Tag tag, const ValueType& value) override;
     std::shared_ptr<Allocator> GetAllocator() override;

@@ -19,6 +19,7 @@
 #include <algorithm>
 #include "filter.h"
 #include "foundation/log.h"
+#include "foundation/pre_defines.h"
 
 namespace OHOS {
 namespace Media {
@@ -60,7 +61,7 @@ ErrorCode InPort::Activate(const std::vector<WorkMode>& modes, WorkMode& outMode
         outMode = workMode;
         return ErrorCode::SUCCESS;
     }
-    MEDIA_LOG_E("[Filter %" PUBLIC_LOG "s] InPort %" PUBLIC_LOG "s Activate error: prevPort destructed",
+    MEDIA_LOG_E("[Filter " PUBLIC_LOG "s] InPort " PUBLIC_LOG "s Activate error: prevPort destructed",
                 filter->GetName().c_str(), name.c_str());
     return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
 }
@@ -84,7 +85,7 @@ bool InPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 }
 
 
-void InPort::PushData(AVBufferPtr buffer, int64_t offset)
+void InPort::PushData(const AVBufferPtr& buffer, int64_t offset)
 {
     if (filter) {
         filter->PushData(name, buffer, offset);
@@ -168,7 +169,7 @@ bool OutPort::Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
     return nextPort->Configure(upstreamMeta);
 }
 
-void OutPort::PushData(AVBufferPtr buffer, int64_t offset)
+void OutPort::PushData(const AVBufferPtr& buffer, int64_t offset)
 {
     nextPort->PushData(buffer, offset);
 }
@@ -182,9 +183,9 @@ ErrorCode OutPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
     return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
 }
 
-ErrorCode EmptyInPort::Connect(const std::shared_ptr<Port> &port)
+ErrorCode EmptyInPort::Connect(const std::shared_ptr<Port>& another)
 {
-    UNUSED_VARIABLE(port);
+    UNUSED_VARIABLE(another);
     MEDIA_LOG_E("Connect in EmptyInPort");
     return ErrorCode::SUCCESS;
 }
@@ -217,7 +218,7 @@ bool EmptyInPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamM
     return false;
 }
 
-void EmptyInPort::PushData(AVBufferPtr buffer, int64_t offset)
+void EmptyInPort::PushData(const AVBufferPtr& buffer, int64_t offset)
 {
     UNUSED_VARIABLE(buffer);
     UNUSED_VARIABLE(offset);
@@ -232,9 +233,9 @@ ErrorCode EmptyInPort::PullData(uint64_t offset, size_t size, AVBufferPtr& data)
     return ErrorCode::ERROR_UNIMPLEMENTED;
 }
 
-ErrorCode EmptyOutPort::Connect(const std::shared_ptr<Port> &port)
+ErrorCode EmptyOutPort::Connect(const std::shared_ptr<Port>& another)
 {
-    UNUSED_VARIABLE(port);
+    UNUSED_VARIABLE(another);
     MEDIA_LOG_E("Connect in EmptyOutPort");
     return ErrorCode::SUCCESS;
 }
@@ -265,7 +266,7 @@ bool EmptyOutPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstream
     return false;
 }
 
-void EmptyOutPort::PushData(AVBufferPtr buffer, int64_t offset)
+void EmptyOutPort::PushData(const AVBufferPtr& buffer, int64_t offset)
 {
     UNUSED_VARIABLE(buffer);
     UNUSED_VARIABLE(offset);

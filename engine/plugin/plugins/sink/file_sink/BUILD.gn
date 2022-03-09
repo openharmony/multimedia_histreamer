@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import("//foundation/multimedia/histreamer/config.gni")
 group("plugin_file_sink") {
   deps = [
     ":histreamer_plugin_FileFdSink",
@@ -26,21 +26,7 @@ source_set("file_fd_sink") {
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
-  cflags = [
-    "-fPIC",
-    "-Wall",
-  ]
-  if (!defined(ohos_lite)) {
-    configs -= [
-      "//build/config/compiler:no_rtti",
-      "//build/config/compiler:no_exceptions",
-    ]
-    cflags += [
-      "-frtti",
-      "-fexceptions",
-    ]
-  }
-  cflags_cc = cflags
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
 }
 
 source_set("file_path_sink") {
@@ -50,24 +36,10 @@ source_set("file_path_sink") {
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
-  cflags = [
-    "-fPIC",
-    "-Wall",
-  ]
-  if (!defined(ohos_lite)) {
-    configs -= [
-      "//build/config/compiler:no_rtti",
-      "//build/config/compiler:no_exceptions",
-    ]
-    cflags += [
-      "-frtti",
-      "-fexceptions",
-    ]
-  }
-  cflags_cc = cflags
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
 }
 
-if (defined(ohos_lite)) {
+if (hst_is_lite_sys) {
   import("//build/lite/config/component/lite_component.gni")
   lite_library("histreamer_plugin_FileFdSink") {
     if (ohos_kernel_type == "liteos_m") {

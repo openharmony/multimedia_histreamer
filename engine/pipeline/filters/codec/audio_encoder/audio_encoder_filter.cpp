@@ -18,8 +18,9 @@
 #define HST_LOG_TAG "AudioEncoderFilter"
 
 #include "audio_encoder_filter.h"
-#include "osal/utils/util.h"
 #include "factory/filter_factory.h"
+#include "foundation/cpp_ext/memory_ext.h"
+#include "osal/utils/util.h"
 #include "utils/steady_clock.h"
 
 #define DEFAULT_OUT_BUFFER_POOL_SIZE 5
@@ -30,7 +31,7 @@ namespace Media {
 namespace Pipeline {
 static AutoRegisterFilter<AudioEncoderFilter> g_registerFilterHelper("builtin.recorder.audioencoder");
 
-AudioEncoderFilter::AudioEncoderFilter(const std::string &name) : CodecFilterBase(name)
+AudioEncoderFilter::AudioEncoderFilter(const std::string& name) : CodecFilterBase(name)
 {
     filterType_ = FilterType::AUDIO_ENCODER;
     MEDIA_LOG_D("audio encoder ctor called");
@@ -85,7 +86,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
             }
             auto thisOut = std::make_shared<Plugin::Capability>();
             if (!MergeCapabilityKeys(*upstreamCap, outCap, *thisOut)) {
-                MEDIA_LOG_I("one cap of plugin %" PUBLIC_LOG_S " mismatch upstream cap", candidate.first->name.c_str());
+                MEDIA_LOG_I("one cap of plugin " PUBLIC_LOG_S " mismatch upstream cap", candidate.first->name.c_str());
                 continue;
             }
             atLeastOutCapMatched = true;
@@ -93,9 +94,9 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
             if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_, upstreamParams, downstreamParams)) {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
-                MEDIA_LOG_I("use plugin %" PUBLIC_LOG_S, candidate.first->name.c_str());
-                MEDIA_LOG_I("neg upstream cap %" PUBLIC_LOG_S, Capability2String(capNegWithUpstream_).c_str());
-                MEDIA_LOG_I("neg downstream cap %" PUBLIC_LOG_S, Capability2String(capNegWithDownstream_).c_str());
+                MEDIA_LOG_I("use plugin " PUBLIC_LOG_S, candidate.first->name.c_str());
+                MEDIA_LOG_I("neg upstream cap " PUBLIC_LOG_S, Capability2String(capNegWithUpstream_).c_str());
+                MEDIA_LOG_I("neg downstream cap " PUBLIC_LOG_S, Capability2String(capNegWithDownstream_).c_str());
                 break;
             }
         }
@@ -104,17 +105,18 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
         }
     }
     FALSE_RET_V_MSG_E(atLeastOutCapMatched && selectedPluginInfo != nullptr, false,
-        "can't find available encoder plugin with %" PUBLIC_LOG_S, Capability2String(*upstreamCap).c_str());
+        "can't find available encoder plugin with " PUBLIC_LOG_S, Capability2String(*upstreamCap).c_str());
     auto res = UpdateAndInitPluginByInfo<Plugin::Codec>(plugin_, pluginInfo_, selectedPluginInfo,
         [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
         return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
     });
     negotiatedCap = *upstreamCap;
+    plugin_->SetDataCallback(this);
     PROFILE_END("audio encoder negotiate end");
     return res;
 }
 
-uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<const Plugin::Meta> &meta)
+uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     Plugin::ValueType value;
     if (plugin_->GetParameter(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, value) != Plugin::Status::OK ||
@@ -134,10 +136,10 @@ uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<const Plu
     return GetBytesPerSample(format) * samplesPerFrame * channels;
 }
 
-bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
+bool AudioEncoderFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     PROFILE_BEGIN("Audio encoder configure begin");
-    MEDIA_LOG_I("receive upstream meta %" PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
+    MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
     FALSE_RET_V_MSG_E(plugin_ != nullptr && pluginInfo_ != nullptr, false,
                       "can't configure encoder when no plugin available");
     auto thisMeta = std::make_shared<Plugin::Meta>();
@@ -163,7 +165,7 @@ bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_
 
 ErrorCode AudioEncoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
-    FAIL_RET_ERR_CODE_MSG_E(ConfigureWithMetaLocked(meta), "configure encoder plugin error");
+    FAIL_RET_ERR_CODE_MSG_E(ConfigPluginWithMeta(*plugin_, *meta), "configure encoder plugin error");
     FAIL_RET_ERR_CODE_MSG_E(TranslatePluginStatus(plugin_->Prepare()), "encoder prepare failed");
     FAIL_RET_ERR_CODE_MSG_E(TranslatePluginStatus(plugin_->Start()), "encoder start failed");
 
@@ -184,12 +186,12 @@ ErrorCode AudioEncoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
     } else {
         MEDIA_LOG_I("using plugin output allocator");
         for (size_t cnt = 0; cnt < bufferCnt; cnt++) {
-            auto buf = MemoryHelper::make_unique<AVBuffer>();
+            auto buf = CppExt::make_unique<AVBuffer>();
             buf->AllocMemory(outAllocator, frameSize_);
             outBufferPool_->Append(std::move(buf));
         }
     }
-    rb_ = MemoryHelper::make_unique<RingBuffer>(frameSize_ * 10); // 最大缓存10帧
+    rb_ = CppExt::make_unique<RingBuffer>(frameSize_ * 10); // 最大缓存10帧
     FALSE_RET_V_MSG_E(rb_ != nullptr, ErrorCode::ERROR_NO_MEMORY, "create ring buffer failed");
     rb_->Init();
     cahceBuffer_ = std::make_shared<AVBuffer>(Plugin::BufferMetaType::AUDIO);
@@ -198,11 +200,11 @@ ErrorCode AudioEncoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode AudioEncoderFilter::PushData(const std::string &inPort, AVBufferPtr buffer, int64_t offset)
+ErrorCode AudioEncoderFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     const static int8_t maxRetryCnt = 3; // max retry times of handling one frame
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
-        MEDIA_LOG_W("pushing data to encoder when state is %" PUBLIC_LOG_D32, static_cast<int>(state_.load()));
+        MEDIA_LOG_W("pushing data to encoder when state is " PUBLIC_LOG_D32, static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto inputMemory = buffer->GetMemory();
@@ -268,7 +270,7 @@ ErrorCode AudioEncoderFilter::HandleFrame(const std::shared_ptr<AVBuffer>& buffe
     MEDIA_LOG_D("HandleFrame called");
     auto ret = TranslatePluginStatus(plugin_->QueueInputBuffer(buffer, 0));
     FALSE_LOG_MSG_E(ret == ErrorCode::SUCCESS || ret == ErrorCode::ERROR_TIMED_OUT,
-                    "Queue input buffer to plugin fail: %" PUBLIC_LOG_D32, ret);
+                    "Queue input buffer to plugin fail: " PUBLIC_LOG_D32, ret);
     return ret;
 }
 
@@ -278,26 +280,37 @@ ErrorCode AudioEncoderFilter::FinishFrame()
     auto outBuffer = outBufferPool_->AllocateAppendBufferNonBlocking();
     FALSE_RET_V_MSG_E(outBuffer != nullptr, ErrorCode::ERROR_NO_MEMORY, "Get out buffer from buffer pool fail");
     outBuffer->Reset();
-    auto err = TranslatePluginStatus(plugin_->QueueOutputBuffer(outBuffer, 0));
-    FAIL_RET_ERR_CODE_MSG_E(err, "Queue out buffer to plugin fail: %" PUBLIC_LOG_D32, to_underlying(err));
-    std::shared_ptr<AVBuffer> pcmFrame = nullptr;
-    auto status = plugin_->DequeueOutputBuffer(pcmFrame, 0);
-    if ((status == Plugin::Status::OK || status == Plugin::Status::END_OF_STREAM) && pcmFrame != nullptr) {
-        // push to port
-        auto oPort = outPorts_[0];
-        if (oPort->GetWorkMode() == WorkMode::PUSH) {
-            oPort->PushData(pcmFrame, -1);
-        } else {
-            MEDIA_LOG_W("encoder out port works in pull mode");
+    auto status = plugin_->QueueOutputBuffer(outBuffer, 0);
+    if (status != Plugin::Status::OK && status != Plugin::Status::END_OF_STREAM) {
+        if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
+            MEDIA_LOG_E("Queue output buffer to plugin fail: " PUBLIC_LOG_D32, static_cast<int32_t>((status)));
         }
-        pcmFrame.reset(); // 释放buffer 如果没有被缓存使其回到buffer pool 如果被sink缓存 则从buffer pool拿其他的buffer
-    } else if (status != Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
-        MEDIA_LOG_E("Dequeue pcm frame from plugin fail: %" PUBLIC_LOG_D32, static_cast<int32_t>(status));
     }
     MEDIA_LOG_D("end finish frame");
     return TranslatePluginStatus(status);
 }
+
+void AudioEncoderFilter::OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input)
+{
+    MEDIA_LOG_D("AudioEncoderFilter::OnInputBufferDone");
+}
+
+void AudioEncoderFilter::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output)
+{
+    FALSE_RETURN(output != nullptr);
+
+    // push to port
+    auto oPort = outPorts_[0];
+    if (oPort->GetWorkMode() == WorkMode::PUSH) {
+        oPort->PushData(output, -1);
+    } else {
+        MEDIA_LOG_W("encoder out port works in pull mode");
+    }
+
+    // 释放buffer 如果没有被缓存使其回到buffer pool 如果被sink缓存 则从buffer pool拿其他的buffer
+    std::const_pointer_cast<Plugin::Buffer>(output).reset();
+}
 } // Pipeline
 } // Media
 } // OHOS
-#endif
+#endif // RECORDER_SUPPORT

@@ -108,8 +108,6 @@ else ()
     file(GLOB_RECURSE PLAT_PLUGIN_SRCS
             ${TOP_DIR}/engine/plugin/plugins/source/audio_capture/*.cpp
             ${TOP_DIR}/engine/plugin/plugins/source/video_capture/*.cpp
-            ${TOP_DIR}/engine/plugin/plugins/sink/audio_server_sink/*.cpp
-            ${TOP_DIR}/engine/plugin/plugins/sink/video_surface_sink/*.cpp
             )
 endif ()
 
@@ -152,5 +150,5 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_SHARED_LIBRARY_PREFIX "libmedia_engine_")
 set(CMAKE_SHARED_LIBRARY_SUFFIX ".z.so")
 
-add_library(${PROJECT_NAME} SHARED ${HISTREAMER_SRCS} ${PLUGINS_STATIC_BUILD_SRCS} ${SECURE_C_SRCS}
+add_library(${PROJECT_NAME} SHARED ${HISTREAMER_SRCS} ${PLUGINS_STATIC_BUILD_SRCS}
         ${3RDPARTY_SRCS})

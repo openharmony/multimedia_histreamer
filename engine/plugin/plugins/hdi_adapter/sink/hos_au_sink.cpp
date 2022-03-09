@@ -22,14 +22,16 @@
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
 #include "foundation/osal/utils/util.h"
+#include "foundation/pre_defines.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "plugin/common/plugin_time.h"
 #include "plugins/hdi_adapter/utils/hdi_au_utils.h"
 #include "securec.h"
 #include "utils/constants.h"
-#include "utils/utils.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;
+using namespace OHOS::Media::Plugin::HosLite;
 using PluginSampleFmt = OHOS::Media::Plugin::AudioSampleFormat;
 constexpr int32_t MAX_RETRY_CNT = 3;
 constexpr int32_t RETRY_INTERVAL = 100; // 100ms
@@ -50,7 +52,7 @@ Status LoadAndInitAdapter(AudioManager* audioManager, AudioAdapterDescriptor* de
     }
     if (audioManager->LoadAdapter(audioManager, descriptor, adapter) < 0) {
         *adapter = nullptr;
-        MEDIA_LOG_W("failed to load adapter %" PUBLIC_LOG "s", descriptor->adapterName);
+        MEDIA_LOG_W("failed to load adapter " PUBLIC_LOG "s", descriptor->adapterName);
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     if (*adapter == nullptr) {
@@ -65,10 +67,10 @@ Status LoadAndInitAdapter(AudioManager* audioManager, AudioAdapterDescriptor* de
         } else {
             break;
         }
-        MEDIA_LOG_I("retry init port on adapter %" PUBLIC_LOG "s", descriptor->adapterName);
+        MEDIA_LOG_I("retry init port on adapter " PUBLIC_LOG "s", descriptor->adapterName);
     } while (++retryCnt < MAX_RETRY_CNT);
     if (retryCnt >= MAX_RETRY_CNT) {
-        MEDIA_LOG_W("cannot init port on adapter %" PUBLIC_LOG "s after retry %" PUBLIC_LOG "d times",
+        MEDIA_LOG_W("cannot init port on adapter " PUBLIC_LOG "s after retry " PUBLIC_LOG "d times",
                     descriptor->adapterName, retryCnt);
         audioManager->UnloadAdapter(audioManager, *adapter);
         *adapter = nullptr;
@@ -82,7 +84,7 @@ void UpdatePluginCapWithPortCap(const AudioPortCapability& portCap, Capability& 
     std::vector<PluginSampleFmt> sampleFormats;
     for (size_t cnt = 0; cnt < portCap.supportSampleFormatNum; cnt++) {
         PluginSampleFmt tmp;
-        if (OHOS::Media::HosLitePlugin::HdiAuFormat2PluginFormat(portCap.supportSampleFormats[cnt], tmp)) {
+        if (OHOS::Media::Plugin::HosLite::HdiAuFormat2PluginFormat(portCap.supportSampleFormats[cnt], tmp)) {
             sampleFormats.emplace_back(tmp);
         }
     }
@@ -93,7 +95,7 @@ void UpdatePluginCapWithPortCap(const AudioPortCapability& portCap, Capability& 
             pluginCap.AppendDiscreteKeys<PluginSampleFmt>(Capability::Key::AUDIO_SAMPLE_FORMAT, sampleFormats);
         }
     }
-    auto pluginSampleRates = OHOS::Media::HosLitePlugin::HdiSampleRatesMask2PluginRates(portCap.sampleRateMasks);
+    auto pluginSampleRates = OHOS::Media::Plugin::HosLite::HdiSampleRatesMask2PluginRates(portCap.sampleRateMasks);
     if (!pluginSampleRates.empty()) {
         if (pluginSampleRates.size() == 1) {
             pluginCap.AppendFixedKey<uint32_t>(Capability::Key::AUDIO_SAMPLE_RATE, pluginSampleRates[0]);
@@ -102,7 +104,7 @@ void UpdatePluginCapWithPortCap(const AudioPortCapability& portCap, Capability& 
         }
     }
     AudioChannelLayout pluginLayout;
-    if (OHOS::Media::HosLitePlugin::HdiMask2PluginChannelLayout(portCap.channelMasks, pluginLayout)) {
+    if (OHOS::Media::Plugin::HosLite::HdiMask2PluginChannelLayout(portCap.channelMasks, pluginLayout)) {
         pluginCap.AppendFixedKey(Capability::Key::AUDIO_CHANNEL_LAYOUT, pluginLayout);
     }
     if (portCap.channelCount > 0) {
@@ -112,7 +114,7 @@ void UpdatePluginCapWithPortCap(const AudioPortCapability& portCap, Capability& 
 
 std::shared_ptr<AudioSinkPlugin> AudioSinkPluginCreator(const std::string& name)
 {
-    return std::make_shared<OHOS::Media::HosLitePlugin::HdiSink>(name);
+    return std::make_shared<OHOS::Media::Plugin::HosLite::HdiSink>(name);
 }
 
 void RegisterOutportOnAdapter(const std::shared_ptr<Register>& reg, const AudioAdapterDescriptor& desc,
@@ -151,9 +153,9 @@ void RegisterOutportOnAdapter(const std::shared_ptr<Register>& reg, const AudioA
     sinkPluginDef.rank = RANK100;
     if (reg->AddPlugin(sinkPluginDef) == Status::OK) {
         g_sinkInfos[sinkPluginDef.name] = std::make_pair(pIndex, usingDefaultCaps);
-        MEDIA_LOG_D("register plugin %" PUBLIC_LOG "s succ.", desc.adapterName);
+        MEDIA_LOG_D("register plugin " PUBLIC_LOG "s succ.", desc.adapterName);
     } else {
-        MEDIA_LOG_W("register plugin %" PUBLIC_LOG "s failed", desc.adapterName);
+        MEDIA_LOG_W("register plugin " PUBLIC_LOG "s failed", desc.adapterName);
     }
 }
 
@@ -193,10 +195,10 @@ inline Status AssignIfCastSuccess(T& lvalue, const Any& anyValue, const char* ta
 {
     if (anyValue.SameTypeWith(typeid(T))) {
         lvalue = AnyCast<const T&>(anyValue);
-        MEDIA_LOG_I("AssignIfCastSuccess found %" PUBLIC_LOG "s", tagName);
+        MEDIA_LOG_I("AssignIfCastSuccess found " PUBLIC_LOG "s", tagName);
         return Status::OK;
     } else {
-        MEDIA_LOG_W("tag:%" PUBLIC_LOG "s value type mismatch", tagName);
+        MEDIA_LOG_W("tag:" PUBLIC_LOG "s value type mismatch", tagName);
         return Status::ERROR_MISMATCHED_TYPE;
     }
 }
@@ -210,7 +212,8 @@ PLUGIN_DEFINITION(HdiAuSink, LicenseType::APACHE_V2, RegisterHdiSinkPlugins, UnR
 } // namespace
 namespace OHOS {
 namespace Media {
-namespace HosLitePlugin {
+namespace Plugin {
+namespace HosLite {
 using namespace OHOS::Media::Plugin;
 
 HdiSink::HdiSink(std::string name)
@@ -250,7 +253,7 @@ Status HdiSink::Init()
         break;
     }
     if (audioAdapter_ == nullptr) {
-        MEDIA_LOG_E("cannot find adapter with name %" PUBLIC_LOG "s", pluginName_.c_str());
+        MEDIA_LOG_E("cannot find adapter with name " PUBLIC_LOG "s", pluginName_.c_str());
         return Status::ERROR_UNKNOWN;
     }
     return Status::OK;
@@ -361,10 +364,10 @@ Status HdiSink::Prepare()
     deviceDescriptor_.pins = PIN_OUT_SPEAKER;
     deviceDescriptor_.desc = nullptr;
 
-    MEDIA_LOG_I("create render: %" PUBLIC_LOG "s, port: %" PUBLIC_LOG "d:\ncategory %" PUBLIC_LOG
-                "s,\nchannels %" PUBLIC_LOG "d, sampleRate %" PUBLIC_LOG "d,\n"
-                " audioChannelMask %" PUBLIC_LOG "x, format %" PUBLIC_LOG "d,\nisSignedData %" PUBLIC_LOG
-                "d, interleaved %" PUBLIC_LOG "d,\nperiod %" PUBLIC_LOG "u, frameSize %" PUBLIC_LOG "u",
+    MEDIA_LOG_I("create render: " PUBLIC_LOG "s, port: " PUBLIC_LOG "d:\ncategory " PUBLIC_LOG
+                "s,\nchannels " PUBLIC_LOG "d, sampleRate " PUBLIC_LOG "d,\n"
+                " audioChannelMask " PUBLIC_LOG "x, format " PUBLIC_LOG "d,\nisSignedData " PUBLIC_LOG
+                "d, interleaved " PUBLIC_LOG "d,\nperiod " PUBLIC_LOG "u, frameSize " PUBLIC_LOG "u",
                 adapterDescriptor_.adapterName, deviceDescriptor_.portId,
                 (sampleAttributes_.type == AUDIO_IN_MEDIA) ? "media" : "communication", sampleAttributes_.channelCount,
                 sampleAttributes_.sampleRate, channelMask_, sampleAttributes_.format, sampleAttributes_.isSignedData,
@@ -373,7 +376,7 @@ Status HdiSink::Prepare()
         OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
         auto ret = audioAdapter_->CreateRender(audioAdapter_, &deviceDescriptor_, &sampleAttributes_, &audioRender_);
         if (ret != 0) {
-            MEDIA_LOG_E("cannot create render with error code %" PUBLIC_LOG PRIu64 "x",
+            MEDIA_LOG_E("cannot create render with error code " PUBLIC_LOG PRIu64 "x",
                         static_cast<uint64_t>(ret));
             audioRender_ = nullptr;
             return Status::ERROR_UNKNOWN;
@@ -432,12 +435,6 @@ Status HdiSink::Stop()
     }
     MEDIA_LOG_D("Stop Exited");
     return Status::OK;
-}
-
-bool HdiSink::IsParameterSupported(Tag tag)
-{
-    UNUSED_VARIABLE(tag);
-    return false;
 }
 
 std::shared_ptr<Allocator> HdiSink::GetAllocator()
@@ -507,7 +504,7 @@ Status HdiSink::SetVolume(float volume)
         MEDIA_LOG_E("set volume failed");
         return Status::ERROR_UNKNOWN;
     }
-    MEDIA_LOG_W("set volume to %" PUBLIC_LOG ".3f", relVolume);
+    MEDIA_LOG_W("set volume to " PUBLIC_LOG ".3f", relVolume);
     return Status::OK;
 }
 
@@ -564,7 +561,7 @@ Status HdiSink::Resume()
     return Status::OK;
 }
 
-Status HdiSink::GetLatency(uint64_t& ms)
+Status HdiSink::GetLatency(uint64_t& hstTime)
 {
     OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
@@ -576,8 +573,14 @@ Status HdiSink::GetLatency(uint64_t& ms)
         MEDIA_LOG_E("get latency failed");
         return Status::ERROR_UNKNOWN;
     }
-    ms = tmp;
-    return Status::OK;
+    int64_t latency = 0;
+    if (Ms2HstTime(tmp, latency)) {
+        hstTime = latency;
+        return Status::OK;
+    } else {
+        MEDIA_LOG_E("time convert overflow");
+        return Status::ERROR_UNKNOWN;
+    }
 }
 
 Status HdiSink::GetFrameSize(size_t& size)
@@ -711,7 +714,7 @@ void HdiSink::RenderFrame(const std::shared_ptr<Buffer>& input)
                 OSAL::ScopedLock lock(renderMutex_);
                 renderCond_.WaitFor(lock, timeoutMs, [this] { return processing_.load() == false; });
             } else {
-                MEDIA_LOG_E("renderFrame buffer error %" PUBLIC_LOG "d", ret);
+                MEDIA_LOG_E("renderFrame buffer error " PUBLIC_LOG "d", ret);
                 break;
             }
         }
@@ -719,6 +722,7 @@ void HdiSink::RenderFrame(const std::shared_ptr<Buffer>& input)
         remainingBytes -= renderSize;
     }
 }
-} // namespace HosLitePlugin
+} // namespace HosLite
+} // namespace Plugin
 } // namespace Media
 } // namespace OHOS

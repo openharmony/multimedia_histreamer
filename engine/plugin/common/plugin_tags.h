@@ -18,6 +18,7 @@
 
 #include <map> // NOLINT
 #include <string>
+#include <vector> // NOLINT
 #include "any.h" // NOLINT
 
 namespace OHOS {
@@ -39,10 +40,14 @@ enum struct AudioFormat : uint8_t {
 };
 
 enum struct VideoFormat : uint8_t {
+    UNKNOWN = 0,
     H264 = 1,
+    MPEG4 = 2,
 };
 
 #define MAKE_AUDIO_SPECIFIC_START(format) (SECTION_AUDIO_SPECIFIC_START | (static_cast<uint8_t>(format) << 8U))
+
+#define MAKE_VIDEO_SPECIFIC_START(format) (SECTION_VIDEO_SPECIFIC_START | (static_cast<uint8_t>(format) << 8U))
 
 /**
  * @brief Tag is a key-value pair used to settings or transfer information.
@@ -84,6 +89,7 @@ enum struct Tag : uint32_t {
     WATERLINE_HIGH,                   ///< uint32_t, high waterline
     WATERLINE_LOW,                    ///< uint32_t, low waterline
     SRC_INPUT_TYPE,                   ///< @see SrcInputType
+    THREAD_MODE,                      ///< @see ThreadMode, Threads run in sync or async mode
 
     /* -------------------- media tag -------------------- */
     MEDIA_TITLE = SECTION_MEDIA_START + 1, ///< string
@@ -126,9 +132,15 @@ enum struct Tag : uint32_t {
     VIDEO_WIDTH = SECTION_VIDEO_UNIVERSAL_START + 1, ///< uint32_t, video width
     VIDEO_HEIGHT,                                    ///< uint32_t, video height
     VIDEO_PIXEL_FORMAT,                              ///< @see VideoPixelFormat
-    VIDEO_FRAME_RATE,                                ///< uint64_t, video frame rate
+    VIDEO_FRAME_RATE,                                ///< uint32_t, video frame rate
     VIDEO_SURFACE,                                   ///< @see class Surface
     VIDEO_MAX_SURFACE_NUM,                           ///< uint32_t, max video surface num
+    VIDEO_CAPTURE_RATE,                              ///< double, video capture rate
+
+    /* -------------------- video specific tag -------------------- */
+    VIDEO_SPECIFIC_H264_START = MAKE_VIDEO_SPECIFIC_START(VideoFormat::H264),
+    VIDEO_H264_PROFILE,      ///< @see VideoH264Profile
+    VIDEO_H264_LEVEL,        ///< uint32_t, h264 level
 };
 
 using ValueType = Any;
@@ -137,6 +149,7 @@ using ValueType = Any;
  * The tag content is stored in key-value format.
  */
 using TagMap = std::map<Tag, ValueType>;
+using CodecConfig = std::vector<uint8_t>;
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-if (!defined(ohos_lite)) {
+import("//foundation/multimedia/histreamer/config.gni")
+if (!hst_is_lite_sys) {
   ohos_kernel_type = ""
 }
 
@@ -35,17 +35,32 @@ group("histreamer_plugin") {
 # build plugin interface
 config("hst_plugin_intf_config") {
   include_dirs = [ "//foundation/multimedia/histreamer/engine/plugin" ]
+  if (!hst_is_lite_sys && multimedia_histreamer_enable_video) {
+    include_dirs += [
+      "//utils/native/base/include",
+      "//foundation/graphic/standard/interfaces/innerkits",
+      "//drivers/peripheral/display/interfaces/include",
+      "//foundation/graphic/standard/utils/sync_fence/export",
+    ]
+  }
 }
 
 source_set("histreamer_plugin_intf") {
   sources = [
     "common/media_source.cpp",
     "common/plugin_buffer.cpp",
-    "common/surface_allocator.cpp",
-    "common/surface_memory.cpp",
   ]
-  public_configs = [ ":hst_plugin_intf_config" ]
-  if (defined(ohos_lite)) {
+  if (!hst_is_lite_sys && multimedia_histreamer_enable_video) {
+    sources += [
+      "common/surface_allocator.cpp",
+      "common/surface_memory.cpp",
+    ]
+  }
+  public_configs = [
+    ":hst_plugin_intf_config",
+    "//foundation/multimedia/histreamer:histreamer_presets",
+  ]
+  if (hst_is_lite_sys) {
     if (ohos_kernel_type == "liteos_m") {
       public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
     } else {
@@ -53,36 +68,21 @@ source_set("histreamer_plugin_intf") {
     }
   } else {
     public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    if (multimedia_histreamer_enable_video) {
+      public_deps += [
+        "//foundation/graphic/standard/frameworks/surface:surface",
+        "//foundation/graphic/standard/utils:sync_fence",
+      ]
+    }
   }
-
-  if (!defined(ohos_lite)) {
-    configs -= [
-      "//build/config/compiler:no_rtti",
-      "//build/config/compiler:no_exceptions",
-    ]
-  }
-
-  cflags = [
-    "-fPIC",
-    "-Wall",
-  ]
-  if (!defined(ohos_lite)) {
-    cflags += [
-      "-frtti",
-      "-fexceptions",
-    ]
-  }
-  cflags_cc = cflags
 }
 
 config("hst_plugin_core_config") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine/",
     "//foundation/multimedia/histreamer/engine/plugin",
-    "//foundation/multimedia/histreamer/engine/foundation",
-    "//foundation/multimedia/histreamer/engine/utils",
   ]
-  if (defined(ohos_lite)) {
+  if (hst_is_lite_sys) {
     include_dirs += [ "//foundation/multimedia/utils/lite/interfaces/kits" ]
   } else {
     include_dirs += [
@@ -94,7 +94,6 @@ config("hst_plugin_core_config") {
 }
 
 source_set("histreamer_plugin_core") {
-  defines = [ "MEDIA_OHOS" ]
   sources = [
     "core/audio_sink.cpp",
     "core/base.cpp",
@@ -110,11 +109,12 @@ source_set("histreamer_plugin_core") {
     "core/source.cpp",
     "core/video_sink.cpp",
   ]
+  defines = []
   if (plugin_dynamic_register) {
     sources += [ "core/plugin_loader.cpp" ]
     defines += [ "DYNAMIC_PLUGINS" ]
   }
-  if (defined(ohos_lite)) {
+  if (hst_is_lite_sys) {
     defines += [
       "HST_PLUGIN_PATH=\"/usr/lib\"",
       "HST_PLUGIN_FILE_TAIL=\".so\"",
@@ -125,14 +125,17 @@ source_set("histreamer_plugin_core") {
       "HST_PLUGIN_FILE_TAIL=\".z.so\"",
     ]
   }
-  public_configs = [ ":hst_plugin_core_config" ]
+  public_configs = [
+    ":hst_plugin_core_config",
+    "//foundation/multimedia/histreamer:histreamer_presets",
+  ]
   public_deps = [
     ":histreamer_plugin_intf",
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
 
-  if (defined(ohos_lite)) {
+  if (hst_is_lite_sys) {
     if (ohos_kernel_type == "liteos_m") {
       public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
     } else {
@@ -142,22 +145,4 @@ source_set("histreamer_plugin_core") {
     public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
   }
   public_deps += [ "plugins:gen_plugin_static_header" ]
-  if (!defined(ohos_lite)) {
-    configs -= [
-      "//build/config/compiler:no_rtti",
-      "//build/config/compiler:no_exceptions",
-    ]
-  }
-
-  cflags = [
-    "-fPIC",
-    "-Wall",
-  ]
-  if (!defined(ohos_lite)) {
-    cflags += [
-      "-frtti",
-      "-fexceptions",
-    ]
-  }
-  cflags_cc = cflags
 }

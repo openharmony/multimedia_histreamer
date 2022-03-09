@@ -14,25 +14,28 @@
 
 import("//foundation/multimedia/histreamer/config.gni")
 
-if (!defined(ohos_lite)) {
+if (!hst_is_lite_sys) {
   ohos_kernel_type = ""
 }
 
-print(
-    "histreamer plugin config:multimedia_histreamer_enable_plugin_ffmpeg_adapter =",
-    multimedia_histreamer_enable_plugin_ffmpeg_adapter)
-print(
-    "histreamer plugin config:multimedia_histreamer_enable_plugin_hdi_adapter =",
-    multimedia_histreamer_enable_plugin_hdi_adapter)
-print(
-    "histreamer plugin config:multimedia_histreamer_enable_plugin_file_source =",
-    multimedia_histreamer_enable_plugin_file_source)
-print(
-    "histreamer plugin config:multimedia_histreamer_enable_plugin_stream_source =",
-    multimedia_histreamer_enable_plugin_stream_source)
-print(
-    "histreamer plugin config:multimedia_histreamer_enable_plugin_audio_server_sink =",
-    multimedia_histreamer_enable_plugin_audio_server_sink)
+print("histreamer plugin: ffmpeg_adapter =",
+      multimedia_histreamer_enable_plugin_ffmpeg_adapter)
+print("histreamer plugin: hdi_adapter =",
+      multimedia_histreamer_enable_plugin_hdi_adapter)
+print("histreamer plugin: file_source =",
+      multimedia_histreamer_enable_plugin_file_source)
+print("histreamer plugin: http_source =",
+      multimedia_histreamer_enable_plugin_http_source)
+print("histreamer plugin: stream_source =",
+      multimedia_histreamer_enable_plugin_stream_source)
+print("histreamer plugin: audio_server_sink =",
+      multimedia_histreamer_enable_plugin_audio_server_sink)
+print("histreamer plugin:lite_aac_decoder =",
+      multimedia_histreamer_enable_plugin_lite_aac_decoder)
+print("histreamer plugin:std_video_surface_sink =",
+      multimedia_histreamer_enable_plugin_std_video_surface_sink)
+print("histreamer plugin:std_video_capture =",
+      multimedia_histreamer_enable_plugin_std_video_capture)
 
 group("histreamer_plugin_store") {
   deps = []
@@ -52,8 +55,16 @@ group("histreamer_plugin_store") {
     deps += [ "demuxer/aac_demuxer:plugin_aac_demuxer" ]
   }
 
+  if (multimedia_histreamer_enable_plugin_lite_aac_decoder) {
+    deps += [ "lite_aac_decoder:plugin_lite_aac_decoder_adapter" ]
+  }
+
   if (multimedia_histreamer_enable_plugin_file_source) {
     deps += [ "source/file_source:plugin_file_source" ]
+  }
+
+  if (multimedia_histreamer_enable_plugin_http_source) {
+    deps += [ "source/http_source:plugin_http_source" ]
   }
 
   if (multimedia_histreamer_enable_plugin_hdi_adapter) {
@@ -78,6 +89,14 @@ group("histreamer_plugin_store") {
 
   if (multimedia_histreamer_enable_plugin_file_sink) {
     deps += [ "sink/file_sink:plugin_file_sink" ]
+  }
+
+  if (multimedia_histreamer_enable_plugin_std_video_surface_sink) {
+    deps += [ "sink/video_surface_sink:plugin_standard_video_surface_sink" ]
+  }
+
+  if (multimedia_histreamer_enable_plugin_std_video_capture) {
+    deps += [ "source/video_capture:plugin_standard_video_capture" ]
   }
 }
 
@@ -113,12 +132,20 @@ action("gen_plugin_static_header") {
       args += [ "MiniMP4Demuxer" ]
     }
 
+    if (multimedia_histreamer_enable_plugin_lite_aac_decoder) {
+      args += [ "LiteAACDecoder" ]
+    }
+
     if (multimedia_histreamer_enable_plugin_aac_demuxer) {
       args += [ "AACDemuxer" ]
     }
 
     if (multimedia_histreamer_enable_plugin_file_source) {
       args += [ "FileSource" ]
+    }
+
+    if (multimedia_histreamer_enable_plugin_http_source) {
+      args += [ "HttpSource" ]
     }
 
     if (multimedia_histreamer_enable_plugin_hdi_adapter) {

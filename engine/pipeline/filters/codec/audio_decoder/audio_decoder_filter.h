@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_PIPELINE_FILTER_AUDIO_DECODER_H
 #define HISTREAMER_PIPELINE_FILTER_AUDIO_DECODER_H
 
-#include "filters/codec/codec_filter_base.h"
+#include "pipeline/filters/codec/codec_filter_base.h"
 
 namespace OHOS {
 namespace Media {
@@ -45,7 +45,7 @@ public:
      * @param offset always ignore this parameter
      * @return
      */
-    ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer, int64_t offset) override;
+    ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
     void FlushStart() override;
 
@@ -60,8 +60,8 @@ private:
 
     ErrorCode Release();
 
-    void OnInputBufferDone(std::shared_ptr<Plugin::Buffer>& input) override;
-    void OnOutputBufferDone(std::shared_ptr<Plugin::Buffer>& output) override;
+    void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input) override;
+    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override;
 private:
     std::shared_ptr<BufferPool<AVBuffer>> outBufferPool_ {};
     bool isFlushing_ {false};

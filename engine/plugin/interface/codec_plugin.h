@@ -40,7 +40,7 @@ struct DataCallback {
      *
      * @param input Indicates the pointer to the input data.
      */
-    virtual void OnInputBufferDone(std::shared_ptr<Buffer>& input) = 0;
+    virtual void OnInputBufferDone(const std::shared_ptr<Buffer>& input) = 0;
 
     /**
      * @brief When the out buffer has been produced inside the plugin.
@@ -49,7 +49,7 @@ struct DataCallback {
      *
      * @param output Indicates the pointer to the output data.
      */
-    virtual void OnOutputBufferDone(std::shared_ptr<Buffer>& output) = 0;
+    virtual void OnOutputBufferDone(const std::shared_ptr<Buffer>& output) = 0;
 };
 
 /**
@@ -81,22 +81,6 @@ struct CodecPlugin : public PluginBase {
     virtual Status QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) = 0;
 
     /**
-     * @brief Dequeue input data
-     *
-     * This function works in sync mode if need.
-     *
-     * The function is valid only in the RUNNING state.
-     *
-     * @param inputBuffer  Indicates the pointer to the input data.
-     * @param timeoutMs    Indicates the timeout duration.
-     * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_INVALID_DATA: The input buffer is invalid.
-     *  @retval ERROR_TIMED_OUT: Operation timeout.
-     */
-    virtual Status DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) = 0;
-
-    /**
      * @brief Queues output data
      *
      * This function works with DataCallback::OnOutputBufferDone to implement output data transmission.
@@ -111,22 +95,6 @@ struct CodecPlugin : public PluginBase {
      *  @retval ERROR_TIMED_OUT: Operation timeout.
      */
     virtual Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) = 0;
-
-    /**
-     * @brief Dequeues output data
-     *
-     * This function works in sync mode if need.
-     *
-     * The function is valid only in the RUNNING state.
-     *
-     * @param outputBuffers Indicates the pointer to the output data.
-     * @param timeoutMs     Indicates the timeout duration.
-     * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
-     *  @retval ERROR_INVALID_DATA: The output buffer is invalid.
-     *  @retval ERROR_TIMED_OUT: Operation timeout.
-     */
-    virtual Status DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) = 0;
 
     /**
      * @brief Flushes data in the audio buffer.

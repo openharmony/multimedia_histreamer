@@ -23,6 +23,7 @@ namespace OHOS {
 namespace Media {
 namespace Pipeline {
 const Plugin::ValueType g_emptyString = std::string();
+const Plugin::ValueType g_u8Def = (uint8_t)0;
 const Plugin::ValueType g_u32Def = (uint32_t)0;
 const Plugin::ValueType g_d64Def = (int64_t)0;
 const Plugin::ValueType g_u64Def = (uint64_t)0;
@@ -79,6 +80,7 @@ const std::map<Plugin::Tag, std::tuple<const char*, const Plugin::ValueType&, co
     {Plugin::Tag::VIDEO_FRAME_RATE, {"frm_rate",               g_u32Def,           "uint32_t"}},
     {Plugin::Tag::VIDEO_SURFACE, {"surface",                   g_unknown,          "Surface"}},
     {Plugin::Tag::VIDEO_MAX_SURFACE_NUM, {"surface_num",       g_u32Def,           "uin32_t"}},
+    {Plugin::Tag::THREAD_MODE, {"thread_mode",                 g_u8Def,            "ThreadMode"}},
 };
 
 const std::map<Plugin::AudioSampleFormat, const char*> g_auSampleFmtStrMap = {
@@ -139,6 +141,58 @@ const std::map<Plugin::AudioChannelLayout, const char*> g_auChannelLayoutStrMap 
     {Plugin::AudioChannelLayout::STEREO_DOWNMIX, "STEREO_DOWNMIX"},
 };
 
+const std::map<Plugin::VideoPixelFormat, const char*> g_videoPixelFormatStrMap = {
+    {Plugin::VideoPixelFormat::UNKNOWN, "UNKNOWN"},
+    {Plugin::VideoPixelFormat::YUV410P, "YUV410P"},
+    {Plugin::VideoPixelFormat::YUV411P, "YUV411P"},
+    {Plugin::VideoPixelFormat::YUV420P, "YUV420P"},
+    {Plugin::VideoPixelFormat::NV12, "NV12"},
+    {Plugin::VideoPixelFormat::NV21, "NV21"},
+    {Plugin::VideoPixelFormat::YUYV422, "YUYV422"},
+    {Plugin::VideoPixelFormat::YUV422P, "YUV422P"},
+    {Plugin::VideoPixelFormat::YUV444P, "YUV444P"},
+    {Plugin::VideoPixelFormat::RGB24, "RGB24"},
+    {Plugin::VideoPixelFormat::BGR24, "BGR24"},
+    {Plugin::VideoPixelFormat::PAL8, "PAL8"},
+    {Plugin::VideoPixelFormat::GRAY8, "GRAY8"},
+    {Plugin::VideoPixelFormat::MONOWHITE, "MONOWHITE"},
+    {Plugin::VideoPixelFormat::MONOBLACK, "MONOBLACK"},
+    {Plugin::VideoPixelFormat::YUVJ420P, "YUVJ420P"},
+    {Plugin::VideoPixelFormat::YUVJ422P, "YUVJ422P"},
+    {Plugin::VideoPixelFormat::YUVJ444P, "YUVJ444P"},
+};
+
+const std::map<Plugin::AudioAacProfile, const char*> g_auAacProfileNameStrMap = {
+    {Plugin::AudioAacProfile::NONE, "NONE"},
+    {Plugin::AudioAacProfile::MAIN, "MAIN"},
+    {Plugin::AudioAacProfile::LC, "LC"},
+    {Plugin::AudioAacProfile::SSR, "SSR"},
+    {Plugin::AudioAacProfile::LTP, "LTP"},
+    {Plugin::AudioAacProfile::HE, "HE"},
+    {Plugin::AudioAacProfile::SCALABLE, "SCALABLE"},
+    {Plugin::AudioAacProfile::ERLC, "ERLC"},
+    {Plugin::AudioAacProfile::ER_SCALABLE, "ER_SCALABLE"},
+    {Plugin::AudioAacProfile::LD, "LD"},
+    {Plugin::AudioAacProfile::HE_PS, "HE_PS"},
+    {Plugin::AudioAacProfile::ELD, "ELD"},
+    {Plugin::AudioAacProfile::XHE, "XHE"},
+};
+
+const std::map<Plugin::AudioAacStreamFormat, const char*> g_auAacStreamFormatNameStrMap = {
+    {Plugin::AudioAacStreamFormat::MP2ADTS, "MP2ADTS"},
+    {Plugin::AudioAacStreamFormat::MP4ADTS, "MP4ADTS"},
+    {Plugin::AudioAacStreamFormat::MP4LOAS, "MP4LOAS"},
+    {Plugin::AudioAacStreamFormat::MP4LATM, "MP4LATM"},
+    {Plugin::AudioAacStreamFormat::ADIF, "ADIF"},
+    {Plugin::AudioAacStreamFormat::MP4FF, "MP4FF"},
+    {Plugin::AudioAacStreamFormat::RAW, "RAW"},
+};
+
+const std::map<Plugin::ThreadMode, const char*> g_ThreadModeNameStrMap = {
+    {Plugin::ThreadMode::ASYNC, "Async"},
+    {Plugin::ThreadMode::SYNC, "Sync"},
+};
+
 inline bool HasTagInfo(Plugin::Tag tag)
 {
     return g_tagInfoMap.count(tag) != 0;
@@ -147,7 +201,7 @@ inline bool HasTagInfo(Plugin::Tag tag)
 inline const char* GetTagStrName(Plugin::Tag tag)
 {
     if (!HasTagInfo(tag)) {
-        return nullptr;
+        return "null";
     }
     return std::get<0>(g_tagInfoMap.at(tag));
 }
@@ -155,9 +209,9 @@ inline const char* GetTagStrName(Plugin::Tag tag)
 inline const char* GetTagTypeStrName(Plugin::Tag tag)
 {
     if (!HasTagInfo(tag)) {
-        return nullptr;
+        return "null";
     }
-    return std::get<2>(g_tagInfoMap.at(tag));
+    return std::get<2>(g_tagInfoMap.at(tag)); // secondary parameter 2
 }
 
 inline const Plugin::ValueType* GetTagDefValue(Plugin::Tag tag)
@@ -166,6 +220,84 @@ inline const Plugin::ValueType* GetTagDefValue(Plugin::Tag tag)
         return nullptr;
     }
     return &std::get<1>(g_tagInfoMap.at(tag));
+}
+
+inline bool HasAudSampleFmtInfo(Plugin::AudioSampleFormat fmt)
+{
+    return g_auSampleFmtStrMap.count(fmt) != 0;
+}
+
+inline const char* GetAudSampleFmtNameStr(Plugin::AudioSampleFormat fmt)
+{
+    if (!HasAudSampleFmtInfo(fmt)) {
+        return "null";
+    }
+    return g_auSampleFmtStrMap.at(fmt);
+}
+
+inline bool HasAudChanLyInfo(Plugin::AudioChannelLayout layout)
+{
+    return g_auChannelLayoutStrMap.count(layout) != 0;
+}
+
+inline const char* GetAudChanLyNameStr(Plugin::AudioChannelLayout layout)
+{
+    if (!HasAudChanLyInfo(layout)) {
+        return "null";
+    }
+    return g_auChannelLayoutStrMap.at(layout);
+}
+
+inline bool HasVideoPixelFormatNameStr(Plugin::VideoPixelFormat pixelFormat)
+{
+    return g_videoPixelFormatStrMap.count(pixelFormat) != 0;
+}
+
+inline const char* GetVideoPixelFormatNameStr(Plugin::VideoPixelFormat pixelFormat)
+{
+    if (!HasVideoPixelFormatNameStr(pixelFormat)) {
+        return "null";
+    }
+    return g_videoPixelFormatStrMap.at(pixelFormat);
+}
+
+inline bool HasAuAacProfileNameStr(Plugin::AudioAacProfile aacProfile)
+{
+    return g_auAacProfileNameStrMap.count(aacProfile) != 0;
+}
+
+inline const char* GetAuAacProfileNameStr(Plugin::AudioAacProfile aacProfile)
+{
+    if (!HasAuAacProfileNameStr(aacProfile)) {
+        return "null";
+    }
+    return g_auAacProfileNameStrMap.at(aacProfile);
+}
+
+inline bool HasAacStreamFormatNameStr(Plugin::AudioAacStreamFormat aacStreamFormat)
+{
+    return g_auAacStreamFormatNameStrMap.count(aacStreamFormat) != 0;
+}
+
+inline const char* GetAuAacStreamFormatNameStr(Plugin::AudioAacStreamFormat aacStreamFormat)
+{
+    if (!HasAacStreamFormatNameStr(aacStreamFormat)) {
+        return "null";
+    }
+    return g_auAacStreamFormatNameStrMap.at(aacStreamFormat);
+}
+
+inline bool HasThreadModeNameStr(Plugin::ThreadMode threadMode)
+{
+    return g_ThreadModeNameStrMap.count(threadMode) != 0;
+}
+
+inline const char* GetThreadModeNameStr(Plugin::ThreadMode threadMode)
+{
+    if (!HasThreadModeNameStr(threadMode)) {
+        return "null";
+    }
+    return g_ThreadModeNameStrMap.at(threadMode);
 }
 } // Pipeline
 } // Media

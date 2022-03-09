@@ -27,9 +27,8 @@
 #include "osal/thread/mutex.h"
 #include "osal/thread/task.h"
 #include "utils/blocking_queue.h"
-#include "utils/utils.h"
-#include "foundation/error_code.h"
 #include "pipeline/core/clock_provider.h"
+#include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_base.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/video_sink.h"
@@ -64,7 +63,7 @@ public:
      * @param offset always ignore this parameter
      * @return
      */
-    ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) override;
+    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
     ErrorCode Start() override;
     ErrorCode Stop() override;
@@ -82,6 +81,7 @@ public:
 private:
     ErrorCode ConfigurePluginParams(const std::shared_ptr<const Plugin::Meta>& meta);
     ErrorCode ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta);
+    bool CreateVideoSinkPlugin(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo);
     void HandleNegotiateParams(const Plugin::TagMap& upstreamParams, Plugin::TagMap& downstreamParams);
     void RenderFrame();
     bool DoSync(int64_t pts) const;
@@ -91,6 +91,7 @@ private:
     bool isFlushing_ {false};
     OSAL::ConditionVariable startWorkingCondition_ {};
     OSAL::Mutex mutex_;
+    sptr<Surface> surface_;
 
     std::shared_ptr<Plugin::VideoSink> plugin_ {nullptr};
 

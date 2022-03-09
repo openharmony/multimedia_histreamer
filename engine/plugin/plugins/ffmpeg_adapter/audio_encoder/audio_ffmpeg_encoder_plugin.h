@@ -15,8 +15,6 @@
 #ifndef HISTREAMER_AUDIO_FFMPEG_ENCODER_PLUGIN_H
 #define HISTREAMER_AUDIO_FFMPEG_ENCODER_PLUGIN_H
 
-#ifdef RECORDER_SUPPORT
-
 #include <functional>
 #include <map>
 #include "utils/blocking_queue.h"
@@ -53,14 +51,6 @@ public:
 
     Status Stop() override;
 
-    bool IsParameterSupported(Tag tag) override
-    {
-        if (tag == Tag::REQUIRED_OUT_BUFFER_CNT) {
-            return true;
-        }
-        return false;
-    }
-
     Status GetParameter(Tag tag, ValueType& value) override;
 
     Status SetParameter(Tag tag, const ValueType& value) override;
@@ -74,16 +64,13 @@ public:
 
     Status QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
 
-    Status DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
-
     Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs) override;
-
-    Status DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs) override;
 
     Status Flush() override;
 
     Status SetDataCallback(DataCallback* dataCallback) override
     {
+        dataCallback_ = dataCallback;
         return Status::OK;
     }
 
@@ -104,6 +91,8 @@ private:
 
     void FillInFrameCache(const std::shared_ptr<Memory>& mem);
 
+    Status SendOutputBuffer();
+
     mutable OSAL::Mutex parameterMutex_ {};
     std::map<Tag, ValueType> audioParameter_ {};
 
@@ -120,11 +109,11 @@ private:
     std::shared_ptr<SwrContext> swrCtx_ {nullptr};
     std::vector<uint8_t> resampleCache_ {};
     std::vector<uint8_t*> resampleChannelAddr_ {};
+    DataCallback* dataCallback_ {nullptr};
 };
 } // Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
 
-#endif
 #endif // HISTREAMER_AUDIO_FFMPEG_ENCODER_PLUGIN_H

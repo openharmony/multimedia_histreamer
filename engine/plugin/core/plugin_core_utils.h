@@ -24,7 +24,7 @@ namespace Plugin {
 #define LOG_WARN_IF_NOT_OK(plugin, status) \
 do { \
     if ((status) != Status::OK) { \
-        MEDIA_LOG_W("plugin %" PUBLIC_LOG "s %" PUBLIC_LOG "s failed with status %" PUBLIC_LOG "d", \
+        MEDIA_LOG_W("plugin " PUBLIC_LOG "s " PUBLIC_LOG "s failed with status " PUBLIC_LOG "d", \
             (plugin)->GetName().c_str(), __FUNCTION__, status); \
     } \
 } while (0)
@@ -32,7 +32,7 @@ do { \
 #define RETURN_WRONG_STATE_IF_CON_TRUE(condition, plugin, state) \
 do { \
     if (condition) { \
-        MEDIA_LOG_E("plugin %" PUBLIC_LOG "s cannot %" PUBLIC_LOG "s in state %" PUBLIC_LOG "s", \
+        MEDIA_LOG_E("plugin " PUBLIC_LOG "s cannot " PUBLIC_LOG "s in state " PUBLIC_LOG "s", \
             (plugin)->GetName().c_str(), __FUNCTION__, \
             GetStateString(state)); \
         return Status::ERROR_WRONG_STATE; \
@@ -42,7 +42,7 @@ do { \
 #define RETURN_WRONG_STATE_IF_CON_FALSE(condition, plugin, state) \
 do { \
     if (!(condition)) { \
-        MEDIA_LOG_E("plugin %" PUBLIC_LOG "s cannot %" PUBLIC_LOG "s in state %" PUBLIC_LOG "s", \
+        MEDIA_LOG_E("plugin " PUBLIC_LOG "s cannot " PUBLIC_LOG "s in state " PUBLIC_LOG "s", \
                     (plugin)->GetName().c_str(), __FUNCTION__, \
         GetStateString(state)); \
         return Status::ERROR_WRONG_STATE; \

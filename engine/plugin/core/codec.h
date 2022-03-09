@@ -28,8 +28,8 @@ namespace Media {
 namespace Plugin {
 struct DataCallbackHelper {
     virtual ~DataCallbackHelper() = default;
-    virtual void OnInputBufferDone(std::shared_ptr<Buffer> &input) = 0;
-    virtual void OnOutputBufferDone(std::shared_ptr<Buffer> &output) = 0;
+    virtual void OnInputBufferDone(const std::shared_ptr<Buffer> &input) = 0;
+    virtual void OnOutputBufferDone(const std::shared_ptr<Buffer> &output) = 0;
 };
 
 struct CodecPlugin;
@@ -46,11 +46,7 @@ public:
 
     Status QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs);
 
-    Status DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs);
-
     Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs);
-
-    Status DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs);
 
     Status Flush();
 

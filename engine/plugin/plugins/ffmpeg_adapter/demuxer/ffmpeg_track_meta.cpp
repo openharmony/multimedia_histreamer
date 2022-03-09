@@ -15,10 +15,9 @@
 
 #include "ffmpeg_track_meta.h"
 #include "foundation/log.h"
-#include "utils/constants.h"
-#include "utils/type_define.h"
 #include "plugins/ffmpeg_adapter/utils/aac_audio_config_parser.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
+#include "utils/constants.h"
 #ifdef VIDEO_SUPPORT
 #include "plugins/ffmpeg_adapter/utils/avc_config_data_parser.h"
 #endif
@@ -46,6 +45,7 @@ StreamConvertor g_streamConvertors[] = {{AV_CODEC_ID_PCM_S16LE, ConvertRawAudioS
                                         {AV_CODEC_ID_MP3, ConvertMP3StreamToMetaInfo},
                                         {AV_CODEC_ID_AAC, ConvertAACStreamToMetaInfo},
                                         {AV_CODEC_ID_AAC_LATM, ConvertAACLatmStreamToMetaInfo},
+                                        {AV_CODEC_ID_VORBIS, ConvertVorbisStreamToMetaInfo},
 #ifdef VIDEO_SUPPORT
                                         {AV_CODEC_ID_H264, ConvertAVCStreamToMetaInfo}
 #endif
@@ -69,12 +69,17 @@ void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream, const std::sha
             {Tag::AUDIO_CHANNEL_LAYOUT, ConvertChannelLayoutFromFFmpeg(context->channels, context->channel_layout)});
         // ffmpeg defaults to 1024 samples per frame for planar PCM in each buffer (one for each channel).
         uint32_t samplesPerFrame = 1024;
-        if (!IsPcmStream(avStream)) {
+        if (!IsPcmStream(avStream) && context->frame_size != 0) {
             samplesPerFrame = static_cast<uint32_t>(context->frame_size);
         }
         meta.insert({Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame});
-        meta.insert({Tag::AUDIO_SAMPLE_FORMAT, Trans2Format(context->sample_fmt)});
+        meta.insert({Tag::AUDIO_SAMPLE_FORMAT, ConvFf2PSampleFmt(context->sample_fmt)});
         meta.insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(context->bit_rate)});
+    }
+    if (context->extradata_size > 0) {
+        CodecConfig codecConfig;
+        codecConfig.assign(context->extradata, context->extradata + context->extradata_size);
+        meta.insert({Tag::MEDIA_CODEC_CONFIG, std::move(codecConfig)});
     }
 }
 } // namespace
@@ -134,6 +139,15 @@ void ConvertAACStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
     }
 }
 
+void ConvertVorbisStreamToMetaInfo(const AVStream& avStream,
+                                   const std::shared_ptr<AVCodecContext>& context, TagMap& meta)
+{
+    MEDIA_LOG_I("ConvertOggStreamToMetaInfo Called");
+    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_VORBIS)});
+    ConvertCommonAudioStreamToMetaInfo(avStream, context, meta);
+    meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
+}
+
 void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
                                     TagMap& meta)
 {
@@ -142,7 +156,7 @@ void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_
     if (context->channels != -1) {
         meta.insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(context->sample_rate)});
         meta.insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(context->channels)});
-        meta.insert({Tag::AUDIO_SAMPLE_FORMAT, Trans2Format(context->sample_fmt)});
+        meta.insert({Tag::AUDIO_SAMPLE_FORMAT, ConvFf2PSampleFmt(context->sample_fmt)});
         meta.insert(
             {Tag::AUDIO_CHANNEL_LAYOUT, ConvertChannelLayoutFromFFmpeg(context->channels, context->channel_layout)});
         meta.insert({Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(context->frame_size)});
@@ -155,7 +169,7 @@ void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_
 #ifdef VIDEO_SUPPORT
 void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta)
 {
-    meta.insert({Tag::MIME, std::string(MEDIA_MIME_VIDEO_AVC)});
+    meta.insert({Tag::MIME, std::string(MEDIA_MIME_VIDEO_H264)});
     meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
     meta.insert({Tag::MEDIA_BITRATE, context->bit_rate});
     meta.insert({Tag::VIDEO_WIDTH, static_cast<uint32_t>(context->width)});
@@ -186,7 +200,7 @@ void ConvertAVStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<A
             return;
         }
     }
-    MEDIA_LOG_E("unsupported codec id: %" PUBLIC_LOG "d", codecId);
+    MEDIA_LOG_E("unsupported codec id: " PUBLIC_LOG "d", codecId);
 }
 } // namespace Ffmpeg
 } // namespace Plugin

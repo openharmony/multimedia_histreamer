@@ -20,8 +20,7 @@
 #include <vector>
 
 #include "plugin/common/any.h"
-#include "foundation/error_code.h"
-#include "utils/utils.h"
+#include "error_code.h"
 
 namespace OHOS {
 namespace Media {

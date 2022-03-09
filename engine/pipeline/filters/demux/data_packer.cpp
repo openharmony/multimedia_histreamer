@@ -12,28 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define HST_LOG_TAG "DataPacker"
+
 #include "data_packer.h"
 #include <cstring>
 #include "foundation/log.h"
-#include "plugin/common/plugin_buffer.h"
+#include "filters/common/dump_buffer.h"
 
 namespace OHOS {
 namespace Media {
-#define LOG_WARN_IF_FAIL(errorNo, errorMsg)                                                                            \
-    do {                                                                                                               \
-        if ((errorNo) != EOK) {                                                                                        \
-            MEDIA_LOG_W(errorMsg);                                                                                     \
-        }                                                                                                              \
+#define EXEC_WHEN_GET(isGet, exec)     \
+    do {                               \
+        if (isGet) {                   \
+            exec;                      \
+        }                              \
     } while (0)
 
-#define RETURN_FALSE_IF_NULL(ptr)                                                                                      \
-    do {                                                                                                               \
-        if ((ptr) == nullptr) {                                                                                        \
-            return false;                                                                                              \
-        }                                                                                                              \
-    } while (0)
+static const DataPacker::Position INVALID_POSITION = DataPacker::Position(-1, 0, 0);
+static constexpr size_t MAX_BUFFER_NUMBER_IN_DATA_PACKER = 30;
 
-DataPacker::DataPacker() : mutex_(), que_(), assembler_(), size_(0), bufferOffset_(0), pts_(0), dts_(0)
+DataPacker::DataPacker() : mutex_(), que_(), size_(0), mediaOffset_(0), pts_(0), dts_(0),
+    prevGet_(INVALID_POSITION), currentGet_(INVALID_POSITION), capacity_(MAX_BUFFER_NUMBER_IN_DATA_PACKER)
 {
     MEDIA_LOG_I("DataPacker ctor...");
 }
@@ -60,190 +59,220 @@ inline static const uint8_t* AudioBufferReadOnlyData(AVBufferPtr& ptr)
 
 void DataPacker::PushData(AVBufferPtr bufferPtr, uint64_t offset)
 {
-    MEDIA_LOG_D("DataPacker PushData begin... buffer (offset %" PUBLIC_LOG_U64 ", size %" PUBLIC_LOG_U32 ")",
-                offset, AudioBufferSize(bufferPtr));
+    size_t bufferSize = AudioBufferSize(bufferPtr);
+    MEDIA_LOG_D("DataPacker PushData begin... buffer (offset " PUBLIC_LOG_U64 ", size " PUBLIC_LOG_ZU ")",
+                offset, bufferSize);
+    DUMP_BUFFER2LOG("DataPacker Push", bufferPtr, offset);
+    FALSE_RET_MSG(bufferSize > 0, "Can not push zero length buffer.");
+
     OSAL::ScopedLock lock(mutex_);
+    if (que_.size() >= capacity_) {
+        MEDIA_LOG_D("DataPacker is full, waiting for pop.");
+        cvFull_.Wait(lock, [this] { return que_.size() < capacity_; });
+    }
+
     size_ += AudioBufferSize(bufferPtr);
     if (que_.empty()) {
-        bufferOffset_ = offset;
+        mediaOffset_ = offset;
         dts_ = bufferPtr->dts;
         pts_ = bufferPtr->pts;
     }
     que_.emplace_back(std::move(bufferPtr));
-    MEDIA_LOG_D("DataPacker PushData end... dataPacker (offset %" PUBLIC_LOG_U64 ", size %" PUBLIC_LOG_U32 ")",
-                bufferOffset_, size_.load());
+    cvEmpty_.NotifyOne();
+    MEDIA_LOG_D("DataPacker PushData end... " PUBLIC_LOG_S, ToString().c_str());
 }
 
+// curOffset: the offset end of this dataPacker. if IsDataAvailable() false, we can get data from source from curOffset
 bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOffset)
 {
+    MEDIA_LOG_D("dataPacker (offset " PUBLIC_LOG_U64 ", size " PUBLIC_LOG_U32 "), curOffsetEnd is " PUBLIC_LOG_U64,
+                mediaOffset_, size_.load(), mediaOffset_ + size_.load());
+    MEDIA_LOG_D(PUBLIC_LOG_S, ToString().c_str());
     OSAL::ScopedLock lock(mutex_);
-    auto curOffsetTemp = bufferOffset_;
-    if (que_.empty() || offset < curOffsetTemp || offset >= curOffsetTemp + size_) { // 原有数据无法命中, 则删除原有数据
+    auto curOffsetTemp = mediaOffset_;
+    if (que_.empty() || offset < curOffsetTemp || offset > curOffsetTemp + size_) { // 原有数据无法命中, 则删除原有数据
         curOffset = offset;
         FlushInternal();
         MEDIA_LOG_D("IsDataAvailable false, offset not in cached data, clear it.");
         return false;
     }
-    int bufCnt = que_.size();
-    auto offsetEnd = offset + size;
-    auto curOffsetEnd = bufferOffset_ + AudioBufferSize(que_.front());
+    size_t bufCnt = que_.size();
+    uint64_t offsetEnd = offset + size;
+    uint64_t curOffsetEnd = mediaOffset_ + AudioBufferSize(que_.front());
     if (bufCnt == 1) {
         curOffset = curOffsetEnd;
-        MEDIA_LOG_D("IsDataAvailable bufCnt == 1, result %" PUBLIC_LOG_D32, offsetEnd <= curOffsetEnd);
+        MEDIA_LOG_D("IsDataAvailable bufCnt == 1, result " PUBLIC_LOG_D32, offsetEnd <= curOffsetEnd);
         return offsetEnd <= curOffsetEnd;
     }
     auto preOffsetEnd = curOffsetEnd;
-    for (auto i = 1; i < bufCnt; ++i) {
+    for (size_t i = 1; i < bufCnt; ++i) {
         curOffsetEnd = preOffsetEnd + AudioBufferSize(que_[i]);
         if (curOffsetEnd >= offsetEnd) {
-            MEDIA_LOG_D("IsDataAvailable true, last buffer index %" PUBLIC_LOG_U32 ", offsetEnd %" PUBLIC_LOG_U64
-                ", curOffsetEnd %" PUBLIC_LOG_U64, i, offsetEnd, curOffsetEnd);
+            MEDIA_LOG_D("IsDataAvailable true, last buffer index " PUBLIC_LOG_ZU ", offsetEnd " PUBLIC_LOG_U64
+                ", curOffsetEnd " PUBLIC_LOG_U64, i, offsetEnd, curOffsetEnd);
             return true;
         } else {
             preOffsetEnd = curOffsetEnd;
         }
     }
     if (preOffsetEnd >= offsetEnd) {
-        MEDIA_LOG_D("IsDataAvailable true, use all buffers, last buffer index %" PUBLIC_LOG_U32 ", offsetEnd %"
-            PUBLIC_LOG_U64 ", curOffsetEnd %" PUBLIC_LOG_U64, bufCnt - 1, offsetEnd, curOffsetEnd);
+        MEDIA_LOG_D("IsDataAvailable true, use all buffers, last buffer index " PUBLIC_LOG_ZU ", offsetEnd "
+            PUBLIC_LOG_U64 ", curOffsetEnd " PUBLIC_LOG_U64, bufCnt - 1, offsetEnd, curOffsetEnd);
         return true;
     }
     curOffset = preOffsetEnd;
-    MEDIA_LOG_D("IsDataAvailable false, offsetEnd %" PUBLIC_LOG_U64 ", curOffsetEnd %" PUBLIC_LOG_U64,
-                offsetEnd, curOffsetEnd);
+    MEDIA_LOG_D("IsDataAvailable false, offsetEnd " PUBLIC_LOG_U64 ", curOffsetEnd " PUBLIC_LOG_U64,
+                offsetEnd, preOffsetEnd);
     return false;
 }
 
 bool DataPacker::PeekRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr)
 {
     OSAL::ScopedLock lock(mutex_);
-    return PeekRangeInternal(offset, size, bufferPtr);
+    if (que_.empty()) {
+        MEDIA_LOG_D("DataPacker is empty, waiting for push.");
+        cvEmpty_.Wait(lock, [this] { return !que_.empty(); });
+    }
+
+    return PeekRangeInternal(offset, size, bufferPtr, false);
 }
 
-// 在调用当前接口前需要先调用IsDataAvailable()
-// offset - 要peek的数据起始位置 在media file文件 中的 offset
-// size - 要读取的长度
-// bufferPtr - 出参
-bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr)
+// Should call IsDataAvailable() before to make sure there is enough buffer to copy.
+// offset : the offset (of the media file) to peek ( 要peek的数据起始位置 在media file文件 中的 offset )
+// size : the size of data to peek
+// bufferPtr : out buffer
+// isGet : is it called from GetRange.
+bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr, bool isGet)
 {
-    MEDIA_LOG_D("DataPacker PeekRange(offset, size) = (%" PUBLIC_LOG PRIu64 ", %"
-                PUBLIC_LOG PRIu32 ")...", offset, size);
-    FALSE_RETURN_V(bufferPtr != nullptr, false);
-    assembler_.resize(size);
-    uint8_t* dstPtr = assembler_.data();
-    auto offsetEnd = offset + size;
-    auto curOffsetEnd = bufferOffset_ + AudioBufferSize(que_[0]);
-    if (offsetEnd <= curOffsetEnd) { // 0号buffer够用
-        dstPtr = AudioBufferWritableData(bufferPtr, size);
-        RETURN_FALSE_IF_NULL(dstPtr);
-        LOG_WARN_IF_FAIL(memcpy_s(dstPtr, size,
-            AudioBufferReadOnlyData(que_[0]) + offset - bufferOffset_, size), "failed to memcpy");
-    } else { // 0号buffer不够用
-        // 拷贝第一个buffer需要的内容(多数时候是0号buffer)
-        // 找到第一个要拷贝的Buffer
-        size_t index = 0;
-        uint64_t prevOffset = bufferOffset_;
-        do {
-            if (offset >= prevOffset && offset - prevOffset < AudioBufferSize(que_[index])) {
-                break;
-            }
-            prevOffset += AudioBufferSize(que_[index]);
-            index++;
-        } while (index < que_.size());
-        FALSE_RET_V_MSG_E(index < que_.size(), false, "Can not find first buffer to copy.");
-        auto srcSize = AudioBufferSize(que_[index]) - (offset - prevOffset);
-        dstPtr = AudioBufferWritableData(bufferPtr, srcSize);
-        RETURN_FALSE_IF_NULL(dstPtr);
-        LOG_WARN_IF_FAIL(memcpy_s(dstPtr, srcSize,
-            AudioBufferReadOnlyData(que_[index]) + offset - prevOffset, srcSize),
-            "failed to copy memory");
+    MEDIA_LOG_D("PeekRangeInternal (offset, size) = (" PUBLIC_LOG_U64 ", " PUBLIC_LOG_U32 ")...", offset, size);
+    int32_t startIndex = 0; // The index of buffer that we first use
+    size_t copySize = 0;
+    uint32_t needCopySize = size, firstBufferOffset = 0;
+    uint8_t* dstPtr = AudioBufferWritableData(bufferPtr, needCopySize);
+    FALSE_RETURN_V(dstPtr != nullptr, false);
 
-        // 数据不足的部分，从后续buffer(多数时候是1/2/3...号)拷贝
-        auto prevMediaOffsetEnd = prevOffset + AudioBufferSize(que_[index]);
-        dstPtr += srcSize;
-        size -= srcSize;
-        for (size_t i = index + 1; i < que_.size(); ++i) {
-            curOffsetEnd = prevMediaOffsetEnd + AudioBufferSize(que_[i]);
-            if (curOffsetEnd >= offsetEnd) {
-                LOG_WARN_IF_FAIL(memcpy_s(dstPtr, size, AudioBufferReadOnlyData(que_[i]), size),
-                                 "failed to copy memory");
-                break;
-            } else {
-                srcSize = AudioBufferSize(que_[i]);
-                LOG_WARN_IF_FAIL(memcpy_s(dstPtr, srcSize, AudioBufferReadOnlyData(que_[i]), srcSize),
-                                 "failed to copy memory");
-                dstPtr += srcSize;
-                size -= srcSize;
-                prevMediaOffsetEnd += srcSize;
-            }
+    auto offsetEnd = offset + needCopySize;
+    auto curOffsetEnd = mediaOffset_ + AudioBufferSize(que_[startIndex]);
+    if (offsetEnd <= curOffsetEnd) { // first buffer is enough
+        auto bufferOffset = static_cast<int32_t>(offset - mediaOffset_);
+        FALSE_RET_V_MSG_E(bufferOffset >= 0, false, "Copy buffer start position error.");
+        firstBufferOffset = bufferOffset;
+        copySize = CopyFirstBuffer(size, startIndex, dstPtr, bufferPtr, bufferOffset);
+        needCopySize -= copySize;
+        FALSE_LOG_MSG_E(needCopySize == 0, "First buffer is enough, but copySize is not enough");
+        EXEC_WHEN_GET(isGet, currentGet_ = Position(startIndex, firstBufferOffset, offset));
+        return true;
+    } else { // first buffer not enough
+        // Find the first buffer that should copy
+        uint64_t prevOffset; // The media offset of the startIndex buffer start byte
+        FALSE_RETURN_V(FindFirstBufferToCopy(offset, startIndex, prevOffset), false);
+        auto bufferOffset = static_cast<int32_t>(offset - prevOffset);
+        FALSE_RET_V_MSG_E(bufferOffset >= 0, false, "Copy buffer start position error.");
+        firstBufferOffset = bufferOffset;
+        copySize = CopyFirstBuffer(size, startIndex, dstPtr, bufferPtr, bufferOffset);
+
+        needCopySize -= copySize;
+        if (needCopySize == 0) { // First buffer is enough
+            EXEC_WHEN_GET(isGet, currentGet_ = Position(startIndex, firstBufferOffset, offset));
+            return true;
         }
+        dstPtr += copySize;
+
+        // First buffer is not enough, copy from successive buffers
+        (void)CopyFromSuccessiveBuffer(prevOffset, offsetEnd, startIndex, dstPtr, needCopySize);
     }
-    FALSE_LOG_MSG_W(curOffsetEnd >= offsetEnd, "Processed all cached buffers, still not meet offsetEnd.");
-    WrapAssemblerBuffer(offset).swap(bufferPtr);
+    EXEC_WHEN_GET(isGet, currentGet_ = Position(startIndex, firstBufferOffset, offset));
+
+    // Update to the real size, especially at the end.
+    bufferPtr->GetMemory()->UpdateDataSize(size - needCopySize);
     return true;
 }
 
-// 单个buffer不足以存储请求的数据，需要合并多个buffer从而组成目标buffer
-bool DataPacker::RepackBuffers(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr)
-{
-    // 可能的改进点: 即使是GetRange, 也会先Peek数据，从而发生拷贝, 有可能可以减少拷贝
-    FALSE_RETURN_V(PeekRangeInternal(offset, size, bufferPtr), false);
-
-    // 删除已经拿走的数据
-    auto offsetEnd = offset + size;
-    size_ -= size;
-    while (!que_.empty()) {
-        auto& buf = que_.front();
-        auto curOffsetEnd = bufferOffset_ + AudioBufferSize(buf);
-        if (curOffsetEnd < offsetEnd) {
-            que_.pop_front();
-            bufferOffset_ = curOffsetEnd;
-            continue;
-        } else if (curOffsetEnd == offsetEnd) {
-            que_.pop_front();
-            bufferOffset_ = curOffsetEnd;
-            if (!que_.empty()) {
-                dts_ = que_.front()->dts;
-                pts_ = que_.front()->pts;
-            }
-        } else {
-            auto removeSize = AudioBufferSize(que_.front()) - (curOffsetEnd - offsetEnd);
-            RemoveBufferContent(que_.front(), removeSize);
-            bufferOffset_ = offsetEnd;
-            dts_ = buf->dts;
-            pts_ = buf->pts;
-        }
-        break;
-    }
-    return true;
-}
-
-// 在调用当前接口前需要先调用IsDataAvailable()
+// Call IsDataAvailable() first before call GetRange
 bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr)
 {
-    MEDIA_LOG_D("DataPacker GetRange(offset, size) = (%" PUBLIC_LOG PRIu64 ", %"
-                PUBLIC_LOG PRIu32 ")...", offset, size);
+    MEDIA_LOG_D("DataPacker GetRange(offset, size) = (" PUBLIC_LOG_U64 ", "
+                PUBLIC_LOG_U32 ")...", offset, size);
+    DUMP_BUFFER2LOG("GetRange Input", bufferPtr, 0);
+    FALSE_RET_V_MSG_E(bufferPtr && (!bufferPtr->IsEmpty()) && bufferPtr->GetMemory()->GetCapacity() >= size, false,
+                      "GetRange input bufferPtr empty or capacity not enough.");
+
     OSAL::ScopedLock lock(mutex_);
-    if (!bufferPtr) {
-        bufferPtr = std::make_shared<AVBuffer>();
+    if (que_.empty()) {
+        MEDIA_LOG_D("DataPacker is empty, waiting for push");
+        cvEmpty_.Wait(lock, [this] { return !que_.empty(); });
     }
-    if (RepackBuffers(offset, size, bufferPtr)) {
-        return true;
+
+    FALSE_RETURN_V(!que_.empty(), false);
+    prevGet_ = currentGet_; // store last get position to prevGet_
+
+    FALSE_RETURN_V(PeekRangeInternal(offset, size, bufferPtr, true), false);
+    if (isEos_ && size_ <= size) { // Is EOS, and this time get all the data.
+        FlushInternal();
+    } else {
+        if (prevGet_ < currentGet_) {
+            RemoveOldData(currentGet_);
+        }
     }
-    MEDIA_LOG_E("GetRange peek data failed, have you called IsDataAvailable() first?");
-    return false;
+
+    if (que_.size() < capacity_) {
+        cvFull_.NotifyOne();
+    }
+    return true;
 }
 
-AVBufferPtr DataPacker::WrapAssemblerBuffer(uint64_t offset)
+// GetRange in live play mode
+//  1. not use offset
+//  2. remove the data have been read
+bool DataPacker::GetRange(uint32_t size, AVBufferPtr& bufferPtr)
 {
-    MEDIA_LOG_D("DataPacker WrapAssemblerBuffer, offset = %" PUBLIC_LOG PRIu64, offset);
-    (void)offset;
-    auto bufferPtr = std::make_shared<AVBuffer>();
-    auto dataPtr = std::shared_ptr<uint8_t>(assembler_.data(), [this](void* ptr) { assembler_.resize(0); });
-    auto bufferData = bufferPtr->WrapMemoryPtr(dataPtr, assembler_.size(), assembler_.size());
-    bufferPtr->dts = dts_;
-    bufferPtr->pts = pts_;
-    return bufferPtr;
+    MEDIA_LOG_D("DataPacker live play GetRange(size) = (" PUBLIC_LOG_U32 ")...", size);
+    FALSE_RET_V_MSG_E(bufferPtr && (!bufferPtr->IsEmpty()) && bufferPtr->GetMemory()->GetCapacity() >= size, false,
+                      "Live play GetRange input bufferPtr empty or capacity not enough.");
+
+    OSAL::ScopedLock lock(mutex_);
+    if (que_.empty()) {
+        FALSE_RETURN_V_W(!isEos_, false);
+        MEDIA_LOG_D("DataPacker is empty, live play GetRange waiting for push");
+        cvEmpty_.Wait(lock, [this] { return !que_.empty(); });
+    }
+
+    FALSE_RETURN_V(!que_.empty(), false);
+
+    int32_t needCopySize = static_cast<int32_t>(size);
+    int32_t currCopySize = 0;
+    int32_t index = 0;
+    uint32_t lastBufferOffsetEnd = 0;
+
+    uint8_t* dstPtr = AudioBufferWritableData(bufferPtr, size);
+    FALSE_RETURN_V(dstPtr != nullptr, false);
+
+    while (index < que_.size()) {
+        AVBufferPtr& buffer = que_[index];
+        size_t bufferSize = AudioBufferSize(buffer);
+        currCopySize = std::min(static_cast<int32_t>(bufferSize), needCopySize);
+        currCopySize = CopyFirstBuffer(currCopySize, index, dstPtr, bufferPtr, 0);
+        lastBufferOffsetEnd = currCopySize;
+        dstPtr += currCopySize;
+        needCopySize -= currCopySize;
+        if (needCopySize <= 0) { // it is enough
+            break;
+        }
+        index++;
+        lastBufferOffsetEnd = 0;
+    }
+    FALSE_LOG(needCopySize >= 0);
+    if (needCopySize < 0) {
+        needCopySize = 0;
+    }
+    bufferPtr->GetMemory()->UpdateDataSize(size - needCopySize);
+
+    auto endPosition = Position(index, lastBufferOffsetEnd, mediaOffset_ + size - needCopySize);
+    RemoveOldData(endPosition); // Live play, remove the got data
+    if (que_.size() < capacity_) {
+        cvFull_.NotifyOne();
+    }
+    return true;
 }
 
 void DataPacker::Flush()
@@ -253,21 +282,171 @@ void DataPacker::Flush()
     FlushInternal();
 }
 
+void DataPacker::SetEos()
+{
+    MEDIA_LOG_I("DataPacker SetEos called.");
+    OSAL::ScopedLock lock(mutex_);
+    isEos_ = true;
+}
+
+bool DataPacker::IsEmpty()
+{
+    OSAL::ScopedLock lock(mutex_);
+    return size_ > 0;
+}
+
 void DataPacker::FlushInternal()
 {
     MEDIA_LOG_D("DataPacker FlushInternal called.");
     que_.clear();
     size_ = 0;
-    bufferOffset_ = 0;
+    mediaOffset_ = 0;
     dts_ = 0;
     pts_ = 0;
+    isEos_ = false;
+    prevGet_ = INVALID_POSITION;
+    currentGet_ = INVALID_POSITION;
 }
 
-void DataPacker::RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t removeSize) {
+// Remove first removeSize data in the buffer
+void DataPacker::RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t removeSize)
+{
+    if (removeSize == 0) {
+        return;
+    }
     auto memory = buffer->GetMemory();
+    FALSE_RETURN(removeSize < memory->GetSize());
     auto copySize = memory->GetSize() - removeSize;
     FALSE_LOG_MSG_E(memmove_s(memory->GetWritableAddr(copySize), memory->GetCapacity(),
-              memory->GetReadOnlyData(removeSize), copySize) == EOK, "memmove failed.");
+        memory->GetReadOnlyData(removeSize), copySize) == EOK, "memmove failed.");
+    FALSE_RETURN(UpdateWhenFrontDataRemoved(removeSize));
+}
+
+// Remove consumed data, and make the remaining data continuous
+// Consumed data - between prevGet_.first and currentGet_.first
+// In order to make remaining data continuous, also remove the data before prevGet_.first
+// Update to support live play mode, Remove the data before position
+void DataPacker::RemoveOldData(const Position& position)
+{
+    MEDIA_LOG_D("Before RemoveOldData " PUBLIC_LOG_S, ToString().c_str());
+    FALSE_LOG(RemoveTo(position));
+    if (que_.empty()) {
+        mediaOffset_ = 0;
+        size_ = 0;
+        pts_ = 0;
+        dts_ = 0;
+    } else {
+        pts_ = que_.front()->pts;
+        dts_ = que_.front()->dts;
+    }
+    MEDIA_LOG_D("After RemoveOldData " PUBLIC_LOG_S, ToString().c_str());
+}
+
+bool DataPacker::RemoveTo(const Position& position)
+{
+    MEDIA_LOG_D("Remove to " PUBLIC_LOG_S, position.ToString().c_str());
+    size_t removeSize;
+    int32_t i = 0;
+    while (i < position.index && !que_.empty()) { // Remove all whole buffer before position.index
+        removeSize = AudioBufferSize(que_.front());
+        FALSE_RETURN_V(UpdateWhenFrontDataRemoved(removeSize), false);
+        que_.pop_front();
+        i++;
+    }
+    FALSE_RETURN_V_W(!que_.empty(), true);
+
+    // The last buffer
+    removeSize = AudioBufferSize(que_.front());
+    // 1. If whole buffer should be removed
+    if (position.bufferOffset >= removeSize) {
+        FALSE_RETURN_V(UpdateWhenFrontDataRemoved(removeSize), false);
+        que_.pop_front();
+        return true;
+    }
+    // 2. Remove the front part of the buffer data
+    RemoveBufferContent(que_.front(), position.bufferOffset);
+    return true;
+}
+
+bool DataPacker::UpdateWhenFrontDataRemoved(size_t removeSize)
+{
+    mediaOffset_ += removeSize;
+    FALSE_RET_V_MSG_E(size_.load() >= removeSize, false, "Total size(size_ " PUBLIC_LOG_U32
+            ") smaller than removeSize(" PUBLIC_LOG_ZU ")", size_.load(), removeSize);
+    size_ -= removeSize;
+    return true;
+}
+
+// offset : from GetRange(offset, size)
+// startIndex : out, find the first buffer should copy
+// prevOffset : the first copied buffer's media offset.
+bool DataPacker::FindFirstBufferToCopy(uint64_t offset, int32_t &startIndex, uint64_t &prevOffset)
+{
+    startIndex = 0;
+    prevOffset= mediaOffset_;
+    do {
+        if (offset >= prevOffset && offset - prevOffset < AudioBufferSize(que_[startIndex])) {
+            return true;
+        }
+        prevOffset += AudioBufferSize(que_[startIndex]);
+        startIndex++;
+    } while (static_cast<size_t>(startIndex) < que_.size());
+    return false;
+}
+
+// size : the GetRange size
+// dstPtr : copy data to here
+// dstBufferPtr : the AVBuffer contains dstPtr, pass this parameter to update pts / dts.
+// bufferOffset : the buffer offset that we start copy
+size_t DataPacker::CopyFirstBuffer(size_t size, int32_t index, uint8_t *dstPtr, AVBufferPtr &dstBufferPtr,
+                                   int32_t bufferOffset)
+{
+    auto remainSize = static_cast<int32_t>(AudioBufferSize(que_[index]) - bufferOffset);
+    FALSE_RET_V_MSG_E(remainSize > 0, 0, "Copy size can not be negative.");
+    size_t copySize = std::min(static_cast<size_t>(remainSize), size);
+    NZERO_LOG(memcpy_s(dstPtr, copySize,
+        AudioBufferReadOnlyData(que_[index]) + bufferOffset, copySize));
+
+    dstBufferPtr->pts = que_[index]->pts;
+    dstBufferPtr->dts = que_[index]->dts;
+    return copySize;
+}
+
+// prevOffset : the media offset of the first byte in the startIndex + 1 buffer
+// offsetEnd : calculate from GetRange(offset, size), offsetEnd = offset + size.
+// startIndex : the index start copy data for this GetRange. CopyFromSuccessiveBuffer process from startIndex + 1.
+// dstPtr : copy data to here
+// needCopySize : in and out, indicate how many bytes still need to copy.
+int32_t DataPacker::CopyFromSuccessiveBuffer(uint64_t prevOffset, uint64_t offsetEnd, int32_t startIndex,
+                                             uint8_t *dstPtr, uint32_t &needCopySize)
+{
+    size_t copySize;
+    int32_t usedCount = 0;
+    uint64_t curOffsetEnd;
+    prevOffset = prevOffset + AudioBufferSize(que_[startIndex]);
+    for (size_t i = startIndex + 1; i < que_.size(); ++i) {
+        usedCount++;
+        curOffsetEnd = prevOffset + AudioBufferSize(que_[i]);
+        if (curOffsetEnd >= offsetEnd) { // This buffer is enough
+            NZERO_LOG(memcpy_s(dstPtr, needCopySize, AudioBufferReadOnlyData(que_[i]), needCopySize));
+            needCopySize = 0;
+            return usedCount; // Finished copy buffer
+        } else {
+            copySize = AudioBufferSize(que_[i]);
+            NZERO_LOG(memcpy_s(dstPtr, copySize, AudioBufferReadOnlyData(que_[i]), copySize));
+            dstPtr += copySize;
+            needCopySize -= copySize;
+            prevOffset += copySize;
+        }
+    }
+    MEDIA_LOG_W("Processed all cached buffers, still not meet offsetEnd, maybe EOS reached.");
+    return usedCount;
+}
+
+std::string DataPacker::ToString() const
+{
+    return "DataPacker (offset " + std::to_string(mediaOffset_) + ", size " + std::to_string(size_) +
+           ", buffer count " + std::to_string(que_.size()) + ")";
 }
 } // namespace Media
 } // namespace OHOS

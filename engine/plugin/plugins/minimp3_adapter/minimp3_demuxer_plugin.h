@@ -23,8 +23,7 @@
 #include "core/plugin_register.h"
 #include "minimp3_wrapper.h"
 #include "plugin/interface/demuxer_plugin.h"
-#include "thread/mutex.h"
-#include "utils/type_define.h"
+#include "foundation/osal/thread/mutex.h"
 
 using Mp3DemuxerHandle     = Minimp3WrapperMp3dec;
 using Mp3DemuxerSampleAttr = Minimp3WrapperMp3dSample;
@@ -93,7 +92,6 @@ public:
     Status Reset()   override;
     Status Start()   override;
     Status Stop()    override;
-    bool   IsParameterSupported(Tag tag) override;
     Status GetParameter(Tag tag, ValueType& value) override;
     Status SetParameter(Tag tag, const ValueType& value) override;
     std::shared_ptr<Allocator> GetAllocator() override;

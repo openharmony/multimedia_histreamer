@@ -20,16 +20,15 @@
 #include <memory>
 #include <string>
 
-#include "foundation/error_code.h"
 #include "osal/thread/task.h"
 #include "osal/utils/util.h"
 #include "utils/constants.h"
-#include "utils/type_define.h"
-#include "utils/utils.h"
+#include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_base.h"
+#include "plugin/common/plugin_video_tags.h"
 #include "plugin/core/plugin_manager.h"
 #include "plugin/interface/source_plugin.h"
-#include "plugin/common/plugin_video_tags.h"
+#include "pipeline/core/type_define.h"
 
 namespace OHOS {
 namespace Media {
@@ -50,15 +49,12 @@ public:
     ErrorCode SendEos();
 private:
     void InitPorts() override;
-    ErrorCode InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& audioMeta);
+    ErrorCode InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& videoMeta);
     void ReadLoop();
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);
     ErrorCode FindPlugin();
     bool DoNegotiate(const CapabilitySet& outCaps);
-    bool CheckSampleRate(const Plugin::Capability& cap);
-    bool CheckChannels(const Plugin::Capability& cap);
-    bool CheckSampleFormat(const Plugin::Capability& cap);
     ErrorCode DoConfigure();
     void SendBuffer(const std::shared_ptr<AVBuffer>& buffer);
 
@@ -68,12 +64,13 @@ private:
     std::shared_ptr<Plugin::PluginInfo> pluginInfo_ {nullptr};
     Plugin::SrcInputType inputType_ {};
     bool inputTypeSpecified_ {false};
+    std::string mime_ {"video/raw"};
     uint32_t videoWidth_ {0};
-    bool videoWidthSpecified_ {false};
     uint32_t videoHeight_ {0};
-    bool videoHeightSpecified_ {false};
-    uint64_t frameRate_ {0};
-    bool frameRateSpecified_ {false};
+    double captureRate_ {0};
+    int64_t bitRate_ {0};
+    uint32_t frameRate_ {0};
+    Plugin::VideoPixelFormat pixelFormat_ {Plugin::VideoPixelFormat::NV21};
     Capability capNegWithDownstream_ {};
     std::atomic<bool> isEos_ {false};
     OSAL::Mutex pushMutex_ {};

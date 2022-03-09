@@ -25,7 +25,7 @@
 #include "plugin/common/plugin_video_tags.h"
 
 #ifdef DUMP_RAW_DATA
-#include <fstream>
+#include <cstdio>
 #endif
 
 namespace OHOS {
@@ -48,8 +48,6 @@ public:
     Status Start() override;
 
     Status Stop() override;
-
-    bool IsParameterSupported(Tag tag) override;
 
     Status GetParameter(Tag tag, ValueType &value) override;
 
@@ -85,7 +83,7 @@ private:
     uint64_t curPts_ = {0};
 
 #ifdef DUMP_RAW_DATA
-    std::ofstream dumpData_;
+    std::FILE* dumpFd_;
 #endif
 
     void UpdateTextureRect();

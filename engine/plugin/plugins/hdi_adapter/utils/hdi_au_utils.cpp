@@ -22,7 +22,8 @@
 
 namespace OHOS {
 namespace Media {
-namespace HosLitePlugin {
+namespace Plugin {
+namespace HosLite {
 namespace {
 struct PluginHdiAudioFormatTable {
     AudioFormat hFormat;
@@ -199,6 +200,7 @@ int32_t GetPcmBytes(AudioFormat format)
             return 0;
     }
 }
-} // namespace HosLitePlugin
+} // namespace HosLite
+} // namespace Plugin
 } // namespace Media
 } // namespace OHOS

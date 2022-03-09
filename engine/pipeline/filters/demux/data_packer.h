@@ -22,7 +22,7 @@
 
 #include "osal/thread/mutex.h"
 #include "osal/thread/scoped_lock.h"
-#include "utils/type_define.h"
+#include "pipeline/core/type_define.h"
 
 namespace OHOS {
 namespace Media {
@@ -44,26 +44,83 @@ public:
 
     bool GetRange(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr);
 
+    bool GetRange(uint32_t size, AVBufferPtr &bufferPtr); // For live play
+
     void Flush();
 
+    void SetEos();
+
+    bool IsEmpty();
+
+    // Record the position that GerRange copy start or end.
+    struct Position {
+        int32_t index; // Buffer index, -1 means this Position is invalid
+        uint32_t bufferOffset; // Offset in the buffer
+        uint64_t mediaOffset;  // Offset in the media file
+
+        Position(int32_t index, uint32_t bufferOffset, uint64_t mediaOffset) noexcept
+        {
+            this->index = index;
+            this->bufferOffset = bufferOffset;
+            this->mediaOffset = mediaOffset;
+        }
+
+        bool operator < (const Position& other) const
+        {
+            if (index < 0 || other.index < 0) { // Position invalid
+                return false;
+            }
+            if (index != other.index) {
+                return index < other.index;
+            }
+            return bufferOffset < other.bufferOffset; // use bufferOffset, maybe live play mediaOffset is invalid
+        }
+
+        std::string ToString() const
+        {
+            return "Position (index " + std::to_string(index) + ", bufferOffset " + std::to_string(bufferOffset) +
+                ", mediaOffset " + std::to_string(mediaOffset);
+        }
+    };
+
 private:
-    AVBufferPtr WrapAssemblerBuffer(uint64_t offset);
-
-    bool RepackBuffers(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr);
-
     void RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t removeSize);
 
-    bool PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr);
+    bool PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr, bool isGet);
 
     void FlushInternal();
 
+    bool FindFirstBufferToCopy(uint64_t offset, int32_t &startIndex, uint64_t &prevOffset);
+
+    size_t CopyFirstBuffer(size_t size, int32_t index, uint8_t *dstPtr, AVBufferPtr &dstBufferPtr,
+                           int32_t bufferOffset);
+
+    int32_t CopyFromSuccessiveBuffer(uint64_t prevOffset, uint64_t offsetEnd, int32_t startIndex, uint8_t *dstPtr,
+                                     uint32_t &needCopySize);
+
+    void RemoveOldData(const Position& position);
+
+    bool RemoveTo(const Position& position);
+
+    bool UpdateWhenFrontDataRemoved(size_t removeSize);
+
+    std::string ToString() const;
+
     OSAL::Mutex mutex_;
-    std::deque<AVBufferPtr> que_;  // buffer队列
-    std::vector<uint8_t> assembler_;
+    std::deque<AVBufferPtr> que_;
     std::atomic<uint32_t> size_;
-    uint32_t bufferOffset_; // 当前 DataPacker缓存数据的第一个字节 对应 到 媒体文件中的 offset
+    uint64_t mediaOffset_; // The media file offset of the first byte in data packer
     uint64_t pts_;
     uint64_t dts_;
+    bool isEos_ {false};
+
+    // The position in prev GetRange / current GetRange
+    Position prevGet_ ;
+    Position currentGet_ ;
+
+    OSAL::ConditionVariable cvFull_;
+    OSAL::ConditionVariable cvEmpty_;
+    const size_t capacity_;
 };
 } // namespace Media
 } // namespace OHOS

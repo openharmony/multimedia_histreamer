@@ -18,7 +18,6 @@
 #define private public
 #define protected public
 
-#include "utils/utils.h"
 #include "plugin/core/plugin_manager.h"
 
 #include "plugins/UtSourceTest1.h"

@@ -15,9 +15,11 @@
 
 #ifndef HISTREAMER_PIPELINE_VIDEO_ENCODER_FILTER_H
 #define HISTREAMER_PIPELINE_VIDEO_ENCODER_FILTER_H
+
 #if defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
-#include "utils/type_define.h"
+
 #include "filters/codec/codec_filter_base.h"
+#include "pipeline/core/type_define.h"
 #include "plugin/common/plugin_tags.h"
 
 namespace OHOS {
@@ -25,10 +27,10 @@ namespace Media {
 namespace Pipeline {
 class VideoEncoderFilter : public CodecFilterBase {
 public:
-    explicit VideoEncoderFilter(const std::string &name);
+    explicit VideoEncoderFilter(const std::string& name);
     ~VideoEncoderFilter() override;
 
-    virtual ErrorCode SetVideoEncoder(int32_t sourceId, OHOS::Media::Plugin::VideoFormat encoder);
+    virtual ErrorCode SetVideoEncoder(int32_t sourceId, std::shared_ptr<Plugin::Meta> encoderMeta);
 
     ErrorCode Prepare() override;
 
@@ -55,25 +57,27 @@ public:
      * @param offset always ignore this parameter
      * @return
      */
-    ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer, int64_t offset) override;
+    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
-    void OnInputBufferDone(const std::shared_ptr<AVBuffer> &buffer);
+    void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& buffer) override;
 
-    void OnOutputBufferDone(const std::shared_ptr<AVBuffer> &buffer);
+    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& buffer) override;
 
 private:
     class DataCallbackImpl;
 
-    struct VideoDecoderFormat {
+    struct VideoEncoderFormat {
         std::string mime;
         uint32_t width;
         uint32_t height;
         int64_t bitRate;
+        uint32_t frameRate;
         Plugin::VideoPixelFormat format;
-        std::vector<uint8_t> codecConfig;
+        Plugin::CodecConfig codecConfig;
+        std::shared_ptr<Plugin::Meta> codecMeta;
     };
 
-    ErrorCode SetVideoDecoderFormat(const std::shared_ptr<const Plugin::Meta>& meta);
+    ErrorCode SetVideoEncoderFormat(const std::shared_ptr<const Plugin::Meta>& meta);
 
     ErrorCode AllocateOutputBuffers();
 
@@ -87,14 +91,14 @@ private:
 
     void HandleFrame();
 
-    void HandleOneFrame(const std::shared_ptr<AVBuffer> &data);
+    void HandleOneFrame(const std::shared_ptr<AVBuffer>& data);
 
     void FinishFrame();
 
     bool isFlushing_ {false};
     Capability capNegWithDownstream_;
     Capability capNegWithUpstream_;
-    VideoDecoderFormat vdecFormat_;
+    VideoEncoderFormat vencFormat_;
     DataCallbackImpl* dataCallback_ {nullptr};
 
     std::shared_ptr<OHOS::Media::OSAL::Task> handleFrameTask_ {nullptr};

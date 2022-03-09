@@ -142,12 +142,6 @@ Status StreamSourcePlugin::Stop()
     return Status::OK;
 }
 
-bool StreamSourcePlugin::IsParameterSupported(Tag tag)
-{
-    MEDIA_LOG_D("IN");
-    return true;
-}
-
 Status StreamSourcePlugin::GetParameter(Tag tag, ValueType& value)
 {
     MEDIA_LOG_D("IN");
@@ -191,15 +185,15 @@ Status StreamSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 
 Status StreamSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
 {
-    AVBufferPtr bufPtr_ = bufferQueue_.Pop(); // the cached buffer
+    auto bufPtr_ = bufferQueue_.Pop(); // the cached buffer
     auto availSize = bufPtr_->GetMemory()->GetSize();
-    MEDIA_LOG_D("availSize: %" PUBLIC_LOG "zu, expectedLen: %" PUBLIC_LOG "zu", availSize, expectedLen);
+    MEDIA_LOG_D("availSize: " PUBLIC_LOG "zu, expectedLen: " PUBLIC_LOG "zu", availSize, expectedLen);
     if (buffer->IsEmpty()) { // No buffer provided, use the cached buffer.
         buffer = bufPtr_;
         return Status::OK;
     } else { // Buffer provided, copy it.
         if (buffer->GetMemory()->GetCapacity() < availSize) {
-            MEDIA_LOG_D("buffer->length: %" PUBLIC_LOG "zu is smaller than %" PUBLIC_LOG "zu",
+            MEDIA_LOG_D("buffer->length: " PUBLIC_LOG "zu is smaller than " PUBLIC_LOG "zu",
                         buffer->GetMemory()->GetCapacity(), availSize);
             return Status::ERROR_NO_MEMORY;
         }
@@ -227,12 +221,12 @@ Status StreamSourcePlugin::SeekTo(uint64_t offset)
     return Status::ERROR_UNIMPLEMENTED;
 }
 
-AVBufferPtr StreamSourcePlugin::AllocateBuffer()
+std::shared_ptr<Plugin::Buffer> StreamSourcePlugin::AllocateBuffer()
 {
     return bufferPool_.AllocateBuffer();
 }
 
-AVBufferPtr StreamSourcePlugin::FindBuffer(size_t idx)
+std::shared_ptr<Plugin::Buffer> StreamSourcePlugin::FindBuffer(size_t idx)
 {
     OSAL::ScopedLock lock(mutex_);
     auto it = waitBuffers_.find(idx);
@@ -248,7 +242,7 @@ void StreamSourcePlugin::EraseBuffer(size_t idx)
     waitBuffers_.erase(idx);
 }
 
-void StreamSourcePlugin::EnqueBuffer(AVBufferPtr& bufferPtr)
+void StreamSourcePlugin::EnqueBuffer(std::shared_ptr<Plugin::Buffer>& bufferPtr)
 {
     bufferQueue_.Push(bufferPtr);
 }

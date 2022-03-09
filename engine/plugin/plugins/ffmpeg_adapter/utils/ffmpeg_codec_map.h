@@ -28,11 +28,13 @@ extern "C" {
 
 namespace OHOS {
 namespace Media {
+namespace Plugin {
 namespace FFCodecMap {
-bool CodecId2Cap(AVCodecID codecId, bool encoder, Plugin::Capability& cap);
-bool FormatName2Cap(const std::string& fmtName, Plugin::CapabilitySet& outCap);
+bool CodecId2Cap(AVCodecID codecId, bool encoder, Capability& cap);
+bool FormatName2Cap(const std::string& fmtName, CapabilitySet& outCap);
 bool Mime2CodecId(const std::string& mime, AVCodecID& codecId);
 } // FFCodecMap
+} // Plugin
 } // Media
 } // OHOS
 #endif // HISTREAMER_FFMPEG_CODEC_MAP_H

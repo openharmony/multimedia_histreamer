@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "media_utils.h"
-#include <regex>
-#include <sys/stat.h>
+#include "recorder_utils.h"
 #include "media_errors.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "plugin/common/plugin_video_tags.h"
+
 namespace OHOS {
 namespace Media {
 namespace {
@@ -91,15 +91,27 @@ bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& e
     return false;
 }
 
-bool IsDirectory(const std::string& path)
+bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::Meta& encoderMeta)
 {
-    struct stat s {};
-    return ((stat(path.c_str(), &s) == 0) && S_ISDIR(s.st_mode));
+    bool ret = true;
+    switch (vFormat) {
+        case OHOS::Media::VideoCodecFormat::H264:
+            encoderMeta.SetString(Plugin::MetaID::MIME, MEDIA_MIME_VIDEO_H264);
+            encoderMeta.SetData(Plugin::MetaID::VIDEO_H264_PROFILE, Plugin::VideoH264Profile::BASELINE);
+            break;
+        case OHOS::Media::VideoCodecFormat::MPEG4:
+            encoderMeta.SetString(Plugin::MetaID::MIME, MEDIA_MIME_VIDEO_MPEG4);
+            break;
+        default:
+            ret = false;
+            break;
+    }
+    return ret;
 }
-bool ConvertDirPathToFilePath(const std::string& dirPath, OutputFormatType outputFormatType, std::string& filePath)
+
+bool GenerateFilePath(const std::string& dirPath, OutputFormatType outputFormatType, std::string& filePath)
 {
-    std::regex reg("\\\\");
-    filePath = std::regex_replace(dirPath, reg, "/") ;
+    filePath = dirPath;
     if (filePath[filePath.size() - 1] != '/') {
         filePath += "/";
     }
@@ -111,6 +123,99 @@ bool ConvertDirPathToFilePath(const std::string& dirPath, OutputFormatType outpu
         return true;
     } else {
         return false;
+    }
+}
+namespace {
+#define CAST_TO_ASSIGN(type, param, any) \
+(any) = static_cast<const type&>(param)
+bool CastAudRecorderParam(const RecorderParam& param, Plugin::ValueType& val)
+{
+    auto ret = true;
+    switch (param.type) {
+        case RecorderPublicParamType::AUD_SAMPLERATE:
+            CAST_TO_ASSIGN(AudSampleRate, param, val);
+            break;
+        case RecorderPublicParamType::AUD_CHANNEL:
+            CAST_TO_ASSIGN(AudChannel, param, val);
+            break;
+        case RecorderPublicParamType::AUD_BITRATE:
+            CAST_TO_ASSIGN(AudBitRate, param, val);
+            break;
+        case RecorderPublicParamType::AUD_ENC_FMT:
+            CAST_TO_ASSIGN(AudEnc, param, val);
+            break;
+        default:
+            ret = false;
+            break;
+    }
+    return ret;
+}
+bool CastVidRecorderParam(const RecorderParam& param, Plugin::ValueType& val)
+{
+    auto ret = true;
+    switch (param.type) {
+        case RecorderPublicParamType::VID_CAPTURERATE:
+            CAST_TO_ASSIGN(CaptureRate, param, val);
+            break;
+        case RecorderPublicParamType::VID_RECTANGLE:
+            CAST_TO_ASSIGN(VidRectangle, param, val);
+            break;
+        case RecorderPublicParamType::VID_BITRATE:
+            CAST_TO_ASSIGN(VidBitRate, param, val);
+            break;
+        case RecorderPublicParamType::VID_FRAMERATE:
+            CAST_TO_ASSIGN(VidFrameRate, param, val);
+            break;
+        case RecorderPublicParamType::VID_ENC_FMT:
+            CAST_TO_ASSIGN(VidEnc, param, val);
+            break;
+        default:
+            ret = false;
+            break;
+    }
+    return ret;
+}
+
+bool CastDummyRecorderParam(const RecorderParam& param, Plugin::ValueType& val)
+{
+    auto ret  = true;
+    switch (param.type) {
+        case RecorderPublicParamType::OUT_PATH:
+            CAST_TO_ASSIGN(OutFilePath, param, val);
+            break;
+        case RecorderPublicParamType::OUT_FD:
+            CAST_TO_ASSIGN(OutFd, param, val);
+            break;
+        case RecorderPublicParamType::VID_ORIENTATION_HINT:
+            CAST_TO_ASSIGN(RotationAngle, param, val);
+            break;
+        case RecorderPublicParamType::GEO_LOCATION:
+            CAST_TO_ASSIGN(GeoLocation, param, val);
+            break;
+        case RecorderPublicParamType::MAX_DURATION:
+            CAST_TO_ASSIGN(MaxDuration, param, val);
+            break;
+        case RecorderPublicParamType::MAX_SIZE:
+            CAST_TO_ASSIGN(MaxFileSize, param, val);
+            break;
+        default:
+            ret = false;
+            break;
+    }
+    return ret;
+}
+#undef CAST_TO_ASSIGN
+}
+bool CastRecorderParam(int32_t sourceId, const RecorderParam& param, HstRecParam& out)
+{
+    out.srcId = sourceId;
+    out.stdParamType = static_cast<RecorderPublicParamType>(param.type);
+    if (param.IsAudioParam()) {
+        return CastAudRecorderParam(param, out.val);
+    } else if (param.IsVideoParam()) {
+        return CastVidRecorderParam(param, out.val);
+    } else {
+        return CastDummyRecorderParam(param, out.val);
     }
 }
 }  // namespace Record

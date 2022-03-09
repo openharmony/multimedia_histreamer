@@ -20,9 +20,9 @@
 #include <list>
 #include <memory>
 #include "constants.h"
-#include "osal/thread/condition_variable.h"
-#include "osal/thread/mutex.h"
-#include "osal/thread/scoped_lock.h"
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/osal/thread/scoped_lock.h"
 #include "plugin/common/plugin_buffer.h"
 
 namespace OHOS {
@@ -184,7 +184,7 @@ private:
     mutable std::list<std::unique_ptr<T>> freeBuffers_;
     size_t poolSize_ {0};
     size_t msgSize_ {0};
-    size_t align_  {0}; // 0: use default alignment.
+    size_t align_ {0}; // 0: use default alignment.
     std::atomic<bool> isActive_;
     std::atomic<bool> allocInProgress;
     Plugin::BufferMetaType metaType_;

@@ -18,8 +18,8 @@
 
 #ifdef VIDEO_SUPPORT
 
-#include "utils/type_define.h"
 #include "filters/codec/codec_filter_base.h"
+#include "pipeline/core/type_define.h"
 
 namespace OHOS {
 namespace Media {
@@ -54,11 +54,11 @@ public:
      * @param offset always ignore this parameter
      * @return
      */
-    ErrorCode PushData(const std::string &inPort, AVBufferPtr buffer, int64_t offset) override;
+    ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
-    void OnInputBufferDone(const std::shared_ptr<AVBuffer> &buffer);
+    void OnInputBufferDone(const std::shared_ptr<AVBuffer> &buffer) override;
 
-    void OnOutputBufferDone(const std::shared_ptr<AVBuffer> &buffer);
+    void OnOutputBufferDone(const std::shared_ptr<AVBuffer> &buffer) override;
 
 private:
     class DataCallbackImpl;
@@ -67,7 +67,6 @@ private:
         std::string mime;
         uint32_t width;
         uint32_t height;
-        int64_t bitRate;
         Plugin::VideoPixelFormat format;
         std::vector<uint8_t> codecConfig;
     };

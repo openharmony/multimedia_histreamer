@@ -17,12 +17,11 @@
 #define HISTREAMER_STREAM_SOURCE_PLUGIN_H
 
 #include "source.h"
-#include "foundation/error_code.h"
 #include "foundation/osal/thread/task.h"
 #include "utils/blocking_queue.h"
 #include "utils/buffer_pool.h"
 #include "utils/constants.h"
-#include "utils/type_define.h"
+#include "pipeline/core/error_code.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
 
@@ -71,7 +70,6 @@ public:
     Status Reset() override;
     Status Start() override;
     Status Stop() override;
-    bool IsParameterSupported(Tag tag) override;
     Status GetParameter(Tag tag, ValueType& value) override;
     Status SetParameter(Tag tag, const ValueType& value) override;
     std::shared_ptr<Allocator> GetAllocator() override;
@@ -82,23 +80,23 @@ public:
     bool IsSeekable() override;
     Status SeekTo(uint64_t offset) override;
 
-    AVBufferPtr AllocateBuffer();
-    AVBufferPtr FindBuffer(size_t idx);
+    std::shared_ptr<Plugin::Buffer> AllocateBuffer();
+    std::shared_ptr<Plugin::Buffer> FindBuffer(size_t idx);
     void EraseBuffer(size_t idx);
-    void EnqueBuffer(AVBufferPtr& bufferPtr);
+    void EnqueBuffer(std::shared_ptr<Plugin::Buffer>& bufferPtr);
 
 protected:
-    AVBufferPool bufferPool_;
+    BufferPool<Plugin::Buffer> bufferPool_;
 
 private:
     State state_;
     bool isSeekable_;
     OSAL::Mutex mutex_ {};
-    std::map<size_t, AVBufferPtr> waitBuffers_;
+    std::map<size_t, std::shared_ptr<Plugin::Buffer>> waitBuffers_;
     std::weak_ptr<StreamSource> streamSource_ {};
     std::shared_ptr<StreamSourceCallback> streamCallback_ {nullptr};
     size_t idx_ {0};
-    BlockingQueue<AVBufferPtr> bufferQueue_;
+    BlockingQueue<std::shared_ptr<Plugin::Buffer>> bufferQueue_;
     std::shared_ptr<OSAL::Task> taskPtr_ {nullptr};
     std::shared_ptr<StreamSourceAllocator> mAllocator_ {nullptr};
 

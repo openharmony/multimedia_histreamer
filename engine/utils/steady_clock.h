@@ -17,7 +17,9 @@
 #define HISTREAMER_STEADY_CLOCK_H
 
 #include <chrono>
+#if defined(PROFILE)
 #include "foundation/log.h"
+#endif
 
 namespace OHOS {
 namespace Media {
@@ -42,14 +44,14 @@ private:
 #if defined(PROFILE)
 #define PROFILE_BEGIN(message, ...)                                                                                    \
     do {                                                                                                               \
-        MEDIA_LOG_I(message ", timestamp(ms): %" PUBLIC_LOG_D64, ##__VA_ARGS__, SteadyClock::GetCurrentTimeMs());      \
+        MEDIA_LOG_I(message ", timestamp(ms): " PUBLIC_LOG_D64, ##__VA_ARGS__, SteadyClock::GetCurrentTimeMs());      \
     } while (0);                                                                                                       \
     OHOS::Media::SteadyClock _steadyClock;
 #define PROFILE_RESET() _steadyClock.Reset()
 
 #define PROFILE_END(message, ...)                                                                                      \
     do {                                                                                                               \
-        MEDIA_LOG_I(message ", timestamp(ms): %" PUBLIC_LOG_D64 ", duration(ms): %" PUBLIC_LOG_D64,                    \
+        MEDIA_LOG_I(message ", timestamp(ms): " PUBLIC_LOG_D64 ", duration(ms): " PUBLIC_LOG_D64,                    \
                     ##__VA_ARGS__, SteadyClock::GetCurrentTimeMs(), _steadyClock.ElapsedMilliseconds());               \
     } while (0)
 

@@ -44,7 +44,6 @@ set(SRC
         ${UT_TEST_SRCS}
         ${UT_TEST_PLUGINS}
         ${3RDPARTY_SRCS}
-        ${SECURE_C_SRCS}
         ../main.cpp
         )
 

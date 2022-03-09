@@ -18,14 +18,13 @@
 
 #include <atomic>
 
-#include "foundation/error_code.h"
 #include "osal/thread/condition_variable.h"
 #include "osal/thread/mutex.h"
 #include "pipeline/core/clock_provider.h"
+#include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_base.h"
 #include "plugin/core/audio_sink.h"
 #include "plugin/core/plugin_info.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
@@ -56,7 +55,7 @@ public:
      * @param offset always ignore this parameter
      * @return
      */
-    ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) override;
+    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
     ErrorCode Start() override;
     ErrorCode Stop() override;
@@ -75,7 +74,6 @@ public:
 private:
     ErrorCode SetPluginParameter(Tag tag, const Plugin::ValueType& value);
     ErrorCode ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta);
-    ErrorCode ConfigureWithMeta(const std::shared_ptr<const Plugin::Meta>& meta);
     void ReportCurrentPosition(int64_t pts);
 
     ErrorCode UpdateLatestPts(int64_t pts);

@@ -23,7 +23,7 @@
 #include "pipeline/core/plugin_attr_desc.h"
 
 namespace {
-constexpr int32_t MAX_BUF_LEN = 512;
+constexpr int32_t MAX_BUF_LEN = 256;
 #define RETURN_IF_FAILED(exec, errVal, retVal) \
 do { \
     auto res = exec; \
@@ -38,7 +38,7 @@ do { \
 do { \
     snPrintRet = exec; \
     if ((snPrintRet) == -1) { \
-        MEDIA_LOG_W("stringiness failed due to %" PUBLIC_LOG_S " or truncated.", strerror(errno)); \
+        MEDIA_LOG_W("stringiness failed due to " PUBLIC_LOG_S " or truncated.", strerror(errno)); \
         return retVal; \
     } \
 } while (0)
@@ -49,7 +49,7 @@ inline int32_t SnPrintf(char* buf, size_t maxLen, const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    auto ret = vsnprintf_s(buf, maxLen, SECUREC_STRING_MAX_LEN - 1, fmt, args);
+    auto ret = vsnprintf_truncated_s(buf, maxLen, fmt, args);
     va_end(args);
     if (ret < 0) {
         return ret;
@@ -61,7 +61,7 @@ inline int32_t SnPrintf(char* buf, size_t maxLen, const char* fmt, ...)
 template <typename T>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const T& val)
 {
-    MEDIA_LOG_I("no cap trans function for %" PUBLIC_LOG_S " may be update?", name);
+    MEDIA_LOG_I("no cap trans function for " PUBLIC_LOG_S " may be update?", name);
     return 0;
 }
 
@@ -139,7 +139,7 @@ int32_t CapKeyStringiness(char* buf, size_t maxLen, const char* name, const char
     } else if (val.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
         return DiscreteCapKeyStringiness<T>(buf, maxLen, name, typeName, val);
     } else {
-        MEDIA_LOG_W("cap %" PUBLIC_LOG_S "type mismatches when cast to string, which should be %" PUBLIC_LOG_S,
+        MEDIA_LOG_W("cap " PUBLIC_LOG_S "type mismatches when cast to string, which should be " PUBLIC_LOG_S,
                     name, typeName);
     }
     return -1;
@@ -184,7 +184,7 @@ template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::AudioSampleFormat& val)
 {
     if (Pipeline::g_auSampleFmtStrMap.count(val) == 0) {
-        MEDIA_LOG_W("audio sample format %" PUBLIC_LOG_D32 " is unknown", static_cast<int32_t>(val));
+        MEDIA_LOG_W("audio sample format " PUBLIC_LOG_D32 " is unknown", static_cast<int32_t>(val));
         return 0;
     }
     return SnPrintf(buf, maxLen, "%s", Pipeline::g_auSampleFmtStrMap.at(val));
@@ -194,10 +194,50 @@ template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::AudioChannelLayout& val)
 {
     if (Pipeline::g_auChannelLayoutStrMap.count(val) == 0) {
-        MEDIA_LOG_W("audio channel layout %" PUBLIC_LOG_U64 " is unknown", static_cast<uint64_t>(val));
+        MEDIA_LOG_W("audio channel layout " PUBLIC_LOG_U64 " is unknown", static_cast<uint64_t>(val));
         return 0;
     }
     return SnPrintf(buf, maxLen, "%s", Pipeline::g_auChannelLayoutStrMap.at(val));
+}
+
+template<>
+int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::VideoPixelFormat& val)
+{
+    if (Pipeline::g_videoPixelFormatStrMap.count(val) == 0) {
+        MEDIA_LOG_W("video pixel format " PUBLIC_LOG_U32 " is unknown", static_cast<uint32_t>(val));
+        return 0;
+    }
+    return SnPrintf(buf, maxLen, "%s", Pipeline::g_videoPixelFormatStrMap.at(val));
+}
+
+template<>
+int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::AudioAacProfile& val)
+{
+    if (Pipeline::g_auAacProfileNameStrMap.count(val) == 0) {
+        MEDIA_LOG_W("audio aac profile name " PUBLIC_LOG_U8 " is unknown", static_cast<uint8_t>(val));
+        return 0;
+    }
+    return SnPrintf(buf, maxLen, "%s", Pipeline::g_auAacProfileNameStrMap.at(val));
+}
+
+template<>
+int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::AudioAacStreamFormat& val)
+{
+    if (Pipeline::g_auAacStreamFormatNameStrMap.count(val) == 0) {
+        MEDIA_LOG_W("audio aac stream format name " PUBLIC_LOG_U8 " is unknown", static_cast<uint8_t>(val));
+        return 0;
+    }
+    return SnPrintf(buf, maxLen, "%s", Pipeline::g_auAacStreamFormatNameStrMap.at(val));
+}
+
+template<>
+int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::ThreadMode& val)
+{
+    if (!Pipeline::HasThreadModeNameStr(val)) {
+        MEDIA_LOG_W("Thread Mode " PUBLIC_LOG_U8 " is unknown", static_cast<uint8_t>(val));
+        return 0;
+    }
+    return SnPrintf(buf, maxLen, "%s", Pipeline::GetThreadModeNameStr(val));
 }
 
 template<typename T>
@@ -207,7 +247,7 @@ int32_t MetaIDStringiness(char* buf, size_t maxLen, const char* name, const char
     if (val.SameTypeWith(typeid(T))) {
         return FixedCapKeyStringiness<T>(buf, maxLen, name, typeName, val);
     } else {
-        MEDIA_LOG_W("meta %" PUBLIC_LOG_S " type mismatches when cast to string", name);
+        MEDIA_LOG_W("meta " PUBLIC_LOG_S " type mismatches when cast to string", name);
     }
     return -1;
 }
@@ -245,6 +285,7 @@ std::map<Plugin::MetaID, CapStrnessFunc> g_metaStrnessMap = {
     {Plugin::MetaID::AUDIO_AAC_STREAM_FORMAT, MetaIDStringiness<Plugin::AudioAacStreamFormat>},
     {Plugin::MetaID::VIDEO_WIDTH, MetaIDStringiness<uint32_t>},
     {Plugin::MetaID::VIDEO_HEIGHT, MetaIDStringiness<uint32_t>},
+    {Plugin::MetaID::VIDEO_FRAME_RATE, MetaIDStringiness<uint32_t>},
     {Plugin::MetaID::VIDEO_PIXEL_FORMAT, MetaIDStringiness<Plugin::VideoPixelFormat>},
 };
 }
@@ -252,6 +293,30 @@ std::map<Plugin::MetaID, CapStrnessFunc> g_metaStrnessMap = {
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
+template<typename T>
+bool AssignParameterIfMatch(Tag tag, T& ret, const Plugin::ValueType& val)
+{
+    if (HasTagInfo(tag)) {
+        if (val.SameTypeWith(*GetTagDefValue(tag)) && val.SameTypeWith(typeid(T))) {
+            ret = Plugin::AnyCast<T>(val);
+            return true;
+        } else {
+            MEDIA_LOG_I("type of " PUBLIC_LOG_S " mismatch, should be " PUBLIC_LOG_S,
+                        GetTagStrName(tag), GetTagTypeStrName(tag));
+        }
+    } else {
+        MEDIA_LOG_I("tag " PUBLIC_LOG_D32 "is not in map, may be update it?", tag);
+    }
+    return false;
+}
+
+template bool AssignParameterIfMatch(Tag tag, Plugin::SrcInputType& ret, const Plugin::ValueType& val);
+template bool AssignParameterIfMatch(Tag tag, uint32_t& ret, const Plugin::ValueType& val);
+template bool AssignParameterIfMatch(Tag tag, int64_t& ret, const Plugin::ValueType& val);
+template bool AssignParameterIfMatch(Tag tag, double& ret, const Plugin::ValueType& val);
+template bool AssignParameterIfMatch(Tag tag, Plugin::AudioSampleFormat& ret, const Plugin::ValueType& val);
+template bool AssignParameterIfMatch(Tag tag, Plugin::AudioChannelLayout& ret, const Plugin::ValueType& val);
+
 /**
  * translate plugin error into pipeline error code
  * @param pluginError
@@ -382,6 +447,7 @@ std::string Capability2String(const Capability& capability)
         {Capability::Key::AUDIO_AAC_LEVEL, CapKeyStringiness<uint32_t>},
         {Capability::Key::AUDIO_AAC_STREAM_FORMAT, CapKeyStringiness<Plugin::AudioAacStreamFormat>},
         {Capability::Key::VIDEO_PIXEL_FORMAT, CapKeyStringiness<Plugin::VideoPixelFormat>},
+        {Capability::Key::THREAD_MODE, CapKeyStringiness<Plugin::ThreadMode>},
     };
     char buffer[MAX_BUF_LEN + 1] = {0}; // one more is for \0
     int pos = 0;
@@ -395,13 +461,13 @@ std::string Capability2String(const Capability& capability)
             needEtc = true;
             break;
         }
-        if (capStrnessMap.count(cap.first) == 0 || g_tagInfoMap.count(static_cast<Tag>(cap.first)) == 0) {
-            MEDIA_LOG_W("%" PUBLIC_LOG_D32 " is not in map, may be new key which is not contained?", cap.first);
+        if (capStrnessMap.count(cap.first) == 0 || !HasTagInfo(static_cast<Tag>(cap.first))) {
+            MEDIA_LOG_W(PUBLIC_LOG_D32 " is not in map, may be new key which is not contained?", cap.first);
             continue;
         }
         const auto& info = g_tagInfoMap.at(static_cast<Tag>(cap.first));
         RETURN_IF_SNPRI_FAILED(capStrnessMap.at(cap.first)(buffer + pos, MAX_BUF_LEN - pos, std::get<0>(info),
-                                                           std::get<2>(info), cap.second), ret, buffer);
+            std::get<2>(info), cap.second), ret, buffer); // secondary parameter
         pos += ret;
         RETURN_IF_SNPRI_FAILED(SnPrintf(buffer + pos, MAX_BUF_LEN - pos, ", "), ret, buffer);
         pos += ret;
@@ -430,15 +496,15 @@ std::string Meta2String(const Plugin::Meta& meta)
             needEtc = true;
             break;
         }
-        if (g_tagInfoMap.count(static_cast<Tag>(item)) == 0 || g_metaStrnessMap.count(item) == 0) {
-            MEDIA_LOG_W("meta id %" PUBLIC_LOG_D32 "is not is map, may be update the info map?", item);
+        if (!HasTagInfo(static_cast<Tag>(item)) || g_metaStrnessMap.count(item) == 0) {
+            MEDIA_LOG_W("meta id " PUBLIC_LOG_D32 "is not is map, may be update the info map?", item);
             continue;
         }
         const Plugin::ValueType* tmp = meta.GetData(item);
         const auto& tuple = g_tagInfoMap.at(static_cast<Tag>(item));
         if (tmp) {
             RETURN_IF_SNPRI_FAILED(g_metaStrnessMap.at(item)(buffer + pos, MAX_BUF_LEN - pos,
-                    std::get<0>(tuple), std::get<2>(tuple), *tmp), ret, buffer);
+                std::get<0>(tuple), std::get<2>(tuple), *tmp), ret, buffer); // secondary parameter
             pos += ret;
             RETURN_IF_SNPRI_FAILED(SnPrintf(buffer + pos, MAX_BUF_LEN - pos, ", "), ret, buffer);
             pos += ret;

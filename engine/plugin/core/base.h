@@ -72,8 +72,6 @@ public:
 
     virtual Status Stop();
 
-    virtual bool IsParameterSupported(Tag tag);
-
     virtual Status GetParameter(Tag tag, ValueType &value);
 
     virtual Status SetParameter(Tag tag, const ValueType &value);
@@ -83,6 +81,8 @@ public:
     virtual std::shared_ptr<Allocator> GetAllocator();
 
     virtual Status SetCallback(CallbackWrap* cb);
+
+    std::string GetName();
 
 protected:
     friend class PluginManager;

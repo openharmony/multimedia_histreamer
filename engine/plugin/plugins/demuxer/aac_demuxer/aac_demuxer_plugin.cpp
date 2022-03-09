@@ -21,11 +21,11 @@
 #include <cstring>
 #include <new>
 #include <securec.h>
-#include "core/plugin_manager.h"
 #include "foundation/log.h"
 #include "osal/thread/scoped_lock.h"
 #include "plugin/common/plugin_buffer.h"
 #include "constants.h"
+#include "osal/utils/util.h"
 
 namespace OHOS {
 namespace Media {
@@ -35,21 +35,25 @@ namespace {
     constexpr uint32_t PROBE_READ_LENGTH = 2;
     constexpr uint32_t GET_INFO_READ_LEN = 7;
     constexpr uint32_t MEDIA_IO_SIZE = 2048;
+    constexpr uint32_t MAX_RANK = 100;
+    uint32_t usedDataSize_ = 0;
     int samplingRateMap[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350};
     int IsAACPattern(const uint8_t *data);
     int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource);
     Status RegisterPlugin(const std::shared_ptr<Register>& reg);
-    void UpdatePluginDefinition(CodecPluginDef& definition);
 }
 
 AACDemuxerPlugin::AACDemuxerPlugin(std::string name)
     : DemuxerPlugin(std::move(name)),
       ioContext_(),
-      mediaIOSize_(MEDIA_IO_SIZE),
-      fileSize_(0)
+      fileSize_(0),
+      isSeekable_(false),
+      inIoBuffer_(nullptr),
+      inIoBufferSize_(MEDIA_IO_SIZE),
+      ioDataRemainSize_(0)
 {
     FALSE_LOG(memset_s(&aacDemuxerRst_, sizeof(aacDemuxerRst_), 0x00, sizeof(AACDemuxerRst)) == 0);
-    MEDIA_LOG_I("AACDemuxerPlugin, plugin name: %" PUBLIC_LOG "s", pluginName_.c_str());
+    MEDIA_LOG_I("AACDemuxerPlugin, plugin name: " PUBLIC_LOG_S, pluginName_.c_str());
 }
 
 AACDemuxerPlugin::~AACDemuxerPlugin()
@@ -63,19 +67,107 @@ Status AACDemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& source
     if (ioContext_.dataSource != nullptr) {
         ioContext_.dataSource->GetSize(fileSize_);
     }
-    MEDIA_LOG_I("fileSize_ %" PUBLIC_LOG "d", fileSize_);
+    MEDIA_LOG_I("fileSize_ " PUBLIC_LOG_ZU, fileSize_);
+    isSeekable_ = fileSize_ > 0 ? true : false;
     return Status::OK;
+}
+
+Status AACDemuxerPlugin::DoReadFromSource(uint32_t readSize)
+{
+    if (readSize == 0) {
+        return Status::OK;
+    }
+    auto buffer  = std::make_shared<Buffer>();
+    auto bufData = buffer->AllocMemory(nullptr, readSize);
+    int retryTimes = 0;
+    MEDIA_LOG_D("readSize " PUBLIC_LOG_U32 " inIoBufferSize_ " PUBLIC_LOG_D32 "ioDataRemainSize_ "
+        PUBLIC_LOG_U32, readSize, inIoBufferSize_, ioDataRemainSize_);
+    do {
+        if (isSeekable_) {
+            auto result = ioContext_.dataSource->ReadAt(ioContext_.offset, buffer, static_cast<size_t>(readSize));
+            MEDIA_LOG_D("ioContext_.offset " PUBLIC_LOG_U32, static_cast<uint32_t>(ioContext_.offset));
+            if (result != Status::OK) {
+                MEDIA_LOG_W("read data from source warning " PUBLIC_LOG_D32, static_cast<int>(result));
+                return result;
+            }
+        } else {
+            auto result = ioContext_.dataSource->ReadAt(0, buffer, static_cast<size_t>(readSize));
+            if (result != Status::OK) {
+                MEDIA_LOG_W("read data from source warning " PUBLIC_LOG_D32, static_cast<int>(result));
+                return result;
+            }
+        }
+
+        MEDIA_LOG_D("bufData->GetSize() " PUBLIC_LOG_ZU, bufData->GetSize());
+        if (bufData->GetSize() > 0) {
+            if (readSize >= bufData->GetSize()) {
+                (void)memcpy_s(inIoBuffer_ + ioDataRemainSize_, readSize,
+                    const_cast<uint8_t *>(bufData->GetReadOnlyData()), bufData->GetSize());
+            } else {
+                MEDIA_LOG_E("Error: readSize < bufData->GetSize()");
+                return Status::ERROR_UNKNOWN;
+            }
+            if (isSeekable_) {
+                ioContext_.offset += bufData->GetSize();
+            }
+            ioDataRemainSize_  += bufData->GetSize();
+        }
+        if (bufData->GetSize() == 0 && ioDataRemainSize_ == 0 && retryTimes < 200) { // 200
+            OSAL::SleepFor(30); // 30
+            retryTimes++;
+            continue;
+        }
+        if (retryTimes >= 200) { // 200
+            MEDIA_LOG_E("Warning: not end of file, but do not have enough data");
+            return Status::ERROR_NOT_ENOUGH_DATA;
+        }
+        break;
+    } while (true);
+    return Status::OK;
+}
+
+Status AACDemuxerPlugin::GetDataFromSource()
+{
+    uint32_t ioNeedReadSize = inIoBufferSize_ - ioDataRemainSize_;
+    MEDIA_LOG_D("ioDataRemainSize_ " PUBLIC_LOG_U32, " ioNeedReadSize " PUBLIC_LOG_U32, ioDataRemainSize_,
+                ioNeedReadSize);
+    if (ioDataRemainSize_) {
+        // 将剩余数据移动到buffer的起始位置
+        auto ret = memmove_s(inIoBuffer_,
+                             ioDataRemainSize_,
+                             inIoBuffer_ + usedDataSize_,
+                             ioDataRemainSize_);
+        if (ret != 0) {
+            MEDIA_LOG_E("copy buffer error(" PUBLIC_LOG_D32, ret);
+            return Status::ERROR_UNKNOWN;
+        }
+        ret = memset_s(inIoBuffer_ + ioDataRemainSize_, ioNeedReadSize, 0x00, ioNeedReadSize);
+        if (ret != 0) {
+            MEDIA_LOG_E("memset_s buffer error(" PUBLIC_LOG_D32, ret);
+            return Status::ERROR_UNKNOWN;
+        }
+    }
+    if (isSeekable_) {
+        if (ioContext_.offset >= fileSize_ && ioDataRemainSize_ == 0) {
+            ioContext_.eos = true;
+            ioContext_.offset = 0;
+            return Status::END_OF_STREAM;
+        }
+        if (ioContext_.offset + ioNeedReadSize > fileSize_) {
+            ioNeedReadSize = fileSize_ - ioContext_.offset; // 在读取文件即将结束时，剩余数据不足，更新读取长度
+        }
+    }
+
+    return DoReadFromSource(ioNeedReadSize);
 }
 
 Status AACDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
 {
-    Status status = Status::ERROR_UNKNOWN;
-    auto buffer = std::make_shared<Buffer>();
-    auto bufData = buffer->AllocMemory(nullptr, GET_INFO_READ_LEN);
-    uint8_t *inputDataPtr = nullptr;
-    auto result = ioContext_.dataSource->ReadAt(ioContext_.offset, buffer, static_cast<size_t>(GET_INFO_READ_LEN));
-    inputDataPtr = (uint8_t *)bufData->GetReadOnlyData();
-    int ret = AudioDemuxerAACPrepare(inputDataPtr, bufData->GetSize(), &aacDemuxerRst_);
+    Status retStatus = GetDataFromSource();
+    if (retStatus != Status::OK) {
+        return retStatus;
+    }
+    int ret = AudioDemuxerAACPrepare(inIoBuffer_, ioDataRemainSize_, &aacDemuxerRst_);
     if (ret == 0) {
         mediaInfo.tracks.resize(1);
         if (aacDemuxerRst_.frameChannels == 1) {
@@ -83,14 +175,14 @@ Status AACDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
         } else {
             mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::STEREO});
         }
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_RATE, (uint32_t)aacDemuxerRst_.frameSampleRate});
-        mediaInfo.tracks[0].insert({Tag::MEDIA_BITRATE, (uint32_t)aacDemuxerRst_.frameBitrateKbps});
-        mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNELS, (uint32_t)aacDemuxerRst_.frameChannels});
-        mediaInfo.tracks[0].insert({Tag::TRACK_ID, (uint32_t)0});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(aacDemuxerRst_.frameSampleRate)});
+        mediaInfo.tracks[0].insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(aacDemuxerRst_.frameBitrateKbps)});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(aacDemuxerRst_.frameChannels)});
+        mediaInfo.tracks[0].insert({Tag::TRACK_ID, static_cast<uint32_t>(0)});
         mediaInfo.tracks[0].insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_AAC)});
-        mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_VERSION, (uint32_t)aacDemuxerRst_.mpegVersion});
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::S16P});
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_PER_FRAME, (uint32_t)(1024)});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(aacDemuxerRst_.mpegVersion)});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::S16});
+        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(1024)});   // 1024
         mediaInfo.tracks[0].insert({Tag::AUDIO_AAC_PROFILE, AudioAacProfile::LC});
         mediaInfo.tracks[0].insert({Tag::AUDIO_AAC_STREAM_FORMAT, AudioAacStreamFormat::MP4ADTS});
         return Status::OK;
@@ -101,20 +193,13 @@ Status AACDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
 
 Status AACDemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
 {
-    int  status  = -1;
+    int status  = -1;
     std::shared_ptr<Memory> aacFrameData;
-    auto buffer  = std::make_shared<Buffer>();
-    auto bufData = buffer->AllocMemory(nullptr, mediaIOSize_);
-    auto result  = ioContext_.dataSource->ReadAt(ioContext_.offset, buffer, static_cast<size_t>(mediaIOSize_));
-    if (result != Status::OK) {
-        ioContext_.eos = true;
-        ioContext_.offset = 0;
-        MEDIA_LOG_I("result is %" PUBLIC_LOG "d", result);
-        return result;
+    Status retStatus = GetDataFromSource();
+    if (retStatus != Status::OK) {
+        return retStatus;
     }
-
-    uint8_t *inputPtr = (uint8_t *)bufData->GetReadOnlyData();
-    status = AudioDemuxerAACProcess(inputPtr, bufData->GetSize(), &aacDemuxerRst_);
+    status = AudioDemuxerAACProcess(inIoBuffer_, ioDataRemainSize_, &aacDemuxerRst_);
 
     if (outBuffer.IsEmpty()) {
         aacFrameData = outBuffer.AllocMemory(nullptr, aacDemuxerRst_.frameLength);
@@ -123,12 +208,13 @@ Status AACDemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
     }
     switch (status) {
         case 0:
-            ioContext_.offset += aacDemuxerRst_.usedInputLength;
             aacFrameData->Write(aacDemuxerRst_.frameBuffer, aacDemuxerRst_.frameLength);
             if (aacDemuxerRst_.frameBuffer) {
                 free(aacDemuxerRst_.frameBuffer);
                 aacDemuxerRst_.frameBuffer = nullptr;
             }
+            usedDataSize_ = aacDemuxerRst_.usedInputLength;
+            ioDataRemainSize_ -= aacDemuxerRst_.usedInputLength;
             break;
         case -1:
         default:
@@ -149,10 +235,20 @@ Status AACDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
 
 Status AACDemuxerPlugin::Init()
 {
+    inIoBuffer_ = static_cast<uint8_t *>(malloc(inIoBufferSize_));
+    if (inIoBuffer_ == nullptr) {
+        MEDIA_LOG_E("inIoBuffer_ malloc failed");
+        return Status::ERROR_NO_MEMORY;
+    }
+    (void)memset_s(inIoBuffer_, inIoBufferSize_, 0x00, inIoBufferSize_);
     return Status::OK;
 }
 Status AACDemuxerPlugin::Deinit()
 {
+    if (inIoBuffer_) {
+        free(inIoBuffer_);
+        inIoBuffer_ = nullptr;
+    }
     return Status::OK;
 }
 
@@ -166,6 +262,9 @@ Status AACDemuxerPlugin::Reset()
     ioContext_.eos = false;
     ioContext_.dataSource.reset();
     ioContext_.offset = 0;
+    ioContext_.dataSource.reset();
+    ioDataRemainSize_ = 0;
+    (void)memset_s(inIoBuffer_, inIoBufferSize_, 0x00, inIoBufferSize_);
     return Status::OK;
 }
 
@@ -177,11 +276,6 @@ Status AACDemuxerPlugin::Start()
 Status AACDemuxerPlugin::Stop()
 {
     return Status::OK;
-}
-
-bool AACDemuxerPlugin::IsParameterSupported(Tag tag)
-{
-    return false;
 }
 
 Status AACDemuxerPlugin::GetParameter(Tag tag, ValueType &value)
@@ -199,7 +293,7 @@ std::shared_ptr<Allocator> AACDemuxerPlugin::GetAllocator()
     return nullptr;
 }
 
-Status AACDemuxerPlugin::SetCallback(const std::shared_ptr<Callback>& cb)
+Status AACDemuxerPlugin::SetCallback(Callback* cb)
 {
     return Status::OK;
 }
@@ -224,9 +318,9 @@ Status AACDemuxerPlugin::GetSelectedTracks(std::vector<int32_t>& trackIds)
     return Status::OK;
 }
 
-int AACDemuxerPlugin::getFrameLength(const uint8_t *data)
+int AACDemuxerPlugin::GetFrameLength(const uint8_t *data)
 {
-    return ((data[3] & 0x03) << 11) | (data[4] << 3) | ((data[5] & 0xE0) >> 5);
+    return ((data[3] & 0x03) << 11) | (data[4] << 3) | ((data[5] & 0xE0) >> 5); // 根据协议计算帧长
 }
 
 int AACDemuxerPlugin::AudioDemuxerAACOpen(AudioDemuxerUserArg *userArg)
@@ -242,7 +336,7 @@ int AACDemuxerPlugin::AudioDemuxerAACClose()
 int AACDemuxerPlugin::AudioDemuxerAACPrepare(const uint8_t *buf, uint32_t len, AACDemuxerRst *rst)
 {
     if (IsAACPattern(buf)) {
-        int mpegVersionIndex  = ((buf[1] & 0x0F) >> 3);
+        int mpegVersionIndex  = ((buf[1] & 0x0F) >> 3); // 根据协议计算 mpegVersionIndex
         int mpegVersion = -1;
         if (mpegVersionIndex == 0) {
             mpegVersion = 4; // 4
@@ -252,15 +346,15 @@ int AACDemuxerPlugin::AudioDemuxerAACPrepare(const uint8_t *buf, uint32_t len, A
             return -1;
         }
 
-        int sampleIndex = ((buf[2] & 0x3C) >> 2);
-        int channelCount = ((buf[2] & 0x01) << 2) | ((buf[3] & 0xC0) >> 6);
+        int sampleIndex = ((buf[2] & 0x3C) >> 2); // 根据协议计算 sampleIndex
+        int channelCount = ((buf[2] & 0x01) << 2) | ((buf[3] & 0xC0) >> 6); // 根据协议计算 channelCount
 
         int sample = samplingRateMap[sampleIndex];
 
         rst->frameChannels = channelCount;
         rst->frameSampleRate = sample;
         rst->mpegVersion = mpegVersion;
-        MEDIA_LOG_D("channel %" PUBLIC_LOG "d sample %" PUBLIC_LOG "d", rst->frameChannels, rst->frameSampleRate);
+        MEDIA_LOG_D("channel " PUBLIC_LOG_U8 " sample " PUBLIC_LOG_U32, rst->frameChannels, rst->frameSampleRate);
         return 0;
     } else {
         MEDIA_LOG_D("Err:IsAACPattern");
@@ -284,7 +378,7 @@ int AACDemuxerPlugin::AudioDemuxerAACProcess(const uint8_t *buffer, uint32_t buf
             break;
         }
 
-        length = static_cast<unsigned int>(getFrameLength(buffer));
+        length = static_cast<unsigned int>(GetFrameLength(buffer));
         if (length + 2 > bufferLen) { // 2
             rst->usedInputLength = bufferLen;
             return 0;
@@ -296,16 +390,16 @@ int AACDemuxerPlugin::AudioDemuxerAACProcess(const uint8_t *buffer, uint32_t buf
         }
 
         if (IsAACPattern(buffer + length)) {
-            rst->frameBuffer = (uint8_t *)malloc(length);
+            rst->frameBuffer = static_cast<uint8_t *>(malloc(length));
             if (rst->frameBuffer) {
                 FALSE_LOG(memcpy_s(rst->frameBuffer, length, buffer, length) == 0);
                 rst->frameLength = length;
                 rst->usedInputLength = length;
             } else {
-                MEDIA_LOG_E("malloc error, length %" PUBLIC_LOG "d\n", length);
+                MEDIA_LOG_E("malloc error, length " PUBLIC_LOG_U32, length);
             }
         } else {
-            MEDIA_LOG_D("can't find next aac, length %" PUBLIC_LOG "d is error\n", length);
+            MEDIA_LOG_D("can't find next aac, length " PUBLIC_LOG_U32 " is error", length);
             break;
         }
 
@@ -327,7 +421,7 @@ int AACDemuxerPlugin::AudioDemuxerAACFreeFrame(uint8_t *frame)
 namespace {
     int IsAACPattern(const uint8_t *data)
     {
-        return data[0] == 0xff && (data[1] & 0xf0) == 0xf0 && (data[1] & 0x06) == 0x00;
+        return data[0] == 0xff && (data[1] & 0xf0) == 0xf0 && (data[1] & 0x06) == 0x00; // 根据协议判断是否为AAC帧
     }
 
     int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource)
@@ -341,20 +435,19 @@ namespace {
         if (result != Status::OK) {
             return 0;
         }
-
-        inputDataPtr = (uint8_t *)bufData->GetReadOnlyData();
+        inputDataPtr = const_cast<uint8_t *>(bufData->GetReadOnlyData());
         if (IsAACPattern(inputDataPtr) == 0) {
+            MEDIA_LOG_W("Not AAC format");
             return 0;
         }
-
-        return 100; // 100
+        return MAX_RANK;
     }
 
     Status RegisterPlugin(const std::shared_ptr<Register>& reg)
     {
         MEDIA_LOG_I("RegisterPlugin called.");
         if (!reg) {
-            MEDIA_LOG_I("RegisterPlugin failed due to nullptr pointer for reg.");
+            MEDIA_LOG_E("RegisterPlugin failed due to nullptr pointer for reg.");
             return Status::ERROR_INVALID_PARAMETER;
         }
 
@@ -362,14 +455,14 @@ namespace {
         DemuxerPluginDef regInfo;
         regInfo.name = pluginName;
         regInfo.description = "adapter for aac demuxer plugin";
-        regInfo.rank = 100; // 100
+        regInfo.rank = MAX_RANK;
         regInfo.creator = [](const std::string &name) -> std::shared_ptr<DemuxerPlugin> {
             return std::make_shared<AACDemuxerPlugin>(name);
         };
         regInfo.sniffer = Sniff;
         auto rtv = reg->AddPlugin(regInfo);
         if (rtv != Status::OK) {
-            MEDIA_LOG_I("RegisterPlugin AddPlugin failed with return %" PUBLIC_LOG "d", static_cast<int>(rtv));
+            MEDIA_LOG_I("RegisterPlugin AddPlugin failed with return " PUBLIC_LOG_D32, static_cast<int>(rtv));
         }
         return Status::OK;
     }

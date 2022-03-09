@@ -73,7 +73,7 @@ ErrorCode VideoSinkFilter::SetParameter(int32_t key, const Plugin::Any& value)
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
-        MEDIA_LOG_I("SetParameter key %" PUBLIC_LOG "d is out of boundary", key);
+        MEDIA_LOG_I("SetParameter key " PUBLIC_LOG_D32 "is out of boundary", key);
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     RETURN_AGAIN_IF_NULL(plugin_);
@@ -87,7 +87,7 @@ ErrorCode VideoSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
-        MEDIA_LOG_I("GetParameter key %" PUBLIC_LOG "d is out of boundary", key);
+        MEDIA_LOG_I("GetParameter key " PUBLIC_LOG_D32 "is out of boundary", key);
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     RETURN_AGAIN_IF_NULL(plugin_);
@@ -109,12 +109,44 @@ void VideoSinkFilter::HandleNegotiateParams(const Plugin::TagMap& upstreamParams
     }
     auto pluginAllocator = plugin_->GetAllocator();
     if (pluginAllocator != nullptr && pluginAllocator->GetMemoryType() == Plugin::MemoryType::SURFACE_BUFFER) {
-        // Warning: currently assume BUFFER_ALLOCATOR always SurfaceAllocator
-        // It's better to pass pluginAllocator directly, but I'm afraid we can not get subclass obj from any.
-        auto allocator = std::dynamic_pointer_cast<Plugin::SurfaceAllocator>(pluginAllocator);
+        auto allocator = Plugin::ReinterpretPointerCast<Plugin::SurfaceAllocator>(pluginAllocator);
         downstreamParams.emplace(std::make_pair(Tag::BUFFER_ALLOCATOR, allocator));
     }
 #endif
+}
+
+bool VideoSinkFilter::CreateVideoSinkPlugin(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo)
+{
+    if (plugin_ != nullptr) {
+        if (pluginInfo_ != nullptr && pluginInfo_->name == selectedPluginInfo->name) {
+            if (plugin_->Reset() == Plugin::Status::OK) {
+                return true;
+            }
+            MEDIA_LOG_W("reuse previous plugin " PUBLIC_LOG_S " failed, will create new plugin",
+                        pluginInfo_->name.c_str());
+        }
+        plugin_->Deinit();
+    }
+
+    plugin_ = Plugin::PluginManager::Instance().CreateVideoSinkPlugin(selectedPluginInfo->name);
+    if (plugin_ == nullptr) {
+        MEDIA_LOG_E("cannot create plugin " PUBLIC_LOG_S, selectedPluginInfo->name.c_str());
+        return false;
+    }
+    if (surface_ != nullptr) {
+        auto ret = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_SURFACE, surface_));
+        if (ret != ErrorCode::SUCCESS) {
+            MEDIA_LOG_W("Set surface to plugin fail, ret: " PUBLIC_LOG_U32, ret);
+            return false;
+        }
+    }
+    auto err = TranslatePluginStatus(plugin_->Init());
+    if (err != ErrorCode::SUCCESS) {
+        MEDIA_LOG_E("plugin " PUBLIC_LOG "s init error", selectedPluginInfo->name.c_str());
+        return false;
+    }
+    pluginInfo_ = selectedPluginInfo;
+    return true;
 }
 
 bool VideoSinkFilter::Negotiate(const std::string& inPort,
@@ -135,7 +167,7 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort,
     }
     // always use first one
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = candidatePlugins[0].first;
-    MEDIA_LOG_E("select plugin %" PUBLIC_LOG "s", selectedPluginInfo->name.c_str());
+    MEDIA_LOG_E("select plugin " PUBLIC_LOG_S, selectedPluginInfo->name.c_str());
     for (const auto& onCap : selectedPluginInfo->inCaps) {
         if (onCap.keys.count(CapabilityID::VIDEO_PIXEL_FORMAT) == 0) {
             MEDIA_LOG_E("each in caps of sink must contains valid video pixel format");
@@ -143,13 +175,12 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort,
         }
     }
     negotiatedCap = candidatePlugins[0].second;
-    auto res = UpdateAndInitPluginByInfo<Plugin::VideoSink>(plugin_, pluginInfo_, selectedPluginInfo,
-        [](const std::string& name) -> std::shared_ptr<Plugin::VideoSink> {
-        return Plugin::PluginManager::Instance().CreateVideoSinkPlugin(name);
-    });
+    if (!CreateVideoSinkPlugin(selectedPluginInfo)) {
+        return false;
+    }
     HandleNegotiateParams(upstreamParams, downstreamParams);
     PROFILE_END("video sink negotiate end");
-    return res;
+    return true;
 }
 
 bool VideoSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
@@ -190,7 +221,7 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Plu
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_PIXEL_FORMAT, pixelFormat));
         RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Set plugin pixel format fail");
     }
-    MEDIA_LOG_D("width: %" PUBLIC_LOG "u, height: %" PUBLIC_LOG "u, pixelFormat: %" PUBLIC_LOG "u",
+    MEDIA_LOG_D("width: " PUBLIC_LOG_U32 ", height: " PUBLIC_LOG_U32 ", pixelFormat: " PUBLIC_LOG_U32,
                 width, height, pixelFormat);
     return err;
 }
@@ -219,14 +250,14 @@ bool VideoSinkFilter::DoSync(int64_t pts) const
     if (delta > 0) {
         tempOut = Plugin::HstTime2Ms(delta);
         if (tempOut > 100) { // 100ms
-            MEDIA_LOG_E("DoSync early %" PUBLIC_LOG PRId64 " ms", tempOut);
+            MEDIA_LOG_D("DoSync early " PUBLIC_LOG_D64 " ms", tempOut);
             OHOS::Media::OSAL::SleepFor(tempOut);
             return true;
         }
     } else if (delta < 0) {
         tempOut = Plugin::HstTime2Ms(-delta);
         if (tempOut > 40) { // 40ms drop frame
-            MEDIA_LOG_E("DoSync later %" PUBLIC_LOG PRId64 " ms", tempOut);
+            MEDIA_LOG_E("DoSync later " PUBLIC_LOG_D64 " ms", tempOut);
             return false;
         }
     }
@@ -245,13 +276,13 @@ void VideoSinkFilter::RenderFrame()
 
     Plugin::Status status = plugin_->GetLatency(latencyNano);
     if (status != Plugin::Status::OK) {
-        MEDIA_LOG_E("Video sink GetLatency fail errorcode = %" PUBLIC_LOG "d",
-                    to_underlying(TranslatePluginStatus(status)));
+        MEDIA_LOG_E("Video sink GetLatency fail errorcode = " PUBLIC_LOG_D32,
+                    CppExt::to_underlying(TranslatePluginStatus(status)));
         return;
     }
 
     if (INT64_MAX - latencyNano < oneBuffer->pts) {
-        MEDIA_LOG_E("Video pts(%" PUBLIC_LOG PRIu64 ") + latency overflow.", oneBuffer->pts);
+        MEDIA_LOG_E("Video pts(" PUBLIC_LOG_U64 ") + latency overflow.", oneBuffer->pts);
         return;
     }
 
@@ -265,9 +296,9 @@ void VideoSinkFilter::RenderFrame()
     }
 }
 
-ErrorCode VideoSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
+ErrorCode VideoSinkFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
-    MEDIA_LOG_D("video sink push data started, state_: %" PUBLIC_LOG "d", state_.load());
+    MEDIA_LOG_D("video sink push data started, state_: " PUBLIC_LOG_D32, state_.load());
     frameCnt_++;
     if (isFlushing_ || state_.load() == FilterState::INITIALIZED) {
         MEDIA_LOG_I("video sink is flushing ignore this buffer");
@@ -282,7 +313,7 @@ ErrorCode VideoSinkFilter::PushData(const std::string& inPort, AVBufferPtr buffe
         pushThreadIsBlocking_ = false;
     }
     if (isFlushing_ || state_.load() == FilterState::INITIALIZED) {
-        MEDIA_LOG_I("PushData return due to: isFlushing_ = %" PUBLIC_LOG "d, state_ = %" PUBLIC_LOG "d",
+        MEDIA_LOG_I("PushData return due to: isFlushing_ = " PUBLIC_LOG_D32 ", state_ = " PUBLIC_LOG_D32,
                     isFlushing_, static_cast<int>(state_.load()));
         return ErrorCode::SUCCESS;
     }
@@ -306,7 +337,7 @@ ErrorCode VideoSinkFilter::Start()
 {
     MEDIA_LOG_D("start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
-        MEDIA_LOG_W("sink is not ready when start, state_: %" PUBLIC_LOG "d", state_.load());
+        MEDIA_LOG_W("sink is not ready when start, state_: " PUBLIC_LOG_D32, state_.load());
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     inBufQueue_->SetActive(true);
@@ -409,6 +440,8 @@ ErrorCode VideoSinkFilter::SetVideoSurface(sptr<Surface> surface)
             MEDIA_LOG_W("Set surface to plugin fail");
             return ret;
         }
+    } else {
+        surface_ = surface;
     }
     return ErrorCode::SUCCESS;
 }

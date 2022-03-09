@@ -29,10 +29,10 @@ AudioSink::AudioSink(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<AudioSink
 
 Status AudioSink::Pause()
 {
-    MEDIA_LOG_I("%" PUBLIC_LOG "s Enter.", __FUNCTION__);
+    MEDIA_LOG_I(PUBLIC_LOG "s Enter.", __FUNCTION__);
     OSAL::ScopedLock lock(stateChangeMutex_);
     if (pluginState_ != State::RUNNING) {
-        MEDIA_LOG_I("plugin %" PUBLIC_LOG "s pause in status %" PUBLIC_LOG "s, ignore pause",
+        MEDIA_LOG_I("plugin " PUBLIC_LOG "s pause in status " PUBLIC_LOG "s, ignore pause",
                     plugin_->GetName().c_str(), GetStateString(pluginState_.load()));
         return Status::OK;
     }
@@ -41,16 +41,16 @@ Status AudioSink::Pause()
     if (ret == Status::OK) {
         pluginState_ = State::PAUSED;
     }
-    MEDIA_LOG_I("%" PUBLIC_LOG "s Exit.", __FUNCTION__);
+    MEDIA_LOG_I(PUBLIC_LOG "s Exit.", __FUNCTION__);
     return ret;
 }
 
 Status AudioSink::Resume()
 {
-    MEDIA_LOG_I("%" PUBLIC_LOG "s Enter.", __FUNCTION__);
+    MEDIA_LOG_I(PUBLIC_LOG "s Enter.", __FUNCTION__);
     OSAL::ScopedLock lock(stateChangeMutex_);
     if (pluginState_ != State::PAUSED) {
-        MEDIA_LOG_I("plugin %" PUBLIC_LOG "s resume in status %" PUBLIC_LOG "s, ignore pause",
+        MEDIA_LOG_I("plugin " PUBLIC_LOG "s resume in status " PUBLIC_LOG "s, ignore pause",
                     plugin_->GetName().c_str(), GetStateString(pluginState_.load()));
         return Status::OK;
     }
@@ -59,7 +59,7 @@ Status AudioSink::Resume()
     if (ret == Status::OK) {
         pluginState_ = State::RUNNING;
     }
-    MEDIA_LOG_I("%" PUBLIC_LOG "s Exit.", __FUNCTION__);
+    MEDIA_LOG_I(PUBLIC_LOG "s Exit.", __FUNCTION__);
     return ret;
 }
 

@@ -30,7 +30,7 @@ TEST(ChannelLayoutTest, test_convert_from_ffmpeg_mono)
     int channels = 1;
     uint64_t ffChannelLayout = 0x4;
 
-    AudioChannelLayout channelLayout = Ffmpeg::ConvertChannelLayoutFromFFmpeg(channels,  ffChannelLayout);
+    AudioChannelLayout channelLayout = Ffmpeg::ConvertChannelLayoutFromFFmpeg(channels, ffChannelLayout);
     EXPECT_EQ(AudioChannelLayout::MONO, channelLayout);
 }
 
@@ -39,7 +39,7 @@ TEST(ChannelLayoutTest, test_convert_from_ffmpeg_stereo)
     int channels = 2;
     uint64_t ffChannelLayout = 0x3;
 
-    AudioChannelLayout channelLayout = Ffmpeg::ConvertChannelLayoutFromFFmpeg(channels,  ffChannelLayout);
+    AudioChannelLayout channelLayout = Ffmpeg::ConvertChannelLayoutFromFFmpeg(channels, ffChannelLayout);
     EXPECT_EQ(AudioChannelLayout::STEREO, channelLayout);
 }
 } // namespace Test

@@ -39,7 +39,7 @@ const T* FindTagInMap(Tag tag, const std::map<Tag, ValueType>& tagStore)
     if (ite != tagStore.end() && ite->second.SameTypeWith(typeid(T))) {
         return AnyCast<T>(&ite->second);
     } else {
-        MEDIA_LOG_W("parameter %" PUBLIC_LOG_D32 " is not found or type mismatch", static_cast<int32_t>(tag));
+        MEDIA_LOG_W("parameter " PUBLIC_LOG_D32 " is not found or type mismatch", static_cast<int32_t>(tag));
         return nullptr;
     }
 }
@@ -51,7 +51,7 @@ void ConfigAudioCommonAttr(AVCodecContext& codecContext, const std::map<Tag, Val
     ASSIGN_IF_NOT_NULL(FindTagInMap<int64_t>(Tag::MEDIA_BITRATE, tagStore), codecContext.bit_rate);
     auto audioSampleFmtPtr = FindTagInMap<AudioSampleFormat>(Tag::AUDIO_SAMPLE_FORMAT, tagStore);
     if (audioSampleFmtPtr != nullptr) {
-        auto ffFmt = Trans2FFmepgFormat(*audioSampleFmtPtr);
+        auto ffFmt = ConvP2FfSampleFmt(*audioSampleFmtPtr);
         if (ffFmt != AV_SAMPLE_FMT_NONE) {
             codecContext.sample_fmt = ffFmt;
         }
@@ -125,14 +125,14 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace Ffmpeg {
-void ConfigCodec(AVCodecContext& codecContext, const std::map<Tag, ValueType>& tagStore)
+void ConfigAudioEncoder(AVCodecContext& codecContext, const std::map<Tag, ValueType>& tagStore)
 {
     ConfigAudioCommonAttr(codecContext, tagStore);
     if (g_ConfigFuncMap.count(codecContext.codec_id) != 0) {
         g_ConfigFuncMap.at(codecContext.codec_id)(codecContext, tagStore);
     }
 }
-Status GetParamFromCodecContext(const AVCodecContext& codecContext, Tag tag, Plugin::ValueType& outVal)
+Status GetAudioEncoderParameters(const AVCodecContext& codecContext, Tag tag, Plugin::ValueType& outVal)
 {
     outVal.Reset();
     GetAudioCommonAttr(codecContext, tag, outVal);

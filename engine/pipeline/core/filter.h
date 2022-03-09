@@ -20,10 +20,9 @@
 #include <memory>
 
 #include "filter_callback.h"
-#include "foundation/error_code.h"
+#include "error_code.h"
 #include "utils/constants.h"
 #include "event.h"
-#include "utils/utils.h"
 #include "parameter.h"
 #include "port.h"
 #include "plugin/core/plugin_meta.h"
@@ -89,7 +88,7 @@ public:
      * this parameter.
      * @return
      */
-    virtual ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) = 0; // InPort调用
+    virtual ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) = 0; // InPort调用
     virtual ErrorCode PullData(const std::string& outPort, uint64_t offset, size_t size,
                                AVBufferPtr& data) = 0; // OutPort调用
     virtual const EventReceiver* GetOwnerPipeline() const = 0;

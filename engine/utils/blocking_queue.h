@@ -19,19 +19,20 @@
 #include <atomic>
 #include <queue>
 #include <string>
+#include <utility>
 #include "constants.h"
 #include "foundation/log.h"
-#include "osal/thread/condition_variable.h"
-#include "osal/thread/mutex.h"
-#include "osal/thread/scoped_lock.h"
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/osal/thread/scoped_lock.h"
 
 namespace OHOS {
 namespace Media {
 template <typename T>
 class BlockingQueue {
 public:
-    explicit BlockingQueue(const std::string& name, size_t capacity = DEFAULT_QUEUE_SIZE)
-        : name_(name), capacity_(capacity), isActive(true)
+    explicit BlockingQueue(std::string name, size_t capacity = DEFAULT_QUEUE_SIZE)
+        : name_(std::move(name)), capacity_(capacity), isActive(true)
     {
     }
     ~BlockingQueue() = default;
@@ -53,28 +54,28 @@ public:
     {
         OSAL::ScopedLock lock(mutex_);
         if (!isActive) {
-            MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s is inactive for Push.", name_.c_str());
+            MEDIA_LOG_D("blocking queue " PUBLIC_LOG "s is inactive for Push.", name_.c_str());
             return false;
         }
         if (que_.size() >= capacity_) {
-            MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s is full, waiting for pop.", name_.c_str());
+            MEDIA_LOG_D("blocking queue " PUBLIC_LOG "s is full, waiting for pop.", name_.c_str());
             cvFull_.Wait(lock, [this] { return !isActive || que_.size() < capacity_; });
         }
         if (!isActive) {
-            MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s: inactive: %" PUBLIC_LOG "d, isFull: %" PUBLIC_LOG
+            MEDIA_LOG_D("blocking queue " PUBLIC_LOG "s: inactive: " PUBLIC_LOG "d, isFull: " PUBLIC_LOG
                         "d", name_.c_str(), isActive.load(), que_.size() < capacity_);
             return false;
         }
         que_.push(value);
         cvEmpty_.NotifyAll();
-        MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s Push succeed.", name_.c_str());
+        MEDIA_LOG_D("blocking queue " PUBLIC_LOG "s Push succeed.", name_.c_str());
         return true;
     }
     bool Push(const T& value, int timeoutMs)
     {
         OSAL::ScopedLock lock(mutex_);
         if (!isActive) {
-            MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s is inactive for Push.", name_.c_str());
+            MEDIA_LOG_D("blocking queue " PUBLIC_LOG "s is inactive for Push.", name_.c_str());
             return false;
         }
         if (que_.size() >= capacity_) {
@@ -82,7 +83,7 @@ public:
             cvFull_.WaitFor(lock, timeoutMs, [this] { return !isActive || que_.size() < capacity_; });
         }
         if (!isActive || (que_.size() == capacity_)) {
-            MEDIA_LOG_D("blocking queue: inactive: %" PUBLIC_LOG "d, isFull: %" PUBLIC_LOG "d",
+            MEDIA_LOG_D("blocking queue: inactive: " PUBLIC_LOG "d, isFull: " PUBLIC_LOG "d",
                         isActive, que_.size() < capacity_);
             return false;
         }
@@ -92,14 +93,14 @@ public:
     }
     T Pop()
     {
-        MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s Pop enter.", name_.c_str());
+        MEDIA_LOG_D("blocking queue " PUBLIC_LOG "s Pop enter.", name_.c_str());
         OSAL::ScopedLock lock(mutex_);
         if (!isActive) {
-            MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s is inactive.", name_.c_str());
+            MEDIA_LOG_D("blocking queue " PUBLIC_LOG "s is inactive.", name_.c_str());
             return {};
         }
         if (que_.empty()) {
-            MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s is empty, waiting for push", name_.c_str());
+            MEDIA_LOG_D("blocking queue " PUBLIC_LOG "s is empty, waiting for push", name_.c_str());
             cvEmpty_.Wait(lock, [this] { return !isActive || !que_.empty(); });
         }
         if (!isActive) {
@@ -108,14 +109,14 @@ public:
         T el = que_.front();
         que_.pop();
         cvFull_.NotifyOne();
-        MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s Pop succeed.", name_.c_str());
+        MEDIA_LOG_D("blocking queue " PUBLIC_LOG "s Pop succeed.", name_.c_str());
         return el;
     }
     T Pop(int timeoutMs)
     {
         OSAL::ScopedLock lock(mutex_);
         if (!isActive) {
-            MEDIA_LOG_D("blocking queue %" PUBLIC_LOG "s is inactive.", name_.c_str());
+            MEDIA_LOG_D("blocking queue " PUBLIC_LOG "s is inactive.", name_.c_str());
             return {};
         }
         if (que_.empty()) {
@@ -137,7 +138,7 @@ public:
     void SetActive(bool active)
     {
         OSAL::ScopedLock lock(mutex_);
-        MEDIA_LOG_D("SetActive for %" PUBLIC_LOG "s: %" PUBLIC_LOG "d.", name_.c_str(), active);
+        MEDIA_LOG_D("SetActive for " PUBLIC_LOG "s: " PUBLIC_LOG "d.", name_.c_str(), active);
         isActive = active;
         if (!active) {
             ClearUnprotected();

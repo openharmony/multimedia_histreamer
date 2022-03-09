@@ -30,35 +30,26 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace VideoCapture {
-class VideoCaptureAllocator : public Plugin::Allocator {
-public:
-    VideoCaptureAllocator() = default;
-    ~VideoCaptureAllocator() override = default;
-
-    void* Alloc(size_t size) override;
-    void Free(void* ptr) override; // NOLINT: void*
-};
-class VideoCapturePlugin : public Plugin::SourcePlugin {
+class VideoCapturePlugin : public SourcePlugin {
 public:
     explicit VideoCapturePlugin(std::string name);
     ~VideoCapturePlugin() override;
 
-    Plugin::Status Init() override;
-    Plugin::Status Deinit() override;
-    Plugin::Status Prepare() override;
-    Plugin::Status Reset() override;
-    Plugin::Status Start() override;
-    Plugin::Status Stop() override;
-    bool IsParameterSupported(Plugin::Tag tag) override;
-    Plugin::Status GetParameter(Plugin::Tag tag, Plugin::ValueType& value) override;
-    Plugin::Status SetParameter(Plugin::Tag tag, const Plugin::ValueType& value) override;
-    std::shared_ptr<Plugin::Allocator> GetAllocator() override;
-    Plugin::Status SetCallback(Plugin::Callback* cb) override;
-    Plugin::Status SetSource(std::shared_ptr<Plugin::MediaSource> source) override;
-    Plugin::Status Read(std::shared_ptr<Plugin::Buffer>& buffer, size_t expectedLen) override;
-    Plugin::Status GetSize(size_t& size) override;
+    Status Init() override;
+    Status Deinit() override;
+    Status Prepare() override;
+    Status Reset() override;
+    Status Start() override;
+    Status Stop() override;
+    Status GetParameter(Tag tag, ValueType& value) override;
+    Status SetParameter(Tag tag, const ValueType& value) override;
+    std::shared_ptr<Allocator> GetAllocator() override;
+    Status SetCallback(Callback* cb) override;
+    Status SetSource(std::shared_ptr<MediaSource> source) override;
+    Status Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen) override;
+    Status GetSize(size_t& size) override;
     bool IsSeekable() override;
-    Plugin::Status SeekTo(uint64_t offset) override;
+    Status SeekTo(uint64_t offset) override;
 
 protected:
     class SurfaceConsumerListener : public IBufferConsumerListener {
@@ -74,15 +65,18 @@ private:
     void ConfigSurfaceConsumer();
     Status AcquireSurfaceBuffer();
     void OnBufferAvailable();
+    void SetVideoBufferMeta(std::shared_ptr<BufferMeta>& bufferMeta);
 
-    OHOS::Media::OSAL::Mutex mutex_ {};
+    OSAL::Mutex mutex_ {};
     OSAL::ConditionVariable readCond_;
-    std::shared_ptr<VideoCaptureAllocator> mAllocator_ {nullptr};
     sptr<Surface> surfaceConsumer_ {nullptr};
     sptr<Surface> surfaceProducer_ {nullptr};
     std::atomic<bool> isStop_ {false};
     uint32_t width_ {0};
     uint32_t height_ {0};
+    double captureRate_ {0.0};
+    VideoPixelFormat pixelFormat_;
+
     uint32_t bufferCnt_ {0};
     uint64_t curTimestampNs_ {0};
     uint64_t stopTimestampNs_ {0};

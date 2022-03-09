@@ -21,28 +21,28 @@
 #include <algorithm>
 #include <cmath>
 #include "foundation/log.h"
+#include "foundation/pre_defines.h"
 #include "plugin/common/plugin_time.h"
-#include "utils/utils.h"
 #include "utils/constants.h"
 
 namespace {
 // register plugins
 using namespace OHOS::Media::Plugin;
 using namespace VideoCapture;
-std::shared_ptr<SourcePlugin> VideoCapturePluginCreater(const std::string &name)
-{
-    return std::make_shared<VideoCapturePlugin>(name);
-}
 
 Status VideoCaptureRegister(const std::shared_ptr<Register> &reg)
 {
     SourcePluginDef definition;
-    definition.name = "AudioCapture";
+    definition.name = "VideoCapture";
     definition.description = "Video capture from audio service";
     definition.rank = 100; // 100: max rank
     definition.inputType = SrcInputType::VID_SURFACE_YUV;
-    definition.creator = VideoCapturePluginCreater;
+    definition.creator = [](const std::string& name) -> std::shared_ptr<SourcePlugin> {
+        return std::make_shared<VideoCapturePlugin>(name);
+    };
     Capability outCaps(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
+    outCaps.AppendDiscreteKeys<VideoPixelFormat>(
+        Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21});
     definition.outCaps.push_back(outCaps);
     // add es outCaps later
     return reg->AddPlugin(definition);
@@ -53,27 +53,12 @@ PLUGIN_DEFINITION(StdVideoCapture, LicenseType::APACHE_V2, VideoCaptureRegister,
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-using namespace OHOS::Media::Plugin;
-
+namespace VideoCapture {
 constexpr int32_t DEFAULT_SURFACE_QUEUE_SIZE = 6;
 constexpr int32_t DEFAULT_SURFACE_SIZE = 1024 * 1024;
 constexpr int32_t DEFAULT_VIDEO_WIDTH = 1920;
 constexpr int32_t DEFAULT_VIDEO_HEIGHT = 1080;
-
-void* VideoCaptureAllocator::Alloc(size_t size)
-{
-    if (size == 0) {
-        return nullptr;
-    }
-    return reinterpret_cast<void*>(new (std::nothrow) uint8_t[size]); // NOLINT: cast
-}
-
-void VideoCaptureAllocator::Free(void* ptr) // NOLINT: void*
-{
-    if (ptr != nullptr) {
-        delete[](uint8_t*) ptr;
-    }
-}
+constexpr int32_t DEFAULT_STRIDE_ALIGN = 16;
 
 VideoCapturePlugin::VideoCapturePlugin(std::string name)
     : SourcePlugin(std::move(name)),
@@ -164,7 +149,7 @@ Status VideoCapturePlugin::Reset()
 Status VideoCapturePlugin::Start()
 {
     MEDIA_LOG_D("IN");
-    OHOS::Media::OSAL::ScopedLock lock(mutex_);
+    OSAL::ScopedLock lock(mutex_);
     if (isStop_.load()) {
         if (curTimestampNs_ < stopTimestampNs_) {
             MEDIA_LOG_E("Get wrong audio time");
@@ -178,7 +163,7 @@ Status VideoCapturePlugin::Start()
 Status VideoCapturePlugin::Stop()
 {
     MEDIA_LOG_D("IN");
-    OHOS::Media::OSAL::ScopedLock lock(mutex_);
+    OSAL::ScopedLock lock(mutex_);
     if (!isStop_.load()) {
         stopTimestampNs_ = curTimestampNs_;
         isStop_ = true;
@@ -186,18 +171,12 @@ Status VideoCapturePlugin::Stop()
     return Status::OK;
 }
 
-bool VideoCapturePlugin::IsParameterSupported(Tag tag)
-{
-    MEDIA_LOG_D("IN");
-    return false;
-}
-
 Status VideoCapturePlugin::GetParameter(Tag tag, ValueType& value)
 {
     MEDIA_LOG_D("IN");
     switch (tag) {
         case Tag::VIDEO_SURFACE: {
-            value = surfaceProducer_.GetRefPtr();
+            value = surfaceProducer_;
             break;
         }
         default:
@@ -222,6 +201,18 @@ Status VideoCapturePlugin::SetParameter(Tag tag, const ValueType& value)
             }
             break;
         }
+        case Tag::VIDEO_CAPTURE_RATE: {
+            if (value.SameTypeWith(typeid(double))) {
+                captureRate_ = Plugin::AnyCast<double>(value);
+            }
+            break;
+        }
+        case Tag::VIDEO_PIXEL_FORMAT: {
+            if (value.SameTypeWith(typeid(VideoPixelFormat))) {
+                pixelFormat_ = Plugin::AnyCast<VideoPixelFormat>(value);
+            }
+            break;
+        }
         default:
             MEDIA_LOG_I("Unknown key");
             break;
@@ -232,7 +223,7 @@ Status VideoCapturePlugin::SetParameter(Tag tag, const ValueType& value)
 std::shared_ptr<Allocator> VideoCapturePlugin::GetAllocator()
 {
     MEDIA_LOG_D("IN");
-    return mAllocator_;
+    return nullptr;
 }
 
 Status VideoCapturePlugin::SetCallback(Callback* cb)
@@ -252,30 +243,46 @@ Status VideoCapturePlugin::AcquireSurfaceBuffer()
 {
     auto ret = surfaceConsumer_->AcquireBuffer(surfaceBuffer_, fence_, timestamp_, damage_);
     if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        MEDIA_LOG_E("surfaceConsumer AcquireBuffer() fail: %" PUBLIC_LOG "u", ret);
+        MEDIA_LOG_E("surfaceConsumer AcquireBuffer() fail: " PUBLIC_LOG "u", ret);
         return Status::ERROR_UNKNOWN;
     }
     ret = surfaceBuffer_->ExtraGet("dataSize", bufferSize_);
     if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK || bufferSize_ <= 0) {
-        MEDIA_LOG_E("surfaceBuffer get data size fail: %" PUBLIC_LOG "u", ret);
+        MEDIA_LOG_E("surfaceBuffer get data size fail: " PUBLIC_LOG "u", ret);
         return Status::ERROR_UNKNOWN;
     }
     ret = surfaceBuffer_->ExtraGet("isKeyFrame", isKeyFrame_);
     if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        MEDIA_LOG_E("surfaceBuffer get isKeyFrame fail: %" PUBLIC_LOG "u", ret);
+        MEDIA_LOG_E("surfaceBuffer get isKeyFrame fail: " PUBLIC_LOG "u", ret);
         return Status::ERROR_UNKNOWN;
     }
     int64_t pts;
     ret = surfaceBuffer_->ExtraGet("timeStamp", pts);
     if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK || pts < 0) {
-        MEDIA_LOG_E("surfaceBuffer get data size fail: %" PUBLIC_LOG "u", ret);
+        MEDIA_LOG_E("surfaceBuffer get data size fail: " PUBLIC_LOG "u", ret);
         return Status::ERROR_UNKNOWN;
     }
-    if (pts < curTimestampNs_) {
+    if (static_cast<uint64_t>(pts) < curTimestampNs_) {
         MEDIA_LOG_W("Get wrong timestamp from surface buffer");
     }
     curTimestampNs_ = static_cast<uint64_t>(pts);
     return Status::OK;
+}
+
+void VideoCapturePlugin::SetVideoBufferMeta(std::shared_ptr<BufferMeta>& bufferMeta)
+{
+    std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
+    videoMeta->width = width_;
+    videoMeta->height = height_;
+    videoMeta->videoPixelFormat = VideoPixelFormat::NV21;
+    size_t lineSize = AlignUp(width_, DEFAULT_STRIDE_ALIGN);
+    if ((lineSize / 2) % DEFAULT_STRIDE_ALIGN) { // 2
+        lineSize = AlignUp(width_, DEFAULT_STRIDE_ALIGN * 2); // 2
+    }
+    videoMeta->stride.emplace_back(lineSize); // lineSize[0]
+    videoMeta->stride.emplace_back(lineSize / 2); // lineSize[1], 2
+    videoMeta->stride.emplace_back(lineSize / 2); // lineSize[2], 2
+    videoMeta->planes = videoMeta->stride.size();
 }
 
 Status VideoCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
@@ -285,7 +292,7 @@ Status VideoCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
         return Status::ERROR_INVALID_PARAMETER;
     }
     auto bufferMeta = buffer->GetBufferMeta();
-    if (!bufferMeta || bufferMeta->GetType() != BufferMetaType::VIDEO ||  surfaceConsumer_ == nullptr) {
+    if (!bufferMeta || bufferMeta->GetType() != BufferMetaType::VIDEO || surfaceConsumer_ == nullptr) {
         return Status::ERROR_INVALID_PARAMETER;
     }
     std::shared_ptr<Memory> bufData;
@@ -304,14 +311,16 @@ Status VideoCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
     }
     auto ret = AcquireSurfaceBuffer();
     if (ret != Status::OK) {
-        MEDIA_LOG_E("AcquireSurfaceBuffer fail: %" PUBLIC_LOG "d", ret);
+        MEDIA_LOG_E("AcquireSurfaceBuffer fail: " PUBLIC_LOG "d", ret);
         return ret;
     }
-    if (bufData->Write(static_cast<const uint8_t*>(surfaceBuffer_->GetVirAddr()), bufferSize_) != bufferSize_) {
+    auto writeSize = bufData->Write(static_cast<const uint8_t*>(surfaceBuffer_->GetVirAddr()), bufferSize_);
+    if (static_cast<int32_t>(writeSize) != bufferSize_) {
         MEDIA_LOG_E("write buffer data fail");
         return Status::ERROR_UNKNOWN;
     }
     Ns2HstTime(curTimestampNs_ - totalPauseTimeNs_, reinterpret_cast<int64_t &>(buffer->pts));
+    SetVideoBufferMeta(bufferMeta);
     bufferCnt_--;
     return Status::OK;
 }
@@ -322,7 +331,7 @@ Status VideoCapturePlugin::GetSize(size_t& size)
         return Status::ERROR_INVALID_PARAMETER;
     }
     size = bufferSize_;
-    MEDIA_LOG_D("bufferSize_: %" PUBLIC_LOG "zu", size);
+    MEDIA_LOG_D("bufferSize_: " PUBLIC_LOG "zu", size);
     return Status::OK;
 }
 
@@ -347,12 +356,13 @@ void VideoCapturePlugin::OnBufferAvailable()
     if (!surfaceConsumer_) {
         return;
     }
-    OHOS::Media::OSAL::ScopedLock lock(mutex_);
+    OSAL::ScopedLock lock(mutex_);
     bufferCnt_++;
     if (bufferCnt_ == 1) {
         readCond_.NotifyAll();
     }
 }
+} // namespace VideoCapture
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

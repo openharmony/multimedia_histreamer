@@ -17,8 +17,10 @@
 
 #include "filter_base.h"
 #include <algorithm>
+#include "common/plugin_settings.h"
 #include "common/plugin_utils.h"
 #include "foundation/log.h"
+#include "plugin_attr_desc.h"
 
 namespace OHOS {
 namespace Media {
@@ -103,7 +105,7 @@ std::vector<Filter*> FilterBase::GetNextFilters()
     for (auto&& outPort : outPorts_) {
         auto peerPort = outPort->GetPeerPort();
         if (!peerPort) {
-            MEDIA_LOG_I("Filter %" PUBLIC_LOG "s outport %" PUBLIC_LOG "s has no peer port (%" PUBLIC_LOG
+            MEDIA_LOG_I("Filter " PUBLIC_LOG "s outport " PUBLIC_LOG "s has no peer port (" PUBLIC_LOG
                         "zu).", name_.c_str(), outPort->GetName().c_str(), outPorts_.size());
             continue;
         }
@@ -122,7 +124,7 @@ std::vector<Filter*> FilterBase::GetPreFilters()
     for (auto&& inPort : inPorts_) {
         auto peerPort = inPort->GetPeerPort();
         if (!peerPort) {
-            MEDIA_LOG_I("Filter %" PUBLIC_LOG "s inport %" PUBLIC_LOG "s has no peer port (%" PUBLIC_LOG
+            MEDIA_LOG_I("Filter " PUBLIC_LOG "s inport " PUBLIC_LOG "s has no peer port (" PUBLIC_LOG
                         "zu).", name_.c_str(), inPort->GetName().c_str(), inPorts_.size());
             continue;
         }
@@ -134,7 +136,7 @@ std::vector<Filter*> FilterBase::GetPreFilters()
     return preFilters;
 }
 
-ErrorCode FilterBase::PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset)
+ErrorCode FilterBase::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     UNUSED_VARIABLE(inPort);
     UNUSED_VARIABLE(buffer);
@@ -184,8 +186,32 @@ T FilterBase::FindPort(const std::vector<T>& list, const std::string& name)
     if (find != list.end()) {
         return *find;
     }
-    MEDIA_LOG_E("Find port(%" PUBLIC_LOG "s) failed.", name.c_str());
+    MEDIA_LOG_E("Find port(" PUBLIC_LOG "s) failed.", name.c_str());
     return nullptr;
+}
+
+ErrorCode FilterBase::ConfigPluginWithMeta(Plugin::Base& plugin, const Plugin::Meta& meta)
+{
+    auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
+    for (const auto& keyPair : parameterMap) {
+        if ((keyPair.second.second & PARAM_SET) == 0) {
+            continue;
+        }
+        auto outValPtr = meta.GetData(static_cast<Plugin::MetaID>(keyPair.first));
+        if (outValPtr && keyPair.second.first(keyPair.first, *outValPtr)) {
+            if (plugin.SetParameter(keyPair.first, *outValPtr) != Plugin::Status::OK) {
+                MEDIA_LOG_W("set parameter " PUBLIC_LOG_S "(" PUBLIC_LOG_D32 ") on plugin " PUBLIC_LOG_S " failed",
+                            GetTagStrName(keyPair.first), keyPair.first, plugin.GetName().c_str());
+            }
+        } else {
+            if (!HasTagInfo(keyPair.first)) {
+                MEDIA_LOG_W("tag " PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
+            }
+            MEDIA_LOG_W("parameter " PUBLIC_LOG_S " in meta is not found or type mismatch",
+                        GetTagStrName(keyPair.first));
+        }
+    }
+    return ErrorCode::SUCCESS;
 }
 
 std::string FilterBase::NamePort(const std::string& mime)
@@ -204,7 +230,7 @@ PInPort FilterBase::GetRouteInPort(const std::string& outPortName)
     auto ite = std::find_if(routeMap_.begin(), routeMap_.end(),
                             [&outPortName](const PairPort& pp) { return outPortName == pp.second; });
     if (ite == routeMap_.end()) {
-        MEDIA_LOG_W("out port %" PUBLIC_LOG "s has no route map port", outPortName.c_str());
+        MEDIA_LOG_W("out port " PUBLIC_LOG "s has no route map port", outPortName.c_str());
         return nullptr;
     }
     return GetInPort(ite->first);
@@ -215,7 +241,7 @@ POutPort FilterBase::GetRouteOutPort(const std::string& inPortName)
     auto ite = std::find_if(routeMap_.begin(), routeMap_.end(),
                             [&inPortName](const PairPort& pp) { return inPortName == pp.first; });
     if (ite == routeMap_.end()) {
-        MEDIA_LOG_W("in port %" PUBLIC_LOG "s has no route map port", inPortName.c_str());
+        MEDIA_LOG_W("in port " PUBLIC_LOG "s has no route map port", inPortName.c_str());
         return nullptr;
     }
     return GetOutPort(ite->second);
@@ -235,7 +261,7 @@ bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<T>& plugin, std::shar
             if (plugin->Reset() == Plugin::Status::OK) {
                 return true;
             }
-            MEDIA_LOG_W("reuse previous plugin %" PUBLIC_LOG "s failed, will create new plugin",
+            MEDIA_LOG_W("reuse previous plugin " PUBLIC_LOG "s failed, will create new plugin",
                         pluginInfo->name.c_str());
         }
         plugin->Deinit();
@@ -243,12 +269,12 @@ bool FilterBase::UpdateAndInitPluginByInfo(std::shared_ptr<T>& plugin, std::shar
 
     plugin = pluginCreator(selectedPluginInfo->name);
     if (plugin == nullptr) {
-        MEDIA_LOG_E("cannot create plugin %" PUBLIC_LOG "s", selectedPluginInfo->name.c_str());
+        MEDIA_LOG_E("cannot create plugin " PUBLIC_LOG "s", selectedPluginInfo->name.c_str());
         return false;
     }
     auto err = TranslatePluginStatus(plugin->Init());
     if (err != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("plugin %" PUBLIC_LOG "s init error", selectedPluginInfo->name.c_str());
+        MEDIA_LOG_E("plugin " PUBLIC_LOG "s init error", selectedPluginInfo->name.c_str());
         return false;
     }
     pluginInfo = selectedPluginInfo;

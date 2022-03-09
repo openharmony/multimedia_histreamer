@@ -28,12 +28,12 @@ State::State(StateId stateId, std::string name, PlayExecutor& executor)
 std::tuple<ErrorCode, Action> State::Enter(Intent intent)
 {
     (void)intent;
-    MEDIA_LOG_D("Enter state: %" PUBLIC_LOG "s", name_.c_str());
+    MEDIA_LOG_D("Enter state: " PUBLIC_LOG "s", name_.c_str());
     return {ErrorCode::SUCCESS, Action::ACTION_BUTT};
 }
 void State::Exit()
 {
-    MEDIA_LOG_D("Exit state: %" PUBLIC_LOG "s", name_.c_str());
+    MEDIA_LOG_D("Exit state: " PUBLIC_LOG "s", name_.c_str());
 }
 std::tuple<ErrorCode, Action> State::Execute(Intent intent, const Plugin::Any& param)
 {
@@ -71,7 +71,7 @@ std::tuple<ErrorCode, Action> State::Resume()
 std::tuple<ErrorCode, Action> State::Seek(const Plugin::Any& param)
 {
     (void)param;
-    executor_.DoSeek(false, 0);
+    executor_.DoSeek(false, 0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC);
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::SetAttribute()
@@ -133,7 +133,7 @@ std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin:
         default:
             break;
     }
-    MEDIA_LOG_D("DispatchIntent %" PUBLIC_LOG "s, curState: %" PUBLIC_LOG "s, nextState: %" PUBLIC_LOG "s",
+    MEDIA_LOG_D("DispatchIntent " PUBLIC_LOG "s, curState: " PUBLIC_LOG "s, nextState: " PUBLIC_LOG "s",
                 intentDesc_.at(intent).c_str(), name_.c_str(), actionDesc_.at(nextAction).c_str());
     return {rtv, nextAction};
 }

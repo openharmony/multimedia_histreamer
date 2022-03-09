@@ -52,6 +52,7 @@ private:
     void HttpDownloadThread();
     static size_t RxBodyData(void *buffer, size_t size, size_t nitems, void *userParam);
     static size_t RxHeaderData(void *buffer, size_t size, size_t nitems, void *userParam);
+    void WaitHeaderUpdated() const;
 
 private:
     std::shared_ptr<RingBuffer> buffer_;
@@ -60,6 +61,7 @@ private:
     bool isEos_ {false}; // file download finished
     int64_t startPos_;
     HeaderInfo headerInfo_;
+    bool isHeaderUpdated {false};
     std::shared_ptr<OSAL::Task> task_;
     bool isDownloading_;
     int requestSize_;

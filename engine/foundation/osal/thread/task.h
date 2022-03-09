@@ -20,10 +20,10 @@
 #include <functional>
 #include <string>
 
-#include "osal/thread/condition_variable.h"
-#include "osal/thread/mutex.h"
-#include "osal/thread/scoped_lock.h"
-#include "osal/thread/thread.h"
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/osal/thread/scoped_lock.h"
+#include "foundation/osal/thread/thread.h"
 
 namespace OHOS {
 namespace Media {

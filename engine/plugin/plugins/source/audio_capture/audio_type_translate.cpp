@@ -50,6 +50,7 @@ const std::pair<AudioStandard::AudioChannel, uint32_t> g_auChannelsMap[] = {
 
 namespace OHOS {
 namespace Media {
+namespace Plugin {
 namespace AuCapturePlugin {
 bool SampleRateEnum2Num (OHOS::AudioStandard::AudioSamplingRate enumVal, uint32_t& numVal)
 {
@@ -73,7 +74,7 @@ bool SampleRateNum2Enum (uint32_t numVal, OHOS::AudioStandard::AudioSamplingRate
     return false;
 }
 
-bool SampleFmt2PluginFmt(OHOS::AudioStandard::AudioSampleFormat aFmt, OHOS::Media::Plugin::AudioSampleFormat& pFmt)
+bool SampleFmt2PluginFmt(OHOS::AudioStandard::AudioSampleFormat aFmt, AudioSampleFormat& pFmt)
 {
     for (const auto& item : g_aduFmtMap) {
         if (item.first == aFmt) {
@@ -83,7 +84,7 @@ bool SampleFmt2PluginFmt(OHOS::AudioStandard::AudioSampleFormat aFmt, OHOS::Medi
     }
     return false;
 }
-bool PluginFmt2SampleFmt(OHOS::Media::Plugin::AudioSampleFormat pFmt, OHOS::AudioStandard::AudioSampleFormat& aFmt)
+bool PluginFmt2SampleFmt(AudioSampleFormat pFmt, OHOS::AudioStandard::AudioSampleFormat& aFmt)
 {
     for (const auto& item : g_aduFmtMap) {
         if (item.second == pFmt) {
@@ -114,29 +115,30 @@ bool ChannelNumNum2Enum(uint32_t numVal, OHOS::AudioStandard::AudioChannel& enum
     }
     return false;
 }
-Plugin::Status Error2Status(int32_t err)
+Status Error2Status(int32_t err)
 {
-    const static std::map<int32_t, Plugin::Status> transMap = {
-        {OHOS::AudioStandard::SUCCESS, Plugin::Status::OK},
-        {OHOS::ERR_OK, Plugin::Status::OK},
-        {OHOS::ERR_INVALID_OPERATION, Plugin::Status::ERROR_WRONG_STATE},
-        {OHOS::ERR_NO_MEMORY, Plugin::Status::ERROR_NO_MEMORY},
-        {OHOS::ERR_INVALID_VALUE, Plugin::Status::ERROR_INVALID_PARAMETER},
-        {OHOS::ERR_NAME_NOT_FOUND, Plugin::Status::ERROR_NOT_EXISTED},
-        {OHOS::ERR_PERMISSION_DENIED, Plugin::Status::ERROR_PERMISSION_DENIED},
-        {OHOS::ERR_ENOUGH_DATA, Plugin::Status::ERROR_NOT_ENOUGH_DATA},
-        {OHOS::ERR_WOULD_BLOCK, Plugin::Status::ERROR_AGAIN},
-        {OHOS::ERR_TIMED_OUT, Plugin::Status::ERROR_TIMED_OUT},
-        {OHOS::ERR_ALREADY_EXISTS, Plugin::Status::ERROR_UNKNOWN},
-        {OHOS::ERR_DEAD_OBJECT, Plugin::Status::ERROR_UNKNOWN},
-        {OHOS::ERR_NO_INIT, Plugin::Status::ERROR_UNKNOWN},
-        {OHOS::ERR_OVERFLOW, Plugin::Status::ERROR_UNKNOWN},
+    const static std::map<int32_t, Status> transMap = {
+        {OHOS::AudioStandard::SUCCESS, Status::OK},
+        {OHOS::ERR_OK, Status::OK},
+        {OHOS::ERR_INVALID_OPERATION, Status::ERROR_WRONG_STATE},
+        {OHOS::ERR_NO_MEMORY, Status::ERROR_NO_MEMORY},
+        {OHOS::ERR_INVALID_VALUE, Status::ERROR_INVALID_PARAMETER},
+        {OHOS::ERR_NAME_NOT_FOUND, Status::ERROR_NOT_EXISTED},
+        {OHOS::ERR_PERMISSION_DENIED, Status::ERROR_PERMISSION_DENIED},
+        {OHOS::ERR_ENOUGH_DATA, Status::ERROR_NOT_ENOUGH_DATA},
+        {OHOS::ERR_WOULD_BLOCK, Status::ERROR_AGAIN},
+        {OHOS::ERR_TIMED_OUT, Status::ERROR_TIMED_OUT},
+        {OHOS::ERR_ALREADY_EXISTS, Status::ERROR_UNKNOWN},
+        {OHOS::ERR_DEAD_OBJECT, Status::ERROR_UNKNOWN},
+        {OHOS::ERR_NO_INIT, Status::ERROR_UNKNOWN},
+        {OHOS::ERR_OVERFLOW, Status::ERROR_UNKNOWN},
     };
     if (transMap.count(err) != 0) {
         return transMap.at(err);
     }
-    return Plugin::Status::ERROR_UNKNOWN;
+    return Status::ERROR_UNKNOWN;
 }
-} // AuCapturePlugin
-} // Media
-} // OHOS
+} // namespace AuCapturePlugin
+} // namespace Plugin
+} // namespace Media
+} // namespace OHOS

@@ -16,8 +16,8 @@
 #include "codec.h"
 
 #include <utility>
+#include "foundation/pre_defines.h"
 #include "interface/codec_plugin.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
@@ -32,19 +32,9 @@ Status Codec::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32
     return codec_->QueueInputBuffer(inputBuffer, timeoutMs);
 }
 
-Status Codec::DequeueInputBuffer(std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
-{
-    return codec_->DequeueInputBuffer(inputBuffer, timeoutMs);
-}
-
 Status Codec::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
 {
     return codec_->QueueOutputBuffer(outputBuffers, timeoutMs);
-}
-
-Status Codec::DequeueOutputBuffer(std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
-{
-    return codec_->DequeueOutputBuffer(outputBuffers, timeoutMs);
 }
 
 Status Codec::Flush()
@@ -60,12 +50,12 @@ DataCallbackWrapper(uint32_t pkgVersion, DataCallbackHelper* dataCallback)
 
 ~DataCallbackWrapper() override = default;
 
-void OnInputBufferDone(std::shared_ptr<Buffer>& input) override
+void OnInputBufferDone(const std::shared_ptr<Buffer>& input) override
 {
     dataCallbackHelper->OnInputBufferDone(input);
 }
 
-void OnOutputBufferDone(std::shared_ptr<Buffer>& output) override
+void OnOutputBufferDone(const std::shared_ptr<Buffer>& output) override
 {
     dataCallbackHelper->OnOutputBufferDone(output);
 }

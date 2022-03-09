@@ -17,7 +17,7 @@
 #define HISTREAMER_HIRECORDER_RECORDING_STATE_H
 
 #include <memory>
-#include "foundation/error_code.h"
+#include "pipeline/core/error_code.h"
 #include "recorder_executor.h"
 #include "state.h"
 
@@ -34,7 +34,7 @@ public:
 
     std::tuple<ErrorCode, Action> Enter(Intent intent) override
     {
-        MEDIA_LOG_D("Enter state: %" PUBLIC_LOG "s", name_.c_str());
+        MEDIA_LOG_D("Enter state: " PUBLIC_LOG "s", name_.c_str());
         ErrorCode ret;
         if (intent == Intent::RESUME) {
             ret = executor_.DoResume();

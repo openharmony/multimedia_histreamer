@@ -19,11 +19,11 @@
 #include <atomic>
 #include <memory>
 #include "foundation/log.h"
+#include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
 #include "foundation/osal/thread/scoped_lock.h"
 #include "securec.h"
-#include "utils/memory_helper.h"
 
 namespace OHOS {
 namespace Media {
@@ -37,7 +37,7 @@ public:
 
     bool Init()
     {
-        buffer_ = MemoryHelper::make_unique<uint8_t[]>(bufferSize_);
+        buffer_ = CppExt::make_unique<uint8_t[]>(bufferSize_);
         return buffer_ != nullptr;
     }
 
@@ -125,8 +125,8 @@ public:
     bool Seek(uint64_t offset)
     {
         OSAL::ScopedLock lck(writeMutex_);
-        MEDIA_LOG_I("Seek: buffer size %" PUBLIC_LOG "d, offset %" PUBLIC_LOG PRIu64
-                    ", mediaOffset_ %" PUBLIC_LOG PRIu64, GetSize(), offset, mediaOffset_);
+        MEDIA_LOG_I("Seek: buffer size " PUBLIC_LOG "d, offset " PUBLIC_LOG PRIu64
+                    ", mediaOffset_ " PUBLIC_LOG PRIu64, GetSize(), offset, mediaOffset_);
         bool result = false;
         if (offset >= mediaOffset_ && offset - mediaOffset_ < GetSize()) {
             head_ += offset - mediaOffset_;

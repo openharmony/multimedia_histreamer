@@ -19,7 +19,6 @@
 #define protected public
 #define UNIT_TEST 1
 
-#include "utils/utils.h"
 #include "plugin/core/plugin_meta.h"
 
 namespace OHOS {

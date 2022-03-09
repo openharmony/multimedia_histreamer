@@ -45,18 +45,24 @@ std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine()
     auto player = std::unique_ptr<HiPlayerImpl>(new (std::nothrow) HiPlayerImpl());
     if (player && player->Init() == ErrorCode::SUCCESS) {
         return player;
+    } else {
+        MEDIA_LOG_E("create player failed or player init failed");
     }
     return nullptr;
 }
 
 std::unique_ptr<IRecorderEngine> HstEngineFactory::CreateRecorderEngine()
 {
-    MEDIA_LOG_I("CreateRecorderEngine enter.");
 #ifdef RECORDER_SUPPORT
+    MEDIA_LOG_I("CreateRecorderEngine enter.");
     auto recorder = std::unique_ptr<Record::HiRecorderImpl>(new (std::nothrow) Record::HiRecorderImpl());
     if (recorder && recorder->Init() == ErrorCode::SUCCESS) {
         return recorder;
+    } else {
+        MEDIA_LOG_E("create recorder failed or player init failed");
     }
+#else
+    MEDIA_LOG_W("CreateRecorderEngine not supported now, return nullptr.");
 #endif
     return nullptr;
 }

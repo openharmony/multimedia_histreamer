@@ -19,30 +19,10 @@
 
 #include "audio_capture_filter.h"
 #include "common/plugin_utils.h"
-#include "foundation/log.h"
 #include "factory/filter_factory.h"
-#include "pipeline/core/plugin_attr_desc.h"
-
-namespace {
-using namespace OHOS::Media::Plugin;
-template<typename T>
-inline bool ASSIGN_PARAMETER_IF_MATCH(Tag tag, T& ret, const ValueType& val)
-{
-    using namespace OHOS::Media::Pipeline;
-    if (HasTagInfo(tag)) {
-        if (val.SameTypeWith(*GetTagDefValue(tag)) && val.SameTypeWith(typeid(T))) {
-            ret = AnyCast<T>(val);
-            return true;
-        } else {
-            MEDIA_LOG_I("type of %" PUBLIC_LOG_S " mismatch, should be %" PUBLIC_LOG_S,
-                        GetTagStrName(tag), GetTagTypeStrName(tag));
-        }
-    } else {
-        MEDIA_LOG_I("tag %" PUBLIC_LOG_D32 "is not in map, may be update it?", tag);
-    }
-    return false;
-}
-}
+#include "foundation/cpp_ext/algorithm_ext.h"
+#include "foundation/log.h"
+#include <plugin_attr_desc.h>
 
 namespace OHOS {
 namespace Media {
@@ -89,14 +69,14 @@ ErrorCode AudioCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::
     pluginAllocator_ = plugin_->GetAllocator();
     uint32_t tmp = 0;
     if (audioMeta->GetUint32(MetaID::AUDIO_SAMPLE_RATE, tmp)) {
-        MEDIA_LOG_I("configure plugin with sample rate %" PUBLIC_LOG PRIu32, tmp);
+        MEDIA_LOG_I("configure plugin with sample rate " PUBLIC_LOG_U32, tmp);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_RATE, tmp));
         if (err != ErrorCode::SUCCESS) {
             return err;
         }
     }
     if (audioMeta->GetUint32(MetaID::AUDIO_CHANNELS, tmp)) {
-        MEDIA_LOG_I("configure plugin with channel %" PUBLIC_LOG PRIu32, tmp);
+        MEDIA_LOG_I("configure plugin with channel " PUBLIC_LOG_U32, tmp);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_CHANNELS, channelNum_));
         if (err != ErrorCode::SUCCESS) {
             return err;
@@ -104,7 +84,7 @@ ErrorCode AudioCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::
     }
     int64_t bitRate = 0;
     if (audioMeta->GetInt64(MetaID::AUDIO_CHANNELS, bitRate)) {
-        MEDIA_LOG_I("configure plugin with channel %" PUBLIC_LOG PRId64, bitRate);
+        MEDIA_LOG_I("configure plugin with channel " PUBLIC_LOG_D64, bitRate);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::MEDIA_BITRATE, bitRate));
         if (err != ErrorCode::SUCCESS) {
             return err;
@@ -112,7 +92,7 @@ ErrorCode AudioCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::
     }
     Plugin::AudioSampleFormat sampleFormat = Plugin::AudioSampleFormat::S16;
     if (audioMeta->GetData<Plugin::AudioSampleFormat>(MetaID::AUDIO_SAMPLE_FORMAT, sampleFormat)) {
-        MEDIA_LOG_I("configure plugin with sampleFormat %" PUBLIC_LOG PRIu8, sampleFormat);
+        MEDIA_LOG_I("configure plugin with sampleFormat " PUBLIC_LOG_S, GetAudSampleFmtNameStr(sampleFormat));
         return TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat));
     }
     return ErrorCode::SUCCESS;
@@ -123,29 +103,28 @@ ErrorCode AudioCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value
     auto tag = static_cast<OHOS::Media::Plugin::Tag>(key);
     switch (tag) {
         case Tag::SRC_INPUT_TYPE:
-            inputTypeSpecified_ = ASSIGN_PARAMETER_IF_MATCH(Tag::SRC_INPUT_TYPE, inputType_, value);
+            inputTypeSpecified_ = AssignParameterIfMatch(tag, inputType_, value);
             break;
         case Tag::AUDIO_SAMPLE_RATE:
-            sampleRateSpecified_ = ASSIGN_PARAMETER_IF_MATCH(Tag::AUDIO_SAMPLE_RATE, sampleRate_, value);
+            sampleRateSpecified_ = AssignParameterIfMatch(tag, sampleRate_, value);
             break;
         case Tag::AUDIO_CHANNELS:
-            channelNumSpecified_ = ASSIGN_PARAMETER_IF_MATCH(Tag::AUDIO_CHANNELS, channelNum_, value);
+            channelNumSpecified_ = AssignParameterIfMatch(tag, channelNum_, value);
             break;
         case Tag::MEDIA_BITRATE:
-            bitRateSpecified_ =  ASSIGN_PARAMETER_IF_MATCH(Tag::MEDIA_BITRATE, bitRate_, value);
+            bitRateSpecified_ = AssignParameterIfMatch(tag, bitRate_, value);
             break;
         case Tag::AUDIO_SAMPLE_FORMAT:
-            sampleRateSpecified_ = ASSIGN_PARAMETER_IF_MATCH(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat_, value);
+            sampleRateSpecified_ = AssignParameterIfMatch(tag, sampleFormat_, value);
             break;
         case Tag::AUDIO_CHANNEL_LAYOUT:
-            channelLayoutSpecified_ = ASSIGN_PARAMETER_IF_MATCH(Tag::AUDIO_CHANNEL_LAYOUT, channelLayout_, value);
+            channelLayoutSpecified_ = AssignParameterIfMatch(tag, channelLayout_, value);
             break;
         default:
-            MEDIA_LOG_W("Unknown key %" PUBLIC_LOG "d", OHOS::Media::to_underlying(tag));
+            MEDIA_LOG_W("SetParameter: unknown key " PUBLIC_LOG_S "(" PUBLIC_LOG_D32 ")", GetTagStrName(tag), key);
             break;
     }
     return ErrorCode::SUCCESS;
-#undef ASSIGN_PARAMETER_IF_MATCH
 }
 
 ErrorCode AudioCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
@@ -173,22 +152,49 @@ ErrorCode AudioCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
             break;
         }
         default:
-            MEDIA_LOG_I("Unknown key %" PUBLIC_LOG "d", tag);
+            MEDIA_LOG_W("Unknown key " PUBLIC_LOG_S, GetTagStrName(tag));
             break;
     }
     return ErrorCode::SUCCESS;
 }
 
+void AudioCaptureFilter::PickPreferSampleFmt(const std::shared_ptr<Plugin::Meta>& meta, const Plugin::ValueType& val)
+{
+    static constexpr AudioSampleFormat preferFmt = AudioSampleFormat::S16;
+    bool pickPreferFmt = false;
+    if (val.SameTypeWith(typeid(FixedCapability<AudioSampleFormat>)) &&
+        preferFmt == Plugin::AnyCast<FixedCapability<AudioSampleFormat>>(val)) {
+        pickPreferFmt = true;
+    } else if (val.SameTypeWith(typeid(DiscreteCapability<AudioSampleFormat>))) {
+        const auto* fmts = Plugin::AnyCast<DiscreteCapability<AudioSampleFormat>>(&val);
+        pickPreferFmt = CppExt::AnyOf(fmts->begin(), fmts->end(), [&](AudioSampleFormat tmp) -> bool {
+            return preferFmt == tmp;
+        });
+    }
+    if (pickPreferFmt) {
+        meta->SetData(MetaID::AUDIO_SAMPLE_FORMAT, preferFmt);
+    }
+}
+
+std::shared_ptr<Plugin::Meta> AudioCaptureFilter::PickPreferParameters()
+{
+    auto preferMeta = std::make_shared<Plugin::Meta>();
+    if (capNegWithDownstream_.keys.count(Capability::Key::AUDIO_SAMPLE_FORMAT)) {
+        PickPreferSampleFmt(preferMeta, capNegWithDownstream_.keys.at(Capability::Key::AUDIO_SAMPLE_FORMAT));
+    }
+    return preferMeta;
+}
+
 ErrorCode AudioCaptureFilter::DoConfigure()
 {
-    auto emptyMeta = std::make_shared<Plugin::Meta>();
+    auto preferMeta = PickPreferParameters();
     auto audioMeta = std::make_shared<Plugin::Meta>();
-    if (!MergeMetaWithCapability(*emptyMeta, capNegWithDownstream_, *audioMeta)) {
-        MEDIA_LOG_E("cannot find available capability of plugin %" PUBLIC_LOG "s", pluginInfo_->name.c_str());
+    if (!MergeMetaWithCapability(*preferMeta, capNegWithDownstream_, *audioMeta)) {
+        MEDIA_LOG_E("cannot find available capability of plugin " PUBLIC_LOG_S, pluginInfo_->name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
     if (!outPorts_[0]->Configure(audioMeta)) {
-        MEDIA_LOG_E("Configure downstream fail with %" PUBLIC_LOG_S, Meta2String(*audioMeta).c_str());
+        MEDIA_LOG_E("Configure downstream fail with " PUBLIC_LOG_S, Meta2String(*audioMeta).c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
     return InitAndConfigPlugin(audioMeta);
@@ -222,18 +228,31 @@ ErrorCode AudioCaptureFilter::Prepare()
 ErrorCode AudioCaptureFilter::Start()
 {
     MEDIA_LOG_I("Start entered.");
+    auto res = ErrorCode::SUCCESS;
+    // start plugin firstly
+    if (plugin_) {
+        res = TranslatePluginStatus(plugin_->Start());
+    } else {
+        res = ErrorCode::ERROR_INVALID_OPERATION;
+    }
+    FALSE_RET_V_MSG_E(res == ErrorCode::SUCCESS, res, "start plugin failed");
+    // start task secondly
     if (taskPtr_) {
         taskPtr_->Start();
     }
-    return plugin_ ? TranslatePluginStatus(plugin_->Start()) : ErrorCode::ERROR_INVALID_OPERATION;
+    return res;
 }
 
 ErrorCode AudioCaptureFilter::Stop()
 {
     MEDIA_LOG_I("Stop entered.");
+
+    // stop task firstly
     if (taskPtr_) {
         taskPtr_->Stop();
     }
+
+    // stop plugin secondly
     ErrorCode ret = ErrorCode::SUCCESS;
     if (plugin_) {
         ret = TranslatePluginStatus(plugin_->Stop());
@@ -305,20 +324,20 @@ ErrorCode AudioCaptureFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& in
 {
     if ((plugin_ != nullptr) && (pluginInfo_ != nullptr)) {
         if (info->name == pluginInfo_->name && TranslatePluginStatus(plugin_->Reset()) == ErrorCode::SUCCESS) {
-            MEDIA_LOG_I("Reuse last plugin: %" PUBLIC_LOG "s", name.c_str());
+            MEDIA_LOG_I("Reuse last plugin: " PUBLIC_LOG "s", name.c_str());
             return ErrorCode::SUCCESS;
         }
         if (TranslatePluginStatus(plugin_->Deinit()) != ErrorCode::SUCCESS) {
-            MEDIA_LOG_E("Deinit last plugin: %" PUBLIC_LOG "s error", pluginInfo_->name.c_str());
+            MEDIA_LOG_E("Deinit last plugin: " PUBLIC_LOG_S " error", pluginInfo_->name.c_str());
         }
     }
     plugin_ = manager.CreateSourcePlugin(name);
     if (plugin_ == nullptr) {
-        MEDIA_LOG_E("PluginManager CreatePlugin %" PUBLIC_LOG "s fail", name.c_str());
+        MEDIA_LOG_E("PluginManager CreatePlugin " PUBLIC_LOG_S " fail", name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
     pluginInfo_ = info;
-    MEDIA_LOG_I("Create new plugin: \"%" PUBLIC_LOG "s\" success", pluginInfo_->name.c_str());
+    MEDIA_LOG_I("Create new plugin: " PUBLIC_LOG_S " success", pluginInfo_->name.c_str());
     return ErrorCode::SUCCESS;
 }
 
@@ -436,13 +455,13 @@ ErrorCode AudioCaptureFilter::FindPlugin()
     std::set<std::string> nameList = pluginManager.ListPlugins(PluginType::SOURCE);
     for (const std::string& name : nameList) {
         std::shared_ptr<PluginInfo> info = pluginManager.GetPluginInfo(PluginType::SOURCE, name);
-        MEDIA_LOG_I("name: %" PUBLIC_LOG_S ", info->name: %" PUBLIC_LOG_S, name.c_str(), info->name.c_str());
+        MEDIA_LOG_I("name: " PUBLIC_LOG_S ", info->name: " PUBLIC_LOG_S, name.c_str(), info->name.c_str());
         auto val = info->extra[PLUGIN_INFO_EXTRA_INPUT_TYPE];
         if (val.SameTypeWith(typeid(Plugin::SrcInputType))) {
             auto supportInputType = OHOS::Media::Plugin::AnyCast<Plugin::SrcInputType>(val);
             if (inputType_ == supportInputType && DoNegotiate(info->outCaps) &&
                 CreatePlugin(info, name, pluginManager) == ErrorCode::SUCCESS) {
-                MEDIA_LOG_I("CreatePlugin %" PUBLIC_LOG_S " success", name_.c_str());
+                MEDIA_LOG_I("CreatePlugin " PUBLIC_LOG_S " success", name_.c_str());
                 return ErrorCode::SUCCESS;
             }
         }
@@ -461,4 +480,4 @@ void AudioCaptureFilter::SendBuffer(const std::shared_ptr<AVBuffer>& buffer)
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
-#endif
+#endif // RECORDER_SUPPORT

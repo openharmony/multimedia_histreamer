@@ -19,17 +19,16 @@
 #include <memory>
 #include <string>
 
-#include "foundation/error_code.h"
-#include "osal/thread/task.h"
-#include "osal/utils/util.h"
-#include "utils/blocking_queue.h"
-#include "utils/constants.h"
-#include "utils/type_define.h"
-#include "utils/utils.h"
+#include "pipeline/core/error_code.h"
+#include "foundation/osal/thread/task.h"
+#include "foundation/osal/utils/util.h"
 #include "pipeline/core/filter_base.h"
+#include "pipeline/core/type_define.h"
 #include "plugin/common/media_source.h"
 #include "plugin/core/plugin_manager.h"
 #include "plugin/interface/source_plugin.h"
+#include "utils/blocking_queue.h"
+#include "utils/constants.h"
 
 namespace OHOS {
 namespace Media {
@@ -72,6 +71,7 @@ private:
     std::string uri_;
     bool isSeekable_;
     uint64_t position_;
+    int64_t mediaOffset_ {0}; // offset used in push mode
     size_t bufferSize_;
     std::shared_ptr<Plugin::Source> plugin_;
     std::shared_ptr<Allocator> pluginAllocator_;

@@ -23,7 +23,6 @@
 
 #include "pipeline/core/plugin_attr_desc.h"
 #include "foundation/log.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
@@ -82,6 +81,7 @@ static std::vector<CapabilityID> g_allCapabilityId = {
     CapabilityID::AUDIO_AAC_STREAM_FORMAT, // 8
     CapabilityID::VIDEO_PIXEL_FORMAT, // 9
     CapabilityID::MEDIA_BITRATE, // 10
+    CapabilityID::THREAD_MODE, // 11
 };
 
 template <typename T>
@@ -98,21 +98,23 @@ static std::map<CapabilityID, std::function<bool(const Plugin::ValueType&, Plugi
     {g_allCapabilityId[8], ExtractFixedCap<Plugin::AudioAacStreamFormat>}, // 8
     {g_allCapabilityId[9], ExtractFixedCap<Plugin::VideoPixelFormat>}, // 9
     {g_allCapabilityId[10], ExtractFixedCap<int64_t>}, // 10
+    {g_allCapabilityId[11], ExtractFixedCap<Plugin::ThreadMode>}, // 11
 };
 using CheckFunc = std::function<bool(Capability::Key key, const Plugin::ValueType& val1, const Plugin::ValueType& val2,
         Plugin::ValueType& outValue)>;
 static std::map<CapabilityID, CheckFunc> g_capabilityValueCheckMap = {
-        {g_allCapabilityId[0], FixInvalDiscCapValCheck<uint32_t>}, // 0
-        {g_allCapabilityId[1], FixInvalDiscCapValCheck<uint32_t>}, // 1
-        {g_allCapabilityId[2], FixDiscCapValCheck<Plugin::AudioChannelLayout, uint64_t>}, // 2
-        {g_allCapabilityId[3], FixDiscCapValCheck<Plugin::AudioSampleFormat, uint8_t>}, // 3
-        {g_allCapabilityId[4], FixInvalDiscCapValCheck<uint32_t>}, // 4
-        {g_allCapabilityId[5], FixInvalDiscCapValCheck<uint32_t>}, // 5
-        {g_allCapabilityId[6], FixDiscCapValCheck<Plugin::AudioAacProfile, uint8_t>}, // 6
-        {g_allCapabilityId[7], FixInvalDiscCapValCheck<uint32_t>}, // 7
-        {g_allCapabilityId[8], FixDiscCapValCheck<Plugin::AudioAacStreamFormat, uint8_t>}, // 8
-        {g_allCapabilityId[9], FixDiscCapValCheck<Plugin::VideoPixelFormat, uint32_t>}, // 9
-        {g_allCapabilityId[10], FixInvalDiscCapValCheck<int64_t>}, // 10
+    {g_allCapabilityId[0], FixInvalDiscCapValCheck<uint32_t>}, // 0
+    {g_allCapabilityId[1], FixInvalDiscCapValCheck<uint32_t>}, // 1
+    {g_allCapabilityId[2], FixDiscCapValCheck<Plugin::AudioChannelLayout, uint64_t>}, // 2
+    {g_allCapabilityId[3], FixDiscCapValCheck<Plugin::AudioSampleFormat, uint8_t>}, // 3
+    {g_allCapabilityId[4], FixInvalDiscCapValCheck<uint32_t>}, // 4
+    {g_allCapabilityId[5], FixInvalDiscCapValCheck<uint32_t>}, // 5
+    {g_allCapabilityId[6], FixDiscCapValCheck<Plugin::AudioAacProfile, uint8_t>}, // 6
+    {g_allCapabilityId[7], FixInvalDiscCapValCheck<uint32_t>}, // 7
+    {g_allCapabilityId[8], FixDiscCapValCheck<Plugin::AudioAacStreamFormat, uint8_t>}, // 8
+    {g_allCapabilityId[9], FixDiscCapValCheck<Plugin::VideoPixelFormat, uint32_t>}, // 9
+    {g_allCapabilityId[10], FixInvalDiscCapValCheck<int64_t>}, // 10
+    {g_allCapabilityId[11], FixDiscCapValCheck<Plugin::ThreadMode, uint8_t>}, // 11
 };
 
 
@@ -277,17 +279,17 @@ void LogOutIncorrectType(CapabilityID key, uint8_t flags)
 {
     if (HasTagInfo(static_cast<Tag>(key))) {
         const auto& tuple = g_tagInfoMap.at(static_cast<Tag>(key));
-        const auto& typeName = std::get<2>(tuple);
-        MEDIA_LOG_E("type of %" PUBLIC_LOG_S " should be"
-        " %" PUBLIC_LOG_S "(%" PUBLIC_LOG_C ")"
-        " or Interval<%" PUBLIC_LOG_S ">(%" PUBLIC_LOG_C ")"
-        " or Discrete<%" PUBLIC_LOG_S ">(%" PUBLIC_LOG_C ")",
+        const auto& typeName = std::get<2>(tuple); // secondary
+        MEDIA_LOG_E("type of " PUBLIC_LOG_S " should be"
+        " " PUBLIC_LOG_S "(" PUBLIC_LOG_C ")"
+        " or Interval<" PUBLIC_LOG_S ">(" PUBLIC_LOG_C ")"
+        " or Discrete<" PUBLIC_LOG_S ">(" PUBLIC_LOG_C ")",
         std::get<0>(tuple),
         typeName, IsFixedAllowed(flags)? 'o': 'x',
         typeName, IsFixedAllowed(flags)? 'o': 'x',
         typeName, IsFixedAllowed(flags)? 'o': 'x');
     } else {
-        MEDIA_LOG_E("capability %" PUBLIC_LOG_D32 "is not in the map, may be update the map?", key);
+        MEDIA_LOG_E("capability " PUBLIC_LOG_D32 "is not in the map, may be update the map?", key);
     }
 }
 
@@ -374,7 +376,7 @@ bool MergeCapabilityKeys(const Capability& originCap, const Capability& otherCap
         }
         // if key is in otherCap, calculate the intersections
         if (g_capabilityValueCheckMap.count(pairKey.first) == 0) {
-            MEDIA_LOG_W("capability %" PUBLIC_LOG_D32 " cannot be applied, may be update the check map?",
+            MEDIA_LOG_W("capability " PUBLIC_LOG_D32 " cannot be applied, may be update the check map?",
                         static_cast<int32_t>(pairKey.first));
             continue;
         }
@@ -457,7 +459,7 @@ std::shared_ptr<Capability> MetaToCapability(const Plugin::Meta& meta)
     return ret;
 }
 
-bool MergeMetaWithCapability(const  Plugin::Meta& meta, const Capability& cap,  Plugin::Meta& resMeta)
+bool MergeMetaWithCapability(const Plugin::Meta& meta, const Capability& cap,  Plugin::Meta& resMeta)
 {
     resMeta.Clear();
     // change meta into capability firstly

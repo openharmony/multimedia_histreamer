@@ -26,8 +26,7 @@
 #include "plugin/core/demuxer.h"
 #include "plugin/core/plugin_meta.h"
 #include "type_finder.h"
-#include "utils/type_define.h"
-#include "utils/utils.h"
+#include "pipeline/core/type_define.h"
 
 namespace OHOS {
 namespace Media {
@@ -59,7 +58,7 @@ public:
      * @param offset always ignore this parameter
      * @return
      */
-    ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) override;
+    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
@@ -69,7 +68,7 @@ public:
 
     bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
-    ErrorCode SeekTo(int64_t pos);
+    ErrorCode SeekTo(int64_t pos, Plugin::SeekMode mode);
 
     std::vector<std::shared_ptr<Plugin::Meta>> GetStreamMetaInfo() const;
 

@@ -41,7 +41,6 @@ private:
 
     std::string fileName_ {};
     std::FILE* fp_;
-    size_t fileSize_{0};
     bool isSeekable_;
 };
 }

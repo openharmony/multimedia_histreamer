@@ -17,8 +17,8 @@
 #define HISTREAMER_HIPLAYER_PREPARE_STATE_H
 
 #include <memory>
-#include "foundation/error_code.h"
 #include "foundation/log.h"
+#include "pipeline/core/error_code.h"
 #include "play_executor.h"
 #include "state.h"
 
@@ -34,7 +34,7 @@ public:
 
     std::tuple<ErrorCode, Action> Enter(Intent intent) override
     {
-        MEDIA_LOG_D("Enter state: %" PUBLIC_LOG "s", name_.c_str());
+        MEDIA_LOG_D("Enter state: " PUBLIC_LOG "s", name_.c_str());
         (void)intent;
         Action nextAction = Action::ACTION_BUTT;
         auto rtv = executor_.PrepareFilters();
@@ -54,8 +54,9 @@ public:
     {
         MEDIA_LOG_D("Seek in preparing state.");
         std::tuple<ErrorCode, Action> err {ErrorCode::ERROR_INVALID_PARAMETER_TYPE, Action::ACTION_BUTT};
-        FALSE_RETURN_V(param.SameTypeWith(typeid(int64_t)), err);
-        auto ret = executor_.DoSeek(true, Plugin::AnyCast<int64_t>(param));
+        FALSE_RETURN_V(param.SameTypeWith(typeid(SeekInfo)), err);
+        auto info = Plugin::AnyCast<SeekInfo>(param);
+        auto ret = executor_.DoSeek(true, info.hstTime, info.mode);
         return {ret, Action::ACTION_BUTT};
     }
 

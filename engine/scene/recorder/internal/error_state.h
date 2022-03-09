@@ -16,8 +16,9 @@
 #ifndef HISTREAMERR_HIRECORDER_ERROR_STATE_H
 #define HISTREAMERR_HIRECORDER_ERROR_STATE_H
 
-#include "foundation/error_code.h"
-#include "osal/thread/mutex.h"
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/osal/thread/scoped_lock.h"
+#include "pipeline/core/error_code.h"
 #include "recorder_executor.h"
 #include "state.h"
 

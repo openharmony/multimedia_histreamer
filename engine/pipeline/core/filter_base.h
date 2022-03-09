@@ -20,11 +20,11 @@
 #include <list>
 #include <memory>
 
+#include "foundation/pre_defines.h"
 #include "filter.h"
-#include "foundation/error_code.h"
+#include "error_code.h"
 #include "utils/constants.h"
 #include "event.h"
-#include "utils/utils.h"
 #include "filter_type.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/base.h"
@@ -82,7 +82,7 @@ public:
 
     std::vector<Filter*> GetPreFilters() override;
 
-    ErrorCode PushData(const std::string& inPort, AVBufferPtr buffer, int64_t offset) override;
+    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data) override;
     std::vector<WorkMode> GetWorkModes() override
     {
@@ -94,6 +94,8 @@ public:
 
 protected:
     virtual void InitPorts();
+
+    ErrorCode ConfigPluginWithMeta(Plugin::Base& plugin, const Plugin::Meta& meta);
 
     std::string NamePort(const std::string& mime);
 

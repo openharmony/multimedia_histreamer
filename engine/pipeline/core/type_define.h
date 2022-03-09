@@ -18,10 +18,10 @@
 
 #include <memory>
 
-#include "buffer_pool.h"
 #include "plugin/common/plugin_caps.h"
 #include "plugin/common/plugin_tags.h"
 #include "plugin/common/plugin_buffer.h"
+#include "utils/buffer_pool.h"
 
 namespace OHOS {
 namespace Media {

@@ -19,8 +19,7 @@
 #include <functional>
 #include <memory>
 
-#include "foundation/error_code.h"
-#include "utils/type_define.h"
+#include "pipeline/core/error_code.h"
 #include "pipeline/core/compatible_check.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/common/plugin_tags.h"
@@ -28,6 +27,7 @@
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/plugin_manager.h"
 #include "plugin/core/plugin_meta.h"
+#include "pipeline/core/type_define.h"
 
 namespace OHOS {
 namespace Media {
@@ -38,6 +38,9 @@ do { \
         return ErrorCode::ERROR_AGAIN; \
     } \
 } while (0)
+
+template<typename T>
+bool AssignParameterIfMatch(Tag tag, T& ret, const Plugin::ValueType& val);
 
 /**
  * translate plugin error into pipeline error code

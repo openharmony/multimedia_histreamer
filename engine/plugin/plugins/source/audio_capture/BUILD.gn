@@ -11,10 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import("//foundation/multimedia/histreamer/config.gni")
 group("plugin_standard_audio_capture") {
   deps = []
-  if (defined(ohos_lite)) {
+  if (hst_is_lite_sys) {
     print("std audio capture plugin is not available on lite systems")
   } else {
     deps += [ ":histreamer_plugin_StdAudioCapture" ]
@@ -31,32 +31,21 @@ source_set("std_audio_capture") {
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
-  cflags = [
-    "-fPIC",
-    "-Wall",
-  ]
-  if (defined(ohos_lite)) {
+
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
+  if (hst_is_lite_sys) {
     print("std audio capture plugin is not available on lite systems")
   } else {
     include_dirs = [
-      "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiocommon/include",
+      "//foundation/multimedia/audio_standard/interfaces/inner_api/native/audiocommon/include",
       "//utils/native/base/include/",
     ]
-    public_deps += [ "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiocapturer:audio_capturer" ]
-    configs += [ "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiocapturer:audio_capturer_config" ]
-    configs -= [
-      "//build/config/compiler:no_rtti",
-      "//build/config/compiler:no_exceptions",
-    ]
-    cflags += [
-      "-frtti",
-      "-fexceptions",
-    ]
+    public_deps += [ "//foundation/multimedia/audio_standard/interfaces/inner_api/native/audiocapturer:audio_capturer" ]
+    public_configs += [ "//foundation/multimedia/audio_standard/interfaces/inner_api/native/audiocapturer:audio_capturer_config" ]
   }
-  cflags_cc = cflags
 }
 
-if (defined(ohos_lite)) {
+if (hst_is_lite_sys) {
   print("std audio capture plugin is not available on lite systems")
 } else {
   import("//build/ohos.gni")

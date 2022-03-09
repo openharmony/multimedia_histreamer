@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,22 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILE_SYSTEM_H
+#define HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILE_SYSTEM_H
 
-#include "utils.h"
-#include <sys/stat.h>
+#include <string>
 
 namespace OHOS {
 namespace Media {
-size_t GetFileSize(const char* fileName)
-{
-    size_t fileSize = 0;
-    if (fileName != nullptr) {
-        struct stat fileStatus {};
-        if (stat(fileName, &fileStatus) == 0) {
-            fileSize = static_cast<size_t>(fileStatus.st_size);
-        }
-    }
-    return fileSize;
-}
+namespace OSAL {
+class FileSystem {
+public:
+    static bool IsRegularFile(const std::string& path);
+    static bool IsDirectory(const std::string& path);
+    static bool IsExists(const std::string& path);
+    static bool MakeDir(const std::string& path);
+    static bool MakeMultipleDir(const std::string& path);
+};
+} // namespace OSAL
 } // namespace Media
 } // namespace OHOS
+#endif // HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILE_SYSTEM_H

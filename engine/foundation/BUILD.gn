@@ -15,26 +15,20 @@
 import("//foundation/multimedia/histreamer/config.gni")
 
 config("histreamer_foundation_config") {
-  include_dirs = [
-    "//foundation/multimedia/histreamer/engine",
-    "//foundation/multimedia/histreamer/engine/foundation",
-    "//foundation/multimedia/histreamer/engine/foundation/osal",
-    "//third_party/bounds_checking_function/include",
-  ]
-  if (defined(ohos_lite)) {
-    include_dirs += [
+  if (hst_is_lite_sys) {
+    include_dirs = [
       "//foundation/multimedia/utils/lite/interfaces/kits",
       "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits",
     ]
   } else {
-    include_dirs +=
+    include_dirs =
         [ "//base/hiviewdfx/hilog/interfaces/native/innerkits/include" ]
   }
-  defines = [ "MEDIA_OHOS" ]
 }
 
 source_set("histreamer_foundation") {
   sources = [
+    "osal/filesystem/file_system.cpp",
     "osal/thread/condition_variable.cpp",
     "osal/thread/mutex.cpp",
     "osal/thread/scoped_lock.cpp",
@@ -42,33 +36,19 @@ source_set("histreamer_foundation") {
     "osal/thread/thread.cpp",
     "osal/utils/util.cpp",
   ]
-  public_configs = [ ":histreamer_foundation_config" ]
-  cflags = [
-    "-O2",
-    "-fPIC",
-    "-Wall",
+  public_configs = [
+    ":histreamer_foundation_config",
+    "//foundation/multimedia/histreamer:histreamer_presets",
   ]
-  cflags_cc = cflags
-  if (defined(ohos_lite)) {
-    public_deps = [ "//foundation/multimedia/utils/lite:media_common" ]
+  if (hst_is_lite_sys) {
+    deps = [ "//foundation/multimedia/utils/lite:media_common" ]
     if (ohos_kernel_type == "liteos_m") {
-      public_deps += [
-        "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_static",
-        "//third_party/bounds_checking_function:libsec_static",
-      ]
+      deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_static" ]
     } else {
-      public_deps += [
-        "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-        "//third_party/bounds_checking_function:libsec_shared",
-      ]
+      deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
     }
   } else {
-    public_deps = [
-      "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
-      "//third_party/bounds_checking_function:libsec_static",
-    ]
-    configs -= [ "//build/config/compiler:no_rtti" ]
-    cflags_cc += [ "-frtti" ]
+    deps = [ "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog" ]
   }
 
   if (defined(config_ohos_multimedia_histreamer_stack_size) &&

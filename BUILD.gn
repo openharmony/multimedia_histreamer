@@ -11,8 +11,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import("//foundation/multimedia/histreamer/config.gni")
+config("histreamer_presets") {
+  include_dirs = [ "//foundation/multimedia/histreamer/engine" ]
+  defines = [ "MEDIA_OHOS" ]
+  cflags = [
+    "-O2",
+    "-fPIC",
+    "-Wall",
+    "-frtti",
+    "-fexceptions",
+  ]
+  cflags_cc = cflags
+  if (multimedia_histreamer_enable_recorder) {
+    defines += [ "RECORDER_SUPPORT" ]
+  }
+  if (multimedia_histreamer_enable_video) {
+    defines += [ "VIDEO_SUPPORT" ]
+  }
+}
 
-if (defined(ohos_lite)) {
+if (hst_is_lite_sys) {
   import("//build/lite/config/component/lite_component.gni")
   lite_library("histreamer") {
     if (ohos_kernel_type == "liteos_m") {
@@ -23,12 +42,12 @@ if (defined(ohos_lite)) {
     }
     sources = []
     deps = [
-      "engine/foundation:histreamer_foundation",
-      "engine/pipeline:histreamer_pipeline",
-      "engine/plugin:histreamer_plugin",
+      "engine/plugin/plugins:histreamer_plugin_store",
       "engine/scene/player:histreamer_player",
-      "engine/utils:histreamer_utils",
     ]
+    if (multimedia_histreamer_enable_recorder) {
+      deps += [ "engine/scene/recorder:histreamer_recorder" ]
+    }
     public_deps = [ "//foundation/multimedia/utils/lite:media_common" ]
     public_configs = [ ":hiplayer_external_library_config" ]
   }
@@ -40,11 +59,8 @@ if (defined(ohos_lite)) {
   ohos_shared_library("histreamer") {
     sources = []
     deps = [
-      "engine/foundation:histreamer_foundation",
-      "engine/pipeline:histreamer_pipeline",
-      "engine/plugin:histreamer_plugin",
-      "engine/scene/player:histreamer_player",
-      "engine/utils:histreamer_utils",
+      "engine/plugin/plugins:histreamer_plugin_store",
+      "engine/scene:std_engine_factory",
     ]
     relative_install_dir = "media"
     output_name = "media_engine_histreamer"

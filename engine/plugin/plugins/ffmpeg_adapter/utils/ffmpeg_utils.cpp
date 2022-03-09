@@ -19,9 +19,9 @@
 
 #include "foundation/log.h"
 #include "libavutil/channel_layout.h"
+#include "libavutil/pixfmt.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_time.h"
-#include "utils/utils.h"
 
 namespace OHOS {
 namespace Media {
@@ -84,6 +84,7 @@ std::map<uint64_t, AudioChannelMasks> g_fromFFMPEGChannelLayout = {
     {AV_CH_STEREO_LEFT, AudioChannelMasks::STEREO_LEFT},
     {AV_CH_STEREO_RIGHT, AudioChannelMasks::STEREO_RIGHT},
 };
+
 const std::map<std::string, Tag> g_tagMap = {
     {"title", Tag::MEDIA_TITLE},
     {"artist", Tag::MEDIA_ARTIST},
@@ -107,6 +108,51 @@ const std::vector<std::pair<AudioAacProfile, int32_t>> g_AacProfileMap = {
     {AudioAacProfile::HE_PS, FF_PROFILE_AAC_HE_V2},
     {AudioAacProfile::LD, FF_PROFILE_AAC_LD},
     {AudioAacProfile::ELD, FF_PROFILE_AAC_ELD},
+};
+
+// Histreamer pixel format to ffmpeg pixel format
+std::map<VideoPixelFormat, AVPixelFormat> g_pixelFormatMap = {
+    {VideoPixelFormat::YUV410P, AV_PIX_FMT_YUV410P},
+    {VideoPixelFormat::YUV411P, AV_PIX_FMT_YUV411P},
+    {VideoPixelFormat::YUV420P, AV_PIX_FMT_YUV420P},
+    {VideoPixelFormat::NV12, AV_PIX_FMT_NV12},
+    {VideoPixelFormat::NV21, AV_PIX_FMT_NV21},
+    {VideoPixelFormat::YUYV422, AV_PIX_FMT_YUYV422},
+    {VideoPixelFormat::YUV422P, AV_PIX_FMT_YUV422P},
+    {VideoPixelFormat::YUV444P, AV_PIX_FMT_YUV444P},
+    {VideoPixelFormat::RGB24, AV_PIX_FMT_RGB24},
+    {VideoPixelFormat::BGR24, AV_PIX_FMT_BGR24},
+    {VideoPixelFormat::PAL8, AV_PIX_FMT_PAL8},
+    {VideoPixelFormat::GRAY8, AV_PIX_FMT_GRAY8},
+    {VideoPixelFormat::MONOWHITE, AV_PIX_FMT_MONOWHITE},
+    {VideoPixelFormat::MONOBLACK, AV_PIX_FMT_MONOBLACK},
+    {VideoPixelFormat::YUVJ420P, AV_PIX_FMT_YUVJ420P},
+    {VideoPixelFormat::YUVJ422P, AV_PIX_FMT_YUVJ422P},
+    {VideoPixelFormat::YUVJ444P, AV_PIX_FMT_YUVJ444P},
+};
+
+std::map<VideoH264Profile, int32_t> g_H264ProfileMap = {
+    {VideoH264Profile::BASELINE, FF_PROFILE_H264_BASELINE},
+    {VideoH264Profile::MAIN, FF_PROFILE_H264_MAIN},
+    {VideoH264Profile::EXTENDED, FF_PROFILE_H264_EXTENDED},
+    {VideoH264Profile::HIGH, FF_PROFILE_H264_HIGH},
+    {VideoH264Profile::HIGH10, FF_PROFILE_H264_HIGH_10},
+    {VideoH264Profile::HIGH422, FF_PROFILE_H264_HIGH_422},
+    {VideoH264Profile::HIGH444, FF_PROFILE_H264_HIGH_444}
+};
+std::vector<std::pair<AudioSampleFormat, AVSampleFormat>> g_pFfSampleFmtMap = {
+    {AudioSampleFormat::U8,  AVSampleFormat::AV_SAMPLE_FMT_U8},
+    {AudioSampleFormat::U8P, AVSampleFormat::AV_SAMPLE_FMT_U8P},
+    {AudioSampleFormat::S16, AVSampleFormat::AV_SAMPLE_FMT_S16},
+    {AudioSampleFormat::S16P, AVSampleFormat::AV_SAMPLE_FMT_S16P},
+    {AudioSampleFormat::S32, AVSampleFormat::AV_SAMPLE_FMT_S32},
+    {AudioSampleFormat::S32P, AVSampleFormat::AV_SAMPLE_FMT_S32P},
+    {AudioSampleFormat::F32, AVSampleFormat::AV_SAMPLE_FMT_FLT},
+    {AudioSampleFormat::F32P, AVSampleFormat::AV_SAMPLE_FMT_FLTP},
+    {AudioSampleFormat::F64, AVSampleFormat::AV_SAMPLE_FMT_DBL},
+    {AudioSampleFormat::F64P, AVSampleFormat::AV_SAMPLE_FMT_DBLP},
+    {AudioSampleFormat::S64, AVSampleFormat::AV_SAMPLE_FMT_S64},
+    {AudioSampleFormat::S64P, AVSampleFormat::AV_SAMPLE_FMT_S64P},
 };
 } // namespace
 
@@ -211,60 +257,28 @@ std::vector<std::string> SplitString(const std::string& str, char delimiter)
     return rtv;
 }
 
-AudioSampleFormat Trans2Format(AVSampleFormat sampleFormat)
+AudioSampleFormat ConvFf2PSampleFmt(AVSampleFormat sampleFormat)
 {
-    switch (sampleFormat) {
-        case AV_SAMPLE_FMT_U8:
-            return AudioSampleFormat::U8;
-        case AV_SAMPLE_FMT_U8P:
-            return AudioSampleFormat::U8P;
-        case AV_SAMPLE_FMT_S16:
-            return AudioSampleFormat::S16;
-        case AV_SAMPLE_FMT_S16P:
-            return AudioSampleFormat::S16P;
-        case AV_SAMPLE_FMT_S32:
-            return AudioSampleFormat::S32;
-        case AV_SAMPLE_FMT_S32P:
-            return AudioSampleFormat::S32P;
-        case AV_SAMPLE_FMT_FLT:
-            return AudioSampleFormat::F32;
-        case AV_SAMPLE_FMT_FLTP:
-            return AudioSampleFormat::F32P;
-        case AV_SAMPLE_FMT_DBL:
-            return AudioSampleFormat::F64;
-        case AV_SAMPLE_FMT_DBLP:
-            return AudioSampleFormat::F64P;
-        default:
-            return AudioSampleFormat::S16;
+    auto ite = std::find_if(g_pFfSampleFmtMap.begin(), g_pFfSampleFmtMap.end(),
+        [&sampleFormat] (const std::pair<AudioSampleFormat, AVSampleFormat>& item) ->bool {
+        return item.second == sampleFormat;
+    });
+    if (ite == g_pFfSampleFmtMap.end()) {
+        return AudioSampleFormat::NONE;
     }
+    return ite->first;
 }
 
-AVSampleFormat Trans2FFmepgFormat(AudioSampleFormat sampleFormat)
+AVSampleFormat ConvP2FfSampleFmt(AudioSampleFormat sampleFormat)
 {
-    switch (sampleFormat) {
-        case AudioSampleFormat::U8:
-            return AVSampleFormat::AV_SAMPLE_FMT_U8;
-        case AudioSampleFormat::U8P:
-            return AVSampleFormat::AV_SAMPLE_FMT_U8P;
-        case AudioSampleFormat::S16:
-            return AVSampleFormat::AV_SAMPLE_FMT_S16;
-        case AudioSampleFormat::S16P:
-            return AVSampleFormat::AV_SAMPLE_FMT_S16P;
-        case AudioSampleFormat::S32:
-            return AVSampleFormat::AV_SAMPLE_FMT_S32;
-        case AudioSampleFormat::S32P:
-            return AVSampleFormat::AV_SAMPLE_FMT_S32P;
-        case AudioSampleFormat::F32:
-            return AVSampleFormat::AV_SAMPLE_FMT_FLT;
-        case AudioSampleFormat::F32P:
-            return AVSampleFormat::AV_SAMPLE_FMT_FLTP;
-        case AudioSampleFormat::F64:
-            return AVSampleFormat::AV_SAMPLE_FMT_DBL;
-        case AudioSampleFormat::F64P:
-            return AVSampleFormat::AV_SAMPLE_FMT_DBLP;
-        default:
-            return AV_SAMPLE_FMT_NONE;
+    auto ite = std::find_if(g_pFfSampleFmtMap.begin(), g_pFfSampleFmtMap.end(),
+        [&sampleFormat] (const std::pair<AudioSampleFormat, AVSampleFormat>& item) ->bool {
+        return item.first == sampleFormat;
+    });
+    if (ite == g_pFfSampleFmtMap.end()) {
+        return AV_SAMPLE_FMT_NONE;
     }
+    return ite->second;
 }
 
 AudioChannelLayout ConvertChannelLayoutFromFFmpeg(int channels, uint64_t ffChannelLayout)
@@ -281,7 +295,7 @@ AudioChannelLayout ConvertChannelLayoutFromFFmpeg(int channels, uint64_t ffChann
         if (it != g_fromFFMPEGChannelLayout.end()) {
             channelLayout |= static_cast<uint64_t>(it->second);
         } else {
-            MEDIA_LOG_W("unsupported audio channel layout: %" PUBLIC_LOG PRIu64, mask);
+            MEDIA_LOG_W("unsupported audio channel layout: " PUBLIC_LOG PRIu64, mask);
         }
     }
     auto ret = static_cast<AudioChannelLayout>(channelLayout);
@@ -300,12 +314,12 @@ uint64_t ConvertChannelLayoutToFFmpeg(AudioChannelLayout channelLayout)
 {
     auto it = g_toFFMPEGChannelLayout.find(channelLayout);
     if (it == g_toFFMPEGChannelLayout.end()) {
-        MEDIA_LOG_E("ConvertChannelLayoutToFFmpeg, unexpected audio channel layout: %" PUBLIC_LOG PRIu64,
-                    OHOS::Media::to_underlying(channelLayout));
+        MEDIA_LOG_E("ConvertChannelLayoutToFFmpeg: unknown audio channel layout: " PUBLIC_LOG PRIu64, channelLayout);
         return 0;
     }
     return it->second;
 }
+
 bool FindAvMetaNameByTag(Tag tag, std::string& metaName)
 {
     for (const auto& pair : g_tagMap) {
@@ -316,6 +330,7 @@ bool FindAvMetaNameByTag(Tag tag, std::string& metaName)
     }
     return false;
 }
+
 bool FindTagByAvMetaName(const std::string& metaName, Tag& tag)
 {
     auto ite = g_tagMap.find(metaName);
@@ -325,7 +340,8 @@ bool FindTagByAvMetaName(const std::string& metaName, Tag& tag)
     tag = ite->second;
     return true;
 }
-AudioAacProfile ConvAacProfileFromFfmpeg (int32_t ffmpegProfile)
+
+AudioAacProfile ConvAacProfileFromFfmpeg(int32_t ffmpegProfile)
 {
     auto ite = std::find_if(g_AacProfileMap.begin(), g_AacProfileMap.end(),
         [&] (const std::pair<AudioAacProfile, int32_t>& tmp) -> bool {
@@ -333,13 +349,63 @@ AudioAacProfile ConvAacProfileFromFfmpeg (int32_t ffmpegProfile)
     });
     return ite == g_AacProfileMap.end() ? AudioAacProfile::NONE : ite->first;
 }
-int32_t ConvAacProfileToFfmpeg (AudioAacProfile profile)
+
+int32_t ConvAacProfileToFfmpeg(AudioAacProfile profile)
 {
     auto ite = std::find_if(g_AacProfileMap.begin(), g_AacProfileMap.end(),
         [&] (const std::pair<AudioAacProfile, int32_t>& tmp) -> bool {
         return tmp.first == profile;
     });
     return ite == g_AacProfileMap.end() ? FF_PROFILE_UNKNOWN : ite->second;
+}
+
+VideoPixelFormat ConvertPixelFormatFromFFmpeg(int32_t ffmpegPixelFormat)
+{
+    auto iter = std::find_if(g_pixelFormatMap.begin(), g_pixelFormatMap.end(),
+        [&] (const std::pair<VideoPixelFormat, AVPixelFormat>& tmp) -> bool {
+        return tmp.second == ffmpegPixelFormat;
+    });
+    return iter == g_pixelFormatMap.end() ? VideoPixelFormat::UNKNOWN : iter->first;
+}
+
+AVPixelFormat ConvertPixelFormatToFFmpeg(VideoPixelFormat pixelFormat)
+{
+    auto iter = std::find_if(g_pixelFormatMap.begin(), g_pixelFormatMap.end(),
+        [&] (const std::pair<VideoPixelFormat, AVPixelFormat>& tmp) -> bool {
+        return tmp.first == pixelFormat;
+    });
+    return iter == g_pixelFormatMap.end() ? AV_PIX_FMT_NONE : iter->second;
+}
+
+bool IsYuvFormat(AVPixelFormat format)
+{
+    return (format == AV_PIX_FMT_YUV420P || format == AV_PIX_FMT_NV12 || format == AV_PIX_FMT_NV21 ||
+            format == AV_PIX_FMT_YUYV422 || format == AV_PIX_FMT_YUV422P || format == AV_PIX_FMT_YUV444P ||
+            format == AV_PIX_FMT_YUV410P || format == AV_PIX_FMT_YUV411P || format == AV_PIX_FMT_YUVJ420P ||
+            format == AV_PIX_FMT_YUVJ422P || format == AV_PIX_FMT_YUVJ444P);
+}
+
+bool IsRgbFormat(AVPixelFormat format)
+{
+    return (format == AV_PIX_FMT_RGB24 || format == AV_PIX_FMT_BGR24);
+}
+
+VideoH264Profile ConvH264ProfileFromFfmpeg(int32_t ffmpegProfile)
+{
+    auto iter = std::find_if(g_H264ProfileMap.begin(), g_H264ProfileMap.end(),
+                             [&] (const std::pair<VideoH264Profile, int32_t>& tmp) -> bool {
+        return tmp.second == ffmpegProfile;
+    });
+    return (iter == g_H264ProfileMap.end()) ? VideoH264Profile::UNKNOWN : iter->first;
+}
+
+int32_t ConvH264ProfileToFfmpeg(VideoH264Profile profile)
+{
+    auto iter = std::find_if(g_H264ProfileMap.begin(), g_H264ProfileMap.end(),
+                             [&] (const std::pair<VideoH264Profile, int32_t>& tmp) -> bool {
+        return tmp.first == profile;
+    });
+    return (iter == g_H264ProfileMap.end()) ? FF_PROFILE_UNKNOWN : iter->second;
 }
 } // namespace Ffmpeg
 } // namespace Plugin

@@ -53,7 +53,6 @@ FileFdSinkPlugin::FileFdSinkPlugin(std::string name)
 
 Status FileFdSinkPlugin::SetSink(const Plugin::ValueType& sink)
 {
-    MEDIA_LOG_D("OUT");
     if (!sink.SameTypeWith(typeid(int32_t))) {
         MEDIA_LOG_E("Invalid parameter to file_fd_sink plugin");
         return Status::ERROR_INVALID_PARAMETER;
@@ -64,31 +63,24 @@ Status FileFdSinkPlugin::SetSink(const Plugin::ValueType& sink)
 
 bool FileFdSinkPlugin::IsSeekable()
 {
-    MEDIA_LOG_D("OUT");
     return isSeekable_;
 }
 
 Status FileFdSinkPlugin::SeekTo(uint64_t offset)
 {
-    if (fd_ == -1 || (fileSize_ = lseek(fd_, 0L, SEEK_END)) == -1 || offset > fileSize_) {
-        MEDIA_LOG_E("Invalid operation");
-        return Status::ERROR_WRONG_STATE;
+    FALSE_RET_V_MSG_E(fd_ != -1, Status::ERROR_WRONG_STATE, "no valid fd.");
+    int64_t ret = lseek(fd_, offset, SEEK_SET);
+    if (ret != -1) {
+        MEDIA_LOG_I("now seek to " PUBLIC_LOG_D64, ret);
+    } else {
+        MEDIA_LOG_E("seek to " PUBLIC_LOG_U64 " failed due to " PUBLIC_LOG_S, offset, strerror(errno));
     }
-    if (lseek(fd_, 0L, SEEK_SET) != -1 && lseek(fd_, offset, SEEK_SET) != -1) {
-#ifdef WIN32
-        if (eof(fd_)) {
-            MEDIA_LOG_I("It is the end of file!");
-        }
-#endif
-        return Status::OK;
-    }
-    MEDIA_LOG_E("Seek to %" PUBLIC_LOG "" PRIu64, offset);
     return Status::ERROR_UNKNOWN;
 }
 
 Status FileFdSinkPlugin::Write(const std::shared_ptr<Buffer>& buffer)
 {
-    MEDIA_LOG_D("FileFdSink write begin");
+    MEDIA_LOG_D("Write begin");
     if (buffer == nullptr || buffer->IsEmpty()) {
         return Status::OK;
     }

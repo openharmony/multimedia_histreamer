@@ -17,7 +17,7 @@
 #define HISTREAMER_PIPELINE_CORE_CLOCK_PROVIDER_H
 
 #include <cstdint>
-#include "foundation/error_code.h"
+#include "error_code.h"
 
 namespace OHOS {
 namespace Media {

@@ -18,7 +18,6 @@
 #include "scoped_lock.h"
 
 #include <utility>
-#include "base/common.h"
 
 namespace OHOS {
 namespace Media {
