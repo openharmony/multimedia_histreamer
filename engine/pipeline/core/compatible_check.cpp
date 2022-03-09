@@ -103,18 +103,18 @@ static std::map<CapabilityID, std::function<bool(const Plugin::ValueType&, Plugi
 using CheckFunc = std::function<bool(Capability::Key key, const Plugin::ValueType& val1, const Plugin::ValueType& val2,
         Plugin::ValueType& outValue)>;
 static std::map<CapabilityID, CheckFunc> g_capabilityValueCheckMap = {
-        {g_allCapabilityId[0], FixInvalDiscCapValCheck<uint32_t>}, // 0
-        {g_allCapabilityId[1], FixInvalDiscCapValCheck<uint32_t>}, // 1
-        {g_allCapabilityId[2], FixDiscCapValCheck<Plugin::AudioChannelLayout, uint64_t>}, // 2
-        {g_allCapabilityId[3], FixDiscCapValCheck<Plugin::AudioSampleFormat, uint8_t>}, // 3
-        {g_allCapabilityId[4], FixInvalDiscCapValCheck<uint32_t>}, // 4
-        {g_allCapabilityId[5], FixInvalDiscCapValCheck<uint32_t>}, // 5
-        {g_allCapabilityId[6], FixDiscCapValCheck<Plugin::AudioAacProfile, uint8_t>}, // 6
-        {g_allCapabilityId[7], FixInvalDiscCapValCheck<uint32_t>}, // 7
-        {g_allCapabilityId[8], FixDiscCapValCheck<Plugin::AudioAacStreamFormat, uint8_t>}, // 8
-        {g_allCapabilityId[9], FixDiscCapValCheck<Plugin::VideoPixelFormat, uint32_t>}, // 9
-        {g_allCapabilityId[10], FixInvalDiscCapValCheck<int64_t>}, // 10
-        {g_allCapabilityId[11], FixDiscCapValCheck<Plugin::ThreadMode, uint8_t>}, // 11
+    {g_allCapabilityId[0], FixInvalDiscCapValCheck<uint32_t>}, // 0
+    {g_allCapabilityId[1], FixInvalDiscCapValCheck<uint32_t>}, // 1
+    {g_allCapabilityId[2], FixDiscCapValCheck<Plugin::AudioChannelLayout, uint64_t>}, // 2
+    {g_allCapabilityId[3], FixDiscCapValCheck<Plugin::AudioSampleFormat, uint8_t>}, // 3
+    {g_allCapabilityId[4], FixInvalDiscCapValCheck<uint32_t>}, // 4
+    {g_allCapabilityId[5], FixInvalDiscCapValCheck<uint32_t>}, // 5
+    {g_allCapabilityId[6], FixDiscCapValCheck<Plugin::AudioAacProfile, uint8_t>}, // 6
+    {g_allCapabilityId[7], FixInvalDiscCapValCheck<uint32_t>}, // 7
+    {g_allCapabilityId[8], FixDiscCapValCheck<Plugin::AudioAacStreamFormat, uint8_t>}, // 8
+    {g_allCapabilityId[9], FixDiscCapValCheck<Plugin::VideoPixelFormat, uint32_t>}, // 9
+    {g_allCapabilityId[10], FixInvalDiscCapValCheck<int64_t>}, // 10
+    {g_allCapabilityId[11], FixDiscCapValCheck<Plugin::ThreadMode, uint8_t>}, // 11
 };
 
 

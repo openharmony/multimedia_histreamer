@@ -273,7 +273,7 @@ void MuxerFilter::SendBuffer(const std::shared_ptr<AVBuffer>& buffer, int64_t of
 
 bool MuxerFilter::AllTracksEos()
 {
-    return eosTrackCnt.load() == trackInfos_.size();
+    return static_cast<size_t>(eosTrackCnt.load()) == trackInfos_.size();
 }
 void MuxerFilter::UpdateEosState(const std::string& inPort)
 {

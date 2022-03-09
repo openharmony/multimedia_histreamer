@@ -187,7 +187,7 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
         MEDIA_LOG_D("audio sink push data send event_complete");
         OnEvent(event);
     }
-    if (buffer->pts != -1) {
+    if (buffer->pts != static_cast<uint64_t>(-1)) {
         UpdateLatestPts(buffer->pts);
     } else {
     }
@@ -301,7 +301,7 @@ ErrorCode AudioSinkFilter::UpdateLatestPts(int64_t pts)
         return TranslatePluginStatus(status);
     }
     nowNs = SteadyClock::GetCurrentTimeNanoSec();
-    if (INT64_MAX - nowNs < latencyNano) { // overflow
+    if (INT64_MAX - nowNs < static_cast<int64_t>(latencyNano)) { // overflow
         return ErrorCode::ERROR_UNKNOWN;
     }
     latestSysClock_ = nowNs + latencyNano;

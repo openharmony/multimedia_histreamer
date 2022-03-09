@@ -86,7 +86,8 @@ int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId
     sourceId = INVALID_SOURCE_ID;
     FALSE_RETURN_V(source != AudioSourceType::AUDIO_SOURCE_INVALID,
                    TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
-    FALSE_RETURN_V(audioCount_ < AUDIO_SOURCE_MAX_COUNT, TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
+    FALSE_RETURN_V(audioCount_ < static_cast<int32_t>(AUDIO_SOURCE_MAX_COUNT),
+                   TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
     auto tempSourceId = SourceIdGenerator::GenerateAudioSourceId(audioCount_);
     auto ret = SetAudioSourceInternal(source, tempSourceId);
     if (ret == ErrorCode::SUCCESS) {
@@ -105,7 +106,8 @@ int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId
     sourceId = INVALID_SOURCE_ID;
     FALSE_RETURN_V(source != VideoSourceType::VIDEO_SOURCE_BUTT,
                    TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
-    FALSE_RETURN_V(videoCount_ < VIDEO_SOURCE_MAX_COUNT, TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
+    FALSE_RETURN_V(videoCount_ < static_cast<int32_t>(VIDEO_SOURCE_MAX_COUNT),
+                   TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
     auto tempSourceId = SourceIdGenerator::GenerateVideoSourceId(videoCount_);
     auto ret = SetVideoSourceInternal(source, tempSourceId);
     if (ret == ErrorCode::SUCCESS) {
@@ -123,8 +125,8 @@ int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId
 sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
 {
 #ifdef VIDEO_SUPPORT
-    FALSE_RETURN_V(SourceIdGenerator::IsVideo(sourceId) && sourceId == videoSourceId_ &&
-                   videoCapture_ != nullptr, nullptr);
+    FALSE_RETURN_V(SourceIdGenerator::IsVideo(sourceId) && sourceId == static_cast<int32_t>(videoSourceId_) &&
+        videoCapture_ != nullptr, nullptr);
     Plugin::Any any;
     FALSE_RETURN_V(videoCapture_ ->GetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_SURFACE), any)
                    != ErrorCode::SUCCESS, nullptr);
@@ -137,7 +139,8 @@ sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
 int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
 {
     FALSE_RETURN_V(format != OutputFormatType::FORMAT_BUTT, TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
-    FALSE_RETURN_V((audioCount_+ videoCount_) > 0, TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
+    FALSE_RETURN_V((audioCount_+ videoCount_) > static_cast<uint32_t>(0),
+                   TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
     outputFormatType_ = format;
     auto ret = fsm_.SendEvent(Intent::SET_OUTPUT_FORMAT, outputFormatType_);
     if (ret != ErrorCode::SUCCESS) {
@@ -572,8 +575,10 @@ ErrorCode HiRecorderImpl::DoConfigureOther(const HstRecParam& param) const
 
 bool HiRecorderImpl::CheckParamType(int32_t sourceId, const RecorderParam& recParam) const
 {
-    FALSE_RETURN_V((SourceIdGenerator::IsAudio(sourceId) && recParam.IsAudioParam() && audioSourceId_ == sourceId) ||
-        (SourceIdGenerator::IsVideo(sourceId) && recParam.IsVideoParam() && videoSourceId_ == sourceId) ||
+    FALSE_RETURN_V((SourceIdGenerator::IsAudio(sourceId) && recParam.IsAudioParam() &&
+        static_cast<int32_t>(audioSourceId_) == sourceId) ||
+        (SourceIdGenerator::IsVideo(sourceId) && recParam.IsVideoParam() &&
+        static_cast<int32_t>(videoSourceId_) == sourceId) ||
         ((sourceId == DUMMY_SOURCE_ID) && !(recParam.IsAudioParam() || recParam.IsVideoParam())), false);
     return true;
 }

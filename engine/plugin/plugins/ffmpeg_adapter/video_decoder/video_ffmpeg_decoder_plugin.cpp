@@ -443,7 +443,8 @@ Status VideoFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
 
 void VideoFfmpegDecoderPlugin::CheckResolutionChange()
 {
-    if ((width_ > 0) && (height_ > 0) && ((cachedFrame_->width != width_) || (cachedFrame_->height != height_))) {
+    if ((width_ > 0) && (height_ > 0) && ((static_cast<uint32_t>(cachedFrame_->width) != width_) ||
+        (static_cast<uint32_t>(cachedFrame_->height) != height_))) {
         MEDIA_LOG_W("Demuxer's W&H&S: [" PUBLIC_LOG "u " PUBLIC_LOG "u] diff from FFMPEG's [" PUBLIC_LOG
                     "d " PUBLIC_LOG "d]", width_, height_, cachedFrame_->width, cachedFrame_->height);
         // need to reallocte output buffers

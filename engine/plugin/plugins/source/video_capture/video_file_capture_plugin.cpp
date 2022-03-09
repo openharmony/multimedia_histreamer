@@ -45,8 +45,7 @@ Status VideoFileCaptureRegister(const std::shared_ptr<Register> &reg)
         return std::make_shared<VideoFileCapturePlugin>(name);
     };
     Capability outCaps(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
-    outCaps.AppendDiscreteKeys<VideoPixelFormat>(
-        Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21});
+    outCaps.AppendDiscreteKeys<VideoPixelFormat>(Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21});
     definition.outCaps.push_back(outCaps);
     // add es outCaps later
     return reg->AddPlugin(definition);
@@ -246,7 +245,7 @@ Status VideoFileCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expe
         return Status::END_OF_STREAM;
     }
     uint8_t fileData[DATA_SIZE+1] = { 0 };
-    fread(fileData, DATA_SIZE, 1, fp_);
+    (void)fread(fileData, DATA_SIZE, 1, fp_);
     if (bufData->Write(static_cast<const uint8_t*>(fileData), bufferSize_) != bufferSize_) {
         MEDIA_LOG_E("write buffer data fail");
         return Status::ERROR_UNKNOWN;

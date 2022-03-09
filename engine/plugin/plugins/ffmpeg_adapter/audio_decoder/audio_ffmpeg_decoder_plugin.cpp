@@ -481,15 +481,15 @@ Status AudioFfmpegDecoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>&
     int32_t samples = cachedFrame_->nb_samples;
     auto sampleFormat = static_cast<AVSampleFormat>(cachedFrame_->format);
     int32_t bytePerSample = av_get_bytes_per_sample(sampleFormat);
-    int32_t outputSize = samples * bytePerSample * channels;
+    size_t outputSize = samples * bytePerSample * channels;
     auto ioInfoMem = ioInfo->GetMemory();
     if (ioInfoMem->GetCapacity() < outputSize) {
         MEDIA_LOG_W("output buffer size is not enough");
         return Status::ERROR_NO_MEMORY;
     }
     if (av_sample_fmt_is_planar(avCodecContext_->sample_fmt)) {
-        int32_t planarSize = outputSize / channels;
-        for (size_t idx = 0; idx < channels; idx++) {
+        size_t planarSize = outputSize / channels;
+        for (int32_t idx = 0; idx < channels; idx++) {
             ioInfoMem->Write(cachedFrame_->extended_data[idx], planarSize);
         }
     } else {
