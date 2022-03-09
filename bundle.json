@@ -1,0 +1,53 @@
+{
+    "name": "@ohos/multimedia_histreamer",
+    "description": "Histreamer engine.",
+    "optional": "true",
+    "version": "3.1",
+    "license": "Apache License 2.0",
+    "publishAs": "code-segment",
+    "segment": {
+        "destPath": "foundation/multimedia/histreamer"
+    },
+    "dirs": {},
+    "scripts": {},
+    "component": {
+        "name": "histreamer",
+        "subsystem": "multimedia",
+        "syscap": [],
+        "features": [],
+        "adapted_system_type": [
+            "histreamer"
+        ],
+        "rom": "622KB",
+        "ram": "",
+        "output": [
+            "libhistreamer.so",
+            "libhistreamer.a"
+        ],
+        "adapted_kernel": [ "liteos_a","liteos_m","linux" ],
+        "deps": {
+            "third_party": [
+                "ffmpeg",
+                "minimp3",
+                "minimp4"
+            ],
+            "kernel_special": {},
+            "board_special": {
+                "hi3516dv300": [
+                    "hi3516dv300_adapter"
+                ],
+                "hi3518ev300": [
+                    "hi3518ev300_adapter"
+                ]
+            },
+            "components": [
+                "hilog_lite"
+            ]
+        },
+        "build": {
+            "sub_component": [
+                "//foundation/multimedia/histreamer:histreamer"
+            ]
+        }
+    }
+}
