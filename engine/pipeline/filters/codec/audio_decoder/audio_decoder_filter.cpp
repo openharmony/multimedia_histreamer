@@ -28,6 +28,7 @@
 namespace {
 constexpr int32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 5;
 constexpr int32_t MAX_OUT_DECODED_DATA_SIZE_PER_FRAME = 20 * 1024; // 20kB
+constexpr int32_t MAX_SAMPLE_PER_FRAME = 10240; // 10240 set max samples per frame
 
 uint32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta)
 {
@@ -136,6 +137,11 @@ bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_
     auto thisMeta = std::make_shared<Plugin::Meta>();
     FALSE_RET_V_MSG_E(MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta), false,
                       "can't configure decoder plugin since meta is not compatible with negotiated caps");
+    uint32_t samplesPerFrame = 0;
+    if (GetPluginParameterLocked(Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame) != ErrorCode::SUCCESS) {
+        samplesPerFrame = MAX_SAMPLE_PER_FRAME;
+    }
+    (void) thisMeta->SetUint32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame);
     auto targetOutPort = GetRouteOutPort(inPort);
     FALSE_RET_V_MSG_E(targetOutPort != nullptr, false, "encoder out port is not found");
     FALSE_RET_V_MSG_E(targetOutPort->Configure(thisMeta), false, "fail to configure downstream");

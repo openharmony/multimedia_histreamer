@@ -46,6 +46,8 @@ StreamConvertor g_streamConvertors[] = {{AV_CODEC_ID_PCM_S16LE, ConvertRawAudioS
                                         {AV_CODEC_ID_AAC, ConvertAACStreamToMetaInfo},
                                         {AV_CODEC_ID_AAC_LATM, ConvertAACLatmStreamToMetaInfo},
                                         {AV_CODEC_ID_VORBIS, ConvertVorbisStreamToMetaInfo},
+                                        {AV_CODEC_ID_FLAC, ConvertFLACStreamToMetaInfo},
+                                        {AV_CODEC_ID_APE, ConvertAPEStreamToMetaInfo},
 #ifdef VIDEO_SUPPORT
                                         {AV_CODEC_ID_H264, ConvertAVCStreamToMetaInfo}
 #endif
@@ -91,7 +93,8 @@ void ConvertRawAudioStreamToMetaInfo(const AVStream& avStream, const std::shared
     ConvertCommonAudioStreamToMetaInfo(avStream, context, meta);
 }
 
-void ConvertMP1StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta)
+void ConvertMP1StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
+                                TagMap& meta)
 {
     meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_MPEG)});
     ConvertCommonAudioStreamToMetaInfo(avStream, context, meta);
@@ -99,7 +102,8 @@ void ConvertMP1StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
     meta.insert({Tag::AUDIO_MPEG_LAYER, static_cast<uint32_t>(1)});
 }
 
-void ConvertMP2StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta)
+void ConvertMP2StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
+                                TagMap& meta)
 {
     meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_MPEG)});
     ConvertCommonAudioStreamToMetaInfo(avStream, context, meta);
@@ -107,7 +111,8 @@ void ConvertMP2StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
     meta.insert({Tag::AUDIO_MPEG_LAYER, static_cast<uint32_t>(2)}); // 2
 }
 
-void ConvertMP3StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta)
+void ConvertMP3StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
+                                TagMap& meta)
 {
     meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_MPEG)});
     ConvertCommonAudioStreamToMetaInfo(avStream, context, meta);
@@ -115,7 +120,29 @@ void ConvertMP3StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
     meta.insert({Tag::AUDIO_MPEG_LAYER, static_cast<uint32_t>(3)}); // 3
 }
 
-void ConvertAACStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta)
+void ConvertFLACStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
+                                 TagMap& meta)
+{
+    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_FLAC)});
+    ConvertCommonAudioStreamToMetaInfo(avStream, context, meta);
+}
+
+void ConvertAPEStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
+                                TagMap& meta)
+{
+    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_APE)});
+    ConvertCommonAudioStreamToMetaInfo(avStream, context, meta);
+}
+
+void ConvertVorbisStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
+                                   TagMap& meta)
+{
+    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_VORBIS)});
+    ConvertCommonAudioStreamToMetaInfo(avStream, context, meta);
+}
+
+void ConvertAACStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
+                                TagMap& meta)
 {
     meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_AAC)});
     ConvertCommonAudioStreamToMetaInfo(avStream, context, meta);
@@ -139,15 +166,6 @@ void ConvertAACStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
     }
 }
 
-void ConvertVorbisStreamToMetaInfo(const AVStream& avStream,
-                                   const std::shared_ptr<AVCodecContext>& context, TagMap& meta)
-{
-    MEDIA_LOG_I("ConvertOggStreamToMetaInfo Called");
-    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_VORBIS)});
-    ConvertCommonAudioStreamToMetaInfo(avStream, context, meta);
-    meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
-}
-
 void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
                                     TagMap& meta)
 {
@@ -158,7 +176,8 @@ void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_
         meta.insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(context->channels)});
         meta.insert({Tag::AUDIO_SAMPLE_FORMAT, ConvFf2PSampleFmt(context->sample_fmt)});
         meta.insert(
-            {Tag::AUDIO_CHANNEL_LAYOUT, ConvertChannelLayoutFromFFmpeg(context->channels, context->channel_layout)});
+            {Tag::AUDIO_CHANNEL_LAYOUT, ConvertChannelLayoutFromFFmpeg(context->channels,
+               context->channel_layout)});
         meta.insert({Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(context->frame_size)});
         meta.insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(context->bit_rate)});
     }
@@ -190,7 +209,8 @@ void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
 }
 #endif
 
-void ConvertAVStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta)
+void ConvertAVStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
+                               TagMap& meta)
 {
     meta.clear();
     auto codecId = avStream.codecpar->codec_id;
