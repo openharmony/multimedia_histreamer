@@ -38,7 +38,7 @@ source_set("httpsource") {
   ]
   if (hst_is_lite_sys) {
     if (ohos_kernel_type == "liteos_m") {
-      public_deps += [ "//third_party/curl:curl" ]
+      public_deps += [ "//third_party/curl:libcurl_static" ]
     } else {
       public_deps += [ "//third_party/curl:libcurl_shared" ]
     }
