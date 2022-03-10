@@ -302,17 +302,15 @@ void MediaSourceFilter::ReadLoop()
 
 bool MediaSourceFilter::GetProtocolByUri()
 {
+    auto ret = true;
     auto const pos = uri_.find("://");
     if (pos != std::string::npos) {
         auto prefix = uri_.substr(0, pos);
         protocol_.append(prefix);
     } else {
         protocol_.append("file");
-    }
-    auto ret = true;
-    if (protocol_ == "file") {
         std::string fullPath;
-        ret = OSAL::ConvertFullPath(uri_, fullPath);
+        ret = OSAL::ConvertFullPath(uri_, fullPath); // convert path to full path
         if (ret && !fullPath.empty()) {
             uri_ = fullPath;
         }
