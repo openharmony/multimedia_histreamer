@@ -23,6 +23,7 @@
 
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_buffer.h"
+#include "plugin/common/plugin_caps_builder.h"
 #include "plugin/interface/codec_plugin.h"
 
 namespace OHOS {
@@ -259,25 +260,32 @@ Status RegisterDecoderPlugin(const std::shared_ptr<Register>& reg)
     return Status::OK;
 }
 
+void UpdateInCaps(CodecPluginDef& definition)
+{
+    CapabilityBuilder capBuilder;
+    capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_MPEG)
+        .SetAudioMpegVersion(1)
+        .SetAudioMpegLayerRange(1, 3); // 3
+    DiscreteCapability<uint32_t> values = {8000, 16000, 22050, 44100, 48000, 32000}; // 8000, 16000 etc. sample rates
+    capBuilder.SetAudioSampleRateList(values);
+    DiscreteCapability<AudioChannelLayout> channelLayoutValues = {
+        AudioChannelLayout::MONO, AudioChannelLayout::STEREO};
+    capBuilder.SetAudioChannelLayoutList(channelLayoutValues);
+    definition.inCaps.push_back(capBuilder.Build());
+}
+
+void UpdateOutCaps(CodecPluginDef& definition)
+{
+    CapabilityBuilder capBuilder;
+    capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
+    capBuilder.SetAudioSampleFormatList({AudioSampleFormat::S16});
+    definition.outCaps.emplace_back(capBuilder.Build());
+}
+
 void UpdatePluginDefinition(CodecPluginDef& definition)
 {
-    Capability cap("audio/unknown");
-    cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_MPEG)
-            .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 1)
-            .AppendIntervalKey<uint32_t>(Capability::Key::AUDIO_MPEG_LAYER, 1, 3); // 3
-
-    DiscreteCapability<uint32_t> values = {8000, 16000, 22050, 44100, 48000, 32000}; // 8000, 16000 etc. sample rates
-    cap.AppendDiscreteKeys(Capability::Key::AUDIO_SAMPLE_RATE, values);
-
-    DiscreteCapability<AudioChannelLayout> channelLayoutValues = {
-            AudioChannelLayout::MONO, AudioChannelLayout::STEREO};
-    cap.AppendDiscreteKeys<AudioChannelLayout>(Capability::Key::AUDIO_CHANNEL_LAYOUT, channelLayoutValues);
-
-    definition.inCaps.push_back(cap);
-
-    Capability outCap(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
-    outCap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, {AudioSampleFormat::S16});
-    definition.outCaps.emplace_back(outCap);
+    UpdateInCaps(definition);
+    UpdateOutCaps(definition);
 }
 }
 

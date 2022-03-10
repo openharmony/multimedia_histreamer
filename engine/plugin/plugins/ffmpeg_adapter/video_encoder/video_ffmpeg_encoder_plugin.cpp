@@ -21,6 +21,7 @@
 #include <cstring>
 #include <map>
 #include <set>
+#include "plugin/common/plugin_caps_builder.h"
 #include "plugin/common/plugin_time.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "ffmpeg_vid_enc_config.h"
@@ -74,33 +75,43 @@ void UnRegisterVideoEncoderPlugins()
     codecMap.clear();
 }
 
-void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
+void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
 {
-    Capability inputCaps(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
+    CapabilityBuilder capBuilder;
+    capBuilder.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
     if (codec->pix_fmts != nullptr) {
         DiscreteCapability<VideoPixelFormat> values;
         for (uint32_t index = 0; codec->pix_fmts[index] != -1; ++index) {
             values.push_back(ConvertPixelFormatFromFFmpeg(codec->pix_fmts[index]));
         }
         if (!values.empty()) {
-            inputCaps.AppendDiscreteKeys(Capability::Key::VIDEO_PIXEL_FORMAT, values);
+            capBuilder.SetVideoPixelFormatList(values);
         }
     } else {
-        inputCaps.AppendDiscreteKeys<VideoPixelFormat>(
-            Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21});
+        capBuilder.SetVideoPixelFormatList({VideoPixelFormat::NV21});
     }
-    definition.inCaps.push_back(inputCaps);
+    definition.inCaps.push_back(capBuilder.Build());
+}
 
-    Capability outputCaps("video/unknown");
+void UpdateOutCaps(const AVCodec* codec, CodecPluginDef& definition)
+{
+    CapabilityBuilder capBuilder;
+    capBuilder.SetMime("video/unknown");
     switch (codec->id) {
         case AV_CODEC_ID_H264:
-            outputCaps.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
+            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
             break;
         default:
             MEDIA_LOG_I("codec is not supported right now");
             break;
     }
-    definition.outCaps.push_back(outputCaps);
+    definition.outCaps.push_back(capBuilder.Build());
+}
+
+void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
+{
+    UpdateInCaps(codec, definition);
+    UpdateOutCaps(codec, definition);
 }
 } // namespace
 

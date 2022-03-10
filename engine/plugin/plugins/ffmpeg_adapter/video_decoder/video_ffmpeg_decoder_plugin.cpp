@@ -21,6 +21,7 @@
 #include <cstring>
 #include <map>
 #include <set>
+#include "plugin/common/plugin_caps_builder.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
 namespace {
@@ -75,25 +76,33 @@ void UnRegisterVideoDecoderPlugins()
     codecMap.clear();
 }
 
-void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
+void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
 {
-    Capability inputCaps("video/unknown");
+    CapabilityBuilder capBuilder;
+    capBuilder.SetMime("video/unknown");
     switch (codec->id) {
         case AV_CODEC_ID_H264:
-            inputCaps.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
+            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
             break;
         default:
             MEDIA_LOG_I("codec is not supported right now");
             break;
     }
-    definition.inCaps.push_back(inputCaps);
+    definition.inCaps.push_back(capBuilder.Build());
+}
 
-    Capability outputCaps(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
-    outputCaps.AppendDiscreteKeys<VideoPixelFormat>(
-        Capability::Key::VIDEO_PIXEL_FORMAT,
-        {VideoPixelFormat::YUV420P, VideoPixelFormat::NV12, VideoPixelFormat::NV21});
+void UpdateOutCaps(const AVCodec* codec, CodecPluginDef& definition)
+{
+    CapabilityBuilder capBuilder;
+    capBuilder.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
+    capBuilder.SetVideoPixelFormatList({VideoPixelFormat::YUV420P, VideoPixelFormat::NV12, VideoPixelFormat::NV21});
     MEDIA_LOG_E("Capability VIDEO_PIXEL_FORMAT: " PUBLIC_LOG "u", Capability::Key::VIDEO_PIXEL_FORMAT);
-    definition.outCaps.push_back(outputCaps);
+    definition.outCaps.push_back(capBuilder.Build());
+}
+void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
+{
+    UpdateInCaps(codec, definition);
+    UpdateOutCaps(codec, definition);
 }
 } // namespace
 
