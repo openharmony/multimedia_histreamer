@@ -20,6 +20,7 @@
 #include <map>
 #include <set>
 #include "ffmpeg_au_enc_config.h"
+#include "plugin/common/plugin_caps_builder.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
 namespace {
@@ -71,9 +72,10 @@ void UnRegisterAudioEncoderPlugin()
     codecMap.clear();
 }
 
-void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
+void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
 {
-    Capability inputCaps(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
+    CapabilityBuilder capBuilder;
+    capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
     size_t index = 0;
     if (codec->supported_samplerates != nullptr) {
         DiscreteCapability<uint32_t> values;
@@ -81,30 +83,37 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
             values.push_back(codec->supported_samplerates[index]);
         }
         if (index) {
-            inputCaps.AppendDiscreteKeys(Capability::Key::AUDIO_SAMPLE_RATE, values);
+            capBuilder.SetAudioSampleRateList(values);
         }
     }
-    definition.inCaps.push_back(inputCaps);
+    definition.inCaps.push_back(capBuilder.Build());
+}
 
-    Capability outputCaps;
+void UpdateOutCaps(const AVCodec* codec, CodecPluginDef& definition)
+{
+    CapabilityBuilder capBuilder;
     switch (codec->id) {
         case AV_CODEC_ID_AAC:
-            outputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC)
-                .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 4)  // 4
-                .AppendFixedKey<AudioAacProfile>(Capability::Key::AUDIO_AAC_PROFILE, AudioAacProfile::LC)
-                .AppendFixedKey<AudioAacStreamFormat>(Capability::Key::AUDIO_AAC_STREAM_FORMAT,
-                                                      AudioAacStreamFormat::MP4ADTS);
+            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC)
+                .SetAudioMpegVersion(4) // 4
+                .SetAudioAacProfile(AudioAacProfile::LC)
+                .SetAudioAacStreamFormat(AudioAacStreamFormat::MP4ADTS);
             break;
         case AV_CODEC_ID_AAC_LATM:
-            outputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM)
-                .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 4)  // 4
-                .AppendFixedKey<AudioAacStreamFormat>(Capability::Key::AUDIO_AAC_STREAM_FORMAT,
-                                                      AudioAacStreamFormat::MP4LOAS);
+            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM)
+                .SetAudioMpegVersion(4)  // 4
+                .SetAudioAacStreamFormat(AudioAacStreamFormat::MP4LOAS);
             break;
         default:
             MEDIA_LOG_I("codec is not supported right now");
     }
-    definition.outCaps.push_back(outputCaps);
+    definition.outCaps.push_back(capBuilder.Build());
+}
+
+void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
+{
+    UpdateInCaps(codec, definition);
+    UpdateOutCaps(codec, definition);
 }
 } // namespace
 PLUGIN_DEFINITION(FFmpegAudioEncoders, LicenseType::LGPL, RegisterAudioEncoderPlugins, UnRegisterAudioEncoderPlugin);
