@@ -42,6 +42,13 @@ const std::set<AVCodecID> g_supportedCodec = {
     AV_CODEC_ID_AAC_LATM,
     AV_CODEC_ID_VORBIS
 };
+std::map<AVCodecID,uint32_t> samplesPerFrameMap = {
+    {AV_CODEC_ID_MP3, 1152}, // 1152
+    {AV_CODEC_ID_FLAC, 8192}, // 8192
+    {AV_CODEC_ID_AAC, 2048},  // 2048
+    {AV_CODEC_ID_AAC_LATM, 2048}, // 2048
+    {AV_CODEC_ID_VORBIS, 8192}, // 8192
+};
 
 Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
 {
@@ -177,10 +184,19 @@ Status AudioFfmpegDecoderPlugin::Init()
         avCodec_ = ite->second;
         cachedFrame_ = std::shared_ptr<AVFrame>(av_frame_alloc(), [](AVFrame *fp) { av_frame_free(&fp); });
     }
-    OSAL::ScopedLock lock1(parameterMutex_);
+
     {
+        OSAL::ScopedLock lock1(parameterMutex_);
         audioParameter_[Tag::REQUIRED_OUT_BUFFER_CNT] = (uint32_t) BUFFER_QUEUE_SIZE;
+        std::map<AVCodecID,uint32_t>::iterator it;
+        it = samplesPerFrameMap.find(avCodec_->id);
+        if ( it == samplesPerFrameMap.end()) {
+            return Status::ERROR_UNSUPPORTED_FORMAT;
+        } else {
+            audioParameter_[Tag::AUDIO_SAMPLE_PER_FRAME] = it->second;
+        }
     }
+
     return Status::OK;
 }
 
