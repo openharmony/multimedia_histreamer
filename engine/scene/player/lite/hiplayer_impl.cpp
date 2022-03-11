@@ -297,7 +297,7 @@ ErrorCode HiPlayerImpl::SetBufferSize(size_t size)
 
 void HiPlayerImpl::OnEvent(const Event& event)
 {
-    MEDIA_LOG_D("[HiStreamer] OnEvent (" PUBLIC_LOG "d)", event.type);
+    MEDIA_LOG_I("[HiStreamer] OnEvent (" PUBLIC_LOG_S ")", GetEventName(event.type));
     switch (event.type) {
         case EventType::EVENT_ERROR: {
             fsm_.SendEventAsync(Intent::NOTIFY_ERROR, event.param);
@@ -340,7 +340,7 @@ void HiPlayerImpl::OnEvent(const Event& event)
             break;
         }
         default:
-            MEDIA_LOG_E("Unknown event(" PUBLIC_LOG "d)", event.type);
+            MEDIA_LOG_E("Unknown event(" PUBLIC_LOG_U32 ")", event.type);
     }
 }
 
