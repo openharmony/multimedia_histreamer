@@ -133,6 +133,8 @@ bool VideoSinkFilter::CreateVideoSinkPlugin(const std::shared_ptr<Plugin::Plugin
         MEDIA_LOG_E("cannot create plugin " PUBLIC_LOG_S, selectedPluginInfo->name.c_str());
         return false;
     }
+
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
     if (surface_ != nullptr) {
         auto ret = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_SURFACE, surface_));
         if (ret != ErrorCode::SUCCESS) {
@@ -140,6 +142,8 @@ bool VideoSinkFilter::CreateVideoSinkPlugin(const std::shared_ptr<Plugin::Plugin
             return false;
         }
     }
+#endif
+
     auto err = TranslatePluginStatus(plugin_->Init());
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("plugin " PUBLIC_LOG "s init error", selectedPluginInfo->name.c_str());
