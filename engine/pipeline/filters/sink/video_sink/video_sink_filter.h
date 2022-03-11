@@ -91,7 +91,10 @@ private:
     bool isFlushing_ {false};
     OSAL::ConditionVariable startWorkingCondition_ {};
     OSAL::Mutex mutex_;
+
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
     sptr<Surface> surface_;
+#endif
 
     std::shared_ptr<Plugin::VideoSink> plugin_ {nullptr};
 
