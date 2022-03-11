@@ -36,7 +36,8 @@ static std::map<std::string, ProtocolType> g_protocolStringToType = {
     {"http", ProtocolType::HTTP},
     {"https", ProtocolType::HTTPS},
     {"file", ProtocolType::FILE},
-    {"stream", ProtocolType::STREAM}
+    {"stream", ProtocolType::STREAM},
+    {"fd", ProtocolType::FD}
 };
 
 MediaSourceFilter::MediaSourceFilter(const std::string& name)

@@ -12,6 +12,7 @@
                 "multimedia_histreamer_enable_plugin_ffmpeg_adapter",
                 "multimedia_histreamer_enable_plugin_hdi_adapter",
                 "multimedia_histreamer_enable_plugin_file_source",
+		"multimedia_histreamer_enable_plugin_file_fd_source",
                 "multimedia_histreamer_enable_plugin_http_source",
                 "multimedia_histreamer_enable_plugin_stream_source",
                 "multimedia_histreamer_enable_plugin_minimp3_adapter",

@@ -58,7 +58,7 @@ enum struct OutputType {
 };
 
 struct OutputSinkPluginDef : public PluginDefBase {
-    OutputType outputType;
+    OutputType outputType; // According selected type to select different plugin
     CapabilitySet inCaps;
     PluginCreatorFunc<OutputSinkPlugin> creator {nullptr}; ///< Output sink plugin create function.
     OutputSinkPluginDef()
