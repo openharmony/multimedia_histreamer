@@ -17,13 +17,25 @@
 #define HISTREAMER_FOUNDATION_LOG_H
 
 #include <cinttypes>
+#include <string>
+
+// If file name and line number is need, #define HST_DEBUG at the beginning of the cpp file.
+#ifdef HST_DEBUG
+inline std::string MediaGetFileName(std::string file)
+{
+    if (file == "") {
+        return "Unknown File";
+    }
+    return file.substr(file.find_last_of("/\\") + 1);
+}
+#endif
 
 #ifdef MEDIA_OHOS
 #ifndef LOG_DOMAIN
 #define LOG_DOMAIN 0xD002B00
 #endif
 #ifndef LOG_TAG
-#define LOG_TAG "MultiMedia"
+#define LOG_TAG "HiStreamer"
 #endif
 #include "hilog/log.h"
 #else
@@ -56,15 +68,17 @@
 #define PUBLIC_LOG_HU PUBLIC_LOG "hu"
 
 #ifdef MEDIA_OHOS
-#ifndef OHOS_DEBUG
-#define HST_DECORATOR_HILOG(op, fmt, args...) \
-    do { \
-        op(LOG_CORE, PUBLIC_LOG "s:" fmt, HST_LOG_TAG, ##args); \
+#ifndef HST_DEBUG
+#define HST_DECORATOR_HILOG(op, fmt, args...)                                               \
+    do {                                                                                    \
+        op(LOG_CORE, PUBLIC_LOG_S ":" fmt, HST_LOG_TAG, ##args);                            \
     } while (0)
 #else
-#define HST_DECORATOR_HILOG(op, fmt, args...)\
-    do { \
-        op(LOG_CORE, PUBLIC_LOG "s[" PUBLIC_LOG "d]:" fmt, HST_LOG_TAG, __LINE__, ##args); \
+#define HST_DECORATOR_HILOG(op, fmt, args...)                                                                           \
+    do {                                                                                                                \
+        std::string file(__FILE__);                                                                                     \
+        std::string bareFile = MediaGetFileName(file);                                                                  \
+        op(LOG_CORE, "(" PUBLIC_LOG_S ", " PUBLIC_LOG_D32 "): " fmt, bareFile.c_str(), __LINE__, ##args);               \
     } while (0)
 #endif
 
