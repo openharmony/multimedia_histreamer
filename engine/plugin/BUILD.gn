@@ -36,7 +36,8 @@ group("histreamer_plugin") {
 config("hst_plugin_intf_config") {
   include_dirs = [ "//foundation/multimedia/histreamer/engine/plugin" ]
   if (!hst_is_lite_sys) {
-    include_dirs += [ "//foundation/multimedia/histreamer/engine/scene/standard" ]
+    include_dirs +=
+        [ "//foundation/multimedia/histreamer/engine/scene/standard" ]
     if (multimedia_histreamer_enable_video) {
       include_dirs += [
         "//utils/native/base/include",
