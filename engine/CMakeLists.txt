@@ -49,9 +49,9 @@ include_directories(
 )
 
 if (NOT ${OHOS_LITE})
-    message(STATUS "engine factory header included.")
+    message(STATUS "media interface header included.")
     include_directories(
-            ${TOP_DIR}/engine/factory
+            ${TOP_DIR}/engine/scene/standard
     )
 endif ()
 

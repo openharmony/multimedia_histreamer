@@ -35,13 +35,16 @@ group("histreamer_plugin") {
 # build plugin interface
 config("hst_plugin_intf_config") {
   include_dirs = [ "//foundation/multimedia/histreamer/engine/plugin" ]
-  if (!hst_is_lite_sys && multimedia_histreamer_enable_video) {
-    include_dirs += [
-      "//utils/native/base/include",
-      "//foundation/graphic/standard/interfaces/innerkits",
-      "//drivers/peripheral/display/interfaces/include",
-      "//foundation/graphic/standard/utils/sync_fence/export",
-    ]
+  if (!hst_is_lite_sys) {
+    include_dirs += [ "//foundation/multimedia/histreamer/engine/scene/standard" ]
+    if (multimedia_histreamer_enable_video) {
+      include_dirs += [
+        "//utils/native/base/include",
+        "//foundation/graphic/standard/interfaces/innerkits",
+        "//drivers/peripheral/display/interfaces/include",
+        "//foundation/graphic/standard/utils/sync_fence/export",
+      ]
+    }
   }
 }
 
