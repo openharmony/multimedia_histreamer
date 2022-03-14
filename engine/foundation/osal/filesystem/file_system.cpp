@@ -24,7 +24,6 @@
 #endif
 #include <cstring>
 #include <cerrno>
-#include <sys/stat.h>
 #include "foundation/log.h"
 
 #ifndef _WIN32
@@ -40,7 +39,7 @@ bool FileSystem::IsRegularFile(const std::string& path)
     return (stat(path.c_str(), &s) == 0) && S_ISREG(s.st_mode);
 }
 
-bool FileSystem::IsFdValid(int32_t fd, struct stat s)
+bool FileSystem::IsFdValid(int32_t fd, struct stat& s)
 {
     return fstat(fd, &s) == 0;
 }
