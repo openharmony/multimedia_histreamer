@@ -82,6 +82,7 @@ static std::vector<CapabilityID> g_allCapabilityId = {
     CapabilityID::VIDEO_PIXEL_FORMAT, // 9
     CapabilityID::MEDIA_BITRATE, // 10
     CapabilityID::THREAD_MODE, // 11
+    CapabilityID::BITS_PER_CODED_SAMPLE, // 12
 };
 
 template <typename T>
@@ -99,6 +100,7 @@ static std::map<CapabilityID, std::function<bool(const Plugin::ValueType&, Plugi
     {g_allCapabilityId[9], ExtractFixedCap<Plugin::VideoPixelFormat>}, // 9
     {g_allCapabilityId[10], ExtractFixedCap<int64_t>}, // 10
     {g_allCapabilityId[11], ExtractFixedCap<Plugin::ThreadMode>}, // 11
+    {g_allCapabilityId[12], ExtractFixedCap<uint32_t>}, // 12
 };
 using CheckFunc = std::function<bool(Capability::Key key, const Plugin::ValueType& val1, const Plugin::ValueType& val2,
         Plugin::ValueType& outValue)>;
@@ -115,6 +117,7 @@ static std::map<CapabilityID, CheckFunc> g_capabilityValueCheckMap = {
     {g_allCapabilityId[9], FixDiscCapValCheck<Plugin::VideoPixelFormat, uint32_t>}, // 9
     {g_allCapabilityId[10], FixInvalDiscCapValCheck<int64_t>}, // 10
     {g_allCapabilityId[11], FixDiscCapValCheck<Plugin::ThreadMode, uint8_t>}, // 11
+    {g_allCapabilityId[12], FixInvalDiscCapValCheck<uint32_t>}, // 12
 };
 
 

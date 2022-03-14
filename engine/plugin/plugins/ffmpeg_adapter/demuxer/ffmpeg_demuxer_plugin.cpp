@@ -420,7 +420,7 @@ bool FFmpegDemuxerPlugin::ParseMediaData()
         if (codecContext == nullptr) {
             continue;
         }
-        ConvertAVStreamToMetaInfo(avStream, codecContext, mediaInfo_->tracks[i]);
+        ConvertAVStreamToMetaInfo(avStream, formatContext_, codecContext, mediaInfo_->tracks[i]);
     }
     SaveFileInfoToMetaInfo(mediaInfo_->general);
     return true;

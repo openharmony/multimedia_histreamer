@@ -18,12 +18,13 @@
 #include "plugin_utils.h"
 
 #include <cstdarg>
+#include <sstream>
 
 #include "foundation/log.h"
 #include "pipeline/core/plugin_attr_desc.h"
 
 namespace {
-constexpr int32_t MAX_BUF_LEN = 256;
+constexpr int32_t MAX_BUF_LEN = 320; // 320 buffer size
 #define RETURN_IF_FAILED(exec, errVal, retVal) \
 do { \
     auto res = exec; \
@@ -227,6 +228,23 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::Th
     return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::GetThreadModeNameStr(val));
 }
 
+template<>
+int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::CodecConfig& val)
+{
+    auto int2hex = [](int i){
+        std::stringstream ss{};
+        ss << "0x"<< std::hex << i;
+        return ss.str();
+    };
+    std::string codeConfigStr;
+    for (auto var: val) {
+        codeConfigStr += int2hex(var);
+        codeConfigStr += ", ";
+    }
+    codeConfigStr = codeConfigStr.substr(0, codeConfigStr.find_last_of(','));
+    return SnPrintf(buf, maxLen, "{%s}", codeConfigStr.c_str());
+}
+
 template<typename T>
 int32_t MetaIDStringiness(char* buf, size_t maxLen, const char* name, const char* typeName,
                           const Plugin::ValueType& val)
@@ -274,6 +292,7 @@ std::map<Plugin::MetaID, CapStrnessFunc> g_metaStrnessMap = {
     {Plugin::MetaID::VIDEO_HEIGHT, MetaIDStringiness<uint32_t>},
     {Plugin::MetaID::VIDEO_FRAME_RATE, MetaIDStringiness<uint32_t>},
     {Plugin::MetaID::VIDEO_PIXEL_FORMAT, MetaIDStringiness<Plugin::VideoPixelFormat>},
+    {Plugin::MetaID::BITS_PER_CODED_SAMPLE, MetaIDStringiness<uint32_t>},
 };
 }
 
@@ -435,6 +454,7 @@ std::string Capability2String(const Capability& capability)
         {Capability::Key::AUDIO_AAC_STREAM_FORMAT, CapKeyStringiness<Plugin::AudioAacStreamFormat>},
         {Capability::Key::VIDEO_PIXEL_FORMAT, CapKeyStringiness<Plugin::VideoPixelFormat>},
         {Capability::Key::THREAD_MODE, CapKeyStringiness<Plugin::ThreadMode>},
+        {Capability::Key::BITS_PER_CODED_SAMPLE, CapKeyStringiness<uint32_t>},
     };
     char buffer[MAX_BUF_LEN + 1] = {0}; // one more is for \0
     int pos = 0;
