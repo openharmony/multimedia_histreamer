@@ -40,7 +40,8 @@ const std::set<AVCodecID> g_supportedCodec = {
     AV_CODEC_ID_FLAC,
     AV_CODEC_ID_AAC,
     AV_CODEC_ID_AAC_LATM,
-    AV_CODEC_ID_VORBIS
+    AV_CODEC_ID_VORBIS,
+    AV_CODEC_ID_APE,
 };
 std::map<AVCodecID,uint32_t> samplesPerFrameMap = {
     {AV_CODEC_ID_MP3, 1152}, // 1152
@@ -48,6 +49,7 @@ std::map<AVCodecID,uint32_t> samplesPerFrameMap = {
     {AV_CODEC_ID_AAC, 2048},  // 2048
     {AV_CODEC_ID_AAC_LATM, 2048}, // 2048
     {AV_CODEC_ID_VORBIS, 8192}, // 8192
+    {AV_CODEC_ID_APE, 4608}, // 4608
 };
 
 Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
@@ -106,6 +108,9 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
             break;
         case AV_CODEC_ID_VORBIS:
             capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_VORBIS);
+            break;
+        case AV_CODEC_ID_APE:
+            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_APE);
             break;
         default:
             MEDIA_LOG_I("codec is not supported right now");
@@ -188,15 +193,12 @@ Status AudioFfmpegDecoderPlugin::Init()
     {
         OSAL::ScopedLock lock1(parameterMutex_);
         audioParameter_[Tag::REQUIRED_OUT_BUFFER_CNT] = (uint32_t) BUFFER_QUEUE_SIZE;
-        std::map<AVCodecID,uint32_t>::iterator it;
-        it = samplesPerFrameMap.find(avCodec_->id);
-        if ( it == samplesPerFrameMap.end()) {
-            return Status::ERROR_UNSUPPORTED_FORMAT;
+        if (samplesPerFrameMap.count(avCodec_->id)) {
+            audioParameter_[Tag::AUDIO_SAMPLE_PER_FRAME] = samplesPerFrameMap[avCodec_->id];
         } else {
-            audioParameter_[Tag::AUDIO_SAMPLE_PER_FRAME] = it->second;
+            return Status::ERROR_UNSUPPORTED_FORMAT;
         }
     }
-
     return Status::OK;
 }
 
@@ -277,6 +279,7 @@ do { \
         FAIL_RET_WHEN_ASSIGN_LOCKED(Tag::AUDIO_CHANNELS, uint32_t, tmpCtx->channels);
         FAIL_RET_WHEN_ASSIGN_LOCKED(Tag::AUDIO_SAMPLE_RATE, uint32_t, tmpCtx->sample_rate);
         FAIL_RET_WHEN_ASSIGN_LOCKED(Tag::MEDIA_BITRATE, int64_t, tmpCtx->bit_rate);
+        FAIL_RET_WHEN_ASSIGN_LOCKED(Tag::BITS_PER_CODED_SAMPLE, uint32_t, tmpCtx->bits_per_coded_sample);
         AudioSampleFormat audioSampleFormat = AudioSampleFormat::NONE;
         auto ret = FindInParameterMapThenAssignLocked(Tag::AUDIO_SAMPLE_FORMAT, audioSampleFormat);
         if (ret != Status::OK) {
