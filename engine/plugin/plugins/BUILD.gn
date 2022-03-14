@@ -104,6 +104,10 @@ group("histreamer_plugin_store") {
   if (multimedia_histreamer_enable_plugin_std_video_capture) {
     deps += [ "source/video_capture:plugin_standard_video_capture" ]
   }
+
+  if (multimedia_histreamer_enable_plugin_wav_demuxer) {
+    deps += [ "demuxer/wav_demuxer:plugin_wav_demuxer" ]
+  }
 }
 
 config("gen_plugin_static_header_config") {
@@ -125,6 +129,10 @@ action("gen_plugin_static_header") {
         "FFmpegDemuxer",
         "FFmpegAudioDecoders",
       ]
+    }
+
+    if (multimedia_histreamer_enable_plugin_wav_demuxer) {
+      args += [ "WavDemuxer" ]
     }
 
     if (multimedia_histreamer_enable_plugin_minimp3_adapter) {
