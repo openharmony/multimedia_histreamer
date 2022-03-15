@@ -20,7 +20,6 @@
 
 namespace OHOS {
 namespace Media {
-
 DataStreamImpl::DataStreamImpl(size_t size, size_t count, MemoryType type)
 {
     FALSE_LOG(type == MemoryType::VIRTUAL_ADDR);
@@ -41,6 +40,7 @@ bool DataStreamImpl::GetDataBuffer(std::shared_ptr<DataBuffer>& buffer, int time
     dataBuffers_.pop();
     return true;
 }
+
 bool DataStreamImpl::QueueEmptyBuffer(const std::shared_ptr<DataBuffer>& buffer)
 {
     OSAL::ScopedLock lock(emptyMutex_);
@@ -73,6 +73,7 @@ bool DataStreamImpl::GetEmptyBuffer(std::shared_ptr<DataBuffer>& buffer, int tim
     emptyBuffers_.pop();
     return true;
 }
+
 bool DataStreamImpl::QueueDataBuffer(const std::shared_ptr<DataBuffer>& buffer)
 {
     OSAL::ScopedLock lock(dataMutex_);
@@ -85,6 +86,7 @@ VirtualDataBuffer::VirtualDataBuffer(size_t capacity) : capacity_(capacity)
 {
     address_ = new uint8_t[capacity];
 }
+
 VirtualDataBuffer::~VirtualDataBuffer()
 {
     delete [] address_;
@@ -94,26 +96,30 @@ bool VirtualDataBuffer::IsEos()
 {
     return isEos_;
 }
+
 void VirtualDataBuffer::SetEos(bool isEos)
 {
     isEos_ = isEos;
 }
+
 uint8_t* VirtualDataBuffer::GetAddress()
 {
     return address_;
 }
+
 size_t VirtualDataBuffer::GetCapacity()
 {
     return capacity_;
 }
+
 size_t VirtualDataBuffer::GetSize()
 {
     return size_;
 }
+
 void VirtualDataBuffer::SetSize(size_t size)
 {
     size_ = size;
 }
-
 } // Media
 } // OHOS

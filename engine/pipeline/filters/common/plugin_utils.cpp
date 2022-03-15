@@ -231,7 +231,7 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::Th
 template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::CodecConfig& val)
 {
-    auto int2hex = [](int i){
+    auto int2hex = [] (int i) {
         std::stringstream ss{};
         ss << "0x"<< std::hex << i;
         return ss.str();
