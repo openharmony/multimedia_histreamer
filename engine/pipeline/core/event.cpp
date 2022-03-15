@@ -17,7 +17,7 @@
 namespace OHOS {
 namespace Media {
 
-static const std::unordered_map<EventType, const char*> g_EventTypeMap = {
+static const std::map<EventType, const char*> g_EventTypeMap = {
         {EventType::EVENT_READY, "EVENT_READY"},
         {EventType::EVENT_AUDIO_PROGRESS, "EVENT_AUDIO_PROGRESS"},
         {EventType::EVENT_VIDEO_PROGRESS, "EVENT_VIDEO_PROGRESS"},

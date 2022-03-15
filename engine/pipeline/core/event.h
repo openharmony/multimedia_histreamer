@@ -17,7 +17,7 @@
 #define HISTREAMER_PIPELINE_CORE_EVENT_H
 
 #include <string>
-#include <unordered_map>
+#include <map>
 #include "plugin/common/any.h"
 
 namespace OHOS {
