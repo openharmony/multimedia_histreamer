@@ -349,6 +349,7 @@ OHOS::Media::ErrorCode TranslatePluginStatus(Plugin::Status pluginError)
         {Plugin::Status::ERROR_NOT_EXISTED, ErrorCode::ERROR_NOT_EXISTED},
         {Plugin::Status::ERROR_AGAIN, ErrorCode::ERROR_AGAIN},
         {Plugin::Status::ERROR_PERMISSION_DENIED, ErrorCode::ERROR_PERMISSION_DENIED},
+        {Plugin::Status::ERROR_DELAY_READY, ErrorCode::SUCCESS},
     };
     auto ite = g_transTable.find(pluginError);
     if (ite == g_transTable.end()) {
