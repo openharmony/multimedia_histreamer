@@ -30,7 +30,7 @@ constexpr int RING_BUFFER_SIZE = 5 * 48 * 1024;
 constexpr int PER_REQUEST_SIZE = 48 * 1024;
 constexpr int WATER_LINE = RING_BUFFER_SIZE * 0.1;
 constexpr unsigned int SLEEP_TIME = 5;    // Sleep 5ms
-constexpr unsigned int RETRY_TIMES = 20;  // Retry 20 times
+constexpr unsigned int RETRY_TIMES = 200;  // Retry 200 times
 }
 
 StreamingExecutor::StreamingExecutor() noexcept
