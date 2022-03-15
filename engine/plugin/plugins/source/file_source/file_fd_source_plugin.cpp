@@ -38,7 +38,7 @@ uint64_t GetFileSize(int32_t fd)
 {
     uint64_t fileSize = 0;
     struct stat s {};
-    if(fstat(fd, &s) ==0) {
+    if (fstat(fd, &s) == 0) {
         fileSize = static_cast<uint64_t>(s.st_size);
         return fileSize;
     }
@@ -130,8 +130,9 @@ Status FileFdSourcePlugin::SeekTo(uint64_t offset)
     return Status::OK;
 }
 
-//uri format:fd://xxxx?offset=xxxx&size=xxx or fd://xxxx
-Status FileFdSourcePlugin::ParseUriInfo(const std::string& uri) {
+// uri format:fd://xxxx?offset=xxxx&size=xxx or fd://xxxx
+Status FileFdSourcePlugin::ParseUriInfo(const std::string& uri)
+{
     if (uri.empty()) {
         MEDIA_LOG_E("uri is empty");
         return Status::ERROR_INVALID_PARAMETER;

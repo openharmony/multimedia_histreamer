@@ -16,21 +16,21 @@
 
 namespace OHOS {
 namespace Media {
-
 static const std::map<EventType, const char*> g_EventTypeMap = {
-        {EventType::EVENT_READY, "EVENT_READY"},
-        {EventType::EVENT_AUDIO_PROGRESS, "EVENT_AUDIO_PROGRESS"},
-        {EventType::EVENT_VIDEO_PROGRESS, "EVENT_VIDEO_PROGRESS"},
-        {EventType::EVENT_COMPLETE, "EVENT_COMPLETE"},
-        {EventType::EVENT_ERROR, "EVENT_ERROR"},
-        {EventType::EVENT_PLUGIN_ERROR, "EVENT_PLUGIN_ERROR"},
-        {EventType::EVENT_PLUGIN_EVENT, "EVENT_PLUGIN_EVENT"},
-        {EventType::EVENT_BUFFERING, "EVENT_BUFFERING"},
-        {EventType::EVENT_BUFFER_PROGRESS, "EVENT_BUFFER_PROGRESS"},
-        {EventType::EVENT_DECODER_ERROR, "EVENT_DECODER_ERROR"}
+    {EventType::EVENT_READY, "EVENT_READY"},
+    {EventType::EVENT_AUDIO_PROGRESS, "EVENT_AUDIO_PROGRESS"},
+    {EventType::EVENT_VIDEO_PROGRESS, "EVENT_VIDEO_PROGRESS"},
+    {EventType::EVENT_COMPLETE, "EVENT_COMPLETE"},
+    {EventType::EVENT_ERROR, "EVENT_ERROR"},
+    {EventType::EVENT_PLUGIN_ERROR, "EVENT_PLUGIN_ERROR"},
+    {EventType::EVENT_PLUGIN_EVENT, "EVENT_PLUGIN_EVENT"},
+    {EventType::EVENT_BUFFERING, "EVENT_BUFFERING"},
+    {EventType::EVENT_BUFFER_PROGRESS, "EVENT_BUFFER_PROGRESS"},
+    {EventType::EVENT_DECODER_ERROR, "EVENT_DECODER_ERROR"}
 };
 
-const char* GetEventName(EventType type) {
+const char* GetEventName(EventType type)
+{
     auto it = g_EventTypeMap.find(type);
     if( it!= g_EventTypeMap.end()) {
         return it->second;

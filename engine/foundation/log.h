@@ -74,11 +74,11 @@ inline std::string MediaGetFileName(std::string file)
         op(LOG_CORE, PUBLIC_LOG_S ":" fmt, HST_LOG_TAG, ##args);                            \
     } while (0)
 #else
-#define HST_DECORATOR_HILOG(op, fmt, args...)                                                                           \
-    do {                                                                                                                \
-        std::string file(__FILE__);                                                                                     \
-        std::string bareFile = MediaGetFileName(file);                                                                  \
-        op(LOG_CORE, "(" PUBLIC_LOG_S ", " PUBLIC_LOG_D32 "): " fmt, bareFile.c_str(), __LINE__, ##args);               \
+#define HST_DECORATOR_HILOG(op, fmt, args...)                                                                          \
+    do {                                                                                                               \
+        std::string file(__FILE__);                                                                                    \
+        std::string bareFile = MediaGetFileName(file);                                                                 \
+        op(LOG_CORE, "(" PUBLIC_LOG_S ", " PUBLIC_LOG_D32 "): " fmt, bareFile.c_str(), __LINE__, ##args);              \
     } while (0)
 #endif
 

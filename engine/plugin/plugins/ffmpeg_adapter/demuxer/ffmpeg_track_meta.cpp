@@ -62,7 +62,8 @@ bool IsPcmStream(const AVStream& avStream)
            codecId == AV_CODEC_ID_PCM_U16BE || codecId == AV_CODEC_ID_PCM_S8 || codecId == AV_CODEC_ID_PCM_U8;
 }
 
-void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream,
+                                        const std::shared_ptr<AVFormatContext>& avFormatContext,
                                         const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
     meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
@@ -79,7 +80,7 @@ void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream, const std::sha
         meta.insert({Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame});
         meta.insert({Tag::AUDIO_SAMPLE_FORMAT, ConvFf2PSampleFmt(avCodecContext->sample_fmt)});
         int64_t bitRate = avCodecContext->bit_rate;
-        if(!bitRate) {
+        if (!bitRate) {
             bitRate = avFormatContext->bit_rate;
         }
         meta.insert({Tag::MEDIA_BITRATE, bitRate});
@@ -186,7 +187,7 @@ void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_
                      ConvertChannelLayoutFromFFmpeg(avCodecContext->channels,  avCodecContext->channel_layout)});
         meta.insert({Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(avCodecContext->frame_size)});
         int64_t bitRate = avCodecContext->bit_rate;
-        if(!bitRate) {
+        if (!bitRate) {
             bitRate = avFormatContext->bit_rate;
         }
         meta.insert({Tag::MEDIA_BITRATE, bitRate});
@@ -203,7 +204,7 @@ void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
     meta.insert({Tag::MIME, std::string(MEDIA_MIME_VIDEO_H264)});
     meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
     int64_t bitRate = avCodecContext->bit_rate;
-    if(!bitRate) {
+    if (!bitRate) {
         bitRate = avFormatContext->bit_rate;
     }
     meta.insert({Tag::MEDIA_BITRATE, bitRate});
