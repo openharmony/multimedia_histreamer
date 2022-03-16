@@ -211,7 +211,7 @@ void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
     meta.insert({Tag::BITS_PER_CODED_SAMPLE, static_cast<uint32_t>(avCodecContext->bits_per_coded_sample)});
     meta.insert({Tag::VIDEO_WIDTH, static_cast<uint32_t>(avCodecContext->width)});
     meta.insert({Tag::VIDEO_HEIGHT, static_cast<uint32_t>(avCodecContext->height)});
-    if (context->extradata_size > 0) {
+    if (avCodecContext->extradata_size > 0) {
         AVCConfigDataParser parser(avCodecContext->extradata, avCodecContext->extradata_size);
         if (!parser.ParseConfigData()) {
             return;
