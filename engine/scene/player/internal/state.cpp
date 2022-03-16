@@ -52,6 +52,10 @@ std::tuple<ErrorCode, Action> State::SetSource(const Plugin::Any& source)
     (void)source;
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
+std::tuple<ErrorCode, Action> State::Prepare()
+{
+    return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
+}
 std::tuple<ErrorCode, Action> State::Play()
 {
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
@@ -102,6 +106,9 @@ std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin:
     switch (intent) {
         case Intent::SET_SOURCE:
             std::tie(rtv, nextAction) = SetSource(param);
+            break;
+        case Intent::PREPARE:
+            std::tie(rtv, nextAction) = Prepare();
             break;
         case Intent::SEEK:
             std::tie(rtv, nextAction) = Seek(param);

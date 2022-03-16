@@ -127,25 +127,15 @@ int32_t HiPlayerImpl::SetSource(const std::shared_ptr<IMediaDataSource>& dataSrc
 int32_t HiPlayerImpl::Prepare()
 {
     MEDIA_LOG_D("Prepare entered, current fsm state: " PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
-    OSAL::ScopedLock lock(stateMutex_);
     PROFILE_BEGIN();
-    if (curFsmState_ == StateId::PREPARING) {
-        errorCode_ = ErrorCode::SUCCESS;
-        cond_.Wait(lock, [this] { return curFsmState_ == StateId::READY || curFsmState_ == StateId::INIT; });
-    }
-    MEDIA_LOG_D("Prepare finished, current fsm state: " PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
-    if (curFsmState_ == StateId::READY) {
-        PROFILE_END("Prepare successfully,");
-        return TransErrorCode(ErrorCode::SUCCESS);
-    } else if (curFsmState_ == StateId::INIT) {
+    auto ret = fsm_.SendEvent(Intent::PREPARE);
+    if (ret != ErrorCode::SUCCESS) {
         PROFILE_END("Prepare failed,");
-        if (errorCode_ == ErrorCode::SUCCESS) {
-            errorCode_ = ErrorCode::ERROR_INVALID_STATE;
-        }
-        return TransErrorCode(errorCode_.load());
+        MEDIA_LOG_E("prepare failed with error " PUBLIC_LOG "d", ret);
     } else {
-        return TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION);
+        PROFILE_END("Prepare successfully,");
     }
+    return TransErrorCode(ret);
 }
 
 int HiPlayerImpl::PrepareAsync()
