@@ -115,6 +115,9 @@ int32_t HiPlayerImpl::SetSource(const Source& source)
         mediaSource = std::make_shared<MediaSource>(source.GetDataConsumer());
     }
     ret = CppExt::to_underlying(fsm_.SendEvent(Intent::SET_SOURCE, mediaSource));
+    if (ret != CppExt::to_underlying(ErrorCode::SUCCESS)) {
+        MEDIA_LOG_E("SetSource error: " PUBLIC_LOG_D32, ret);
+    }
     PROFILE_END("SetSource end.");
     return ret;
 }
