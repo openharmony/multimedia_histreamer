@@ -46,10 +46,8 @@ PLUGIN_DEFINITION(HttpSource, LicenseType::APACHE_V2, HttpSourceRegister, [] {})
 
 HttpSourcePlugin::HttpSourcePlugin(std::string name) noexcept
     : SourcePlugin(std::move(name)),
-      isSeekable_(false),
       bufferSize_(DEFAULT_BUFFER_SIZE),
       waterline_(0),
-      fileSize_(-1),
       executor_(nullptr)
 {
     MEDIA_LOG_D("HttpSourcePlugin IN");
@@ -150,10 +148,7 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 
     auto uri = source->GetSourceUri();
     FALSE_RETURN_V(executor_->Open(uri), Status::ERROR_FUNCTION_CALL);
-    isSeekable_ = !executor_->IsStreaming();
-    fileSize_ = isSeekable_ ? executor_->GetContentLength() : -1;
-    MEDIA_LOG_I("SetSource(" PUBLIC_LOG "s), seekable: " PUBLIC_LOG "d, file size: " PUBLIC_LOG "d",
-                uri.c_str(), isSeekable_, fileSize_);
+    MEDIA_LOG_I("SetSource: " PUBLIC_LOG_S, uri.c_str());
     return Status::OK;
 }
 
@@ -190,22 +185,21 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
 Status HttpSourcePlugin::GetSize(size_t &size)
 {
     MEDIA_LOG_D("IN");
-    fileSize_ = executor_->GetContentLength();
-    size = fileSize_;
+    size = executor_->GetContentLength();
     return Status::OK;
 }
 
 bool HttpSourcePlugin::IsSeekable()
 {
     MEDIA_LOG_D("IN");
-    return isSeekable_;
+    return !executor_->IsStreaming();
 }
 
 Status HttpSourcePlugin::SeekTo(uint64_t offset)
 {
     FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
-    FALSE_RETURN_V(isSeekable_, Status::ERROR_INVALID_OPERATION);
-    FALSE_RETURN_V(offset <= fileSize_, Status::ERROR_INVALID_PARAMETER);
+    FALSE_RETURN_V(!executor_->IsStreaming(), Status::ERROR_INVALID_OPERATION);
+    FALSE_RETURN_V(offset <= executor_->GetContentLength(), Status::ERROR_INVALID_PARAMETER);
     FALSE_RETURN_V(executor_->Seek(offset), Status::ERROR_FUNCTION_CALL);
     return Status::OK;
 }

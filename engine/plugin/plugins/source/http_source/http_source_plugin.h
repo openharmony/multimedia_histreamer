@@ -47,10 +47,8 @@ public:
 private:
     void CloseUri();
 
-    bool isSeekable_;
     uint32_t bufferSize_;
     uint32_t waterline_;
-    size_t   fileSize_;
     Callback* callback_ {};
     std::shared_ptr<StreamingExecutor> executor_;
 };
