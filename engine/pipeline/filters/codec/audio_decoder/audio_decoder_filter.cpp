@@ -139,6 +139,7 @@ bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_
                       "can't configure decoder plugin since meta is not compatible with negotiated caps");
     uint32_t samplesPerFrame = 0;
     if (GetPluginParameterLocked(Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame) != ErrorCode::SUCCESS) {
+        MEDIA_LOG_W("Can't acquire samples per frame from decoder plugin: " PUBLIC_LOG_S,  pluginInfo_->name.c_str());
         samplesPerFrame = MAX_SAMPLE_PER_FRAME;
     }
     (void) thisMeta->SetUint32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame);
