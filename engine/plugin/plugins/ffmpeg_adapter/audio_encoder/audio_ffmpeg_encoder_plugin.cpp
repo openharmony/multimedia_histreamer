@@ -137,7 +137,7 @@ Status AudioFfmpegEncoderPlugin::Init()
 {
     auto ite = codecMap.find(pluginName_);
     if (ite == codecMap.end()) {
-        MEDIA_LOG_W("cannot find codec with name " PUBLIC_LOG "s", pluginName_.c_str());
+        MEDIA_LOG_W("cannot find codec with name " PUBLIC_LOG_S, pluginName_.c_str());
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     OSAL::ScopedLock lock(avMutex_);
@@ -439,7 +439,7 @@ Status AudioFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
     } else if (ret == AVERROR(EAGAIN)) {
         return Status::ERROR_AGAIN;
     } else {
-        MEDIA_LOG_E("send buffer error " PUBLIC_LOG "s", AVStrError(ret).c_str());
+        MEDIA_LOG_E("send buffer error " PUBLIC_LOG_S, AVStrError(ret).c_str());
         return Status::ERROR_UNKNOWN;
     }
 }
@@ -476,7 +476,7 @@ Status AudioFfmpegEncoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
     } else if (ret == AVERROR(EAGAIN)) {
         status = Status::ERROR_NOT_ENOUGH_DATA;
     } else {
-        MEDIA_LOG_E("audio encoder receive error: " PUBLIC_LOG "s", AVStrError(ret).c_str());
+        MEDIA_LOG_E("audio encoder receive error: " PUBLIC_LOG_S, AVStrError(ret).c_str());
         status = Status::ERROR_UNKNOWN;
     }
     av_frame_unref(cachedFrame_.get());

@@ -103,7 +103,7 @@ Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCod
     headers = curl_slist_append(headers, "Connection: Keep-alive");
     headers = curl_slist_append(headers, "Keep-Alive: timeout=120");
     curl_easy_setopt(easyHandle_, CURLOPT_HTTPHEADER, headers);
-
+    
     MEDIA_LOG_D("RequestData: startPos " PUBLIC_LOG_D32 ", len " PUBLIC_LOG_D32, static_cast<int>(startPos), len);
     CURLcode returnCode = curl_easy_perform(easyHandle_);
     if (headers != nullptr) {
@@ -112,7 +112,7 @@ Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCod
     clientCode = NetworkClientErrorCode::ERROR_OK;
     serverCode = 0;
     if (returnCode != CURLE_OK) {
-        MEDIA_LOG_E("Curl error " PUBLIC_LOG "d", returnCode);
+        MEDIA_LOG_E("Curl error " PUBLIC_LOG_D32, returnCode);
         if (returnCode == CURLE_COULDNT_CONNECT || returnCode == CURLE_OPERATION_TIMEDOUT) {
             clientCode = NetworkClientErrorCode::ERROR_TIME_OUT;
         } else {
@@ -123,7 +123,7 @@ Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCod
         int httpCode = 0;
         curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
         if(httpCode >= 400) { // 400
-            MEDIA_LOG_E("Http error " PUBLIC_LOG "d", httpCode);
+            MEDIA_LOG_E("Http error " PUBLIC_LOG_D32, httpCode);
             serverCode = httpCode;
             return Status::ERROR_SERVER;
         }

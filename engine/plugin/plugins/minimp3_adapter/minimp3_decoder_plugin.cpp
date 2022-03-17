@@ -46,12 +46,12 @@ Minimp3DecoderPlugin::Minimp3DecoderPlugin(std::string name)
 {
     FALSE_LOG(memset_s(&mp3DecoderAttr_, sizeof(mp3DecoderAttr_), 0x00, sizeof(AudioDecoderMp3Attr)) == 0);
     FALSE_LOG(memset_s(&minimp3DecoderImpl_, sizeof(minimp3DecoderImpl_), 0x00, sizeof(Minimp3DemuxerOp)) == 0);
-    MEDIA_LOG_I("Minimp3DecoderPlugin, plugin name: " PUBLIC_LOG "s", pluginName_.c_str());
+    MEDIA_LOG_I("Minimp3DecoderPlugin, plugin name: " PUBLIC_LOG_S, pluginName_.c_str());
 }
 
 Minimp3DecoderPlugin::~Minimp3DecoderPlugin()
 {
-    MEDIA_LOG_I("~Minimp3DecoderPlugin, plugin name: " PUBLIC_LOG "s", pluginName_.c_str());
+    MEDIA_LOG_I("~Minimp3DecoderPlugin, plugin name: " PUBLIC_LOG_S, pluginName_.c_str());
 }
 
 Status Minimp3DecoderPlugin::Init()
@@ -97,7 +97,7 @@ Status Minimp3DecoderPlugin::Prepare()
         samplesPerFrame_ != MP3_MAX_SAMPLES_PER_FRAME) {
         return Status::ERROR_INVALID_PARAMETER;
     }
-    MEDIA_LOG_I("channels_ = " PUBLIC_LOG "d samplesPerFrame_ = " PUBLIC_LOG "d", channels_, samplesPerFrame_);
+    MEDIA_LOG_I("channels_ = " PUBLIC_LOG_D32 " samplesPerFrame_ = " PUBLIC_LOG_D32, channels_, samplesPerFrame_);
     return Status::OK;
 }
 

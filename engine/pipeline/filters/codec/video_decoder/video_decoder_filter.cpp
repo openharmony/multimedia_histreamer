@@ -328,8 +328,8 @@ ErrorCode VideoDecoderFilter::ConfigurePluginParams()
         }
     }
     MEDIA_LOG_D("ConfigurePluginParams success, mime: " PUBLIC_LOG_S ", width: " PUBLIC_LOG_U32 ", height: "
-                PUBLIC_LOG_U32 ", format: " PUBLIC_LOG_U32,
-                vdecFormat_.mime.c_str(), vdecFormat_.width, vdecFormat_.height, vdecFormat_.format);
+              PUBLIC_LOG_U32 ", format: " PUBLIC_LOG_U32,
+              vdecFormat_.mime.c_str(), vdecFormat_.width, vdecFormat_.height, vdecFormat_.format);
     return ErrorCode::SUCCESS;
 }
 

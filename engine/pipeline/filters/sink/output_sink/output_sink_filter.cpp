@@ -65,7 +65,7 @@ bool OutputSinkFilter::Negotiate(const std::string &inPort,
         }
     }
     if (selectedPluginInfo == nullptr) {
-        MEDIA_LOG_W("no available output sink plugin with output type of " PUBLIC_LOG "d",
+        MEDIA_LOG_W("no available output sink plugin with output type of " PUBLIC_LOG_D32,
                     static_cast<int32_t>(protocolType_));
         return false;
     }
@@ -110,12 +110,12 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, const AVBufferPt
     auto ret = ErrorCode::SUCCESS;
     if (offset >= 0 && offset != currentPos_) {
         if (!plugin_->IsSeekable()) {
-            MEDIA_LOG_E("plugin " PUBLIC_LOG "s does not support seekable", pluginInfo_->name.c_str());
+            MEDIA_LOG_E("plugin " PUBLIC_LOG_S " does not support seekable", pluginInfo_->name.c_str());
             return ErrorCode::ERROR_INVALID_OPERATION;
         } else {
             ret = TranslatePluginStatus(plugin_->SeekTo(offset));
             if (ret != ErrorCode::SUCCESS) {
-                MEDIA_LOG_E("plugin " PUBLIC_LOG "s seek to " PUBLIC_LOG PRId64 " failed",
+                MEDIA_LOG_E("plugin " PUBLIC_LOG_S " seek to " PUBLIC_LOG_D64 " failed",
                             pluginInfo_->name.c_str(), offset);
                 return ErrorCode::ERROR_INVALID_OPERATION;
             }
@@ -125,7 +125,7 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, const AVBufferPt
     if (!buffer->IsEmpty()) {
         ret = TranslatePluginStatus(plugin_->Write(buffer));
         if (ret != ErrorCode::SUCCESS) {
-            MEDIA_LOG_E("write to plugin failed with error code " PUBLIC_LOG "d", CppExt::to_underlying(ret));
+            MEDIA_LOG_E("write to plugin failed with error code " PUBLIC_LOG_D32, CppExt::to_underlying(ret));
             return ret;
         }
         currentPos_ += buffer->GetMemory()->GetSize();

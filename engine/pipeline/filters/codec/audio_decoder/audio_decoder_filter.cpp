@@ -201,11 +201,11 @@ ErrorCode AudioDecoderFilter::PushData(const std::string &inPort, const AVBuffer
 {
     const static int8_t maxRetryCnt = 3; // max retry times of handling one frame
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
-        MEDIA_LOG_W("pushing data to decoder when state is " PUBLIC_LOG "d", static_cast<int>(state_.load()));
+        MEDIA_LOG_W("pushing data to decoder when state is " PUBLIC_LOG_D32, static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     if (isFlushing_) {
-        MEDIA_LOG_I("decoder is flushing, discarding this data from port " PUBLIC_LOG "s", inPort.c_str());
+        MEDIA_LOG_I("decoder is flushing, discarding this data from port " PUBLIC_LOG_S, inPort.c_str());
         return ErrorCode::SUCCESS;
     }
 
@@ -275,7 +275,7 @@ ErrorCode AudioDecoderFilter::HandleFrame(const std::shared_ptr<AVBuffer>& buffe
     MEDIA_LOG_D("HandleFrame called");
     auto ret = TranslatePluginStatus(plugin_->QueueInputBuffer(buffer, 0));
     if (ret != ErrorCode::SUCCESS && ret != ErrorCode::ERROR_TIMED_OUT) {
-        MEDIA_LOG_E("Queue input buffer to plugin fail: " PUBLIC_LOG "d", CppExt::to_underlying(ret));
+        MEDIA_LOG_E("Queue input buffer to plugin fail: " PUBLIC_LOG_D32, CppExt::to_underlying(ret));
     }
     return ret;
 }

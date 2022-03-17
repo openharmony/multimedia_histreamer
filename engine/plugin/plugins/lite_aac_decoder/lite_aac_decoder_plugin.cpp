@@ -103,7 +103,7 @@ LiteAACDecoderPlugin::LiteAACDecoderPlugin(std::string name)
       inBuffer_ {nullptr},
       outBuffer_ {nullptr}
 {
-    MEDIA_LOG_I("LiteAACDecoderPlugin, plugin name: " PUBLIC_LOG "s", pluginName_.c_str());
+    MEDIA_LOG_I("LiteAACDecoderPlugin, plugin name: " PUBLIC_LOG_S, pluginName_.c_str());
 }
 
 LiteAACDecoderPlugin::~LiteAACDecoderPlugin()
@@ -299,7 +299,7 @@ Status LiteAACDecoderPlugin::AudioDecoderAACMp4Process(std::shared_ptr<Buffer> i
     err = aac_decoder_input_data(const_cast<unsigned char**>(&FramePtr),
         static_cast<size_t *>(&inputLength), &remain_size);
     if (err != 0) {
-        MEDIA_LOG_E("aac_decoder_input_data error is " PUBLIC_LOG "d", err);
+        MEDIA_LOG_E("aac_decoder_input_data error is " PUBLIC_LOG_D32, err);
         return Status::ERROR_UNKNOWN;
     }
     aac_stream_info_t  *aacInfo_ = aac_decoder_get_meida_info();
@@ -313,7 +313,7 @@ Status LiteAACDecoderPlugin::AudioDecoderAACMp4Process(std::shared_ptr<Buffer> i
         err = aac_decoder_get_frame(reinterpret_cast<signed short *>(outData->GetWritableAddr(packet_length, 0)),
             PCM_SIZE / 2, 0); // 2
         if (err != 0) {
-            MEDIA_LOG_E("aac_decoder_get_frame error is " PUBLIC_LOG "d remain_size " PUBLIC_LOG "d", err, remain_size);
+            MEDIA_LOG_E("aac_decoder_get_frame error is " PUBLIC_LOG_D32 " remain_size " PUBLIC_LOG_D32, err, remain_size);
             return Status::ERROR_UNKNOWN;
         }
     } else {

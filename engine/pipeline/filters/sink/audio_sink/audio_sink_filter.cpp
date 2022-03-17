@@ -65,7 +65,7 @@ ErrorCode AudioSinkFilter::SetParameter(int32_t key, const Plugin::Any& value)
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
-        MEDIA_LOG_I("SetParameter key " PUBLIC_LOG "d is out of boundary", key);
+        MEDIA_LOG_I("SetParameter key " PUBLIC_LOG_D32 " is out of boundary", key);
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     RETURN_AGAIN_IF_NULL(plugin_);
@@ -79,7 +79,7 @@ ErrorCode AudioSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
-        MEDIA_LOG_I("GetParameter key " PUBLIC_LOG "d is out of boundary", key);
+        MEDIA_LOG_I("GetParameter key " PUBLIC_LOG_D32 " is out of boundary", key);
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     RETURN_AGAIN_IF_NULL(plugin_);
@@ -199,7 +199,7 @@ ErrorCode AudioSinkFilter::Start()
 {
     MEDIA_LOG_I("start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
-        MEDIA_LOG_W("sink is not ready when start, state: " PUBLIC_LOG "d", static_cast<int32_t>(state_.load()));
+        MEDIA_LOG_W("sink is not ready when start, state: " PUBLIC_LOG_D32, static_cast<int32_t>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto err = FilterBase::Start();
@@ -282,7 +282,7 @@ void AudioSinkFilter::FlushEnd()
 ErrorCode AudioSinkFilter::SetVolume(float volume)
 {
     if (state_ != FilterState::READY && state_ != FilterState::RUNNING && state_ != FilterState::PAUSED) {
-        MEDIA_LOG_E("audio sink filter cannot set volume in state " PUBLIC_LOG "d",
+        MEDIA_LOG_E("audio sink filter cannot set volume in state " PUBLIC_LOG_D32,
                     static_cast<int32_t>(state_.load()));
         return ErrorCode::ERROR_AGAIN;
     }
@@ -296,7 +296,7 @@ ErrorCode AudioSinkFilter::UpdateLatestPts(int64_t pts)
     int64_t nowNs {0};
     Plugin::Status status = plugin_->GetLatency(latencyNano);
     if (status != Plugin::Status::OK) {
-        MEDIA_LOG_E("audio sink GetLatency fail errorcode = " PUBLIC_LOG "d",
+        MEDIA_LOG_E("audio sink GetLatency fail errorcode = " PUBLIC_LOG_D32,
                     CppExt::to_underlying(TranslatePluginStatus(status)));
         return TranslatePluginStatus(status);
     }

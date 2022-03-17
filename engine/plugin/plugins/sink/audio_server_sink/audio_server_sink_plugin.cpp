@@ -366,14 +366,14 @@ Status AudioServerSinkPlugin::GetParameter(Tag tag, ValueType& para)
     switch (tag) {
         case Tag::AUDIO_SAMPLE_RATE:
             if (params.sampleRate != rendererParams_.sampleRate) {
-                MEDIA_LOG_W("samplingRate has changed from " PUBLIC_LOG "u to " PUBLIC_LOG "u",
+                MEDIA_LOG_W("samplingRate has changed from " PUBLIC_LOG_U32 " to " PUBLIC_LOG_U32,
                             rendererParams_.sampleRate, params.sampleRate);
             }
             para = params.sampleRate;
             break;
         case Tag::AUDIO_CHANNELS:
             if (params.channelCount != rendererParams_.channelCount) {
-                MEDIA_LOG_W("channelCount has changed from " PUBLIC_LOG "u to " PUBLIC_LOG "u",
+                MEDIA_LOG_W("channelCount has changed from " PUBLIC_LOG_U32 " to " PUBLIC_LOG_U32,
                             rendererParams_.channelCount, params.channelCount);
             }
             para = params.channelCount;
@@ -383,7 +383,7 @@ Status AudioServerSinkPlugin::GetParameter(Tag tag, ValueType& para)
             break;
         case Tag::AUDIO_SAMPLE_FORMAT:
             if (params.sampleFormat != rendererParams_.sampleFormat) {
-                MEDIA_LOG_W("sampleFormat has changed from " PUBLIC_LOG "u to " PUBLIC_LOG "u",
+                MEDIA_LOG_W("sampleFormat has changed from " PUBLIC_LOG_U32 " to " PUBLIC_LOG_U32,
                             rendererParams_.sampleFormat, params.sampleFormat);
             }
             para = params.sampleFormat;
@@ -400,7 +400,7 @@ bool AudioServerSinkPlugin::AssignSampleRateIfSupported(uint32_t sampleRate)
     sampleRate_ = sampleRate;
     AudioStandard::AudioSamplingRate aRate = AudioStandard::SAMPLE_RATE_8000;
     if (!SampleRateNum2Enum(sampleRate, aRate)) {
-        MEDIA_LOG_E("sample rate " PUBLIC_LOG PRIu32 "not supported", sampleRate);
+        MEDIA_LOG_E("sample rate " PUBLIC_LOG_U32 "not supported", sampleRate);
         return false;
     }
     auto supportedSampleRateList = OHOS::AudioStandard::AudioRenderer::GetSupportedSamplingRates();
@@ -411,7 +411,7 @@ bool AudioServerSinkPlugin::AssignSampleRateIfSupported(uint32_t sampleRate)
     for (const auto& rate : supportedSampleRateList) {
         if (rate == aRate) {
             rendererParams_.sampleRate = rate;
-            MEDIA_LOG_D("sampleRate: " PUBLIC_LOG "u", rendererParams_.sampleRate);
+            MEDIA_LOG_D("sampleRate: " PUBLIC_LOG_U32, rendererParams_.sampleRate);
             return true;
         }
     }
@@ -422,7 +422,7 @@ bool AudioServerSinkPlugin::AssignChannelNumIfSupported(uint32_t channelNum)
 {
     AudioStandard::AudioChannel aChannel = AudioStandard::MONO;
     if (!ChannelNumNum2Enum(channelNum, aChannel)) {
-        MEDIA_LOG_E("sample rate " PUBLIC_LOG PRIu32 "not supported", channelNum);
+        MEDIA_LOG_E("sample rate " PUBLIC_LOG_U32 "not supported", channelNum);
         return false;
     }
     auto supportedChannelsList = OHOS::AudioStandard::AudioRenderer::GetSupportedChannels();
@@ -433,7 +433,7 @@ bool AudioServerSinkPlugin::AssignChannelNumIfSupported(uint32_t channelNum)
     for (const auto& channel : supportedChannelsList) {
         if (channel == aChannel) {
             rendererParams_.channelCount = channel;
-            MEDIA_LOG_D("channelCount: " PUBLIC_LOG "u", rendererParams_.channelCount);
+            MEDIA_LOG_D("channelCount: " PUBLIC_LOG_U32, rendererParams_.channelCount);
             return true;
         }
     }
