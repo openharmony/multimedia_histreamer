@@ -55,7 +55,7 @@ Status FilePathSinkPlugin::SetSink(const MediaSink& sink)
     FALSE_RETURN_V((sink.GetProtocolType() == ProtocolType::FILE && !sink.GetPath().empty()),
         Status::ERROR_INVALID_DATA);
     fileName_ = sink.GetPath();
-    return Status::OK;
+    return OpenFile();
 }
 
 bool FilePathSinkPlugin::IsSeekable()
