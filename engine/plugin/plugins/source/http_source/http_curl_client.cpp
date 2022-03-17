@@ -104,7 +104,7 @@ Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCod
     headers = curl_slist_append(headers, "Keep-Alive: timeout=120");
     curl_easy_setopt(easyHandle_, CURLOPT_HTTPHEADER, headers);
 
-    MEDIA_LOG_D("RequestData: startPos " PUBLIC_LOG "d, len " PUBLIC_LOG "d", startPos, len);
+    MEDIA_LOG_D("RequestData: startPos " PUBLIC_LOG_D32 ", len " PUBLIC_LOG_D32, static_cast<int>(startPos), len);
     CURLcode returnCode = curl_easy_perform(easyHandle_);
     if (headers != nullptr) {
         curl_slist_free_all(headers);
