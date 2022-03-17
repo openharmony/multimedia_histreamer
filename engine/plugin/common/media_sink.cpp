@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,35 +13,35 @@
  * limitations under the License.
  */
 
-#include "output_sink.h"
+#include "media_sink.h"
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-OutputSink::OutputSink(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<OutputSinkPlugin> plugin)
-    : Base(pkgVer, apiVer, plugin), outputSink_(std::move(plugin)) {}
-Status OutputSink::SetSink(const MediaSink &sink)
+MediaSink::MediaSink(ProtocolType protocolType) : protocolType_(std::move(protocolType))
 {
-    return outputSink_->SetSink(sink);
+}
+const std::string& MediaSink::GetPath() const
+{
+    return path_;
 }
 
-bool OutputSink::IsSeekable()
+int32_t MediaSink::GetFd() const
 {
-    return outputSink_->IsSeekable();
+    return fd_;
 }
 
-Status OutputSink::SeekTo(uint64_t offset)
+void MediaSink::SetFd(const int32_t fd)
 {
-    return outputSink_->SeekTo(offset);
+    fd_ = fd;
+}
+void MediaSink::SetPath(const std::string& path)
+{
+    path_ = path;
 }
 
-Status OutputSink::Write(const std::shared_ptr<Buffer>& buffer)
+ProtocolType MediaSink::GetProtocolType() const
 {
-    return outputSink_->Write(buffer);
-}
-
-Status OutputSink::Flush()
-{
-    return outputSink_->Flush();
+    return protocolType_;
 }
 } // namespace Plugin
 } // namespace Media

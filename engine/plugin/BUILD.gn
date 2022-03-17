@@ -53,6 +53,7 @@ config("hst_plugin_intf_config") {
 
 source_set("histreamer_plugin_intf") {
   sources = [
+    "common/media_sink.cpp",
     "common/media_source.cpp",
     "common/plugin_buffer.cpp",
   ]

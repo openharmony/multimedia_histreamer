@@ -19,7 +19,9 @@
 #include "foundation/pre_defines.h"
 #include "plugin_base.h"
 #include "plugin_definition.h"
+#include "plugin/common/media_sink.h"
 #include "plugin/common/plugin_caps.h"
+#include "plugin/common/plugin_tags.h"
 
 namespace OHOS {
 namespace Media {
@@ -35,7 +37,7 @@ struct OutputSinkPlugin : public Plugin::PluginBase {
         UNUSED_VARIABLE(cb);
         return Status::ERROR_UNIMPLEMENTED;
     }
-    virtual Status SetSink(const Plugin::ValueType& sink) = 0;
+    virtual Status SetSink(const MediaSink& sink) = 0;
     virtual bool IsSeekable() = 0;
     virtual Status SeekTo(uint64_t offset) = 0;
     virtual Status Write(const std::shared_ptr<Buffer>& buffer) = 0;
@@ -51,14 +53,8 @@ struct OutputSinkPlugin : public Plugin::PluginBase {
 /// Output Sink plugin version
 #define OUTPUT_SINK_API_VERSION MAKE_VERSION(OUTPUT_SINK_API_VERSION_MAJOR, OUTPUT_SINK_API_VERSION_MINOR)
 
-enum struct OutputType {
-    UNKNOWN = -1,
-    URI, ///< sink type is uri, sink value is std::string
-    FD, ///< sink type is fd, sink value is int32_t
-};
-
 struct OutputSinkPluginDef : public PluginDefBase {
-    OutputType outputType; // According selected type to select different plugin
+    ProtocolType protocolType;
     CapabilitySet inCaps;
     PluginCreatorFunc<OutputSinkPlugin> creator {nullptr}; ///< Output sink plugin create function.
     OutputSinkPluginDef()

@@ -232,7 +232,7 @@ Status PluginRegister::RegisterImpl::InitOutputSinkInfo(std::shared_ptr<PluginRe
     reg->creator = reinterpret_cast<PluginCreatorFunc<PluginBase>>(base.creator);
     std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
     SetPluginInfo(info, def);
-    info->extra[PLUGIN_INFO_EXTRA_OUTPUT_TYPE] = base.outputType;
+    info->extra[PLUGIN_INFO_EXTRA_OUTPUT_TYPE] = base.protocolType;
     info->inCaps = base.inCaps;
     reg->info = info;
     return Status::OK;
