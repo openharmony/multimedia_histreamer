@@ -112,8 +112,8 @@ inline std::string MediaGetFileName(std::string file)
     } while (0)
 #endif
 
-#ifndef FAIL_RET_ERR_CODE_MSG
-#define FAIL_RET_ERR_CODE_MSG(loglevel, exec, fmt, args...)                                                            \
+#ifndef FAIL_RETURN_MSG_IMPL
+#define FAIL_RETURN_MSG_IMPL(loglevel, exec, fmt, args...)                                                             \
     do {                                                                                                               \
         ErrorCode returnValue = (exec);                                                                                \
         if (returnValue != ErrorCode::SUCCESS) {                                                                       \
@@ -123,12 +123,12 @@ inline std::string MediaGetFileName(std::string file)
     } while (0)
 #endif
 
-#ifndef FAIL_RET_ERR_CODE_MSG_W
-#define FAIL_RET_ERR_CODE_MSG_W(exec, fmt, args...) FAIL_RET_ERR_CODE_MSG(MEDIA_LOG_W, exec, fmt, ##args)
+#ifndef FAIL_RETURN_MSG
+#define FAIL_RETURN_MSG(exec, fmt, args...) FAIL_RETURN_MSG_IMPL(MEDIA_LOG_E, exec, fmt, ##args)
 #endif
 
-#ifndef FAIL_RET_ERR_CODE_MSG_E
-#define FAIL_RET_ERR_CODE_MSG_E(exec, fmt, args...) FAIL_RET_ERR_CODE_MSG(MEDIA_LOG_E, exec, fmt, ##args)
+#ifndef FAIL_RETURN_MSG_W
+#define FAIL_RETURN_MSG_W(exec, fmt, args...) FAIL_RETURN_MSG_IMPL(MEDIA_LOG_W, exec, fmt, ##args)
 #endif
 
 #ifndef FAIL_LOG
@@ -217,8 +217,8 @@ inline std::string MediaGetFileName(std::string file)
     } while (0)
 #endif
 
-#ifndef FALSE_RET_MSG
-#define FALSE_RET_MSG(exec, fmt, args...)                                                                              \
+#ifndef FALSE_RETURN_MSG
+#define FALSE_RETURN_MSG(exec, fmt, args...)                                                                           \
     do {                                                                                                               \
         bool returnValue = (exec);                                                                                     \
         if (!returnValue) {                                                                                            \
@@ -228,8 +228,8 @@ inline std::string MediaGetFileName(std::string file)
     } while (0)
 #endif
 
-#ifndef FALSE_RET_V_MSG
-#define FALSE_RET_V_MSG(loglevel, exec, ret, fmt, args...)                                                             \
+#ifndef FALSE_RETURN_V_MSG_IMPL
+#define FALSE_RETURN_V_MSG_IMPL(loglevel, exec, ret, fmt, args...)                                                          \
     do {                                                                                                               \
         bool returnValue = (exec);                                                                                     \
         if (!returnValue) {                                                                                            \
@@ -239,12 +239,16 @@ inline std::string MediaGetFileName(std::string file)
     } while (0)
 #endif
 
-#ifndef FALSE_RET_V_MSG_W
-#define FALSE_RET_V_MSG_W(exec, ret, fmt, args...) FALSE_RET_V_MSG(MEDIA_LOG_W, exec, ret, fmt, ##args)
+#ifndef FALSE_RETURN_V_MSG
+#define FALSE_RETURN_V_MSG(exec, ret, fmt, args...) FALSE_RETURN_V_MSG_IMPL(MEDIA_LOG_E, exec, ret, fmt, ##args)
 #endif
 
-#ifndef FALSE_RET_V_MSG_E
-#define FALSE_RET_V_MSG_E(exec, ret, fmt, args...) FALSE_RET_V_MSG(MEDIA_LOG_E, exec, ret, fmt, ##args)
+#ifndef FALSE_RETURN_V_MSG_W
+#define FALSE_RETURN_V_MSG_W(exec, ret, fmt, args...) FALSE_RETURN_V_MSG_IMPL(MEDIA_LOG_W, exec, ret, fmt, ##args)
+#endif
+
+#ifndef FALSE_RETURN_V_MSG_E
+#define FALSE_RETURN_V_MSG_E(exec, ret, fmt, args...) FALSE_RETURN_V_MSG_IMPL(MEDIA_LOG_E, exec, ret, fmt, ##args)
 #endif
 
 #ifndef FALSE_LOG
@@ -257,8 +261,8 @@ inline std::string MediaGetFileName(std::string file)
     } while (0)
 #endif
 
-#ifndef FALSE_LOG_MSG
-#define FALSE_LOG_MSG(loglevel, exec, fmt, args...)                                                                    \
+#ifndef FALSE_LOG_MSG_IMPL
+#define FALSE_LOG_MSG_IMPL(loglevel, exec, fmt, args...)                                                               \
     do {                                                                                                               \
         bool returnValue = (exec);                                                                                     \
         if (!returnValue) {                                                                                            \
@@ -267,47 +271,12 @@ inline std::string MediaGetFileName(std::string file)
     } while (0)
 #endif
 
+#ifndef FALSE_LOG_MSG
+#define FALSE_LOG_MSG(exec, fmt, args...) FALSE_LOG_MSG_IMPL(MEDIA_LOG_E, exec, fmt, ##args)
+#endif
+
 #ifndef FALSE_LOG_MSG_W
-#define FALSE_LOG_MSG_W(exec, fmt, args...) FALSE_LOG_MSG(MEDIA_LOG_W, exec, fmt, ##args)
-#endif
-
-
-#ifndef FALSE_LOG_MSG_E
-#define FALSE_LOG_MSG_E(exec, fmt, args...) FALSE_LOG_MSG(MEDIA_LOG_E, exec, fmt, ##args)
-#endif
-
-#ifndef ASSERT_CONDITION
-#define ASSERT_CONDITION(exec, msg)                                                                                    \
-    do {                                                                                                               \
-        bool returnValue = (exec);                                                                                     \
-        if (!returnValue) {                                                                                            \
-            MEDIA_LOG_E("ASSERT_CONDITION(msg:" PUBLIC_LOG_S ") " #exec, msg);                                         \
-        }                                                                                                              \
-    } while (0)
-#endif
-
-#ifndef RETURN_ERROR_IF_NULL
-#define RETURN_ERROR_IF_NULL(ptr)                                                                                      \
-    do {                                                                                                               \
-        if ((ptr) == nullptr) {                                                                                        \
-            MEDIA_LOG_E("Null pointer error: " #ptr);                                                                  \
-            return ErrorCode::NULL_POINTER_ERROR;                                                                      \
-        }                                                                                                              \
-    } while (0)
-#endif
-
-#ifndef RETURN_TARGET_ERR_MSG_LOG_IF_FAIL
-#define RETURN_TARGET_ERR_MSG_LOG_IF_FAIL(err, returnErr, msg)                                                         \
-    do {                                                                                                               \
-        if ((err) != ErrorCode::SUCCESS) {                                                                             \
-            MEDIA_LOG_E(msg);                                                                                          \
-            return returnErr;                                                                                          \
-        }                                                                                                              \
-    } while (0)
-#endif
-
-#ifndef RETURN_ERR_MESSAGE_LOG_IF_FAIL
-#define RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, msg) RETURN_TARGET_ERR_MSG_LOG_IF_FAIL(err, err, msg)
+#define FALSE_LOG_MSG_W(exec, fmt, args...) FALSE_LOG_MSG_IMPL(MEDIA_LOG_W, exec, fmt, ##args)
 #endif
 
 #endif // HISTREAMER_FOUNDATION_LOG_H

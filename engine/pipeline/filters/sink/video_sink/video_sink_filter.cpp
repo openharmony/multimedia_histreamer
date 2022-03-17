@@ -213,17 +213,17 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Plu
     uint32_t width;
     if (meta->GetUint32(Plugin::MetaID::VIDEO_WIDTH, width)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_WIDTH, width));
-        RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Set plugin width fail");
+        FAIL_RETURN_MSG(err, "Set plugin width fail");
     }
     uint32_t height;
     if (meta->GetUint32(Plugin::MetaID::VIDEO_HEIGHT, height)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_HEIGHT, height));
-        RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Set plugin height fail");
+        FAIL_RETURN_MSG(err, "Set plugin height fail");
     }
     Plugin::VideoPixelFormat pixelFormat;
     if (meta->GetData<Plugin::VideoPixelFormat>(Plugin::MetaID::VIDEO_PIXEL_FORMAT, pixelFormat)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_PIXEL_FORMAT, pixelFormat));
-        RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Set plugin pixel format fail");
+        FAIL_RETURN_MSG(err, "Set plugin pixel format fail");
     }
     MEDIA_LOG_D("width: " PUBLIC_LOG_U32 ", height: " PUBLIC_LOG_U32 ", pixelFormat: " PUBLIC_LOG_U32,
                 width, height, pixelFormat);
@@ -232,11 +232,11 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Plu
 
 ErrorCode VideoSinkFilter::ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Init()), "Init plugin error");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Init()), "Init plugin error");
     plugin_->SetCallback(this);
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePluginParams(meta), "Configure plugin params fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Start()), "Start plugin fail");
+    FAIL_RETURN_MSG(ConfigurePluginParams(meta), "Configure plugin params fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Start()), "Start plugin fail");
     return ErrorCode::SUCCESS;
 }
 
@@ -361,8 +361,8 @@ ErrorCode VideoSinkFilter::Start()
 ErrorCode VideoSinkFilter::Stop()
 {
     MEDIA_LOG_I("VideoSinkFilter stop called.");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(FilterBase::Stop(), "Video sink stop fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Stop()), "Stop plugin fail");
+    FAIL_RETURN_MSG(FilterBase::Stop(), "Video sink stop fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Stop()), "Stop plugin fail");
     if (pushThreadIsBlocking_.load()) {
         startWorkingCondition_.NotifyOne();
     }
@@ -378,8 +378,8 @@ ErrorCode VideoSinkFilter::Pause()
         MEDIA_LOG_W("video sink cannot pause when not working");
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(FilterBase::Pause(), "Video sink pause fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Pause()), "Pause plugin fail");
+    FAIL_RETURN_MSG(FilterBase::Pause(), "Video sink pause fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Pause()), "Pause plugin fail");
     inBufQueue_->SetActive(false);
     renderTask_->Pause();
     MEDIA_LOG_D("Video sink filter pause end");

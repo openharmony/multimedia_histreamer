@@ -293,7 +293,7 @@ ErrorCode HiPlayerImpl::SetBufferSize(size_t size)
 
 void HiPlayerImpl::OnEvent(const Event& event)
 {
-    MEDIA_LOG_I("[HiStreamer] OnEvent (" PUBLIC_LOG_S ")", GetEventName(event.type));
+    MEDIA_LOG_D("[HiStreamer] OnEvent (" PUBLIC_LOG_S ")", GetEventName(event.type));
     switch (event.type) {
         case EventType::EVENT_ERROR: {
             fsm_.SendEventAsync(Intent::NOTIFY_ERROR, event.param);

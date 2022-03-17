@@ -148,7 +148,7 @@ Plugin::Status TypeFinder::ReadAt(int64_t offset, std::shared_ptr<Plugin::Buffer
         MEDIA_LOG_E("ReadAt exceed maximum allowed try times and failed.");
         return Plugin::Status::ERROR_NOT_ENOUGH_DATA;
     }
-    ASSERT_CONDITION(peekRange_(static_cast<uint64_t>(offset), expectedLen, buffer), "peekRange failed.");
+    FALSE_LOG_MSG(peekRange_(static_cast<uint64_t>(offset), expectedLen, buffer), "peekRange failed.");
     return Plugin::Status::OK;
 }
 

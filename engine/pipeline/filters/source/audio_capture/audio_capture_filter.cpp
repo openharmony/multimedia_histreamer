@@ -235,7 +235,7 @@ ErrorCode AudioCaptureFilter::Start()
     } else {
         res = ErrorCode::ERROR_INVALID_OPERATION;
     }
-    FALSE_RET_V_MSG_E(res == ErrorCode::SUCCESS, res, "start plugin failed");
+    FALSE_RETURN_V_MSG_E(res == ErrorCode::SUCCESS, res, "start plugin failed");
     // start task secondly
     if (taskPtr_) {
         taskPtr_->Start();

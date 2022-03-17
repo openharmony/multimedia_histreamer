@@ -104,15 +104,15 @@ Status Minimp3DemuxerPlugin::DoReadFromSource(uint32_t readSize)
         PUBLIC_LOG_U32, readSize, inIoBufferSize_, ioDataRemainSize_);
     do {
         auto res = ioContext_.dataSource->ReadAt(ioContext_.offset, buffer, static_cast<size_t>(readSize));
-        FALSE_RET_V_MSG_W(res == Status::OK, res, "read data from source error " PUBLIC_LOG_D32, (int)res);
+        FALSE_RETURN_V_MSG_W(res == Status::OK, res, "read data from source error " PUBLIC_LOG_D32, (int)res);
         if (bufData->GetSize() == 0 && retryTimes < 200 && ioDataRemainSize_ == 0) { // 200
             MEDIA_LOG_D("bufData->GetSize() == 0 retryTimes = " PUBLIC_LOG "d", retryTimes);
             OSAL::SleepFor(30); // 30
             retryTimes++;
             continue;
         }
-        FALSE_RET_V_MSG_E(retryTimes < 200, Status::ERROR_NOT_ENOUGH_DATA, // 200 times
-                          "not eof, but doesn't have enough data");
+        FALSE_RETURN_V_MSG_E(retryTimes < 200, Status::ERROR_NOT_ENOUGH_DATA, // 200 times
+                             "not eof, but doesn't have enough data");
         MEDIA_LOG_D("bufData->GetSize() " PUBLIC_LOG "d", bufData->GetSize());
         if (bufData->GetSize() > 0) {
             if (readSize < bufData->GetSize()) {
@@ -141,9 +141,9 @@ Status Minimp3DemuxerPlugin::GetDataFromSource()
         // 将剩余数据移动到buffer的起始位置
         auto ret = memmove_s(inIoBuffer_, ioDataRemainSize_, inIoBuffer_ + mp3DemuxerRst_.usedInputLength,
             ioDataRemainSize_);
-        FALSE_RET_V_MSG_W(ret == 0, Status::ERROR_UNKNOWN, "copy buffer error " PUBLIC_LOG_D32, ret);
+        FALSE_RETURN_V_MSG_W(ret == 0, Status::ERROR_UNKNOWN, "copy buffer error " PUBLIC_LOG_D32, ret);
         ret = memset_s(inIoBuffer_ + ioDataRemainSize_, ioNeedReadSize, 0x00, ioNeedReadSize);
-        FALSE_RET_V_MSG_W(ret == 0, Status::ERROR_UNKNOWN, "memset_s buffer error " PUBLIC_LOG_D32, ret);
+        FALSE_RETURN_V_MSG_W(ret == 0, Status::ERROR_UNKNOWN, "memset_s buffer error " PUBLIC_LOG_D32, ret);
     }
     if (ioContext_.offset >= fileSize_ && ioDataRemainSize_ == 0) {
         ioContext_.eos = true;
@@ -618,7 +618,7 @@ int AudioDemuxerMp3IterateCallbackForProbe(void *userData, const uint8_t *frame,
 Status AudioDemuxerMp3Probe(AudioDemuxerMp3Attr* mp3DemuxerAttr, uint8_t* inputBuffer, uint32_t inputLength,
                             AudioDemuxerRst* mp3DemuxerRst)
 {
-    FALSE_RET_V_MSG_W(inputBuffer != nullptr && inputLength >= 0, Status::ERROR_INVALID_PARAMETER, "invalid parameter");
+    FALSE_RETURN_V_MSG_W(inputBuffer != nullptr && inputLength >= 0, Status::ERROR_INVALID_PARAMETER, "invalid parameter");
     if (inputLength == 0) {
         return Status::ERROR_NOT_ENOUGH_DATA;
     }

@@ -141,8 +141,8 @@ ErrorCode VideoEncoderFilter::Prepare()
 ErrorCode VideoEncoderFilter::SetVideoEncoder(int32_t sourceId, std::shared_ptr<Plugin::Meta> encoderMeta)
 {
     std::string mime;
-    FALSE_RET_V_MSG_E(encoderMeta->GetString(Plugin::MetaID::MIME, mime), ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
-                      "encoder meta must contains mime");
+    FALSE_RETURN_V_MSG_E(encoderMeta->GetString(Plugin::MetaID::MIME, mime), ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
+                         "encoder meta must contains mime");
     vencFormat_.mime = mime;
     vencFormat_.codecMeta = std::move(encoderMeta);
     return ErrorCode::SUCCESS;
@@ -160,12 +160,12 @@ bool VideoEncoderFilter::Negotiate(const std::string& inPort,
         return false;
     }
     auto targetOutPort = GetRouteOutPort(inPort);
-    FALSE_RET_V_MSG_E(targetOutPort != nullptr, false, "out port not found");
+    FALSE_RETURN_V_MSG_E(targetOutPort != nullptr, false, "out port not found");
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
     bool atLeastOutCapMatched = false;
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::CODEC);
     for (const auto& candidate : candidatePlugins) {
-        FALSE_LOG_MSG_E(!candidate.first->outCaps.empty(), "encoder plugin must have out caps");
+        FALSE_LOG_MSG(!candidate.first->outCaps.empty(), "encoder plugin must have out caps");
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
             Plugin::Meta tmpMeta;
             if (outCap.mime != vencFormat_.mime ||
@@ -192,9 +192,9 @@ bool VideoEncoderFilter::Negotiate(const std::string& inPort,
             break;
         }
     }
-    FALSE_RET_V_MSG_E(atLeastOutCapMatched && selectedPluginInfo != nullptr, false,
-                      "can't find available encoder plugin with " PUBLIC_LOG_S,
-                      Capability2String(*upstreamCap).c_str());
+    FALSE_RETURN_V_MSG_E(atLeastOutCapMatched && selectedPluginInfo != nullptr, false,
+                         "can't find available encoder plugin with " PUBLIC_LOG_S,
+                         Capability2String(*upstreamCap).c_str());
     auto res = UpdateAndInitPluginByInfo<Plugin::Codec>(plugin_, pluginInfo_, selectedPluginInfo,
         [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
         return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
@@ -319,12 +319,12 @@ ErrorCode VideoEncoderFilter::SetVideoEncoderFormat(const std::shared_ptr<const 
 
 ErrorCode VideoEncoderFilter::ConfigurePluginParams()
 {
-    FALSE_RET_V_MSG_W(SetPluginParameterLocked(Tag::VIDEO_WIDTH, vencFormat_.width) == ErrorCode::SUCCESS,
-                      ErrorCode::ERROR_UNKNOWN, "Set width to plugin fail");
-    FALSE_RET_V_MSG_W(SetPluginParameterLocked(Tag::VIDEO_HEIGHT, vencFormat_.height) == ErrorCode::SUCCESS,
-                      ErrorCode::ERROR_UNKNOWN, "Set height to plugin fail");
-    FALSE_RET_V_MSG_W(SetPluginParameterLocked(Tag::VIDEO_PIXEL_FORMAT, vencFormat_.format) == ErrorCode::SUCCESS,
-                      ErrorCode::ERROR_UNKNOWN, "Set pixel format to plugin fail");
+    FALSE_RETURN_V_MSG_W(SetPluginParameterLocked(Tag::VIDEO_WIDTH, vencFormat_.width) == ErrorCode::SUCCESS,
+                         ErrorCode::ERROR_UNKNOWN, "Set width to plugin fail");
+    FALSE_RETURN_V_MSG_W(SetPluginParameterLocked(Tag::VIDEO_HEIGHT, vencFormat_.height) == ErrorCode::SUCCESS,
+                         ErrorCode::ERROR_UNKNOWN, "Set height to plugin fail");
+    FALSE_RETURN_V_MSG_W(SetPluginParameterLocked(Tag::VIDEO_PIXEL_FORMAT, vencFormat_.format) == ErrorCode::SUCCESS,
+                         ErrorCode::ERROR_UNKNOWN, "Set pixel format to plugin fail");
     if (vencFormat_.bitRate > 0) {
         if (SetPluginParameterLocked(Tag::MEDIA_BITRATE, vencFormat_.bitRate) != ErrorCode::SUCCESS) {
             MEDIA_LOG_W("Set bitrate to plugin fail");
@@ -368,20 +368,20 @@ ErrorCode VideoEncoderFilter::ConfigurePluginOutputBuffers()
 
 ErrorCode VideoEncoderFilter::ConfigurePlugin()
 {
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->SetDataCallback(dataCallback_)),
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->SetDataCallback(dataCallback_)),
                                    "Set plugin callback fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePluginParams(), "Configure plugin params error");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePluginOutputBuffers(), "Configure plugin output buffers error");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
+    FAIL_RETURN_MSG(ConfigurePluginParams(), "Configure plugin params error");
+    FAIL_RETURN_MSG(ConfigurePluginOutputBuffers(), "Configure plugin output buffers error");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
     return TranslatePluginStatus(plugin_->Start());
 }
 
 ErrorCode VideoEncoderFilter::ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     MEDIA_LOG_D("video encoder configure called");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(SetVideoEncoderFormat(meta), "Set video encoder format fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(AllocateOutputBuffers(), "Alloc output buffers fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePlugin(), "Config plugin fail");
+    FAIL_RETURN_MSG(SetVideoEncoderFormat(meta), "Set video encoder format fail");
+    FAIL_RETURN_MSG(AllocateOutputBuffers(), "Alloc output buffers fail");
+    FAIL_RETURN_MSG(ConfigurePlugin(), "Config plugin fail");
     if (handleFrameTask_) {
         handleFrameTask_->Start();
     }
@@ -452,8 +452,8 @@ void VideoEncoderFilter::FlushEnd()
 
 ErrorCode VideoEncoderFilter::Stop()
 {
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Flush()), "Flush plugin fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Stop()), "Stop plugin fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Flush()), "Flush plugin fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Stop()), "Stop plugin fail");
     outBufQue_->SetActive(false);
     pushTask_->Pause();
     inBufQue_->SetActive(false);

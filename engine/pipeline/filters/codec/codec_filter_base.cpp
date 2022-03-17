@@ -73,8 +73,8 @@ ErrorCode CodecFilterBase::SetParameter(int32_t key, const Plugin::Any& inVal)
         return ErrorCode::ERROR_AGAIN;
     }
     Tag tag = Tag::INVALID;
-    FALSE_RET_V_MSG_E(TranslateIntoParameter(key, tag), ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
-                      "key " PUBLIC_LOG_D32 " is out of boundary", key);
+    FALSE_RETURN_V_MSG_E(TranslateIntoParameter(key, tag), ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
+                         "key " PUBLIC_LOG_D32 " is out of boundary", key);
     RETURN_AGAIN_IF_NULL(plugin_);
     return SetPluginParameterLocked(tag, inVal);
 }
@@ -85,7 +85,7 @@ ErrorCode CodecFilterBase::GetParameter(int32_t key, Plugin::Any& outVal)
         return ErrorCode::ERROR_AGAIN;
     }
     Tag tag = Tag::INVALID;
-    FALSE_RET_V_MSG_E(TranslateIntoParameter(key, tag), ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
+    FALSE_RETURN_V_MSG_E(TranslateIntoParameter(key, tag), ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
                       "key " PUBLIC_LOG_D32 " is out of boundary", key);
     RETURN_AGAIN_IF_NULL(plugin_);
     return TranslatePluginStatus(plugin_->GetParameter(tag, outVal));

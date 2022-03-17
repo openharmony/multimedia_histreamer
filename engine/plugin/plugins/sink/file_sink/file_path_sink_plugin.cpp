@@ -67,7 +67,7 @@ bool FilePathSinkPlugin::IsSeekable()
 
 Status FilePathSinkPlugin::SeekTo(uint64_t offset)
 {
-    FALSE_RET_V_MSG_E(fp_ != nullptr, Status::ERROR_WRONG_STATE, "no files have been opened.");
+    FALSE_RETURN_V_MSG_E(fp_ != nullptr, Status::ERROR_WRONG_STATE, "no files have been opened.");
     if (std::fseek(fp_, offset, SEEK_SET) == 0) {
         return Status::OK;
     } else {

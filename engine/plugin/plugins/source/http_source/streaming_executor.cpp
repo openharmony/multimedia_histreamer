@@ -116,7 +116,7 @@ bool StreamingExecutor::Seek(int offset)
 size_t StreamingExecutor::GetContentLength() const
 {
     WaitHeaderUpdated();
-    FALSE_RET_V_MSG_E(headerInfo_.fileContentLen > 0, 0, "Could not get content length.");
+    FALSE_RETURN_V_MSG_E(headerInfo_.fileContentLen > 0, 0, "Could not get content length.");
     return headerInfo_.fileContentLen;
 }
 
@@ -265,7 +265,7 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
         FALSE_RETURN_V(token != nullptr, size * nitems);
         char *strRange = StringTrim(token);
         long start, end, fileLen;
-        FALSE_LOG_MSG_E(sscanf_s(strRange, "bytes %ld-%ld/%ld", &start, &end, &fileLen) != -1,
+        FALSE_LOG_MSG(sscanf_s(strRange, "bytes %ld-%ld/%ld", &start, &end, &fileLen) != -1,
                         "sscanf get range failed");
         if (info->fileContentLen > 0 && info->fileContentLen != fileLen) {
             MEDIA_LOG_E("FileContentLen doesn't equal to fileLen");
