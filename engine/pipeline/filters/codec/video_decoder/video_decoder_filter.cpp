@@ -143,9 +143,9 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
                                    Plugin::TagMap& downstreamParams)
 {
     PROFILE_BEGIN("video decoder negotiate start");
-    FALSE_RET_V_MSG_W(state_ == FilterState::PREPARING, false, "filter is not preparing when negotiate");
+    FALSE_RETURN_V_MSG_W(state_ == FilterState::PREPARING, false, "filter is not preparing when negotiate");
     auto targetOutPort = GetRouteOutPort(inPort);
-    FALSE_RET_V_MSG_W(targetOutPort != nullptr, false, "outPort is not found");
+    FALSE_RETURN_V_MSG_W(targetOutPort != nullptr, false, "outPort is not found");
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
     bool atLeastOutCapMatched = false;
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::CODEC);
@@ -153,8 +153,8 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
     Plugin::TagMap proposeParams = upstreamParams;
     proposeParams.insert({Plugin::Tag::VIDEO_MAX_SURFACE_NUM, static_cast<uint32_t>(DEFAULT_OUT_BUFFER_POOL_SIZE)});
     for (const auto& candidate : candidatePlugins) {
-        FALSE_LOG_MSG_E(!candidate.first->outCaps.empty(),
-                        "plugin " PUBLIC_LOG_S " has no out caps", candidate.first->name.c_str());
+        FALSE_LOG_MSG(!candidate.first->outCaps.empty(),
+                      "plugin " PUBLIC_LOG_S " has no out caps", candidate.first->name.c_str());
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
             auto thisOut = std::make_shared<Plugin::Capability>();
             if (!MergeCapabilityKeys(*upstreamCap, outCap, *thisOut)) {
@@ -176,7 +176,7 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
             break;
         }
     }
-    FALSE_RET_V_MSG_E(atLeastOutCapMatched && selectedPluginInfo != nullptr, false,
+    FALSE_RETURN_V_MSG_E(atLeastOutCapMatched && selectedPluginInfo != nullptr, false,
         "can't find available decoder plugin with " PUBLIC_LOG_S, Capability2String(*upstreamCap).c_str());
 
     auto res = UpdateAndInitPluginByInfo<Plugin::Codec>(plugin_, pluginInfo_, selectedPluginInfo,
@@ -352,20 +352,20 @@ ErrorCode VideoDecoderFilter::ConfigurePluginOutputBuffers()
 
 ErrorCode VideoDecoderFilter::ConfigurePlugin()
 {
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->SetDataCallback(dataCallback_)),
-                                   "Set plugin callback fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePluginParams(), "Configure plugin params error");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePluginOutputBuffers(), "Configure plugin output buffers error");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->SetDataCallback(dataCallback_)),
+                    "Set plugin callback fail");
+    FAIL_RETURN_MSG(ConfigurePluginParams(), "Configure plugin params error");
+    FAIL_RETURN_MSG(ConfigurePluginOutputBuffers(), "Configure plugin output buffers error");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
     return TranslatePluginStatus(plugin_->Start());
 }
 
 ErrorCode VideoDecoderFilter::ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     MEDIA_LOG_D("video decoder configure called");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(SetVideoDecoderFormat(meta), "Set video decoder format fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(AllocateOutputBuffers(), "Alloc output buffers fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePlugin(), "Config plugin fail");
+    FAIL_RETURN_MSG(SetVideoDecoderFormat(meta), "Set video decoder format fail");
+    FAIL_RETURN_MSG(AllocateOutputBuffers(), "Alloc output buffers fail");
+    FAIL_RETURN_MSG(ConfigurePlugin(), "Config plugin fail");
     if (handleFrameTask_) {
         handleFrameTask_->Start();
     }
@@ -436,8 +436,8 @@ void VideoDecoderFilter::FlushEnd()
 
 ErrorCode VideoDecoderFilter::Stop()
 {
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Flush()), "Flush plugin fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Stop()), "Stop plugin fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Flush()), "Flush plugin fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Stop()), "Stop plugin fail");
     outBufQue_->SetActive(false);
     pushTask_->Pause();
     inBufQue_->SetActive(false);

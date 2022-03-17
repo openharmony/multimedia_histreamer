@@ -451,25 +451,25 @@ ErrorCode HiRecorderImpl::DoConfigureAudio(const HstRecParam& param) const
     switch (param.stdParamType) {
         case RecorderPublicParamType::AUD_SAMPLERATE: {
             auto ptr = param.GetValPtr<AudSampleRate>();
-            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             return audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_SAMPLE_RATE),
                                                static_cast<uint32_t>(ptr->sampleRate));
         }
         case RecorderPublicParamType::AUD_CHANNEL: {
             auto ptr = param.GetValPtr<AudChannel>();
-            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             return audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_CHANNELS),
                                                static_cast<uint32_t>(ptr->channel));
         }
         case RecorderPublicParamType::AUD_BITRATE: {
             auto ptr = param.GetValPtr<AudBitRate>();
-            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             return audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
                                                static_cast<int64_t>(ptr->bitRate));
         }
         case RecorderPublicParamType::AUD_ENC_FMT: {
             auto ptr = param.GetValPtr<AudEnc>();
-            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             auto encoderMeta = std::make_shared<Plugin::Meta>();
             if (!TransAudioEncoderFmt(ptr->encFmt, *encoderMeta)) {
                 return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
@@ -488,7 +488,7 @@ ErrorCode HiRecorderImpl::DoConfigureVideo(const HstRecParam& param) const
     switch (param.stdParamType) {
         case RecorderPublicParamType::VID_RECTANGLE: {
             auto ptr = param.GetValPtr<VidRectangle>();
-            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             auto ret = videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_WIDTH),
                                                    static_cast<uint32_t>(ptr->width));
             if (ret == ErrorCode::SUCCESS) {
@@ -499,24 +499,24 @@ ErrorCode HiRecorderImpl::DoConfigureVideo(const HstRecParam& param) const
         }
         case RecorderPublicParamType::VID_CAPTURERATE: {
             auto ptr = param.GetValPtr<CaptureRate>();
-            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             return videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_CAPTURE_RATE), ptr->capRate);
         }
         case RecorderPublicParamType::VID_BITRATE: {
             auto ptr = param.GetValPtr<VidBitRate>();
-            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             return videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
                 static_cast<int64_t>((ptr->bitRate >= 0) ? ptr->bitRate : 0));
         }
         case RecorderPublicParamType::VID_FRAMERATE: {
             auto ptr = param.GetValPtr<VidFrameRate>();
-            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             return videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_FRAME_RATE),
                 static_cast<uint32_t>((ptr->frameRate >= 0) ? ptr->frameRate : 0));
         }
         case RecorderPublicParamType::VID_ENC_FMT: {
             auto ptr = param.GetValPtr<VidEnc>();
-            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             auto encoderMeta = std::make_shared<Plugin::Meta>();
             if (!TransVideoEncoderFmt(ptr->encFmt, *encoderMeta)) {
                 return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
@@ -537,32 +537,32 @@ ErrorCode HiRecorderImpl::DoConfigureOther(const HstRecParam& param) const
     switch (param.stdParamType) {
         case RecorderPublicParamType::OUT_PATH: {
             auto ptr = param.GetValPtr<OutFilePath>();
-            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             auto dirPath = ptr->path;
             std::regex reg("\\\\");
             dirPath= std::regex_replace(dirPath, reg, "/");
-            FALSE_RET_V_MSG_E(!OSAL::FileSystem::IsRegularFile(dirPath) && OSAL::FileSystem::MakeMultipleDir(dirPath),
-                              ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "OutFilePath is not a valid directory path");
+            FALSE_RETURN_V_MSG_E(!OSAL::FileSystem::IsRegularFile(dirPath) && OSAL::FileSystem::MakeMultipleDir(dirPath),
+                                 ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "OutFilePath is not a valid directory path");
             std::string filePath;
-            FALSE_RET_V_MSG_E(GenerateFilePath(dirPath, outputFormatType_, filePath),
-                              ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "generate file path error");
+            FALSE_RETURN_V_MSG_E(GenerateFilePath(dirPath, outputFormatType_, filePath),
+                                 ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "generate file path error");
             return outputSink_->SetOutputPath(filePath);
         }
         case RecorderPublicParamType::OUT_FD: {
             auto ptr = param.GetValPtr<OutFd>();
-            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             return outputSink_->SetFd(ptr->fd);
         }
         case RecorderPublicParamType::MAX_DURATION: {
             auto ptr = param.GetValPtr<MaxDuration>();
-            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             int64_t hstTime = 0;
             Plugin::Sec2HstTime(ptr->duration, hstTime);
             return muxer_->SetMaxDuration(hstTime > 0 ? hstTime : 0);
         }
         case RecorderPublicParamType::MAX_SIZE: {
             auto ptr = param.GetValPtr<MaxFileSize>();
-            FALSE_RET_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             return muxer_->SetMaxSize(ptr->size > 0 ? ptr->size : 0);
         }
         case RecorderPublicParamType::VID_ORIENTATION_HINT:

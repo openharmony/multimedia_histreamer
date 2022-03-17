@@ -249,7 +249,7 @@ Status AudioServerSinkPlugin::Deinit()
 Status AudioServerSinkPlugin::Prepare()
 {
     MEDIA_LOG_I("Prepare entered.");
-    FALSE_RET_V_MSG_E(fmtSupported_, Status::ERROR_INVALID_PARAMETER, "sample fmt is not supported");
+    FALSE_RETURN_V_MSG_E(fmtSupported_, Status::ERROR_INVALID_PARAMETER, "sample fmt is not supported");
     auto types = AudioStandard::AudioRenderer::GetSupportedEncodingTypes();
     if (!CppExt::AnyOf(types.begin(), types.end(), [](AudioStandard::AudioEncodingType tmp) -> bool {
         return tmp == AudioStandard::ENCODING_PCM;

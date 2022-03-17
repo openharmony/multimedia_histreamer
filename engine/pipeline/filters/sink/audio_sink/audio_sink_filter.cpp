@@ -142,8 +142,8 @@ bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr
 
 ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta)
 {
-    FAIL_RET_ERR_CODE_MSG_E(ConfigPluginWithMeta(*plugin_, *meta), "sink configuration failed.");
-    FAIL_RET_ERR_CODE_MSG_E(TranslatePluginStatus(plugin_->Prepare()), "sink prepare failed");
+    FAIL_RETURN_MSG(ConfigPluginWithMeta(*plugin_, *meta), "sink configuration failed.");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Prepare()), "sink prepare failed");
     return ErrorCode::SUCCESS;
 }
 
@@ -175,7 +175,7 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
         return ErrorCode::SUCCESS;
     }
     auto err = TranslatePluginStatus(plugin_->Write(buffer));
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "audio sink write failed");
+    FAIL_RETURN_MSG(err, "audio sink write failed");
     ReportCurrentPosition(static_cast<int64_t>(buffer->pts));
     if ((buffer->flag & BUFFER_FLAG_EOS) != 0) {
         constexpr int waitTimeForPlaybackCompleteMs = 60;
@@ -208,7 +208,7 @@ ErrorCode AudioSinkFilter::Start()
         return err;
     }
     err = TranslatePluginStatus(plugin_->Start());
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "audio sink plugin start failed");
+    FAIL_RETURN_MSG(err, "audio sink plugin start failed");
     if (pushThreadIsBlocking.load()) {
         startWorkingCondition_.NotifyOne();
     }
@@ -239,7 +239,7 @@ ErrorCode AudioSinkFilter::Pause()
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto err = FilterBase::Pause();
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "audio sink pause failed");
+    FAIL_RETURN_MSG(err, "audio sink pause failed");
     err = TranslatePluginStatus(plugin_->Pause());
     MEDIA_LOG_D("audio sink filter pause end");
     return err;

@@ -119,7 +119,7 @@ bool FileFdSourcePlugin::IsSeekable()
 
 Status FileFdSourcePlugin::SeekTo(uint64_t offset)
 {
-    FALSE_RET_V_MSG_E(fd_ != -1 && isSeekable_, Status::ERROR_WRONG_STATE, "no valid fd or no seekable.");
+    FALSE_RETURN_V_MSG_E(fd_ != -1 && isSeekable_, Status::ERROR_WRONG_STATE, "no valid fd or no seekable.");
     int32_t ret = lseek(fd_, offset, SEEK_SET);
     if (ret == -1) {
         MEDIA_LOG_E("seek to " PUBLIC_LOG_U64 " failed due to " PUBLIC_LOG_S, offset, strerror(errno));
@@ -139,12 +139,12 @@ Status FileFdSourcePlugin::ParseUriInfo(const std::string& uri)
     }
     MEDIA_LOG_D("uri: " PUBLIC_LOG_S, uri.c_str());
     std::smatch fdUriMatch;
-    FALSE_RET_V_MSG_E(std::regex_match(uri, fdUriMatch, std::regex("^fd://(.*)?offset=(.*)&size=(.*)")) ||
+    FALSE_RETURN_V_MSG_E(std::regex_match(uri, fdUriMatch, std::regex("^fd://(.*)?offset=(.*)&size=(.*)")) ||
         std::regex_match(uri, fdUriMatch, std::regex("^fd://(.*)")),
         Status::ERROR_INVALID_PARAMETER, "Invalid fd uri format: " PUBLIC_LOG_S, uri.c_str());
     fd_ = std::stoi(fdUriMatch[1].str()); // 1: sub match fd subscript
-    FALSE_RET_V_MSG_E(fd_ != -1 && OSAL::FileSystem::IsRegularFile(fd_),
-                      Status::ERROR_INVALID_PARAMETER, "Invalid fd: " PUBLIC_LOG_D32, fd_);
+    FALSE_RETURN_V_MSG_E(fd_ != -1 && OSAL::FileSystem::IsRegularFile(fd_),
+        Status::ERROR_INVALID_PARAMETER, "Invalid fd: " PUBLIC_LOG_D32, fd_);
     fileSize_ = GetFileSize(fd_);
     if (fdUriMatch.size() == 4) { // 4：4 sub match
         offset_ = std::stoll(fdUriMatch[2].str()); // 2: sub match offset subscript

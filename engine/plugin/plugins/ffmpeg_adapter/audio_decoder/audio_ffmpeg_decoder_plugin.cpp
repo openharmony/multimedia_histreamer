@@ -270,7 +270,7 @@ do { \
         }
         context = avcodec_alloc_context3(avCodec_.get());
     }
-    FALSE_RET_V_MSG_E(context != nullptr, Status::ERROR_NO_MEMORY, "can't allocate codec context");
+    FALSE_RETURN_V_MSG_E(context != nullptr, Status::ERROR_NO_MEMORY, "can't allocate codec context");
     auto tmpCtx = std::shared_ptr<AVCodecContext>(context, [](AVCodecContext* ptr) {
         avcodec_free_context(&ptr);
     });

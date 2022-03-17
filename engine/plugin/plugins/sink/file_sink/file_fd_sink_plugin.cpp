@@ -68,7 +68,7 @@ bool FileFdSinkPlugin::IsSeekable()
 
 Status FileFdSinkPlugin::SeekTo(uint64_t offset)
 {
-    FALSE_RET_V_MSG_E(fd_ != -1, Status::ERROR_WRONG_STATE, "no valid fd.");
+    FALSE_RETURN_V_MSG_E(fd_ != -1, Status::ERROR_WRONG_STATE, "no valid fd.");
     int64_t ret = lseek(fd_, offset, SEEK_SET);
     if (ret != -1) {
         MEDIA_LOG_I("now seek to " PUBLIC_LOG_D64, ret);

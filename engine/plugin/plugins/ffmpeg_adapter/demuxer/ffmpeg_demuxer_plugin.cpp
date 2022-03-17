@@ -236,7 +236,7 @@ bool FFmpegDemuxerPlugin::ConvertAVPacketToFrameInfo(const AVStream& avStream, c
     auto data = frameInfo.AllocMemory(allocator_, frameSize);
     if (data) {
         size_t writeSize = data->Write(pkt.data, frameSize);
-        ASSERT_CONDITION(writeSize == frameSize, "Copy data failed.");
+        FALSE_LOG_MSG(writeSize == frameSize, "Copy data failed.");
     }
     return data != nullptr;
 }

@@ -69,8 +69,8 @@ bool UpdatePluginCapability(const AVOutputFormat* oFmt, MuxerPluginDef& pluginDe
 Status RegisterMuxerPlugins(const std::shared_ptr<Register>& reg)
 {
     MEDIA_LOG_D("register muxer plugins.");
-    FALSE_RET_V_MSG_E(reg != nullptr, Status::ERROR_INVALID_PARAMETER,
-                      "RegisterPlugins failed due to null pointer for reg.");
+    FALSE_RETURN_V_MSG_E(reg != nullptr, Status::ERROR_INVALID_PARAMETER,
+                         "RegisterPlugins failed due to null pointer for reg.");
     const AVOutputFormat* outputFormat = nullptr;
     void* ite = nullptr;
     while ((outputFormat = av_muxer_iterate(&ite))) {
@@ -109,11 +109,11 @@ PLUGIN_DEFINITION(FFmpegMuxers, LicenseType::LGPL, RegisterMuxerPlugins, [] {g_p
 Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime, AVStream* stream)
 {
     AVCodecID id = AV_CODEC_ID_NONE;
-    FALSE_RET_V_MSG_E(FFCodecMap::Mime2CodecId(mime, id), Status::ERROR_UNSUPPORTED_FORMAT,
-                      "mime " PUBLIC_LOG_S " has no corresponding codec id", mime.c_str());
+    FALSE_RETURN_V_MSG_E(FFCodecMap::Mime2CodecId(mime, id), Status::ERROR_UNSUPPORTED_FORMAT,
+                         "mime " PUBLIC_LOG_S " has no corresponding codec id", mime.c_str());
     auto ptr = avcodec_find_encoder(id);
-    FALSE_RET_V_MSG_E(ptr != nullptr, Status::ERROR_UNSUPPORTED_FORMAT,
-                      "codec of mime " PUBLIC_LOG_S " is not founder as encoder", mime.c_str());
+    FALSE_RETURN_V_MSG_E(ptr != nullptr, Status::ERROR_UNSUPPORTED_FORMAT,
+                         "codec of mime " PUBLIC_LOG_S " is not founder as encoder", mime.c_str());
     bool matched = true;
     switch (ptr->type) {
         case AVMEDIA_TYPE_VIDEO:
@@ -128,7 +128,7 @@ Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime, AVStre
         default:
             matched = false;
     }
-    FALSE_RET_V_MSG_E(matched, Status::ERROR_UNSUPPORTED_FORMAT,  "codec of mime " PUBLIC_LOG_S
+    FALSE_RETURN_V_MSG_E(matched, Status::ERROR_UNSUPPORTED_FORMAT,  "codec of mime " PUBLIC_LOG_S
         " is not matched with " PUBLIC_LOG_S " muxer", mime.c_str(), fmt->name);
     stream->codecpar->codec_id = id;
     stream->codecpar->codec_type = ptr->type;
@@ -138,7 +138,7 @@ Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime, AVStre
 Status SetCodecOfTrack(const AVOutputFormat* fmt, AVStream* stream, const TagMap& tagMap)
 {
     auto ite = tagMap.find(Tag::MIME);
-    FALSE_RET_V_MSG_E(ite != std::end(tagMap), Status::ERROR_UNSUPPORTED_FORMAT, "mime is missing!");
+    FALSE_RETURN_V_MSG_E(ite != std::end(tagMap), Status::ERROR_UNSUPPORTED_FORMAT, "mime is missing!");
     FALSE_RETURN_V(ite->second.SameTypeWith(typeid(std::string)), Status::ERROR_MISMATCHED_TYPE);
     // todo specially for audio/mpeg audio/mpeg we should check mpegversion and mpeglayer
 
@@ -150,8 +150,8 @@ Status SetSingleParameter(Tag tag, const TagMap& tagMap, U& target, std::functio
 {
     auto ite = tagMap.find(tag);
     if (ite != std::end(tagMap)) {
-        FALSE_RET_V_MSG_E(ite->second.SameTypeWith(typeid(T)), Status::ERROR_MISMATCHED_TYPE,
-                          "tag " PUBLIC_LOG_U32 " type mismatched", tag);
+        FALSE_RETURN_V_MSG_E(ite->second.SameTypeWith(typeid(T)), Status::ERROR_MISMATCHED_TYPE,
+                             "tag " PUBLIC_LOG_U32 " type mismatched", tag);
         target = func(AnyCast<T>(ite->second));
     }
     return Status::OK;
@@ -235,7 +235,7 @@ Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const TagMap&
     // extra data
     auto ite = tagMap.find(Tag::MEDIA_CODEC_CONFIG);
     if (ite != std::end(tagMap)) {
-        FALSE_RET_V_MSG_E(ite->second.SameTypeWith(typeid(CodecConfig)), Status::ERROR_MISMATCHED_TYPE,
+        FALSE_RETURN_V_MSG_E(ite->second.SameTypeWith(typeid(CodecConfig)), Status::ERROR_MISMATCHED_TYPE,
                           "tag " PUBLIC_LOG_D32 " type mismatched", Tag::MEDIA_CODEC_CONFIG);
         auto codecConfig = AnyCast<CodecConfig>(ite->second);
         if (!codecConfig.empty()) {
@@ -325,7 +325,7 @@ AVIOContext* FFmpegMuxerPlugin::InitAvIoCtx()
 {
     constexpr int bufferSize = 4096; // 4096
     auto buffer = static_cast<unsigned char*>(av_malloc(bufferSize));
-    FALSE_RET_V_MSG_E(buffer != nullptr, nullptr,  "AllocAVIOContext failed to av_malloc...");
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr,  "AllocAVIOContext failed to av_malloc...");
     AVIOContext* avioContext = avio_alloc_context(buffer, bufferSize, AVIO_FLAG_WRITE, static_cast<void*>(&ioContext_),
                                                   IoRead, IoWrite, IoSeek);
     if (avioContext == nullptr) {
@@ -423,7 +423,7 @@ Status FFmpegMuxerPlugin::WriteHeader()
     OSAL::ScopedLock lock(fmtMutex_);
     FALSE_RETURN_V(formatContext_ != nullptr, Status::ERROR_WRONG_STATE);
     int ret = avformat_write_header(formatContext_.get(), nullptr);
-    FALSE_RET_V_MSG_E(ret >= 0, Status::ERROR_UNKNOWN, "failed to write header " PUBLIC_LOG_S, AVStrError(ret).c_str());
+    FALSE_RETURN_V_MSG_E(ret >= 0, Status::ERROR_UNKNOWN, "failed to write header " PUBLIC_LOG_S, AVStrError(ret).c_str());
     return Status::OK;
 }
 
