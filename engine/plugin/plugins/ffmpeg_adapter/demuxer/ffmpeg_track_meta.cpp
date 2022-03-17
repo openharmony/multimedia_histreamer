@@ -237,7 +237,7 @@ void ConvertAVStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<A
             return;
         }
     }
-    MEDIA_LOG_E("unsupported codec id: " PUBLIC_LOG "d", codecId);
+    MEDIA_LOG_E("unsupported codec id: " PUBLIC_LOG_D32, codecId);
 }
 } // namespace Ffmpeg
 } // namespace Plugin

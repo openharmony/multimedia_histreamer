@@ -89,15 +89,15 @@ bool StreamingExecutor::Read(unsigned char *buff, unsigned int wantReadLength,
     if (isEos_ && realReadLength == 0) {
         isEos = true;
     }
-    MEDIA_LOG_D("Read: wantReadLength " PUBLIC_LOG "d, realReadLength " PUBLIC_LOG "d, isEos "
-        PUBLIC_LOG "d", wantReadLength, realReadLength, isEos);
+    MEDIA_LOG_D("Read: wantReadLength " PUBLIC_LOG_D32 ", realReadLength " PUBLIC_LOG_D32 ", isEos "
+                PUBLIC_LOG_D32, wantReadLength, realReadLength, isEos);
     return true;
 }
 
 bool StreamingExecutor::Seek(int offset)
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
-    MEDIA_LOG_I("Seek: buffer size " PUBLIC_LOG "d, offset " PUBLIC_LOG "d", buffer_->GetSize(), offset);
+    MEDIA_LOG_I("Seek: buffer size " PUBLIC_LOG_D32 ", offset " PUBLIC_LOG_D32, buffer_->GetSize(), offset);
     if (buffer_->Seek(offset)) {
         return true;
     }
@@ -191,7 +191,7 @@ size_t StreamingExecutor::RxBodyData(void *buffer, size_t size, size_t nitems, v
     executor->buffer_->WriteBuffer(buffer, dataLen, executor->startPos_);
     executor->isDownloading_ = false;
     MEDIA_LOG_I("RxBodyData: dataLen " PUBLIC_LOG_ZU ", startPos_ " PUBLIC_LOG_D64 ", buffer size "
-        PUBLIC_LOG_ZU, dataLen, executor->startPos_, executor->buffer_->GetSize());
+                PUBLIC_LOG_ZU, dataLen, executor->startPos_, executor->buffer_->GetSize());
     executor->startPos_ = executor->startPos_ + dataLen;
 
     int bufferSize = executor->buffer_->GetSize();

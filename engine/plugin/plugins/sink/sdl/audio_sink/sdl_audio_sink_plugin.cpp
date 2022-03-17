@@ -147,7 +147,7 @@ Status SdlAudioSinkPlugin::Prepare()
     wantedSpec_.silence = 0;
     wantedSpec_.callback = SDLAudioCallback;
     if (SDL_OpenAudio(&wantedSpec_, nullptr) < 0) {
-        MEDIA_LOG_E("sdl cannot open audio with error: " PUBLIC_LOG "s", SDL_GetError());
+        MEDIA_LOG_E("sdl cannot open audio with error: " PUBLIC_LOG_S, SDL_GetError());
         return Status::ERROR_UNKNOWN;
     }
 
@@ -387,7 +387,7 @@ void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len)
     SDL_memset(stream, 0, len);
     SDL_MixAudio(stream, mixCache_.data(), realLen, volume_);
     SDL_PauseAudio(0);
-    MEDIA_LOG_D("sdl audio callback end with " PUBLIC_LOG "zu", realLen);
+    MEDIA_LOG_D("sdl audio callback end with " PUBLIC_LOG_ZU, realLen);
 }
 } // namespace Sdl
 } // namespace Plugin

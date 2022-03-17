@@ -178,7 +178,7 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
     unsigned int realReadSize = 0;
     executor_->Read(bufData->GetWritableAddr(expectedLen), expectedLen, realReadSize, isEos);
     bufData->UpdateDataSize(realReadSize);
-    MEDIA_LOG_D("Read finished, read size = " PUBLIC_LOG "d, isEos " PUBLIC_LOG "d", bufData->GetSize(), isEos);
+    MEDIA_LOG_D("Read finished, read size = " PUBLIC_LOG_D32 ", isEos " PUBLIC_LOG_D32, bufData->GetSize(), isEos);
     return Status::OK;
 }
 

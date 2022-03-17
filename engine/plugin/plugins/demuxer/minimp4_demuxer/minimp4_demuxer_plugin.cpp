@@ -58,7 +58,7 @@ MiniMP4DemuxerPlugin::MiniMP4DemuxerPlugin(std::string name)
       sampleIndex_(0)
 {
     (void)memset_s(&miniMP4_, sizeof(MP4D_demux_t), 0, sizeof(MP4D_demux_t));
-    MEDIA_LOG_I("MiniMP4DemuxerPlugin, plugin name: " PUBLIC_LOG "s", pluginName_.c_str());
+    MEDIA_LOG_I("MiniMP4DemuxerPlugin, plugin name: " PUBLIC_LOG_S, pluginName_.c_str());
 }
 
 MiniMP4DemuxerPlugin::~MiniMP4DemuxerPlugin()
@@ -73,7 +73,7 @@ Status MiniMP4DemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource> &so
         ioContext_.dataSource->GetSize(fileSize_);
     }
     fileSize = fileSize_;
-    MEDIA_LOG_I("fileSize_ " PUBLIC_LOG "zu", fileSize_);
+    MEDIA_LOG_I("fileSize_ " PUBLIC_LOG_ZU, fileSize_);
     return Status::OK;
 }
 
@@ -175,16 +175,16 @@ Status MiniMP4DemuxerPlugin::DoReadFromSource(uint32_t readSize)
     auto bufData = buffer->AllocMemory(nullptr, readSize);
     int retryTimes = 0;
     MEDIA_LOG_D("readSize " PUBLIC_LOG_U32 " inIoBufferSize_ " PUBLIC_LOG_D32 "ioDataRemainSize_ "
-        PUBLIC_LOG_U32 "", readSize, inIoBufferSize_, ioDataRemainSize_);
+                PUBLIC_LOG_U32 "", readSize, inIoBufferSize_, ioDataRemainSize_);
     do {
         auto result = ioContext_.dataSource->ReadAt(ioContext_.offset, buffer, static_cast<size_t>(readSize));
-        MEDIA_LOG_D("ioContext_.offset " PUBLIC_LOG "d", static_cast<uint32_t>(ioContext_.offset));
+        MEDIA_LOG_D("ioContext_.offset " PUBLIC_LOG_D32, static_cast<uint32_t>(ioContext_.offset));
         if (result != Status::OK) {
-            MEDIA_LOG_W("read data from source warning " PUBLIC_LOG "d", static_cast<int>(result));
+            MEDIA_LOG_W("read data from source warning " PUBLIC_LOG_D32, static_cast<int>(result));
             return result;
         }
 
-        MEDIA_LOG_D("bufData->GetSize() " PUBLIC_LOG "zu", bufData->GetSize());
+        MEDIA_LOG_D("bufData->GetSize() " PUBLIC_LOG_ZU, bufData->GetSize());
         if (bufData->GetSize() > 0) {
             if (readSize >= bufData->GetSize()) {
                 (void)memcpy_s(inIoBuffer_ + ioDataRemainSize_, readSize,
@@ -213,7 +213,7 @@ Status MiniMP4DemuxerPlugin::DoReadFromSource(uint32_t readSize)
 Status MiniMP4DemuxerPlugin::GetDataFromSource()
 {
     uint32_t ioNeedReadSize = inIoBufferSize_ - ioDataRemainSize_;
-    MEDIA_LOG_D("ioDataRemainSize_ " PUBLIC_LOG "d ioNeedReadSize " PUBLIC_LOG "d", ioDataRemainSize_, ioNeedReadSize);
+    MEDIA_LOG_D("ioDataRemainSize_ " PUBLIC_LOG_D32 " ioNeedReadSize " PUBLIC_LOG_D32, ioDataRemainSize_, ioNeedReadSize);
     if (ioDataRemainSize_) {
         // 将剩余数据移动到buffer的起始位置
         auto ret = memmove_s(inIoBuffer_,
@@ -221,12 +221,12 @@ Status MiniMP4DemuxerPlugin::GetDataFromSource()
                              inIoBuffer_ + readDataSize,
                              ioDataRemainSize_);
         if (ret != 0) {
-            MEDIA_LOG_E("copy buffer error(" PUBLIC_LOG "d)", ret);
+            MEDIA_LOG_E("copy buffer error(" PUBLIC_LOG_D32 ")", ret);
             return Status::ERROR_UNKNOWN;
         }
         ret = memset_s(inIoBuffer_ + ioDataRemainSize_, ioNeedReadSize, 0x00, ioNeedReadSize);
         if (ret != 0) {
-            MEDIA_LOG_E("memset_s buffer error(" PUBLIC_LOG "d)", ret);
+            MEDIA_LOG_E("memset_s buffer error(" PUBLIC_LOG_D32 ")", ret);
             return Status::ERROR_UNKNOWN;
         }
     }
@@ -279,10 +279,10 @@ Status MiniMP4DemuxerPlugin::GetMediaInfo(MediaInfo &mediaInfo)
     int64_t offset = MP4D_frame_offset(&miniMP4_, 0, 0, &frameSize, &timeStamp, &duration);
     ioDataRemainSize_ = 0;
     ioContext_.offset = offset;
-    MEDIA_LOG_D("samplerate_hz " PUBLIC_LOG "d",
+    MEDIA_LOG_D("samplerate_hz " PUBLIC_LOG_D32,
         static_cast<uint32_t>(miniMP4_.track->SampleDescription.audio.samplerate_hz));
-    MEDIA_LOG_D("avg_bitrate_bps " PUBLIC_LOG "d", static_cast<uint32_t>(miniMP4_.track->avg_bitrate_bps));
-    MEDIA_LOG_D("channel num " PUBLIC_LOG "d",
+    MEDIA_LOG_D("avg_bitrate_bps " PUBLIC_LOG_D32, static_cast<uint32_t>(miniMP4_.track->avg_bitrate_bps));
+    MEDIA_LOG_D("channel num " PUBLIC_LOG_D32,
         static_cast<uint32_t>(miniMP4_.track->SampleDescription.audio.channelcount));
     return Status::OK;
 }
@@ -322,9 +322,9 @@ int MiniMP4DemuxerPlugin::ReadCallback(int64_t offset, void *buffer, size_t size
         return 0;
     }
     while ((offset + size) > mp4Demuxer->ioContext_.offset) {
-        MEDIA_LOG_D("offset " PUBLIC_LOG "d size " PUBLIC_LOG "zu",
+        MEDIA_LOG_D("offset " PUBLIC_LOG_D32 " size " PUBLIC_LOG_ZU,
             static_cast<uint32_t>(offset), static_cast<uint32_t>(size));
-        MEDIA_LOG_D("mp4Demuxer->ioContext_.offset " PUBLIC_LOG "d",
+        MEDIA_LOG_D("mp4Demuxer->ioContext_.offset " PUBLIC_LOG_D32,
             static_cast<uint32_t>(mp4Demuxer->ioContext_.offset));
         mp4Demuxer->ioDataRemainSize_ = 0;
         mp4Demuxer->ioContext_.offset = offset;
@@ -348,8 +348,8 @@ Status MiniMP4DemuxerPlugin::ReadFrame(Buffer &outBuffer, int32_t timeOutMs)
     if (sampleIndex_ >= miniMP4_.track->sample_count) {
         (void)memset_s(inIoBuffer_, MEDIA_IO_SIZE, 0, MEDIA_IO_SIZE);
         ioDataRemainSize_ = 0;
-        MEDIA_LOG_D("sampleIndex_ " PUBLIC_LOG "d", sampleIndex_);
-        MEDIA_LOG_D("miniMP4_.track->sample_count " PUBLIC_LOG "d", miniMP4_.track->sample_count);
+        MEDIA_LOG_D("sampleIndex_ " PUBLIC_LOG_D32, sampleIndex_);
+        MEDIA_LOG_D("miniMP4_.track->sample_count " PUBLIC_LOG_D32, miniMP4_.track->sample_count);
         return Status::END_OF_STREAM;
     }
     unsigned int frameSize = 0;
@@ -359,7 +359,7 @@ Status MiniMP4DemuxerPlugin::ReadFrame(Buffer &outBuffer, int32_t timeOutMs)
     if (offset > fileSize_) {
         return Status::ERROR_UNKNOWN;
     }
-    MEDIA_LOG_D("frameSize " PUBLIC_LOG "d offset " PUBLIC_LOG "d sampleIndex_ " PUBLIC_LOG "d",
+    MEDIA_LOG_D("frameSize " PUBLIC_LOG_D32 " offset " PUBLIC_LOG_D32 " sampleIndex_ " PUBLIC_LOG_D32,
         frameSize, static_cast<uint32_t>(offset), sampleIndex_);
     if (outBuffer.IsEmpty()) {
         mp4FrameData = outBuffer.AllocMemory(nullptr, frameSize + ADTS_HEADER_SIZE);
@@ -379,7 +379,7 @@ Status MiniMP4DemuxerPlugin::ReadFrame(Buffer &outBuffer, int32_t timeOutMs)
     FillADTSHead(mp4FrameData, frameSize);
     size_t writeSize = mp4FrameData->Write(inIoBuffer_, frameSize, ADTS_HEADER_SIZE);
     sampleIndex_++;
-    MEDIA_LOG_D("writeSize " PUBLIC_LOG "zu mp4FrameData size " PUBLIC_LOG "zu", writeSize, mp4FrameData->GetSize());
+    MEDIA_LOG_D("writeSize " PUBLIC_LOG_ZU " mp4FrameData size " PUBLIC_LOG_ZU, writeSize, mp4FrameData->GetSize());
     ioDataRemainSize_ -= frameSize;
     readDataSize = frameSize;
 
@@ -412,7 +412,7 @@ Status MiniMP4DemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode m
     }
     ioContext_.offset = tempPos;
     ioDataRemainSize_ = 0;
-    MEDIA_LOG_D("ioContext_.offset " PUBLIC_LOG "d", static_cast<uint32_t>(ioContext_.offset));
+    MEDIA_LOG_D("ioContext_.offset " PUBLIC_LOG_D32, static_cast<uint32_t>(ioContext_.offset));
     (void)memset_s(inIoBuffer_, inIoBufferSize_, 0x00, inIoBufferSize_);
     return Status::OK;
 }
@@ -482,7 +482,7 @@ Status RegisterPlugins(const std::shared_ptr<Register> &reg)
     regInfo.sniffer = Sniff;
     auto ret = reg->AddPlugin(regInfo);
     if (ret != Status::OK) {
-        MEDIA_LOG_E("RegisterPlugin AddPlugin failed with return " PUBLIC_LOG "d", static_cast<int>(ret));
+        MEDIA_LOG_E("RegisterPlugin AddPlugin failed with return " PUBLIC_LOG_D32, static_cast<int>(ret));
     }
     return Status::OK;
 }

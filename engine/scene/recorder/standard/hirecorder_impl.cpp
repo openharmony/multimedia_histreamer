@@ -145,7 +145,7 @@ int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
     outputFormatType_ = format;
     auto ret = fsm_.SendEvent(Intent::SET_OUTPUT_FORMAT, outputFormatType_);
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("SetOutputFormat failed with error " PUBLIC_LOG "d", static_cast<int>(ret));
+        MEDIA_LOG_E("SetOutputFormat failed with error " PUBLIC_LOG_D32, static_cast<int>(ret));
     }
     return TransErrorCode(ret);
 }
@@ -166,19 +166,19 @@ int32_t HiRecorderImpl::Configure(int32_t sourceId, const RecorderParam& recPara
     FALSE_RETURN_V(castRet, TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
     auto ret = fsm_.SendEvent(Intent::CONFIGURE, hstRecParam);
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("Configure failed with error " PUBLIC_LOG "d", static_cast<int>(ret));
+        MEDIA_LOG_E("Configure failed with error " PUBLIC_LOG_D32, static_cast<int>(ret));
     }
     return TransErrorCode(ret);
 }
 
 int32_t HiRecorderImpl::Prepare()
 {
-    MEDIA_LOG_D("Prepare entered, current fsm state: " PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
+    MEDIA_LOG_D("Prepare entered, current fsm state: " PUBLIC_LOG_S ".", fsm_.GetCurrentState().c_str());
     PROFILE_BEGIN();
     auto ret = fsm_.SendEvent(Intent::PREPARE);
     if (ret != ErrorCode::SUCCESS) {
         PROFILE_END("Prepare failed,");
-        MEDIA_LOG_E("prepare failed with error " PUBLIC_LOG "d", ret);
+        MEDIA_LOG_E("prepare failed with error " PUBLIC_LOG_D32, ret);
     } else {
         PROFILE_END("Prepare successfully,");
     }
@@ -194,7 +194,7 @@ int32_t HiRecorderImpl::Start()
     } else {
         ret = fsm_.SendEvent(Intent::START);
     }
-    PROFILE_END("Start ret = " PUBLIC_LOG "d", TransErrorCode(ret));
+    PROFILE_END("Start ret = " PUBLIC_LOG_D32, TransErrorCode(ret));
     return TransErrorCode(ret);
 }
 
@@ -202,7 +202,7 @@ int32_t HiRecorderImpl::Pause()
 {
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::PAUSE));
-    PROFILE_END("Pause ret = " PUBLIC_LOG "d", ret);
+    PROFILE_END("Pause ret = " PUBLIC_LOG_D32, ret);
     return ret;
 }
 
@@ -210,7 +210,7 @@ int32_t HiRecorderImpl::Resume()
 {
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::RESUME));
-    PROFILE_END("Resume ret = " PUBLIC_LOG "d", ret);
+    PROFILE_END("Resume ret = " PUBLIC_LOG_D32, ret);
     return ret;
 }
 
@@ -219,7 +219,7 @@ int32_t HiRecorderImpl::Stop(bool isDrainAll)
     PROFILE_BEGIN();
     outputFormatType_ = OutputFormatType::FORMAT_BUTT;
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::STOP, isDrainAll));
-    PROFILE_END("Stop ret = " PUBLIC_LOG "d", ret);
+    PROFILE_END("Stop ret = " PUBLIC_LOG_D32, ret);
     return ret;
 }
 
@@ -235,7 +235,7 @@ int32_t HiRecorderImpl::SetParameter(int32_t sourceId, const RecorderParam &recP
 
 void HiRecorderImpl::OnEvent(const Event& event)
 {
-    MEDIA_LOG_D("[HiStreamer] OnEvent (" PUBLIC_LOG "d)", event.type);
+    MEDIA_LOG_D("[HiStreamer] OnEvent (" PUBLIC_LOG_D32 ")", event.type);
     switch (event.type) {
         case EventType::EVENT_ERROR: {
             fsm_.SendEventAsync(Intent::NOTIFY_ERROR, event.param);
@@ -257,13 +257,13 @@ void HiRecorderImpl::OnEvent(const Event& event)
             }
             break;
         default:
-            MEDIA_LOG_E("Unknown event(" PUBLIC_LOG "d)", event.type);
+            MEDIA_LOG_E("Unknown event(" PUBLIC_LOG_D32 ")", event.type);
     }
 }
 
 void HiRecorderImpl::OnStateChanged(StateId state)
 {
-    MEDIA_LOG_I("OnStateChanged from " PUBLIC_LOG "d to " PUBLIC_LOG "d", curFsmState_.load(), state);
+    MEDIA_LOG_I("OnStateChanged from " PUBLIC_LOG_D32 " to " PUBLIC_LOG_D32, curFsmState_.load(), state);
     {
         OSAL::ScopedLock lock(stateMutex_);
         curFsmState_ = state;
@@ -348,7 +348,7 @@ ErrorCode HiRecorderImpl::DoSetOutputFormat(const Plugin::Any& param) const
         ret = ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
     }
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("SetOutputFormat failed with error " PUBLIC_LOG "d", static_cast<int>(ret));
+        MEDIA_LOG_E("SetOutputFormat failed with error " PUBLIC_LOG_D32, static_cast<int>(ret));
     }
     return ret;
 }

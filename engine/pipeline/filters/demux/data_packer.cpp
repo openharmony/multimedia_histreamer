@@ -117,7 +117,7 @@ bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOf
     }
     if (preOffsetEnd >= offsetEnd) {
         MEDIA_LOG_D("IsDataAvailable true, use all buffers, last buffer index " PUBLIC_LOG_ZU ", offsetEnd "
-            PUBLIC_LOG_U64 ", curOffsetEnd " PUBLIC_LOG_U64, bufCnt - 1, offsetEnd, curOffsetEnd);
+        PUBLIC_LOG_U64 ", curOffsetEnd " PUBLIC_LOG_U64, bufCnt - 1, offsetEnd, curOffsetEnd);
         return true;
     }
     curOffset = preOffsetEnd;

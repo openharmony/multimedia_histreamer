@@ -96,7 +96,7 @@ void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugin::Buffer>& bu
         dstPtr += len;
     }
     MEDIA_LOG_I(PUBLIC_LOG_S " Buffer(offset " PUBLIC_LOG_D64 ", size " PUBLIC_LOG_ZU ", capacity "
-        PUBLIC_LOG_ZU ") : " PUBLIC_LOG_S, desc, offset, bufferSize, buffer->GetMemory()->GetCapacity(), tmpStr);
+                PUBLIC_LOG_ZU ") : " PUBLIC_LOG_S, desc, offset, bufferSize, buffer->GetMemory()->GetCapacity(), tmpStr);
 }
 } // Pipeline
 } // Media

@@ -146,7 +146,7 @@ bool VideoSinkFilter::CreateVideoSinkPlugin(const std::shared_ptr<Plugin::Plugin
 
     auto err = TranslatePluginStatus(plugin_->Init());
     if (err != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("plugin " PUBLIC_LOG "s init error", selectedPluginInfo->name.c_str());
+        MEDIA_LOG_E("plugin " PUBLIC_LOG_S " init error", selectedPluginInfo->name.c_str());
         return false;
     }
     pluginInfo_ = selectedPluginInfo;

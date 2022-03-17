@@ -39,11 +39,11 @@ ErrorCode CodecFilterBase::UpdateMetaAccordingToPlugin(Plugin::Meta& meta)
         if (ret != ErrorCode::SUCCESS) {
             if (HasTagInfo(keyPair.first)) {
                 MEDIA_LOG_I("GetParameter " PUBLIC_LOG_S " from plugin " PUBLIC_LOG_S "failed with code "
-                    PUBLIC_LOG_D32, GetTagStrName(keyPair.first), pluginInfo_->name.c_str(), ret);
+                PUBLIC_LOG_D32, GetTagStrName(keyPair.first), pluginInfo_->name.c_str(), ret);
             } else {
                 MEDIA_LOG_I("Tag " PUBLIC_LOG_D32 " is not is map, may be update it?", keyPair.first);
                 MEDIA_LOG_I("GetParameter " PUBLIC_LOG_D32 " from plugin " PUBLIC_LOG_S " failed with code "
-                    PUBLIC_LOG_D32, keyPair.first, pluginInfo_->name.c_str(), ret);
+                PUBLIC_LOG_D32, keyPair.first, pluginInfo_->name.c_str(), ret);
             }
             continue;
         }

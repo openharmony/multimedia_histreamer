@@ -324,7 +324,7 @@ ErrorCode AudioCaptureFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& in
 {
     if ((plugin_ != nullptr) && (pluginInfo_ != nullptr)) {
         if (info->name == pluginInfo_->name && TranslatePluginStatus(plugin_->Reset()) == ErrorCode::SUCCESS) {
-            MEDIA_LOG_I("Reuse last plugin: " PUBLIC_LOG "s", name.c_str());
+            MEDIA_LOG_I("Reuse last plugin: " PUBLIC_LOG_S, name.c_str());
             return ErrorCode::SUCCESS;
         }
         if (TranslatePluginStatus(plugin_->Deinit()) != ErrorCode::SUCCESS) {

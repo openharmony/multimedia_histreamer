@@ -181,7 +181,7 @@ Status AudioFfmpegDecoderPlugin::Init()
 {
     auto ite = codecMap.find(pluginName_);
     if (ite == codecMap.end()) {
-        MEDIA_LOG_W("cannot find codec with name " PUBLIC_LOG "s", pluginName_.c_str());
+        MEDIA_LOG_W("cannot find codec with name " PUBLIC_LOG_S, pluginName_.c_str());
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     {
@@ -468,7 +468,7 @@ Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
             if (paddedBufferSize_ < bufferLength + AV_INPUT_BUFFER_PADDING_SIZE) {
                 paddedBufferSize_ = bufferLength + AV_INPUT_BUFFER_PADDING_SIZE;
                 paddedBuffer_.reserve(paddedBufferSize_);
-                MEDIA_LOG_I("increase padded buffer size to " PUBLIC_LOG "zu", paddedBufferSize_);
+                MEDIA_LOG_I("increase padded buffer size to " PUBLIC_LOG_ZU, paddedBufferSize_);
             }
             paddedBuffer_.assign(ptr, ptr + bufferLength);
             paddedBuffer_.insert(paddedBuffer_.end(), AV_INPUT_BUFFER_PADDING_SIZE, 0);
@@ -489,7 +489,7 @@ Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
     } else if (ret == AVERROR(EAGAIN)) {
         return Status::ERROR_AGAIN;
     } else {
-        MEDIA_LOG_E("send buffer error " PUBLIC_LOG "s", AVStrError(ret).c_str());
+        MEDIA_LOG_E("send buffer error " PUBLIC_LOG_S, AVStrError(ret).c_str());
         return Status::ERROR_UNKNOWN;
     }
 }
@@ -533,7 +533,7 @@ Status AudioFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
     } else if (ret == AVERROR(EAGAIN)) {
         status = Status::ERROR_NOT_ENOUGH_DATA;
     } else {
-        MEDIA_LOG_E("audio decoder receive error: " PUBLIC_LOG "s", AVStrError(ret).c_str());
+        MEDIA_LOG_E("audio decoder receive error: " PUBLIC_LOG_S, AVStrError(ret).c_str());
         status = Status::ERROR_UNKNOWN;
     }
     av_frame_unref(cachedFrame_.get());
