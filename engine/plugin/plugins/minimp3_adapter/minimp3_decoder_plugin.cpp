@@ -31,11 +31,11 @@ namespace Media {
 namespace Plugin {
 namespace Minimp3 {
 namespace {
-    constexpr uint32_t MP3_384_SAMPLES_PER_FRAME  = 384;
-    constexpr uint32_t MP3_576_SAMPLES_PER_FRAME  = 576;
-    constexpr uint32_t MP3_1152_SAMPLES_PER_FRAME = 1152;
-    constexpr uint32_t BUFFER_ITEM_CNT            = 6;
-    constexpr uint32_t MAX_RANK                   = 100;
+    constexpr uint32_t MP3_384_SAMPLES_PER_FRAME  = 384;  // 384
+    constexpr uint32_t MP3_576_SAMPLES_PER_FRAME  = 576;  // 576
+    constexpr uint32_t MP3_MAX_SAMPLES_PER_FRAME  = 1152; // 1152
+    constexpr uint32_t BUFFER_ITEM_CNT            = 6;    // 6
+    constexpr uint32_t MAX_RANK                   = 100;  // 100
 }
 
 Minimp3DecoderPlugin::Minimp3DecoderPlugin(std::string name)
@@ -59,6 +59,7 @@ Status Minimp3DecoderPlugin::Init()
     minimp3DecoderImpl_ = MiniMp3GetOpt();
     AudioDecoderMp3Open();
     mp3Parameter_[Tag::REQUIRED_OUT_BUFFER_CNT] = BUFFER_ITEM_CNT;
+    mp3Parameter_[Tag::AUDIO_SAMPLE_PER_FRAME] = MP3_MAX_SAMPLES_PER_FRAME;
     return Status::OK;
 }
 
@@ -89,18 +90,14 @@ Status Minimp3DecoderPlugin::Prepare()
     if (mp3Parameter_.find(Tag::AUDIO_CHANNELS) != mp3Parameter_.end()) {
         channels_ = AnyCast<uint32_t>((mp3Parameter_.find(Tag::AUDIO_CHANNELS))->second);
     }
-
     if (mp3Parameter_.find(Tag::AUDIO_SAMPLE_PER_FRAME) != mp3Parameter_.end()) {
         samplesPerFrame_ = AnyCast<uint32_t>(mp3Parameter_.find(Tag::AUDIO_SAMPLE_PER_FRAME)->second);
     }
-
     if (samplesPerFrame_ != MP3_384_SAMPLES_PER_FRAME && samplesPerFrame_ != MP3_576_SAMPLES_PER_FRAME &&
-        samplesPerFrame_ != MP3_1152_SAMPLES_PER_FRAME) {
+        samplesPerFrame_ != MP3_MAX_SAMPLES_PER_FRAME) {
         return Status::ERROR_INVALID_PARAMETER;
     }
-
     MEDIA_LOG_I("channels_ = " PUBLIC_LOG "d samplesPerFrame_ = " PUBLIC_LOG "d", channels_, samplesPerFrame_);
-
     return Status::OK;
 }
 
