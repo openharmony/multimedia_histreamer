@@ -19,6 +19,7 @@
 #include <regex>
 #include "foundation/osal/filesystem/file_system.h"
 #include "pipeline/factory/filter_factory.h"
+#include "plugin/common/media_sink.h"
 #include "plugin/common/plugin_time.h"
 #include "recorder_utils.h"
 #include "utils/steady_clock.h"
@@ -546,12 +547,16 @@ ErrorCode HiRecorderImpl::DoConfigureOther(const HstRecParam& param) const
             std::string filePath;
             FALSE_RETURN_V_MSG_E(GenerateFilePath(dirPath, outputFormatType_, filePath),
                                  ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "generate file path error");
-            return outputSink_->SetOutputPath(filePath);
+            MediaSink mediaSink {Plugin::ProtocolType::FILE};
+            mediaSink.SetPath(filePath);
+            return outputSink_->SetSink(mediaSink);
         }
         case RecorderPublicParamType::OUT_FD: {
             auto ptr = param.GetValPtr<OutFd>();
             FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
-            return outputSink_->SetFd(ptr->fd);
+            MediaSink mediaSink {Plugin::ProtocolType::FD};
+            mediaSink.SetFd(ptr->fd);
+            return outputSink_->SetSink(mediaSink);
         }
         case RecorderPublicParamType::MAX_DURATION: {
             auto ptr = param.GetValPtr<MaxDuration>();

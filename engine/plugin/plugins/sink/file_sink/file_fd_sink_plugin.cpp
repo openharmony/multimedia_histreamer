@@ -35,11 +35,11 @@ std::shared_ptr<OutputSinkPlugin> FileFdSinkPluginCreator(const std::string& nam
 Status FileFdSinkRegister(const std::shared_ptr<Register>& reg)
 {
     OutputSinkPluginDef definition;
-    definition.outputType = OutputType::FD;
+    definition.protocolType = ProtocolType::FD;
     definition.name = "file_fd_sink";
     definition.description = "file fd sink";
     definition.rank = 100; // 100
-    definition.outputType = OutputType::FD;
+    definition.protocolType = ProtocolType::FD;
     definition.creator = FileFdSinkPluginCreator;
     return reg->AddPlugin(definition);
 }
@@ -51,13 +51,10 @@ FileFdSinkPlugin::FileFdSinkPlugin(std::string name)
 {
 }
 
-Status FileFdSinkPlugin::SetSink(const Plugin::ValueType& sink)
+Status FileFdSinkPlugin::SetSink(const MediaSink& sink)
 {
-    if (!sink.SameTypeWith(typeid(int32_t))) {
-        MEDIA_LOG_E("Invalid parameter to file_fd_sink plugin");
-        return Status::ERROR_INVALID_PARAMETER;
-    }
-    fd_ =  Plugin::AnyCast<int32_t>(sink);
+    FALSE_RETURN_V((sink.GetProtocolType() == ProtocolType::FD && sink.GetFd() != -1),Status::ERROR_INVALID_DATA);
+    fd_ =  sink.GetFd();
     return Status::OK;
 }
 
