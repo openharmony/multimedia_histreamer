@@ -45,19 +45,6 @@ do { \
 
 using namespace OHOS::Media;
 
-inline int32_t SnPrintf(char* buf, size_t maxLen, const char* fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    auto ret = vsnprintf_truncated_s(buf, maxLen, fmt, args);
-    va_end(args);
-    if (ret < 0) {
-        return ret;
-    }
-    auto tmp = static_cast<int32_t>(maxLen);
-    return tmp > ret ? ret : tmp;
-}
-
 template <typename T>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const T& val)
 {
@@ -70,7 +57,7 @@ int32_t FixedCapKeyStringiness(char* buf, size_t maxLen, const char* name, const
                                const Plugin::ValueType& val)
 {
     int pos = 0;
-    auto ret = SnPrintf(buf, maxLen, "%s:(%s)", name, typeName);
+    auto ret = snprintf_truncated_s(buf, maxLen, "%s:(%s)", name, typeName);
     if (ret == -1) {
         return ret;
     }
@@ -85,7 +72,7 @@ int32_t IntervalCapKeyStringiness(char* buf, size_t maxLen, const char* name, co
                                   const Plugin::ValueType& val)
 {
     int pos = 0;
-    auto ret = SnPrintf(buf, maxLen, "%s:(%s)[", name, typeName);
+    auto ret = snprintf_truncated_s(buf, maxLen, "%s:(%s)[", name, typeName);
     if (ret == -1) {
         return ret;
     }
@@ -93,11 +80,11 @@ int32_t IntervalCapKeyStringiness(char* buf, size_t maxLen, const char* name, co
     auto item = Plugin::AnyCast<Plugin::IntervalCapability<T>>(&val);
     RETURN_IF_FAILED(Stringiness(buf + pos, maxLen - pos, name, item->first), -1, ret);
     pos += ret;
-    RETURN_IF_FAILED(SnPrintf(buf + pos , maxLen - pos, ", "), -1, ret);
+    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos , maxLen - pos, ", "), -1, ret);
     pos += ret;
     RETURN_IF_FAILED(Stringiness(buf + pos, maxLen - pos, name, item->second), -1, ret);
     pos += ret;
-    RETURN_IF_FAILED(SnPrintf(buf + pos , maxLen - pos, "]"), -1, ret);
+    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos , maxLen - pos, "]"), -1, ret);
     return pos + ret;
 }
 
@@ -106,7 +93,7 @@ int32_t DiscreteCapKeyStringiness(char* buf, size_t maxLen, const char* name, co
                                   const Plugin::ValueType& val)
 {
     int pos = 0;
-    auto ret = SnPrintf(buf, maxLen, "%s:(%s){", name, typeName);
+    auto ret = snprintf_truncated_s(buf, maxLen, "%s:(%s){", name, typeName);
     if (ret == -1) {
         return ret;
     }
@@ -117,14 +104,14 @@ int32_t DiscreteCapKeyStringiness(char* buf, size_t maxLen, const char* name, co
     for (; i < length - 1; i++) {
         RETURN_IF_FAILED(Stringiness<T>(buf + pos, maxLen - pos, name, item->at(i)), -1, ret);
         pos += ret;
-        RETURN_IF_FAILED(SnPrintf(buf + pos , maxLen - pos, ", "), -1, ret);
+        RETURN_IF_FAILED(snprintf_truncated_s(buf + pos , maxLen - pos, ", "), -1, ret);
         pos += ret;
     }
     if (i == length -1) {
         RETURN_IF_FAILED(Stringiness<T>(buf + pos, maxLen - pos, name, item->at(i)), -1, ret);
         pos += ret;
     }
-    RETURN_IF_FAILED(SnPrintf(buf + pos , maxLen - pos, "}"), -1, ret);
+    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos , maxLen - pos, "}"), -1, ret);
     return pos + ret;
 }
 
@@ -147,37 +134,37 @@ int32_t CapKeyStringiness(char* buf, size_t maxLen, const char* name, const char
 template <>
 MEDIA_UNUSED int32_t Stringiness(char* buf, size_t maxLen, const char* name, const int32_t& val)
 {
-    return SnPrintf(buf, maxLen, "%" PRIi32, val);
+    return snprintf_truncated_s(buf, maxLen, "%" PRIi32, val);
 }
 
 template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const uint32_t& val)
 {
-    return SnPrintf(buf, maxLen, "%" PRIu32, val);
+    return snprintf_truncated_s(buf, maxLen, "%" PRIu32, val);
 }
 
 template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const std::string& val)
 {
-    return SnPrintf(buf, maxLen, "%s", val.c_str());
+    return snprintf_truncated_s(buf, maxLen, "%s", val.c_str());
 }
 
 template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const int64_t& val)
 {
-    return SnPrintf(buf, maxLen, "%" PRId64, val);
+    return snprintf_truncated_s(buf, maxLen, "%" PRId64, val);
 }
 
 template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const uint64_t& val)
 {
-    return SnPrintf(buf, maxLen, "%" PRIu64, val);
+    return snprintf_truncated_s(buf, maxLen, "%" PRIu64, val);
 }
 
 template<>
 MEDIA_UNUSED int32_t Stringiness(char* buf, size_t maxLen, const char* name, const std::vector<int8_t>& val)
 {
-    return SnPrintf(buf, maxLen, "%p", val.data());
+    return snprintf_truncated_s(buf, maxLen, "%p", val.data());
 }
 
 template<>
@@ -187,7 +174,7 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::Au
         MEDIA_LOG_W("audio sample format " PUBLIC_LOG_D32 " is unknown", static_cast<int32_t>(val));
         return 0;
     }
-    return SnPrintf(buf, maxLen, "%s", Pipeline::g_auSampleFmtStrMap.at(val));
+    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::g_auSampleFmtStrMap.at(val));
 }
 
 template<>
@@ -197,7 +184,7 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::Au
         MEDIA_LOG_W("audio channel layout " PUBLIC_LOG_U64 " is unknown", static_cast<uint64_t>(val));
         return 0;
     }
-    return SnPrintf(buf, maxLen, "%s", Pipeline::g_auChannelLayoutStrMap.at(val));
+    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::g_auChannelLayoutStrMap.at(val));
 }
 
 template<>
@@ -207,7 +194,7 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::Vi
         MEDIA_LOG_W("video pixel format " PUBLIC_LOG_U32 " is unknown", static_cast<uint32_t>(val));
         return 0;
     }
-    return SnPrintf(buf, maxLen, "%s", Pipeline::g_videoPixelFormatStrMap.at(val));
+    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::g_videoPixelFormatStrMap.at(val));
 }
 
 template<>
@@ -217,7 +204,7 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::Au
         MEDIA_LOG_W("audio aac profile name " PUBLIC_LOG_U8 " is unknown", static_cast<uint8_t>(val));
         return 0;
     }
-    return SnPrintf(buf, maxLen, "%s", Pipeline::g_auAacProfileNameStrMap.at(val));
+    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::g_auAacProfileNameStrMap.at(val));
 }
 
 template<>
@@ -227,7 +214,7 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::Au
         MEDIA_LOG_W("audio aac stream format name " PUBLIC_LOG_U8 " is unknown", static_cast<uint8_t>(val));
         return 0;
     }
-    return SnPrintf(buf, maxLen, "%s", Pipeline::g_auAacStreamFormatNameStrMap.at(val));
+    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::g_auAacStreamFormatNameStrMap.at(val));
 }
 
 template<>
@@ -237,7 +224,7 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::Th
         MEDIA_LOG_W("Thread Mode " PUBLIC_LOG_U8 " is unknown", static_cast<uint8_t>(val));
         return 0;
     }
-    return SnPrintf(buf, maxLen, "%s", Pipeline::GetThreadModeNameStr(val));
+    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::GetThreadModeNameStr(val));
 }
 
 template<typename T>
@@ -452,7 +439,7 @@ std::string Capability2String(const Capability& capability)
     char buffer[MAX_BUF_LEN + 1] = {0}; // one more is for \0
     int pos = 0;
     int32_t ret = 0;
-    RETURN_IF_SNPRI_FAILED(SnPrintf(buffer, MAX_BUF_LEN, "Capability{mime:%s, ", capability.mime.c_str()),
+    RETURN_IF_SNPRI_FAILED(snprintf_truncated_s(buffer, MAX_BUF_LEN, "Capability{mime:%s, ", capability.mime.c_str()),
                            ret, {});
     pos += ret;
     bool needEtc = false;
@@ -469,15 +456,15 @@ std::string Capability2String(const Capability& capability)
         RETURN_IF_SNPRI_FAILED(capStrnessMap.at(cap.first)(buffer + pos, MAX_BUF_LEN - pos, std::get<0>(info),
             std::get<2>(info), cap.second), ret, buffer); // secondary parameter
         pos += ret;
-        RETURN_IF_SNPRI_FAILED(SnPrintf(buffer + pos, MAX_BUF_LEN - pos, ", "), ret, buffer);
+        RETURN_IF_SNPRI_FAILED(snprintf_truncated_s(buffer + pos, MAX_BUF_LEN - pos, ", "), ret, buffer);
         pos += ret;
     }
     if (needEtc) {
         pos = MAX_BUF_LEN - 5; // 5 is length of " ...}"
-        SnPrintf(buffer + pos, MAX_BUF_LEN + 1 - pos, " ...}");
+        snprintf_truncated_s(buffer + pos, MAX_BUF_LEN + 1 - pos, " ...}");
     } else {
         pos -= 2; // 2 is length of ", "
-        SnPrintf(buffer + pos, MAX_BUF_LEN + 1 - pos, "}");
+        snprintf_truncated_s(buffer + pos, MAX_BUF_LEN + 1 - pos, "}");
     }
     return buffer;
 }
@@ -488,7 +475,7 @@ std::string Meta2String(const Plugin::Meta& meta)
     int pos = 0;
     int32_t ret = 0;
     std::string mime;
-    RETURN_IF_SNPRI_FAILED(SnPrintf(buffer + pos, MAX_BUF_LEN - pos, "Meta{"), ret, {});
+    RETURN_IF_SNPRI_FAILED(snprintf_truncated_s(buffer + pos, MAX_BUF_LEN - pos, "Meta{"), ret, {});
     pos += ret;
     bool needEtc = false;
     for (const auto & item : meta.GetMetaIDs()) {
@@ -506,16 +493,16 @@ std::string Meta2String(const Plugin::Meta& meta)
             RETURN_IF_SNPRI_FAILED(g_metaStrnessMap.at(item)(buffer + pos, MAX_BUF_LEN - pos,
                 std::get<0>(tuple), std::get<2>(tuple), *tmp), ret, buffer); // secondary parameter
             pos += ret;
-            RETURN_IF_SNPRI_FAILED(SnPrintf(buffer + pos, MAX_BUF_LEN - pos, ", "), ret, buffer);
+            RETURN_IF_SNPRI_FAILED(snprintf_truncated_s(buffer + pos, MAX_BUF_LEN - pos, ", "), ret, buffer);
             pos += ret;
         }
     }
     if (needEtc) {
         pos = MAX_BUF_LEN - 5; // 5 is length of " ...}\0"
-        SnPrintf(buffer + pos, MAX_BUF_LEN + 1 - pos, " ...}");
+        snprintf_truncated_s(buffer + pos, MAX_BUF_LEN + 1 - pos, " ...}");
     } else {
         pos -= 2; // 2 is length of ", "
-        SnPrintf(buffer + pos, MAX_BUF_LEN + 1 - pos, "}");
+        snprintf_truncated_s(buffer + pos, MAX_BUF_LEN + 1 - pos, "}");
     }
     return buffer;
 }
