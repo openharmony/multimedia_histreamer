@@ -101,7 +101,8 @@ public:
         if (rtv) {
             result = syncMap_[syncId];
             syncMap_.erase(syncId);
-            MEDIA_LOG_D("Synchronizer " PUBLIC_LOG_S " return.", name_.c_str());
+            MEDIA_LOG_D("Synchronizer " PUBLIC_LOG_S " Wait for " PUBLIC_LOG_D32 " return.", name_.c_str(),
+                        static_cast<int>(syncId));
         } else {
             waitSet_.erase(syncId);
         }
