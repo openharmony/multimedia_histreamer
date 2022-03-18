@@ -423,7 +423,8 @@ Status FFmpegMuxerPlugin::WriteHeader()
     OSAL::ScopedLock lock(fmtMutex_);
     FALSE_RETURN_V(formatContext_ != nullptr, Status::ERROR_WRONG_STATE);
     int ret = avformat_write_header(formatContext_.get(), nullptr);
-    FALSE_RETURN_V_MSG_E(ret >= 0, Status::ERROR_UNKNOWN, "failed to write header " PUBLIC_LOG_S, AVStrError(ret).c_str());
+    FALSE_RETURN_V_MSG_E(ret >= 0, Status::ERROR_UNKNOWN, "failed to write header " PUBLIC_LOG_S,
+        AVStrError(ret).c_str());
     return Status::OK;
 }
 

@@ -266,7 +266,7 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
         char *strRange = StringTrim(token);
         long start, end, fileLen;
         FALSE_LOG_MSG(sscanf_s(strRange, "bytes %ld-%ld/%ld", &start, &end, &fileLen) != -1,
-                        "sscanf get range failed");
+            "sscanf get range failed");
         if (info->fileContentLen > 0 && info->fileContentLen != fileLen) {
             MEDIA_LOG_E("FileContentLen doesn't equal to fileLen");
         }

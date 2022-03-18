@@ -61,7 +61,6 @@ private:
     size_t capacity_ {0};
     size_t size_ {0};
 };
-
 } // Media
 } // OHOS
 #endif // MEDIA_DATA_STREAM_IMPL

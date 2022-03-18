@@ -479,36 +479,36 @@ Status AudioServerSinkPlugin::SetParameter(Tag tag, const ValueType& para)
     switch (tag) {
         case Tag::AUDIO_SAMPLE_RATE:
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
-                              "sample rate type should be uint32_t");
+                "sample rate type should be uint32_t");
             FALSE_RETURN_V_MSG_E(AssignSampleRateIfSupported(Plugin::AnyCast<uint32_t>(para)),
-                              Status::ERROR_INVALID_PARAMETER, "sampleRate isn't supported");
+                Status::ERROR_INVALID_PARAMETER, "sampleRate isn't supported");
             break;
         case Tag::AUDIO_CHANNELS:
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
-                              "channels type should be uint32_t");
+                "channels type should be uint32_t");
             channels_ = Plugin::AnyCast<uint32_t>(para);
             FALSE_RETURN_V_MSG_E(AssignChannelNumIfSupported(channels_), Status::ERROR_INVALID_PARAMETER,
-                              "channel isn't supported");
+                "channel isn't supported");
             break;
         case Tag::MEDIA_BITRATE:
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(int64_t)), Status::ERROR_MISMATCHED_TYPE,
-                              "bit rate type should be int64_t");
+                "bit rate type should be int64_t");
             bitRate_ = Plugin::AnyCast<int64_t>(para);
             break;
         case Tag::AUDIO_SAMPLE_FORMAT:
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(AudioSampleFormat)), Status::ERROR_MISMATCHED_TYPE,
-                              "AudioSampleFormat type should be AudioSampleFormat");
+                "AudioSampleFormat type should be AudioSampleFormat");
             FALSE_RETURN_V_MSG_E(AssignSampleFmtIfSupported(Plugin::AnyCast<AudioSampleFormat>(para)),
                 Status::ERROR_INVALID_PARAMETER, "sampleFmt isn't supported by audio renderer or resample lib");
             break;
         case Tag::AUDIO_CHANNEL_LAYOUT:
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(AudioChannelLayout)), Status::ERROR_MISMATCHED_TYPE,
-                              "channel layout type should be AudioChannelLayout");
+                "channel layout type should be AudioChannelLayout");
             channelLayout_ = Plugin::AnyCast<AudioChannelLayout>(para);
             break;
         case Tag::AUDIO_SAMPLE_PER_FRAME:
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
-                              "SAMPLE_PER_FRAME type should be uint32_t");
+                "SAMPLE_PER_FRAME type should be uint32_t");
             samplesPerFrame_ = Plugin::AnyCast<uint32_t>(para);
             break;
         default:

@@ -129,7 +129,7 @@ int32_t HiPlayerImpl::Prepare()
     auto ret = fsm_.SendEvent(Intent::PREPARE);
     if (ret != ErrorCode::SUCCESS) {
         PROFILE_END("Prepare failed,");
-        MEDIA_LOG_E("prepare failed with error " PUBLIC_LOG_D32 , ret);
+        MEDIA_LOG_E("prepare failed with error " PUBLIC_LOG_D32, ret);
     } else {
         PROFILE_END("Prepare successfully,");
     }

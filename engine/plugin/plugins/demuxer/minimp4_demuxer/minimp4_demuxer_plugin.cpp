@@ -213,7 +213,8 @@ Status MiniMP4DemuxerPlugin::DoReadFromSource(uint32_t readSize)
 Status MiniMP4DemuxerPlugin::GetDataFromSource()
 {
     uint32_t ioNeedReadSize = inIoBufferSize_ - ioDataRemainSize_;
-    MEDIA_LOG_D("ioDataRemainSize_ " PUBLIC_LOG_D32 " ioNeedReadSize " PUBLIC_LOG_D32, ioDataRemainSize_, ioNeedReadSize);
+    MEDIA_LOG_D("ioDataRemainSize_ " PUBLIC_LOG_D32 " ioNeedReadSize " PUBLIC_LOG_D32, ioDataRemainSize_,
+        ioNeedReadSize);
     if (ioDataRemainSize_) {
         // 将剩余数据移动到buffer的起始位置
         auto ret = memmove_s(inIoBuffer_,

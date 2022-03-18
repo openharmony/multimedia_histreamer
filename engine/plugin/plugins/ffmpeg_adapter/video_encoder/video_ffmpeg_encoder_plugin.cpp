@@ -393,10 +393,10 @@ Status VideoFfmpegEncoderPlugin::FillAvFrame(const std::shared_ptr<Buffer>& inpu
     const uint8_t *data = inputBuffer->GetMemory()->GetReadOnlyData();
     auto bufferMeta = inputBuffer->GetBufferMeta();
     FALSE_RETURN_V_MSG_W(bufferMeta != nullptr && bufferMeta->GetType() == BufferMetaType::VIDEO,
-                      Status::ERROR_INVALID_PARAMETER, "invalid buffer meta");
+        Status::ERROR_INVALID_PARAMETER, "invalid buffer meta");
     std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
     FALSE_RETURN_V_MSG_W(pixelFormat_ == videoMeta->videoPixelFormat, Status::ERROR_INVALID_PARAMETER,
-                      "pixel format change");
+        "pixel format change");
     cachedFrame_->format = ConvertPixelFormatToFFmpeg(videoMeta->videoPixelFormat);
     cachedFrame_->width = videoMeta->width;
     cachedFrame_->height = videoMeta->height;
@@ -428,7 +428,7 @@ Status VideoFfmpegEncoderPlugin::FillAvFrame(const std::shared_ptr<Buffer>& inpu
 Status VideoFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer)
 {
     FALSE_RETURN_V_MSG_E(state_ == State::RUNNING,
-                      Status::ERROR_WRONG_STATE, "queue input buffer in wrong state");
+        Status::ERROR_WRONG_STATE, "queue input buffer in wrong state");
     bool isEos = false;
     if (inputBuffer == nullptr || (inputBuffer->flag & BUFFER_FLAG_EOS) != 0) {
         isEos = true;
@@ -454,11 +454,11 @@ Status VideoFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
 Status VideoFfmpegEncoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& packetBuffer)
 {
     FALSE_RETURN_V_MSG_E(cachedPacket_->data != nullptr, Status::ERROR_UNKNOWN,
-                      "avcodec_receive_packet() packet data is empty");
+        "avcodec_receive_packet() packet data is empty");
     auto frameBufferMem = packetBuffer->GetMemory();
     FALSE_RETURN_V_MSG_E(frameBufferMem->Write(cachedPacket_->data, cachedPacket_->size, 0) ==
-                      static_cast<size_t>(cachedPacket_->size), Status::ERROR_UNKNOWN,
-                      "copy packet data to buffer fail");
+        static_cast<size_t>(cachedPacket_->size), Status::ERROR_UNKNOWN,
+        "copy packet data to buffer fail");
     if (cachedPacket_->flags & AV_PKT_FLAG_KEY) {
         MEDIA_LOG_D("It is key frame");
     }
@@ -477,7 +477,7 @@ Status VideoFfmpegEncoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& 
 Status VideoFfmpegEncoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffer>& packetBuffer)
 {
     FALSE_RETURN_V_MSG_E(state_ == State::RUNNING, Status::ERROR_WRONG_STATE,
-                      "encode task in wrong state");
+        "encode task in wrong state");
     Status status;
     auto ret = avcodec_receive_packet(avCodecContext_.get(), cachedPacket_.get());
     if (ret >= 0) {

@@ -53,7 +53,7 @@ FileFdSinkPlugin::FileFdSinkPlugin(std::string name)
 
 Status FileFdSinkPlugin::SetSink(const MediaSink& sink)
 {
-    FALSE_RETURN_V((sink.GetProtocolType() == ProtocolType::FD && sink.GetFd() != -1),Status::ERROR_INVALID_DATA);
+    FALSE_RETURN_V((sink.GetProtocolType() == ProtocolType::FD && sink.GetFd() != -1), Status::ERROR_INVALID_DATA);
     fd_ =  sink.GetFd();
     return Status::OK;
 }

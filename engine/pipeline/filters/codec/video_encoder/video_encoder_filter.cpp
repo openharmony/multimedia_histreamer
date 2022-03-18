@@ -369,7 +369,7 @@ ErrorCode VideoEncoderFilter::ConfigurePluginOutputBuffers()
 ErrorCode VideoEncoderFilter::ConfigurePlugin()
 {
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->SetDataCallback(dataCallback_)),
-                                   "Set plugin callback fail");
+        "Set plugin callback fail");
     FAIL_RETURN_MSG(ConfigurePluginParams(), "Configure plugin params error");
     FAIL_RETURN_MSG(ConfigurePluginOutputBuffers(), "Configure plugin output buffers error");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
