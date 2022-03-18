@@ -143,6 +143,7 @@ int32_t HiPlayerImpl::Prepare()
 
 int HiPlayerImpl::PrepareAsync()
 {
+    (void)fsm_.SendEventAsync(Intent::PREPARE);
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 
