@@ -198,6 +198,7 @@ int32_t MetaIDStringiness(char* buf, size_t maxLen, const char* name, const char
     }
     return -1;
 }
+
 using CapStrnessFunc = std::function<int32_t(char*, size_t, const char*, const char*, const Plugin::ValueType&)>;
 
 std::map<Plugin::MetaID, CapStrnessFunc> g_metaStrnessMap = {
