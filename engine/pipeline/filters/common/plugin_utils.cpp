@@ -242,7 +242,7 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::Co
         codeConfigStr += ", ";
     }
     codeConfigStr = codeConfigStr.substr(0, codeConfigStr.find_last_of(','));
-    return SnPrintf(buf, maxLen, "{%s}", codeConfigStr.c_str());
+    return snprintf_truncated_s(buf, maxLen, "{%s}", codeConfigStr.c_str());
 }
 
 template<typename T>
