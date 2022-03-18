@@ -141,11 +141,11 @@ bool AudioEncoderFilter::Configure(const std::string& inPort, const std::shared_
     PROFILE_BEGIN("Audio encoder configure begin");
     MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
     FALSE_RETURN_V_MSG_E(plugin_ != nullptr && pluginInfo_ != nullptr, false,
-                      "can't configure encoder when no plugin available");
+        "can't configure encoder when no plugin available");
     auto thisMeta = std::make_shared<Plugin::Meta>();
     // todo how to decide the caps ?
     FALSE_RETURN_V_MSG_E(MergeMetaWithCapability(*upstreamMeta, pluginInfo_->outCaps[0], *thisMeta), false,
-                      "can't configure encoder plugin since meta is not compatible with negotiated caps");
+        "can't configure encoder plugin since meta is not compatible with negotiated caps");
     auto targetOutPort = GetRouteOutPort(inPort);
     FALSE_RETURN_V_MSG_E(targetOutPort != nullptr, false, "encoder out port is not found");
     auto err = ConfigureToStartPluginLocked(thisMeta);

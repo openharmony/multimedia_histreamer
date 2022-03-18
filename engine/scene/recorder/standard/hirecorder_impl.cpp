@@ -542,8 +542,9 @@ ErrorCode HiRecorderImpl::DoConfigureOther(const HstRecParam& param) const
             auto dirPath = ptr->path;
             std::regex reg("\\\\");
             dirPath= std::regex_replace(dirPath, reg, "/");
-            FALSE_RETURN_V_MSG_E(!OSAL::FileSystem::IsRegularFile(dirPath) && OSAL::FileSystem::MakeMultipleDir(dirPath),
-                                 ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "OutFilePath is not a valid directory path");
+            FALSE_RETURN_V_MSG_E(!OSAL::FileSystem::IsRegularFile(dirPath)
+                && OSAL::FileSystem::MakeMultipleDir(dirPath),
+                ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "OutFilePath is not a valid directory path");
             std::string filePath;
             FALSE_RETURN_V_MSG_E(GenerateFilePath(dirPath, outputFormatType_, filePath),
                                  ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "generate file path error");

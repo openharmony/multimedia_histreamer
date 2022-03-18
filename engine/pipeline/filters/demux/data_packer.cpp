@@ -195,7 +195,7 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
                 PUBLIC_LOG_U32 ")...", offset, size);
     DUMP_BUFFER2LOG("GetRange Input", bufferPtr, 0);
     FALSE_RETURN_V_MSG_E(bufferPtr && (!bufferPtr->IsEmpty()) && bufferPtr->GetMemory()->GetCapacity() >= size, false,
-                      "GetRange input bufferPtr empty or capacity not enough.");
+        "GetRange input bufferPtr empty or capacity not enough.");
 
     OSAL::ScopedLock lock(mutex_);
     if (que_.empty()) {
@@ -228,7 +228,7 @@ bool DataPacker::GetRange(uint32_t size, AVBufferPtr& bufferPtr)
 {
     MEDIA_LOG_D("DataPacker live play GetRange(size) = (" PUBLIC_LOG_U32 ")...", size);
     FALSE_RETURN_V_MSG_E(bufferPtr && (!bufferPtr->IsEmpty()) && bufferPtr->GetMemory()->GetCapacity() >= size, false,
-                      "Live play GetRange input bufferPtr empty or capacity not enough.");
+        "Live play GetRange input bufferPtr empty or capacity not enough.");
 
     OSAL::ScopedLock lock(mutex_);
     if (que_.empty()) {

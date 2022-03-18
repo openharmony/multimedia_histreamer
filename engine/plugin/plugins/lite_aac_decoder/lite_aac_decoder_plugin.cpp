@@ -82,7 +82,7 @@ void UpdateOutCaps(CodecPluginDef& definition)
 
 void UpdatePluginDefinition(CodecPluginDef& definition)
 {
-    UpdateInCaps( definition);
+    UpdateInCaps(definition);
     UpdateOutCaps(definition);
 }
 }
@@ -313,7 +313,8 @@ Status LiteAACDecoderPlugin::AudioDecoderAACMp4Process(std::shared_ptr<Buffer> i
         err = aac_decoder_get_frame(reinterpret_cast<signed short *>(outData->GetWritableAddr(packet_length, 0)),
             PCM_SIZE / 2, 0); // 2
         if (err != 0) {
-            MEDIA_LOG_E("aac_decoder_get_frame error is " PUBLIC_LOG_D32 " remain_size " PUBLIC_LOG_D32, err, remain_size);
+            MEDIA_LOG_E("aac_decoder_get_frame error is " PUBLIC_LOG_D32 " remain_size " PUBLIC_LOG_D32, err,
+                remain_size);
             return Status::ERROR_UNKNOWN;
         }
     } else {

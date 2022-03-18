@@ -168,9 +168,9 @@ void SdlVideoSinkPlugin::UpdateTextureRect()
     textureRect_.x = (static_cast<int32_t>(windowWidth_) - textureRect_.w) / 2;  // 2
     textureRect_.y = (static_cast<int32_t>(windowHeight_) - textureRect_.h) / 2; // 2
     MEDIA_LOG_D("pixelWH[" PUBLIC_LOG_U32 ", " PUBLIC_LOG_U32 "], windowWH[" PUBLIC_LOG_U32 ", " PUBLIC_LOG_U32
-                "], textureWH[" PUBLIC_LOG_U32 ", " PUBLIC_LOG_U32 "], textureXY[" PUBLIC_LOG_U32 ", "
-               PUBLIC_LOG_U32 "]", pixelWidth_, pixelHeight_,
-               windowWidth_, windowHeight_, textureRect_.w, textureRect_.h, textureRect_.x, textureRect_.y);
+        "], textureWH[" PUBLIC_LOG_U32 ", " PUBLIC_LOG_U32 "], textureXY[" PUBLIC_LOG_U32 ", "
+        PUBLIC_LOG_U32 "]", pixelWidth_, pixelHeight_,
+        windowWidth_, windowHeight_, textureRect_.w, textureRect_.h, textureRect_.x, textureRect_.y);
 }
 
 Status SdlVideoSinkPlugin::CreateSdlDispContext()

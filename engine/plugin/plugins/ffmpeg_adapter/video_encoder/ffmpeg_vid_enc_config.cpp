@@ -89,7 +89,7 @@ Status SetVideoPixelFormat(AVCodecContext& codecContext, const std::map<Tag, Val
     VideoPixelFormat pixelFormat = VideoPixelFormat::UNKNOWN;
     ASSIGN_IF_NOT_NULL(FindTagInMap<VideoPixelFormat>(Tag::VIDEO_PIXEL_FORMAT, tagStore), pixelFormat);
     FALSE_RETURN_V_MSG_E(pixelFormat != VideoPixelFormat::UNKNOWN,
-                      Status::ERROR_INVALID_PARAMETER,  "pixel format is invalid");
+        Status::ERROR_INVALID_PARAMETER,  "pixel format is invalid");
     codecContext.pix_fmt = ConvertPixelFormatToFFmpeg(pixelFormat);
     int32_t bpp = 0;
     const AVPixFmtDescriptor* desc = av_pix_fmt_desc_get(codecContext.pix_fmt);

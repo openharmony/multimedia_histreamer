@@ -43,7 +43,7 @@ const std::set<AVCodecID> g_supportedCodec = {
     AV_CODEC_ID_VORBIS,
     AV_CODEC_ID_APE,
 };
-std::map<AVCodecID,uint32_t> samplesPerFrameMap = {
+std::map<AVCodecID, uint32_t> samplesPerFrameMap = {
     {AV_CODEC_ID_MP3, 1152}, // 1152
     {AV_CODEC_ID_FLAC, 8192}, // 8192
     {AV_CODEC_ID_AAC, 2048},  // 2048
