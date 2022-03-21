@@ -1,5 +1,5 @@
 {
-    "name": "@ohos/multimedia_histreamer",
+    "name": "@ohos/histreamer",
     "description": "Histreamer engine.",
     "optional": "true",
     "version": "3.1",
