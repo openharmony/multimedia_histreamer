@@ -143,8 +143,16 @@ int32_t HiPlayerImpl::Prepare()
 
 int HiPlayerImpl::PrepareAsync()
 {
-    (void)fsm_.SendEventAsync(Intent::PREPARE);
-    return TransErrorCode(ErrorCode::SUCCESS);
+    MEDIA_LOG_D("Prepare async entered, current fsm state: " PUBLIC_LOG_S, fsm_.GetCurrentState().c_str());
+    PROFILE_BEGIN();
+    auto ret = fsm_.SendEventAsync(Intent::PREPARE);
+    if (ret != ErrorCode::SUCCESS) {
+        PROFILE_END("Prepare async failed,");
+        MEDIA_LOG_E("Prepare async failed with error " PUBLIC_LOG_D32, ret);
+    } else {
+        PROFILE_END("Prepare async successfully,");
+    }
+    return TransErrorCode(ret);
 }
 
 int32_t HiPlayerImpl::Play()
@@ -217,7 +225,7 @@ int32_t HiPlayerImpl::SetVideoSurface(sptr<Surface> surface)
 #ifdef VIDEO_SUPPORT
     return TransErrorCode(videoSink_->SetVideoSurface(surface));
 #else
-    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+    return TransErrorCode(ErrorCode::SUCCESS);
 #endif
 }
 
