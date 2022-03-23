@@ -81,11 +81,11 @@ int32_t IntervalCapKeyStringiness(char* buf, size_t maxLen, const char* name, co
     auto item = Plugin::AnyCast<Plugin::IntervalCapability<T>>(&val);
     RETURN_IF_FAILED(Stringiness(buf + pos, maxLen - pos, name, item->first), -1, ret);
     pos += ret;
-    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos , maxLen - pos, ", "), -1, ret);
+    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos, maxLen - pos, ", "), -1, ret);
     pos += ret;
     RETURN_IF_FAILED(Stringiness(buf + pos, maxLen - pos, name, item->second), -1, ret);
     pos += ret;
-    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos , maxLen - pos, "]"), -1, ret);
+    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos, maxLen - pos, "]"), -1, ret);
     return pos + ret;
 }
 
@@ -105,14 +105,14 @@ int32_t DiscreteCapKeyStringiness(char* buf, size_t maxLen, const char* name, co
     for (; i < length - 1; i++) {
         RETURN_IF_FAILED(Stringiness<T>(buf + pos, maxLen - pos, name, item->at(i)), -1, ret);
         pos += ret;
-        RETURN_IF_FAILED(snprintf_truncated_s(buf + pos , maxLen - pos, ", "), -1, ret);
+        RETURN_IF_FAILED(snprintf_truncated_s(buf + pos, maxLen - pos, ", "), -1, ret);
         pos += ret;
     }
     if (i == length -1) {
         RETURN_IF_FAILED(Stringiness<T>(buf + pos, maxLen - pos, name, item->at(i)), -1, ret);
         pos += ret;
     }
-    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos , maxLen - pos, "}"), -1, ret);
+    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos, maxLen - pos, "}"), -1, ret);
     return pos + ret;
 }
 
@@ -232,7 +232,7 @@ template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::CodecConfig& val)
 {
     auto int2hex = [] (int i) {
-        std::stringstream ss{};
+        std::stringstream ss {};
         ss << "0x"<< std::hex << i;
         return ss.str();
     };
