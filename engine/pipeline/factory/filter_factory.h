@@ -25,9 +25,9 @@
 
 namespace OHOS {
 namespace Media {
-class FilterFactory {
-    using InstanceGenerator = std::function<std::shared_ptr<Pipeline::Filter>(const std::string&)>;
+using InstanceGenerator = std::function<std::shared_ptr<Pipeline::Filter>(const std::string&)>;
 
+class FilterFactory {
 public:
     ~FilterFactory() = default;
 
@@ -70,6 +70,12 @@ public:
     {
         FilterFactory::Instance().RegisterFilter<T>(name);
     }
+
+    AutoRegisterFilter(const std::string& name, const InstanceGenerator& generator)
+    {
+        FilterFactory::Instance().RegisterGenerator(name, generator);
+    }
+
     ~AutoRegisterFilter() = default;
 };
 } // namespace Media
