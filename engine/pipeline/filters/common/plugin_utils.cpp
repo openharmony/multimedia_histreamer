@@ -163,12 +163,6 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const uint64_t& 
 }
 
 template<>
-MEDIA_UNUSED int32_t Stringiness(char* buf, size_t maxLen, const char* name, const std::vector<int8_t>& val)
-{
-    return snprintf_truncated_s(buf, maxLen, "%p", val.data());
-}
-
-template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::AudioSampleFormat& val)
 {
     if (Pipeline::g_auSampleFmtStrMap.count(val) == 0) {
