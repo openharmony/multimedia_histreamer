@@ -132,6 +132,7 @@ if (WIN32)
             avutil
             avfilter
             swresample
+            swscale
             SDL2
             curl
     )

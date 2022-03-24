@@ -91,13 +91,10 @@ private:
     bool isFlushing_ {false};
     OSAL::ConditionVariable startWorkingCondition_ {};
     OSAL::Mutex mutex_;
-
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+#ifndef OHOS_LITE
     sptr<Surface> surface_;
 #endif
-
     std::shared_ptr<Plugin::VideoSink> plugin_ {nullptr};
-
     int64_t frameCnt_ {0};
 };
 } // namespace Pipeline

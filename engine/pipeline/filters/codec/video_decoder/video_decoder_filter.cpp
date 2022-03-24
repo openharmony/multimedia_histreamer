@@ -27,12 +27,15 @@
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
 #include "plugin/common/surface_allocator.h"
+#ifndef OHOS_LITE
+#include "plugin/common/surface_memory.h"
+#endif
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-const uint32_t DEFAULT_IN_BUFFER_POOL_SIZE = 200;
-const uint32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 8;
+const uint32_t DEFAULT_IN_BUFFER_POOL_SIZE = 10;
+const uint32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 10;
 const float VIDEO_PIX_DEPTH = 1.5;
 static uint32_t VIDEO_ALIGN_SIZE = 16;
 static uint32_t DEFAULT_TRY_DECODE_TIME = 10;
@@ -184,6 +187,7 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
         return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
     });
     PROFILE_END("video decoder negotiate end");
+    MEDIA_LOG_D("video decoder negotiate success");
     return res;
 }
 
@@ -203,11 +207,7 @@ bool VideoDecoderFilter::Configure(const std::string& inPort, const std::shared_
         return false;
     }
     auto targetOutPort = GetRouteOutPort(inPort);
-    if (targetOutPort == nullptr) {
-        MEDIA_LOG_E("decoder out port is not found");
-        return false;
-    }
-    if (!targetOutPort->Configure(thisMeta)) {
+    if (targetOutPort == nullptr || !targetOutPort->Configure(thisMeta)) {
         MEDIA_LOG_E("decoder filter downstream Configure failed");
         return false;
     }
@@ -233,19 +233,63 @@ bool VideoDecoderFilter::Configure(const std::string& inPort, const std::shared_
     return true;
 }
 
-std::shared_ptr<Allocator> VideoDecoderFilter::DecideOutPutAllocator()
+void VideoDecoderFilter::DecideOutPutAllocator()
 {
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+#ifndef OHOS_LITE
     // Use sink allocator first, zero copy while passing data
     Plugin::Tag tag = Plugin::Tag::BUFFER_ALLOCATOR;
     auto ite = sinkParams_.find(tag);
     if (ite != std::end(sinkParams_)) {
         if (ite->second.SameTypeWith(typeid(std::shared_ptr<Plugin::SurfaceAllocator>))) {
-            return Plugin::AnyCast<std::shared_ptr<Plugin::SurfaceAllocator>>(ite->second);
+            MEDIA_LOG_D("Get SurfaceAllocator from sink");
+            outAllocator_ = Plugin::AnyCast<std::shared_ptr<Plugin::SurfaceAllocator>>(ite->second);
+            return;
         }
     }
 #endif
-    return plugin_->GetAllocator();
+    outAllocator_ = plugin_->GetAllocator();
+}
+
+ErrorCode VideoDecoderFilter::GetOutputBufferSize()
+{
+    //YUV420:size = stride * height * 1.5
+    uint32_t stride = Plugin::AlignUp(vdecFormat_.width, VIDEO_ALIGN_SIZE);
+    if (vdecFormat_.format == Plugin::VideoPixelFormat::YUV420P ||
+        vdecFormat_.format == Plugin::VideoPixelFormat::NV21 ||
+        vdecFormat_.format == Plugin::VideoPixelFormat::NV12) {
+        bufferSize_ = static_cast<uint32_t>(Plugin::AlignUp(stride, VIDEO_ALIGN_SIZE) *
+                                            Plugin::AlignUp(vdecFormat_.height, VIDEO_ALIGN_SIZE) * VIDEO_PIX_DEPTH);
+        MEDIA_LOG_D("YUV output buffer size: " PUBLIC_LOG_U32, bufferSize_);
+    } else if (vdecFormat_.format == Plugin::VideoPixelFormat::RGBA ||
+               vdecFormat_.format == Plugin::VideoPixelFormat::ARGB ||
+               vdecFormat_.format == Plugin::VideoPixelFormat::ABGR ||
+               vdecFormat_.format == Plugin::VideoPixelFormat::BGRA) {
+        bufferSize_ = static_cast<uint32_t>(Plugin::AlignUp(stride, VIDEO_ALIGN_SIZE) *
+                                            Plugin::AlignUp(vdecFormat_.height, VIDEO_ALIGN_SIZE) * 4); //4: 32bit
+        MEDIA_LOG_D("RGBA output buffer size: " PUBLIC_LOG_U32, vdecFormat_.format);
+    } else {
+        // need to check video sink support and calc buffer size
+        MEDIA_LOG_E("Unsupported video pixel format: " PUBLIC_LOG_U32, vdecFormat_.format);
+        return ErrorCode::ERROR_UNIMPLEMENTED;
+    }
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode VideoDecoderFilter::CheckBufferValidity(std::shared_ptr<AVBuffer>& buffer)
+{
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "buffer is invalid");
+    auto memory = buffer->GetMemory();
+    FALSE_RETURN_V_MSG_E(memory != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "memory is invalid");
+#ifndef OHOS_LITE
+    if(memory->GetMemoryType() != Plugin::MemoryType::SHARE_MEMORY) {
+        return ErrorCode::SUCCESS;
+    }
+    std::shared_ptr<Plugin::SurfaceMemory> surfaceMemory =
+            Plugin::ReinterpretPointerCast<Plugin::SurfaceMemory>(memory);
+    auto surfaceBuffer = surfaceMemory->GetSurfaceBuffer();
+    FALSE_RETURN_V_MSG_E(surfaceBuffer != nullptr, ErrorCode::ERROR_NO_MEMORY, "get surface buffer fail");
+#endif
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
@@ -254,34 +298,26 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
     if (GetPluginParameterLocked(Tag::REQUIRED_OUT_BUFFER_CNT, bufferCnt) != ErrorCode::SUCCESS) {
         bufferCnt = DEFAULT_OUT_BUFFER_POOL_SIZE;
     }
+    MEDIA_LOG_D("bufferCnt: " PUBLIC_LOG_U32, bufferCnt);
     outBufPool_ = std::make_shared<BufferPool<AVBuffer>>(bufferCnt);
-    // YUV420: size = stride * height * 1.5
-    uint32_t bufferSize = 0;
-    uint32_t stride = Plugin::AlignUp(vdecFormat_.width, VIDEO_ALIGN_SIZE);
-    if (vdecFormat_.format == Plugin::VideoPixelFormat::YUV420P ||
-        vdecFormat_.format == Plugin::VideoPixelFormat::NV21 ||
-        vdecFormat_.format == Plugin::VideoPixelFormat::NV12) {
-        bufferSize = static_cast<uint32_t>(Plugin::AlignUp(stride, VIDEO_ALIGN_SIZE) *
-                                           Plugin::AlignUp(vdecFormat_.height, VIDEO_ALIGN_SIZE) * VIDEO_PIX_DEPTH);
-        MEDIA_LOG_D("Output buffer size: " PUBLIC_LOG_U32, bufferSize);
-    } else {
-        // need to check video sink support and calc buffer size
-        MEDIA_LOG_E("Unsupported video pixel format: " PUBLIC_LOG_U32, vdecFormat_.format);
-        return ErrorCode::ERROR_UNIMPLEMENTED;
-    }
-
-    std::shared_ptr<Allocator> outAllocator = DecideOutPutAllocator();
-    if (outAllocator == nullptr) {
+    FALSE_RETURN_V_MSG_E(GetOutputBufferSize() == ErrorCode::SUCCESS, ErrorCode::ERROR_UNIMPLEMENTED,
+                         "get output buffer size fail");
+    DecideOutPutAllocator();
+    if (outAllocator_ == nullptr) {
         MEDIA_LOG_I("plugin doest not support out allocator, using framework allocator");
-        outBufPool_->Init(bufferSize, Plugin::BufferMetaType::VIDEO);
+        outBufPool_->Init(bufferSize_, Plugin::BufferMetaType::VIDEO);
     } else {
         MEDIA_LOG_I("using plugin output allocator");
         for (size_t cnt = 0; cnt < bufferCnt; cnt++) {
             auto buf = CppExt::make_unique<AVBuffer>(Plugin::BufferMetaType::VIDEO);
-            buf->AllocMemory(outAllocator, bufferSize);
+            if (buf == nullptr || buf->AllocMemory(outAllocator_, bufferSize_) == nullptr) {
+                MEDIA_LOG_I("alloc buffer " PUBLIC_LOG_U32, " fail", static_cast<uint32_t>(cnt));
+                continue;
+            }
             outBufPool_->Append(std::move(buf));
         }
     }
+    MEDIA_LOG_D("AllocateOutputBuffers success");
     return ErrorCode::SUCCESS;
 }
 
@@ -328,8 +364,8 @@ ErrorCode VideoDecoderFilter::ConfigurePluginParams()
         }
     }
     MEDIA_LOG_D("ConfigurePluginParams success, mime: " PUBLIC_LOG_S ", width: " PUBLIC_LOG_U32 ", height: "
-              PUBLIC_LOG_U32 ", format: " PUBLIC_LOG_U32,
-              vdecFormat_.mime.c_str(), vdecFormat_.width, vdecFormat_.height, vdecFormat_.format);
+                PUBLIC_LOG_U32 ", format: " PUBLIC_LOG_U32,
+                vdecFormat_.mime.c_str(), vdecFormat_.width, vdecFormat_.height, vdecFormat_.format);
     return ErrorCode::SUCCESS;
 }
 
@@ -337,12 +373,12 @@ ErrorCode VideoDecoderFilter::ConfigurePluginOutputBuffers()
 {
     ErrorCode err = ErrorCode::SUCCESS;
     while (!outBufPool_->Empty()) {
-        auto ptr = outBufPool_->AllocateBuffer();
-        if (ptr == nullptr) {
+        auto buf = outBufPool_->AllocateBuffer();
+        if (CheckBufferValidity(buf) != ErrorCode::SUCCESS) {
             MEDIA_LOG_W("cannot allocate buffer in buffer pool");
             continue;
         }
-        err = TranslatePluginStatus(plugin_->QueueOutputBuffer(ptr, -1));
+        err = TranslatePluginStatus(plugin_->QueueOutputBuffer(buf, -1));
         if (err != ErrorCode::SUCCESS) {
             MEDIA_LOG_E("queue output buffer error");
         }
@@ -476,23 +512,26 @@ void VideoDecoderFilter::HandleOneFrame(const std::shared_ptr<AVBuffer>& data)
 
 void VideoDecoderFilter::FinishFrame()
 {
-    MEDIA_LOG_D("begin finish frame");
-    auto ptr = outBufQue_->Pop();
-    if (ptr) {
-        auto oPort = outPorts_[0];
-        if (oPort->GetWorkMode() == WorkMode::PUSH) {
-            oPort->PushData(ptr, -1);
-        } else {
-            MEDIA_LOG_W("decoder out port works in pull mode");
-        }
-        ptr.reset();
-        auto oPtr = outBufPool_->AllocateBuffer();
-        if (oPtr != nullptr) {
-            oPtr->Reset();
-            plugin_->QueueOutputBuffer(oPtr, 0);
-        }
+    auto voutBuffer = outBufQue_->Pop();
+    if (voutBuffer == nullptr) {
+        MEDIA_LOG_E("outBufQue_ pop buffer fail");
+        return;
     }
-    MEDIA_LOG_D("end finish frame");
+    auto oPort = outPorts_[0];
+    if (oPort->GetWorkMode() == WorkMode::PUSH) {
+        oPort->PushData(voutBuffer, -1);
+    } else {
+        MEDIA_LOG_W("decoder out port works in pull mode");
+        return;
+    }
+    voutBuffer.reset();
+    auto newOutBuffer = outBufPool_->AllocateBuffer();
+    //trigger surface memory to request surface buffer again when it is surface buffer
+    if (CheckBufferValidity(newOutBuffer) == ErrorCode::SUCCESS) {
+        newOutBuffer->Reset();
+        plugin_->QueueOutputBuffer(newOutBuffer, 0);
+    }
+    MEDIA_LOG_D("FinishFrame success");
 }
 
 void VideoDecoderFilter::OnInputBufferDone(const std::shared_ptr<AVBuffer>& buffer)

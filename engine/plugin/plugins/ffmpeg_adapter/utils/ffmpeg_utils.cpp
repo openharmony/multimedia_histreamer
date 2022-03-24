@@ -120,6 +120,10 @@ std::map<VideoPixelFormat, AVPixelFormat> g_pixelFormatMap = {
     {VideoPixelFormat::YUYV422, AV_PIX_FMT_YUYV422},
     {VideoPixelFormat::YUV422P, AV_PIX_FMT_YUV422P},
     {VideoPixelFormat::YUV444P, AV_PIX_FMT_YUV444P},
+    {VideoPixelFormat::RGBA,AV_PIX_FMT_RGBA},
+    {VideoPixelFormat::ARGB,AV_PIX_FMT_ARGB},
+    {VideoPixelFormat::ABGR,AV_PIX_FMT_ABGR},
+    {VideoPixelFormat::BGRA,AV_PIX_FMT_BGRA},
     {VideoPixelFormat::RGB24, AV_PIX_FMT_RGB24},
     {VideoPixelFormat::BGR24, AV_PIX_FMT_BGR24},
     {VideoPixelFormat::PAL8, AV_PIX_FMT_PAL8},
@@ -387,7 +391,8 @@ bool IsYuvFormat(AVPixelFormat format)
 
 bool IsRgbFormat(AVPixelFormat format)
 {
-    return (format == AV_PIX_FMT_RGB24 || format == AV_PIX_FMT_BGR24);
+    return (format == AV_PIX_FMT_ABGR || format == AV_PIX_FMT_ARGB || format == AV_PIX_FMT_RGBA ||
+            format == AV_PIX_FMT_BGRA || format == AV_PIX_FMT_RGB24 || format == AV_PIX_FMT_BGR24);
 }
 
 VideoH264Profile ConvH264ProfileFromFfmpeg(int32_t ffmpegProfile)

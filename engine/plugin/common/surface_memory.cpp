@@ -25,23 +25,35 @@ namespace Plugin {
 SurfaceMemory::SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocator, size_t align)
     : Memory(capacity, std::move(allocator), align, MemoryType::SURFACE_BUFFER, false)
 {
-    size_t allocSize = align ? (capacity + align - 1) : capacity;
-    FALSE_RETURN(this->allocator != nullptr && this->allocator->GetMemoryType() == MemoryType::SURFACE_BUFFER);
-    auto surfaceAllocator = std::dynamic_pointer_cast<SurfaceAllocator>(this->allocator);
-    surfaceBuffer_ = surfaceAllocator->AllocSurfaceBuffer(allocSize);
+    bufferSize_ = align ? (capacity + align - 1) : capacity;
+    if (this->allocator != nullptr && this->allocator->GetMemoryType() == MemoryType::SURFACE_BUFFER &&
+        bufferSize_ != 0) {
+        surfaceAllocator_ = ReinterpretPointerCast<SurfaceAllocator>(this->allocator);
+        surfaceBuffer_ = surfaceAllocator_->AllocSurfaceBuffer(bufferSize_);
+    }
 }
 
 SurfaceMemory::~SurfaceMemory()
 {
-    auto surfaceAllocator = std::dynamic_pointer_cast<SurfaceAllocator>(this->allocator);
-    if (surfaceAllocator && surfaceBuffer_) {
-        surfaceAllocator->FreeSurfaceBuffer(surfaceBuffer_);
-    }
+    ReleaseSurfaceBuffer();
 }
 
 sptr<SurfaceBuffer> SurfaceMemory::GetSurfaceBuffer()
 {
+    if (surfaceBuffer_ != nullptr) {
+        return surfaceBuffer_;
+    }
+    surfaceAllocator_ = ReinterpretPointerCast<SurfaceAllocator>(this->allocator);
+    if (surfaceAllocator_ != nullptr && bufferSize_ != 0) {
+        surfaceBuffer_ = surfaceAllocator_->AllocSurfaceBuffer(bufferSize_);
+        MEDIA_LOG_D("Realloc new surface buffer success");
+    }
     return surfaceBuffer_;
+}
+
+void SurfaceMemory::ReleaseSurfaceBuffer()
+{
+    surfaceBuffer_ = nullptr;
 }
 
 void SurfaceMemory::SetFenceFd(int32_t& fd)

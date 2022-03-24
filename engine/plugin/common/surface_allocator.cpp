@@ -14,6 +14,9 @@
  */
 
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+
+#define HST_LOG_TAG "SurfaceAllocator"
+
 #include "surface_allocator.h"
 #include "foundation/log.h"
 #include "display_type.h"
@@ -22,9 +25,17 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-SurfaceAllocator::SurfaceAllocator(sptr<Surface> surface) : Allocator(MemoryType::SURFACE_BUFFER)
+constexpr int32_t DEFAULT_SURFACE_WIDTH = 640;
+constexpr int32_t DEFAULT_SURFACE_HEIGHT = 480;
+constexpr int32_t DEFAULT_SURFACE_STRIDE_ALIGN = 8;
+
+SurfaceAllocator::SurfaceAllocator(sptr<Surface> surface)
+    : Allocator(MemoryType::SURFACE_BUFFER),
+    surface_(surface)
 {
-    surface_ = surface;
+    requestConfig_ = {
+            DEFAULT_SURFACE_WIDTH, DEFAULT_SURFACE_HEIGHT, DEFAULT_SURFACE_STRIDE_ALIGN,
+            PixelFormat ::PIXEL_FMT_RGBA_8888, HBM_USE_CPU_READ | HBM_USE_CPU_WRITE | HBM_USE_MEM_DMA, 0};
 }
 
 sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer(size_t size)
@@ -33,6 +44,9 @@ sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer(size_t size)
         MEDIA_LOG_E("surface is nullptr");
         return nullptr;
     }
+    MEDIA_LOG_D("SurfaceAllocator Config width: " PUBLIC_LOG_D32 ", height :" PUBLIC_LOG_D32 ", align: " PUBLIC_LOG_D32
+                ", format: " PUBLIC_LOG_D32,
+                requestConfig_.width, requestConfig_.height, requestConfig_.strideAlignment, requestConfig_.format);
     OHOS::sptr<OHOS::SurfaceBuffer> surfaceBuffer = nullptr;
     int32_t fence = -1;
     auto ret = surface_->RequestBuffer(surfaceBuffer, fence, requestConfig_);
@@ -47,16 +61,14 @@ sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer(size_t size)
     sptr<SyncFence> autoFence = new(std::nothrow) SyncFence(fence);
     if (autoFence != nullptr) {
         autoFence->Wait(100); // 100ms
+        MEDIA_LOG_D("request surface buffer success");
     }
     return surfaceBuffer;
 }
 
 void SurfaceAllocator::FreeSurfaceBuffer(sptr<SurfaceBuffer> buffer)
 {
-    auto ret = surface_->CancelBuffer(buffer);
-    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        MEDIA_LOG_E("surface CancelBuffer fail");
-    }
+    buffer = nullptr;
 }
 
 void* SurfaceAllocator::Alloc(size_t size)
@@ -69,11 +81,11 @@ void SurfaceAllocator::Free(void* ptr) // NOLINT: void*
     (void)ptr;
 }
 
-void SurfaceAllocator::Config(int32_t width, int32_t height, int32_t usage, int32_t format, int32_t strideAlign)
+void SurfaceAllocator::Config(int32_t width, int32_t height, int32_t usage, int32_t format, int32_t strideAlign,
+                              int32_t timeout)
 {
     requestConfig_ = {
-            width, height, strideAlign, format,
-            usage | HBM_USE_CPU_READ | HBM_USE_CPU_WRITE | HBM_USE_MEM_DMA, 0
+        width, height, strideAlign, format, usage, timeout
     };
 }
 } // namespace Plugin

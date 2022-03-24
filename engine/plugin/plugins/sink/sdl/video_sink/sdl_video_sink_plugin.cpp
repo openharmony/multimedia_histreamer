@@ -43,7 +43,7 @@ const Status SdlVideoRegister(const std::shared_ptr<Register>& reg)
     Capability cap(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
     cap.AppendDiscreteKeys<VideoPixelFormat>(
         Capability::Key::VIDEO_PIXEL_FORMAT,
-        {VideoPixelFormat::YUV420P, VideoPixelFormat::NV12, VideoPixelFormat::NV21});
+        {VideoPixelFormat::YUV420P, VideoPixelFormat::NV12, VideoPixelFormat::NV21, VideoPixelFormat::RGBA});
     definition.inCaps.emplace_back(cap);
     definition.creator = VideoSinkPluginCreator;
     return reg->AddPlugin(definition);
@@ -74,6 +74,14 @@ static uint32_t TranslatePixelFormat(const VideoPixelFormat pixelFormat)
         case VideoPixelFormat::BGR24:
             sdlFormat = SDL_PIXELFORMAT_BGR24;
             break;
+        case VideoPixelFormat::RGBA:
+            sdlFormat = SDL_PIXELFORMAT_ABGR8888;
+        case VideoPixelFormat::ARGB:
+            sdlFormat = SDL_PIXELFORMAT_BGRA8888;
+        case VideoPixelFormat::ABGR:
+            sdlFormat = SDL_PIXELFORMAT_RGBA8888;
+        case VideoPixelFormat::BGRA:
+            sdlFormat = SDL_PIXELFORMAT_ARGB8888;
         case VideoPixelFormat::YUV422P:
         case VideoPixelFormat::YUV444P:
         case VideoPixelFormat::YUV410P:

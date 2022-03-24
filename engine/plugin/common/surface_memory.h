@@ -20,6 +20,7 @@
 
 #include "refbase.h"
 #include "surface/surface.h"
+#include "surface_allocator.h"
 #include "plugin_buffer.h"
 
 namespace OHOS {
@@ -30,6 +31,8 @@ public:
     ~SurfaceMemory();
 
     sptr<SurfaceBuffer> GetSurfaceBuffer();
+
+    void ReleaseSurfaceBuffer();
 
     void SetFenceFd(int32_t& fd);
 
@@ -46,8 +49,12 @@ private:
     /// Surface buffer
     sptr<SurfaceBuffer> surfaceBuffer_;
 
+    std::shared_ptr<SurfaceAllocator> surfaceAllocator_ {nullptr};
+
     /// the fence fd for Surface
     int32_t fenceFd_ {-1};
+
+    size_t bufferSize_;
 
     friend class Buffer;
 };
