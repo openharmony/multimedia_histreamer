@@ -73,7 +73,11 @@ private:
 
     ErrorCode SetVideoDecoderFormat(const std::shared_ptr<const Plugin::Meta>& meta);
 
-    std::shared_ptr<Allocator> DecideOutPutAllocator();
+    ErrorCode CheckBufferValidity(std::shared_ptr<AVBuffer>& buffer);
+
+    void DecideOutPutAllocator();
+
+    ErrorCode GetOutputBufferSize();
 
     ErrorCode AllocateOutputBuffers();
 
@@ -97,6 +101,8 @@ private:
     Plugin::TagMap sinkParams_;
     VideoDecoderFormat vdecFormat_;
     DataCallbackImpl* dataCallback_ {nullptr};
+    std::shared_ptr<Allocator> outAllocator_ {nullptr};
+    uint32_t bufferSize_ {0};
 
     std::shared_ptr<OHOS::Media::OSAL::Task> handleFrameTask_ {nullptr};
     std::shared_ptr<OHOS::Media::OSAL::Task> pushTask_ {nullptr};

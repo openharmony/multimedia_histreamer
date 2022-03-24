@@ -25,15 +25,17 @@
 #include "osal/utils/util.h"
 #include "pipeline/core/clock_manager.h"
 #include "plugin/common/plugin_time.h"
-#include "plugin/common/surface_allocator.h"
 #include "utils/steady_clock.h"
+#ifndef OHOS_LITE
+#include "plugin/common/surface_allocator.h"
+#endif
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
 static AutoRegisterFilter<VideoSinkFilter> g_registerFilterHelper("builtin.player.videosink");
 
-const uint32_t VSINK_DEFAULT_BUFFER_NUM = 8;
+const uint32_t VSINK_DEFAULT_BUFFER_NUM = 10;
 
 VideoSinkFilter::VideoSinkFilter(const std::string& name) : FilterBase(name)
 {
@@ -96,7 +98,7 @@ ErrorCode VideoSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
 
 void VideoSinkFilter::HandleNegotiateParams(const Plugin::TagMap& upstreamParams, Plugin::TagMap& downstreamParams)
 {
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+#ifndef OHOS_LITE
     Plugin::Tag tag = Plugin::Tag::VIDEO_MAX_SURFACE_NUM;
     auto ite = upstreamParams.find(tag);
     if (ite != std::end(upstreamParams)) {
@@ -109,6 +111,7 @@ void VideoSinkFilter::HandleNegotiateParams(const Plugin::TagMap& upstreamParams
     }
     auto pluginAllocator = plugin_->GetAllocator();
     if (pluginAllocator != nullptr && pluginAllocator->GetMemoryType() == Plugin::MemoryType::SURFACE_BUFFER) {
+        MEDIA_LOG_D("plugin provide surface allocator");
         auto allocator = Plugin::ReinterpretPointerCast<Plugin::SurfaceAllocator>(pluginAllocator);
         downstreamParams.emplace(std::make_pair(Tag::BUFFER_ALLOCATOR, allocator));
     }
@@ -127,14 +130,12 @@ bool VideoSinkFilter::CreateVideoSinkPlugin(const std::shared_ptr<Plugin::Plugin
         }
         plugin_->Deinit();
     }
-
     plugin_ = Plugin::PluginManager::Instance().CreateVideoSinkPlugin(selectedPluginInfo->name);
     if (plugin_ == nullptr) {
         MEDIA_LOG_E("cannot create plugin " PUBLIC_LOG_S, selectedPluginInfo->name.c_str());
         return false;
     }
-
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+#ifndef OHOS_LITE
     if (surface_ != nullptr) {
         auto ret = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_SURFACE, surface_));
         if (ret != ErrorCode::SUCCESS) {
@@ -143,7 +144,6 @@ bool VideoSinkFilter::CreateVideoSinkPlugin(const std::shared_ptr<Plugin::Plugin
         }
     }
 #endif
-
     auto err = TranslatePluginStatus(plugin_->Init());
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("plugin " PUBLIC_LOG_S " init error", selectedPluginInfo->name.c_str());
@@ -184,6 +184,7 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort,
     }
     HandleNegotiateParams(upstreamParams, downstreamParams);
     PROFILE_END("video sink negotiate end");
+    MEDIA_LOG_D("video sink negotiate success");
     return true;
 }
 
@@ -270,26 +271,23 @@ bool VideoSinkFilter::DoSync(int64_t pts) const
 
 void VideoSinkFilter::RenderFrame()
 {
-    uint64_t latencyNano {0};
     MEDIA_LOG_D("RenderFrame called");
     auto oneBuffer = inBufQueue_->Pop();
     if (oneBuffer == nullptr) {
         MEDIA_LOG_W("Video sink find nullptr in esBufferQ");
         return;
     }
-
+    uint64_t latencyNano {0};
     Plugin::Status status = plugin_->GetLatency(latencyNano);
     if (status != Plugin::Status::OK) {
         MEDIA_LOG_E("Video sink GetLatency fail errorcode = " PUBLIC_LOG_D32,
                     CppExt::to_underlying(TranslatePluginStatus(status)));
         return;
     }
-
     if (INT64_MAX - latencyNano < oneBuffer->pts) {
         MEDIA_LOG_E("Video pts(" PUBLIC_LOG_U64 ") + latency overflow.", oneBuffer->pts);
         return;
     }
-
     if (!DoSync(oneBuffer->pts + latencyNano)) {
         return;
     }
@@ -322,7 +320,7 @@ ErrorCode VideoSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
         return ErrorCode::SUCCESS;
     }
 
-    if (buffer->GetMemory()->GetSize() == 0) {
+    if (buffer->flag & BUFFER_FLAG_EOS) {
         Event event{
             .srcFilter = name_,
             .type = EventType::EVENT_COMPLETE,
@@ -431,7 +429,7 @@ void VideoSinkFilter::FlushEnd()
     }
 }
 
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+#ifndef OHOS_LITE
 ErrorCode VideoSinkFilter::SetVideoSurface(sptr<Surface> surface)
 {
     if (!surface) {

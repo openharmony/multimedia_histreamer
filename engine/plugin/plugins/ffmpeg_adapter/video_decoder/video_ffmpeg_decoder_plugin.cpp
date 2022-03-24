@@ -15,7 +15,7 @@
 
 #ifdef VIDEO_SUPPORT
 
-#define HST_LOG_TAG "Ffmpeg_Video_Decoder"
+#define HST_LOG_TAG "FfmpegVideoDecoderPlugin"
 
 #include "video_ffmpeg_decoder_plugin.h"
 #include <cstring>
@@ -23,6 +23,7 @@
 #include <set>
 #include "plugin/common/plugin_caps_builder.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
+#include "plugin/common/surface_memory.h"
 
 namespace {
 // register plugins
@@ -32,7 +33,8 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition);
 
 std::map<std::string, std::shared_ptr<const AVCodec>> codecMap;
 
-const size_t BUFFER_QUEUE_SIZE = 6;
+constexpr size_t BUFFER_QUEUE_SIZE = 10;
+constexpr int32_t STRIDE_ALIGN = 16;
 
 std::set<AVCodecID> supportedCodec = {AV_CODEC_ID_H264};
 
@@ -78,27 +80,39 @@ void UnRegisterVideoDecoderPlugins()
 
 void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
 {
-    CapabilityBuilder capBuilder;
-    capBuilder.SetMime("video/unknown");
+    CapabilityBuilder incapBuilder;
     switch (codec->id) {
         case AV_CODEC_ID_H264:
-            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
+            incapBuilder.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
             break;
         default:
+            incapBuilder.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
             MEDIA_LOG_I("codec is not supported right now");
             break;
     }
-    definition.inCaps.push_back(capBuilder.Build());
+    definition.inCaps.push_back(incapBuilder.Build());
 }
 
 void UpdateOutCaps(const AVCodec* codec, CodecPluginDef& definition)
 {
-    CapabilityBuilder capBuilder;
-    capBuilder.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
-    capBuilder.SetVideoPixelFormatList({VideoPixelFormat::YUV420P, VideoPixelFormat::NV12, VideoPixelFormat::NV21});
-    MEDIA_LOG_E("Capability VIDEO_PIXEL_FORMAT: " PUBLIC_LOG_U32, Capability::Key::VIDEO_PIXEL_FORMAT);
-    definition.outCaps.push_back(capBuilder.Build());
+    CapabilityBuilder outcapBuilder;
+    outcapBuilder.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
+    if (codec->pix_fmts != nullptr) {
+        DiscreteCapability<VideoPixelFormat> values;
+        size_t index = 0;
+        for (index = 0; codec->pix_fmts[index] != 0; ++index) {
+            auto supportFormat = ConvertPixelFormatFromFFmpeg(codec->pix_fmts[index]);
+            if (supportFormat != VideoPixelFormat::UNKNOWN) {
+                values.push_back(supportFormat);
+            }
+        }
+        if (index) {
+            outcapBuilder.SetVideoPixelFormatList(values);
+        }
+    }
+    definition.outCaps.push_back(outcapBuilder.Build());
 }
+
 void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
 {
     UpdateInCaps(codec, definition);
@@ -114,6 +128,10 @@ namespace Plugin {
 VideoFfmpegDecoderPlugin::VideoFfmpegDecoderPlugin(std::string name)
     : CodecPlugin(std::move(name)), outBufferQ_("vdecPluginQueue", BUFFER_QUEUE_SIZE)
 {
+    for (int32_t i = 0; i < AV_NUM_DATA_POINTERS; i++) {
+        scaleData_[i] = nullptr;
+        scaleLineSize_[i] = 0;
+    }
 }
 
 Status VideoFfmpegDecoderPlugin::Init()
@@ -129,7 +147,7 @@ Status VideoFfmpegDecoderPlugin::Init()
     videoDecParams_[Tag::REQUIRED_OUT_BUFFER_CNT] = (uint32_t)BUFFER_QUEUE_SIZE;
     if (!decodeTask_) {
         decodeTask_ = std::make_shared<OHOS::Media::OSAL::Task>("videoFfmpegDecThread");
-        decodeTask_->RegisterHandler([this] { ReceiveBuffer(); });
+        decodeTask_->RegisterHandler([this] { ReceiveFrameBuffer(); });
     }
     state_ = State::INITIALIZED;
     MEDIA_LOG_I("Init success");
@@ -195,7 +213,7 @@ Status VideoFfmpegDecoderPlugin::CreateCodecContext()
             avcodec_free_context(&ptr);
         }
     });
-    MEDIA_LOG_I("Create ffmpeg codec context success");
+    MEDIA_LOG_I("CreateCodecContext success");
     return Status::OK;
 }
 
@@ -249,11 +267,11 @@ void VideoFfmpegDecoderPlugin::SetCodecExtraData()
     auto codecConfig = Plugin::AnyCast<std::vector<uint8_t>>(iter->second);
     int configSize = codecConfig.size();
     if (configSize > 0) {
-        auto allocSize = AlignUp(configSize + AV_INPUT_BUFFER_PADDING_SIZE, 16); // 16
+        auto allocSize = AlignUp(configSize + AV_INPUT_BUFFER_PADDING_SIZE, STRIDE_ALIGN); // 16
         avCodecContext_->extradata = static_cast<uint8_t*>(av_mallocz(allocSize));
         (void)memcpy_s(avCodecContext_->extradata, configSize, codecConfig.data(), configSize);
         avCodecContext_->extradata_size = configSize;
-        MEDIA_LOG_I("Set Codec Extra Data success");
+        MEDIA_LOG_I("SetCodecExtraData success");
     }
 }
 
@@ -271,7 +289,7 @@ Status VideoFfmpegDecoderPlugin::OpenCodecContext()
         DeinitCodecContext();
         return Status::ERROR_UNKNOWN;
     }
-    MEDIA_LOG_I("Open ffmpeg codec context success");
+    MEDIA_LOG_I("OpenCodecContext success");
     return Status::OK;
 }
 
@@ -317,6 +335,13 @@ Status VideoFfmpegDecoderPlugin::ResetLocked()
     videoDecParams_.clear();
     avCodecContext_.reset();
     outBufferQ_.Clear();
+    if (scaleData_[0] != nullptr) {
+        av_free(scaleData_[0]);
+        for (int32_t i = 0; i < AV_NUM_DATA_POINTERS; i++) {
+            scaleData_[i] = nullptr;
+            scaleLineSize_[i] = 0;
+        }
+    }
 #ifdef DUMP_RAW_DATA
     if (dumpFd_) {
         std::fclose(dumpFd_);
@@ -374,8 +399,8 @@ Status VideoFfmpegDecoderPlugin::Stop()
 
 Status VideoFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs)
 {
-    MEDIA_LOG_D("queue output buffer");
     outBufferQ_.Push(outputBuffer);
+    MEDIA_LOG_D("QueueOutputBuffer success");
     return Status::OK;
 }
 
@@ -390,7 +415,6 @@ Status VideoFfmpegDecoderPlugin::Flush()
 
 Status VideoFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
 {
-    MEDIA_LOG_D("queue input buffer");
     if (inputBuffer->IsEmpty() && !(inputBuffer->flag & BUFFER_FLAG_EOS)) {
         MEDIA_LOG_E("decoder does not support fd buffer");
         return Status::ERROR_INVALID_DATA;
@@ -401,13 +425,14 @@ Status VideoFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
         ret = SendBufferLocked(inputBuffer);
     }
     NotifyInputBufferDone(inputBuffer);
+    MEDIA_LOG_D("QueueInputBuffer success");
     return ret;
 }
 
 Status VideoFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer)
 {
     if (state_ != State::RUNNING) {
-        MEDIA_LOG_W("queue input buffer in wrong state");
+        MEDIA_LOG_W("SendBufferLocked in wrong state: " PUBLIC_LOG_D32, state_);
         return Status::ERROR_WRONG_STATE;
     }
     AVPacket packet;
@@ -450,119 +475,188 @@ Status VideoFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
     return Status::OK;
 }
 
-void VideoFfmpegDecoderPlugin::CheckResolutionChange()
-{
-    if ((width_ > 0) && (height_ > 0) && ((static_cast<uint32_t>(cachedFrame_->width) != width_) ||
-        (static_cast<uint32_t>(cachedFrame_->height) != height_))) {
-        MEDIA_LOG_W("Demuxer's W&H&S: [" PUBLIC_LOG_U32 " " PUBLIC_LOG_U32 "] diff from FFMPEG's [" PUBLIC_LOG
-                    "d " PUBLIC_LOG_D32 "]", width_, height_, cachedFrame_->width, cachedFrame_->height);
-        // need to reallocte output buffers
-    }
-}
-
 #ifdef DUMP_RAW_DATA
 void VideoFfmpegDecoderPlugin::DumpVideoRawOutData()
 {
     if (dumpFd_ == nullptr) {
         return;
     }
-    if (cachedFrame_->format == AV_PIX_FMT_YUV420P) {
-        if (cachedFrame_->data[0] != nullptr && cachedFrame_->linesize[0] != 0) {
-            std::fwrite(reinterpret_cast<const char*>(cachedFrame_->data[0]),
-                        cachedFrame_->linesize[0] * cachedFrame_->height, 1, dumpFd_);
+    if (pixelFormat_ == VideoPixelFormat::YUV420P) {
+        if (scaleData_[0] != nullptr && scaleLineSize_[0] != 0) {
+            std::fwrite(reinterpret_cast<const char*>(scaleData_[0]),
+                        scaleLineSize_ * height_, 1, dumpFd_);
         }
-        if (cachedFrame_->data[1] != nullptr && cachedFrame_->linesize[1] != 0) {
-            std::fwrite(reinterpret_cast<const char*>(cachedFrame_->data[1]),
-                        cachedFrame_->linesize[1] * cachedFrame_->height / 2, 1, dumpFd_); // 2
+        if (scaleData_[1] != nullptr && scaleLineSize_[1] != 0) {
+            std::fwrite(reinterpret_cast<const char*>(scaleData_[1]),
+                        scaleLineSize_[1] * height_ / 2, 1, dumpFd_); // 2
         }
-        if (cachedFrame_->data[2] != nullptr && cachedFrame_->linesize[2] != 0) {                                // 2
-            std::fwrite(reinterpret_cast<const char*>(cachedFrame_->data[2]),
-                        cachedFrame_->linesize[2] * cachedFrame_->height / 2, 1, dumpFd_); // 2
+        if (scaleData_[2] != nullptr && scaleLineSize_[2] != 0) {                                // 2
+            std::fwrite(reinterpret_cast<const char*>(scaleData_[2]),
+                        scaleLineSize_[2] * height_ / 2, 1, dumpFd_); // 2
         }
-    } else if (cachedFrame_->format == AV_PIX_FMT_NV12 || cachedFrame_->format == AV_PIX_FMT_NV21) {
-        if (cachedFrame_->data[0] != nullptr && cachedFrame_->linesize[0] != 0) {
-            std::fwrite(reinterpret_cast<const char*>(cachedFrame_->data[0]),
-                        cachedFrame_->linesize[0] * cachedFrame_->height, 1, dumpFd_);
+    } else if (pixelFormat_ == VideoPixelFormat::NV21 || pixelFormat_ == VideoPixelFormat::NV12) {
+        if (scaleData_[0] != nullptr && scaleLineSize_[0] != 0) {
+            std::fwrite(reinterpret_cast<const char*>(scaleData_[0]),
+                        scaleLineSize_[0] * height_, 1, dumpFd_);
         }
-        if (cachedFrame_->data[1] != nullptr && cachedFrame_->linesize[1] != 0) {
-            std::fwrite(reinterpret_cast<const char*>(cachedFrame_->data[1]),
-                        cachedFrame_->linesize[1] * cachedFrame_->height / 2, 1, dumpFd_); // 2
+        if (scaleData_[1] != nullptr && scaleLineSize_[1] != 0) {
+            std::fwrite(reinterpret_cast<const char*>(scaleData_[1]),
+                        scaleLineSize_[1] * height_ / 2, 1, dumpFd_); // 2
+        }
+    } else if (pixelFormat_ == VideoPixelFormat::RGBA || pixelFormat_ == VideoPixelFormat::ARGB ||
+               pixelFormat_ == VideoPixelFormat::ABGR || pixelFormat_ == VideoPixelFormat::BGRA) {
+        if (scaleData_[0] != nullptr && scaleLineSize_[0] != 0) {
+            std::fwrite(reinterpret_cast<const char*>(scaleData_[0]),
+                        scaleLineSize_[0] * height_, 1, dumpFd_);
         }
     }
 }
 #endif
 
-void VideoFfmpegDecoderPlugin::CalculateFrameSizes(size_t& ySize, size_t& uvSize, size_t& frameSize)
+Status VideoFfmpegDecoderPlugin::CreateSwsContext()
 {
-    ySize = static_cast<size_t>(cachedFrame_->linesize[0] * AlignUp(cachedFrame_->height, 16)); // 16
+    if (swsCtx_ != nullptr) {
+        return Status::OK;
+    }
+    auto swsContext = sws_getContext(cachedFrame_->width, cachedFrame_->height,
+                                     static_cast<enum AVPixelFormat>(cachedFrame_->format),
+                                     static_cast<int32_t>(width_), static_cast<int32_t>(height_),
+                                     ConvertPixelFormatToFFmpeg(pixelFormat_), SWS_BILINEAR, NULL, NULL, NULL);
+    FALSE_RETURN_V_MSG_E(swsContext != nullptr, Status::ERROR_UNKNOWN, "sws_getContext fail");
+    swsCtx_ = std::shared_ptr<struct SwsContext>(swsContext, [](struct SwsContext *ptr) {
+        if (ptr != nullptr) {
+            sws_freeContext(ptr);
+        }
+    });
+    FALSE_RETURN_V_MSG_E(swsCtx_ != nullptr, Status::ERROR_NO_MEMORY, "create swsCtx fail");
+    if (scaleData_[0] == nullptr) {
+        auto ret = av_image_alloc(scaleData_, scaleLineSize_, width_, height_,
+                          ConvertPixelFormatToFFmpeg(pixelFormat_), STRIDE_ALIGN);
+        FALSE_RETURN_V_MSG_E(ret >= 0, Status::ERROR_UNKNOWN, "av_image_fill_linesizes fail: " PUBLIC_LOG_D32, ret);
+        MEDIA_LOG_E("pixelFormat_: " PUBLIC_LOG_U32 ", pix_fmt: " PUBLIC_LOG_D32,
+                    pixelFormat_, ConvertPixelFormatToFFmpeg(pixelFormat_));
+        for (int32_t i = 0; i < AV_NUM_DATA_POINTERS; i++) {
+            MEDIA_LOG_D("scaleData[" PUBLIC_LOG_D32 "]: " PUBLIC_LOG_P ", scaleLineSize[" PUBLIC_LOG_D32 "]: " PUBLIC_LOG_D32,
+                        i, scaleData_[i], i, scaleLineSize_[i]);
+            if (scaleData_[i] && !scaleLineSize_[i]) {
+                MEDIA_LOG_E("scaleFrame is broken, i: " PUBLIC_LOG_D32, i);
+                return Status::ERROR_UNKNOWN;
+            }
+        }
+    }
+    MEDIA_LOG_D("CreateSwsContext success");
+    return Status::OK;
+}
+
+Status VideoFfmpegDecoderPlugin::ScaleVideoFrame()
+{
+    if ((ConvertPixelFormatFromFFmpeg(static_cast<AVPixelFormat>(cachedFrame_->format)) == pixelFormat_) &&
+        static_cast<uint32_t>(cachedFrame_->width == width_) &&
+        static_cast<uint32_t>(cachedFrame_->height == height_)) {
+        for (int32_t i = 0; cachedFrame_->linesize[i] > 0; i++) {
+            scaleData_[i] = cachedFrame_->data[i];
+            scaleLineSize_[i] = cachedFrame_->linesize[i];
+        }
+        return Status::OK;
+    }
+    auto ret = CreateSwsContext();
+    FALSE_RETURN_V_MSG_E(ret == Status::OK, ret, "CreateSwsContext fail: " PUBLIC_LOG_D32, ret);
+    int32_t res = sws_scale(swsCtx_.get(), cachedFrame_->data, cachedFrame_->linesize, 0, cachedFrame_->height,
+                            scaleData_, scaleLineSize_);
+    FALSE_RETURN_V_MSG_E(res >= 0, Status::ERROR_UNKNOWN, "sws_scale fail " PUBLIC_LOG_D32, ret);
+    MEDIA_LOG_D("ScaleVideoFrame success");
+    return Status::OK;
+}
+
+Status VideoFfmpegDecoderPlugin::WriteYuvData(const std::shared_ptr<Buffer> &frameBuffer)
+{
+    size_t ySize = static_cast<size_t>(scaleLineSize_[0] * AlignUp(height_, STRIDE_ALIGN));
     // AV_PIX_FMT_YUV420P: linesize[0] = linesize[1] * 2, AV_PIX_FMT_NV12: linesize[0] = linesize[1]
-    uvSize = static_cast<size_t>(cachedFrame_->linesize[1] * AlignUp(cachedFrame_->height, 16) / 2); // 2 16
-    frameSize = 0;
-    if (cachedFrame_->format == AV_PIX_FMT_YUV420P) {
-        frameSize = ySize + (uvSize * 2); // 2
-    } else if (cachedFrame_->format == AV_PIX_FMT_NV12 || cachedFrame_->format == AV_PIX_FMT_NV21) {
+    size_t uvSize = static_cast<size_t>(scaleLineSize_[1] * AlignUp(height_, STRIDE_ALIGN) / 2);
+    size_t frameSize = 0;
+    if (pixelFormat_ == VideoPixelFormat::YUV420P) {
+        frameSize = ySize + (uvSize * 2);
+    } else if (pixelFormat_ == VideoPixelFormat::NV21 || pixelFormat_ == VideoPixelFormat::NV12) {
         frameSize = ySize + uvSize;
     }
+    auto frameBufferMem = frameBuffer->GetMemory();
+    FALSE_RETURN_V_MSG_E(frameBufferMem->GetCapacity() >= frameSize, Status::ERROR_NO_MEMORY,
+                         "output buffer size is not enough: real[" PUBLIC_LOG "zu], need[" PUBLIC_LOG "zu]",
+                         frameBufferMem->GetCapacity(), frameSize);
+    if (pixelFormat_ == VideoPixelFormat::YUV420P) {
+        frameBufferMem->Write(scaleData_[0], ySize);
+        frameBufferMem->Write(scaleData_[1], uvSize);
+        frameBufferMem->Write(scaleData_[2], uvSize);
+    } else if ((pixelFormat_ == VideoPixelFormat::NV12) || (pixelFormat_ == VideoPixelFormat::NV21)) {
+        frameBufferMem->Write(scaleData_[0], ySize);
+        frameBufferMem->Write(scaleData_[1], uvSize);
+    } else {
+        return Status::ERROR_UNSUPPORTED_FORMAT;
+    }
+    MEDIA_LOG_D("WriteYuvData success");
+    return Status::OK;
+}
+
+Status VideoFfmpegDecoderPlugin::WriteRgbData(const std::shared_ptr<Buffer> &frameBuffer)
+{
+    size_t frameSize = static_cast<size_t>(scaleLineSize_[0] * AlignUp(height_, STRIDE_ALIGN));
+    auto frameBufferMem = frameBuffer->GetMemory();
+    FALSE_RETURN_V_MSG_E(frameBufferMem->GetCapacity() >= frameSize, Status::ERROR_NO_MEMORY,
+                         "output buffer size is not enough: real[" PUBLIC_LOG "zu], need[" PUBLIC_LOG "zu]",
+                         frameBufferMem->GetCapacity(), frameSize);
+    if (pixelFormat_ == VideoPixelFormat::RGBA || pixelFormat_ == VideoPixelFormat::ARGB ||
+        pixelFormat_ == VideoPixelFormat::ABGR || pixelFormat_ == VideoPixelFormat::BGRA) {
+        frameBufferMem->Write(scaleData_[0], frameSize);
+    } else {
+        return Status::ERROR_UNSUPPORTED_FORMAT;
+    }
+    MEDIA_LOG_D("WriteRgbData success");
+    return Status::OK;
 }
 
 Status VideoFfmpegDecoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& frameBuffer)
 {
     MEDIA_LOG_D("receive one frame: " PUBLIC_LOG_D32 ", picture type: " PUBLIC_LOG_D32 ", pixel format: "
                 PUBLIC_LOG_D32 ", packet size: " PUBLIC_LOG_D32, cachedFrame_->key_frame,
-                static_cast<int32_t>(cachedFrame_->pict_type), static_cast<int32_t>(cachedFrame_->format),
-                cachedFrame_->pkt_size);
-    if (cachedFrame_->flags & AV_FRAME_FLAG_CORRUPT ||
-        ConvertPixelFormatFromFFmpeg(static_cast<AVPixelFormat>(cachedFrame_->format)) != pixelFormat_) {
-        MEDIA_LOG_W("format: " PUBLIC_LOG_D32 " unsupported, pixelFormat_: " PUBLIC_LOG_U32,
-                    cachedFrame_->format, pixelFormat_);
-        return Status::ERROR_INVALID_DATA;
-    }
-    CheckResolutionChange();
-#ifdef DUMP_RAW_DATA
-    DumpVideoRawOutData();
-#endif
-    MEDIA_LOG_D("linesize: " PUBLIC_LOG_D32 ", " PUBLIC_LOG_D32 ", " PUBLIC_LOG_D32, cachedFrame_->linesize[0],
-                cachedFrame_->linesize[1], cachedFrame_->linesize[2]); // 2
+                static_cast<int32_t>(cachedFrame_->pict_type), static_cast<int32_t>(cachedFrame_->format), cachedFrame_->pkt_size);
+    FALSE_RETURN_V_MSG_E((cachedFrame_->flags & AV_FRAME_FLAG_CORRUPT) == 0, Status::ERROR_INVALID_DATA,
+                         "decoded frame is corrupt");
+    auto ret = ScaleVideoFrame();
+    FALSE_RETURN_V_MSG_E(ret == Status::OK, ret, "ScaleVideoFrame fail: " PUBLIC_LOG_D32, ret);
     auto bufferMeta = frameBuffer->GetBufferMeta();
     if (bufferMeta != nullptr && bufferMeta->GetType() == BufferMetaType::VIDEO) {
-        std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
-        videoMeta->videoPixelFormat = ConvertPixelFormatFromFFmpeg(static_cast<AVPixelFormat>(cachedFrame_->format));
-        videoMeta->height = cachedFrame_->height;
-        videoMeta->width = cachedFrame_->width;
-        for (int i = 0; cachedFrame_->linesize[i] > 0; ++i) {
-            videoMeta->stride.emplace_back(cachedFrame_->linesize[i]);
+        std::shared_ptr<VideoBufferMeta> videoMeta = ReinterpretPointerCast<VideoBufferMeta>(bufferMeta);
+        videoMeta->videoPixelFormat = pixelFormat_;
+        videoMeta->height = height_;
+        videoMeta->width = width_;
+        for (int i = 0; scaleLineSize_[i] > 0; ++i) {
+            videoMeta->stride.emplace_back(scaleLineSize_[i]);
         }
         videoMeta->planes = videoMeta->stride.size();
     }
-    size_t ySize = 0;
-    size_t uvSize = 0;
-    size_t frameSize = 0;
-    CalculateFrameSizes(ySize, uvSize, frameSize);
-    auto frameBufferMem = frameBuffer->GetMemory();
-    if (frameBufferMem->GetCapacity() < frameSize) {
-        MEDIA_LOG_W("output buffer size is not enough: real[" PUBLIC_LOG_ZU "], need[" PUBLIC_LOG_ZU "]",
-                    frameBufferMem->GetCapacity(), frameSize);
-        return Status::ERROR_NO_MEMORY;
-    }
-    if (cachedFrame_->format == AV_PIX_FMT_YUV420P) {
-        frameBufferMem->Write(cachedFrame_->data[0], ySize);
-        frameBufferMem->Write(cachedFrame_->data[1], uvSize);
-        frameBufferMem->Write(cachedFrame_->data[2], uvSize); // 2
-    } else if ((cachedFrame_->format == AV_PIX_FMT_NV12) || (cachedFrame_->format == AV_PIX_FMT_NV21)) {
-        frameBufferMem->Write(cachedFrame_->data[0], ySize);
-        frameBufferMem->Write(cachedFrame_->data[1], uvSize);
+#ifdef DUMP_RAW_DATA
+    DumpVideoRawOutData();
+#endif
+    auto newFormat = ConvertPixelFormatToFFmpeg(pixelFormat_);
+    if (IsYuvFormat(newFormat)) {
+        FALSE_RETURN_V_MSG_E(WriteYuvData(frameBuffer) == Status::OK, Status::ERROR_UNSUPPORTED_FORMAT,
+                             "Unsupported pixel format: " PUBLIC_LOG_U32, pixelFormat_);
+    } else if (IsRgbFormat(newFormat)) {
+        FALSE_RETURN_V_MSG_E(WriteRgbData(frameBuffer) == Status::OK, Status::ERROR_UNSUPPORTED_FORMAT,
+                             "Unsupported pixel format: " PUBLIC_LOG_U32, pixelFormat_);
     } else {
-        MEDIA_LOG_E("Unsupported pixel format: " PUBLIC_LOG_D32, cachedFrame_->format);
+        MEDIA_LOG_E("Unsupported pixel format: " PUBLIC_LOG_U32, pixelFormat_);
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     frameBuffer->pts = static_cast<uint64_t>(cachedFrame_->pts);
+    MEDIA_LOG_D("FillFrameBuffer success");
     return Status::OK;
 }
 
 Status VideoFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffer>& frameBuffer)
 {
     if (state_ != State::RUNNING) {
-        MEDIA_LOG_W("queue input buffer in wrong state");
+        MEDIA_LOG_W("ReceiveBufferLocked in wrong state: " PUBLIC_LOG_D32, state_);
         return Status::ERROR_WRONG_STATE;
     }
     Status status;
@@ -572,6 +666,7 @@ Status VideoFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
     } else if (ret == AVERROR_EOF) {
         MEDIA_LOG_I("eos received");
         frameBuffer->GetMemory()->Reset();
+        frameBuffer->flag |= BUFFER_FLAG_EOS;
         avcodec_flush_buffers(avCodecContext_.get());
         status = Status::END_OF_STREAM;
     } else {
@@ -582,11 +677,30 @@ Status VideoFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
     return status;
 }
 
-void VideoFfmpegDecoderPlugin::ReceiveBuffer()
+Status VideoFfmpegDecoderPlugin::CheckFrameBuffer(const std::shared_ptr<Buffer> &frameBuffer)
 {
-    std::shared_ptr<Buffer> frameBuffer = outBufferQ_.Pop();
     if (frameBuffer == nullptr || frameBuffer->IsEmpty() ||
         frameBuffer->GetBufferMeta()->GetType() != BufferMetaType::VIDEO) {
+        return Status::ERROR_INVALID_PARAMETER;
+    }
+    auto bufMemory = frameBuffer->GetMemory();
+    if (bufMemory == nullptr) {
+        return Status::ERROR_NO_MEMORY;
+    }
+    if (bufMemory->GetMemoryType() != Plugin::MemoryType::SURFACE_BUFFER) {
+        return Status::OK;
+    }
+    std::shared_ptr<Plugin::SurfaceMemory> surfaceMemory =
+            Plugin::ReinterpretPointerCast<Plugin::SurfaceMemory>(bufMemory);
+    auto surfaceBuffer = surfaceMemory->GetSurfaceBuffer();
+    FALSE_RETURN_V_MSG_E(surfaceBuffer != nullptr, Status::ERROR_NO_MEMORY, "get surface buffer fail");
+    return Status::OK;
+}
+
+void VideoFfmpegDecoderPlugin::ReceiveFrameBuffer()
+{
+    std::shared_ptr<Buffer> frameBuffer = outBufferQ_.Pop();
+    if (CheckFrameBuffer(frameBuffer) != Status::OK) {
         MEDIA_LOG_W("cannot fetch valid buffer to output");
         return;
     }
