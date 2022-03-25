@@ -75,7 +75,7 @@ private:
 
     ErrorCode CheckBufferValidity(std::shared_ptr<AVBuffer>& buffer);
 
-    void DecideOutPutAllocator();
+    void DecideOutputAllocator();
 
     ErrorCode GetOutputBufferSize();
 
