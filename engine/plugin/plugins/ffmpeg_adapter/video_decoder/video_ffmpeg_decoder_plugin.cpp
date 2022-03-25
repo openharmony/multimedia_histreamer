@@ -267,7 +267,7 @@ void VideoFfmpegDecoderPlugin::SetCodecExtraData()
     auto codecConfig = Plugin::AnyCast<std::vector<uint8_t>>(iter->second);
     int configSize = codecConfig.size();
     if (configSize > 0) {
-        auto allocSize = AlignUp(configSize + AV_INPUT_BUFFER_PADDING_SIZE, STRIDE_ALIGN); // 16
+        auto allocSize = AlignUp(configSize + AV_INPUT_BUFFER_PADDING_SIZE, STRIDE_ALIGN);
         avCodecContext_->extradata = static_cast<uint8_t*>(av_mallocz(allocSize));
         (void)memcpy_s(avCodecContext_->extradata, configSize, codecConfig.data(), configSize);
         avCodecContext_->extradata_size = configSize;

@@ -100,46 +100,6 @@ inline std::string MediaGetFileName(std::string file)
 #define MEDIA_LOG_D(msg, ...) ((void)0)
 #endif
 
-#ifndef FAIL_RETURN
-#define FAIL_RETURN(exec)                                                                                              \
-    do {                                                                                                               \
-        ErrorCode returnValue = (exec);                                                                                \
-        if (returnValue != ErrorCode::SUCCESS) {                                                                       \
-            MEDIA_LOG_E("FAIL_RETURN on ErrorCode(" PUBLIC_LOG "d).", returnValue);                                    \
-            return returnValue;                                                                                        \
-        }                                                                                                              \
-    } while (0)
-#endif
-
-#ifndef FAIL_RETURN_MSG_IMPL
-#define FAIL_RETURN_MSG_IMPL(loglevel, exec, fmt, args...)                                                             \
-    do {                                                                                                               \
-        ErrorCode returnValue = (exec);                                                                                \
-        if (returnValue != ErrorCode::SUCCESS) {                                                                       \
-            loglevel(fmt, ##args);                                                                                     \
-            return returnValue;                                                                                        \
-        }                                                                                                              \
-    } while (0)
-#endif
-
-#ifndef FAIL_RETURN_MSG
-#define FAIL_RETURN_MSG(exec, fmt, args...) FAIL_RETURN_MSG_IMPL(MEDIA_LOG_E, exec, fmt, ##args)
-#endif
-
-#ifndef FAIL_RETURN_MSG_W
-#define FAIL_RETURN_MSG_W(exec, fmt, args...) FAIL_RETURN_MSG_IMPL(MEDIA_LOG_W, exec, fmt, ##args)
-#endif
-
-#ifndef FAIL_LOG
-#define FAIL_LOG(exec)                                                                                                 \
-    do {                                                                                                               \
-        ErrorCode returnValue = (exec);                                                                                \
-        if (returnValue != ErrorCode::SUCCESS) {                                                                       \
-            MEDIA_LOG_E("FAIL_LOG on ErrorCode(" PUBLIC_LOG_D32 ").", returnValue);                                    \
-        }                                                                                                              \
-    } while (0)
-#endif
-
 #ifndef NOK_RETURN
 #define NOK_RETURN(exec)                                                                                               \
     do {                                                                                                               \

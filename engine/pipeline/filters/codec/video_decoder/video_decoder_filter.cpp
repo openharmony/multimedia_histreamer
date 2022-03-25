@@ -233,7 +233,7 @@ bool VideoDecoderFilter::Configure(const std::string& inPort, const std::shared_
     return true;
 }
 
-void VideoDecoderFilter::DecideOutPutAllocator()
+void VideoDecoderFilter::DecideOutputAllocator()
 {
 #ifndef OHOS_LITE
     // Use sink allocator first, zero copy while passing data
@@ -252,7 +252,7 @@ void VideoDecoderFilter::DecideOutPutAllocator()
 
 ErrorCode VideoDecoderFilter::GetOutputBufferSize()
 {
-    //YUV420:size = stride * height * 1.5
+    // YUV420:size = stride * height * 1.5
     uint32_t stride = Plugin::AlignUp(vdecFormat_.width, VIDEO_ALIGN_SIZE);
     if (vdecFormat_.format == Plugin::VideoPixelFormat::YUV420P ||
         vdecFormat_.format == Plugin::VideoPixelFormat::NV21 ||
@@ -302,7 +302,7 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
     outBufPool_ = std::make_shared<BufferPool<AVBuffer>>(bufferCnt);
     FALSE_RETURN_V_MSG_E(GetOutputBufferSize() == ErrorCode::SUCCESS, ErrorCode::ERROR_UNIMPLEMENTED,
                          "get output buffer size fail");
-    DecideOutPutAllocator();
+    DecideOutputAllocator();
     if (outAllocator_ == nullptr) {
         MEDIA_LOG_I("plugin doest not support out allocator, using framework allocator");
         outBufPool_->Init(bufferSize_, Plugin::BufferMetaType::VIDEO);
