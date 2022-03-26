@@ -20,6 +20,7 @@
 
 #include "filters/codec/codec_filter_base.h"
 #include "pipeline/core/type_define.h"
+#include "foundation/osal/thread/task.h"
 
 namespace OHOS {
 namespace Media {
@@ -108,7 +109,8 @@ private:
     std::shared_ptr<OHOS::Media::OSAL::Task> pushTask_ {nullptr};
     std::shared_ptr<BufferPool<AVBuffer>> outBufPool_ {nullptr};
     std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQue_ {nullptr};
-    std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> outBufQue_ {nullptr};
+    std::queue<AVBufferPtr> outBufQue_;
+    mutable OSAL::Mutex renderMutex_ {};
 };
 }
 }

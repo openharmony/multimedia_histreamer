@@ -32,8 +32,6 @@ public:
 
     sptr<SurfaceBuffer> AllocSurfaceBuffer(size_t size);
 
-    void FreeSurfaceBuffer(sptr<SurfaceBuffer> buffer);
-
     void* Alloc(size_t size) override;
     void Free(void* ptr) override; // NOLINT: void*
 

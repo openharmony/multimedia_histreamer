@@ -22,6 +22,7 @@
 #include "surface/surface.h"
 #include "surface_allocator.h"
 #include "plugin_buffer.h"
+#include "foundation/osal/thread/task.h"
 
 namespace OHOS {
 namespace Media {
@@ -30,15 +31,17 @@ class SurfaceMemory : public Memory {
 public:
     ~SurfaceMemory();
 
+    size_t GetCapacity() override;
+
     sptr<SurfaceBuffer> GetSurfaceBuffer();
 
     void ReleaseSurfaceBuffer();
 
-    void SetFenceFd(int32_t& fd);
-
-    int32_t GetFenceFd();
+    int32_t GetFlushFence();
 
     BufferHandle *GetBufferHandle();
+
+    uint32_t GetSurfaceBufferStride();
 
 private:
     explicit SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr, size_t align = 1);
@@ -46,15 +49,21 @@ private:
     uint8_t *GetRealAddr() const override;
 
 private:
+    void AllocSurfaceBuffer();
+
+    mutable OSAL::Mutex memMutex_ {};
+
     /// Surface buffer
-    sptr<SurfaceBuffer> surfaceBuffer_;
+    sptr<SurfaceBuffer> surfaceBuffer_ {nullptr};
 
     std::shared_ptr<SurfaceAllocator> surfaceAllocator_ {nullptr};
 
     /// the fence fd for Surface
-    int32_t fenceFd_ {-1};
+    int32_t fence_ {-1};
 
-    size_t bufferSize_;
+    size_t bufferSize_ {0};
+
+    uint32_t stride_ {0};
 
     friend class Buffer;
 };

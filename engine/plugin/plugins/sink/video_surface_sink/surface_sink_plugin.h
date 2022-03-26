@@ -79,8 +79,7 @@ private:
     void SetDumpFrameFromSysPara();
     void SetDumpFrameInternalFromSysPara();
     void SetKpiLogFromSysPara();
-    Status AdjustSurfaceBufferByStride(sptr<SurfaceBuffer> buffer, int32_t stride);
-    Status UpdateSurfaceBuffer(sptr<SurfaceBuffer> surfaceBuffer, int32_t fd);
+    Status UpdateSurfaceBuffer(sptr<SurfaceBuffer> surfaceBuffer, int32_t fence);
 
     OSAL::Mutex mutex_ {};
     OSAL::ConditionVariable surfaceCond_;
@@ -95,11 +94,6 @@ private:
 #ifdef DUMP_RAW_DATA
     std::FILE* dumpFd_;
 #endif
-
-    bool surfaceTimeEnable_ {false};
-    bool dumpFrameEnable_ {false};
-    bool kpiLogEnable_ {false};
-    uint32_t dumpFrameInternal_ {1};
 };
 } // SurfaceSinkPlugin
 } // Plugin
