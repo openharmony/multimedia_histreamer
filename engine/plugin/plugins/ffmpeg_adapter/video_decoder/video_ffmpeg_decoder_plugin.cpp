@@ -690,10 +690,12 @@ Status VideoFfmpegDecoderPlugin::CheckFrameBuffer(const std::shared_ptr<Buffer> 
     if (bufMemory->GetMemoryType() != Plugin::MemoryType::SURFACE_BUFFER) {
         return Status::OK;
     }
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
     std::shared_ptr<Plugin::SurfaceMemory> surfaceMemory =
             Plugin::ReinterpretPointerCast<Plugin::SurfaceMemory>(bufMemory);
     auto surfaceBuffer = surfaceMemory->GetSurfaceBuffer();
     FALSE_RETURN_V_MSG_E(surfaceBuffer != nullptr, Status::ERROR_NO_MEMORY, "get surface buffer fail");
+#endif
     return Status::OK;
 }
 
