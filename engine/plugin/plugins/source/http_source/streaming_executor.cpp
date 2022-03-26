@@ -85,10 +85,12 @@ bool StreamingExecutor::Read(unsigned char *buff, unsigned int wantReadLength,
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
     isEos = false;
-    realReadLength = buffer_->ReadBuffer(buff, wantReadLength, 2); // wait 2 times
-    if (isEos_ && realReadLength == 0) {
+    if (isEos_ && buffer_->GetSize() == 0) {
         isEos = true;
+        realReadLength = 0;
+        return false;
     }
+    realReadLength = buffer_->ReadBuffer(buff, wantReadLength, 2); // wait 2 times
     MEDIA_LOG_D("Read: wantReadLength " PUBLIC_LOG_D32 ", realReadLength " PUBLIC_LOG_D32 ", isEos "
                 PUBLIC_LOG_D32, wantReadLength, realReadLength, isEos);
     return true;
