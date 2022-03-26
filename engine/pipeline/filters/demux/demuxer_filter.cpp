@@ -150,7 +150,7 @@ ErrorCode DemuxerFilter::Stop()
 {
     MEDIA_LOG_I("Stop called.");
     if (task_) {
-        task_->Pause();
+        task_->Stop();
     }
     Reset();
     if (!outPorts_.empty()) {

@@ -215,6 +215,10 @@ void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode resu
     } else {
         intentSync_.Notify(intent, result);
     }
+    if (intent == Intent::STOP) {
+        jobs_.SetActive(false);
+        Task::StopAsync();
+    }
 }
 } // namespace Media
 } // namespace OHOS

@@ -70,6 +70,15 @@ void Task::Stop()
     MEDIA_LOG_W("task " PUBLIC_LOG_S " stop exited", name_.c_str());
 }
 
+void Task::StopAsync()
+{
+    MEDIA_LOG_D("task " PUBLIC_LOG_S " StopAsync called", name_.c_str());
+    OSAL::ScopedLock lock(stateMutex_);
+    if (runningState_.load() != RunningState::STOPPED) {
+        runningState_ = RunningState::STOPPING;
+    }
+}
+
 void Task::Pause()
 {
     MEDIA_LOG_D("task " PUBLIC_LOG_S " Pause called", name_.c_str());
@@ -119,6 +128,7 @@ void Task::DoTask()
 void Task::Run()
 {
     for (;;) {
+        MEDIA_LOG_D("task " PUBLIC_LOG_S " is running on state : " PUBLIC_LOG_D32, name_.c_str(), runningState_.load());
         if (runningState_.load() == RunningState::STARTED) {
             handler_();
         }

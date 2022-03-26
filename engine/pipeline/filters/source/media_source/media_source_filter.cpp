@@ -202,7 +202,7 @@ ErrorCode MediaSourceFilter::Stop()
 {
     MEDIA_LOG_I("Stop entered.");
     if (taskPtr_) {
-        taskPtr_->Stop();
+        taskPtr_->StopAsync();
     }
     mediaOffset_ = 0;
     protocol_.clear();
@@ -288,6 +288,7 @@ void MediaSourceFilter::ReadLoop()
     if (result == ErrorCode::END_OF_STREAM) {
         Stop();
         bufferPtr->flag |= BUFFER_FLAG_EOS;
+        outPorts_[0]->PushData(bufferPtr, mediaOffset_);
     } else if (result == ErrorCode::SUCCESS) {
         auto memory = bufferPtr->GetMemory();
         FALSE_RETURN(memory != nullptr);
