@@ -76,12 +76,16 @@ static uint32_t TranslatePixelFormat(const VideoPixelFormat pixelFormat)
             break;
         case VideoPixelFormat::RGBA:
             sdlFormat = SDL_PIXELFORMAT_ABGR8888;
+            break;
         case VideoPixelFormat::ARGB:
             sdlFormat = SDL_PIXELFORMAT_BGRA8888;
+            break;
         case VideoPixelFormat::ABGR:
             sdlFormat = SDL_PIXELFORMAT_RGBA8888;
+            break;
         case VideoPixelFormat::BGRA:
             sdlFormat = SDL_PIXELFORMAT_ARGB8888;
+            break;
         case VideoPixelFormat::YUV422P:
         case VideoPixelFormat::YUV444P:
         case VideoPixelFormat::YUV410P:

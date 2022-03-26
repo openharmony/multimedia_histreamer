@@ -34,11 +34,12 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-const uint32_t DEFAULT_IN_BUFFER_POOL_SIZE = 10;
-const uint32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 10;
+const uint32_t DEFAULT_IN_BUFFER_POOL_SIZE = 8;
+const uint32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 8;
 const float VIDEO_PIX_DEPTH = 1.5;
 static uint32_t VIDEO_ALIGN_SIZE = 16;
 static uint32_t DEFAULT_TRY_DECODE_TIME = 10;
+static uint32_t DEFAULT_TRY_RENDER_TIME = 10;
 
 static AutoRegisterFilter<VideoDecoderFilter> g_registerFilterHelper("builtin.player.videodecoder");
 
@@ -91,9 +92,11 @@ VideoDecoderFilter::~VideoDecoderFilter()
         pushTask_->Stop();
         pushTask_.reset();
     }
-    if (outBufQue_) {
-        outBufQue_->SetActive(false);
-        outBufQue_.reset();
+    {
+        OSAL::ScopedLock l(renderMutex_);
+        while (!outBufQue_.empty()) {
+            outBufQue_.pop();
+        }
     }
     if (dataCallback_) {
         delete dataCallback_;
@@ -117,11 +120,6 @@ ErrorCode VideoDecoderFilter::Prepare()
     if (state_ != FilterState::INITIALIZED) {
         MEDIA_LOG_W("decoder filter is not in init state_");
         return ErrorCode::ERROR_INVALID_OPERATION;
-    }
-    if (!outBufQue_) {
-        outBufQue_ = std::make_shared<BlockingQueue<AVBufferPtr>>("vdecFilterOutBufQue", DEFAULT_OUT_BUFFER_POOL_SIZE);
-    } else {
-        outBufQue_->SetActive(true);
     }
     if (!pushTask_) {
         pushTask_ = std::make_shared<OSAL::Task>("vdecPushThread");
@@ -152,9 +150,6 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
     bool atLeastOutCapMatched = false;
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::CODEC);
-    // need to get the max buffer num from plugin capability when use hdi as codec plugin interfaces
-    Plugin::TagMap proposeParams = upstreamParams;
-    proposeParams.insert({Plugin::Tag::VIDEO_MAX_SURFACE_NUM, static_cast<uint32_t>(DEFAULT_OUT_BUFFER_POOL_SIZE)});
     for (const auto& candidate : candidatePlugins) {
         FALSE_LOG_MSG(!candidate.first->outCaps.empty(),
                       "plugin " PUBLIC_LOG_S " has no out caps", candidate.first->name.c_str());
@@ -167,6 +162,10 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
             }
             atLeastOutCapMatched = true;
             thisOut->mime = outCap.mime;
+            // need to get the max buffer num from plugin capability when use hdi as codec plugin interfaces
+            Plugin::TagMap proposeParams = upstreamParams;
+            proposeParams.insert({Plugin::Tag::VIDEO_MAX_SURFACE_NUM,
+                                  static_cast<uint32_t>(DEFAULT_OUT_BUFFER_POOL_SIZE)});
             if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_, proposeParams, downstreamParams)) {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
@@ -187,7 +186,7 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
         return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
     });
     PROFILE_END("video decoder negotiate end");
-    MEDIA_LOG_D("video decoder negotiate success");
+    MEDIA_LOG_D("video decoder negotiate end");
     return res;
 }
 
@@ -252,7 +251,7 @@ void VideoDecoderFilter::DecideOutputAllocator()
 
 ErrorCode VideoDecoderFilter::GetOutputBufferSize()
 {
-    // YUV420:size = stride * height * 1.5
+    // YUV420: size = stride * height * 1.5
     uint32_t stride = Plugin::AlignUp(vdecFormat_.width, VIDEO_ALIGN_SIZE);
     if (vdecFormat_.format == Plugin::VideoPixelFormat::YUV420P ||
         vdecFormat_.format == Plugin::VideoPixelFormat::NV21 ||
@@ -266,7 +265,7 @@ ErrorCode VideoDecoderFilter::GetOutputBufferSize()
                vdecFormat_.format == Plugin::VideoPixelFormat::BGRA) {
         bufferSize_ = static_cast<uint32_t>(Plugin::AlignUp(stride, VIDEO_ALIGN_SIZE) *
                                             Plugin::AlignUp(vdecFormat_.height, VIDEO_ALIGN_SIZE) * 4); //4: 32bit
-        MEDIA_LOG_D("RGBA output buffer size: " PUBLIC_LOG_U32, vdecFormat_.format);
+        MEDIA_LOG_D("RGBA output buffer size: " PUBLIC_LOG_U32, bufferSize_);
     } else {
         // need to check video sink support and calc buffer size
         MEDIA_LOG_E("Unsupported video pixel format: " PUBLIC_LOG_U32, vdecFormat_.format);
@@ -277,17 +276,21 @@ ErrorCode VideoDecoderFilter::GetOutputBufferSize()
 
 ErrorCode VideoDecoderFilter::CheckBufferValidity(std::shared_ptr<AVBuffer>& buffer)
 {
-    FALSE_RETURN_V_MSG_E(buffer != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "buffer is invalid");
-    auto memory = buffer->GetMemory();
-    FALSE_RETURN_V_MSG_E(memory != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "memory is invalid");
-#ifndef OHOS_LITE
-    if(memory->GetMemoryType() != Plugin::MemoryType::SHARE_MEMORY) {
-        return ErrorCode::SUCCESS;
+    if (buffer == nullptr) {
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    std::shared_ptr<Plugin::SurfaceMemory> surfaceMemory =
-            Plugin::ReinterpretPointerCast<Plugin::SurfaceMemory>(memory);
-    auto surfaceBuffer = surfaceMemory->GetSurfaceBuffer();
-    FALSE_RETURN_V_MSG_E(surfaceBuffer != nullptr, ErrorCode::ERROR_NO_MEMORY, "get surface buffer fail");
+    auto memory = buffer->GetMemory();
+    if (memory == nullptr) {
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+    }
+#ifndef OHOS_LITE
+    if (memory->GetMemoryType() == Plugin::MemoryType::SURFACE_BUFFER) {
+        std::shared_ptr<Plugin::SurfaceMemory> surfaceMemory =
+                Plugin::ReinterpretPointerCast<Plugin::SurfaceMemory>(memory);
+        // trigger surface memory to request surface buffer again when it is surface buffer
+        FALSE_RETURN_V_MSG_E(surfaceMemory->GetSurfaceBuffer() != nullptr, ErrorCode::ERROR_NO_MEMORY,
+                             "get surface buffer fail");
+    }
 #endif
     return ErrorCode::SUCCESS;
 }
@@ -311,7 +314,7 @@ ErrorCode VideoDecoderFilter::AllocateOutputBuffers()
         for (size_t cnt = 0; cnt < bufferCnt; cnt++) {
             auto buf = CppExt::make_unique<AVBuffer>(Plugin::BufferMetaType::VIDEO);
             if (buf == nullptr || buf->AllocMemory(outAllocator_, bufferSize_) == nullptr) {
-                MEDIA_LOG_I("alloc buffer " PUBLIC_LOG_U32, " fail", static_cast<uint32_t>(cnt));
+                MEDIA_LOG_I("alloc buffer " PUBLIC_LOG_U32 " fail", static_cast<uint32_t>(cnt));
                 continue;
             }
             outBufPool_->Append(std::move(buf));
@@ -435,9 +438,6 @@ void VideoDecoderFilter::FlushStart()
     if (handleFrameTask_) {
         handleFrameTask_->PauseAsync();
     }
-    if (outBufQue_) {
-        outBufQue_->SetActive(false);
-    }
     if (pushTask_) {
         pushTask_->PauseAsync();
     }
@@ -459,9 +459,6 @@ void VideoDecoderFilter::FlushEnd()
     if (handleFrameTask_) {
         handleFrameTask_->Start();
     }
-    if (outBufQue_) {
-        outBufQue_->SetActive(true);
-    }
     if (pushTask_) {
         pushTask_->Start();
     }
@@ -474,9 +471,14 @@ ErrorCode VideoDecoderFilter::Stop()
 {
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Flush()), "Flush plugin fail");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Stop()), "Stop plugin fail");
-    outBufQue_->SetActive(false);
     pushTask_->Pause();
     inBufQue_->SetActive(false);
+    {
+        OSAL::ScopedLock l(renderMutex_);
+        while (!outBufQue_.empty()) {
+            outBufQue_.pop();
+        }
+    }
     if (handleFrameTask_) {
         handleFrameTask_->Pause();
     }
@@ -512,24 +514,34 @@ void VideoDecoderFilter::HandleOneFrame(const std::shared_ptr<AVBuffer>& data)
 
 void VideoDecoderFilter::FinishFrame()
 {
-    auto voutBuffer = outBufQue_->Pop();
-    if (voutBuffer == nullptr) {
-        MEDIA_LOG_E("outBufQue_ pop buffer fail");
-        return;
+    MEDIA_LOG_D("FinishFrame begin");
+    bool isRendered = false;
+    {
+        OSAL::ScopedLock l(renderMutex_);
+        std::shared_ptr<AVBuffer> frameBuffer = nullptr;
+        if (!outBufQue_.empty()) {
+            frameBuffer = outBufQue_.front();
+        }
+        if (frameBuffer != nullptr) {
+            auto oPort = outPorts_[0];
+            if (oPort->GetWorkMode() == WorkMode::PUSH) {
+                oPort->PushData(frameBuffer, -1);
+                isRendered = true;
+                outBufQue_.pop();
+            } else {
+                MEDIA_LOG_W("decoder out port works in pull mode");
+                return;
+            }
+            frameBuffer.reset();
+        }
     }
-    auto oPort = outPorts_[0];
-    if (oPort->GetWorkMode() == WorkMode::PUSH) {
-        oPort->PushData(voutBuffer, -1);
-    } else {
-        MEDIA_LOG_W("decoder out port works in pull mode");
-        return;
-    }
-    voutBuffer.reset();
-    auto newOutBuffer = outBufPool_->AllocateBuffer();
-    //trigger surface memory to request surface buffer again when it is surface buffer
+    auto newOutBuffer = outBufPool_->AllocateBufferNonBlocking();
     if (CheckBufferValidity(newOutBuffer) == ErrorCode::SUCCESS) {
         newOutBuffer->Reset();
         plugin_->QueueOutputBuffer(newOutBuffer, 0);
+    }
+    if (!isRendered) {
+        OSAL::SleepFor(DEFAULT_TRY_RENDER_TIME);
     }
     MEDIA_LOG_D("FinishFrame success");
 }
@@ -541,7 +553,8 @@ void VideoDecoderFilter::OnInputBufferDone(const std::shared_ptr<AVBuffer>& buff
 
 void VideoDecoderFilter::OnOutputBufferDone(const std::shared_ptr<AVBuffer>& buffer)
 {
-    outBufQue_->Push(buffer);
+    OSAL::ScopedLock l(renderMutex_);
+    outBufQue_.push(buffer);
 }
 } // namespace Pipeline
 } // namespace Media

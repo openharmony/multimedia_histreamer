@@ -103,11 +103,15 @@ private:
 
     Status WriteRgbData(const std::shared_ptr<Buffer>& frameBuffer);
 
+#ifndef OHOS_LITE
+    Status WriteYuvDataStride(const std::shared_ptr<Buffer>& frameBuffer, int32_t stride);
+
+    Status WriteRgbDataStride(const std::shared_ptr<Buffer>& frameBuffer, int32_t stride);
+#endif
+
     Status FillFrameBuffer(const std::shared_ptr<Buffer>& frameBuffer);
 
     Status ReceiveBufferLocked(const std::shared_ptr<Buffer>& frameBuffer);
-
-    Status CheckFrameBuffer(const std::shared_ptr<Buffer>& frameBuffer);
 
     void ReceiveFrameBuffer();
 

@@ -84,7 +84,7 @@ private:
     bool CreateVideoSinkPlugin(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo);
     void HandleNegotiateParams(const Plugin::TagMap& upstreamParams, Plugin::TagMap& downstreamParams);
     void RenderFrame();
-    bool DoSync(int64_t pts) const;
+    bool DoSync(const AVBufferPtr& buffer) const;
     std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQueue_ {nullptr};
     std::shared_ptr<OHOS::Media::OSAL::Task> renderTask_ {nullptr};
     std::atomic<bool> pushThreadIsBlocking_ {false};

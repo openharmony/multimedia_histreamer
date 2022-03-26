@@ -35,7 +35,7 @@ namespace Media {
 namespace Pipeline {
 static AutoRegisterFilter<VideoSinkFilter> g_registerFilterHelper("builtin.player.videosink");
 
-const uint32_t VSINK_DEFAULT_BUFFER_NUM = 10;
+const uint32_t VSINK_DEFAULT_BUFFER_NUM = 8;
 
 VideoSinkFilter::VideoSinkFilter(const std::string& name) : FilterBase(name)
 {
@@ -241,16 +241,26 @@ ErrorCode VideoSinkFilter::ConfigureNoLocked(const std::shared_ptr<const Plugin:
     return ErrorCode::SUCCESS;
 }
 
-bool VideoSinkFilter::DoSync(int64_t pts) const
+bool VideoSinkFilter::DoSync(const AVBufferPtr& buffer) const
 {
-    int64_t  delta {0};
-    int64_t  tempOut {0};
-    if (frameCnt_ == 0 || pts == 0) {
+    if (frameCnt_ == 0) {
         return true;
     }
+    uint64_t latencyNano = 0;
+    Plugin::Status status = plugin_->GetLatency(latencyNano);
+    if (status != Plugin::Status::OK) {
+        MEDIA_LOG_E("Video sink GetLatency fail: " PUBLIC_LOG_D32,
+                    CppExt::to_underlying(TranslatePluginStatus(status)));
+        latencyNano = 0;
+    }
+    int64_t pts = (INT64_MAX - static_cast<int64_t>(latencyNano) < static_cast<int64_t>(buffer->pts)) ?
+                  (static_cast<int64_t>(buffer->pts) + static_cast<int64_t>(latencyNano)) :
+                  (static_cast<int64_t>(latencyNano) - (INT64_MAX - static_cast<int64_t>(buffer->pts)));
+    int64_t delta = 0;
+    int64_t tempOut = 0;
     if (ClockManager::Instance().GetProvider().CheckPts(pts, delta) != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("DoSync CheckPts fail");
-        return false;
+        MEDIA_LOG_E("ClockManager clock is not exit, skip avsync");
+        return true;
     }
     if (delta > 0) {
         tempOut = Plugin::HstTime2Ms(delta);
@@ -272,30 +282,21 @@ bool VideoSinkFilter::DoSync(int64_t pts) const
 void VideoSinkFilter::RenderFrame()
 {
     MEDIA_LOG_D("RenderFrame called");
-    auto oneBuffer = inBufQueue_->Pop();
-    if (oneBuffer == nullptr) {
+    auto frameBuffer = inBufQueue_->Pop();
+    if (frameBuffer == nullptr) {
         MEDIA_LOG_W("Video sink find nullptr in esBufferQ");
         return;
     }
-    uint64_t latencyNano {0};
-    Plugin::Status status = plugin_->GetLatency(latencyNano);
-    if (status != Plugin::Status::OK) {
-        MEDIA_LOG_E("Video sink GetLatency fail errorcode = " PUBLIC_LOG_D32,
-                    CppExt::to_underlying(TranslatePluginStatus(status)));
+    if (!DoSync(frameBuffer)) {
+        MEDIA_LOG_W("drop this frame");
         return;
     }
-    if (INT64_MAX - latencyNano < oneBuffer->pts) {
-        MEDIA_LOG_E("Video pts(" PUBLIC_LOG_U64 ") + latency overflow.", oneBuffer->pts);
-        return;
-    }
-    if (!DoSync(oneBuffer->pts + latencyNano)) {
-        return;
-    }
-    auto err = plugin_->Write(oneBuffer);
+    auto err = plugin_->Write(frameBuffer);
     if (err != Plugin::Status::OK) {
-        MEDIA_LOG_E("Video sink write failed");
+        MEDIA_LOG_E("write to plugin fail: " PUBLIC_LOG_U32, err);
         return;
     }
+    MEDIA_LOG_D("RenderFrame success");
 }
 
 ErrorCode VideoSinkFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
@@ -445,6 +446,7 @@ ErrorCode VideoSinkFilter::SetVideoSurface(sptr<Surface> surface)
     } else {
         surface_ = surface;
     }
+    MEDIA_LOG_D("SetVideoSurface success");
     return ErrorCode::SUCCESS;
 }
 #endif

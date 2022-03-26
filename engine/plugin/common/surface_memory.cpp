@@ -23,13 +23,14 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 SurfaceMemory::SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocator, size_t align)
-    : Memory(capacity, std::move(allocator), align, MemoryType::SURFACE_BUFFER, false)
+    : Memory(capacity, std::move(allocator), align, MemoryType::SURFACE_BUFFER, false),
+      fence_(-1),
+      stride_(0)
 {
     bufferSize_ = align ? (capacity + align - 1) : capacity;
-    if (this->allocator != nullptr && this->allocator->GetMemoryType() == MemoryType::SURFACE_BUFFER &&
-        bufferSize_ != 0) {
+    if (this->allocator != nullptr && this->allocator->GetMemoryType() == MemoryType::SURFACE_BUFFER) {
         surfaceAllocator_ = ReinterpretPointerCast<SurfaceAllocator>(this->allocator);
-        surfaceBuffer_ = surfaceAllocator_->AllocSurfaceBuffer(bufferSize_);
+        AllocSurfaceBuffer();
     }
 }
 
@@ -38,48 +39,75 @@ SurfaceMemory::~SurfaceMemory()
     ReleaseSurfaceBuffer();
 }
 
+void SurfaceMemory::AllocSurfaceBuffer()
+{
+    if (surfaceAllocator_ == nullptr || bufferSize_ == 0 || surfaceBuffer_ != nullptr) {
+        return;
+    }
+    surfaceBuffer_ = surfaceAllocator_->AllocSurfaceBuffer(bufferSize_);
+    if (surfaceBuffer_ != nullptr) {
+        auto bufferHandle = surfaceBuffer_->GetBufferHandle();
+        if (bufferHandle != nullptr) {
+            stride_ = bufferHandle->stride;
+        }
+        fence_ = -1;
+    }
+}
+
 sptr<SurfaceBuffer> SurfaceMemory::GetSurfaceBuffer()
 {
+    OSAL::ScopedLock l(memMutex_);
     if (surfaceBuffer_ != nullptr) {
         return surfaceBuffer_;
     }
-    surfaceAllocator_ = ReinterpretPointerCast<SurfaceAllocator>(this->allocator);
-    if (surfaceAllocator_ != nullptr && bufferSize_ != 0) {
-        surfaceBuffer_ = surfaceAllocator_->AllocSurfaceBuffer(bufferSize_);
-        MEDIA_LOG_D("Realloc new surface buffer success");
-    }
+    // request surface buffer again when old buffer flush to nullptr
+    AllocSurfaceBuffer();
     return surfaceBuffer_;
 }
 
 void SurfaceMemory::ReleaseSurfaceBuffer()
 {
+    OSAL::ScopedLock l(memMutex_);
     surfaceBuffer_ = nullptr;
 }
 
-void SurfaceMemory::SetFenceFd(int32_t& fd)
+int32_t SurfaceMemory::GetFlushFence()
 {
-    fenceFd_ = fd;
-}
-
-int32_t SurfaceMemory::GetFenceFd()
-{
-    return fenceFd_;
+    OSAL::ScopedLock l(memMutex_);
+    return fence_;
 }
 
 BufferHandle *SurfaceMemory::GetBufferHandle()
 {
+    OSAL::ScopedLock l(memMutex_);
     if (surfaceBuffer_) {
         return surfaceBuffer_->GetBufferHandle();
     }
     return nullptr;
 }
 
+uint32_t SurfaceMemory::GetSurfaceBufferStride()
+{
+    OSAL::ScopedLock l(memMutex_);
+    return stride_;
+}
+
 uint8_t* SurfaceMemory::GetRealAddr() const
 {
+    OSAL::ScopedLock l(memMutex_);
     if (surfaceBuffer_) {
         return static_cast<uint8_t *>(surfaceBuffer_->GetVirAddr());
     }
     return nullptr;
+}
+
+size_t SurfaceMemory::GetCapacity()
+{
+    OSAL::ScopedLock l(memMutex_);
+    if (surfaceBuffer_) {
+        return static_cast<size_t>(surfaceBuffer_->GetSize());
+    }
+    return 0;
 }
 } // namespace Plugin
 } // namespace Media
