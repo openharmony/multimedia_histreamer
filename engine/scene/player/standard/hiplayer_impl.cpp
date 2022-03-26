@@ -18,6 +18,7 @@
 
 #include "hiplayer_impl.h"
 #include "foundation/log.h"
+#include "pipeline/core/clock_manager.h"
 #include "pipeline/factory/filter_factory.h"
 #include "scene/player/standard/media_utils.h"
 #include "plugin/common/media_source.h"
@@ -79,6 +80,7 @@ HiPlayerImpl::~HiPlayerImpl()
     audioDecoderMap_.clear();
     audioSink_.reset();
     fsm_.Stop();
+    ClockManager::Instance().ClearProviders();
     MEDIA_LOG_D("dtor called.");
 }
 
