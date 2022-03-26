@@ -193,6 +193,7 @@ Status SdlAudioSinkPlugin::Start()
 
 Status SdlAudioSinkPlugin::Stop()
 {
+    MEDIA_LOG_I("SDL SINK Stop...");
     rb->SetActive(false);
     SDL_PauseAudio(1);
     Flush();

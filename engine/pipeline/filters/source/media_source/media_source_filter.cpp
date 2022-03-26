@@ -58,11 +58,11 @@ MediaSourceFilter::MediaSourceFilter(const std::string& name)
 MediaSourceFilter::~MediaSourceFilter()
 {
     MEDIA_LOG_D("dtor called");
-    if (taskPtr_) {
-        taskPtr_->Stop();
-    }
     if (plugin_) {
         plugin_->Deinit();
+    }
+    if (taskPtr_) {
+        taskPtr_->Stop();
     }
 }
 
@@ -147,9 +147,6 @@ ErrorCode MediaSourceFilter::Prepare()
 ErrorCode MediaSourceFilter::Start()
 {
     MEDIA_LOG_I("Start entered.");
-    if (taskPtr_) {
-        taskPtr_->Start();
-    }
     return plugin_ ? TranslatePluginStatus(plugin_->Start()) : ErrorCode::ERROR_INVALID_OPERATION;
 }
 
@@ -236,8 +233,10 @@ void MediaSourceFilter::ActivateMode()
     MEDIA_LOG_D("IN");
     isSeekable_ = plugin_ && plugin_->IsSeekable();
     if (!isSeekable_) {
-        taskPtr_ = std::make_shared<OSAL::Task>("DataReader");
-        taskPtr_->RegisterHandler(std::bind(&MediaSourceFilter::ReadLoop, this));
+        if (taskPtr_ == nullptr) {
+            taskPtr_ = std::make_shared<OSAL::Task>("DataReader");
+            taskPtr_->RegisterHandler(std::bind(&MediaSourceFilter::ReadLoop, this));
+        }
         taskPtr_->Start();
     }
 }
