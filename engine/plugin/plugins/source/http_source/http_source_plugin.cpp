@@ -98,6 +98,7 @@ Status HttpSourcePlugin::Start()
 Status HttpSourcePlugin::Stop()
 {
     MEDIA_LOG_D("IN");
+    CloseUri();
     return Status::OK;
 }
 
