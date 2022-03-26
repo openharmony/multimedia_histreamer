@@ -17,6 +17,7 @@
 
 #include "hiplayer_impl.h"
 #include "foundation/log.h"
+#include "pipeline/core/clock_manager.h"
 #include "pipeline/factory/filter_factory.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_meta.h"
@@ -70,6 +71,7 @@ HiPlayerImpl::HiPlayerImpl()
 HiPlayerImpl::~HiPlayerImpl()
 {
     fsm_.Stop();
+    ClockManager::Instance().ClearProviders();
     MEDIA_LOG_D("dtor called.");
 }
 
@@ -385,6 +387,7 @@ ErrorCode HiPlayerImpl::DoResume()
 
 ErrorCode HiPlayerImpl::DoStop()
 {
+    MEDIA_LOG_I("HiPlayerImpl DoStop called, stop pipeline.");
     mediaStats_.Reset();
     auto ret = pipeline_->Stop();
     if (ret == ErrorCode::SUCCESS) {
