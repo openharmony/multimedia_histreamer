@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Media {
 namespace OSAL {
 Task::Task(std::string name, ThreadPriority priority)
-    : name_(std::move(name)), runningState_(RunningState::PAUSED), loop_(priority)
+    : name_(std::move(name)), runningState_(RunningState::STOPPED), loop_(priority)
 {
     MEDIA_LOG_D("task " PUBLIC_LOG_S " ctor called", name_.c_str());
     loop_.SetName(name_);
