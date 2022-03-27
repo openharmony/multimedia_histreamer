@@ -85,7 +85,6 @@ const char* GetErrorName(ErrorCode code);
         }                                                                                                              \
     } while (0)
 #endif
-
 }  // namespace Media
 }  // namespace OHOS
 #endif  // HISTREAMER_FOUNDATION_ERROR_CODE_H

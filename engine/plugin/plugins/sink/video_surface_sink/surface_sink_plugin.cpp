@@ -294,7 +294,7 @@ Status SurfaceSinkPlugin::UpdateSurfaceBuffer(sptr<SurfaceBuffer> surfaceBuffer,
 #endif
     FALSE_RETURN_V_MSG_E(needConvFormat == false, Status::ERROR_UNIMPLEMENTED, "Need to convert format");
     OHOS::BufferFlushConfig flushConfig = {
-            {0, 0, surfaceBuffer->GetWidth(), surfaceBuffer->GetHeight()},
+        {0, 0, surfaceBuffer->GetWidth(), surfaceBuffer->GetHeight()},
     };
     auto res = surface_->FlushBuffer(surfaceBuffer, fence, flushConfig);
     if (res != OHOS::SurfaceError::SURFACE_ERROR_OK) {
