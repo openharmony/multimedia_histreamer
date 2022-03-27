@@ -125,7 +125,7 @@ public:
     bool Seek(uint64_t offset)
     {
         OSAL::ScopedLock lck(writeMutex_);
-        MEDIA_LOG_I("Seek: buffer size " PUBLIC_LOG_D32 ", offset " PUBLIC_LOG_U64
+        MEDIA_LOG_I("Seek: buffer size " PUBLIC_LOG_ZU ", offset " PUBLIC_LOG_U64
                     ", mediaOffset_ " PUBLIC_LOG_U64, GetSize(), offset, mediaOffset_);
         bool result = false;
         if (offset >= mediaOffset_ && offset - mediaOffset_ < GetSize()) {

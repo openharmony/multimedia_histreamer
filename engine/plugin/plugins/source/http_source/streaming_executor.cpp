@@ -30,7 +30,7 @@ constexpr int RING_BUFFER_SIZE = 5 * 48 * 1024;
 constexpr int PER_REQUEST_SIZE = 48 * 1024;
 constexpr int WATER_LINE = RING_BUFFER_SIZE * 0.1;
 constexpr unsigned int SLEEP_TIME = 5;    // Sleep 5ms
-constexpr unsigned int RETRY_TIMES = 200;  // Retry 200 times
+constexpr size_t RETRY_TIMES = 200;  // Retry 200 times
 }
 
 StreamingExecutor::StreamingExecutor() noexcept
@@ -135,12 +135,12 @@ void StreamingExecutor::SetCallback(Callback* cb)
 
 void StreamingExecutor::WaitHeaderUpdated() const
 {
-    int times = 0;
+    size_t times = 0;
     while (!isHeaderUpdated && times < RETRY_TIMES) { // Wait Header(fileContentLen etc.) updated
         OSAL::SleepFor(SLEEP_TIME);
         times++;
     }
-    MEDIA_LOG_D("isHeaderUpdated " PUBLIC_LOG_D32 ", times " PUBLIC_LOG_D32,
+    MEDIA_LOG_D("isHeaderUpdated " PUBLIC_LOG_D32 ", times " PUBLIC_LOG_ZU,
                 isHeaderUpdated, times);
 }
 
@@ -266,7 +266,7 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
         char *token = strtok(nullptr, ":");
         FALSE_RETURN_V(token != nullptr, size * nitems);
         char *strRange = StringTrim(token);
-        long start, end, fileLen;
+        size_t start, end, fileLen;
         FALSE_LOG_MSG(sscanf_s(strRange, "bytes %ld-%ld/%ld", &start, &end, &fileLen) != -1,
             "sscanf get range failed");
         if (info->fileContentLen > 0 && info->fileContentLen != fileLen) {
