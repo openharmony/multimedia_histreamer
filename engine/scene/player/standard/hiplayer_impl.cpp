@@ -74,11 +74,6 @@ HiPlayerImpl::HiPlayerImpl()
 
 HiPlayerImpl::~HiPlayerImpl()
 {
-    pipeline_.reset();
-    audioSource_.reset();
-    demuxer_.reset();
-    audioDecoderMap_.clear();
-    audioSink_.reset();
     fsm_.Stop();
     ClockManager::Instance().ClearProviders();
     MEDIA_LOG_D("dtor called.");
