@@ -504,12 +504,6 @@ Status SdlVideoSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
         MEDIA_LOG_W("SDL_QUIT, write nothing");
         return Status::ERROR_NOT_ENOUGH_DATA;
     }
-    if ((curPts_ != 0) && (curPts_ != inputInfo->pts)) {
-        uint64_t refreshTime = (curPts_ > inputInfo->pts) ? (curPts_ - inputInfo->pts) : (inputInfo->pts - curPts_);
-        if (refreshTime < 70) { // 70 ms
-            SDL_Delay(refreshTime);
-        }
-    }
     return VideoImageDisaplay(inputInfo);
 }
 

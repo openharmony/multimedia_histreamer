@@ -84,7 +84,8 @@ private:
     bool CreateVideoSinkPlugin(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo);
     void HandleNegotiateParams(const Plugin::TagMap& upstreamParams, Plugin::TagMap& downstreamParams);
     void RenderFrame();
-    bool DoSync(const AVBufferPtr& buffer) const;
+    void SyncVideoOnly(int64_t pts);
+    bool DoSync(const AVBufferPtr& buffer);
     std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQueue_ {nullptr};
     std::shared_ptr<OHOS::Media::OSAL::Task> renderTask_ {nullptr};
     std::atomic<bool> pushThreadIsBlocking_ {false};
@@ -96,6 +97,8 @@ private:
 #endif
     std::shared_ptr<Plugin::VideoSink> plugin_ {nullptr};
     int64_t frameCnt_ {0};
+    int64_t curPts_ {0};
+    int64_t refreshTime_ {0};
 };
 } // namespace Pipeline
 } // namespace Media
