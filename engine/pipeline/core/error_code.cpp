@@ -37,7 +37,7 @@ static const std::map<ErrorCode, const char*> g_ErrorTypeMap = {
 const char* GetErrorName(ErrorCode code)
 {
     auto it = g_ErrorTypeMap.find(code);
-    if( it!= g_ErrorTypeMap.end()) {
+    if (it!= g_ErrorTypeMap.end()) {
         return it->second;
     }
     return "Unknow error type";

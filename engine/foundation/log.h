@@ -188,7 +188,7 @@ inline std::string MediaGetFileName(std::string file)
 #endif
 
 #ifndef FALSE_RETURN_V_MSG_IMPL
-#define FALSE_RETURN_V_MSG_IMPL(loglevel, exec, ret, fmt, args...)                                                          \
+#define FALSE_RETURN_V_MSG_IMPL(loglevel, exec, ret, fmt, args...)                                                     \
     do {                                                                                                               \
         bool returnValue = (exec);                                                                                     \
         if (!returnValue) {                                                                                            \

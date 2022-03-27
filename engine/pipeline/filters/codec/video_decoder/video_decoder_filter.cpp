@@ -264,7 +264,7 @@ ErrorCode VideoDecoderFilter::GetOutputBufferSize()
                vdecFormat_.format == Plugin::VideoPixelFormat::ABGR ||
                vdecFormat_.format == Plugin::VideoPixelFormat::BGRA) {
         bufferSize_ = static_cast<uint32_t>(Plugin::AlignUp(stride, VIDEO_ALIGN_SIZE) *
-                                            Plugin::AlignUp(vdecFormat_.height, VIDEO_ALIGN_SIZE) * 4); //4: 32bit
+                                            Plugin::AlignUp(vdecFormat_.height, VIDEO_ALIGN_SIZE) * 4); // 4: 32bit
         MEDIA_LOG_D("RGBA output buffer size: " PUBLIC_LOG_U32, bufferSize_);
     } else {
         // need to check video sink support and calc buffer size

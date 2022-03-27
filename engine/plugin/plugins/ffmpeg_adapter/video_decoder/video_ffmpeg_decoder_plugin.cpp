@@ -536,8 +536,8 @@ Status VideoFfmpegDecoderPlugin::CreateSwsContext()
         MEDIA_LOG_E("pixelFormat_: " PUBLIC_LOG_U32 ", pix_fmt: " PUBLIC_LOG_D32,
                     pixelFormat_, ConvertPixelFormatToFFmpeg(pixelFormat_));
         for (int32_t i = 0; i < AV_NUM_DATA_POINTERS; i++) {
-            MEDIA_LOG_D("scaleData[" PUBLIC_LOG_D32 "]: " PUBLIC_LOG_P ", scaleLineSize[" PUBLIC_LOG_D32 "]: " PUBLIC_LOG_D32,
-                        i, scaleData_[i], i, scaleLineSize_[i]);
+            MEDIA_LOG_D("scaleData[" PUBLIC_LOG_D32 "]: " PUBLIC_LOG_P ", scaleLineSize[" PUBLIC_LOG_D32 "]: "
+                        PUBLIC_LOG_D32, i, scaleData_[i], i, scaleLineSize_[i]);
             if (scaleData_[i] && !scaleLineSize_[i]) {
                 MEDIA_LOG_E("scaleFrame is broken, i: " PUBLIC_LOG_D32, i);
                 return Status::ERROR_UNKNOWN;
@@ -587,9 +587,9 @@ Status VideoFfmpegDecoderPlugin::WriteYuvDataStride(const std::shared_ptr<Buffer
             dstPos += stride;
         }
         srcPos = 0;
-        writeSize = scaleLineSize_[2];
+        writeSize = scaleLineSize_[2]; // 2
         for (uint32_t colNum = 0; colNum < height_; colNum++) {
-            frameBufferMem->Write(scaleData_[2] + srcPos, writeSize, dstPos);
+            frameBufferMem->Write(scaleData_[2] + srcPos, writeSize, dstPos); // 2
             dstPos += stride;
         }
     } else if ((pixelFormat_ == VideoPixelFormat::NV12) || (pixelFormat_ == VideoPixelFormat::NV21)) {
