@@ -39,6 +39,8 @@ const uint32_t VSINK_DEFAULT_BUFFER_NUM = 8;
 
 VideoSinkFilter::VideoSinkFilter(const std::string& name) : FilterBase(name)
 {
+    curPts_ = 0;
+    refreshTime_ = 0;
     MEDIA_LOG_I("VideoSinkFilter ctor called...");
 }
 
@@ -241,11 +243,22 @@ ErrorCode VideoSinkFilter::ConfigureNoLocked(const std::shared_ptr<const Plugin:
     return ErrorCode::SUCCESS;
 }
 
-bool VideoSinkFilter::DoSync(const AVBufferPtr& buffer) const
+void VideoSinkFilter::SyncVideoOnly(int64_t pts)
 {
-    if (frameCnt_ == 0) {
-        return true;
+    if ((curPts_ != 0) && (curPts_ != pts)) {
+        int64_t deltaTime =
+                Plugin::HstTime2Ms((pts > curPts_) ? (pts - curPts_) : (pts + (INT64_MAX - curPts_)));
+        if (deltaTime < 70) { // 70 ms
+            refreshTime_ = deltaTime;
+        }
     }
+    if (refreshTime_) {
+        OHOS::Media::OSAL::SleepFor(refreshTime_);
+    }
+}
+
+bool VideoSinkFilter::DoSync(const AVBufferPtr& buffer)
+{
     uint64_t latencyNano = 0;
     Plugin::Status status = plugin_->GetLatency(latencyNano);
     if (status != Plugin::Status::OK) {
@@ -253,26 +266,31 @@ bool VideoSinkFilter::DoSync(const AVBufferPtr& buffer) const
                     CppExt::to_underlying(TranslatePluginStatus(status)));
         latencyNano = 0;
     }
-    int64_t pts = (INT64_MAX - static_cast<int64_t>(latencyNano) < static_cast<int64_t>(buffer->pts)) ?
-                  (static_cast<int64_t>(buffer->pts) + static_cast<int64_t>(latencyNano)) :
-                  (static_cast<int64_t>(latencyNano) - (INT64_MAX - static_cast<int64_t>(buffer->pts)));
+    if (INT64_MAX - static_cast<int64_t>(latencyNano) < static_cast<int64_t>(buffer->pts)) {
+        MEDIA_LOG_E("Video pts(" PUBLIC_LOG_U64 ") + latency overflow.", buffer->pts);
+        return false;
+    }
     int64_t delta = 0;
     int64_t tempOut = 0;
+    int64_t pts = static_cast<int64_t>(buffer->pts) + static_cast<int64_t>(latencyNano);
+    if (frameCnt_ == 0 || pts == 0) {
+        return true;
+    }
     if (ClockManager::Instance().GetProvider().CheckPts(pts, delta) != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("ClockManager clock is not exit, skip avsync");
+        SyncVideoOnly(pts);
         return true;
     }
     if (delta > 0) {
         tempOut = Plugin::HstTime2Ms(delta);
         if (tempOut > 100) { // 100ms
-            MEDIA_LOG_D("DoSync early " PUBLIC_LOG_D64 " ms", tempOut);
+            MEDIA_LOG_D("DoSync early " PUBLIC_LOG_D64 " ms, wait", tempOut);
             OHOS::Media::OSAL::SleepFor(tempOut);
             return true;
         }
     } else if (delta < 0) {
         tempOut = Plugin::HstTime2Ms(-delta);
         if (tempOut > 40) { // 40ms drop frame
-            MEDIA_LOG_E("DoSync later " PUBLIC_LOG_D64 " ms", tempOut);
+            MEDIA_LOG_D("DoSync later " PUBLIC_LOG_D64 " ms, drop", tempOut);
             return false;
         }
     }
@@ -284,13 +302,13 @@ void VideoSinkFilter::RenderFrame()
     MEDIA_LOG_D("RenderFrame called");
     auto frameBuffer = inBufQueue_->Pop();
     if (frameBuffer == nullptr) {
-        MEDIA_LOG_W("Video sink find nullptr in esBufferQ");
+        MEDIA_LOG_D("Video sink find nullptr in esBufferQ");
         return;
     }
     if (!DoSync(frameBuffer)) {
-        MEDIA_LOG_W("drop this frame");
         return;
     }
+    curPts_ = frameBuffer->pts;
     auto err = plugin_->Write(frameBuffer);
     if (err != Plugin::Status::OK) {
         MEDIA_LOG_E("write to plugin fail: " PUBLIC_LOG_U32, err);
