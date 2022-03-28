@@ -133,16 +133,16 @@ Status Minimp3DecoderPlugin::GetPcmDataProcess(const std::shared_ptr<Buffer>& in
     if (inputBuffer == nullptr) {
         return Status::ERROR_NOT_ENOUGH_DATA;
     }
+    if (outputBuffer == nullptr || outputBuffer->IsEmpty()) {
+        MEDIA_LOG_W("outputBuffer nullptr warning");
+        return Status::ERROR_INVALID_PARAMETER;
+    }
     if (inputBuffer->IsEmpty() && (inputBuffer->flag & BUFFER_FLAG_EOS) != 0) {
         MEDIA_LOG_I("eos received");
         outputBuffer->GetMemory()->Reset();
         outputBuffer->flag |= BUFFER_FLAG_EOS;
         return Status::END_OF_STREAM;
-    } else if (outputBuffer == nullptr || outputBuffer->IsEmpty()) {
-        MEDIA_LOG_W("outputBuffer nullptr warning");
-        return Status::ERROR_INVALID_PARAMETER;
     }
-
     return AudioDecoderMp3Process(inputBuffer_, outputBuffer);
 }
 
