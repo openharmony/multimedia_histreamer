@@ -300,7 +300,7 @@ Status Minimp3DemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode m
         ioDataRemainSize_ = 0;
         currentDemuxerPos_ = pos;
         MEDIA_LOG_D("ioContext_.offset " PUBLIC_LOG_D32, static_cast<uint32_t>(ioContext_.offset));
-        memset_s(inIoBuffer_, inIoBufferSize_, 0x00, inIoBufferSize_);
+        (void)memset_s(inIoBuffer_, inIoBufferSize_, 0x00, inIoBufferSize_);
     } else {
         return Status::ERROR_INVALID_PARAMETER;
     }
@@ -317,7 +317,7 @@ Status Minimp3DemuxerPlugin::Init()
         MEDIA_LOG_E("inIoBuffer_ malloc failed");
         return Status::ERROR_NO_MEMORY;
     }
-    memset_s(inIoBuffer_, inIoBufferSize_, 0x00, inIoBufferSize_);
+    (void)memset_s(inIoBuffer_, inIoBufferSize_, 0x00, inIoBufferSize_);
     return Status::OK;
 }
 
@@ -342,7 +342,7 @@ Status Minimp3DemuxerPlugin::Reset()
     ioContext_.offset = 0;
     ioDataRemainSize_ = 0;
     currentDemuxerPos_ = 0;
-    memset_s(inIoBuffer_, inIoBufferSize_, 0x00, inIoBufferSize_);
+    (void)memset_s(inIoBuffer_, inIoBufferSize_, 0x00, inIoBufferSize_);
     return Status::OK;
 }
 
@@ -498,7 +498,7 @@ int Minimp3DemuxerPlugin::AudioDemuxerMp3Process(uint8_t *buf, uint32_t len)
     uint32_t processLen = len;
     AudioDemuxerMp3IgnoreTailZero(buf, &processLen);
     // this memset_s will always success
-    memset_s(&mp3DemuxerRst_, sizeof(AudioDemuxerRst), 0x00, sizeof(AudioDemuxerRst));
+    (void)memset_s(&mp3DemuxerRst_, sizeof(AudioDemuxerRst), 0x00, sizeof(AudioDemuxerRst));
     mp3DemuxerAttr_.rst = &mp3DemuxerRst_;
     mp3DemuxerAttr_.internalRemainLen = processLen;
     ret = minimp3DemuxerImpl_.iterateBuf(buf, processLen, AudioDemuxerMp3IterateCallback, &mp3DemuxerAttr_);

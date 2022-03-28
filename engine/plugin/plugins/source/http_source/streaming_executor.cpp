@@ -43,7 +43,7 @@ StreamingExecutor::StreamingExecutor() noexcept
     task_ = std::make_shared<OSAL::Task>(std::string("StreamingExecutor"));
     task_->RegisterHandler(std::bind(&StreamingExecutor::HttpDownloadThread, this));
 
-    memset_s(&headerInfo_, sizeof(HeaderInfo), 0x00, sizeof(HeaderInfo));
+    (void)memset_s(&headerInfo_, sizeof(HeaderInfo), 0x00, sizeof(HeaderInfo));
     headerInfo_.fileContentLen = 0;
     startPos_ = 0;
     isDownloading_ = false;
@@ -234,18 +234,19 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
 {
     auto executor = reinterpret_cast<StreamingExecutor *>(userParam);
     HeaderInfo *info = &(executor->headerInfo_);
-    char *key = strtok(reinterpret_cast<char *>(buffer), ":");
+    char *next = nullptr;
+    char *key = strtok_s(reinterpret_cast<char *>(buffer), ":", &next);
     FALSE_RETURN_V(key != nullptr, size * nitems);
     if (!strncmp(key, "Content-Type", strlen("Content-Type"))) {
-        char *token = strtok(nullptr, ":");
+        char *token = strtok_s(nullptr, ":", &next);
         FALSE_RETURN_V(token != nullptr, size * nitems);
         char *type = StringTrim(token);
-        memcpy_s(info->contentType, sizeof(info->contentType), type, sizeof(info->contentType));
+        (void)memcpy_s(info->contentType, sizeof(info->contentType), type, sizeof(info->contentType));
     }
 
     if (!strncmp(key, "Content-Length", strlen("Content-Length")) ||
         !strncmp(key, "content-length", strlen("content-length"))) {
-        char *token = strtok(nullptr, ":");
+        char *token = strtok_s(nullptr, ":", &next);
         FALSE_RETURN_V(token != nullptr, size * nitems);
         char *contLen = StringTrim(token);
         info->contentLen = atol(contLen);
@@ -253,7 +254,7 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
 
     if (!strncmp(key, "Transfer-Encoding", strlen("Transfer-Encoding")) ||
         !strncmp(key, "transfer-encoding", strlen("transfer-encoding"))) {
-        char *token = strtok(nullptr, ":");
+        char *token = strtok_s(nullptr, ":", &next);
         FALSE_RETURN_V(token != nullptr, size * nitems);
         char *transEncode = StringTrim(token);
         if (!strncmp(transEncode, "chunked", strlen("chunked"))) {
@@ -263,7 +264,7 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
 
     if (!strncmp(key, "Content-Range", strlen("Content-Range")) ||
         !strncmp(key, "content-range", strlen("content-range"))) {
-        char *token = strtok(nullptr, ":");
+        char *token = strtok_s(nullptr, ":", &next);
         FALSE_RETURN_V(token != nullptr, size * nitems);
         char *strRange = StringTrim(token);
         size_t start, end, fileLen;

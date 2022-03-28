@@ -196,7 +196,7 @@ Status SetParameterOfSubTitleTrack(AVStream* stream, const TagMap& tagMap)
 void ResetCodecParameter(AVCodecParameters* par)
 {
     av_freep(&par->extradata);
-    memset_s(par, sizeof(*par), 0, sizeof(*par));
+    (void)memset_s(par, sizeof(*par), 0, sizeof(*par));
     par->codec_type = AVMEDIA_TYPE_UNKNOWN;
     par->codec_id = AV_CODEC_ID_NONE;
     par->format = -1;
@@ -242,7 +242,7 @@ Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const TagMap&
             auto extraSize = codecConfig.size();
             stream->codecpar->extradata = static_cast<uint8_t *>(av_mallocz(extraSize + AV_INPUT_BUFFER_PADDING_SIZE));
             FALSE_RETURN_V(stream->codecpar->extradata != nullptr, Status::ERROR_NO_MEMORY);
-            memcpy_s(stream->codecpar->extradata, extraSize, codecConfig.data(), extraSize);
+            (void)memcpy_s(stream->codecpar->extradata, extraSize, codecConfig.data(), extraSize);
             stream->codecpar->extradata_size = extraSize;
         }
     }
