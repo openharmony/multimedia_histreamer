@@ -284,6 +284,16 @@ std::set<std::string> PluginRegister::ListPlugins(PluginType type)
     return registerData->registerNames[type];
 }
 
+int PluginRegister::GetAllPluginsCounts()
+{
+    int counts = 0;
+    for (auto it : registerData->registerTable) {
+        auto plugins = it.second;
+        counts += plugins.size();
+    }
+    return counts;
+}
+
 std::shared_ptr<PluginRegInfo> PluginRegister::GetPluginRegInfo(PluginType type, const std::string& name)
 {
     if (registerData->IsPluginExist(type, name)) {
@@ -343,7 +353,7 @@ void PluginRegister::UnregisterAllPlugins()
     UnregisterPluginStatic();
 #ifdef DYNAMIC_PLUGINS
     for (auto& loader : registeredLoaders) {
-        EraseRegisteredPlugins(loader);
+        EraseRegisteredPluginsByLoader(loader);
         loader->FetchUnregisterFunction()();
         loader.reset();
     }
@@ -351,7 +361,7 @@ void PluginRegister::UnregisterAllPlugins()
     registeredLoaders.clear();
 }
 
-void PluginRegister::EraseRegisteredPlugins(const std::shared_ptr<PluginLoader>& loader)
+void PluginRegister::EraseRegisteredPluginsByLoader(const std::shared_ptr<PluginLoader>& loader)
 {
     for (auto& it : registerData->registerTable) {
         PluginType type = it.first;
@@ -367,8 +377,78 @@ void PluginRegister::EraseRegisteredPlugins(const std::shared_ptr<PluginLoader>&
     }
 }
 
+bool PluginRegister::EraseRegisteredPluginByName(std::string name)
+{
+    for (auto& it : registerData->registerTable) {
+        PluginType type = it.first;
+        auto plugins = it.second;
+        for (auto info = plugins.begin(); info != plugins.end();) {
+            if (info->second->packageDef->name == name) {
+                SaveDisabledPlugin(*info);
+                registerData->registerNames[type].erase(info->first);
+                registerData->registerTable[type].erase(info->first);
+                info = plugins.erase(info);
+            } else {
+                info++;
+            }
+        }
+    }
+    return true;
+}
+
+void PluginRegister::SaveDisabledPlugin(std::pair<std::string, std::shared_ptr<PluginRegInfo>> info)
+{
+    registerData->disabledPlugins.push_back(info);
+}
+
 bool PluginRegister::RegisterData::IsPluginExist(PluginType type, const std::string& name)
 {
     return (registerTable.find(type) != registerTable.end() &&
             registerTable[type].find(name) != registerTable[type].end());
 }
+
+bool PluginRegister::RegisterData::IsPackageExist(PluginType type, const std::string& name)
+{
+    if (registerTable.find(type) != registerTable.end()) {
+        for (auto plugin : registerTable[type]) {
+            //printf("package name is %s\n", plugin.second->packageDef->name.c_str());
+            if (plugin.second->packageDef->name == name) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+bool PluginRegister::RecoverDisabledPlugin(PluginType type, std::string name)
+{
+    for (auto it = registerData->disabledPlugins.begin(); it != registerData->disabledPlugins.end();) {
+        if (it->second->packageDef->name == name) {
+            registerData->registerTable[type].insert(*it);
+            registerData->registerNames[type].insert(it->first);
+            it = registerData->disabledPlugins.erase(it);
+            return true;
+        } else {
+            it++;
+        }
+    }
+    return false;
+}
+
+bool PluginRegister::EnablePackage(PluginType type, const std::string& name)
+{
+    if (registerData->IsPackageExist(type, name)) {
+        return true;
+    } else {
+        return RecoverDisabledPlugin(type, name);
+    }
+}
+
+bool PluginRegister::DisablePackage(PluginType type, const std::string& name)
+{
+    if (registerData->IsPackageExist(type, name)) {
+        return EraseRegisteredPluginByName(name);
+    }
+    return true;
+}
+

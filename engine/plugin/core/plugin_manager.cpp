@@ -61,6 +61,16 @@ int32_t PluginManager::Sniffer(const std::string& name, std::shared_ptr<DataSour
     return 0;
 }
 
+bool PluginManager::EnablePackage(PluginType type, const std::string& name)
+{
+    return pluginRegister_->EnablePackage(type, name);
+}
+
+bool PluginManager::DisablePackage(PluginType type, const std::string& name)
+{
+    return pluginRegister_->DisablePackage(type, name);
+}
+
 void PluginManager::Init()
 {
     pluginRegister_ = std::make_shared<PluginRegister>();

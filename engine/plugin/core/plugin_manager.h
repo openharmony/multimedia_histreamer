@@ -62,6 +62,10 @@ public:
 
     int32_t Sniffer(const std::string& name, std::shared_ptr<DataSourceHelper> source);
 
+    bool EnablePackage(PluginType type, const std::string& name);
+
+    bool DisablePackage(PluginType type, const std::string& name);
+
 private:
     PluginManager();
 
