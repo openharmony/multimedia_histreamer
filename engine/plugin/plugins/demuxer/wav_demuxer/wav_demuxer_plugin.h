@@ -55,8 +55,10 @@ private:
     };
     uint8_t* GetWavMediaInfo(void);
     size_t              fileSize_;
-    uint32_t            wavHeadLength_;
     IOContext           ioContext_;
+    uint32_t            dataOffset_;
+    bool                isSeekable_;
+    bool                isFirstFrame_;
 };
 } // namespace Wav
 } // namespace Plugin
