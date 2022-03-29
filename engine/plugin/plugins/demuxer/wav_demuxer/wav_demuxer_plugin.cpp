@@ -60,7 +60,7 @@ std::map<uint32_t, AudioSampleFormat> g_WavAudioSampleFormatPacked = {
     {32, AudioSampleFormat::S32},
 };
 
-enum WavAudioFormat {
+enum class WavAudioFormat {
     WAVE_FORMAT_PCM = 0x0001,
     WAVE_FORMAT_IEEE_FLOAT = 0x0003,
     WAVE_FORMAT_ALAW = 0x0006,
@@ -142,15 +142,15 @@ Status WavDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
     mediaInfo.tracks[0].insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_RAW)});
     mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(1)});
     mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_PER_FRAME, WAV_PER_FRAME_SIZE});
-    if (wavHeader->audioFormat == WavAudioFormat::WAVE_FORMAT_PCM
-        || wavHeader->audioFormat == WavAudioFormat::WAVE_FORMAT_EXTENSIBLE ) {
+    if (wavHeader->audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_PCM)
+        || wavHeader->audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_EXTENSIBLE)) {
         mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT,
-            g_WavAudioSampleFormatPacked[static_cast<uint32_t>(wavHeader->bitPerSample)]});
-        } else if (wavHeader->audioFormat == WavAudioFormat::WAVE_FORMAT_IEEE_FLOAT){
-            mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::F32});
-        } else {
-            mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::NONE});
-        }
+        g_WavAudioSampleFormatPacked[static_cast<uint32_t>(wavHeader->bitPerSample)]});
+    } else if (wavHeader->audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_IEEE_FLOAT)){
+        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::F32});
+    } else {
+        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::NONE});
+    }
     mediaInfo.tracks[0].insert({Tag::BITS_PER_CODED_SAMPLE, static_cast<uint32_t>(wavHeader->bitPerSample)});
     return Status::OK;
 }
