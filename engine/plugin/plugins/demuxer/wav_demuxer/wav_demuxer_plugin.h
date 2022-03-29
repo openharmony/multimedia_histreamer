@@ -58,7 +58,6 @@ private:
     IOContext           ioContext_;
     uint32_t            dataOffset_;
     bool                isSeekable_;
-    bool                isFirstFrame_;
 };
 } // namespace Wav
 } // namespace Plugin
