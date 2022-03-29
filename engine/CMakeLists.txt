@@ -70,6 +70,7 @@ file(GLOB_RECURSE HISTREAMER_BASE_SRCS
         )
 
 file(GLOB_RECURSE COMMON_PLUGIN_SRCS
+        ${TOP_DIR}/engine/plugin/plugins/demuxer/wav_demuxer/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/ffmpeg_adapter/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/sink/sdl/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/sink/file_sink/*.cpp

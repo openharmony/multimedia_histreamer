@@ -33,12 +33,12 @@ struct WavHeadAttr {
     uint8_t  waveFlag[4]; // 4
     uint8_t  fmt[4];      // 4
     uint32_t fmtLen;      // 4
-    uint16_t tag;         // 2
+    uint16_t audioFormat; // 2
     uint16_t channels;    // 2
     uint32_t sampFreq;    // 4
     uint32_t byteRate;    // 4
     uint16_t blockAlign;  // 2
-    uint16_t bitSamp;     // 2
+    uint16_t bitPerSample; //2
     uint8_t  dataFlag[4]; // 4
     uint32_t length;      // 4
 }; // 根据wav协议构建的结构体，轻易勿动
@@ -50,10 +50,23 @@ namespace WavPlugin {
 namespace {
 constexpr uint8_t  MAX_RANK = 100;
 constexpr uint8_t  PROBE_READ_LENGTH  = 4;
-constexpr uint32_t WAV_PER_FRAME_SIZE = 4096;
-constexpr uint32_t WAV_HEAD_INFO_LEN = sizeof(WavHeadAttr);
+constexpr uint32_t WAV_PER_FRAME_SIZE = 8192;
+constexpr uint32_t MAX_WAV_HEAD_INFO_LEN = 256;
 bool WavSniff(const uint8_t *inputBuf);
-int8_t firstFrameFlag = 0;
+
+std::map<uint32_t, AudioSampleFormat> g_WavAudioSampleFormatPacked = {
+    {8, AudioSampleFormat::U8},
+    {16, AudioSampleFormat::S16},
+    {32, AudioSampleFormat::S32},
+};
+
+enum WavAudioFormat {
+    WAVE_FORMAT_PCM = 0x0001,
+    WAVE_FORMAT_IEEE_FLOAT = 0x0003,
+    WAVE_FORMAT_ALAW = 0x0006,
+    WAVE_FORMAT_MULAW = 0x0007,
+    WAVE_FORMAT_EXTENSIBLE = 0xFFFE,
+};
 int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource);
 Status RegisterPlugin(const std::shared_ptr<Register>& reg);
 }
@@ -62,7 +75,9 @@ WavDemuxerPlugin::WavDemuxerPlugin(std::string name)
     : DemuxerPlugin(std::move(name)),
       fileSize_(0),
       ioContext_(),
-      wavHeadLength_(0)
+      dataOffset_(0),
+      isSeekable_(true),
+      isFirstFrame_(true)
 {
     MEDIA_LOG_I("WavDemuxerPlugin, plugin name: " PUBLIC_LOG_S, pluginName_.c_str());
 }
@@ -78,6 +93,9 @@ Status WavDemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& source
     if (ioContext_.dataSource != nullptr) {
         ioContext_.dataSource->GetSize(fileSize_);
     }
+    if (fileSize_ == 0) {
+        isSeekable_ = false;
+    }
     MEDIA_LOG_I("fileSize_ " PUBLIC_LOG_ZU, fileSize_);
     return Status::OK;
 }
@@ -85,14 +103,23 @@ Status WavDemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& source
 uint8_t* WavDemuxerPlugin::GetWavMediaInfo(void)
 {
     auto buffer = std::make_shared<Buffer>();
-    auto bufData = buffer->AllocMemory(nullptr, WAV_HEAD_INFO_LEN);
-    Status status = ioContext_.dataSource->ReadAt(0, buffer, WAV_HEAD_INFO_LEN);
+    auto bufData = buffer->AllocMemory(nullptr, MAX_WAV_HEAD_INFO_LEN);
+    Status status = ioContext_.dataSource->ReadAt(0, buffer, MAX_WAV_HEAD_INFO_LEN);
     MEDIA_LOG_D("WAV_HEAD_INFO_LEN " PUBLIC_LOG_U32, WAV_HEAD_INFO_LEN);
     if (status != Status::OK) {
         MEDIA_LOG_E("Read Data Error");
         return nullptr;
     }
     uint8_t *dataPtr = const_cast<uint8_t *>(bufData->GetReadOnlyData());
+    int pos = 0;
+    while (pos < MAX_WAV_HEAD_INFO_LEN - 3) {
+        if (dataPtr[pos] == 'd'&& dataPtr[pos + 1] == 'a' && dataPtr[pos + 2] == 't' &&  // 2,3
+            dataPtr[pos + 3] == 'a') {
+            dataOffset_ = pos + 8; // 8 ----the length of data size
+            break;
+        }
+        pos++;
+    }
     return dataPtr;
 }
 
@@ -102,8 +129,6 @@ Status WavDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
     if (wavHeader == nullptr) {
         return Status::ERROR_UNKNOWN;
     }
-    wavHeadLength_ = wavHeader->fmtLen + 20 + 8; // 20 8
-    MEDIA_LOG_D("wavHeadLength_ " PUBLIC_LOG_U32, wavHeadLength_);
     mediaInfo.tracks.resize(1);
     if (wavHeader->channels == 1) {
         mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::MONO});
@@ -111,13 +136,22 @@ Status WavDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
         mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::STEREO});
     }
     mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(wavHeader->sampFreq)});
-    mediaInfo.tracks[0].insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(wavHeader->byteRate)});
+    mediaInfo.tracks[0].insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(wavHeader->byteRate) * 8}); // 8  byte to bit
     mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(wavHeader->channels)});
     mediaInfo.tracks[0].insert({Tag::TRACK_ID, static_cast<uint32_t>(0)});
     mediaInfo.tracks[0].insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_RAW)});
     mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(1)});
     mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_PER_FRAME, WAV_PER_FRAME_SIZE});
-    mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::S16});
+    if (wavHeader->audioFormat == WavAudioFormat::WAVE_FORMAT_PCM
+        || wavHeader->audioFormat == WavAudioFormat::WAVE_FORMAT_EXTENSIBLE ) {
+        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT,
+            g_WavAudioSampleFormatPacked[static_cast<uint32_t>(wavHeader->bitPerSample)]});
+        } else if (wavHeader->audioFormat == WavAudioFormat::WAVE_FORMAT_IEEE_FLOAT){
+            mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::F32});
+        } else {
+            mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::NONE});
+        }
+    mediaInfo.tracks[0].insert({Tag::BITS_PER_CODED_SAMPLE, static_cast<uint32_t>(wavHeader->bitPerSample)});
     return Status::OK;
 }
 
@@ -128,11 +162,16 @@ Status WavDemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
     if (outBuffer.IsEmpty()) {
         outBuffer.AllocMemory(nullptr, WAV_PER_FRAME_SIZE);
     }
-    if (firstFrameFlag == 0) {
-        retResult = ioContext_.dataSource->ReadAt(wavHeadLength_ - WAV_HEAD_INFO_LEN, outBufferPtr, WAV_PER_FRAME_SIZE);
-        firstFrameFlag = 1;
+    if (!isSeekable_) {
+        if (isFirstFrame_) {
+            retResult = ioContext_.dataSource->ReadAt(dataOffset_, outBufferPtr, WAV_PER_FRAME_SIZE);
+            isFirstFrame_ = false;
+        } else {
+            retResult = ioContext_.dataSource->ReadAt(0, outBufferPtr, WAV_PER_FRAME_SIZE);
+        }
     } else {
-        retResult = ioContext_.dataSource->ReadAt(0, outBufferPtr, WAV_PER_FRAME_SIZE);
+        retResult = ioContext_.dataSource->ReadAt(dataOffset_, outBufferPtr, WAV_PER_FRAME_SIZE);
+        dataOffset_ +=  outBuffer.GetMemory()->GetSize();
     }
     if (retResult != Status::OK) {
         MEDIA_LOG_E("Read Data Error");
@@ -150,7 +189,10 @@ Status WavDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
 
 Status WavDemuxerPlugin::Reset()
 {
-    firstFrameFlag = 0;
+    isFirstFrame_ = true;
+    dataOffset_ = 0;
+    fileSize_ = 0;
+    isSeekable_ = true;
     return Status::OK;
 }
 
