@@ -53,7 +53,6 @@ private:
         int64_t offset {0};
         bool eos {false};
     };
-    uint8_t* GetWavMediaInfo(void);
     size_t              fileSize_;
     IOContext           ioContext_;
     uint32_t            dataOffset_;
