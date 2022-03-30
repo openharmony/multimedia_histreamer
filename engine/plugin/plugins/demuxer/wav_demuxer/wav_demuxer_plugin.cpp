@@ -105,23 +105,16 @@ Status WavDemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& source
     return Status::OK;
 }
 
-uint8_t* WavDemuxerPlugin::GetWavMediaInfo(void)
+Status WavDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
 {
     auto buffer = std::make_shared<Buffer>();
     auto bufData = buffer->AllocMemory(nullptr, WAV_HEAD_INFO_LEN);
     Status status = ioContext_.dataSource->ReadAt(0, buffer, WAV_HEAD_INFO_LEN);
-    MEDIA_LOG_D("WAV_HEAD_INFO_LEN " PUBLIC_LOG_U32, WAV_HEAD_INFO_LEN);
     if (status != Status::OK) {
-        MEDIA_LOG_E("Read Data Error");
-        return nullptr;
+        return status;
     }
     uint8_t *dataPtr = const_cast<uint8_t *>(bufData->GetReadOnlyData());
-    return dataPtr;
-}
-
-Status WavDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
-{
-    WavHeadAttr *wavHeader = reinterpret_cast<WavHeadAttr *>(GetWavMediaInfo());
+    WavHeadAttr *wavHeader = reinterpret_cast<WavHeadAttr *>(dataPtr);
     if (wavHeader == nullptr) {
         return Status::ERROR_UNKNOWN;
     }
