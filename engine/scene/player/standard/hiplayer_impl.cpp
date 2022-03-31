@@ -112,7 +112,7 @@ int32_t HiPlayerImpl::SetSource(const std::string& uri)
         ret = fsm_.SendEvent(Intent::SET_SOURCE, std::make_shared<MediaSource>(uri));
     }
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("SetSource error: " PUBLIC_LOG_D32, ret);
+        MEDIA_LOG_E("SetSource error: " PUBLIC_LOG_S, GetErrorName(ret));
     }
     PROFILE_END("SetSource end.");
     return TransErrorCode(ret);
