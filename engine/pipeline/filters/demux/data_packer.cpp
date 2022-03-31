@@ -234,7 +234,11 @@ bool DataPacker::GetRange(uint32_t size, AVBufferPtr& bufferPtr)
     if (que_.empty()) {
         FALSE_RETURN_V_W(!isEos_, false);
         MEDIA_LOG_D("DataPacker is empty, live play GetRange waiting for push");
-        cvEmpty_.Wait(lock, [this] { return !que_.empty(); });
+        cvEmpty_.Wait(lock, [this] { return !que_.empty() || isEos_; });
+        if (isEos_) {
+            MEDIA_LOG_D("Eos wakeup the cvEmpty ConditionVariable");
+            return false;
+        }
     }
 
     FALSE_RETURN_V(!que_.empty(), false);
@@ -287,6 +291,7 @@ void DataPacker::SetEos()
     MEDIA_LOG_I("DataPacker SetEos called.");
     OSAL::ScopedLock lock(mutex_);
     isEos_ = true;
+    cvEmpty_.NotifyOne();
 }
 
 bool DataPacker::IsEmpty()
