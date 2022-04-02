@@ -93,6 +93,12 @@ const std::map<FilterType, PluginParaAllowedMap> PluginParameterTable::table_ = 
         {Tag::AUDIO_AAC_PROFILE, {CommonParameterChecker, PARAM_SET | PARAM_GET}},
         {Tag::AUDIO_AAC_LEVEL, {CommonParameterChecker, PARAM_SET | PARAM_GET}},
     }},
+    {FilterType::VIDEO_DECODER, {
+        {Tag::VIDEO_WIDTH, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_HEIGHT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_PIXEL_FORMAT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::MEDIA_CODEC_CONFIG, {CommonParameterChecker, PARAM_SET}},
+    }},
 };
 }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,12 +23,22 @@ namespace Media {
 namespace Pipeline {
 class AudioDecoderFilter : public CodecFilterBase {
 public:
-    explicit AudioDecoderFilter(const std::string &name);
+    AudioDecoderFilter(const std::string& name, std::shared_ptr<CodecMode>& codecMode);
     ~AudioDecoderFilter() override;
+
+    ErrorCode Prepare() override;
 
     ErrorCode Start() override;
 
     ErrorCode Stop() override;
+
+    void FlushStart() override;
+
+    void FlushEnd() override;
+
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
+
+    ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
@@ -36,38 +46,12 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
 
-    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
-
-    /**
-     *
-     * @param inPort
-     * @param buffer
-     * @param offset always ignore this parameter
-     * @return
-     */
-    ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
-
-    void FlushStart() override;
-
-    void FlushEnd() override;
-
-private:
-    ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta> &meta);
-
-    ErrorCode HandleFrame(const std::shared_ptr<AVBuffer>& buffer);
-
-    ErrorCode FinishFrame();
-
-    ErrorCode Release();
-
     void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input) override;
-    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override;
-private:
-    std::shared_ptr<BufferPool<AVBuffer>> outBufferPool_ {};
-    bool isFlushing_ {false};
 
-    Capability capNegWithDownstream_;
-    Capability capNegWithUpstream_;
+    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override;
+
+private:
+    uint32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta) override;
 };
 } // Pipeline
 } // Media

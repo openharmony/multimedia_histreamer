@@ -90,6 +90,7 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
             MEDIA_LOG_I("codec is not supported right now");
             break;
     }
+    incapBuilder.SetThreadModeList({ThreadMode::ASYNC});
     definition.inCaps.push_back(incapBuilder.Build());
 }
 

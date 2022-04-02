@@ -559,7 +559,7 @@ ErrorCode HiPlayerImpl::SetVolume(float volume)
     }
     ErrorCode ret = ErrorCode::SUCCESS;
     if (volume > 0) {
-        MEDIA_LOG_I("set volume " PUBLIC_LOG ".3f", volume);
+        MEDIA_LOG_I("set volume " PUBLIC_LOG_F, volume);
         ret = audioSink_->SetVolume(volume);
     }
     if (ret != ErrorCode::SUCCESS) {

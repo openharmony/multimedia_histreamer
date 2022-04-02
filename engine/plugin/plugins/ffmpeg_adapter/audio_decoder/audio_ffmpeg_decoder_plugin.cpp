@@ -136,9 +136,7 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
             capBuilder.SetAudioChannelLayoutList(values);
         }
     }
-
-    capBuilder.SetThreadModeList({ThreadMode::SYNC});
-
+    capBuilder.SetThreadModeList({ThreadMode::SYNC, ThreadMode::ASYNC});
     definition.inCaps.push_back(capBuilder.Build());
 }
 
@@ -171,7 +169,8 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace Ffmpeg {
-AudioFfmpegDecoderPlugin::AudioFfmpegDecoderPlugin(std::string name) : CodecPlugin(std::move(name)) {}
+AudioFfmpegDecoderPlugin::AudioFfmpegDecoderPlugin(std::string name)
+    : CodecPlugin(std::move(name)), outBufferQ_("adecPluginQueue", BUFFER_QUEUE_SIZE) {}
 
 AudioFfmpegDecoderPlugin::~AudioFfmpegDecoderPlugin()
 {
@@ -220,7 +219,11 @@ Status AudioFfmpegDecoderPlugin::DeInitLocked()
 Status AudioFfmpegDecoderPlugin::SetParameter(Tag tag, const ValueType& value)
 {
     OSAL::ScopedLock lock(parameterMutex_);
-    audioParameter_.insert(std::make_pair(tag, value));
+    if (tag == Tag::THREAD_MODE) {
+        threadMode_ = Plugin::AnyCast<Plugin::ThreadMode>(value);
+    } else {
+        audioParameter_.insert(std::make_pair(tag, value));
+    }
     return Status::OK;
 }
 
@@ -302,6 +305,7 @@ do { \
         OSAL::ScopedLock lock(avMutex_);
         avCodecContext_ = tmpCtx;
     }
+    outBufferQ_.SetActive(true);
     return Status::OK;
 #undef FAIL_RET_WHEN_ASSIGN_LOCKED
 }
@@ -342,6 +346,7 @@ Status AudioFfmpegDecoderPlugin::ResetLocked()
     audioParameter_.clear();
     StopLocked();
     avCodecContext_.reset();
+    outBufferQ_.Clear();
     return Status::OK;
 }
 
@@ -368,6 +373,11 @@ Status AudioFfmpegDecoderPlugin::OpenCtxLocked()
 Status AudioFfmpegDecoderPlugin::Start()
 {
     OSAL::ScopedLock lock(avMutex_);
+    if (threadMode_ == ThreadMode::SYNC) {
+        MEDIA_LOG_I("Plugin ThreadMode: SYNC");
+    } else {
+        MEDIA_LOG_I("Plugin ThreadMode: ASYNC");
+    }
     return OpenCtxLocked();
 }
 
@@ -380,6 +390,7 @@ Status AudioFfmpegDecoderPlugin::CloseCtxLocked()
             return Status::ERROR_UNKNOWN;
         }
     }
+    outBufferQ_.SetActive(true);
     return Status::OK;
 }
 
@@ -390,6 +401,7 @@ Status AudioFfmpegDecoderPlugin::StopLocked()
     if (outBuffer_) {
         outBuffer_.reset();
     }
+    outBufferQ_.SetActive(false);
     return ret;
 }
 
@@ -426,6 +438,13 @@ Status AudioFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
         }
         ret = SendBufferLocked(inputBuffer);
     }
+
+    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
+        if (ret != Status::OK) {
+            return ret;
+        }
+        ret = ReceiveBuffer();
+    }
     return ret;
 }
 
@@ -435,6 +454,10 @@ Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>
     (void)timeoutMs;
     if (!outputBuffer) {
         return Status::ERROR_INVALID_PARAMETER;
+    }
+    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
+        outBufferQ_.Push(outputBuffer);
+        return Status::OK;
     }
     outBuffer_ = outputBuffer;
     return SendOutputBuffer();
@@ -488,6 +511,8 @@ Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
         return Status::OK;
     } else if (ret == AVERROR(EAGAIN)) {
         return Status::ERROR_AGAIN;
+    } else if (ret == AVERROR_EOF) {  // AVStrError(ret).c_str() == "End of file"
+        return Status::END_OF_STREAM;
     } else {
         MEDIA_LOG_E("send buffer error " PUBLIC_LOG_S, AVStrError(ret).c_str());
         return Status::ERROR_UNKNOWN;
@@ -542,7 +567,12 @@ Status AudioFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
 
 Status AudioFfmpegDecoderPlugin::ReceiveBuffer()
 {
-    std::shared_ptr<Buffer> ioInfo = outBuffer_;
+    std::shared_ptr<Buffer> ioInfo {nullptr};
+    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
+        ioInfo = outBufferQ_.Pop();
+    } else {
+        ioInfo = outBuffer_;
+    }
     if ((ioInfo == nullptr) || ioInfo->IsEmpty() ||
         (ioInfo->GetBufferMeta()->GetType() != BufferMetaType::AUDIO)) {
         MEDIA_LOG_W("cannot fetch valid buffer to output");
@@ -556,7 +586,24 @@ Status AudioFfmpegDecoderPlugin::ReceiveBuffer()
         }
         status = ReceiveBufferLocked(ioInfo);
     }
+    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
+        if (status == Status::OK || status == Status::END_OF_STREAM) {
+            NotifyOutputBufferDone(ioInfo);
+        } else {
+            outBufferQ_.Push(ioInfo);
+        }
+    }
     return status;
+}
+
+void AudioFfmpegDecoderPlugin::NotifyInputBufferDone(const std::shared_ptr<Buffer>& input)
+{
+    dataCallback_->OnInputBufferDone(input);
+}
+
+void AudioFfmpegDecoderPlugin::NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output)
+{
+    dataCallback_->OnOutputBufferDone(output);
 }
 
 std::shared_ptr<Allocator> AudioFfmpegDecoderPlugin::GetAllocator()
