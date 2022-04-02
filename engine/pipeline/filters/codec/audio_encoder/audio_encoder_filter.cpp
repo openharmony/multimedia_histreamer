@@ -154,7 +154,7 @@ bool AudioEncoderFilter::Configure(const std::string& inPort, const std::shared_
         OnEvent({name_, EventType::EVENT_ERROR, err});
         return false;
     }
-    FAIL_LOG(UpdateMetaAccordingToPlugin(*thisMeta));
+    FAIL_LOG(UpdateMetaFromPlugin(*thisMeta));
     FALSE_RETURN_V_MSG_E(targetOutPort->Configure(thisMeta), false, "fail to configure downstream");
     state_ = FilterState::READY;
     OnEvent({name_, EventType::EVENT_READY});

@@ -100,6 +100,10 @@ private:
 
     Status SendOutputBuffer();
 
+    void NotifyInputBufferDone(const std::shared_ptr<Buffer>& input);
+
+    void NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output);
+
     mutable OSAL::Mutex parameterMutex_ {};
     std::map<Tag, ValueType> audioParameter_ {};
 
@@ -112,6 +116,11 @@ private:
     size_t paddedBufferSize_ {0};
     std::shared_ptr<Buffer> outBuffer_ {nullptr};
     DataCallback* dataCallback_ {nullptr};
+
+    // outBufferQ有自己的锁保护 不要和lock_同时混用 否则可能导致死锁
+    OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufferQ_;    // For async
+
+    Plugin::ThreadMode threadMode_ {};
 };
 } // namespace Ffmpeg
 } // namespace Plugin

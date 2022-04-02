@@ -172,9 +172,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
             }
             if (data != nullptr && data->GetMemory() != nullptr) {
                 auto realSize = data->GetMemory()->GetCapacity();
-                if (readSize > realSize) {
-                    readSize = realSize;
-                }
+                readSize = (readSize > realSize) ? realSize : readSize;
             }
             MEDIA_LOG_D("totalSize_: " PUBLIC_LOG_ZU, totalSize);
         }

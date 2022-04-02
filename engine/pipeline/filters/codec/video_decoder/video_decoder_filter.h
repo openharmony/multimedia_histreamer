@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef MEDIA_PIPELINE_VIDEO_DECODER_FILTER_H
-#define MEDIA_PIPELINE_VIDEO_DECODER_FILTER_H
+#ifndef HISTREAMER_PIPELINE_VIDEO_ASYNC_DECODER_FILTER_H
+#define HISTREAMER_PIPELINE_VIDEO_ASYNC_DECODER_FILTER_H
 
 #ifdef VIDEO_SUPPORT
 
 #include "filters/codec/codec_filter_base.h"
-#include "pipeline/core/type_define.h"
-#include "foundation/osal/thread/task.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
 class VideoDecoderFilter : public CodecFilterBase {
 public:
-    explicit VideoDecoderFilter(const std::string &name);
+    explicit VideoDecoderFilter(const std::string &name, std::shared_ptr<CodecMode>& codecMode);
     ~VideoDecoderFilter() override;
 
     ErrorCode Prepare() override;
@@ -48,72 +46,27 @@ public:
 
     bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
-    /**
-     *
-     * @param inPort
-     * @param buffer
-     * @param offset always ignore this parameter
-     * @return
-     */
     ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
-    void OnInputBufferDone(const std::shared_ptr<AVBuffer> &buffer) override;
+    void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input) override;
 
-    void OnOutputBufferDone(const std::shared_ptr<AVBuffer> &buffer) override;
+    void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override;
 
 private:
-    class DataCallbackImpl;
+    uint32_t GetOutBufferPoolSize() override;
 
-    struct VideoDecoderFormat {
-        std::string mime;
-        uint32_t width;
-        uint32_t height;
-        Plugin::VideoPixelFormat format;
-        std::vector<uint8_t> codecConfig;
-    };
+    std::shared_ptr<Allocator> GetAllocator() override;
 
-    ErrorCode SetVideoDecoderFormat(const std::shared_ptr<const Plugin::Meta>& meta);
+    Plugin::TagMap GetNegotiateParams(const Plugin::TagMap& upstreamParams) override;
 
-    ErrorCode CheckBufferValidity(std::shared_ptr<AVBuffer>& buffer);
+    uint32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta) override;
 
-    void DecideOutputAllocator();
+    void SetMaxSamplesPerFrame(std::shared_ptr<Plugin::Meta>& meta) override;
 
-    ErrorCode GetOutputBufferSize();
-
-    ErrorCode AllocateOutputBuffers();
-
-    ErrorCode ConfigurePluginOutputBuffers();
-
-    ErrorCode ConfigurePluginParams();
-
-    ErrorCode ConfigurePlugin();
-
-    ErrorCode ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta);
-
-    void HandleFrame();
-
-    void HandleOneFrame(const std::shared_ptr<AVBuffer> &data);
-
-    void FinishFrame();
-
-    bool isFlushing_ {false};
-    Capability capNegWithDownstream_;
-    Capability capNegWithUpstream_;
-    Plugin::TagMap sinkParams_;
-    VideoDecoderFormat vdecFormat_;
-    DataCallbackImpl* dataCallback_ {nullptr};
-    std::shared_ptr<Allocator> outAllocator_ {nullptr};
-    uint32_t bufferSize_ {0};
-
-    std::shared_ptr<OHOS::Media::OSAL::Task> handleFrameTask_ {nullptr};
-    std::shared_ptr<OHOS::Media::OSAL::Task> pushTask_ {nullptr};
-    std::shared_ptr<BufferPool<AVBuffer>> outBufPool_ {nullptr};
-    std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQue_ {nullptr};
-    std::queue<AVBufferPtr> outBufQue_;
-    mutable OSAL::Mutex renderMutex_ {};
+    bool MatchedPluginsThreadMode(const mapCandidate& candidatePlugins) override;
 };
 }
 }
 }
-#endif
-#endif // MEDIA_PIPELINE_VIDEO_DECODER_FILTER_H
+#endif // VIDEO_SUPPORT
+#endif // HISTREAMER_PIPELINE_VIDEO_ASYNC_DECODER_FILTER_H
