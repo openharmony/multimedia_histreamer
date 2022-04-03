@@ -16,6 +16,7 @@
 #define HST_LOG_TAG "WavDemuxerPlugin"
 
 #include "wav_demuxer_plugin.h"
+
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
@@ -120,7 +121,7 @@ Status WavDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
         || wavHeader_->audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_EXTENSIBLE)) {
         mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT,
                                     g_WavAudioSampleFormatPacked[static_cast<uint32_t>(wavHeader_->bitsPerSample)]});
-    } else if (wavHeader_->audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_IEEE_FLOAT)){
+    } else if (wavHeader_->audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_IEEE_FLOAT)) {
         mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::F32});
     } else {
         mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::NONE});

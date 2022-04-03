@@ -268,9 +268,7 @@ do { \
     AVCodecContext* context = nullptr;
     {
         OSAL::ScopedLock lock(avMutex_);
-        if (avCodec_ == nullptr) {
-            return Status::ERROR_WRONG_STATE;
-        }
+        FALSE_RETURN_V(avCodec_ != nullptr, Status::ERROR_WRONG_STATE);
         context = avcodec_alloc_context3(avCodec_.get());
     }
     FALSE_RETURN_V_MSG_E(context != nullptr, Status::ERROR_NO_MEMORY, "can't allocate codec context");
@@ -285,19 +283,13 @@ do { \
         FAIL_RET_WHEN_ASSIGN_LOCKED(Tag::BITS_PER_CODED_SAMPLE, uint32_t, tmpCtx->bits_per_coded_sample);
         AudioSampleFormat audioSampleFormat = AudioSampleFormat::NONE;
         auto ret = FindInParameterMapThenAssignLocked(Tag::AUDIO_SAMPLE_FORMAT, audioSampleFormat);
-        if (ret != Status::OK) {
-            return ret;
-        }
+        FALSE_RETURN_V(ret == Status::OK, ret);
         auto tmpFmt = ConvP2FfSampleFmt(Plugin::AnyCast<AudioSampleFormat>(audioSampleFormat));
-        if (tmpFmt == AV_SAMPLE_FMT_NONE) {
-            return Status::ERROR_INVALID_PARAMETER;
-        }
+        FALSE_RETURN_V(tmpFmt != AV_SAMPLE_FMT_NONE, Status::ERROR_INVALID_PARAMETER);
         tmpCtx->sample_fmt = tmpFmt;
         tmpCtx->request_sample_fmt = tmpCtx->sample_fmt;
         ret = AssignExtraDataIfExistsLocked(tmpCtx);
-        if (ret != Status::OK) {
-            return ret;
-        }
+        FALSE_RETURN_V(ret == Status::OK, ret);
     }
     tmpCtx->workaround_bugs = static_cast<uint32_t>(tmpCtx->workaround_bugs) | static_cast<uint32_t>(FF_BUG_AUTODETECT);
     tmpCtx->err_recognition = 1;
