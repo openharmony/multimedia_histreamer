@@ -64,6 +64,7 @@ ErrorCode AsyncMode::Release()
 
 ErrorCode AsyncMode::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
 {
+    stopped_ = false;
     if (handleFrameTask_) {
         handleFrameTask_->Start();
     }
@@ -85,6 +86,7 @@ ErrorCode AsyncMode::PushData(const std::string &inPort, const AVBufferPtr& buff
 ErrorCode AsyncMode::Stop()
 {
     MEDIA_LOG_D("AsyncMode stop start.");
+    stopped_ = true;
     pushTask_->Pause();
     inBufQue_->SetActive(false);
     {
@@ -144,7 +146,7 @@ ErrorCode AsyncMode::HandleFrame()
     Plugin::Status status = Plugin::Status::OK;
     do {
         status = plugin_->QueueInputBuffer(oneBuffer, 0);
-        if (status == Plugin::Status::OK || status == Plugin::Status::END_OF_STREAM) {
+        if (status == Plugin::Status::OK || status == Plugin::Status::END_OF_STREAM || stopped_) {
             break;
         }
         MEDIA_LOG_D("Send data to plugin error: " PUBLIC_LOG_D32, status);

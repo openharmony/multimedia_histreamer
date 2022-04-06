@@ -63,6 +63,7 @@ private:
     std::shared_ptr<OHOS::Media::BlockingQueue<OHOS::Media::AVBufferPtr>> inBufQue_ {nullptr};
     std::queue<AVBufferPtr> outBufQue_;  // PCM data
     mutable OSAL::Mutex renderMutex_ {};
+    bool stopped_ {false};
 };
 } // namespace Pipeline
 } // namespace Media
