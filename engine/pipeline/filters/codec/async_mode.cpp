@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "async_mode.h"
 #include "common/plugin_utils.h"
 #include "osal/utils/util.h"
@@ -40,6 +39,9 @@ AsyncMode::~AsyncMode()
 
 ErrorCode AsyncMode::Release()
 {
+    MEDIA_LOG_I("AsyncMode Release start.");
+    stopped_ = true;
+
     // 先停止线程 然后释放bufferQ 如果顺序反过来 可能导致线程访问已经释放的锁
     if (handleFrameTask_) {
         handleFrameTask_->Stop();
@@ -59,6 +61,7 @@ ErrorCode AsyncMode::Release()
             outBufQue_.pop();
         }
     }
+    MEDIA_LOG_I("AsyncMode Release end.");
     return ErrorCode::SUCCESS;
 }
 
@@ -85,7 +88,7 @@ ErrorCode AsyncMode::PushData(const std::string &inPort, const AVBufferPtr& buff
 
 ErrorCode AsyncMode::Stop()
 {
-    MEDIA_LOG_D("AsyncMode stop start.");
+    MEDIA_LOG_I("AsyncMode stop start.");
     stopped_ = true;
     pushTask_->Pause();
     inBufQue_->SetActive(false);
@@ -99,7 +102,7 @@ ErrorCode AsyncMode::Stop()
         handleFrameTask_->Pause();
     }
     outBufPool_.reset();
-    MEDIA_LOG_D("AsyncMode stop end.");
+    MEDIA_LOG_I("AsyncMode stop end.");
     return ErrorCode::SUCCESS;
 }
 
@@ -138,7 +141,7 @@ void AsyncMode::FlushEnd()
 ErrorCode AsyncMode::HandleFrame()
 {
     MEDIA_LOG_D("AsyncMode handle frame called");
-    auto oneBuffer = inBufQue_->Pop();
+    auto oneBuffer = inBufQue_->Pop(200); // timeout 200 ms
     if (oneBuffer == nullptr) {
         MEDIA_LOG_W("decoder find nullptr in esBufferQ");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
