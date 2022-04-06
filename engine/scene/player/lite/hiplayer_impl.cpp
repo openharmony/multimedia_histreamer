@@ -445,9 +445,8 @@ ErrorCode HiPlayerImpl::DoOnComplete()
         fsm_.SendEventAsync(Intent::SEEK, SeekInfo{0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC});
     }
     auto ptr = callback_.lock();
-    if (ptr != nullptr) {
-        ptr->OnPlaybackComplete();
-    }
+    FALSE_RETURN_V_MSG(ptr != nullptr, ErrorCode::SUCCESS, "Player callback not exist.");
+    ptr->OnPlaybackComplete();
     return ErrorCode::SUCCESS;
 }
 
