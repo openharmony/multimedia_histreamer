@@ -19,6 +19,7 @@
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
 #include "foundation/osal/utils/util.h"
+#include "pipeline/filters/common/dump_buffer.h"
 #include "pipeline/filters/common/plugin_settings.h"
 #include "pipeline/core/clock_manager.h"
 #include "pipeline/core/plugin_attr_desc.h"
@@ -174,6 +175,7 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
                     isFlushing, static_cast<int>(state_.load()));
         return ErrorCode::SUCCESS;
     }
+    DUMP_BUFFER2LOG("AudioSink Write", buffer, offset);
     auto err = TranslatePluginStatus(plugin_->Write(buffer));
     FAIL_RETURN_MSG(err, "audio sink write failed");
     ReportCurrentPosition(static_cast<int64_t>(buffer->pts));
