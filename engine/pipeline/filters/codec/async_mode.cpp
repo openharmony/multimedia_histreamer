@@ -90,7 +90,7 @@ ErrorCode AsyncMode::Stop()
 {
     MEDIA_LOG_I("AsyncMode stop start.");
     stopped_ = true;
-    pushTask_->Pause();
+    pushTask_->Stop();
     inBufQue_->SetActive(false);
     {
         OSAL::ScopedLock l(renderMutex_);
@@ -99,7 +99,7 @@ ErrorCode AsyncMode::Stop()
         }
     }
     if (handleFrameTask_) {
-        handleFrameTask_->Pause();
+        handleFrameTask_->Stop();
     }
     outBufPool_.reset();
     MEDIA_LOG_I("AsyncMode stop end.");

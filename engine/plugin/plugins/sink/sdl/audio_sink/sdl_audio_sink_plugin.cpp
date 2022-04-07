@@ -396,7 +396,7 @@ void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len)
 
 void SdlAudioSinkPlugin::DrainData()
 {
-    while(rb->GetSize()) {
+    while (rb->GetSize()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 10
     }
 }
