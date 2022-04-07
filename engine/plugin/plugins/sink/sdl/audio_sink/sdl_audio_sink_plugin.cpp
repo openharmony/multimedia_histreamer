@@ -17,6 +17,7 @@
 
 #include "sdl_audio_sink_plugin.h"
 #include <functional>
+#include <thread>
 #include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/log.h"
 #include "foundation/pre_defines.h"
@@ -194,6 +195,7 @@ Status SdlAudioSinkPlugin::Start()
 Status SdlAudioSinkPlugin::Stop()
 {
     MEDIA_LOG_I("SDL SINK Stop...");
+    DrainData();
     rb->SetActive(false);
     SDL_PauseAudio(1);
     Flush();
@@ -302,6 +304,7 @@ Status SdlAudioSinkPlugin::SetSpeed(float speed)
 Status SdlAudioSinkPlugin::Pause()
 {
     MEDIA_LOG_I("Paused");
+    DrainData();
     SDL_PauseAudio(1);
     return Status::OK;
 }
@@ -389,6 +392,13 @@ void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len)
     SDL_MixAudio(stream, mixCache_.data(), realLen, volume_);
     SDL_PauseAudio(0);
     MEDIA_LOG_D("sdl audio callback end with " PUBLIC_LOG_ZU, realLen);
+}
+
+void SdlAudioSinkPlugin::DrainData()
+{
+    while(rb->GetSize()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 10
+    }
 }
 } // namespace Sdl
 } // namespace Plugin
