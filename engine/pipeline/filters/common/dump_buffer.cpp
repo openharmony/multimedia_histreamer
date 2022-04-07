@@ -49,7 +49,7 @@ void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin:
     FALSE_RETURN_MSG(filePtr != nullptr, "Open file(" PUBLIC_LOG_S ") failed(" PUBLIC_LOG_S ").", filePath.c_str(),
                      strerror(errno));
     (void)fwrite(reinterpret_cast<const char*>(buffer->GetMemory()->GetReadOnlyData()),
-                 bufferSize, 1, filePtr);
+                 1, bufferSize, filePtr);
     (void)fclose(filePtr);
 }
 
