@@ -21,7 +21,7 @@ config("histreamer_player_config") {
     ]
   } else {
     include_dirs += [
-      "//foundation/multimedia/media_standard/interfaces/innerkits/native/media/include",
+      "//foundation/multimedia/media_standard/interfaces/inner_api/native",
       "//foundation/multimedia/image_standard/interfaces/innerkits/include",
       "//foundation/multimedia/media_standard/services/include",
       "//foundation/multimedia/media_standard/services/services/engine_intf",
