@@ -14,6 +14,7 @@
  */
 #include "async_mode.h"
 #include "common/plugin_utils.h"
+#include "common/dump_buffer.h"
 #include "osal/utils/util.h"
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #include "plugin/common/surface_memory.h"
@@ -82,6 +83,7 @@ ErrorCode AsyncMode::Configure(const std::string &inPort, const std::shared_ptr<
 
 ErrorCode AsyncMode::PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset)
 {
+    DUMP_BUFFER2LOG("AsyncMode in", buffer, offset);
     inBufQue_->Push(buffer);
     return ErrorCode::SUCCESS;
 }
@@ -148,6 +150,7 @@ ErrorCode AsyncMode::HandleFrame()
     }
     Plugin::Status status = Plugin::Status::OK;
     do {
+        DUMP_BUFFER2LOG("AsyncMode QueueInput to Plugin", oneBuffer, -1);
         status = plugin_->QueueInputBuffer(oneBuffer, 0);
         if (status == Plugin::Status::OK || status == Plugin::Status::END_OF_STREAM || stopped_) {
             break;
@@ -172,6 +175,7 @@ ErrorCode AsyncMode::FinishFrame()
         if (frameBuffer != nullptr) {
             auto oPort = outPorts_[0];
             if (oPort->GetWorkMode() == WorkMode::PUSH) {
+                DUMP_BUFFER2LOG("AsyncMode PushData to Sink", frameBuffer, -1);
                 oPort->PushData(frameBuffer, -1);
                 isRendered = true;
                 outBufQue_.pop();
