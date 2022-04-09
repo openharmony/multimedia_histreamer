@@ -89,7 +89,7 @@ Status VideoFileCapturePlugin::Deinit()
 Status VideoFileCapturePlugin::Prepare()
 {
     MEDIA_LOG_D("IN");
-    std::string filePath = "VideoData.yuv";
+    std::string filePath = RESOURCE_DIR "/VideoData.yuv";
     std::string fullPath;
     if (OSAL::ConvertFullPath(filePath, fullPath) && !fullPath.empty()) {
         filePath = fullPath;
