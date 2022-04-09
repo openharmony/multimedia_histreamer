@@ -200,7 +200,10 @@ Status SdlAudioSinkPlugin::Stop()
     SDL_PauseAudio(1);
     Flush();
     SDL_CloseAudio();
+#ifndef VIDEO_SUPPORT
     SDL_Quit();
+#endif
+    MEDIA_LOG_I("SDL SINK Stop end");
     return Status::OK;
 }
 
@@ -396,9 +399,11 @@ void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len)
 
 void SdlAudioSinkPlugin::DrainData()
 {
+    MEDIA_LOG_I("DrainData begin");
     while (rb->GetSize()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 10
     }
+    MEDIA_LOG_I("DrainData end");
 }
 } // namespace Sdl
 } // namespace Plugin
