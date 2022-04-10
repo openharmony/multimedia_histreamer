@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#define HST_LOG_TAG "AsyncMode"
+
 #include "async_mode.h"
 #include "common/plugin_utils.h"
 #include "common/dump_buffer.h"
