@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "codec_filter_factory.h"
+#define HST_LOG_TAG "CodecFilterFactory"
 
+#include "codec_filter_factory.h"
 #include "async_mode.h"
 #include "codec_filter_base.h"
 #include "codec/audio_decoder/audio_decoder_filter.h"

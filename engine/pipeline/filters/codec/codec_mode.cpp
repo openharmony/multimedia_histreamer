@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#define HST_LOG_TAG "CodecMode"
+
 #include "codec_mode.h"
 #include "common/plugin_utils.h"
 #include "foundation/log.h"

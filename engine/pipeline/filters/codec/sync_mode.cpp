@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "sync_mode.h"
+#define HST_LOG_TAG "SyncMode"
 
+#include "sync_mode.h"
 #include "common/plugin_utils.h"
 #include "filters/common/dump_buffer.h"
 #include "foundation/log.h"
@@ -23,6 +24,11 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
+SyncMode::SyncMode()
+{
+    MEDIA_LOG_I("ThreadMode: SYNC");
+}
+
 SyncMode::~SyncMode()
 {
     MEDIA_LOG_D("sync mode dtor called");
