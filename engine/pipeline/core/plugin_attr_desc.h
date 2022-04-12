@@ -300,6 +300,15 @@ inline const char* GetThreadModeNameStr(Plugin::ThreadMode threadMode)
     }
     return g_ThreadModeNameStrMap.at(threadMode);
 }
+
+inline const char* Tag2String(const Plugin::Tag tag)
+{
+    auto mapIte = g_tagInfoMap.find(tag);
+    if (mapIte == g_tagInfoMap.end()) {
+        return "NULL";
+    }
+    return std::get<0>(mapIte->second);
+}
 } // Pipeline
 } // Media
 } // OHOS

@@ -155,6 +155,13 @@ uint32_t AudioDecoderFilter::CalculateBufferSize(const std::shared_ptr<const OHO
     }
     return Pipeline::GetBytesPerSample(format) * samplesPerFrame * channels;
 }
+
+std::vector<Capability::Key> AudioDecoderFilter::GetRequiredOutCapKeys()
+{
+    std::vector<Capability::Key> capKey;
+    capKey.push_back(Capability::Key::AUDIO_SAMPLE_FORMAT);
+    return capKey;
+}
 } // Pipeline
 } // Media
 } // OHOS

@@ -68,6 +68,10 @@ protected:
 
     virtual Plugin::TagMap GetNegotiateParams(const Plugin::TagMap& upstreamParams);
 
+    bool CheckRequiredOutCapKeys(const Capability& capability);
+
+    virtual std::vector<Capability::Key> GetRequiredOutCapKeys();
+
     virtual ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta> &meta);
 
     ErrorCode UpdateMetaFromPlugin(Plugin::Meta& meta);
