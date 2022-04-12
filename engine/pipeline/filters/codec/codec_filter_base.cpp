@@ -179,6 +179,26 @@ Plugin::TagMap CodecFilterBase::GetNegotiateParams(const Plugin::TagMap& upstrea
     return upstreamParams;
 }
 
+bool CodecFilterBase::CheckRequiredOutCapKeys(const Capability& capability)
+{
+    std::vector<Capability::Key> outCapKeys = GetRequiredOutCapKeys();
+    std::vector<Capability::Key>::iterator ite;
+    for (ite = outCapKeys.begin(); ite != outCapKeys.end(); ite++) {
+        if (capability.keys.count(*ite) == 0) {
+            MEDIA_LOG_W("decoder plugin must specify key " PUBLIC_LOG_S " in out caps",
+                        Tag2String(static_cast<Plugin::Tag>(*ite)));
+            return false;
+        }
+    }
+    return true;
+}
+
+std::vector<Capability::Key> CodecFilterBase::GetRequiredOutCapKeys()
+{
+    // Not required by default
+    return {};
+}
+
 bool CodecFilterBase::Negotiate(const std::string& inPort,
                                 const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                 Plugin::Capability& negotiatedCap,
@@ -199,8 +219,7 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
             continue;
         }
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
-            if (outCap.keys.count(Capability::Key::AUDIO_SAMPLE_FORMAT) == 0) {
-                MEDIA_LOG_W("decoder plugin must specify sample format in out caps");
+            if (!CheckRequiredOutCapKeys(outCap)) {
                 continue;
             }
             auto thisOut = std::make_shared<Plugin::Capability>();
