@@ -33,8 +33,6 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition);
 
 std::map<std::string, std::shared_ptr<const AVCodec>> codecMap;
 
-const size_t BUFFER_QUEUE_SIZE = 6;
-
 const std::set<AVCodecID> g_supportedCodec = {
     AV_CODEC_ID_MP3,
     AV_CODEC_ID_FLAC,
@@ -170,7 +168,7 @@ namespace Media {
 namespace Plugin {
 namespace Ffmpeg {
 AudioFfmpegDecoderPlugin::AudioFfmpegDecoderPlugin(std::string name)
-    : CodecPlugin(std::move(name)), outBufferQ_("adecPluginQueue", BUFFER_QUEUE_SIZE) {}
+    : CodecPlugin(std::move(name)) {}
 
 AudioFfmpegDecoderPlugin::~AudioFfmpegDecoderPlugin()
 {
@@ -221,6 +219,12 @@ Status AudioFfmpegDecoderPlugin::SetParameter(Tag tag, const ValueType& value)
     OSAL::ScopedLock lock(parameterMutex_);
     if (tag == Tag::THREAD_MODE) {
         threadMode_ = Plugin::AnyCast<Plugin::ThreadMode>(value);
+        if (threadMode_ == Plugin::ThreadMode::ASYNC) {
+            if (!decodeTask_) {
+                decodeTask_ = std::make_shared<OHOS::Media::OSAL::Task>("audioFfmpegDecThread");
+                decodeTask_->RegisterHandler([this] { ReceiveBuffer(); });
+            }
+        }
     } else {
         audioParameter_.insert(std::make_pair(tag, value));
     }
@@ -297,7 +301,9 @@ do { \
         OSAL::ScopedLock lock(avMutex_);
         avCodecContext_ = tmpCtx;
     }
-    outBufferQ_.SetActive(true);
+    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
+        outBufferQ_.SetActive(true);
+    }
     return Status::OK;
 #undef FAIL_RET_WHEN_ASSIGN_LOCKED
 }
@@ -338,7 +344,9 @@ Status AudioFfmpegDecoderPlugin::ResetLocked()
     audioParameter_.clear();
     StopLocked();
     avCodecContext_.reset();
-    outBufferQ_.Clear();
+    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
+        outBufferQ_.Clear();
+    }
     return Status::OK;
 }
 
@@ -368,6 +376,8 @@ Status AudioFfmpegDecoderPlugin::Start()
     if (threadMode_ == ThreadMode::SYNC) {
         MEDIA_LOG_I("Plugin ThreadMode: SYNC");
     } else {
+        outBufferQ_.SetActive(true);
+        decodeTask_->Start();
         MEDIA_LOG_I("Plugin ThreadMode: ASYNC");
     }
     return OpenCtxLocked();
@@ -382,7 +392,9 @@ Status AudioFfmpegDecoderPlugin::CloseCtxLocked()
             return Status::ERROR_UNKNOWN;
         }
     }
-    outBufferQ_.SetActive(true);
+    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
+        outBufferQ_.SetActive(true);
+    }
     return Status::OK;
 }
 
@@ -393,7 +405,9 @@ Status AudioFfmpegDecoderPlugin::StopLocked()
     if (outBuffer_) {
         outBuffer_.reset();
     }
-    outBufferQ_.SetActive(false);
+    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
+        outBufferQ_.SetActive(false);
+    }
     return ret;
 }
 
@@ -429,13 +443,6 @@ Status AudioFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
             return Status::ERROR_WRONG_STATE;
         }
         ret = SendBufferLocked(inputBuffer);
-    }
-
-    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
-        if (ret != Status::OK) {
-            return ret;
-        }
-        ret = ReceiveBuffer();
     }
     return ret;
 }
@@ -581,8 +588,6 @@ Status AudioFfmpegDecoderPlugin::ReceiveBuffer()
     if (threadMode_ == Plugin::ThreadMode::ASYNC) {
         if (status == Status::OK || status == Status::END_OF_STREAM) {
             NotifyOutputBufferDone(ioInfo);
-        } else {
-            outBufferQ_.Push(ioInfo);
         }
     }
     return status;
