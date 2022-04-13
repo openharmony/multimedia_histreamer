@@ -33,7 +33,7 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-using mapCandidate = std::pair<std::shared_ptr<Plugin::PluginInfo>, Capability>;
+using MapCandidate = std::pair<std::shared_ptr<Plugin::PluginInfo>, Capability>;
 class CodecFilterBase : public FilterBase, public Plugin::DataCallbackHelper {
 public:
     explicit CodecFilterBase(const std::string &name);
@@ -82,7 +82,7 @@ protected:
 
     virtual void SetMaxSamplesPerFrame(std::shared_ptr<Plugin::Meta>& meta);
 
-    virtual bool MatchedPluginsThreadMode(const mapCandidate& candidate);
+    virtual bool MatchedPluginsThreadMode(const MapCandidate& candidate);
 
     template<typename T>
     ErrorCode GetPluginParameterLocked(Tag tag, T& value)

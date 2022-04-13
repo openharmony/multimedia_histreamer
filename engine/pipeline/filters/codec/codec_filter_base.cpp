@@ -182,11 +182,10 @@ Plugin::TagMap CodecFilterBase::GetNegotiateParams(const Plugin::TagMap& upstrea
 bool CodecFilterBase::CheckRequiredOutCapKeys(const Capability& capability)
 {
     std::vector<Capability::Key> outCapKeys = GetRequiredOutCapKeys();
-    std::vector<Capability::Key>::iterator ite;
-    for (ite = outCapKeys.begin(); ite != outCapKeys.end(); ite++) {
-        if (capability.keys.count(*ite) == 0) {
+    for (auto outCapKey : outCapKeys) {
+        if (capability.keys.count(outCapKey) == 0) {
             MEDIA_LOG_W("decoder plugin must specify key " PUBLIC_LOG_S " in out caps",
-                        Tag2String(static_cast<Plugin::Tag>(*ite)));
+                        Tag2String(static_cast<Plugin::Tag>(outCapKey)));
             return false;
         }
     }
@@ -260,7 +259,7 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
     return res;
 }
 
-bool CodecFilterBase::MatchedPluginsThreadMode(const mapCandidate& candidate)
+bool CodecFilterBase::MatchedPluginsThreadMode(const MapCandidate& candidate)
 {
     bool threadModeMatched = false;
 #ifdef OHOS_LITE
