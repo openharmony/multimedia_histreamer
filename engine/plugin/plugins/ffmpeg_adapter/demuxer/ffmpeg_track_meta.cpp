@@ -40,6 +40,7 @@ StreamConvertor g_streamConvertors[] = {{AV_CODEC_ID_PCM_S16LE, ConvertRawAudioS
                                         {AV_CODEC_ID_PCM_S16BE, ConvertRawAudioStreamToMetaInfo},
                                         {AV_CODEC_ID_PCM_U16LE, ConvertRawAudioStreamToMetaInfo},
                                         {AV_CODEC_ID_PCM_U16BE, ConvertRawAudioStreamToMetaInfo},
+                                        {AV_CODEC_ID_PCM_F32LE, ConvertRawAudioStreamToMetaInfo},
                                         {AV_CODEC_ID_PCM_S8, ConvertRawAudioStreamToMetaInfo},
                                         {AV_CODEC_ID_PCM_U8, ConvertRawAudioStreamToMetaInfo},
                                         {AV_CODEC_ID_MP1, ConvertMP1StreamToMetaInfo},
