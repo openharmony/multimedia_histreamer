@@ -63,7 +63,7 @@ private:
 
     void SetMaxSamplesPerFrame(std::shared_ptr<Plugin::Meta>& meta) override;
 
-    bool MatchedPluginsThreadMode(const mapCandidate& candidatePlugins) override;
+    bool MatchedPluginsThreadMode(const MapCandidate& candidatePlugins) override;
 };
 }
 }

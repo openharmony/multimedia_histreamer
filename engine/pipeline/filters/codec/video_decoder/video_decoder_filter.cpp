@@ -218,7 +218,7 @@ void VideoDecoderFilter::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer
     codecMode_->OnOutputBufferDone(output);
 }
 
-bool VideoDecoderFilter::MatchedPluginsThreadMode(const mapCandidate& candidate)
+bool VideoDecoderFilter::MatchedPluginsThreadMode(const MapCandidate& candidate)
 {
     bool threadModeMatched = false;
     if (Capability2String(candidate.second).find("Async") != std::string::npos) {
