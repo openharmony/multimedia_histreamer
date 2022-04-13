@@ -69,6 +69,7 @@ void UpdateInCaps(CodecPluginDef& definition)
     capBuilder.SetAudioSampleFormatList({AudioSampleFormat::S16});
     capBuilder.SetAudioAacProfileList({AudioAacProfile::LC});
     capBuilder.SetAudioAacStreamFormatList({AudioAacStreamFormat::MP4ADTS});
+    capBuilder.SetThreadModeList({ThreadMode::SYNC});
     definition.inCaps.push_back(capBuilder.Build());
 }
 
