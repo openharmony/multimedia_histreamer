@@ -61,9 +61,7 @@ Status PluginRegister::RegisterImpl::AddPackage(const PackageDef& def)
 
 Status PluginRegister::RegisterImpl::SetPackageDef(const PackageDef& def)
 {
-    packageDef->name = def.name;
-    packageDef->licenseType = def.licenseType;
-    packageDef->pkgVersion = def.pkgVersion;
+    packageNameToPackageDefMap[def.name] = std::make_shared<PackageDef>(def);
     return Status::OK;
 }
 
@@ -93,7 +91,7 @@ Status PluginRegister::RegisterImpl::AddPlugin(const PluginDefBase& def)
 std::shared_ptr<PluginRegInfo> PluginRegister::RegisterImpl::BuildRegInfo(const PluginDefBase& def)
 {
     std::shared_ptr<PluginRegInfo> regInfo = std::make_shared<PluginRegInfo>();
-    regInfo->packageDef = packageDef;
+    regInfo->packageDef = packageNameToPackageDefMap[def.packageName];
     switch (def.pluginType) {
         case PluginType::SOURCE:
             InitSourceInfo(regInfo, def);

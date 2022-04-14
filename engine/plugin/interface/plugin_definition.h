@@ -101,7 +101,9 @@ struct PluginDefBase {
     std::string description; ///< Detailed description of the plugin.
 
     uint32_t rank;  ///< Plugin score. The plugin with a high score may be preferred. You can evaluate the
-                    ///< plugin score in terms of performance, version support, and license. Range: 0 to 100.
+                    ///< plugin score in terms of performance, version support, and license. Range: 0 to 100
+    std::string packageName; /// plugin package name
+
 };
 
 /**

@@ -35,6 +35,7 @@ std::shared_ptr<SourcePlugin> HttpSourcePluginCreater(const std::string &name)
 const Status HttpSourceRegister(std::shared_ptr<Register> reg)
 {
     SourcePluginDef definition;
+    definition.packageName = "HttpLiteSource";
     definition.name = "HttpLiteSource";
     definition.description = "Http lite source";
     definition.rank = RANK_MAX;

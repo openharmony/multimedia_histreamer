@@ -89,6 +89,7 @@ Status RegisterMuxerPlugins(const std::shared_ptr<Register>& reg)
         if (!UpdatePluginCapability(outputFormat, def)) {
             continue;
         }
+        def.packageName ="FFmpegMuxers";
         def.name = pluginName;
         def.description = "ffmpeg muxer";
         def.rank = 100; // 100

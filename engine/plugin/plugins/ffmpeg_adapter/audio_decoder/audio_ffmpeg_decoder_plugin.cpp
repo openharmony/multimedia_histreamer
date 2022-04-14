@@ -65,6 +65,7 @@ Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
             continue;
         }
         CodecPluginDef definition;
+        definition.packageName ="FFmpegAudioDecoders";
         definition.name = "ffmpegAuDec_" + std::string(codec->name);
         definition.codecType = CodecType::AUDIO_DECODER;
         definition.rank = 100; // 100

@@ -597,6 +597,7 @@ Status RegisterPlugins(const std::shared_ptr<Register>& reg)
         ReplaceDelimiter(".,|-<> ", '_', pluginName);
 
         DemuxerPluginDef regInfo;
+        regInfo.packageName ="FFmpegDemuxer";
         regInfo.name = pluginName;
         regInfo.description = "adapter for ffmpeg demuxer plugin";
         regInfo.rank = 100; // 100

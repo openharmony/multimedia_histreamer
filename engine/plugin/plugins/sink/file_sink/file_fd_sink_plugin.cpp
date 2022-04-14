@@ -35,6 +35,7 @@ std::shared_ptr<OutputSinkPlugin> FileFdSinkPluginCreator(const std::string& nam
 Status FileFdSinkRegister(const std::shared_ptr<Register>& reg)
 {
     OutputSinkPluginDef definition;
+    definition.packageName = "FileFdSink";
     definition.protocolType = ProtocolType::FD;
     definition.name = "file_fd_sink";
     definition.description = "file fd sink";

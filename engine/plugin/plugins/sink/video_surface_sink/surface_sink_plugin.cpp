@@ -44,6 +44,7 @@ std::shared_ptr<VideoSinkPlugin> VideoSinkPluginCreator(const std::string& name)
 Status SurfaceSinkRegister(const std::shared_ptr<Register>& reg)
 {
     VideoSinkPluginDef definition;
+    definition.packageName = "StdVideoSurfaceSink";
     definition.name = "surface_sink";
     definition.rank = 100; // 100
     Capability cap(OHOS::Media::MEDIA_MIME_VIDEO_RAW);

@@ -48,6 +48,7 @@ uint64_t GetFileSize(int32_t fd)
 Status FileFdSourceRegister(const std::shared_ptr<Register>& reg)
 {
     SourcePluginDef definition;
+    definition.packageName = "FileFdSource";
     definition.name = "FileFdSource";
     definition.description = "File Fd source";
     definition.rank = 100; // 100: max rank

@@ -37,6 +37,7 @@ const size_t DATA_SIZE = 25344; // 25344=176*144 the size of yuv file
 Status VideoFileCaptureRegister(const std::shared_ptr<Register> &reg)
 {
     SourcePluginDef definition;
+    definition.packageName = "StubVideoCapture";
     definition.name = "VideoFileCapture";
     definition.description = "Video capture from audio service";
     definition.rank = 100; // 100: max rank
