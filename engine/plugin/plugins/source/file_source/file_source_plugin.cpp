@@ -44,6 +44,7 @@ std::shared_ptr<SourcePlugin> FileSourcePluginCreator(const std::string& name)
 Status FileSourceRegister(const std::shared_ptr<Register>& reg)
 {
     SourcePluginDef definition;
+    definition.packageName = "FileSource";
     definition.name = "FileSource";
     definition.description = "File source";
     definition.rank = 100; // 100: max rank

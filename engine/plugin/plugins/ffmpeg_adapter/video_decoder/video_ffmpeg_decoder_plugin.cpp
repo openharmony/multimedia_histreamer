@@ -58,6 +58,7 @@ Status RegisterVideoDecoderPlugins(const std::shared_ptr<Register>& reg)
             continue;
         }
         CodecPluginDef definition;
+        definition.packageName ="FFmpegVideoDecoders";
         definition.name = "videodecoder_" + std::string(codec->name);
         definition.codecType = CodecType::VIDEO_DECODER;
         definition.rank = 100; // 100

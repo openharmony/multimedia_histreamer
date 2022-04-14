@@ -28,6 +28,7 @@ std::shared_ptr<OutputSinkPlugin> FilePathSinkPluginCreator(const std::string& n
 Status FilePathSinkRegister(const std::shared_ptr<Register>& reg)
 {
     OutputSinkPluginDef definition;
+    definition.packageName = "FilePathSink";
     definition.protocolType = ProtocolType::FILE;
     definition.name = "file_path_sink";
     definition.description = "file path sink";

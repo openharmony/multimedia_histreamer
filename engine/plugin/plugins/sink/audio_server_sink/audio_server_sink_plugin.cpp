@@ -171,6 +171,7 @@ void UpdateSupportedSampleFormat(Capability& inCaps)
 Status AudioServerSinkRegister(const std::shared_ptr<Register>& reg)
 {
     AudioSinkPluginDef definition;
+    definition.packageName = "AudioServerSink";
     definition.name = "AudioServerSink";
     definition.description = "Audio sink for audio server of media standard";
     definition.rank = 100; // 100: max rank

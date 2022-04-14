@@ -129,7 +129,7 @@ private:
 
         std::shared_ptr<PluginLoader> pluginLoader;
         std::shared_ptr<RegisterData> registerData;
-        std::shared_ptr<PackageDef> packageDef = std::make_shared<PackageDef>();
+        std::map<std::string, std::shared_ptr<PackageDef>> packageNameToPackageDefMap;
     };
 
     std::shared_ptr<RegisterData> registerData = std::make_shared<RegisterData>();

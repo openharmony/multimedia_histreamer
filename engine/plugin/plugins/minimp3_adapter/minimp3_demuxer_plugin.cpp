@@ -725,6 +725,7 @@ Status RegisterPlugin(const std::shared_ptr<Register>& reg)
 
     std::string pluginName = "Minimp3DemuxerPlugin";
     DemuxerPluginDef regInfo;
+    regInfo.packageName = "Minimp3Demuxer";
     regInfo.name = pluginName;
     regInfo.description = "adapter for minimp3 demuxer plugin";
     regInfo.rank = MAX_RANK;

@@ -147,6 +147,7 @@ void RegisterOutportOnAdapter(const std::shared_ptr<Register>& reg, const AudioA
         return;
     }
     AudioSinkPluginDef sinkPluginDef;
+    sinkPluginDef.packageName = "HdiAuSink";
     sinkPluginDef.creator = AudioSinkPluginCreator;
     sinkPluginDef.name = desc.adapterName;
     sinkPluginDef.inCaps = adapterCapabilities;

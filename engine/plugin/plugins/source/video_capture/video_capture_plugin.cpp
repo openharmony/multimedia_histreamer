@@ -33,6 +33,7 @@ using namespace VideoCapture;
 Status VideoCaptureRegister(const std::shared_ptr<Register> &reg)
 {
     SourcePluginDef definition;
+    definition.packageName = "StdVideoCapture";
     definition.name = "VideoCapture";
     definition.description = "Video capture from audio service";
     definition.rank = 100; // 100: max rank

@@ -89,6 +89,7 @@ std::shared_ptr<AudioSinkPlugin> AudioSinkPluginCreator(const std::string& name)
 const Status SdlAudioRegister(const std::shared_ptr<Register>& reg)
 {
     AudioSinkPluginDef definition;
+    definition.packageName = "SdlAudioSink";
     definition.name = "sdl_audio_sink";
     definition.rank = 100; // 100
     Capability cap(OHOS::Media::MEDIA_MIME_AUDIO_RAW);

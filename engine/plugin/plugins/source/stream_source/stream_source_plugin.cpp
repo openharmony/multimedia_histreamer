@@ -33,6 +33,7 @@ std::shared_ptr<SourcePlugin> StreamSourcePluginCreator(const std::string& name)
 const Status StreamSourceRegister(const std::shared_ptr<Register>& reg)
 {
     SourcePluginDef definition;
+    definition.packageName = "StreamSource";
     definition.name = "StreamSource";
     definition.description = "Stream source";
     definition.rank = 100; // 100: max rank

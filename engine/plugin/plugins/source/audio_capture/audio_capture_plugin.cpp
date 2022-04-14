@@ -85,6 +85,7 @@ void UpdateSupportedSampleFormat(Capability& outCaps)
 Status AudioCaptureRegister(const std::shared_ptr<Register> &reg)
 {
     SourcePluginDef definition;
+    definition.packageName = "StdAudioCapture";
     definition.name = "AudioCapture";
     definition.description = "Audio capture from audio service";
     definition.rank = 100; // 100: max rank
