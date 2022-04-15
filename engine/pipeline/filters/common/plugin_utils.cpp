@@ -305,7 +305,7 @@ bool AssignParameterIfMatch(Tag tag, T& ret, const Plugin::ValueType& val)
                         GetTagStrName(tag), GetTagTypeStrName(tag));
         }
     } else {
-        MEDIA_LOG_I("tag " PUBLIC_LOG_D32 "is not in map, may be update it?", tag);
+        MEDIA_LOG_I("tag " PUBLIC_LOG_D32 " is not in map, may be update it?", tag);
     }
     return false;
 }

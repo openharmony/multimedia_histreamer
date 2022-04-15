@@ -183,7 +183,15 @@ Status SetParameterOfVdTrack(AVStream* stream, const TagMap& tagMap)
     ret = SetSingleParameter<uint32_t, int32_t>(Tag::VIDEO_WIDTH, tagMap, stream->codecpar->width, ui2iFunc);
     NOK_RETURN(ret);
     ret = SetSingleParameter<uint32_t, int32_t>(Tag::VIDEO_HEIGHT, tagMap, stream->codecpar->height, ui2iFunc);
-    return ret;
+    NOK_RETURN(ret);
+    ret = SetSingleParameter<int64_t, int64_t>(Tag::MEDIA_BITRATE, tagMap, stream->codecpar->bit_rate,
+                                               [](int64_t bitRate) {return bitRate;});
+    NOK_RETURN(ret);
+    ret = SetSingleParameter<VideoH264Profile, int32_t>(Tag::VIDEO_H264_PROFILE, tagMap, stream->codecpar->profile,
+                                                        ConvH264ProfileToFfmpeg);
+    NOK_RETURN(ret);
+    return SetSingleParameter<uint32_t, int32_t>(Tag::VIDEO_H264_LEVEL, tagMap, stream->codecpar->level,
+                                                 ui2iFunc);
 }
 
 Status SetParameterOfSubTitleTrack(AVStream* stream, const TagMap& tagMap)
@@ -352,6 +360,7 @@ Status FFmpegMuxerPlugin::Prepare()
         SetTagsOfTrack(outputFormat_.get(), formatContext_->streams[pair.first], pair.second);
     }
     SetTagsOfGeneral(formatContext_.get(), generalParameters_);
+    formatContext_->flags |= AVFMT_TS_NONSTRICT;
     return Status::OK;
 }
 void FFmpegMuxerPlugin::ResetIoCtx(IOContext& ioContext)
@@ -402,9 +411,9 @@ Status FFmpegMuxerPlugin::SetTrackParameter(uint32_t trackId, Tag tag, const Plu
 Status FFmpegMuxerPlugin::AddTrack(uint32_t &trackId)
 {
     OSAL::ScopedLock lock(fmtMutex_);
-    FALSE_RETURN_V(formatContext_ != nullptr, Status::ERROR_WRONG_STATE);
+    FALSE_RETURN_V_MSG_E(formatContext_ != nullptr, Status::ERROR_WRONG_STATE, "formatContext_ is NULL");
     auto st = avformat_new_stream(formatContext_.get(), nullptr);
-    FALSE_RETURN_V(st != nullptr, Status::ERROR_NO_MEMORY);
+    FALSE_RETURN_V_MSG_E(st != nullptr, Status::ERROR_NO_MEMORY, "avformat_new_stream fail");
     st->codecpar->codec_type = AVMEDIA_TYPE_UNKNOWN;
     st->codecpar->codec_id = AV_CODEC_ID_NONE;
     trackId = st->index;
@@ -442,10 +451,16 @@ Status FFmpegMuxerPlugin::WriteFrame(const std::shared_ptr<Plugin::Buffer>& buff
     cachePacket_->dts = cachePacket_->pts;
     cachePacket_->flags = 0;
     if (buffer->flag & BUFFER_FLAG_KEY_FRAME) {
+        MEDIA_LOG_D("It is key frame");
         cachePacket_->flags |= AV_PKT_FLAG_KEY;
     }
     cachePacket_->duration = ConvertTimeToFFmpeg(buffer->duration, formatContext_->streams[trackId]->time_base);
-    av_write_frame(formatContext_.get(), cachePacket_.get());
+    auto ret = av_write_frame(formatContext_.get(), cachePacket_.get());
+    if (ret < 0) {
+        MEDIA_LOG_D("failed to write frame " PUBLIC_LOG_S, AVStrError(ret).c_str());
+        av_packet_unref(cachePacket_.get());
+        return Status::ERROR_UNKNOWN;
+    }
     av_packet_unref(cachePacket_.get());
     return Status::OK;
 }

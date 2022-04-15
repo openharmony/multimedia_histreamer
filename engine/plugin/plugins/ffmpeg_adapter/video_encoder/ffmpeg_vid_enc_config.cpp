@@ -35,8 +35,8 @@ do { \
 using namespace OHOS::Media::Plugin;
 using namespace Ffmpeg;
 
-const size_t DEFAULT_BITRATE = 400000;
-const size_t DEFAULT_FRAMERATE = 25;
+const size_t DEFAULT_BITRATE = 12004000;
+const size_t DEFAULT_FRAMERATE = 60;
 const size_t DEFAULT_GOP_SIZE = 10;
 const size_t DEFAULT_BIT_PER_CODED_SAMPLE = 24;
 
@@ -69,8 +69,8 @@ Status SetVideoResolution(AVCodecContext& codecContext, const std::map<Tag, Valu
 
 void SetVideoFrameRateAndTimeBase(AVCodecContext& codecContext, const std::map<Tag, ValueType>& tagStore)
 {
-    uint64_t frameRate = 0;
-    ASSIGN_IF_NOT_NULL(FindTagInMap<uint64_t>(Tag::VIDEO_FRAME_RATE, tagStore), frameRate);
+    uint32_t frameRate = 0;
+    ASSIGN_IF_NOT_NULL(FindTagInMap<uint32_t>(Tag::VIDEO_FRAME_RATE, tagStore), frameRate);
     if (frameRate > 0) {
         codecContext.framerate.num = static_cast<int32_t>(frameRate);
         codecContext.framerate.den = 1;
@@ -165,6 +165,9 @@ Status ConfigVideoCommonAttr(AVCodecContext& codecContext, const std::map<Tag, V
 void ConfigH264Codec(AVCodecContext& codecContext, const std::map<Tag, ValueType>& tagStore)
 {
     ASSIGN_IF_NOT_NULL(FindTagInMap<uint32_t>(Tag::VIDEO_H264_LEVEL, tagStore), codecContext.level);
+    if (codecContext.level == FF_LEVEL_UNKNOWN) {
+        codecContext.level = 41;
+    }
     auto profilePtr = FindTagInMap<VideoH264Profile>(Tag::VIDEO_H264_PROFILE, tagStore);
     if (profilePtr != nullptr) {
         auto profile = ConvH264ProfileToFfmpeg(*profilePtr);
@@ -172,6 +175,13 @@ void ConfigH264Codec(AVCodecContext& codecContext, const std::map<Tag, ValueType
             codecContext.profile = profile;
         }
     }
+    if (codecContext.profile == FF_PROFILE_UNKNOWN) {
+        codecContext.profile = FF_PROFILE_H264_BASELINE;
+    }
+    MEDIA_LOG_D("profile: " PUBLIC_LOG_D32, codecContext.profile);
+    av_opt_set(codecContext.priv_data, "preset", "slow", 0);
+    av_opt_set(codecContext.priv_data, "tune", "zerolatency", 0);
+    codecContext.flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 }
 using ConfigFunc = std::function<void(AVCodecContext&, const std::map<Tag, ValueType>&)>;
 std::map<AVCodecID, ConfigFunc> g_videoConfigFuncMap = {

@@ -251,24 +251,17 @@ ErrorCode MuxerFilter::StartNextSegment()
 
 ErrorCode MuxerFilter::SendEos()
 {
+    OSAL::ScopedLock lock(pushDataMutex_);
     MEDIA_LOG_I("SendEos entered.");
+    eos_ = true;
     if (plugin_) {
         plugin_->WriteTrailer();
     }
     hasWriteHeader_ = false;
     auto buf = std::make_shared<AVBuffer>();
     buf->flag |= BUFFER_FLAG_EOS;
-    SendBuffer(buf, -1);
-    eos_ = true;
+    outPorts_[0]->PushData(buf, -1);
     return ErrorCode::SUCCESS;
-}
-
-void MuxerFilter::SendBuffer(const std::shared_ptr<AVBuffer>& buffer, int64_t offset)
-{
-    OSAL::ScopedLock lock(pushDataMutex_);
-    if (!eos_) {
-        outPorts_[0]->PushData(buffer, offset);
-    }
 }
 
 bool MuxerFilter::AllTracksEos()
@@ -291,11 +284,13 @@ void MuxerFilter::UpdateEosState(const std::string& inPort)
 
 ErrorCode MuxerFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
+    OSAL::ScopedLock lock(pushDataMutex_);
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
         MEDIA_LOG_W("pushing data to muxer when state is " PUBLIC_LOG_D32, static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
-    if (eos_.load()) {
+    if (eos_) {
+        MEDIA_LOG_D("SendEos exit");
         return ErrorCode::SUCCESS;
     }
     // todo we should consider more tracks
@@ -308,6 +303,7 @@ ErrorCode MuxerFilter::PushData(const std::string& inPort, const AVBufferPtr& bu
     }
 
     if (buffer->flag & BUFFER_FLAG_EOS) {
+        MEDIA_LOG_I("It is EOS buffer");
         UpdateEosState(inPort);
     }
     if (AllTracksEos()) {

@@ -45,15 +45,6 @@ HiRecorderImpl::HiRecorderImpl() : fsm_(*this), curFsmState_(StateId::INIT)
 
 HiRecorderImpl::~HiRecorderImpl()
 {
-    pipeline_.reset();
-    audioCapture_.reset();
-    audioEncoder_.reset();
-#ifdef VIDEO_SUPPORT
-    videoCapture_.reset();
-    videoEncoder_.reset();
-#endif
-    muxer_.reset();
-    outputSink_.reset();
     fsm_.Stop();
     MEDIA_LOG_D("dtor called.");
 }
@@ -140,7 +131,7 @@ sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
 int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
 {
     FALSE_RETURN_V(format != OutputFormatType::FORMAT_BUTT, TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
-    FALSE_RETURN_V((audioCount_+ videoCount_) > static_cast<uint32_t>(0),
+    FALSE_RETURN_V((audioCount_ + videoCount_) > static_cast<uint32_t>(0),
                    TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
     outputFormatType_ = format;
     auto ret = fsm_.SendEvent(Intent::SET_OUTPUT_FORMAT, outputFormatType_);
@@ -217,10 +208,17 @@ int32_t HiRecorderImpl::Resume()
 int32_t HiRecorderImpl::Stop(bool isDrainAll)
 {
     PROFILE_BEGIN();
+    MEDIA_LOG_D("Stop start, isDrainAll: " PUBLIC_LOG_U32, static_cast<uint32_t>(isDrainAll));
     outputFormatType_ = OutputFormatType::FORMAT_BUTT;
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::STOP, isDrainAll));
     PROFILE_END("Stop ret = " PUBLIC_LOG_D32, ret);
-    return ret;
+    FALSE_RETURN_V_MSG_E(ret == ERR_OK, ret, "send STOP event to fsm fail");
+    OSAL::ScopedLock lock(stateMutex_);
+    cond_.WaitFor(lock, 3000, [this] { // 3000: time out
+        return curFsmState_ == StateId::ERROR || curFsmState_ == StateId::INIT;
+    });
+    FALSE_RETURN_V_MSG_E(curFsmState_ == StateId::INIT, ERR_UNKNOWN_REASON, "stop fail");
+    return ERR_OK;
 }
 
 int32_t HiRecorderImpl::Reset()
@@ -278,6 +276,8 @@ void HiRecorderImpl::OnStateChanged(StateId state)
 ErrorCode HiRecorderImpl::DoSetVideoSource(const Plugin::Any& param) const
 {
 #ifdef VIDEO_SUPPORT
+    FALSE_RETURN_V_MSG_E(videoCapture_ != nullptr, ErrorCode::ERROR_INVALID_OPERATION,
+                         "videoCapture is NULL");
     using SrcInputPair = std::pair<int32_t, Plugin::SrcInputType>;
     if (param.SameTypeWith(typeid(SrcInputPair))) {
         auto srcType = Plugin::AnyCast<SrcInputPair>(param).second;
@@ -292,6 +292,8 @@ ErrorCode HiRecorderImpl::DoSetVideoSource(const Plugin::Any& param) const
 
 ErrorCode HiRecorderImpl::DoSetAudioSource(const Plugin::Any& param) const
 {
+    FALSE_RETURN_V_MSG_E(audioCapture_ != nullptr, ErrorCode::ERROR_INVALID_OPERATION,
+                         "audioCapture is NULL");
     using SrcInputPair = std::pair<int32_t, Plugin::SrcInputType>;
     if (param.SameTypeWith(typeid(SrcInputPair))) {
         auto srcType = Plugin::AnyCast<SrcInputPair>(param).second;
@@ -378,9 +380,11 @@ ErrorCode HiRecorderImpl::DoStop(const Plugin::Any& param)
     ErrorCode ret = ErrorCode::SUCCESS;
     mediaStatStub_.Reset();
     if (Plugin::AnyCast<bool>(param)) {
-        ret = audioCapture_->SendEos();
+        if (audioCapture_) {
+            ret = audioCapture_->SendEos();
+        }
 #ifdef VIDEO_SUPPORT
-        if (ret == ErrorCode::SUCCESS) {
+        if (videoCapture_) {
             ret = videoCapture_->SendEos();
         }
 #endif
@@ -401,22 +405,20 @@ ErrorCode HiRecorderImpl::SetAudioSourceInternal(AudioSourceType source, int32_t
             "builtin.recorder.audiocapture", "audiocapture");
     audioEncoder_ = FilterFactory::Instance().CreateFilterWithType<AudioEncoderFilter>(
             "builtin.recorder.audioencoder", "audioencoder");
+    FALSE_RETURN_V_MSG_E(audioCapture_ != nullptr && audioEncoder_ != nullptr, ErrorCode::ERROR_UNKNOWN,
+                         "create audioCapture/audioEncoder filter fail");
     auto ret = pipeline_->AddFilters({audioCapture_.get(), audioEncoder_.get()});
-    if (ret == ErrorCode::SUCCESS) {
-        ret = pipeline_->LinkFilters({audioCapture_.get(), audioEncoder_.get()});
-    }
+    FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "AddFilters audioCapture to pipeline fail");
+    ret = pipeline_->LinkFilters({audioCapture_.get(), audioEncoder_.get()});
+    FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "LinkFilters audioCapture and audioEncoder fail");
     std::shared_ptr<InPort> muxerInPort {nullptr};
-    if (ret == ErrorCode::SUCCESS) {
-        ret = muxer_->AddTrack(muxerInPort);
-    }
-    if (ret == ErrorCode::SUCCESS) {
-        ret = pipeline_->LinkPorts(audioEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
-    }
-    if (ret == ErrorCode::SUCCESS) {
-        ret = fsm_.SendEvent(Intent::SET_AUDIO_SOURCE, std::pair<int32_t, Plugin::SrcInputType>(
-            sourceId, TransAudioInputType(source)));
-    }
-    return ret;
+    ret = muxer_->AddTrack(muxerInPort);
+    FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "muxer AddTrack fail");
+    ret = pipeline_->LinkPorts(audioEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
+    FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "LinkPorts audioEncoderOutPort and muxerInPort fail");
+    MEDIA_LOG_E("SendEvent: SET_AUDIO_SOURCE");
+    return fsm_.SendEvent(Intent::SET_AUDIO_SOURCE,
+                          std::pair<int32_t, Plugin::SrcInputType>(sourceId, TransAudioInputType(source)));
 }
 
 ErrorCode HiRecorderImpl::SetVideoSourceInternal(VideoSourceType source, int32_t sourceId)
@@ -426,22 +428,20 @@ ErrorCode HiRecorderImpl::SetVideoSourceInternal(VideoSourceType source, int32_t
             "builtin.recorder.videocapture", "videocapture");
     videoEncoder_ = FilterFactory::Instance().CreateFilterWithType<VideoEncoderFilter>(
             "builtin.recorder.videoencoder", "videoencoder");
+    FALSE_RETURN_V_MSG_E(videoCapture_ != nullptr && videoEncoder_ != nullptr, ErrorCode::ERROR_UNKNOWN,
+                         "create videoCapture/videoEncoder filter fail");
     auto ret = pipeline_->AddFilters({videoCapture_.get(), videoEncoder_.get()});
-    if (ret == ErrorCode::SUCCESS) {
-        ret = pipeline_->LinkFilters({videoCapture_.get(), videoEncoder_.get()});
-    }
+    FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "AddFilters videoCapture to pipeline fail");
+    ret = pipeline_->LinkFilters({videoCapture_.get(), videoEncoder_.get()});
+    FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "LinkFilters videoCapture and videoEncoder fail");
     std::shared_ptr<InPort> muxerInPort {nullptr};
-    if (ret == ErrorCode::SUCCESS) {
-        ret =muxer_->AddTrack(muxerInPort);
-    }
-    if (ret == ErrorCode::SUCCESS) {
-        ret = pipeline_->LinkPorts(videoEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
-    }
-    if (ret == ErrorCode::SUCCESS) {
-        ret = fsm_.SendEvent(Intent::SET_VIDEO_SOURCE, std::pair<int32_t, Plugin::SrcInputType>(
-            sourceId, TransVideoInputType(source)));
-    }
-    return ret;
+    ret =muxer_->AddTrack(muxerInPort);
+    FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "muxer AddTrack fail");
+    ret = pipeline_->LinkPorts(videoEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
+    FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "LinkPorts videoEncoderOutPort and muxerInPort fail");
+    MEDIA_LOG_E("SendEvent: SET_VIDEO_SOURCE");
+    return fsm_.SendEvent(Intent::SET_VIDEO_SOURCE,
+                          std::pair<int32_t, Plugin::SrcInputType>(sourceId, TransVideoInputType(source)));
 #else
     return ErrorCode::ERROR_UNIMPLEMENTED;
 #endif
@@ -449,6 +449,8 @@ ErrorCode HiRecorderImpl::SetVideoSourceInternal(VideoSourceType source, int32_t
 
 ErrorCode HiRecorderImpl::DoConfigureAudio(const HstRecParam& param) const
 {
+    FALSE_RETURN_V_MSG_E(audioCapture_ != nullptr && audioEncoder_ != nullptr, ErrorCode::ERROR_INVALID_OPERATION,
+                         "audioCapture/audioEncoder is NULL");
     switch (param.stdParamType) {
         case RecorderPublicParamType::AUD_SAMPLERATE: {
             auto ptr = param.GetValPtr<AudSampleRate>();
@@ -486,6 +488,8 @@ ErrorCode HiRecorderImpl::DoConfigureAudio(const HstRecParam& param) const
 ErrorCode HiRecorderImpl::DoConfigureVideo(const HstRecParam& param) const
 {
 #ifdef VIDEO_SUPPORT
+    FALSE_RETURN_V_MSG_E(videoCapture_ != nullptr && videoEncoder_ != nullptr, ErrorCode::ERROR_INVALID_OPERATION,
+                         "videoCapture/videoEncoder is NULL");
     switch (param.stdParamType) {
         case RecorderPublicParamType::VID_RECTANGLE: {
             auto ptr = param.GetValPtr<VidRectangle>();
@@ -501,7 +505,8 @@ ErrorCode HiRecorderImpl::DoConfigureVideo(const HstRecParam& param) const
         case RecorderPublicParamType::VID_CAPTURERATE: {
             auto ptr = param.GetValPtr<CaptureRate>();
             FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
-            return videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_CAPTURE_RATE), ptr->capRate);
+            return videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_CAPTURE_RATE),
+                                               static_cast<double>(ptr->capRate));
         }
         case RecorderPublicParamType::VID_BITRATE: {
             auto ptr = param.GetValPtr<VidBitRate>();
@@ -535,6 +540,8 @@ ErrorCode HiRecorderImpl::DoConfigureVideo(const HstRecParam& param) const
 
 ErrorCode HiRecorderImpl::DoConfigureOther(const HstRecParam& param) const
 {
+    FALSE_RETURN_V_MSG_E(muxer_ != nullptr && outputSink_ != nullptr, ErrorCode::ERROR_INVALID_OPERATION,
+                         "muxer/outputSink is NULL");
     switch (param.stdParamType) {
         case RecorderPublicParamType::OUT_PATH: {
             auto ptr = param.GetValPtr<OutFilePath>();

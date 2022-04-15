@@ -15,7 +15,7 @@
 
 #if defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
 
-#define HST_LOG_TAG "Ffmpeg_Video_Encoder"
+#define HST_LOG_TAG "FfmpegVideoEncoderPlugin"
 
 #include "video_ffmpeg_encoder_plugin.h"
 #include <cstring>
@@ -47,6 +47,10 @@ Status RegisterVideoEncoderPlugins(const std::shared_ptr<Register>& reg)
     MEDIA_LOG_I("registering video encoders");
     while ((codec = av_codec_iterate(&iter))) {
         if (!av_codec_is_encoder(codec) || codec->type != AVMEDIA_TYPE_VIDEO) {
+            continue;
+        }
+        std::string iterCodec(codec->name);
+        if (iterCodec.find("264") != std::string::npos && iterCodec != "libx264") {
             continue;
         }
         if (supportedCodec.find(codec->id) == supportedCodec.end()) {
@@ -88,7 +92,7 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
             capBuilder.SetVideoPixelFormatList(values);
         }
     } else {
-        capBuilder.SetVideoPixelFormatList({VideoPixelFormat::NV21});
+        capBuilder.SetVideoPixelFormatList({VideoPixelFormat::YUV420P});
     }
     definition.inCaps.push_back(capBuilder.Build());
 }
@@ -216,10 +220,10 @@ void VideoFfmpegEncoderPlugin::InitCodecContext()
     avCodecContext_->codec_type = AVMEDIA_TYPE_VIDEO;
     FindInParameterMapThenAssignLocked<std::uint32_t>(Tag::VIDEO_WIDTH, width_);
     FindInParameterMapThenAssignLocked<std::uint32_t>(Tag::VIDEO_HEIGHT, height_);
-    FindInParameterMapThenAssignLocked<uint64_t>(Tag::VIDEO_FRAME_RATE, frameRate_);
+    FindInParameterMapThenAssignLocked<uint32_t>(Tag::VIDEO_FRAME_RATE, frameRate_);
     FindInParameterMapThenAssignLocked<Plugin::VideoPixelFormat>(Tag::VIDEO_PIXEL_FORMAT, pixelFormat_);
     MEDIA_LOG_D("width: " PUBLIC_LOG_U32 ", height: " PUBLIC_LOG_U32 ", pixelFormat: " PUBLIC_LOG_S ", frameRate_: "
-                PUBLIC_LOG_U64, width_, height_, Pipeline::GetVideoPixelFormatNameStr(pixelFormat_), frameRate_);
+                PUBLIC_LOG_U32, width_, height_, Pipeline::GetVideoPixelFormatNameStr(pixelFormat_), frameRate_);
     ConfigVideoEncoder(*avCodecContext_, vencParams_);
 }
 
@@ -288,7 +292,7 @@ Status VideoFfmpegEncoderPlugin::Prepare()
             InitCodecContext();
         }
 #ifdef DUMP_RAW_DATA
-        dumpFd_ = fopen("./enc_out.es", "w");
+        dumpFd_ = fopen("./enc_out.es", "wb");
 #endif
         state_ = State::PREPARED;
     }
@@ -402,7 +406,7 @@ Status VideoFfmpegEncoderPlugin::FillAvFrame(const std::shared_ptr<Buffer>& inpu
     cachedFrame_->height = videoMeta->height;
     if (!videoMeta->stride.empty()) {
         for (uint32_t i = 0; i < videoMeta->planes; i++) {
-            cachedFrame_->linesize[i] = videoMeta->stride[i];
+            cachedFrame_->linesize[i] = static_cast<int32_t>(videoMeta->stride[i]);
         }
     }
     int32_t ySize = cachedFrame_->linesize[0] * AlignUp(cachedFrame_->height, DEFAULT_ALIGN);
@@ -420,8 +424,11 @@ Status VideoFfmpegEncoderPlugin::FillAvFrame(const std::shared_ptr<Buffer>& inpu
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     cachedFrame_->pts = ConvertTimeToFFmpeg(
-        static_cast<uint64_t>(inputBuffer->pts) / avCodecContext_->ticks_per_frame,
+        static_cast<uint64_t>(HstTime2Us(inputBuffer->pts)) / avCodecContext_->ticks_per_frame,
         avCodecContext_->time_base);
+    MEDIA_LOG_D("hst pts: " PUBLIC_LOG_U64 " ns, ffmpeg pts: " PUBLIC_LOG_D64
+                " us, den: " PUBLIC_LOG_D32 ", num: " PUBLIC_LOG_D32,
+                inputBuffer->pts, cachedFrame_->pts, avCodecContext_->time_base.den, avCodecContext_->time_base.num);
     return Status::OK;
 }
 
@@ -454,13 +461,14 @@ Status VideoFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
 Status VideoFfmpegEncoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& packetBuffer)
 {
     FALSE_RETURN_V_MSG_E(cachedPacket_->data != nullptr, Status::ERROR_UNKNOWN,
-        "avcodec_receive_packet() packet data is empty");
+                         "avcodec_receive_packet() packet data is empty");
     auto frameBufferMem = packetBuffer->GetMemory();
     FALSE_RETURN_V_MSG_E(frameBufferMem->Write(cachedPacket_->data, cachedPacket_->size, 0) ==
-        static_cast<size_t>(cachedPacket_->size), Status::ERROR_UNKNOWN,
-        "copy packet data to buffer fail");
+                         static_cast<size_t>(cachedPacket_->size), Status::ERROR_UNKNOWN,
+                         "copy packet data to buffer fail");
     if (cachedPacket_->flags & AV_PKT_FLAG_KEY) {
         MEDIA_LOG_D("It is key frame");
+        packetBuffer->flag |= BUFFER_FLAG_KEY_FRAME;
     }
     packetBuffer->pts =
             static_cast<uint64_t>(ConvertTimeFromFFmpeg(cachedPacket_->pts, avCodecContext_->time_base));
@@ -468,9 +476,12 @@ Status VideoFfmpegEncoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& 
             static_cast<uint64_t>(ConvertTimeFromFFmpeg(cachedPacket_->dts, avCodecContext_->time_base));
 #ifdef DUMP_RAW_DATA
     if (dumpFd_) {
-        std::fwrite(reinterpret_cast<const char *>(cachedPacket_->data), cachedPacket_->size, 1, dumpFd_);
+        std::fwrite(reinterpret_cast<const char *>(cachedPacket_->data), 1, cachedPacket_->size, dumpFd_);
     }
 #endif
+    MEDIA_LOG_D("receive one pkt, hst pts: " PUBLIC_LOG_U64 " ns, ffmpeg pts: " PUBLIC_LOG_D64
+                " us, duration: " PUBLIC_LOG_D64 ", pos: " PUBLIC_LOG_D64,
+                packetBuffer->pts, cachedPacket_->pts, cachedPacket_->duration, cachedPacket_->pos);
     return Status::OK;
 }
 
@@ -485,6 +496,7 @@ Status VideoFfmpegEncoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
     } else if (ret == AVERROR_EOF) {
         MEDIA_LOG_I("eos received");
         packetBuffer->GetMemory()->Reset();
+        packetBuffer->flag |= BUFFER_FLAG_EOS;
         avcodec_flush_buffers(avCodecContext_.get());
         status = Status::END_OF_STREAM;
     } else {

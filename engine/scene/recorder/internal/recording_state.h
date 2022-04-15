@@ -58,7 +58,7 @@ public:
     {
         OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoStop(param);
-        Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_INIT : Action::TRANS_TO_ERROR;
+        Action action = (ret == ErrorCode::SUCCESS) ? Action::ACTION_BUTT : Action::TRANS_TO_ERROR;
         return {ret, action};
     }
 

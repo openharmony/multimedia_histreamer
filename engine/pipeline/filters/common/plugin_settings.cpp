@@ -81,6 +81,14 @@ const std::map<FilterType, PluginParaAllowedMap> PluginParameterTable::table_ = 
         {Tag::MEDIA_CODEC_CONFIG, {CommonParameterChecker, PARAM_SET}},
         {Tag::AUDIO_AAC_PROFILE, {CommonParameterChecker, PARAM_SET}},
         {Tag::AUDIO_AAC_LEVEL, {CommonParameterChecker, PARAM_SET}},
+#ifdef VIDEO_SUPPORT
+        {Tag::VIDEO_PIXEL_FORMAT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_WIDTH, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_HEIGHT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_FRAME_RATE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_H264_PROFILE, {CommonParameterChecker, PARAM_SET | PARAM_GET}},
+        {Tag::VIDEO_H264_LEVEL, {CommonParameterChecker, PARAM_SET | PARAM_GET}},
+#endif
     }},
     {FilterType::AUDIO_ENCODER, {
         {Tag::AUDIO_CHANNELS, {CommonParameterChecker, PARAM_SET}},
@@ -93,12 +101,35 @@ const std::map<FilterType, PluginParaAllowedMap> PluginParameterTable::table_ = 
         {Tag::AUDIO_AAC_PROFILE, {CommonParameterChecker, PARAM_SET | PARAM_GET}},
         {Tag::AUDIO_AAC_LEVEL, {CommonParameterChecker, PARAM_SET | PARAM_GET}},
     }},
+#ifdef VIDEO_SUPPORT
     {FilterType::VIDEO_DECODER, {
+        {Tag::VIDEO_PIXEL_FORMAT, {CommonParameterChecker, PARAM_SET}},
         {Tag::VIDEO_WIDTH, {CommonParameterChecker, PARAM_SET}},
         {Tag::VIDEO_HEIGHT, {CommonParameterChecker, PARAM_SET}},
-        {Tag::VIDEO_PIXEL_FORMAT, {CommonParameterChecker, PARAM_SET}},
-        {Tag::MEDIA_CODEC_CONFIG, {CommonParameterChecker, PARAM_SET}},
+        {Tag::MEDIA_CODEC_CONFIG, {CommonParameterChecker, PARAM_GET}},
+        {Tag::VIDEO_FRAME_RATE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_H264_PROFILE, {CommonParameterChecker, PARAM_SET | PARAM_GET}},
+        {Tag::VIDEO_H264_LEVEL, {CommonParameterChecker, PARAM_SET | PARAM_GET}},
     }},
+    {FilterType::VIDEO_ENCODER, {
+        {Tag::VIDEO_PIXEL_FORMAT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_WIDTH, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_HEIGHT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::MEDIA_BITRATE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_FRAME_RATE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_H264_PROFILE, {CommonParameterChecker, PARAM_SET | PARAM_GET}},
+        {Tag::VIDEO_H264_LEVEL, {CommonParameterChecker, PARAM_SET | PARAM_GET}},
+        {Tag::MEDIA_CODEC_CONFIG, {CommonParameterChecker, PARAM_GET}},
+    }},
+    {FilterType::VIDEO_SINK, {
+        {Tag::VIDEO_PIXEL_FORMAT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_WIDTH, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_HEIGHT, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_FRAME_RATE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_SURFACE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::VIDEO_MAX_SURFACE_NUM, {CommonParameterChecker, PARAM_SET}},
+    }},
+#endif
 };
 }
 }
