@@ -72,6 +72,7 @@ bool StreamingExecutor::Open(const std::string &url)
 
 void StreamingExecutor::Close()
 {
+    buffer_->SetActive(false);
     task_->Stop();
     startPos_ = 0;
     if (client_ != nullptr) {
