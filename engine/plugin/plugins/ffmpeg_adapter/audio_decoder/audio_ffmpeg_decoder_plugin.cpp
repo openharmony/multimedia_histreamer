@@ -41,6 +41,7 @@ const std::set<AVCodecID> g_supportedCodec = {
     AV_CODEC_ID_VORBIS,
     AV_CODEC_ID_APE,
 };
+
 std::map<AVCodecID, uint32_t> samplesPerFrameMap = {
     {AV_CODEC_ID_MP3, 1152}, // 1152
     {AV_CODEC_ID_FLAC, 8192}, // 8192
@@ -167,13 +168,13 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace Ffmpeg {
-AudioFfmpegDecoderPlugin::AudioFfmpegDecoderPlugin(std::string name)
-    : CodecPlugin(std::move(name)) {}
+AudioFfmpegDecoderPlugin::AudioFfmpegDecoderPlugin(std::string name) : CodecPlugin(std::move(name)) {}
 
 AudioFfmpegDecoderPlugin::~AudioFfmpegDecoderPlugin()
 {
     DeInitLocked();
 }
+
 Status AudioFfmpegDecoderPlugin::Init()
 {
     auto ite = codecMap.find(pluginName_);
@@ -346,6 +347,10 @@ Status AudioFfmpegDecoderPlugin::ResetLocked()
     avCodecContext_.reset();
     if (threadMode_ == Plugin::ThreadMode::ASYNC) {
         outBufferQ_.Clear();
+        if (decodeTask_) {
+            decodeTask_->Stop();
+            decodeTask_.reset();
+        }
     }
     return Status::OK;
 }
@@ -402,11 +407,13 @@ Status AudioFfmpegDecoderPlugin::StopLocked()
 {
     auto ret = CloseCtxLocked();
     avCodecContext_.reset();
-    if (outBuffer_) {
-        outBuffer_.reset();
-    }
     if (threadMode_ == Plugin::ThreadMode::ASYNC) {
         outBufferQ_.SetActive(false);
+        decodeTask_->Stop();
+    } else {
+        if (outBuffer_) {
+            outBuffer_.reset();
+        }
     }
     return ret;
 }
@@ -553,6 +560,7 @@ Status AudioFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
         MEDIA_LOG_I("eos received");
         ioInfo->GetMemory()->Reset();
         ioInfo->flag = BUFFER_FLAG_EOS;
+        avcodec_flush_buffers(avCodecContext_.get());
         status = Status::END_OF_STREAM;
     } else if (ret == AVERROR(EAGAIN)) {
         status = Status::ERROR_NOT_ENOUGH_DATA;
@@ -588,6 +596,8 @@ Status AudioFfmpegDecoderPlugin::ReceiveBuffer()
     if (threadMode_ == Plugin::ThreadMode::ASYNC) {
         if (status == Status::OK || status == Status::END_OF_STREAM) {
             NotifyOutputBufferDone(ioInfo);
+        } else {
+            outBufferQ_.Push(ioInfo);
         }
     }
     return status;

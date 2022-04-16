@@ -60,7 +60,8 @@ bool IsPcmStream(const AVStream& avStream)
 {
     auto codecId = avStream.codecpar->codec_id;
     return codecId == AV_CODEC_ID_PCM_S16LE || codecId == AV_CODEC_ID_PCM_S16BE || codecId == AV_CODEC_ID_PCM_U16LE ||
-           codecId == AV_CODEC_ID_PCM_U16BE || codecId == AV_CODEC_ID_PCM_S8 || codecId == AV_CODEC_ID_PCM_U8;
+           codecId == AV_CODEC_ID_PCM_U16BE || codecId == AV_CODEC_ID_PCM_S8 || codecId == AV_CODEC_ID_PCM_U8 ||
+           codecId == AV_CODEC_ID_PCM_F32LE;
 }
 
 void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream,
