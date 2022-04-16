@@ -33,6 +33,8 @@ void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition);
 
 std::map<std::string, std::shared_ptr<const AVCodec>> codecMap;
 
+const size_t BUFFER_QUEUE_SIZE = 6;
+
 const std::set<AVCodecID> g_supportedCodec = {
     AV_CODEC_ID_MP3,
     AV_CODEC_ID_FLAC,
@@ -218,17 +220,7 @@ Status AudioFfmpegDecoderPlugin::DeInitLocked()
 Status AudioFfmpegDecoderPlugin::SetParameter(Tag tag, const ValueType& value)
 {
     OSAL::ScopedLock lock(parameterMutex_);
-    if (tag == Tag::THREAD_MODE) {
-        threadMode_ = Plugin::AnyCast<Plugin::ThreadMode>(value);
-        if (threadMode_ == Plugin::ThreadMode::ASYNC) {
-            if (!decodeTask_) {
-                decodeTask_ = std::make_shared<OHOS::Media::OSAL::Task>("audioFfmpegDecThread");
-                decodeTask_->RegisterHandler([this] { ReceiveBuffer(); });
-            }
-        }
-    } else {
-        audioParameter_.insert(std::make_pair(tag, value));
-    }
+    audioParameter_.insert(std::make_pair(tag, value));
     return Status::OK;
 }
 
@@ -302,9 +294,6 @@ do { \
         OSAL::ScopedLock lock(avMutex_);
         avCodecContext_ = tmpCtx;
     }
-    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
-        outBufferQ_.SetActive(true);
-    }
     return Status::OK;
 #undef FAIL_RET_WHEN_ASSIGN_LOCKED
 }
@@ -345,13 +334,6 @@ Status AudioFfmpegDecoderPlugin::ResetLocked()
     audioParameter_.clear();
     StopLocked();
     avCodecContext_.reset();
-    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
-        outBufferQ_.Clear();
-        if (decodeTask_) {
-            decodeTask_->Stop();
-            decodeTask_.reset();
-        }
-    }
     return Status::OK;
 }
 
@@ -378,13 +360,6 @@ Status AudioFfmpegDecoderPlugin::OpenCtxLocked()
 Status AudioFfmpegDecoderPlugin::Start()
 {
     OSAL::ScopedLock lock(avMutex_);
-    if (threadMode_ == ThreadMode::SYNC) {
-        MEDIA_LOG_I("Plugin ThreadMode: SYNC");
-    } else {
-        outBufferQ_.SetActive(true);
-        decodeTask_->Start();
-        MEDIA_LOG_I("Plugin ThreadMode: ASYNC");
-    }
     return OpenCtxLocked();
 }
 
@@ -397,9 +372,6 @@ Status AudioFfmpegDecoderPlugin::CloseCtxLocked()
             return Status::ERROR_UNKNOWN;
         }
     }
-    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
-        outBufferQ_.SetActive(true);
-    }
     return Status::OK;
 }
 
@@ -407,13 +379,8 @@ Status AudioFfmpegDecoderPlugin::StopLocked()
 {
     auto ret = CloseCtxLocked();
     avCodecContext_.reset();
-    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
-        outBufferQ_.SetActive(false);
-        decodeTask_->Stop();
-    } else {
-        if (outBuffer_) {
-            outBuffer_.reset();
-        }
+    if (outBuffer_) {
+        outBuffer_.reset();
     }
     return ret;
 }
@@ -460,10 +427,6 @@ Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>
     (void)timeoutMs;
     if (!outputBuffer) {
         return Status::ERROR_INVALID_PARAMETER;
-    }
-    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
-        outBufferQ_.Push(outputBuffer);
-        return Status::OK;
     }
     outBuffer_ = outputBuffer;
     return SendOutputBuffer();
@@ -574,12 +537,7 @@ Status AudioFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
 
 Status AudioFfmpegDecoderPlugin::ReceiveBuffer()
 {
-    std::shared_ptr<Buffer> ioInfo {nullptr};
-    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
-        ioInfo = outBufferQ_.Pop();
-    } else {
-        ioInfo = outBuffer_;
-    }
+    std::shared_ptr<Buffer> ioInfo {outBuffer_};
     if ((ioInfo == nullptr) || ioInfo->IsEmpty() ||
         (ioInfo->GetBufferMeta()->GetType() != BufferMetaType::AUDIO)) {
         MEDIA_LOG_W("cannot fetch valid buffer to output");
@@ -592,13 +550,6 @@ Status AudioFfmpegDecoderPlugin::ReceiveBuffer()
             return Status::ERROR_WRONG_STATE;
         }
         status = ReceiveBufferLocked(ioInfo);
-    }
-    if (threadMode_ == Plugin::ThreadMode::ASYNC) {
-        if (status == Status::OK || status == Status::END_OF_STREAM) {
-            NotifyOutputBufferDone(ioInfo);
-        } else {
-            outBufferQ_.Push(ioInfo);
-        }
     }
     return status;
 }

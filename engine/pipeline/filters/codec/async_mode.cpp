@@ -80,7 +80,8 @@ ErrorCode AsyncMode::Configure(const std::string &inPort, const std::shared_ptr<
     }
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->SetParameter(Tag::THREAD_MODE, Plugin::ThreadMode::ASYNC)),
         "Set plugin threadMode fail");
-    FAIL_RETURN_MSG(QueueAllBufferInPoolToPluginLocked(), "Configure plugin output buffers error");
+    FALSE_LOG_MSG_W(QueueAllBufferInPoolToPluginLocked() == ErrorCode::SUCCESS,
+                    "Can not configure all output buffers to plugin before start.");
     return CodecMode::Configure(inPort, upstreamMeta);
 }
 
@@ -237,7 +238,8 @@ ErrorCode AsyncMode::QueueAllBufferInPoolToPluginLocked()
         }
         err = TranslatePluginStatus(plugin_->QueueOutputBuffer(buf, -1));
         if (err != ErrorCode::SUCCESS) {
-            MEDIA_LOG_E("queue output buffer error");
+            MEDIA_LOG_W("Queue output buffer error, plugin doesn't support queue all out buffers.");
+            break;
         }
     }
     return err;

@@ -34,7 +34,6 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace Ffmpeg {
-const size_t BUFFER_QUEUE_SIZE = 6;
 class AudioFfmpegDecoderPlugin : public CodecPlugin {
 public:
     explicit AudioFfmpegDecoderPlugin(std::string name);
@@ -118,11 +117,6 @@ private:
     size_t paddedBufferSize_ {0};
     std::shared_ptr<Buffer> outBuffer_ {nullptr};
     DataCallback* dataCallback_ {nullptr};
-
-    // outBufferQ有自己的锁保护 不要和lock_同时混用 否则可能导致死锁
-    OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufferQ_ {"adecPluginQueue", BUFFER_QUEUE_SIZE}; // For async
-    std::shared_ptr<OHOS::Media::OSAL::Task> decodeTask_ {nullptr};
-    Plugin::ThreadMode threadMode_ {};
 };
 } // namespace Ffmpeg
 } // namespace Plugin
