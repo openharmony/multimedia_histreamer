@@ -89,8 +89,8 @@ public:
     void Stop();
 
 private:
-    bool Open();
-    void Close();
+    bool BeginDownload();
+    void EndDownload();
 
     void HttpDownloadLoop();
     static size_t RxBodyData(void *buffer, size_t size, size_t nitems, void *userParam);

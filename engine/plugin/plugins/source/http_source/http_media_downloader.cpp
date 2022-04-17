@@ -87,6 +87,7 @@ bool HttpMediaDownloader::Open(const std::string &url)
 void HttpMediaDownloader::Close()
 {
     buffer_->SetActive(false);
+    downloader->Stop();
     task_->Stop();
     startPos_ = 0;
     if (client_ != nullptr) {

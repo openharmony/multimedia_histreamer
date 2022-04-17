@@ -57,15 +57,16 @@ void Downloader::Start()
 
 void Downloader::Pause()
 {
-    task_->Stop();
+    task_->Pause();
 }
 
 void Downloader::Stop()
 {
     task_->Stop();
+    EndDownload();
 }
 
-bool Downloader::Open()
+bool Downloader::BeginDownload()
 {
     MEDIA_LOG_D("Open in");
     std::string url = currentRequest_->url_;
@@ -85,7 +86,7 @@ bool Downloader::Open()
 }
 
 
-void Downloader::Close()
+void Downloader::EndDownload()
 {
     if (client_ != nullptr) {
         client_->Close();
@@ -96,8 +97,8 @@ void Downloader::Close()
 void Downloader::HttpDownloadLoop()
 {
     if (shouldStartNextRequest) {
-        currentRequest_ = requestQue_->Pop(); //1000); // 1000
-        Open();
+        currentRequest_ = requestQue_->Pop(); // 1000);
+        BeginDownload();
         shouldStartNextRequest = false;
     }
     FALSE_RETURN_W(currentRequest_ != nullptr);
@@ -119,7 +120,7 @@ void Downloader::HttpDownloadLoop()
     if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
         MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64, currentRequest_->startPos_);
         task_->PauseAsync();
-        Close();
+        EndDownload();
         shouldStartNextRequest = true;
     } else if(remaining < PER_REQUEST_SIZE){
         currentRequest_->requestSize_ = remaining;
