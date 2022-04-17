@@ -53,11 +53,11 @@ bool HttpMediaDownloader::Open(const std::string &url)
     MEDIA_LOG_I("Open download " PUBLIC_LOG_S, url.c_str());
     isEos_ = false;
     isHeaderUpdated = false;
-    std::shared_ptr<DownloadRequest> request = std::make_shared<DownloadRequest>(url,
+    request_ = std::make_shared<DownloadRequest>(url,
         std::bind(&HttpMediaDownloader::SaveHeader, this, _1),
         std::bind(&HttpMediaDownloader::SaveData, this, _1, _2, _3),
         std::bind(&HttpMediaDownloader::OnDownloadStatus, this, _1, _2));
-    downloader->Download(request, -1);
+    downloader->Download(request_, -1);
     downloader->Start();
     return true;
 }
@@ -104,8 +104,11 @@ bool HttpMediaDownloader::Seek(int offset)
 size_t HttpMediaDownloader::GetContentLength() const
 {
     WaitHeaderUpdated();
-    FALSE_RETURN_V_MSG_E(headerInfo_.fileContentLen > 0, 0, "Could not get content length.");
-    return headerInfo_.fileContentLen;
+    size_t length = headerInfo_.GetFileContentLength();
+    if (length > 0) {
+        return length;
+    }
+    return request_->GetFileContentLength();
 }
 
 bool HttpMediaDownloader::IsStreaming() const

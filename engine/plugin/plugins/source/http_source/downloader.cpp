@@ -43,6 +43,7 @@ Downloader::Downloader() noexcept
 
 bool Downloader::Download(const std::shared_ptr<DownloadRequest>& request, int32_t waitMs)
 {
+    MEDIA_LOG_I("In");
     if (waitMs == -1) { // wait until push success
         requestQue_->Push(request);
         return true;
@@ -52,9 +53,9 @@ bool Downloader::Download(const std::shared_ptr<DownloadRequest>& request, int32
 
 void Downloader::Start()
 {
-    MEDIA_LOG_D("Begin");
+    MEDIA_LOG_I("Begin");
     task_->Start();
-    MEDIA_LOG_D("End");
+    MEDIA_LOG_I("End");
 }
 
 void Downloader::Pause()
@@ -66,10 +67,10 @@ void Downloader::Pause()
 
 void Downloader::Stop()
 {
-    MEDIA_LOG_D("Begin");
+    MEDIA_LOG_I("Begin");
     task_->Stop();
     EndDownload();
-    MEDIA_LOG_D("End");
+    MEDIA_LOG_I("End");
 }
 
 bool Downloader::Seek(int64_t offset)
@@ -79,12 +80,13 @@ bool Downloader::Seek(int64_t offset)
     int64_t temp = currentRequest_->headerInfo_.fileContentLen - offset;
     temp = temp >= 0 ? temp : PER_REQUEST_SIZE;
     currentRequest_->requestSize_ = static_cast<int>(std::min(temp, static_cast<int64_t>(PER_REQUEST_SIZE)));
+    shouldStartNextRequest = false; // Reuse last request when seek
     return true;
 }
 
 bool Downloader::BeginDownload()
 {
-    MEDIA_LOG_D("Begin");
+    MEDIA_LOG_I("Begin");
     std::string url = currentRequest_->url_;
     FALSE_RETURN_V(!url.empty(), false);
 
@@ -98,17 +100,13 @@ bool Downloader::BeginDownload()
     currentRequest_->isEos_ = false;
 
     task_->Start();
-    MEDIA_LOG_D("End");
+    MEDIA_LOG_I("End");
     return true;
 }
 
 
 void Downloader::EndDownload()
 {
-    if (client_ != nullptr) {
-        client_->Close();
-        client_ = nullptr;
-    }
 }
 
 void Downloader::HttpDownloadLoop()

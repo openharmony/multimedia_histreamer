@@ -47,6 +47,13 @@ struct HeaderInfo {
         contentLen = info->contentLen;
         isChunked = info->isChunked;
     }
+
+    size_t GetFileContentLength() const {
+        if (fileContentLen > 0) {
+            return fileContentLen;
+        }
+        return contentLen > 0 ? contentLen : 0;
+    }
 };
 
 using HeaderSaveFunc = std::function<void(const HeaderInfo*)>;
@@ -63,6 +70,11 @@ public:
                     StatusCallbackFunc statusCallback) : url_(url),
                     saveHeader_(std::move(saveHeader)), saveData_(std::move(saveData)),
                     statusCallback_(std::move(statusCallback)) {}
+
+    size_t GetFileContentLength() const
+    {
+        return headerInfo_.GetFileContentLength();
+    }
 private:
     std::string url_;
     HeaderSaveFunc saveHeader_;

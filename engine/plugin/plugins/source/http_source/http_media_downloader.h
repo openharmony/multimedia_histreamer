@@ -53,6 +53,7 @@ private:
 private:
     std::shared_ptr<RingBuffer> buffer_;
     std::shared_ptr<Downloader> downloader;
+    std::shared_ptr<DownloadRequest> request_;
     bool isEos_ {false}; // file download finished
     HeaderInfo headerInfo_;
     bool isHeaderUpdated {false};
