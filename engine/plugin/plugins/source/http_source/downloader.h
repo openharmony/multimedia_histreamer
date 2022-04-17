@@ -87,6 +87,7 @@ public:
     void Start();
     void Pause();
     void Stop();
+    bool Seek(int64_t offset);
 
 private:
     bool BeginDownload();

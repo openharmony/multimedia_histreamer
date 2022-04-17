@@ -16,10 +16,10 @@
 
 #include "downloader.h"
 #include <algorithm>
-#include <plugin/plugins/source/http_source/downloader.h>
 
-#include "securec.h"
+#include "foundation/log.h"
 #include "osal/utils/util.h"
+#include "securec.h"
 #include "steady_clock.h"
 
 namespace OHOS {
@@ -47,28 +47,44 @@ bool Downloader::Download(const std::shared_ptr<DownloadRequest>& request, int32
         requestQue_->Push(request);
         return true;
     }
-    return requestQue_->Push(request, waitMs);
+    return requestQue_->Push(request, static_cast<int>(waitMs));
 }
 
 void Downloader::Start()
 {
+    MEDIA_LOG_D("Begin");
     task_->Start();
+    MEDIA_LOG_D("End");
 }
 
 void Downloader::Pause()
 {
+    MEDIA_LOG_I("Begin");
     task_->Pause();
+    MEDIA_LOG_I("End");
 }
 
 void Downloader::Stop()
 {
+    MEDIA_LOG_D("Begin");
     task_->Stop();
     EndDownload();
+    MEDIA_LOG_D("End");
+}
+
+bool Downloader::Seek(int64_t offset)
+{
+    MEDIA_LOG_I("Begin");
+    currentRequest_->startPos_ = offset;
+    int64_t temp = currentRequest_->headerInfo_.fileContentLen - offset;
+    temp = temp >= 0 ? temp : PER_REQUEST_SIZE;
+    currentRequest_->requestSize_ = static_cast<int>(std::min(temp, static_cast<int64_t>(PER_REQUEST_SIZE)));
+    return true;
 }
 
 bool Downloader::BeginDownload()
 {
-    MEDIA_LOG_D("Open in");
+    MEDIA_LOG_D("Begin");
     std::string url = currentRequest_->url_;
     FALSE_RETURN_V(!url.empty(), false);
 
@@ -82,6 +98,7 @@ bool Downloader::BeginDownload()
     currentRequest_->isEos_ = false;
 
     task_->Start();
+    MEDIA_LOG_D("End");
     return true;
 }
 
@@ -119,6 +136,7 @@ void Downloader::HttpDownloadLoop()
     int64_t remaining = currentRequest_->headerInfo_.fileContentLen - currentRequest_->startPos_;
     if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
         MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64, currentRequest_->startPos_);
+        currentRequest_->statusCallback_(DownloadStatus::FINISHED, 0);
         task_->PauseAsync();
         EndDownload();
         shouldStartNextRequest = true;

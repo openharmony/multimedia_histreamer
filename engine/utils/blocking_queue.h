@@ -84,7 +84,7 @@ public:
         }
         if (!isActive || (que_.size() == capacity_)) {
             MEDIA_LOG_D("blocking queue: inactive: " PUBLIC_LOG_D32 ", isFull: " PUBLIC_LOG_D32,
-                        isActive, que_.size() < capacity_);
+                        isActive.load(), que_.size() < capacity_);
             return false;
         }
         que_.push(value);
