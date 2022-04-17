@@ -132,6 +132,17 @@ inline std::string MediaGetFileName(std::string file)
     } while (0)
 #endif
 
+#ifndef NZERO_RETURN
+#define NZERO_RETURN(exec)                                                                                             \
+    do {                                                                                                               \
+        int returnValue = (exec);                                                                                      \
+        if (returnValue != 0) {                                                                                        \
+            MEDIA_LOG_E("NZERO_LOG when call (" #exec "), return " PUBLIC_LOG_D32, returnValue);                       \
+            return returnValue;                                                                                        \
+        }                                                                                                              \
+    } while (0)
+#endif
+
 #ifndef FALSE_RETURN
 #define FALSE_RETURN(exec)                                                                                             \
     do {                                                                                                               \
