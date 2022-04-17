@@ -18,7 +18,7 @@
 #include "foundation/osal/thread/scoped_lock.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
-#include "streaming_executor.h"
+#include "http_media_downloader.h"
 
 namespace OHOS {
 namespace Media {
@@ -50,7 +50,7 @@ private:
     uint32_t bufferSize_;
     uint32_t waterline_;
     Callback* callback_ {};
-    std::shared_ptr<StreamingExecutor> executor_;
+    std::shared_ptr<HttpMediaDownloader> executor_;
 };
 } // namespace HttpPluginLite
 } // namespace Plugin 

@@ -13,12 +13,13 @@
  * limitations under the License.
  */
  
-#ifndef HISTREAMER_STREAMING_EXECUTOR_H
-#define HISTREAMER_STREAMING_EXECUTOR_H
+#ifndef HISTREAMER_HTTP_MEDIA_DOWNLOADER_H
+#define HISTREAMER_HTTP_MEDIA_DOWNLOADER_H
 
 #include <string>
 #include <memory>
 #include "client_factory.h"
+#include "media_downloader.h"
 #include "ring_buffer.h"
 #include "network_client.h"
 #include "osal/thread/task.h"
@@ -36,18 +37,18 @@ struct HeaderInfo {
     bool isChunked {false};
 };
 
-class StreamingExecutor {
+class HttpMediaDownloader : public MediaDownloader {
 public:
-    StreamingExecutor() noexcept;
-    virtual ~StreamingExecutor();
-    bool Open(const std::string &url);
-    void Close();
-    bool Read(unsigned char *buff, unsigned int wantReadLength, unsigned int &realReadLength, bool &isEos);
-    bool Seek(int offset);
+    HttpMediaDownloader() noexcept;
+    ~HttpMediaDownloader() override;
+    bool Open(const std::string &url) override;
+    void Close() override;
+    bool Read(unsigned char *buff, unsigned int wantReadLength, unsigned int &realReadLength, bool &isEos) override;
+    bool Seek(int offset) override;
 
-    size_t GetContentLength() const;
-    bool IsStreaming() const;
-    void SetCallback(Callback* cb);
+    size_t GetContentLength() const override;
+    bool IsStreaming() const override;
+    void SetCallback(Callback* cb) override;
 private:
     void HttpDownloadThread();
     static size_t RxBodyData(void *buffer, size_t size, size_t nitems, void *userParam);

@@ -65,7 +65,7 @@ HttpSourcePlugin::~HttpSourcePlugin()
 Status HttpSourcePlugin::Init()
 {
     MEDIA_LOG_D("Init IN");
-    executor_ = std::make_shared<StreamingExecutor>();
+    executor_ = std::make_shared<HttpMediaDownloader>();
     return Status::OK;
 }
 

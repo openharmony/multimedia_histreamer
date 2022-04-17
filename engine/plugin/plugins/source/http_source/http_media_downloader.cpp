@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define HST_LOG_TAG "StreamingExecutor"
+#define HST_LOG_TAG "HttpMediaDownloader"
 
-#include "streaming_executor.h"
+#include "http_media_downloader.h"
 #include <algorithm>
 #include <functional>
 #include "securec.h"
@@ -33,15 +33,15 @@ constexpr unsigned int SLEEP_TIME = 5;    // Sleep 5ms
 constexpr size_t RETRY_TIMES = 200;  // Retry 200 times
 }
 
-StreamingExecutor::StreamingExecutor() noexcept
+HttpMediaDownloader::HttpMediaDownloader() noexcept
 {
     buffer_ = std::make_shared<RingBuffer>(RING_BUFFER_SIZE);
     buffer_->Init();
 
     factory_ = std::make_shared<ClientFactory>(&RxHeaderData, &RxBodyData, this);
 
-    task_ = std::make_shared<OSAL::Task>(std::string("StreamingExecutor"));
-    task_->RegisterHandler(std::bind(&StreamingExecutor::HttpDownloadThread, this));
+    task_ = std::make_shared<OSAL::Task>(std::string("HttpMediaDownloader"));
+    task_->RegisterHandler(std::bind(&HttpMediaDownloader::HttpDownloadThread, this));
 
     (void)memset_s(&headerInfo_, sizeof(HeaderInfo), 0x00, sizeof(HeaderInfo));
     headerInfo_.fileContentLen = 0;
@@ -49,9 +49,9 @@ StreamingExecutor::StreamingExecutor() noexcept
     isDownloading_ = false;
 }
 
-StreamingExecutor::~StreamingExecutor() {}
+HttpMediaDownloader::~HttpMediaDownloader() {}
 
-bool StreamingExecutor::Open(const std::string &url)
+bool HttpMediaDownloader::Open(const std::string &url)
 {
     MEDIA_LOG_D("Open in");
     FALSE_RETURN_V(!url.empty(), false);
@@ -70,7 +70,7 @@ bool StreamingExecutor::Open(const std::string &url)
 }
 
 
-void StreamingExecutor::Close()
+void HttpMediaDownloader::Close()
 {
     buffer_->SetActive(false);
     task_->Stop();
@@ -81,8 +81,8 @@ void StreamingExecutor::Close()
     }
 }
 
-bool StreamingExecutor::Read(unsigned char *buff, unsigned int wantReadLength,
-                             unsigned int &realReadLength, bool &isEos)
+bool HttpMediaDownloader::Read(unsigned char *buff, unsigned int wantReadLength,
+                               unsigned int &realReadLength, bool &isEos)
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
     isEos = false;
@@ -97,7 +97,7 @@ bool StreamingExecutor::Read(unsigned char *buff, unsigned int wantReadLength,
     return true;
 }
 
-bool StreamingExecutor::Seek(int offset)
+bool HttpMediaDownloader::Seek(int offset)
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
     MEDIA_LOG_I("Seek: buffer size " PUBLIC_LOG_ZU ", offset " PUBLIC_LOG_D32, buffer_->GetSize(), offset);
@@ -116,25 +116,25 @@ bool StreamingExecutor::Seek(int offset)
     return true;
 }
 
-size_t StreamingExecutor::GetContentLength() const
+size_t HttpMediaDownloader::GetContentLength() const
 {
     WaitHeaderUpdated();
     FALSE_RETURN_V_MSG_E(headerInfo_.fileContentLen > 0, 0, "Could not get content length.");
     return headerInfo_.fileContentLen;
 }
 
-bool StreamingExecutor::IsStreaming() const
+bool HttpMediaDownloader::IsStreaming() const
 {
     WaitHeaderUpdated();
     return headerInfo_.isChunked;
 }
 
-void StreamingExecutor::SetCallback(Callback* cb)
+void HttpMediaDownloader::SetCallback(Callback* cb)
 {
     callback_ = cb;
 }
 
-void StreamingExecutor::WaitHeaderUpdated() const
+void HttpMediaDownloader::WaitHeaderUpdated() const
 {
     size_t times = 0;
     while (!isHeaderUpdated && times < RETRY_TIMES) { // Wait Header(fileContentLen etc.) updated
@@ -145,7 +145,7 @@ void StreamingExecutor::WaitHeaderUpdated() const
                 isHeaderUpdated, times);
 }
 
-void StreamingExecutor::HttpDownloadThread()
+void HttpMediaDownloader::HttpDownloadThread()
 {
     NetworkClientErrorCode clientCode;
     NetworkServerErrorCode serverCode;
@@ -173,10 +173,10 @@ void StreamingExecutor::HttpDownloadThread()
     }
 }
 
-size_t StreamingExecutor::RxBodyData(void *buffer, size_t size, size_t nitems, void *userParam)
+size_t HttpMediaDownloader::RxBodyData(void *buffer, size_t size, size_t nitems, void *userParam)
 {
-    auto executor = static_cast<StreamingExecutor *>(userParam);
-    HeaderInfo *header = &(executor->headerInfo_);
+    auto mediaDownloader = static_cast<HttpMediaDownloader *>(userParam);
+    HeaderInfo *header = &(mediaDownloader->headerInfo_);
     size_t dataLen = size * nitems;
 
     if (header->fileContentLen == 0) {
@@ -188,25 +188,25 @@ size_t StreamingExecutor::RxBodyData(void *buffer, size_t size, size_t nitems, v
             return 0;
         }
     }
-    if (!executor->isDownloading_) {
-        executor->isDownloading_ = true;
+    if (!mediaDownloader->isDownloading_) {
+        mediaDownloader->isDownloading_ = true;
     }
-    executor->buffer_->WriteBuffer(buffer, dataLen, executor->startPos_);
-    executor->isDownloading_ = false;
+    mediaDownloader->buffer_->WriteBuffer(buffer, dataLen, mediaDownloader->startPos_);
+    mediaDownloader->isDownloading_ = false;
     MEDIA_LOG_I("RxBodyData: dataLen " PUBLIC_LOG_ZU ", startPos_ " PUBLIC_LOG_D64 ", buffer size "
-                PUBLIC_LOG_ZU, dataLen, executor->startPos_, executor->buffer_->GetSize());
-    executor->startPos_ = executor->startPos_ + dataLen;
+                PUBLIC_LOG_ZU, dataLen, mediaDownloader->startPos_, mediaDownloader->buffer_->GetSize());
+    mediaDownloader->startPos_ = mediaDownloader->startPos_ + dataLen;
 
-    int bufferSize = executor->buffer_->GetSize();
+    int bufferSize = mediaDownloader->buffer_->GetSize();
     double ratio = (static_cast<double>(bufferSize)) / RING_BUFFER_SIZE;
-    if (bufferSize >= WATER_LINE && !executor->aboveWaterline_) {
-        executor->aboveWaterline_ = true;
+    if (bufferSize >= WATER_LINE && !mediaDownloader->aboveWaterline_) {
+        mediaDownloader->aboveWaterline_ = true;
         MEDIA_LOG_I("Send http aboveWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
-        executor->callback_->OnEvent({PluginEventType::ABOVE_LOW_WATERLINE, {ratio}, "http"});
-    } else if (bufferSize < WATER_LINE && executor->aboveWaterline_) {
-        executor->aboveWaterline_ = false;
+        mediaDownloader->callback_->OnEvent({PluginEventType::ABOVE_LOW_WATERLINE, {ratio}, "http"});
+    } else if (bufferSize < WATER_LINE && mediaDownloader->aboveWaterline_) {
+        mediaDownloader->aboveWaterline_ = false;
         MEDIA_LOG_I("Send http belowWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
-        executor->callback_->OnEvent({PluginEventType::BELOW_LOW_WATERLINE, {ratio}, "http"});
+        mediaDownloader->callback_->OnEvent({PluginEventType::BELOW_LOW_WATERLINE, {ratio}, "http"});
     }
 
     return dataLen;
@@ -231,10 +231,10 @@ char *StringTrim(char *str)
 }
 }
 
-size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems, void *userParam)
+size_t HttpMediaDownloader::RxHeaderData(void *buffer, size_t size, size_t nitems, void *userParam)
 {
-    auto executor = reinterpret_cast<StreamingExecutor *>(userParam);
-    HeaderInfo *info = &(executor->headerInfo_);
+    auto mediaDownloader = reinterpret_cast<HttpMediaDownloader *>(userParam);
+    HeaderInfo *info = &(mediaDownloader->headerInfo_);
     char *next = nullptr;
     char *key = strtok_s(reinterpret_cast<char *>(buffer), ":", &next);
     FALSE_RETURN_V(key != nullptr, size * nitems);
@@ -278,7 +278,7 @@ size_t StreamingExecutor::RxHeaderData(void *buffer, size_t size, size_t nitems,
             info->fileContentLen = fileLen;
         }
     }
-    executor->isHeaderUpdated = true;
+    mediaDownloader->isHeaderUpdated = true;
     return size * nitems;
 }
 }
