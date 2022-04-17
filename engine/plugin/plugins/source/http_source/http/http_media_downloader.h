@@ -18,11 +18,11 @@
 
 #include <string>
 #include <memory>
-#include "client_factory.h"
-#include "downloader.h"
-#include "media_downloader.h"
+#include "plugin/plugins/source/http_source/download/client_factory.h"
+#include "plugin/plugins/source/http_source/download/downloader.h"
+#include "plugin/plugins/source/http_source/media_downloader.h"
 #include "ring_buffer.h"
-#include "network_client.h"
+#include "plugin/plugins/source/http_source/download/network_client.h"
 #include "osal/thread/task.h"
 #include "plugin/interface/plugin_base.h"
 

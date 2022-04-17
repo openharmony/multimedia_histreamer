@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 #define HST_LOG_TAG "HttpSourcePlugin"
+
 #include "http_source_plugin.h"
-#include "plugin/core/plugin_manager.h"
+#include "plugins/source/http_source/hls/hls_media_downloader.h"
 #include "utils/util.h"
 #include "foundation/log.h"
 
@@ -65,7 +66,6 @@ HttpSourcePlugin::~HttpSourcePlugin()
 Status HttpSourcePlugin::Init()
 {
     MEDIA_LOG_D("Init IN");
-    executor_ = std::make_shared<HttpMediaDownloader>();
     return Status::OK;
 }
 
@@ -138,16 +138,27 @@ Status HttpSourcePlugin::SetCallback(Callback* cb)
 {
     MEDIA_LOG_D("IN");
     callback_ = cb;
-    executor_->SetCallback(cb);
+    if (executor_ != nullptr) {
+        executor_->SetCallback(cb);
+    }
     return Status::OK;
 }
 
 Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 {
     MEDIA_LOG_D("SetSource IN");
+    auto uri = source->GetSourceUri();
+    if (uri.find(".m3u8") != std::string::npos) {
+        executor_ = std::make_shared<HlsMediaDownloader>();
+    } else if (uri.compare(0, 4, "http") == 0) { // 0 : position, 4: count
+        executor_ = std::make_shared<HttpMediaDownloader>();
+    }
     FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
 
-    auto uri = source->GetSourceUri();
+    if (callback_ != nullptr) {
+        executor_->SetCallback(callback_);
+    }
+
     MEDIA_LOG_I("SetSource: " PUBLIC_LOG_S, uri.c_str());
     FALSE_RETURN_V(executor_->Open(uri), Status::ERROR_FUNCTION_CALL);
     return Status::OK;
@@ -186,6 +197,7 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
 Status HttpSourcePlugin::GetSize(size_t &size)
 {
     MEDIA_LOG_D("IN");
+    FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
     size = executor_->GetContentLength();
     return Status::OK;
 }
@@ -193,6 +205,7 @@ Status HttpSourcePlugin::GetSize(size_t &size)
 bool HttpSourcePlugin::IsSeekable()
 {
     MEDIA_LOG_D("IN");
+    FALSE_RETURN_V(executor_ != nullptr, true);
     return !executor_->IsStreaming();
 }
 
