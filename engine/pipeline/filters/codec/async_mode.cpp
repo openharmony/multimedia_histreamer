@@ -78,8 +78,6 @@ ErrorCode AsyncMode::Configure(const std::string &inPort, const std::shared_ptr<
     if (pushTask_) {
         pushTask_->Start();
     }
-    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->SetParameter(Tag::THREAD_MODE, Plugin::ThreadMode::ASYNC)),
-        "Set plugin threadMode fail");
     FALSE_LOG_MSG_W(QueueAllBufferInPoolToPluginLocked() == ErrorCode::SUCCESS,
                     "Can not configure all output buffers to plugin before start.");
     return CodecMode::Configure(inPort, upstreamMeta);

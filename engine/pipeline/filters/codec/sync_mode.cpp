@@ -36,8 +36,6 @@ SyncMode::~SyncMode()
 
 ErrorCode SyncMode::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
-    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->SetParameter(Tag::THREAD_MODE, Plugin::ThreadMode::SYNC)),
-        "Set plugin threadMode fail");
     return CodecMode::Configure(inPort, upstreamMeta);
 }
 

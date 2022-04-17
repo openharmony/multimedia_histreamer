@@ -82,8 +82,6 @@ protected:
 
     virtual void SetMaxSamplesPerFrame(std::shared_ptr<Plugin::Meta>& meta);
 
-    virtual bool MatchedPluginsThreadMode(const MapCandidate& candidate);
-
     template<typename T>
     ErrorCode GetPluginParameterLocked(Tag tag, T& value)
     {

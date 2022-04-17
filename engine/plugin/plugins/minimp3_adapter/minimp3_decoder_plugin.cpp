@@ -268,7 +268,6 @@ void UpdateInCaps(CodecPluginDef& definition)
     DiscreteCapability<AudioChannelLayout> channelLayoutValues = {
         AudioChannelLayout::MONO, AudioChannelLayout::STEREO};
     capBuilder.SetAudioChannelLayoutList(channelLayoutValues);
-    capBuilder.SetThreadModeList({ThreadMode::SYNC});
     definition.inCaps.push_back(capBuilder.Build());
 }
 

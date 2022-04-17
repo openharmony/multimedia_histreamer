@@ -214,9 +214,6 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
     for (const auto& candidate : candidatePlugins) {
         FALSE_LOG_MSG(!candidate.first->outCaps.empty(),
                       "plugin " PUBLIC_LOG_S " has no out caps", candidate.first->name.c_str());
-        if (!MatchedPluginsThreadMode(candidate)) {
-            continue;
-        }
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
             if (!CheckRequiredOutCapKeys(outCap)) {
                 continue;
@@ -257,21 +254,6 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
     PROFILE_END("async codec negotiate end");
     MEDIA_LOG_D("codec filter base negotiate end");
     return res;
-}
-
-bool CodecFilterBase::MatchedPluginsThreadMode(const MapCandidate& candidate)
-{
-    bool threadModeMatched = false;
-#ifdef OHOS_LITE
-    if (Capability2String(candidate.second).find("Sync") != std::string::npos) {
-        threadModeMatched = true;
-    }
-#else
-    if (Capability2String(candidate.second).find("Async") != std::string::npos) {
-        threadModeMatched = true;
-    }
-#endif
-    return threadModeMatched;
 }
 
 bool CodecFilterBase::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
