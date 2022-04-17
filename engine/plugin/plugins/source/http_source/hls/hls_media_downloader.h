@@ -46,16 +46,6 @@ public:
     size_t GetContentLength() const override { return 0; }
     bool IsStreaming() const override { return false;}
     void SetCallback(Callback* cb) override {}
-
-private:
-    std::shared_ptr<RingBuffer> buffer_;
-    std::shared_ptr<Downloader> downloader;
-    std::shared_ptr<DownloadRequest> request_;
-    bool isEos_ {false}; // file download finished
-    HeaderInfo headerInfo_;
-    bool isHeaderUpdated {false};
-    Callback* callback_ {nullptr};
-    bool aboveWaterline_ {false};
 };
 }
 }

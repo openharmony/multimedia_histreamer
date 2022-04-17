@@ -27,7 +27,6 @@ namespace Plugin {
 namespace HttpPlugin {
 namespace {
 constexpr int RING_BUFFER_SIZE = 5 * 48 * 1024;
-constexpr int PER_REQUEST_SIZE = 48 * 1024;
 constexpr int WATER_LINE = RING_BUFFER_SIZE * 0.1;
 constexpr unsigned int SLEEP_TIME = 5;    // Sleep 5ms
 constexpr size_t RETRY_TIMES = 200;  // Retry 200 times
@@ -135,7 +134,6 @@ void HttpMediaDownloader::WaitHeaderUpdated() const
 
 void HttpMediaDownloader::SaveHeader(const HeaderInfo* header)
 {
-    MEDIA_LOG_I("SaveHeader header->fileContentLen = " PUBLIC_LOG_D32, header->fileContentLen);
     headerInfo_.Update(header);
     isHeaderUpdated = true;
 }
