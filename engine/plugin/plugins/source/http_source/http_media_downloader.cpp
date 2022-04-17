@@ -33,10 +33,14 @@ constexpr unsigned int SLEEP_TIME = 5;    // Sleep 5ms
 constexpr size_t RETRY_TIMES = 200;  // Retry 200 times
 }
 
+using namespace std::placeholders;
+
 HttpMediaDownloader::HttpMediaDownloader() noexcept
 {
     buffer_ = std::make_shared<RingBuffer>(RING_BUFFER_SIZE);
     buffer_->Init();
+
+    downloader = std::make_shared<Downloader>();
 
     factory_ = std::make_shared<ClientFactory>(&RxHeaderData, &RxBodyData, this);
 
@@ -53,6 +57,15 @@ HttpMediaDownloader::~HttpMediaDownloader() {}
 
 bool HttpMediaDownloader::Open(const std::string &url)
 {
+    MEDIA_LOG_I("Open download " PUBLIC_LOG_S, url.c_str());
+#if 1
+    std::shared_ptr<DownloadRequest> request = std::make_shared<DownloadRequest>(url,
+        std::bind(&HttpMediaDownloader::SaveHeader, this, _1),
+        std::bind(&HttpMediaDownloader::SaveData, this, _1, _2, _3),
+        std::bind(&HttpMediaDownloader::OnDownloadStatus, this, _1, _2));
+    downloader->Download(request, -1);
+    downloader->Start();
+#else
     MEDIA_LOG_D("Open in");
     FALSE_RETURN_V(!url.empty(), false);
 
@@ -66,6 +79,7 @@ bool HttpMediaDownloader::Open(const std::string &url)
     isEos_ = false;
     isHeaderUpdated = false;
     task_->Start();
+#endif
     return true;
 }
 
@@ -280,6 +294,49 @@ size_t HttpMediaDownloader::RxHeaderData(void *buffer, size_t size, size_t nitem
     }
     mediaDownloader->isHeaderUpdated = true;
     return size * nitems;
+}
+
+void HttpMediaDownloader::SaveHeader(const HeaderInfo* header)
+{
+    headerInfo_.Update(header);
+    isHeaderUpdated = true;
+}
+
+void HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
+{
+    buffer_->WriteBuffer(data, len, offset);
+
+    size_t bufferSize = buffer_->GetSize();
+    double ratio = (static_cast<double>(bufferSize)) / RING_BUFFER_SIZE;
+    if (bufferSize >= WATER_LINE && !aboveWaterline_) {
+        aboveWaterline_ = true;
+        MEDIA_LOG_I("Send http aboveWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
+        callback_->OnEvent({PluginEventType::ABOVE_LOW_WATERLINE, {ratio}, "http"});
+    } else if (bufferSize < WATER_LINE && aboveWaterline_) {
+        aboveWaterline_ = false;
+        MEDIA_LOG_I("Send http belowWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
+        callback_->OnEvent({PluginEventType::BELOW_LOW_WATERLINE, {ratio}, "http"});
+    }
+}
+
+void HttpMediaDownloader::OnDownloadStatus(DownloadStatus status, int32_t code)
+{
+    switch (status) {
+        case DownloadStatus::FINISHED:
+            isEos_ = true;
+            break;
+        case DownloadStatus::CLIENT_ERROR:
+            MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, code);
+            callback_->OnEvent({PluginEventType::CLIENT_ERROR, {code}, "http"});
+            break;
+        case DownloadStatus::SERVER_ERROR:
+            MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32, code);
+            callback_->OnEvent({PluginEventType::SERVER_ERROR, {code}, "http"});
+            break;
+        default:
+            MEDIA_LOG_E("Unknown download status.");
+
+    }
 }
 }
 }

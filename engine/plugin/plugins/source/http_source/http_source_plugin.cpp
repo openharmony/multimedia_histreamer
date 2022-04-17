@@ -148,8 +148,8 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
 
     auto uri = source->GetSourceUri();
-    FALSE_RETURN_V(executor_->Open(uri), Status::ERROR_FUNCTION_CALL);
     MEDIA_LOG_I("SetSource: " PUBLIC_LOG_S, uri.c_str());
+    FALSE_RETURN_V(executor_->Open(uri), Status::ERROR_FUNCTION_CALL);
     return Status::OK;
 }
 

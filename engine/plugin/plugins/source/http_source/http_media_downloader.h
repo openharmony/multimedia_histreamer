@@ -19,6 +19,7 @@
 #include <string>
 #include <memory>
 #include "client_factory.h"
+#include "downloader.h"
 #include "media_downloader.h"
 #include "ring_buffer.h"
 #include "network_client.h"
@@ -29,13 +30,6 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-
-struct HeaderInfo {
-    char contentType[32]; // 32 chars
-    size_t fileContentLen;
-    long contentLen;
-    bool isChunked {false};
-};
 
 class HttpMediaDownloader : public MediaDownloader {
 public:
@@ -55,8 +49,13 @@ private:
     static size_t RxHeaderData(void *buffer, size_t size, size_t nitems, void *userParam);
     void WaitHeaderUpdated() const;
 
+    void SaveHeader(const HeaderInfo* header);
+    void SaveData(uint8_t* data, uint32_t len, int64_t offset);
+    void OnDownloadStatus(DownloadStatus status, int32_t code);
+
 private:
     std::shared_ptr<RingBuffer> buffer_;
+    std::shared_ptr<Downloader> downloader;
     std::shared_ptr<ClientFactory> factory_;
     std::shared_ptr<NetworkClient> client_;
     bool isEos_ {false}; // file download finished
