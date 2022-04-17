@@ -61,6 +61,36 @@ int32_t PluginManager::Sniffer(const std::string& name, std::shared_ptr<DataSour
     return 0;
 }
 
+void PluginManager::EnablePackage(PluginType type, const std::string& name)
+{
+    return pluginRegister_->EnablePackage(type, name);
+}
+
+void PluginManager::DisablePackage(PluginType type, const std::string& name)
+{
+    return pluginRegister_->DisablePackage(type, name);
+}
+
+bool PluginManager::IsPackageExist(PluginType type, const std::string& name)
+{
+    return pluginRegister_->IsPackageExist(type, name);
+}
+
+void PluginManager::PrintRegisteredPluginInfo()
+{
+    pluginRegister_->PrintRegisteredPluginInfo();
+}
+
+int PluginManager::GetAllRegisteredPluginCount()
+{
+    return pluginRegister_->GetAllRegisteredPluginCount();
+}
+
+int PluginManager::GetRegisteredPluginCountByPackageName(std::string name)
+{
+    return pluginRegister_->GetRegisteredPluginCountByPackageName(name);
+}
+
 void PluginManager::Init()
 {
     pluginRegister_ = std::make_shared<PluginRegister>();
