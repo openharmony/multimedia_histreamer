@@ -27,7 +27,7 @@ namespace Media {
 namespace Pipeline {
 class CodecMode {
 public:
-    CodecMode() = default;
+    CodecMode(std::string name) : codecName_(std::move(name)) {}
     virtual ~CodecMode() = default;
 
     ErrorCode Init(std::shared_ptr<Plugin::Codec>& plugin, std::vector<POutPort>& outPorts);
@@ -60,6 +60,7 @@ protected:
     std::shared_ptr<Plugin::Codec> plugin_ {nullptr};
     std::vector<POutPort> outPorts_ {};
     std::shared_ptr<BufferPool<AVBuffer>> outBufPool_ {nullptr};
+    std::string codecName_ {};
 
 private:
     uint32_t inBufPoolSize_;

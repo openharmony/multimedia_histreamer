@@ -173,7 +173,7 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort,
     }
     // always use first one
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = candidatePlugins[0].first;
-    MEDIA_LOG_E("select plugin " PUBLIC_LOG_S, selectedPluginInfo->name.c_str());
+    MEDIA_LOG_I("select plugin " PUBLIC_LOG_S, selectedPluginInfo->name.c_str());
     for (const auto& onCap : selectedPluginInfo->inCaps) {
         if (onCap.keys.count(CapabilityID::VIDEO_PIXEL_FORMAT) == 0) {
             MEDIA_LOG_E("each in caps of sink must contains valid video pixel format");

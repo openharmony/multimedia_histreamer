@@ -31,9 +31,9 @@ constexpr uint32_t DEFAULT_TRY_RENDER_TIME = 10;
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-AsyncMode::AsyncMode()
+AsyncMode::AsyncMode(std::string name) : CodecMode(std::move(name))
 {
-    MEDIA_LOG_I("ThreadMode: ASYNC");
+    MEDIA_LOG_I(PUBLIC_LOG_S " ThreadMode: ASYNC", codecName_.c_str());
 }
 
 AsyncMode::~AsyncMode()
@@ -215,11 +215,11 @@ ErrorCode AsyncMode::Prepare()
         inBufQue_->SetActive(true);
     }
     if (!handleFrameTask_) {
-        handleFrameTask_ = std::make_shared<OSAL::Task>("asyncHandleFrameThread");
+        handleFrameTask_ = std::make_shared<OSAL::Task>(codecName_ + "AsyncHandleFrame");
         handleFrameTask_->RegisterHandler([this] { (void)HandleFrame(); });
     }
     if (!pushTask_) {
-        pushTask_ = std::make_shared<OSAL::Task>("asyncPushThread");
+        pushTask_ = std::make_shared<OSAL::Task>(codecName_ + "AsyncPush");
         pushTask_->RegisterHandler([this] { (void)FinishFrame(); });
     }
     return ErrorCode::SUCCESS;

@@ -24,9 +24,9 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-SyncMode::SyncMode()
+SyncMode::SyncMode(std::string name) : CodecMode(std::move(name))
 {
-    MEDIA_LOG_I("ThreadMode: SYNC");
+    MEDIA_LOG_I(PUBLIC_LOG_S " ThreadMode: SYNC", codecName_.c_str());
 }
 
 SyncMode::~SyncMode()

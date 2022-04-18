@@ -50,20 +50,20 @@ std::shared_ptr<CodecFilterBase> CreateCodecFilter(const std::string& name, Filt
     std::shared_ptr<CodecFilterBase> filter {nullptr};
     switch (type) {
         case FilterCodecMode::AUDIO_SYNC_DECODER:
-            codecMode = std::make_shared<SyncMode>();
+            codecMode = std::make_shared<SyncMode>("audioDec");
             filter = std::make_shared<AudioDecoderFilter>(name, codecMode);
             break;
         case FilterCodecMode::AUDIO_ASYNC_DECODER:
-            codecMode = std::make_shared<AsyncMode>();
+            codecMode = std::make_shared<AsyncMode>("audioDec");
             filter = std::make_shared<AudioDecoderFilter>(name, codecMode);
             break;
 #ifdef VIDEO_SUPPORT
         case FilterCodecMode::VIDEO_SYNC_DECODER:
-            codecMode = std::make_shared<SyncMode>();
+            codecMode = std::make_shared<SyncMode>("videoDec");
             filter = std::make_shared<VideoDecoderFilter>(name, codecMode);
             break;
         case FilterCodecMode::VIDEO_ASYNC_DECODER:
-            codecMode = std::make_shared<AsyncMode>();
+            codecMode = std::make_shared<AsyncMode>("videoDec");
             filter = std::make_shared<VideoDecoderFilter>(name, codecMode);
             break;
 #endif
