@@ -336,7 +336,7 @@ Status VideoFfmpegDecoderPlugin::ResetLocked()
     avCodecContext_.reset();
     outBufferQ_.Clear();
     if (scaleData_[0] != nullptr) {
-        av_free(scaleData_[0]);
+        // av_free(scaleData_[0]); // Maybe free wrong address.
         for (int32_t i = 0; i < AV_NUM_DATA_POINTERS; i++) {
             scaleData_[i] = nullptr;
             scaleLineSize_[i] = 0;
