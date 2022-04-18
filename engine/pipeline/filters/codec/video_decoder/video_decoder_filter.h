@@ -62,8 +62,6 @@ private:
     uint32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta) override;
 
     void SetMaxSamplesPerFrame(std::shared_ptr<Plugin::Meta>& meta) override;
-
-    bool MatchedPluginsThreadMode(const MapCandidate& candidatePlugins) override;
 };
 }
 }

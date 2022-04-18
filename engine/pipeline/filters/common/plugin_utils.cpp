@@ -213,16 +213,6 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::Au
 }
 
 template<>
-int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::ThreadMode& val)
-{
-    if (!Pipeline::HasThreadModeNameStr(val)) {
-        MEDIA_LOG_W("Thread Mode " PUBLIC_LOG_U8 " is unknown", static_cast<uint8_t>(val));
-        return 0;
-    }
-    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::GetThreadModeNameStr(val));
-}
-
-template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::CodecConfig& val)
 {
     auto int2hex = [] (int i) {
@@ -448,7 +438,6 @@ std::string Capability2String(const Capability& capability)
         {Capability::Key::AUDIO_AAC_LEVEL, CapKeyStringiness<uint32_t>},
         {Capability::Key::AUDIO_AAC_STREAM_FORMAT, CapKeyStringiness<Plugin::AudioAacStreamFormat>},
         {Capability::Key::VIDEO_PIXEL_FORMAT, CapKeyStringiness<Plugin::VideoPixelFormat>},
-        {Capability::Key::THREAD_MODE, CapKeyStringiness<Plugin::ThreadMode>},
         {Capability::Key::BITS_PER_CODED_SAMPLE, CapKeyStringiness<uint32_t>},
     };
     char buffer[MAX_BUF_LEN + 1] = {0}; // one more is for \0

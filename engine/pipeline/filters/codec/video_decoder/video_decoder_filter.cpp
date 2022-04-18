@@ -217,15 +217,6 @@ void VideoDecoderFilter::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer
 {
     codecMode_->OnOutputBufferDone(output);
 }
-
-bool VideoDecoderFilter::MatchedPluginsThreadMode(const MapCandidate& candidate)
-{
-    bool threadModeMatched = false;
-    if (Capability2String(candidate.second).find("Async") != std::string::npos) {
-        threadModeMatched = true;
-    }
-    return threadModeMatched;
-}
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
