@@ -120,8 +120,13 @@ source_set("histreamer_plugin_core") {
       "HST_PLUGIN_FILE_TAIL=\".so\"",
     ]
   } else {
+    if (target_cpu == "arm64") {
+      hst_plugin_path = "\"/system/lib64/media/histreamer_plugins\""
+    } else {
+      hst_plugin_path = "\"/system/lib/media/histreamer_plugins\""
+    }
     defines += [
-      "HST_PLUGIN_PATH=\"/system/lib/media/histreamer_plugins\"",
+      "HST_PLUGIN_PATH=${hst_plugin_path}",
       "HST_PLUGIN_FILE_TAIL=\".z.so\"",
     ]
   }
