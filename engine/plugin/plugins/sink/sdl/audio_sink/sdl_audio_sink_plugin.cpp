@@ -200,9 +200,7 @@ Status SdlAudioSinkPlugin::Stop()
     SDL_PauseAudio(1);
     Flush();
     SDL_CloseAudio();
-#ifndef VIDEO_SUPPORT
-    SDL_Quit();
-#endif
+    // SDL_Quit(); // Hang on playing video + audio
     MEDIA_LOG_I("SDL SINK Stop end");
     return Status::OK;
 }
