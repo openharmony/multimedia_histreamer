@@ -54,6 +54,8 @@ private:
     uint32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta) override;
 
     std::vector<Capability::Key> GetRequiredOutCapKeys() override;
+
+    void UpdateParams(std::shared_ptr<Plugin::Meta>& meta) override;
 };
 } // Pipeline
 } // Media

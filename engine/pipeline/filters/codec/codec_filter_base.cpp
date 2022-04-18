@@ -23,7 +23,6 @@
 
 namespace {
 constexpr uint32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 5;
-constexpr int32_t MAX_SAMPLE_PER_FRAME = 10240; // 10240 set max samples per frame
 constexpr int32_t MAX_OUT_DECODED_DATA_SIZE_PER_FRAME = 20 * 1024; // 20kB
 };
 
@@ -149,14 +148,8 @@ ErrorCode CodecFilterBase::GetParameter(int32_t key, Plugin::Any& outVal)
     return TranslatePluginStatus(plugin_->GetParameter(tag, outVal));
 }
 
-void CodecFilterBase::SetMaxSamplesPerFrame(std::shared_ptr<Plugin::Meta>& meta)
+void CodecFilterBase::UpdateParams(std::shared_ptr<Plugin::Meta>& meta)
 {
-    uint32_t samplesPerFrame = 0;
-    if (GetPluginParameterLocked(Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame) != ErrorCode::SUCCESS) {
-        MEDIA_LOG_W("Can't acquire samples per frame from decoder plugin: " PUBLIC_LOG_S, pluginInfo_->name.c_str());
-        samplesPerFrame = MAX_SAMPLE_PER_FRAME;
-    }
-    (void) meta->SetUint32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame);
 }
 
 std::shared_ptr<Allocator> CodecFilterBase::GetAllocator()
@@ -264,7 +257,7 @@ bool CodecFilterBase::Configure(const std::string &inPort, const std::shared_ptr
     auto thisMeta = std::make_shared<Plugin::Meta>();
     FALSE_RETURN_V_MSG_E(MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta), false,
                          "can't configure codec plugin since meta is not compatible with negotiated caps");
-    SetMaxSamplesPerFrame(thisMeta);
+    UpdateParams(thisMeta);
     auto targetOutPort = GetRouteOutPort(inPort);
     if (targetOutPort == nullptr || !targetOutPort->Configure(thisMeta)) {
         MEDIA_LOG_E("decoder filter downstream Configure failed");

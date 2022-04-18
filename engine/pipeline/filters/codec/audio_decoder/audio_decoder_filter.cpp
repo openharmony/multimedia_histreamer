@@ -29,6 +29,7 @@
 namespace {
 constexpr uint32_t DEFAULT_IN_BUFFER_POOL_SIZE = 5;
 constexpr uint32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 5;
+constexpr int32_t MAX_SAMPLE_PER_FRAME = 10240; // 10240 set max samples per frame
 };
 
 namespace OHOS {
@@ -161,6 +162,16 @@ std::vector<Capability::Key> AudioDecoderFilter::GetRequiredOutCapKeys()
     std::vector<Capability::Key> capKey;
     capKey.push_back(Capability::Key::AUDIO_SAMPLE_FORMAT);
     return capKey;
+}
+
+void AudioDecoderFilter::UpdateParams(std::shared_ptr<Plugin::Meta>& meta)
+{
+    uint32_t samplesPerFrame = 0;
+    if (GetPluginParameterLocked(Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame) != ErrorCode::SUCCESS) {
+        MEDIA_LOG_W("Can't acquire samples per frame from decoder plugin: " PUBLIC_LOG_S, pluginInfo_->name.c_str());
+        samplesPerFrame = MAX_SAMPLE_PER_FRAME;
+    }
+    (void) meta->SetUint32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame);
 }
 } // Pipeline
 } // Media
