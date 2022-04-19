@@ -23,6 +23,7 @@
 #include "network_client.h"
 #include "osal/thread/task.h"
 #include "blocking_queue.h"
+#include "osal/utils/util.h"
 
 namespace OHOS {
 namespace Media {
@@ -54,9 +55,8 @@ struct HeaderInfo {
         }
         return contentLen > 0 ? contentLen : 0;
     }
-};
 
-using HeaderSaveFunc = std::function<void(const HeaderInfo*)>;
+};
 
 // uint8_t* : the data should save
 // uint32_t : length
@@ -66,22 +66,19 @@ using StatusCallbackFunc = std::function<void(DownloadStatus, int32_t)>;
 
 class DownloadRequest {
 public:
-    DownloadRequest(const std::string& url, HeaderSaveFunc saveHeader, DataSaveFunc saveData,
-                    StatusCallbackFunc statusCallback) : url_(url),
-                    saveHeader_(std::move(saveHeader)), saveData_(std::move(saveData)),
-                    statusCallback_(std::move(statusCallback)) {}
-
-    size_t GetFileContentLength() const
-    {
-        return headerInfo_.GetFileContentLength();
-    }
+    DownloadRequest(const std::string& url, DataSaveFunc saveData, StatusCallbackFunc statusCallback);
+    size_t GetFileContentLength() const;
+    void SaveHeader(const HeaderInfo* header);
+    bool IsChunked() const;
 private:
+    void WaitHeaderUpdated() const;
+
     std::string url_;
-    HeaderSaveFunc saveHeader_;
     DataSaveFunc saveData_;
     StatusCallbackFunc statusCallback_;
 
     HeaderInfo headerInfo_;
+    bool isHeaderUpdated {false};
     bool isEos_ {false}; // file download finished
     int64_t startPos_;
     bool isDownloading_;
@@ -100,7 +97,6 @@ public:
     void Pause();
     void Stop();
     bool Seek(int64_t offset);
-
 private:
     bool BeginDownload();
     void EndDownload();

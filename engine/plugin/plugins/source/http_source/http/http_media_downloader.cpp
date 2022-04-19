@@ -19,7 +19,6 @@
 #include <functional>
 #include "securec.h"
 #include "osal/utils/util.h"
-#include "steady_clock.h"
 
 namespace OHOS {
 namespace Media {
@@ -28,8 +27,6 @@ namespace HttpPlugin {
 namespace {
 constexpr int RING_BUFFER_SIZE = 5 * 48 * 1024;
 constexpr int WATER_LINE = RING_BUFFER_SIZE * 0.1;
-constexpr unsigned int SLEEP_TIME = 5;    // Sleep 5ms
-constexpr size_t RETRY_TIMES = 200;  // Retry 200 times
 }
 
 using namespace std::placeholders;
@@ -40,9 +37,6 @@ HttpMediaDownloader::HttpMediaDownloader() noexcept
     buffer_->Init();
 
     downloader = std::make_shared<Downloader>();
-
-    (void)memset_s(&headerInfo_, sizeof(HeaderInfo), 0x00, sizeof(HeaderInfo));
-    headerInfo_.fileContentLen = 0;
 }
 
 HttpMediaDownloader::~HttpMediaDownloader() {}
@@ -51,16 +45,13 @@ bool HttpMediaDownloader::Open(const std::string &url)
 {
     MEDIA_LOG_I("Open download " PUBLIC_LOG_S, url.c_str());
     isEos_ = false;
-    isHeaderUpdated = false;
     request_ = std::make_shared<DownloadRequest>(url,
-        std::bind(&HttpMediaDownloader::SaveHeader, this, _1),
         std::bind(&HttpMediaDownloader::SaveData, this, _1, _2, _3),
         std::bind(&HttpMediaDownloader::OnDownloadStatus, this, _1, _2));
     downloader->Download(request_, -1);
     downloader->Start();
     return true;
 }
-
 
 void HttpMediaDownloader::Close()
 {
@@ -102,40 +93,17 @@ bool HttpMediaDownloader::Seek(int offset)
 
 size_t HttpMediaDownloader::GetContentLength() const
 {
-    WaitHeaderUpdated();
-    size_t length = headerInfo_.GetFileContentLength();
-    if (length > 0) {
-        return length;
-    }
     return request_->GetFileContentLength();
 }
 
 bool HttpMediaDownloader::IsStreaming() const
 {
-    WaitHeaderUpdated();
-    return headerInfo_.isChunked;
+    return request_->IsChunked();;
 }
 
 void HttpMediaDownloader::SetCallback(Callback* cb)
 {
     callback_ = cb;
-}
-
-void HttpMediaDownloader::WaitHeaderUpdated() const
-{
-    size_t times = 0;
-    while (!isHeaderUpdated && times < RETRY_TIMES) { // Wait Header(fileContentLen etc.) updated
-        OSAL::SleepFor(SLEEP_TIME);
-        times++;
-    }
-    MEDIA_LOG_D("isHeaderUpdated " PUBLIC_LOG_D32 ", times " PUBLIC_LOG_ZU,
-                isHeaderUpdated, times);
-}
-
-void HttpMediaDownloader::SaveHeader(const HeaderInfo* header)
-{
-    headerInfo_.Update(header);
-    isHeaderUpdated = true;
 }
 
 void HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)

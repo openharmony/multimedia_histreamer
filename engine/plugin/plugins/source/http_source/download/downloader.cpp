@@ -28,6 +28,41 @@ namespace Plugin {
 namespace HttpPlugin {
 namespace {
 constexpr int PER_REQUEST_SIZE = 48 * 1024;
+constexpr unsigned int SLEEP_TIME = 5;    // Sleep 5ms
+constexpr size_t RETRY_TIMES = 200;  // Retry 200 times
+}
+
+DownloadRequest::DownloadRequest(const std::string& url, DataSaveFunc saveData, StatusCallbackFunc statusCallback)
+    : url_(url), saveData_(std::move(saveData)), statusCallback_(std::move(statusCallback))
+{
+    (void)memset_s(&headerInfo_, sizeof(HeaderInfo), 0x00, sizeof(HeaderInfo));
+    headerInfo_.fileContentLen = 0;
+}
+
+size_t DownloadRequest::GetFileContentLength() const
+{
+    WaitHeaderUpdated();
+    return headerInfo_.GetFileContentLength();
+}
+
+void DownloadRequest::SaveHeader(const HeaderInfo* header)
+{
+    headerInfo_.Update(header);
+    isHeaderUpdated = true;
+}
+
+bool DownloadRequest::IsChunked() const{
+    WaitHeaderUpdated();
+    return headerInfo_.isChunked;
+};
+
+void DownloadRequest::WaitHeaderUpdated() const {
+    size_t times = 0;
+    while (!isHeaderUpdated && times < RETRY_TIMES) { // Wait Header(fileContentLen etc.) updated
+        OSAL::SleepFor(SLEEP_TIME);
+        times++;
+    }
+    MEDIA_LOG_D("isHeaderUpdated " PUBLIC_LOG_D32 ", times " PUBLIC_LOG_ZU, isHeaderUpdated, times);
 }
 
 Downloader::Downloader() noexcept
@@ -68,6 +103,7 @@ void Downloader::Pause()
 void Downloader::Stop()
 {
     MEDIA_LOG_I("Begin");
+    requestQue_->SetActive(false);
     task_->Stop();
     EndDownload();
     MEDIA_LOG_I("End");
@@ -237,7 +273,7 @@ size_t Downloader::RxHeaderData(void *buffer, size_t size, size_t nitems, void *
             info->fileContentLen = fileLen;
         }
     }
-    mediaDownloader->currentRequest_->saveHeader_(info);
+    mediaDownloader->currentRequest_->SaveHeader(info);
     return size * nitems;
 }
 }

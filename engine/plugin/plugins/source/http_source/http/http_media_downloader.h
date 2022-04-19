@@ -44,9 +44,6 @@ public:
     bool IsStreaming() const override;
     void SetCallback(Callback* cb) override;
 private:
-    void WaitHeaderUpdated() const;
-
-    void SaveHeader(const HeaderInfo* header);
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
     void OnDownloadStatus(DownloadStatus status, int32_t code);
 
@@ -55,8 +52,6 @@ private:
     std::shared_ptr<Downloader> downloader;
     std::shared_ptr<DownloadRequest> request_;
     bool isEos_ {false}; // file download finished
-    HeaderInfo headerInfo_;
-    bool isHeaderUpdated {false};
     Callback* callback_ {nullptr};
     bool aboveWaterline_ {false};
 };
