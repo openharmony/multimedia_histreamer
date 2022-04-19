@@ -24,8 +24,8 @@
 #endif
 
 namespace {
-constexpr uint32_t DEFAULT_TRY_DECODE_TIME = 10;
-constexpr uint32_t DEFAULT_TRY_RENDER_TIME = 10;
+constexpr uint32_t DEFAULT_TRY_DECODE_TIME = 5;
+constexpr uint32_t DEFAULT_TRY_RENDER_TIME = 5;
 }
 
 namespace OHOS {
