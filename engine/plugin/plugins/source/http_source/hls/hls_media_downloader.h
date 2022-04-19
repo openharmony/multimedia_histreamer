@@ -35,16 +35,28 @@ class HlsMediaDownloader : public MediaDownloader {
 public:
     HlsMediaDownloader() noexcept {}
     ~HlsMediaDownloader() override {}
-    bool Open(const std::string &url) override { return false; }
+    bool Open(const std::string &url) override
+    {
+        return false;
+    }
     void Close() override {}
     bool Read(unsigned char *buff, unsigned int wantReadLength, unsigned int &realReadLength, bool &isEos) override
     {
         return false;
     }
-    bool Seek(int offset) override { return false; }
+    bool Seek(int offset) override
+    {
+        return false;
+    }
 
-    size_t GetContentLength() const override { return 0; }
-    bool IsStreaming() const override { return false;}
+    size_t GetContentLength() const override
+    {
+        return 0;
+    }
+    bool IsStreaming() const override
+    {
+        return false;
+    }
     void SetCallback(Callback* cb) override {}
 };
 }

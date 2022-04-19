@@ -23,7 +23,6 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-
 class MediaDownloader {
 public:
     virtual ~MediaDownloader() = default;

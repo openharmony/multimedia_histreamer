@@ -135,7 +135,7 @@ private:
 
         std::shared_ptr<PluginLoader> pluginLoader;
         std::shared_ptr<RegisterData> registerData;
-        std::shared_ptr<PackageDef> packageDef{nullptr};
+        std::shared_ptr<PackageDef> packageDef {nullptr};
     };
 
     std::shared_ptr<RegisterData> registerData = std::make_shared<RegisterData>();

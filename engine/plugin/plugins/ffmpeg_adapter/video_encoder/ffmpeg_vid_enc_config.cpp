@@ -166,7 +166,7 @@ void ConfigH264Codec(AVCodecContext& codecContext, const std::map<Tag, ValueType
 {
     ASSIGN_IF_NOT_NULL(FindTagInMap<uint32_t>(Tag::VIDEO_H264_LEVEL, tagStore), codecContext.level);
     if (codecContext.level == FF_LEVEL_UNKNOWN) {
-        codecContext.level = 41;
+        codecContext.level = 41; // 41
     }
     auto profilePtr = FindTagInMap<VideoH264Profile>(Tag::VIDEO_H264_PROFILE, tagStore);
     if (profilePtr != nullptr) {

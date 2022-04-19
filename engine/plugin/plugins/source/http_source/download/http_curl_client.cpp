@@ -122,7 +122,7 @@ Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCod
     } else {
         int httpCode = 0;
         curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
-        if(httpCode >= 400) { // 400
+        if (httpCode >= 400) { // 400
             MEDIA_LOG_E("Http error " PUBLIC_LOG_D32, httpCode);
             serverCode = httpCode;
             return Status::ERROR_SERVER;

@@ -49,7 +49,8 @@ struct HeaderInfo {
         isChunked = info->isChunked;
     }
 
-    size_t GetFileContentLength() const {
+    size_t GetFileContentLength() const
+    {
         if (fileContentLen > 0) {
             return fileContentLen;
         }

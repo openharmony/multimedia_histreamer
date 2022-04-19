@@ -30,7 +30,6 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-
 class HttpMediaDownloader : public MediaDownloader {
 public:
     HttpMediaDownloader() noexcept;

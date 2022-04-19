@@ -140,7 +140,6 @@ void HttpMediaDownloader::OnDownloadStatus(DownloadStatus status, int32_t code)
             break;
         default:
             MEDIA_LOG_E("Unknown download status.");
-
     }
 }
 }

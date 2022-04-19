@@ -18,6 +18,7 @@
 #include <dirent.h>
 
 #include "all_plugin_static.h"
+#include "foundation/log.h"
 #include "interface/audio_sink_plugin.h"
 #include "interface/codec_plugin.h"
 #include "interface/demuxer_plugin.h"
@@ -434,7 +435,8 @@ void PluginRegister::PrintRegisteredPluginInfo()
     for (auto it : registerData->registerTable) {
         auto plugins = it.second;
         for (auto plugin : plugins) {
-            printf("plugin name is %s, plugin belong to package %s\n", plugin.first.c_str(), plugin.second->packageDef->name.c_str());
+            MEDIA_LOG_I("Plugin " PUBLIC_LOG_S " belongs to package " PUBLIC_LOG_S, plugin.first.c_str(),
+                        plugin.second->packageDef->name.c_str());
         }
     }
 }

@@ -70,7 +70,8 @@ Downloader::Downloader() noexcept
     shouldStartNextRequest = true;
 
     factory_ = std::make_shared<ClientFactory>(&RxHeaderData, &RxBodyData, this);
-    requestQue_ = std::make_shared<BlockingQueue<std::shared_ptr<DownloadRequest>>>("downloadRequestQue", 10);
+    requestQue_ = std::make_shared<BlockingQueue<std::shared_ptr<DownloadRequest>>>("downloadRequestQue",
+                                                                                    10); // 10 que size
 
     task_ = std::make_shared<OSAL::Task>(std::string("HttpDownloader"));
     task_->RegisterHandler(std::bind(&Downloader::HttpDownloadLoop, this));
@@ -174,7 +175,7 @@ void Downloader::HttpDownloadLoop()
         task_->PauseAsync();
         EndDownload();
         shouldStartNextRequest = true;
-    } else if(remaining < PER_REQUEST_SIZE){
+    } else if (remaining < PER_REQUEST_SIZE){
         currentRequest_->requestSize_ = remaining;
     }
 }
