@@ -56,7 +56,6 @@ struct HeaderInfo {
         }
         return contentLen > 0 ? contentLen : 0;
     }
-
 };
 
 // uint8_t* : the data should save

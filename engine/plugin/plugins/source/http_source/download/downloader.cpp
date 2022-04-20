@@ -51,12 +51,14 @@ void DownloadRequest::SaveHeader(const HeaderInfo* header)
     isHeaderUpdated = true;
 }
 
-bool DownloadRequest::IsChunked() const{
+bool DownloadRequest::IsChunked() const
+{
     WaitHeaderUpdated();
     return headerInfo_.isChunked;
 };
 
-void DownloadRequest::WaitHeaderUpdated() const {
+void DownloadRequest::WaitHeaderUpdated() const
+{
     size_t times = 0;
     while (!isHeaderUpdated && times < RETRY_TIMES) { // Wait Header(fileContentLen etc.) updated
         OSAL::SleepFor(SLEEP_TIME);
@@ -175,7 +177,7 @@ void Downloader::HttpDownloadLoop()
         task_->PauseAsync();
         EndDownload();
         shouldStartNextRequest = true;
-    } else if (remaining < PER_REQUEST_SIZE){
+    } else if (remaining < PER_REQUEST_SIZE) {
         currentRequest_->requestSize_ = remaining;
     }
 }

@@ -27,7 +27,7 @@ namespace Media {
 namespace Pipeline {
 class CodecMode {
 public:
-    CodecMode(std::string name) : codecName_(std::move(name)) {}
+    explicit CodecMode(std::string name) : codecName_(std::move(name)) {}
     virtual ~CodecMode() = default;
 
     ErrorCode Init(std::shared_ptr<Plugin::Codec>& plugin, std::vector<POutPort>& outPorts);

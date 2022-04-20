@@ -23,7 +23,7 @@ namespace Media {
 namespace Pipeline {
 class SyncMode : public CodecMode {
 public:
-    SyncMode(std::string name);
+    explicit SyncMode(std::string name);
     ~SyncMode() override;
 
     ErrorCode Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
