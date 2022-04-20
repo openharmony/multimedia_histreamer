@@ -240,8 +240,7 @@ ErrorCode DemuxerFilter::SeekTo(int64_t pos, Plugin::SeekMode mode)
         MEDIA_LOG_E("SeekTo failed due to no valid plugin");
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
-    int64_t seekPos = (pos > mediaDataSize_) ? mediaDataSize_ : pos;
-    auto rtv = TranslatePluginStatus(plugin_->SeekTo(-1, seekPos, mode));
+    auto rtv = TranslatePluginStatus(plugin_->SeekTo(-1, pos, mode));
     if (rtv == ErrorCode::SUCCESS) {
         if (task_) {
             task_->Start();
