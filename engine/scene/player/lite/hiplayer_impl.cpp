@@ -254,9 +254,12 @@ ErrorCode HiPlayerImpl::StopAsync()
 int32_t HiPlayerImpl::Rewind(int64_t mSeconds, int32_t mode)
 {
     int64_t hstTime = 0;
+    int64_t durationMs = 0;
     if (!Plugin::Ms2HstTime(mSeconds, hstTime)) {
         return CppExt::to_underlying(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }
+    NZERO_RETURN(GetDuration(durationMs));
+    FALSE_RETURN_V(mSeconds <= durationMs, CppExt::to_underlying(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
     auto smode = Transform2SeekMode(static_cast<PlayerSeekMode>(mode));
     return CppExt::to_underlying(fsm_.SendEventAsync(Intent::SEEK, SeekInfo{hstTime, smode}));
 }
