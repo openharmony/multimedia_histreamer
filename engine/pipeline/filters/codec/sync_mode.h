@@ -26,7 +26,7 @@ public:
     explicit SyncMode(std::string name);
     ~SyncMode() override;
 
-    ErrorCode Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
+    ErrorCode Configure() override;
 
     ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
 

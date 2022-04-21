@@ -34,9 +34,9 @@ SyncMode::~SyncMode()
     MEDIA_LOG_D("sync mode dtor called");
 }
 
-ErrorCode SyncMode::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+ErrorCode SyncMode::Configure()
 {
-    return CodecMode::Configure(inPort, upstreamMeta);
+    return CodecMode::Configure();
 }
 
 ErrorCode SyncMode::PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset)

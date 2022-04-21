@@ -30,9 +30,9 @@ public:
     explicit CodecMode(std::string name) : codecName_(std::move(name)) {}
     virtual ~CodecMode() = default;
 
-    ErrorCode Init(std::shared_ptr<Plugin::Codec>& plugin, std::vector<POutPort>& outPorts);
+    bool Init(std::shared_ptr<Plugin::Codec>& plugin, std::vector<POutPort>& outPorts);
 
-    virtual ErrorCode Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta);
+    virtual ErrorCode Configure();
 
     virtual ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) = 0;
 

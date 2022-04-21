@@ -76,11 +76,9 @@ ErrorCode VideoDecoderFilter::Start()
 ErrorCode VideoDecoderFilter::Stop()
 {
     MEDIA_LOG_D("video decoder stop start.");
-    // 先改变底层状态 然后停掉上层线程 否则会产生死锁
-    ErrorCode errorCode = CodecFilterBase::Stop();
-    codecMode_->Stop();
+    FAIL_RETURN(CodecFilterBase::Stop());
     MEDIA_LOG_D("video decoder stop end.");
-    return errorCode;
+    return ErrorCode::SUCCESS;
 }
 
 void VideoDecoderFilter::FlushStart()
@@ -101,10 +99,9 @@ void VideoDecoderFilter::FlushEnd()
 bool VideoDecoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     PROFILE_BEGIN("audio decoder configure begin");
-    bool ret = CodecFilterBase::Configure(inPort, upstreamMeta);
-    codecMode_->Configure(inPort, upstreamMeta);
+    FALSE_RETURN_V(CodecFilterBase::Configure(inPort, upstreamMeta), false);
     PROFILE_END("audio decoder configure end");
-    return ret;
+    return true;
 }
 
 ErrorCode VideoDecoderFilter::PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset)
@@ -127,10 +124,10 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
                                    const Plugin::TagMap& upstreamParams,
                                    Plugin::TagMap& downstreamParams)
 {
-    bool ret = CodecFilterBase::Negotiate(inPort, upstreamCap, negotiatedCap, upstreamParams, downstreamParams);
-    codecMode_->Init(plugin_, outPorts_);
+    FALSE_RETURN_V(CodecFilterBase::Negotiate(inPort, upstreamCap, negotiatedCap, upstreamParams, downstreamParams),
+                   false);
     MEDIA_LOG_D("video decoder negotiate end");
-    return ret;
+    return true;
 }
 
 uint32_t VideoDecoderFilter::GetOutBufferPoolSize()

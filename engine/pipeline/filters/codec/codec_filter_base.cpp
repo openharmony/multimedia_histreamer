@@ -49,8 +49,10 @@ ErrorCode CodecFilterBase::Start()
 ErrorCode CodecFilterBase::Stop()
 {
     MEDIA_LOG_D("CodecFilterBase stop start.");
+    // 先改变底层状态 然后停掉上层线程 否则会产生死锁
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Flush()), "Flush plugin fail");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Stop()), "Stop plugin fail");
+    FAIL_RETURN_MSG(codecMode_->Stop(), "Codec mode stop fail");
     MEDIA_LOG_D("CodecFilterBase stop end.");
     return FilterBase::Stop();
 }
@@ -242,8 +244,7 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
         [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
             return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
     });
-    plugin_->SetCallback(this);
-    plugin_->SetDataCallback(this);
+    FALSE_RETURN_V(codecMode_->Init(plugin_, outPorts_), false);
     PROFILE_END("async codec negotiate end");
     MEDIA_LOG_D("codec filter base negotiate end");
     return res;
@@ -280,6 +281,9 @@ ErrorCode CodecFilterBase::ConfigureToStartPluginLocked(const std::shared_ptr<co
     MEDIA_LOG_D("CodecFilterBase configure called");
     FAIL_RETURN_MSG(ConfigPluginWithMeta(*plugin_, *meta), "configure decoder plugin error");
     FAIL_RETURN_MSG(AllocateOutputBuffers(meta), "Alloc output buffers fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->SetCallback(this)), "plugin set callback fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->SetDataCallback(this)), "plugin set data callback fail");
+    FAIL_RETURN_MSG(codecMode_->Configure(), "codec mode configure error");
     return ErrorCode::SUCCESS;
 }
 

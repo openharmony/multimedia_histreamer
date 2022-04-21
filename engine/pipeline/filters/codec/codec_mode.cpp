@@ -24,23 +24,23 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-ErrorCode CodecMode::Init(std::shared_ptr<Plugin::Codec>& plugin, std::vector<POutPort>& outPorts)
+bool CodecMode::Init(std::shared_ptr<Plugin::Codec>& plugin, std::vector<POutPort>& outPorts)
 {
     if (plugin == nullptr) {
         MEDIA_LOG_I("plugin is null");
-        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+        return false;
     }
     plugin_ = plugin;
 
     if (outPorts.empty()) {
         MEDIA_LOG_I("outPorts is empty");
-        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+        return false;
     }
     outPorts_ = outPorts;
-    return ErrorCode::SUCCESS;
+    return true;
 }
 
-ErrorCode CodecMode::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+ErrorCode CodecMode::Configure()
 {
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Start()), "Start plugin fail");

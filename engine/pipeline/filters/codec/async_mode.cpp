@@ -69,18 +69,19 @@ ErrorCode AsyncMode::Release()
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode AsyncMode::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
+ErrorCode AsyncMode::Configure()
 {
     stopped_ = false;
+    FALSE_LOG_MSG_W(QueueAllBufferInPoolToPluginLocked() == ErrorCode::SUCCESS,
+                    "Can not configure all output buffers to plugin before start.");
+    FAIL_RETURN(CodecMode::Configure());
     if (handleFrameTask_) {
         handleFrameTask_->Start();
     }
     if (pushTask_) {
         pushTask_->Start();
     }
-    FALSE_LOG_MSG_W(QueueAllBufferInPoolToPluginLocked() == ErrorCode::SUCCESS,
-                    "Can not configure all output buffers to plugin before start.");
-    return CodecMode::Configure(inPort, upstreamMeta);
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode AsyncMode::PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset)

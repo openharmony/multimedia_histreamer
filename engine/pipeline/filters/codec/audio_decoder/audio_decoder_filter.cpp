@@ -73,11 +73,9 @@ ErrorCode AudioDecoderFilter::Start()
 ErrorCode AudioDecoderFilter::Stop()
 {
     MEDIA_LOG_D("audio decoder stop start.");
-    // 先改变底层状态 然后停掉上层线程 否则会产生死锁
-    ErrorCode errorCode = CodecFilterBase::Stop();
-    codecMode_->Stop();
+    FAIL_RETURN(CodecFilterBase::Stop());
     MEDIA_LOG_D("audio decoder stop end.");
-    return errorCode;
+    return ErrorCode::SUCCESS;
 }
 
 bool AudioDecoderFilter::Negotiate(const std::string& inPort,
@@ -86,18 +84,18 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
                                    const Plugin::TagMap& upstreamParams,
                                    Plugin::TagMap& downstreamParams)
 {
-    bool ret = CodecFilterBase::Negotiate(inPort, upstreamCap, negotiatedCap, upstreamParams, downstreamParams);
-    codecMode_->Init(plugin_, outPorts_);
-    return ret;
+    FALSE_RETURN_V(CodecFilterBase::Negotiate(inPort, upstreamCap, negotiatedCap, upstreamParams, downstreamParams),
+                   false);
+    MEDIA_LOG_D("audio decoder negotiate end");
+    return true;
 }
 
 bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     PROFILE_BEGIN("audio decoder configure begin");
-    bool ret = CodecFilterBase::Configure(inPort, upstreamMeta);
-    codecMode_->Configure(inPort, upstreamMeta);
+    FALSE_RETURN_V(CodecFilterBase::Configure(inPort, upstreamMeta), false);
     PROFILE_END("audio decoder configure end");
-    return ret;
+    return true;
 }
 
 ErrorCode AudioDecoderFilter::PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset)
