@@ -117,10 +117,10 @@ void AsyncMode::FlushStart()
         inBufQue_->SetActive(false);
     }
     if (handleFrameTask_) {
-        handleFrameTask_->PauseAsync();
+        handleFrameTask_->Pause();
     }
     if (pushTask_) {
-        pushTask_->PauseAsync();
+        pushTask_->Pause();
     }
     MEDIA_LOG_D("AsyncMode FlushStart exit.");
 }
