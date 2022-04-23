@@ -60,9 +60,7 @@ ErrorCode SyncMode::PushData(const std::string &inPort, const AVBufferPtr& buffe
 
 ErrorCode SyncMode::Stop()
 {
-    MEDIA_LOG_D("SyncMode stop start.");
-    outBufPool_.reset();
-    MEDIA_LOG_D("SyncMode stop end.");
+    MEDIA_LOG_D("SyncMode stop");
     return ErrorCode::SUCCESS;
 }
 
