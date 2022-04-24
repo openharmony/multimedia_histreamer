@@ -98,7 +98,7 @@ size_t HttpMediaDownloader::GetContentLength() const
 
 bool HttpMediaDownloader::IsStreaming() const
 {
-    return request_->IsChunked();;
+    return request_->IsChunked();
 }
 
 void HttpMediaDownloader::SetCallback(Callback* cb)

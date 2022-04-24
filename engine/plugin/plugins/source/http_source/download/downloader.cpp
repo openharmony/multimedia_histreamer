@@ -116,7 +116,7 @@ bool Downloader::Seek(int64_t offset)
 {
     MEDIA_LOG_I("Begin");
     currentRequest_->startPos_ = offset;
-    int64_t temp = currentRequest_->headerInfo_.fileContentLen - offset;
+    int64_t temp = currentRequest_->GetFileContentLength() - offset;
     temp = temp >= 0 ? temp : PER_REQUEST_SIZE;
     currentRequest_->requestSize_ = static_cast<int>(std::min(temp, static_cast<int64_t>(PER_REQUEST_SIZE)));
     shouldStartNextRequest = false; // Reuse last request when seek
