@@ -194,7 +194,8 @@ int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
         return TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }
     NZERO_RETURN(GetDuration(durationMs));
-    FALSE_RETURN_V(mSeconds <= durationMs, TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
+    FALSE_RETURN_V_MSG_E(mSeconds <= durationMs, CppExt::to_underlying(ErrorCode::ERROR_INVALID_PARAMETER_VALUE),
+                         "mSeconds : " PUBLIC_LOG_D64 ", durationMs : " PUBLIC_LOG_D64, mSeconds, durationMs);
     auto smode = Transform2SeekMode(mode);
     return TransErrorCode(fsm_.SendEventAsync(Intent::SEEK, SeekInfo{hstTime, smode}));
 }
