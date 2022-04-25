@@ -164,6 +164,7 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
     }
     if (state_.load() != FilterState::RUNNING) {
         pushThreadIsBlocking = true;
+        MEDIA_LOG_I("audio sink push data wait.");
         OSAL::ScopedLock lock(mutex_);
         startWorkingCondition_.Wait(lock, [this] {
             return state_ == FilterState::RUNNING || state_ == FilterState::INITIALIZED || isFlushing;

@@ -16,6 +16,8 @@
 #define HST_LOG_TAG "StateMachine"
 
 #include "state_machine.h"
+#include <thread>
+#include <chrono>
 #include "init_state.h"
 #include "utils/steady_clock.h"
 
@@ -36,7 +38,10 @@ StateMachine::StateMachine(PlayExecutor& executor)
 
 void StateMachine::Stop()
 {
-    MEDIA_LOG_D("Stop called.");
+    MEDIA_LOG_I("StateMachine stop called.");
+    while (!jobs_.Empty()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
     jobs_.SetActive(false);
     Task::Stop();
 }
@@ -216,6 +221,7 @@ void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode resu
         intentSync_.Notify(intent, result);
     }
     if (intent == Intent::STOP) {
+        MEDIA_LOG_I("OnIntentExecuted handle stop intent, stop state machine.");
         jobs_.SetActive(false);
         Task::StopAsync();
     }

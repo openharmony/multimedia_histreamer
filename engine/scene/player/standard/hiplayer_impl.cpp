@@ -74,9 +74,10 @@ HiPlayerImpl::HiPlayerImpl()
 
 HiPlayerImpl::~HiPlayerImpl()
 {
+    MEDIA_LOG_I("dtor called.");
+    fsm_.SendEventAsync(Intent::STOP, {});
     fsm_.Stop();
     ClockManager::Instance().ClearProviders();
-    MEDIA_LOG_D("dtor called.");
 }
 
 ErrorCode HiPlayerImpl::Init()
