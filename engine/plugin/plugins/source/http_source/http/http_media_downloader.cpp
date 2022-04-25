@@ -112,7 +112,7 @@ void HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 
     size_t bufferSize = buffer_->GetSize();
     double ratio = (static_cast<double>(bufferSize)) / RING_BUFFER_SIZE;
-    if (bufferSize >= WATER_LINE && !aboveWaterline_) {
+    if ((bufferSize >= WATER_LINE || bufferSize >= request_->GetFileContentLength() / 2) && !aboveWaterline_) {
         aboveWaterline_ = true;
         MEDIA_LOG_I("Send http aboveWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
         callback_->OnEvent({PluginEventType::ABOVE_LOW_WATERLINE, {ratio}, "http"});
