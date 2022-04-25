@@ -37,6 +37,7 @@ DownloadRequest::DownloadRequest(const std::string& url, DataSaveFunc saveData, 
 {
     (void)memset_s(&headerInfo_, sizeof(HeaderInfo), 0x00, sizeof(HeaderInfo));
     headerInfo_.fileContentLen = 0;
+    headerInfo_.contentLen = 0;
 }
 
 size_t DownloadRequest::GetFileContentLength() const
