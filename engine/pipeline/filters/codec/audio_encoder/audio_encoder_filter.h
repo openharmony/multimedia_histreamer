@@ -56,7 +56,7 @@ public:
     ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
 private:
-    ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta);
+    ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta) override;
 
     ErrorCode HandleFrame(const std::shared_ptr<AVBuffer>& buffer);
 

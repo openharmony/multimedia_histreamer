@@ -82,6 +82,7 @@ HiPlayerImpl::~HiPlayerImpl()
 
 ErrorCode HiPlayerImpl::Init()
 {
+    MEDIA_LOG_D("Init entered.");
     errorCode_ = ErrorCode::SUCCESS;
     mediaStats_.Reset();
     if (initialized_.load()) {
@@ -107,6 +108,7 @@ ErrorCode HiPlayerImpl::Init()
 
 int32_t HiPlayerImpl::SetSource(const std::string& uri)
 {
+    MEDIA_LOG_D("SetSource entered source uri: " PUBLIC_LOG_S, uri.c_str());
     PROFILE_BEGIN("SetSource begin");
     auto ret = Init();
     if (ret == ErrorCode::SUCCESS) {
@@ -155,6 +157,7 @@ int HiPlayerImpl::PrepareAsync()
 
 int32_t HiPlayerImpl::Play()
 {
+    MEDIA_LOG_D("Play entered.");
     PROFILE_BEGIN();
     ErrorCode ret;
     if (pipelineStates_ == PlayerStates::PLAYER_PAUSED) {
@@ -168,6 +171,7 @@ int32_t HiPlayerImpl::Play()
 
 int32_t HiPlayerImpl::Pause()
 {
+    MEDIA_LOG_D("Pause entered.");
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::PAUSE));
     PROFILE_END("Pause ret = " PUBLIC_LOG_D32, ret);
@@ -176,6 +180,7 @@ int32_t HiPlayerImpl::Pause()
 
 int32_t HiPlayerImpl::Stop()
 {
+    MEDIA_LOG_D("Stop entered.");
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::STOP));
     PROFILE_END("Stop ret = " PUBLIC_LOG_D32, ret);
@@ -184,11 +189,13 @@ int32_t HiPlayerImpl::Stop()
 
 ErrorCode HiPlayerImpl::StopAsync()
 {
+    MEDIA_LOG_D("StopAsync entered.");
     return fsm_.SendEventAsync(Intent::STOP);
 }
 
 int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
 {
+    MEDIA_LOG_D("Seek entered.");
     int64_t hstTime = 0;
     int32_t durationMs = 0;
     if (!Plugin::Ms2HstTime(mSeconds, hstTime)) {
@@ -196,13 +203,14 @@ int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
     }
     NZERO_RETURN(GetDuration(durationMs));
     FALSE_RETURN_V_MSG_E(mSeconds <= durationMs, CppExt::to_underlying(ErrorCode::ERROR_INVALID_PARAMETER_VALUE),
-                         "mSeconds : " PUBLIC_LOG_D64 ", durationMs : " PUBLIC_LOG_D64, mSeconds, durationMs);
+                         "mSeconds : " PUBLIC_LOG_D32 ", durationMs : " PUBLIC_LOG_D32, mSeconds, durationMs);
     auto smode = Transform2SeekMode(mode);
     return TransErrorCode(fsm_.SendEventAsync(Intent::SEEK, SeekInfo{hstTime, smode}));
 }
 
 int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
 {
+    MEDIA_LOG_D("SetVolume entered.");
     if (leftVolume < 0 || leftVolume > MAX_MEDIA_VOLUME || rightVolume < 0 || rightVolume > MAX_MEDIA_VOLUME) {
         MEDIA_LOG_E("volume not valid, should be in range [0,100]");
         return TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
@@ -224,6 +232,7 @@ int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
 
 int32_t HiPlayerImpl::SetVideoSurface(sptr<Surface> surface)
 {
+    MEDIA_LOG_D("SetVideoSurface entered.");
 #ifdef VIDEO_SUPPORT
     return TransErrorCode(videoSink_->SetVideoSurface(surface));
 #else
@@ -233,18 +242,22 @@ int32_t HiPlayerImpl::SetVideoSurface(sptr<Surface> surface)
 
 int32_t HiPlayerImpl::GetVideoTrackInfo(std::vector<Format> &videoTrack)
 {
+    MEDIA_LOG_D("GetVideoTrackInfo entered.");
     return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
 }
 int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format> &audioTrack)
 {
+    MEDIA_LOG_D("GetAudioTrackInfo entered.");
     return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
 }
 int32_t HiPlayerImpl::GetVideoWidth()
 {
+    MEDIA_LOG_D("GetVideoWidth entered.");
     return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
 }
 int32_t HiPlayerImpl::GetVideoHeight()
 {
+    MEDIA_LOG_D("GetVideoHeight entered.");
     return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
 }
 
@@ -424,6 +437,7 @@ ErrorCode HiPlayerImpl::DoOnError(ErrorCode errorCode)
 
 ErrorCode HiPlayerImpl::SetVolume(float volume)
 {
+    MEDIA_LOG_D("SetVolume entered.");
     if (audioSink_ == nullptr) {
         MEDIA_LOG_W("cannot set volume while audio sink filter is null");
         return ErrorCode::ERROR_AGAIN;
@@ -451,23 +465,27 @@ PFilter HiPlayerImpl::CreateAudioDecoder(const std::string& desc)
 
 int32_t HiPlayerImpl::SetLooping(bool loop)
 {
+    MEDIA_LOG_D("SetLooping entered.");
     singleLoop_ = loop;
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 
 int32_t HiPlayerImpl::SetParameter(const Format& params)
 {
+    MEDIA_LOG_D("SetParameter entered.");
     return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
 }
 
 int32_t HiPlayerImpl::SetObs(const std::weak_ptr<IPlayerEngineObs>& obs)
 {
+    MEDIA_LOG_D("SetObs entered.");
     obs_ = obs;
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 
 int32_t HiPlayerImpl::Reset()
 {
+    MEDIA_LOG_D("Reset entered.");
     Stop();
     pipelineStates_ = PlayerStates::PLAYER_IDLE;
     singleLoop_ = false;
@@ -478,11 +496,14 @@ int32_t HiPlayerImpl::Reset()
 int32_t HiPlayerImpl::GetCurrentTime(int32_t& currentPositionMs)
 {
     currentPositionMs = Plugin::HstTime2Ms(mediaStats_.GetCurrentPosition());
+    MEDIA_LOG_D("GetCurrentTime entered, Media pos: " PUBLIC_LOG_D64 " currentTime: " PUBLIC_LOG_D32,
+                mediaStats_.GetCurrentPosition(), currentPositionMs);
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 
 int32_t HiPlayerImpl::GetDuration(int32_t& durationMs)
 {
+    MEDIA_LOG_D("GetDuration entered, duration :" PUBLIC_LOG_D32, durationMs);
     if (audioSource_ && !audioSource_->IsSeekable()) {
         durationMs = -1;
         return TransErrorCode(ErrorCode::SUCCESS);
@@ -516,11 +537,13 @@ int32_t HiPlayerImpl::GetDuration(int32_t& durationMs)
 
 int32_t HiPlayerImpl::SetPlaybackSpeed(PlaybackRateMode mode)
 {
+    MEDIA_LOG_D("SetPlaybackSpeed entered.");
     (void)mode;
     return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
 }
 int32_t HiPlayerImpl::GetPlaybackSpeed(PlaybackRateMode& mode)
 {
+    MEDIA_LOG_D("GetPlaybackSpeed entered.");
     (void)mode;
     return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
 }
