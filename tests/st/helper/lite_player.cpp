@@ -61,15 +61,16 @@ public:
     {
         MEDIA_LOG_I("TestPlayerImpl dtor called.");
     }
-    int32_t SetSource(const TestSource& source);
-    int32_t SetSingleLoop(bool loop);
-    bool IsPlaying();
-    int32_t Play();
-    int32_t Pause();
-    int32_t Stop();
-    int32_t Seek(int64_t timeMs);
-    int32_t GetCurrentTime(int64_t &currentMS);
-    int32_t GetDuration(int64_t &durationMs);
+    int32_t SetSource(const TestSource& source) override;
+    int32_t SetSingleLoop(bool loop) override;
+    bool IsPlaying() override;
+    int32_t Prepare() override;
+    int32_t Play() override;
+    int32_t Pause() override;
+    int32_t Stop() override;
+    int32_t Seek(int64_t timeMs) override;
+    int32_t GetCurrentTime(int64_t& currentMS) override;
+    int32_t GetDuration(int64_t& durationMs) override;
 private:
     std::shared_ptr<Media::PlayerInterface> player_;
 };
@@ -99,10 +100,14 @@ bool TestPlayerImpl::IsPlaying()
     return !g_playFinished;
 }
 
+int32_t TestPlayerImpl::Prepare()
+{
+    return player_->Prepare();
+}
+
 int32_t TestPlayerImpl::Play()
 {
     g_playFinished = false;
-    NZERO_RETURN(player_->Prepare());
     return player_->Play();
 }
 
@@ -128,12 +133,12 @@ int32_t TestPlayerImpl::Seek(int64_t timeMs)
     return ret;
 }
 
-int32_t TestPlayerImpl::GetCurrentTime(int64_t &currentMS)
+int32_t TestPlayerImpl::GetCurrentTime(int64_t& currentMS)
 {
     return player_->GetCurrentPosition(currentMS);
 }
 
-int32_t TestPlayerImpl::GetDuration(int64_t &durationMs)
+int32_t TestPlayerImpl::GetDuration(int64_t& durationMs)
 {
     return player_->GetDuration(durationMs);
 }

@@ -29,8 +29,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
 	PTEST( (std::string url), Test single player play url video, and finished automatically)
 	{
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-        ASSERT_EQ(0,player->SetSource(TestSource(url)));
-        ASSERT_EQ(0,player->Play());
+        ASSERT_EQ(0, player->SetSource(TestSource(url)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
         while (player->IsPlaying()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }

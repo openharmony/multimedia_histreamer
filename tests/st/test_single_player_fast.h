@@ -65,6 +65,7 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0,player->SetSource(TestSource(url)));
+        ASSERT_EQ(0,player->Prepare());
         ASSERT_EQ(0,player->Play());
         while (player->IsPlaying()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -76,6 +77,7 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0,player->SetSource(TestSource(url)));
+        ASSERT_EQ(0,player->Prepare());
         ASSERT_EQ(0,player->Play());
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -86,8 +88,9 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     PTEST( (std::string url, int32_t expectDuration), Can get music duration)
     {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-        ASSERT_EQ(0,player->SetSource(TestSource(url)));
-        ASSERT_EQ(0,player->Play());
+        ASSERT_EQ(0, player->SetSource(TestSource(url)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         int64_t duration;
         ASSERT_EQ(0, player->GetDuration(duration));
@@ -100,11 +103,12 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     {
         int64_t currentMS {0};
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-        ASSERT_EQ(0,player->SetSource(TestSource(url)));
-        ASSERT_EQ(0,player->Play());
+        ASSERT_EQ(0, player->SetSource(TestSource(url)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        ASSERT_EQ(0,player->GetCurrentTime(currentMS));
+        ASSERT_EQ(0, player->GetCurrentTime(currentMS));
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         ASSERT_TRUE(CheckTimeEquality(2000, currentMS));
         ASSERT_EQ(0, player->Stop());
@@ -116,13 +120,15 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
         int64_t seekPos {5000};
         int64_t currentMS {0};
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-        ASSERT_EQ(0,player->SetSource(TestSource(url)));
-        ASSERT_EQ(0,player->Play());
+        ASSERT_EQ(0, player->SetSource(TestSource(url)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         ASSERT_EQ(0, player->Seek(seekPos));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
         EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
         ASSERT_EQ(0, player->Stop());
     }
 
@@ -132,15 +138,65 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
         int64_t seekPos {5000};
         int64_t currentMS {0};
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-        ASSERT_EQ(0,player->SetSource(TestSource(url)));
-        ASSERT_EQ(0,player->Play());
+        ASSERT_EQ(0, player->SetSource(TestSource(url)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        ASSERT_EQ(0,player->Pause());
+        ASSERT_EQ(0, player->Pause());
         ASSERT_EQ(0, player->Seek(seekPos));
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
         ASSERT_TRUE(CheckTimeEquality(seekPos, currentMS)); // pause + seek still pause
+        ASSERT_EQ(0, player->Stop());
+    }
+
+    // @test(data="longMusicUrls", tags=fast)
+    PTEST( (std::string url), Can pause,then seek,then play,final stop)
+    {
+        int64_t seekPos {5000};
+        int64_t currentMS {0};
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(url)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        ASSERT_TRUE(player->IsPlaying());
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        ASSERT_EQ(0, player->Pause());
+        ASSERT_EQ(0, player->Seek(seekPos));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        ASSERT_EQ(0, player->GetCurrentTime(currentMS));
+        ASSERT_TRUE(CheckTimeEquality(seekPos, currentMS)); // pause + seek still pause
+        ASSERT_EQ(0, player->Play());
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000)); // pause + seek + play still play
+        ASSERT_EQ(0, player->Stop());
+    }
+
+    // @test(data="longMusicUrls", tags=fast)
+    PTEST( (std::string url), Can play after pause)
+    {
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(url)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        ASSERT_TRUE(player->IsPlaying());
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        ASSERT_EQ(0, player->Pause());
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        ASSERT_EQ(0, player->Play());
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        ASSERT_EQ(0, player->Stop());
+    }
+
+    // @test(data="shortMusicUrls", tags=fast)
+    PTEST( (std::string url), Can single Loop)
+    {
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(url)));
+        ASSERT_EQ(0, player->SetSingleLoop(true));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        std::this_thread::sleep_for(std::chrono::seconds(20));
         ASSERT_EQ(0, player->Stop());
     }
 };
