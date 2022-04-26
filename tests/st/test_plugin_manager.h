@@ -40,14 +40,14 @@ FIXTURE(PluginsEnableAndDisable)
     PluginManager& pluginManager = PluginManager::Instance();
     int pluginCounts = pluginManager.GetAllRegisteredPluginCount();
 
-    DATA_PROVIDER( plugins, 10
-    , DATA_GROUP(OHOS::Media::Plugin::PluginType::SOURCE, std::string("FileSource"))
-    , DATA_GROUP(OHOS::Media::Plugin::PluginType::SOURCE, std::string("HttpSource"))
-    , DATA_GROUP(OHOS::Media::Plugin::PluginType::DEMUXER, std::string("FFmpegDemuxer"))
-    , DATA_GROUP(OHOS::Media::Plugin::PluginType::CODEC, std::string("Minimp3Decoder")));
+    DATA_PROVIDER(plugins, 10,
+    DATA_GROUP(OHOS::Media::Plugin::PluginType::SOURCE, std::string("FileSource")),
+    DATA_GROUP(OHOS::Media::Plugin::PluginType::SOURCE, std::string("HttpSource")),
+    DATA_GROUP(OHOS::Media::Plugin::PluginType::DEMUXER, std::string("FFmpegDemuxer")),
+    DATA_GROUP(OHOS::Media::Plugin::PluginType::CODEC, std::string("Minimp3Decoder")));
 
     // @test(data="plugins",tags=fast)
-    PTEST( (OHOS::Media::Plugin::PluginType type, std::string name), Can disable one package and enable it again)
+    PTEST((OHOS::Media::Plugin::PluginType type, std::string name), Can disable one package and enable it again)
     {
         pluginManager.DisablePackage(type, name);
         ASSERT_FALSE(pluginManager.IsPackageExist(type, name));

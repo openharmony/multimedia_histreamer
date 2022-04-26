@@ -22,11 +22,11 @@ using namespace OHOS::Media::Test;
 
 FIXTURE(DataDrivenSingleVideoPlayerTestFast)
 {
-    DATA_PROVIDER( myurls, 10
-    , DATA_GROUP(std::string(RESOURCE_DIR "/MP4/9_AVC_1280x720_59.940fps_AAC_128Kbps_2channels.mp4")));
+    DATA_PROVIDER(myurls, 10,
+    DATA_GROUP(std::string(RESOURCE_DIR "/MP4/9_AVC_1280x720_59.940fps_AAC_128Kbps_2channels.mp4")));
 
 	// @test(data="myurls", tags=video_play_fast)
-	PTEST( (std::string url), Test single player play url video, and finished automatically)
+	PTEST((std::string url), Test single player play url video, and finished automatically)
 	{
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(url)));

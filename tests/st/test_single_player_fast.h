@@ -29,39 +29,39 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
         return fabs(expectValue - currentValue) < 1000; // if open debug log, should use value >= 1000
     }
 
-    DATA_PROVIDER( myurls, 100
-    , DATA_GROUP(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"))
-    , DATA_GROUP(std::string(RESOURCE_DIR "/MP3/MP3_48000_32_SHORT.mp3"))
-    , DATA_GROUP(std::string(RESOURCE_DIR "/AAC/AAC_48000_32_SHORT.aac"))
-    , DATA_GROUP(std::string(RESOURCE_DIR "/FLAC/vorbis_48000_32_SHORT.flac"))
-    , DATA_GROUP(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_SHORT.m4a"))
-    , DATA_GROUP(std::string(RESOURCE_DIR "/WAV/vorbis_48000_32_SHORT.wav"))
-    , DATA_GROUP(std::string("http://localhost/resource-src/media/MP3/MP3_48000_32_SHORT.mp3")));
+    DATA_PROVIDER(myurls, 100,
+    DATA_GROUP(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3")),
+    DATA_GROUP(std::string(RESOURCE_DIR "/MP3/MP3_48000_32_SHORT.mp3")),
+    DATA_GROUP(std::string(RESOURCE_DIR "/AAC/AAC_48000_32_SHORT.aac")),
+    DATA_GROUP(std::string(RESOURCE_DIR "/FLAC/vorbis_48000_32_SHORT.flac")),
+    DATA_GROUP(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_SHORT.m4a")),
+    DATA_GROUP(std::string(RESOURCE_DIR "/WAV/vorbis_48000_32_SHORT.wav")),
+    DATA_GROUP(std::string("http://localhost/resource-src/media/MP3/MP3_48000_32_SHORT.mp3")));
 
-    DATA_PROVIDER( shortMusicUrls, 100
-    , DATA_GROUP(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_SHORT.m4a"))
-    , DATA_GROUP(std::string(RESOURCE_DIR "/WAV/vorbis_48000_32_SHORT.wav"))
-    , DATA_GROUP(std::string(RESOURCE_DIR "/AAC/AAC_48000_32_SHORT.aac"))
-    , DATA_GROUP(std::string(RESOURCE_DIR "/FLAC/vorbis_48000_32_SHORT.flac"))
-    , DATA_GROUP(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"))
-    , DATA_GROUP(std::string(RESOURCE_DIR "/WAV/vorbis_48000_32_SHORT.wav"))
-    , DATA_GROUP(std::string("http://localhost/resource-src/media/MP3/MP3_48000_32_SHORT.mp3")));
+    DATA_PROVIDER(shortMusicUrls, 100,
+    DATA_GROUP(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_SHORT.m4a")),
+    DATA_GROUP(std::string(RESOURCE_DIR "/WAV/vorbis_48000_32_SHORT.wav")),
+    DATA_GROUP(std::string(RESOURCE_DIR "/AAC/AAC_48000_32_SHORT.aac")),
+    DATA_GROUP(std::string(RESOURCE_DIR "/FLAC/vorbis_48000_32_SHORT.flac")),
+    DATA_GROUP(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3")),
+    DATA_GROUP(std::string(RESOURCE_DIR "/WAV/vorbis_48000_32_SHORT.wav")),
+    DATA_GROUP(std::string("http://localhost/resource-src/media/MP3/MP3_48000_32_SHORT.mp3")));
 
-    DATA_PROVIDER( longMusicUrls, 100
-    , DATA_GROUP(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"))
-    , DATA_GROUP(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a"))
-    , DATA_GROUP(std::string("http://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3"))
-    , DATA_GROUP(std::string("http://localhost/resource-src/media/MP3/MP3_LONG_48000_32.mp3")));
+    DATA_PROVIDER(longMusicUrls, 100,
+    DATA_GROUP(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3")),
+    DATA_GROUP(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a")),
+    DATA_GROUP(std::string("http://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3")),
+    DATA_GROUP(std::string("http://localhost/resource-src/media/MP3/MP3_LONG_48000_32.mp3")));
 
-    DATA_PROVIDER( durationTestMusicUrls, 100
-    , DATA_GROUP(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"), 30000)
-    , DATA_GROUP(std::string(RESOURCE_DIR "/AAC/AAC_LONG_48000_32.aac"), 30000)
-    , DATA_GROUP(std::string(RESOURCE_DIR "/FLAC/FLAC_48000_32_LONG.flac"), 30000)
-    , DATA_GROUP(std::string(RESOURCE_DIR "/WAV/vorbis_48000_32_SHORT.wav"), 5000)
-    , DATA_GROUP(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a"), 30000));
+    DATA_PROVIDER(durationTestMusicUrls, 100,
+    DATA_GROUP(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"), 30000),
+    DATA_GROUP(std::string(RESOURCE_DIR "/AAC/AAC_LONG_48000_32.aac"), 30000),
+    DATA_GROUP(std::string(RESOURCE_DIR "/FLAC/FLAC_48000_32_LONG.flac"), 30000),
+    DATA_GROUP(std::string(RESOURCE_DIR "/WAV/vorbis_48000_32_SHORT.wav"), 5000),
+    DATA_GROUP(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a"), 30000));
 
     // @test(data="shortMusicUrls", tags=fast)
-    PTEST( (std::string url), Test single player play url music, and finished automatically)
+    PTEST((std::string url), Test single player play url music, and finished automatically)
     {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0,player->SetSource(TestSource(url)));
@@ -73,7 +73,7 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     }
 
     // @test(data="longMusicUrls", tags=fast)
-    PTEST( (std::string url), Test single player play url music, and finished manually)
+    PTEST((std::string url), Test single player play url music, and finished manually)
     {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0,player->SetSource(TestSource(url)));
@@ -85,7 +85,7 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     }
 
     // @test(data="durationTestMusicUrls", tags=fast)
-    PTEST( (std::string url, int32_t expectDuration), Can get music duration)
+    PTEST((std::string url, int32_t expectDuration), Can get music duration)
     {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(url)));
@@ -99,7 +99,7 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     }
 
     // @test(data="longMusicUrls", tags=fast)
-    PTEST( (std::string url), Can get current time)
+    PTEST((std::string url), Can get current time)
     {
         int64_t currentMS {0};
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -115,7 +115,7 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     }
 
     // @test(data="longMusicUrls", tags=fast)
-    PTEST( (std::string url), Can seek to the position specified)
+    PTEST((std::string url), Can seek to the position specified)
     {
         int64_t seekPos {5000};
         int64_t currentMS {0};
@@ -133,7 +133,7 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     }
 
     // @test(data="longMusicUrls", tags=fast)
-    PTEST( (std::string url), Can seek after pause)
+    PTEST((std::string url), Can seek after pause)
     {
         int64_t seekPos {5000};
         int64_t currentMS {0};
@@ -152,7 +152,7 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     }
 
     // @test(data="longMusicUrls", tags=fast)
-    PTEST( (std::string url), Can pause,then seek,then play,final stop)
+    PTEST((std::string url), Can pause,then seek,then play,final stop)
     {
         int64_t seekPos {5000};
         int64_t currentMS {0};
@@ -173,7 +173,7 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     }
 
     // @test(data="longMusicUrls", tags=fast)
-    PTEST( (std::string url), Can play after pause)
+    PTEST((std::string url), Can play after pause)
     {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(url)));
@@ -189,7 +189,7 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     }
 
     // @test(data="shortMusicUrls", tags=fast)
-    PTEST( (std::string url), Can single Loop)
+    PTEST((std::string url), Can single Loop)
     {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(url)));

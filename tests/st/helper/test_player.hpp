@@ -16,7 +16,6 @@
 #include <memory>
 
 namespace OHOS::Media::Test {
-
 class TestSource {
 public:
     TestSource(std::string url) : url_(std::move(url)) {}
@@ -40,5 +39,4 @@ public:
     virtual int32_t GetCurrentTime(int64_t& currentMs) = 0;
     virtual int32_t GetDuration(int64_t& durationMs) = 0;
 };
-
 }

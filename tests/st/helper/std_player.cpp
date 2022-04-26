@@ -49,7 +49,7 @@ public:
         }
     }
 };
-    std::shared_ptr<IPlayerEngineObs> gCallback = std::make_shared<PlayerCallbackImpl>();
+std::shared_ptr<IPlayerEngineObs> gCallback = std::make_shared<PlayerCallbackImpl>();
 
 class TestPlayerImpl : public TestPlayer {
 public:
