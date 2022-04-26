@@ -27,15 +27,15 @@ FIXTURE(PluginsEnableAndDisable)
      *  3. [Done] Can disable two packages.
      *  4. [Done] Can enable two packages.
      *  5. [Done] Can not disable a package not exists.
-     *  6. [ToDo] Can not enable a package not exists.
-     *  7. [ToDo] Can not enable a package that also enabled.
-     *  8. [ToDo] The plugin manager seems only registered these plugins:
-     *  1 WavDemuxerPlugin INFO (wav_demuxer_plugin.cpp, 248) : Func(RegisterPlugin) RegisterPlugin called.
-        1 Ffmpeg_Au_Decoder INFO (audio_ffmpeg_decoder_plugin.cpp, 60) : Func(RegisterAudioDecoderPlugins) registering audio decoders
-        1 Ffmpeg_Au_Encoder INFO (audio_ffmpeg_encoder_plugin.cpp, 45) : Func(RegisterAudioEncoderPlugins) registering audio encoders
-        1 Minimp3DecoderPlugin INFO (minimp3_decoder_plugin.cpp, 242) : Func(RegisterDecoderPlugin) RegisterPlugins called.
-        1 FfmpegVideoEncoderPlugin INFO (video_ffmpeg_encoder_plugin.cpp, 47) : Func(RegisterVideoEncoderPlugins) registering video encoders
-        1 FfmpegVideoDecoderPlugin INFO (video_ffmpeg_decoder_plugin.cpp, 50) : Func(RegisterVideoDecoderPlugins) registering video decoders
+     *  6. [To Fix] Can not enable a package not exists.
+     *  7. [To Fix] Can not enable a package that also enabled.
+     *  8. [To Fix] The plugin manager seems only registered these plugins:
+     *  1 (wav_demuxer_plugin.cpp, 248) : Func(RegisterPlugin) RegisterPlugin called.
+        1 (audio_ffmpeg_decoder_plugin.cpp, 60) : Func(RegisterAudioDecoderPlugins) registering audio decoders
+        1 (audio_ffmpeg_encoder_plugin.cpp, 45) : Func(RegisterAudioEncoderPlugins) registering audio encoders
+        1 (minimp3_decoder_plugin.cpp, 242) : Func(RegisterDecoderPlugin) RegisterPlugins called.
+        1 (video_ffmpeg_encoder_plugin.cpp, 47) : Func(RegisterVideoEncoderPlugins) registering video encoders
+        1 (video_ffmpeg_decoder_plugin.cpp, 50) : Func(RegisterVideoDecoderPlugins) registering video decoders
      * */
     PluginManager& pluginManager = PluginManager::Instance();
     int pluginCounts = pluginManager.GetAllRegisteredPluginCount();

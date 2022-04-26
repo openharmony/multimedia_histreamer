@@ -20,7 +20,7 @@ namespace OHOS::Media::Test {
 class TestSource {
 public:
     TestSource(std::string url) : url_(std::move(url)) {}
-    // TestSource(stream) // TODO: support stream
+    // To Fix: support stream, TestSource(stream)
 
     std::string url_;
 };
