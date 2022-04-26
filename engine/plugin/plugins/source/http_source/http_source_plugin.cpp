@@ -160,7 +160,7 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     }
 
     MEDIA_LOG_I("SetSource: " PUBLIC_LOG_S, uri.c_str());
-    FALSE_RETURN_V(executor_->Open(uri), Status::ERROR_FUNCTION_CALL);
+    FALSE_RETURN_V(executor_->Open(uri), Status::ERROR_UNKNOWN);
     return Status::OK;
 }
 
@@ -214,7 +214,7 @@ Status HttpSourcePlugin::SeekTo(uint64_t offset)
     FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
     FALSE_RETURN_V(!executor_->IsStreaming(), Status::ERROR_INVALID_OPERATION);
     FALSE_RETURN_V(offset <= executor_->GetContentLength(), Status::ERROR_INVALID_PARAMETER);
-    FALSE_RETURN_V(executor_->Seek(offset), Status::ERROR_FUNCTION_CALL);
+    FALSE_RETURN_V(executor_->Seek(offset), Status::ERROR_UNKNOWN);
     return Status::OK;
 }
 

@@ -81,10 +81,9 @@ enum struct Status : int32_t {
     ERROR_PERMISSION_DENIED = -15,  ///< Permission denied.
     ERROR_NULL_POINTER = -16,       ///< Null pointer.
     ERROR_INVALID_OPERATION = -17,  ///< Invalid operation.
-    ERROR_FUNCTION_CALL = -18,      ///< Call some function failed.
-    ERROR_CLIENT = -19,             ///< Http client error
-    ERROR_SERVER = -20,             ///< Http server error
-    ERROR_DELAY_READY = -21,        ///< Delay ready event
+    ERROR_CLIENT = -18,             ///< Http client error
+    ERROR_SERVER = -19,             ///< Http server error
+    ERROR_DELAY_READY = -20,        ///< Delay ready event
 };
 
 /**

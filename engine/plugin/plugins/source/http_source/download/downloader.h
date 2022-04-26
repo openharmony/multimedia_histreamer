@@ -52,7 +52,7 @@ struct HeaderInfo {
     size_t GetFileContentLength() const
     {
         while (fileContentLen == 0 && !isChunked) {
-            OSAL::SleepFor(10);
+            OSAL::SleepFor(10); // 10, wait for fileContentLen updated
         }
         return fileContentLen;
     }
