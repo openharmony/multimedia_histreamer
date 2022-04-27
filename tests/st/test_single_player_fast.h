@@ -198,4 +198,17 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
         std::this_thread::sleep_for(std::chrono::seconds(20));
         ASSERT_EQ(0, player->Stop());
     }
+
+    // @test(tags=debug)
+    TEST(Test hls audio broadcast)
+    {
+        std::string url = "http://ls-open.qingting.fm/live/389/64k.m3u8?"
+                          "deviceid=00000000-0000-0000-0000-000000000000&format=aac";
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(url)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        std::this_thread::sleep_for(std::chrono::seconds(20));
+        player->Stop();
+    }
 };
