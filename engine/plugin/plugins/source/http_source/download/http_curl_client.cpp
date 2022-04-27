@@ -24,9 +24,13 @@ namespace HttpPlugin {
 HttpCurlClient::HttpCurlClient(RxHeader headCallback, RxBody bodyCallback, void *userParam)
     : rxHeader_(headCallback), rxBody_(bodyCallback), userParam_(userParam)
 {
+    MEDIA_LOG_I("HttpCurlClient ctor");
 }
 
-HttpCurlClient::~HttpCurlClient() = default;
+HttpCurlClient::~HttpCurlClient()
+{
+    MEDIA_LOG_I("~HttpCurlClient dtor");
+}
 
 Status HttpCurlClient::Init()
 {
@@ -38,8 +42,7 @@ Status HttpCurlClient::Init()
 
 Status HttpCurlClient::Open(const std::string& url)
 {
-    url_ = url;
-    InitCurlEnvironment();
+    InitCurlEnvironment(url);
     return Status::OK;
 }
 
@@ -60,9 +63,9 @@ Status HttpCurlClient::Deinit()
     return Status::OK;
 }
 
-void HttpCurlClient::InitCurlEnvironment()
+void HttpCurlClient::InitCurlEnvironment(const std::string& url)
 {
-    curl_easy_setopt(easyHandle_, CURLOPT_URL, url_.c_str());
+    curl_easy_setopt(easyHandle_, CURLOPT_URL, url.c_str());
     curl_easy_setopt(easyHandle_, CURLOPT_HTTPGET, 1L);
 
     curl_easy_setopt(easyHandle_, CURLOPT_FORBID_REUSE, 0L);

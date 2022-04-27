@@ -130,7 +130,9 @@ bool Downloader::BeginDownload()
     std::string url = currentRequest_->url_;
     FALSE_RETURN_V(!url.empty(), false);
 
-    client_ = factory_->CreateClient(url);
+    std::string protocol = ClientFactory::GetProtocol(url);
+    FALSE_RETURN_V(!protocol.empty(), false);
+    client_ = factory_->GetClient(protocol);
     FALSE_RETURN_V(client_ != nullptr, false);
 
     client_->Open(url);

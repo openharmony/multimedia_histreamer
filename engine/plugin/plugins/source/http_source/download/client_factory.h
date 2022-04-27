@@ -29,14 +29,15 @@ public:
     ClientFactory(RxHeader headCallback, RxBody bodyCallback, void *userParam);
     ~ClientFactory();
 
-    std::shared_ptr<NetworkClient> CreateClient(const std::string& url);
+    std::shared_ptr<NetworkClient> GetClient(const std::string& protocol);
+
+    static std::string GetProtocol(const std::string& url);
 
 private:
     RxHeader rxHeader_;
     RxBody rxBody_;
     void *userParam_;
     std::shared_ptr<NetworkClient> httpClient_;
-    std::shared_ptr<NetworkClient> httpsClient_;
 };
 }
 }
