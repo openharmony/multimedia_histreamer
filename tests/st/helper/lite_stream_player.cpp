@@ -97,12 +97,11 @@ void DataProcessThread()
                 free(sourceData);
             } else { // not get data, must be eos
                 buffer->SetSize(0);
-                if (sourceFlag == SOURCE_EOS) {
-                    MEDIA_LOG_I("SourceEos");
-                    buffer->SetEos(true);
-                    stream->QueueDataBuffer(buffer);
-                    break;
-                }
+                FALSE_LOG(sourceFlag == SOURCE_EOS);
+                MEDIA_LOG_I("SourceEos");
+                buffer->SetEos(true);
+                stream->QueueDataBuffer(buffer);
+                break;
             }
             stream->QueueDataBuffer(buffer);
         }
