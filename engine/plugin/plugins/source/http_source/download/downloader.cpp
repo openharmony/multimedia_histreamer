@@ -177,7 +177,6 @@ void Downloader::HttpDownloadLoop()
     if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
         MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64, currentRequest_->startPos_);
         currentRequest_->statusCallback_(DownloadStatus::FINISHED, 0);
-        task_->PauseAsync();
         EndDownload();
         shouldStartNextRequest = true;
     } else if (remaining < PER_REQUEST_SIZE) {
