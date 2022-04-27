@@ -179,7 +179,7 @@ Plugin::TagMap VideoDecoderFilter::GetNegotiateParams(const Plugin::TagMap& upst
 {
     // video, need to get the max buffer num from plugin capability when use hdi as codec plugin interfaces
     Plugin::TagMap proposeParams = upstreamParams;
-    proposeParams.insert({Plugin::Tag::VIDEO_MAX_SURFACE_NUM, static_cast<uint32_t>(DEFAULT_OUT_BUFFER_POOL_SIZE)});
+    proposeParams.Insert<Plugin::Tag::VIDEO_MAX_SURFACE_NUM>(DEFAULT_OUT_BUFFER_POOL_SIZE);
     return proposeParams;
 }
 
@@ -188,7 +188,7 @@ std::shared_ptr<Allocator> VideoDecoderFilter::GetAllocator()
 #ifndef OHOS_LITE
     // Use sink allocator first, zero copy while passing data
     Plugin::Tag tag = Plugin::Tag::BUFFER_ALLOCATOR;
-    auto ite = sinkParams_.find(tag);
+    auto ite = sinkParams_.Find(tag);
     if (ite != std::end(sinkParams_)) {
         if (ite->second.SameTypeWith(typeid(std::shared_ptr<Plugin::SurfaceAllocator>))) {
             MEDIA_LOG_D("Get SurfaceAllocator from sink");

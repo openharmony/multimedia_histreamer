@@ -22,6 +22,7 @@
 #include "plugin/common/plugin_tags.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_video_tags.h"
+#include "plugin/common/tag_map.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -86,7 +87,7 @@ uint64_t ConvertChannelLayoutToFFmpeg(AudioChannelLayout channelLayout);
 
 bool FindAvMetaNameByTag(Tag tag, std::string& metaName);
 
-bool FindTagByAvMetaName(const std::string& metaName, Tag& tag);
+void InsertMediaTag(TagMap& meta, AVDictionaryEntry* tag);
 
 AudioAacProfile ConvAacProfileFromFfmpeg (int32_t ffmpegProfile);
 

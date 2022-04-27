@@ -68,22 +68,22 @@ void ConvertCommonTrackToMetaInfo(const AVStream& avStream,
                                   const std::shared_ptr<AVFormatContext>& avFormatContext,
                                   const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
-    meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
-    meta.insert({Tag::MEDIA_DURATION, static_cast<uint64_t>(
-            ConvertTimeFromFFmpeg(avStream.duration, avStream.time_base))});
-    meta.insert({Tag::MEDIA_START_TIME, static_cast<int64_t>(
-            ConvertTimeFromFFmpeg(avStream.start_time, avStream.time_base))});
+    meta.Insert<Tag::TRACK_ID>(avStream.index);
+    meta.Insert<Tag::MEDIA_DURATION>(
+            ConvertTimeFromFFmpeg(avStream.duration, avStream.time_base));
+    meta.Insert<Tag::MEDIA_START_TIME>(
+            ConvertTimeFromFFmpeg(avStream.start_time, avStream.time_base));
     if (avCodecContext->extradata_size > 0) {
         CodecConfig codecConfig;
         codecConfig.assign(avCodecContext->extradata, avCodecContext->extradata + avCodecContext->extradata_size);
-        meta.insert({Tag::MEDIA_CODEC_CONFIG, std::move(codecConfig)});
+        meta.Insert<Tag::MEDIA_CODEC_CONFIG>(std::move(codecConfig));
     }
     int64_t bitRate = avCodecContext->bit_rate;
     if (!bitRate) {
         bitRate = avFormatContext->bit_rate;
     }
-    meta.insert({Tag::MEDIA_BITRATE, bitRate});
-    meta.insert({Tag::BITS_PER_CODED_SAMPLE, static_cast<uint32_t>(avCodecContext->bits_per_coded_sample)});
+    meta.Insert<Tag::MEDIA_BITRATE>(bitRate);
+    meta.Insert<Tag::BITS_PER_CODED_SAMPLE>(avCodecContext->bits_per_coded_sample);
 }
 
 #ifdef VIDEO_SUPPORT
@@ -92,15 +92,14 @@ void ConvertCommonVideoTrackToMetaInfo(const AVStream& avStream,
                                        const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
     ConvertCommonTrackToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
-    meta.insert({Tag::VIDEO_WIDTH, static_cast<uint32_t>(avCodecContext->width)});
-    meta.insert({Tag::VIDEO_HEIGHT, static_cast<uint32_t>(avCodecContext->height)});
+    meta.Insert<Tag::VIDEO_WIDTH>(avCodecContext->width);
+    meta.Insert<Tag::VIDEO_HEIGHT>(avCodecContext->height);
     uint32_t frameRate = 0;
     if (avCodecContext->framerate.den != 0) {
         frameRate = avCodecContext->framerate.num / avCodecContext->framerate.den;
     }
     if (frameRate > 0) {
-        meta.insert({Tag::VIDEO_FRAME_RATE,
-                     static_cast<uint32_t>(avCodecContext->framerate.num / avCodecContext->framerate.den)});
+        meta.Insert<Tag::VIDEO_FRAME_RATE>(avCodecContext->framerate.num / avCodecContext->framerate.den);
     }
 }
 #endif
@@ -111,17 +110,17 @@ void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream,
 {
     ConvertCommonTrackToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
     if (avCodecContext->channels != -1) {
-        meta.insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(avCodecContext->sample_rate)});
-        meta.insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(avCodecContext->channels)});
-        meta.insert({Tag::AUDIO_CHANNEL_LAYOUT,
-                     ConvertChannelLayoutFromFFmpeg(avCodecContext->channels, avCodecContext->channel_layout)});
+        meta.Insert<Tag::AUDIO_SAMPLE_RATE>(avCodecContext->sample_rate);
+        meta.Insert<Tag::AUDIO_CHANNELS>(avCodecContext->channels);
+        meta.Insert<Tag::AUDIO_CHANNEL_LAYOUT>(ConvertChannelLayoutFromFFmpeg(avCodecContext->channels,
+                                                                              avCodecContext->channel_layout));
         // ffmpeg defaults to 1024 samples per frame for planar PCM in each buffer (one for each channel).
         uint32_t samplesPerFrame = 1024;
         if (!IsPcmStream(avStream) && avCodecContext->frame_size != 0) {
             samplesPerFrame = static_cast<uint32_t>(avCodecContext->frame_size);
         }
-        meta.insert({Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame});
-        meta.insert({Tag::AUDIO_SAMPLE_FORMAT, ConvFf2PSampleFmt(avCodecContext->sample_fmt)});
+        meta.Insert<Tag::AUDIO_SAMPLE_PER_FRAME>(samplesPerFrame);
+        meta.Insert<Tag::AUDIO_SAMPLE_FORMAT>(ConvFf2PSampleFmt(avCodecContext->sample_fmt));
     }
 }
 } // namespace
@@ -129,98 +128,98 @@ void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream,
 void ConvertRawAudioStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                      const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
-    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_RAW)});
+    meta.Insert<Tag::MIME>(MEDIA_MIME_AUDIO_RAW);
     ConvertCommonAudioStreamToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
 }
 
 void ConvertMP1StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                 const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
-    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_MPEG)});
+    meta.Insert<Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
     ConvertCommonAudioStreamToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
-    meta.insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(1)});
-    meta.insert({Tag::AUDIO_MPEG_LAYER, static_cast<uint32_t>(1)});
+    meta.Insert<Tag::AUDIO_MPEG_VERSION>(1);
+    meta.Insert<Tag::AUDIO_MPEG_LAYER>(1);
 }
 
 void ConvertMP2StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                 const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
-    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_MPEG)});
+    meta.Insert<Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
     ConvertCommonAudioStreamToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
-    meta.insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(1)});
-    meta.insert({Tag::AUDIO_MPEG_LAYER, static_cast<uint32_t>(2)}); // 2
+    meta.Insert<Tag::AUDIO_MPEG_VERSION>(1);
+    meta.Insert<Tag::AUDIO_MPEG_LAYER>(2); // 2
 }
 
 void ConvertMP3StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                 const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
-    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_MPEG)});
+    meta.Insert<Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
     ConvertCommonAudioStreamToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
-    meta.insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(1)});
-    meta.insert({Tag::AUDIO_MPEG_LAYER, static_cast<uint32_t>(3)}); // 3
+    meta.Insert<Tag::AUDIO_MPEG_VERSION>(1);
+    meta.Insert<Tag::AUDIO_MPEG_LAYER>(3); // 3
 }
 
 void ConvertFLACStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                  const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
-    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_FLAC)});
+    meta.Insert<Tag::MIME>(MEDIA_MIME_AUDIO_FLAC);
     ConvertCommonAudioStreamToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
 }
 
 void ConvertAPEStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                 const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
-    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_APE)});
+    meta.Insert<Tag::MIME>(MEDIA_MIME_AUDIO_APE);
     ConvertCommonAudioStreamToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
 }
 
 void ConvertVorbisStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                    const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
-    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_VORBIS)});
+    meta.Insert<Tag::MIME>(MEDIA_MIME_AUDIO_VORBIS);
     ConvertCommonAudioStreamToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
 }
 
 void ConvertAACStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                 const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
-    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_AAC)});
+    meta.Insert<Tag::MIME>(MEDIA_MIME_AUDIO_AAC);
     ConvertCommonAudioStreamToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
-    meta.insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(4)}); // 4
-    meta.insert({Tag::AUDIO_AAC_PROFILE, AudioAacProfile::LC});
+    meta.Insert<Tag::AUDIO_MPEG_VERSION>(4); // 4
+    meta.Insert<Tag::AUDIO_AAC_PROFILE>(AudioAacProfile::LC);
     if (avCodecContext->extradata_size > 0) {
         std::vector<uint8_t> codecConfig;
         codecConfig.assign(avCodecContext->extradata, avCodecContext->extradata + avCodecContext->extradata_size);
-        meta.insert({Tag::MEDIA_CODEC_CONFIG, std::move(codecConfig)});
+        meta.Insert<Tag::MEDIA_CODEC_CONFIG>(std::move(codecConfig));
         AACAudioConfigParser parser(avCodecContext->extradata, avCodecContext->extradata_size);
         if (!parser.ParseConfigs()) {
             return;
         }
-        meta.insert({Tag::AUDIO_AAC_LEVEL, parser.GetLevel()});
+        meta.Insert<Tag::AUDIO_AAC_LEVEL>(parser.GetLevel());
         auto profile = parser.GetProfile();
         if (profile != AudioAacProfile::NONE) {
-            meta.insert({Tag::AUDIO_AAC_PROFILE, profile});
+            meta.Insert<Tag::AUDIO_AAC_PROFILE>(profile);
         }
     } else {
-        meta.insert({Tag::AUDIO_AAC_STREAM_FORMAT, AudioAacStreamFormat::MP4ADTS});
+        meta.Insert<Tag::AUDIO_AAC_STREAM_FORMAT>(AudioAacStreamFormat::MP4ADTS);
     }
 }
 
 void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                     const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
-    meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_AAC_LATM)});
+    meta.Insert<Tag::MIME>(MEDIA_MIME_AUDIO_AAC_LATM);
     ConvertCommonAudioStreamToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
-    meta.insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(4)}); // 4
-    meta.insert({Tag::AUDIO_AAC_STREAM_FORMAT, AudioAacStreamFormat::MP4LOAS});
-    meta.insert({Tag::BITS_PER_CODED_SAMPLE, static_cast<uint32_t>(avCodecContext->bits_per_coded_sample)});
+    meta.Insert<Tag::AUDIO_MPEG_VERSION>(4); // 4
+    meta.Insert<Tag::AUDIO_AAC_STREAM_FORMAT>(AudioAacStreamFormat::MP4LOAS);
+    meta.Insert<Tag::BITS_PER_CODED_SAMPLE>(avCodecContext->bits_per_coded_sample);
 }
 
 #ifdef VIDEO_SUPPORT
 void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                 const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
-    meta.insert({Tag::MIME, std::string(MEDIA_MIME_VIDEO_H264)});
+    meta.Insert<Tag::MIME>(MEDIA_MIME_VIDEO_H264);
     ConvertCommonVideoTrackToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
     if (avCodecContext->extradata_size > 0) {
         AVCConfigDataParser parser(avCodecContext->extradata, avCodecContext->extradata_size);
@@ -232,7 +231,7 @@ void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
         if (parser.GetNewConfigData(cfgData, cfgDataSize) && (cfgData != nullptr) && (cfgDataSize != 0)) {
             std::vector<uint8_t> codecConfig;
             codecConfig.assign(cfgData.get(), cfgData.get() + cfgDataSize);
-            meta.insert({Tag::MEDIA_CODEC_CONFIG, std::move(codecConfig)});
+            meta.Insert<Tag::MEDIA_CODEC_CONFIG>(std::move(codecConfig));
         }
     }
 }
@@ -240,7 +239,7 @@ void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
 void ConvertAVStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
-    meta.clear();
+    meta.Clear();
     auto codecId = avStream.codecpar->codec_id;
     for (auto& streamConvertor : g_streamConvertors) {
         if (streamConvertor.codecId == codecId) {

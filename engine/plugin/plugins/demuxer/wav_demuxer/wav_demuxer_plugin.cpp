@@ -106,28 +106,27 @@ Status WavDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
     dataOffset_ = wavHeadLength_;
     mediaInfo.tracks.resize(1);
     if (wavHeader_->numChannels == 1) {
-        mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::MONO});
+        mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::MONO);
     } else {
-        mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::STEREO});
+        mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
     }
-    mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(wavHeader_->sampleRate)});
-    mediaInfo.tracks[0].insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(wavHeader_->byteRate) * 8}); // 8  byte to bit
-    mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(wavHeader_->numChannels)});
-    mediaInfo.tracks[0].insert({Tag::TRACK_ID, static_cast<uint32_t>(0)});
-    mediaInfo.tracks[0].insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_RAW)});
-    mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(1)});
-    mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_PER_FRAME, WAV_PER_FRAME_SIZE});
+    mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_RATE>(wavHeader_->sampleRate);
+    mediaInfo.tracks[0].Insert<Tag::MEDIA_BITRATE>((wavHeader_->byteRate) * 8); // 8  byte to bit
+    mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNELS>(wavHeader_->numChannels);
+    mediaInfo.tracks[0].Insert<Tag::TRACK_ID>(0);
+    mediaInfo.tracks[0].Insert<Tag::MIME>(MEDIA_MIME_AUDIO_RAW);
+    mediaInfo.tracks[0].Insert<Tag::AUDIO_MPEG_VERSION>(1);
+    mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_PER_FRAME>(WAV_PER_FRAME_SIZE);
     if (wavHeader_->audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_PCM)
         || wavHeader_->audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_EXTENSIBLE)) {
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT,
-                                    g_WavAudioSampleFormatPacked[static_cast<uint32_t>(wavHeader_->bitsPerSample)]});
+        mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_FORMAT>
+            (g_WavAudioSampleFormatPacked[static_cast<uint32_t>(wavHeader_->bitsPerSample)]);
     } else if (wavHeader_->audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_IEEE_FLOAT)) {
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::F32});
+        mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::F32);
     } else {
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::NONE});
+        mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::NONE);
     }
-    mediaInfo.tracks[0].insert({Tag::BITS_PER_CODED_SAMPLE, static_cast<uint32_t>(wavHeader_->bitsPerSample)});
-
+    mediaInfo.tracks[0].Insert<Tag::BITS_PER_CODED_SAMPLE>(wavHeader_->bitsPerSample);
     return Status::OK;
 }
 

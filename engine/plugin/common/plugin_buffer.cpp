@@ -129,7 +129,7 @@ BufferMeta::BufferMeta(BufferMetaType type) : type(type)
 ValueType BufferMeta::GetMeta(Tag tag)
 {
     if (tags) {
-        return (*tags.get())[tag];
+        return (*tags)[tag];
     }
     return ValueType();
 }
@@ -139,7 +139,7 @@ void BufferMeta::SetMeta(Tag tag, ValueType value)
     if (!tags) {
         tags = std::make_shared<TagMap>();
     }
-    (*tags.get())[tag] = value;
+    (*tags)[tag] = value;
 }
 
 BufferMetaType BufferMeta::GetType() const

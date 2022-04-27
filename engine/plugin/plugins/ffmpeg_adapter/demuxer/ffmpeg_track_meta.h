@@ -19,6 +19,7 @@
 #include <memory>
 #include <vector>
 #include "plugin/common/plugin_tags.h"
+#include "plugin/common/tag_map.h"
 
 #ifdef __cplusplus
 extern "C" {
