@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <thread>
 #include <chrono>
+#include <thread>
 #include "helper/test_player.hpp"
 #include "testngpp/testngpp.hpp"
 
@@ -36,11 +36,11 @@ FIXTURE(TestPlayerExit)
         return true;
     }
 
-	TEST(Test play local source two times)
-	{
+    TEST(Test play local source two times)
+    {
         ASSERT_TRUE(StartPlayer(RESOURCE_DIR "/MP3/MP3_48000_32_SHORT.mp3"));
         ASSERT_TRUE(StartPlayer(RESOURCE_DIR "/MP3/MP3_48000_32_SHORT.mp3"));
-	}
+    }
 
     TEST(Test play http non live source two times)
     {

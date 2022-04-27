@@ -23,22 +23,22 @@ namespace Media {
 namespace Plugin {
 #define DEFINE_INSERT_GET_FUNC(condition, ValueType)             \
         template<Tag tag>                                        \
-        inline typename std::enable_if<condition, bool>::type    \
+        inline typename std::enable_if<(condition), bool>::type  \
         Insert(ValueType value)                                  \
         {                                                        \
             map.insert(std::make_pair(tag, value));              \
             return true;                                         \
         }                                                        \
         template<Tag tag>                                        \
-        inline typename std::enable_if<condition, bool>::type    \
+        inline typename std::enable_if<(condition), bool>::type  \
         Get(ValueType& value)                                    \
         {                                                        \
             if (map.count(tag) == 0) {                           \
-                 return false;                                   \
+                return false;                                    \
             }                                                    \
             Any& temp = map.at(tag);                             \
             if (!temp.SameTypeWith(typeid(ValueType))) {         \
-                 return false;                                   \
+                return false;                                    \
             }                                                    \
             value = AnyCast<ValueType>(map.at(tag));             \
             return true;                                         \

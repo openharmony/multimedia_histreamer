@@ -17,22 +17,22 @@
 
 #define LOG_TAG "main"
 
-#include <iostream>
-#include <memory>
-#include <thread>
 #include <chrono>
 #include <cstring>
+#include <cstdio>
 #include <fstream>
+#include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <vector>
-#include <cstdio>
-
-#include "foundation/log.h"
-#include "foundation/osal/utils/util.h"
-#include "foundation/multimedia/utils/lite/interfaces/kits/data_stream.h"
 
 #include "scene/lite/hiplayer.h"
+#include "securec.h"
+#include "foundation/log.h"
+#include "foundation/multimedia/utils/lite/interfaces/kits/data_stream.h"
+#include "foundation/osal/utils/util.h"
 #include "foundation/osal/thread/task.h"
 
 using namespace OHOS::Media;
@@ -44,7 +44,7 @@ static uint32_t readPos = 0;
 std::vector<uint32_t> testData;
 uint32_t testDataSize = 0;
 std::shared_ptr<DataStream> stream = nullptr;
-auto task = std::make_shared<OSAL::Task>("DataProcessThread");
+std::shared_ptr<OSAL::Task> task = nullptr;
 
 enum SourceFlag {
     SOURCE_EOS,
@@ -61,11 +61,11 @@ uint8_t *GetDataFromSource(int8_t *flag, uint32_t *getDataSize)
         return outDataPtr;
     }
     outDataPtr = (uint8_t *)malloc(inputSize);
-    memset(outDataPtr, 0, inputSize);
+    (void)memset_s(outDataPtr, INPUT_BUFFER_SIZE, 0, inputSize);
     if (readPos + INPUT_BUFFER_SIZE > testDataSize) {
         inputSize = testDataSize - readPos;
     }
-    memcpy(outDataPtr, &testData[0] + readPos / sizeof(uint32_t), inputSize);
+    (void)memcpy_s(outDataPtr, INPUT_BUFFER_SIZE, &testData[0] + readPos / sizeof(uint32_t), inputSize);
     readPos += inputSize;
     MEDIA_LOG_I("readPo:" PUBLIC_LOG_U32, readPos);
     *getDataSize = inputSize;
@@ -85,19 +85,24 @@ void DataProcessThread()
         (void) stream->GetEmptyBuffer(buffer);
         if (buffer == nullptr) {
             MEDIA_LOG_E("buffer null error.");
+            if (sourceData != nullptr) {
+                free(sourceData);
+            }
             return;
         } else {
             MEDIA_LOG_I("realGetSize:" PUBLIC_LOG_U32, realGetSize);
-            buffer->SetSize(realGetSize);
-            memcpy(buffer->GetAddress(), sourceData, realGetSize);
-            if (sourceData) {
+            if (sourceData != nullptr) { // get data
+                (void) memcpy_s(buffer->GetAddress(), buffer->GetCapacity(), sourceData, realGetSize);
+                buffer->SetSize(realGetSize);
                 free(sourceData);
-            }
-            if (sourceFlag == SOURCE_EOS) {
-                MEDIA_LOG_I("SourceEos");
-                buffer->SetEos(true);
-                stream->QueueDataBuffer(buffer);
-                break;
+            } else { // not get data, must be eos
+                buffer->SetSize(0);
+                if (sourceFlag == SOURCE_EOS) {
+                    MEDIA_LOG_I("SourceEos");
+                    buffer->SetEos(true);
+                    stream->QueueDataBuffer(buffer);
+                    break;
+                }
             }
             stream->QueueDataBuffer(buffer);
         }
@@ -106,21 +111,27 @@ void DataProcessThread()
 }
 
 class PlayerCallbackImpl : public PlayerCallback {
-    void OnPlaybackComplete() override {
+    void OnPlaybackComplete() override
+    {
         g_playFinished = true;
         MEDIA_LOG_I("OnPlaybackComplete called, g_playFinished is true now.");
     }
-    void OnError(int32_t errorType, int32_t errorCode) override {
+    void OnError(int32_t errorType, int32_t errorCode) override
+    {
     }
-    void OnInfo(int type, int extra) override {
+    void OnInfo(int type, int extra) override
+    {
     }
-    void OnVideoSizeChanged(int width, int height) override {
+    void OnVideoSizeChanged(int width, int height) override
+    {
     }
-    void OnRewindToComplete() override {
+    void OnRewindToComplete() override
+    {
     }
 };
 
-int ReadDataFromFile(std::string dataPath) {
+int ReadDataFromFile(std::string dataPath)
+{
     std::string dataFullPath;
     if (OSAL::ConvertFullPath(dataPath, dataFullPath) && !dataFullPath.empty()) {
         dataPath = dataFullPath;
@@ -131,22 +142,22 @@ int ReadDataFromFile(std::string dataPath) {
         return 0;
     }
     std::stringstream ss;
-    while(!fs.eof()) {
+    while (!fs.eof()) {
         std::string s;
         fs >> s;
         ss << s;
     }
-    std::string data= ss.str();
-    const char * split = ",";
-    char *s_input = (char *)data.c_str();
-    char *p = strtok(s_input, split);
-    while(p != nullptr) {
+    std::string data = ss.str();
+    const char* split = ",";
+    char* s_input = (char *)data.c_str();
+    char* p = strtok(s_input, split);
+    while (p != nullptr) {
         uint32_t data;
-        sscanf(p, "%x", &data);
+        (void)sscanf_s(p, "%x", &data);
         testData.push_back(data);
         p=strtok(nullptr, split);
     }
-    return testData.size() * 4;
+    return testData.size() * 4; // 4
 }
 
 int StartLiteStreamPlayer(std::string dataPath)
@@ -171,12 +182,13 @@ int StartLiteStreamPlayer(std::string dataPath)
         return -1;
     }
     MEDIA_LOG_I("testDataSize:" PUBLIC_LOG_U32, testDataSize);
+    task = std::make_shared<OSAL::Task>("DataProcessThread");
     task->RegisterHandler(DataProcessThread);
     task->Start();
     player->Prepare();
     player->Play();
     while (!g_playFinished) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // 100
         MEDIA_LOG_I("stream player thread running...");
     }
     readPos = 0;

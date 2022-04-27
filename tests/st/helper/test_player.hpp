@@ -18,7 +18,7 @@
 namespace OHOS::Media::Test {
 class TestSource {
 public:
-    TestSource(std::string url) : url_(std::move(url)) {}
+    explicit TestSource(std::string url) : url_(std::move(url)) {}
     // To Fix: support stream, TestSource(stream)
 
     std::string url_;

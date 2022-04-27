@@ -56,7 +56,7 @@ static std::shared_ptr<PlayerCallback> gCallback = std::make_shared<PlayerCallba
 
 class TestPlayerImpl : public TestPlayer {
 public:
-    TestPlayerImpl(std::shared_ptr<Media::PlayerInterface> player) : player_(std::move(player)) {}
+    explicit TestPlayerImpl(std::shared_ptr<Media::PlayerInterface> player) : player_(std::move(player)) {}
     ~TestPlayerImpl() override
     {
         MEDIA_LOG_I("TestPlayerImpl dtor called.");
@@ -78,7 +78,7 @@ private:
 std::unique_ptr<TestPlayer> TestPlayer::Create()
 {
     auto player = OHOS::Media::CreateHiPlayer();
-    FALSE_LOG(0 == player->Init());
+    FALSE_LOG(player->Init() == 0);
     player->SetPlayerCallback(gCallback);
     g_playFinished = false;
     return std::make_unique<TestPlayerImpl>(player);
@@ -126,7 +126,7 @@ int32_t TestPlayerImpl::Seek(int64_t timeMs)
     int32_t ret = player_->Rewind(timeMs, 0);
     NZERO_RETURN(ret);
     while (!g_seekFinished) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50)); // 50
     }
     FALSE_RETURN_V(g_seekFinished, false);
     g_seekFinished = false;

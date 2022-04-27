@@ -53,7 +53,7 @@ std::shared_ptr<IPlayerEngineObs> gCallback = std::make_shared<PlayerCallbackImp
 
 class TestPlayerImpl : public TestPlayer {
 public:
-    TestPlayerImpl(std::unique_ptr<IPlayerEngine> player) : player_(std::move(player)) {}
+    explicit TestPlayerImpl(std::unique_ptr<IPlayerEngine> player) : player_(std::move(player)) {}
     int32_t SetSource(const TestSource& source) override;
     int32_t SetSingleLoop(bool loop) override;
     bool IsPlaying() override;
@@ -66,7 +66,7 @@ public:
     int32_t GetDuration(int64_t& durationMs) override;
 private:
     std::unique_ptr<IPlayerEngine> player_;
- };
+};
 
 std::unique_ptr<TestPlayer> TestPlayer::Create()
 {
@@ -118,7 +118,7 @@ int32_t TestPlayerImpl::Seek(int64_t timeMs)
     int32_t ret = player_->Seek(timeMs, PlayerSeekMode::SEEK_CLOSEST);
     NZERO_RETURN(ret);
     while (!g_seekFinished) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50)); // 50
     }
     FALSE_RETURN_V(g_seekFinished, false);
     g_seekFinished = false;

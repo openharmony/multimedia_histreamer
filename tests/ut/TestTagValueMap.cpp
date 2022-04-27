@@ -26,7 +26,7 @@ namespace Media {
 namespace Test {
 using namespace OHOS::Media::Plugin;
 
-class TestPluginTags : public ::testing::Test {
+class TestTagValueMap : public ::testing::Test {
 public:
     void SetUp() override
     {
@@ -37,7 +37,7 @@ public:
     }
 };
 
-TEST_F(TestPluginTags, Can_insert_tag_value_int64_to_TagValueMap)
+TEST_F(TestTagValueMap, Can_insert_tag_value_int64_to_TagValueMap)
 {
     TagValueMap map;
     ASSERT_TRUE(map.Insert<Tag::MEDIA_DURATION>(10000));
@@ -49,7 +49,7 @@ TEST_F(TestPluginTags, Can_insert_tag_value_int64_to_TagValueMap)
     ASSERT_EQ(500, value);
 }
 
-TEST_F(TestPluginTags, Can_insert_tag_value_int32_to_TagValueMap)
+TEST_F(TestTagValueMap, Can_insert_tag_value_int32_to_TagValueMap)
 {
     TagValueMap map;
     ASSERT_TRUE(map.Insert<Tag::TRACK_ID>(10000));
@@ -57,7 +57,6 @@ TEST_F(TestPluginTags, Can_insert_tag_value_int32_to_TagValueMap)
     ASSERT_TRUE(map.Get<Tag::TRACK_ID>(value));
     ASSERT_EQ(10000, value);
 }
-
 } // namespace Test
 } // namespace Media
 } // namespace OHOS

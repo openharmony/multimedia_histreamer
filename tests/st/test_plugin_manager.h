@@ -51,10 +51,10 @@ FIXTURE(PluginsEnableAndDisable)
     {
         pluginManager.DisablePackage(type, name);
         ASSERT_FALSE(pluginManager.IsPackageExist(type, name));
-        ASSERT_TRUE( pluginManager.GetAllRegisteredPluginCount() < pluginCounts);
+        ASSERT_TRUE(pluginManager.GetAllRegisteredPluginCount() < pluginCounts);
         pluginManager.EnablePackage(type, name);
         ASSERT_TRUE(pluginManager.IsPackageExist(type, name));
-        ASSERT_TRUE( pluginManager.GetAllRegisteredPluginCount() == pluginCounts);
+        ASSERT_TRUE(pluginManager.GetAllRegisteredPluginCount() == pluginCounts);
     }
 
     // @test(tags=fast)
@@ -64,12 +64,12 @@ FIXTURE(PluginsEnableAndDisable)
         pluginManager.DisablePackage(OHOS::Media::Plugin::PluginType::DEMUXER, "FFmpegDemuxer");
         ASSERT_FALSE(pluginManager.IsPackageExist(OHOS::Media::Plugin::PluginType::SOURCE, "FileSource"));
         ASSERT_FALSE(pluginManager.IsPackageExist(OHOS::Media::Plugin::PluginType::DEMUXER, "FFmpegDemuxer"));
-        ASSERT_TRUE( pluginManager.GetAllRegisteredPluginCount() < pluginCounts);
+        ASSERT_TRUE(pluginManager.GetAllRegisteredPluginCount() < pluginCounts);
         pluginManager.EnablePackage(OHOS::Media::Plugin::PluginType::SOURCE, "FileSource");
         pluginManager.EnablePackage(OHOS::Media::Plugin::PluginType::DEMUXER, "FFmpegDemuxer");
         ASSERT_TRUE(pluginManager.IsPackageExist(OHOS::Media::Plugin::PluginType::SOURCE, "FileSource"));
         ASSERT_TRUE(pluginManager.IsPackageExist(OHOS::Media::Plugin::PluginType::DEMUXER, "FFmpegDemuxer"));
-        ASSERT_TRUE( pluginManager.GetAllRegisteredPluginCount() == pluginCounts);
+        ASSERT_TRUE(pluginManager.GetAllRegisteredPluginCount() == pluginCounts);
     }
 
     // @test(tags=fast)

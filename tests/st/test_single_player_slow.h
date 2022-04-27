@@ -679,8 +679,8 @@ FIXTURE(DataDrivenSinglePlayerTestSlow)
     DATA_GROUP(std::string("https://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3")));
 
 	// @test(data="myurls")
-	PTEST((std::string url), Test single player play url music, and finished automatically)
-	{
+    PTEST((std::string url), Test single player play url music, and finished automatically)
+    {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(url)));
         ASSERT_EQ(0, player->Prepare());
@@ -688,7 +688,7 @@ FIXTURE(DataDrivenSinglePlayerTestSlow)
         while (player->IsPlaying()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
-	}
+    }
 
     DATA_PROVIDER(specialFileUrls, 10,
     // TO FIX: ffmpeg wav demuxer cause crash  RESOURCE_DIR "/../../../../resource_ext/WAV/dash-runner-8bit.wav

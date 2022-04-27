@@ -12,13 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <thread>
 #include <chrono>
-#include <memory>
 #include <math.h>
+#include <thread>
+#include "helper/test_player.hpp"
 #include "testngpp/testngpp.hpp"
 #include "foundation/log.h"
-#include "helper/test_player.hpp"
 
 using namespace OHOS::Media::Test;
 FIXTURE(DataDrivenSinglePlayerTestFast)
@@ -64,9 +63,9 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     PTEST((std::string url), Test single player play url music, and finished automatically)
     {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-        ASSERT_EQ(0,player->SetSource(TestSource(url)));
-        ASSERT_EQ(0,player->Prepare());
-        ASSERT_EQ(0,player->Play());
+        ASSERT_EQ(0, player->SetSource(TestSource(url)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
         while (player->IsPlaying()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
@@ -76,12 +75,12 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     PTEST((std::string url), Test single player play url music, and finished manually)
     {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-        ASSERT_EQ(0,player->SetSource(TestSource(url)));
-        ASSERT_EQ(0,player->Prepare());
-        ASSERT_EQ(0,player->Play());
+        ASSERT_EQ(0, player->SetSource(TestSource(url)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        ASSERT_EQ(0,player->Stop());
+        ASSERT_EQ(0, player->Stop());
     }
 
     // @test(data="durationTestMusicUrls", tags=fast)

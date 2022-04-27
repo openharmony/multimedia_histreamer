@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <thread>
 #include <chrono>
-#include "testngpp/testngpp.hpp"
+#include <thread>
 #include "helper/test_player.hpp"
+#include "testngpp/testngpp.hpp"
 
 using namespace OHOS::Media::Test;
 
@@ -25,9 +25,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
     DATA_PROVIDER(myurls, 10,
     DATA_GROUP(std::string(RESOURCE_DIR "/MP4/9_AVC_1280x720_59.940fps_AAC_128Kbps_2channels.mp4")));
 
-	// @test(data="myurls", tags=video_play_fast)
-	PTEST((std::string url), Test single player play url video, and finished automatically)
-	{
+    // @test(data="myurls", tags=video_play_fast)
+    PTEST((std::string url), Test single player play url video, and finished automatically)
+    {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(url)));
         ASSERT_EQ(0, player->Prepare());
@@ -35,5 +35,5 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         while (player->IsPlaying()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
-	}
+    }
 };
