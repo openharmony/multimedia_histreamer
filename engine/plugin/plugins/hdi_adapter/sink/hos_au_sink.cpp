@@ -217,7 +217,7 @@ namespace HosLite {
 using namespace OHOS::Media::Plugin;
 
 HdiSink::HdiSink(std::string name)
-    : Plugin::AudioSinkPlugin(std::move(name)), audioManager_(nullptr), cacheData_(), processing_(false), renderCond_()
+    : AudioSinkPlugin(std::move(name)), audioManager_(nullptr), cacheData_(), processing_(false), renderCond_()
 {
     // default is media
     sampleAttributes_.type = AUDIO_IN_MEDIA;
@@ -262,7 +262,7 @@ Status HdiSink::Init()
 Media::Plugin::Status HdiSink::ReleaseRender()
 {
     {
-        OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+        OSAL::ScopedLock lock(renderMutex_);
         if (audioAdapter_ != nullptr && audioRender_ != nullptr) {
             audioAdapter_->DestroyRender(audioAdapter_, audioRender_);
             audioRender_ = nullptr;
@@ -373,7 +373,7 @@ Status HdiSink::Prepare()
                 sampleAttributes_.sampleRate, channelMask_, sampleAttributes_.format, sampleAttributes_.isSignedData,
                 sampleAttributes_.interleaved, sampleAttributes_.period, sampleAttributes_.frameSize);
     {
-        OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+        OSAL::ScopedLock lock(renderMutex_);
         auto ret = audioAdapter_->CreateRender(audioAdapter_, &deviceDescriptor_, &sampleAttributes_, &audioRender_);
         if (ret != 0) {
             MEDIA_LOG_E("cannot create render with error code " PUBLIC_LOG_U64 "x",
@@ -405,7 +405,7 @@ Status HdiSink::Reset()
 Status HdiSink::Start()
 {
     MEDIA_LOG_I("Start entered.");
-    OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+    OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
         MEDIA_LOG_E("no available render");
         return Status::ERROR_UNKNOWN;
@@ -422,7 +422,7 @@ Status HdiSink::Start()
 Status HdiSink::Stop()
 {
     MEDIA_LOG_I("Stop Entered");
-    OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+    OSAL::ScopedLock lock(renderMutex_);
     processing_ = false;
     renderCond_.NotifyOne();
     if (audioRender_ == nullptr) {
@@ -450,7 +450,7 @@ Status HdiSink::SetCallback(Callback* cb)
 
 Status HdiSink::GetMute(bool& mute)
 {
-    OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+    OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
         MEDIA_LOG_W("no render available, get mute must be called after prepared");
         return Status::ERROR_WRONG_STATE;
@@ -465,7 +465,7 @@ Status HdiSink::GetMute(bool& mute)
 Status HdiSink::SetMute(bool mute)
 {
     // todo when to set mute
-    OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+    OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
         MEDIA_LOG_W("no render available, set mute must be called after prepare");
         return Status::ERROR_WRONG_STATE;
@@ -479,7 +479,7 @@ Status HdiSink::SetMute(bool mute)
 
 Status HdiSink::GetVolume(float& volume)
 {
-    OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+    OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
         MEDIA_LOG_W("no render available, get volume must be called after prepare");
         return Status::ERROR_WRONG_STATE;
@@ -493,7 +493,7 @@ Status HdiSink::GetVolume(float& volume)
 
 Status HdiSink::SetVolume(float volume)
 {
-    OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+    OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
         MEDIA_LOG_W("no render available, set volume must be called after prepare");
         return Status::ERROR_WRONG_STATE;
@@ -510,7 +510,7 @@ Status HdiSink::SetVolume(float volume)
 
 Status HdiSink::GetSpeed(float& speed)
 {
-    OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+    OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
         MEDIA_LOG_W("no render available, get speed must be called after prepare");
         return Status::ERROR_WRONG_STATE;
@@ -524,7 +524,7 @@ Status HdiSink::GetSpeed(float& speed)
 
 Status HdiSink::SetSpeed(float speed)
 {
-    OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+    OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
         MEDIA_LOG_W("no render available, set speed must be called after prepare");
         return Status::ERROR_WRONG_STATE;
@@ -539,7 +539,7 @@ Status HdiSink::SetSpeed(float speed)
 Status HdiSink::Pause()
 {
     MEDIA_LOG_I("Pause Entered");
-    OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+    OSAL::ScopedLock lock(renderMutex_);
     processing_ = false;
     renderCond_.NotifyOne();
     if (audioRender_ != nullptr && audioRender_->control.Pause(audioRender_) != 0) {
@@ -552,7 +552,7 @@ Status HdiSink::Pause()
 Status HdiSink::Resume()
 {
     MEDIA_LOG_I("Resume Entered");
-    OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+    OSAL::ScopedLock lock(renderMutex_);
     processing_ = true;
     if (audioRender_ != nullptr && audioRender_->control.Resume(audioRender_) != 0) {
         MEDIA_LOG_E("resume failed");
@@ -563,7 +563,7 @@ Status HdiSink::Resume()
 
 Status HdiSink::GetLatency(uint64_t& hstTime)
 {
-    OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+    OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
         MEDIA_LOG_W("no render available, get latency must be called after prepare");
         return Status::ERROR_WRONG_STATE;
@@ -604,22 +604,15 @@ Status HdiSink::Write(const std::shared_ptr<Buffer>& input)
     }
     if (!input->IsEmpty()) {
         RenderFrame(input);
-        MEDIA_LOG_DD("Write finished.");
-        return Status::OK;
     }
-    Status status = Status::OK;
-    if ((input->flag & BUFFER_FLAG_EOS) != 0) {
-        // TODO: call DrainBuffer, but now this function is invalid.
-    } else {
-        status = Status::ERROR_INVALID_PARAMETER;
-    }
-    return status;
+    MEDIA_LOG_DD("Write finished.");
+    return Status::OK;
 }
 
 Status HdiSink::Flush()
 {
     MEDIA_LOG_I("Flush Entered");
-    OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+    OSAL::ScopedLock lock(renderMutex_);
     if (audioRender_ == nullptr) {
         MEDIA_LOG_E("no render available, flush must be called after prepare");
         return Status::ERROR_WRONG_STATE;
@@ -629,6 +622,15 @@ Status HdiSink::Flush()
         return Status::ERROR_UNKNOWN;
     }
     MEDIA_LOG_I("Flush Exited.");
+    return Status::OK;
+}
+
+Status HdiSink::Drain()
+{
+    MEDIA_LOG_I("Drain Entered");
+    constexpr int waitTimeForPlaybackCompleteMs = 60; // 60
+    OHOS::Media::OSAL::SleepFor(waitTimeForPlaybackCompleteMs);
+    MEDIA_LOG_I("Drain Exited.");
     return Status::OK;
 }
 
@@ -697,7 +699,7 @@ void HdiSink::RenderFrame(const std::shared_ptr<Buffer>& input)
         int32_t ret = 0;
         uint64_t renderSize = 0;
         {
-            OHOS::Media::OSAL::ScopedLock lock(renderMutex_);
+            OSAL::ScopedLock lock(renderMutex_);
             if (audioRender_ == nullptr) {
                 break;
             }

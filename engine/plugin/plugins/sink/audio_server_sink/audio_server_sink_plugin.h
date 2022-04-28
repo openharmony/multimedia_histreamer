@@ -44,83 +44,83 @@ public:
 
     ~AudioServerSinkPlugin() override;
 
-    Plugin::Status Init() override;
+    Status Init() override;
 
-    Plugin::Status Deinit() override;
+    Status Deinit() override;
 
-    Plugin::Status Prepare() override;
+    Status Prepare() override;
 
-    Plugin::Status Reset() override;
+    Status Reset() override;
 
-    Plugin::Status Start() override;
+    Status Start() override;
 
-    Plugin::Status Stop() override;
+    Status Stop() override;
 
-    Plugin::Status GetParameter(Plugin::Tag tag, Plugin::ValueType& para) override;
+    Status GetParameter(Tag tag, ValueType& para) override;
 
-    Plugin::Status SetParameter(Plugin::Tag tag, const Plugin::ValueType& para) override;
+    Status SetParameter(Tag tag, const ValueType& para) override;
 
-    std::shared_ptr<Plugin::Allocator> GetAllocator() override
+    std::shared_ptr<Allocator> GetAllocator() override
     {
         return nullptr;
     }
 
-    Plugin::Status SetCallback(Plugin::Callback* cb) override
+    Status SetCallback(Callback* cb) override
     {
-        return Plugin::Status::OK;
+        return Status::OK;
     }
 
-    Plugin::Status GetMute(bool& mute) override
+    Status GetMute(bool& mute) override
     {
-        return Plugin::Status::OK;
+        return Status::OK;
     }
 
-    Plugin::Status SetMute(bool mute) override
+    Status SetMute(bool mute) override
     {
-        return Plugin::Status::OK;
+        return Status::OK;
     }
 
-    Plugin::Status GetVolume(float& volume) override;
+    Status GetVolume(float& volume) override;
 
-    Plugin::Status SetVolume(float volume) override;
+    Status SetVolume(float volume) override;
 
-    Plugin::Status GetSpeed(float& speed) override
+    Status GetSpeed(float& speed) override
     {
-        return Plugin::Status::OK;
+        return Status::OK;
     }
 
-    Plugin::Status SetSpeed(float speed) override
+    Status SetSpeed(float speed) override
     {
-        return Plugin::Status::OK;
+        return Status::OK;
     }
 
-    Plugin::Status Pause() override;
+    Status Pause() override;
 
-    Plugin::Status Resume() override;
+    Status Resume() override;
 
-    Plugin::Status GetLatency(uint64_t& hstTime) override;
+    Status GetLatency(uint64_t& hstTime) override;
 
-    Plugin::Status GetFrameSize(size_t& size) override
+    Status GetFrameSize(size_t& size) override
     {
-        return Plugin::Status::OK;
+        return Status::OK;
     }
 
-    Plugin::Status GetFrameCount(uint32_t& count) override
+    Status GetFrameCount(uint32_t& count) override
     {
-        return Plugin::Status::OK;
+        return Status::OK;
     }
 
-    Plugin::Status Write(const std::shared_ptr<Plugin::Buffer>& input) override;
+    Status Write(const std::shared_ptr<Buffer>& input) override;
 
-    Plugin::Status Flush() override;
+    Status Flush() override;
 
+    Status Drain() override;
 private:
     void ReleaseRender();
     bool StopRender();
     bool AssignSampleRateIfSupported(uint32_t sampleRate);
     bool AssignChannelNumIfSupported(uint32_t channelNum);
-    bool AssignSampleFmtIfSupported(Plugin::AudioSampleFormat sampleFormat);
-    void DrainInner();
+    bool AssignSampleFmtIfSupported(AudioSampleFormat sampleFormat);
 
     OSAL::Mutex renderMutex_ {};
     std::unique_ptr<AudioStandard::AudioRenderer> audioRenderer_;
@@ -130,7 +130,7 @@ private:
     AVSampleFormat reSrcFfFmt_ {AV_SAMPLE_FMT_NONE};
     const AudioStandard::AudioSampleFormat reStdDestFmt_ {AudioStandard::AudioSampleFormat::SAMPLE_S16LE};
     const AVSampleFormat reFfDestFmt_ {AV_SAMPLE_FMT_S16};
-    Plugin::AudioChannelLayout channelLayout_ {};
+    AudioChannelLayout channelLayout_ {};
     uint32_t channels_ {};
     uint32_t samplesPerFrame_ {};
     uint32_t sampleRate_ {};

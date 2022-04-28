@@ -34,60 +34,62 @@ namespace Plugin {
 namespace HosLite {
 class RingBuffer;
 
-class HdiSink : public std::enable_shared_from_this<HdiSink>, public OHOS::Media::Plugin::AudioSinkPlugin {
+class HdiSink : public std::enable_shared_from_this<HdiSink>, public AudioSinkPlugin {
 public:
     explicit HdiSink(std::string name);
 
     ~HdiSink() override = default;
 
-    Media::Plugin::Status Init() override;
+    Status Init() override;
 
-    Media::Plugin::Status Deinit() override;
+    Status Deinit() override;
 
-    Media::Plugin::Status Prepare() override;
+    Status Prepare() override;
 
-    Media::Plugin::Status Reset() override;
+    Status Reset() override;
 
-    Media::Plugin::Status Start() override;
+    Status Start() override;
 
-    Media::Plugin::Status Stop() override;
+    Status Stop() override;
 
-    Media::Plugin::Status GetParameter(Media::Plugin::Tag tag, Media::Plugin::ValueType& value) override;
+    Status GetParameter(Tag tag, ValueType& value) override;
 
-    Media::Plugin::Status SetParameter(Media::Plugin::Tag tag, const Media::Plugin::ValueType& value) override;
+    Status SetParameter(Tag tag, const ValueType& value) override;
 
-    std::shared_ptr<OHOS::Media::Plugin::Allocator> GetAllocator() override;
+    std::shared_ptr<Allocator> GetAllocator() override;
 
-    Media::Plugin::Status SetCallback(OHOS::Media::Plugin::Callback* cb) override;
+    Status SetCallback(Callback* cb) override;
 
-    Media::Plugin::Status GetMute(bool& mute) override;
+    Status GetMute(bool& mute) override;
 
-    Media::Plugin::Status SetMute(bool mute) override;
+    Status SetMute(bool mute) override;
 
-    Media::Plugin::Status GetVolume(float& volume) override;
+    Status GetVolume(float& volume) override;
 
-    Media::Plugin::Status SetVolume(float volume) override;
+    Status SetVolume(float volume) override;
 
-    Media::Plugin::Status GetSpeed(float& speed) override;
+    Status GetSpeed(float& speed) override;
 
-    Media::Plugin::Status SetSpeed(float speed) override;
+    Status SetSpeed(float speed) override;
 
-    Media::Plugin::Status Pause() override;
+    Status Pause() override;
 
-    Media::Plugin::Status Resume() override;
+    Status Resume() override;
 
-    Media::Plugin::Status GetLatency(uint64_t& hstTime) override;
+    Status GetLatency(uint64_t& hstTime) override;
 
-    Media::Plugin::Status GetFrameSize(size_t& size) override;
+    Status GetFrameSize(size_t& size) override;
 
-    Media::Plugin::Status GetFrameCount(uint32_t& count) override;
+    Status GetFrameCount(uint32_t& count) override;
 
-    Media::Plugin::Status Write(const std::shared_ptr<Media::Plugin::Buffer>& input) override;
+    Status Write(const std::shared_ptr<Buffer>& input) override;
 
-    Media::Plugin::Status Flush() override;
+    Status Flush() override;
+
+    Status Drain() override;
 
 private:
-    Media::Plugin::Status ReleaseRender();
+    Status ReleaseRender();
 
     void Deinterleave8(uint8_t* inData, uint8_t* outData, int32_t frameCnt);
 
@@ -97,12 +99,12 @@ private:
 
     bool HandleInterleaveData(uint8_t* origData, int32_t frameCnt);
 
-    void RenderFrame(const std::shared_ptr<Plugin::Buffer>& input);
+    void RenderFrame(const std::shared_ptr<Buffer>& input);
 
-    Media::Plugin::Status ProcessInputSampleFormat(const Media::Plugin::ValueType& value);
+    Status ProcessInputSampleFormat(const ValueType& value);
 
 private:
-    OHOS::Media::OSAL::Mutex renderMutex_ {};
+    OSAL::Mutex renderMutex_ {};
     AudioManager* audioManager_ {nullptr};
     AudioAdapterDescriptor adapterDescriptor_ {};
     AudioAdapter* audioAdapter_ {nullptr};
@@ -111,7 +113,7 @@ private:
     AudioSampleAttributes sampleAttributes_ {};
     bool isInputInterleaved_{false};
     AudioChannelMask channelMask_{AUDIO_CHANNEL_MONO};
-    OHOS::Media::Plugin::Callback* eventCallback_ {};
+    Callback* eventCallback_ {};
     std::vector<uint8_t> cacheData_;
     bool usingDefaultInCaps_ {true}; // if true pass hdi with S16P pcm data and convert input into non-interleaved
     std::atomic<bool> processing_;

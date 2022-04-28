@@ -68,6 +68,11 @@ Status AudioSink::Flush()
     return audioSink->Flush();
 }
 
+Status AudioSink::Drain()
+{
+    return audioSink->Drain();
+}
+
 Status AudioSink::Write(const std::shared_ptr<Buffer>& input)
 {
     return audioSink->Write(input);
