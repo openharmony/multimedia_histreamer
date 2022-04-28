@@ -67,22 +67,24 @@ bool Thread::CreateThread(const std::function<void()>& func)
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 #ifdef MEDIA_OHOS
-    pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
     pthread_attr_setschedpolicy(&attr, SCHED_RR);
+#endif
+#ifdef OHOS_LITE
+    pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
 #endif
     struct sched_param sched = {static_cast<int>(priority_)};
     pthread_attr_setschedparam(&attr, &sched);
 #if defined(THREAD_STACK_SIZE) and THREAD_STACK_SIZE > 0
     pthread_attr_setstacksize(&attr, THREAD_STACK_SIZE);
-    MEDIA_LOG_I("thread stack size set to " PUBLIC_LOG "d", THREAD_STACK_SIZE);
+    MEDIA_LOG_I("thread stack size set to " PUBLIC_LOG_D32, THREAD_STACK_SIZE);
 #endif
     int rtv = pthread_create(&id_, &attr, Thread::Run, state_.get());
     if (rtv == 0) {
-        MEDIA_LOG_I("thread " PUBLIC_LOG "s create succ", name_.c_str());
+        MEDIA_LOG_I("thread " PUBLIC_LOG_S " create succ", name_.c_str());
         SetNameInternal();
     } else {
         state_.reset();
-        MEDIA_LOG_E("thread create failed");
+        MEDIA_LOG_E("thread create failed, rtv: " PUBLIC_LOG_D32, rtv);
     }
     return rtv == 0;
 }
@@ -93,7 +95,7 @@ void Thread::SetNameInternal()
     if (state_ && !name_.empty()) {
         constexpr int threadNameMaxSize = 15;
         if (name_.size() > threadNameMaxSize) {
-            MEDIA_LOG_W("task name " PUBLIC_LOG "s exceed max size: " PUBLIC_LOG "d",
+            MEDIA_LOG_W("task name " PUBLIC_LOG_S " exceed max size: " PUBLIC_LOG_D32,
                         name_.c_str(), threadNameMaxSize);
             name_ = name_.substr(0, threadNameMaxSize);
         }
@@ -108,7 +110,7 @@ void* Thread::Run(void* arg) // NOLINT: void*
     if (state && state->func) {
         state->func();
     }
-    MEDIA_LOG_W("Thread " PUBLIC_LOG "s exited...", state->name.c_str());
+    MEDIA_LOG_W("Thread " PUBLIC_LOG_S " exited...", state->name.c_str());
     return nullptr;
 }
 } // namespace OSAL

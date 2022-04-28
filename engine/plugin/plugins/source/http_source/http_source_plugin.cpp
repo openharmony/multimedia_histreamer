@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 #define HST_LOG_TAG "HttpSourcePlugin"
+
 #include "http_source_plugin.h"
-#include "plugin/core/plugin_manager.h"
+#include "plugins/source/http_source/hls/hls_media_downloader.h"
 #include "utils/util.h"
 #include "foundation/log.h"
 
@@ -46,10 +47,8 @@ PLUGIN_DEFINITION(HttpSource, LicenseType::APACHE_V2, HttpSourceRegister, [] {})
 
 HttpSourcePlugin::HttpSourcePlugin(std::string name) noexcept
     : SourcePlugin(std::move(name)),
-      isSeekable_(false),
       bufferSize_(DEFAULT_BUFFER_SIZE),
       waterline_(0),
-      fileSize_(-1),
       executor_(nullptr)
 {
     MEDIA_LOG_D("HttpSourcePlugin IN");
@@ -67,7 +66,6 @@ HttpSourcePlugin::~HttpSourcePlugin()
 Status HttpSourcePlugin::Init()
 {
     MEDIA_LOG_D("Init IN");
-    executor_ = std::make_shared<StreamingExecutor>();
     return Status::OK;
 }
 
@@ -99,7 +97,8 @@ Status HttpSourcePlugin::Start()
 
 Status HttpSourcePlugin::Stop()
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_I("IN");
+    CloseUri();
     return Status::OK;
 }
 
@@ -139,21 +138,29 @@ Status HttpSourcePlugin::SetCallback(Callback* cb)
 {
     MEDIA_LOG_D("IN");
     callback_ = cb;
-    executor_->SetCallback(cb);
+    if (executor_ != nullptr) {
+        executor_->SetCallback(cb);
+    }
     return Status::OK;
 }
 
 Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 {
     MEDIA_LOG_D("SetSource IN");
+    auto uri = source->GetSourceUri();
+    if (uri.find(".m3u8") != std::string::npos) {
+        executor_ = std::make_shared<HlsMediaDownloader>();
+    } else if (uri.compare(0, 4, "http") == 0) { // 0 : position, 4: count
+        executor_ = std::make_shared<HttpMediaDownloader>();
+    }
     FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
 
-    auto uri = source->GetSourceUri();
-    FALSE_RETURN_V(executor_->Open(uri), Status::ERROR_FUNCTION_CALL);
-    isSeekable_ = !executor_->IsStreaming();
-    fileSize_ = isSeekable_ ? executor_->GetContentLength() : -1;
-    MEDIA_LOG_I("SetSource(" PUBLIC_LOG "s), seekable: " PUBLIC_LOG "d, file size: " PUBLIC_LOG "d",
-                uri.c_str(), isSeekable_, fileSize_);
+    if (callback_ != nullptr) {
+        executor_->SetCallback(callback_);
+    }
+
+    MEDIA_LOG_I("SetSource: " PUBLIC_LOG_S, uri.c_str());
+    FALSE_RETURN_V(executor_->Open(uri), Status::ERROR_UNKNOWN);
     return Status::OK;
 }
 
@@ -166,7 +173,11 @@ std::shared_ptr<Allocator> HttpSourcePlugin::GetAllocator()
 Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLen)
 {
     MEDIA_LOG_D("Read in");
-    FALSE_RETURN_V(executor_ != nullptr && buffer != nullptr, Status::ERROR_NULL_POINTER);
+    FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
+
+    if (buffer == nullptr) {
+        buffer = std::make_shared<Buffer>();
+    }
 
     std::shared_ptr<Memory>bufData;
     if (buffer->IsEmpty()) {
@@ -177,32 +188,33 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
 
     bool isEos = false;
     unsigned int realReadSize = 0;
-    executor_->Read(bufData->GetWritableAddr(expectedLen), expectedLen, realReadSize, isEos);
+    bool result = executor_->Read(bufData->GetWritableAddr(expectedLen), expectedLen, realReadSize, isEos);
     bufData->UpdateDataSize(realReadSize);
-    MEDIA_LOG_D("Read finished, read size = " PUBLIC_LOG "d, isEos " PUBLIC_LOG "d", bufData->GetSize(), isEos);
-    return Status::OK;
+    MEDIA_LOG_D("Read finished, read size = " PUBLIC_LOG_D32 ", isEos " PUBLIC_LOG_D32, bufData->GetSize(), isEos);
+    return result ? Status::OK : Status::END_OF_STREAM;
 }
 
 Status HttpSourcePlugin::GetSize(size_t &size)
 {
     MEDIA_LOG_D("IN");
-    fileSize_ = executor_->GetContentLength();
-    size = fileSize_;
+    FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
+    size = executor_->GetContentLength();
     return Status::OK;
 }
 
 bool HttpSourcePlugin::IsSeekable()
 {
     MEDIA_LOG_D("IN");
-    return isSeekable_;
+    FALSE_RETURN_V(executor_ != nullptr, true);
+    return !executor_->IsStreaming();
 }
 
 Status HttpSourcePlugin::SeekTo(uint64_t offset)
 {
     FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
-    FALSE_RETURN_V(isSeekable_, Status::ERROR_INVALID_OPERATION);
-    FALSE_RETURN_V(offset <= fileSize_, Status::ERROR_INVALID_PARAMETER);
-    FALSE_RETURN_V(executor_->Seek(offset), Status::ERROR_FUNCTION_CALL);
+    FALSE_RETURN_V(!executor_->IsStreaming(), Status::ERROR_INVALID_OPERATION);
+    FALSE_RETURN_V(offset <= executor_->GetContentLength(), Status::ERROR_INVALID_PARAMETER);
+    FALSE_RETURN_V(executor_->Seek(offset), Status::ERROR_UNKNOWN);
     return Status::OK;
 }
 

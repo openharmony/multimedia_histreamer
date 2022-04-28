@@ -49,9 +49,9 @@ include_directories(
 )
 
 if (NOT ${OHOS_LITE})
-    message(STATUS "engine factory header included.")
+    message(STATUS "media interface header included.")
     include_directories(
-            ${TOP_DIR}/engine/factory
+            ${TOP_DIR}/engine/scene/standard
     )
 endif ()
 
@@ -70,6 +70,7 @@ file(GLOB_RECURSE HISTREAMER_BASE_SRCS
         )
 
 file(GLOB_RECURSE COMMON_PLUGIN_SRCS
+        ${TOP_DIR}/engine/plugin/plugins/demuxer/wav_demuxer/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/ffmpeg_adapter/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/sink/sdl/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/sink/file_sink/*.cpp
@@ -78,6 +79,7 @@ file(GLOB_RECURSE COMMON_PLUGIN_SRCS
         ${TOP_DIR}/engine/plugin/plugins/minimp3_adapter/*.c
         ${TOP_DIR}/engine/plugin/plugins/source/http_source/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/source/http_source_test/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
 )
 
 if (OHOS_LITE)
@@ -90,9 +92,6 @@ if (OHOS_LITE)
     file(GLOB_RECURSE RECORDER_SRCS
             ${TOP_DIR}/engine/scene/lite/*.cpp
             ${TOP_DIR}/engine/scene/recorder/lite/*.cpp
-            )
-    file(GLOB_RECURSE PLAT_PLUGIN_SRCS
-            ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
             )
 else ()
     message(STATUS "player standard source")
@@ -134,6 +133,7 @@ if (WIN32)
             avutil
             avfilter
             swresample
+            swscale
             SDL2
             curl
     )

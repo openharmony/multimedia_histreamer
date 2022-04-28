@@ -24,6 +24,8 @@ print("histreamer plugin: hdi_adapter =",
       multimedia_histreamer_enable_plugin_hdi_adapter)
 print("histreamer plugin: file_source =",
       multimedia_histreamer_enable_plugin_file_source)
+print("histreamer plugin: file_fd_source =",
+      multimedia_histreamer_enable_plugin_file_fd_source)
 print("histreamer plugin: http_source =",
       multimedia_histreamer_enable_plugin_http_source)
 print("histreamer plugin: stream_source =",
@@ -63,6 +65,10 @@ group("histreamer_plugin_store") {
     deps += [ "source/file_source:plugin_file_source" ]
   }
 
+  if (multimedia_histreamer_enable_plugin_file_fd_source) {
+    deps += [ "source/file_source:plugin_file_fd_source" ]
+  }
+
   if (multimedia_histreamer_enable_plugin_http_source) {
     deps += [ "source/http_source:plugin_http_source" ]
   }
@@ -98,6 +104,10 @@ group("histreamer_plugin_store") {
   if (multimedia_histreamer_enable_plugin_std_video_capture) {
     deps += [ "source/video_capture:plugin_standard_video_capture" ]
   }
+
+  if (multimedia_histreamer_enable_plugin_wav_demuxer) {
+    deps += [ "demuxer/wav_demuxer:plugin_wav_demuxer" ]
+  }
 }
 
 config("gen_plugin_static_header_config") {
@@ -121,6 +131,10 @@ action("gen_plugin_static_header") {
       ]
     }
 
+    if (multimedia_histreamer_enable_plugin_wav_demuxer) {
+      args += [ "WavDemuxer" ]
+    }
+
     if (multimedia_histreamer_enable_plugin_minimp3_adapter) {
       args += [
         "Minimp3Demuxer",
@@ -142,6 +156,10 @@ action("gen_plugin_static_header") {
 
     if (multimedia_histreamer_enable_plugin_file_source) {
       args += [ "FileSource" ]
+    }
+
+    if (multimedia_histreamer_enable_plugin_file_fd_source) {
+      args += [ "FileFdSource" ]
     }
 
     if (multimedia_histreamer_enable_plugin_http_source) {

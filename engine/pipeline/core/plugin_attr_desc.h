@@ -27,6 +27,7 @@ const Plugin::ValueType g_u8Def = (uint8_t)0;
 const Plugin::ValueType g_u32Def = (uint32_t)0;
 const Plugin::ValueType g_d64Def = (int64_t)0;
 const Plugin::ValueType g_u64Def = (uint64_t)0;
+const Plugin::ValueType g_doubleDef = (double)0.0;
 const Plugin::ValueType g_srcInputTypedef = Plugin::SrcInputType::UNKNOWN;
 const Plugin::ValueType g_unknown = nullptr;
 const Plugin::ValueType g_vecBufDef = std::vector<uint8_t>();
@@ -80,7 +81,8 @@ const std::map<Plugin::Tag, std::tuple<const char*, const Plugin::ValueType&, co
     {Plugin::Tag::VIDEO_FRAME_RATE, {"frm_rate",               g_u32Def,           "uint32_t"}},
     {Plugin::Tag::VIDEO_SURFACE, {"surface",                   g_unknown,          "Surface"}},
     {Plugin::Tag::VIDEO_MAX_SURFACE_NUM, {"surface_num",       g_u32Def,           "uin32_t"}},
-    {Plugin::Tag::THREAD_MODE, {"thread_mode",                 g_u8Def,            "ThreadMode"}},
+    {Plugin::Tag::VIDEO_CAPTURE_RATE, {"capture_rate",         g_doubleDef,        "double"}},
+    {Plugin::Tag::BITS_PER_CODED_SAMPLE, {"bits_per_coded_sample", g_u32Def,       "uin32_t"}},
 };
 
 const std::map<Plugin::AudioSampleFormat, const char*> g_auSampleFmtStrMap = {
@@ -188,11 +190,6 @@ const std::map<Plugin::AudioAacStreamFormat, const char*> g_auAacStreamFormatNam
     {Plugin::AudioAacStreamFormat::RAW, "RAW"},
 };
 
-const std::map<Plugin::ThreadMode, const char*> g_ThreadModeNameStrMap = {
-    {Plugin::ThreadMode::ASYNC, "Async"},
-    {Plugin::ThreadMode::SYNC, "Sync"},
-};
-
 inline bool HasTagInfo(Plugin::Tag tag)
 {
     return g_tagInfoMap.count(tag) != 0;
@@ -287,17 +284,13 @@ inline const char* GetAuAacStreamFormatNameStr(Plugin::AudioAacStreamFormat aacS
     return g_auAacStreamFormatNameStrMap.at(aacStreamFormat);
 }
 
-inline bool HasThreadModeNameStr(Plugin::ThreadMode threadMode)
+inline const char* Tag2String(const Plugin::Tag tag)
 {
-    return g_ThreadModeNameStrMap.count(threadMode) != 0;
-}
-
-inline const char* GetThreadModeNameStr(Plugin::ThreadMode threadMode)
-{
-    if (!HasThreadModeNameStr(threadMode)) {
-        return "null";
+    auto mapIte = g_tagInfoMap.find(tag);
+    if (mapIte == g_tagInfoMap.end()) {
+        return "NULL";
     }
-    return g_ThreadModeNameStrMap.at(threadMode);
+    return std::get<0>(mapIte->second);
 }
 } // Pipeline
 } // Media

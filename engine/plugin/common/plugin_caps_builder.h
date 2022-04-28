@@ -103,8 +103,6 @@ public:
 
     DECL_SET_FL_CAP_FUNCS(Capability::Key::VIDEO_PIXEL_FORMAT, VideoPixelFormat, VideoPixelFormat);
 
-    DECL_SET_FL_CAP_FUNCS(Capability::Key::THREAD_MODE, ThreadMode, ThreadMode);
-
     /**
      *  @brief Build one Capability.
      *

@@ -58,7 +58,7 @@ struct SourcePlugin : public PluginBase {
      *
      * The function is valid only after RUNNING state.
      *
-     * @param buffer Storage of the read data
+     * @param buffer Buffer to store the data, it can be nullptr or empty to get the buffer from plugin.
      * @param expectedLen   Expected data size to be read
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.

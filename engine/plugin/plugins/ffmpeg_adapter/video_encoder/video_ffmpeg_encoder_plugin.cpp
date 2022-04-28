@@ -15,12 +15,13 @@
 
 #if defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
 
-#define HST_LOG_TAG "Ffmpeg_Video_Encoder"
+#define HST_LOG_TAG "FfmpegVideoEncoderPlugin"
 
 #include "video_ffmpeg_encoder_plugin.h"
 #include <cstring>
 #include <map>
 #include <set>
+#include "plugin/common/plugin_caps_builder.h"
 #include "plugin/common/plugin_time.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "ffmpeg_vid_enc_config.h"
@@ -46,6 +47,10 @@ Status RegisterVideoEncoderPlugins(const std::shared_ptr<Register>& reg)
     MEDIA_LOG_I("registering video encoders");
     while ((codec = av_codec_iterate(&iter))) {
         if (!av_codec_is_encoder(codec) || codec->type != AVMEDIA_TYPE_VIDEO) {
+            continue;
+        }
+        std::string iterCodec(codec->name);
+        if (iterCodec.find("264") != std::string::npos && iterCodec != "libx264") {
             continue;
         }
         if (supportedCodec.find(codec->id) == supportedCodec.end()) {
@@ -74,33 +79,43 @@ void UnRegisterVideoEncoderPlugins()
     codecMap.clear();
 }
 
-void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
+void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
 {
-    Capability inputCaps(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
+    CapabilityBuilder capBuilder;
+    capBuilder.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
     if (codec->pix_fmts != nullptr) {
         DiscreteCapability<VideoPixelFormat> values;
         for (uint32_t index = 0; codec->pix_fmts[index] != -1; ++index) {
             values.push_back(ConvertPixelFormatFromFFmpeg(codec->pix_fmts[index]));
         }
         if (!values.empty()) {
-            inputCaps.AppendDiscreteKeys(Capability::Key::VIDEO_PIXEL_FORMAT, values);
+            capBuilder.SetVideoPixelFormatList(values);
         }
     } else {
-        inputCaps.AppendDiscreteKeys<VideoPixelFormat>(
-            Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21});
+        capBuilder.SetVideoPixelFormatList({VideoPixelFormat::YUV420P});
     }
-    definition.inCaps.push_back(inputCaps);
+    definition.inCaps.push_back(capBuilder.Build());
+}
 
-    Capability outputCaps("video/unknown");
+void UpdateOutCaps(const AVCodec* codec, CodecPluginDef& definition)
+{
+    CapabilityBuilder capBuilder;
+    capBuilder.SetMime("video/unknown");
     switch (codec->id) {
         case AV_CODEC_ID_H264:
-            outputCaps.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
+            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
             break;
         default:
             MEDIA_LOG_I("codec is not supported right now");
             break;
     }
-    definition.outCaps.push_back(outputCaps);
+    definition.outCaps.push_back(capBuilder.Build());
+}
+
+void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
+{
+    UpdateInCaps(codec, definition);
+    UpdateOutCaps(codec, definition);
 }
 } // namespace
 
@@ -119,7 +134,7 @@ Status VideoFfmpegEncoderPlugin::Init()
 {
     OSAL::ScopedLock lock(avMutex_);
     auto iter = codecMap.find(pluginName_);
-    FALSE_RET_V_MSG_E(iter != codecMap.end(), Status::ERROR_UNSUPPORTED_FORMAT,
+    FALSE_RETURN_V_MSG_E(iter != codecMap.end(), Status::ERROR_UNSUPPORTED_FORMAT,
                       "cannot find codec with name " PUBLIC_LOG_S, pluginName_.c_str());
     avCodec_ = iter->second;
     cachedFrame_ = std::shared_ptr<AVFrame>(av_frame_alloc(), [](AVFrame* fp) { av_frame_free(&fp); });
@@ -167,7 +182,7 @@ Status VideoFfmpegEncoderPlugin::GetParameter(Tag tag, ValueType& value)
         }
     }
     OSAL::ScopedLock lock(avMutex_);
-    FALSE_RET_V_MSG_E(avCodecContext_ != nullptr, Status::ERROR_WRONG_STATE, "codec context is null");
+    FALSE_RETURN_V_MSG_E(avCodecContext_ != nullptr, Status::ERROR_WRONG_STATE, "codec context is null");
     return GetVideoEncoderParameters(*avCodecContext_, tag, value);
 }
 
@@ -185,7 +200,7 @@ void VideoFfmpegEncoderPlugin::FindInParameterMapThenAssignLocked(Tag tag, T& as
 Status VideoFfmpegEncoderPlugin::CreateCodecContext()
 {
     auto context = avcodec_alloc_context3(avCodec_.get());
-    FALSE_RET_V_MSG_E(context != nullptr, Status::ERROR_UNKNOWN, "cannot allocate codec context");
+    FALSE_RETURN_V_MSG_E(context != nullptr, Status::ERROR_UNKNOWN, "cannot allocate codec context");
 
     avCodecContext_ = std::shared_ptr<AVCodecContext>(context, [](AVCodecContext* ptr) {
         if (ptr != nullptr) {
@@ -205,10 +220,10 @@ void VideoFfmpegEncoderPlugin::InitCodecContext()
     avCodecContext_->codec_type = AVMEDIA_TYPE_VIDEO;
     FindInParameterMapThenAssignLocked<std::uint32_t>(Tag::VIDEO_WIDTH, width_);
     FindInParameterMapThenAssignLocked<std::uint32_t>(Tag::VIDEO_HEIGHT, height_);
-    FindInParameterMapThenAssignLocked<uint64_t>(Tag::VIDEO_FRAME_RATE, frameRate_);
+    FindInParameterMapThenAssignLocked<uint32_t>(Tag::VIDEO_FRAME_RATE, frameRate_);
     FindInParameterMapThenAssignLocked<Plugin::VideoPixelFormat>(Tag::VIDEO_PIXEL_FORMAT, pixelFormat_);
     MEDIA_LOG_D("width: " PUBLIC_LOG_U32 ", height: " PUBLIC_LOG_U32 ", pixelFormat: " PUBLIC_LOG_S ", frameRate_: "
-        PUBLIC_LOG_U64, width_, height_, Pipeline::GetVideoPixelFormatNameStr(pixelFormat_), frameRate_);
+                PUBLIC_LOG_U32, width_, height_, Pipeline::GetVideoPixelFormatNameStr(pixelFormat_), frameRate_);
     ConfigVideoEncoder(*avCodecContext_, vencParams_);
 }
 
@@ -271,13 +286,13 @@ Status VideoFfmpegEncoderPlugin::Prepare()
     {
         OSAL::ScopedLock l(avMutex_);
         FALSE_RETURN_V(state_ == State::INITIALIZED || state_ == State::PREPARED, Status::ERROR_WRONG_STATE);
-        FALSE_RET_V_MSG_E(CreateCodecContext() == Status::OK, Status::ERROR_UNKNOWN, "Create codec context fail");
+        FALSE_RETURN_V_MSG_E(CreateCodecContext() == Status::OK, Status::ERROR_UNKNOWN, "Create codec context fail");
         {
             OSAL::ScopedLock lock(parameterMutex_);
             InitCodecContext();
         }
 #ifdef DUMP_RAW_DATA
-        dumpFd_ = fopen("./enc_out.es", "w");
+        dumpFd_ = fopen("./enc_out.es", "wb");
 #endif
         state_ = State::PREPARED;
     }
@@ -315,7 +330,7 @@ Status VideoFfmpegEncoderPlugin::Start()
     {
         OSAL::ScopedLock lock(avMutex_);
         FALSE_RETURN_V(state_ == State::PREPARED, Status::ERROR_WRONG_STATE);
-        FALSE_RET_V_MSG_E(OpenCodecContext() == Status::OK, Status::ERROR_UNKNOWN, "Open codec context fail");
+        FALSE_RETURN_V_MSG_E(OpenCodecContext() == Status::OK, Status::ERROR_UNKNOWN, "Open codec context fail");
         state_ = State::RUNNING;
     }
     outBufferQ_.SetActive(true);
@@ -366,8 +381,8 @@ Status VideoFfmpegEncoderPlugin::Flush()
 Status VideoFfmpegEncoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
 {
     MEDIA_LOG_D("queue input buffer");
-    FALSE_RET_V_MSG_E(!inputBuffer->IsEmpty() || (inputBuffer->flag & BUFFER_FLAG_EOS),
-                      Status::ERROR_INVALID_DATA, "encoder does not support fd buffer");
+    FALSE_RETURN_V_MSG_E(!inputBuffer->IsEmpty() || (inputBuffer->flag & BUFFER_FLAG_EOS),
+        Status::ERROR_INVALID_DATA, "encoder does not support fd buffer");
     Status ret = Status::OK;
     {
         OSAL::ScopedLock lock(avMutex_);
@@ -381,17 +396,17 @@ Status VideoFfmpegEncoderPlugin::FillAvFrame(const std::shared_ptr<Buffer>& inpu
 {
     const uint8_t *data = inputBuffer->GetMemory()->GetReadOnlyData();
     auto bufferMeta = inputBuffer->GetBufferMeta();
-    FALSE_RET_V_MSG_W(bufferMeta != nullptr && bufferMeta->GetType() == BufferMetaType::VIDEO,
-                      Status::ERROR_INVALID_PARAMETER, "invalid buffer meta");
+    FALSE_RETURN_V_MSG_W(bufferMeta != nullptr && bufferMeta->GetType() == BufferMetaType::VIDEO,
+        Status::ERROR_INVALID_PARAMETER, "invalid buffer meta");
     std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
-    FALSE_RET_V_MSG_W(pixelFormat_ == videoMeta->videoPixelFormat, Status::ERROR_INVALID_PARAMETER,
-                      "pixel format change");
+    FALSE_RETURN_V_MSG_W(pixelFormat_ == videoMeta->videoPixelFormat, Status::ERROR_INVALID_PARAMETER,
+        "pixel format change");
     cachedFrame_->format = ConvertPixelFormatToFFmpeg(videoMeta->videoPixelFormat);
     cachedFrame_->width = videoMeta->width;
     cachedFrame_->height = videoMeta->height;
     if (!videoMeta->stride.empty()) {
         for (uint32_t i = 0; i < videoMeta->planes; i++) {
-            cachedFrame_->linesize[i] = videoMeta->stride[i];
+            cachedFrame_->linesize[i] = static_cast<int32_t>(videoMeta->stride[i]);
         }
     }
     int32_t ySize = cachedFrame_->linesize[0] * AlignUp(cachedFrame_->height, DEFAULT_ALIGN);
@@ -409,15 +424,18 @@ Status VideoFfmpegEncoderPlugin::FillAvFrame(const std::shared_ptr<Buffer>& inpu
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     cachedFrame_->pts = ConvertTimeToFFmpeg(
-        static_cast<uint64_t>(inputBuffer->pts) / avCodecContext_->ticks_per_frame,
+        static_cast<uint64_t>(HstTime2Us(inputBuffer->pts)) / avCodecContext_->ticks_per_frame,
         avCodecContext_->time_base);
+    MEDIA_LOG_D("hst pts: " PUBLIC_LOG_U64 " ns, ffmpeg pts: " PUBLIC_LOG_D64
+                " us, den: " PUBLIC_LOG_D32 ", num: " PUBLIC_LOG_D32,
+                inputBuffer->pts, cachedFrame_->pts, avCodecContext_->time_base.den, avCodecContext_->time_base.num);
     return Status::OK;
 }
 
 Status VideoFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer)
 {
-    FALSE_RET_V_MSG_E(state_ == State::RUNNING,
-                      Status::ERROR_WRONG_STATE, "queue input buffer in wrong state");
+    FALSE_RETURN_V_MSG_E(state_ == State::RUNNING,
+        Status::ERROR_WRONG_STATE, "queue input buffer in wrong state");
     bool isEos = false;
     if (inputBuffer == nullptr || (inputBuffer->flag & BUFFER_FLAG_EOS) != 0) {
         isEos = true;
@@ -442,14 +460,15 @@ Status VideoFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
 
 Status VideoFfmpegEncoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& packetBuffer)
 {
-    FALSE_RET_V_MSG_E(cachedPacket_->data != nullptr, Status::ERROR_UNKNOWN,
-                      "avcodec_receive_packet() packet data is empty");
+    FALSE_RETURN_V_MSG_E(cachedPacket_->data != nullptr, Status::ERROR_UNKNOWN,
+                         "avcodec_receive_packet() packet data is empty");
     auto frameBufferMem = packetBuffer->GetMemory();
-    FALSE_RET_V_MSG_E(frameBufferMem->Write(cachedPacket_->data, cachedPacket_->size, 0) ==
-                      static_cast<size_t>(cachedPacket_->size), Status::ERROR_UNKNOWN,
-                      "copy packet data to buffer fail");
+    FALSE_RETURN_V_MSG_E(frameBufferMem->Write(cachedPacket_->data, cachedPacket_->size, 0) ==
+                         static_cast<size_t>(cachedPacket_->size), Status::ERROR_UNKNOWN,
+                         "copy packet data to buffer fail");
     if (cachedPacket_->flags & AV_PKT_FLAG_KEY) {
         MEDIA_LOG_D("It is key frame");
+        packetBuffer->flag |= BUFFER_FLAG_KEY_FRAME;
     }
     packetBuffer->pts =
             static_cast<uint64_t>(ConvertTimeFromFFmpeg(cachedPacket_->pts, avCodecContext_->time_base));
@@ -457,16 +476,19 @@ Status VideoFfmpegEncoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& 
             static_cast<uint64_t>(ConvertTimeFromFFmpeg(cachedPacket_->dts, avCodecContext_->time_base));
 #ifdef DUMP_RAW_DATA
     if (dumpFd_) {
-        std::fwrite(reinterpret_cast<const char *>(cachedPacket_->data), cachedPacket_->size, 1, dumpFd_);
+        std::fwrite(reinterpret_cast<const char *>(cachedPacket_->data), 1, cachedPacket_->size, dumpFd_);
     }
 #endif
+    MEDIA_LOG_D("receive one pkt, hst pts: " PUBLIC_LOG_U64 " ns, ffmpeg pts: " PUBLIC_LOG_D64
+                " us, duration: " PUBLIC_LOG_D64 ", pos: " PUBLIC_LOG_D64,
+                packetBuffer->pts, cachedPacket_->pts, cachedPacket_->duration, cachedPacket_->pos);
     return Status::OK;
 }
 
 Status VideoFfmpegEncoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffer>& packetBuffer)
 {
-    FALSE_RET_V_MSG_E(state_ == State::RUNNING, Status::ERROR_WRONG_STATE,
-                      "encode task in wrong state");
+    FALSE_RETURN_V_MSG_E(state_ == State::RUNNING, Status::ERROR_WRONG_STATE,
+        "encode task in wrong state");
     Status status;
     auto ret = avcodec_receive_packet(avCodecContext_.get(), cachedPacket_.get());
     if (ret >= 0) {
@@ -474,6 +496,7 @@ Status VideoFfmpegEncoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
     } else if (ret == AVERROR_EOF) {
         MEDIA_LOG_I("eos received");
         packetBuffer->GetMemory()->Reset();
+        packetBuffer->flag |= BUFFER_FLAG_EOS;
         avcodec_flush_buffers(avCodecContext_.get());
         status = Status::END_OF_STREAM;
     } else {
@@ -487,9 +510,9 @@ Status VideoFfmpegEncoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
 void VideoFfmpegEncoderPlugin::ReceiveBuffer()
 {
     std::shared_ptr<Buffer> packetBuffer = outBufferQ_.Pop();
-    FALSE_RET_MSG(packetBuffer != nullptr && !packetBuffer->IsEmpty() &&
-                  packetBuffer->GetBufferMeta()->GetType() == BufferMetaType::VIDEO,
-                  "cannot fetch valid buffer to output");
+    FALSE_RETURN_MSG(packetBuffer != nullptr && !packetBuffer->IsEmpty() &&
+        packetBuffer->GetBufferMeta()->GetType() == BufferMetaType::VIDEO,
+        "cannot fetch valid buffer to output");
     Status status;
     {
         OSAL::ScopedLock lock(avMutex_);

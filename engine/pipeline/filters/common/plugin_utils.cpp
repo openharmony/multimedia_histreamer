@@ -18,12 +18,13 @@
 #include "plugin_utils.h"
 
 #include <cstdarg>
+#include <sstream>
 
 #include "foundation/log.h"
 #include "pipeline/core/plugin_attr_desc.h"
 
 namespace {
-constexpr int32_t MAX_BUF_LEN = 256;
+constexpr int32_t MAX_BUF_LEN = 320; // 320 buffer size
 #define RETURN_IF_FAILED(exec, errVal, retVal) \
 do { \
     auto res = exec; \
@@ -80,11 +81,11 @@ int32_t IntervalCapKeyStringiness(char* buf, size_t maxLen, const char* name, co
     auto item = Plugin::AnyCast<Plugin::IntervalCapability<T>>(&val);
     RETURN_IF_FAILED(Stringiness(buf + pos, maxLen - pos, name, item->first), -1, ret);
     pos += ret;
-    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos , maxLen - pos, ", "), -1, ret);
+    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos, maxLen - pos, ", "), -1, ret);
     pos += ret;
     RETURN_IF_FAILED(Stringiness(buf + pos, maxLen - pos, name, item->second), -1, ret);
     pos += ret;
-    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos , maxLen - pos, "]"), -1, ret);
+    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos, maxLen - pos, "]"), -1, ret);
     return pos + ret;
 }
 
@@ -104,14 +105,14 @@ int32_t DiscreteCapKeyStringiness(char* buf, size_t maxLen, const char* name, co
     for (; i < length - 1; i++) {
         RETURN_IF_FAILED(Stringiness<T>(buf + pos, maxLen - pos, name, item->at(i)), -1, ret);
         pos += ret;
-        RETURN_IF_FAILED(snprintf_truncated_s(buf + pos , maxLen - pos, ", "), -1, ret);
+        RETURN_IF_FAILED(snprintf_truncated_s(buf + pos, maxLen - pos, ", "), -1, ret);
         pos += ret;
     }
     if (i == length -1) {
         RETURN_IF_FAILED(Stringiness<T>(buf + pos, maxLen - pos, name, item->at(i)), -1, ret);
         pos += ret;
     }
-    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos , maxLen - pos, "}"), -1, ret);
+    RETURN_IF_FAILED(snprintf_truncated_s(buf + pos, maxLen - pos, "}"), -1, ret);
     return pos + ret;
 }
 
@@ -159,12 +160,6 @@ template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const uint64_t& val)
 {
     return snprintf_truncated_s(buf, maxLen, "%" PRIu64, val);
-}
-
-template<>
-MEDIA_UNUSED int32_t Stringiness(char* buf, size_t maxLen, const char* name, const std::vector<int8_t>& val)
-{
-    return snprintf_truncated_s(buf, maxLen, "%p", val.data());
 }
 
 template<>
@@ -218,13 +213,20 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::Au
 }
 
 template<>
-int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::ThreadMode& val)
+int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::CodecConfig& val)
 {
-    if (!Pipeline::HasThreadModeNameStr(val)) {
-        MEDIA_LOG_W("Thread Mode " PUBLIC_LOG_U8 " is unknown", static_cast<uint8_t>(val));
-        return 0;
+    auto int2hex = [] (int i) {
+        std::stringstream ss {};
+        ss << "0x"<< std::hex << i;
+        return ss.str();
+    };
+    std::string codeConfigStr;
+    for (auto var: val) {
+        codeConfigStr += int2hex(var);
+        codeConfigStr += ", ";
     }
-    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::GetThreadModeNameStr(val));
+    codeConfigStr = codeConfigStr.substr(0, codeConfigStr.find_last_of(','));
+    return snprintf_truncated_s(buf, maxLen, "{%s}", codeConfigStr.c_str());
 }
 
 template<typename T>
@@ -274,6 +276,7 @@ std::map<Plugin::MetaID, CapStrnessFunc> g_metaStrnessMap = {
     {Plugin::MetaID::VIDEO_HEIGHT, MetaIDStringiness<uint32_t>},
     {Plugin::MetaID::VIDEO_FRAME_RATE, MetaIDStringiness<uint32_t>},
     {Plugin::MetaID::VIDEO_PIXEL_FORMAT, MetaIDStringiness<Plugin::VideoPixelFormat>},
+    {Plugin::MetaID::BITS_PER_CODED_SAMPLE, MetaIDStringiness<uint32_t>},
 };
 }
 
@@ -292,7 +295,7 @@ bool AssignParameterIfMatch(Tag tag, T& ret, const Plugin::ValueType& val)
                         GetTagStrName(tag), GetTagTypeStrName(tag));
         }
     } else {
-        MEDIA_LOG_I("tag " PUBLIC_LOG_D32 "is not in map, may be update it?", tag);
+        MEDIA_LOG_I("tag " PUBLIC_LOG_D32 " is not in map, may be update it?", tag);
     }
     return false;
 }
@@ -330,6 +333,7 @@ OHOS::Media::ErrorCode TranslatePluginStatus(Plugin::Status pluginError)
         {Plugin::Status::ERROR_NOT_EXISTED, ErrorCode::ERROR_NOT_EXISTED},
         {Plugin::Status::ERROR_AGAIN, ErrorCode::ERROR_AGAIN},
         {Plugin::Status::ERROR_PERMISSION_DENIED, ErrorCode::ERROR_PERMISSION_DENIED},
+        {Plugin::Status::ERROR_DELAY_READY, ErrorCode::SUCCESS},
     };
     auto ite = g_transTable.find(pluginError);
     if (ite == g_transTable.end()) {
@@ -434,7 +438,7 @@ std::string Capability2String(const Capability& capability)
         {Capability::Key::AUDIO_AAC_LEVEL, CapKeyStringiness<uint32_t>},
         {Capability::Key::AUDIO_AAC_STREAM_FORMAT, CapKeyStringiness<Plugin::AudioAacStreamFormat>},
         {Capability::Key::VIDEO_PIXEL_FORMAT, CapKeyStringiness<Plugin::VideoPixelFormat>},
-        {Capability::Key::THREAD_MODE, CapKeyStringiness<Plugin::ThreadMode>},
+        {Capability::Key::BITS_PER_CODED_SAMPLE, CapKeyStringiness<uint32_t>},
     };
     char buffer[MAX_BUF_LEN + 1] = {0}; // one more is for \0
     int pos = 0;

@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <map>
+#include "foundation/osal/thread/task.h"
 #include "utils/blocking_queue.h"
 #include "plugin/interface/codec_plugin.h"
 
@@ -99,6 +100,10 @@ private:
     Status ReceiveBufferLocked(const std::shared_ptr<Buffer>& ioInfo);
 
     Status SendOutputBuffer();
+
+    void NotifyInputBufferDone(const std::shared_ptr<Buffer>& input);
+
+    void NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output);
 
     mutable OSAL::Mutex parameterMutex_ {};
     std::map<Tag, ValueType> audioParameter_ {};

@@ -77,7 +77,6 @@ private:
     ErrorCode ConfigureToStart();
     ErrorCode AddTrackThenConfigure(const std::pair<std::string, Plugin::Meta>& meta);
 
-    void SendBuffer(const std::shared_ptr<AVBuffer>& buffer, int64_t offset);
     bool AllTracksEos();
     void UpdateEosState(const std::string& inPort);
 
@@ -92,7 +91,7 @@ private:
     std::shared_ptr<MuxerDataSink> muxerDataSink_;
 
     OSAL::Mutex pushDataMutex_;
-    std::atomic<bool> eos_ {false};
+    bool eos_ {false};
     std::atomic<int> eosTrackCnt {0};
 };
 } // Pipeline

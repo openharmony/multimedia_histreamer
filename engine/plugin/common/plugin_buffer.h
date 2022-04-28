@@ -132,8 +132,7 @@ public:
     /// Destructor
     virtual ~Memory() = default;
 
-    // Todo: Add the documentation description.
-    size_t GetCapacity();
+    virtual size_t GetCapacity();
 
     size_t GetSize();
 

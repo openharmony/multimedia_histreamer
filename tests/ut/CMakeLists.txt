@@ -103,5 +103,5 @@ else ()
             ${MOCKCPP_DIR}/lib/libmockcpp.a
             )
 endif ()
-add_test(Test HiStreamerUtTests)
+add_test(Test histreamer_ut)
 enable_testing()

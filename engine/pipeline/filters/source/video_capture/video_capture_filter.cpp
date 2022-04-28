@@ -91,6 +91,13 @@ ErrorCode VideoCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value
     switch (tag) {
         case Tag::SRC_INPUT_TYPE:
             inputTypeSpecified_ = AssignParameterIfMatch(tag, inputType_, value);
+            if (inputType_ == Plugin::SrcInputType::VID_SURFACE_YUV) {
+                pixelFormat_ = Plugin::VideoPixelFormat::YUV420P;
+            } else if (inputType_ == Plugin::SrcInputType::VID_SURFACE_RGB) {
+                pixelFormat_ = Plugin::VideoPixelFormat::RGBA;
+            } else {
+                MEDIA_LOG_W("unsupport inputType: " PUBLIC_LOG_U32, inputType_);
+            }
             break;
         case Tag::VIDEO_WIDTH:
             (void)AssignParameterIfMatch(tag, videoWidth_, value);
@@ -240,6 +247,7 @@ ErrorCode VideoCaptureFilter::Resume()
 ErrorCode VideoCaptureFilter::SendEos()
 {
     MEDIA_LOG_I("SendEos entered.");
+    Stop();
     auto eosBuffer = std::make_shared<AVBuffer>();
     eosBuffer->flag |= BUFFER_FLAG_EOS;
     SendBuffer(eosBuffer);
@@ -268,10 +276,11 @@ void VideoCaptureFilter::ReadLoop()
     AVBufferPtr bufferPtr = std::make_shared<AVBuffer>(BufferMetaType::VIDEO);
     ret = plugin_->Read(bufferPtr, bufferSize);
     if (ret != Status::OK) {
-        SendEos();
+        MEDIA_LOG_D("read buffer from plugin fail: " PUBLIC_LOG_U32, ret);
         return;
     }
     SendBuffer(bufferPtr);
+    OSAL::SleepFor(10); // 10: sleep 10ms when read one frame
 }
 
 ErrorCode VideoCaptureFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& info, const std::string& name,
@@ -326,7 +335,7 @@ ErrorCode VideoCaptureFilter::FindPlugin()
     std::set<std::string> nameList = pluginManager.ListPlugins(PluginType::SOURCE);
     for (const std::string& name : nameList) {
         std::shared_ptr<PluginInfo> info = pluginManager.GetPluginInfo(PluginType::SOURCE, name);
-        MEDIA_LOG_I("name: " PUBLIC_LOG "s, info->name: " PUBLIC_LOG_S, name.c_str(), info->name.c_str());
+        MEDIA_LOG_I("name: " PUBLIC_LOG_S ", info->name: " PUBLIC_LOG_S, name.c_str(), info->name.c_str());
         auto val = info->extra[PLUGIN_INFO_EXTRA_INPUT_TYPE];
         if (val.SameTypeWith(typeid(Plugin::SrcInputType))) {
             auto supportInputType = OHOS::Media::Plugin::AnyCast<Plugin::SrcInputType>(val);

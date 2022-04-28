@@ -27,6 +27,12 @@ void ClockManager::UnRegisterProvider(const std::shared_ptr<ClockProvider> &prov
     std::shared_ptr<ClockProvider> ptrRest {nullptr};
     providerProxy_.SetStub(ptrRest);
 }
+
+void ClockManager::ClearProviders()
+{
+    std::shared_ptr<ClockProvider> ptrRest {nullptr};
+    providerProxy_.SetStub(ptrRest);
+}
 } // Pipeline
 } // Media
 } // OHOS

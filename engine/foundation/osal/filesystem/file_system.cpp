@@ -17,13 +17,13 @@
 #include "file_system.h"
 #ifdef _WIN32
 #include <direct.h>
+#include <fcntl.h>
 #else
 #include <sys/types.h>
 #include <unistd.h>
 #endif
 #include <cstring>
 #include <cerrno>
-#include <sys/stat.h>
 #include "foundation/log.h"
 
 #ifndef _WIN32
@@ -37,6 +37,28 @@ bool FileSystem::IsRegularFile(const std::string& path)
 {
     struct stat s {};
     return (stat(path.c_str(), &s) == 0) && S_ISREG(s.st_mode);
+}
+
+bool FileSystem::IsFdValid(int32_t fd, struct stat& s)
+{
+    return fstat(fd, &s) == 0;
+}
+
+bool FileSystem::IsRegularFile(int32_t fd)
+{
+    struct stat s {};
+    return IsFdValid(fd, s) && S_ISREG(s.st_mode);
+}
+
+bool FileSystem::IsSocketFile(int32_t fd)
+{
+    struct stat s {};
+    return IsFdValid(fd, s) && S_ISSOCK(s.st_mode);
+}
+
+bool FileSystem::IsSeekable(int32_t fd)
+{
+    return IsRegularFile(fd) && lseek(fd, 0, SEEK_CUR) != -1;
 }
 
 bool FileSystem::IsDirectory(const std::string& path)

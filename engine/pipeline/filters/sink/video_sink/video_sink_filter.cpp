@@ -25,8 +25,10 @@
 #include "osal/utils/util.h"
 #include "pipeline/core/clock_manager.h"
 #include "plugin/common/plugin_time.h"
-#include "plugin/common/surface_allocator.h"
 #include "utils/steady_clock.h"
+#ifndef OHOS_LITE
+#include "plugin/common/surface_allocator.h"
+#endif
 
 namespace OHOS {
 namespace Media {
@@ -37,6 +39,8 @@ const uint32_t VSINK_DEFAULT_BUFFER_NUM = 8;
 
 VideoSinkFilter::VideoSinkFilter(const std::string& name) : FilterBase(name)
 {
+    curPts_ = 0;
+    refreshTime_ = 0;
     MEDIA_LOG_I("VideoSinkFilter ctor called...");
 }
 
@@ -96,7 +100,7 @@ ErrorCode VideoSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
 
 void VideoSinkFilter::HandleNegotiateParams(const Plugin::TagMap& upstreamParams, Plugin::TagMap& downstreamParams)
 {
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+#ifndef OHOS_LITE
     Plugin::Tag tag = Plugin::Tag::VIDEO_MAX_SURFACE_NUM;
     auto ite = upstreamParams.find(tag);
     if (ite != std::end(upstreamParams)) {
@@ -109,6 +113,7 @@ void VideoSinkFilter::HandleNegotiateParams(const Plugin::TagMap& upstreamParams
     }
     auto pluginAllocator = plugin_->GetAllocator();
     if (pluginAllocator != nullptr && pluginAllocator->GetMemoryType() == Plugin::MemoryType::SURFACE_BUFFER) {
+        MEDIA_LOG_D("plugin provide surface allocator");
         auto allocator = Plugin::ReinterpretPointerCast<Plugin::SurfaceAllocator>(pluginAllocator);
         downstreamParams.emplace(std::make_pair(Tag::BUFFER_ALLOCATOR, allocator));
     }
@@ -127,12 +132,12 @@ bool VideoSinkFilter::CreateVideoSinkPlugin(const std::shared_ptr<Plugin::Plugin
         }
         plugin_->Deinit();
     }
-
     plugin_ = Plugin::PluginManager::Instance().CreateVideoSinkPlugin(selectedPluginInfo->name);
     if (plugin_ == nullptr) {
         MEDIA_LOG_E("cannot create plugin " PUBLIC_LOG_S, selectedPluginInfo->name.c_str());
         return false;
     }
+#ifndef OHOS_LITE
     if (surface_ != nullptr) {
         auto ret = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_SURFACE, surface_));
         if (ret != ErrorCode::SUCCESS) {
@@ -140,9 +145,10 @@ bool VideoSinkFilter::CreateVideoSinkPlugin(const std::shared_ptr<Plugin::Plugin
             return false;
         }
     }
+#endif
     auto err = TranslatePluginStatus(plugin_->Init());
     if (err != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("plugin " PUBLIC_LOG "s init error", selectedPluginInfo->name.c_str());
+        MEDIA_LOG_E("plugin " PUBLIC_LOG_S " init error", selectedPluginInfo->name.c_str());
         return false;
     }
     pluginInfo_ = selectedPluginInfo;
@@ -167,7 +173,7 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort,
     }
     // always use first one
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = candidatePlugins[0].first;
-    MEDIA_LOG_E("select plugin " PUBLIC_LOG_S, selectedPluginInfo->name.c_str());
+    MEDIA_LOG_I("select plugin " PUBLIC_LOG_S, selectedPluginInfo->name.c_str());
     for (const auto& onCap : selectedPluginInfo->inCaps) {
         if (onCap.keys.count(CapabilityID::VIDEO_PIXEL_FORMAT) == 0) {
             MEDIA_LOG_E("each in caps of sink must contains valid video pixel format");
@@ -180,6 +186,7 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort,
     }
     HandleNegotiateParams(upstreamParams, downstreamParams);
     PROFILE_END("video sink negotiate end");
+    MEDIA_LOG_D("video sink negotiate success");
     return true;
 }
 
@@ -209,17 +216,17 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Plu
     uint32_t width;
     if (meta->GetUint32(Plugin::MetaID::VIDEO_WIDTH, width)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_WIDTH, width));
-        RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Set plugin width fail");
+        FAIL_RETURN_MSG(err, "Set plugin width fail");
     }
     uint32_t height;
     if (meta->GetUint32(Plugin::MetaID::VIDEO_HEIGHT, height)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_HEIGHT, height));
-        RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Set plugin height fail");
+        FAIL_RETURN_MSG(err, "Set plugin height fail");
     }
     Plugin::VideoPixelFormat pixelFormat;
     if (meta->GetData<Plugin::VideoPixelFormat>(Plugin::MetaID::VIDEO_PIXEL_FORMAT, pixelFormat)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_PIXEL_FORMAT, pixelFormat));
-        RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "Set plugin pixel format fail");
+        FAIL_RETURN_MSG(err, "Set plugin pixel format fail");
     }
     MEDIA_LOG_D("width: " PUBLIC_LOG_U32 ", height: " PUBLIC_LOG_U32 ", pixelFormat: " PUBLIC_LOG_U32,
                 width, height, pixelFormat);
@@ -228,36 +235,62 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Plu
 
 ErrorCode VideoSinkFilter::ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Init()), "Init plugin error");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Init()), "Init plugin error");
     plugin_->SetCallback(this);
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(ConfigurePluginParams(meta), "Configure plugin params fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Start()), "Start plugin fail");
+    FAIL_RETURN_MSG(ConfigurePluginParams(meta), "Configure plugin params fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Start()), "Start plugin fail");
     return ErrorCode::SUCCESS;
 }
 
-bool VideoSinkFilter::DoSync(int64_t pts) const
+void VideoSinkFilter::SyncVideoOnly(int64_t pts)
 {
-    int64_t  delta {0};
-    int64_t  tempOut {0};
+    if ((curPts_ != 0) && (curPts_ != pts)) {
+        int64_t deltaTime =
+                Plugin::HstTime2Ms((pts > curPts_) ? (pts - curPts_) : (pts + (INT64_MAX - curPts_)));
+        if (deltaTime < 70) { // 70 ms
+            refreshTime_ = deltaTime;
+        }
+    }
+    if (refreshTime_) {
+        OHOS::Media::OSAL::SleepFor(refreshTime_);
+    }
+}
+
+bool VideoSinkFilter::DoSync(const AVBufferPtr& buffer)
+{
+    uint64_t latencyNano = 0;
+    Plugin::Status status = plugin_->GetLatency(latencyNano);
+    if (status != Plugin::Status::OK) {
+        MEDIA_LOG_E("Video sink GetLatency fail: " PUBLIC_LOG_D32,
+                    CppExt::to_underlying(TranslatePluginStatus(status)));
+        latencyNano = 0;
+    }
+    if (INT64_MAX - static_cast<int64_t>(latencyNano) < static_cast<int64_t>(buffer->pts)) {
+        MEDIA_LOG_E("Video pts(" PUBLIC_LOG_U64 ") + latency overflow.", buffer->pts);
+        return false;
+    }
+    int64_t delta = 0;
+    int64_t tempOut = 0;
+    int64_t pts = static_cast<int64_t>(buffer->pts) + static_cast<int64_t>(latencyNano);
     if (frameCnt_ == 0 || pts == 0) {
         return true;
     }
     if (ClockManager::Instance().GetProvider().CheckPts(pts, delta) != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("DoSync CheckPts fail");
-        return false;
+        SyncVideoOnly(pts);
+        return true;
     }
     if (delta > 0) {
         tempOut = Plugin::HstTime2Ms(delta);
         if (tempOut > 100) { // 100ms
-            MEDIA_LOG_D("DoSync early " PUBLIC_LOG_D64 " ms", tempOut);
+            MEDIA_LOG_D("DoSync early " PUBLIC_LOG_D64 " ms, wait", tempOut);
             OHOS::Media::OSAL::SleepFor(tempOut);
             return true;
         }
     } else if (delta < 0) {
         tempOut = Plugin::HstTime2Ms(-delta);
         if (tempOut > 40) { // 40ms drop frame
-            MEDIA_LOG_E("DoSync later " PUBLIC_LOG_D64 " ms", tempOut);
+            MEDIA_LOG_D("DoSync later " PUBLIC_LOG_D64 " ms, drop", tempOut);
             return false;
         }
     }
@@ -266,34 +299,22 @@ bool VideoSinkFilter::DoSync(int64_t pts) const
 
 void VideoSinkFilter::RenderFrame()
 {
-    uint64_t latencyNano {0};
     MEDIA_LOG_D("RenderFrame called");
-    auto oneBuffer = inBufQueue_->Pop();
-    if (oneBuffer == nullptr) {
-        MEDIA_LOG_W("Video sink find nullptr in esBufferQ");
+    auto frameBuffer = inBufQueue_->Pop();
+    if (frameBuffer == nullptr) {
+        MEDIA_LOG_D("Video sink find nullptr in esBufferQ");
         return;
     }
-
-    Plugin::Status status = plugin_->GetLatency(latencyNano);
-    if (status != Plugin::Status::OK) {
-        MEDIA_LOG_E("Video sink GetLatency fail errorcode = " PUBLIC_LOG_D32,
-                    CppExt::to_underlying(TranslatePluginStatus(status)));
+    if (!DoSync(frameBuffer)) {
         return;
     }
-
-    if (INT64_MAX - latencyNano < oneBuffer->pts) {
-        MEDIA_LOG_E("Video pts(" PUBLIC_LOG_U64 ") + latency overflow.", oneBuffer->pts);
-        return;
-    }
-
-    if (!DoSync(oneBuffer->pts + latencyNano)) {
-        return;
-    }
-    auto err = plugin_->Write(oneBuffer);
+    curPts_ = frameBuffer->pts;
+    auto err = plugin_->Write(frameBuffer);
     if (err != Plugin::Status::OK) {
-        MEDIA_LOG_E("Video sink write failed");
+        MEDIA_LOG_E("write to plugin fail: " PUBLIC_LOG_U32, err);
         return;
     }
+    MEDIA_LOG_D("RenderFrame success");
 }
 
 ErrorCode VideoSinkFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
@@ -318,7 +339,7 @@ ErrorCode VideoSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
         return ErrorCode::SUCCESS;
     }
 
-    if (buffer->GetMemory()->GetSize() == 0) {
+    if (buffer->flag & BUFFER_FLAG_EOS) {
         Event event{
             .srcFilter = name_,
             .type = EventType::EVENT_COMPLETE,
@@ -357,8 +378,8 @@ ErrorCode VideoSinkFilter::Start()
 ErrorCode VideoSinkFilter::Stop()
 {
     MEDIA_LOG_I("VideoSinkFilter stop called.");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(FilterBase::Stop(), "Video sink stop fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Stop()), "Stop plugin fail");
+    FAIL_RETURN_MSG(FilterBase::Stop(), "Video sink stop fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Stop()), "Stop plugin fail");
     if (pushThreadIsBlocking_.load()) {
         startWorkingCondition_.NotifyOne();
     }
@@ -374,8 +395,8 @@ ErrorCode VideoSinkFilter::Pause()
         MEDIA_LOG_W("video sink cannot pause when not working");
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(FilterBase::Pause(), "Video sink pause fail");
-    RETURN_ERR_MESSAGE_LOG_IF_FAIL(TranslatePluginStatus(plugin_->Pause()), "Pause plugin fail");
+    FAIL_RETURN_MSG(FilterBase::Pause(), "Video sink pause fail");
+    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Pause()), "Pause plugin fail");
     inBufQueue_->SetActive(false);
     renderTask_->Pause();
     MEDIA_LOG_D("Video sink filter pause end");
@@ -427,7 +448,7 @@ void VideoSinkFilter::FlushEnd()
     }
 }
 
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+#ifndef OHOS_LITE
 ErrorCode VideoSinkFilter::SetVideoSurface(sptr<Surface> surface)
 {
     if (!surface) {
@@ -443,6 +464,7 @@ ErrorCode VideoSinkFilter::SetVideoSurface(sptr<Surface> surface)
     } else {
         surface_ = surface;
     }
+    MEDIA_LOG_D("SetVideoSurface success");
     return ErrorCode::SUCCESS;
 }
 #endif

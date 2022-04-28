@@ -23,8 +23,8 @@ MediaSource::MediaSource(std::string uri)
 {
 }
 
-MediaSource::MediaSource(std::shared_ptr<DataStream> dataStream)
-    : type_(SourceType::SOURCE_TYPE_STREAM), dataStream_(std::move(dataStream))
+MediaSource::MediaSource(std::shared_ptr<DataConsumer> dataStream)
+    : type_(SourceType::SOURCE_TYPE_STREAM), dataConsumer_(std::move(dataStream))
 {
 }
 
@@ -48,9 +48,9 @@ const std::map<std::string, std::string> &MediaSource::GetSourceHeader() const
     return header_;
 }
 
-std::shared_ptr<DataStream> MediaSource::GetDataStream() const
+std::shared_ptr<DataConsumer> MediaSource::GetDataConsumer() const
 {
-    return dataStream_;
+    return dataConsumer_;
 }
 } // namespace Plugin
 } // namespace Media

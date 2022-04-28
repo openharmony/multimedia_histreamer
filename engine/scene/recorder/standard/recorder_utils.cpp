@@ -98,6 +98,7 @@ bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::Meta& e
         case OHOS::Media::VideoCodecFormat::H264:
             encoderMeta.SetString(Plugin::MetaID::MIME, MEDIA_MIME_VIDEO_H264);
             encoderMeta.SetData(Plugin::MetaID::VIDEO_H264_PROFILE, Plugin::VideoH264Profile::BASELINE);
+            encoderMeta.SetUint32(Plugin::MetaID::VIDEO_H264_LEVEL, 32); // 32: LEVEL 3.2
             break;
         case OHOS::Media::VideoCodecFormat::MPEG4:
             encoderMeta.SetString(Plugin::MetaID::MIME, MEDIA_MIME_VIDEO_MPEG4);

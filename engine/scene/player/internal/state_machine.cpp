@@ -16,6 +16,8 @@
 #define HST_LOG_TAG "StateMachine"
 
 #include "state_machine.h"
+#include <thread>
+#include <chrono>
 #include "init_state.h"
 #include "utils/steady_clock.h"
 
@@ -36,7 +38,10 @@ StateMachine::StateMachine(PlayExecutor& executor)
 
 void StateMachine::Stop()
 {
-    MEDIA_LOG_D("Stop called.");
+    MEDIA_LOG_I("StateMachine stop called.");
+    while (!jobs_.Empty()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 10
+    }
     jobs_.SetActive(false);
     Task::Stop();
 }
@@ -63,11 +68,11 @@ ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param) const
 
 ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param)
 {
-    constexpr int timeoutMs = 5000;
+    constexpr int timeoutMs = 20000;
     ErrorCode errorCode = ErrorCode::ERROR_TIMED_OUT;
     if (!intentSync_.WaitFor(
         intent, [this, intent, param] { SendEventAsync(intent, param); }, timeoutMs, errorCode)) {
-        MEDIA_LOG_E("SendEvent timeout, intent: " PUBLIC_LOG "d", static_cast<int>(intent));
+        MEDIA_LOG_E("SendEvent timeout, intent: " PUBLIC_LOG_D32, static_cast<int>(intent));
     }
     return errorCode;
 }
@@ -79,7 +84,7 @@ ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param) 
 
 ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param)
 {
-    MEDIA_LOG_D("SendEventAsync, intent: " PUBLIC_LOG "d", static_cast<int>(intent));
+    MEDIA_LOG_D("SendEventAsync, intent: " PUBLIC_LOG_D32, static_cast<int>(intent));
     jobs_.Push([this, intent, param]() -> Action { return ProcessIntent(intent, param); });
     return ErrorCode::SUCCESS;
 }
@@ -204,8 +209,8 @@ ErrorCode StateMachine::TransitionTo(const std::shared_ptr<State>& state)
 
 void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode result)
 {
-    MEDIA_LOG_D("OnIntentExecuted, curState: " PUBLIC_LOG "s, intent: " PUBLIC_LOG "d, action: " PUBLIC_LOG
-                "d, result: " PUBLIC_LOG "d", curState_->GetName().c_str(),
+    MEDIA_LOG_D("OnIntentExecuted, curState: " PUBLIC_LOG_S ", intent: " PUBLIC_LOG_D32 ", action: " PUBLIC_LOG
+                "d, result: " PUBLIC_LOG_D32, curState_->GetName().c_str(),
                 static_cast<int>(intent), static_cast<int>(action), static_cast<int>(result));
     if (action == Action::ACTION_PENDING) {
         return;
@@ -214,6 +219,11 @@ void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode resu
         intentSync_.Notify(Intent::PLAY, result);
     } else {
         intentSync_.Notify(intent, result);
+    }
+    if (intent == Intent::STOP) {
+        MEDIA_LOG_I("OnIntentExecuted handle stop intent, stop state machine.");
+        jobs_.SetActive(false);
+        Task::StopAsync();
     }
 }
 } // namespace Media
