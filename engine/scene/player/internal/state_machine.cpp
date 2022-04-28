@@ -16,10 +16,9 @@
 #define HST_LOG_TAG "StateMachine"
 
 #include "state_machine.h"
-#include <thread>
-#include <chrono>
 #include "init_state.h"
 #include "utils/steady_clock.h"
+#include "osal/utils/util.h"
 
 namespace OHOS {
 namespace Media {
@@ -40,7 +39,7 @@ void StateMachine::Stop()
 {
     MEDIA_LOG_I("StateMachine stop called.");
     while (!jobs_.Empty()) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 10
+        OSAL::SleepFor(10); // 10
     }
     jobs_.SetActive(false);
     Task::Stop();
