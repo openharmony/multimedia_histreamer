@@ -20,7 +20,6 @@
 #include <map>
 #include <set>
 #include "ffmpeg_au_enc_config.h"
-#include "plugin/common/plugin_caps_builder.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
 namespace {
@@ -72,10 +71,9 @@ void UnRegisterAudioEncoderPlugin()
     codecMap.clear();
 }
 
-void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
+void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
 {
-    CapabilityBuilder capBuilder;
-    capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
+    Capability inputCaps(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
     size_t index = 0;
     if (codec->supported_samplerates != nullptr) {
         DiscreteCapability<uint32_t> values;
@@ -83,37 +81,30 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
             values.push_back(codec->supported_samplerates[index]);
         }
         if (index) {
-            capBuilder.SetAudioSampleRateList(values);
+            inputCaps.AppendDiscreteKeys(Capability::Key::AUDIO_SAMPLE_RATE, values);
         }
     }
-    definition.inCaps.push_back(capBuilder.Build());
-}
+    definition.inCaps.push_back(inputCaps);
 
-void UpdateOutCaps(const AVCodec* codec, CodecPluginDef& definition)
-{
-    CapabilityBuilder capBuilder;
+    Capability outputCaps;
     switch (codec->id) {
         case AV_CODEC_ID_AAC:
-            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC)
-                .SetAudioMpegVersion(4) // 4
-                .SetAudioAacProfile(AudioAacProfile::LC)
-                .SetAudioAacStreamFormat(AudioAacStreamFormat::MP4ADTS);
+            outputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC)
+                .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 4)  // 4
+                .AppendFixedKey<AudioAacProfile>(Capability::Key::AUDIO_AAC_PROFILE, AudioAacProfile::LC)
+                .AppendFixedKey<AudioAacStreamFormat>(Capability::Key::AUDIO_AAC_STREAM_FORMAT,
+                                                      AudioAacStreamFormat::MP4ADTS);
             break;
         case AV_CODEC_ID_AAC_LATM:
-            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM)
-                .SetAudioMpegVersion(4)  // 4
-                .SetAudioAacStreamFormat(AudioAacStreamFormat::MP4LOAS);
+            outputCaps.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC_LATM)
+                .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 4)  // 4
+                .AppendFixedKey<AudioAacStreamFormat>(Capability::Key::AUDIO_AAC_STREAM_FORMAT,
+                                                      AudioAacStreamFormat::MP4LOAS);
             break;
         default:
             MEDIA_LOG_I("codec is not supported right now");
     }
-    definition.outCaps.push_back(capBuilder.Build());
-}
-
-void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition)
-{
-    UpdateInCaps(codec, definition);
-    UpdateOutCaps(codec, definition);
+    definition.outCaps.push_back(outputCaps);
 }
 } // namespace
 PLUGIN_DEFINITION(FFmpegAudioEncoders, LicenseType::LGPL, RegisterAudioEncoderPlugins, UnRegisterAudioEncoderPlugin);
@@ -137,7 +128,7 @@ Status AudioFfmpegEncoderPlugin::Init()
 {
     auto ite = codecMap.find(pluginName_);
     if (ite == codecMap.end()) {
-        MEDIA_LOG_W("cannot find codec with name " PUBLIC_LOG_S, pluginName_.c_str());
+        MEDIA_LOG_W("cannot find codec with name " PUBLIC_LOG "s", pluginName_.c_str());
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     OSAL::ScopedLock lock(avMutex_);
@@ -189,7 +180,7 @@ Status AudioFfmpegEncoderPlugin::Prepare()
             return Status::ERROR_WRONG_STATE;
         }
         auto context = avcodec_alloc_context3(avCodec_.get());
-        FALSE_RETURN_V_MSG_E(context != nullptr, Status::ERROR_UNKNOWN, "cannot allocate codec context");
+        FALSE_RET_V_MSG_E(context != nullptr, Status::ERROR_UNKNOWN, "cannot allocate codec context");
         avCodecContext_ = std::shared_ptr<AVCodecContext>(context, [](AVCodecContext* ptr) {
             if (ptr != nullptr) {
                 if (ptr->extradata) {
@@ -256,11 +247,11 @@ Status AudioFfmpegEncoderPlugin::Start()
             // always use the first fmt
             avCodecContext_->sample_fmt = avCodec_->sample_fmts[0];
             SwrContext* swrContext = swr_alloc();
-            FALSE_RETURN_V_MSG_E(swrContext != nullptr, Status::ERROR_NO_MEMORY, "cannot allocate swr context");
+            FALSE_RET_V_MSG_E(swrContext != nullptr, Status::ERROR_NO_MEMORY, "cannot allocate swr context");
             swrContext = swr_alloc_set_opts(swrContext, avCodecContext_->channel_layout, avCodecContext_->sample_fmt,
                 avCodecContext_->sample_rate, avCodecContext_->channel_layout, srcFmt_, avCodecContext_->sample_rate,
                 0, nullptr);
-            FALSE_RETURN_V_MSG_E(swr_init(swrContext) == 0, Status::ERROR_UNKNOWN, "swr init error");
+            FALSE_RET_V_MSG_E(swr_init(swrContext) == 0, Status::ERROR_UNKNOWN, "swr init error");
             swrCtx_ = std::shared_ptr<SwrContext>(swrContext, [](SwrContext* ptr) {
                 if (ptr) {
                     swr_free(&ptr);
@@ -268,9 +259,9 @@ Status AudioFfmpegEncoderPlugin::Start()
             });
         }
         auto res = avcodec_open2(avCodecContext_.get(), avCodec_.get(), nullptr);
-        FALSE_RETURN_V_MSG_E(res == 0, Status::ERROR_UNKNOWN, "avcodec open error " PUBLIC_LOG_S " when start encoder",
+        FALSE_RET_V_MSG_E(res == 0, Status::ERROR_UNKNOWN, "avcodec open error " PUBLIC_LOG_S " when start encoder",
                           AVStrError(res).c_str());
-        FALSE_RETURN_V_MSG_E(avCodecContext_->frame_size > 0, Status::ERROR_UNKNOWN, "frame_size unknown");
+        FALSE_RET_V_MSG_E(avCodecContext_->frame_size > 0, Status::ERROR_UNKNOWN, "frame_size unknown");
         fullInputFrameSize_ = av_samples_get_buffer_size(nullptr, avCodecContext_->channels,
             avCodecContext_->frame_size, srcFmt_, 1);
         srcBytesPerSample_ = av_get_bytes_per_sample(srcFmt_) * avCodecContext_->channels;
@@ -295,8 +286,8 @@ Status AudioFfmpegEncoderPlugin::Stop()
         OSAL::ScopedLock lock(avMutex_);
         if (avCodecContext_ != nullptr) {
             auto res = avcodec_close(avCodecContext_.get());
-            FALSE_RETURN_V_MSG_E(res == 0, Status::ERROR_UNKNOWN,
-                "avcodec close error " PUBLIC_LOG_S " when stop encoder", AVStrError(res).c_str());
+            FALSE_RET_V_MSG_E(res == 0, Status::ERROR_UNKNOWN,
+                              "avcodec close error " PUBLIC_LOG_S " when stop encoder", AVStrError(res).c_str());
             avCodecContext_.reset();
         }
         if (outBuffer_) {
@@ -419,7 +410,7 @@ Status AudioFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
         eos = true;
     } else {
         auto inputMemory = inputBuffer->GetMemory();
-        FALSE_RETURN_V_MSG_W(inputMemory->GetSize() == fullInputFrameSize_, Status::ERROR_NOT_ENOUGH_DATA,
+        FALSE_RET_V_MSG_W(inputMemory->GetSize() == fullInputFrameSize_, Status::ERROR_NOT_ENOUGH_DATA,
             "Not enough data, input: " PUBLIC_LOG_ZU ", fullInputFrameSize: " PUBLIC_LOG_U32,
             inputMemory->GetSize(), fullInputFrameSize_);
         FillInFrameCache(inputMemory);
@@ -439,7 +430,7 @@ Status AudioFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
     } else if (ret == AVERROR(EAGAIN)) {
         return Status::ERROR_AGAIN;
     } else {
-        MEDIA_LOG_E("send buffer error " PUBLIC_LOG_S, AVStrError(ret).c_str());
+        MEDIA_LOG_E("send buffer error " PUBLIC_LOG "s", AVStrError(ret).c_str());
         return Status::ERROR_UNKNOWN;
     }
 }
@@ -448,8 +439,8 @@ Status AudioFfmpegEncoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>&
                                                   const std::shared_ptr<AVPacket>& packet)
 {
     auto ioInfoMem = ioInfo->GetMemory();
-    FALSE_RETURN_V_MSG_W(ioInfoMem->GetCapacity() >= static_cast<size_t>(packet->size),
-                         Status::ERROR_NO_MEMORY, "buffer size is not enough");
+    FALSE_RET_V_MSG_W(ioInfoMem->GetCapacity() >= static_cast<size_t>(packet->size),
+                      Status::ERROR_NO_MEMORY, "buffer size is not enough");
     ioInfoMem->Write(packet->data, packet->size);
     // how get perfect pts with upstream pts ?
     ioInfo->duration = ConvertTimeFromFFmpeg(packet->duration, avCodecContext_->time_base);
@@ -476,7 +467,7 @@ Status AudioFfmpegEncoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
     } else if (ret == AVERROR(EAGAIN)) {
         status = Status::ERROR_NOT_ENOUGH_DATA;
     } else {
-        MEDIA_LOG_E("audio encoder receive error: " PUBLIC_LOG_S, AVStrError(ret).c_str());
+        MEDIA_LOG_E("audio encoder receive error: " PUBLIC_LOG "s", AVStrError(ret).c_str());
         status = Status::ERROR_UNKNOWN;
     }
     av_frame_unref(cachedFrame_.get());

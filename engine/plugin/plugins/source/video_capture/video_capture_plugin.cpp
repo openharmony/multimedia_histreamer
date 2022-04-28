@@ -243,23 +243,23 @@ Status VideoCapturePlugin::AcquireSurfaceBuffer()
 {
     auto ret = surfaceConsumer_->AcquireBuffer(surfaceBuffer_, fence_, timestamp_, damage_);
     if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        MEDIA_LOG_E("surfaceConsumer AcquireBuffer() fail: " PUBLIC_LOG_U32, ret);
+        MEDIA_LOG_E("surfaceConsumer AcquireBuffer() fail: " PUBLIC_LOG "u", ret);
         return Status::ERROR_UNKNOWN;
     }
     ret = surfaceBuffer_->ExtraGet("dataSize", bufferSize_);
     if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK || bufferSize_ <= 0) {
-        MEDIA_LOG_E("surfaceBuffer get data size fail: " PUBLIC_LOG_U32, ret);
+        MEDIA_LOG_E("surfaceBuffer get data size fail: " PUBLIC_LOG "u", ret);
         return Status::ERROR_UNKNOWN;
     }
     ret = surfaceBuffer_->ExtraGet("isKeyFrame", isKeyFrame_);
     if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        MEDIA_LOG_E("surfaceBuffer get isKeyFrame fail: " PUBLIC_LOG_U32, ret);
+        MEDIA_LOG_E("surfaceBuffer get isKeyFrame fail: " PUBLIC_LOG "u", ret);
         return Status::ERROR_UNKNOWN;
     }
     int64_t pts;
     ret = surfaceBuffer_->ExtraGet("timeStamp", pts);
     if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK || pts < 0) {
-        MEDIA_LOG_E("surfaceBuffer get data size fail: " PUBLIC_LOG_U32, ret);
+        MEDIA_LOG_E("surfaceBuffer get data size fail: " PUBLIC_LOG "u", ret);
         return Status::ERROR_UNKNOWN;
     }
     if (static_cast<uint64_t>(pts) < curTimestampNs_) {
@@ -311,7 +311,7 @@ Status VideoCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
     }
     auto ret = AcquireSurfaceBuffer();
     if (ret != Status::OK) {
-        MEDIA_LOG_E("AcquireSurfaceBuffer fail: " PUBLIC_LOG_D32, ret);
+        MEDIA_LOG_E("AcquireSurfaceBuffer fail: " PUBLIC_LOG "d", ret);
         return ret;
     }
     auto writeSize = bufData->Write(static_cast<const uint8_t*>(surfaceBuffer_->GetVirAddr()), bufferSize_);
@@ -331,7 +331,7 @@ Status VideoCapturePlugin::GetSize(size_t& size)
         return Status::ERROR_INVALID_PARAMETER;
     }
     size = bufferSize_;
-    MEDIA_LOG_D("bufferSize_: " PUBLIC_LOG_ZU, size);
+    MEDIA_LOG_D("bufferSize_: " PUBLIC_LOG "zu", size);
     return Status::OK;
 }
 

@@ -50,20 +50,7 @@ public:
 
     std::set<std::string> ListPlugins(PluginType type);
 
-    int GetAllRegisteredPluginCount();
-
     std::shared_ptr<PluginRegInfo> GetPluginRegInfo(PluginType type, const std::string& name);
-
-    void EnablePackage(PluginType type, const std::string& name);
-
-    void DisablePackage(PluginType type, const std::string& name);
-
-    int GetRegisteredPluginCountByPackageName(std::string& name);
-
-    bool IsPackageExist(PluginType type, const std::string& name);
-    void PrintRegisteredPluginInfo();
-
-    int GetPackageCounts(std::string& name);
 
     void RegisterPlugins();
 
@@ -72,10 +59,7 @@ private:
     void RegisterDynamicPlugins();
     void RegisterPluginsFromPath(const char* libDirPath);
     void UnregisterAllPlugins();
-    void EraseRegisteredPluginsByPackageName(std::string name);
-    void EraseRegisteredPluginsByLoader(const std::shared_ptr<PluginLoader>& loader);
-    void SaveDisabledPackage(std::pair<std::string, std::shared_ptr<PluginRegInfo>> info);
-    void RecoverDisabledPackage(PluginType type, std::string name);
+    void EraseRegisteredPlugins(const std::shared_ptr<PluginLoader>& loader);
 
 private:
     using REGISTERED_TABLE = std::map<PluginType, std::map<std::string, std::shared_ptr<PluginRegInfo>>>;
@@ -83,7 +67,6 @@ private:
     struct RegisterData {
         std::map<PluginType, std::set<std::string>> registerNames;
         REGISTERED_TABLE registerTable;
-        std::vector<std::pair<std::string, std::shared_ptr<PluginRegInfo>>> disabledPackage;
         bool IsPluginExist(PluginType type, const std::string& name);
     };
 
@@ -135,7 +118,7 @@ private:
 
         std::shared_ptr<PluginLoader> pluginLoader;
         std::shared_ptr<RegisterData> registerData;
-        std::shared_ptr<PackageDef> packageDef {nullptr};
+        std::shared_ptr<PackageDef> packageDef = std::make_shared<PackageDef>();
     };
 
     std::shared_ptr<RegisterData> registerData = std::make_shared<RegisterData>();

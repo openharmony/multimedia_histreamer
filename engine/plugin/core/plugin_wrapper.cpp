@@ -50,7 +50,6 @@ std::set<OHOS::Media::Plugin::MetaID> g_metaIdSet = {
     OHOS::Media::Plugin::MetaID::VIDEO_WIDTH,
     OHOS::Media::Plugin::MetaID::VIDEO_HEIGHT,
     OHOS::Media::Plugin::MetaID::VIDEO_PIXEL_FORMAT,
-    OHOS::Media::Plugin::MetaID::BITS_PER_CODED_SAMPLE,
 };
 }
 

@@ -62,18 +62,6 @@ public:
 
     int32_t Sniffer(const std::string& name, std::shared_ptr<DataSourceHelper> source);
 
-    void EnablePackage(PluginType type, const std::string& name);
-
-    void DisablePackage(PluginType type, const std::string& name);
-
-    bool IsPackageExist(PluginType type, const std::string& name);
-
-    void PrintRegisteredPluginInfo();
-
-    int GetAllRegisteredPluginCount();
-
-    int GetRegisteredPluginCountByPackageName(std::string name);
-
 private:
     PluginManager();
 

@@ -23,7 +23,6 @@
 extern "C" {
 #endif
 #include "libavformat/avformat.h"
-#include "libavutil/opt.h"
 #ifdef __cplusplus
 }
 #endif

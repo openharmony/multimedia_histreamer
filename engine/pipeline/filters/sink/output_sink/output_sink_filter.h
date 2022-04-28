@@ -17,14 +17,11 @@
 #define HISTREAMER_PIPELINE_OUTPUT_SINK_FILTER_H
 #ifdef RECORDER_SUPPORT
 #include "filter_base.h"
-#include "plugin/common/media_sink.h"
-#include "plugin/common/plugin_tags.h"
 #include "plugin/core/output_sink.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-using MediaSink = OHOS::Media::Plugin::MediaSink;
 class OutputSinkFilter : public FilterBase {
 public:
     explicit OutputSinkFilter(std::string name);
@@ -41,14 +38,18 @@ public:
     bool Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta) override;
 
     ErrorCode Stop() override;
-    ErrorCode SetSink(const MediaSink& sink);
+
+    ErrorCode SetOutputPath(const std::string& path);
+    ErrorCode SetFd(int32_t fd);
+
     ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
 private:
     std::shared_ptr<Plugin::OutputSink> plugin_;
-    Plugin::ProtocolType protocolType_ {Plugin::ProtocolType::UNKNOWN};
+    Plugin::OutputType outputType_ {Plugin::OutputType::UNKNOWN};
+    std::string outputPath_ {};
+    int32_t fd_ {-1};
     int64_t currentPos_ {0};
-    MediaSink sink_ {Plugin::ProtocolType::UNKNOWN};
 };
 } // Pipeline
 } // Media

@@ -16,8 +16,6 @@
 #ifndef HISTREAMER_FOUNDATION_ERROR_CODE_H
 #define HISTREAMER_FOUNDATION_ERROR_CODE_H
 
-#include <cstdint>
-
 #ifdef WIN32
 // Fix compile error: expected identifier before numeric constant
 // also can add in plugin_loader.cpp before include log.h
@@ -43,48 +41,6 @@ enum struct ErrorCode : int32_t {
     ERROR_INVALID_STATE = ERROR_UNKNOWN + 10,
     ERROR_PERMISSION_DENIED = ERROR_UNKNOWN + 11,
 };
-
-const char* GetErrorName(ErrorCode code);
-
-#ifndef FAIL_RETURN
-#define FAIL_RETURN(exec)                                                                                              \
-    do {                                                                                                               \
-        ErrorCode returnValue = (exec);                                                                                \
-        if (returnValue != ErrorCode::SUCCESS) {                                                                       \
-            MEDIA_LOG_E("FAIL_RETURN on ErrorCode(" PUBLIC_LOG_S ").", GetErrorName(returnValue));                     \
-            return returnValue;                                                                                        \
-        }                                                                                                              \
-    } while (0)
-#endif
-
-#ifndef FAIL_RETURN_MSG_IMPL
-#define FAIL_RETURN_MSG_IMPL(loglevel, exec, fmt, args...)                                                             \
-    do {                                                                                                               \
-        ErrorCode returnValue = (exec);                                                                                \
-        if (returnValue != ErrorCode::SUCCESS) {                                                                       \
-            loglevel(fmt, ##args);                                                                                     \
-            return returnValue;                                                                                        \
-        }                                                                                                              \
-    } while (0)
-#endif
-
-#ifndef FAIL_RETURN_MSG
-#define FAIL_RETURN_MSG(exec, fmt, args...) FAIL_RETURN_MSG_IMPL(MEDIA_LOG_E, exec, fmt, ##args)
-#endif
-
-#ifndef FAIL_RETURN_MSG_W
-#define FAIL_RETURN_MSG_W(exec, fmt, args...) FAIL_RETURN_MSG_IMPL(MEDIA_LOG_W, exec, fmt, ##args)
-#endif
-
-#ifndef FAIL_LOG
-#define FAIL_LOG(exec)                                                                                                 \
-    do {                                                                                                               \
-        ErrorCode returnValue = (exec);                                                                                \
-        if (returnValue != ErrorCode::SUCCESS) {                                                                       \
-            MEDIA_LOG_E("FAIL_LOG on ErrorCode(" PUBLIC_LOG_S ").", GetErrorName(returnValue));                        \
-        }                                                                                                              \
-    } while (0)
-#endif
 }  // namespace Media
 }  // namespace OHOS
 #endif  // HISTREAMER_FOUNDATION_ERROR_CODE_H

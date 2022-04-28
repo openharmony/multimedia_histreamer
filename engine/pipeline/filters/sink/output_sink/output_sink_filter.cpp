@@ -17,10 +17,10 @@
 #define HST_LOG_TAG "OutputSinkFilter"
 
 #include "output_sink_filter.h"
+
 #include "common/plugin_utils.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
-#include "plugin/common/plugin_tags.h"
 #include "utils/steady_clock.h"
 
 namespace OHOS {
@@ -51,10 +51,10 @@ bool OutputSinkFilter::Negotiate(const std::string &inPort,
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
     for (const auto& candidate : candidatePlugins) {
         const auto& tmp = candidate.first->extra[PLUGIN_INFO_EXTRA_OUTPUT_TYPE];
-        if (!tmp.SameTypeWith(typeid(Plugin::ProtocolType))) {
+        if (!tmp.SameTypeWith(typeid(Plugin::OutputType))) {
             continue;
         }
-        if (Plugin::AnyCast<Plugin::ProtocolType>(tmp) == protocolType_) {
+        if (Plugin::AnyCast<Plugin::OutputType>(tmp) == outputType_) {
             if (selectedPluginInfo == nullptr) {
                 selectedPluginInfo = candidate.first;
                 negotiatedCap = candidate.second;
@@ -65,8 +65,8 @@ bool OutputSinkFilter::Negotiate(const std::string &inPort,
         }
     }
     if (selectedPluginInfo == nullptr) {
-        MEDIA_LOG_W("no available output sink plugin with output type of " PUBLIC_LOG_D32,
-                    static_cast<int32_t>(protocolType_));
+        MEDIA_LOG_W("no available output sink plugin with output type of " PUBLIC_LOG "d",
+                    static_cast<int32_t>(outputType_));
         return false;
     }
     auto res = UpdateAndInitPluginByInfo<Plugin::OutputSink>(plugin_, pluginInfo_, selectedPluginInfo,
@@ -83,7 +83,16 @@ bool OutputSinkFilter::Configure(const std::string& inPort, const std::shared_pt
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
     }
-    auto err = TranslatePluginStatus(plugin_->SetSink(sink_));
+
+    auto err = ErrorCode::SUCCESS;
+    if (fd_ == -1) { // always use fd firstly
+        if (!outputPath_.empty()) {
+            err = TranslatePluginStatus(plugin_->SetSink(outputPath_));
+        }
+    } else {
+        err = TranslatePluginStatus(plugin_->SetSink(fd_));
+    }
+
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("Output sink configure error");
         OnEvent({name_, EventType::EVENT_ERROR, err});
@@ -96,12 +105,43 @@ bool OutputSinkFilter::Configure(const std::string& inPort, const std::shared_pt
     return true;
 }
 
-ErrorCode OutputSinkFilter::SetSink(const MediaSink& sink)
+ErrorCode OutputSinkFilter::SetOutputPath(const std::string &path)
 {
-    auto protocolType = sink.GetProtocolType();
-    FALSE_RETURN_V(protocolType != Plugin::ProtocolType::UNKNOWN, ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
-    sink_ = sink;
-    protocolType_ = protocolType;
+    if (outputType_ != Plugin::OutputType::UNKNOWN && outputType_ != Plugin::OutputType::URI) {
+        return ErrorCode::ERROR_INVALID_OPERATION;
+    }
+    if (path.empty()) {
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+    }
+    auto ret = ErrorCode::SUCCESS;
+    if (plugin_ != nullptr) {
+        ret = TranslatePluginStatus(plugin_->SetSink(path));
+    }
+    if (ret != ErrorCode::SUCCESS) {
+        return ret;
+    }
+    outputPath_ = path;
+    outputType_ = Plugin::OutputType::URI;
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode OutputSinkFilter::SetFd(int32_t fd)
+{
+    if (outputType_ != Plugin::OutputType::UNKNOWN && outputType_ != Plugin::OutputType::FD) {
+        return ErrorCode::ERROR_INVALID_OPERATION;
+    }
+    if (fd < 0) {
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+    }
+    auto ret = ErrorCode::SUCCESS;
+    if (plugin_ != nullptr) {
+        ret = TranslatePluginStatus(plugin_->SetSink(fd));
+    }
+    if (ret != ErrorCode::SUCCESS) {
+        return ret;
+    }
+    fd_ = fd;
+    outputType_ = Plugin::OutputType::FD;
     return ErrorCode::SUCCESS;
 }
 
@@ -110,12 +150,12 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, const AVBufferPt
     auto ret = ErrorCode::SUCCESS;
     if (offset >= 0 && offset != currentPos_) {
         if (!plugin_->IsSeekable()) {
-            MEDIA_LOG_E("plugin " PUBLIC_LOG_S " does not support seekable", pluginInfo_->name.c_str());
+            MEDIA_LOG_E("plugin " PUBLIC_LOG "s does not support seekable", pluginInfo_->name.c_str());
             return ErrorCode::ERROR_INVALID_OPERATION;
         } else {
             ret = TranslatePluginStatus(plugin_->SeekTo(offset));
             if (ret != ErrorCode::SUCCESS) {
-                MEDIA_LOG_E("plugin " PUBLIC_LOG_S " seek to " PUBLIC_LOG_D64 " failed",
+                MEDIA_LOG_E("plugin " PUBLIC_LOG "s seek to " PUBLIC_LOG PRId64 " failed",
                             pluginInfo_->name.c_str(), offset);
                 return ErrorCode::ERROR_INVALID_OPERATION;
             }
@@ -125,7 +165,7 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, const AVBufferPt
     if (!buffer->IsEmpty()) {
         ret = TranslatePluginStatus(plugin_->Write(buffer));
         if (ret != ErrorCode::SUCCESS) {
-            MEDIA_LOG_E("write to plugin failed with error code " PUBLIC_LOG_D32, CppExt::to_underlying(ret));
+            MEDIA_LOG_E("write to plugin failed with error code " PUBLIC_LOG "d", CppExt::to_underlying(ret));
             return ret;
         }
         currentPos_ += buffer->GetMemory()->GetSize();
@@ -145,6 +185,8 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, const AVBufferPt
 ErrorCode OutputSinkFilter::Stop()
 {
     currentPos_ = 0;
+    fd_ = -1;
+    outputPath_.clear();
     return ErrorCode::SUCCESS;
 }
 } // Pipeline

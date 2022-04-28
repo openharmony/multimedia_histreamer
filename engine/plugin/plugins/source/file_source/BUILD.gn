@@ -16,22 +16,8 @@ group("plugin_file_source") {
   deps = [ ":histreamer_plugin_FileSource" ]
 }
 
-group("plugin_file_fd_source") {
-  deps = [ ":histreamer_plugin_FileFdSource" ]
-}
-
 source_set("filesource") {
   sources = [ "file_source_plugin.cpp" ]
-  public_deps = [
-    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
-  ]
-  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
-}
-
-source_set("filefdsource") {
-  sources = [ "file_fd_source_plugin.cpp" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
@@ -52,26 +38,11 @@ if (hst_is_lite_sys) {
     sources = []
     deps = [ ":filesource" ]
   }
-  lite_library("histreamer_plugin_FileFdSource") {
-    if (ohos_kernel_type == "liteos_m") {
-      target_type = "static_library"
-    } else {
-      target_type = "shared_library"
-    }
-    sources = []
-    deps = [ ":filefdsource" ]
-  }
 } else {
   # standard
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_FileSource") {
     deps = [ ":filesource" ]
-    relative_install_dir = "media/histreamer_plugins"
-    subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
-  }
-  ohos_shared_library("histreamer_plugin_FileFdSource") {
-    deps = [ ":filefdsource" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"

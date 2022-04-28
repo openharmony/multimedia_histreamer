@@ -39,7 +39,6 @@ enum class StateId {
 enum class Intent {
     SET_SOURCE,
     SEEK,
-    PREPARE,
     PLAY,
     PAUSE,
     RESUME,
@@ -71,7 +70,6 @@ public:
     const std::string& GetName();
     StateId GetStateId();
     virtual std::tuple<ErrorCode, Action> SetSource(const Plugin::Any& param);
-    virtual std::tuple<ErrorCode, Action> Prepare();
     virtual std::tuple<ErrorCode, Action> Play();
     virtual std::tuple<ErrorCode, Action> Stop();
     virtual std::tuple<ErrorCode, Action> Pause();
@@ -89,7 +87,6 @@ protected:
     const std::string name_;
     PlayExecutor& executor_;
     const std::map<Intent, std::string> intentDesc_ = {{Intent::SET_SOURCE, "SET_SOURCE"},
-                                                       {Intent::PREPARE, "PREPARE"},
                                                        {Intent::SEEK, "SEEK"},
                                                        {Intent::PLAY, "PLAY"},
                                                        {Intent::PAUSE, "PAUSE"},

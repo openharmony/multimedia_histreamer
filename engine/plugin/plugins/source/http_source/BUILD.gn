@@ -26,27 +26,16 @@ config("plugin_http_source_config") {
 
 source_set("httpsource") {
   sources = [
-    "download/client_factory.cpp",
-    "download/downloader.cpp",
-    "download/http_curl_client.cpp",
-    "http/http_media_downloader.cpp",
+    "client_factory.cpp",
+    "http_curl_client.cpp",
     "http_source_plugin.cpp",
+    "streaming_executor.cpp",
   ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
-  if (hst_is_lite_sys) {
-    if (ohos_kernel_type == "liteos_m") {
-      public_deps += [ "//third_party/curl:libcurl_static" ]
-    } else {
-      public_deps += [ "//third_party/curl:libcurl_shared" ]
-    }
-  } else {
-    public_deps += [ "//third_party/curl:curl" ]
-  }
-
   public_configs = [
     ":plugin_http_source_config",
     "//foundation/multimedia/histreamer:histreamer_presets",

@@ -13,17 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_PIPELINE_FILTER_CODEC_FILTER_FACTORY_H
-#define HISTREAMER_PIPELINE_FILTER_CODEC_FILTER_FACTORY_H
+#ifndef HISTREAMER_CLIENT_FACTORY_H
+#define HISTREAMER_CLIENT_FACTORY_H
 
-#include "codec_filter_base.h"
-#include "pipeline/core/filter_codec_mode.h"
+#include <memory>
+#include <string>
+#include "network_client.h"
 
 namespace OHOS {
 namespace Media {
-namespace Pipeline {
-std::shared_ptr<CodecFilterBase> CreateCodecFilter(const std::string& name, FilterCodecMode type);
-} // Pipeline
-} // Media
-} // OHOS
-#endif // HISTREAMER_PIPELINE_FILTER_CODEC_FILTER_FACTORY_H
+namespace Plugin {
+namespace HttpPlugin {
+class ClientFactory {
+public:
+    ClientFactory(RxHeader headCallback, RxBody bodyCallback, void *userParam);
+    ~ClientFactory();
+
+    std::shared_ptr<NetworkClient> CreateClient(const std::string& url);
+
+private:
+    RxHeader rxHeader_;
+    RxBody rxBody_;
+    void *userParam_;
+    std::shared_ptr<NetworkClient> httpClient_;
+    std::shared_ptr<NetworkClient> httpsClient_;
+};
+}
+}
+}
+}
+#endif

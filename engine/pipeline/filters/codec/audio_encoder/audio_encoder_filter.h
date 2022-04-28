@@ -42,7 +42,7 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
 
-    uint32_t CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta) override;
+    uint32_t CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta);
 
     bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
@@ -56,7 +56,7 @@ public:
     ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
 private:
-    ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta) override;
+    ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta);
 
     ErrorCode HandleFrame(const std::shared_ptr<AVBuffer>& buffer);
 

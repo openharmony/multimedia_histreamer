@@ -297,7 +297,7 @@ private:
         static void Copy(Storage& dest, const Storage& source) noexcept
         {
             // memcpy_s will always success in this function
-            (void)memcpy_s(GetPtr(dest), sizeof(Storage), GetConstPtr(source), sizeof(Storage));
+            memcpy_s(GetPtr(dest), sizeof(Storage), GetConstPtr(source), sizeof(Storage));
         }
 
         static void Move(Storage& dest, Storage& source) noexcept

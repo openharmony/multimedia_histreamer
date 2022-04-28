@@ -75,12 +75,6 @@ public:
     Status GetLatency(uint64_t &nanoSec) override;
 
 private:
-    void SetSurfaceTimeFromSysPara();
-    void SetDumpFrameFromSysPara();
-    void SetDumpFrameInternalFromSysPara();
-    void SetKpiLogFromSysPara();
-    Status UpdateSurfaceBuffer(sptr<SurfaceBuffer> surfaceBuffer, int32_t fence);
-
     OSAL::Mutex mutex_ {};
     OSAL::ConditionVariable surfaceCond_;
     uint32_t width_;
@@ -89,7 +83,6 @@ private:
     sptr<Surface> surface_ {nullptr};
     std::shared_ptr<SurfaceAllocator> mAllocator_ {nullptr};
     uint32_t maxSurfaceNum_;
-    bool needConvFormat {false};
 
 #ifdef DUMP_RAW_DATA
     std::FILE* dumpFd_;

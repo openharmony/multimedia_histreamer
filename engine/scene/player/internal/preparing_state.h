@@ -32,8 +32,10 @@ public:
 
     ~PreparingState() override = default;
 
-    std::tuple<ErrorCode, Action> Prepare() override
+    std::tuple<ErrorCode, Action> Enter(Intent intent) override
     {
+        MEDIA_LOG_D("Enter state: " PUBLIC_LOG "s", name_.c_str());
+        (void)intent;
         Action nextAction = Action::ACTION_BUTT;
         auto rtv = executor_.PrepareFilters();
         if (rtv != ErrorCode::SUCCESS) {

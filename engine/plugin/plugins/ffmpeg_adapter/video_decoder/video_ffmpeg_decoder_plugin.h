@@ -28,8 +28,6 @@
 extern "C" {
 #endif
 #include "libavcodec/avcodec.h"
-#include "libswscale/swscale.h"
-#include "libavutil/imgutils.h"
 #ifdef __cplusplus
 };
 #endif
@@ -53,8 +51,8 @@ public:
     Status Reset() override;
     Status Start() override;
     Status Stop() override;
-    Status GetParameter(Tag tag, ValueType& value) override;
-    Status SetParameter(Tag tag, const ValueType& value) override;
+    Status GetParameter(Tag tag, ValueType &value) override;
+    Status SetParameter(Tag tag, const ValueType &value) override;
 
     std::shared_ptr<Allocator> GetAllocator() override;
 
@@ -63,9 +61,9 @@ public:
         return Status::OK;
     }
 
-    Status QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
+    Status QueueInputBuffer(const std::shared_ptr<Buffer> &inputBuffer, int32_t timeoutMs) override;
 
-    Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) override;
+    Status QueueOutputBuffer(const std::shared_ptr<Buffer> &outputBuffers, int32_t timeoutMs) override;
 
     Status Flush() override;
 
@@ -91,47 +89,34 @@ private:
     Status ResetLocked();
 
     template<typename T>
-    void FindInParameterMapThenAssignLocked(Tag tag, T& assign);
+    void FindInParameterMapThenAssignLocked(Tag tag, T &assign);
 
-    Status SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer);
+    Status SendBufferLocked(const std::shared_ptr<Buffer> &inputBuffer);
 
-    Status CreateSwsContext();
+    void CalculateFrameSizes(size_t &ySize, size_t &uvSize, size_t &frameSize);
 
-    Status ScaleVideoFrame();
+    Status FillFrameBuffer(const std::shared_ptr<Buffer> &frameBuffer);
 
-    Status WriteYuvData(const std::shared_ptr<Buffer>& frameBuffer);
+    Status ReceiveBufferLocked(const std::shared_ptr<Buffer> &frameBuffer);
 
-    Status WriteRgbData(const std::shared_ptr<Buffer>& frameBuffer);
+    void CheckResolutionChange();
 
-#ifndef OHOS_LITE
-    Status WriteYuvDataStride(const std::shared_ptr<Buffer>& frameBuffer, int32_t stride);
-
-    Status WriteRgbDataStride(const std::shared_ptr<Buffer>& frameBuffer, int32_t stride);
-#endif
-
-    Status FillFrameBuffer(const std::shared_ptr<Buffer>& frameBuffer);
-
-    Status ReceiveBufferLocked(const std::shared_ptr<Buffer>& frameBuffer);
-
-    void ReceiveFrameBuffer();
+    void ReceiveBuffer();
 
 #ifdef DUMP_RAW_DATA
     std::FILE* dumpFd_;
     void DumpVideoRawOutData();
 #endif
 
-    void NotifyInputBufferDone(const std::shared_ptr<Buffer>& input);
+    void NotifyInputBufferDone(const std::shared_ptr<Buffer> &input);
 
-    void NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output);
+    void NotifyOutputBufferDone(const std::shared_ptr<Buffer> &output);
 
     std::shared_ptr<const AVCodec> avCodec_;
-    std::shared_ptr<struct SwsContext> swsCtx_ {nullptr};
     std::map<Tag, ValueType> videoDecParams_ {};
     std::vector<uint8_t> paddedBuffer_;
     size_t paddedBufferSize_ {0};
-    std::shared_ptr<AVFrame> cachedFrame_ {nullptr};
-    uint8_t* scaleData_[AV_NUM_DATA_POINTERS];
-    int32_t scaleLineSize_[AV_NUM_DATA_POINTERS];
+    std::shared_ptr<AVFrame> cachedFrame_;
     DataCallback* dataCb_ {};
 
     uint32_t width_;

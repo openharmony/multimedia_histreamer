@@ -22,6 +22,28 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 /**
+ * @enum Source protocol type.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+enum struct ProtocolType : uint32_t {
+    UNKNOWN, ///< Unknown protocol
+    FILE,    ///< File protocol, uri prefix: "file://"
+    FD,      ///< File descriptor protocol, uri prefix: "fd://"
+    STREAM,  ///< Stream protocol, uri prefix: "stream://"
+    HTTP,    ///< Http protocol, uri prefix: "http://"
+    HTTPS,   ///< Https protocol, uri prefix: "https://"
+    HLS,     ///< Http live streaming protocol, uri prefix: "https://" or "https://" or "file://", suffix: ".m3u8"
+    DASH,    ///< Dynamic adaptive streaming over Http protocol, uri prefix: "https://" or "https://", suffix: ".mpd"
+    RTSP,    ///< Real time streaming protocol, uri prefix: "rtsp://"
+    RTP,     ///< Real-time transport protocol, uri prefix: "rtp://"
+    RTMP,    ///< RTMP protocol, uri prefix: "rtmp://"
+    FTP,     ///< FTP protocol, uri prefix: "ftp://"
+    UDP,     ///< User datagram protocol, uri prefix: "udp://"
+};
+
+/**
  * @enum source input type.
  *
  * @since 1.0

@@ -70,7 +70,7 @@ private:
     double captureRate_ {0};
     int64_t bitRate_ {0};
     uint32_t frameRate_ {0};
-    Plugin::VideoPixelFormat pixelFormat_ {Plugin::VideoPixelFormat::YUV420P};
+    Plugin::VideoPixelFormat pixelFormat_ {Plugin::VideoPixelFormat::NV21};
     Capability capNegWithDownstream_ {};
     std::atomic<bool> isEos_ {false};
     OSAL::Mutex pushMutex_ {};

@@ -38,7 +38,6 @@ public:
     // todo how to decide the priority of providers
     void RegisterProvider(const std::shared_ptr<ClockProvider>& provider);
     void UnRegisterProvider(const std::shared_ptr<ClockProvider>& provider);
-    void ClearProviders();
 
     ClockProvider& GetProvider()
     {

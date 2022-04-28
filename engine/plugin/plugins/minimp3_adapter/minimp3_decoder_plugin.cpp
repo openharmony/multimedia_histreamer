@@ -23,7 +23,6 @@
 
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_buffer.h"
-#include "plugin/common/plugin_caps_builder.h"
 #include "plugin/interface/codec_plugin.h"
 
 namespace OHOS {
@@ -31,11 +30,11 @@ namespace Media {
 namespace Plugin {
 namespace Minimp3 {
 namespace {
-    constexpr uint32_t MP3_384_SAMPLES_PER_FRAME  = 384;  // 384
-    constexpr uint32_t MP3_576_SAMPLES_PER_FRAME  = 576;  // 576
-    constexpr uint32_t MP3_MAX_SAMPLES_PER_FRAME  = 1152; // 1152
-    constexpr uint32_t BUFFER_ITEM_CNT            = 6;    // 6
-    constexpr uint32_t MAX_RANK                   = 100;  // 100
+    constexpr uint32_t MP3_384_SAMPLES_PER_FRAME  = 384;
+    constexpr uint32_t MP3_576_SAMPLES_PER_FRAME  = 576;
+    constexpr uint32_t MP3_1152_SAMPLES_PER_FRAME = 1152;
+    constexpr uint32_t BUFFER_ITEM_CNT            = 6;
+    constexpr uint32_t MAX_RANK                   = 100;
 }
 
 Minimp3DecoderPlugin::Minimp3DecoderPlugin(std::string name)
@@ -46,12 +45,12 @@ Minimp3DecoderPlugin::Minimp3DecoderPlugin(std::string name)
 {
     FALSE_LOG(memset_s(&mp3DecoderAttr_, sizeof(mp3DecoderAttr_), 0x00, sizeof(AudioDecoderMp3Attr)) == 0);
     FALSE_LOG(memset_s(&minimp3DecoderImpl_, sizeof(minimp3DecoderImpl_), 0x00, sizeof(Minimp3DemuxerOp)) == 0);
-    MEDIA_LOG_I("Minimp3DecoderPlugin, plugin name: " PUBLIC_LOG_S, pluginName_.c_str());
+    MEDIA_LOG_I("Minimp3DecoderPlugin, plugin name: " PUBLIC_LOG "s", pluginName_.c_str());
 }
 
 Minimp3DecoderPlugin::~Minimp3DecoderPlugin()
 {
-    MEDIA_LOG_I("~Minimp3DecoderPlugin, plugin name: " PUBLIC_LOG_S, pluginName_.c_str());
+    MEDIA_LOG_I("~Minimp3DecoderPlugin, plugin name: " PUBLIC_LOG "s", pluginName_.c_str());
 }
 
 Status Minimp3DecoderPlugin::Init()
@@ -59,7 +58,6 @@ Status Minimp3DecoderPlugin::Init()
     minimp3DecoderImpl_ = MiniMp3GetOpt();
     AudioDecoderMp3Open();
     mp3Parameter_[Tag::REQUIRED_OUT_BUFFER_CNT] = BUFFER_ITEM_CNT;
-    mp3Parameter_[Tag::AUDIO_SAMPLE_PER_FRAME] = MP3_MAX_SAMPLES_PER_FRAME;
     return Status::OK;
 }
 
@@ -90,14 +88,18 @@ Status Minimp3DecoderPlugin::Prepare()
     if (mp3Parameter_.find(Tag::AUDIO_CHANNELS) != mp3Parameter_.end()) {
         channels_ = AnyCast<uint32_t>((mp3Parameter_.find(Tag::AUDIO_CHANNELS))->second);
     }
+
     if (mp3Parameter_.find(Tag::AUDIO_SAMPLE_PER_FRAME) != mp3Parameter_.end()) {
         samplesPerFrame_ = AnyCast<uint32_t>(mp3Parameter_.find(Tag::AUDIO_SAMPLE_PER_FRAME)->second);
     }
+
     if (samplesPerFrame_ != MP3_384_SAMPLES_PER_FRAME && samplesPerFrame_ != MP3_576_SAMPLES_PER_FRAME &&
-        samplesPerFrame_ != MP3_MAX_SAMPLES_PER_FRAME) {
+        samplesPerFrame_ != MP3_1152_SAMPLES_PER_FRAME) {
         return Status::ERROR_INVALID_PARAMETER;
     }
-    MEDIA_LOG_I("channels_ = " PUBLIC_LOG_D32 " samplesPerFrame_ = " PUBLIC_LOG_D32, channels_, samplesPerFrame_);
+
+    MEDIA_LOG_I("channels_ = " PUBLIC_LOG "d samplesPerFrame_ = " PUBLIC_LOG "d", channels_, samplesPerFrame_);
+
     return Status::OK;
 }
 
@@ -133,16 +135,16 @@ Status Minimp3DecoderPlugin::GetPcmDataProcess(const std::shared_ptr<Buffer>& in
     if (inputBuffer == nullptr) {
         return Status::ERROR_NOT_ENOUGH_DATA;
     }
-    if (outputBuffer == nullptr || outputBuffer->IsEmpty()) {
-        MEDIA_LOG_W("outputBuffer nullptr warning");
-        return Status::ERROR_INVALID_PARAMETER;
-    }
     if (inputBuffer->IsEmpty() && (inputBuffer->flag & BUFFER_FLAG_EOS) != 0) {
         MEDIA_LOG_I("eos received");
         outputBuffer->GetMemory()->Reset();
         outputBuffer->flag |= BUFFER_FLAG_EOS;
         return Status::END_OF_STREAM;
+    } else if (outputBuffer == nullptr || outputBuffer->IsEmpty()) {
+        MEDIA_LOG_W("outputBuffer nullptr warning");
+        return Status::ERROR_INVALID_PARAMETER;
     }
+
     return AudioDecoderMp3Process(inputBuffer_, outputBuffer);
 }
 
@@ -257,32 +259,25 @@ Status RegisterDecoderPlugin(const std::shared_ptr<Register>& reg)
     return Status::OK;
 }
 
-void UpdateInCaps(CodecPluginDef& definition)
-{
-    CapabilityBuilder capBuilder;
-    capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_MPEG)
-        .SetAudioMpegVersion(1)
-        .SetAudioMpegLayerRange(1, 3); // 3
-    DiscreteCapability<uint32_t> values = {8000, 16000, 22050, 44100, 48000, 32000}; // 8000, 16000 etc. sample rates
-    capBuilder.SetAudioSampleRateList(values);
-    DiscreteCapability<AudioChannelLayout> channelLayoutValues = {
-        AudioChannelLayout::MONO, AudioChannelLayout::STEREO};
-    capBuilder.SetAudioChannelLayoutList(channelLayoutValues);
-    definition.inCaps.push_back(capBuilder.Build());
-}
-
-void UpdateOutCaps(CodecPluginDef& definition)
-{
-    CapabilityBuilder capBuilder;
-    capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
-    capBuilder.SetAudioSampleFormatList({AudioSampleFormat::S16});
-    definition.outCaps.emplace_back(capBuilder.Build());
-}
-
 void UpdatePluginDefinition(CodecPluginDef& definition)
 {
-    UpdateInCaps(definition);
-    UpdateOutCaps(definition);
+    Capability cap("audio/unknown");
+    cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_MPEG)
+            .AppendFixedKey<uint32_t>(Capability::Key::AUDIO_MPEG_VERSION, 1)
+            .AppendIntervalKey<uint32_t>(Capability::Key::AUDIO_MPEG_LAYER, 1, 3); // 3
+
+    DiscreteCapability<uint32_t> values = {8000, 16000, 22050, 44100, 48000, 32000}; // 8000, 16000 etc. sample rates
+    cap.AppendDiscreteKeys(Capability::Key::AUDIO_SAMPLE_RATE, values);
+
+    DiscreteCapability<AudioChannelLayout> channelLayoutValues = {
+            AudioChannelLayout::MONO, AudioChannelLayout::STEREO};
+    cap.AppendDiscreteKeys<AudioChannelLayout>(Capability::Key::AUDIO_CHANNEL_LAYOUT, channelLayoutValues);
+
+    definition.inCaps.push_back(cap);
+
+    Capability outCap(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
+    outCap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, {AudioSampleFormat::S16});
+    definition.outCaps.emplace_back(outCap);
 }
 }
 

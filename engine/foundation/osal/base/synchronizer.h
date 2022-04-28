@@ -43,7 +43,7 @@ public:
 
     void Wait(SyncIdType syncId, const std::function<void()>& asyncOps)
     {
-        MEDIA_LOG_I("Synchronizer " PUBLIC_LOG_S " Wait for " PUBLIC_LOG_D32,
+        MEDIA_LOG_I("Synchronizer " PUBLIC_LOG "s Wait for " PUBLIC_LOG "d",
                     name_.c_str(), static_cast<int>(syncId));
         if (asyncOps) {
             OSAL::ScopedLock lock(mutex_);
@@ -56,7 +56,7 @@ public:
 
     bool WaitFor(SyncIdType syncId, const std::function<void()>& asyncOps, int timeoutMs)
     {
-        MEDIA_LOG_I("Synchronizer " PUBLIC_LOG_S " Wait for " PUBLIC_LOG_D32 ", timeout: " PUBLIC_LOG_D32,
+        MEDIA_LOG_I("Synchronizer " PUBLIC_LOG "s Wait for " PUBLIC_LOG "d, timeout: " PUBLIC_LOG "d",
                     name_.c_str(), static_cast<int>(syncId), timeoutMs);
         if (!asyncOps) {
             return false;
@@ -75,7 +75,7 @@ public:
 
     void Wait(SyncIdType syncId, const std::function<void()>& asyncOps, ResultType& result)
     {
-        MEDIA_LOG_I("Synchronizer " PUBLIC_LOG_S " Wait for " PUBLIC_LOG_D32,
+        MEDIA_LOG_I("Synchronizer " PUBLIC_LOG "s Wait for " PUBLIC_LOG "d",
                     name_.c_str(), static_cast<int>(syncId));
         if (asyncOps) {
             OSAL::ScopedLock lock(mutex_);
@@ -89,7 +89,7 @@ public:
 
     bool WaitFor(SyncIdType syncId, const std::function<void()>& asyncOps, int timeoutMs, ResultType& result)
     {
-        MEDIA_LOG_I("Synchronizer " PUBLIC_LOG_S " Wait for " PUBLIC_LOG_D32 ", timeout: " PUBLIC_LOG_D32,
+        MEDIA_LOG_I("Synchronizer " PUBLIC_LOG "s Wait for " PUBLIC_LOG "d, timeout: " PUBLIC_LOG "d",
                     name_.c_str(), static_cast<int>(syncId), timeoutMs);
         if (!asyncOps) {
             return false;
@@ -101,8 +101,7 @@ public:
         if (rtv) {
             result = syncMap_[syncId];
             syncMap_.erase(syncId);
-            MEDIA_LOG_D("Synchronizer " PUBLIC_LOG_S " Wait for " PUBLIC_LOG_D32 " return.", name_.c_str(),
-                        static_cast<int>(syncId));
+            MEDIA_LOG_D("Synchronizer " PUBLIC_LOG "s return.", name_.c_str());
         } else {
             waitSet_.erase(syncId);
         }
@@ -111,7 +110,7 @@ public:
 
     void Notify(SyncIdType syncId, ResultType result = ResultType())
     {
-        MEDIA_LOG_I("Synchronizer " PUBLIC_LOG_S " Notify: " PUBLIC_LOG_D32,
+        MEDIA_LOG_I("Synchronizer " PUBLIC_LOG "s Notify: " PUBLIC_LOG "d",
                     name_.c_str(), static_cast<int>(syncId));
         OSAL::ScopedLock lock(mutex_);
         if (waitSet_.find(syncId) != waitSet_.end()) {

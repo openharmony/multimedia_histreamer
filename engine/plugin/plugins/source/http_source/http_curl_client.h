@@ -42,12 +42,13 @@ public:
     Status Deinit() override;
 
 private:
-    void InitCurlEnvironment(const std::string& url);
+    void InitCurlEnvironment();
 
 private:
     RxHeader rxHeader_;
     RxBody rxBody_;
     void *userParam_;
+    std::string url_;
     CURL* easyHandle_ {nullptr};
 };
 }

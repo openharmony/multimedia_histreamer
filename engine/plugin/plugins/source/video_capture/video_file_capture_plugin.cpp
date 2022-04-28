@@ -17,7 +17,7 @@
 
 #if !defined(OHOS_LITE) && defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
 
-#define HST_LOG_TAG "VideoFileCapturePlugin"
+#define HST_LOG_TAG "VideoCapturePlugin"
 
 #include "video_capture_plugin.h"
 #include <algorithm>
@@ -32,6 +32,7 @@ namespace {
 // register plugins
 using namespace OHOS::Media::Plugin;
 using namespace VideoCapture;
+const size_t DATA_SIZE = 25344; // 25344=176*144 the size of yuv file
 
 Status VideoFileCaptureRegister(const std::shared_ptr<Register> &reg)
 {
@@ -44,8 +45,7 @@ Status VideoFileCaptureRegister(const std::shared_ptr<Register> &reg)
         return std::make_shared<VideoFileCapturePlugin>(name);
     };
     Capability outCaps(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
-    outCaps.AppendDiscreteKeys<VideoPixelFormat>(
-        Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::YUV420P});
+    outCaps.AppendDiscreteKeys<VideoPixelFormat>(Capability::Key::VIDEO_PIXEL_FORMAT, {VideoPixelFormat::NV21});
     definition.outCaps.push_back(outCaps);
     // add es outCaps later
     return reg->AddPlugin(definition);
@@ -57,20 +57,14 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace VideoCapture {
+constexpr int32_t DEFAULT_SURFACE_QUEUE_SIZE = 6;
+constexpr int32_t DEFAULT_SURFACE_SIZE = 1024 * 1024;
 constexpr int32_t DEFAULT_VIDEO_WIDTH = 1920;
 constexpr int32_t DEFAULT_VIDEO_HEIGHT = 1080;
 constexpr int32_t DEFAULT_STRIDE_ALIGN = 16;
-constexpr double DEFAULT_CAPTURE_RATE = 60.0;
 
 VideoFileCapturePlugin::VideoFileCapturePlugin(std::string name)
-    : SourcePlugin(std::move(name)),
-      width_(DEFAULT_VIDEO_WIDTH),
-      height_(DEFAULT_VIDEO_HEIGHT),
-      captureRate_(DEFAULT_CAPTURE_RATE),
-      curTimestampNs_(0),
-      stopTimestampNs_(0),
-      totalPauseTimeNs_(0),
-      isFirstFrame_(true)
+    : SourcePlugin(std::move(name)), width_(DEFAULT_VIDEO_WIDTH), height_(DEFAULT_VIDEO_HEIGHT)
 {
     MEDIA_LOG_D("IN");
 }
@@ -89,27 +83,20 @@ Status VideoFileCapturePlugin::Init()
 Status VideoFileCapturePlugin::Deinit()
 {
     MEDIA_LOG_D("IN");
-    if (cacheFrame_ != nullptr) {
-        delete[](uint8_t*) cacheFrame_;
-        cacheFrame_ = nullptr;
-    }
     return Status::OK;
 }
 
 Status VideoFileCapturePlugin::Prepare()
 {
     MEDIA_LOG_D("IN");
-    std::string filePath = RESOURCE_DIR "/YUV/VideoData.yuv";
+    std::string filePath = "VideoData.yuv";
     std::string fullPath;
     if (OSAL::ConvertFullPath(filePath, fullPath) && !fullPath.empty()) {
         filePath = fullPath;
     }
     fp_ = fopen(filePath.c_str(), "rb");
     FALSE_RETURN_V(fp_ != nullptr, Status::ERROR_NULL_POINTER);
-    bufferSize_ = width_ * height_ * 3 / 2; // 3, 2
-    if (cacheFrame_ == nullptr) {
-        cacheFrame_ = new (std::nothrow) uint8_t[bufferSize_];
-    }
+    bufferSize_ = DATA_SIZE;
     return Status::OK;
 }
 
@@ -181,10 +168,7 @@ Status VideoFileCapturePlugin::SetParameter(Tag tag, const ValueType& value)
         }
         case Tag::VIDEO_CAPTURE_RATE: {
             if (value.SameTypeWith(typeid(double))) {
-                auto rate = Plugin::AnyCast<double>(value);
-                if (rate != 0.0) {
-                    captureRate_ = rate;
-                }
+                captureRate_ = Plugin::AnyCast<double>(value);
             }
             break;
         }
@@ -225,7 +209,7 @@ void VideoFileCapturePlugin::SetVideoBufferMeta(std::shared_ptr<BufferMeta>& buf
     std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
     videoMeta->width = width_;
     videoMeta->height = height_;
-    videoMeta->videoPixelFormat = VideoPixelFormat::YUV420P;
+    videoMeta->videoPixelFormat = VideoPixelFormat::NV21;
     size_t lineSize = AlignUp(width_, DEFAULT_STRIDE_ALIGN);
     if ((lineSize / 2) % DEFAULT_STRIDE_ALIGN) { // 2
         lineSize = AlignUp(width_, DEFAULT_STRIDE_ALIGN * 2); // 2
@@ -239,33 +223,36 @@ void VideoFileCapturePlugin::SetVideoBufferMeta(std::shared_ptr<BufferMeta>& buf
 Status VideoFileCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
 {
     OSAL::ScopedLock lock(mutex_);
-    FALSE_RETURN_V_MSG_E(buffer != nullptr, Status::ERROR_INVALID_PARAMETER, "buffer is NULL");
+    if (!buffer) {
+        return Status::ERROR_INVALID_PARAMETER;
+    }
     auto bufferMeta = buffer->GetBufferMeta();
-    FALSE_RETURN_V_MSG_E(bufferMeta != nullptr && bufferMeta->GetType() == BufferMetaType::VIDEO,
-                         Status::ERROR_INVALID_PARAMETER, "bufferMeta or fp is invalid");
+    if (!bufferMeta || bufferMeta->GetType() != BufferMetaType::VIDEO || fp_ == nullptr) {
+        return Status::ERROR_INVALID_PARAMETER;
+    }
     std::shared_ptr<Memory> bufData;
     if (buffer->IsEmpty()) {
         bufData = buffer->AllocMemory(GetAllocator(), expectedLen);
     } else {
         bufData = buffer->GetMemory();
     }
-    FALSE_RETURN_V_MSG_E(bufData != nullptr && bufData->GetMemoryType() == MemoryType::VIRTUAL_ADDR ||
-                         bufData->GetCapacity() > 0, Status::ERROR_NO_MEMORY, "buffer memory is invalid");
+    if (bufData->GetMemoryType() != MemoryType::VIRTUAL_ADDR || bufData->GetCapacity() <= 0) {
+        return Status::ERROR_NO_MEMORY;
+    }
+    readCond_.Wait(lock, [this] { return bufferCnt_ > 0 || isStop_.load(); });
     if (isStop_.load()) {
         MEDIA_LOG_I("flush or EOS, skip read buffer");
         return Status::END_OF_STREAM;
     }
-    FALSE_RETURN_V_MSG_E(std::fread(static_cast<void*>(cacheFrame_), 1, bufferSize_, fp_) == bufferSize_,
-                         Status::ERROR_UNKNOWN, "read frame from file fail");
-    FALSE_RETURN_V_MSG_E(bufData->Write(cacheFrame_, bufferSize_) == bufferSize_,
-                         Status::ERROR_UNKNOWN, "write buffer data fail");
-    if (!isFirstFrame_ && captureRate_ != 0.0) {
-        curTimestampNs_ += static_cast<int64_t>(1000000000 / captureRate_); // 1000000000 ns
+    uint8_t fileData[DATA_SIZE+1] = { 0 };
+    (void)fread(fileData, DATA_SIZE, 1, fp_);
+    if (bufData->Write(static_cast<const uint8_t*>(fileData), bufferSize_) != bufferSize_) {
+        MEDIA_LOG_E("write buffer data fail");
+        return Status::ERROR_UNKNOWN;
     }
     Ns2HstTime(curTimestampNs_ - totalPauseTimeNs_, reinterpret_cast<int64_t &>(buffer->pts));
-    MEDIA_LOG_D("curTimestampNs: " PUBLIC_LOG_U64 ", pts: " PUBLIC_LOG_U64, curTimestampNs_, buffer->pts);
     SetVideoBufferMeta(bufferMeta);
-    isFirstFrame_ = false;
+    bufferCnt_--;
     return Status::OK;
 }
 
@@ -275,6 +262,11 @@ Status VideoFileCapturePlugin::GetSize(size_t& size)
         return Status::ERROR_INVALID_PARAMETER;
     }
     size = bufferSize_;
+    OSAL::ScopedLock lock(mutex_);
+    bufferCnt_++;
+    if (bufferCnt_ == 1) {
+        readCond_.NotifyAll();
+    }
     MEDIA_LOG_D("bufferSize_: " PUBLIC_LOG_ZU, size);
     return Status::OK;
 }

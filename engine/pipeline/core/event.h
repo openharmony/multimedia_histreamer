@@ -17,7 +17,6 @@
 #define HISTREAMER_PIPELINE_CORE_EVENT_H
 
 #include <string>
-#include <map>
 #include "plugin/common/any.h"
 
 namespace OHOS {
@@ -41,8 +40,6 @@ struct Event {
     EventType type;
     Plugin::Any param;
 };
-
-const char* GetEventName(EventType type);
 } // namespace Media
 } // namespace OHOS
 #endif

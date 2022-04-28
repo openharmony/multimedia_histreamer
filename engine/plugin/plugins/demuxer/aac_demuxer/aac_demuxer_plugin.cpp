@@ -81,7 +81,7 @@ Status AACDemuxerPlugin::DoReadFromSource(uint32_t readSize)
     auto bufData = buffer->AllocMemory(nullptr, readSize);
     int retryTimes = 0;
     MEDIA_LOG_D("readSize " PUBLIC_LOG_U32 " inIoBufferSize_ " PUBLIC_LOG_D32 "ioDataRemainSize_ "
-                PUBLIC_LOG_U32, readSize, inIoBufferSize_, ioDataRemainSize_);
+        PUBLIC_LOG_U32, readSize, inIoBufferSize_, ioDataRemainSize_);
     do {
         if (isSeekable_) {
             auto result = ioContext_.dataSource->ReadAt(ioContext_.offset, buffer, static_cast<size_t>(readSize));

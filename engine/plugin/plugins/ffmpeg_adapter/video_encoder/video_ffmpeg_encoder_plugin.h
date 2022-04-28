@@ -117,7 +117,7 @@ private:
 
     uint32_t width_ {0};
     uint32_t height_ {0};
-    uint32_t frameRate_ {0};
+    uint64_t frameRate_ {0};
     VideoPixelFormat pixelFormat_ {};
 
     mutable OSAL::Mutex avMutex_ {};

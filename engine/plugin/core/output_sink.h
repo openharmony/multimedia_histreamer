@@ -18,7 +18,6 @@
 
 #include "base.h"
 #include "common/plugin_buffer.h"
-#include "plugin/common/media_sink.h"
 #include "plugin/interface/output_sink_plugin.h"
 
 namespace OHOS {
@@ -30,7 +29,7 @@ public:
     OutputSink operator = (const OutputSink &) = delete;
     ~OutputSink() override = default;
 
-    Status SetSink(const MediaSink& sink);
+    Status SetSink(const Plugin::ValueType &sink);
     bool IsSeekable();
     Status SeekTo(uint64_t offset);
     Status Write(const std::shared_ptr<Buffer>& buffer);

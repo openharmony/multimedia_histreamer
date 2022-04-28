@@ -17,7 +17,6 @@
 
 #include "sdl_audio_sink_plugin.h"
 #include <functional>
-#include <thread>
 #include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/log.h"
 #include "foundation/pre_defines.h"
@@ -148,7 +147,7 @@ Status SdlAudioSinkPlugin::Prepare()
     wantedSpec_.silence = 0;
     wantedSpec_.callback = SDLAudioCallback;
     if (SDL_OpenAudio(&wantedSpec_, nullptr) < 0) {
-        MEDIA_LOG_E("sdl cannot open audio with error: " PUBLIC_LOG_S, SDL_GetError());
+        MEDIA_LOG_E("sdl cannot open audio with error: " PUBLIC_LOG "s", SDL_GetError());
         return Status::ERROR_UNKNOWN;
     }
 
@@ -194,14 +193,11 @@ Status SdlAudioSinkPlugin::Start()
 
 Status SdlAudioSinkPlugin::Stop()
 {
-    MEDIA_LOG_I("SDL SINK Stop...");
-    DrainData();
     rb->SetActive(false);
     SDL_PauseAudio(1);
     Flush();
     SDL_CloseAudio();
-    // SDL_Quit(); // Hang on playing video + audio
-    MEDIA_LOG_I("SDL SINK Stop end");
+    SDL_Quit();
     return Status::OK;
 }
 
@@ -305,7 +301,6 @@ Status SdlAudioSinkPlugin::SetSpeed(float speed)
 Status SdlAudioSinkPlugin::Pause()
 {
     MEDIA_LOG_I("Paused");
-    DrainData();
     SDL_PauseAudio(1);
     return Status::OK;
 }
@@ -392,16 +387,7 @@ void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len)
     SDL_memset(stream, 0, len);
     SDL_MixAudio(stream, mixCache_.data(), realLen, volume_);
     SDL_PauseAudio(0);
-    MEDIA_LOG_D("sdl audio callback end with " PUBLIC_LOG_ZU, realLen);
-}
-
-void SdlAudioSinkPlugin::DrainData()
-{
-    MEDIA_LOG_I("DrainData begin");
-    while (rb->GetSize()) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 10
-    }
-    MEDIA_LOG_I("DrainData end");
+    MEDIA_LOG_D("sdl audio callback end with " PUBLIC_LOG "zu", realLen);
 }
 } // namespace Sdl
 } // namespace Plugin

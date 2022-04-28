@@ -13,5 +13,6 @@ set(TOP_DIR ${PROJECT_SOURCE_DIR})
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+add_subdirectory(${DEV_TOP_DIR}/histreamer/engine/plugin/plugins/source/file_source file_source.out)
 add_subdirectory(${DEV_TOP_DIR}/histreamer/engine engine.out)
 add_subdirectory(${DEV_TOP_DIR}/histreamer/tests tests.out)

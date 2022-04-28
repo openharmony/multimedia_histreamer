@@ -73,9 +73,8 @@ private:
         int64_t bitRate;
         uint32_t frameRate;
         Plugin::VideoPixelFormat format;
-        Plugin::VideoH264Profile profile;
-        uint32_t level;
         Plugin::CodecConfig codecConfig;
+        std::shared_ptr<Plugin::Meta> codecMeta;
     };
 
     ErrorCode SetVideoEncoderFormat(const std::shared_ptr<const Plugin::Meta>& meta);
@@ -97,11 +96,9 @@ private:
     void FinishFrame();
 
     bool isFlushing_ {false};
-    bool isStop_ {false};
     Capability capNegWithDownstream_;
     Capability capNegWithUpstream_;
     VideoEncoderFormat vencFormat_;
-    std::shared_ptr<Plugin::Meta> codecMeta_ {nullptr};
     DataCallbackImpl* dataCallback_ {nullptr};
 
     std::shared_ptr<OHOS::Media::OSAL::Task> handleFrameTask_ {nullptr};

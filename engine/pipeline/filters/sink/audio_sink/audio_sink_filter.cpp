@@ -19,7 +19,6 @@
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
 #include "foundation/osal/utils/util.h"
-#include "pipeline/filters/common/dump_buffer.h"
 #include "pipeline/filters/common/plugin_settings.h"
 #include "pipeline/core/clock_manager.h"
 #include "pipeline/core/plugin_attr_desc.h"
@@ -66,7 +65,7 @@ ErrorCode AudioSinkFilter::SetParameter(int32_t key, const Plugin::Any& value)
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
-        MEDIA_LOG_I("SetParameter key " PUBLIC_LOG_D32 " is out of boundary", key);
+        MEDIA_LOG_I("SetParameter key " PUBLIC_LOG "d is out of boundary", key);
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     RETURN_AGAIN_IF_NULL(plugin_);
@@ -80,7 +79,7 @@ ErrorCode AudioSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
     }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
-        MEDIA_LOG_I("GetParameter key " PUBLIC_LOG_D32 " is out of boundary", key);
+        MEDIA_LOG_I("GetParameter key " PUBLIC_LOG "d is out of boundary", key);
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     RETURN_AGAIN_IF_NULL(plugin_);
@@ -143,8 +142,8 @@ bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr
 
 ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta)
 {
-    FAIL_RETURN_MSG(ConfigPluginWithMeta(*plugin_, *meta), "sink configuration failed.");
-    FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Prepare()), "sink prepare failed");
+    FAIL_RET_ERR_CODE_MSG_E(ConfigPluginWithMeta(*plugin_, *meta), "sink configuration failed.");
+    FAIL_RET_ERR_CODE_MSG_E(TranslatePluginStatus(plugin_->Prepare()), "sink prepare failed");
     return ErrorCode::SUCCESS;
 }
 
@@ -164,7 +163,6 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
     }
     if (state_.load() != FilterState::RUNNING) {
         pushThreadIsBlocking = true;
-        MEDIA_LOG_I("audio sink push data wait.");
         OSAL::ScopedLock lock(mutex_);
         startWorkingCondition_.Wait(lock, [this] {
             return state_ == FilterState::RUNNING || state_ == FilterState::INITIALIZED || isFlushing;
@@ -176,9 +174,8 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
                     isFlushing, static_cast<int>(state_.load()));
         return ErrorCode::SUCCESS;
     }
-    DUMP_BUFFER2LOG("AudioSink Write", buffer, offset);
     auto err = TranslatePluginStatus(plugin_->Write(buffer));
-    FAIL_RETURN_MSG(err, "audio sink write failed");
+    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "audio sink write failed");
     ReportCurrentPosition(static_cast<int64_t>(buffer->pts));
     if ((buffer->flag & BUFFER_FLAG_EOS) != 0) {
         constexpr int waitTimeForPlaybackCompleteMs = 60;
@@ -202,7 +199,7 @@ ErrorCode AudioSinkFilter::Start()
 {
     MEDIA_LOG_I("start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
-        MEDIA_LOG_W("sink is not ready when start, state: " PUBLIC_LOG_D32, static_cast<int32_t>(state_.load()));
+        MEDIA_LOG_W("sink is not ready when start, state: " PUBLIC_LOG "d", static_cast<int32_t>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto err = FilterBase::Start();
@@ -211,7 +208,7 @@ ErrorCode AudioSinkFilter::Start()
         return err;
     }
     err = TranslatePluginStatus(plugin_->Start());
-    FAIL_RETURN_MSG(err, "audio sink plugin start failed");
+    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "audio sink plugin start failed");
     if (pushThreadIsBlocking.load()) {
         startWorkingCondition_.NotifyOne();
     }
@@ -242,7 +239,7 @@ ErrorCode AudioSinkFilter::Pause()
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto err = FilterBase::Pause();
-    FAIL_RETURN_MSG(err, "audio sink pause failed");
+    RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, "audio sink pause failed");
     err = TranslatePluginStatus(plugin_->Pause());
     MEDIA_LOG_D("audio sink filter pause end");
     return err;
@@ -285,7 +282,7 @@ void AudioSinkFilter::FlushEnd()
 ErrorCode AudioSinkFilter::SetVolume(float volume)
 {
     if (state_ != FilterState::READY && state_ != FilterState::RUNNING && state_ != FilterState::PAUSED) {
-        MEDIA_LOG_E("audio sink filter cannot set volume in state " PUBLIC_LOG_D32,
+        MEDIA_LOG_E("audio sink filter cannot set volume in state " PUBLIC_LOG "d",
                     static_cast<int32_t>(state_.load()));
         return ErrorCode::ERROR_AGAIN;
     }
@@ -299,7 +296,7 @@ ErrorCode AudioSinkFilter::UpdateLatestPts(int64_t pts)
     int64_t nowNs {0};
     Plugin::Status status = plugin_->GetLatency(latencyNano);
     if (status != Plugin::Status::OK) {
-        MEDIA_LOG_E("audio sink GetLatency fail errorcode = " PUBLIC_LOG_D32,
+        MEDIA_LOG_E("audio sink GetLatency fail errorcode = " PUBLIC_LOG "d",
                     CppExt::to_underlying(TranslatePluginStatus(status)));
         return TranslatePluginStatus(status);
     }

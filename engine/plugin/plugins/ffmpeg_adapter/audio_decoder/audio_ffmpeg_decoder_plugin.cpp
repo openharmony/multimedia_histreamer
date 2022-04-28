@@ -40,17 +40,7 @@ const std::set<AVCodecID> g_supportedCodec = {
     AV_CODEC_ID_FLAC,
     AV_CODEC_ID_AAC,
     AV_CODEC_ID_AAC_LATM,
-    AV_CODEC_ID_VORBIS,
-    AV_CODEC_ID_APE,
-};
-
-std::map<AVCodecID, uint32_t> samplesPerFrameMap = {
-    {AV_CODEC_ID_MP3, 1152}, // 1152
-    {AV_CODEC_ID_FLAC, 8192}, // 8192
-    {AV_CODEC_ID_AAC, 2048},  // 2048
-    {AV_CODEC_ID_AAC_LATM, 2048}, // 2048
-    {AV_CODEC_ID_VORBIS, 8192}, // 8192
-    {AV_CODEC_ID_APE, 4608}, // 4608
+    AV_CODEC_ID_VORBIS
 };
 
 Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
@@ -110,9 +100,6 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
         case AV_CODEC_ID_VORBIS:
             capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_VORBIS);
             break;
-        case AV_CODEC_ID_APE:
-            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_APE);
-            break;
         default:
             MEDIA_LOG_I("codec is not supported right now");
     }
@@ -137,6 +124,9 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
             capBuilder.SetAudioChannelLayoutList(values);
         }
     }
+
+    capBuilder.SetThreadModeList({ThreadMode::SYNC});
+
     definition.inCaps.push_back(capBuilder.Build());
 }
 
@@ -175,12 +165,11 @@ AudioFfmpegDecoderPlugin::~AudioFfmpegDecoderPlugin()
 {
     DeInitLocked();
 }
-
 Status AudioFfmpegDecoderPlugin::Init()
 {
     auto ite = codecMap.find(pluginName_);
     if (ite == codecMap.end()) {
-        MEDIA_LOG_W("cannot find codec with name " PUBLIC_LOG_S, pluginName_.c_str());
+        MEDIA_LOG_W("cannot find codec with name " PUBLIC_LOG "s", pluginName_.c_str());
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     {
@@ -188,15 +177,9 @@ Status AudioFfmpegDecoderPlugin::Init()
         avCodec_ = ite->second;
         cachedFrame_ = std::shared_ptr<AVFrame>(av_frame_alloc(), [](AVFrame *fp) { av_frame_free(&fp); });
     }
-
+    OSAL::ScopedLock lock1(parameterMutex_);
     {
-        OSAL::ScopedLock lock1(parameterMutex_);
         audioParameter_[Tag::REQUIRED_OUT_BUFFER_CNT] = (uint32_t) BUFFER_QUEUE_SIZE;
-        if (samplesPerFrameMap.count(avCodec_->id)) {
-            audioParameter_[Tag::AUDIO_SAMPLE_PER_FRAME] = samplesPerFrameMap[avCodec_->id];
-        } else {
-            return Status::ERROR_UNSUPPORTED_FORMAT;
-        }
     }
     return Status::OK;
 }
@@ -264,10 +247,12 @@ do { \
     AVCodecContext* context = nullptr;
     {
         OSAL::ScopedLock lock(avMutex_);
-        FALSE_RETURN_V(avCodec_ != nullptr, Status::ERROR_WRONG_STATE);
+        if (avCodec_ == nullptr) {
+            return Status::ERROR_WRONG_STATE;
+        }
         context = avcodec_alloc_context3(avCodec_.get());
     }
-    FALSE_RETURN_V_MSG_E(context != nullptr, Status::ERROR_NO_MEMORY, "can't allocate codec context");
+    FALSE_RET_V_MSG_E(context != nullptr, Status::ERROR_NO_MEMORY, "can't allocate codec context");
     auto tmpCtx = std::shared_ptr<AVCodecContext>(context, [](AVCodecContext* ptr) {
         avcodec_free_context(&ptr);
     });
@@ -276,16 +261,21 @@ do { \
         FAIL_RET_WHEN_ASSIGN_LOCKED(Tag::AUDIO_CHANNELS, uint32_t, tmpCtx->channels);
         FAIL_RET_WHEN_ASSIGN_LOCKED(Tag::AUDIO_SAMPLE_RATE, uint32_t, tmpCtx->sample_rate);
         FAIL_RET_WHEN_ASSIGN_LOCKED(Tag::MEDIA_BITRATE, int64_t, tmpCtx->bit_rate);
-        FAIL_RET_WHEN_ASSIGN_LOCKED(Tag::BITS_PER_CODED_SAMPLE, uint32_t, tmpCtx->bits_per_coded_sample);
         AudioSampleFormat audioSampleFormat = AudioSampleFormat::NONE;
         auto ret = FindInParameterMapThenAssignLocked(Tag::AUDIO_SAMPLE_FORMAT, audioSampleFormat);
-        FALSE_RETURN_V(ret == Status::OK, ret);
+        if (ret != Status::OK) {
+            return ret;
+        }
         auto tmpFmt = ConvP2FfSampleFmt(Plugin::AnyCast<AudioSampleFormat>(audioSampleFormat));
-        FALSE_RETURN_V(tmpFmt != AV_SAMPLE_FMT_NONE, Status::ERROR_INVALID_PARAMETER);
+        if (tmpFmt == AV_SAMPLE_FMT_NONE) {
+            return Status::ERROR_INVALID_PARAMETER;
+        }
         tmpCtx->sample_fmt = tmpFmt;
         tmpCtx->request_sample_fmt = tmpCtx->sample_fmt;
         ret = AssignExtraDataIfExistsLocked(tmpCtx);
-        FALSE_RETURN_V(ret == Status::OK, ret);
+        if (ret != Status::OK) {
+            return ret;
+        }
     }
     tmpCtx->workaround_bugs = static_cast<uint32_t>(tmpCtx->workaround_bugs) | static_cast<uint32_t>(FF_BUG_AUTODETECT);
     tmpCtx->err_recognition = 1;
@@ -459,7 +449,7 @@ Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
             if (paddedBufferSize_ < bufferLength + AV_INPUT_BUFFER_PADDING_SIZE) {
                 paddedBufferSize_ = bufferLength + AV_INPUT_BUFFER_PADDING_SIZE;
                 paddedBuffer_.reserve(paddedBufferSize_);
-                MEDIA_LOG_I("increase padded buffer size to " PUBLIC_LOG_ZU, paddedBufferSize_);
+                MEDIA_LOG_I("increase padded buffer size to " PUBLIC_LOG "zu", paddedBufferSize_);
             }
             paddedBuffer_.assign(ptr, ptr + bufferLength);
             paddedBuffer_.insert(paddedBuffer_.end(), AV_INPUT_BUFFER_PADDING_SIZE, 0);
@@ -479,10 +469,8 @@ Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
         return Status::OK;
     } else if (ret == AVERROR(EAGAIN)) {
         return Status::ERROR_AGAIN;
-    } else if (ret == AVERROR_EOF) {  // AVStrError(ret).c_str() == "End of file"
-        return Status::END_OF_STREAM;
     } else {
-        MEDIA_LOG_E("send buffer error " PUBLIC_LOG_S, AVStrError(ret).c_str());
+        MEDIA_LOG_E("send buffer error " PUBLIC_LOG "s", AVStrError(ret).c_str());
         return Status::ERROR_UNKNOWN;
     }
 }
@@ -522,12 +510,11 @@ Status AudioFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
         MEDIA_LOG_I("eos received");
         ioInfo->GetMemory()->Reset();
         ioInfo->flag = BUFFER_FLAG_EOS;
-        avcodec_flush_buffers(avCodecContext_.get());
         status = Status::END_OF_STREAM;
     } else if (ret == AVERROR(EAGAIN)) {
         status = Status::ERROR_NOT_ENOUGH_DATA;
     } else {
-        MEDIA_LOG_E("audio decoder receive error: " PUBLIC_LOG_S, AVStrError(ret).c_str());
+        MEDIA_LOG_E("audio decoder receive error: " PUBLIC_LOG "s", AVStrError(ret).c_str());
         status = Status::ERROR_UNKNOWN;
     }
     av_frame_unref(cachedFrame_.get());
@@ -536,7 +523,7 @@ Status AudioFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
 
 Status AudioFfmpegDecoderPlugin::ReceiveBuffer()
 {
-    std::shared_ptr<Buffer> ioInfo {outBuffer_};
+    std::shared_ptr<Buffer> ioInfo = outBuffer_;
     if ((ioInfo == nullptr) || ioInfo->IsEmpty() ||
         (ioInfo->GetBufferMeta()->GetType() != BufferMetaType::AUDIO)) {
         MEDIA_LOG_W("cannot fetch valid buffer to output");
@@ -551,16 +538,6 @@ Status AudioFfmpegDecoderPlugin::ReceiveBuffer()
         status = ReceiveBufferLocked(ioInfo);
     }
     return status;
-}
-
-void AudioFfmpegDecoderPlugin::NotifyInputBufferDone(const std::shared_ptr<Buffer>& input)
-{
-    dataCallback_->OnInputBufferDone(input);
-}
-
-void AudioFfmpegDecoderPlugin::NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output)
-{
-    dataCallback_->OnOutputBufferDone(output);
 }
 
 std::shared_ptr<Allocator> AudioFfmpegDecoderPlugin::GetAllocator()

@@ -63,7 +63,7 @@ void DataPacker::PushData(AVBufferPtr bufferPtr, uint64_t offset)
     MEDIA_LOG_D("DataPacker PushData begin... buffer (offset " PUBLIC_LOG_U64 ", size " PUBLIC_LOG_ZU ")",
                 offset, bufferSize);
     DUMP_BUFFER2LOG("DataPacker Push", bufferPtr, offset);
-    FALSE_RETURN_MSG(bufferSize > 0, "Can not push zero length buffer.");
+    FALSE_RET_MSG(bufferSize > 0, "Can not push zero length buffer.");
 
     OSAL::ScopedLock lock(mutex_);
     if (que_.size() >= capacity_) {
@@ -117,7 +117,7 @@ bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOf
     }
     if (preOffsetEnd >= offsetEnd) {
         MEDIA_LOG_D("IsDataAvailable true, use all buffers, last buffer index " PUBLIC_LOG_ZU ", offsetEnd "
-        PUBLIC_LOG_U64 ", curOffsetEnd " PUBLIC_LOG_U64, bufCnt - 1, offsetEnd, curOffsetEnd);
+            PUBLIC_LOG_U64 ", curOffsetEnd " PUBLIC_LOG_U64, bufCnt - 1, offsetEnd, curOffsetEnd);
         return true;
     }
     curOffset = preOffsetEnd;
@@ -155,11 +155,11 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
     auto curOffsetEnd = mediaOffset_ + AudioBufferSize(que_[startIndex]);
     if (offsetEnd <= curOffsetEnd) { // first buffer is enough
         auto bufferOffset = static_cast<int32_t>(offset - mediaOffset_);
-        FALSE_RETURN_V_MSG_E(bufferOffset >= 0, false, "Copy buffer start position error.");
+        FALSE_RET_V_MSG_E(bufferOffset >= 0, false, "Copy buffer start position error.");
         firstBufferOffset = bufferOffset;
         copySize = CopyFirstBuffer(size, startIndex, dstPtr, bufferPtr, bufferOffset);
         needCopySize -= copySize;
-        FALSE_LOG_MSG(needCopySize == 0, "First buffer is enough, but copySize is not enough");
+        FALSE_LOG_MSG_E(needCopySize == 0, "First buffer is enough, but copySize is not enough");
         EXEC_WHEN_GET(isGet, currentGet_ = Position(startIndex, firstBufferOffset, offset));
         return true;
     } else { // first buffer not enough
@@ -167,7 +167,7 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
         uint64_t prevOffset; // The media offset of the startIndex buffer start byte
         FALSE_RETURN_V(FindFirstBufferToCopy(offset, startIndex, prevOffset), false);
         auto bufferOffset = static_cast<int32_t>(offset - prevOffset);
-        FALSE_RETURN_V_MSG_E(bufferOffset >= 0, false, "Copy buffer start position error.");
+        FALSE_RET_V_MSG_E(bufferOffset >= 0, false, "Copy buffer start position error.");
         firstBufferOffset = bufferOffset;
         copySize = CopyFirstBuffer(size, startIndex, dstPtr, bufferPtr, bufferOffset);
 
@@ -194,8 +194,8 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
     MEDIA_LOG_D("DataPacker GetRange(offset, size) = (" PUBLIC_LOG_U64 ", "
                 PUBLIC_LOG_U32 ")...", offset, size);
     DUMP_BUFFER2LOG("GetRange Input", bufferPtr, 0);
-    FALSE_RETURN_V_MSG_E(bufferPtr && (!bufferPtr->IsEmpty()) && bufferPtr->GetMemory()->GetCapacity() >= size, false,
-        "GetRange input bufferPtr empty or capacity not enough.");
+    FALSE_RET_V_MSG_E(bufferPtr && (!bufferPtr->IsEmpty()) && bufferPtr->GetMemory()->GetCapacity() >= size, false,
+                      "GetRange input bufferPtr empty or capacity not enough.");
 
     OSAL::ScopedLock lock(mutex_);
     if (que_.empty()) {
@@ -227,18 +227,14 @@ bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr
 bool DataPacker::GetRange(uint32_t size, AVBufferPtr& bufferPtr)
 {
     MEDIA_LOG_D("DataPacker live play GetRange(size) = (" PUBLIC_LOG_U32 ")...", size);
-    FALSE_RETURN_V_MSG_E(bufferPtr && (!bufferPtr->IsEmpty()) && bufferPtr->GetMemory()->GetCapacity() >= size, false,
-        "Live play GetRange input bufferPtr empty or capacity not enough.");
+    FALSE_RET_V_MSG_E(bufferPtr && (!bufferPtr->IsEmpty()) && bufferPtr->GetMemory()->GetCapacity() >= size, false,
+                      "Live play GetRange input bufferPtr empty or capacity not enough.");
 
     OSAL::ScopedLock lock(mutex_);
     if (que_.empty()) {
         FALSE_RETURN_V_W(!isEos_, false);
         MEDIA_LOG_D("DataPacker is empty, live play GetRange waiting for push");
-        cvEmpty_.Wait(lock, [this] { return !que_.empty() || isEos_; });
-        if (isEos_) {
-            MEDIA_LOG_D("Eos wakeup the cvEmpty ConditionVariable");
-            return false;
-        }
+        cvEmpty_.Wait(lock, [this] { return !que_.empty(); });
     }
 
     FALSE_RETURN_V(!que_.empty(), false);
@@ -291,7 +287,6 @@ void DataPacker::SetEos()
     MEDIA_LOG_I("DataPacker SetEos called.");
     OSAL::ScopedLock lock(mutex_);
     isEos_ = true;
-    cvEmpty_.NotifyOne();
 }
 
 bool DataPacker::IsEmpty()
@@ -322,7 +317,7 @@ void DataPacker::RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t r
     auto memory = buffer->GetMemory();
     FALSE_RETURN(removeSize < memory->GetSize());
     auto copySize = memory->GetSize() - removeSize;
-    FALSE_LOG_MSG(memmove_s(memory->GetWritableAddr(copySize), memory->GetCapacity(),
+    FALSE_LOG_MSG_E(memmove_s(memory->GetWritableAddr(copySize), memory->GetCapacity(),
         memory->GetReadOnlyData(removeSize), copySize) == EOK, "memmove failed.");
     FALSE_RETURN(UpdateWhenFrontDataRemoved(removeSize));
 }
@@ -376,8 +371,8 @@ bool DataPacker::RemoveTo(const Position& position)
 bool DataPacker::UpdateWhenFrontDataRemoved(size_t removeSize)
 {
     mediaOffset_ += removeSize;
-    FALSE_RETURN_V_MSG_E(size_.load() >= removeSize, false, "Total size(size_ " PUBLIC_LOG_U32
-        ") smaller than removeSize(" PUBLIC_LOG_ZU ")", size_.load(), removeSize);
+    FALSE_RET_V_MSG_E(size_.load() >= removeSize, false, "Total size(size_ " PUBLIC_LOG_U32
+            ") smaller than removeSize(" PUBLIC_LOG_ZU ")", size_.load(), removeSize);
     size_ -= removeSize;
     return true;
 }
@@ -407,7 +402,7 @@ size_t DataPacker::CopyFirstBuffer(size_t size, int32_t index, uint8_t *dstPtr, 
                                    int32_t bufferOffset)
 {
     auto remainSize = static_cast<int32_t>(AudioBufferSize(que_[index]) - bufferOffset);
-    FALSE_RETURN_V_MSG_E(remainSize > 0, 0, "Copy size can not be negative.");
+    FALSE_RET_V_MSG_E(remainSize > 0, 0, "Copy size can not be negative.");
     size_t copySize = std::min(static_cast<size_t>(remainSize), size);
     NZERO_LOG(memcpy_s(dstPtr, copySize,
         AudioBufferReadOnlyData(que_[index]) + bufferOffset, copySize));

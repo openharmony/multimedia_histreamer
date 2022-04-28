@@ -29,7 +29,6 @@ struct HttpLiteAttr {
     int bufferSize;
     int priority;
     std::string certFile;
-    bool notVerifyCert; // false for verify; true for not verify
 };
 
 enum HttpLiteStatus {

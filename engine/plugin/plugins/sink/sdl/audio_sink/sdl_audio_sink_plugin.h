@@ -90,7 +90,6 @@ public:
 
 private:
     void AudioCallback(void* userdata, uint8_t* stream, int len); // NOLINT: void*
-    void DrainData();
 
     bool needResample_ {false};
     std::vector<uint8_t> resampleCache_ {};

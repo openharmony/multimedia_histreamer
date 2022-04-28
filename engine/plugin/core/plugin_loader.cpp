@@ -66,7 +66,7 @@ void* PluginLoader::LoadPluginFile(const std::string& path)
     if (pathStr) {
         auto ptr = ::dlopen(pathStr, RTLD_NOW);
         if (ptr == nullptr) {
-            MEDIA_LOG_E("dlopen failed due to " PUBLIC_LOG_S, ::dlerror());
+            MEDIA_LOG_E("dlopen failed due to " PUBLIC_LOG "s", ::dlerror());
         }
         return ptr;
     }

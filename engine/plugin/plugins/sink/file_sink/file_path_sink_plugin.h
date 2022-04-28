@@ -16,7 +16,6 @@
 #define HISTREAMER_FILE_PATH_SINK_PLUGIN_H
 
 #include <cstdio>
-#include "plugin/common/media_sink.h"
 #include "plugin/interface/output_sink_plugin.h"
 
 namespace OHOS {
@@ -31,7 +30,7 @@ public:
     Status Stop() override;
 
     // file path sink
-    Status SetSink(const MediaSink& sink) override;
+    Status SetSink(const Plugin::ValueType& sink) override;
     bool IsSeekable()  override;
     Status SeekTo(uint64_t offset)  override;
     Status Write(const std::shared_ptr<Buffer>& buffer) override;

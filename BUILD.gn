@@ -29,9 +29,6 @@ config("histreamer_presets") {
   if (multimedia_histreamer_enable_video) {
     defines += [ "VIDEO_SUPPORT" ]
   }
-  if (hst_is_lite_sys) {
-    defines += [ "OHOS_LITE" ]
-  }
 }
 
 if (hst_is_lite_sys) {

@@ -24,41 +24,27 @@ namespace HttpPlugin {
 ClientFactory::ClientFactory(RxHeader headCallback, RxBody bodyCallback, void *userParam)
     : rxHeader_(headCallback), rxBody_(bodyCallback), userParam_(userParam)
 {
-    MEDIA_LOG_I("ClientFactory ctor");
 }
 
 ClientFactory::~ClientFactory()
 {
-    MEDIA_LOG_I("~ClientFactory dtor");
     if (httpClient_ != nullptr) {
         httpClient_->Deinit();
         httpClient_ = nullptr;
     }
 }
 
-std::shared_ptr<NetworkClient> ClientFactory::GetClient(const std::string& protocol)
+std::shared_ptr<NetworkClient> ClientFactory::CreateClient(const std::string& url)
 {
-    FALSE_RETURN_V(!protocol.empty(), nullptr);
-    if (protocol == "http") {
+    FALSE_RETURN_V(!url.empty(), nullptr);
+    if (url.compare(0, 4, "http") == 0) { // 0 : position, 4: count
         if (httpClient_ == nullptr) {
             httpClient_ = std::make_shared<HttpCurlClient>(rxHeader_, rxBody_, userParam_);
             httpClient_->Init();
         }
         return httpClient_;
-    } else { // When support more client types, maybe need a [protocol, client] map.
-        MEDIA_LOG_E("Protocol " PUBLIC_LOG_S " is not supported.", protocol.c_str());
     }
     return nullptr;
-}
-
-std::string ClientFactory::GetProtocol(const std::string &url)
-{
-    if (url.compare(0, 4, "http") == 0) { // 0 : position, 4: count
-        return "http";   // http, or https
-    }
-    size_t protocolEnd = url.rfind("://");
-    FALSE_RETURN_V(protocolEnd != std::string::npos, "");
-    return url.substr(0, protocolEnd);
 }
 }
 }

@@ -15,9 +15,7 @@
 #ifndef HISTREAMER_FILE_FD_SINK_PLUGIN_H
 #define HISTREAMER_FILE_FD_SINK_PLUGIN_H
 
-#include "plugin/common/media_sink.h"
 #include "plugin/interface/output_sink_plugin.h"
-
 
 namespace OHOS {
 namespace Media {
@@ -27,8 +25,9 @@ class FileFdSinkPlugin : public OutputSinkPlugin {
 public:
     explicit FileFdSinkPlugin(std::string name);
     ~FileFdSinkPlugin() override = default;
+
     // file fd sink
-    Status SetSink(const MediaSink& sink) override;
+    Status SetSink(const Plugin::ValueType& sink) override;
     bool IsSeekable()  override;
     Status SeekTo(uint64_t offset)  override;
     Status Write(const std::shared_ptr<Buffer>& buffer) override;

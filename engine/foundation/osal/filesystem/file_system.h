@@ -16,7 +16,6 @@
 #define HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILE_SYSTEM_H
 
 #include <string>
-#include <sys/stat.h>
 
 namespace OHOS {
 namespace Media {
@@ -24,10 +23,6 @@ namespace OSAL {
 class FileSystem {
 public:
     static bool IsRegularFile(const std::string& path);
-    static bool IsFdValid(int32_t fd, struct stat& s);
-    static bool IsRegularFile(int32_t fd);
-    static bool IsSocketFile(int32_t fd);
-    static bool IsSeekable(int32_t fd);
     static bool IsDirectory(const std::string& path);
     static bool IsExists(const std::string& path);
     static bool MakeDir(const std::string& path);

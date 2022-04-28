@@ -38,10 +38,6 @@ source_set("scene_common") {
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline",
   ]
-  sources = [
-    "common/data_stream.cpp",
-    "common/data_stream_impl.cpp",
-    "common/media_stat_stub.cpp",
-  ]
+  sources = [ "common/media_stat_stub.cpp" ]
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
 }

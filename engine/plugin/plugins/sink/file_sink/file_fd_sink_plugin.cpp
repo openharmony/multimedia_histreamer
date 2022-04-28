@@ -35,11 +35,11 @@ std::shared_ptr<OutputSinkPlugin> FileFdSinkPluginCreator(const std::string& nam
 Status FileFdSinkRegister(const std::shared_ptr<Register>& reg)
 {
     OutputSinkPluginDef definition;
-    definition.protocolType = ProtocolType::FD;
+    definition.outputType = OutputType::FD;
     definition.name = "file_fd_sink";
     definition.description = "file fd sink";
     definition.rank = 100; // 100
-    definition.protocolType = ProtocolType::FD;
+    definition.outputType = OutputType::FD;
     definition.creator = FileFdSinkPluginCreator;
     return reg->AddPlugin(definition);
 }
@@ -51,10 +51,13 @@ FileFdSinkPlugin::FileFdSinkPlugin(std::string name)
 {
 }
 
-Status FileFdSinkPlugin::SetSink(const MediaSink& sink)
+Status FileFdSinkPlugin::SetSink(const Plugin::ValueType& sink)
 {
-    FALSE_RETURN_V((sink.GetProtocolType() == ProtocolType::FD && sink.GetFd() != -1), Status::ERROR_INVALID_DATA);
-    fd_ =  sink.GetFd();
+    if (!sink.SameTypeWith(typeid(int32_t))) {
+        MEDIA_LOG_E("Invalid parameter to file_fd_sink plugin");
+        return Status::ERROR_INVALID_PARAMETER;
+    }
+    fd_ =  Plugin::AnyCast<int32_t>(sink);
     return Status::OK;
 }
 
@@ -65,7 +68,7 @@ bool FileFdSinkPlugin::IsSeekable()
 
 Status FileFdSinkPlugin::SeekTo(uint64_t offset)
 {
-    FALSE_RETURN_V_MSG_E(fd_ != -1, Status::ERROR_WRONG_STATE, "no valid fd.");
+    FALSE_RET_V_MSG_E(fd_ != -1, Status::ERROR_WRONG_STATE, "no valid fd.");
     int64_t ret = lseek(fd_, offset, SEEK_SET);
     if (ret != -1) {
         MEDIA_LOG_I("now seek to " PUBLIC_LOG_D64, ret);
