@@ -358,13 +358,13 @@ public:
     uint32_t trackID;
 
     /// presentation timestamp of the buffer based on {@link HST_TIME_BASE}.
-    uint64_t pts;
+    int64_t pts;
 
     /// decoding timestamp of the buffer based on {@link HST_TIME_BASE}.
-    uint64_t dts;
+    int64_t dts;
 
     /// duration in time of the buffer data based on {@link HST_TIME_BASE}.
-    uint64_t duration;
+    int64_t duration;
 
     /// flag of the buffer, which is used to record extra information.
     /// @see BUFFER_FLAG_EOS

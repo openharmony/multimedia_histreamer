@@ -18,7 +18,6 @@
 
 #include "hiplayer_impl.h"
 #include "foundation/log.h"
-#include "pipeline/core/clock_manager.h"
 #include "pipeline/factory/filter_factory.h"
 #include "scene/player/standard/media_utils.h"
 #include "plugin/common/media_source.h"
@@ -61,12 +60,13 @@ HiPlayerImpl::HiPlayerImpl()
     videoSink_ =
         FilterFactory::Instance().CreateFilterWithType<VideoSinkFilter>("builtin.player.videosink", "videoSink");
     FALSE_RETURN(videoSink_ != nullptr);
+    videoSink_->SetSyncCenter(&syncManager_);
 #endif
 #endif
     FALSE_RETURN(audioSource_ != nullptr);
     FALSE_RETURN(demuxer_ != nullptr);
     FALSE_RETURN(audioSink_ != nullptr);
-
+    audioSink_->SetSyncCenter(&syncManager_);
     pipeline_ = std::make_shared<PipelineCore>();
 }
 
@@ -75,7 +75,6 @@ HiPlayerImpl::~HiPlayerImpl()
     MEDIA_LOG_I("dtor called.");
     fsm_.SendEventAsync(Intent::STOP);
     fsm_.Stop();
-    ClockManager::Instance().ClearProviders();
 }
 void HiPlayerImpl::UpdateStateNoLock(PlayerStates newState, bool notifyUpward)
 {
@@ -296,8 +295,6 @@ int32_t HiPlayerImpl::GetVideoHeight()
 
 void HiPlayerImpl::HandleAudioProgressEvent(const Event& event)
 {
-    mediaStats_.ReceiveEvent(EventType::EVENT_AUDIO_PROGRESS,
-                             Plugin::AnyCast<int64_t>(event.param));
     auto ptr = obs_.lock();
     if (ptr != nullptr) {
         Format format;
@@ -342,15 +339,11 @@ void HiPlayerImpl::OnEvent(const Event& event)
             fsm_.SendEventAsync(Intent::NOTIFY_READY);
             break;
         case EventType::EVENT_COMPLETE:
-            mediaStats_.ReceiveEvent(EventType::EVENT_COMPLETE, 0);
+            mediaStats_.ReceiveEvent(event);
             if (mediaStats_.IsEventCompleteAllReceived()) {
                 fsm_.SendEventAsync(Intent::NOTIFY_COMPLETE);
             }
             break;
-        case EventType::EVENT_AUDIO_PROGRESS: {
-            HandleAudioProgressEvent(event);
-            break;
-        }
         case EventType::EVENT_PLUGIN_ERROR: {
             HandlePluginErrorEvent(event);
             break;
@@ -388,6 +381,7 @@ ErrorCode HiPlayerImpl::PrepareFilters()
 
 ErrorCode HiPlayerImpl::DoPlay()
 {
+    syncManager_.Resume();
     auto ret = pipeline_->Start();
     if (ret != ErrorCode::SUCCESS) {
         UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
@@ -398,6 +392,7 @@ ErrorCode HiPlayerImpl::DoPlay()
 ErrorCode HiPlayerImpl::DoPause()
 {
     auto ret = pipeline_->Pause();
+    syncManager_.Pause();
     if (ret != ErrorCode::SUCCESS) {
         UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }
@@ -406,6 +401,7 @@ ErrorCode HiPlayerImpl::DoPause()
 
 ErrorCode HiPlayerImpl::DoResume()
 {
+    syncManager_.Resume();
     auto ret = pipeline_->Resume();
     if (ret != ErrorCode::SUCCESS) {
         UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
@@ -417,6 +413,7 @@ ErrorCode HiPlayerImpl::DoStop()
 {
     mediaStats_.Reset();
     auto ret = pipeline_->Stop();
+    syncManager_.Reset();
     if (ret != ErrorCode::SUCCESS) {
         UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }
@@ -439,11 +436,8 @@ ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode m
         pipeline_->FlushEnd();
         PROFILE_END("Flush end");
         PROFILE_RESET();
+        syncManager_.Seek(hstTime);
         rtv = demuxer_->SeekTo(hstTime, mode);
-        if (rtv == ErrorCode::SUCCESS) {
-            mediaStats_.ReceiveEvent(EventType::EVENT_AUDIO_PROGRESS, hstTime);
-            mediaStats_.ReceiveEvent(EventType::EVENT_VIDEO_PROGRESS, hstTime);
-        }
         PROFILE_END("SeekTo");
     }
     auto ptr = obs_.lock();
@@ -573,7 +567,7 @@ int32_t HiPlayerImpl::Reset()
 
 int32_t HiPlayerImpl::GetCurrentTime(int32_t& currentPositionMs)
 {
-    currentPositionMs = Plugin::HstTime2Ms(mediaStats_.GetCurrentPosition());
+    currentPositionMs = Plugin::HstTime2Ms(syncManager_.GetMediaTimeNow());
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 
@@ -675,7 +669,7 @@ ErrorCode HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& par
                                               audioSink_->GetInPort(PORT_NAME_DEFAULT)));
                 ActiveFilters({newAudioDecoder.get(), audioSink_.get()});
             }
-            mediaStats_.Append(MediaStatStub::MediaType::AUDIO);
+            mediaStats_.Append(audioSink_->GetName());
             rtv = ErrorCode::SUCCESS;
             break;
         }
@@ -712,6 +706,7 @@ ErrorCode HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin::Any& par
                     toPort = videoSink_->GetInPort(PORT_NAME_DEFAULT);
                     FAIL_LOG(pipeline_->LinkPorts(fromPort, toPort));  // link ports
                     newFilters.push_back(videoSink_.get());
+                    mediaStats_.Append(videoSink_->GetName());
                 }
             }
         }

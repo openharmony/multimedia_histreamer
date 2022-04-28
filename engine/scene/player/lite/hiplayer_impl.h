@@ -31,6 +31,7 @@
 #include "osal/thread/mutex.h"
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_callback.h"
+#include "pipeline/core/media_sync_manager.h"
 #include "pipeline/core/pipeline.h"
 #include "pipeline/core/pipeline_core.h"
 #include "pipeline/filters/codec/audio_decoder/audio_decoder_filter.h"
@@ -129,7 +130,6 @@ private:
     ErrorCode RemoveFilterChains(Pipeline::Filter* filter, const Plugin::Any& parameter);
 
     void ActiveFilters(const std::vector<Pipeline::Filter*>& filters);
-    void HandleAudioProgressEvent(const Event& event);
     void HandlePluginErrorEvent(const Event& event);
     void UpdateStateNoLock(PlayerStates newState, bool notifyUpward = true);
 
@@ -162,6 +162,8 @@ private:
     std::weak_ptr<PlayerCallback> callback_;
     float volume_;
     MediaStatStub mediaStats_;
+
+    Pipeline::MediaSyncManager syncManager_;
 };
 } // namespace Media
 } // namespace OHOS

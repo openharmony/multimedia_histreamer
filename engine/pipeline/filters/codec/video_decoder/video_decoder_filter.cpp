@@ -83,10 +83,9 @@ ErrorCode VideoDecoderFilter::Stop()
 
 void VideoDecoderFilter::FlushStart()
 {
-    MEDIA_LOG_D("video decoder FlushStart entered.");
+    MEDIA_LOG_I("video decoder FlushStart entered.");
     codecMode_->FlushStart();
     CodecFilterBase::FlushStart();
-    MEDIA_LOG_D("video decoder FlushStart exit.");
 }
 
 void VideoDecoderFilter::FlushEnd()

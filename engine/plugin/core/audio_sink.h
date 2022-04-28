@@ -45,7 +45,7 @@ public:
 
     Status SetVolume(float volume);
 
-    Status GetLatency(uint64_t& nanoSec);
+    Status GetLatency(uint64_t& hstTime);
 private:
     friend class PluginManager;
 

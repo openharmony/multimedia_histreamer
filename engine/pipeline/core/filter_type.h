@@ -33,9 +33,20 @@ enum struct FilterType : uint8_t {
     VIDEO_ENCODER,
     AUDIO_SINK,
     VIDEO_SINK,
+    OUTPUT_SINK,
 };
-} // Pipeline
-} // Media
-} // OHOS
-
+inline bool IsSink(FilterType type)
+{
+    switch (type) {
+        case FilterType::AUDIO_SINK:
+        case FilterType::VIDEO_SINK:
+        case FilterType::OUTPUT_SINK:
+            return true;
+        default:
+            return false;
+    }
+}
+} // namespace Pipeline
+} // namespace Media
+} // namespace OHOS
 #endif // HISTREAMER_PIPELINE_CORE_FILTER_TYPE_H

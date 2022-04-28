@@ -65,11 +65,6 @@ ErrorCode AudioDecoderFilter::Prepare()
     return CodecFilterBase::Prepare();
 }
 
-ErrorCode AudioDecoderFilter::Start()
-{
-    return CodecFilterBase::Start();
-}
-
 ErrorCode AudioDecoderFilter::Stop()
 {
     MEDIA_LOG_D("audio decoder stop start.");

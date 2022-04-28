@@ -23,6 +23,7 @@
 #include "foundation/pre_defines.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_buffer.h"
+#include "plugin/common/plugin_time.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "utils/constants.h"
 
@@ -320,7 +321,7 @@ Status SdlAudioSinkPlugin::Resume()
 
 Status SdlAudioSinkPlugin::GetLatency(uint64_t& nanoSec)
 {
-    nanoSec = 0;
+    nanoSec = 100 * HST_MSECOND; // 100ms
     return Status::OK;
 }
 

@@ -92,6 +92,7 @@ public:
     // Port调用此方法向Filter报告事件
     void OnEvent(const Event& event) override;
 
+    void SetSyncCenter(IMediaSyncCenter* syncCenter) final;
 protected:
     virtual void InitPorts();
 
@@ -136,6 +137,8 @@ protected:
     FilterType filterType_ {FilterType::NONE};
 
     std::shared_ptr<Plugin::PluginInfo> pluginInfo_{};
+
+    IMediaSyncCenter* syncCenter_ {nullptr};
 
 private:
     template <typename T>

@@ -64,11 +64,52 @@ bool IsPcmStream(const AVStream& avStream)
            codecId == AV_CODEC_ID_PCM_F32LE;
 }
 
+void ConvertCommonTrackToMetaInfo(const AVStream& avStream,
+                                  const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                  const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
+{
+    meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
+    meta.insert({Tag::MEDIA_DURATION, static_cast<uint64_t>(
+            ConvertTimeFromFFmpeg(avStream.duration, avStream.time_base))});
+    meta.insert({Tag::MEDIA_START_TIME, static_cast<int64_t>(
+            ConvertTimeFromFFmpeg(avStream.start_time, avStream.time_base))});
+    if (avCodecContext->extradata_size > 0) {
+        CodecConfig codecConfig;
+        codecConfig.assign(avCodecContext->extradata, avCodecContext->extradata + avCodecContext->extradata_size);
+        meta.insert({Tag::MEDIA_CODEC_CONFIG, std::move(codecConfig)});
+    }
+    int64_t bitRate = avCodecContext->bit_rate;
+    if (!bitRate) {
+        bitRate = avFormatContext->bit_rate;
+    }
+    meta.insert({Tag::MEDIA_BITRATE, bitRate});
+    meta.insert({Tag::BITS_PER_CODED_SAMPLE, static_cast<uint32_t>(avCodecContext->bits_per_coded_sample)});
+}
+
+#ifdef VIDEO_SUPPORT
+void ConvertCommonVideoTrackToMetaInfo(const AVStream& avStream,
+                                       const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                       const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
+{
+    ConvertCommonTrackToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
+    meta.insert({Tag::VIDEO_WIDTH, static_cast<uint32_t>(avCodecContext->width)});
+    meta.insert({Tag::VIDEO_HEIGHT, static_cast<uint32_t>(avCodecContext->height)});
+    uint32_t frameRate = 0;
+    if (avCodecContext->framerate.den != 0) {
+        frameRate = avCodecContext->framerate.num / avCodecContext->framerate.den;
+    }
+    if (frameRate > 0) {
+        meta.insert({Tag::VIDEO_FRAME_RATE,
+                     static_cast<uint32_t>(avCodecContext->framerate.num / avCodecContext->framerate.den)});
+    }
+}
+#endif
+
 void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream,
                                         const std::shared_ptr<AVFormatContext>& avFormatContext,
                                         const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
-    meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
+    ConvertCommonTrackToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
     if (avCodecContext->channels != -1) {
         meta.insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(avCodecContext->sample_rate)});
         meta.insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(avCodecContext->channels)});
@@ -81,18 +122,7 @@ void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream,
         }
         meta.insert({Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame});
         meta.insert({Tag::AUDIO_SAMPLE_FORMAT, ConvFf2PSampleFmt(avCodecContext->sample_fmt)});
-        int64_t bitRate = avCodecContext->bit_rate;
-        if (!bitRate) {
-            bitRate = avFormatContext->bit_rate;
-        }
-        meta.insert({Tag::MEDIA_BITRATE, bitRate});
     }
-    if (avCodecContext->extradata_size > 0) {
-        CodecConfig codecConfig;
-        codecConfig.assign(avCodecContext->extradata, avCodecContext->extradata + avCodecContext->extradata_size);
-        meta.insert({Tag::MEDIA_CODEC_CONFIG, std::move(codecConfig)});
-    }
-    meta.insert({Tag::BITS_PER_CODED_SAMPLE, static_cast<uint32_t>(avCodecContext->bits_per_coded_sample)});
 }
 } // namespace
 
@@ -180,20 +210,7 @@ void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_
                                     const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
     meta.insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_AAC_LATM)});
-    meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
-    if (avCodecContext->channels != -1) {
-        meta.insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(avCodecContext->sample_rate)});
-        meta.insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(avCodecContext->channels)});
-        meta.insert({Tag::AUDIO_SAMPLE_FORMAT, ConvFf2PSampleFmt(avCodecContext->sample_fmt)});
-        meta.insert({Tag::AUDIO_CHANNEL_LAYOUT,
-                     ConvertChannelLayoutFromFFmpeg(avCodecContext->channels,  avCodecContext->channel_layout)});
-        meta.insert({Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(avCodecContext->frame_size)});
-        int64_t bitRate = avCodecContext->bit_rate;
-        if (!bitRate) {
-            bitRate = avFormatContext->bit_rate;
-        }
-        meta.insert({Tag::MEDIA_BITRATE, bitRate});
-    }
+    ConvertCommonAudioStreamToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
     meta.insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(4)}); // 4
     meta.insert({Tag::AUDIO_AAC_STREAM_FORMAT, AudioAacStreamFormat::MP4LOAS});
     meta.insert({Tag::BITS_PER_CODED_SAMPLE, static_cast<uint32_t>(avCodecContext->bits_per_coded_sample)});
@@ -204,15 +221,7 @@ void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
                                 const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
     meta.insert({Tag::MIME, std::string(MEDIA_MIME_VIDEO_H264)});
-    meta.insert({Tag::TRACK_ID, static_cast<uint32_t>(avStream.index)});
-    int64_t bitRate = avCodecContext->bit_rate;
-    if (!bitRate) {
-        bitRate = avFormatContext->bit_rate;
-    }
-    meta.insert({Tag::MEDIA_BITRATE, bitRate});
-    meta.insert({Tag::BITS_PER_CODED_SAMPLE, static_cast<uint32_t>(avCodecContext->bits_per_coded_sample)});
-    meta.insert({Tag::VIDEO_WIDTH, static_cast<uint32_t>(avCodecContext->width)});
-    meta.insert({Tag::VIDEO_HEIGHT, static_cast<uint32_t>(avCodecContext->height)});
+    ConvertCommonVideoTrackToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
     if (avCodecContext->extradata_size > 0) {
         AVCConfigDataParser parser(avCodecContext->extradata, avCodecContext->extradata_size);
         if (!parser.ParseConfigData()) {

@@ -20,16 +20,16 @@
 
 #include "osal/thread/condition_variable.h"
 #include "osal/thread/mutex.h"
-#include "pipeline/core/clock_provider.h"
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_base.h"
+#include "pipeline/filters/sink/media_synchronous_sink.h"
 #include "plugin/core/audio_sink.h"
 #include "plugin/core/plugin_info.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class AudioSinkFilter : public std::enable_shared_from_this<AudioSinkFilter>, public FilterBase, public ClockProvider {
+class AudioSinkFilter : public std::enable_shared_from_this<AudioSinkFilter>, public MediaSynchronousSink {
 public:
     explicit AudioSinkFilter(const std::string& name);
     ~AudioSinkFilter() override;
@@ -67,19 +67,18 @@ public:
     void FlushEnd() override;
     ErrorCode SetVolume(float volume);
 
-    ErrorCode CheckPts(int64_t pts, int64_t& delta) override;
-    ErrorCode GetCurrentPosition(int64_t& position) override;
-    ErrorCode GetCurrentTimeNano(int64_t& nowNano) override;
+protected:
+    ErrorCode DoSyncWrite(const AVBufferPtr& buffer) override;
+
+    void ResetSyncInfo() override;
 
 private:
     ErrorCode SetPluginParameter(Tag tag, const Plugin::ValueType& value);
     ErrorCode ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta);
-    void ReportCurrentPosition(int64_t pts);
     ErrorCode SetVolumeToPlugin();
 
-    ErrorCode UpdateLatestPts(int64_t pts);
-    int64_t latestPts_ {0};
-    int64_t latestSysClock_ {0}; // now+latency
+    int64_t latestBufferPts_ {HST_TIME_NONE};
+    int64_t latestBufferDuration_ {0};
     int64_t frameCnt_ {0};
 
     std::atomic<bool> pushThreadIsBlocking {false};
@@ -89,6 +88,10 @@ private:
 
     std::shared_ptr<Plugin::AudioSink> plugin_ {};
     float volume_ {-1.0f}; // default invalid value
+    int64_t reportAnchorDuration_ {0};
+    int64_t lastReportedClockTime_ {HST_TIME_NONE};
+
+    bool forceUpdateTimeAnchorNextTime_ {false};
 };
 } // namespace Pipeline
 } // namespace Media

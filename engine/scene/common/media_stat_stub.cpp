@@ -28,38 +28,30 @@ void MediaStatStub::Reset()
     duration_ = 0;
 }
 
-void MediaStatStub::Append(MediaType mediaType)
+void MediaStatStub::Append(const std::string& reporter)
 {
     for (auto& stat : mediaStats_) {
-        if (stat.mediaType == mediaType) {
+        if (stat.reporter == reporter) {
             return;
         }
     }
-    mediaStats_.emplace_back(mediaType);
+    mediaStats_.emplace_back(reporter);
 }
 
-void MediaStatStub::ReceiveEvent(const EventType& eventType, int64_t param)
+void MediaStatStub::ReceiveEvent(const Event& event)
 {
-    switch (eventType) {
+    switch (event.type) {
         case EventType::EVENT_COMPLETE:
             for (auto& stat : mediaStats_) {
-                if (stat.mediaType == MediaType::AUDIO) {
+                if (stat.reporter == event.srcFilter) {
                     stat.completeEventReceived = true;
-                    break;
-                }
-            }
-            break;
-        case EventType::EVENT_AUDIO_PROGRESS:
-            for (auto& stat : mediaStats_) {
-                if (stat.mediaType == MediaType::AUDIO) {
-                    stat.currentPosition = param;
                     break;
                 }
             }
             break;
         default:
             MEDIA_LOG_W("MediaStats::ReceiveEvent receive unexpected event " PUBLIC_LOG_D32,
-                        static_cast<int>(eventType));
+                        static_cast<int>(event.type));
             break;
     }
 }

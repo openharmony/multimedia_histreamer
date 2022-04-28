@@ -22,6 +22,7 @@
 #include "filter_callback.h"
 #include "error_code.h"
 #include "utils/constants.h"
+#include "i_media_sync_center.h"
 #include "event.h"
 #include "parameter.h"
 #include "port.h"
@@ -118,6 +119,7 @@ public:
     virtual void UnlinkPrevFilters() = 0;
     virtual std::vector<Filter*> GetNextFilters() = 0;
     virtual std::vector<Filter*> GetPreFilters() = 0;
+    virtual void SetSyncCenter(IMediaSyncCenter* mediaSyncCenter) = 0;
 };
 } // namespace Pipeline
 } // namespace Media

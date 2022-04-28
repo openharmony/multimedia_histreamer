@@ -27,6 +27,7 @@
 #include "internal/state_machine.h"
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_callback.h"
+#include "pipeline/core/media_sync_manager.h"
 #include "pipeline/core/pipeline.h"
 #include "pipeline/core/pipeline_core.h"
 #include "pipeline/filters/codec/audio_decoder/audio_decoder_filter.h"
@@ -137,6 +138,7 @@ private:
     std::shared_ptr<Pipeline::VideoSinkFilter> videoSink_;
 #endif
     std::unordered_map<std::string, std::shared_ptr<Pipeline::AudioDecoderFilter>> audioDecoderMap_;
+    Pipeline::MediaSyncManager syncManager_;
 };
 }  // namespace Media
 }  // namespace OHOS

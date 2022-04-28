@@ -26,6 +26,8 @@ int TransErrorCode(ErrorCode errorCode);
 PlayerStates TransStateId2PlayerState(StateId state);
 Plugin::SeekMode Transform2SeekMode(PlayerSeekMode mode);
 const std::string& StringnessPlayerState(PlayerStates state);
+inline float TransformPlayRate2Float(PlaybackRateMode rateMode);
+inline PlaybackRateMode TransformFloat2PlayRate(float rate);
 }  // namespace Media
 }  // namespace OHOS
 

@@ -27,17 +27,16 @@
 #include "osal/thread/mutex.h"
 #include "osal/thread/task.h"
 #include "utils/blocking_queue.h"
-#include "pipeline/core/clock_provider.h"
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_base.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/video_sink.h"
+#include "pipeline/filters/sink/media_synchronous_sink.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class VideoSinkAdapter;
-class VideoSinkFilter : public FilterBase {
+class VideoSinkFilter : public MediaSynchronousSink {
 public:
     explicit VideoSinkFilter(const std::string& name);
     ~VideoSinkFilter() override;
@@ -78,14 +77,18 @@ public:
     ErrorCode SetVideoSurface(sptr<Surface> surface);
 #endif
 
+protected:
+    ErrorCode DoSyncWrite(const AVBufferPtr &buffer) override;
+
+    void ResetSyncInfo() override;
+
 private:
     ErrorCode ConfigurePluginParams(const std::shared_ptr<const Plugin::Meta>& meta);
-    ErrorCode ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta);
+    ErrorCode ConfigurePluginToStartNoLocked(const std::shared_ptr<const Plugin::Meta>& meta);
     bool CreateVideoSinkPlugin(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo);
     void HandleNegotiateParams(const Plugin::TagMap& upstreamParams, Plugin::TagMap& downstreamParams);
     void RenderFrame();
-    void SyncVideoOnly(int64_t pts);
-    bool DoSync(const AVBufferPtr& buffer);
+    bool CheckBufferLatenessMayWait(AVBufferPtr buffer);
     std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQueue_ {nullptr};
     std::shared_ptr<OHOS::Media::OSAL::Task> renderTask_ {nullptr};
     std::atomic<bool> pushThreadIsBlocking_ {false};
@@ -97,8 +100,10 @@ private:
 #endif
     std::shared_ptr<Plugin::VideoSink> plugin_ {nullptr};
     int64_t frameCnt_ {0};
-    int64_t curPts_ {0};
     int64_t refreshTime_ {0};
+    bool isFirstFrame_ {true};
+    uint32_t frameRate_ {0};
+    bool forceRenderNextFrame_ {false};
 };
 } // namespace Pipeline
 } // namespace Media

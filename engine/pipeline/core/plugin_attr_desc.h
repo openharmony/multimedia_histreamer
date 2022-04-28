@@ -36,6 +36,7 @@ const Plugin::ValueType g_auSampleFmtDef = Plugin::AudioSampleFormat::U8;
 const Plugin::ValueType g_aacProfileDef = Plugin::AudioAacProfile::LC;
 const Plugin::ValueType g_aacStFmtDef = Plugin::AudioAacStreamFormat::RAW;
 const Plugin::ValueType g_vdPixelFmtDef = Plugin::VideoPixelFormat::UNKNOWN;
+const Plugin::ValueType g_vdH264ProfileDef = Plugin::VideoH264Profile::BASELINE;
 
 // tuple is <tagName, default_val, typeName> default_val is used for type compare
 const std::map<Plugin::Tag, std::tuple<const char*, const Plugin::ValueType&, const char*>> g_tagInfoMap = {
@@ -83,6 +84,9 @@ const std::map<Plugin::Tag, std::tuple<const char*, const Plugin::ValueType&, co
     {Plugin::Tag::VIDEO_MAX_SURFACE_NUM, {"surface_num",       g_u32Def,           "uin32_t"}},
     {Plugin::Tag::VIDEO_CAPTURE_RATE, {"capture_rate",         g_doubleDef,        "double"}},
     {Plugin::Tag::BITS_PER_CODED_SAMPLE, {"bits_per_coded_sample", g_u32Def,       "uin32_t"}},
+    {Plugin::Tag::MEDIA_START_TIME, {"med_start_time",         g_d64Def,           "in64_t"}},
+    {Plugin::Tag::VIDEO_H264_PROFILE, {"h264_profile",         g_vdH264ProfileDef, "VideoH264Profile"}},
+    {Plugin::Tag::VIDEO_H264_LEVEL, {"vd_level",               g_u32Def,           "uin32_t"}},
 };
 
 const std::map<Plugin::AudioSampleFormat, const char*> g_auSampleFmtStrMap = {
@@ -153,6 +157,10 @@ const std::map<Plugin::VideoPixelFormat, const char*> g_videoPixelFormatStrMap =
     {Plugin::VideoPixelFormat::YUYV422, "YUYV422"},
     {Plugin::VideoPixelFormat::YUV422P, "YUV422P"},
     {Plugin::VideoPixelFormat::YUV444P, "YUV444P"},
+    {Plugin::VideoPixelFormat::RGBA, "RGBA"},
+    {Plugin::VideoPixelFormat::ARGB, "ARGB"},
+    {Plugin::VideoPixelFormat::ABGR, "ABGR"},
+    {Plugin::VideoPixelFormat::BGRA, "BGRA"},
     {Plugin::VideoPixelFormat::RGB24, "RGB24"},
     {Plugin::VideoPixelFormat::BGR24, "BGR24"},
     {Plugin::VideoPixelFormat::PAL8, "PAL8"},
