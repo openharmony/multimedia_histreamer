@@ -598,6 +598,7 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
     auto mem = input->GetMemory();
     auto* buffer = const_cast<uint8_t *>(mem->GetReadOnlyData());
     size_t length = mem->GetSize();
+    FALSE_RETURN_V(length > 0, Status::ERROR_INVALID_DATA);
     if (needReformat_) {
         size_t lineSize = mem->GetSize() / channels_;
         std::vector<const uint8_t*> tmpInput(channels_);
@@ -619,16 +620,19 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
     }
     MEDIA_LOG_D("write data size " PUBLIC_LOG_ZU, length);
     int32_t ret = -1;
-    {
-        OSAL::ScopedLock lock(renderMutex_);
-        if (audioRenderer_ == nullptr) {
-            MEDIA_LOG_E("audioRenderer_ invalid.");
-            return Status::ERROR_WRONG_STATE;
-        }
-        if (length > 0) {
-            ret = audioRenderer_->Write(buffer, length);
-        }
+    OSAL::ScopedLock lock(renderMutex_);
+    FALSE_RETURN_V(audioRenderer_ != nullptr, Status::ERROR_WRONG_STATE);
+    for (; length > 0;) {
+        ret = audioRenderer_->Write(buffer, length);
         MEDIA_LOG_D("written data size " PUBLIC_LOG_D32, ret);
+        if (ret < 0) {
+            MEDIA_LOG_E("Write data error " PUBLIC_LOG_D32, ret);
+            break;
+        } else if (ret < length) {
+            OSAL::SleepFor(5); // 5ms
+        }
+        buffer += ret;
+        length -= ret;
     }
     if (input->flag & BUFFER_FLAG_EOS) {
         audioRenderer_->Drain();
