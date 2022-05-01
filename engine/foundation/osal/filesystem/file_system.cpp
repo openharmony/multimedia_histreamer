@@ -81,13 +81,19 @@ bool FileSystem::MakeDir(const std::string& path)
         return false;
     }
 #else
+#ifndef OHOS_LITE
     auto oldMask = umask(0);
+#endif
     if (mkdir(path.c_str(), 755) == -1) { // 755 directory access permissions
         MEDIA_LOG_E("Fail to create dir " PUBLIC_LOG_S " due to " PUBLIC_LOG_S, path.c_str(), std::strerror(errno));
+#ifndef OHOS_LITE
         umask(oldMask);
+#endif
         return false;
     }
+#ifndef OHOS_LITE
     umask(oldMask);
+#endif
 #endif
     return true;
 }
