@@ -33,28 +33,40 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace Ffmpeg {
-void ConvertRawAudioStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
-                                     TagMap& meta);
+void ConvertRawAudioStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                     const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
 
-void ConvertMP1StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta);
+void ConvertMP1StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
 
-void ConvertMP2StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta);
+void ConvertMP2StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
 
-void ConvertMP3StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta);
+void ConvertMP3StreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
 
-void ConvertAACStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta);
+void ConvertAACStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
 
-void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
-                                    TagMap& meta);
+void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                    const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
 
-void ConvertVorbisStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context,
-                                   TagMap& meta);
+void ConvertVorbisStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                   const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
+
+void ConvertFLACStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                 const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
+
+void ConvertAPEStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
 
 #ifdef VIDEO_SUPPORT
-void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta);
+void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
 #endif
 
-void ConvertAVStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVCodecContext>& context, TagMap& meta);
+void ConvertAVStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                               const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
 } // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media

@@ -41,6 +41,8 @@ public:
 
     virtual void Stop();
 
+    virtual void StopAsync();
+
     virtual void Pause();
 
     virtual void PauseAsync();

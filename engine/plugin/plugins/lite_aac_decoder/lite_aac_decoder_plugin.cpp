@@ -23,67 +23,68 @@
 #include "foundation/log.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_buffer.h"
+#include "plugin/common/plugin_caps_builder.h"
 #include "plugin/interface/codec_plugin.h"
 #include "securec.h"
 
 namespace {
-    using namespace OHOS::Media::Plugin;
-    void UpdatePluginDefinition(CodecPluginDef& definition);
-    constexpr int8_t RANK_MAX = 100;
-    constexpr unsigned int BUFFER_ITEM_CNT = 6;
+using namespace OHOS::Media::Plugin;
+void UpdatePluginDefinition(CodecPluginDef& definition);
+constexpr int8_t RANK_MAX = 100;
+constexpr unsigned int BUFFER_ITEM_CNT = 6;
 
-    std::shared_ptr<CodecPlugin> LiteAACDecoderCreator(const std::string& name)
-    {
-        return std::make_shared<LiteAacPlugin::LiteAACDecoderPlugin>(name);
+std::shared_ptr<CodecPlugin> LiteAACDecoderCreator(const std::string& name)
+{
+    return std::make_shared<LiteAacPlugin::LiteAACDecoderPlugin>(name);
+}
+
+Status RegisterDecoderPlugin(const std::shared_ptr<Register>& reg)
+{
+    MEDIA_LOG_D("RegisterDecoderPlugin called.");
+    if (!reg) {
+        MEDIA_LOG_E("RegisterDecoderPlugin failed due to null pointer for reg.");
+        return Status::ERROR_INVALID_PARAMETER;
     }
 
-    Status RegisterDecoderPlugin(const std::shared_ptr<Register>& reg)
-    {
-        MEDIA_LOG_D("RegisterDecoderPlugin called.");
-        if (!reg) {
-            MEDIA_LOG_E("RegisterDecoderPlugin failed due to null pointer for reg.");
-            return Status::ERROR_INVALID_PARAMETER;
-        }
-
-        CodecPluginDef definition;
-        definition.name      = "LiteAACDecoderPlugin";
-        definition.codecType = CodecType::AUDIO_DECODER;
-        definition.rank      = RANK_MAX;
-        definition.creator   = LiteAACDecoderCreator;
-        UpdatePluginDefinition(definition);
-        if (reg->AddPlugin(definition) != Status::OK) {
-            MEDIA_LOG_W("register lite aac decoder plugin failed");
-        }
-        return Status::OK;
+    CodecPluginDef definition;
+    definition.name      = "LiteAACDecoderPlugin";
+    definition.codecType = CodecType::AUDIO_DECODER;
+    definition.rank      = RANK_MAX;
+    definition.creator   = LiteAACDecoderCreator;
+    UpdatePluginDefinition(definition);
+    if (reg->AddPlugin(definition) != Status::OK) {
+        MEDIA_LOG_W("register lite aac decoder plugin failed");
     }
+    return Status::OK;
+}
 
-    void UpdatePluginDefinition(CodecPluginDef& definition)
-    {
-        Capability cap("audio/unknown");
-        cap.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC);
+void UpdateInCaps(CodecPluginDef& definition)
+{
+    CapabilityBuilder capBuilder;
+    capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AAC);
+    capBuilder.SetAudioSampleRateList({96000, 88200, 64000, 48000, 44100, 32000, 24000,
+                                        22050, 16000, 12000, 11025, 8000, 7350});
+    capBuilder.SetAudioChannelLayoutList({AudioChannelLayout::MONO,
+                                          AudioChannelLayout::STEREO});
+    capBuilder.SetAudioSampleFormatList({AudioSampleFormat::S16});
+    capBuilder.SetAudioAacProfileList({AudioAacProfile::LC});
+    capBuilder.SetAudioAacStreamFormatList({AudioAacStreamFormat::MP4ADTS});
+    definition.inCaps.push_back(capBuilder.Build());
+}
 
-        DiscreteCapability<uint32_t> values { 96000, 88200, 64000, 48000, 44100, 32000, 24000,
-            22050, 16000, 12000, 11025, 8000, 7350 };
-        cap.AppendDiscreteKeys(Capability::Key::AUDIO_SAMPLE_RATE, values);
+void UpdateOutCaps(CodecPluginDef& definition)
+{
+    CapabilityBuilder capBuilder;
+    capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
+    capBuilder.SetAudioSampleFormatList({AudioSampleFormat::S16});
+    definition.outCaps.emplace_back(capBuilder.Build());
+}
 
-        DiscreteCapability<AudioChannelLayout> channelLayoutValues {AudioChannelLayout::MONO,
-            AudioChannelLayout::STEREO};
-        cap.AppendDiscreteKeys<AudioChannelLayout>(Capability::Key::AUDIO_CHANNEL_LAYOUT, channelLayoutValues);
-
-        DiscreteCapability<AudioSampleFormat> sampleFmtValues {AudioSampleFormat::S16};
-        cap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, sampleFmtValues);
-
-        DiscreteCapability<AudioAacProfile> aacProfileValues {AudioAacProfile::LC};
-        cap.AppendDiscreteKeys<AudioAacProfile>(Capability::Key::AUDIO_AAC_PROFILE, aacProfileValues);
-
-        DiscreteCapability<AudioAacStreamFormat> aacStreamFmtValues {AudioAacStreamFormat::MP4ADTS};
-        cap.AppendDiscreteKeys<AudioAacStreamFormat>(Capability::Key::AUDIO_AAC_STREAM_FORMAT, aacStreamFmtValues);
-
-        definition.inCaps.push_back(cap);
-        Capability outCap(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
-        outCap.AppendDiscreteKeys<AudioSampleFormat>(Capability::Key::AUDIO_SAMPLE_FORMAT, {AudioSampleFormat::S16});
-        definition.outCaps.emplace_back(outCap);
-    }
+void UpdatePluginDefinition(CodecPluginDef& definition)
+{
+    UpdateInCaps(definition);
+    UpdateOutCaps(definition);
+}
 }
 
 PLUGIN_DEFINITION(LiteAACDecoder, LicenseType::APACHE_V2, RegisterDecoderPlugin, [] {});
@@ -102,7 +103,7 @@ LiteAACDecoderPlugin::LiteAACDecoderPlugin(std::string name)
       inBuffer_ {nullptr},
       outBuffer_ {nullptr}
 {
-    MEDIA_LOG_I("LiteAACDecoderPlugin, plugin name: " PUBLIC_LOG "s", pluginName_.c_str());
+    MEDIA_LOG_I("LiteAACDecoderPlugin, plugin name: " PUBLIC_LOG_S, pluginName_.c_str());
 }
 
 LiteAACDecoderPlugin::~LiteAACDecoderPlugin()
@@ -298,7 +299,7 @@ Status LiteAACDecoderPlugin::AudioDecoderAACMp4Process(std::shared_ptr<Buffer> i
     err = aac_decoder_input_data(const_cast<unsigned char**>(&FramePtr),
         static_cast<size_t *>(&inputLength), &remain_size);
     if (err != 0) {
-        MEDIA_LOG_E("aac_decoder_input_data error is " PUBLIC_LOG "d", err);
+        MEDIA_LOG_E("aac_decoder_input_data error is " PUBLIC_LOG_D32, err);
         return Status::ERROR_UNKNOWN;
     }
     aac_stream_info_t  *aacInfo_ = aac_decoder_get_meida_info();
@@ -312,7 +313,8 @@ Status LiteAACDecoderPlugin::AudioDecoderAACMp4Process(std::shared_ptr<Buffer> i
         err = aac_decoder_get_frame(reinterpret_cast<signed short *>(outData->GetWritableAddr(packet_length, 0)),
             PCM_SIZE / 2, 0); // 2
         if (err != 0) {
-            MEDIA_LOG_E("aac_decoder_get_frame error is " PUBLIC_LOG "d remain_size " PUBLIC_LOG "d", err, remain_size);
+            MEDIA_LOG_E("aac_decoder_get_frame error is " PUBLIC_LOG_D32 " remain_size " PUBLIC_LOG_D32, err,
+                remain_size);
             return Status::ERROR_UNKNOWN;
         }
     } else {

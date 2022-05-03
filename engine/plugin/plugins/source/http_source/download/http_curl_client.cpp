@@ -24,9 +24,13 @@ namespace HttpPlugin {
 HttpCurlClient::HttpCurlClient(RxHeader headCallback, RxBody bodyCallback, void *userParam)
     : rxHeader_(headCallback), rxBody_(bodyCallback), userParam_(userParam)
 {
+    MEDIA_LOG_I("HttpCurlClient ctor");
 }
 
-HttpCurlClient::~HttpCurlClient() = default;
+HttpCurlClient::~HttpCurlClient()
+{
+    MEDIA_LOG_I("~HttpCurlClient dtor");
+}
 
 Status HttpCurlClient::Init()
 {
@@ -38,8 +42,7 @@ Status HttpCurlClient::Init()
 
 Status HttpCurlClient::Open(const std::string& url)
 {
-    url_ = url;
-    InitCurlEnvironment();
+    InitCurlEnvironment(url);
     return Status::OK;
 }
 
@@ -60,9 +63,9 @@ Status HttpCurlClient::Deinit()
     return Status::OK;
 }
 
-void HttpCurlClient::InitCurlEnvironment()
+void HttpCurlClient::InitCurlEnvironment(const std::string& url)
 {
-    curl_easy_setopt(easyHandle_, CURLOPT_URL, url_.c_str());
+    curl_easy_setopt(easyHandle_, CURLOPT_URL, url.c_str());
     curl_easy_setopt(easyHandle_, CURLOPT_HTTPGET, 1L);
 
     curl_easy_setopt(easyHandle_, CURLOPT_FORBID_REUSE, 0L);
@@ -103,8 +106,8 @@ Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCod
     headers = curl_slist_append(headers, "Connection: Keep-alive");
     headers = curl_slist_append(headers, "Keep-Alive: timeout=120");
     curl_easy_setopt(easyHandle_, CURLOPT_HTTPHEADER, headers);
-
-    MEDIA_LOG_D("RequestData: startPos " PUBLIC_LOG "d, len " PUBLIC_LOG "d", startPos, len);
+    
+    MEDIA_LOG_D("RequestData: startPos " PUBLIC_LOG_D32 ", len " PUBLIC_LOG_D32, static_cast<int>(startPos), len);
     CURLcode returnCode = curl_easy_perform(easyHandle_);
     if (headers != nullptr) {
         curl_slist_free_all(headers);
@@ -112,7 +115,7 @@ Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCod
     clientCode = NetworkClientErrorCode::ERROR_OK;
     serverCode = 0;
     if (returnCode != CURLE_OK) {
-        MEDIA_LOG_E("Curl error " PUBLIC_LOG "d", returnCode);
+        MEDIA_LOG_E("Curl error " PUBLIC_LOG_D32, returnCode);
         if (returnCode == CURLE_COULDNT_CONNECT || returnCode == CURLE_OPERATION_TIMEDOUT) {
             clientCode = NetworkClientErrorCode::ERROR_TIME_OUT;
         } else {
@@ -122,8 +125,8 @@ Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCod
     } else {
         int httpCode = 0;
         curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
-        if(httpCode >= 400) { // 400
-            MEDIA_LOG_E("Http error " PUBLIC_LOG "d", httpCode);
+        if (httpCode >= 400) { // 400
+            MEDIA_LOG_E("Http error " PUBLIC_LOG_D32, httpCode);
             serverCode = httpCode;
             return Status::ERROR_SERVER;
         }

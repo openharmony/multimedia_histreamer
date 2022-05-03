@@ -17,13 +17,25 @@
 #define HISTREAMER_FOUNDATION_LOG_H
 
 #include <cinttypes>
+#include <string>
+
+// If file name and line number is need, #define HST_DEBUG at the beginning of the cpp file.
+#ifdef HST_DEBUG
+inline std::string MediaGetFileName(std::string file)
+{
+    if (file == "") {
+        return "Unknown File";
+    }
+    return file.substr(file.find_last_of("/\\") + 1);
+}
+#endif
 
 #ifdef MEDIA_OHOS
 #ifndef LOG_DOMAIN
 #define LOG_DOMAIN 0xD002B00
 #endif
 #ifndef LOG_TAG
-#define LOG_TAG "MultiMedia"
+#define LOG_TAG "HiStreamer"
 #endif
 #include "hilog/log.h"
 #else
@@ -53,18 +65,19 @@
 #define PUBLIC_LOG_F PUBLIC_LOG "f"
 #define PUBLIC_LOG_P PUBLIC_LOG "p"
 #define PUBLIC_LOG_ZU PUBLIC_LOG "zu"
-#define PUBLIC_LOG_HU PUBLIC_LOG "hu"
 
 #ifdef MEDIA_OHOS
-#ifndef OHOS_DEBUG
-#define HST_DECORATOR_HILOG(op, fmt, args...) \
-    do { \
-        op(LOG_CORE, PUBLIC_LOG "s:" fmt, HST_LOG_TAG, ##args); \
+#ifndef HST_DEBUG
+#define HST_DECORATOR_HILOG(op, fmt, args...)                                               \
+    do {                                                                                    \
+        op(LOG_CORE, PUBLIC_LOG_S ":" fmt, HST_LOG_TAG, ##args);                            \
     } while (0)
 #else
-#define HST_DECORATOR_HILOG(op, fmt, args...)\
-    do { \
-        op(LOG_CORE, PUBLIC_LOG "s[" PUBLIC_LOG "d]:" fmt, HST_LOG_TAG, __LINE__, ##args); \
+#define HST_DECORATOR_HILOG(op, fmt, args...)                                                                          \
+    do {                                                                                                               \
+        std::string file(__FILE__);                                                                                    \
+        std::string bareFile = MediaGetFileName(file);                                                                 \
+        op(LOG_CORE, "(" PUBLIC_LOG_S ", " PUBLIC_LOG_D32 "): " fmt, bareFile.c_str(), __LINE__, ##args);              \
     } while (0)
 #endif
 
@@ -85,46 +98,6 @@
 #if !MEDIA_LOG_DEBUG
 #undef MEDIA_LOG_D
 #define MEDIA_LOG_D(msg, ...) ((void)0)
-#endif
-
-#ifndef FAIL_RETURN
-#define FAIL_RETURN(exec)                                                                                              \
-    do {                                                                                                               \
-        ErrorCode returnValue = (exec);                                                                                \
-        if (returnValue != ErrorCode::SUCCESS) {                                                                       \
-            MEDIA_LOG_E("FAIL_RETURN on ErrorCode(" PUBLIC_LOG "d).", returnValue);                                    \
-            return returnValue;                                                                                        \
-        }                                                                                                              \
-    } while (0)
-#endif
-
-#ifndef FAIL_RET_ERR_CODE_MSG
-#define FAIL_RET_ERR_CODE_MSG(loglevel, exec, fmt, args...)                                                            \
-    do {                                                                                                               \
-        ErrorCode returnValue = (exec);                                                                                \
-        if (returnValue != ErrorCode::SUCCESS) {                                                                       \
-            loglevel(fmt, ##args);                                                                                     \
-            return returnValue;                                                                                        \
-        }                                                                                                              \
-    } while (0)
-#endif
-
-#ifndef FAIL_RET_ERR_CODE_MSG_W
-#define FAIL_RET_ERR_CODE_MSG_W(exec, fmt, args...) FAIL_RET_ERR_CODE_MSG(MEDIA_LOG_W, exec, fmt, ##args)
-#endif
-
-#ifndef FAIL_RET_ERR_CODE_MSG_E
-#define FAIL_RET_ERR_CODE_MSG_E(exec, fmt, args...) FAIL_RET_ERR_CODE_MSG(MEDIA_LOG_E, exec, fmt, ##args)
-#endif
-
-#ifndef FAIL_LOG
-#define FAIL_LOG(exec)                                                                                                 \
-    do {                                                                                                               \
-        ErrorCode returnValue = (exec);                                                                                \
-        if (returnValue != ErrorCode::SUCCESS) {                                                                       \
-            MEDIA_LOG_E("FAIL_LOG on ErrorCode(" PUBLIC_LOG_D32 ").", returnValue);                                    \
-        }                                                                                                              \
-    } while (0)
 #endif
 
 #ifndef NOK_RETURN
@@ -155,6 +128,17 @@
         int returnValue = (exec);                                                                                      \
         if (returnValue != 0) {                                                                                        \
             MEDIA_LOG_E("NZERO_LOG when call (" #exec "), return " PUBLIC_LOG_D32, returnValue);                       \
+        }                                                                                                              \
+    } while (0)
+#endif
+
+#ifndef NZERO_RETURN
+#define NZERO_RETURN(exec)                                                                                             \
+    do {                                                                                                               \
+        int returnValue = (exec);                                                                                      \
+        if (returnValue != 0) {                                                                                        \
+            MEDIA_LOG_E("NZERO_LOG when call (" #exec "), return " PUBLIC_LOG_D32, returnValue);                       \
+            return returnValue;                                                                                        \
         }                                                                                                              \
     } while (0)
 #endif
@@ -203,8 +187,8 @@
     } while (0)
 #endif
 
-#ifndef FALSE_RET_MSG
-#define FALSE_RET_MSG(exec, fmt, args...)                                                                              \
+#ifndef FALSE_RETURN_MSG
+#define FALSE_RETURN_MSG(exec, fmt, args...)                                                                           \
     do {                                                                                                               \
         bool returnValue = (exec);                                                                                     \
         if (!returnValue) {                                                                                            \
@@ -214,8 +198,8 @@
     } while (0)
 #endif
 
-#ifndef FALSE_RET_V_MSG
-#define FALSE_RET_V_MSG(loglevel, exec, ret, fmt, args...)                                                             \
+#ifndef FALSE_RETURN_V_MSG_IMPL
+#define FALSE_RETURN_V_MSG_IMPL(loglevel, exec, ret, fmt, args...)                                                     \
     do {                                                                                                               \
         bool returnValue = (exec);                                                                                     \
         if (!returnValue) {                                                                                            \
@@ -225,12 +209,16 @@
     } while (0)
 #endif
 
-#ifndef FALSE_RET_V_MSG_W
-#define FALSE_RET_V_MSG_W(exec, ret, fmt, args...) FALSE_RET_V_MSG(MEDIA_LOG_W, exec, ret, fmt, ##args)
+#ifndef FALSE_RETURN_V_MSG
+#define FALSE_RETURN_V_MSG(exec, ret, fmt, args...) FALSE_RETURN_V_MSG_IMPL(MEDIA_LOG_E, exec, ret, fmt, ##args)
 #endif
 
-#ifndef FALSE_RET_V_MSG_E
-#define FALSE_RET_V_MSG_E(exec, ret, fmt, args...) FALSE_RET_V_MSG(MEDIA_LOG_E, exec, ret, fmt, ##args)
+#ifndef FALSE_RETURN_V_MSG_W
+#define FALSE_RETURN_V_MSG_W(exec, ret, fmt, args...) FALSE_RETURN_V_MSG_IMPL(MEDIA_LOG_W, exec, ret, fmt, ##args)
+#endif
+
+#ifndef FALSE_RETURN_V_MSG_E
+#define FALSE_RETURN_V_MSG_E(exec, ret, fmt, args...) FALSE_RETURN_V_MSG_IMPL(MEDIA_LOG_E, exec, ret, fmt, ##args)
 #endif
 
 #ifndef FALSE_LOG
@@ -243,8 +231,8 @@
     } while (0)
 #endif
 
-#ifndef FALSE_LOG_MSG
-#define FALSE_LOG_MSG(loglevel, exec, fmt, args...)                                                                    \
+#ifndef FALSE_LOG_MSG_IMPL
+#define FALSE_LOG_MSG_IMPL(loglevel, exec, fmt, args...)                                                               \
     do {                                                                                                               \
         bool returnValue = (exec);                                                                                     \
         if (!returnValue) {                                                                                            \
@@ -253,47 +241,12 @@
     } while (0)
 #endif
 
+#ifndef FALSE_LOG_MSG
+#define FALSE_LOG_MSG(exec, fmt, args...) FALSE_LOG_MSG_IMPL(MEDIA_LOG_E, exec, fmt, ##args)
+#endif
+
 #ifndef FALSE_LOG_MSG_W
-#define FALSE_LOG_MSG_W(exec, fmt, args...) FALSE_LOG_MSG(MEDIA_LOG_W, exec, fmt, ##args)
-#endif
-
-
-#ifndef FALSE_LOG_MSG_E
-#define FALSE_LOG_MSG_E(exec, fmt, args...) FALSE_LOG_MSG(MEDIA_LOG_E, exec, fmt, ##args)
-#endif
-
-#ifndef ASSERT_CONDITION
-#define ASSERT_CONDITION(exec, msg)                                                                                    \
-    do {                                                                                                               \
-        bool returnValue = (exec);                                                                                     \
-        if (!returnValue) {                                                                                            \
-            MEDIA_LOG_E("ASSERT_CONDITION(msg:" PUBLIC_LOG_S ") " #exec, msg);                                         \
-        }                                                                                                              \
-    } while (0)
-#endif
-
-#ifndef RETURN_ERROR_IF_NULL
-#define RETURN_ERROR_IF_NULL(ptr)                                                                                      \
-    do {                                                                                                               \
-        if ((ptr) == nullptr) {                                                                                        \
-            MEDIA_LOG_E("Null pointer error: " #ptr);                                                                  \
-            return ErrorCode::NULL_POINTER_ERROR;                                                                      \
-        }                                                                                                              \
-    } while (0)
-#endif
-
-#ifndef RETURN_TARGET_ERR_MSG_LOG_IF_FAIL
-#define RETURN_TARGET_ERR_MSG_LOG_IF_FAIL(err, returnErr, msg)                                                         \
-    do {                                                                                                               \
-        if ((err) != ErrorCode::SUCCESS) {                                                                             \
-            MEDIA_LOG_E(msg);                                                                                          \
-            return returnErr;                                                                                          \
-        }                                                                                                              \
-    } while (0)
-#endif
-
-#ifndef RETURN_ERR_MESSAGE_LOG_IF_FAIL
-#define RETURN_ERR_MESSAGE_LOG_IF_FAIL(err, msg) RETURN_TARGET_ERR_MSG_LOG_IF_FAIL(err, err, msg)
+#define FALSE_LOG_MSG_W(exec, fmt, args...) FALSE_LOG_MSG_IMPL(MEDIA_LOG_W, exec, fmt, ##args)
 #endif
 
 #endif // HISTREAMER_FOUNDATION_LOG_H

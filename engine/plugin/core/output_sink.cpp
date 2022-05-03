@@ -14,29 +14,31 @@
  */
 
 #include "output_sink.h"
-#include "plugin_wrapper.h"
-
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 OutputSink::OutputSink(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<OutputSinkPlugin> plugin)
     : Base(pkgVer, apiVer, plugin), outputSink_(std::move(plugin)) {}
-Status OutputSink::SetSink(const Plugin::ValueType &sink)
+Status OutputSink::SetSink(const MediaSink &sink)
 {
     return outputSink_->SetSink(sink);
 }
+
 bool OutputSink::IsSeekable()
 {
     return outputSink_->IsSeekable();
 }
+
 Status OutputSink::SeekTo(uint64_t offset)
 {
     return outputSink_->SeekTo(offset);
 }
+
 Status OutputSink::Write(const std::shared_ptr<Buffer>& buffer)
 {
     return outputSink_->Write(buffer);
 }
+
 Status OutputSink::Flush()
 {
     return outputSink_->Flush();

@@ -61,11 +61,11 @@ private:
     uint32_t height_ {0};
     double captureRate_ {0.0};
     VideoPixelFormat pixelFormat_;
-
-    uint32_t bufferCnt_ {0};
     uint64_t curTimestampNs_ {0};
     uint64_t stopTimestampNs_ {0};
     uint64_t totalPauseTimeNs_ {0};
+    uint8_t* cacheFrame_ {nullptr};
+    bool isFirstFrame_ {true};
 
     int64_t timestamp_ {0};
     std::FILE* fp_ {nullptr};

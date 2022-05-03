@@ -34,7 +34,7 @@ public:
 
     std::tuple<ErrorCode, Action> Enter(Intent intent) override
     {
-        MEDIA_LOG_D("Enter state: " PUBLIC_LOG "s", name_.c_str());
+        MEDIA_LOG_D("Enter state: " PUBLIC_LOG_S, name_.c_str());
         ErrorCode ret;
         if (intent == Intent::RESUME) {
             ret = executor_.DoResume();
@@ -58,7 +58,7 @@ public:
     {
         OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoStop(param);
-        Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_INIT : Action::TRANS_TO_ERROR;
+        Action action = (ret == ErrorCode::SUCCESS) ? Action::ACTION_BUTT : Action::TRANS_TO_ERROR;
         return {ret, action};
     }
 

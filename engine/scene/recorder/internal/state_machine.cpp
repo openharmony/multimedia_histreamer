@@ -70,7 +70,7 @@ ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param)
                              [this, intent, param] { SendEventAsync(intent, param); },
                              timeoutMs,
                              errorCode)) {
-        MEDIA_LOG_E("SendEvent timeout, intent: " PUBLIC_LOG "d", static_cast<int>(intent));
+        MEDIA_LOG_E("SendEvent timeout, intent: " PUBLIC_LOG_D32, static_cast<int>(intent));
     }
     return errorCode;
 }
@@ -82,16 +82,16 @@ ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param) 
 
 ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param)
 {
-    MEDIA_LOG_D("SendEventAsync, intent: " PUBLIC_LOG "d", static_cast<int>(intent));
+    MEDIA_LOG_D("SendEventAsync, intent: " PUBLIC_LOG_D32, static_cast<int>(intent));
     jobs_.Push([this, intent, param]() -> Action { return ProcessIntent(intent, param); });
     return ErrorCode::SUCCESS;
 }
 
 Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
 {
-    MEDIA_LOG_D("ProcessIntent, curState: " PUBLIC_LOG "s, intent: " PUBLIC_LOG "d.",
+    MEDIA_LOG_D("ProcessIntent, curState: " PUBLIC_LOG_S ", intent: " PUBLIC_LOG_D32 ".",
                 curState_->GetName().c_str(), intent);
-    PROFILE_BEGIN("ProcessIntent, curState: " PUBLIC_LOG "s, intent: " PUBLIC_LOG "d.",
+    PROFILE_BEGIN("ProcessIntent, curState: " PUBLIC_LOG_S ", intent: " PUBLIC_LOG_D32 ".",
                   curState_->GetName().c_str(), intent);
     OSAL::ScopedLock lock(mutex_);
     lastIntent = intent;
@@ -106,7 +106,7 @@ Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
         }
     }
     OnIntentExecuted(intent, nextAction, rtv);
-    PROFILE_END("ProcessIntent, curState: " PUBLIC_LOG "s, intent: " PUBLIC_LOG "d.",
+    PROFILE_END("ProcessIntent, curState: " PUBLIC_LOG_S ", intent: " PUBLIC_LOG_D32 ".",
                 curState_->GetName().c_str(), intent);
     return (rtv == ErrorCode::SUCCESS) ? nextAction : Action::ACTION_BUTT;
 }
@@ -210,8 +210,8 @@ ErrorCode StateMachine::TransitionTo(const std::shared_ptr<State>& state)
 
 void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode result)
 {
-    MEDIA_LOG_D("OnIntentExecuted, curState: " PUBLIC_LOG "s, intent: " PUBLIC_LOG "d, action: " PUBLIC_LOG
-                "d, result: " PUBLIC_LOG "d", curState_->GetName().c_str(),
+    MEDIA_LOG_D("OnIntentExecuted, curState: " PUBLIC_LOG_S ", intent: " PUBLIC_LOG_D32 ", action: " PUBLIC_LOG
+                "d, result: " PUBLIC_LOG_D32, curState_->GetName().c_str(),
                 static_cast<int>(intent), static_cast<int>(action), static_cast<int>(result));
     if (action == Action::ACTION_PENDING) {
         return;

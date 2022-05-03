@@ -254,40 +254,48 @@ Status HttpSourcePlugin::OnHttpEvent(void *priv, int errorType, int32_t errorCod
 Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLen)
 {
     MEDIA_LOG_D("Read in");
-    if (httpHandle_ == nullptr || buffer == nullptr) {
+    if (httpHandle_ == nullptr) {
         MEDIA_LOG_D("Read error");
         return Status::ERROR_INVALID_PARAMETER;
     }
-    {
-        OSAL::ScopedLock lock(httpMutex_);
-        std::shared_ptr<Memory>bufData;
+    if (buffer == nullptr) {
+        buffer = std::make_shared<Buffer>();
+    }
 
-        if (buffer->IsEmpty()) {
-            bufData = buffer->AllocMemory(GetAllocator(), expectedLen);
-        } else {
-            bufData = buffer->GetMemory();
-        }
-        unsigned int read = 0;
-        unsigned int write = 0;
-        unsigned int realReadSize = 0;
-        int isEos = -1;
+    OSAL::ScopedLock lock(httpMutex_);
+    std::shared_ptr<Memory> bufData;
 
-        httpHandle_->GetHttpBufferRange(&read, &write);
+    if (buffer->IsEmpty()) {
+        bufData = buffer->AllocMemory(GetAllocator(), expectedLen);
+    } else {
+        bufData = buffer->GetMemory();
+    }
+    unsigned int read = 0;
+    unsigned int write = 0;
+    unsigned int realReadSize = 0;
+    int isEos = -1;
+    int retryReadTimes = 0;
 
-        MEDIA_LOG_D("read pos " PUBLIC_LOG_U32 " write pos " PUBLIC_LOG_U32 " expectedLen " PUBLIC_LOG_ZU,
-                    read, write, expectedLen);
+    httpHandle_->GetHttpBufferRange(&read, &write);
 
-        expectedLen = std::min(static_cast<size_t>(write - read), expectedLen);
-        expectedLen = std::min(bufData->GetCapacity(), expectedLen);
+    MEDIA_LOG_D("read pos " PUBLIC_LOG_U32 " write pos " PUBLIC_LOG_U32 " expectedLen " PUBLIC_LOG_ZU,
+                read, write, expectedLen);
 
+    do {
         MEDIA_LOG_D("bufData->GetCapacity() " PUBLIC_LOG_ZU, bufData->GetCapacity());
         httpHandle_->HttpRead(bufData->GetWritableAddr(expectedLen), expectedLen, realReadSize, isEos);
-        bufData->UpdateDataSize(realReadSize);
-        httpHandle_->GetHttpBufferRange(&position_, &write);
-        MEDIA_LOG_D("position_ : " PUBLIC_LOG_U32 ", readSize = " PUBLIC_LOG_ZU ", isEos " PUBLIC_LOG_D32,
-                    position_, bufData->GetSize(), isEos);
-        return Status::OK;
-    }
+        if (realReadSize == 0 && retryReadTimes <= 200) { // 200
+            OSAL::SleepFor(10); // 10
+            retryReadTimes++;
+            continue;
+        }
+        break;
+    } while (true);
+    bufData->UpdateDataSize(realReadSize);
+    httpHandle_->GetHttpBufferRange(&position_, &write);
+    MEDIA_LOG_D("position_ : " PUBLIC_LOG_U32 ", readSize = " PUBLIC_LOG_ZU ", isEos " PUBLIC_LOG_D32,
+                position_, bufData->GetSize(), isEos);
+    return Status::OK;
 }
 
 Status HttpSourcePlugin::GetSize(size_t &size)
@@ -339,6 +347,7 @@ Status HttpSourcePlugin::OpenUri(std::string &url)
     httpAttr.bufferSize = bufferSize_;
     httpAttr.pluginHandle = this;
     httpAttr.callbackFunc = OnError;
+    httpAttr.notVerifyCert = true;
     return httpHandle_->HttpOpen(url, httpAttr) ? Status::OK : Status::ERROR_UNKNOWN;
 }
 

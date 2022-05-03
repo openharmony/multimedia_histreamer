@@ -28,11 +28,11 @@ std::shared_ptr<OutputSinkPlugin> FilePathSinkPluginCreator(const std::string& n
 Status FilePathSinkRegister(const std::shared_ptr<Register>& reg)
 {
     OutputSinkPluginDef definition;
-    definition.outputType = OutputType::URI;
+    definition.protocolType = ProtocolType::FILE;
     definition.name = "file_path_sink";
     definition.description = "file path sink";
     definition.rank = 100; // 100
-    definition.outputType = OutputType::URI;
+    definition.protocolType = ProtocolType::FILE;
     definition.creator = FilePathSinkPluginCreator;
     return reg->AddPlugin(definition);
 }
@@ -50,13 +50,11 @@ Status FilePathSinkPlugin::Stop()
     return Status::OK;
 }
 
-Status FilePathSinkPlugin::SetSink(const Plugin::ValueType& sink)
+Status FilePathSinkPlugin::SetSink(const MediaSink& sink)
 {
-    if (!sink.SameTypeWith(typeid(std::string))) {
-        MEDIA_LOG_E("Invalid parameter to file_path_sink plugin");
-        return Status::ERROR_INVALID_PARAMETER;
-    }
-    fileName_ = Plugin::AnyCast<std::string>(sink);
+    FALSE_RETURN_V((sink.GetProtocolType() == ProtocolType::FILE && !sink.GetPath().empty()),
+        Status::ERROR_INVALID_DATA);
+    fileName_ = sink.GetPath();
     return OpenFile();
 }
 
@@ -67,7 +65,7 @@ bool FilePathSinkPlugin::IsSeekable()
 
 Status FilePathSinkPlugin::SeekTo(uint64_t offset)
 {
-    FALSE_RET_V_MSG_E(fp_ != nullptr, Status::ERROR_WRONG_STATE, "no files have been opened.");
+    FALSE_RETURN_V_MSG_E(fp_ != nullptr, Status::ERROR_WRONG_STATE, "no files have been opened.");
     if (std::fseek(fp_, offset, SEEK_SET) == 0) {
         return Status::OK;
     } else {

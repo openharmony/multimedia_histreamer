@@ -21,3 +21,4 @@ Makefile
 cmake_install.cmake
 *.mp3
 *.mp4
+tests/st/gen_testsuites
