@@ -21,6 +21,7 @@
 #include "foundation/cpp_ext/algorithm_ext.h"
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
+#include "foundation/osal/utils/util.h"
 #include "plugin/common/plugin_time.h"
 #include "utils/constants.h"
 
@@ -604,7 +605,7 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
         std::vector<const uint8_t*> tmpInput(channels_);
         tmpInput[0] = mem->GetReadOnlyData();
         if (av_sample_fmt_is_planar(reSrcFfFmt_)) {
-            for (int i = 1; i < channels_; ++i) {
+            for (size_t i = 1; i < channels_; ++i) {
                 tmpInput[i] = tmpInput[i-1] + lineSize;
             }
         }
@@ -628,7 +629,7 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
         if (ret < 0) {
             MEDIA_LOG_E("Write data error " PUBLIC_LOG_D32, ret);
             break;
-        } else if (ret < length) {
+        } else if (static_cast<size_t>(ret) < length) {
             OSAL::SleepFor(5); // 5ms
         }
         buffer += ret;
