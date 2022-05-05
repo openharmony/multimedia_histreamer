@@ -87,7 +87,7 @@ public:
         }
     }
 
-    bool WaitFor(SyncIdType syncId, const std::function<void()>& asyncOps, int timeoutMs, ResultType& result)
+    bool WaitFor(SyncIdType syncId, const std::function<bool()>& asyncOps, int timeoutMs, ResultType& result)
     {
         MEDIA_LOG_I("Synchronizer " PUBLIC_LOG_S " Wait for " PUBLIC_LOG_D32 ", timeout: " PUBLIC_LOG_D32,
                     name_.c_str(), static_cast<int>(syncId), timeoutMs);
@@ -96,7 +96,10 @@ public:
         }
         OSAL::ScopedLock lock(mutex_);
         waitSet_.insert(syncId);
-        asyncOps();
+        if (!asyncOps()) {
+            waitSet_.erase(syncId);
+            return false;
+        }
         auto rtv = cv_.WaitFor(lock, timeoutMs, [this, syncId] { return syncMap_.find(syncId) != syncMap_.end(); });
         if (rtv) {
             result = syncMap_[syncId];

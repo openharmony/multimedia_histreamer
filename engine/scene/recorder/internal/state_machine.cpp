@@ -67,7 +67,7 @@ ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param)
     constexpr int timeoutMs = 5000; /// magic number
     ErrorCode errorCode = ErrorCode::ERROR_TIMED_OUT;
     if (!intentSync_.WaitFor(intent,
-                             [this, intent, param] { SendEventAsync(intent, param); },
+                             [this, intent, param] { return SendEventAsync(intent, param) == ErrorCode::SUCCESS; },
                              timeoutMs,
                              errorCode)) {
         MEDIA_LOG_E("SendEvent timeout, intent: " PUBLIC_LOG_D32, static_cast<int>(intent));
@@ -83,8 +83,10 @@ ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param) 
 ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param)
 {
     MEDIA_LOG_D("SendEventAsync, intent: " PUBLIC_LOG_D32, static_cast<int>(intent));
-    jobs_.Push([this, intent, param]() -> Action { return ProcessIntent(intent, param); });
-    return ErrorCode::SUCCESS;
+    if (jobs_.Push([this, intent, param]() -> Action { return ProcessIntent(intent, param); })) {
+        return ErrorCode::SUCCESS;
+    }
+    return ErrorCode::ERROR_UNKNOWN;
 }
 
 Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)

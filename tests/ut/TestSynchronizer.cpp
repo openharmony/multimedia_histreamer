@@ -91,7 +91,7 @@ TEST_F(TestSynchronizer, test_waitfor_with_result_succ)
     int timeoutMs = 1000;
     int result = 0;
     auto rtv = synchronizer.WaitFor(
-        syncId, [] {}, timeoutMs, result);
+        syncId, [] { return true; }, timeoutMs, result);
     EXPECT_EQ(true, rtv);
     EXPECT_EQ(expect, result);
 }
