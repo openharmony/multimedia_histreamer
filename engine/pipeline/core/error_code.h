@@ -85,6 +85,24 @@ const char* GetErrorName(ErrorCode code);
         }                                                                                                              \
     } while (0)
 #endif
+
+#ifndef FAIL_LOG_MSG_IMPL
+#define FAIL_LOG_MSG_IMPL(loglevel, exec, fmt, args...)                                                                \
+    do {                                                                                                               \
+        ErrorCode returnValue = (exec);                                                                                \
+        if (returnValue != ErrorCode::SUCCESS) {                                                                       \
+            loglevel(fmt, ##args);                                                                                     \
+        }                                                                                                              \
+    } while (0)
+#endif
+
+#ifndef FAIL_LOG_MSG
+#define FAIL_LOG_MSG(exec, fmt, args...) FAIL_LOG_MSG_IMPL(MEDIA_LOG_E, exec, fmt, ##args)
+#endif
+
+#ifndef FAIL_LOG_MSG_W
+#define FAIL_LOG_MSG_W(exec, fmt, args...) FAIL_LOG_MSG_IMPL(MEDIA_LOG_W, exec, fmt, ##args)
+#endif
 }  // namespace Media
 }  // namespace OHOS
 #endif  // HISTREAMER_FOUNDATION_ERROR_CODE_H
