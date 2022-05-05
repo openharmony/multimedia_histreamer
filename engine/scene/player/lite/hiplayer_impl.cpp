@@ -346,7 +346,7 @@ void HiPlayerImpl::OnEvent(const Event& event)
     }
 }
 
-ErrorCode HiPlayerImpl::DoSetSource(const std::shared_ptr<MediaSource>& source) const
+ErrorCode HiPlayerImpl::DoSetSource(const std::shared_ptr<MediaSource>& source)
 {
     return audioSource_->SetSource(source);
 }

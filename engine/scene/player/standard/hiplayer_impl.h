@@ -85,7 +85,7 @@ public:
                          const Plugin::Any& parameter) override;
 
     // interface from PlayExecutor
-    ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source) const override;
+    ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source) override;
     ErrorCode PrepareFilters() override;
     ErrorCode DoPlay() override;
     ErrorCode DoPause() override;
@@ -106,6 +106,8 @@ private:
 #endif
     ErrorCode RemoveFilterChains(Pipeline::Filter* filter, const Plugin::Any& parameter);
     void ActiveFilters(const std::vector<Pipeline::Filter*>& filters);
+    void HandleAudioProgressEvent(const Event& event);
+    void HandlePluginErrorEvent(const Event& event);
 
     OSAL::Mutex stateMutex_ {};
     OSAL::ConditionVariable cond_ {};

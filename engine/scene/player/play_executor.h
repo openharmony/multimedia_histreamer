@@ -40,7 +40,7 @@ public:
         return ErrorCode::SUCCESS;
     }
 
-    virtual ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source) const
+    virtual ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source)
     {
         (void)source;
         return ErrorCode::SUCCESS;

@@ -122,7 +122,7 @@ public:
                          const Plugin::Any& parameter) override;
 
     // interface from PlayExecutor
-    ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source) const override;
+    ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source) override;
     ErrorCode PrepareFilters() override;
     ErrorCode DoPlay() override;
     ErrorCode DoPause() override;
