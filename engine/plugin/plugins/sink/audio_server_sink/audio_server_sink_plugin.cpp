@@ -568,7 +568,6 @@ Status AudioServerSinkPlugin::Pause()
 
 Status AudioServerSinkPlugin::GetLatency(uint64_t& hstTime)
 {
-    MEDIA_LOG_D("GetLatency entered.");
     uint64_t microSec = 0;
     int32_t ret = AudioStandard::SUCCESS;
     {
@@ -595,7 +594,6 @@ Status AudioServerSinkPlugin::GetLatency(uint64_t& hstTime)
 
 Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
 {
-    MEDIA_LOG_D("Write entered.");
     FALSE_RETURN_V_MSG_W(input != nullptr && !input->IsEmpty(), Status::OK, "Receive empty buffer."); // return ok
     auto mem = input->GetMemory();
     auto* buffer = const_cast<uint8_t *>(mem->GetReadOnlyData());
