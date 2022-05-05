@@ -180,7 +180,7 @@ int32_t HiPlayerImpl::Pause()
 
 int32_t HiPlayerImpl::Stop()
 {
-    MEDIA_LOG_D("Stop entered.");
+    MEDIA_LOG_I("Stop entered.");
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::STOP));
     PROFILE_END("Stop ret = " PUBLIC_LOG_D32, ret);
@@ -410,7 +410,7 @@ ErrorCode HiPlayerImpl::DoOnReady()
 
 ErrorCode HiPlayerImpl::DoOnComplete()
 {
-    MEDIA_LOG_W("OnComplete looping: " PUBLIC_LOG_D32 ".", singleLoop_.load());
+    MEDIA_LOG_I("OnComplete looping: " PUBLIC_LOG_D32 ".", singleLoop_.load());
     if (!singleLoop_) {
         StopAsync();
     } else {
