@@ -243,23 +243,21 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
     MEDIA_LOG_D("IN");
     SourceType sourceType = source->GetSourceType();
     if (sourceType == SourceType::SOURCE_TYPE_URI) {
+        std::shared_ptr<Plugin::Meta> suffixMeta = std::make_shared<Plugin::Meta>();
         std::string suffix = GetUriSuffix(source->GetSourceUri());
-        if (!suffix.empty()) {
-            std::shared_ptr<Plugin::Meta> suffixMeta = std::make_shared<Plugin::Meta>();
-            suffixMeta->SetString(Media::Plugin::MetaID::MEDIA_FILE_EXTENSION, suffix);
-            size_t fileSize = 0;
-            if ((plugin_->GetSize(fileSize) == Status::OK) && (fileSize != 0)) {
-                suffixMeta->SetUint64(Media::Plugin::MetaID::MEDIA_FILE_SIZE, fileSize);
-            }
-            Capability peerCap;
-            auto tmpCap = MetaToCapability(*suffixMeta);
-            Plugin::TagMap upstreamParams;
-            Plugin::TagMap downstreamParams;
-            if (!GetOutPort(PORT_NAME_DEFAULT)->Negotiate(tmpCap, peerCap, upstreamParams, downstreamParams) ||
-                !GetOutPort(PORT_NAME_DEFAULT)->Configure(suffixMeta)) {
-                MEDIA_LOG_E("Negotiate fail!");
-                return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
-            }
+        suffixMeta->SetString(Media::Plugin::MetaID::MEDIA_FILE_EXTENSION, suffix);
+        size_t fileSize = 0;
+        if ((plugin_->GetSize(fileSize) == Status::OK) && (fileSize != 0)) {
+            suffixMeta->SetUint64(Media::Plugin::MetaID::MEDIA_FILE_SIZE, fileSize);
+        }
+        Capability peerCap;
+        auto tmpCap = MetaToCapability(*suffixMeta);
+        Plugin::TagMap upstreamParams;
+        Plugin::TagMap downstreamParams;
+        if (!GetOutPort(PORT_NAME_DEFAULT)->Negotiate(tmpCap, peerCap, upstreamParams, downstreamParams) ||
+            !GetOutPort(PORT_NAME_DEFAULT)->Configure(suffixMeta)) {
+            MEDIA_LOG_E("Negotiate fail!");
+            return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
         }
     }
     return ErrorCode::SUCCESS;
