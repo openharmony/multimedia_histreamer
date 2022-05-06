@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 #include <chrono>
+#include <fcntl.h>
+#ifndef WIN32
+#include <sys/types.h>
+#include <unistd.h>
+#endif
 #include <math.h>
 #include <thread>
 #include "helper/test_player.hpp"
@@ -58,6 +63,15 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     DATA_GROUP(std::string(RESOURCE_DIR "/FLAC/FLAC_48000_32_LONG.flac"), 30000),
     DATA_GROUP(std::string(RESOURCE_DIR "/WAV/vorbis_48000_32_SHORT.wav"), 5000),
     DATA_GROUP(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a"), 30000));
+
+    DATA_PROVIDER(FileFdSourceTestShortMusicUrls, 100,
+    DATA_GROUP(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_SHORT.m4a"), 36715),
+    DATA_GROUP(std::string(RESOURCE_DIR "/WAV/vorbis_48000_32_SHORT.wav"), 524472),
+    DATA_GROUP(std::string(RESOURCE_DIR "/AAC/AAC_48000_32_SHORT.aac"), 49233),
+    DATA_GROUP(std::string(RESOURCE_DIR "/FLAC/vorbis_48000_32_SHORT.flac"), 217292),
+    DATA_GROUP(std::string(RESOURCE_DIR "/MP3/MP3_48000_32_SHORT.mp3"), 24697),
+    DATA_GROUP(std::string(RESOURCE_DIR "/OGG/OGG_48000_SHORT.ogg"), 30912),
+    DATA_GROUP(std::string(RESOURCE_DIR "/APE/MPEG-4_48000_32_SHORT.ape"), 161018));
 
     // @test(data="shortMusicUrls", tags=fast)
     PTEST((std::string url), Test single player play url music, and finished automatically)
@@ -210,5 +224,23 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
         ASSERT_EQ(0, player->Play());
         std::this_thread::sleep_for(std::chrono::seconds(20));
         player->Stop();
+    }
+
+    // @test(data="FileFdSourceTestShortMusicUrls", tags=fast)
+    PTEST((std::string url, int32_t fileSize), Can fd play single Loop)
+    {
+        std::string uri = "fd://?offset=0&size=";
+        uri += std::to_string(fileSize);
+        int32_t fd = open(url.c_str(), O_RDONLY|O_BINARY);
+        char ch[256];
+        std::string fdStr = itoa(fd, ch, 256);
+        uri.insert(5, fdStr);
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(uri)));
+        ASSERT_EQ(0, player->SetSingleLoop(true));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        std::this_thread::sleep_for(std::chrono::seconds(20));
+        ASSERT_EQ(0, player->Stop());
     }
 };
