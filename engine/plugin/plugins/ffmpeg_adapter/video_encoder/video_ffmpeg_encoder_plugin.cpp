@@ -54,7 +54,7 @@ Status RegisterVideoEncoderPlugins(const std::shared_ptr<Register>& reg)
             continue;
         }
         if (supportedCodec.find(codec->id) == supportedCodec.end()) {
-            MEDIA_LOG_D("codec %s(%s) is not supported right now", codec->name, codec->long_name);
+            MEDIA_LOG_DD("codec %s(%s) is not supported right now", codec->name, codec->long_name);
             continue;
         }
         CodecPluginDef definition;
@@ -361,7 +361,7 @@ Status VideoFfmpegEncoderPlugin::Stop()
 
 Status VideoFfmpegEncoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs)
 {
-    MEDIA_LOG_D("queue output buffer");
+    MEDIA_LOG_DD("queue output buffer");
     if (outputBuffer) {
         outBufferQ_.Push(outputBuffer);
         return Status::OK;
@@ -380,7 +380,7 @@ Status VideoFfmpegEncoderPlugin::Flush()
 
 Status VideoFfmpegEncoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
 {
-    MEDIA_LOG_D("queue input buffer");
+    MEDIA_LOG_DD("queue input buffer");
     FALSE_RETURN_V_MSG_E(!inputBuffer->IsEmpty() || (inputBuffer->flag & BUFFER_FLAG_EOS),
         Status::ERROR_INVALID_DATA, "encoder does not support fd buffer");
     Status ret = Status::OK;

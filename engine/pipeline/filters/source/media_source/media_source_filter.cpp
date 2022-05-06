@@ -107,13 +107,13 @@ ErrorCode MediaSourceFilter::SetBufferSize(size_t size)
 
 bool MediaSourceFilter::IsSeekable() const
 {
-    MEDIA_LOG_D("IN, isSeekable_: " PUBLIC_LOG_D32, static_cast<int32_t>(isSeekable_));
+    MEDIA_LOG_DD("IN, isSeekable_: " PUBLIC_LOG_D32, static_cast<int32_t>(isSeekable_));
     return isSeekable_;
 }
 
 std::vector<WorkMode> MediaSourceFilter::GetWorkModes()
 {
-    MEDIA_LOG_D("IN, isSeekable_: " PUBLIC_LOG_D32, static_cast<int32_t>(isSeekable_));
+    MEDIA_LOG_DD("IN, isSeekable_: " PUBLIC_LOG_D32, static_cast<int32_t>(isSeekable_));
     if (isSeekable_) {
         return {WorkMode::PUSH, WorkMode::PULL};
     } else {
@@ -152,8 +152,8 @@ ErrorCode MediaSourceFilter::Start()
 
 ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data)
 {
-    MEDIA_LOG_D("IN, offset: " PUBLIC_LOG_U64 ", size: " PUBLIC_LOG_ZU ", outPort: " PUBLIC_LOG_S,
-                offset, size, outPort.c_str());
+    MEDIA_LOG_DD("IN, offset: " PUBLIC_LOG_U64 ", size: " PUBLIC_LOG_ZU ", outPort: " PUBLIC_LOG_S,
+                 offset, size, outPort.c_str());
     if (!plugin_) {
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
@@ -174,7 +174,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
                 auto realSize = data->GetMemory()->GetCapacity();
                 readSize = (readSize > realSize) ? realSize : readSize;
             }
-            MEDIA_LOG_D("totalSize_: " PUBLIC_LOG_ZU, totalSize);
+            MEDIA_LOG_DD("totalSize_: " PUBLIC_LOG_ZU, totalSize);
         }
         if (position_ != offset) {
             err = TranslatePluginStatus(plugin_->SeekTo(offset));

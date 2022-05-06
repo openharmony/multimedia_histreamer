@@ -502,7 +502,7 @@ void VideoEncoderFilter::HandleOneFrame(const std::shared_ptr<AVBuffer>& data)
         if (ret == Plugin::Status::OK) {
             break;
         }
-        MEDIA_LOG_D("Send data to plugin error: " PUBLIC_LOG_D32, ret);
+        MEDIA_LOG_DD("Send data to plugin error: " PUBLIC_LOG_D32, ret);
         OSAL::SleepFor(DEFAULT_TRY_DECODE_TIME);
     } while (1);
 }

@@ -435,7 +435,7 @@ int FFmpegDemuxerPlugin::AVReadPacket(void* opaque, uint8_t* buf, int bufSize) /
         auto buffer = std::make_shared<Buffer>();
         auto bufData = buffer->WrapMemory(buf, bufSize, 0);
         auto result = ioContext->dataSource->ReadAt(ioContext->offset, buffer, static_cast<size_t>(bufSize));
-        MEDIA_LOG_D("AVReadPacket read data size = " PUBLIC_LOG_D32, static_cast<int>(bufData->GetSize()));
+        MEDIA_LOG_DD("AVReadPacket read data size = " PUBLIC_LOG_D32, static_cast<int>(bufData->GetSize()));
         if (result == Status::OK) {
             ioContext->offset += buffer->GetMemory()->GetSize();
             rtv = buffer->GetMemory()->GetSize();
@@ -469,13 +469,13 @@ int64_t FFmpegDemuxerPlugin::AVSeek(void* opaque, int64_t offset, int whence) //
         case SEEK_SET:
             newPos = static_cast<uint64_t>(offset);
             ioContext->offset = newPos;
-            MEDIA_LOG_I("AVSeek whence: " PUBLIC_LOG_D32 ", pos = " PUBLIC_LOG_D64 ", newPos = " PUBLIC_LOG
-                        PRIu64, whence, offset, newPos);
+            MEDIA_LOG_DD("AVSeek whence: " PUBLIC_LOG_D32 ", pos = " PUBLIC_LOG_D64 ", newPos = " PUBLIC_LOG
+                         PRIu64, whence, offset, newPos);
             break;
         case SEEK_CUR:
             newPos = ioContext->offset + offset;
-            MEDIA_LOG_I("AVSeek whence: " PUBLIC_LOG_D32 ", pos = " PUBLIC_LOG_D64 ", newPos = " PUBLIC_LOG
-                        PRIu64, whence, offset, newPos);
+            MEDIA_LOG_DD("AVSeek whence: " PUBLIC_LOG_D32 ", pos = " PUBLIC_LOG_D64 ", newPos = " PUBLIC_LOG
+                         PRIu64, whence, offset, newPos);
             break;
         case SEEK_END:
         case AVSEEK_SIZE: {
@@ -494,8 +494,8 @@ int64_t FFmpegDemuxerPlugin::AVSeek(void* opaque, int64_t offset, int whence) //
     if (whence != AVSEEK_SIZE) {
         ioContext->offset = newPos;
     }
-    MEDIA_LOG_I("current offset: " PUBLIC_LOG_D64 ", new pos: " PUBLIC_LOG_U64,
-                ioContext->offset, newPos);
+    MEDIA_LOG_DD("current offset: " PUBLIC_LOG_D64 ", new pos: " PUBLIC_LOG_U64,
+                 ioContext->offset, newPos);
     return newPos;
 }
 
@@ -544,8 +544,8 @@ int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource)
         AVProbeData probeData{"", buff.data(), static_cast<int>(bufferInfo->GetMemory()->GetSize()), ""};
         confidence = plugin->read_probe(&probeData);
     }
-    MEDIA_LOG_D("Sniff: plugin pluginName = " PUBLIC_LOG_S ", probability = " PUBLIC_LOG_D32 " / 100 ...",
-                plugin->name, confidence);
+    MEDIA_LOG_DD("Sniff: plugin pluginName = " PUBLIC_LOG_S ", probability = " PUBLIC_LOG_D32 " / 100 ...",
+                 plugin->name, confidence);
     return confidence;
 }
 
@@ -580,8 +580,8 @@ Status RegisterPlugins(const std::shared_ptr<Register>& reg)
     const AVInputFormat* plugin = nullptr;
     void* i = nullptr;
     while ((plugin = av_demuxer_iterate(&i))) {
-        MEDIA_LOG_D("Attempting to handle libav demuxer plugin " PUBLIC_LOG_S " [" PUBLIC_LOG_S "]",
-                    plugin->name, plugin->long_name);
+        MEDIA_LOG_DD("Attempting to handle libav demuxer plugin " PUBLIC_LOG_S " [" PUBLIC_LOG_S "]",
+                     plugin->name, plugin->long_name);
         /* no emulators */
         if (plugin->long_name != nullptr) {
             if (!strncmp(plugin->long_name, "pcm ", 4)) { // 4

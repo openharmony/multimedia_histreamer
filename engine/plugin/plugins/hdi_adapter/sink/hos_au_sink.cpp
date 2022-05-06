@@ -597,14 +597,14 @@ Status HdiSink::GetFrameCount(uint32_t& count)
 
 Status HdiSink::Write(const std::shared_ptr<Buffer>& input)
 {
-    MEDIA_LOG_D("Write begin.");
+    MEDIA_LOG_DD("Write begin.");
     if (!input) {
         MEDIA_LOG_E("Write failed due to nullptr.");
         return Status::ERROR_INVALID_PARAMETER;
     }
     if (!input->IsEmpty()) {
         RenderFrame(input);
-        MEDIA_LOG_D("Write finished.");
+        MEDIA_LOG_DD("Write finished.");
         return Status::OK;
     }
     Status status = Status::OK;
@@ -689,7 +689,7 @@ bool HdiSink::HandleInterleaveData(uint8_t* origData, int32_t frameCnt)
 
 void HdiSink::RenderFrame(const std::shared_ptr<Buffer>& input)
 {
-    MEDIA_LOG_D("RenderFrame started");
+    MEDIA_LOG_DD("RenderFrame started");
     auto mem = input->GetMemory();
     auto frame = const_cast<uint8_t*>(mem->GetReadOnlyData());
     bool dataInterleaved = false;
@@ -709,7 +709,7 @@ void HdiSink::RenderFrame(const std::shared_ptr<Buffer>& input)
         }
         if (ret != 0) {
             if (ret == HI_ERR_VI_BUF_FULL) {
-                MEDIA_LOG_D("renderFrame buffer full"); // do not log this info
+                MEDIA_LOG_DD("renderFrame buffer full"); // do not log this info
                 constexpr int timeoutMs = 5;
                 OSAL::ScopedLock lock(renderMutex_);
                 renderCond_.WaitFor(lock, timeoutMs, [this] { return processing_.load() == false; });
