@@ -487,7 +487,12 @@ ErrorCode HiPlayerImpl::DoOnError(ErrorCode errorCode)
 {
     errorCode_ = errorCode;
     pipelineStates_ = PlayerStates::PLAYER_STATE_ERROR;
-    ReportStateChanged();
+    auto ptr = obs_.lock();
+    if (ptr != nullptr) {
+        ptr->OnError(PLAYER_ERROR, TransErrorCode(errorCode));
+        Format format;
+        ptr->OnInfo(INFO_TYPE_STATE_CHANGE, pipelineStates_, format);
+    }
     return ErrorCode::SUCCESS;
 }
 

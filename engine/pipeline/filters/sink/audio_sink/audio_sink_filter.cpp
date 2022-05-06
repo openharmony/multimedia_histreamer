@@ -159,7 +159,7 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
 {
     MEDIA_LOG_DD("audio sink push data started, state: " PUBLIC_LOG_D32, state_.load());
     if (isFlushing || state_.load() == FilterState::INITIALIZED) {
-        MEDIA_LOG_I("audio sink is flushing ignore this buffer");
+        MEDIA_LOG_DD("audio sink is flushing ignore this buffer");
         return ErrorCode::SUCCESS;
     }
     if (state_.load() != FilterState::RUNNING) {
