@@ -108,6 +108,7 @@ private:
     void ActiveFilters(const std::vector<Pipeline::Filter*>& filters);
     void HandleAudioProgressEvent(const Event& event);
     void HandlePluginErrorEvent(const Event& event);
+    void ReportStateChanged();
 
     OSAL::Mutex stateMutex_ {};
     OSAL::ConditionVariable cond_ {};

@@ -338,7 +338,7 @@ Status SdlAudioSinkPlugin::GetFrameCount(uint32_t& count)
 
 Status SdlAudioSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
 {
-    MEDIA_LOG_D("SdlSink Write begin");
+    MEDIA_LOG_DD("SdlSink Write begin");
     if (inputInfo == nullptr || inputInfo->IsEmpty()) {
         return Status::OK;
     }
@@ -364,9 +364,9 @@ Status SdlAudioSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
             length = res * av_get_bytes_per_sample(reFfDestFmt_) * channels_;
         }
     }
-    MEDIA_LOG_D("SdlSink Write before ring buffer");
+    MEDIA_LOG_DD("SdlSink Write before ring buffer");
     rb->WriteBuffer(buffer, length);
-    MEDIA_LOG_D("SdlSink Write end");
+    MEDIA_LOG_DD("SdlSink Write end");
     return Status::OK;
 }
 
@@ -380,7 +380,7 @@ Status SdlAudioSinkPlugin::Flush()
 void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len) // NOLINT: void*
 {
     UNUSED_VARIABLE(userdata);
-    MEDIA_LOG_D("sdl audio callback begin");
+    MEDIA_LOG_DD("sdl audio callback begin");
     if (mixCache_.capacity() < len) {
         mixCache_.reserve(len);
     }
@@ -392,7 +392,7 @@ void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len)
     SDL_memset(stream, 0, len);
     SDL_MixAudio(stream, mixCache_.data(), realLen, volume_);
     SDL_PauseAudio(0);
-    MEDIA_LOG_D("sdl audio callback end with " PUBLIC_LOG_ZU, realLen);
+    MEDIA_LOG_DD("sdl audio callback end with " PUBLIC_LOG_ZU, realLen);
 }
 
 void SdlAudioSinkPlugin::DrainData()

@@ -20,8 +20,9 @@
 #include <string>
 
 // If file name and line number is need, #define HST_DEBUG at the beginning of the cpp file.
+#define HST_DEBUG
 #ifdef HST_DEBUG
-inline std::string MediaGetFileName(std::string file)
+inline std::string HstGetFileName(std::string file)
 {
     if (file == "") {
         return "Unknown File";
@@ -76,7 +77,7 @@ inline std::string MediaGetFileName(std::string file)
 #define HST_DECORATOR_HILOG(op, fmt, args...)                                                                          \
     do {                                                                                                               \
         std::string file(__FILE__);                                                                                    \
-        std::string bareFile = MediaGetFileName(file);                                                                 \
+        std::string bareFile = HstGetFileName(file);                                                                   \
         op(LOG_CORE, "(" PUBLIC_LOG_S ", " PUBLIC_LOG_D32 "): " fmt, bareFile.c_str(), __LINE__, ##args);              \
     } while (0)
 #endif
@@ -92,12 +93,26 @@ inline std::string MediaGetFileName(std::string file)
 // Control the MEDIA_LOG_D.
 // If MEDIA_LOG_D is needed, #define MEDIA_LOG_DEBUG 1 at the beginning of the cpp file.
 #ifndef MEDIA_LOG_DEBUG
-#define MEDIA_LOG_DEBUG 0
+#define MEDIA_LOG_DEBUG 1
 #endif
 
 #if !MEDIA_LOG_DEBUG
 #undef MEDIA_LOG_D
 #define MEDIA_LOG_D(msg, ...) ((void)0)
+#endif
+
+// Control the debug detail logs MEDIA_LOG_DD.
+// If MEDIA_LOG_DD is needed, #define MEDIA_LOG_DEBUG_DETAIL 1 at the beginning of the cpp file.
+#ifndef MEDIA_LOG_DEBUG_DETAIL
+#define MEDIA_LOG_DEBUG_DETAIL 0
+#endif
+
+#if !MEDIA_LOG_DEBUG_DETAIL
+#undef MEDIA_LOG_DD
+#define MEDIA_LOG_DD(msg, ...) ((void)0)
+#else
+#undef MEDIA_LOG_DD
+#define MEDIA_LOG_DD MEDIA_LOG_D
 #endif
 
 #ifndef NOK_RETURN

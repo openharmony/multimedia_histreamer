@@ -148,7 +148,7 @@ Status Minimp3DecoderPlugin::GetPcmDataProcess(const std::shared_ptr<Buffer>& in
 
 Status Minimp3DecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
 {
-    MEDIA_LOG_D("queue output buffer");
+    MEDIA_LOG_DD("queue output buffer");
     (void)timeoutMs;
     if (!outputBuffers) {
         return Status::ERROR_INVALID_PARAMETER;
@@ -159,7 +159,7 @@ Status Minimp3DecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& ou
 
 Status Minimp3DecoderPlugin::SendOutputBuffer()
 {
-    MEDIA_LOG_D("send output buffer");
+    MEDIA_LOG_DD("send output buffer");
     OSAL::ScopedLock lock(ioMutex_);
     Status status = GetPcmDataProcess(inputBuffer_, outputBuffer_);
     inputBuffer_.reset();
@@ -174,7 +174,7 @@ Status Minimp3DecoderPlugin::SendOutputBuffer()
 
 Status Minimp3DecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
 {
-    MEDIA_LOG_D("queue input buffer");
+    MEDIA_LOG_DD("queue input buffer");
     (void)timeoutMs;
     if (inputBuffer->IsEmpty() && !(inputBuffer->flag & BUFFER_FLAG_EOS)) {
         MEDIA_LOG_E("decoder does not support fd buffer");

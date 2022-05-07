@@ -145,10 +145,10 @@ void AsyncMode::FlushEnd()
 
 ErrorCode AsyncMode::HandleFrame()
 {
-    MEDIA_LOG_D("AsyncMode handle frame called");
+    MEDIA_LOG_DD("AsyncMode handle frame called");
     auto oneBuffer = inBufQue_->Pop(200); // timeout 200 ms
     if (oneBuffer == nullptr) {
-        MEDIA_LOG_W("decoder find nullptr in esBufferQ");
+        MEDIA_LOG_DD("decoder find nullptr in esBufferQ");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     Plugin::Status status = Plugin::Status::OK;
@@ -158,16 +158,16 @@ ErrorCode AsyncMode::HandleFrame()
         if (status == Plugin::Status::OK || status == Plugin::Status::END_OF_STREAM || stopped_) {
             break;
         }
-        MEDIA_LOG_D("Send data to plugin error: " PUBLIC_LOG_D32, status);
+        MEDIA_LOG_DD("Send data to plugin error: " PUBLIC_LOG_D32, status);
         OSAL::SleepFor(DEFAULT_TRY_DECODE_TIME);
     } while (true);
-    MEDIA_LOG_D("Async handle frame finished");
+    MEDIA_LOG_DD("Async handle frame finished");
     return TranslatePluginStatus(status);
 }
 
 ErrorCode AsyncMode::FinishFrame()
 {
-    MEDIA_LOG_D("FinishFrame begin");
+    MEDIA_LOG_DD("FinishFrame begin");
     bool isRendered = false;
     {
         OSAL::ScopedLock l(renderMutex_);
@@ -197,7 +197,7 @@ ErrorCode AsyncMode::FinishFrame()
     if (!isRendered) {
         OSAL::SleepFor(DEFAULT_TRY_RENDER_TIME);
     }
-    MEDIA_LOG_D("AsyncMode finish frame success");
+    MEDIA_LOG_DD("AsyncMode finish frame success");
     return ErrorCode::SUCCESS;
 }
 

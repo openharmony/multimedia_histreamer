@@ -54,11 +54,11 @@ public:
     {
         OSAL::ScopedLock lock(mutex_);
         if (!isActive) {
-            MEDIA_LOG_D("blocking queue " PUBLIC_LOG_S " is inactive for Push.", name_.c_str());
+            MEDIA_LOG_DD("blocking queue " PUBLIC_LOG_S " is inactive for Push.", name_.c_str());
             return false;
         }
         if (que_.size() >= capacity_) {
-            MEDIA_LOG_D("blocking queue " PUBLIC_LOG_S " is full, waiting for pop.", name_.c_str());
+            MEDIA_LOG_DD("blocking queue " PUBLIC_LOG_S " is full, waiting for pop.", name_.c_str());
             cvFull_.Wait(lock, [this] { return !isActive || que_.size() < capacity_; });
         }
         if (!isActive) {
@@ -68,7 +68,7 @@ public:
         }
         que_.push(value);
         cvEmpty_.NotifyAll();
-        MEDIA_LOG_D("blocking queue " PUBLIC_LOG_S " Push succeed.", name_.c_str());
+        MEDIA_LOG_DD("blocking queue " PUBLIC_LOG_S " Push succeed.", name_.c_str());
         return true;
     }
     bool Push(const T& value, int timeoutMs)

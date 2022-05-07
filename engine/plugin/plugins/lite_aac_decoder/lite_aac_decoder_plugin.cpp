@@ -191,7 +191,7 @@ Status LiteAACDecoderPlugin::SetDataCallback(DataCallback* dataCallback)
 
 Status LiteAACDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer> &inputBuffer, int32_t timeoutMs)
 {
-    MEDIA_LOG_D("queue input buffer");
+    MEDIA_LOG_DD("queue input buffer");
     if (inBuffer_ != nullptr) {
         return Status::ERROR_TIMED_OUT;
     }

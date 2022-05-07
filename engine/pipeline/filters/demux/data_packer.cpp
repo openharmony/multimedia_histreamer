@@ -60,8 +60,8 @@ inline static const uint8_t* AudioBufferReadOnlyData(AVBufferPtr& ptr)
 void DataPacker::PushData(AVBufferPtr bufferPtr, uint64_t offset)
 {
     size_t bufferSize = AudioBufferSize(bufferPtr);
-    MEDIA_LOG_D("DataPacker PushData begin... buffer (offset " PUBLIC_LOG_U64 ", size " PUBLIC_LOG_ZU ")",
-                offset, bufferSize);
+    MEDIA_LOG_DD("DataPacker PushData begin... buffer (offset " PUBLIC_LOG_U64 ", size " PUBLIC_LOG_ZU ")",
+                 offset, bufferSize);
     DUMP_BUFFER2LOG("DataPacker Push", bufferPtr, offset);
     FALSE_RETURN_MSG(bufferSize > 0, "Can not push zero length buffer.");
 
@@ -79,21 +79,21 @@ void DataPacker::PushData(AVBufferPtr bufferPtr, uint64_t offset)
     }
     que_.emplace_back(std::move(bufferPtr));
     cvEmpty_.NotifyOne();
-    MEDIA_LOG_D("DataPacker PushData end... " PUBLIC_LOG_S, ToString().c_str());
+    MEDIA_LOG_DD("DataPacker PushData end. " PUBLIC_LOG_S, ToString().c_str());
 }
 
 // curOffset: the offset end of this dataPacker. if IsDataAvailable() false, we can get data from source from curOffset
 bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOffset)
 {
-    MEDIA_LOG_D("dataPacker (offset " PUBLIC_LOG_U64 ", size " PUBLIC_LOG_U32 "), curOffsetEnd is " PUBLIC_LOG_U64,
-                mediaOffset_, size_.load(), mediaOffset_ + size_.load());
-    MEDIA_LOG_D(PUBLIC_LOG_S, ToString().c_str());
+    MEDIA_LOG_DD("dataPacker (offset " PUBLIC_LOG_U64 ", size " PUBLIC_LOG_U32 "), curOffsetEnd is " PUBLIC_LOG_U64,
+                 mediaOffset_, size_.load(), mediaOffset_ + size_.load());
+    MEDIA_LOG_DD(PUBLIC_LOG_S, ToString().c_str());
     OSAL::ScopedLock lock(mutex_);
     auto curOffsetTemp = mediaOffset_;
     if (que_.empty() || offset < curOffsetTemp || offset > curOffsetTemp + size_) { // 原有数据无法命中, 则删除原有数据
         curOffset = offset;
         FlushInternal();
-        MEDIA_LOG_D("IsDataAvailable false, offset not in cached data, clear it.");
+        MEDIA_LOG_DD("IsDataAvailable false, offset not in cached data, clear it.");
         return false;
     }
     size_t bufCnt = que_.size();
@@ -101,28 +101,28 @@ bool DataPacker::IsDataAvailable(uint64_t offset, uint32_t size, uint64_t &curOf
     uint64_t curOffsetEnd = mediaOffset_ + AudioBufferSize(que_.front());
     if (bufCnt == 1) {
         curOffset = curOffsetEnd;
-        MEDIA_LOG_D("IsDataAvailable bufCnt == 1, result " PUBLIC_LOG_D32, offsetEnd <= curOffsetEnd);
+        MEDIA_LOG_DD("IsDataAvailable bufCnt == 1, result " PUBLIC_LOG_D32, offsetEnd <= curOffsetEnd);
         return offsetEnd <= curOffsetEnd;
     }
     auto preOffsetEnd = curOffsetEnd;
     for (size_t i = 1; i < bufCnt; ++i) {
         curOffsetEnd = preOffsetEnd + AudioBufferSize(que_[i]);
         if (curOffsetEnd >= offsetEnd) {
-            MEDIA_LOG_D("IsDataAvailable true, last buffer index " PUBLIC_LOG_ZU ", offsetEnd " PUBLIC_LOG_U64
-                ", curOffsetEnd " PUBLIC_LOG_U64, i, offsetEnd, curOffsetEnd);
+            MEDIA_LOG_DD("IsDataAvailable true, last buffer index " PUBLIC_LOG_ZU ", offsetEnd " PUBLIC_LOG_U64
+                         ", curOffsetEnd " PUBLIC_LOG_U64, i, offsetEnd, curOffsetEnd);
             return true;
         } else {
             preOffsetEnd = curOffsetEnd;
         }
     }
     if (preOffsetEnd >= offsetEnd) {
-        MEDIA_LOG_D("IsDataAvailable true, use all buffers, last buffer index " PUBLIC_LOG_ZU ", offsetEnd "
-        PUBLIC_LOG_U64 ", curOffsetEnd " PUBLIC_LOG_U64, bufCnt - 1, offsetEnd, curOffsetEnd);
+        MEDIA_LOG_DD("IsDataAvailable true, use all buffers, last buffer index " PUBLIC_LOG_ZU ", offsetEnd "
+                     PUBLIC_LOG_U64 ", curOffsetEnd " PUBLIC_LOG_U64, bufCnt - 1, offsetEnd, curOffsetEnd);
         return true;
     }
     curOffset = preOffsetEnd;
-    MEDIA_LOG_D("IsDataAvailable false, offsetEnd " PUBLIC_LOG_U64 ", curOffsetEnd " PUBLIC_LOG_U64,
-                offsetEnd, preOffsetEnd);
+    MEDIA_LOG_DD("IsDataAvailable false, offsetEnd " PUBLIC_LOG_U64 ", curOffsetEnd " PUBLIC_LOG_U64,
+                 offsetEnd, preOffsetEnd);
     return false;
 }
 
@@ -144,7 +144,7 @@ bool DataPacker::PeekRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPt
 // isGet : is it called from GetRange.
 bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &bufferPtr, bool isGet)
 {
-    MEDIA_LOG_D("PeekRangeInternal (offset, size) = (" PUBLIC_LOG_U64 ", " PUBLIC_LOG_U32 ")...", offset, size);
+    MEDIA_LOG_DD("PeekRangeInternal (offset, size) = (" PUBLIC_LOG_U64 ", " PUBLIC_LOG_U32 ")...", offset, size);
     int32_t startIndex = 0; // The index of buffer that we first use
     size_t copySize = 0;
     uint32_t needCopySize = size, firstBufferOffset = 0;
@@ -191,8 +191,8 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
 // Call IsDataAvailable() first before call GetRange
 bool DataPacker::GetRange(uint64_t offset, uint32_t size, AVBufferPtr& bufferPtr)
 {
-    MEDIA_LOG_D("DataPacker GetRange(offset, size) = (" PUBLIC_LOG_U64 ", "
-                PUBLIC_LOG_U32 ")...", offset, size);
+    MEDIA_LOG_DD("DataPacker GetRange(offset, size) = (" PUBLIC_LOG_U64 ", "
+                 PUBLIC_LOG_U32 ")...", offset, size);
     DUMP_BUFFER2LOG("GetRange Input", bufferPtr, 0);
     FALSE_RETURN_V_MSG_E(bufferPtr && (!bufferPtr->IsEmpty()) && bufferPtr->GetMemory()->GetCapacity() >= size, false,
         "GetRange input bufferPtr empty or capacity not enough.");
@@ -333,7 +333,7 @@ void DataPacker::RemoveBufferContent(std::shared_ptr<AVBuffer> &buffer, size_t r
 // Update to support live play mode, Remove the data before position
 void DataPacker::RemoveOldData(const Position& position)
 {
-    MEDIA_LOG_D("Before RemoveOldData " PUBLIC_LOG_S, ToString().c_str());
+    MEDIA_LOG_DD("Before RemoveOldData " PUBLIC_LOG_S, ToString().c_str());
     FALSE_LOG(RemoveTo(position));
     if (que_.empty()) {
         mediaOffset_ = 0;
@@ -344,12 +344,12 @@ void DataPacker::RemoveOldData(const Position& position)
         pts_ = que_.front()->pts;
         dts_ = que_.front()->dts;
     }
-    MEDIA_LOG_D("After RemoveOldData " PUBLIC_LOG_S, ToString().c_str());
+    MEDIA_LOG_DD("After RemoveOldData " PUBLIC_LOG_S, ToString().c_str());
 }
 
 bool DataPacker::RemoveTo(const Position& position)
 {
-    MEDIA_LOG_D("Remove to " PUBLIC_LOG_S, position.ToString().c_str());
+    MEDIA_LOG_DD("Remove to " PUBLIC_LOG_S, position.ToString().c_str());
     size_t removeSize;
     int32_t i = 0;
     while (i < position.index && !que_.empty()) { // Remove all whole buffer before position.index

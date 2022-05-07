@@ -95,25 +95,25 @@ Status FileFdSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
     }
     expectedLen = std::min(static_cast<size_t>(fileSize_ - position_), expectedLen);
     expectedLen = std::min(bufData->GetCapacity(), expectedLen);
-    MEDIA_LOG_D("buffer position " PUBLIC_LOG_U64 ", expectedLen " PUBLIC_LOG_ZU, position_, expectedLen);
+    MEDIA_LOG_DD("buffer position " PUBLIC_LOG_U64 ", expectedLen " PUBLIC_LOG_ZU, position_, expectedLen);
     auto size = read(fd_, bufData->GetWritableAddr(expectedLen), expectedLen);
     bufData->UpdateDataSize(size);
     position_ += bufData->GetSize();
-    MEDIA_LOG_D("position_: " PUBLIC_LOG_U64 ", readSize: " PUBLIC_LOG_ZU, position_, bufData->GetSize());
+    MEDIA_LOG_DD("position_: " PUBLIC_LOG_U64 ", readSize: " PUBLIC_LOG_ZU, position_, bufData->GetSize());
     return Status::OK;
 }
 
 Status FileFdSourcePlugin::GetSize(size_t& size)
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_DD("IN");
     size = fileSize_;
-    MEDIA_LOG_D("fileSize_: " PUBLIC_LOG_ZU, size);
+    MEDIA_LOG_DD("fileSize_: " PUBLIC_LOG_ZU, size);
     return Status::OK;
 }
 
 bool FileFdSourcePlugin::IsSeekable()
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_DD("IN");
     return isSeekable_;
 }
 

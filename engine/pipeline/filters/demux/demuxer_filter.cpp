@@ -322,8 +322,8 @@ void DemuxerFilter::ActivatePullMode()
         if (dataPacker_->IsDataAvailable(offset, size, curOffset)) {
             return true;
         }
-        MEDIA_LOG_D("IsDataAvailable false, require offset " PUBLIC_LOG_D64 ", DataPacker data offset end - curOffset "
-                    PUBLIC_LOG_D64, offset, curOffset);
+        MEDIA_LOG_DD("IsDataAvailable false, require offset " PUBLIC_LOG_D64 ", DataPacker data offset end - curOffset "
+                     PUBLIC_LOG_D64, offset, curOffset);
         AVBufferPtr bufferPtr = std::make_shared<AVBuffer>();
         bufferPtr->AllocMemory(pluginAllocator_, size);
         auto ret = inPorts_.front()->PullData(curOffset, size, bufferPtr);
@@ -384,6 +384,7 @@ void DemuxerFilter::MediaTypeFound(std::string pluginName)
     if (InitPlugin(std::move(pluginName))) {
         task_->Start();
     } else {
+        MEDIA_LOG_E("MediaTypeFound init plugin error.");
         OnEvent({name_, EventType::EVENT_ERROR, ErrorCode::ERROR_UNSUPPORTED_FORMAT});
     }
 }
@@ -457,14 +458,14 @@ bool DemuxerFilter::PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo)
 
 ErrorCode DemuxerFilter::ReadFrame(AVBuffer& buffer, uint32_t& trackId)
 {
-    MEDIA_LOG_D("ReadFrame called");
+    MEDIA_LOG_DD("ReadFrame called");
     ErrorCode result = ErrorCode::ERROR_UNKNOWN;
     auto rtv = plugin_->ReadFrame(buffer, 0);
     if (rtv == Plugin::Status::OK) {
         trackId = buffer.trackID;
         result = ErrorCode::SUCCESS;
     }
-    MEDIA_LOG_D("ReadFrame return with rtv = " PUBLIC_LOG_D32, static_cast<int32_t>(rtv));
+    MEDIA_LOG_DD("ReadFrame return with rtv = " PUBLIC_LOG_D32, static_cast<int32_t>(rtv));
     return (rtv != Plugin::Status::END_OF_STREAM) ? result : ErrorCode::END_OF_STREAM;
 }
 
@@ -510,6 +511,7 @@ void DemuxerFilter::NegotiateDownstream()
                 stream.needNegoCaps = false;
             } else {
                 task_->PauseAsync();
+                MEDIA_LOG_E("NegotiateDownstream failed error.");
                 OnEvent({name_, EventType::EVENT_ERROR, ErrorCode::ERROR_UNSUPPORTED_FORMAT});
             }
         }

@@ -617,13 +617,13 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
             length = res * av_get_bytes_per_sample(reFfDestFmt_) * channels_;
         }
     }
-    MEDIA_LOG_D("write data size " PUBLIC_LOG_ZU, length);
+    MEDIA_LOG_DD("write data size " PUBLIC_LOG_ZU, length);
     int32_t ret = -1;
     OSAL::ScopedLock lock(renderMutex_);
     FALSE_RETURN_V(audioRenderer_ != nullptr, Status::ERROR_WRONG_STATE);
     for (; length > 0;) {
         ret = audioRenderer_->Write(buffer, length);
-        MEDIA_LOG_D("written data size " PUBLIC_LOG_D32, ret);
+        MEDIA_LOG_DD("written data size " PUBLIC_LOG_D32, ret);
         if (ret < 0) {
             MEDIA_LOG_E("Write data error " PUBLIC_LOG_D32, ret);
             break;

@@ -544,7 +544,7 @@ int64_t FFmpegMuxerPlugin::IoSeek(void* opaque, int64_t offset, int whence)
     if (whence != AVSEEK_SIZE) {
         ioContext->pos_ = newPos;
     }
-    MEDIA_LOG_I("current offset: " PUBLIC_LOG_D64 ", new pos: " PUBLIC_LOG_U64, ioContext->pos_, newPos);
+    MEDIA_LOG_DD("current offset: " PUBLIC_LOG_D64 ", new pos: " PUBLIC_LOG_U64, ioContext->pos_, newPos);
     return newPos;
 }
 } // Ffmpeg

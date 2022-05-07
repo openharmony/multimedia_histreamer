@@ -127,7 +127,8 @@ void Task::DoTask()
 void Task::Run()
 {
     for (;;) {
-        MEDIA_LOG_D("task " PUBLIC_LOG_S " is running on state : " PUBLIC_LOG_D32, name_.c_str(), runningState_.load());
+        MEDIA_LOG_DD("task " PUBLIC_LOG_S " is running on state : " PUBLIC_LOG_D32,
+                     name_.c_str(), runningState_.load());
         if (runningState_.load() == RunningState::STARTED) {
             handler_();
         }

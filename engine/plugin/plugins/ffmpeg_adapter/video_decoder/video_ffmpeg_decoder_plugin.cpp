@@ -53,8 +53,8 @@ Status RegisterVideoDecoderPlugins(const std::shared_ptr<Register>& reg)
             continue;
         }
         if (supportedCodec.find(codec->id) == supportedCodec.end()) {
-            MEDIA_LOG_D("codec " PUBLIC_LOG_S "(" PUBLIC_LOG_S ") is not supported right now",
-                        codec->name, codec->long_name);
+            MEDIA_LOG_DD("codec " PUBLIC_LOG_S "(" PUBLIC_LOG_S ") is not supported right now",
+                         codec->name, codec->long_name);
             continue;
         }
         CodecPluginDef definition;

@@ -63,8 +63,8 @@ Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
             continue;
         }
         if (g_supportedCodec.find(codec->id) == g_supportedCodec.end()) {
-            MEDIA_LOG_D("codec " PUBLIC_LOG_S "(" PUBLIC_LOG_S ") is not supported right now",
-                        codec->name, codec->long_name);
+            MEDIA_LOG_DD("codec " PUBLIC_LOG_S "(" PUBLIC_LOG_S ") is not supported right now",
+                         codec->name, codec->long_name);
             continue;
         }
         CodecPluginDef definition;
@@ -403,7 +403,7 @@ Status AudioFfmpegDecoderPlugin::Flush()
 
 Status AudioFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
 {
-    MEDIA_LOG_D("queue input buffer");
+    MEDIA_LOG_DD("queue input buffer");
     (void)timeoutMs;
     if (inputBuffer->IsEmpty() && !(inputBuffer->flag & BUFFER_FLAG_EOS)) {
         MEDIA_LOG_E("decoder does not support fd buffer");
@@ -422,7 +422,7 @@ Status AudioFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
 
 Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs)
 {
-    MEDIA_LOG_D("queue output buffer");
+    MEDIA_LOG_DD("queue output buffer");
     (void)timeoutMs;
     if (!outputBuffer) {
         return Status::ERROR_INVALID_PARAMETER;
@@ -433,7 +433,7 @@ Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>
 
 Status AudioFfmpegDecoderPlugin::SendOutputBuffer()
 {
-    MEDIA_LOG_D("send output buffer");
+    MEDIA_LOG_DD("send output buffer");
     Status status = ReceiveBuffer();
     if (status == Status::OK || status == Status::END_OF_STREAM) {
         dataCallback_->OnOutputBufferDone(outBuffer_);
@@ -516,7 +516,7 @@ Status AudioFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
     Status status;
     auto ret = avcodec_receive_frame(avCodecContext_.get(), cachedFrame_.get());
     if (ret >= 0) {
-        MEDIA_LOG_D("receive one frame");
+        MEDIA_LOG_DD("receive one frame");
         status = ReceiveFrameSucc(ioInfo);
     } else if (ret == AVERROR_EOF) {
         MEDIA_LOG_I("eos received");
