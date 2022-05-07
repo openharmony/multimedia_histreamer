@@ -446,7 +446,8 @@ ErrorCode HiPlayerImpl::DoOnComplete()
 {
     MEDIA_LOG_W("OnComplete looping: " PUBLIC_LOG_D32 ".", singleLoop_.load());
     if (!singleLoop_) {
-        StopAsync();
+        FAIL_LOG(fsm_.SendEventAsync(Intent::PAUSE));
+        FAIL_LOG(fsm_.SendEventAsync(Intent::SEEK, SeekInfo{0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC}));
     } else {
         fsm_.SendEventAsync(Intent::SEEK, SeekInfo{0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC});
     }
