@@ -21,6 +21,50 @@
 
 namespace OHOS {
 namespace Media {
+const char* State::GetStateName(StateId state)
+{
+    static const std::map<StateId, const char*> stateDesc = {
+        {StateId::INIT, "INIT"},
+        {StateId::PREPARING, "PREPARING"},
+        {StateId::READY, "READY"},
+        {StateId::PAUSE, "PAUSE"},
+        {StateId::PLAYING, "PLAYING"},
+        {StateId::BUTT, "BUTT"},
+    };
+    return stateDesc.at(state);
+}
+const char* State::GetIntentName(Intent intent)
+{
+    static const std::map<Intent, const char*> intentDesc = {
+        {Intent::SET_SOURCE, "SET_SOURCE"},
+        {Intent::PREPARE, "PREPARE"},
+        {Intent::SEEK, "SEEK"},
+        {Intent::PLAY, "PLAY"},
+        {Intent::PAUSE, "PAUSE"},
+        {Intent::RESUME, "RESUME"},
+        {Intent::STOP, "STOP"},
+        {Intent::SET_ATTRIBUTE, "SET_ATTRIBUTE"},
+        {Intent::NOTIFY_READY, "NOTIFY_READY"},
+        {Intent::NOTIFY_COMPLETE, "NOTIFY_COMPLETE"},
+        {Intent::NOTIFY_ERROR, "NOTIFY_ERROR"},
+        {Intent::INTENT_BUTT, "INTENT_BUTT"}
+    };
+    return intentDesc.at(intent);
+}
+const char* State::GetActionName(Action action)
+{
+    static const std::map<Action, const char*> actionDesc = {
+        {Action::TRANS_TO_INIT, "TRANS_TO_INIT"},
+        {Action::TRANS_TO_PREPARING, "TRANS_TO_PREPARING"},
+        {Action::TRANS_TO_READY, "TRANS_TO_READY"},
+        {Action::TRANS_TO_PLAYING, "TRANS_TO_PLAYING"},
+        {Action::TRANS_TO_PAUSE, "TRANS_TO_PAUSE"},
+        {Action::ACTION_PENDING, "ACTION_PENDING"},
+        {Action::ACTION_BUTT, "ACTION_BUTT"}
+    };
+    return actionDesc.at(action);
+}
+
 State::State(StateId stateId, std::string name, PlayExecutor& executor)
     : stateId_(stateId), name_(std::move(name)), executor_(executor)
 {
@@ -140,8 +184,8 @@ std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin:
         default:
             break;
     }
-    MEDIA_LOG_D("DispatchIntent " PUBLIC_LOG_S ", curState: " PUBLIC_LOG_S ", nextState: " PUBLIC_LOG_S,
-                intentDesc_.at(intent).c_str(), name_.c_str(), actionDesc_.at(nextAction).c_str());
+    MEDIA_LOG_D("DispatchIntent " PUBLIC_LOG_S ", curState: " PUBLIC_LOG_S ", action: " PUBLIC_LOG_S,
+                GetIntentName(intent), name_.c_str(), GetActionName(nextAction));
     return {rtv, nextAction};
 }
 } // namespace Media

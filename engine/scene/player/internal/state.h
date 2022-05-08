@@ -82,29 +82,16 @@ public:
     virtual std::tuple<ErrorCode, Action> OnError(const Plugin::Any& param) final;
     virtual std::tuple<ErrorCode, Action> OnComplete();
 
+    static const char* GetStateName(StateId state);
+    static const char* GetIntentName(Intent intent);
+    static const char* GetActionName(Action action);
+
 protected:
     std::tuple<ErrorCode, Action> DispatchIntent(Intent intent, const Plugin::Any& param);
 
     const StateId stateId_;
     const std::string name_;
     PlayExecutor& executor_;
-    const std::map<Intent, std::string> intentDesc_ = {{Intent::SET_SOURCE, "SET_SOURCE"},
-                                                       {Intent::PREPARE, "PREPARE"},
-                                                       {Intent::SEEK, "SEEK"},
-                                                       {Intent::PLAY, "PLAY"},
-                                                       {Intent::PAUSE, "PAUSE"},
-                                                       {Intent::RESUME, "RESUME"},
-                                                       {Intent::STOP, "STOP"},
-                                                       {Intent::SET_ATTRIBUTE, "SET_ATTRIBUTE"},
-                                                       {Intent::NOTIFY_READY, "NOTIFY_READY"},
-                                                       {Intent::NOTIFY_COMPLETE, "NOTIFY_COMPLETE"},
-                                                       {Intent::NOTIFY_ERROR, "NOTIFY_ERROR"},
-                                                       {Intent::INTENT_BUTT, "INTENT_BUTT"}};
-    const std::map<Action, std::string> actionDesc_ = {
-        {Action::TRANS_TO_INIT, "TRANS_TO_INIT"},   {Action::TRANS_TO_PREPARING, "TRANS_TO_PREPARING"},
-        {Action::TRANS_TO_READY, "TRANS_TO_READY"}, {Action::TRANS_TO_PLAYING, "TRANS_TO_PLAYING"},
-        {Action::TRANS_TO_PAUSE, "TRANS_TO_PAUSE"}, {Action::ACTION_PENDING, "ACTION_PENDING"},
-        {Action::ACTION_BUTT, "ACTION_BUTT"}};
 };
 } // namespace Media
 } // namespace OHOS
