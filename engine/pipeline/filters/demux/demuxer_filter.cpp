@@ -190,6 +190,7 @@ ErrorCode DemuxerFilter::Prepare()
     MEDIA_LOG_I("Prepare called");
     DUMP_BUFFER2FILE_PREPARE();
 
+    dataPacker_->Flush();
     pluginState_ = DemuxerState::DEMUXER_STATE_NULL;
     task_->RegisterHandler([this] { DemuxerLoop(); });
     Pipeline::WorkMode mode;
@@ -297,14 +298,10 @@ bool DemuxerFilter::InitPlugin(std::string pluginName)
         return false;
     }
     if (pluginName_ != pluginName) {
-        if (!CreatePlugin(std::move(pluginName))) {
-            return false;
-        }
+        FALSE_RETURN_V(CreatePlugin(std::move(pluginName)), false);
     } else {
         if (plugin_->Reset() != Plugin::Status::OK) {
-            if (!CreatePlugin(std::move(pluginName))) {
-                return false;
-            }
+            FALSE_RETURN_V(CreatePlugin(std::move(pluginName)), false);
         }
     }
     MEDIA_LOG_I("InitPlugin, " PUBLIC_LOG_S " used.", pluginName_.c_str());
@@ -358,7 +355,10 @@ void DemuxerFilter::ActivatePullMode()
         return false;
     };
     typeFinder_->Init(uriSuffix_, mediaDataSize_, checkRange_, peekRange_);
-    MediaTypeFound(typeFinder_->FindMediaType());
+    std::string type = typeFinder_->FindMediaType();
+    MEDIA_LOG_I("FindMediaType result : type : " PUBLIC_LOG_S ", uriSuffix_ : " PUBLIC_LOG_S ", mediaDataSize_ : "
+        PUBLIC_LOG_D64, type.c_str(), uriSuffix_.c_str(), mediaDataSize_);
+    MediaTypeFound(std::move(type));
 }
 
 void DemuxerFilter::ActivatePushMode()

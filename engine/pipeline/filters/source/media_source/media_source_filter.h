@@ -65,6 +65,7 @@ private:
                            Plugin::PluginManager& manager);
     ErrorCode FindPlugin(const std::shared_ptr<MediaSource>& source);
     void OnEvent(const Plugin::PluginEvent &event) override;
+    void ClearData();
 
     std::shared_ptr<OSAL::Task> taskPtr_;
     std::string protocol_;

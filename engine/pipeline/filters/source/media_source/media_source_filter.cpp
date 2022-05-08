@@ -19,6 +19,7 @@
 #include "common/plugin_utils.h"
 #include "compatible_check.h"
 #include "factory/filter_factory.h"
+#include "filters/common/dump_buffer.h"
 #include "pipeline/core/type_define.h"
 #include "plugin/interface/source_plugin.h"
 #include "plugin/core/plugin_meta.h"
@@ -66,6 +67,17 @@ MediaSourceFilter::~MediaSourceFilter()
     }
 }
 
+void MediaSourceFilter::ClearData()
+{
+    protocol_.clear();
+    uri_.clear();
+    isSeekable_ = false;
+    position_ = 0;
+    mediaOffset_ = 0;
+    isPluginReady_ = false;
+    isAboveWaterline_ = false;
+}
+
 ErrorCode MediaSourceFilter::SetSource(const std::shared_ptr<MediaSource>& source)
 {
     MEDIA_LOG_I("SetSource entered.");
@@ -73,7 +85,7 @@ ErrorCode MediaSourceFilter::SetSource(const std::shared_ptr<MediaSource>& sourc
         MEDIA_LOG_E("Invalid source");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    protocol_.clear();
+    ClearData();
     ErrorCode err = FindPlugin(source);
     if (err != ErrorCode::SUCCESS) {
         return err;
@@ -186,6 +198,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
         }
     }
     err = TranslatePluginStatus(plugin_->Read(data, readSize));
+    DUMP_BUFFER2LOG("Source PullData", data, offset);
     if (err == ErrorCode::SUCCESS) {
         position_ += data->GetMemory()->GetSize();
     }

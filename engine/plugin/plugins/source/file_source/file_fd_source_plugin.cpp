@@ -160,6 +160,9 @@ Status FileFdSourcePlugin::ParseUriInfo(const std::string& uri)
     }
     position_ = offset_;
     isSeekable_ = OSAL::FileSystem::IsSeekable(fd_);
+    if (isSeekable_) {
+        NOK_LOG(SeekTo(offset_));
+    }
     MEDIA_LOG_D("fd: " PUBLIC_LOG_D32 ", offset: " PUBLIC_LOG_D64 ", size: " PUBLIC_LOG_D64, fd_, offset_, size_);
     return Status::OK;
 }
