@@ -72,7 +72,8 @@ ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param)
     if (!intentSync_.WaitFor(
         intent, [this, intent, param] { return SendEventAsync(intent, param) == ErrorCode::SUCCESS; },
         timeoutMs, errorCode)) {
-        MEDIA_LOG_E("SendEvent timeout, intent: " PUBLIC_LOG_D32, static_cast<int>(intent));
+        MEDIA_LOG_E("SendEvent timeout, intent: " PUBLIC_LOG_S " - " PUBLIC_LOG_D32,
+                    State::GetIntentName(intent), static_cast<int>(intent));
     }
     return errorCode;
 }
@@ -84,7 +85,8 @@ ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param) 
 
 ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param)
 {
-    MEDIA_LOG_D("SendEventAsync, intent: " PUBLIC_LOG_D32, static_cast<int>(intent));
+    MEDIA_LOG_D("SendEventAsync, intent: " PUBLIC_LOG_S " - " PUBLIC_LOG_D32,
+                State::GetIntentName(intent), static_cast<int>(intent));
     if (jobs_.Push([this, intent, param]() -> Action { return ProcessIntent(intent, param); })) {
         return ErrorCode::SUCCESS;
     }
@@ -93,10 +95,10 @@ ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param)
 
 Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
 {
-    MEDIA_LOG_D("ProcessIntent, curState: " PUBLIC_LOG_S ", intent: " PUBLIC_LOG_D32,
-                curState_->GetName().c_str(), intent);
-    PROFILE_BEGIN("ProcessIntent, curState: " PUBLIC_LOG_S ", intent: " PUBLIC_LOG_D32,
-                  curState_->GetName().c_str(), intent);
+    MEDIA_LOG_D("ProcessIntent, curState: " PUBLIC_LOG_S ", intent: " PUBLIC_LOG_S,
+                curState_->GetName().c_str(), State::GetIntentName(intent));
+    PROFILE_BEGIN("ProcessIntent, curState: " PUBLIC_LOG_S ", intent: " PUBLIC_LOG_S,
+                  curState_->GetName().c_str(), State::GetIntentName(intent));
     OSAL::ScopedLock lock(mutex_);
     lastIntent = intent;
     ErrorCode rtv = ErrorCode::SUCCESS;
@@ -110,8 +112,8 @@ Action StateMachine::ProcessIntent(Intent intent, const Plugin::Any& param)
         }
     }
     OnIntentExecuted(intent, nextAction, rtv);
-    PROFILE_END("ProcessIntent, curState: " PUBLIC_LOG_S ", intent: " PUBLIC_LOG_D32,
-                curState_->GetName().c_str(), intent);
+    PROFILE_END("ProcessIntent, curState: " PUBLIC_LOG_S ", intent: " PUBLIC_LOG_S,
+                curState_->GetName().c_str(), State::GetIntentName(intent));
     return (rtv == ErrorCode::SUCCESS) ? nextAction : Action::ACTION_BUTT;
 }
 
@@ -190,7 +192,7 @@ ErrorCode StateMachine::ProcAction(Action nextAction)
 ErrorCode StateMachine::TransitionTo(const std::shared_ptr<State>& state)
 {
     if (state == nullptr) {
-        MEDIA_LOG_E("TransitionTo, nullptr for state");
+        MEDIA_LOG_E("TransitionTo, state is nullptr");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     ErrorCode rtv = ErrorCode::SUCCESS;
@@ -211,9 +213,9 @@ ErrorCode StateMachine::TransitionTo(const std::shared_ptr<State>& state)
 
 void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode result)
 {
-    MEDIA_LOG_D("OnIntentExecuted, curState: " PUBLIC_LOG_S ", intent: " PUBLIC_LOG_D32 ", action: " PUBLIC_LOG
-                "d, result: " PUBLIC_LOG_D32, curState_->GetName().c_str(),
-                static_cast<int>(intent), static_cast<int>(action), static_cast<int>(result));
+    MEDIA_LOG_D("OnIntentExecuted, curState: " PUBLIC_LOG_S ", intent: " PUBLIC_LOG_S ", action: " PUBLIC_LOG_S
+                ", result: " PUBLIC_LOG_S, curState_->GetName().c_str(),
+                State::GetIntentName(intent), State::GetActionName(action), GetErrorName(result));
     if (action == Action::ACTION_PENDING) {
         return;
     }
