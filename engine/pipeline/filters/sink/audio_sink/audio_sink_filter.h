@@ -75,6 +75,7 @@ private:
     ErrorCode SetPluginParameter(Tag tag, const Plugin::ValueType& value);
     ErrorCode ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta);
     void ReportCurrentPosition(int64_t pts);
+    ErrorCode SetVolumeToPlugin();
 
     ErrorCode UpdateLatestPts(int64_t pts);
     int64_t latestPts_ {0};
@@ -87,6 +88,7 @@ private:
     OSAL::Mutex mutex_ {};
 
     std::shared_ptr<Plugin::AudioSink> plugin_ {};
+    float volume_ {0.f};
 };
 } // namespace Pipeline
 } // namespace Media

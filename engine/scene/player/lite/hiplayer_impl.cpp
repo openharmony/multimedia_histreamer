@@ -445,12 +445,6 @@ ErrorCode HiPlayerImpl::DoOnReady()
 ErrorCode HiPlayerImpl::DoOnComplete()
 {
     MEDIA_LOG_W("OnComplete looping: " PUBLIC_LOG_D32 ".", singleLoop_.load());
-    if (!singleLoop_) {
-        FAIL_LOG(fsm_.SendEventAsync(Intent::PAUSE));
-        FAIL_LOG(fsm_.SendEventAsync(Intent::SEEK, SeekInfo{0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC}));
-    } else {
-        fsm_.SendEventAsync(Intent::SEEK, SeekInfo{0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC});
-    }
     auto ptr = callback_.lock();
     FALSE_RETURN_V_MSG(ptr != nullptr, ErrorCode::SUCCESS, "Player callback not exist.");
     ptr->OnPlaybackComplete();
@@ -477,6 +471,12 @@ int32_t HiPlayerImpl::SetLoop(bool loop)
 {
     singleLoop_ = loop;
     return CppExt::to_underlying(ErrorCode::SUCCESS);
+}
+
+bool HiPlayerImpl::IsSingleLoop()
+{
+    // note that we should also consider the live source, which cannot be singleLoop!
+    return singleLoop_;
 }
 
 void HiPlayerImpl::SetPlayerCallback(const std::shared_ptr<PlayerCallback>& cb)

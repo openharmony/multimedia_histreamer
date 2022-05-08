@@ -53,6 +53,9 @@ PlayerStates TransStateId2PlayerState(StateId state)
 {
     PlayerStates playerState = PLAYER_STATE_ERROR;
     switch (state) {
+        case StateId::IDLE:
+            playerState = PLAYER_IDLE;
+            break;
         case StateId::INIT:
             playerState = PLAYER_INITIALIZED;
             break;
@@ -67,6 +70,12 @@ PlayerStates TransStateId2PlayerState(StateId state)
             break;
         case StateId::PLAYING:
             playerState = PLAYER_STARTED;
+            break;
+        case StateId::STOPPED:
+            playerState = PLAYER_STOPPED;
+            break;
+        case StateId::EOS:
+            playerState = PLAYER_PLAYBACK_COMPLETE;
             break;
         default:
             break;
@@ -86,6 +95,29 @@ Plugin::SeekMode Transform2SeekMode(PlayerSeekMode mode)
         case PlayerSeekMode::SEEK_CLOSEST:
             return Plugin::SeekMode::SEEK_CLOSEST;
     }
+}
+const std::string& StringnessPlayerState(PlayerStates state)
+{
+    using StateString = std::pair<PlayerStates, std::string>;
+    const static std::array<StateString, 9> maps = { // array size
+        std::make_pair(PlayerStates::PLAYER_STATE_ERROR, "state error"),
+        std::make_pair(PlayerStates::PLAYER_IDLE, "idle"),
+        std::make_pair(PlayerStates::PLAYER_INITIALIZED, "init"),
+        std::make_pair(PlayerStates::PLAYER_PREPARING, "preparing"),
+        std::make_pair(PlayerStates::PLAYER_PREPARED, "prepared"),
+        std::make_pair(PlayerStates::PLAYER_STARTED, "started"),
+        std::make_pair(PlayerStates::PLAYER_PAUSED, "paused"),
+        std::make_pair(PlayerStates::PLAYER_STOPPED, "stopped"),
+        std::make_pair(PlayerStates::PLAYER_PLAYBACK_COMPLETE, "completed"),
+    };
+    const static std::string unknown = "unknown";
+    auto ite = std::find_if(maps.begin(), maps.end(), [&] (const StateString& item) -> bool {
+        return item.first == state;
+    });
+    if (ite == maps.end()) {
+        return unknown;
+    }
+    return ite->second;
 }
 }  // namespace Media
 }  // namespace OHOS

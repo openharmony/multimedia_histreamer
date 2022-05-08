@@ -37,8 +37,7 @@ using namespace Pipeline;
 
 HiPlayerImpl::HiPlayerImpl()
     : fsm_(*this),
-      curFsmState_(StateId::INIT),
-      pipelineStates_(PlayerStates::PLAYER_IDLE),
+      curFsmState_(StateId::IDLE),
       volume_(-1.0f),
       errorCode_(ErrorCode::SUCCESS),
       mediaStats_()
@@ -75,9 +74,24 @@ HiPlayerImpl::HiPlayerImpl()
 HiPlayerImpl::~HiPlayerImpl()
 {
     MEDIA_LOG_I("dtor called.");
-    fsm_.SendEventAsync(Intent::STOP, {});
+    fsm_.SendEventAsync(Intent::STOP);
     fsm_.Stop();
     ClockManager::Instance().ClearProviders();
+}
+void HiPlayerImpl::UpdateStateNoLock(PlayerStates newState, bool notifyUpward)
+{
+    if (pipelineStates_ == newState) {
+        return;
+    }
+    pipelineStates_ = newState;
+    if (notifyUpward) {
+        auto ptr = obs_.lock();
+        if (ptr != nullptr) {
+            Format format;
+            MEDIA_LOG_I("State change to : " PUBLIC_LOG_S, StringnessPlayerState(pipelineStates_.load()).c_str());
+            ptr->OnInfo(INFO_TYPE_STATE_CHANGE, pipelineStates_, format);
+        }
+    }
 }
 
 ErrorCode HiPlayerImpl::Init()
@@ -94,16 +108,14 @@ ErrorCode HiPlayerImpl::Init()
         ret = pipeline_->LinkFilters({audioSource_.get(), demuxer_.get()});
     }
     if (ret == ErrorCode::SUCCESS) {
-        pipelineStates_ = PlayerStates::PLAYER_INITIALIZED;
         fsm_.SetStateCallback(this);
         fsm_.Start();
         initialized_ = true;
     } else {
         pipeline_->UnlinkPrevFilters();
         pipeline_->RemoveFilterChain(audioSource_.get());
-        pipelineStates_ = PlayerStates::PLAYER_STATE_ERROR;
+        UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }
-    ReportStateChanged();
     return ret;
 }
 
@@ -218,19 +230,25 @@ int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
         MEDIA_LOG_E("volume not valid, should be in range [0,100]");
         return TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }
+    float volume = 0.0f;
     if (leftVolume < 1e-6 && rightVolume >= 1e-6) {  // 1e-6
-        volume_ = rightVolume;
+        volume = rightVolume;
     } else if (rightVolume < 1e-6 && leftVolume >= 1e-6) {  // 1e-6
-        volume_ = leftVolume;
+        volume = leftVolume;
     } else {
-        volume_ = (leftVolume + rightVolume) / 2;  // 2
+        volume = (leftVolume + rightVolume) / 2;  // 2
     }
-    volume_ /= MAX_MEDIA_VOLUME;  // normalize to 0~1
-    PlayerStates states = pipelineStates_.load();
-    if (states != Media::PlayerStates::PLAYER_STARTED) {
+    volume /= MAX_MEDIA_VOLUME;  // normalize to 0~1
+    if (pipelineStates_ == PlayerStates::PLAYER_STOPPED) {
+        return TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION);
+    }
+    volume_ = volume;
+    if (pipelineStates_ == PlayerStates::PLAYER_IDLE || pipelineStates_ == PlayerStates::PLAYER_INITIALIZED ||
+        pipelineStates_ == PlayerStates::PLAYER_PREPARING || audioSink_ == nullptr) {
+        MEDIA_LOG_W("cannot set volume, will do this onReady");
         return TransErrorCode(ErrorCode::SUCCESS);
     }
-    return TransErrorCode(SetVolume(volume_));
+    return TransErrorCode(SetVolumeToSink(volume));
 }
 
 int32_t HiPlayerImpl::SetVideoSurface(sptr<Surface> surface)
@@ -341,11 +359,8 @@ void HiPlayerImpl::OnEvent(const Event& event)
 ErrorCode HiPlayerImpl::DoSetSource(const std::shared_ptr<MediaSource>& source)
 {
     auto ret = audioSource_->SetSource(source);
-    if (ret == ErrorCode::SUCCESS) {
-        pipelineStates_ = PlayerStates::PLAYER_PREPARING;
-    } else {
-        pipelineStates_ = PlayerStates::PLAYER_STATE_ERROR;
-        ReportStateChanged();
+    if (ret != ErrorCode::SUCCESS) {
+        UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }
     return ret;
 }
@@ -353,24 +368,17 @@ ErrorCode HiPlayerImpl::DoSetSource(const std::shared_ptr<MediaSource>& source)
 ErrorCode HiPlayerImpl::PrepareFilters()
 {
     auto ret = pipeline_->Prepare();
-    if (ret == ErrorCode::SUCCESS) {
-        pipelineStates_ = PlayerStates::PLAYER_PREPARED;
-    } else {
-        pipelineStates_ = PlayerStates::PLAYER_STATE_ERROR;
-        ReportStateChanged();
+    if (ret != ErrorCode::SUCCESS) {
+        UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }
     return ret;
 }
 
 ErrorCode HiPlayerImpl::DoPlay()
 {
-    (void)SetVolume(volume_);
     auto ret = pipeline_->Start();
-    if (ret == ErrorCode::SUCCESS) {
-        pipelineStates_ = PlayerStates::PLAYER_STARTED;
-    } else {
-        pipelineStates_ = PlayerStates::PLAYER_STATE_ERROR;
-        ReportStateChanged();
+    if (ret != ErrorCode::SUCCESS) {
+        UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }
     return ret;
 }
@@ -378,24 +386,17 @@ ErrorCode HiPlayerImpl::DoPlay()
 ErrorCode HiPlayerImpl::DoPause()
 {
     auto ret = pipeline_->Pause();
-    if (ret == ErrorCode::SUCCESS) {
-        pipelineStates_ = PlayerStates::PLAYER_PAUSED;
-    } else {
-        pipelineStates_ = PlayerStates::PLAYER_STATE_ERROR;
-        ReportStateChanged();
+    if (ret != ErrorCode::SUCCESS) {
+        UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }
     return ret;
 }
 
 ErrorCode HiPlayerImpl::DoResume()
 {
-    (void)SetVolume(volume_);
     auto ret = pipeline_->Resume();
-    if (ret == ErrorCode::SUCCESS) {
-        pipelineStates_ = PlayerStates::PLAYER_STARTED;
-    } else {
-        pipelineStates_ = PlayerStates::PLAYER_STATE_ERROR;
-        ReportStateChanged();
+    if (ret != ErrorCode::SUCCESS) {
+        UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }
     return ret;
 }
@@ -404,13 +405,15 @@ ErrorCode HiPlayerImpl::DoStop()
 {
     mediaStats_.Reset();
     auto ret = pipeline_->Stop();
-    if (ret == ErrorCode::SUCCESS) {
-        pipelineStates_ = PlayerStates::PLAYER_STOPPED;
-    } else {
-        pipelineStates_ = PlayerStates::PLAYER_STATE_ERROR;
-        ReportStateChanged();
+    if (ret != ErrorCode::SUCCESS) {
+        UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }
     return ret;
+}
+
+ErrorCode HiPlayerImpl::DoReset()
+{
+    return DoStop();
 }
 
 ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode)
@@ -445,37 +448,34 @@ ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode m
     return rtv;
 }
 
-void HiPlayerImpl::ReportStateChanged()
-{
-    auto ptr = obs_.lock();
-    if (ptr != nullptr) {
-        Format format;
-        MEDIA_LOG_I("State change to : " PUBLIC_LOG_D32, pipelineStates_.load());
-        ptr->OnInfo(INFO_TYPE_STATE_CHANGE, pipelineStates_, format);
-    }
-}
-
 ErrorCode HiPlayerImpl::DoOnReady()
 {
-    pipelineStates_ = PlayerStates::PLAYER_PREPARED;
-    sourceMeta_ = demuxer_->GetGlobalMetaInfo();
+    SetVolumeToSink(volume_, false); // do not report
+    auto tmpMeta = demuxer_->GetGlobalMetaInfo();
+    sourceMeta_ = tmpMeta;
+    uint64_t duration = 0;
+    bool found = false;
+    if (tmpMeta->GetUint64(Media::Plugin::MetaID::MEDIA_DURATION, duration)) {
+        found = true;
+    }
     streamMeta_.clear();
+    uint64_t tmp = 0;
     for (auto& streamMeta : demuxer_->GetStreamMetaInfo()) {
         streamMeta_.push_back(streamMeta);
+        if (streamMeta->GetUint64(Media::Plugin::MetaID::MEDIA_DURATION, tmp)) {
+            duration = std::max(duration, tmp);
+            found = true;
+        }
     }
-    ReportStateChanged();
+    if (found) {
+        duration_ = duration;
+    }
     return ErrorCode::SUCCESS;
 }
 
 ErrorCode HiPlayerImpl::DoOnComplete()
 {
     MEDIA_LOG_I("OnComplete looping: " PUBLIC_LOG_D32 ".", singleLoop_.load());
-    if (!singleLoop_) {
-        FAIL_LOG(fsm_.SendEventAsync(Intent::PAUSE));
-        FAIL_LOG(fsm_.SendEventAsync(Intent::SEEK, SeekInfo{0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC}));
-    } else {
-        fsm_.SendEventAsync(Intent::SEEK, SeekInfo{0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC});
-    }
     auto ptr = obs_.lock();
     if (ptr != nullptr) {
         Format format;
@@ -487,25 +487,19 @@ ErrorCode HiPlayerImpl::DoOnComplete()
 ErrorCode HiPlayerImpl::DoOnError(ErrorCode errorCode)
 {
     errorCode_ = errorCode;
-    pipelineStates_ = PlayerStates::PLAYER_STATE_ERROR;
+    UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     auto ptr = obs_.lock();
     if (ptr != nullptr) {
         ptr->OnError(PLAYER_ERROR, TransErrorCode(errorCode));
-        Format format;
-        ptr->OnInfo(INFO_TYPE_STATE_CHANGE, pipelineStates_, format);
     }
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode HiPlayerImpl::SetVolume(float volume)
+ErrorCode HiPlayerImpl::SetVolumeToSink(float volume, bool reportUpward)
 {
-    MEDIA_LOG_I("SetVolume entered.");
-    if (audioSink_ == nullptr) {
-        MEDIA_LOG_W("cannot set volume while audio sink filter is null");
-        return ErrorCode::ERROR_AGAIN;
-    }
+    MEDIA_LOG_I("SetVolumeToSink entered.");
     ErrorCode ret = ErrorCode::SUCCESS;
-    if (volume > 0) {
+    if (volume_ > 0) {
         MEDIA_LOG_I("set volume " PUBLIC_LOG_F, volume);
         ret = audioSink_->SetVolume(volume);
     }
@@ -514,7 +508,7 @@ ErrorCode HiPlayerImpl::SetVolume(float volume)
         if (ret != ErrorCode::SUCCESS) {
             MEDIA_LOG_E("SetVolume failed with error " PUBLIC_LOG_D32, static_cast<int>(ret));
             ptr->OnError(PLAYER_ERROR, TransErrorCode(ret));
-        } else {
+        } else if (reportUpward) {
             Format format;
             ptr->OnInfo(INFO_TYPE_VOLUME_CHANGE, volume, format);
         }
@@ -539,6 +533,12 @@ int32_t HiPlayerImpl::SetLooping(bool loop)
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 
+bool HiPlayerImpl::IsSingleLoop()
+{
+    // note that we should also consider the live source, which cannot be singleLoop!
+    return singleLoop_;
+}
+
 int32_t HiPlayerImpl::SetParameter(const Format& params)
 {
     MEDIA_LOG_I("SetParameter entered.");
@@ -555,12 +555,9 @@ int32_t HiPlayerImpl::SetObs(const std::weak_ptr<IPlayerEngineObs>& obs)
 int32_t HiPlayerImpl::Reset()
 {
     MEDIA_LOG_I("Reset entered.");
-    Stop();
-    pipelineStates_ = PlayerStates::PLAYER_IDLE;
     singleLoop_ = false;
     mediaStats_.Reset();
-    ReportStateChanged();
-    return TransErrorCode(ErrorCode::SUCCESS);
+    return TransErrorCode(fsm_.SendEvent(Intent::RESET));
 }
 
 int32_t HiPlayerImpl::GetCurrentTime(int32_t& currentPositionMs)
@@ -571,35 +568,21 @@ int32_t HiPlayerImpl::GetCurrentTime(int32_t& currentPositionMs)
 
 int32_t HiPlayerImpl::GetDuration(int32_t& durationMs)
 {
+    MEDIA_LOG_I("GetDuration entered.");
+    if (pipelineStates_ == PlayerStates::PLAYER_IDLE || pipelineStates_ == PlayerStates::PLAYER_PREPARING) {
+        return MSERR_INVALID_STATE;
+    }
+
     if (audioSource_ && !audioSource_->IsSeekable()) {
         durationMs = -1;
-        return TransErrorCode(ErrorCode::SUCCESS);
     }
-    uint64_t duration = 0;
-    auto sourceMeta = sourceMeta_.lock();
-    if (sourceMeta == nullptr) {
-        durationMs = 0;
-        return TransErrorCode(ErrorCode::ERROR_AGAIN);
+    if (duration_ < 0) {
+        MEDIA_LOG_W("no valid duration");
+        durationMs = -1;
     }
-    if (sourceMeta->GetUint64(Media::Plugin::MetaID::MEDIA_DURATION, duration)) {
-        durationMs = Plugin::HstTime2Ms(duration);
-        return TransErrorCode(ErrorCode::SUCCESS);
-    }
-    // use max stream duration as whole source duration if source meta does not contains the duration meta
-    uint64_t tmp = 0;
-    bool found = false;
-    for (const auto& streamMeta : streamMeta_) {
-        auto ptr = streamMeta.lock();
-        if (ptr != nullptr && ptr->GetUint64(Media::Plugin::MetaID::MEDIA_DURATION, tmp)) {
-            found = true;
-            duration = std::max(duration, tmp);
-        }
-    }
-    if (found) {
-        durationMs = Plugin::HstTime2Ms(duration);
-        return TransErrorCode(ErrorCode::SUCCESS);
-    }
-    return TransErrorCode(ErrorCode::ERROR_AGAIN);
+    durationMs = Plugin::HstTime2Ms(duration_);
+    MEDIA_LOG_I("GetDuration returned " PUBLIC_LOG_D32, durationMs);
+    return MSERR_OK;
 }
 
 int32_t HiPlayerImpl::SetPlaybackSpeed(PlaybackRateMode mode)
@@ -623,11 +606,8 @@ void HiPlayerImpl::OnStateChanged(StateId state)
         curFsmState_ = state;
         cond_.NotifyOne();
     }
-    auto ptr = obs_.lock();
-    if (ptr != nullptr) {
-        Format format;
-        ptr->OnInfo(INFO_TYPE_STATE_CHANGE, TransStateId2PlayerState(state), format);
-    }
+
+    UpdateStateNoLock(TransStateId2PlayerState(state));
 }
 
 ErrorCode HiPlayerImpl::OnCallback(const FilterCallbackType& type, Filter* filter, const Plugin::Any& parameter)

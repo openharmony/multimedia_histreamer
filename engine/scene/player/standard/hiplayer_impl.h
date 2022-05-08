@@ -85,12 +85,14 @@ public:
                          const Plugin::Any& parameter) override;
 
     // interface from PlayExecutor
+    bool IsSingleLoop() override;
     ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source) override;
     ErrorCode PrepareFilters() override;
     ErrorCode DoPlay() override;
     ErrorCode DoPause() override;
     ErrorCode DoResume() override;
     ErrorCode DoStop() override;
+    ErrorCode DoReset() override;
     ErrorCode DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode) override;
     ErrorCode DoOnReady() override;
     ErrorCode DoOnComplete() override;
@@ -98,7 +100,7 @@ public:
 
 private:
     ErrorCode StopAsync();
-    ErrorCode SetVolume(float volume);
+    ErrorCode SetVolumeToSink(float volume, bool reportUpward = true);
     Pipeline::PFilter CreateAudioDecoder(const std::string& desc);
     ErrorCode NewAudioPortFound(Pipeline::Filter* filter, const Plugin::Any& parameter);
 #ifdef VIDEO_SUPPORT
@@ -108,18 +110,19 @@ private:
     void ActiveFilters(const std::vector<Pipeline::Filter*>& filters);
     void HandleAudioProgressEvent(const Event& event);
     void HandlePluginErrorEvent(const Event& event);
-    void ReportStateChanged();
+    void UpdateStateNoLock(PlayerStates newState, bool notifyUpward = true);
 
     OSAL::Mutex stateMutex_ {};
     OSAL::ConditionVariable cond_ {};
     StateMachine fsm_;
     std::atomic<StateId> curFsmState_;
     std::shared_ptr<Pipeline::PipelineCore> pipeline_;
-    std::atomic<PlayerStates> pipelineStates_;
+    std::atomic<PlayerStates> pipelineStates_ {PlayerStates::PLAYER_IDLE}; // only update in UpdateStateNoLock()
     std::atomic<bool> initialized_ {false};
 
     std::weak_ptr<Plugin::Meta> sourceMeta_ {};
     std::vector<std::weak_ptr<Plugin::Meta>> streamMeta_ {};
+    int64_t duration_ {-1};
     std::atomic<bool> singleLoop_ {false};
     std::weak_ptr<IPlayerEngineObs> obs_ {};
     float volume_;

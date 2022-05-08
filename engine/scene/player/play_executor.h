@@ -35,6 +35,8 @@ public:
     {
     }
 
+    virtual bool IsSingleLoop() = 0;
+
     virtual ErrorCode PrepareFilters()
     {
         return ErrorCode::SUCCESS;
@@ -62,6 +64,11 @@ public:
     }
 
     virtual ErrorCode DoStop()
+    {
+        return ErrorCode::SUCCESS;
+    }
+
+    virtual ErrorCode DoReset()
     {
         return ErrorCode::SUCCESS;
     }
