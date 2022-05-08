@@ -236,7 +236,7 @@ bool FFmpegDemuxerPlugin::ConvertAVPacketToFrameInfo(const AVStream& avStream, c
     auto data = frameInfo.AllocMemory(allocator_, frameSize);
     if (data) {
         size_t writeSize = data->Write(pkt.data, frameSize);
-        FALSE_LOG_MSG(writeSize == frameSize, "Copy data failed.");
+        FALSE_LOG_MSG(writeSize == static_cast<size_t>(frameSize), "Copy data failed.");
     }
     return data != nullptr;
 }
@@ -544,8 +544,8 @@ int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource)
         AVProbeData probeData{"", buff.data(), static_cast<int>(bufferInfo->GetMemory()->GetSize()), ""};
         confidence = plugin->read_probe(&probeData);
     }
-    MEDIA_LOG_DD("Sniff: plugin pluginName = " PUBLIC_LOG_S ", probability = " PUBLIC_LOG_D32 " / 100 ...",
-                 plugin->name, confidence);
+    MEDIA_LOG_D("Sniff: plugin pluginName = " PUBLIC_LOG_S ", probability = " PUBLIC_LOG_D32 " / 100 ...",
+                plugin->name, confidence);
     return confidence;
 }
 

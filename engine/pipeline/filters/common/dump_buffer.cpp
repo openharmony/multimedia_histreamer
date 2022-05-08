@@ -30,7 +30,7 @@ namespace Media {
 namespace Pipeline {
 // Specify the dump file dir in BUILD.gn
 #ifndef DUMP_FILE_DIR
-#define DUMP_FILE_DIR ""
+#define DUMP_FILE_DIR "/data/local/tmp"
 #endif
 
 std::string GetDumpFileDir()
