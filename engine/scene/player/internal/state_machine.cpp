@@ -67,14 +67,12 @@ ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param) const
 
 ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param)
 {
-    MEDIA_LOG_D("SendEvent, intent: " PUBLIC_LOG_S " " PUBLIC_LOG_D32,
-                State::GetIntentName(intent), static_cast<int>(intent));
     constexpr int timeoutMs = 20000;
     ErrorCode errorCode = ErrorCode::ERROR_TIMED_OUT;
     if (!intentSync_.WaitFor(
         intent, [this, intent, param] { return SendEventAsync(intent, param) == ErrorCode::SUCCESS; },
         timeoutMs, errorCode)) {
-        MEDIA_LOG_E("SendEvent timeout, intent: " PUBLIC_LOG_S " " PUBLIC_LOG_D32,
+        MEDIA_LOG_E("SendEvent timeout, intent: " PUBLIC_LOG_S " - " PUBLIC_LOG_D32,
                     State::GetIntentName(intent), static_cast<int>(intent));
     }
     return errorCode;
@@ -87,7 +85,8 @@ ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param) 
 
 ErrorCode StateMachine::SendEventAsync(Intent intent, const Plugin::Any& param)
 {
-    MEDIA_LOG_D("SendEventAsync, intent: " PUBLIC_LOG_S, State::GetIntentName(intent));
+    MEDIA_LOG_D("SendEventAsync, intent: " PUBLIC_LOG_S " - " PUBLIC_LOG_D32,
+                State::GetIntentName(intent), static_cast<int>(intent));
     if (jobs_.Push([this, intent, param]() -> Action { return ProcessIntent(intent, param); })) {
         return ErrorCode::SUCCESS;
     }
