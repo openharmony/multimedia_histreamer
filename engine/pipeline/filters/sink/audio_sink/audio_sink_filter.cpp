@@ -127,7 +127,7 @@ bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
     }
-
+    SetVolumeToPlugin();
     auto err = ConfigureToPreparePlugin(upstreamMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("sink configure error");
@@ -281,16 +281,18 @@ void AudioSinkFilter::FlushEnd()
     plugin_->Resume();
     isFlushing = false;
 }
-
+ErrorCode AudioSinkFilter::SetVolumeToPlugin()
+{
+    if (plugin_ == nullptr) {
+        return ErrorCode::SUCCESS;
+    }
+    return TranslatePluginStatus(plugin_->SetVolume(volume_));
+}
 ErrorCode AudioSinkFilter::SetVolume(float volume)
 {
-    if (state_ != FilterState::READY && state_ != FilterState::RUNNING && state_ != FilterState::PAUSED) {
-        MEDIA_LOG_E("audio sink filter cannot set volume in state " PUBLIC_LOG_D32,
-                    static_cast<int32_t>(state_.load()));
-        return ErrorCode::ERROR_AGAIN;
-    }
+    volume_ = volume;
     MEDIA_LOG_I("set volume " PUBLIC_LOG ".3f", volume);
-    return TranslatePluginStatus(plugin_->SetVolume(volume));
+    return SetVolumeToPlugin();
 }
 
 ErrorCode AudioSinkFilter::UpdateLatestPts(int64_t pts)

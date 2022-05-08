@@ -16,23 +16,33 @@
 #define HST_LOG_TAG "StateMachine"
 
 #include "state_machine.h"
+#include "eos_state.h"
+#include "idle_state.h"
 #include "init_state.h"
 #include "utils/steady_clock.h"
 #include "osal/utils/util.h"
+#include "pause_state.h"
+#include "playing_state.h"
+#include "preparing_state.h"
+#include "ready_state.h"
+#include "stopped_state.h"
 
 namespace OHOS {
 namespace Media {
 StateMachine::StateMachine(PlayExecutor& executor)
     : Task("StateMachine"),
       intentSync_("fsmSync"),
-      curState_(std::make_shared<InitState>(StateId::INIT, executor)),
+      curState_(std::make_shared<IdleState>(StateId::IDLE, executor)),
       jobs_("StateMachineJobQue")
 {
     AddState(curState_);
+    AddState(std::make_shared<InitState>(StateId::INIT, executor));
     AddState(std::make_shared<PreparingState>(StateId::PREPARING, executor));
     AddState(std::make_shared<ReadyState>(StateId::READY, executor));
     AddState(std::make_shared<PlayingState>(StateId::PLAYING, executor));
     AddState(std::make_shared<PauseState>(StateId::PAUSE, executor));
+    AddState(std::make_shared<StoppedState>(StateId::STOPPED, executor));
+    AddState(std::make_shared<EosState>(StateId::EOS, executor));
 }
 
 void StateMachine::Stop()
@@ -133,11 +143,14 @@ void StateMachine::DoTask()
         case Action::ACTION_PENDING:
             pendingJobs_.push(job);
             break;
+        case Action::TRANS_TO_IDLE:
         case Action::TRANS_TO_INIT:
-        case Action::TRANS_TO_READY:
         case Action::TRANS_TO_PREPARING:
+        case Action::TRANS_TO_READY:
         case Action::TRANS_TO_PLAYING:
-        case Action::TRANS_TO_PAUSE: {
+        case Action::TRANS_TO_PAUSE:
+        case Action::TRANS_TO_STOPPED:
+        case Action::TRANS_TO_EOS: {
             if (!pendingJobs_.empty()) {
                 job = pendingJobs_.front();
                 pendingJobs_.pop();
@@ -164,6 +177,9 @@ ErrorCode StateMachine::ProcAction(Action nextAction)
 {
     std::shared_ptr<State> nextState = nullptr;
     switch (nextAction) {
+        case Action::TRANS_TO_IDLE:
+            nextState = states_[StateId::IDLE];
+            break;
         case Action::TRANS_TO_INIT:
             nextState = states_[StateId::INIT];
             break;
@@ -178,6 +194,12 @@ ErrorCode StateMachine::ProcAction(Action nextAction)
             break;
         case Action::TRANS_TO_PAUSE:
             nextState = states_[StateId::PAUSE];
+            break;
+        case Action::TRANS_TO_STOPPED:
+            nextState = states_[StateId::STOPPED];
+            break;
+        case Action::TRANS_TO_EOS:
+            nextState = states_[StateId::EOS];
             break;
         default:
             break;
@@ -223,11 +245,6 @@ void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode resu
         intentSync_.Notify(Intent::PLAY, result);
     } else {
         intentSync_.Notify(intent, result);
-    }
-    if (intent == Intent::STOP) {
-        MEDIA_LOG_I("OnIntentExecuted handle stop intent, stop state machine.");
-        jobs_.SetActive(false);
-        Task::StopAsync();
     }
 }
 } // namespace Media

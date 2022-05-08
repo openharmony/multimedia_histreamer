@@ -70,7 +70,7 @@ public:
     std::tuple<ErrorCode, Action> Stop() override
     {
         MEDIA_LOG_D("Stop called in pause state.");
-        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
+        return {ErrorCode::SUCCESS, Action::TRANS_TO_STOPPED};
     }
 };
 } // namespace Media

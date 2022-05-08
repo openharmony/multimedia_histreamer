@@ -32,7 +32,7 @@ public:
 
     ~PreparingState() override = default;
 
-    std::tuple<ErrorCode, Action> Prepare() override
+    std::tuple<ErrorCode, Action> Enter(Intent) override
     {
         Action nextAction = Action::ACTION_BUTT;
         auto rtv = executor_.PrepareFilters();
@@ -48,19 +48,9 @@ public:
         return {ErrorCode::SUCCESS, Action::ACTION_PENDING};
     }
 
-    std::tuple<ErrorCode, Action> Seek(const Plugin::Any& param) override
-    {
-        MEDIA_LOG_D("Seek in preparing state.");
-        std::tuple<ErrorCode, Action> err {ErrorCode::ERROR_INVALID_PARAMETER_TYPE, Action::ACTION_BUTT};
-        FALSE_RETURN_V(param.SameTypeWith(typeid(SeekInfo)), err);
-        auto info = Plugin::AnyCast<SeekInfo>(param);
-        auto ret = executor_.DoSeek(true, info.hstTime, info.mode);
-        return {ret, Action::ACTION_BUTT};
-    }
-
     std::tuple<ErrorCode, Action> Stop() override
     {
-        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
+        return {ErrorCode::SUCCESS, Action::TRANS_TO_STOPPED};
     }
 
     std::tuple<ErrorCode, Action> OnReady() override

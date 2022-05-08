@@ -24,13 +24,10 @@
 #include "osal/base/synchronizer.h"
 #include "osal/thread/mutex.h"
 #include "osal/thread/task.h"
-#include "pause_state.h"
 #include "pipeline/core/error_code.h"
 #include "play_executor.h"
-#include "playing_state.h"
 #include "plugin/common/any.h"
-#include "preparing_state.h"
-#include "ready_state.h"
+#include "state.h"
 #include "utils/blocking_queue.h"
 
 namespace OHOS {

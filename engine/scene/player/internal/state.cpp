@@ -24,11 +24,14 @@ namespace Media {
 const char* State::GetStateName(StateId state)
 {
     static const std::map<StateId, const char*> stateDesc = {
+        {StateId::IDLE, "IDLE"},
         {StateId::INIT, "INIT"},
         {StateId::PREPARING, "PREPARING"},
         {StateId::READY, "READY"},
         {StateId::PAUSE, "PAUSE"},
         {StateId::PLAYING, "PLAYING"},
+        {StateId::STOPPED, "STOPPED"},
+        {StateId::EOS, "EOS"},
         {StateId::BUTT, "BUTT"},
     };
     return stateDesc.at(state);
@@ -43,6 +46,7 @@ const char* State::GetIntentName(Intent intent)
         {Intent::PAUSE, "PAUSE"},
         {Intent::RESUME, "RESUME"},
         {Intent::STOP, "STOP"},
+        {Intent::RESET, "RESET"},
         {Intent::SET_ATTRIBUTE, "SET_ATTRIBUTE"},
         {Intent::NOTIFY_READY, "NOTIFY_READY"},
         {Intent::NOTIFY_COMPLETE, "NOTIFY_COMPLETE"},
@@ -54,11 +58,14 @@ const char* State::GetIntentName(Intent intent)
 const char* State::GetActionName(Action action)
 {
     static const std::map<Action, const char*> actionDesc = {
+        {Action::TRANS_TO_IDLE, "TRANS_TO_IDLE"},
         {Action::TRANS_TO_INIT, "TRANS_TO_INIT"},
         {Action::TRANS_TO_PREPARING, "TRANS_TO_PREPARING"},
         {Action::TRANS_TO_READY, "TRANS_TO_READY"},
         {Action::TRANS_TO_PLAYING, "TRANS_TO_PLAYING"},
         {Action::TRANS_TO_PAUSE, "TRANS_TO_PAUSE"},
+        {Action::TRANS_TO_STOPPED, "TRANS_TO_STOPPED"},
+        {Action::TRANS_TO_EOS, "TRANS_TO_EOS"},
         {Action::ACTION_PENDING, "ACTION_PENDING"},
         {Action::ACTION_BUTT, "ACTION_BUTT"}
     };
@@ -108,6 +115,12 @@ std::tuple<ErrorCode, Action> State::Stop()
 {
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
+
+std::tuple<ErrorCode, Action> State::Reset()
+{
+    return {ErrorCode::SUCCESS, Action::TRANS_TO_IDLE};
+}
+
 std::tuple<ErrorCode, Action> State::Pause()
 {
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
@@ -141,7 +154,7 @@ std::tuple<ErrorCode, Action> State::OnError(const Plugin::Any& param)
 }
 std::tuple<ErrorCode, Action> State::OnComplete()
 {
-    return {ErrorCode::SUCCESS, Action::ACTION_BUTT};
+    return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin::Any& param)
 {
@@ -168,6 +181,9 @@ std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin:
             break;
         case Intent::STOP:
             std::tie(rtv, nextAction) = Stop();
+            break;
+        case Intent::RESET:
+            std::tie(rtv, nextAction) = Reset();
             break;
         case Intent::SET_ATTRIBUTE:
             std::tie(rtv, nextAction) = SetAttribute();

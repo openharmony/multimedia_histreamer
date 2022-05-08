@@ -62,7 +62,7 @@ public:
     std::tuple<ErrorCode, Action> Stop() override
     {
         MEDIA_LOG_D("Stop in ready state.");
-        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
+        return {ErrorCode::SUCCESS, Action::TRANS_TO_STOPPED};
     }
 };
 } // namespace Media

@@ -66,13 +66,19 @@ public:
 
     std::tuple<ErrorCode, Action> Stop() override
     {
-        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
+        return {ErrorCode::SUCCESS, Action::TRANS_TO_STOPPED};
     }
 
     std::tuple<ErrorCode, Action> OnComplete() override
     {
         auto ret = executor_.DoOnComplete();
-        return {ret, Action::ACTION_BUTT};
+        if (executor_.IsSingleLoop()) {
+            MEDIA_LOG_I("will seeking to 0 and continue playing");
+            auto seekRes = executor_.DoSeek(true, 0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC);
+            return {seekRes, Action::ACTION_BUTT};
+        } else {
+            return {ret, Action::TRANS_TO_EOS};
+        }
     }
 };
 } // namespace Media

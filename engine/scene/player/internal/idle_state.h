@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_HIPLAYER_INIT_STATE_H
-#define HISTREAMER_HIPLAYER_INIT_STATE_H
-
-#include <memory>
-
-#include "foundation/log.h"
-#include "osal/thread/mutex.h"
-#include "pipeline/core/error_code.h"
-#include "play_executor.h"
+#ifndef HISTREAMER_HIPLAYER_IDLE_STATE_H
+#define HISTREAMER_HIPLAYER_IDLE_STATE_H
 #include "state.h"
-
 namespace OHOS {
 namespace Media {
-class InitState : public State {
+// idle --setSource--> init  anyState --reset--> idle
+class IdleState : public State {
 public:
-    explicit InitState(StateId stateId, PlayExecutor &executor) : State(stateId, "InitState", executor) {}
+    explicit IdleState(StateId stateId, PlayExecutor& executor) : State(stateId, "IdleState", executor) {}
 
-    ~InitState() override = default;
+    ~IdleState() override = default;
 
     std::tuple<ErrorCode, Action> SetSource(const Plugin::Any& param) override
     {
@@ -44,16 +37,11 @@ public:
         return {ret, action};
     }
 
-    std::tuple<ErrorCode, Action> Prepare() override
+    std::tuple<ErrorCode, Action> Enter(Intent) override
     {
-        return {ErrorCode::SUCCESS, Action::TRANS_TO_PREPARING};
-    }
-
-    std::tuple<ErrorCode, Action> Stop() override
-    {
-        return {ErrorCode::SUCCESS, Action::TRANS_TO_STOPPED};
+        return {executor_.DoReset(), Action::ACTION_BUTT};
     }
 };
 } // namespace Media
 } // namespace OHOS
-#endif
+#endif // HISTREAMER_HIPLAYER_IDLE_STATE_H

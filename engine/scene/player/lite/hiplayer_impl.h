@@ -122,6 +122,7 @@ public:
                          const Plugin::Any& parameter) override;
 
     // interface from PlayExecutor
+    bool IsSingleLoop() override;
     ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source) override;
     ErrorCode PrepareFilters() override;
     ErrorCode DoPlay() override;

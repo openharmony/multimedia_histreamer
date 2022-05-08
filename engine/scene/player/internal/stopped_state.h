@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_MEDIA_UTILS_H
-#define HISTREAMER_MEDIA_UTILS_H
-
-#include "i_player_engine.h"
-#include "pipeline/core/error_code.h"
-#include "scene/player/internal/state.h"
-
+#ifndef HISTREAMER_STOPPED_STATE_H
+#define HISTREAMER_STOPPED_STATE_H
+#include "state.h"
 namespace OHOS {
 namespace Media {
-int TransErrorCode(ErrorCode errorCode);
-PlayerStates TransStateId2PlayerState(StateId state);
-Plugin::SeekMode Transform2SeekMode(PlayerSeekMode mode);
-const std::string& StringnessPlayerState(PlayerStates state);
-}  // namespace Media
-}  // namespace OHOS
+class StoppedState : public State {
+public:
+    explicit StoppedState(StateId stateId, PlayExecutor& executor) : State(stateId, "StoppedState", executor) {}
 
-#endif  // HISTREAMER_MEDIA_UTILS_H
+    ~StoppedState() override = default;
+
+    std::tuple<ErrorCode, Action> Enter(Intent) override
+    {
+        return {executor_.DoStop(), Action::ACTION_BUTT};
+    }
+};
+} // namespace Media
+} // namespace OHOS
+#endif // HISTREAMER_STOPPED_STATE_H

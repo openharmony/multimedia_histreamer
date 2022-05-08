@@ -28,11 +28,14 @@
 namespace OHOS {
 namespace Media {
 enum class StateId {
-    INIT,
-    PREPARING,
-    READY,
-    PAUSE,
-    PLAYING,
+    IDLE = 0,
+    INIT = 1,
+    PREPARING = 2,
+    READY = 3,
+    PAUSE = 4,
+    PLAYING = 5,
+    STOPPED = 6,
+    EOS = 7,
     BUTT,
 };
 
@@ -44,6 +47,7 @@ enum class Intent {
     PAUSE,
     RESUME,
     STOP,
+    RESET,
     SET_ATTRIBUTE,
     NOTIFY_READY,
     NOTIFY_COMPLETE,
@@ -52,11 +56,14 @@ enum class Intent {
 };
 
 enum class Action {
+    TRANS_TO_IDLE,
     TRANS_TO_INIT,
     TRANS_TO_PREPARING,
     TRANS_TO_READY,
     TRANS_TO_PLAYING,
     TRANS_TO_PAUSE,
+    TRANS_TO_STOPPED,
+    TRANS_TO_EOS,
     ACTION_PENDING,
     ACTION_BUTT
 };
@@ -74,6 +81,7 @@ public:
     virtual std::tuple<ErrorCode, Action> Prepare();
     virtual std::tuple<ErrorCode, Action> Play();
     virtual std::tuple<ErrorCode, Action> Stop();
+    virtual std::tuple<ErrorCode, Action> Reset();
     virtual std::tuple<ErrorCode, Action> Pause();
     virtual std::tuple<ErrorCode, Action> Resume();
     virtual std::tuple<ErrorCode, Action> Seek(const Plugin::Any& param);
