@@ -568,20 +568,25 @@ int32_t HiPlayerImpl::GetCurrentTime(int32_t& currentPositionMs)
 
 int32_t HiPlayerImpl::GetDuration(int32_t& durationMs)
 {
-    MEDIA_LOG_I("GetDuration entered.");
-    if (pipelineStates_ == PlayerStates::PLAYER_IDLE || pipelineStates_ == PlayerStates::PLAYER_PREPARING) {
+    durationMs = 0;
+    if (pipelineStates_ == PlayerStates::PLAYER_IDLE || pipelineStates_ == PlayerStates::PLAYER_PREPARING ||
+        audioSource_ == nullptr) {
+        MEDIA_LOG_E("GetDuration, invalid state or audioSource_ is null. state: " PUBLIC_LOG_S,
+                    StringnessPlayerState(pipelineStates_).c_str());
         return MSERR_INVALID_STATE;
     }
 
-    if (audioSource_ && !audioSource_->IsSeekable()) {
+    if (!audioSource_->IsSeekable()) { // maybe wrong seekable status, it's default value is false.
         durationMs = -1;
+        MEDIA_LOG_DD("Source is not seekable");
+        return MSERR_OK;
     }
     if (duration_ < 0) {
         MEDIA_LOG_W("no valid duration");
-        durationMs = -1;
+        return MSERR_UNKNOWN;
     }
     durationMs = Plugin::HstTime2Ms(duration_);
-    MEDIA_LOG_I("GetDuration returned " PUBLIC_LOG_D32, durationMs);
+    MEDIA_LOG_DD("GetDuration returned " PUBLIC_LOG_D32, durationMs);
     return MSERR_OK;
 }
 
