@@ -50,12 +50,17 @@ public:
     MediaStatStub() = default;
     void Reset();
     void Append(MediaType mediaType);
+    void SetDuration(int64_t hstTime)
+    {
+        duration_ = hstTime;
+    }
     void ReceiveEvent(const EventType& eventType, int64_t param = 0);
     int64_t GetCurrentPosition();
     bool IsEventCompleteAllReceived();
 
 private:
-    std::vector<MediaStat> mediaStats;
+    std::vector<MediaStat> mediaStats_;
+    int64_t duration_;
 };
 } // Media
 } // OHOS

@@ -84,12 +84,25 @@ void HiPlayerImpl::UpdateStateNoLock(PlayerStates newState, bool notifyUpward)
         return;
     }
     pipelineStates_ = newState;
+    if (pipelineStates_ == PlayerStates::PLAYER_IDLE) {
+        MEDIA_LOG_W("do not report idle since audio player will report idle");
+        return;
+    }
     if (notifyUpward) {
         auto ptr = obs_.lock();
         if (ptr != nullptr) {
             Format format;
-            MEDIA_LOG_I("State change to : " PUBLIC_LOG_S, StringnessPlayerState(pipelineStates_.load()).c_str());
+            while (!pendingStates_.empty()) {
+                auto pendingState = pendingStates_.front();
+                pendingStates_.pop();
+                MEDIA_LOG_I("sending pending state change: " PUBLIC_LOG_S, StringnessPlayerState(pendingState).c_str());
+                ptr->OnInfo(INFO_TYPE_STATE_CHANGE, pendingState, format);
+            }
+            MEDIA_LOG_I("sending newest state change: " PUBLIC_LOG_S,
+                        StringnessPlayerState(pipelineStates_.load()).c_str());
             ptr->OnInfo(INFO_TYPE_STATE_CHANGE, pipelineStates_, format);
+        } else {
+            pendingStates_.push(newState);
         }
     }
 }
@@ -212,13 +225,14 @@ int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
                 mSeconds, static_cast<int32_t>(mode));
     int64_t hstTime = 0;
     int32_t durationMs = 0;
+    NZERO_RETURN(GetDuration(durationMs));
+    MEDIA_LOG_D("Seek durationMs : " PUBLIC_LOG_D32, durationMs);
+    if (mSeconds >= durationMs) { // if exceeds change to duration
+        mSeconds = durationMs;
+    }
     if (!Plugin::Ms2HstTime(mSeconds, hstTime)) {
         return TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }
-    NZERO_RETURN(GetDuration(durationMs));
-    MEDIA_LOG_I("Seek durationMs : " PUBLIC_LOG_D32, durationMs);
-    FALSE_RETURN_V_MSG_E(mSeconds <= durationMs, CppExt::to_underlying(ErrorCode::ERROR_INVALID_PARAMETER_VALUE),
-                         "mSeconds : " PUBLIC_LOG_D32 ", durationMs : " PUBLIC_LOG_D32, mSeconds, durationMs);
     auto smode = Transform2SeekMode(mode);
     return TransErrorCode(fsm_.SendEventAsync(Intent::SEEK, SeekInfo{hstTime, smode}));
 }
@@ -440,7 +454,7 @@ ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode m
             ptr->OnError(PLAYER_ERROR, TransErrorCode(rtv));
         } else {
             Format format;
-            int64_t currentPos = Plugin::HstTime2Ms(mediaStats_.GetCurrentPosition());
+            int64_t currentPos = Plugin::HstTime2Ms(hstTime);
             MEDIA_LOG_I("Seek done, currentPos : " PUBLIC_LOG_D64, currentPos);
             ptr->OnInfo(INFO_TYPE_SEEKDONE, static_cast<int32_t>(currentPos), format);
         }
@@ -469,6 +483,7 @@ ErrorCode HiPlayerImpl::DoOnReady()
     }
     if (found) {
         duration_ = duration;
+        mediaStats_.SetDuration(duration_);
     }
     return ErrorCode::SUCCESS;
 }
