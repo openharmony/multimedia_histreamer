@@ -286,6 +286,10 @@ ErrorCode AudioSinkFilter::SetVolumeToPlugin()
     if (plugin_ == nullptr) {
         return ErrorCode::SUCCESS;
     }
+    if (volume_ < 0) {
+        MEDIA_LOG_D("No need to set volume because upper layer hasn't set it.");
+        return ErrorCode::SUCCESS;
+    }
     return TranslatePluginStatus(plugin_->SetVolume(volume_));
 }
 ErrorCode AudioSinkFilter::SetVolume(float volume)

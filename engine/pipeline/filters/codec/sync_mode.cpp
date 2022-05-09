@@ -47,7 +47,7 @@ ErrorCode SyncMode::PushData(const std::string &inPort, const AVBufferPtr& buffe
     do {
         handleFrameRes = HandleFrame(buffer);
         while (FinishFrame() == ErrorCode::SUCCESS) {
-            MEDIA_LOG_D("finish frame");
+            MEDIA_LOG_DD("finish frame");
         }
         retryCnt++;
         if (retryCnt >= maxRetryCnt) { // if retry cnt exceeds we will drop this frame
@@ -76,7 +76,7 @@ void SyncMode::FlushEnd()
 
 ErrorCode SyncMode::HandleFrame(const std::shared_ptr<AVBuffer>& buffer)
 {
-    MEDIA_LOG_D("SyncMode HandleFrame called");
+    MEDIA_LOG_DD("SyncMode HandleFrame called");
     auto ret = TranslatePluginStatus(plugin_->QueueInputBuffer(buffer, 0));
     if (ret != ErrorCode::SUCCESS && ret != ErrorCode::ERROR_TIMED_OUT) {
         MEDIA_LOG_E("Queue input buffer to plugin fail: " PUBLIC_LOG_D32, CppExt::to_underlying(ret));
@@ -86,7 +86,7 @@ ErrorCode SyncMode::HandleFrame(const std::shared_ptr<AVBuffer>& buffer)
 
 ErrorCode SyncMode::FinishFrame()
 {
-    MEDIA_LOG_D("SyncMode begin finish frame");
+    MEDIA_LOG_DD("SyncMode begin finish frame");
     auto outBuffer = outBufPool_->AllocateAppendBufferNonBlocking();
     if (outBuffer == nullptr) {
         MEDIA_LOG_E("Get out buffer from buffer pool fail");
@@ -99,13 +99,13 @@ ErrorCode SyncMode::FinishFrame()
             MEDIA_LOG_E("Queue output buffer to plugin fail: " PUBLIC_LOG_D32, static_cast<int32_t>((status)));
         }
     }
-    MEDIA_LOG_D("SyncMode end finish frame");
+    MEDIA_LOG_DD("SyncMode end finish frame");
     return TranslatePluginStatus(status);
 }
 
 void SyncMode::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& buffer)
 {
-    MEDIA_LOG_D("begin");
+    MEDIA_LOG_DD("begin");
     FALSE_RETURN(buffer != nullptr);
 
     // push to port
@@ -118,7 +118,7 @@ void SyncMode::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& buffer)
     }
     // 释放buffer 如果没有被缓存使其回到buffer pool 如果被sink缓存 则从buffer pool拿其他的buffer
     std::const_pointer_cast<Plugin::Buffer>(buffer).reset();
-    MEDIA_LOG_D("end");
+    MEDIA_LOG_DD("end");
 }
 
 ErrorCode SyncMode::Prepare()

@@ -528,7 +528,7 @@ int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource)
     }
     auto plugin = g_pluginInputFormat[pluginName];
     if (!plugin || !plugin->read_probe) {
-        MEDIA_LOG_D("Sniff failed due to invalid plugin for " PUBLIC_LOG_S ".", pluginName.c_str());
+        MEDIA_LOG_DD("Sniff failed due to invalid plugin for " PUBLIC_LOG_S ".", pluginName.c_str());
         return 0;
     }
     size_t bufferSize = 4096;
@@ -544,8 +544,10 @@ int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource)
         AVProbeData probeData{"", buff.data(), static_cast<int>(bufferInfo->GetMemory()->GetSize()), ""};
         confidence = plugin->read_probe(&probeData);
     }
-    MEDIA_LOG_D("Sniff: plugin pluginName = " PUBLIC_LOG_S ", probability = " PUBLIC_LOG_D32 " / 100 ...",
-                plugin->name, confidence);
+    if (confidence > 0) {
+        MEDIA_LOG_I("Sniff: plugin pluginName = " PUBLIC_LOG_S ", probability = " PUBLIC_LOG_D32 " / 100 ...",
+                    plugin->name, confidence);
+    }
     return confidence;
 }
 

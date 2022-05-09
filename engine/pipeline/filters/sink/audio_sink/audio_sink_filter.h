@@ -88,7 +88,7 @@ private:
     OSAL::Mutex mutex_ {};
 
     std::shared_ptr<Plugin::AudioSink> plugin_ {};
-    float volume_ {1.0f}; // default max volume
+    float volume_ {-1.0f}; // default invalid value
 };
 } // namespace Pipeline
 } // namespace Media
