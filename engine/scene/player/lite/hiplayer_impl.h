@@ -36,6 +36,7 @@
 #include "pipeline/filters/codec/audio_decoder/audio_decoder_filter.h"
 #include "pipeline/filters/sink/audio_sink/audio_sink_filter.h"
 #include "play_executor.h"
+#include "scene/common/media_stat_stub.h"
 #include "scene/lite/hiplayer.h"
 
 namespace OHOS {
@@ -74,47 +75,21 @@ public:
     int32_t GetPlayerState(int32_t& state) override;
     int32_t GetCurrentPosition(int64_t& currentPositionMs) override;
     int32_t GetDuration(int64_t& outDurationMs) override;
-    int32_t GetVideoWidth(int32_t& videoWidth) override
-    {
-        return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
-    }
-    int32_t GetVideoHeight(int32_t& videoHeight) override
-    {
-        return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
-    }
-    int32_t SetPlaybackSpeed(float speed) override
-    {
-        return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
-    }
-    int32_t GetPlaybackSpeed(float& speed) override
-    {
-        return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
-    }
-    int32_t SetAudioStreamType(int32_t type) override
-    {
-        return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
-    }
-    void GetAudioStreamType(int32_t& type) override
-    {
-        type = -1;
-    }
-
-    int32_t SetParameter(const Format& params) override
-    {
-        return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
-    }
+    int32_t GetVideoWidth(int32_t& videoWidth) override;
+    int32_t GetVideoHeight(int32_t& videoHeight) override;
+    int32_t SetPlaybackSpeed(float speed) override;
+    int32_t GetPlaybackSpeed(float& speed) override;
+    int32_t SetAudioStreamType(int32_t type) override;
+    void GetAudioStreamType(int32_t& type) override;
+    int32_t SetParameter(const Format& params) override;
 
     void OnEvent(const Event& event) override;
-
-    ErrorCode Resume();
 
     ErrorCode SetBufferSize(size_t size);
 
     ErrorCode GetSourceMeta(std::shared_ptr<const Plugin::Meta>& meta) const;
     ErrorCode GetTrackCnt(size_t& cnt) const;
     ErrorCode GetTrackMeta(size_t id, std::shared_ptr<const Plugin::Meta>& meta) const;
-
-    ErrorCode SetVolume(float volume);
 
     void OnStateChanged(StateId state) override;
 
@@ -129,54 +104,21 @@ public:
     ErrorCode DoPause() override;
     ErrorCode DoResume() override;
     ErrorCode DoStop() override;
+    ErrorCode DoReset() override;
     ErrorCode DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode) override;
     ErrorCode DoOnReady() override;
     ErrorCode DoOnComplete() override;
     ErrorCode DoOnError(ErrorCode) override;
 
 private:
-    enum class MediaType : int32_t { AUDIO, VIDEO, BUTT };
-
+    PlayerStates TransStateId2PlayerState(StateId state);
+    const std::string& StringnessPlayerState(PlayerStates state);
     static Plugin::SeekMode Transform2SeekMode(PlayerSeekMode mode);
-
-    struct MediaStat {
-        MediaType mediaType {MediaType::BUTT};
-        std::atomic<int64_t> currentPositionMs {0};
-        std::atomic<bool> completeEventReceived {false};
-        explicit MediaStat(MediaType mediaType) : mediaType(mediaType)
-        {
-        }
-        MediaStat(const MediaStat& other) : mediaType(other.mediaType)
-        {
-            currentPositionMs = other.currentPositionMs.load();
-            completeEventReceived = other.completeEventReceived.load();
-        }
-        MediaStat& operator=(const MediaStat& other)
-        {
-            currentPositionMs = other.currentPositionMs.load();
-            completeEventReceived = other.completeEventReceived.load();
-            return *this;
-        }
-    };
-
-    class MediaStats {
-    public:
-        MediaStats() = default;
-        void Reset();
-        void Append(MediaType mediaType);
-        void ReceiveEvent(EventType eventType, int64_t param = 0);
-        int64_t GetCurrentPosition();
-        bool IsEventCompleteAllReceived();
-
-    private:
-        std::vector<MediaStat> mediaStats;
-    };
-
     HiPlayerImpl();
     HiPlayerImpl(const HiPlayerImpl& other);
     HiPlayerImpl& operator=(const HiPlayerImpl& other);
     ErrorCode StopAsync();
-
+    ErrorCode SetVolumeToSink(float volume, bool reportUpward = true);
     Pipeline::PFilter CreateAudioDecoder(const std::string& desc);
 
     ErrorCode NewAudioPortFound(Pipeline::Filter* filter, const Plugin::Any& parameter);
@@ -187,6 +129,9 @@ private:
     ErrorCode RemoveFilterChains(Pipeline::Filter* filter, const Plugin::Any& parameter);
 
     void ActiveFilters(const std::vector<Pipeline::Filter*>& filters);
+    void HandleAudioProgressEvent(const Event& event);
+    void HandlePluginErrorEvent(const Event& event);
+    void UpdateStateNoLock(PlayerStates newState, bool notifyUpward = true);
 
     OSAL::Mutex stateMutex_;
     OSAL::ConditionVariable cond_;
@@ -194,7 +139,7 @@ private:
     std::atomic<StateId> curFsmState_;
 
     std::shared_ptr<Pipeline::PipelineCore> pipeline_;
-    std::atomic<PlayerStates> pipelineStates_;
+    std::atomic<PlayerStates> pipelineStates_ {PlayerStates::PLAYER_IDLE}; // only update in UpdateStateNoLock()
     std::atomic<bool> initialized_ {false};
 
     std::shared_ptr<Pipeline::MediaSourceFilter> audioSource_;
@@ -211,12 +156,13 @@ private:
 
     std::weak_ptr<Plugin::Meta> sourceMeta_;
     std::vector<std::weak_ptr<Plugin::Meta>> streamMeta_;
+    int64_t duration_ {-1};
     std::atomic<bool> singleLoop_ {false};
 
     std::weak_ptr<PlayerCallback> callback_;
     float volume_;
     std::atomic<ErrorCode> errorCode_;
-    MediaStats mediaStats_;
+    MediaStatStub mediaStats_;
 };
 } // namespace Media
 } // namespace OHOS
