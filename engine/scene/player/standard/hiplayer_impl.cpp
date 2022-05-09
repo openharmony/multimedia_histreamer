@@ -454,7 +454,7 @@ ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode m
             ptr->OnError(PLAYER_ERROR, TransErrorCode(rtv));
         } else {
             Format format;
-            int64_t currentPos = Plugin::HstTime2Ms(mediaStats_.GetCurrentPosition());
+            int64_t currentPos = Plugin::HstTime2Ms(hstTime);
             MEDIA_LOG_I("Seek done, currentPos : " PUBLIC_LOG_D64, currentPos);
             ptr->OnInfo(INFO_TYPE_SEEKDONE, static_cast<int32_t>(currentPos), format);
         }
