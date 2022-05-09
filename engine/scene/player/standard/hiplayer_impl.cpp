@@ -84,12 +84,25 @@ void HiPlayerImpl::UpdateStateNoLock(PlayerStates newState, bool notifyUpward)
         return;
     }
     pipelineStates_ = newState;
+    if (pipelineStates_ == PlayerStates::PLAYER_IDLE) {
+        MEDIA_LOG_W("do not report idle since audio player will report idle");
+        return;
+    }
     if (notifyUpward) {
         auto ptr = obs_.lock();
         if (ptr != nullptr) {
             Format format;
-            MEDIA_LOG_I("State change to : " PUBLIC_LOG_S, StringnessPlayerState(pipelineStates_.load()).c_str());
+            while (!pendingStates_.empty()) {
+                auto pendingState = pendingStates_.front();
+                pendingStates_.pop();
+                MEDIA_LOG_I("sending pending state change: " PUBLIC_LOG_S, StringnessPlayerState(pendingState).c_str());
+                ptr->OnInfo(INFO_TYPE_STATE_CHANGE, pendingState, format);
+            }
+            MEDIA_LOG_I("sending newest state change: " PUBLIC_LOG_S,
+                        StringnessPlayerState(pipelineStates_.load()).c_str());
             ptr->OnInfo(INFO_TYPE_STATE_CHANGE, pipelineStates_, format);
+        } else {
+            pendingStates_.push(newState);
         }
     }
 }
