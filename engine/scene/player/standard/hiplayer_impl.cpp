@@ -38,7 +38,7 @@ using namespace Pipeline;
 HiPlayerImpl::HiPlayerImpl()
     : fsm_(*this),
       curFsmState_(StateId::IDLE),
-      volume_(-1.0f),
+      volume_(-1.0f), // default negative, if app not set, will not set it.
       errorCode_(ErrorCode::SUCCESS),
       mediaStats_()
 {
