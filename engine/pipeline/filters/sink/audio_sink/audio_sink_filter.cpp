@@ -179,7 +179,9 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
     DUMP_BUFFER2LOG("AudioSink Write", buffer, offset);
     auto err = TranslatePluginStatus(plugin_->Write(buffer));
     FAIL_LOG_MSG_W(err, "audio sink write failed");
-    ReportCurrentPosition(static_cast<int64_t>(buffer->pts));
+    if (!buffer->IsEmpty() && buffer->GetMemory()->GetSize() != 0) { // only update in valid buffer
+        ReportCurrentPosition(static_cast<int64_t>(buffer->pts));
+    }
     if ((buffer->flag & BUFFER_FLAG_EOS) != 0) {
         constexpr int waitTimeForPlaybackCompleteMs = 60;
         OHOS::Media::OSAL::SleepFor(waitTimeForPlaybackCompleteMs);

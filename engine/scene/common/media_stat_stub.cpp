@@ -24,24 +24,25 @@ namespace OHOS {
 namespace Media {
 void MediaStatStub::Reset()
 {
-    mediaStats.clear();
+    mediaStats_.clear();
+    duration_ = 0;
 }
 
 void MediaStatStub::Append(MediaType mediaType)
 {
-    for (auto& stat : mediaStats) {
+    for (auto& stat : mediaStats_) {
         if (stat.mediaType == mediaType) {
             return;
         }
     }
-    mediaStats.emplace_back(mediaType);
+    mediaStats_.emplace_back(mediaType);
 }
 
 void MediaStatStub::ReceiveEvent(const EventType& eventType, int64_t param)
 {
     switch (eventType) {
         case EventType::EVENT_COMPLETE:
-            for (auto& stat : mediaStats) {
+            for (auto& stat : mediaStats_) {
                 if (stat.mediaType == MediaType::AUDIO) {
                     stat.completeEventReceived = true;
                     break;
@@ -49,7 +50,7 @@ void MediaStatStub::ReceiveEvent(const EventType& eventType, int64_t param)
             }
             break;
         case EventType::EVENT_AUDIO_PROGRESS:
-            for (auto& stat : mediaStats) {
+            for (auto& stat : mediaStats_) {
                 if (stat.mediaType == MediaType::AUDIO) {
                     stat.currentPosition = param;
                     break;
@@ -66,7 +67,10 @@ void MediaStatStub::ReceiveEvent(const EventType& eventType, int64_t param)
 int64_t MediaStatStub::GetCurrentPosition()
 {
     int64_t currentPosition = 0;
-    for (const auto& stat : mediaStats) {
+    if (IsEventCompleteAllReceived()) {
+        return duration_;
+    }
+    for (const auto& stat : mediaStats_) {
         currentPosition = std::max(currentPosition, stat.currentPosition.load());
     }
     return currentPosition;
@@ -74,7 +78,7 @@ int64_t MediaStatStub::GetCurrentPosition()
 
 bool MediaStatStub::IsEventCompleteAllReceived()
 {
-    return std::all_of(mediaStats.begin(), mediaStats.end(), [](const MediaStat& stat) {
+    return std::all_of(mediaStats_.begin(), mediaStats_.end(), [](const MediaStat& stat) {
         return stat.completeEventReceived.load();
     });
 }

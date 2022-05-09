@@ -44,8 +44,6 @@ std::map<std::string, std::shared_ptr<AVInputFormat>> g_pluginInputFormat;
 int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource);
 
 Status RegisterPlugins(const std::shared_ptr<Register>& reg);
-
-int ConvertSeekModeToFFmpeg(SeekMode mode);
 } // namespace
 
 void* FFmpegDemuxerPlugin::DemuxerPluginAllocator::Alloc(size_t size)
@@ -279,7 +277,7 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mo
     auto avStream = formatContext_->streams[trackId];
     int64_t ffTime = ConvertTimeToFFmpeg(hstTime, avStream->time_base);
     if (avStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-        int keyFrameIdx = av_index_search_timestamp(avStream, ffTime, ConvertSeekModeToFFmpeg(mode));
+        int keyFrameIdx = av_index_search_timestamp(avStream, ffTime, AVSEEK_FLAG_BACKWARD);
         MEDIA_LOG_I("SeekTo " PUBLIC_LOG_D64 "ns, ffTime: " PUBLIC_LOG_D64 ", key frame index: "
                     PUBLIC_LOG_D32, hstTime, ffTime, keyFrameIdx);
         if (keyFrameIdx >= 0) {
@@ -295,7 +293,7 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mo
     auto newTime = ConvertTimeFromFFmpeg(ffTime, avStream->time_base);
     MEDIA_LOG_I("SeekTo " PUBLIC_LOG_U64 " / " PUBLIC_LOG_D64 ", ffTime: " PUBLIC_LOG_D64,
                 newTime, hstTime, ffTime);
-    auto rtv = av_seek_frame(formatContext_.get(), trackId, ffTime, ConvertSeekModeToFFmpeg(mode));
+    auto rtv = av_seek_frame(formatContext_.get(), trackId, ffTime, AVSEEK_FLAG_BACKWARD);
     if (rtv < 0) {
         MEDIA_LOG_E("seek failed, return value: " PUBLIC_LOG_D32, rtv);
     }
@@ -500,26 +498,6 @@ int64_t FFmpegDemuxerPlugin::AVSeek(void* opaque, int64_t offset, int whence) //
 }
 
 namespace {
-int ConvertSeekModeToFFmpeg(SeekMode mode)
-{
-    int seekFlag = AVSEEK_FLAG_BACKWARD;
-    switch (mode) {
-        case SeekMode::SEEK_PREVIOUS_SYNC:
-            seekFlag = AVSEEK_FLAG_BACKWARD;
-            break;
-        case SeekMode::SEEK_NEXT_SYNC:
-        case SeekMode::SEEK_CLOSEST_SYNC:
-        case SeekMode::SEEK_CLOSEST:
-            seekFlag = 0;
-            break;
-        default:
-            MEDIA_LOG_W("unsupported seekmode: " PUBLIC_LOG_D32 ", using backward mode instead.",
-                        static_cast<int>(mode));
-            break;
-    }
-    return seekFlag;
-}
-
 int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource)
 {
     if (pluginName.empty() || !dataSource) {

@@ -225,13 +225,14 @@ int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
                 mSeconds, static_cast<int32_t>(mode));
     int64_t hstTime = 0;
     int32_t durationMs = 0;
+    NZERO_RETURN(GetDuration(durationMs));
+    MEDIA_LOG_D("Seek durationMs : " PUBLIC_LOG_D32, durationMs);
+    if (mSeconds >= durationMs) { // if exceeds change to duration
+        mSeconds = durationMs;
+    }
     if (!Plugin::Ms2HstTime(mSeconds, hstTime)) {
         return TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }
-    NZERO_RETURN(GetDuration(durationMs));
-    MEDIA_LOG_I("Seek durationMs : " PUBLIC_LOG_D32, durationMs);
-    FALSE_RETURN_V_MSG_E(mSeconds <= durationMs, CppExt::to_underlying(ErrorCode::ERROR_INVALID_PARAMETER_VALUE),
-                         "mSeconds : " PUBLIC_LOG_D32 ", durationMs : " PUBLIC_LOG_D32, mSeconds, durationMs);
     auto smode = Transform2SeekMode(mode);
     return TransErrorCode(fsm_.SendEventAsync(Intent::SEEK, SeekInfo{hstTime, smode}));
 }
@@ -482,6 +483,7 @@ ErrorCode HiPlayerImpl::DoOnReady()
     }
     if (found) {
         duration_ = duration;
+        mediaStats_.SetDuration(duration_);
     }
     return ErrorCode::SUCCESS;
 }
