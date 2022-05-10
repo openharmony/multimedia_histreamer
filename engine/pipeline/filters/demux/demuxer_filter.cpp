@@ -189,13 +189,12 @@ ErrorCode DemuxerFilter::Prepare()
 {
     MEDIA_LOG_I("Prepare called");
     DUMP_BUFFER2FILE_PREPARE();
-
-    dataPacker_->Flush();
     pluginState_ = DemuxerState::DEMUXER_STATE_NULL;
     task_->RegisterHandler([this] { DemuxerLoop(); });
     Pipeline::WorkMode mode;
     GetInPort(PORT_NAME_DEFAULT)->Activate({Pipeline::WorkMode::PULL, Pipeline::WorkMode::PUSH}, mode);
     if (mode == Pipeline::WorkMode::PULL) {
+        dataPacker_->Flush();
         ActivatePullMode();
     } else {
         ActivatePushMode();

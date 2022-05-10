@@ -140,6 +140,7 @@ private:
 
     std::shared_ptr<Pipeline::PipelineCore> pipeline_;
     std::atomic<PlayerStates> pipelineStates_ {PlayerStates::PLAYER_IDLE}; // only update in UpdateStateNoLock()
+    std::queue<PlayerStates> pendingStates_ {};
     std::atomic<bool> initialized_ {false};
 
     std::shared_ptr<Pipeline::MediaSourceFilter> audioSource_;
