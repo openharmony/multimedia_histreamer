@@ -510,12 +510,40 @@ Status AudioFfmpegDecoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>&
     ioInfo->pts = static_cast<uint64_t>(cachedFrame_->pts);
     return Status::OK;
 }
-
+/*
+ Audio/Video Track is composed of multiple BufferGroups,
+ and BufferGroup is composed of multiple Buffers.
+ Each BufferGroup has a pts, it's the pts of the first buffer in group.
+ We should calculate the other buffer's pts.
+┌────────────────────────────────────────────┐
+│                                            │
+│         Audio / Video Track                │
+│                                            │
+├─────────────────────┬──────────────────────┤
+│                     │                      │
+│    BufferGroup      │   BufferGroup        │
+│                     │                      │
+├──────┬──────┬───────┼──────┬───────┬───────┤
+│      │      │       │      │       │       │
+│Buffer│Buffer│Buffer │Buffer│Buffer │Buffer │
+│      │      │       │      │       │       │
+└──────┴──────┴───────┴──────┴───────┴───────┘
+ */
 Status AudioFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffer>& ioInfo)
 {
     Status status;
     auto ret = avcodec_receive_frame(avCodecContext_.get(), cachedFrame_.get());
     if (ret >= 0) {
+        if (cachedFrame_->pts != AV_NOPTS_VALUE) {
+            preBufferGroupPts_ = curBufferGroupPts_;
+            curBufferGroupPts_ = cachedFrame_->pts;
+            bufferNum_ = bufferIndex_;
+            bufferIndex_ = 1;
+        } else {
+            bufferIndex_ ++;
+            cachedFrame_->pts = curBufferGroupPts_ + (curBufferGroupPts_ -preBufferGroupPts_) *
+                (bufferIndex_ - 1) / bufferNum_;
+        }
         MEDIA_LOG_DD("receive one frame");
         status = ReceiveFrameSucc(ioInfo);
     } else if (ret == AVERROR_EOF) {
