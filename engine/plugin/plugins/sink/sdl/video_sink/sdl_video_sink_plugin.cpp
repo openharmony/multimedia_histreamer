@@ -387,8 +387,8 @@ Status SdlVideoSinkPlugin::VideoImageDisaplay(const std::shared_ptr<Buffer>& inp
     auto ptr = bufferMem->GetReadOnlyData();
     data[0] = ptr;
     lineSize[0] = static_cast<int32_t>(videoMeta->stride[0]);
-    MEDIA_LOG_D("Display one frame: WHS[" PUBLIC_LOG_U32 "," PUBLIC_LOG_U32 "," PUBLIC_LOG_U32 "]",
-                pixelWidth_, pixelHeight_, lineSize[0]);
+    MEDIA_LOG_DD("Display one frame: WHS[" PUBLIC_LOG_U32 "," PUBLIC_LOG_U32 "," PUBLIC_LOG_U32 "]",
+                 pixelWidth_, pixelHeight_, lineSize[0]);
     if (IsFormatYUV()) {
         if (videoMeta->planes != 3) { // 3
             MEDIA_LOG_E("Invalid video buffer, planes: " PUBLIC_LOG_U32, videoMeta->planes);
@@ -496,7 +496,7 @@ bool SdlVideoSinkPlugin::HandleSdlEvent()
 
 Status SdlVideoSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
 {
-    MEDIA_LOG_D("SDL sink write begin");
+    MEDIA_LOG_DD("SDL sink write begin");
     if (inputInfo == nullptr || inputInfo->IsEmpty()) {
         return Status::OK;
     }

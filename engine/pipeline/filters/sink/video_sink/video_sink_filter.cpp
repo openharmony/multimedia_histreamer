@@ -283,14 +283,14 @@ bool VideoSinkFilter::DoSync(const AVBufferPtr& buffer)
     if (delta > 0) {
         tempOut = Plugin::HstTime2Ms(delta);
         if (tempOut > 100) { // 100ms
-            MEDIA_LOG_D("DoSync early " PUBLIC_LOG_D64 " ms, wait", tempOut);
+            MEDIA_LOG_DD("DoSync early " PUBLIC_LOG_D64 " ms, wait", tempOut);
             OHOS::Media::OSAL::SleepFor(tempOut);
             return true;
         }
     } else if (delta < 0) {
         tempOut = Plugin::HstTime2Ms(-delta);
         if (tempOut > 40) { // 40ms drop frame
-            MEDIA_LOG_D("DoSync later " PUBLIC_LOG_D64 " ms, drop", tempOut);
+            MEDIA_LOG_DD("DoSync later " PUBLIC_LOG_D64 " ms, drop", tempOut);
             return false;
         }
     }
@@ -299,7 +299,7 @@ bool VideoSinkFilter::DoSync(const AVBufferPtr& buffer)
 
 void VideoSinkFilter::RenderFrame()
 {
-    MEDIA_LOG_D("RenderFrame called");
+    MEDIA_LOG_DD("RenderFrame called");
     auto frameBuffer = inBufQueue_->Pop();
     if (frameBuffer == nullptr) {
         MEDIA_LOG_D("Video sink find nullptr in esBufferQ");
@@ -314,12 +314,12 @@ void VideoSinkFilter::RenderFrame()
         MEDIA_LOG_E("write to plugin fail: " PUBLIC_LOG_U32, err);
         return;
     }
-    MEDIA_LOG_D("RenderFrame success");
+    MEDIA_LOG_DD("RenderFrame success");
 }
 
 ErrorCode VideoSinkFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
-    MEDIA_LOG_D("video sink push data started, state_: " PUBLIC_LOG_D32, state_.load());
+    MEDIA_LOG_DD("video sink push data started, state_: " PUBLIC_LOG_D32, state_.load());
     frameCnt_++;
     if (isFlushing_ || state_.load() == FilterState::INITIALIZED) {
         MEDIA_LOG_I("video sink is flushing ignore this buffer");
@@ -350,13 +350,13 @@ ErrorCode VideoSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
         return ErrorCode::SUCCESS;
     }
     inBufQueue_->Push(buffer);
-    MEDIA_LOG_D("video sink push data end");
+    MEDIA_LOG_DD("video sink push data end");
     return ErrorCode::SUCCESS;
 }
 
 ErrorCode VideoSinkFilter::Start()
 {
-    MEDIA_LOG_D("start called");
+    MEDIA_LOG_DD("start called");
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED) {
         MEDIA_LOG_W("sink is not ready when start, state_: " PUBLIC_LOG_D32, state_.load());
         return ErrorCode::ERROR_INVALID_OPERATION;

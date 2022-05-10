@@ -386,7 +386,7 @@ void SdlAudioSinkPlugin::AudioCallback(void* userdata, uint8_t* stream, int len)
     }
     auto realLen = rb->ReadBuffer(mixCache_.data(), len);
     if (realLen == 0) {
-        MEDIA_LOG_D("sdl audio callback end with 0");
+        MEDIA_LOG_DD("sdl audio callback end with 0");
         return;
     }
     SDL_memset(stream, 0, len);

@@ -400,7 +400,7 @@ Status VideoFfmpegDecoderPlugin::Stop()
 Status VideoFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs)
 {
     outBufferQ_.Push(outputBuffer);
-    MEDIA_LOG_D("QueueOutputBuffer success");
+    MEDIA_LOG_DD("QueueOutputBuffer success");
     return Status::OK;
 }
 
@@ -425,7 +425,7 @@ Status VideoFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
         ret = SendBufferLocked(inputBuffer);
     }
     NotifyInputBufferDone(inputBuffer);
-    MEDIA_LOG_D("QueueInputBuffer ret: " PUBLIC_LOG_U32, ret);
+    MEDIA_LOG_DD("QueueInputBuffer ret: " PUBLIC_LOG_U32, ret);
     return ret;
 }
 
@@ -469,7 +469,7 @@ Status VideoFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
     }
     auto ret = avcodec_send_packet(avCodecContext_.get(), packetPtr);
     if (ret < 0) {
-        MEDIA_LOG_D("send buffer error " PUBLIC_LOG_S, AVStrError(ret).c_str());
+        MEDIA_LOG_DD("send buffer error " PUBLIC_LOG_S, AVStrError(ret).c_str());
         return Status::ERROR_NO_MEMORY;
     }
     return Status::OK;
@@ -667,7 +667,7 @@ Status VideoFfmpegDecoderPlugin::WriteYuvData(const std::shared_ptr<Buffer>& fra
     } else {
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
-    MEDIA_LOG_D("WriteYuvData success");
+    MEDIA_LOG_DD("WriteYuvData success");
     return Status::OK;
 }
 
@@ -700,9 +700,9 @@ Status VideoFfmpegDecoderPlugin::WriteRgbData(const std::shared_ptr<Buffer>& fra
 
 Status VideoFfmpegDecoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& frameBuffer)
 {
-    MEDIA_LOG_D("receive one frame: " PUBLIC_LOG_D32 ", picture type: " PUBLIC_LOG_D32 ", pixel format: "
-                PUBLIC_LOG_D32 ", packet size: " PUBLIC_LOG_D32, cachedFrame_->key_frame,
-                static_cast<int32_t>(cachedFrame_->pict_type), cachedFrame_->format, cachedFrame_->pkt_size);
+    MEDIA_LOG_DD("receive one frame: " PUBLIC_LOG_D32 ", picture type: " PUBLIC_LOG_D32 ", pixel format: "
+                 PUBLIC_LOG_D32 ", packet size: " PUBLIC_LOG_D32, cachedFrame_->key_frame,
+                 static_cast<int32_t>(cachedFrame_->pict_type), cachedFrame_->format, cachedFrame_->pkt_size);
     FALSE_RETURN_V_MSG_E((cachedFrame_->flags & AV_FRAME_FLAG_CORRUPT) == 0, Status::ERROR_INVALID_DATA,
                          "decoded frame is corrupt");
     auto ret = ScaleVideoFrame();
@@ -733,7 +733,7 @@ Status VideoFfmpegDecoderPlugin::FillFrameBuffer(const std::shared_ptr<Buffer>& 
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     frameBuffer->pts = static_cast<uint64_t>(cachedFrame_->pts);
-    MEDIA_LOG_D("FillFrameBuffer success");
+    MEDIA_LOG_DD("FillFrameBuffer success");
     return Status::OK;
 }
 
@@ -754,11 +754,11 @@ Status VideoFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
         avcodec_flush_buffers(avCodecContext_.get());
         status = Status::END_OF_STREAM;
     } else {
-        MEDIA_LOG_D("video decoder receive error: " PUBLIC_LOG_S, AVStrError(ret).c_str());
+        MEDIA_LOG_DD("video decoder receive error: " PUBLIC_LOG_S, AVStrError(ret).c_str());
         status = Status::ERROR_TIMED_OUT;
     }
     av_frame_unref(cachedFrame_.get());
-    MEDIA_LOG_D("ReceiveBufferLocked status: " PUBLIC_LOG_U32, status);
+    MEDIA_LOG_DD("ReceiveBufferLocked status: " PUBLIC_LOG_U32, status);
     return status;
 }
 
