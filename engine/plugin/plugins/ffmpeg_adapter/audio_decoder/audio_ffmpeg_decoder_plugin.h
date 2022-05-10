@@ -117,6 +117,10 @@ private:
     size_t paddedBufferSize_ {0};
     std::shared_ptr<Buffer> outBuffer_ {nullptr};
     DataCallback* dataCallback_ {nullptr};
+    int64_t preBufferGroupPts_ {0};
+    int64_t curBufferGroupPts_ {0};
+    int32_t bufferNum_ {1};
+    int32_t bufferIndex_ {1};
 };
 } // namespace Ffmpeg
 } // namespace Plugin
