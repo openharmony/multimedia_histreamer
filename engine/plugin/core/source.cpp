@@ -38,9 +38,9 @@ Status Source::GetSize(size_t& size)
     return source_->GetSize(size);
 }
 
-bool Source::IsSeekable()
+Status Source::IsSeekable(bool& seekable)
 {
-    return source_->IsSeekable();
+    return source_->IsSeekable(seekable);
 }
 
 Status Source::SeekTo(uint64_t offset)

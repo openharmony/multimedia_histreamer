@@ -56,9 +56,10 @@ Status UtSourceTest2::GetSize(size_t &size)
     return Status::OK;
 }
 
-bool UtSourceTest2::IsSeekable()
+Status UtSourceTest2::IsSeekable(bool& seekable)
 {
-    return false;
+    seekable = false;
+    return Status::OK;
 }
 
 Status UtSourceTest2::SeekTo(uint64_t offset)

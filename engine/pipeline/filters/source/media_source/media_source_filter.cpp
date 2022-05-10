@@ -47,6 +47,7 @@ MediaSourceFilter::MediaSourceFilter(const std::string& name)
       protocol_(),
       uri_(),
       isSeekable_(false),
+      seekableValid_ (false),
       position_(0),
       bufferSize_(DEFAULT_FRAME_SIZE),
       plugin_(nullptr),
@@ -76,6 +77,7 @@ void MediaSourceFilter::ClearData()
     mediaOffset_ = 0;
     isPluginReady_ = false;
     isAboveWaterline_ = false;
+    seekableValid_ = false;
 }
 
 ErrorCode MediaSourceFilter::SetSource(const std::shared_ptr<MediaSource>& source)
@@ -117,10 +119,11 @@ ErrorCode MediaSourceFilter::SetBufferSize(size_t size)
     return ErrorCode::SUCCESS;
 }
 
-bool MediaSourceFilter::IsSeekable() const
+ErrorCode MediaSourceFilter::IsSeekable(bool& seekable) const
 {
     MEDIA_LOG_DD("IN, isSeekable_: " PUBLIC_LOG_D32, static_cast<int32_t>(isSeekable_));
-    return isSeekable_;
+    seekable = isSeekable_;
+    return seekableValid_ ? ErrorCode::SUCCESS : ErrorCode::ERROR_UNKNOWN;
 }
 
 std::vector<WorkMode> MediaSourceFilter::GetWorkModes()
@@ -214,6 +217,7 @@ ErrorCode MediaSourceFilter::Stop()
     mediaOffset_ = 0;
     protocol_.clear();
     uri_.clear();
+    seekableValid_ = false;
     ErrorCode ret = ErrorCode::SUCCESS;
     if (plugin_) {
         ret = TranslatePluginStatus(plugin_->Stop());
@@ -241,7 +245,13 @@ void MediaSourceFilter::InitPorts()
 void MediaSourceFilter::ActivateMode()
 {
     MEDIA_LOG_D("IN");
-    isSeekable_ = plugin_ && plugin_->IsSeekable();
+    if (plugin_) {
+        Plugin::Status status = plugin_->IsSeekable(isSeekable_);
+        if (status == Plugin::Status::OK) {
+            seekableValid_ = true;
+        }
+    }
+    FALSE_LOG(seekableValid_);
     if (!isSeekable_) {
         if (taskPtr_ == nullptr) {
             taskPtr_ = std::make_shared<OSAL::Task>("DataReader");

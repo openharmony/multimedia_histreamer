@@ -466,9 +466,10 @@ Status AudioCapturePlugin::GetSize(size_t& size)
     return Status::OK;
 }
 
-bool AudioCapturePlugin::IsSeekable()
+Status AudioCapturePlugin::IsSeekable(bool& seekable)
 {
-    return false;
+    seekable = false;
+    return Status::OK;
 }
 
 Status AudioCapturePlugin::SeekTo(uint64_t offset)
