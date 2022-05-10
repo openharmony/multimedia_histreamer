@@ -74,7 +74,7 @@ Status RegisterMuxerPlugins(const std::shared_ptr<Register>& reg)
     const AVOutputFormat* outputFormat = nullptr;
     void* ite = nullptr;
     while ((outputFormat = av_muxer_iterate(&ite))) {
-        MEDIA_LOG_D("check ffmpeg muxer name: " PUBLIC_LOG_S, outputFormat->name);
+        MEDIA_LOG_DD("check ffmpeg muxer name: " PUBLIC_LOG_S, outputFormat->name);
         if (!IsMuxerSupported(outputFormat->name)) {
             continue;
         }

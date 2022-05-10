@@ -207,7 +207,7 @@ void VideoDecoderFilter::UpdateParams(std::shared_ptr<Plugin::Meta>& meta)
 
 void VideoDecoderFilter::OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input)
 {
-    MEDIA_LOG_D("VideoDecoderFilter::OnInputBufferDone");
+    MEDIA_LOG_DD("VideoDecoderFilter::OnInputBufferDone");
 }
 
 void VideoDecoderFilter::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output)

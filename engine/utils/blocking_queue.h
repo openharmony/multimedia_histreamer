@@ -93,14 +93,14 @@ public:
     }
     T Pop()
     {
-        MEDIA_LOG_D("blocking queue " PUBLIC_LOG_S " Pop enter.", name_.c_str());
+        MEDIA_LOG_DD("blocking queue " PUBLIC_LOG_S " Pop enter.", name_.c_str());
         OSAL::ScopedLock lock(mutex_);
         if (!isActive) {
             MEDIA_LOG_D("blocking queue " PUBLIC_LOG_S " is inactive.", name_.c_str());
             return {};
         }
         if (que_.empty()) {
-            MEDIA_LOG_D("blocking queue " PUBLIC_LOG_S " is empty, waiting for push", name_.c_str());
+            MEDIA_LOG_DD("blocking queue " PUBLIC_LOG_S " is empty, waiting for push", name_.c_str());
             cvEmpty_.Wait(lock, [this] { return !isActive || !que_.empty(); });
         }
         if (!isActive) {
@@ -109,7 +109,7 @@ public:
         T el = que_.front();
         que_.pop();
         cvFull_.NotifyOne();
-        MEDIA_LOG_D("blocking queue " PUBLIC_LOG_S " Pop succeed.", name_.c_str());
+        MEDIA_LOG_DD("blocking queue " PUBLIC_LOG_S " Pop succeed.", name_.c_str());
         return el;
     }
     T Pop(int timeoutMs)
