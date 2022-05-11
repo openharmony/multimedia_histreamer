@@ -537,12 +537,22 @@ Status AudioFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
         if (cachedFrame_->pts != AV_NOPTS_VALUE) {
             preBufferGroupPts_ = curBufferGroupPts_;
             curBufferGroupPts_ = cachedFrame_->pts;
-            bufferNum_ = bufferIndex_;
+            if (bufferGroupPtsDistance == 0) {
+                bufferGroupPtsDistance = abs(curBufferGroupPts_ - preBufferGroupPts_);
+            }
+            if (bufferIndex_ >= bufferNum_) {
+                bufferNum_ = bufferIndex_;
+            }
             bufferIndex_ = 1;
         } else {
-            bufferIndex_ ++;
-            cachedFrame_->pts = curBufferGroupPts_ + (curBufferGroupPts_ -preBufferGroupPts_) *
-                (bufferIndex_ - 1) / bufferNum_;
+            bufferIndex_++;
+            if (abs(curBufferGroupPts_ - preBufferGroupPts_) > bufferGroupPtsDistance) {
+                cachedFrame_->pts = curBufferGroupPts_;
+                preBufferGroupPts_ = curBufferGroupPts_;
+            } else {
+                cachedFrame_->pts = curBufferGroupPts_ + abs(curBufferGroupPts_ - preBufferGroupPts_) *
+                    (bufferIndex_ - 1) / bufferNum_;
+            }
         }
         MEDIA_LOG_DD("receive one frame");
         status = ReceiveFrameSucc(ioInfo);
