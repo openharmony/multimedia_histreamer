@@ -67,9 +67,6 @@ void MediaStatStub::ReceiveEvent(const EventType& eventType, int64_t param)
 int64_t MediaStatStub::GetCurrentPosition()
 {
     int64_t currentPosition = 0;
-    if (IsEventCompleteAllReceived()) {
-        return duration_;
-    }
     for (const auto& stat : mediaStats_) {
         currentPosition = std::max(currentPosition, stat.currentPosition.load());
     }

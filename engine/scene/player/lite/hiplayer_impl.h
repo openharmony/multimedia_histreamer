@@ -157,12 +157,10 @@ private:
 
     std::weak_ptr<Plugin::Meta> sourceMeta_;
     std::vector<std::weak_ptr<Plugin::Meta>> streamMeta_;
-    int64_t duration_ {-1};
     std::atomic<bool> singleLoop_ {false};
 
     std::weak_ptr<PlayerCallback> callback_;
     float volume_;
-    std::atomic<ErrorCode> errorCode_;
     MediaStatStub mediaStats_;
 };
 } // namespace Media
