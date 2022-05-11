@@ -35,7 +35,6 @@ HiPlayerImpl::HiPlayerImpl()
     : fsm_(*this),
       curFsmState_(StateId::IDLE),
       volume_(-1.0f),
-      errorCode_(ErrorCode::SUCCESS),
       mediaStats_()
 {
     MEDIA_LOG_I("hiPlayerImpl ctor");
@@ -105,7 +104,6 @@ std::shared_ptr<HiPlayerImpl> HiPlayerImpl::CreateHiPlayerImpl()
 
 int32_t HiPlayerImpl::Init()
 {
-    errorCode_ = ErrorCode::SUCCESS;
     mediaStats_.Reset();
     if (initialized_.load()) {
         return CppExt::to_underlying(ErrorCode::SUCCESS);
@@ -415,8 +413,7 @@ ErrorCode HiPlayerImpl::DoOnReady()
         }
     }
     if (found) {
-        duration_ = duration;
-        mediaStats_.SetDuration(duration_);
+        mediaStats_.SetDuration(duration);
     }
     return ErrorCode::SUCCESS;
 }
@@ -432,7 +429,6 @@ ErrorCode HiPlayerImpl::DoOnComplete()
 
 ErrorCode HiPlayerImpl::DoOnError(ErrorCode errorCode)
 {
-    errorCode_ = errorCode;
     UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     auto ptr = callback_.lock();
     FALSE_RETURN_V_MSG(ptr != nullptr, ErrorCode::SUCCESS, "Player callback not exist.");
@@ -465,6 +461,7 @@ bool HiPlayerImpl::IsSingleLooping()
 
 int32_t HiPlayerImpl::SetLoop(bool loop)
 {
+    MEDIA_LOG_I("SetLoop entered, loop: " PUBLIC_LOG_D32, loop);
     singleLoop_ = loop;
     return CppExt::to_underlying(ErrorCode::SUCCESS);
 }
@@ -529,12 +526,13 @@ int32_t HiPlayerImpl::GetDuration(int64_t& outDurationMs)
         outDurationMs = -1;
         return CppExt::to_underlying(ErrorCode::SUCCESS);
     }
-    if (duration_ < 0) {
+    auto duration = mediaStats_.GetDuration();
+    if (duration < 0) {
         MEDIA_LOG_W("no valid duration");
         outDurationMs = -1;
         return CppExt::to_underlying(ErrorCode::ERROR_UNKNOWN);
     }
-    outDurationMs = Plugin::HstTime2Ms(duration_);
+    outDurationMs = Plugin::HstTime2Ms(duration);
     MEDIA_LOG_I("GetDuration returned " PUBLIC_LOG_D32, outDurationMs);
     return CppExt::to_underlying(ErrorCode::SUCCESS);
 }

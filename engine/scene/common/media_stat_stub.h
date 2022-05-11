@@ -54,13 +54,19 @@ public:
     {
         duration_ = hstTime;
     }
+
+    int64_t GetDuration()
+    {
+        return duration_;
+    }
+
     void ReceiveEvent(const EventType& eventType, int64_t param = 0);
     int64_t GetCurrentPosition();
     bool IsEventCompleteAllReceived();
 
 private:
     std::vector<MediaStat> mediaStats_;
-    int64_t duration_;
+    int64_t duration_ {-1};
 };
 } // Media
 } // OHOS

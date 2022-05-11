@@ -39,7 +39,6 @@ HiPlayerImpl::HiPlayerImpl()
     : fsm_(*this),
       curFsmState_(StateId::IDLE),
       volume_(-1.0f), // default negative, if app not set, will not set it.
-      errorCode_(ErrorCode::SUCCESS),
       mediaStats_()
 {
     MEDIA_LOG_I("hiPlayerImpl ctor");
@@ -110,7 +109,6 @@ void HiPlayerImpl::UpdateStateNoLock(PlayerStates newState, bool notifyUpward)
 ErrorCode HiPlayerImpl::Init()
 {
     MEDIA_LOG_I("Init entered.");
-    errorCode_ = ErrorCode::SUCCESS;
     mediaStats_.Reset();
     if (initialized_.load()) {
         return ErrorCode::SUCCESS;
@@ -482,8 +480,7 @@ ErrorCode HiPlayerImpl::DoOnReady()
         }
     }
     if (found) {
-        duration_ = duration;
-        mediaStats_.SetDuration(duration_);
+        mediaStats_.SetDuration(duration);
     }
     return ErrorCode::SUCCESS;
 }
@@ -501,7 +498,6 @@ ErrorCode HiPlayerImpl::DoOnComplete()
 
 ErrorCode HiPlayerImpl::DoOnError(ErrorCode errorCode)
 {
-    errorCode_ = errorCode;
     UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     auto ptr = obs_.lock();
     if (ptr != nullptr) {
@@ -543,7 +539,7 @@ PFilter HiPlayerImpl::CreateAudioDecoder(const std::string& desc)
 
 int32_t HiPlayerImpl::SetLooping(bool loop)
 {
-    MEDIA_LOG_I("SetLooping entered.");
+    MEDIA_LOG_I("SetLooping entered, loop: " PUBLIC_LOG_D32, loop);
     singleLoop_ = loop;
     return TransErrorCode(ErrorCode::SUCCESS);
 }
@@ -596,11 +592,13 @@ int32_t HiPlayerImpl::GetDuration(int32_t& durationMs)
         MEDIA_LOG_DD("Source is not seekable");
         return MSERR_OK;
     }
-    if (duration_ < 0) {
+    auto duration = mediaStats_.GetDuration();
+    if (duration < 0) {
+        durationMs = -1;
         MEDIA_LOG_W("no valid duration");
         return MSERR_UNKNOWN;
     }
-    durationMs = Plugin::HstTime2Ms(duration_);
+    durationMs = Plugin::HstTime2Ms(duration);
     MEDIA_LOG_DD("GetDuration returned " PUBLIC_LOG_D32, durationMs);
     return MSERR_OK;
 }
