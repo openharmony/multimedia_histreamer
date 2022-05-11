@@ -28,19 +28,16 @@ class MediaStatStub {
 public:
     struct MediaStat {
         std::string reporter;
-        std::atomic<int64_t> currentPosition {0};
         std::atomic<bool> completeEventReceived {false};
         explicit MediaStat(std::string rep) : reporter(std::move(rep))
         {
         }
         MediaStat(const MediaStat& other) : reporter(other.reporter)
         {
-            currentPosition = other.currentPosition.load();
             completeEventReceived = other.completeEventReceived.load();
         }
         MediaStat& operator=(const MediaStat& other)
         {
-            currentPosition = other.currentPosition.load();
             completeEventReceived = other.completeEventReceived.load();
             return *this;
         }
@@ -50,12 +47,10 @@ public:
     void Reset();
     void Append(const std::string& reporter);
     void ReceiveEvent(const Event& event);
-    int64_t GetCurrentPosition();
     bool IsEventCompleteAllReceived();
 
 private:
     std::vector<MediaStat> mediaStats_;
-    int64_t duration_ {-1};
 };
 } // Media
 } // OHOS

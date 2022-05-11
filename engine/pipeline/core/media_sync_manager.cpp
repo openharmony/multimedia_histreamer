@@ -111,6 +111,7 @@ void MediaSyncManager::SetMediaTimeRangeStart(int64_t startMediaTime, int32_t tr
     SetMediaTimeStartEnd(trackId, MEDIA_TUPLE_START_INDEX, startMediaTime);
     if (minRangeStartOfMediaTime_ == HST_TIME_NONE || startMediaTime < minRangeStartOfMediaTime_) {
         minRangeStartOfMediaTime_ = startMediaTime;
+        MEDIA_LOG_I("set media started at " PUBLIC_LOG_D64, minRangeStartOfMediaTime_);
     }
 }
 void MediaSyncManager::SetMediaTimeRangeEnd(int64_t endMediaTime, int32_t trackId)
@@ -119,6 +120,7 @@ void MediaSyncManager::SetMediaTimeRangeEnd(int64_t endMediaTime, int32_t trackI
     SetMediaTimeStartEnd(trackId, MEDIA_TUPLE_END_INDEX, endMediaTime);
     if (maxRangeEndOfMediaTime_ == HST_TIME_NONE || endMediaTime > maxRangeEndOfMediaTime_) {
         maxRangeEndOfMediaTime_ = endMediaTime;
+        MEDIA_LOG_I("set media end at " PUBLIC_LOG_D64, maxRangeEndOfMediaTime_);
     }
 }
 
@@ -260,7 +262,7 @@ ErrorCode MediaSyncManager::UpdateTimeAnchor(int64_t clockTime, int64_t mediaTim
     if (IsSupplierValid(supplier) && supplier->GetPriority() >= currentSyncerPriority_) {
         currentSyncerPriority_ = supplier->GetPriority();
         SimpleUpdateTimeAnchor(clockTime, mediaTime);
-        MEDIA_LOG_D("update time anchor to priority " PUBLIC_LOG_D32 ", mediaTime " PUBLIC_LOG_D64 ", clockTime "
+        MEDIA_LOG_DD("update time anchor to priority " PUBLIC_LOG_D32 ", mediaTime " PUBLIC_LOG_D64 ", clockTime "
         PUBLIC_LOG_D64, currentSyncerPriority_, currentAnchorMediaTime_, currentAnchorClockTime_);
     }
     if (isSeeking_ && seekingMediaTime_ <= currentAnchorMediaTime_)  {

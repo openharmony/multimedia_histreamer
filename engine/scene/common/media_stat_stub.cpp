@@ -25,7 +25,6 @@ namespace Media {
 void MediaStatStub::Reset()
 {
     mediaStats_.clear();
-    duration_ = 0;
 }
 
 void MediaStatStub::Append(const std::string& reporter)
@@ -54,15 +53,6 @@ void MediaStatStub::ReceiveEvent(const Event& event)
                         static_cast<int>(event.type));
             break;
     }
-}
-
-int64_t MediaStatStub::GetCurrentPosition()
-{
-    int64_t currentPosition = 0;
-    for (const auto& stat : mediaStats_) {
-        currentPosition = std::max(currentPosition, stat.currentPosition.load());
-    }
-    return currentPosition;
 }
 
 bool MediaStatStub::IsEventCompleteAllReceived()

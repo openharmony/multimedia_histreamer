@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_HIPLAYER_IMPL_H
-#define HISTREAMER_HIPLAYER_IMPL_H
+#ifndef HISTREAMER_SCENE_LITE_HIPLAYER_IMPL_H
+#define HISTREAMER_SCENE_LITE_HIPLAYER_IMPL_H
 
 #include <memory>
 #include <unordered_map>
@@ -157,6 +157,7 @@ private:
 
     std::weak_ptr<Plugin::Meta> sourceMeta_;
     std::vector<std::weak_ptr<Plugin::Meta>> streamMeta_;
+    int64_t duration_ {-1};
     std::atomic<bool> singleLoop_ {false};
 
     std::weak_ptr<PlayerCallback> callback_;
@@ -167,4 +168,4 @@ private:
 };
 } // namespace Media
 } // namespace OHOS
-#endif
+#endif // HISTREAMER_SCENE_LITE_HIPLAYER_IMPL_H

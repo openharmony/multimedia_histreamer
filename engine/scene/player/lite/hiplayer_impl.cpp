@@ -410,7 +410,7 @@ ErrorCode HiPlayerImpl::DoOnReady()
         }
     }
     if (found) {
-        mediaStats_.SetDuration(duration);
+        duration_ = duration;
     }
     return ErrorCode::SUCCESS;
 }
@@ -521,19 +521,12 @@ int32_t HiPlayerImpl::GetDuration(int64_t& outDurationMs)
         || audioSource_ == nullptr) {
         return CppExt::to_underlying(ErrorCode::ERROR_INVALID_STATE);
     }
-    bool seekable = true;
-    FALSE_RETURN_V(audioSource_->IsSeekable(seekable) == ErrorCode::SUCCESS,
-                   CppExt::to_underlying(ErrorCode::ERROR_UNKNOWN));
-    if (!seekable) {
+    if (duration_ < 0) {
         outDurationMs = -1;
-        return CppExt::to_underlying(ErrorCode::SUCCESS);
-    }
-    auto duration = mediaStats_.GetDuration();
-    if (duration < 0) {
         MEDIA_LOG_W("no valid duration");
         return CppExt::to_underlying(ErrorCode::ERROR_UNKNOWN);
     }
-    outDurationMs = Plugin::HstTime2Ms(duration);
+    outDurationMs = Plugin::HstTime2Ms(duration_);
     MEDIA_LOG_I("GetDuration returned " PUBLIC_LOG_D32, outDurationMs);
     return CppExt::to_underlying(ErrorCode::SUCCESS);
 }

@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_HIPLAYER_IMPL_H
-#define HISTREAMER_HIPLAYER_IMPL_H
+#ifndef HISTREAMER_SCENE_STD_HIPLAYER_IMPL_H
+#define HISTREAMER_SCENE_STD_HIPLAYER_IMPL_H
 
 #include <memory>
 #include <unordered_map>
 
+#include "hiplayer_callback_looper.h"
 #include "i_player_engine.h"
 #include "filters/demux/demuxer_filter.h"
 #include "filters/source/media_source/media_source_filter.h"
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
+#include "hiplayer_callback_looper.h"
 #include "internal/state_machine.h"
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_callback.h"
@@ -109,7 +111,6 @@ private:
 #endif
     ErrorCode RemoveFilterChains(Pipeline::Filter* filter, const Plugin::Any& parameter);
     void ActiveFilters(const std::vector<Pipeline::Filter*>& filters);
-    void HandleAudioProgressEvent(const Event& event);
     void HandlePluginErrorEvent(const Event& event);
     void UpdateStateNoLock(PlayerStates newState, bool notifyUpward = true);
 
@@ -124,8 +125,8 @@ private:
 
     std::weak_ptr<Plugin::Meta> sourceMeta_ {};
     std::vector<std::weak_ptr<Plugin::Meta>> streamMeta_ {};
+    int64_t duration_ {-1};
     std::atomic<bool> singleLoop_ {false};
-    std::weak_ptr<IPlayerEngineObs> obs_ {};
     float volume_;
     MediaStatStub mediaStats_;
 
@@ -139,7 +140,9 @@ private:
 #endif
     std::unordered_map<std::string, std::shared_ptr<Pipeline::AudioDecoderFilter>> audioDecoderMap_;
     Pipeline::MediaSyncManager syncManager_;
+
+    HiPlayerCallbackLooper callbackLooper_ {};
 };
 }  // namespace Media
 }  // namespace OHOS
-#endif
+#endif // HISTREAMER_SCENE_STD_HIPLAYER_IMPL_H

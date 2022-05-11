@@ -568,12 +568,12 @@ Status AudioServerSinkPlugin::Pause()
 
 Status AudioServerSinkPlugin::GetLatency(uint64_t& hstTime)
 {
-    uint64_t microSec = 0;
+    uint64_t uSec = 0;
     int32_t ret = AudioStandard::SUCCESS;
     {
         OSAL::ScopedLock lock(renderMutex_);
         if (audioRenderer_ != nullptr) {
-            ret = audioRenderer_->GetLatency(microSec);
+            ret = audioRenderer_->GetLatency(uSec);
         } else {
             return Status::ERROR_WRONG_STATE;
         }
@@ -583,7 +583,7 @@ Status AudioServerSinkPlugin::GetLatency(uint64_t& hstTime)
         return Status::ERROR_UNKNOWN;
     }
     int64_t latency = 0;
-    if (Ms2HstTime(microSec, latency)) {
+    if (Us2HstTime(uSec, latency)) {
         hstTime = latency;
         return Status::OK;
     } else {
@@ -598,7 +598,7 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
     auto mem = input->GetMemory();
     auto* buffer = const_cast<uint8_t *>(mem->GetReadOnlyData());
     size_t length = mem->GetSize();
-    if (needReformat_) {
+    if (needReformat_ && length > 0) {
         size_t lineSize = mem->GetSize() / channels_;
         std::vector<const uint8_t*> tmpInput(channels_);
         tmpInput[0] = mem->GetReadOnlyData();
@@ -618,7 +618,7 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
         }
     }
     MEDIA_LOG_DD("write data size " PUBLIC_LOG_ZU, length);
-    int32_t ret = -1;
+    int32_t ret = 0;
     OSAL::ScopedLock lock(renderMutex_);
     FALSE_RETURN_V(audioRenderer_ != nullptr, Status::ERROR_WRONG_STATE);
     for (; length > 0;) {
