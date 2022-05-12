@@ -519,17 +519,21 @@ int32_t HiPlayerImpl::GetCurrentPosition(int64_t& currentPositionMs)
 int32_t HiPlayerImpl::GetDuration(int64_t& outDurationMs)
 {
     MEDIA_LOG_I("GetDuration entered.");
-    if (pipelineStates_ == PlayerStates::PLAYER_IDLE || pipelineStates_ == PlayerStates::PLAYER_PREPARING) {
+    outDurationMs = 0;
+    if (pipelineStates_ == PlayerStates::PLAYER_IDLE || pipelineStates_ == PlayerStates::PLAYER_PREPARING
+        || audioSource_ == nullptr) {
         return CppExt::to_underlying(ErrorCode::ERROR_INVALID_STATE);
     }
-    if (audioSource_ && !audioSource_->IsSeekable()) {
+    bool seekable = true;
+    FALSE_RETURN_V(audioSource_->IsSeekable(seekable) == ErrorCode::SUCCESS,
+                   CppExt::to_underlying(ErrorCode::ERROR_UNKNOWN));
+    if (!seekable) {
         outDurationMs = -1;
         return CppExt::to_underlying(ErrorCode::SUCCESS);
     }
     auto duration = mediaStats_.GetDuration();
     if (duration < 0) {
         MEDIA_LOG_W("no valid duration");
-        outDurationMs = -1;
         return CppExt::to_underlying(ErrorCode::ERROR_UNKNOWN);
     }
     outDurationMs = Plugin::HstTime2Ms(duration);

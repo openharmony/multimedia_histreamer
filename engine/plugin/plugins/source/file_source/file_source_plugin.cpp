@@ -187,10 +187,11 @@ Status FileSourcePlugin::GetSize(size_t& size)
     return Status::OK;
 }
 
-bool FileSourcePlugin::IsSeekable()
+Status FileSourcePlugin::IsSeekable(bool& seekable)
 {
     MEDIA_LOG_DD("IN");
-    return isSeekable_;
+    seekable = isSeekable_;
+    return Status::OK;
 }
 
 Status FileSourcePlugin::SeekTo(uint64_t offset)

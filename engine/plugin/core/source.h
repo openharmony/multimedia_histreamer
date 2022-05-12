@@ -42,7 +42,7 @@ public:
 
     Status GetSize(size_t& size);
 
-    bool IsSeekable();
+    Status IsSeekable(bool& seekable);
 
     Status SeekTo(uint64_t offset);
 

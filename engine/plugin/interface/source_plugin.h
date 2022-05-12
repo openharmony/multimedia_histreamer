@@ -86,7 +86,7 @@ struct SourcePlugin : public PluginBase {
      * @return  Execution status return
      *  @retval OK: Plugin reset succeeded.
      */
-    virtual bool IsSeekable() = 0;
+    virtual Status IsSeekable(bool& seekable) = 0;
 
     /**
      * @brief Seeks for a specified position for the source.

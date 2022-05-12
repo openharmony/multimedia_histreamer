@@ -586,8 +586,9 @@ int32_t HiPlayerImpl::GetDuration(int32_t& durationMs)
                     StringnessPlayerState(pipelineStates_).c_str());
         return MSERR_INVALID_STATE;
     }
-
-    if (!audioSource_->IsSeekable()) { // maybe wrong seekable status, it's default value is false.
+    bool seekable = true;
+    FALSE_RETURN_V(audioSource_->IsSeekable(seekable) == ErrorCode::SUCCESS, MSERR_UNKNOWN);
+    if (!seekable) {
         durationMs = -1;
         MEDIA_LOG_DD("Source is not seekable");
         return MSERR_OK;

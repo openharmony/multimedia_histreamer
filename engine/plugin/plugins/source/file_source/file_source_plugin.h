@@ -49,7 +49,7 @@ public:
     Status SetSource(std::shared_ptr<MediaSource> source) override;
     Status Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen) override;
     Status GetSize(size_t& size) override;
-    bool IsSeekable() override;
+    Status IsSeekable(bool& seekable) override;
     Status SeekTo(uint64_t offset) override;
 
 private:

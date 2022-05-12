@@ -45,7 +45,7 @@ public:
     ErrorCode PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data) override;
     virtual ErrorCode SetSource(const std::shared_ptr<MediaSource>& source);
     virtual ErrorCode SetBufferSize(size_t size);
-    bool IsSeekable() const;
+    ErrorCode IsSeekable(bool& seekable) const;
     ErrorCode Prepare() override;
     ErrorCode Start() override;
     ErrorCode Stop() override;
@@ -71,6 +71,7 @@ private:
     std::string protocol_;
     std::string uri_;
     bool isSeekable_;
+    bool seekableValid_;
     uint64_t position_;
     int64_t mediaOffset_ {0}; // offset used in push mode
     size_t bufferSize_;
