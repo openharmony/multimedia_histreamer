@@ -28,7 +28,10 @@ namespace Media {
 namespace Pipeline {
 static AutoRegisterFilter<OutputSinkFilter> g_registerFilterHelper("builtin.recorder.output_sink");
 
-OutputSinkFilter::OutputSinkFilter(std::string name) : FilterBase(std::move(name)) {}
+OutputSinkFilter::OutputSinkFilter(std::string name) : FilterBase(std::move(name))
+{
+    filterType_ = FilterType::OUTPUT_SINK;
+}
 
 OutputSinkFilter::~OutputSinkFilter() {}
 

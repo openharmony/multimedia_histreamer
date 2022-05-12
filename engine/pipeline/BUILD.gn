@@ -24,11 +24,11 @@ config("histreamer_pipeline_config") {
 
 source_set("histreamer_pipeline") {
   sources = [
-    "core/clock_manager.cpp",
     "core/compatible_check.cpp",
     "core/error_code.cpp",
     "core/event.cpp",
     "core/filter_base.cpp",
+    "core/media_sync_manager.cpp",
     "core/pipeline_core.cpp",
     "core/port.cpp",
     "factory/filter_factory.cpp",
@@ -47,6 +47,7 @@ source_set("histreamer_pipeline") {
     "filters/demux/type_finder.cpp",
     "filters/muxer/muxer_filter.cpp",
     "filters/sink/audio_sink/audio_sink_filter.cpp",
+    "filters/sink/media_synchronous_sink.cpp",
     "filters/sink/output_sink/output_sink_filter.cpp",
     "filters/source/audio_capture/audio_capture_filter.cpp",
     "filters/source/media_source/media_source_filter.cpp",

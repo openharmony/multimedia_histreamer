@@ -249,7 +249,7 @@ void HiRecorderImpl::OnEvent(const Event& event)
             break;
         }
         case EventType::EVENT_COMPLETE:
-            mediaStatStub_.ReceiveEvent(EventType::EVENT_COMPLETE, 0);
+            mediaStatStub_.ReceiveEvent(event);
             if (mediaStatStub_.IsEventCompleteAllReceived()) {
                 fsm_.SendEventAsync(Intent::NOTIFY_COMPLETE);
             }

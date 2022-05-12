@@ -206,9 +206,10 @@ ErrorCode FilterBase::ConfigPluginWithMeta(Plugin::Base& plugin, const Plugin::M
         } else {
             if (!HasTagInfo(keyPair.first)) {
                 MEDIA_LOG_W("tag " PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
+            } else {
+                MEDIA_LOG_W("parameter " PUBLIC_LOG_S " in meta is not found or type mismatch",
+                            GetTagStrName(keyPair.first));
             }
-            MEDIA_LOG_W("parameter " PUBLIC_LOG_S " in meta is not found or type mismatch",
-                        GetTagStrName(keyPair.first));
         }
     }
     return ErrorCode::SUCCESS;
@@ -308,6 +309,11 @@ void FilterBase::OnEvent(const Plugin::PluginEvent &event)
             eventReceiver_->OnEvent({name_, EventType::EVENT_PLUGIN_EVENT, event});
         }
     }
+}
+
+void FilterBase::SetSyncCenter(IMediaSyncCenter* syncCenter)
+{
+    syncCenter_ = syncCenter;
 }
 } // namespace Pipeline
 } // namespace Media

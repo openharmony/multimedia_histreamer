@@ -26,22 +26,18 @@ namespace OHOS {
 namespace Media {
 class MediaStatStub {
 public:
-    enum class MediaType : int32_t { AUDIO, VIDEO, BUTT };
     struct MediaStat {
-        MediaType mediaType {MediaType::BUTT};
-        std::atomic<int64_t> currentPosition {0};
+        std::string reporter;
         std::atomic<bool> completeEventReceived {false};
-        explicit MediaStat(MediaType mediaType) : mediaType(mediaType)
+        explicit MediaStat(std::string rep) : reporter(std::move(rep))
         {
         }
-        MediaStat(const MediaStat& other) : mediaType(other.mediaType)
+        MediaStat(const MediaStat& other) : reporter(other.reporter)
         {
-            currentPosition = other.currentPosition.load();
             completeEventReceived = other.completeEventReceived.load();
         }
         MediaStat& operator=(const MediaStat& other)
         {
-            currentPosition = other.currentPosition.load();
             completeEventReceived = other.completeEventReceived.load();
             return *this;
         }
@@ -49,24 +45,12 @@ public:
 
     MediaStatStub() = default;
     void Reset();
-    void Append(MediaType mediaType);
-    void SetDuration(int64_t hstTime)
-    {
-        duration_ = hstTime;
-    }
-
-    int64_t GetDuration()
-    {
-        return duration_;
-    }
-
-    void ReceiveEvent(const EventType& eventType, int64_t param = 0);
-    int64_t GetCurrentPosition();
+    void Append(const std::string& reporter);
+    void ReceiveEvent(const Event& event);
     bool IsEventCompleteAllReceived();
 
 private:
     std::vector<MediaStat> mediaStats_;
-    int64_t duration_ {-1};
 };
 } // Media
 } // OHOS

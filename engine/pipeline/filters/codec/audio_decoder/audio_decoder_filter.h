@@ -28,8 +28,6 @@ public:
 
     ErrorCode Prepare() override;
 
-    ErrorCode Start() override;
-
     ErrorCode Stop() override;
 
     void FlushStart() override;

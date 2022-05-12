@@ -14,6 +14,7 @@
  */
 
 #include "media_utils.h"
+#include <cmath>
 #include "media_errors.h"
 
 namespace OHOS {
@@ -36,6 +37,13 @@ const ErrorCodePair g_errorCodePair[] = {
     {ErrorCode::ERROR_TIMED_OUT, MSERR_EXT_TIMEOUT},
     {ErrorCode::ERROR_NO_MEMORY, MSERR_EXT_NO_MEMORY},
     {ErrorCode::ERROR_INVALID_STATE, MSERR_INVALID_STATE},
+};
+const std::array<std::pair<PlaybackRateMode, float>, 5> PLAY_RATE_REFS = {
+    std::make_pair(PlaybackRateMode::SPEED_FORWARD_0_75_X, 0.75),
+    std::make_pair(PlaybackRateMode::SPEED_FORWARD_1_00_X, 1.0),
+    std::make_pair(PlaybackRateMode::SPEED_FORWARD_1_25_X, 1.25),
+    std::make_pair(PlaybackRateMode::SPEED_FORWARD_1_75_X, 1.75),
+    std::make_pair(PlaybackRateMode::SPEED_FORWARD_2_00_X, 2.00),
 };
 }  // namespace
 
@@ -93,6 +101,7 @@ Plugin::SeekMode Transform2SeekMode(PlayerSeekMode mode)
         case PlayerSeekMode::SEEK_CLOSEST_SYNC:
             return Plugin::SeekMode::SEEK_CLOSEST_SYNC;
         case PlayerSeekMode::SEEK_CLOSEST:
+        default:
             return Plugin::SeekMode::SEEK_CLOSEST;
     }
 }
@@ -118,6 +127,26 @@ const std::string& StringnessPlayerState(PlayerStates state)
         return unknown;
     }
     return ite->second;
+}
+float TransformPlayRate2Float(PlaybackRateMode rateMode)
+{
+    auto ite = std::find_if(PLAY_RATE_REFS.begin(), PLAY_RATE_REFS.end(), [&](const auto& pair) ->bool {
+        return pair.first == rateMode;
+    });
+    if (ite == PLAY_RATE_REFS.end()) {
+        return 1.0f;
+    }
+    return ite->second;
+}
+PlaybackRateMode TransformFloat2PlayRate(float rate)
+{
+    auto ite = std::find_if(PLAY_RATE_REFS.begin(), PLAY_RATE_REFS.end(), [&](const auto& pair) ->bool {
+        return std::fabs(rate - pair.second) < 1e-3;
+    });
+    if (ite == PLAY_RATE_REFS.end()) {
+        return PlaybackRateMode::SPEED_FORWARD_1_00_X;
+    }
+    return ite->first;
 }
 }  // namespace Media
 }  // namespace OHOS

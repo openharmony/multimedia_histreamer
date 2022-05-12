@@ -23,6 +23,7 @@
 #include "foundation/log.h"
 #include "utils/constants.h"
 #include "plugin/common/plugin_buffer.h"
+#include "plugin/common/plugin_time.h"
 #include "plugin/common/plugin_video_tags.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
@@ -514,7 +515,7 @@ Status SdlVideoSinkPlugin::Flush()
 
 Status SdlVideoSinkPlugin::GetLatency(uint64_t& nanoSec)
 {
-    nanoSec = 10; // 10 ns
+    nanoSec = 10 * HST_MSECOND; // 10 ms
     return Status::OK;
 }
 } // namespace Plugin

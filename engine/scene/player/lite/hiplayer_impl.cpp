@@ -17,7 +17,6 @@
 
 #include "hiplayer_impl.h"
 #include "foundation/log.h"
-#include "pipeline/core/clock_manager.h"
 #include "pipeline/factory/filter_factory.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_meta.h"
@@ -57,12 +56,13 @@ HiPlayerImpl::HiPlayerImpl()
     videoSink =
         FilterFactory::Instance().CreateFilterWithType<VideoSinkFilter>("builtin.player.videosink", "videoSink");
     FALSE_RETURN(videoSink != nullptr);
+    videoSink->SetSyncCenter(&syncManager_);
 #endif
 #endif
     FALSE_RETURN(audioSource_ != nullptr);
     FALSE_RETURN(demuxer_ != nullptr);
     FALSE_RETURN(audioSink_ != nullptr);
-
+    audioSink_->SetSyncCenter(&syncManager_);
     pipeline_ = std::make_shared<PipelineCore>();
 }
 
@@ -94,7 +94,6 @@ HiPlayerImpl::~HiPlayerImpl()
     MEDIA_LOG_D("dtor called.");
     fsm_.SendEventAsync(Intent::STOP);
     fsm_.Stop();
-    ClockManager::Instance().ClearProviders();
 }
 
 std::shared_ptr<HiPlayerImpl> HiPlayerImpl::CreateHiPlayerImpl()
@@ -278,13 +277,10 @@ void HiPlayerImpl::OnEvent(const Event& event)
             fsm_.SendEventAsync(Intent::NOTIFY_READY);
             break;
         case EventType::EVENT_COMPLETE:
-            mediaStats_.ReceiveEvent(EventType::EVENT_COMPLETE, 0);
+            mediaStats_.ReceiveEvent(event);
             if (mediaStats_.IsEventCompleteAllReceived()) {
                 fsm_.SendEventAsync(Intent::NOTIFY_COMPLETE);
             }
-            break;
-        case EventType::EVENT_AUDIO_PROGRESS:
-            HandleAudioProgressEvent(event);
             break;
         case EventType::EVENT_PLUGIN_ERROR: {
             HandlePluginErrorEvent(event);
@@ -323,6 +319,7 @@ ErrorCode HiPlayerImpl::PrepareFilters()
 
 ErrorCode HiPlayerImpl::DoPlay()
 {
+    syncManager_.Resume();
     auto ret = pipeline_->Start();
     if (ret != ErrorCode::SUCCESS) {
         UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
@@ -333,6 +330,7 @@ ErrorCode HiPlayerImpl::DoPlay()
 ErrorCode HiPlayerImpl::DoPause()
 {
     auto ret = pipeline_->Pause();
+    syncManager_.Pause();
     if (ret != ErrorCode::SUCCESS) {
         UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }
@@ -341,6 +339,7 @@ ErrorCode HiPlayerImpl::DoPause()
 
 ErrorCode HiPlayerImpl::DoResume()
 {
+    syncManager_.Resume();
     auto ret = pipeline_->Resume();
     if (ret != ErrorCode::SUCCESS) {
         UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
@@ -353,6 +352,7 @@ ErrorCode HiPlayerImpl::DoStop()
     MEDIA_LOG_I("HiPlayerImpl DoStop called, stop pipeline.");
     mediaStats_.Reset();
     auto ret = pipeline_->Stop();
+    syncManager_.Reset();
     if (ret != ErrorCode::SUCCESS) {
         UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }
@@ -375,11 +375,8 @@ ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode m
         pipeline_->FlushEnd();
         PROFILE_END("Flush end");
         PROFILE_RESET();
+        syncManager_.Seek(hstTime);
         rtv = demuxer_->SeekTo(hstTime, mode);
-        if (rtv == ErrorCode::SUCCESS) {
-            mediaStats_.ReceiveEvent(EventType::EVENT_AUDIO_PROGRESS, hstTime);
-            mediaStats_.ReceiveEvent(EventType::EVENT_VIDEO_PROGRESS, hstTime);
-        }
         PROFILE_END("SeekTo");
     }
     auto ptr = callback_.lock();
@@ -413,7 +410,7 @@ ErrorCode HiPlayerImpl::DoOnReady()
         }
     }
     if (found) {
-        mediaStats_.SetDuration(duration);
+        duration_ = duration;
     }
     return ErrorCode::SUCCESS;
 }
@@ -512,7 +509,7 @@ int32_t HiPlayerImpl::GetPlayerState(int32_t& state)
 
 int32_t HiPlayerImpl::GetCurrentPosition(int64_t& currentPositionMs)
 {
-    currentPositionMs = Plugin::HstTime2Ms(mediaStats_.GetCurrentPosition());
+    currentPositionMs = Plugin::HstTime2Ms(syncManager_.GetMediaTimeNow());
     return CppExt::to_underlying(ErrorCode::SUCCESS);
 }
 
@@ -524,19 +521,12 @@ int32_t HiPlayerImpl::GetDuration(int64_t& outDurationMs)
         || audioSource_ == nullptr) {
         return CppExt::to_underlying(ErrorCode::ERROR_INVALID_STATE);
     }
-    bool seekable = true;
-    FALSE_RETURN_V(audioSource_->IsSeekable(seekable) == ErrorCode::SUCCESS,
-                   CppExt::to_underlying(ErrorCode::ERROR_UNKNOWN));
-    if (!seekable) {
+    if (duration_ < 0) {
         outDurationMs = -1;
-        return CppExt::to_underlying(ErrorCode::SUCCESS);
-    }
-    auto duration = mediaStats_.GetDuration();
-    if (duration < 0) {
         MEDIA_LOG_W("no valid duration");
         return CppExt::to_underlying(ErrorCode::ERROR_UNKNOWN);
     }
-    outDurationMs = Plugin::HstTime2Ms(duration);
+    outDurationMs = Plugin::HstTime2Ms(duration_);
     MEDIA_LOG_I("GetDuration returned " PUBLIC_LOG_D32, outDurationMs);
     return CppExt::to_underlying(ErrorCode::SUCCESS);
 }
@@ -549,12 +539,6 @@ int32_t HiPlayerImpl::GetVideoWidth(int32_t& videoWidth)
 int32_t HiPlayerImpl::GetVideoHeight(int32_t& videoHeight)
 {
     return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
-}
-
-void HiPlayerImpl::HandleAudioProgressEvent(const Event& event)
-{
-    mediaStats_.ReceiveEvent(EventType::EVENT_AUDIO_PROGRESS,
-                             Plugin::AnyCast<int64_t>(event.param));
 }
 
 void HiPlayerImpl::HandlePluginErrorEvent(const Event& event)
@@ -683,7 +667,7 @@ ErrorCode HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& par
                                               audioSink_->GetInPort(PORT_NAME_DEFAULT)));
                 ActiveFilters({newAudioDecoder.get(), audioSink_.get()});
             }
-            mediaStats_.Append(MediaStatStub::MediaType::AUDIO);
+            mediaStats_.Append(audioSink_->GetName());
             rtv = ErrorCode::SUCCESS;
             break;
         }
@@ -720,6 +704,7 @@ ErrorCode HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin::Any& par
                     toPort = videoSink->GetInPort(PORT_NAME_DEFAULT);
                     FAIL_LOG(pipeline_->LinkPorts(fromPort, toPort)); // link ports
                     newFilters.push_back(videoSink.get());
+                    mediaStats_.Append(videoSink->GetName());
                 }
             }
         }

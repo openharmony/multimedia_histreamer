@@ -344,6 +344,11 @@ void PipelineCore::ReorderFilters()
         filters_.assign(result.begin(), result.end());
     }
 }
+
+void PipelineCore::SetSyncCenter(IMediaSyncCenter* syncCenter)
+{
+    syncCenter_ = syncCenter;
+}
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

@@ -75,7 +75,7 @@ Status VideoSink::Write(const std::shared_ptr<Buffer>& input)
     return videoSink->Write(input);
 }
 
-Status VideoSink::GetLatency(uint64_t& nanoSec)
+Status VideoSink::GetLatency(uint64_t& hstTime)
 {
-    return videoSink->GetLatency(nanoSec);
+    return videoSink->GetLatency(hstTime);
 }

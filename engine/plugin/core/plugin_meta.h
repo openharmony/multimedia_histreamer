@@ -56,6 +56,7 @@ enum struct MetaID : uint32_t {
     MEDIA_LYRICS = CppExt::to_underlying(Tag::MEDIA_LYRICS),
     MEDIA_DURATION = CppExt::to_underlying(Tag::MEDIA_DURATION),
     MEDIA_BITRATE = CppExt::to_underlying(Tag::MEDIA_BITRATE),
+    MEDIA_START_TIME = CppExt::to_underlying(Tag::MEDIA_START_TIME),
     MEDIA_FILE_EXTENSION = CppExt::to_underlying(Tag::MEDIA_FILE_EXTENSION),
     MEDIA_FILE_SIZE = CppExt::to_underlying(Tag::MEDIA_FILE_SIZE),
 
