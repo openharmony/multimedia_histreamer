@@ -121,6 +121,7 @@ private:
     int64_t curBufferGroupPts_ {0};
     int32_t bufferNum_ {1};
     int32_t bufferIndex_ {1};
+    int64_t bufferGroupPtsDistance {0};
 };
 } // namespace Ffmpeg
 } // namespace Plugin
