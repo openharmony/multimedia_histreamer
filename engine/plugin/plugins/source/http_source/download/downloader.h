@@ -37,8 +37,8 @@ enum struct DownloadStatus {
 
 struct HeaderInfo {
     char contentType[32]; // 32 chars
-    size_t fileContentLen;
-    long contentLen;
+    size_t fileContentLen {0};
+    long contentLen {0};
     bool isChunked {false};
 
     void Update(const HeaderInfo* info)
@@ -64,18 +64,39 @@ using DataSaveFunc = std::function<void(uint8_t*, uint32_t, int64_t)>;
 
 using StatusCallbackFunc = std::function<void(DownloadStatus, int32_t)>;
 
+struct RequestCallback {
+    RequestCallback(std::string url, size_t len, bool isEos, int32_t error1, int32_t error2)
+    {
+        url_ = url;
+        len_ = len;
+        isEos_ = isEos;
+        error1_ = error1;
+        error2_ = error2;
+    }
+    std::string url_;
+    size_t len_ {0};
+    bool isEos_ {false};
+    int32_t error1_;
+    int32_t error2_;
+};
+using RequestCallbackFunc = std::function<void(std::shared_ptr<RequestCallback>)>;
+
 class DownloadRequest {
 public:
     DownloadRequest(const std::string& url, DataSaveFunc saveData, StatusCallbackFunc statusCallback);
     size_t GetFileContentLength() const;
     void SaveHeader(const HeaderInfo* header);
     bool IsChunked() const;
+    bool IsEos() const;
+    void SetRequestCallback(RequestCallbackFunc requestCallbackFunc);
+
 private:
     void WaitHeaderUpdated() const;
 
     std::string url_;
     DataSaveFunc saveData_;
     StatusCallbackFunc statusCallback_;
+    RequestCallbackFunc requestCallbackFunc_;
 
     HeaderInfo headerInfo_;
     bool isHeaderUpdated {false};

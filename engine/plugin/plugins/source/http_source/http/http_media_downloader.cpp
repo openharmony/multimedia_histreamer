@@ -15,10 +15,6 @@
 #define HST_LOG_TAG "HttpMediaDownloader"
 
 #include "http_media_downloader.h"
-#include <algorithm>
-#include <functional>
-#include "securec.h"
-#include "osal/utils/util.h"
 
 namespace OHOS {
 namespace Media {

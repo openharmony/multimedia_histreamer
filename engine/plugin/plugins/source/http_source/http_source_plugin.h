@@ -15,15 +15,21 @@
 #ifndef HISTREAMER_HTTP_SOURCE_PLUGIN_H
 #define HISTREAMER_HTTP_SOURCE_PLUGIN_H
 
-#include "foundation/osal/thread/scoped_lock.h"
+#include "media_downloader.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
-#include "plugin/plugins/source/http_source/http/http_media_downloader.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
+enum class HttpType : int32_t {
+    Http_TYPE_INVALID = -1,
+    Http_TYPE_M3U8,
+    Http_TYPE_DASH,
+    Http_TYPE,
+};
+
 class HttpSourcePlugin : public SourcePlugin {
 public:
     explicit HttpSourcePlugin(std::string name) noexcept;
@@ -51,6 +57,7 @@ private:
     uint32_t waterline_;
     Callback* callback_ {};
     std::shared_ptr<MediaDownloader> executor_;
+    HttpType type_;
 };
 } // namespace HttpPluginLite
 } // namespace Plugin 

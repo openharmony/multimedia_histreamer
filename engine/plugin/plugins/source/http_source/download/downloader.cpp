@@ -30,6 +30,7 @@ namespace {
 constexpr int PER_REQUEST_SIZE = 48 * 1024;
 constexpr unsigned int SLEEP_TIME = 5;    // Sleep 5ms
 constexpr size_t RETRY_TIMES = 200;  // Retry 200 times
+constexpr size_t REQUEST_QUEUE_SIZE = 50;
 }
 
 DownloadRequest::DownloadRequest(const std::string& url, DataSaveFunc saveData, StatusCallbackFunc statusCallback)
@@ -58,6 +59,11 @@ bool DownloadRequest::IsChunked() const
     return headerInfo_.isChunked;
 };
 
+bool DownloadRequest::IsEos() const
+{
+    return isEos_;
+}
+
 void DownloadRequest::WaitHeaderUpdated() const
 {
     size_t times = 0;
@@ -68,13 +74,18 @@ void DownloadRequest::WaitHeaderUpdated() const
     MEDIA_LOG_D("isHeaderUpdated " PUBLIC_LOG_D32 ", times " PUBLIC_LOG_ZU, isHeaderUpdated, times);
 }
 
+void DownloadRequest::SetRequestCallback(RequestCallbackFunc requestCallbackFunc)
+{
+    requestCallbackFunc_ = requestCallbackFunc;
+}
+
 Downloader::Downloader() noexcept
 {
     shouldStartNextRequest = true;
 
     factory_ = std::make_shared<ClientFactory>(&RxHeaderData, &RxBodyData, this);
     requestQue_ = std::make_shared<BlockingQueue<std::shared_ptr<DownloadRequest>>>("downloadRequestQue",
-                                                                                    10); // 10 que size
+                                                                                    REQUEST_QUEUE_SIZE);
 
     task_ = std::make_shared<OSAL::Task>(std::string("HttpDownloader"));
     task_->RegisterHandler(std::bind(&Downloader::HttpDownloadLoop, this));
@@ -137,7 +148,7 @@ bool Downloader::BeginDownload()
 
     client_->Open(url);
 
-    currentRequest_->requestSize_ = PER_REQUEST_SIZE;
+    currentRequest_->requestSize_ = 1;
     currentRequest_->startPos_ = 0;
     currentRequest_->isEos_ = false;
 
@@ -164,6 +175,12 @@ void Downloader::HttpDownloadLoop()
     NetworkServerErrorCode serverCode;
     Status ret = client_->RequestData(currentRequest_->startPos_, currentRequest_->requestSize_,
                                       serverCode, clientCode);
+
+    std::shared_ptr<RequestCallback> r = std::make_shared<RequestCallback>(currentRequest_->url_,
+                                                                           currentRequest_->headerInfo_.fileContentLen,
+                                                                           currentRequest_->isEos_,
+                                                                           static_cast<int32_t>(clientCode),
+                                                                           static_cast<int32_t>(serverCode));
     if (ret == Status::ERROR_CLIENT) {
         MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, clientCode);
         currentRequest_->statusCallback_(DownloadStatus::CLIENT_ERROR, static_cast<int32_t>(clientCode));
@@ -175,8 +192,11 @@ void Downloader::HttpDownloadLoop()
 
     int64_t remaining = currentRequest_->headerInfo_.fileContentLen - currentRequest_->startPos_;
     if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
-        MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64, currentRequest_->startPos_);
+        MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,
+                    currentRequest_->startPos_, currentRequest_->url_.c_str());
         currentRequest_->statusCallback_(DownloadStatus::FINISHED, 0);
+        currentRequest_->isEos_ = true;
+        r->isEos_ = true;
         if (requestQue_->Empty()) {
             task_->PauseAsync();
         }
@@ -184,6 +204,11 @@ void Downloader::HttpDownloadLoop()
         shouldStartNextRequest = true;
     } else if (remaining < PER_REQUEST_SIZE) {
         currentRequest_->requestSize_ = remaining;
+    } else {
+        currentRequest_->requestSize_ = PER_REQUEST_SIZE;
+    }
+    if (currentRequest_->requestCallbackFunc_) {
+        currentRequest_->requestCallbackFunc_(r);
     }
 }
 
