@@ -446,16 +446,16 @@ ErrorCode HiPlayerImpl::DoOnReady()
     SetVolumeToSink(volume_, false); // do not report
     auto tmpMeta = demuxer_->GetGlobalMetaInfo();
     sourceMeta_ = tmpMeta;
-    uint64_t duration = 0;
+    int64_t duration = 0;
     bool found = false;
-    if (tmpMeta->GetUint64(Media::Plugin::MetaID::MEDIA_DURATION, duration)) {
+    if (tmpMeta->GetInt64(Media::Plugin::MetaID::MEDIA_DURATION, duration)) {
         found = true;
     }
     streamMeta_.clear();
-    uint64_t tmp = 0;
+    int64_t tmp = 0;
     for (auto& streamMeta : demuxer_->GetStreamMetaInfo()) {
         streamMeta_.push_back(streamMeta);
-        if (streamMeta->GetUint64(Media::Plugin::MetaID::MEDIA_DURATION, tmp)) {
+        if (streamMeta->GetInt64(Media::Plugin::MetaID::MEDIA_DURATION, tmp)) {
             duration = std::max(duration, tmp);
             found = true;
         }

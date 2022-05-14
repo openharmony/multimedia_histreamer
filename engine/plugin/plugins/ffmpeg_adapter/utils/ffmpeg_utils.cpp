@@ -22,6 +22,7 @@
 #include "libavutil/pixfmt.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_time.h"
+#include "plugin/common/tag_map.h"
 
 namespace OHOS {
 namespace Media {
@@ -99,6 +100,27 @@ const std::map<std::string, Tag> g_tagMap = {
     {"description", Tag::MEDIA_DESCRIPTION},
     {"lyrics", Tag::MEDIA_LYRICS},
 };
+
+std::map<std::string, std::function<void(TagMap&, AVDictionaryEntry*)>> g_MediaMap = {
+    {"title", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_TITLE>(tag->value); }},
+    {"artist", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_ARTIST>(tag->value); }},
+    {"lyricist", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_LYRICIST>(tag->value); }},
+    {"album", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_ALBUM>(tag->value); }},
+    {"album-artist", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_ALBUM_ARTIST>(tag->value); }},
+    {"date", [](TagMap& meta, AVDictionaryEntry* tag) {
+        uint32_t year, month, day = 0;
+        if (sscanf_s(tag->value, "%04u-%02u-%02u", &year, &month, &day) == 3) { // 3
+            meta.Insert<Tag::MEDIA_DATE>(RemoveDelimiter(tag->value, '-'));
+        }
+    }},
+    {"comment", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_COMMENT>(tag->value); }},
+    {"genre", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_GENRE>(tag->value); }},
+    {"copyright", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_COPYRIGHT>(tag->value); }},
+    {"language", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_LANGUAGE>(tag->value); }},
+    {"description", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_DESCRIPTION>(tag->value); }},
+    {"lyrics", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_LYRICS>(tag->value); }}
+};
+
 const std::vector<std::pair<AudioAacProfile, int32_t>> g_AacProfileMap = {
     {AudioAacProfile::MAIN, FF_PROFILE_AAC_MAIN},
     {AudioAacProfile::LC, FF_PROFILE_AAC_LOW},
@@ -167,11 +189,11 @@ std::string AVStrError(int errnum)
     return std::string(errbuf);
 }
 
-uint64_t ConvertTimeFromFFmpeg(int64_t pts, AVRational base)
+int64_t ConvertTimeFromFFmpeg(int64_t pts, AVRational base)
 {
-    uint64_t out;
+    int64_t out;
     if (pts == AV_NOPTS_VALUE) {
-        out = static_cast<uint64_t>(-1);
+        out = -1;
     } else {
         AVRational bq = {1, HST_SECOND};
         out = av_rescale_q(pts, base, bq);
@@ -335,14 +357,14 @@ bool FindAvMetaNameByTag(Tag tag, std::string& metaName)
     return false;
 }
 
-bool FindTagByAvMetaName(const std::string& metaName, Tag& tag)
+void InsertMediaTag(TagMap& meta, AVDictionaryEntry* tag)
 {
-    auto ite = g_tagMap.find(metaName);
-    if (ite == std::end(g_tagMap)) {
-        return false;
+    for (auto e : g_MediaMap) {
+        if (e.first == tag->key) {
+            e.second(meta, tag);
+            return;
+        }
     }
-    tag = ite->second;
-    return true;
 }
 
 AudioAacProfile ConvAacProfileFromFfmpeg(int32_t ffmpegProfile)

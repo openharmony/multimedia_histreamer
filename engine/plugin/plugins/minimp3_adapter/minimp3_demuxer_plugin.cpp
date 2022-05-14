@@ -162,21 +162,21 @@ void Minimp3DemuxerPlugin::FillInMediaInfo(MediaInfo& mediaInfo) const
 {
     mediaInfo.tracks.resize(1);
     if (mp3DemuxerRst_.frameChannels == 1) {
-        mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::MONO});
+        mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::MONO);
     } else {
-        mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::STEREO});
+        mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
     }
     int64_t durationHst;
     Ms2HstTime(durationMs, durationHst);
-    mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(mp3DemuxerRst_.frameSampleRate)});
-    mediaInfo.tracks[0].insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(mp3DemuxerRst_.frameBitrateKbps)});
-    mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(mp3DemuxerRst_.frameChannels)});
-    mediaInfo.tracks[0].insert({Tag::TRACK_ID, static_cast<uint32_t>(0)});
-    mediaInfo.tracks[0].insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_MPEG)});
-    mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(1)});
-    mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_LAYER, static_cast<uint32_t>(mp3DemuxerRst_.audioLayer)});
-    mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(mp3DemuxerRst_.samplesPerFrame)});
-    mediaInfo.tracks[0].insert({Tag::MEDIA_DURATION, static_cast<uint64_t>(durationHst)});
+    mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_RATE>(mp3DemuxerRst_.frameSampleRate);
+    mediaInfo.tracks[0].Insert<Tag::MEDIA_BITRATE>(mp3DemuxerRst_.frameBitrateKbps);
+    mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNELS>(mp3DemuxerRst_.frameChannels);
+    mediaInfo.tracks[0].Insert<Tag::TRACK_ID>(0);
+    mediaInfo.tracks[0].Insert<Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
+    mediaInfo.tracks[0].Insert<Tag::AUDIO_MPEG_VERSION>(1);
+    mediaInfo.tracks[0].Insert<Tag::AUDIO_MPEG_LAYER>(mp3DemuxerRst_.audioLayer);
+    mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_PER_FRAME>(mp3DemuxerRst_.samplesPerFrame);
+    mediaInfo.tracks[0].Insert<Tag::MEDIA_DURATION>(durationHst);
 }
 
 Status Minimp3DemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)

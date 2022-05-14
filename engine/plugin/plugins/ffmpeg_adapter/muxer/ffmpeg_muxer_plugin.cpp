@@ -137,7 +137,7 @@ Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime, AVStre
 
 Status SetCodecOfTrack(const AVOutputFormat* fmt, AVStream* stream, const TagMap& tagMap)
 {
-    auto ite = tagMap.find(Tag::MIME);
+    auto ite = tagMap.Find(Tag::MIME);
     FALSE_RETURN_V_MSG_E(ite != std::end(tagMap), Status::ERROR_UNSUPPORTED_FORMAT, "mime is missing!");
     FALSE_RETURN_V(ite->second.SameTypeWith(typeid(std::string)), Status::ERROR_MISMATCHED_TYPE);
     // todo specially for audio/mpeg audio/mpeg we should check mpegversion and mpeglayer
@@ -148,7 +148,7 @@ Status SetCodecOfTrack(const AVOutputFormat* fmt, AVStream* stream, const TagMap
 template<typename T, typename U>
 Status SetSingleParameter(Tag tag, const TagMap& tagMap, U& target, std::function<U(T)> func)
 {
-    auto ite = tagMap.find(tag);
+    auto ite = tagMap.Find(tag);
     if (ite != std::end(tagMap)) {
         FALSE_RETURN_V_MSG_E(ite->second.SameTypeWith(typeid(T)), Status::ERROR_MISMATCHED_TYPE,
                              "tag " PUBLIC_LOG_U32 " type mismatched", tag);
@@ -241,7 +241,7 @@ Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const TagMap&
          [](int64_t rate) {return rate;});
     NOK_RETURN(ret);
     // extra data
-    auto ite = tagMap.find(Tag::MEDIA_CODEC_CONFIG);
+    auto ite = tagMap.Find(Tag::MEDIA_CODEC_CONFIG);
     if (ite != std::end(tagMap)) {
         FALSE_RETURN_V_MSG_E(ite->second.SameTypeWith(typeid(CodecConfig)), Status::ERROR_MISMATCHED_TYPE,
                           "tag " PUBLIC_LOG_D32 " type mismatched", Tag::MEDIA_CODEC_CONFIG);
@@ -372,7 +372,7 @@ void FFmpegMuxerPlugin::ResetIoCtx(IOContext& ioContext)
 Status FFmpegMuxerPlugin::Reset()
 {
     ResetIoCtx(ioContext_);
-    generalParameters_.clear();
+    generalParameters_.Clear();
     trackParameters_.clear();
     OSAL::ScopedLock lock(fmtMutex_);
     if (outputFormat_->deinit) {

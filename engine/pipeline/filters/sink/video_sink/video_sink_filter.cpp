@@ -103,7 +103,7 @@ void VideoSinkFilter::HandleNegotiateParams(const Plugin::TagMap& upstreamParams
 {
 #ifndef OHOS_LITE
     Plugin::Tag tag = Plugin::Tag::VIDEO_MAX_SURFACE_NUM;
-    auto ite = upstreamParams.find(tag);
+    auto ite = upstreamParams.Find(tag);
     if (ite != std::end(upstreamParams)) {
         if (ite->second.SameTypeWith(typeid(uint32_t))) {
             auto ret = plugin_->SetParameter(tag, Plugin::AnyCast<uint32_t>(ite->second));
@@ -116,7 +116,7 @@ void VideoSinkFilter::HandleNegotiateParams(const Plugin::TagMap& upstreamParams
     if (pluginAllocator != nullptr && pluginAllocator->GetMemoryType() == Plugin::MemoryType::SURFACE_BUFFER) {
         MEDIA_LOG_D("plugin provide surface allocator");
         auto allocator = Plugin::ReinterpretPointerCast<Plugin::SurfaceAllocator>(pluginAllocator);
-        downstreamParams.emplace(std::make_pair(Tag::BUFFER_ALLOCATOR, allocator));
+        downstreamParams.Insert<Tag::BUFFER_ALLOCATOR>(allocator);
     }
 #endif
 }

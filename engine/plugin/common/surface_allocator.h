@@ -18,9 +18,9 @@
 
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
+#include "plugin_memory.h"
 #include "refbase.h"
 #include "surface/surface.h"
-#include "plugin_buffer.h"
 
 namespace OHOS {
 namespace Media {

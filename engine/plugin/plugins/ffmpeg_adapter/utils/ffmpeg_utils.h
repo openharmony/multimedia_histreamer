@@ -22,6 +22,7 @@
 #include "plugin/common/plugin_tags.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_video_tags.h"
+#include "plugin/common/tag_map.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,7 +47,7 @@ std::string AVStrError(int errnum);
  * @param base ffmpeg time_base
  * @return time in HST_TIME_BASE
  */
-uint64_t ConvertTimeFromFFmpeg(int64_t pts, AVRational base);
+int64_t ConvertTimeFromFFmpeg(int64_t pts, AVRational base);
 
 /**
  * Convert time in HST_TIME_BASE to ffmpeg time.
@@ -86,7 +87,7 @@ uint64_t ConvertChannelLayoutToFFmpeg(AudioChannelLayout channelLayout);
 
 bool FindAvMetaNameByTag(Tag tag, std::string& metaName);
 
-bool FindTagByAvMetaName(const std::string& metaName, Tag& tag);
+void InsertMediaTag(TagMap& meta, AVDictionaryEntry* tag);
 
 AudioAacProfile ConvAacProfileFromFfmpeg (int32_t ffmpegProfile);
 

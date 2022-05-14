@@ -372,27 +372,13 @@ bool FFmpegDemuxerPlugin::IsSelectedTrack(int32_t trackId)
 
 void FFmpegDemuxerPlugin::SaveFileInfoToMetaInfo(TagMap& meta)
 {
-    meta.clear();
+    meta.Clear();
     AVDictionaryEntry* tag = nullptr;
     while ((tag = av_dict_get(formatContext_->metadata, "", tag, AV_DICT_IGNORE_SUFFIX))) {
-        Tag target;
-        auto found = FindTagByAvMetaName(tag->key, target);
-        if (!found) {
-            continue;
-        }
-        if (target != Media::Plugin::Tag::MEDIA_DATE) {
-            meta.insert({target, std::string(tag->value)});
-        } else {
-            uint32_t year = 0;
-            uint32_t month = 0;
-            uint32_t day = 0;
-            if (sscanf_s(tag->value, "%04u-%02u-%02u", &year, &month, &day) == 3) { // 3
-                meta.insert({Tag::MEDIA_DATE, RemoveDelimiter(tag->value, '-')});
-            }
-        }
+        InsertMediaTag(meta, tag);
     }
     int64_t nanoSec = formatContext_->duration * (HST_SECOND / AV_TIME_BASE);
-    meta.insert({Tag::MEDIA_DURATION, static_cast<uint64_t>(nanoSec)});
+    meta.Insert<Tag::MEDIA_DURATION>(nanoSec);
 }
 
 bool FFmpegDemuxerPlugin::ParseMediaData()
@@ -410,7 +396,7 @@ bool FFmpegDemuxerPlugin::ParseMediaData()
 
     CppExt::make_unique<MediaInfo>().swap(mediaInfo_);
     size_t streamCnt = formatContext_->nb_streams;
-    mediaInfo_->general.clear();
+    mediaInfo_->general.Clear();
     mediaInfo_->tracks.resize(streamCnt);
     for (size_t i = 0; i < streamCnt; ++i) {
         auto& avStream = *formatContext_->streams[i];

@@ -19,14 +19,14 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "plugin/common/tag_value_map.h"
+#include "plugin/common/tag_map.h"
 
 namespace OHOS {
 namespace Media {
 namespace Test {
 using namespace OHOS::Media::Plugin;
 
-class TestTagValueMap : public ::testing::Test {
+class TestTagMap : public ::testing::Test {
 public:
     void SetUp() override
     {
@@ -37,9 +37,9 @@ public:
     }
 };
 
-TEST_F(TestTagValueMap, Can_insert_tag_value_int64_to_TagValueMap)
+TEST_F(TestTagMap, Can_insert_tag_value_int64_to_TagMap)
 {
-    TagValueMap map;
+    TagMap map;
     ASSERT_TRUE(map.Insert<Tag::MEDIA_DURATION>(10000));
     ASSERT_TRUE(map.Insert<Tag::MEDIA_FILE_SIZE>(500));
     int64_t value;
@@ -49,11 +49,11 @@ TEST_F(TestTagValueMap, Can_insert_tag_value_int64_to_TagValueMap)
     ASSERT_EQ(500, value);
 }
 
-TEST_F(TestTagValueMap, Can_insert_tag_value_int32_to_TagValueMap)
+TEST_F(TestTagMap, Can_insert_tag_value_uint32_to_TagMap)
 {
-    TagValueMap map;
+    TagMap map;
     ASSERT_TRUE(map.Insert<Tag::TRACK_ID>(10000));
-    int32_t value;
+    uint32_t value;
     ASSERT_TRUE(map.Get<Tag::TRACK_ID>(value));
     ASSERT_EQ(10000, value);
 }
