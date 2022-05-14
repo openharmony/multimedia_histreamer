@@ -104,7 +104,7 @@ enum struct Tag : uint32_t {
     MEDIA_LANGUAGE,                        ///< std::string, language
     MEDIA_DESCRIPTION,                     ///< std::string, description
     MEDIA_LYRICS,                          ///< std::string, cyrics
-    MEDIA_DURATION,                        ///< uint64_t, duration based on {@link HST_TIME_BASE}
+    MEDIA_DURATION,                        ///< int64_t, duration based on {@link HST_TIME_BASE}
     MEDIA_FILE_SIZE,                       ///< uint64_t, file size
     MEDIA_BITRATE,                         ///< int64_t, bite rate
     MEDIA_FILE_EXTENSION,                  ///< std::string, file extension

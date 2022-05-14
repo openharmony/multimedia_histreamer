@@ -435,12 +435,12 @@ bool VideoSinkFilter::CheckBufferLatenessMayWait(AVBufferPtr buffer)
         if (diff < 0 && 0 - diff > latency) { // using latency as vsync
             // buffer is early
             auto waitTimeMs = Plugin::HstTime2Ms(0 - diff);
-            MEDIA_LOG_D("buffer is eary, sleep for " PUBLIC_LOG_D64 " ms", waitTimeMs);
+            MEDIA_LOG_DD("buffer is eary, sleep for " PUBLIC_LOG_D64 " ms", waitTimeMs);
             OSAL::SleepFor(waitTimeMs);
         } else if (diff > 0 && Plugin::HstTime2Ms(diff) > 40) { // > 40ms
             // buffer is late
             tooLate = true;
-            MEDIA_LOG_D("buffer is too late");
+            MEDIA_LOG_DD("buffer is too late");
         }
         // buffer is too late and is not key frame drop it
         if (tooLate && (buffer->flag & BUFFER_FLAG_KEY_FRAME) == 0) {
@@ -472,7 +472,7 @@ ErrorCode VideoSinkFilter::DoSyncWrite(const AVBufferPtr& buffer)
         }
     }
     if (shouldDrop) {
-        MEDIA_LOG_I("drop buffer with pts " PUBLIC_LOG_D64 " due to too late", buffer->pts);
+        MEDIA_LOG_DD("drop buffer with pts " PUBLIC_LOG_D64 " due to too late", buffer->pts);
         return ErrorCode::SUCCESS;
     } else {
         return TranslatePluginStatus(plugin_->Write(buffer));
