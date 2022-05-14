@@ -73,8 +73,8 @@ void MediaSynchronousSink::UpdateMediaTimeRange(const Plugin::Meta& meta)
     uint32_t trackId = 0;
     meta.GetUint32(Plugin::MetaID::TRACK_ID, trackId);
     syncCenter_->SetMediaTimeRangeStart(trackStartTime, trackId);
-    uint64_t trackDuration = 0;
-    if (meta.GetUint64(Plugin::MetaID::MEDIA_DURATION, trackDuration)) {
+    int64_t trackDuration = 0;
+    if (meta.GetInt64(Plugin::MetaID::MEDIA_DURATION, trackDuration)) {
         syncCenter_->SetMediaTimeRangeEnd(trackDuration + trackStartTime, trackId);
     } else {
         syncCenter_->SetMediaTimeRangeEnd(INT64_MAX, trackId);

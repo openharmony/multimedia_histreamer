@@ -61,8 +61,7 @@ WavDemuxerPlugin::WavDemuxerPlugin(std::string name)
       ioContext_(),
       dataOffset_(0),
       isSeekable_(true),
-      wavHeadLength_(0),
-      wavHeader_(nullptr)
+      wavHeadLength_(0)
 {
     MEDIA_LOG_I("WavDemuxerPlugin, plugin name: " PUBLIC_LOG_S, pluginName_.c_str());
 }
@@ -88,45 +87,40 @@ Status WavDemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& source
 Status WavDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
 {
     auto buffer = std::make_shared<Buffer>();
-    auto bufData = buffer->AllocMemory(nullptr, WAV_HEAD_INFO_LEN);
+    buffer->WrapMemory((uint8_t*)&wavHeader_, sizeof(wavHeader_), 0);
     Status status = ioContext_.dataSource->ReadAt(0, buffer, WAV_HEAD_INFO_LEN);
     if (status != Status::OK) {
         return status;
     }
-    uint8_t *dataPtr = const_cast<uint8_t *>(bufData->GetReadOnlyData());
-    wavHeader_ = reinterpret_cast<WavHeadAttr *>(dataPtr);
-    if (wavHeader_ == nullptr) {
-        return Status::ERROR_UNKNOWN;
-    }
     wavHeadLength_  = WAV_HEAD_INFO_LEN;
-    if (wavHeader_->audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_PCM)) {
+    if (wavHeader_.audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_PCM)) {
         wavHeadLength_ -= 12; // 12 = subChunk2ID(optional)+subChunk2Size(optional)+dataFactSize(optional)
     }
     MEDIA_LOG_D("wavHeadLength_ " PUBLIC_LOG_U32, wavHeadLength_);
     dataOffset_ = wavHeadLength_;
     mediaInfo.tracks.resize(1);
-    if (wavHeader_->numChannels == 1) {
+    if (wavHeader_.numChannels == 1) {
         mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::MONO);
     } else {
         mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
     }
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_RATE>(wavHeader_->sampleRate);
-    mediaInfo.tracks[0].Insert<Tag::MEDIA_BITRATE>((wavHeader_->byteRate) * 8); // 8  byte to bit
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNELS>(wavHeader_->numChannels);
+    mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_RATE>(wavHeader_.sampleRate);
+    mediaInfo.tracks[0].Insert<Tag::MEDIA_BITRATE>((wavHeader_.byteRate) * 8); // 8  byte to bit
+    mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNELS>(wavHeader_.numChannels);
     mediaInfo.tracks[0].Insert<Tag::TRACK_ID>(0);
     mediaInfo.tracks[0].Insert<Tag::MIME>(MEDIA_MIME_AUDIO_RAW);
     mediaInfo.tracks[0].Insert<Tag::AUDIO_MPEG_VERSION>(1);
     mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_PER_FRAME>(WAV_PER_FRAME_SIZE);
-    if (wavHeader_->audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_PCM)
-        || wavHeader_->audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_EXTENSIBLE)) {
+    if (wavHeader_.audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_PCM)
+        || wavHeader_.audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_EXTENSIBLE)) {
         mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_FORMAT>
-            (g_WavAudioSampleFormatPacked[static_cast<uint32_t>(wavHeader_->bitsPerSample)]);
-    } else if (wavHeader_->audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_IEEE_FLOAT)) {
+            (g_WavAudioSampleFormatPacked[static_cast<uint32_t>(wavHeader_.bitsPerSample)]);
+    } else if (wavHeader_.audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_IEEE_FLOAT)) {
         mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::F32);
     } else {
         mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::NONE);
     }
-    mediaInfo.tracks[0].Insert<Tag::BITS_PER_CODED_SAMPLE>(wavHeader_->bitsPerSample);
+    mediaInfo.tracks[0].Insert<Tag::BITS_PER_CODED_SAMPLE>(wavHeader_.bitsPerSample);
     return Status::OK;
 }
 
@@ -151,12 +145,14 @@ Status WavDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
     }
 
     // time(sec) * byte per second= current time byte number
-    auto position = hstTime * wavHeader_->sampleRate * wavHeader_->numChannels * wavHeader_->byteRate;
+    auto position = hstTime * wavHeader_.sampleRate * wavHeader_.numChannels * wavHeader_.byteRate;
 
     // current time byte number / sample rate * numChannels
     // To round and position to the starting point of a complete sample.
-    position = position / (wavHeader_->sampleRate * wavHeader_->numChannels) *
-            (wavHeader_->sampleRate * wavHeader_->numChannels);
+    if (wavHeader_.sampleRate != 0 && wavHeader_.numChannels != 0) {
+        position = position / (wavHeader_.sampleRate * wavHeader_.numChannels) *
+                   (wavHeader_.sampleRate * wavHeader_.numChannels);
+    }
     if (position) { // no loop play seek
         if (mode == SeekMode::SEEK_NEXT_SYNC) {
             dataOffset_ = dataOffset_ + position;
