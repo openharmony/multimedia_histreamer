@@ -114,6 +114,7 @@ ErrorCode AsyncMode::Stop()
 void AsyncMode::FlushStart()
 {
     MEDIA_LOG_D("AsyncMode FlushStart entered.");
+    stopped_ = true; // thread will pause, should not enter endless loop
     if (inBufQue_) {
         inBufQue_->SetActive(false);
     }
@@ -129,6 +130,7 @@ void AsyncMode::FlushStart()
 void AsyncMode::FlushEnd()
 {
     MEDIA_LOG_I("AsyncMode FlushEnd entered");
+    stopped_ = false;
     if (inBufQue_) {
         inBufQue_->SetActive(true);
     }
