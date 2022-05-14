@@ -132,6 +132,7 @@ private:
     std::shared_ptr<AVFrame> cachedFrame_ {nullptr};
     uint8_t* scaleData_[AV_NUM_DATA_POINTERS];
     int32_t scaleLineSize_[AV_NUM_DATA_POINTERS];
+    bool isAllocScaleData_ {false};
     DataCallback* dataCb_ {};
 
     uint32_t width_;

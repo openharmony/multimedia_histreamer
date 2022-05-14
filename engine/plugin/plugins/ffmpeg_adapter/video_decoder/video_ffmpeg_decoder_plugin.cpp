@@ -132,6 +132,7 @@ VideoFfmpegDecoderPlugin::VideoFfmpegDecoderPlugin(std::string name)
         scaleData_[i] = nullptr;
         scaleLineSize_[i] = 0;
     }
+    isAllocScaleData_ = false;
 }
 
 Status VideoFfmpegDecoderPlugin::Init()
@@ -336,7 +337,10 @@ Status VideoFfmpegDecoderPlugin::ResetLocked()
     avCodecContext_.reset();
     outBufferQ_.Clear();
     if (scaleData_[0] != nullptr) {
-        // av_free(scaleData_[0]); // Maybe free wrong address.
+        if (isAllocScaleData_) {
+            av_free(scaleData_[0]);
+            isAllocScaleData_ = false;
+        }
         for (int32_t i = 0; i < AV_NUM_DATA_POINTERS; i++) {
             scaleData_[i] = nullptr;
             scaleLineSize_[i] = 0;
@@ -529,11 +533,11 @@ Status VideoFfmpegDecoderPlugin::CreateSwsContext()
         }
     });
     FALSE_RETURN_V_MSG_E(swsCtx_ != nullptr, Status::ERROR_NO_MEMORY, "create swsCtx fail");
-    if (scaleData_[0] == nullptr) {
+    if (scaleData_[0] == nullptr && !isAllocScaleData_) {
         auto ret = av_image_alloc(scaleData_, scaleLineSize_, width_, height_,
                                   ConvertPixelFormatToFFmpeg(pixelFormat_), STRIDE_ALIGN);
         FALSE_RETURN_V_MSG_E(ret >= 0, Status::ERROR_UNKNOWN, "av_image_fill_linesizes fail: " PUBLIC_LOG_D32, ret);
-        MEDIA_LOG_E("pixelFormat_: " PUBLIC_LOG_U32 ", pix_fmt: " PUBLIC_LOG_D32,
+        MEDIA_LOG_D("pixelFormat_: " PUBLIC_LOG_U32 ", pix_fmt: " PUBLIC_LOG_D32,
                     pixelFormat_, ConvertPixelFormatToFFmpeg(pixelFormat_));
         for (int32_t i = 0; i < AV_NUM_DATA_POINTERS; i++) {
             MEDIA_LOG_D("scaleData[" PUBLIC_LOG_D32 "]: " PUBLIC_LOG_P ", scaleLineSize[" PUBLIC_LOG_D32 "]: "
@@ -543,6 +547,7 @@ Status VideoFfmpegDecoderPlugin::CreateSwsContext()
                 return Status::ERROR_UNKNOWN;
             }
         }
+        isAllocScaleData_ = true;
     }
     MEDIA_LOG_D("CreateSwsContext success");
     return Status::OK;
