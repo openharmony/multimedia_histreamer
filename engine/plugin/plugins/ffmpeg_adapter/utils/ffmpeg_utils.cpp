@@ -189,11 +189,11 @@ std::string AVStrError(int errnum)
     return std::string(errbuf);
 }
 
-uint64_t ConvertTimeFromFFmpeg(int64_t pts, AVRational base)
+int64_t ConvertTimeFromFFmpeg(int64_t pts, AVRational base)
 {
-    uint64_t out;
+    int64_t out;
     if (pts == AV_NOPTS_VALUE) {
-        out = static_cast<uint64_t>(-1);
+        out = -1;
     } else {
         AVRational bq = {1, HST_SECOND};
         out = av_rescale_q(pts, base, bq);

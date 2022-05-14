@@ -47,7 +47,7 @@ std::string AVStrError(int errnum);
  * @param base ffmpeg time_base
  * @return time in HST_TIME_BASE
  */
-uint64_t ConvertTimeFromFFmpeg(int64_t pts, AVRational base);
+int64_t ConvertTimeFromFFmpeg(int64_t pts, AVRational base);
 
 /**
  * Convert time in HST_TIME_BASE to ffmpeg time.
