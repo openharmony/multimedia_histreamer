@@ -184,6 +184,7 @@ ErrorCode MediaSyncManager::Pause()
     } else {
         pausedMediaTime_ = HST_TIME_NONE;
     }
+    pausedMediaTime_ = ClipMediaTime(pausedMediaTime_);
     MEDIA_LOG_I("pause with clockTime " PUBLIC_LOG_D64 ", mediaTime " PUBLIC_LOG_D64, pausedClockTime_,
                 pausedMediaTime_);
     clockState_ = State::PAUSED;
@@ -228,6 +229,20 @@ ErrorCode MediaSyncManager::Reset()
         prerolledSyncers_.clear();
     }
     return ErrorCode::SUCCESS;
+}
+
+int64_t MediaSyncManager::ClipMediaTime(int64_t inTime)
+{
+    int64_t ret = inTime;
+    if (minRangeStartOfMediaTime_ != HST_TIME_NONE && ret < minRangeStartOfMediaTime_) {
+        ret = minRangeStartOfMediaTime_;
+        MEDIA_LOG_D("clip to min media time" PUBLIC_LOG_D64, ret);
+    }
+    if (maxRangeEndOfMediaTime_ != HST_TIME_NONE && ret > maxRangeEndOfMediaTime_) {
+        ret = maxRangeEndOfMediaTime_;
+        MEDIA_LOG_D("clip to max media time" PUBLIC_LOG_D64, ret);
+    }
+    return ret;
 }
 
 void MediaSyncManager::ResetTimeAnchorNoLock()
@@ -296,15 +311,7 @@ int64_t MediaSyncManager::GetMediaTimeNow()
     }
     auto ret = SimpleGetMediaTime(currentAnchorClockTime_, GetSystemClock(), currentAnchorMediaTime_, playRate_);
     // clip into min&max media time
-    if (minRangeStartOfMediaTime_ != HST_TIME_NONE && ret < minRangeStartOfMediaTime_) {
-        ret = minRangeStartOfMediaTime_;
-        MEDIA_LOG_D("clip to min media time" PUBLIC_LOG_D64, ret);
-    }
-    if (maxRangeEndOfMediaTime_ != HST_TIME_NONE && ret > maxRangeEndOfMediaTime_) {
-        ret = maxRangeEndOfMediaTime_;
-        MEDIA_LOG_D("clip to max media time" PUBLIC_LOG_D64, ret);
-    }
-    return ret;
+    return ClipMediaTime(ret);
 }
 
 int64_t MediaSyncManager::GetClockTimeNow()
