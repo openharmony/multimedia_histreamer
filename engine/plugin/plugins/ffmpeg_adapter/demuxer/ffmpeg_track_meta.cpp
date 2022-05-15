@@ -40,6 +40,7 @@ StreamConvertor g_streamConvertors[] = {{AV_CODEC_ID_PCM_S16LE, ConvertRawAudioS
                                         {AV_CODEC_ID_PCM_S16BE, ConvertRawAudioStreamToMetaInfo},
                                         {AV_CODEC_ID_PCM_U16LE, ConvertRawAudioStreamToMetaInfo},
                                         {AV_CODEC_ID_PCM_U16BE, ConvertRawAudioStreamToMetaInfo},
+                                        {AV_CODEC_ID_PCM_S24LE, ConvertRawAudioStreamToMetaInfo},
                                         {AV_CODEC_ID_PCM_F32LE, ConvertRawAudioStreamToMetaInfo},
                                         {AV_CODEC_ID_PCM_S8, ConvertRawAudioStreamToMetaInfo},
                                         {AV_CODEC_ID_PCM_U8, ConvertRawAudioStreamToMetaInfo},
@@ -247,7 +248,7 @@ void ConvertAVStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<A
             return;
         }
     }
-    MEDIA_LOG_E("unsupported codec id: " PUBLIC_LOG_D32, codecId);
+    MEDIA_LOG_E("unsupported codec id: " PUBLIC_LOG_D32 ", name: " PUBLIC_LOG_S, codecId, avcodec_get_name(codecId));
 }
 } // namespace Ffmpeg
 } // namespace Plugin
