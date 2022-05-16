@@ -17,7 +17,8 @@
         "features": [],
         "adapted_system_type": [
             "mini",
-            "small"
+            "small",
+            "standard"
         ],
         "rom": "622KB",
         "ram": "",
