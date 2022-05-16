@@ -120,6 +120,7 @@ private:
     bool AssignSampleRateIfSupported(uint32_t sampleRate);
     bool AssignChannelNumIfSupported(uint32_t channelNum);
     bool AssignSampleFmtIfSupported(Plugin::AudioSampleFormat sampleFormat);
+    void DrainInner();
 
     OSAL::Mutex renderMutex_ {};
     std::unique_ptr<AudioStandard::AudioRenderer> audioRenderer_;
