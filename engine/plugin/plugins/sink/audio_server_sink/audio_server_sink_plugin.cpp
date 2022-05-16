@@ -634,7 +634,7 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
         length -= ret;
     }
     if (input->flag & BUFFER_FLAG_EOS) {
-        audioRenderer_->Drain();
+        DrainInner();
     }
     return ret >= 0 ? Status::OK : Status::ERROR_UNKNOWN;
 }
@@ -652,6 +652,21 @@ Status AudioServerSinkPlugin::Flush()
     }
     MEDIA_LOG_E("audioRenderer_ Flush() fail");
     return Status::ERROR_UNKNOWN;
+}
+
+void AudioServerSinkPlugin::DrainInner()
+{
+    if (audioRenderer_ == nullptr) {
+        return;
+    }
+    auto res = audioRenderer_->Drain();
+    uint64_t latency = 0;
+    audioRenderer_->GetLatency(latency);
+    latency /= 1000; // cast into ms
+    if (!res || latency > 50) { // latency too large
+        MEDIA_LOG_W("drain failed or latency is too large, will sleep " PUBLIC_LOG_U64 " ms, aka. latency", latency);
+        OSAL::SleepFor(latency);
+    }
 }
 } // namespace AuSrSinkPlugin
 } // Plugin
