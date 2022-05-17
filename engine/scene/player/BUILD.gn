@@ -59,7 +59,7 @@ source_set("histreamer_player") {
     ]
     public_deps += [
       "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
-      "//foundation/graphic/graphic/frameworks/surface:surface",
+      "//foundation/graphic/graphic_2d/frameworks/surface:surface",
       "//foundation/multimedia/media_standard/services/utils:media_format",
     ]
   }
