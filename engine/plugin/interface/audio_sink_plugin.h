@@ -180,6 +180,16 @@ struct AudioSinkPlugin : public PluginBase {
      *  @retval OK: Plugin reset succeeded.
      */
     virtual Status Flush() = 0;
+
+    /**
+     * @brief Drain data to make sure all the data processed.
+     *
+     * The function is valid only in RUNNING state.
+     *
+     * @return  Execution status return
+     *  @retval OK: Plugin Drain succeeded.
+     */
+    virtual Status Drain() = 0;
 };
 
 /// Audio sink plugin api major number.

@@ -41,6 +41,8 @@ public:
 
     Status Flush();
 
+    Status Drain();
+
     Status Write(const std::shared_ptr<Buffer> &input);
 
     Status SetVolume(float volume);
