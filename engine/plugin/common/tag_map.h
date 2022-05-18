@@ -106,16 +106,12 @@ public:
         tag == Tag::MEDIA_DESCRIPTION or
         tag == Tag::MEDIA_LYRICS, std::string);
 
-    ValueType operator[](Tag tag)
+    ValueType& operator[](const Tag &tag)
     {
-        if (map_.find(tag) != map_.end()) {
-            return map_[tag];
-        } else {
-            return ValueType();
-        }
+        return map_[tag];
     }
 
-    MapIt begin() const
+    MapIt begin() const // to support for (auto e : TagMap), must use begin/end name
     {
         return map_.cbegin();
     }
@@ -134,7 +130,6 @@ public:
     {
         return map_.find(tag);
     }
-
 private:
     std::map<Tag, Any> map_;
 };

@@ -16,13 +16,13 @@
 #include "ffmpeg_utils.h"
 
 #include <algorithm>
+#include <functional>
 
 #include "foundation/log.h"
 #include "libavutil/channel_layout.h"
 #include "libavutil/pixfmt.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_time.h"
-#include "plugin/common/tag_map.h"
 
 namespace OHOS {
 namespace Media {
