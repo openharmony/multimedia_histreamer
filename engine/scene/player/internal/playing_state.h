@@ -55,7 +55,7 @@ public:
         std::tuple<ErrorCode, Action> err {ErrorCode::ERROR_INVALID_PARAMETER_TYPE, Action::ACTION_BUTT};
         FALSE_RETURN_V(param.SameTypeWith(typeid(SeekInfo)), err);
         auto info = Plugin::AnyCast<SeekInfo>(param);
-        auto ret = executor_.DoSeek(true, info.hstTime, info.mode);
+        auto ret = executor_.DoSeek(true, info.hstTime, info.mode, true);
         return {ret, Action::ACTION_BUTT};
     }
 
@@ -74,7 +74,7 @@ public:
         auto ret = executor_.DoOnComplete();
         if (executor_.IsSingleLoop()) {
             MEDIA_LOG_I("will seeking to 0 and continue playing");
-            auto seekRes = executor_.DoSeek(true, 0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC);
+            auto seekRes = executor_.DoSeek(true, 0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC, false);
             return {seekRes, Action::ACTION_BUTT};
         } else {
             return {ret, Action::TRANS_TO_EOS};
