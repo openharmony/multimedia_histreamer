@@ -104,6 +104,8 @@ private:
     void SetMediaTimeStartEnd(int32_t trackId, int32_t index, int64_t val);
     void SetAllSyncShouldWaitNoLock();
     void ResetTimeAnchorNoLock();
+
+    int64_t ClipMediaTime(int64_t inTime);
     OSAL::Mutex clockMutex_ {};
     State clockState_ {State::PAUSED};
     int8_t currentSyncerPriority_ {IMediaSynchronizer::NONE};
