@@ -75,6 +75,23 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     DATA_GROUP(std::string(RESOURCE_DIR "/OGG/OGG_48000_SHORT.ogg"), 30912),
     DATA_GROUP(std::string(RESOURCE_DIR "/APE/MPEG-4_48000_32_SHORT.ape"), 161018));
 
+    DATA_PROVIDER(hlsLinks, 100,
+    DATA_GROUP(std::string("http://ls-open.qingting.fm/live/389/64k.m3u8?"
+                           "deviceid=00000000-0000-0000-0000-000000000000&format=aac")),
+    // CRI环球资讯
+    DATA_GROUP(std::string("http://srs-cdn.ajmide.com/r_110/nglive_110.m3u8"
+                           "?auth_key=1652751160-0-0-39ab02ff2504b3a90e75232a6dcb5b70")),
+    // CNR中国之声
+    DATA_GROUP(std::string("http://srs-cdn.ajmide.com/r_67/nglive_67.m3u8"
+                           "?auth_key=1652750914-0-0-a21f9f25bdefbe20c8cd76b7423938b4")),
+    // CNR中国乡村之声
+    DATA_GROUP(std::string("http://srs-cdn.ajmide.com/r_82/nglive_82.m3u8"
+                           "?auth_key=1652755141-0-0-08de39584a14c53d934ab00e717eae97")),
+    // CNR文艺之声
+    DATA_GROUP(std::string(" http://srs-cdn.ajmide.com/r_76/nglive_76.m3u8"
+                           "?auth_key=1652751455-0-0-ce940379fcda37898d95cbcd4d414f59"))
+    );
+
     // @test(data="shortMusicUrls", tags=fast)
     PTEST((std::string url), Test single player play url music, and finished automatically)
     {
@@ -215,11 +232,9 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
         ASSERT_EQ(0, player->Stop());
     }
 
-    // @test(tags=debug)
-    TEST(Test hls audio broadcast)
+    // @test(data="hlsLinks", tags=debuging)
+    PTEST((std::string url), Test hls audio broadcast)
     {
-        std::string url = "http://ls-open.qingting.fm/live/389/64k.m3u8?"
-                          "deviceid=00000000-0000-0000-0000-000000000000&format=aac";
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(url)));
         ASSERT_EQ(0, player->Prepare());

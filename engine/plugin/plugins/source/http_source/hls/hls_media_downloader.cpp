@@ -83,6 +83,8 @@ bool HlsMediaDownloader::Open(const std::string &url)
 void HlsMediaDownloader::Close()
 {
     buffer_->SetActive(false);
+    updateTask_->Stop();
+    downloadTask_->Stop();
     downloader->Stop();
 }
 
