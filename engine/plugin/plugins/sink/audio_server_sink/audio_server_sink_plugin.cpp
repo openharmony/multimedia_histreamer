@@ -568,28 +568,8 @@ Status AudioServerSinkPlugin::Pause()
 
 Status AudioServerSinkPlugin::GetLatency(uint64_t& hstTime)
 {
-    uint64_t uSec = 0;
-    int32_t ret = AudioStandard::SUCCESS;
-    {
-        OSAL::ScopedLock lock(renderMutex_);
-        if (audioRenderer_ != nullptr) {
-            ret = audioRenderer_->GetLatency(uSec);
-        } else {
-            return Status::ERROR_WRONG_STATE;
-        }
-    }
-    if (ret != AudioStandard::SUCCESS) {
-        MEDIA_LOG_E("get latency failed with code " PUBLIC_LOG_D32, ret);
-        return Status::ERROR_UNKNOWN;
-    }
-    int64_t latency = 0;
-    if (Us2HstTime(uSec, latency)) {
-        hstTime = latency;
-        return Status::OK;
-    } else {
-        MEDIA_LOG_E("time convert overflow");
-        return Status::ERROR_UNKNOWN;
-    }
+    hstTime = 0; // set latency as 0 since latency of audio system is not reliable
+    return Status::OK;
 }
 
 Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
