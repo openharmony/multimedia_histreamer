@@ -140,6 +140,7 @@ if (${OHOS_LITE})
 else()
     set(TEST_HELPER_SRCS
             ${TOP_DIR}/histreamer/tests/st/helper/std_player.cpp
+            ${TOP_DIR}/histreamer/tests/st/helper/std_audio_recorder.cpp
             )
 endif ()
 

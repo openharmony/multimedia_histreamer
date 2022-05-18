@@ -1,0 +1,113 @@
+/*
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef OHOS_LITE
+#include "test_recorder.hpp"
+
+#include <thread>
+#include <chrono>
+
+#include "i_engine_factory.h"
+#include "foundation/log.h"
+
+extern "C" {
+__attribute__((visibility("default"))) OHOS::Media::IEngineFactory* CreateEngineFactory();
+}
+
+using namespace OHOS::Media;
+
+namespace OHOS::Media::Test {
+class RecorderEngineObs : public IRecorderEngineObs {
+public:
+    ~RecorderEngineObs() override = default;
+
+    void OnError(ErrorType errorType, int32_t errorCode) override
+    {
+        MEDIA_LOG_I("media_standard recorder error : " PUBLIC_LOG_D32 ,errorCode);
+    }
+
+    void OnInfo(InfoType type, int32_t extra) override
+    {
+    }
+};
+
+class TestRecorderImpl : public TestRecorder {
+public:
+    explicit TestRecorderImpl(std::unique_ptr<IRecorderEngine> recorder) : recorder_(std::move(recorder)) {}
+    int32_t Configure(const AudioRecordSource& recordSource) override;
+    int32_t Prepare() override;
+    int32_t Start() override;
+    int32_t Pause() override;
+    int32_t Resume() override;
+    int32_t Stop() override;
+private:
+    std::unique_ptr<IRecorderEngine> recorder_;
+};
+
+std::unique_ptr<TestRecorder> TestRecorder::CreateAudioRecorder()
+{
+    auto engineFactory = std::unique_ptr<OHOS::Media::IEngineFactory>(CreateEngineFactory());
+    auto recorder = engineFactory->CreateRecorderEngine();
+    auto obs = std::make_shared<RecorderEngineObs>();
+    recorder->SetObs(obs);
+    return std::make_unique<TestRecorderImpl>(std::move(recorder));
+}
+
+int32_t TestRecorderImpl::Configure(const AudioRecordSource& recordSource)
+{
+    // TO DO: should use recordSource.pcmPath_ to read the pcm file.
+    int32_t audioSourceId = 0;
+    OHOS::AudioStandard::AudioCaptureCreator::GetInstance().SetPcmPath(recordSource.pcmPath_);
+    recorder_->SetAudioSource(recordSource.sourceType_,audioSourceId);
+    recorder_->SetOutputFormat(recordSource.outputFormat_);
+    auto audSampleRate = AudSampleRate{ recordSource.sampleRate_ };
+    auto audChannel = AudChannel{ recordSource.channel_ };
+    auto audBitRate = AudBitRate{ recordSource.bitRate_ };
+    auto auEncoder = AudEnc{ recordSource.encodeType_ };
+
+    recorder_->Configure(audioSourceId, audSampleRate);
+    recorder_->Configure(audioSourceId, audChannel);
+    recorder_->Configure(audioSourceId, audBitRate);
+    recorder_->Configure(audioSourceId, auEncoder);
+
+    auto outFilePath = OutFilePath{ recordSource.outputPath_ };
+    return recorder_->Configure(DUMMY_SOURCE_ID, outFilePath); // result record file name
+}
+
+int32_t TestRecorderImpl::Prepare()
+{
+    return recorder_->Prepare();
+}
+
+int32_t TestRecorderImpl::Start()
+{
+    return recorder_->Start();
+}
+
+int32_t TestRecorderImpl::Pause()
+{
+    return recorder_->Pause();
+}
+
+int32_t TestRecorderImpl::Resume()
+{
+    return recorder_->Resume();
+}
+
+int32_t TestRecorderImpl::Stop()
+{
+    return recorder_->Stop();
+}
+}
+#endif
