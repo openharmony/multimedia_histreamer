@@ -123,8 +123,8 @@ private:
     void EndDownload();
 
     void HttpDownloadLoop();
-    static size_t RxBodyData(void *buffer, size_t size, size_t nitems, void *userParam);
-    static size_t RxHeaderData(void *buffer, size_t size, size_t nitems, void *userParam);
+    static size_t RxBodyData(void* buffer, size_t size, size_t nitems, void* userParam);
+    static size_t RxHeaderData(void* buffer, size_t size, size_t nitems, void* userParam);
 
     std::shared_ptr<ClientFactory> factory_;
     std::shared_ptr<NetworkClient> client_;

@@ -35,16 +35,18 @@ HttpMediaDownloader::HttpMediaDownloader() noexcept
     downloader = std::make_shared<Downloader>();
 }
 
-HttpMediaDownloader::~HttpMediaDownloader() {}
-
-bool HttpMediaDownloader::Open(const std::string &url)
+bool HttpMediaDownloader::Open(const std::string& url)
 {
     MEDIA_LOG_I("Open download " PUBLIC_LOG_S, url.c_str());
     isEos_ = false;
-    request_ = std::make_shared<DownloadRequest>(url,
-        std::bind(&HttpMediaDownloader::SaveData, this, _1, _2, _3),
-        std::bind(&HttpMediaDownloader::OnDownloadStatus, this, _1, _2));
-    downloader->Download(request_, -1);
+    auto saveData =  [this] (auto&& data, auto&& len, auto&& offset) {
+        SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
+                std::forward<decltype(offset)>(offset)); };
+    auto statusCallback = [this](auto&& status, auto&& code) {
+        OnDownloadStatus(std::forward<decltype(status)>(status), std::forward<decltype(code)>(code)); };
+
+    request_ = std::make_shared<DownloadRequest>(url, saveData, statusCallback);
+    downloader->Download(request_, -1); // -1
     downloader->Start();
     return true;
 }
@@ -55,8 +57,8 @@ void HttpMediaDownloader::Close()
     downloader->Stop();
 }
 
-bool HttpMediaDownloader::Read(unsigned char *buff, unsigned int wantReadLength,
-                               unsigned int &realReadLength, bool &isEos)
+bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
+                               unsigned int& realReadLength, bool& isEos)
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
     isEos = false;

@@ -30,10 +30,10 @@ namespace HttpPlugin {
 class HttpMediaDownloader : public MediaDownloader {
 public:
     HttpMediaDownloader() noexcept;
-    ~HttpMediaDownloader() override;
-    bool Open(const std::string &url) override;
+    ~HttpMediaDownloader() override = default;
+    bool Open(const std::string& url) override;
     void Close() override;
-    bool Read(unsigned char *buff, unsigned int wantReadLength, unsigned int &realReadLength, bool &isEos) override;
+    bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) override;
     bool Seek(int offset) override;
 
     size_t GetContentLength() const override;

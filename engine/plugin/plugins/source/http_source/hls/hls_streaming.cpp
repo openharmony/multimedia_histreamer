@@ -19,15 +19,11 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-HLSStreaming::HLSStreaming(const std::string &url) : AdaptiveStreaming(url)
+HLSStreaming::HLSStreaming(const std::string& url) : AdaptiveStreaming(url)
 {
 }
 
-HLSStreaming::~HLSStreaming()
-{
-}
-
-void HLSStreaming::SetCurrentVariant(std::shared_ptr<M3U8VariantStream> &variant)
+void HLSStreaming::SetCurrentVariant(std::shared_ptr<M3U8VariantStream>& variant)
 {
     currentVariant_ = variant;
 }
@@ -44,9 +40,10 @@ bool HLSStreaming::UpdateM3U8()
 
 bool HLSStreaming::ProcessManifest()
 {
-    if (GetPlaylist(GetUri())) {
+    auto uri = GetUri();
+    if (GetPlaylist(uri)) {
         std::string masterM3U8(playList);
-        master_ = std::make_shared<M3U8MasterPlaylist>(masterM3U8, GetUri());
+        master_ = std::make_shared<M3U8MasterPlaylist>(masterM3U8, uri);
         SetCurrentVariant(master_->defaultVariant_);
         if (!master_->isSimple_) {
             return UpdateM3U8();
@@ -65,8 +62,8 @@ bool HLSStreaming::UpdateManifest()
 bool HLSStreaming::GetDownloadList(std::shared_ptr<BlockingQueue<std::string>> downloadList)
 {
     std::shared_ptr<M3U8> m3u8 = currentVariant_->m3u8_;
-    for (auto it = m3u8->files_.begin(); it != m3u8->files_.end(); it++) {
-        downloadList->Push((*it)->uri_);
+    for (auto& file : m3u8->files_) {
+        downloadList->Push(file->uri_);
     }
     return true;
 }

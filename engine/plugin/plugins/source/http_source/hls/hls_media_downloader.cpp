@@ -36,15 +36,22 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
     downloader = std::make_shared<Downloader>();
 
     updateTask_ = std::make_shared<OSAL::Task>(std::string("HlsUpdates"));
-    updateTask_->RegisterHandler(std::bind(&HlsMediaDownloader::PlaylistUpdatesLoop, this));
+    updateTask_->RegisterHandler([this] { PlaylistUpdatesLoop(); });
 
     downloadTask_ = std::make_shared<OSAL::Task>(std::string("HlsDownload"));
-    downloadTask_->RegisterHandler(std::bind(&HlsMediaDownloader::FragmentDownloadLoop, this));
+    downloadTask_->RegisterHandler([this] { FragmentDownloadLoop(); });
 
     downloadList_ = std::make_shared<BlockingQueue<std::string>>("HlsDownloadList", 50); // 50
-}
 
-HlsMediaDownloader::~HlsMediaDownloader() {}
+    dataSave_ =  [this] (auto&& data, auto&& len, auto&& offset) {
+        SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
+                std::forward<decltype(offset)>(offset)); };
+    statusCallback_ = [this] (auto&& status, auto&& code) {
+        OnDownloadStatus(std::forward<decltype(status)>(status), std::forward<decltype(code)>(code)); };
+
+    requestCallbackFunc_ = [this] (auto&& callback) {
+        SaveRequestCallback(std::forward<decltype(callback)>(callback)); };
+}
 
 void HlsMediaDownloader::PlaylistUpdatesLoop()
 {
@@ -56,20 +63,18 @@ void HlsMediaDownloader::PlaylistUpdatesLoop()
 void HlsMediaDownloader::FragmentDownloadLoop()
 {
     std::string url = downloadList_->Pop();
-    if (fragmentStatus_[url].isDownloading == false) {
+    if (!fragmentStatus_[url].isDownloading) {
         fragmentStatus_[url].isDownloading = true;
-        request_ = std::make_shared<DownloadRequest>(url,
-                                                     std::bind(&HlsMediaDownloader::SaveData, this, _1, _2, _3),
-                                                     std::bind(&HlsMediaDownloader::OnDownloadStatus, this, _1, _2));
-        request_->SetRequestCallback(std::bind(&HlsMediaDownloader::SaveRequestCallback, this, _1));
-        downloader->Download(request_, -1);
+        request_ = std::make_shared<DownloadRequest>(url, dataSave_, statusCallback_);
+        request_->SetRequestCallback(requestCallbackFunc_);
+        downloader->Download(request_, -1); // -1
         downloader->Start();
         fragmentList_[fragmentCounter_] = url;
         fragmentCounter_++;
     }
 }
 
-bool HlsMediaDownloader::Open(const std::string &url)
+bool HlsMediaDownloader::Open(const std::string& url)
 {
     adaptiveStreaming_ = std::make_shared<HLSStreaming>(url);
     adaptiveStreaming_->ProcessManifest();
@@ -88,8 +93,8 @@ void HlsMediaDownloader::Close()
     downloader->Stop();
 }
 
-bool HlsMediaDownloader::Read(unsigned char *buff, unsigned int wantReadLength,
-                              unsigned int &realReadLength, bool &isEos)
+bool HlsMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
+                              unsigned int& realReadLength, bool& isEos)
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
     isEos = false;

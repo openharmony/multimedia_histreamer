@@ -26,7 +26,7 @@ namespace Plugin {
 namespace HttpPlugin {
 class HttpCurlClient : public NetworkClient {
 public:
-    HttpCurlClient(RxHeader headCallback, RxBody bodyCallback, void *userParam);
+    HttpCurlClient(RxHeader headCallback, RxBody bodyCallback, void* userParam);
 
     ~HttpCurlClient() override;
 

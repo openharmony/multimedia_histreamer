@@ -26,9 +26,9 @@ namespace HttpPlugin {
 constexpr size_t PLAY_LIST_SIZE = 5 * 1024;
 class AdaptiveStreaming {
 public:
-    explicit AdaptiveStreaming(const std::string &url);
-    AdaptiveStreaming();
-    virtual ~AdaptiveStreaming();
+    explicit AdaptiveStreaming(const std::string& url);
+    AdaptiveStreaming() = default;
+    virtual ~AdaptiveStreaming() = default;
 
     virtual bool ProcessManifest() = 0;
     virtual bool UpdateManifest() = 0;
@@ -38,7 +38,7 @@ protected:
     void SavePlayListData(uint8_t* data, uint32_t len, int64_t offset);
     void OnDownloadPlayListStatus(DownloadStatus status, int32_t code);
 
-    bool GetPlaylist(const std::string &url);
+    bool GetPlaylist(const std::string& url);
 
     void SetUri(std::string url)
     {
@@ -52,6 +52,9 @@ protected:
 protected:
     std::shared_ptr<Downloader> playListDownloader_;
     std::shared_ptr<DownloadRequest> playListRequest_;
+    DataSaveFunc playListDataSave_;
+    StatusCallbackFunc playListStatusCallback_;
+
     char playList[PLAY_LIST_SIZE] {0};
     std::string uri_;
 };

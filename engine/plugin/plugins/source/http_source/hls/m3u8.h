@@ -40,7 +40,7 @@ struct M3U8InitFile {
 };
 
 struct M3U8FragmentFile {
-    M3U8FragmentFile(std::string &uri, std::string &title, double duration, int sequence);
+    M3U8FragmentFile(std::string& uri, std::string& title, double duration, int sequence);
     std::string uri_;
     std::string title_;
     double duration_;
@@ -53,7 +53,7 @@ struct M3U8FragmentFile {
 };
 
 struct M3U8 {
-    bool Update(std::string &playlist);
+    bool Update(std::string& playlist);
     std::string uri_;
     std::string name_;
     
@@ -102,7 +102,7 @@ struct M3U8VariantStream {
 };
 
 struct M3U8MasterPlaylist {
-    M3U8MasterPlaylist(std::string &playlist, std::string uri);
+    M3U8MasterPlaylist(std::string& playlist, std::string uri);
 
     std::list<std::shared_ptr<M3U8VariantStream>> variants_;
 

@@ -26,9 +26,9 @@ namespace HttpPlugin {
 class MediaDownloader {
 public:
     virtual ~MediaDownloader() = default;
-    virtual bool Open(const std::string &url) = 0;
+    virtual bool Open(const std::string& url) = 0;
     virtual void Close() = 0;
-    virtual bool Read(unsigned char *buff, unsigned int wantReadLength, unsigned int &realReadLength, bool &isEos) = 0;
+    virtual bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) = 0;
     virtual bool Seek(int offset) = 0;
 
     virtual size_t GetContentLength() const = 0;

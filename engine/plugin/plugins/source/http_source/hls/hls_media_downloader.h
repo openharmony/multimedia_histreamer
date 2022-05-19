@@ -36,10 +36,10 @@ struct FragmentStatus {
 class HlsMediaDownloader : public MediaDownloader {
 public:
     HlsMediaDownloader() noexcept;
-    ~HlsMediaDownloader() override;
-    bool Open(const std::string &url) override;
+    ~HlsMediaDownloader() override = default;
+    bool Open(const std::string& url) override;
     void Close() override;
-    bool Read(unsigned char *buff, unsigned int wantReadLength, unsigned int &realReadLength, bool &isEos) override;
+    bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) override;
     bool Seek(int offset) override;
 
     size_t GetContentLength() const override;
@@ -61,6 +61,9 @@ private:
 
     bool isEos_ {false};
     Callback* callback_ {nullptr};
+    DataSaveFunc dataSave_;
+    StatusCallbackFunc statusCallback_;
+    RequestCallbackFunc requestCallbackFunc_;
 
     std::shared_ptr<AdaptiveStreaming> adaptiveStreaming_;
 

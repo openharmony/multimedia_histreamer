@@ -20,7 +20,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-M3U8FragmentFile::M3U8FragmentFile(std::string &uri, std::string &title, double duration, int sequence)
+M3U8FragmentFile::M3U8FragmentFile(std::string& uri, std::string &title, double duration, int sequence)
     :uri_(uri),
     title_(title),
     duration_(duration),
@@ -29,25 +29,25 @@ M3U8FragmentFile::M3U8FragmentFile(std::string &uri, std::string &title, double 
 }
 
 namespace {
-bool StrHasPrefix(std::string &str, std::string prefix)
+bool StrHasPrefix(std::string& str, std::string prefix)
 {
     return str.find(prefix) == 0;
 }
 
-std::string UriJoin(std::string &baseUri, std::string name)
+std::string UriJoin(std::string& baseUri, std::string name)
 {
     if (baseUri.find("qingting") != std::string::npos) {
         return "https:" + name;
     } else {
-        int pos = baseUri.rfind("/");
+        std::string::size_type pos = baseUri.rfind('/');
         return baseUri.substr(0, pos + 1) + name;
     }
 }
 }
 
-bool M3U8::Update(std::string &playlist)
+bool M3U8::Update(std::string& playlist)
 {
-    if (lastestData_.compare(playlist) == 0) {
+    if (lastestData_ == playlist) {
         MEDIA_LOG_I("playlist does not change ");
         return true;
     }
@@ -68,13 +68,13 @@ bool M3U8::Update(std::string &playlist)
     int mediaSequence = 0;
     bool haveMediasequence = false;
     bool discontinuity = false;
-    int pos = 8;
-    int len = lastestData_.size();
-    int t = -1;
+    std::string::size_type pos = 8;
+    std::string::size_type len = lastestData_.size();
+    std::string::size_type t = std::string::npos;
     std::string line;
     while (pos < len) {
-        t = lastestData_.find("\n", pos);
-        if (t == -1) {
+        t = lastestData_.find('\n', pos);
+        if (t == std::string::npos) {
             line = lastestData_.substr(pos);
             pos = len;
         } else {
@@ -82,7 +82,6 @@ bool M3U8::Update(std::string &playlist)
             pos = t + 1;
         }
         MEDIA_LOG_I("media playlist new line " PUBLIC_LOG_S, line.c_str());
-
         if (line.length() >= 1) {
             if (line[0] != '#' && line[0] != '\0') {
                 if (duration <= 0) {
@@ -101,28 +100,28 @@ bool M3U8::Update(std::string &playlist)
                 files_.emplace_back(file);
             } else if (StrHasPrefix(line, "#EXTINF:")) {
                 std::string s = line.substr(8); // 8
-                int p = s.find(",");
-                duration = std::stod(s.substr(0, p), nullptr);
+                std::string::size_type p = s.find(',');
+                duration = std::stod(s.substr(0, p));
                 title = s.substr(p + 1);
             } else if (StrHasPrefix(line, "#EXT-X-")) {
                 std::string s = line.substr(7); // 7
                 if (StrHasPrefix(s, "ENDLIST")) {
                     endlist_ = true;
                 } else if (StrHasPrefix(s, "VERSION:")) {
-                    version_ = std::stoi(s.substr(8), nullptr); // 8
+                    version_ = std::stoi(s.substr(8)); // 8
                 } else if (StrHasPrefix(s, "TARGETDURATION:")) {
-                    targetDuration_ = std::stod(s.substr(15), nullptr); // 15
+                    targetDuration_ = std::stod(s.substr(15)); // 15
                 } else if (StrHasPrefix(s, "MEDIA-SEQUENCE:")) {
-                    mediaSequence = std::stoi(s.substr(15), nullptr); // 15
+                    mediaSequence = std::stoi(s.substr(15)); // 15
                     haveMediasequence = true;
                 } else if (StrHasPrefix(s, "DISCONTINUITY-SEQUENCE:")) {
-                    discontSequence_ = std::stoi(s.substr(23), nullptr); // 23
+                    discontSequence_ = std::stoi(s.substr(23)); // 23
                     discontinuity = true;
                 } else if (StrHasPrefix(s, "DISCONTINUITY")) {
                     discontSequence_++;
                     discontinuity = true;
                 } else if (StrHasPrefix(s, "ALLOW-CACHE:")) {
-                    allowCache_ = s.substr(12).compare("YES") == 0; // 12
+                    allowCache_ = s.substr(12) == "YES"; // 12
                 } else if (StrHasPrefix(s, "KEY:")) {
                     MEDIA_LOG_I("need to parse " PUBLIC_LOG_S, line.c_str());
                 } else if (StrHasPrefix(s, "BYTERANGE:")) {
@@ -143,13 +142,11 @@ bool M3U8::Update(std::string &playlist)
     return true;
 }
 
-M3U8MasterPlaylist::M3U8MasterPlaylist(std::string &playlist, std::string uri)
+M3U8MasterPlaylist::M3U8MasterPlaylist(std::string& playlist, std::string uri)
 {
     latestData_ = playlist;
-    int pos = 0;
-    int len = latestData_.size();
+    std::string::size_type len = latestData_.size();
     std::shared_ptr<M3U8VariantStream> pendingStream;
-
     if (!StrHasPrefix(latestData_, "#EXTM3U")) {
         MEDIA_LOG_I("playlist doesn't start with #EXTM3U " PUBLIC_LOG_S, uri.c_str());
     }
@@ -166,13 +163,11 @@ M3U8MasterPlaylist::M3U8MasterPlaylist(std::string &playlist, std::string uri)
         defaultVariant_ = pendingStream;
         m3u8->Update(playlist);
     } else {
-        pos = 8; // 8
-        int t ;
+        std::string::size_type pos = 8; // 8
         std::string line;
-
         while (pos < len) {
-            t = latestData_.find("\n", pos);
-            if (t == -1) {
+            std::string::size_type t = latestData_.find('\n', pos);
+            if (t == std::string::npos) {
                 line = latestData_.substr(pos);
                 pos = len;
             } else {
@@ -180,7 +175,6 @@ M3U8MasterPlaylist::M3U8MasterPlaylist(std::string &playlist, std::string uri)
                 pos = t + 1;
             }
             MEDIA_LOG_I("master playlist new line " PUBLIC_LOG_S, line.c_str());
-
             if (line.length() >= 1) {
                 if (line[0] != '#' && line[0] != '\0') {
                     pendingStream->name_ = line;
@@ -198,27 +192,25 @@ M3U8MasterPlaylist::M3U8MasterPlaylist(std::string &playlist, std::string uri)
                     std::shared_ptr<M3U8VariantStream> stream = std::make_shared<M3U8VariantStream>();
                     std::shared_ptr<M3U8> m3u8 = std::make_shared<M3U8>();
                     stream->m3u8_ = m3u8;
-
                     stream->iframe_ = StrHasPrefix(line, "#EXT-X-I-FRAME-STREAM-INF:");
-                    int posAttBegin = stream->iframe_ ? 26: 18 ; // 26 18
-                    int posAttNext = 0;
-                    while (posAttNext != -1) {
-                        posAttNext = line.find(",", posAttBegin);
+                    std::string::size_type posAttBegin = stream->iframe_ ? 26: 18 ; // 26 18
+                    std::string::size_type posAttNext;
+                    do {
+                        posAttNext = line.find(',', posAttBegin);
                         std::string att = line.substr(posAttBegin, posAttNext-posAttBegin);
                         if (StrHasPrefix(att, "BANDWIDTH")) {
                             stream->bandWidth_ = std::stoi(att.substr(10), nullptr); // 10
                         }
                         if (StrHasPrefix(att, "RESOLUTION")) {
-                            int p = att.find("x");
+                            std::string::size_type p = att.find('x');
                             stream->width_ = std::stoi(att.substr(11, p - 11), nullptr) ; // 11
                             stream->height_ = std::stoi(att.substr(p + 1), nullptr) ; // 1
                         }
-
-                        if (posAttNext == -1) {
+                        if (posAttNext == std::string::npos) {
                             break;
                         }
                         posAttBegin = posAttNext + 1;
-                    }
+                    } while (true);
                     pendingStream = stream;
                 }
             }

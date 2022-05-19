@@ -20,29 +20,22 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-AdaptiveStreaming::AdaptiveStreaming(const std::string &url)
+AdaptiveStreaming::AdaptiveStreaming(const std::string& url)
     :uri_(url)
 {
     playListDownloader_ = std::make_shared<Downloader>();
+    playListDataSave_ =  [this] (auto&& data, auto&& len, auto&& offset) {
+        SavePlayListData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
+                std::forward<decltype(offset)>(offset)); };
+    playListStatusCallback_ = [this] (auto&& status, auto&& code) {
+        OnDownloadPlayListStatus(std::forward<decltype(status)>(status), std::forward<decltype(code)>(code)); };
 }
 
-AdaptiveStreaming::AdaptiveStreaming()
-{
-}
-
-AdaptiveStreaming::~AdaptiveStreaming()
-{
-}
-
-bool AdaptiveStreaming::GetPlaylist(const std::string &url)
+bool AdaptiveStreaming::GetPlaylist(const std::string& url)
 {
     memset_s(playList, PLAY_LIST_SIZE, 0, PLAY_LIST_SIZE);
-    using namespace std::placeholders;
-    playListRequest_ = std::make_shared<DownloadRequest>(url,
-    std::bind(&AdaptiveStreaming::SavePlayListData, this, _1, _2, _3),
-    std::bind(&AdaptiveStreaming::OnDownloadPlayListStatus, this, _1, _2));
-
-    playListDownloader_->Download(playListRequest_, -1);
+    playListRequest_ = std::make_shared<DownloadRequest>(url, playListDataSave_, playListStatusCallback_);
+    playListDownloader_->Download(playListRequest_, -1); // -1
     playListDownloader_->Start();
 
     while (!playListRequest_->IsEos()) {

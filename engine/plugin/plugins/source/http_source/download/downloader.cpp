@@ -88,7 +88,7 @@ Downloader::Downloader() noexcept
                                                                                     REQUEST_QUEUE_SIZE);
 
     task_ = std::make_shared<OSAL::Task>(std::string("HttpDownloader"));
-    task_->RegisterHandler(std::bind(&Downloader::HttpDownloadLoop, this));
+    task_->RegisterHandler([this] { HttpDownloadLoop(); });
 }
 
 bool Downloader::Download(const std::shared_ptr<DownloadRequest>& request, int32_t waitMs)
@@ -212,10 +212,10 @@ void Downloader::HttpDownloadLoop()
     }
 }
 
-size_t Downloader::RxBodyData(void *buffer, size_t size, size_t nitems, void *userParam)
+size_t Downloader::RxBodyData(void* buffer, size_t size, size_t nitems, void* userParam)
 {
     auto mediaDownloader = static_cast<Downloader *>(userParam);
-    HeaderInfo *header = &(mediaDownloader->currentRequest_->headerInfo_);
+    HeaderInfo* header = &(mediaDownloader->currentRequest_->headerInfo_);
     size_t dataLen = size * nitems;
 
     if (header->fileContentLen == 0) {
@@ -241,13 +241,13 @@ size_t Downloader::RxBodyData(void *buffer, size_t size, size_t nitems, void *us
 }
 
 namespace {
-char *StringTrim(char *str)
+char* StringTrim(char* str)
 {
     if (str == nullptr) {
         return nullptr;
     }
-    char *p = str;
-    char *p1 = p + strlen(str) - 1;
+    char* p = str;
+    char* p1 = p + strlen(str) - 1;
 
     while (*p && isspace(static_cast<int>(*p))) {
         p++;
@@ -259,33 +259,33 @@ char *StringTrim(char *str)
 }
 }
 
-size_t Downloader::RxHeaderData(void *buffer, size_t size, size_t nitems, void *userParam)
+size_t Downloader::RxHeaderData(void* buffer, size_t size, size_t nitems, void* userParam)
 {
     auto mediaDownloader = reinterpret_cast<Downloader *>(userParam);
-    HeaderInfo *info = &(mediaDownloader->currentRequest_->headerInfo_);
-    char *next = nullptr;
-    char *key = strtok_s(reinterpret_cast<char *>(buffer), ":", &next);
+    HeaderInfo* info = &(mediaDownloader->currentRequest_->headerInfo_);
+    char* next = nullptr;
+    char* key = strtok_s(reinterpret_cast<char*>(buffer), ":", &next);
     FALSE_RETURN_V(key != nullptr, size * nitems);
     if (!strncmp(key, "Content-Type", strlen("Content-Type"))) {
-        char *token = strtok_s(nullptr, ":", &next);
+        char* token = strtok_s(nullptr, ":", &next);
         FALSE_RETURN_V(token != nullptr, size * nitems);
-        char *type = StringTrim(token);
+        char* type = StringTrim(token);
         (void)memcpy_s(info->contentType, sizeof(info->contentType), type, sizeof(info->contentType));
     }
 
     if (!strncmp(key, "Content-Length", strlen("Content-Length")) ||
         !strncmp(key, "content-length", strlen("content-length"))) {
-        char *token = strtok_s(nullptr, ":", &next);
+        char* token = strtok_s(nullptr, ":", &next);
         FALSE_RETURN_V(token != nullptr, size * nitems);
-        char *contLen = StringTrim(token);
+        char* contLen = StringTrim(token);
         info->contentLen = atol(contLen);
     }
 
     if (!strncmp(key, "Transfer-Encoding", strlen("Transfer-Encoding")) ||
         !strncmp(key, "transfer-encoding", strlen("transfer-encoding"))) {
-        char *token = strtok_s(nullptr, ":", &next);
+        char* token = strtok_s(nullptr, ":", &next);
         FALSE_RETURN_V(token != nullptr, size * nitems);
-        char *transEncode = StringTrim(token);
+        char* transEncode = StringTrim(token);
         if (!strncmp(transEncode, "chunked", strlen("chunked"))) {
             info->isChunked = true;
         }
@@ -293,9 +293,9 @@ size_t Downloader::RxHeaderData(void *buffer, size_t size, size_t nitems, void *
 
     if (!strncmp(key, "Content-Range", strlen("Content-Range")) ||
         !strncmp(key, "content-range", strlen("content-range"))) {
-        char *token = strtok_s(nullptr, ":", &next);
+        char* token = strtok_s(nullptr, ":", &next);
         FALSE_RETURN_V(token != nullptr, size * nitems);
-        char *strRange = StringTrim(token);
+        char* strRange = StringTrim(token);
         size_t start, end, fileLen;
         FALSE_LOG_MSG(sscanf_s(strRange, "bytes %ld-%ld/%ld", &start, &end, &fileLen) != -1,
             "sscanf get range failed");

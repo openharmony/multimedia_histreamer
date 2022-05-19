@@ -25,22 +25,19 @@ namespace Plugin {
 namespace HttpPlugin {
 class HLSStreaming : public AdaptiveStreaming {
 public:
-    explicit HLSStreaming(const std::string &url);
-    ~HLSStreaming() override;
+    explicit HLSStreaming(const std::string& url);
+    ~HLSStreaming() override = default;
 
     bool ProcessManifest() override;
     bool UpdateManifest() override;
     bool GetDownloadList(std::shared_ptr<BlockingQueue<std::string>> downloadList) override;
 
-    void SetCurrentVariant(std::shared_ptr<M3U8VariantStream> &variant);
+    void SetCurrentVariant(std::shared_ptr<M3U8VariantStream>& variant);
     bool UpdateM3U8();
 
 private:
-
     std::shared_ptr<M3U8MasterPlaylist> master_;
-
     std::shared_ptr<M3U8VariantStream> currentVariant_;
-
     std::shared_ptr<M3U8VariantStream> previousVariant_;
 };
 }

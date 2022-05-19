@@ -26,7 +26,7 @@ namespace Plugin {
 namespace HttpPlugin {
 class ClientFactory {
 public:
-    ClientFactory(RxHeader headCallback, RxBody bodyCallback, void *userParam);
+    ClientFactory(RxHeader headCallback, RxBody bodyCallback, void* userParam);
     ~ClientFactory();
 
     std::shared_ptr<NetworkClient> GetClient(const std::string& protocol);
@@ -36,7 +36,7 @@ public:
 private:
     RxHeader rxHeader_;
     RxBody rxBody_;
-    void *userParam_;
+    void* userParam_;
     std::shared_ptr<NetworkClient> httpClient_;
 };
 }
