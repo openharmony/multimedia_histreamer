@@ -132,7 +132,8 @@ std::tuple<ErrorCode, Action> State::Resume()
 std::tuple<ErrorCode, Action> State::Seek(const Plugin::Any& param)
 {
     (void)param;
-    executor_.DoSeek(false, 0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC);
+    // current state doesn't support seek, so allowed is false.
+    executor_.DoSeek(false, 0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC, true);
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::SetAttribute()
