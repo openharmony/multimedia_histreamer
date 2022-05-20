@@ -24,6 +24,7 @@
 #endif
 #include <cstring>
 #include <cerrno>
+#include <dirent.h>
 #include "foundation/log.h"
 
 #ifndef _WIN32
@@ -111,6 +112,23 @@ bool FileSystem::MakeMultipleDir(const std::string& path)
         index = path.find('/', index + 1);
     }
     return path[path.size() - 1] == '/' || MakeDir(path);
+}
+
+void FileSystem::RemoveFilesInDir(const std::string& path)
+{
+    DIR *directory;
+    struct dirent *info;
+    if ((directory = opendir(path.c_str())) != nullptr) {
+        while ((info = readdir(directory)) != nullptr) {
+            if (strcmp(info->d_name, ".") == 0 || strcmp(info->d_name, "..") == 0) {
+                continue;
+            }
+            std::string fullPath = path + "/" + info->d_name;
+            MEDIA_LOG_D("Remove file : " PUBLIC_LOG_S, fullPath.c_str());
+            NZERO_LOG(remove(fullPath.c_str()));
+        }
+        closedir(directory);
+    }
 }
 } // namespace OSAL
 } // namespace Media

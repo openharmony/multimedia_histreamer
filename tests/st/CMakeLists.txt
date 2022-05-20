@@ -22,7 +22,7 @@ ADD_LINK_OPTIONS(
 )
 ENDIF(UNIX OR MINGW)
 
-ADD_DEFINITIONS(-D__STDC_FORMAT_MACROS)
+ADD_DEFINITIONS(-D__STDC_FORMAT_MACROS -DHST_WORKING_DIR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 
 IF(CMAKE_CL_64)
     ADD_DEFINITIONS(-DWIN64)
@@ -104,6 +104,7 @@ SET(TEST_PLUGIN_SRCS
         ${TOP_DIR}/histreamer/engine/plugin/core/plugin_wrapper.cpp
         ${TOP_DIR}/histreamer/engine/plugin/core/output_sink.cpp
         ${TOP_DIR}/histreamer/engine/plugin/core/plugin_meta.cpp
+        ${TOP_DIR}/histreamer/engine/foundation/osal/filesystem/file_system.cpp
         ${TOP_DIR}/histreamer/engine/foundation/osal/thread/mutex.cpp
         ${TOP_DIR}/histreamer/engine/foundation/osal/thread/scoped_lock.cpp)
 

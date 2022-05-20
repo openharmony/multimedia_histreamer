@@ -53,28 +53,12 @@ void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin:
     (void)fclose(filePtr);
 }
 
-void RemoveFilesInDir(const std::string& path)
-{
-    DIR *directory;
-    struct dirent *info;
-    if ((directory = opendir(path.c_str())) != nullptr) {
-        while ((info = readdir(directory)) != nullptr) {
-            if (strcmp(info->d_name, ".") == 0 || strcmp(info->d_name, "..") == 0) {
-                continue;
-            }
-            std::string fullPath = path + info->d_name;
-            remove(fullPath.c_str());
-        }
-        closedir(directory);
-    }
-}
-
 void PrepareDumpDir()
 {
     std::string dumpDir = GetDumpFileDir();
     const char* fileDir = dumpDir.c_str();
     if (access(fileDir, 0) == 0) { // 目录存在
-        RemoveFilesInDir(fileDir);
+        OSAL::FileSystem::RemoveFilesInDir(fileDir);
     } else {
         (void)OSAL::FileSystem::MakeMultipleDir(fileDir);
     }

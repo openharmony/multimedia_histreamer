@@ -17,6 +17,8 @@
 
 #include <thread>
 #include <chrono>
+#include <dirent.h>
+#include <sys/stat.h>
 
 #include "i_engine_factory.h"
 #include "foundation/log.h"
@@ -51,6 +53,7 @@ public:
     int32_t Pause() override;
     int32_t Resume() override;
     int32_t Stop() override;
+    int32_t GetRecordedFile(std::string& path) override;
 private:
     std::unique_ptr<IRecorderEngine> recorder_;
 };
@@ -64,9 +67,13 @@ std::unique_ptr<TestRecorder> TestRecorder::CreateAudioRecorder()
     return std::make_unique<TestRecorderImpl>(std::move(recorder));
 }
 
+std::string TestRecorder::GetOutputDir()
+{
+    return std::string(HST_WORKING_DIR) + "/" + outputDirName;
+}
+
 int32_t TestRecorderImpl::Configure(const AudioRecordSource& recordSource)
 {
-    // TO DO: should use recordSource.pcmPath_ to read the pcm file.
     int32_t audioSourceId = 0;
     OHOS::AudioStandard::AudioCaptureCreator::GetInstance().SetPcmPath(recordSource.pcmPath_);
     recorder_->SetAudioSource(recordSource.sourceType_,audioSourceId);
@@ -108,6 +115,30 @@ int32_t TestRecorderImpl::Resume()
 int32_t TestRecorderImpl::Stop()
 {
     return recorder_->Stop();
+}
+
+// The file in output dir is the latest recorded file.
+int32_t TestRecorderImpl::GetRecordedFile(std::string& path)
+{
+    DIR *directory;
+    struct dirent *info;
+    if ((directory = opendir(GetOutputDir().c_str())) != nullptr) {
+        while ((info = readdir(directory)) != nullptr) {
+            if (strcmp(info->d_name, ".") == 0 || strcmp(info->d_name, "..") == 0) {
+                continue;
+            }
+            path = GetOutputDir() + "/" + info->d_name;
+            MEDIA_LOG_D("GetRecordedFile : " PUBLIC_LOG_S, path.c_str());
+        }
+        closedir(directory);
+    }
+
+    int32_t fileSize = 0;
+    struct stat fileStatus {};
+    if (stat(path.c_str(), &fileStatus) == 0) {
+        fileSize = static_cast<int32_t>(fileStatus.st_size);
+    }
+    return fileSize;
 }
 }
 #endif

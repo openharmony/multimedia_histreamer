@@ -231,7 +231,7 @@ ErrorCode AudioEncoderFilter::PushData(const std::string& inPort, const AVBuffer
         do {
             handleFrameRes = HandleFrame(cahceBuffer_);
             while (FinishFrame() == ErrorCode::SUCCESS) {
-                MEDIA_LOG_D("finish frame");
+                MEDIA_LOG_DD("finish frame");
             }
             retryCnt++;
             if (retryCnt >= maxRetryCnt) { // if retry cnt exceeds we will drop this frame
@@ -267,7 +267,7 @@ ErrorCode AudioEncoderFilter::Release()
 
 ErrorCode AudioEncoderFilter::HandleFrame(const std::shared_ptr<AVBuffer>& buffer)
 {
-    MEDIA_LOG_D("HandleFrame called");
+    MEDIA_LOG_DD("HandleFrame called");
     auto ret = TranslatePluginStatus(plugin_->QueueInputBuffer(buffer, 0));
     FALSE_LOG_MSG(ret == ErrorCode::SUCCESS || ret == ErrorCode::ERROR_TIMED_OUT,
                     "Queue input buffer to plugin fail: " PUBLIC_LOG_D32, ret);
@@ -276,7 +276,7 @@ ErrorCode AudioEncoderFilter::HandleFrame(const std::shared_ptr<AVBuffer>& buffe
 
 ErrorCode AudioEncoderFilter::FinishFrame()
 {
-    MEDIA_LOG_D("begin finish frame");
+    MEDIA_LOG_DD("begin finish frame");
     auto outBuffer = outBufferPool_->AllocateAppendBufferNonBlocking();
     FALSE_RETURN_V_MSG_E(outBuffer != nullptr, ErrorCode::ERROR_NO_MEMORY, "Get out buffer from buffer pool fail");
     outBuffer->Reset();
@@ -286,13 +286,13 @@ ErrorCode AudioEncoderFilter::FinishFrame()
             MEDIA_LOG_E("Queue output buffer to plugin fail: " PUBLIC_LOG_D32, static_cast<int32_t>((status)));
         }
     }
-    MEDIA_LOG_D("end finish frame");
+    MEDIA_LOG_DD("end finish frame");
     return TranslatePluginStatus(status);
 }
 
 void AudioEncoderFilter::OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input)
 {
-    MEDIA_LOG_D("AudioEncoderFilter::OnInputBufferDone");
+    MEDIA_LOG_DD("AudioEncoderFilter::OnInputBufferDone");
 }
 
 void AudioEncoderFilter::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output)

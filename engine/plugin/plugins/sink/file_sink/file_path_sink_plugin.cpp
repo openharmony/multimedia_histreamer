@@ -77,7 +77,7 @@ Status FilePathSinkPlugin::SeekTo(uint64_t offset)
 
 Status FilePathSinkPlugin::Write(const std::shared_ptr<Buffer>& buffer)
 {
-    MEDIA_LOG_D("Write begin");
+    MEDIA_LOG_DD("Write begin");
     if (buffer == nullptr || buffer->IsEmpty()) {
         return Status::OK;
     }

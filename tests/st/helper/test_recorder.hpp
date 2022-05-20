@@ -18,6 +18,8 @@
 
 namespace OHOS::Media::Test {
 
+static const std::string outputDirName = "audio_record_result";
+
 class AudioRecordSource {
 public:
     explicit AudioRecordSource(std::string pcmPath,
@@ -27,7 +29,7 @@ public:
                                AudioSourceType sourceType = AudioSourceType::AUDIO_MIC,
                                AudioCodecFormat encodeType = AudioCodecFormat::AAC_LC,
                                OutputFormatType outputFormat = OutputFormatType::FORMAT_M4A,
-                               std::string outputPath = "audio_record_result") :  // current_dir/audio_record_result/
+                               std::string outputPath = outputDirName) :  // current_dir/audio_record_result/
                                pcmPath_(std::move(pcmPath)),
                                sampleRate_(sampleRate),
                                channel_(channel),
@@ -37,8 +39,6 @@ public:
                                outputFormat_(outputFormat),
                                outputPath_(std::move(outputPath))
                                {}
-public:
-    std::string getPcmPath() {return outputPath_;};
 private:
     std::string pcmPath_;
     int32_t sampleRate_;
@@ -55,6 +55,7 @@ private:
 class TestRecorder {
 public:
     static std::unique_ptr<TestRecorder> CreateAudioRecorder();
+    static std::string GetOutputDir();
     virtual ~TestRecorder() = default;
     virtual int32_t Configure(const AudioRecordSource& recordSource) = 0;
     virtual int32_t Prepare() = 0;
@@ -62,5 +63,6 @@ public:
     virtual int32_t Pause() = 0;
     virtual int32_t Resume() = 0;
     virtual int32_t Stop() = 0;
+    virtual int32_t GetRecordedFile(std::string& path) = 0; // for testing, return file size
 };
 }
