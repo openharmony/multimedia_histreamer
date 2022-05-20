@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef HISTREAMER_ST_TEST_RECORDER
+#define HISTREAMER_ST_TEST_RECORDER
 #include "audio_capture_creator.h"
 #include "i_recorder_engine.h"
 
 namespace OHOS::Media::Test {
-
-static const std::string outputDirName = "audio_record_result";
+const std::string outputDirName = "audio_record_result";
 
 class AudioRecordSource {
 public:
@@ -66,3 +66,4 @@ public:
     virtual int32_t GetRecordedFile(std::string& path) = 0; // for testing, return file size
 };
 }
+#endif

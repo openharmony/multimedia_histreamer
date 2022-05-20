@@ -36,7 +36,7 @@ public:
 
     void OnError(ErrorType errorType, int32_t errorCode) override
     {
-        MEDIA_LOG_I("media_standard recorder error : " PUBLIC_LOG_D32 ,errorCode);
+        MEDIA_LOG_I("media_standard recorder error : " PUBLIC_LOG_D32, errorCode);
     }
 
     void OnInfo(InfoType type, int32_t extra) override
@@ -76,19 +76,19 @@ int32_t TestRecorderImpl::Configure(const AudioRecordSource& recordSource)
 {
     int32_t audioSourceId = 0;
     OHOS::AudioStandard::AudioCaptureCreator::GetInstance().SetPcmPath(recordSource.pcmPath_);
-    recorder_->SetAudioSource(recordSource.sourceType_,audioSourceId);
+    recorder_->SetAudioSource(recordSource.sourceType_, audioSourceId);
     recorder_->SetOutputFormat(recordSource.outputFormat_);
-    auto audSampleRate = AudSampleRate{ recordSource.sampleRate_ };
-    auto audChannel = AudChannel{ recordSource.channel_ };
-    auto audBitRate = AudBitRate{ recordSource.bitRate_ };
-    auto auEncoder = AudEnc{ recordSource.encodeType_ };
+    auto audSampleRate = AudSampleRate {recordSource.sampleRate_};
+    auto audChannel = AudChannel {recordSource.channel_};
+    auto audBitRate = AudBitRate {recordSource.bitRate_};
+    auto auEncoder = AudEnc {recordSource.encodeType_};
 
     recorder_->Configure(audioSourceId, audSampleRate);
     recorder_->Configure(audioSourceId, audChannel);
     recorder_->Configure(audioSourceId, audBitRate);
     recorder_->Configure(audioSourceId, auEncoder);
 
-    auto outFilePath = OutFilePath{ recordSource.outputPath_ };
+    auto outFilePath = OutFilePath {recordSource.outputPath_};
     return recorder_->Configure(DUMMY_SOURCE_ID, outFilePath); // result record file name
 }
 
