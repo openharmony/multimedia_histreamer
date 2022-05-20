@@ -32,6 +32,7 @@ public:
     static bool IsExists(const std::string& path);
     static bool MakeDir(const std::string& path);
     static bool MakeMultipleDir(const std::string& path);
+    static void RemoveFilesInDir(const std::string& path);
 };
 } // namespace OSAL
 } // namespace Media

@@ -387,7 +387,7 @@ Status AudioCapturePlugin::SetParameter(Tag tag, const ValueType& value)
 
 std::shared_ptr<Allocator> AudioCapturePlugin::GetAllocator()
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_DD("IN");
     return nullptr;
 }
 
@@ -462,7 +462,7 @@ Status AudioCapturePlugin::GetSize(size_t& size)
         return Status::ERROR_INVALID_PARAMETER;
     }
     size = bufferSize_;
-    MEDIA_LOG_D("bufferSize_: " PUBLIC_LOG_ZU, size);
+    MEDIA_LOG_DD("bufferSize_: " PUBLIC_LOG_ZU, size);
     return Status::OK;
 }
 

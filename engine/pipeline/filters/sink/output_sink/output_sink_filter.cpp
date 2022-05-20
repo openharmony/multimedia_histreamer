@@ -135,12 +135,32 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, const AVBufferPt
     }
     if (buffer->flag & BUFFER_FLAG_EOS) {
         plugin_->Flush();
+        plugin_->Stop();
         Event event {
             .srcFilter = name_,
             .type = EventType::EVENT_COMPLETE,
         };
         MEDIA_LOG_D("file sink push data send event_complete");
         OnEvent(event);
+    }
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode OutputSinkFilter::Prepare()
+{
+    FilterBase::Prepare();
+    if (plugin_) {
+        plugin_->Prepare();
+    }
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode OutputSinkFilter::Start()
+{
+    FilterBase::Start();
+    if (plugin_) {
+        plugin_->Prepare(); // Because in OutputSinkFilter::Prepare() plugin_ is nullptr.
+        plugin_->Start();
     }
     return ErrorCode::SUCCESS;
 }

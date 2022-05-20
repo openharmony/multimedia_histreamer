@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef HISTREAMER_ST_TEST_PLAYER
+#define HISTREAMER_ST_TEST_PLAYER
 #include <string>
 #include <memory>
 
@@ -40,3 +42,4 @@ public:
     virtual int32_t GetDuration(int64_t& durationMs) = 0;
 };
 }
+#endif

@@ -40,6 +40,8 @@ public:
 
     bool Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta) override;
 
+    ErrorCode Prepare() override;
+    ErrorCode Start() override;
     ErrorCode Stop() override;
     ErrorCode SetSink(const MediaSink& sink);
     ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
