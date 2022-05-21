@@ -135,7 +135,6 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, const AVBufferPt
     }
     if (buffer->flag & BUFFER_FLAG_EOS) {
         plugin_->Flush();
-        plugin_->Stop();
         Event event {
             .srcFilter = name_,
             .type = EventType::EVENT_COMPLETE,
@@ -167,7 +166,11 @@ ErrorCode OutputSinkFilter::Start()
 
 ErrorCode OutputSinkFilter::Stop()
 {
+    FilterBase::Stop();
     currentPos_ = 0;
+    if (plugin_) {
+        plugin_->Stop();
+    }
     return ErrorCode::SUCCESS;
 }
 } // Pipeline
