@@ -70,7 +70,7 @@ void FileSourceAllocator::Free(void* ptr) // NOLINT: void*
 }
 
 FileSourcePlugin::FileSourcePlugin(std::string name)
-    : SourcePlugin(std::move(name)), fp_(nullptr), fileSize_(0), isSeekable_(true), position_(0)
+    : SourcePlugin(std::move(name)), fp_(nullptr), fileSize_(0), seekable_(Seekable::SEEKABLE), position_(0)
 {
     MEDIA_LOG_D("IN");
 }
@@ -187,11 +187,10 @@ Status FileSourcePlugin::GetSize(size_t& size)
     return Status::OK;
 }
 
-Status FileSourcePlugin::IsSeekable(bool& seekable)
+Seekable FileSourcePlugin::GetSeekable()
 {
     MEDIA_LOG_DD("IN");
-    seekable = isSeekable_;
-    return Status::OK;
+    return seekable_;
 }
 
 Status FileSourcePlugin::SeekTo(uint64_t offset)

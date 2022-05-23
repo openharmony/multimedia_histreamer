@@ -150,6 +150,7 @@ Status FFmpegDemuxerPlugin::SetCallback(Callback* cb)
 Status FFmpegDemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& source)
 {
     ioContext_.dataSource = source;
+    seekable_ = source->GetSeekable();
     return Status::OK;
 }
 

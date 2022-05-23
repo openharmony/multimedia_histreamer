@@ -93,6 +93,7 @@ private:
 
     static int64_t AVSeek(void* opaque, int64_t offset, int whence); // NOLINT: void*
 
+    Seekable seekable_;
     IOContext ioContext_;
     Callback* callback_ {};
     std::shared_ptr<AVInputFormat> pluginImpl_;

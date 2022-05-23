@@ -128,6 +128,7 @@ private:
 
     void DemuxerLoop();
 
+    Plugin::Seekable seekable_;
     std::string uriSuffix_;
     uint64_t mediaDataSize_;
     std::shared_ptr<OSAL::Task> task_;

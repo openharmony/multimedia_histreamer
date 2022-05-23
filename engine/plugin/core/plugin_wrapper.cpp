@@ -42,6 +42,7 @@ std::set<OHOS::Media::Plugin::MetaID> g_metaIdSet = {
     OHOS::Media::Plugin::MetaID::MEDIA_DURATION,
     OHOS::Media::Plugin::MetaID::MEDIA_FILE_EXTENSION,
     OHOS::Media::Plugin::MetaID::MEDIA_FILE_SIZE,
+    OHOS::Media::Plugin::MetaID::MEDIA_SEEKABLE,
     OHOS::Media::Plugin::MetaID::AUDIO_MPEG_VERSION,
     OHOS::Media::Plugin::MetaID::AUDIO_MPEG_LAYER,
     OHOS::Media::Plugin::MetaID::AUDIO_AAC_PROFILE,

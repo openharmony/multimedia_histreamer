@@ -45,6 +45,8 @@ public:
 
     Plugin::Status GetSize(size_t& size) override;
 
+    Plugin::Seekable GetSeekable() override;
+
 private:
     void DoTask();
 

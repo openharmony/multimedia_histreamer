@@ -134,6 +134,7 @@ private:
 
     void FillInMediaInfo(MediaInfo& mediaInfo) const;
 
+    Seekable            seekable_;
     int                 inIoBufferSize_;
     size_t              fileSize_;
     uint8_t             *inIoBuffer_;

@@ -59,6 +59,7 @@ enum struct MetaID : uint32_t {
     MEDIA_START_TIME = CppExt::to_underlying(Tag::MEDIA_START_TIME),
     MEDIA_FILE_EXTENSION = CppExt::to_underlying(Tag::MEDIA_FILE_EXTENSION),
     MEDIA_FILE_SIZE = CppExt::to_underlying(Tag::MEDIA_FILE_SIZE),
+    MEDIA_SEEKABLE = CppExt::to_underlying(Tag::MEDIA_SEEKABLE),
 
     AUDIO_MPEG_VERSION = CppExt::to_underlying(Tag::AUDIO_MPEG_VERSION),
     AUDIO_MPEG_LAYER = CppExt::to_underlying(Tag::AUDIO_MPEG_LAYER),

@@ -113,6 +113,7 @@ enum struct Tag : uint32_t {
     MEDIA_CODEC_CONFIG,                    ///< std::vector<uint8_t>, codec config. e.g. AudioSpecificConfig for mp4
     MEDIA_POSITION,                        ///< uint64_t : The byte position within media stream/file
     MEDIA_START_TIME,                      ///< int64_t: The start time of one track
+    MEDIA_SEEKABLE,                        ///< enum Seekable: Seekable status of the media
 
     /* -------------------- audio universal tag -------------------- */
     AUDIO_CHANNELS = SECTION_AUDIO_UNIVERSAL_START + 1, ///< uint32_t

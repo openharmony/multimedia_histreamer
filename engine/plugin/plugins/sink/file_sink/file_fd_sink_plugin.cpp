@@ -47,7 +47,7 @@ Status FileFdSinkRegister(const std::shared_ptr<Register>& reg)
 PLUGIN_DEFINITION(FileFdSink, LicenseType::APACHE_V2, FileFdSinkRegister, [] {});
 
 FileFdSinkPlugin::FileFdSinkPlugin(std::string name)
-    : OutputSinkPlugin(std::move(name)), fd_(-1), isSeekable_(true)
+    : OutputSinkPlugin(std::move(name)), fd_(-1), seekable_(Seekable::SEEKABLE)
 {
 }
 
@@ -58,9 +58,9 @@ Status FileFdSinkPlugin::SetSink(const MediaSink& sink)
     return Status::OK;
 }
 
-bool FileFdSinkPlugin::IsSeekable()
+Seekable FileFdSinkPlugin::GetSeekable()
 {
-    return isSeekable_;
+    return seekable_;
 }
 
 Status FileFdSinkPlugin::SeekTo(uint64_t offset)

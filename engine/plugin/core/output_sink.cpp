@@ -24,9 +24,9 @@ Status OutputSink::SetSink(const MediaSink &sink)
     return outputSink_->SetSink(sink);
 }
 
-bool OutputSink::IsSeekable()
+Seekable OutputSink::GetSeekable()
 {
-    return outputSink_->IsSeekable();
+    return outputSink_->GetSeekable();
 }
 
 Status OutputSink::SeekTo(uint64_t offset)

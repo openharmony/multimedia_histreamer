@@ -73,6 +73,15 @@ struct DataSource {
      *  @retval OK: Plugin reset succeeded.
      */
     virtual Status GetSize(size_t& size) = 0;
+
+    /**
+     * @brief Indicates that the current data source seekable or not.
+     *
+     * The function is valid only after INITIALIZED state.
+     *
+     * @return  Seekable status
+     */
+    virtual Seekable GetSeekable() = 0;
 };
 
 /**

@@ -36,6 +36,7 @@ struct DataSourceHelper {
     virtual ~DataSourceHelper() = default;
     virtual Status ReadAt(int64_t offset, std::shared_ptr<Buffer> &buffer, size_t expectedLen) = 0;
     virtual Status GetSize(size_t &size) = 0;
+    virtual Seekable GetSeekable() = 0;
 };
 
 struct DemuxerPlugin;

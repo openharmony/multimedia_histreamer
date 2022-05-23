@@ -29,6 +29,7 @@ const Plugin::ValueType g_d32Def = (int32_t)0;
 const Plugin::ValueType g_d64Def = (int64_t)0;
 const Plugin::ValueType g_u64Def = (uint64_t)0;
 const Plugin::ValueType g_doubleDef = (double)0.0;
+const Plugin::ValueType g_seekableDef = Plugin::Seekable::INVALID;
 const Plugin::ValueType g_srcInputTypedef = Plugin::SrcInputType::UNKNOWN;
 const Plugin::ValueType g_unknown = nullptr;
 const Plugin::ValueType g_vecBufDef = std::vector<uint8_t>();
@@ -63,6 +64,7 @@ const std::map<Plugin::Tag, std::tuple<const char*, const Plugin::ValueType&, co
     {Plugin::Tag::MEDIA_LYRICS, {"lyrics",                     g_emptyString,      "string"}},
     {Plugin::Tag::MEDIA_DURATION, {"duration",                 g_d64Def,           "int64_t"}},
     {Plugin::Tag::MEDIA_FILE_SIZE, {"file_size",               g_u64Def,           "uint64_t"}},
+    {Plugin::Tag::MEDIA_SEEKABLE, {"media_seekable",           g_seekableDef,      "Seekable"}},
     {Plugin::Tag::MEDIA_BITRATE, {"bit_rate",                  g_d64Def,           "int64_t"}},
     {Plugin::Tag::MEDIA_FILE_EXTENSION, {"file_ext",           g_emptyString,      "string"}},
     {Plugin::Tag::MEDIA_CODEC_CONFIG, {"codec_config",         g_vecBufDef,        "std::vector<uint8_t>"}},
