@@ -22,7 +22,7 @@
 #include "factory/filter_factory.h"
 #include "foundation/cpp_ext/algorithm_ext.h"
 #include "foundation/log.h"
-#include <plugin_attr_desc.h>
+#include "pipeline/core/plugin_attr_desc.h"
 
 namespace OHOS {
 namespace Media {
@@ -246,7 +246,7 @@ ErrorCode AudioCaptureFilter::Start()
 ErrorCode AudioCaptureFilter::Stop()
 {
     MEDIA_LOG_I("Stop entered.");
-
+    FilterBase::Stop();
     // stop task firstly
     if (taskPtr_) {
         taskPtr_->Stop();
@@ -263,6 +263,7 @@ ErrorCode AudioCaptureFilter::Stop()
 ErrorCode AudioCaptureFilter::Pause()
 {
     MEDIA_LOG_I("Pause entered.");
+    FilterBase::Pause();
     if (taskPtr_) {
         taskPtr_->PauseAsync();
     }
@@ -276,6 +277,7 @@ ErrorCode AudioCaptureFilter::Pause()
 ErrorCode AudioCaptureFilter::Resume()
 {
     MEDIA_LOG_I("Resume entered.");
+    state_ = FilterState::RUNNING;
     if (taskPtr_) {
         taskPtr_->Start();
     }

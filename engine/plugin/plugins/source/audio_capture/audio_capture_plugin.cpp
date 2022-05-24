@@ -20,7 +20,7 @@
 #include "audio_errors.h"
 #include "audio_type_translate.h"
 #include "foundation/log.h"
-#include "foundation/pre_defines.h"
+#include "foundation/osal/thread/scoped_lock.h"
 #include "plugin/common/plugin_time.h"
 #include "utils/constants.h"
 
@@ -116,21 +116,18 @@ do { \
     } \
 } while (0)
 
-AudioCapturePlugin::AudioCapturePlugin(std::string name) : SourcePlugin(std::move(name))
-{
-    MEDIA_LOG_D("IN");
-}
+AudioCapturePlugin::AudioCapturePlugin(std::string name) : SourcePlugin(std::move(name)) {}
 
 AudioCapturePlugin::~AudioCapturePlugin()
 {
-    MEDIA_LOG_D("IN");
+    DoDeinit();
 }
 
 Status AudioCapturePlugin::Init()
 {
-    MEDIA_LOG_D("IN");
+    OSAL::ScopedLock lock(captureMutex_);
     if (audioCapturer_ == nullptr) {
-        audioCapturer_ = AudioStandard::AudioCapturer::Create(AudioStandard::AudioStreamType::STREAM_MUSIC);
+        audioCapturer_ = AudioStandard::AudioCapturer::Create(AudioStandard::AudioStreamType::STREAM_DEFAULT);
         if (audioCapturer_ == nullptr) {
             MEDIA_LOG_E("Create audioCapturer fail");
             return Status::ERROR_UNKNOWN;
@@ -139,9 +136,9 @@ Status AudioCapturePlugin::Init()
     return Status::OK;
 }
 
-Status AudioCapturePlugin::Deinit()
+Status AudioCapturePlugin::DoDeinit()
 {
-    MEDIA_LOG_D("IN");
+    OSAL::ScopedLock lock(captureMutex_);
     if (audioCapturer_) {
         if (audioCapturer_->GetStatus() == AudioStandard::CapturerState::CAPTURER_RUNNING) {
             if (!audioCapturer_->Stop()) {
@@ -154,6 +151,12 @@ Status AudioCapturePlugin::Deinit()
         audioCapturer_ = nullptr;
     }
     return Status::OK;
+}
+
+Status AudioCapturePlugin::Deinit()
+{
+    MEDIA_LOG_D("Deinit");
+    return DoDeinit();
 }
 
 Status AudioCapturePlugin::Prepare()
@@ -173,9 +176,13 @@ Status AudioCapturePlugin::Prepare()
         return Status::ERROR_UNKNOWN;
     }
     capturerParams_.audioEncoding = AudioStandard::ENCODING_PCM;
-    FAIL_LOG_RETURN(audioCapturer_->SetParams(capturerParams_), "audioCapturer SetParam");
     size_t size;
-    FAIL_LOG_RETURN(audioCapturer_->GetBufferSize(size), "audioCapturer GetBufferSize");
+    {
+        OSAL::ScopedLock lock (captureMutex_);
+        FALSE_RETURN_V_MSG_E(audioCapturer_ != nullptr, Status::ERROR_WRONG_STATE, "no available audio capture");
+        FAIL_LOG_RETURN(audioCapturer_->SetParams(capturerParams_), "audioCapturer SetParam");
+        FAIL_LOG_RETURN(audioCapturer_->GetBufferSize(size), "audioCapturer GetBufferSize");
+    }
     if (size >= MAX_CAPTURE_BUFFER_SIZE) {
         MEDIA_LOG_E("bufferSize is too big: " PUBLIC_LOG_ZU, size);
         return Status::ERROR_INVALID_PARAMETER;
@@ -187,72 +194,60 @@ Status AudioCapturePlugin::Prepare()
 
 Status AudioCapturePlugin::Reset()
 {
-    MEDIA_LOG_D("IN");
-    if (audioCapturer_->GetStatus() == AudioStandard::CapturerState::CAPTURER_RUNNING) {
-        if (!audioCapturer_->Stop()) {
-            MEDIA_LOG_E("Stop audioCapturer fail");
+    MEDIA_LOG_D("Reset");
+    {
+        OSAL::ScopedLock lock (captureMutex_);
+        FALSE_RETURN_V_MSG_E(audioCapturer_ != nullptr, Status::ERROR_WRONG_STATE, "no available audio capture");
+        if (audioCapturer_->GetStatus() == AudioStandard::CapturerState::CAPTURER_RUNNING) {
+            if (!audioCapturer_->Stop()) {
+                MEDIA_LOG_E("Stop audioCapturer fail");
+            }
         }
     }
     bufferSize_ = 0;
-    curTimestampNs_ = 0;
-    stopTimestampNs_ = 0;
-    totalPauseTimeNs_ = 0;
     bitRate_ = 0;
-    isStop_ = false;
     capturerParams_ = AudioStandard::AudioCapturerParams();
     return Status::OK;
 }
 
 Status AudioCapturePlugin::Start()
 {
-    MEDIA_LOG_D("IN");
-    if (audioCapturer_->GetStatus() != AudioStandard::CapturerState::CAPTURER_PREPARED) {
-        MEDIA_LOG_E("audioCapturer need to prepare first");
-        return Status::ERROR_WRONG_STATE;
-    }
-    if (!audioCapturer_->Start()) {
-        MEDIA_LOG_E("audioCapturer start failed");
-        return Status::ERROR_UNKNOWN;
-    }
-    if (isStop_) {
-        if (GetAudioTime(curTimestampNs_) != Status::OK) {
-            MEDIA_LOG_E("Get auido time fail");
+    MEDIA_LOG_D("start capture");
+    OSAL::ScopedLock lock (captureMutex_);
+    FALSE_RETURN_V_MSG_E(audioCapturer_ != nullptr, Status::ERROR_WRONG_STATE, "no available audio capture");
+    if (audioCapturer_->GetStatus() != AudioStandard::CapturerState::CAPTURER_RUNNING) {
+        if (!audioCapturer_->Start()) {
+            MEDIA_LOG_E("audioCapturer start failed");
+            return Status::ERROR_UNKNOWN;
         }
-        if (curTimestampNs_ < stopTimestampNs_) {
-            MEDIA_LOG_E("Get wrong audio time");
-        }
-        totalPauseTimeNs_ += std::fabs(curTimestampNs_ - stopTimestampNs_);
-        isStop_ = false;
     }
     return Status::OK;
 }
 
 Status AudioCapturePlugin::Stop()
 {
-    MEDIA_LOG_D("IN");
-    enum AudioStandard::CapturerState state = audioCapturer_->GetStatus();
-    if (state != AudioStandard::CapturerState::CAPTURER_RUNNING) {
-        MEDIA_LOG_E("audioCapturer need to prepare first");
-        return Status::ERROR_WRONG_STATE;
-    }
-    if (!audioCapturer_->Stop()) {
-        MEDIA_LOG_E("Stop audioCapturer fail");
-    }
-    if (!isStop_) {
-        stopTimestampNs_ = curTimestampNs_;
-        isStop_ = true;
+    MEDIA_LOG_D("stop capture");
+    OSAL::ScopedLock lock (captureMutex_);
+    if (audioCapturer_ && audioCapturer_->GetStatus() == AudioStandard::CAPTURER_RUNNING) {
+        if (!audioCapturer_->Stop()) {
+            MEDIA_LOG_E("Stop audioCapturer fail");
+            return Status::ERROR_UNKNOWN;
+        }
     }
     return Status::OK;
 }
 
 Status AudioCapturePlugin::GetParameter(Tag tag, ValueType& value)
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_D("GetParameter");
     AudioStandard::AudioCapturerParams params;
-    if (!audioCapturer_) {
-        return Plugin::Status::ERROR_WRONG_STATE;
+    OSAL::ScopedLock lock (captureMutex_);
+    {
+        if (!audioCapturer_) {
+            return Plugin::Status::ERROR_WRONG_STATE;
+        }
+        FAIL_LOG_RETURN(audioCapturer_->GetParams(params), "audioCapturer GetParams");
     }
-    FAIL_LOG_RETURN(audioCapturer_->GetParams(params), "audioCapturer GetParams");
     switch (tag) {
         case Tag::AUDIO_SAMPLE_RATE: {
             if (params.samplingRate != capturerParams_.samplingRate) {
@@ -387,32 +382,27 @@ Status AudioCapturePlugin::SetParameter(Tag tag, const ValueType& value)
 
 std::shared_ptr<Allocator> AudioCapturePlugin::GetAllocator()
 {
-    MEDIA_LOG_DD("IN");
     return nullptr;
 }
 
 Status AudioCapturePlugin::SetCallback(Callback* cb)
 {
-    MEDIA_LOG_D("IN");
-    UNUSED_VARIABLE(cb);
+    (void)cb;
     return Status::ERROR_UNIMPLEMENTED;
 }
 
 Status AudioCapturePlugin::SetSource(std::shared_ptr<MediaSource> source)
 {
-    UNUSED_VARIABLE(source);
+    (void)source;
     return Status::ERROR_UNIMPLEMENTED;
 }
 
-Status AudioCapturePlugin::GetAudioTime(uint64_t& audioTimeNs)
+Status AudioCapturePlugin::GetAudioTimeLocked(int64_t& audioTimeNs)
 {
-    if (!audioCapturer_) {
-        return Status::ERROR_WRONG_STATE;
-    }
     OHOS::AudioStandard::Timestamp timeStamp;
     auto timeBase = OHOS::AudioStandard::Timestamp::Timestampbase::MONOTONIC;
     if (!audioCapturer_->GetAudioTime(timeStamp, timeBase)) {
-        MEDIA_LOG_E("audioCapturer GetAudioTime() fail");
+        MEDIA_LOG_E("audioCapturer GetAudioTimeLocked() fail");
         return Status::ERROR_UNKNOWN;
     }
     if (timeStamp.time.tv_sec < 0 || timeStamp.time.tv_nsec < 0) {
@@ -440,19 +430,23 @@ Status AudioCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
     if (bufData->GetCapacity() <= 0) {
         return Status::ERROR_NO_MEMORY;
     }
-    bool isBlocking = true;
-    auto size = audioCapturer_->Read(*bufData->GetWritableAddr(expectedLen), expectedLen, isBlocking);
+    auto size = 0;
+    Status ret = Status::OK;
+    int64_t timestampNs = 0;
+    {
+        OSAL::ScopedLock lock(captureMutex_);
+        size = audioCapturer_->Read(*bufData->GetWritableAddr(expectedLen), expectedLen, true);
+        ret = GetAudioTimeLocked(timestampNs);
+    }
     if (size < 0) {
         MEDIA_LOG_E("audioCapturer Read() fail");
         return Status::ERROR_NOT_ENOUGH_DATA;
     }
-    auto ret = GetAudioTime(curTimestampNs_);
     if (ret != Status::OK) {
         MEDIA_LOG_E("Get audio timestamp fail");
         return ret;
     }
-    Ns2HstTime(curTimestampNs_ + totalPauseTimeNs_, reinterpret_cast<int64_t &>(buffer->pts));
-    bufferSize_ = size;
+    Ns2HstTime(timestampNs, buffer->pts);
     return ret;
 }
 
@@ -474,7 +468,7 @@ Status AudioCapturePlugin::IsSeekable(bool& seekable)
 
 Status AudioCapturePlugin::SeekTo(uint64_t offset)
 {
-    UNUSED_VARIABLE(offset);
+    (void)offset;
     return Status::ERROR_UNIMPLEMENTED;
 }
 } // namespace AuCapturePlugin

@@ -28,6 +28,7 @@
 #include "pipeline/core/type_define.h"
 #include "plugin/interface/source_plugin.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "plugin/common/plugin_time.h"
 #include "utils/constants.h"
 
 namespace OHOS {

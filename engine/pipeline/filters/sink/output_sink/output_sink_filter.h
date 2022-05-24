@@ -47,6 +47,7 @@ public:
     ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
 private:
+    ErrorCode ConfigureToPreparePlugin();
     std::shared_ptr<Plugin::OutputSink> plugin_;
     Plugin::ProtocolType protocolType_ {Plugin::ProtocolType::UNKNOWN};
     int64_t currentPos_ {0};
