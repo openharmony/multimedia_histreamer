@@ -77,6 +77,10 @@ private:
     bool channelNumSpecified_ {false};
     int64_t bitRate_ {0};
     bool bitRateSpecified_ {false};
+    uint32_t appTokenId_ {0};
+    bool appTokenIdSpecified_ {false};
+    int32_t appUid_ {0};
+    bool appUidSpecified_ {false};
     Plugin::AudioSampleFormat sampleFormat_ {OHOS::Media::Plugin::AudioSampleFormat::S16};
     bool sampleFormatSpecified_ {false};
     Plugin::AudioChannelLayout channelLayout_ {OHOS::Media::Plugin::AudioChannelLayout::STEREO};

@@ -25,6 +25,7 @@ namespace Pipeline {
 const Plugin::ValueType g_emptyString = std::string();
 const Plugin::ValueType g_u8Def = (uint8_t)0;
 const Plugin::ValueType g_u32Def = (uint32_t)0;
+const Plugin::ValueType g_d32Def = (int32_t)0;
 const Plugin::ValueType g_d64Def = (int64_t)0;
 const Plugin::ValueType g_u64Def = (uint64_t)0;
 const Plugin::ValueType g_doubleDef = (double)0.0;
@@ -87,6 +88,8 @@ const std::map<Plugin::Tag, std::tuple<const char*, const Plugin::ValueType&, co
     {Plugin::Tag::MEDIA_START_TIME, {"med_start_time",         g_d64Def,           "in64_t"}},
     {Plugin::Tag::VIDEO_H264_PROFILE, {"h264_profile",         g_vdH264ProfileDef, "VideoH264Profile"}},
     {Plugin::Tag::VIDEO_H264_LEVEL, {"vd_level",               g_u32Def,           "uin32_t"}},
+    {Plugin::Tag::APP_TOKEN_ID, {"apptoken_id",                g_u32Def,           "uin32_t"}},
+    {Plugin::Tag::APP_UID, {"app_uid",                         g_d32Def,           "in32_t"}},
 };
 
 const std::map<Plugin::AudioSampleFormat, const char*> g_auSampleFmtStrMap = {

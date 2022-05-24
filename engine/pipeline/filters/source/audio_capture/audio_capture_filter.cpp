@@ -63,6 +63,12 @@ std::vector<WorkMode> AudioCaptureFilter::GetWorkModes()
 ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin::Meta>& audioMeta)
 {
     MEDIA_LOG_D("IN");
+    if (appTokenIdSpecified_) {
+        NOK_LOG(plugin_->SetParameter(Tag::APP_TOKEN_ID, appTokenId_));
+    }
+    if (appUidSpecified_) {
+        NOK_LOG(plugin_->SetParameter(Tag::APP_UID, appUid_));
+    }
     ErrorCode err = TranslatePluginStatus(plugin_->Init());
     if (err != ErrorCode::SUCCESS) {
         return err;
@@ -124,6 +130,12 @@ ErrorCode AudioCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value
             break;
         case Tag::AUDIO_CHANNEL_LAYOUT:
             channelLayoutSpecified_ = AssignParameterIfMatch(tag, channelLayout_, value);
+            break;
+        case Tag::APP_TOKEN_ID:
+            appTokenIdSpecified_ = AssignParameterIfMatch(tag, appTokenId_, value);
+            break;
+        case Tag::APP_UID:
+            appUidSpecified_ = AssignParameterIfMatch(tag, appUid_, value);
             break;
         default:
             MEDIA_LOG_W("SetParameter: unknown key " PUBLIC_LOG_S "(" PUBLIC_LOG_D32 ")", GetTagStrName(tag), key);

@@ -90,6 +90,8 @@ enum struct Tag : uint32_t {
     WATERLINE_LOW,                    ///< uint32_t, low waterline
     SRC_INPUT_TYPE,                   ///< @see SrcInputType
     BITS_PER_CODED_SAMPLE,            ///< uint32_t, bits per coded sample
+    APP_TOKEN_ID,                     ///< uint32_t, app token id
+    APP_UID,                          ///< int32_t, app uid
 
     /* -------------------- media tag -------------------- */
     MEDIA_TITLE = SECTION_MEDIA_START + 1, ///< string
