@@ -33,6 +33,7 @@ source_set("httpsource") {
     "hls/hls_media_downloader.cpp",
     "hls/hls_streaming.cpp",
     "hls/m3u8.cpp",
+    "hls/tags.cpp",
     "http/http_media_downloader.cpp",
     "http_source_plugin.cpp",
   ]

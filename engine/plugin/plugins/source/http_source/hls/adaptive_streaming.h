@@ -23,7 +23,6 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-constexpr size_t PLAY_LIST_SIZE = 5 * 1024;
 class AdaptiveStreaming {
 public:
     explicit AdaptiveStreaming(const std::string& url);
@@ -32,11 +31,11 @@ public:
 
     virtual bool ProcessManifest() = 0;
     virtual bool UpdateManifest() = 0;
-    virtual bool GetDownloadList(std::shared_ptr<BlockingQueue<std::string>> downloadList) = 0;
+    virtual bool GetDownloadList(std::shared_ptr<BlockingQueue<std::string>>& downloadList) = 0;
 
 protected:
-    void SavePlayListData(uint8_t* data, uint32_t len, int64_t offset);
-    void OnDownloadPlayListStatus(DownloadStatus status, int32_t code);
+    void SaveData(uint8_t* data, uint32_t len, int64_t offset);
+    void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request, int32_t code);
 
     bool GetPlaylist(const std::string& url);
 
@@ -50,12 +49,11 @@ protected:
     }
 
 protected:
-    std::shared_ptr<Downloader> playListDownloader_;
-    std::shared_ptr<DownloadRequest> playListRequest_;
-    DataSaveFunc playListDataSave_;
-    StatusCallbackFunc playListStatusCallback_;
-
-    char playList[PLAY_LIST_SIZE] {0};
+    std::shared_ptr<Downloader> downloader;
+    std::shared_ptr<DownloadRequest> downloadRequest_;
+    DataSaveFunc dataSave_;
+    StatusCallbackFunc statusCallback_;
+    std::string playList_;
     std::string uri_;
 };
 }

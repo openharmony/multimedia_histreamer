@@ -41,13 +41,12 @@ public:
     void SetCallback(Callback* cb) override;
 private:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
-    void OnDownloadStatus(DownloadStatus status, int32_t code);
+    void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request, int32_t code);
 
 private:
     std::shared_ptr<RingBuffer> buffer_;
-    std::shared_ptr<Downloader> downloader;
-    std::shared_ptr<DownloadRequest> request_;
-    bool isEos_ {false}; // file download finished
+    std::shared_ptr<Downloader> downloader_;
+    std::shared_ptr<DownloadRequest> downloadRequest_;
     Callback* callback_ {nullptr};
     bool aboveWaterline_ {false};
 };

@@ -23,39 +23,42 @@ namespace HttpPlugin {
 AdaptiveStreaming::AdaptiveStreaming(const std::string& url)
     :uri_(url)
 {
-    playListDownloader_ = std::make_shared<Downloader>();
-    playListDataSave_ =  [this] (auto&& data, auto&& len, auto&& offset) {
-        SavePlayListData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
-                std::forward<decltype(offset)>(offset)); };
-    playListStatusCallback_ = [this] (auto&& status, auto&& code) {
-        OnDownloadPlayListStatus(std::forward<decltype(status)>(status), std::forward<decltype(code)>(code)); };
+    downloader = std::make_shared<Downloader>();
+    dataSave_ = [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
+        SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
+                 std::forward<decltype(offset)>(offset));
+    };
+    statusCallback_ = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request, int32_t code) {
+        OnDownloadStatus(std::forward<decltype(status)>(status),
+            std::forward<decltype(request)>(request), std::forward<decltype(code)>(code));
+    };
 }
 
 bool AdaptiveStreaming::GetPlaylist(const std::string& url)
 {
-    memset_s(playList, PLAY_LIST_SIZE, 0, PLAY_LIST_SIZE);
-    playListRequest_ = std::make_shared<DownloadRequest>(url, playListDataSave_, playListStatusCallback_);
-    playListDownloader_->Download(playListRequest_, -1); // -1
-    playListDownloader_->Start();
+    playList_.clear();
+    downloadRequest_ = std::make_shared<DownloadRequest>(url, dataSave_, statusCallback_);
+    downloader->Download(downloadRequest_, -1); // -1
+    downloader->Start();
 
-    while (!playListRequest_->IsEos()) {
+    while (!downloadRequest_->IsEos()) {
         OSAL::SleepFor(200); // 200 time to download playlist, size is not more than 5*1024 usually
     }
 
-    return playListRequest_->IsEos();
+    return downloadRequest_->IsEos();
 }
 
-void AdaptiveStreaming::SavePlayListData(uint8_t* data, uint32_t len, int64_t offset)
+void AdaptiveStreaming::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 {
-    memcpy_s(playList+offset, len, data, len);
+    (void)offset;
+    playList_.append(reinterpret_cast<const char*>(data), len);
 }
 
-void AdaptiveStreaming::OnDownloadPlayListStatus(DownloadStatus status, int32_t code)
+void AdaptiveStreaming::OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request,
+                                         int32_t code)
 {
     MEDIA_LOG_I("OnDownloadStatus " PUBLIC_LOG_D32, status);
     switch (status) {
-        case DownloadStatus::FINISHED:
-            break;
         case DownloadStatus::CLIENT_ERROR:
             MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, code);
             break;

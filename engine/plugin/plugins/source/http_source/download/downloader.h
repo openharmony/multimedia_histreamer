@@ -30,7 +30,6 @@ namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
 enum struct DownloadStatus {
-    FINISHED,
     SERVER_ERROR,
     CLIENT_ERROR
 };
@@ -61,25 +60,8 @@ struct HeaderInfo {
 // uint8_t* : the data should save
 // uint32_t : length
 using DataSaveFunc = std::function<void(uint8_t*, uint32_t, int64_t)>;
-
-using StatusCallbackFunc = std::function<void(DownloadStatus, int32_t)>;
-
-struct RequestCallback {
-    RequestCallback(std::string url, size_t len, bool isEos, int32_t error1, int32_t error2)
-    {
-        url_ = url;
-        len_ = len;
-        isEos_ = isEos;
-        error1_ = error1;
-        error2_ = error2;
-    }
-    std::string url_;
-    size_t len_ {0};
-    bool isEos_ {false};
-    int32_t error1_;
-    int32_t error2_;
-};
-using RequestCallbackFunc = std::function<void(std::shared_ptr<RequestCallback>)>;
+class DownloadRequest;
+using StatusCallbackFunc = std::function<void(DownloadStatus, std::shared_ptr<DownloadRequest>&, int32_t)>;
 
 class DownloadRequest {
 public:
@@ -88,7 +70,6 @@ public:
     void SaveHeader(const HeaderInfo* header);
     bool IsChunked() const;
     bool IsEos() const;
-    void SetRequestCallback(RequestCallbackFunc requestCallbackFunc);
 
 private:
     void WaitHeaderUpdated() const;
@@ -96,7 +77,6 @@ private:
     std::string url_;
     DataSaveFunc saveData_;
     StatusCallbackFunc statusCallback_;
-    RequestCallbackFunc requestCallbackFunc_;
 
     HeaderInfo headerInfo_;
     bool isHeaderUpdated {false};

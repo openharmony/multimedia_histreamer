@@ -30,7 +30,7 @@ public:
 
     bool ProcessManifest() override;
     bool UpdateManifest() override;
-    bool GetDownloadList(std::shared_ptr<BlockingQueue<std::string>> downloadList) override;
+    bool GetDownloadList(std::shared_ptr<BlockingQueue<std::string>>& downloadList) override;
 
     void SetCurrentVariant(std::shared_ptr<M3U8VariantStream>& variant);
     bool UpdateM3U8();

@@ -33,7 +33,7 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
     buffer_ = std::make_shared<RingBuffer>(RING_BUFFER_SIZE);
     buffer_->Init();
 
-    downloader = std::make_shared<Downloader>();
+    downloader_ = std::make_shared<Downloader>();
 
     updateTask_ = std::make_shared<OSAL::Task>(std::string("HlsUpdates"));
     updateTask_->RegisterHandler([this] { PlaylistUpdatesLoop(); });
@@ -43,14 +43,14 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
 
     downloadList_ = std::make_shared<BlockingQueue<std::string>>("HlsDownloadList", 50); // 50
 
-    dataSave_ =  [this] (auto&& data, auto&& len, auto&& offset) {
+    dataSave_ =  [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
         SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
-                std::forward<decltype(offset)>(offset)); };
-    statusCallback_ = [this] (auto&& status, auto&& code) {
-        OnDownloadStatus(std::forward<decltype(status)>(status), std::forward<decltype(code)>(code)); };
-
-    requestCallbackFunc_ = [this] (auto&& callback) {
-        SaveRequestCallback(std::forward<decltype(callback)>(callback)); };
+                 std::forward<decltype(offset)>(offset));
+    };
+    statusCallback_ = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request, int32_t code) {
+        OnDownloadStatus(std::forward<decltype(status)>(status), std::forward<decltype(request)>(request),
+            std::forward<decltype(code)>(code));
+    };
 }
 
 void HlsMediaDownloader::PlaylistUpdatesLoop()
@@ -63,12 +63,11 @@ void HlsMediaDownloader::PlaylistUpdatesLoop()
 void HlsMediaDownloader::FragmentDownloadLoop()
 {
     std::string url = downloadList_->Pop();
-    if (!fragmentStatus_[url].isDownloading) {
-        fragmentStatus_[url].isDownloading = true;
-        request_ = std::make_shared<DownloadRequest>(url, dataSave_, statusCallback_);
-        request_->SetRequestCallback(requestCallbackFunc_);
-        downloader->Download(request_, -1); // -1
-        downloader->Start();
+    if (!fragmentDownloadStart[url]) {
+        fragmentDownloadStart[url] = true;
+        downloadRequest_ = std::make_shared<DownloadRequest>(url, dataSave_, statusCallback_);
+        downloader_->Download(downloadRequest_, -1); // -1
+        downloader_->Start();
         fragmentList_[fragmentCounter_] = url;
         fragmentCounter_++;
     }
@@ -90,14 +89,13 @@ void HlsMediaDownloader::Close()
     buffer_->SetActive(false);
     updateTask_->Stop();
     downloadTask_->Stop();
-    downloader->Stop();
+    downloader_->Stop();
 }
 
 bool HlsMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
                               unsigned int& realReadLength, bool& isEos)
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
-    isEos = false;
     realReadLength = buffer_->ReadBuffer(buff, wantReadLength, 2); // wait 2 times
     MEDIA_LOG_D("Read: wantReadLength " PUBLIC_LOG_D32 ", realReadLength " PUBLIC_LOG_D32 ", isEos "
                 PUBLIC_LOG_D32, wantReadLength, realReadLength, isEos);
@@ -112,11 +110,10 @@ bool HlsMediaDownloader::Seek(int offset)
         return true;
     }
     buffer_->Clear(); // First clear buffer, avoid no available buffer then task pause never exit.
-    downloader->Pause();
+    downloader_->Pause();
     buffer_->Clear();
-    downloader->Seek(offset);
-    downloader->Start();
-    isEos_ = false;
+    downloader_->Seek(offset);
+    downloader_->Start();
     return true;
 }
 
@@ -135,27 +132,16 @@ void HlsMediaDownloader::SetCallback(Callback* cb)
     callback_ = cb;
 }
 
-void HlsMediaDownloader::SaveRequestCallback(std::shared_ptr<RequestCallback> r)
-{
-    std::string url_ = r->url_;
-
-    fragmentStatus_[url_].len_ = r->len_;
-    fragmentStatus_[url_].isEos_ = r->isEos_;
-    fragmentStatus_[url_].error1_ = r->error1_;
-    fragmentStatus_[url_].error2_ = r->error2_;
-}
-
 void HlsMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 {
     buffer_->WriteBuffer(data, len, offset);
 }
 
-void HlsMediaDownloader::OnDownloadStatus(DownloadStatus status, int32_t code)
+void HlsMediaDownloader::OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request,
+                                          int32_t code)
 {
     MEDIA_LOG_I("OnDownloadStatus " PUBLIC_LOG_D32, status);
     switch (status) {
-        case DownloadStatus::FINISHED:
-            break;
         case DownloadStatus::CLIENT_ERROR:
             MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, code);
             break;

@@ -74,11 +74,6 @@ void DownloadRequest::WaitHeaderUpdated() const
     MEDIA_LOG_D("isHeaderUpdated " PUBLIC_LOG_D32 ", times " PUBLIC_LOG_ZU, isHeaderUpdated, times);
 }
 
-void DownloadRequest::SetRequestCallback(RequestCallbackFunc requestCallbackFunc)
-{
-    requestCallbackFunc_ = requestCallbackFunc;
-}
-
 Downloader::Downloader() noexcept
 {
     shouldStartNextRequest = true;
@@ -131,6 +126,7 @@ bool Downloader::Seek(int64_t offset)
     int64_t temp = currentRequest_->GetFileContentLength() - offset;
     temp = temp >= 0 ? temp : PER_REQUEST_SIZE;
     currentRequest_->requestSize_ = static_cast<int>(std::min(temp, static_cast<int64_t>(PER_REQUEST_SIZE)));
+    currentRequest_->isEos_ = false;
     shouldStartNextRequest = false; // Reuse last request when seek
     return true;
 }
@@ -157,7 +153,6 @@ bool Downloader::BeginDownload()
     return true;
 }
 
-
 void Downloader::EndDownload()
 {
 }
@@ -170,33 +165,25 @@ void Downloader::HttpDownloadLoop()
         shouldStartNextRequest = false;
     }
     FALSE_RETURN_W(currentRequest_ != nullptr);
-
     NetworkClientErrorCode clientCode;
     NetworkServerErrorCode serverCode;
     Status ret = client_->RequestData(currentRequest_->startPos_, currentRequest_->requestSize_,
                                       serverCode, clientCode);
-
-    std::shared_ptr<RequestCallback> r = std::make_shared<RequestCallback>(currentRequest_->url_,
-                                                                           currentRequest_->headerInfo_.fileContentLen,
-                                                                           currentRequest_->isEos_,
-                                                                           static_cast<int32_t>(clientCode),
-                                                                           static_cast<int32_t>(serverCode));
     if (ret == Status::ERROR_CLIENT) {
         MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, clientCode);
-        currentRequest_->statusCallback_(DownloadStatus::CLIENT_ERROR, static_cast<int32_t>(clientCode));
+        currentRequest_->statusCallback_(DownloadStatus::CLIENT_ERROR, currentRequest_,
+                                         static_cast<int32_t>(clientCode));
     } else if (ret == Status::ERROR_SERVER) {
         MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32, serverCode);
-        currentRequest_->statusCallback_(DownloadStatus::SERVER_ERROR, static_cast<int32_t>(serverCode));
+        currentRequest_->statusCallback_(DownloadStatus::SERVER_ERROR, currentRequest_,
+                                         static_cast<int32_t>(serverCode));
     }
     FALSE_LOG(ret == Status::OK);
-
     int64_t remaining = currentRequest_->headerInfo_.fileContentLen - currentRequest_->startPos_;
     if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
         MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,
                     currentRequest_->startPos_, currentRequest_->url_.c_str());
-        currentRequest_->statusCallback_(DownloadStatus::FINISHED, 0);
         currentRequest_->isEos_ = true;
-        r->isEos_ = true;
         if (requestQue_->Empty()) {
             task_->PauseAsync();
         }
@@ -206,9 +193,6 @@ void Downloader::HttpDownloadLoop()
         currentRequest_->requestSize_ = remaining;
     } else {
         currentRequest_->requestSize_ = PER_REQUEST_SIZE;
-    }
-    if (currentRequest_->requestCallbackFunc_) {
-        currentRequest_->requestCallbackFunc_(r);
     }
 }
 

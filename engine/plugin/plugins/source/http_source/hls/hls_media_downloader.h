@@ -24,15 +24,6 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-struct FragmentStatus {
-    std::string url_;
-    bool isDownloading {false};
-    size_t len_ {0};
-    bool isEos_ {false};
-    int32_t error1_ {0};
-    int32_t error2_ {0};
-};
-
 class HlsMediaDownloader : public MediaDownloader {
 public:
     HlsMediaDownloader() noexcept;
@@ -47,8 +38,7 @@ public:
     void SetCallback(Callback* cb) override;
 private:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
-    void OnDownloadStatus(DownloadStatus status, int32_t code);
-    void SaveRequestCallback(std::shared_ptr<RequestCallback> r);
+    void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request, int32_t code);
 
     void PlaylistUpdatesLoop();
     void FragmentDownloadLoop();
@@ -56,14 +46,12 @@ private:
 private:
     size_t fragmentCounter_ {1};
     std::shared_ptr<RingBuffer> buffer_;
-    std::shared_ptr<Downloader> downloader;
-    std::shared_ptr<DownloadRequest> request_;
+    std::shared_ptr<Downloader> downloader_;
+    std::shared_ptr<DownloadRequest> downloadRequest_;
 
-    bool isEos_ {false};
     Callback* callback_ {nullptr};
     DataSaveFunc dataSave_;
     StatusCallbackFunc statusCallback_;
-    RequestCallbackFunc requestCallbackFunc_;
 
     std::shared_ptr<AdaptiveStreaming> adaptiveStreaming_;
 
@@ -72,7 +60,7 @@ private:
 
     std::shared_ptr<BlockingQueue<std::string>> downloadList_;
 
-    std::map<std::string, FragmentStatus> fragmentStatus_;
+    std::map<std::string, bool> fragmentDownloadStart;
     std::map<size_t, std::string> fragmentList_;
 };
 }

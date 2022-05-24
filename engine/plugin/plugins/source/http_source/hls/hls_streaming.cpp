@@ -31,8 +31,7 @@ void HLSStreaming::SetCurrentVariant(std::shared_ptr<M3U8VariantStream>& variant
 bool HLSStreaming::UpdateM3U8()
 {
     if (GetPlaylist(currentVariant_->m3u8_->uri_)) {
-        std::string m3u8(playList);
-        return currentVariant_->m3u8_->Update(m3u8);
+        return currentVariant_->m3u8_->Update(playList_);
     }
     MEDIA_LOG_E("HLSStreaming::UpdateM3U8 Error");
     return false;
@@ -42,8 +41,7 @@ bool HLSStreaming::ProcessManifest()
 {
     auto uri = GetUri();
     if (GetPlaylist(uri)) {
-        std::string masterM3U8(playList);
-        master_ = std::make_shared<M3U8MasterPlaylist>(masterM3U8, uri);
+        master_ = std::make_shared<M3U8MasterPlaylist>(playList_, uri);
         SetCurrentVariant(master_->defaultVariant_);
         if (!master_->isSimple_) {
             return UpdateM3U8();
@@ -59,7 +57,7 @@ bool HLSStreaming::UpdateManifest()
     return UpdateM3U8();
 }
 
-bool HLSStreaming::GetDownloadList(std::shared_ptr<BlockingQueue<std::string>> downloadList)
+bool HLSStreaming::GetDownloadList(std::shared_ptr<BlockingQueue<std::string>>& downloadList)
 {
     std::shared_ptr<M3U8> m3u8 = currentVariant_->m3u8_;
     for (auto& file : m3u8->files_) {

@@ -19,6 +19,7 @@
 #include <memory>
 #include <string>
 #include <list>
+#include "tags.h"
 
 namespace OHOS {
 namespace Media {
@@ -39,8 +40,8 @@ struct M3U8InitFile {
     int size;
 };
 
-struct M3U8FragmentFile {
-    M3U8FragmentFile(std::string& uri, std::string& title, double duration, int sequence);
+struct M3U8Fragment {
+    M3U8Fragment(std::string uri, std::string title, double duration, int sequence, bool discont);
     std::string uri_;
     std::string title_;
     double duration_;
@@ -53,28 +54,28 @@ struct M3U8FragmentFile {
 };
 
 struct M3U8 {
+    M3U8(std::string uri, std::string name);
     bool Update(std::string& playlist);
+    void UpdateFromTags(std::list<std::shared_ptr<Tag>>& tags);
+    void GetExtInf(const std::shared_ptr<Tag>& tag, double& duration, std::string& title) const;
+    bool isLive() const;
+
     std::string uri_;
     std::string name_;
-    
+
     bool endlist_;
     int version_;
     double targetDuration_;
     bool allowCache_;
     
-    std::list<std::shared_ptr<M3U8FragmentFile>> files_;
-
-    std::shared_ptr<M3U8FragmentFile> currentFile_;
-
-    int64_t sequence_ {-1};
+    std::list<std::shared_ptr<M3U8Fragment>> files_;
+    int64_t sequence_ {1}; // default 1
     int discontSequence_;
-
-    std::string lastestData_;
+    std::string playList_;
 };
 
 struct M3U8Media {
     M3U8MediaType type_;
-
     std::string groupID_;
     std::string name_;
     std::string lang_;
@@ -82,38 +83,34 @@ struct M3U8Media {
     bool isDefault_;
     bool autoSelect_;
     bool forced_;
-
     std::shared_ptr<M3U8> m3u8_;
 };
 
 struct M3U8VariantStream {
+    M3U8VariantStream(std::string name, std::string uri, std::shared_ptr<M3U8> m3u8);
     std::string name_;
     std::string uri_;
     std::string codecs_;
-    int bandWidth_;
-    int programID_;
-    int width_;
-    int height_;
-    bool iframe_;
-
+    uint64_t bandWidth_ {};
+    int programID_ {};
+    int width_ {};
+    int height_ {};
+    bool iframe_ {false};
     std::shared_ptr<M3U8> m3u8_;
-
     std::list<M3U8Media> media_;
 };
 
 struct M3U8MasterPlaylist {
-    M3U8MasterPlaylist(std::string& playlist, std::string uri);
-
+    M3U8MasterPlaylist(std::string& playlist, const std::string& uri);
+    void UpdateMediaPlaylist();
+    void UpdateMasterPlaylist();
     std::list<std::shared_ptr<M3U8VariantStream>> variants_;
-
     std::list<M3U8VariantStream> iframeVariants_;
-
     std::shared_ptr<M3U8VariantStream> defaultVariant_;
-
-    int version_;
+    std::string uri_;
+    int version_ {};
     bool isSimple_ {false};
-
-    std::string latestData_;
+    std::string playList_;
 };
 }
 }
