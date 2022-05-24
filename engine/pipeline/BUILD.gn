@@ -45,6 +45,8 @@ source_set("histreamer_pipeline") {
     "filters/demux/data_packer.cpp",
     "filters/demux/demuxer_filter.cpp",
     "filters/demux/type_finder.cpp",
+    "filters/filter_tool_box/buffer_calibration/audio_buffer_calibration.cpp",
+    "filters/filter_tool_box/buffer_calibration/i_avbuffer_calibration.cpp",
     "filters/muxer/muxer_filter.cpp",
     "filters/sink/audio_sink/audio_sink_filter.cpp",
     "filters/sink/media_synchronous_sink.cpp",

@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 
+#include "pipeline/filters/filter_tool_box/buffer_calibration/i_avbuffer_calibration.h"
 #include "osal/thread/task.h"
 #include "osal/utils/util.h"
 #include "pipeline/core/error_code.h"
@@ -50,7 +51,7 @@ public:
     ErrorCode SendEos();
 private:
     void InitPorts() override;
-    ErrorCode InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& audioMeta);
+    ErrorCode InitAndConfigWithMeta(const std::shared_ptr<Plugin::Meta>& audioMeta);
     void ReadLoop();
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);
@@ -82,6 +83,7 @@ private:
     bool channelLayoutSpecified_ {false};
     Capability capNegWithDownstream_ {};
 
+    std::unique_ptr<IAvBufferCalibration> bufferCalibration_ {};
     std::atomic<bool> eos_ {false};
     OSAL::Mutex pushDataMutex_ {};
 };
