@@ -19,10 +19,11 @@
 #include "plugin/common/plugin_time.h"
 namespace OHOS {
 namespace Media {
-class IAvPtsCalibrationStrategy {
+namespace Pipeline {
+class PtsCalibrationStrategy {
 public:
-    IAvPtsCalibrationStrategy() = default;
-    virtual ~IAvPtsCalibrationStrategy() = default;
+    PtsCalibrationStrategy() = default;
+    virtual ~PtsCalibrationStrategy() = default;
     void Reset()
     {
         startTime_ = HST_TIME_NONE;
@@ -48,8 +49,9 @@ protected:
     virtual void ResetImpl() {}
     int64_t startTime_ {HST_TIME_NONE};
     int64_t startTimeDiffThreshold_ {5 * HST_MSECOND};
-    int64_t ptsDiffThreshold_ {3 * HST_MSECOND};
+    int64_t ptsDiffThreshold_ {10 * HST_MSECOND};
 };
+} // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
 

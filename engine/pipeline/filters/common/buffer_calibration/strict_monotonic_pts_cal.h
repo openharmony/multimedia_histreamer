@@ -15,10 +15,11 @@
 
 #ifndef HISTREAMER_STRICTMONOTONICPTSCAL_H
 #define HISTREAMER_STRICTMONOTONICPTSCAL_H
-#include "i_av_pts_calibration_strategy.h"
+#include "pts_calibration_strategy.h"
 namespace OHOS {
 namespace Media {
-class StrictMonotonicPtsCal : public IAvPtsCalibrationStrategy {
+namespace Pipeline {
+class StrictMonotonicPtsCal : public PtsCalibrationStrategy {
 public:
     StrictMonotonicPtsCal() = default;
     ~StrictMonotonicPtsCal() override = default;
@@ -59,6 +60,7 @@ private:
     int64_t lastPts_ {HST_TIME_NONE};
     int64_t lastDuration_ {0};
 };
+} // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_STRICTMONOTONICPTSCAL_H

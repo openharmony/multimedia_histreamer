@@ -23,6 +23,7 @@
 
 namespace OHOS {
 namespace Media {
+namespace Pipeline {
 template<class T>
 bool ExtractTag(T& out, const Plugin::Any& val)
 {
@@ -90,5 +91,6 @@ void AudioBufferCalibration::CorrectPts(const AVBufferPtr &bufferPtr) const
 {
     ptsCalibrationStrategy_->CorrectPts(bufferPtr);
 }
+} // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

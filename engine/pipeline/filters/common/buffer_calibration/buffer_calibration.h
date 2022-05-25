@@ -16,17 +16,18 @@
 #ifndef HISTREAMER_PIPELINE_FILTER_AVBUFFER_CALIBRATION_H
 #define HISTREAMER_PIPELINE_FILTER_AVBUFFER_CALIBRATION_H
 #include <memory>
-#include "i_av_pts_calibration_strategy.h"
+#include "pts_calibration_strategy.h"
 #include "plugin/common/plugin_tags.h"
 #include "pipeline/core/type_define.h"
 namespace OHOS {
 namespace Media {
-class IAvBufferCalibration {
+namespace Pipeline {
+class BufferCalibration {
 public:
-    IAvBufferCalibration();
-    virtual ~IAvBufferCalibration() = default;
+    BufferCalibration();
+    virtual ~BufferCalibration() = default;
 
-    void SetStrategy(std::unique_ptr<IAvPtsCalibrationStrategy> ptr)
+    void SetStrategy(std::unique_ptr<PtsCalibrationStrategy> ptr)
     {
         ptsCalibrationStrategy_ = std::move(ptr);
     }
@@ -66,8 +67,9 @@ protected:
     virtual void ResetImpl() {}
     virtual void CorrectBufferImpl(const AVBufferPtr& bufferPtr) {}
     bool enable_ {false};
-    std::unique_ptr<IAvPtsCalibrationStrategy> ptsCalibrationStrategy_;
+    std::unique_ptr<PtsCalibrationStrategy> ptsCalibrationStrategy_;
 };
+} // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
 

@@ -15,10 +15,11 @@
 
 #ifndef HISTREAMER_PIPELINE_AUDIO_BUFFER_CALIBRATION_H
 #define HISTREAMER_PIPELINE_AUDIO_BUFFER_CALIBRATION_H
-#include "i_avbuffer_calibration.h"
+#include "buffer_calibration.h"
 namespace OHOS {
 namespace Media {
-class AudioBufferCalibration : public IAvBufferCalibration {
+namespace Pipeline {
+class AudioBufferCalibration : public BufferCalibration {
 public:
     ~AudioBufferCalibration() override = default;
 
@@ -38,6 +39,7 @@ private:
     uint32_t sampleRate_ {0};
     int64_t startTime_ {-1};
 };
+} // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
 

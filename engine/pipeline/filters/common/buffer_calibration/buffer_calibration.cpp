@@ -12,10 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "i_avbuffer_calibration.h"
+#include "buffer_calibration.h"
 #include "strict_monotonic_pts_cal.h"
 namespace OHOS {
 namespace Media {
-IAvBufferCalibration::IAvBufferCalibration() : ptsCalibrationStrategy_(new StrictMonotonicPtsCal) {}
+namespace Pipeline {
+BufferCalibration::BufferCalibration() : ptsCalibrationStrategy_(new StrictMonotonicPtsCal) {}
+} // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

@@ -20,7 +20,7 @@
 #include <memory>
 #include <string>
 
-#include "pipeline/filters/filter_tool_box/buffer_calibration/i_avbuffer_calibration.h"
+#include "pipeline/filters/common/buffer_calibration/buffer_calibration.h"
 #include "osal/thread/task.h"
 #include "osal/utils/util.h"
 #include "pipeline/core/error_code.h"
@@ -83,7 +83,11 @@ private:
     bool channelLayoutSpecified_ {false};
     Capability capNegWithDownstream_ {};
 
-    std::unique_ptr<IAvBufferCalibration> bufferCalibration_ {};
+    std::unique_ptr<BufferCalibration> bufferCalibration_ {};
+    bool refreshTotalPauseTime_ {false};
+    int64_t latestBufferTime_ {HST_TIME_NONE};
+    int64_t latestPausedTime_ {HST_TIME_NONE};
+    int64_t totalPausedTime_ {0};
     std::atomic<bool> eos_ {false};
     OSAL::Mutex pushDataMutex_ {};
 };

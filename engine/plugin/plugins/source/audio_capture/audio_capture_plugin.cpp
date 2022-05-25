@@ -127,7 +127,7 @@ Status AudioCapturePlugin::Init()
 {
     OSAL::ScopedLock lock(captureMutex_);
     if (audioCapturer_ == nullptr) {
-        audioCapturer_ = AudioStandard::AudioCapturer::Create(AudioStandard::AudioStreamType::STREAM_DEFAULT);
+        audioCapturer_ = AudioStandard::AudioCapturer::Create(AudioStandard::AudioStreamType::STREAM_MUSIC);
         if (audioCapturer_ == nullptr) {
             MEDIA_LOG_E("Create audioCapturer fail");
             return Status::ERROR_UNKNOWN;
@@ -241,8 +241,8 @@ Status AudioCapturePlugin::GetParameter(Tag tag, ValueType& value)
 {
     MEDIA_LOG_D("GetParameter");
     AudioStandard::AudioCapturerParams params;
-    OSAL::ScopedLock lock (captureMutex_);
     {
+        OSAL::ScopedLock lock (captureMutex_);
         if (!audioCapturer_) {
             return Plugin::Status::ERROR_WRONG_STATE;
         }
@@ -435,6 +435,9 @@ Status AudioCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
     int64_t timestampNs = 0;
     {
         OSAL::ScopedLock lock(captureMutex_);
+        if (audioCapturer_->GetStatus() != AudioStandard::CAPTURER_RUNNING) {
+            return Status::ERROR_AGAIN;
+        }
         size = audioCapturer_->Read(*bufData->GetWritableAddr(expectedLen), expectedLen, true);
         ret = GetAudioTimeLocked(timestampNs);
     }

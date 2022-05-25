@@ -23,7 +23,7 @@
 #include "foundation/cpp_ext/algorithm_ext.h"
 #include "foundation/log.h"
 #include "pipeline/core/plugin_attr_desc.h"
-#include "pipeline/filters/filter_tool_box/buffer_calibration/audio_buffer_calibration.h"
+#include "pipeline/filters/common/buffer_calibration/audio_buffer_calibration.h"
 
 namespace OHOS {
 namespace Media {
@@ -253,12 +253,15 @@ ErrorCode AudioCaptureFilter::Stop()
 {
     MEDIA_LOG_I("Stop entered.");
     FilterBase::Stop();
-    bufferCalibration_->Reset();
     // stop task firstly
     if (taskPtr_) {
         taskPtr_->Stop();
     }
-
+    bufferCalibration_->Reset();
+    latestBufferTime_ = HST_TIME_NONE;
+    latestPausedTime_ = HST_TIME_NONE;
+    totalPausedTime_ = 0;
+    refreshTotalPauseTime_ = false;
     // stop plugin secondly
     ErrorCode ret = ErrorCode::SUCCESS;
     if (plugin_) {
@@ -272,8 +275,9 @@ ErrorCode AudioCaptureFilter::Pause()
     MEDIA_LOG_I("Pause entered.");
     FilterBase::Pause();
     if (taskPtr_) {
-        taskPtr_->PauseAsync();
+        taskPtr_->Pause();
     }
+    latestPausedTime_ = latestBufferTime_;
     ErrorCode ret = ErrorCode::SUCCESS;
     if (plugin_) {
         ret = TranslatePluginStatus(plugin_->Stop());
@@ -284,6 +288,9 @@ ErrorCode AudioCaptureFilter::Pause()
 ErrorCode AudioCaptureFilter::Resume()
 {
     MEDIA_LOG_I("Resume entered.");
+    if (state_ == FilterState::PAUSED) {
+        refreshTotalPauseTime_ = true;
+    }
     state_ = FilterState::RUNNING;
     if (taskPtr_) {
         taskPtr_->Start();
@@ -321,10 +328,22 @@ void AudioCaptureFilter::ReadLoop()
     }
     AVBufferPtr bufferPtr = std::make_shared<AVBuffer>(BufferMetaType::AUDIO);
     ret = plugin_->Read(bufferPtr, bufferSize);
+    if (ret == Status::ERROR_AGAIN) {
+        MEDIA_LOG_D("plugin read return again");
+        return;
+    }
     if (ret != Status::OK) {
         SendEos();
         return;
     }
+    latestBufferTime_ = bufferPtr->pts;
+    if (refreshTotalPauseTime_) {
+        if (latestPausedTime_ != HST_TIME_NONE && latestBufferTime_ > latestPausedTime_) {
+            totalPausedTime_ += latestBufferTime_ - latestPausedTime_;
+        }
+        refreshTotalPauseTime_ = false;
+    }
+    bufferPtr->pts -= totalPausedTime_;
     SendBuffer(bufferPtr);
 }
 
