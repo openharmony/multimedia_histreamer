@@ -34,10 +34,10 @@ source_set("std_video_surface_sink") {
     print("std video surface sink plugin is not available on lite systems")
   } else {
     include_dirs = [
-      "//foundation/graphic/graphic/interfaces/innerkits",
+      "//foundation/graphic/graphic_2d/interfaces/innerkits",
       "//drivers/peripheral/display/interfaces/include",
-      "//foundation/graphic/graphic/interfaces/innerkits/common",
-      "//foundation/graphic/graphic/utils/sync_fence/export",
+      "//foundation/graphic/graphic_2d/interfaces/innerkits/common",
+      "//foundation/graphic/graphic_2d/utils/sync_fence/export",
       "//utils/native/base/include",
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
       "//drivers/framework/include/utils",
@@ -45,8 +45,8 @@ source_set("std_video_surface_sink") {
     ]
     public_deps += [
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
-      "//foundation/graphic/graphic:libsurface",
-      "//foundation/graphic/graphic/utils:sync_fence",
+      "//foundation/graphic/graphic_2d:libsurface",
+      "//foundation/graphic/graphic_2d/utils:sync_fence",
       "//third_party/bounds_checking_function:libsec_static",
       "//utils/native/base:utils",
     ]

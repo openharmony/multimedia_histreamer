@@ -43,9 +43,9 @@ config("hst_plugin_intf_config") {
     if (multimedia_histreamer_enable_video) {
       include_dirs += [
         "//utils/native/base/include",
-        "//foundation/graphic/graphic/interfaces/innerkits",
+        "//foundation/graphic/graphic_2d/interfaces/innerkits",
         "//drivers/peripheral/display/interfaces/include",
-        "//foundation/graphic/graphic/utils/sync_fence/export",
+        "//foundation/graphic/graphic_2d/utils/sync_fence/export",
       ]
     }
   }
@@ -77,8 +77,8 @@ source_set("histreamer_plugin_intf") {
     public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
     if (multimedia_histreamer_enable_video) {
       public_deps += [
-        "//foundation/graphic/graphic/frameworks/surface:surface",
-        "//foundation/graphic/graphic/utils:sync_fence",
+        "//foundation/graphic/graphic_2d/frameworks/surface:surface",
+        "//foundation/graphic/graphic_2d/utils:sync_fence",
       ]
     }
   }
@@ -94,7 +94,7 @@ config("hst_plugin_core_config") {
   } else {
     include_dirs += [
       "//utils/native/base/include",
-      "//foundation/graphic/graphic/interfaces/innerkits",
+      "//foundation/graphic/graphic_2d/interfaces/innerkits",
       "//drivers/peripheral/display/interfaces/include",
     ]
   }

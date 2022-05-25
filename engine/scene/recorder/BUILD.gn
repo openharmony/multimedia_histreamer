@@ -49,7 +49,7 @@ source_set("histreamer_recorder") {
         "standard/recorder_utils.cpp",
       ]
       public_deps += [
-        "//foundation/graphic/graphic/frameworks/surface:surface",
+        "//foundation/graphic/graphic_2d/frameworks/surface:surface",
         "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline",
       ]
     }
