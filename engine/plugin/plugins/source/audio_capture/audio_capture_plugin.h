@@ -15,10 +15,10 @@
 
 #ifndef HISTREAMER_AUDIO_CAPTURE_PLUGIN_H
 #define HISTREAMER_AUDIO_CAPTURE_PLUGIN_H
-
+#include "audio_capturer.h"
+#include "foundation/osal/thread/mutex.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
-#include "audio_capturer.h"
 
 namespace OHOS {
 namespace Media {
@@ -46,19 +46,17 @@ public:
     Status SeekTo(uint64_t offset) override;
 
 private:
+    Status DoDeinit();
     bool AssignSampleRateIfSupported(uint32_t sampleRate);
     bool AssignChannelNumIfSupported(uint32_t channelNum);
     bool AssignSampleFmtIfSupported(AudioSampleFormat sampleFormat);
-    Plugin::Status GetAudioTime(uint64_t& audioTimeNs);
+    Status GetAudioTimeLocked(int64_t& audioTimeNs);
 
+    OSAL::Mutex captureMutex_ {};
     std::shared_ptr<OHOS::AudioStandard::AudioCapturer> audioCapturer_ {nullptr};
     AudioStandard::AudioCapturerParams capturerParams_ {};
-    bool isStop_ {false};
     int64_t bitRate_ {0};
     size_t bufferSize_ {0};
-    uint64_t curTimestampNs_ {0};
-    uint64_t stopTimestampNs_ {0};
-    uint64_t totalPauseTimeNs_ {0};
 };
 } // namespace AuCapturePlugin
 } // namespace Plugin

@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 
+#include "pipeline/filters/common/buffer_calibration/buffer_calibration.h"
 #include "osal/thread/task.h"
 #include "osal/utils/util.h"
 #include "pipeline/core/error_code.h"
@@ -28,6 +29,7 @@
 #include "pipeline/core/type_define.h"
 #include "plugin/interface/source_plugin.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "plugin/common/plugin_time.h"
 #include "utils/constants.h"
 
 namespace OHOS {
@@ -49,7 +51,7 @@ public:
     ErrorCode SendEos();
 private:
     void InitPorts() override;
-    ErrorCode InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& audioMeta);
+    ErrorCode InitAndConfigWithMeta(const std::shared_ptr<Plugin::Meta>& audioMeta);
     void ReadLoop();
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);
@@ -81,6 +83,11 @@ private:
     bool channelLayoutSpecified_ {false};
     Capability capNegWithDownstream_ {};
 
+    std::unique_ptr<BufferCalibration> bufferCalibration_ {};
+    bool refreshTotalPauseTime_ {false};
+    int64_t latestBufferTime_ {HST_TIME_NONE};
+    int64_t latestPausedTime_ {HST_TIME_NONE};
+    int64_t totalPausedTime_ {0};
     std::atomic<bool> eos_ {false};
     OSAL::Mutex pushDataMutex_ {};
 };

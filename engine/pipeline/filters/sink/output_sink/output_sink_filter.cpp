@@ -86,10 +86,8 @@ bool OutputSinkFilter::Configure(const std::string& inPort, const std::shared_pt
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
     }
-    auto err = TranslatePluginStatus(plugin_->SetSink(sink_));
-    if (err != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("Output sink configure error");
-        OnEvent({name_, EventType::EVENT_ERROR, err});
+
+    if (ConfigureToPreparePlugin() != ErrorCode::SUCCESS) {
         return false;
     }
     state_ = FilterState::READY;
@@ -157,10 +155,11 @@ ErrorCode OutputSinkFilter::Prepare()
 ErrorCode OutputSinkFilter::Start()
 {
     FilterBase::Start();
-    if (plugin_) {
-        plugin_->Prepare(); // Because in OutputSinkFilter::Prepare() plugin_ is nullptr.
-        plugin_->Start();
+    if (plugin_ == nullptr) {
+        MEDIA_LOG_E("no valid plugin");
+        return ErrorCode::ERROR_INVALID_STATE;
     }
+    FAIL_RETURN_MSG_W(TranslatePluginStatus(plugin_->Start()), "plugin start failed");
     return ErrorCode::SUCCESS;
 }
 
@@ -171,6 +170,22 @@ ErrorCode OutputSinkFilter::Stop()
     if (plugin_) {
         plugin_->Stop();
     }
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode OutputSinkFilter::ConfigureToPreparePlugin()
+{
+    if (plugin_ == nullptr) {
+        MEDIA_LOG_E("no available plugin");
+        return ErrorCode::ERROR_INVALID_STATE;
+    }
+    auto err = TranslatePluginStatus(plugin_->SetSink(sink_));
+    if (err != ErrorCode::SUCCESS) {
+        MEDIA_LOG_E("Output sink configure error");
+        OnEvent({name_, EventType::EVENT_ERROR, err});
+        return err;
+    }
+    FAIL_RETURN_MSG_W(TranslatePluginStatus(plugin_->Prepare()), "plugin prepare failed");
     return ErrorCode::SUCCESS;
 }
 } // Pipeline

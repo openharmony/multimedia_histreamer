@@ -22,7 +22,8 @@
 #include "factory/filter_factory.h"
 #include "foundation/cpp_ext/algorithm_ext.h"
 #include "foundation/log.h"
-#include <plugin_attr_desc.h>
+#include "pipeline/core/plugin_attr_desc.h"
+#include "pipeline/filters/common/buffer_calibration/audio_buffer_calibration.h"
 
 namespace OHOS {
 namespace Media {
@@ -36,7 +37,8 @@ AudioCaptureFilter::AudioCaptureFilter(const std::string& name)
       taskPtr_(nullptr),
       plugin_(nullptr),
       pluginAllocator_(nullptr),
-      pluginInfo_(nullptr)
+      pluginInfo_(nullptr),
+      bufferCalibration_(new AudioBufferCalibration)
 {
     filterType_ = FilterType::CAPTURE_SOURCE;
     MEDIA_LOG_D("ctor called");
@@ -58,7 +60,7 @@ std::vector<WorkMode> AudioCaptureFilter::GetWorkModes()
     return {WorkMode::PUSH};
 }
 
-ErrorCode AudioCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& audioMeta)
+ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin::Meta>& audioMeta)
 {
     MEDIA_LOG_D("IN");
     ErrorCode err = TranslatePluginStatus(plugin_->Init());
@@ -70,6 +72,7 @@ ErrorCode AudioCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::
     uint32_t tmp = 0;
     if (audioMeta->GetUint32(MetaID::AUDIO_SAMPLE_RATE, tmp)) {
         MEDIA_LOG_I("configure plugin with sample rate " PUBLIC_LOG_U32, tmp);
+        bufferCalibration_->SetParam(Tag::AUDIO_SAMPLE_RATE, tmp);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_RATE, tmp));
         if (err != ErrorCode::SUCCESS) {
             return err;
@@ -77,13 +80,14 @@ ErrorCode AudioCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::
     }
     if (audioMeta->GetUint32(MetaID::AUDIO_CHANNELS, tmp)) {
         MEDIA_LOG_I("configure plugin with channel " PUBLIC_LOG_U32, tmp);
+        bufferCalibration_->SetParam(Tag::AUDIO_CHANNELS, tmp);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_CHANNELS, channelNum_));
         if (err != ErrorCode::SUCCESS) {
             return err;
         }
     }
     int64_t bitRate = 0;
-    if (audioMeta->GetInt64(MetaID::AUDIO_CHANNELS, bitRate)) {
+    if (audioMeta->GetInt64(MetaID::MEDIA_BITRATE, bitRate)) {
         MEDIA_LOG_I("configure plugin with channel " PUBLIC_LOG_D64, bitRate);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::MEDIA_BITRATE, bitRate));
         if (err != ErrorCode::SUCCESS) {
@@ -92,6 +96,7 @@ ErrorCode AudioCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::
     }
     Plugin::AudioSampleFormat sampleFormat = Plugin::AudioSampleFormat::S16;
     if (audioMeta->GetData<Plugin::AudioSampleFormat>(MetaID::AUDIO_SAMPLE_FORMAT, sampleFormat)) {
+        bufferCalibration_->SetParam(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat);
         MEDIA_LOG_I("configure plugin with sampleFormat " PUBLIC_LOG_S, GetAudSampleFmtNameStr(sampleFormat));
         return TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat));
     }
@@ -197,7 +202,7 @@ ErrorCode AudioCaptureFilter::DoConfigure()
         MEDIA_LOG_E("Configure downstream fail with " PUBLIC_LOG_S, Meta2String(*audioMeta).c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
-    return InitAndConfigPlugin(audioMeta);
+    return InitAndConfigWithMeta(audioMeta);
 }
 
 ErrorCode AudioCaptureFilter::Prepare()
@@ -229,6 +234,7 @@ ErrorCode AudioCaptureFilter::Start()
 {
     MEDIA_LOG_I("Start entered.");
     auto res = ErrorCode::SUCCESS;
+    bufferCalibration_->Enable();
     // start plugin firstly
     if (plugin_) {
         res = TranslatePluginStatus(plugin_->Start());
@@ -246,12 +252,16 @@ ErrorCode AudioCaptureFilter::Start()
 ErrorCode AudioCaptureFilter::Stop()
 {
     MEDIA_LOG_I("Stop entered.");
-
+    FilterBase::Stop();
     // stop task firstly
     if (taskPtr_) {
         taskPtr_->Stop();
     }
-
+    bufferCalibration_->Reset();
+    latestBufferTime_ = HST_TIME_NONE;
+    latestPausedTime_ = HST_TIME_NONE;
+    totalPausedTime_ = 0;
+    refreshTotalPauseTime_ = false;
     // stop plugin secondly
     ErrorCode ret = ErrorCode::SUCCESS;
     if (plugin_) {
@@ -263,9 +273,11 @@ ErrorCode AudioCaptureFilter::Stop()
 ErrorCode AudioCaptureFilter::Pause()
 {
     MEDIA_LOG_I("Pause entered.");
+    FilterBase::Pause();
     if (taskPtr_) {
-        taskPtr_->PauseAsync();
+        taskPtr_->Pause();
     }
+    latestPausedTime_ = latestBufferTime_;
     ErrorCode ret = ErrorCode::SUCCESS;
     if (plugin_) {
         ret = TranslatePluginStatus(plugin_->Stop());
@@ -276,6 +288,10 @@ ErrorCode AudioCaptureFilter::Pause()
 ErrorCode AudioCaptureFilter::Resume()
 {
     MEDIA_LOG_I("Resume entered.");
+    if (state_ == FilterState::PAUSED) {
+        refreshTotalPauseTime_ = true;
+    }
+    state_ = FilterState::RUNNING;
     if (taskPtr_) {
         taskPtr_->Start();
     }
@@ -312,10 +328,22 @@ void AudioCaptureFilter::ReadLoop()
     }
     AVBufferPtr bufferPtr = std::make_shared<AVBuffer>(BufferMetaType::AUDIO);
     ret = plugin_->Read(bufferPtr, bufferSize);
+    if (ret == Status::ERROR_AGAIN) {
+        MEDIA_LOG_D("plugin read return again");
+        return;
+    }
     if (ret != Status::OK) {
         SendEos();
         return;
     }
+    latestBufferTime_ = bufferPtr->pts;
+    if (refreshTotalPauseTime_) {
+        if (latestPausedTime_ != HST_TIME_NONE && latestBufferTime_ > latestPausedTime_) {
+            totalPausedTime_ += latestBufferTime_ - latestPausedTime_;
+        }
+        refreshTotalPauseTime_ = false;
+    }
+    bufferPtr->pts -= totalPausedTime_;
     SendBuffer(bufferPtr);
 }
 
@@ -474,6 +502,7 @@ void AudioCaptureFilter::SendBuffer(const std::shared_ptr<AVBuffer>& buffer)
 {
     OSAL::ScopedLock lock(pushDataMutex_);
     if (!eos_) {
+        bufferCalibration_->CorrectBuffer(buffer);
         outPorts_[0]->PushData(buffer, -1);
     }
 }

@@ -403,7 +403,9 @@ uint8_t GetBytesPerSample(Plugin::AudioSampleFormat fmt)
             bytesPerSample = 2; // 2 bytes
             break;
         case Plugin::AudioSampleFormat::S8:
+        case Plugin::AudioSampleFormat::S8P:
         case Plugin::AudioSampleFormat::U8:
+        case Plugin::AudioSampleFormat::U8P:
             bytesPerSample = 1; // 1 bytes
             break;
         default:
