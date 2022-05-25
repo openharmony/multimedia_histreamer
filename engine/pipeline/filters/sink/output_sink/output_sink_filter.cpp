@@ -17,6 +17,7 @@
 #define HST_LOG_TAG "OutputSinkFilter"
 
 #include "output_sink_filter.h"
+#include <cstdio>
 #include "common/plugin_utils.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
@@ -33,7 +34,13 @@ OutputSinkFilter::OutputSinkFilter(std::string name) : FilterBase(std::move(name
     filterType_ = FilterType::OUTPUT_SINK;
 }
 
-OutputSinkFilter::~OutputSinkFilter() {}
+OutputSinkFilter::~OutputSinkFilter()
+{
+    if (!bufferEos_) {
+        OnEvent({name_, EventType::EVENT_ERROR, "No EOS Received"});
+        MEDIA_LOG_E("OutputSink send EVENT_ERROR: No EOS Received");
+    }
+}
 
 void OutputSinkFilter::Init(EventReceiver *receiver, FilterCallback *callback)
 {
@@ -141,6 +148,7 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, const AVBufferPt
         };
         MEDIA_LOG_D("file sink push data send event_complete");
         OnEvent(event);
+        bufferEos_ = true;
     }
     return ErrorCode::SUCCESS;
 }
@@ -162,6 +170,7 @@ ErrorCode OutputSinkFilter::Start()
         return ErrorCode::ERROR_INVALID_STATE;
     }
     FAIL_RETURN_MSG_W(TranslatePluginStatus(plugin_->Start()), "plugin start failed");
+    bufferEos_ = false;
     return ErrorCode::SUCCESS;
 }
 

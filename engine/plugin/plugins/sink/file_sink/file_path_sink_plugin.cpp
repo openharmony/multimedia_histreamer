@@ -15,6 +15,8 @@
 #define HST_LOG_TAG "FilePathSinkPlugin"
 #include "file_path_sink_plugin.h"
 #include "foundation/log.h"
+#include "foundation/osal/filesystem/file_system.h"
+#include "pipeline/filters/common/plugin_utils.h"
 
 namespace OHOS {
 namespace Media {
@@ -42,6 +44,15 @@ PLUGIN_DEFINITION(FilePathSink, LicenseType::APACHE_V2, FilePathSinkRegister, []
 FilePathSinkPlugin::FilePathSinkPlugin(std::string name)
     : OutputSinkPlugin(std::move(name)), fp_(nullptr), seekable_(Seekable::SEEKABLE)
 {
+}
+
+FilePathSinkPlugin::~FilePathSinkPlugin()
+{
+    if (fp_) {
+        MEDIA_LOG_W("close file in dtor");
+        std::fclose(fp_);
+        fp_ = nullptr;
+    }
 }
 
 Status FilePathSinkPlugin::Stop()
@@ -97,7 +108,8 @@ Status FilePathSinkPlugin::Flush()
 
 Status FilePathSinkPlugin::OpenFile()
 {
-    fp_ = std::fopen(fileName_.c_str(), "wb");
+    tmpFileName_ = OSAL::FileSystem::GetTmpFileName();
+    fp_ = std::fopen(tmpFileName_.c_str(), "wb");
     if (fp_ == nullptr) {
         int32_t err = errno;
         MEDIA_LOG_E("Fail to open file due to " PUBLIC_LOG_S, strerror(err));
@@ -110,7 +122,7 @@ Status FilePathSinkPlugin::OpenFile()
                 return Status::ERROR_UNKNOWN;
         }
     }
-    MEDIA_LOG_D("open file %s", fileName_.c_str()); // file name is privacy
+    MEDIA_LOG_D("open file %s", tmpFileName_.c_str()); // file name is privacy
     return Status::OK;
 }
 
@@ -120,6 +132,7 @@ void FilePathSinkPlugin::CloseFile()
         MEDIA_LOG_D("close file");
         std::fclose(fp_);
         fp_ = nullptr;
+        std::rename(tmpFileName_.c_str(), fileName_.c_str());
     }
 }
 } // namespace FileSink
