@@ -94,6 +94,8 @@ private:
     std::atomic<uint32_t> videoCount_ {0};
     std::atomic<uint32_t> audioSourceId_ {0};
     std::atomic<uint32_t> videoSourceId_ {0};
+    uint32_t appTokenId_ {0};
+    int32_t appUid_ {0};
 
     OutputFormatType outputFormatType_ {OutputFormatType::FORMAT_BUTT};
     OSAL::Mutex stateMutex_ {};

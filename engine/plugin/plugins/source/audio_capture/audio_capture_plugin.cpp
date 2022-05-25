@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cmath>
 #include "audio_errors.h"
+#include "audio_info.h"
 #include "audio_type_translate.h"
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
@@ -127,7 +128,10 @@ Status AudioCapturePlugin::Init()
 {
     OSAL::ScopedLock lock(captureMutex_);
     if (audioCapturer_ == nullptr) {
-        audioCapturer_ = AudioStandard::AudioCapturer::Create(AudioStandard::AudioStreamType::STREAM_MUSIC);
+        AudioStandard::AppInfo appInfo;
+        appInfo.appTokenId = appTokenId_;
+        appInfo.appUid = appUid_;
+        audioCapturer_ = AudioStandard::AudioCapturer::Create(AudioStandard::AudioStreamType::STREAM_MUSIC, appInfo);
         if (audioCapturer_ == nullptr) {
             MEDIA_LOG_E("Create audioCapturer fail");
             return Status::ERROR_UNKNOWN;
@@ -370,6 +374,18 @@ Status AudioCapturePlugin::SetParameter(Tag tag, const ValueType& value)
                     MEDIA_LOG_E("sampleFormat is not supported by audiocapturer");
                     return Status::ERROR_INVALID_PARAMETER;
                 }
+            }
+            break;
+        }
+        case Tag::APP_TOKEN_ID: {
+            if (value.SameTypeWith(typeid(uint32_t))) {
+                appTokenId_ = Plugin::AnyCast<uint32_t>(value);
+            }
+            break;
+        }
+        case Tag::APP_UID: {
+            if (value.SameTypeWith(typeid(int32_t))) {
+                appUid_ = Plugin::AnyCast<int32_t>(value);
             }
             break;
         }

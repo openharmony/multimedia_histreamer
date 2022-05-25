@@ -19,6 +19,7 @@ config("histreamer_recorder_config") {
         [ "//foundation/multimedia/histreamer/engine/scene/recorder" ]
     if (!hst_is_lite_sys) {
       include_dirs += [
+        "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
         "//foundation/multimedia/media_standard/interfaces/inner_api/native",
         "//foundation/multimedia/image_standard/interfaces/innerkits/include",
         "//foundation/multimedia/media_standard/services/include",
@@ -37,9 +38,11 @@ source_set("histreamer_recorder") {
     ]
     public_configs = [
       ":histreamer_recorder_config",
+      "//foundation/communication/ipc/interfaces/innerkits/ipc_core:libipc_core_private_config",
       "//foundation/multimedia/histreamer:histreamer_presets",
     ]
     public_deps = [
+      "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
     ]

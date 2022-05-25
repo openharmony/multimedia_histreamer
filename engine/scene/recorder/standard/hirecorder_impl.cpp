@@ -18,6 +18,7 @@
 #include "hirecorder_impl.h"
 #include <regex>
 #include "foundation/osal/filesystem/file_system.h"
+#include "ipc_skeleton.h"
 #include "pipeline/factory/filter_factory.h"
 #include "plugin/common/media_sink.h"
 #include "plugin/common/plugin_time.h"
@@ -32,7 +33,6 @@ using namespace Pipeline;
 HiRecorderImpl::HiRecorderImpl() : fsm_(*this), curFsmState_(StateId::INIT)
 {
     MEDIA_LOG_I("hiRecorderImpl ctor");
-
     FilterFactory::Instance().Init();
     muxer_ = FilterFactory::Instance().CreateFilterWithType<MuxerFilter>(
             "builtin.recorder.muxer", "muxer");
@@ -407,6 +407,10 @@ ErrorCode HiRecorderImpl::SetAudioSourceInternal(AudioSourceType source, int32_t
             "builtin.recorder.audioencoder", "audioencoder");
     FALSE_RETURN_V_MSG_E(audioCapture_ != nullptr && audioEncoder_ != nullptr, ErrorCode::ERROR_UNKNOWN,
                          "create audioCapture/audioEncoder filter fail");
+    appTokenId_ = IPCSkeleton::GetCallingTokenID();
+    appUid_ = IPCSkeleton::GetCallingUid();
+    audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::APP_TOKEN_ID), appTokenId_);
+    audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::APP_UID), appUid_);
     auto ret = pipeline_->AddFilters({audioCapture_.get(), audioEncoder_.get()});
     FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "AddFilters audioCapture to pipeline fail");
     ret = pipeline_->LinkFilters({audioCapture_.get(), audioEncoder_.get()});
