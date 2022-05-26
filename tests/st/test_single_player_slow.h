@@ -19,10 +19,10 @@
 
 using namespace OHOS::Media::Test;
 
-// @fixture(tags=slow)
+// @fixture(tags=audio_play_slow)
 FIXTURE(DataDrivenSinglePlayerTestSlow)
 {
-    DATA_PROVIDER(myurls, 300,
+    DATA_PROVIDER(myurls, 1,
     DATA_GROUP(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3")),
     DATA_GROUP(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a")),
     DATA_GROUP(std::string(RESOURCE_DIR "/../../../../resource_ext/WAV/02-400Hz Stereo 0dB.wav")),
@@ -690,7 +690,7 @@ FIXTURE(DataDrivenSinglePlayerTestSlow)
         }
     }
 
-    DATA_PROVIDER(specialFileUrls, 10,
+    DATA_PROVIDER(specialFileUrls, 1,
     // TO FIX: ffmpeg wav demuxer cause crash  RESOURCE_DIR "/../../../../resource_ext/WAV/dash-runner-8bit.wav
     DATA_GROUP(std::string(RESOURCE_DIR "/../../../../resource_ext/AAC/AACLC_1channel_001.aac")),
     DATA_GROUP(std::string(RESOURCE_DIR "/../../../../resource_ext/APE/bridgegril85595213.ape")),

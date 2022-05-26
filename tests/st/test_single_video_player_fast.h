@@ -22,7 +22,7 @@ using namespace OHOS::Media::Test;
 
 FIXTURE(DataDrivenSingleVideoPlayerTestFast)
 {
-    DATA_PROVIDER(myurls, 10,
+    DATA_PROVIDER(myurls, 1,
     DATA_GROUP(std::string(RESOURCE_DIR "/MP4/9_AVC_1280x720_59.940fps_AAC_128Kbps_2channels.mp4")));
 
     // @test(data="myurls", tags=video_play_fast)

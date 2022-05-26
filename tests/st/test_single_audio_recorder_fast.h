@@ -33,11 +33,11 @@
 
 using namespace OHOS::Media::Test;
 
-// @fixture(tags=debuging)
+// @fixture(tags=audio_record_fast)
 FIXTURE(DataDrivenSingleAudioRecorderTestFast)
 {
     // file name: 44100_2_02.pcm,  44100 - sample rate, 2 - channel count, 02 - file index
-    DATA_PROVIDER(pcmSources, 10,
+    DATA_PROVIDER(pcmSources, 1,
     DATA_GROUP(AudioRecordSource(std::string(RESOURCE_DIR "/PCM/44100_2_02.pcm"), 44100, 2, 320000)));
 
     SETUP()
@@ -49,6 +49,29 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
     }
 
+    // @test(data="pcmSources", tags=fast)
+    PTEST((AudioRecordSource recordSource), Test single audio fd recorder)
+    {
+        std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+         // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY);
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
+        ASSERT_EQ(0, recorder->Configure(recordSource));
+        ASSERT_EQ(0, recorder->Prepare());
+        ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+        ASSERT_EQ(0, recorder->Stop());
+        ASSERT_EQ(0, close(fd));
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+        ASSERT_EQ(0, player->Stop());
+    }
     // @test(data="pcmSources", tags=fast)
     PTEST((AudioRecordSource recordSource), Test single audio recorder)
     {

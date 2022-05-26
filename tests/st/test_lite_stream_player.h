@@ -25,7 +25,7 @@ int StartLiteStreamPlayer(std::string dataPath);
 // @fixture(tags=fast)
 FIXTURE(TestLiteStreamPlayerFast)
 {
-    DATA_PROVIDER(musicUrls, 5,
+    DATA_PROVIDER(musicUrls, 1,
     DATA_GROUP(std::string(RESOURCE_DIR "/WAV/wav_stream")));
 
     // @test(data="musicUrls")

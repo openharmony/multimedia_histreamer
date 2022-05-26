@@ -22,11 +22,11 @@
 
 using namespace OHOS::Media::Test;
 
-// @fixture(tags=recorderdebug)
+// @fixture(tags=audio_record_slow)
 FIXTURE(DataDrivenSingleAudioRecorderTestSlow)
 {
     // file name: 44100_2_02.pcm,  44100 - sample rate, 2 - channel count, 02 - file index
-    DATA_PROVIDER(pcmSources, 10,
+    DATA_PROVIDER(pcmSources, 1,
     DATA_GROUP(AudioRecordSource(std::string(RESOURCE_DIR "/PCM/8000_1_01.pcm"), 8000, 1, 320000)),
     DATA_GROUP(AudioRecordSource(std::string(RESOURCE_DIR "/PCM/8000_2_01.pcm"), 8000, 2, 320000)),
     DATA_GROUP(AudioRecordSource(std::string(RESOURCE_DIR "/PCM/11025_2_01.pcm"), 11025, 2, 320000)),
