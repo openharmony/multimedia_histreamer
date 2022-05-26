@@ -31,7 +31,9 @@
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
 #if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 78, 0) and LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(58, 64, 100)
+#if LIBAVFORMAT_VERSION_INT != AV_VERSION_INT(58, 76, 100)
 #include "libavformat/internal.h"
+#endif
 #endif
 
 namespace OHOS {
@@ -283,6 +285,8 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mo
         if (keyFrameIdx >= 0) {
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(58, 78, 0)
             ffTime = avformat_index_get_entry(avStream, keyFrameIdx)->timestamp;
+#elif LIBAVFORMAT_VERSION_INT == AV_VERSION_INT(58, 76, 100)
+            ffTime = avStream->index_entries[keyFrameIdx].timestamp;
 #elif LIBAVFORMAT_VERSION_INT > AV_VERSION_INT(58, 64, 100)
             ffTime = avStream->internal->index_entries[keyFrameIdx].timestamp;
 #else

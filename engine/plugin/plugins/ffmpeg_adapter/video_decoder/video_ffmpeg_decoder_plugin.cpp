@@ -326,6 +326,9 @@ Status VideoFfmpegDecoderPlugin::Prepare()
 #endif
         state_ = State::PREPARED;
     }
+    avPacket_ = std::shared_ptr<AVPacket>(av_packet_alloc(), [](AVPacket* ptr) {
+        av_packet_free(&ptr);
+    });
     outBufferQ_.SetActive(true);
     MEDIA_LOG_I("Prepare success");
     return Status::OK;
@@ -439,16 +442,10 @@ Status VideoFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
         MEDIA_LOG_W("SendBufferLocked in wrong state: " PUBLIC_LOG_D32, state_);
         return Status::ERROR_WRONG_STATE;
     }
-    AVPacket packet;
-    size_t bufferLength = 0;
-    bool eos = false;
-    if (inputBuffer == nullptr || (inputBuffer->flag & BUFFER_FLAG_EOS) != 0) {
-        // eos buffer
-        eos = true;
-    } else {
+    if (inputBuffer && !(inputBuffer->flag & BUFFER_FLAG_EOS)) {
         auto inputMemory = inputBuffer->GetMemory();
         const uint8_t* ptr = inputMemory->GetReadOnlyData();
-        bufferLength = inputMemory->GetSize();
+        auto bufferLength = inputMemory->GetSize();
         size_t bufferEnd = bufferLength;
         // pad to data if needed
         if ((bufferLength % AV_INPUT_BUFFER_PADDING_SIZE != 0) &&
@@ -462,16 +459,12 @@ Status VideoFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
             paddedBuffer_.insert(paddedBuffer_.end(), AV_INPUT_BUFFER_PADDING_SIZE, 0);
             ptr = paddedBuffer_.data();
         }
-        av_init_packet(&packet);
-        packet.data = const_cast<uint8_t*>(ptr);
-        packet.size = static_cast<int32_t>(bufferLength);
-        packet.pts = static_cast<int64_t>(inputBuffer->pts);
+        avPacket_->data = const_cast<uint8_t*>(ptr);
+        avPacket_->size = static_cast<int32_t>(bufferLength);
+        avPacket_->pts = static_cast<int64_t>(inputBuffer->pts);
     }
-    AVPacket* packetPtr = nullptr;
-    if (!eos) {
-        packetPtr = &packet;
-    }
-    auto ret = avcodec_send_packet(avCodecContext_.get(), packetPtr);
+    auto ret = avcodec_send_packet(avCodecContext_.get(), avPacket_.get());
+    av_packet_unref(avPacket_.get());
     if (ret < 0) {
         MEDIA_LOG_DD("send buffer error " PUBLIC_LOG_S, AVStrError(ret).c_str());
         return Status::ERROR_NO_MEMORY;
