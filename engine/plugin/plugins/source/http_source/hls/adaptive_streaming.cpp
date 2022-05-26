@@ -20,8 +20,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-AdaptiveStreaming::AdaptiveStreaming(const std::string& url)
-    :uri_(url)
+AdaptiveStreaming::AdaptiveStreaming()
 {
     downloader = std::make_shared<Downloader>();
     dataSave_ = [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
@@ -32,20 +31,25 @@ AdaptiveStreaming::AdaptiveStreaming(const std::string& url)
         OnDownloadStatus(std::forward<decltype(status)>(status),
             std::forward<decltype(request)>(request), std::forward<decltype(code)>(code));
     };
+    updateTask_ = std::make_shared<OSAL::Task>(std::string("FragmentListUpdate"));
+    updateTask_->RegisterHandler([this] { FragmentListUpdateLoop(); });
 }
 
-bool AdaptiveStreaming::GetPlaylist(const std::string& url)
+AdaptiveStreaming::~AdaptiveStreaming()
+{
+    downloader->Stop();
+    updateTask_->Stop();
+}
+
+void AdaptiveStreaming::Open(const std::string& url)
 {
     playList_.clear();
     downloadRequest_ = std::make_shared<DownloadRequest>(url, dataSave_, statusCallback_);
     downloader->Download(downloadRequest_, -1); // -1
     downloader->Start();
-
     while (!downloadRequest_->IsEos()) {
         OSAL::SleepFor(200); // 200 time to download playlist, size is not more than 5*1024 usually
     }
-
-    return downloadRequest_->IsEos();
 }
 
 void AdaptiveStreaming::SaveData(uint8_t* data, uint32_t len, int64_t offset)

@@ -26,22 +26,16 @@ namespace {
 constexpr int RING_BUFFER_SIZE = 5 * 48 * 1024;
 }
 
-using namespace std::placeholders;
-
 HlsMediaDownloader::HlsMediaDownloader() noexcept
 {
     buffer_ = std::make_shared<RingBuffer>(RING_BUFFER_SIZE);
     buffer_->Init();
 
     downloader_ = std::make_shared<Downloader>();
-
-    updateTask_ = std::make_shared<OSAL::Task>(std::string("HlsUpdates"));
-    updateTask_->RegisterHandler([this] { PlaylistUpdatesLoop(); });
-
-    downloadTask_ = std::make_shared<OSAL::Task>(std::string("HlsDownload"));
+    downloadTask_ = std::make_shared<OSAL::Task>(std::string("FragmentDownload"));
     downloadTask_->RegisterHandler([this] { FragmentDownloadLoop(); });
 
-    downloadList_ = std::make_shared<BlockingQueue<std::string>>("HlsDownloadList", 50); // 50
+    fragmentList_ = std::make_shared<BlockingQueue<std::string>>("FragmentList", 50); // 50
 
     dataSave_ =  [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
         SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
@@ -53,33 +47,23 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
     };
 }
 
-void HlsMediaDownloader::PlaylistUpdatesLoop()
-{
-    OSAL::SleepFor(8000); // 8000 how often is playlist updated
-    adaptiveStreaming_->UpdateManifest();
-    adaptiveStreaming_->GetDownloadList(downloadList_);
-}
-
 void HlsMediaDownloader::FragmentDownloadLoop()
 {
-    std::string url = downloadList_->Pop();
+    std::string url = fragmentList_->Pop();
     if (!fragmentDownloadStart[url]) {
         fragmentDownloadStart[url] = true;
         downloadRequest_ = std::make_shared<DownloadRequest>(url, dataSave_, statusCallback_);
         downloader_->Download(downloadRequest_, -1); // -1
         downloader_->Start();
-        fragmentList_[fragmentCounter_] = url;
-        fragmentCounter_++;
     }
 }
 
 bool HlsMediaDownloader::Open(const std::string& url)
 {
-    adaptiveStreaming_ = std::make_shared<HLSStreaming>(url);
-    adaptiveStreaming_->ProcessManifest();
-    adaptiveStreaming_->GetDownloadList(downloadList_);
-
-    updateTask_->Start();
+    adaptiveStreaming_ = std::make_shared<HLSStreaming>();
+    adaptiveStreaming_->SetFragmentListCallback(this);
+    adaptiveStreaming_->ProcessManifest(url);
+    adaptiveStreaming_->Start();
     downloadTask_->Start();
     return true;
 }
@@ -87,7 +71,7 @@ bool HlsMediaDownloader::Open(const std::string& url)
 void HlsMediaDownloader::Close()
 {
     buffer_->SetActive(false);
-    updateTask_->Stop();
+    adaptiveStreaming_->Stop();
     downloadTask_->Stop();
     downloader_->Stop();
 }
@@ -130,6 +114,13 @@ bool HlsMediaDownloader::IsStreaming() const
 void HlsMediaDownloader::SetCallback(Callback* cb)
 {
     callback_ = cb;
+}
+
+void HlsMediaDownloader::OnFragmentListChanged(const std::vector<std::string>& fragmentList)
+{
+    for (auto& fragment : fragmentList) {
+        fragmentList_->Push(fragment);
+    }
 }
 
 void HlsMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)

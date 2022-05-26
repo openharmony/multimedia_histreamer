@@ -16,45 +16,45 @@
 #ifndef HISTREAMER_ADAPTIVE_STREAMING_H
 #define HISTREAMER_ADAPTIVE_STREAMING_H
 
-#include <list>
+#include <vector>
 #include "plugin/plugins/source/http_source/download/downloader.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
+struct FragmentListChangeCallback {
+    virtual ~FragmentListChangeCallback() = default;
+    virtual void OnFragmentListChanged(const std::vector<std::string>& fragmentList) = 0;
+};
 class AdaptiveStreaming {
 public:
-    explicit AdaptiveStreaming(const std::string& url);
-    AdaptiveStreaming() = default;
-    virtual ~AdaptiveStreaming() = default;
+    AdaptiveStreaming();
+    virtual ~AdaptiveStreaming();
 
-    virtual bool ProcessManifest() = 0;
-    virtual bool UpdateManifest() = 0;
-    virtual bool GetDownloadList(std::shared_ptr<BlockingQueue<std::string>>& downloadList) = 0;
-
+    virtual void ProcessManifest(std::string url) = 0;
+    virtual void UpdateManifest() = 0;
+    virtual void FragmentListUpdateLoop() = 0;
+    virtual void SetFragmentListCallback(FragmentListChangeCallback* callback) = 0;
+    void Start()
+    {
+        updateTask_->Start();
+    }
+    void Stop()
+    {
+        updateTask_->Stop();
+    }
 protected:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
     void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request, int32_t code);
-
-    bool GetPlaylist(const std::string& url);
-
-    void SetUri(std::string url)
-    {
-        uri_ = url;
-    }
-    std::string GetUri()
-    {
-        return uri_;
-    }
-
+    void Open(const std::string& url);
 protected:
     std::shared_ptr<Downloader> downloader;
     std::shared_ptr<DownloadRequest> downloadRequest_;
+    std::shared_ptr<OSAL::Task> updateTask_;
     DataSaveFunc dataSave_;
     StatusCallbackFunc statusCallback_;
     std::string playList_;
-    std::string uri_;
 };
 }
 }

@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-class HlsMediaDownloader : public MediaDownloader {
+class HlsMediaDownloader : public MediaDownloader, public FragmentListChangeCallback {
 public:
     HlsMediaDownloader() noexcept;
     ~HlsMediaDownloader() override = default;
@@ -36,15 +36,13 @@ public:
     size_t GetContentLength() const override;
     bool IsStreaming() const override;
     void SetCallback(Callback* cb) override;
+    void OnFragmentListChanged(const std::vector<std::string>& fragmentList) override;
 private:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
     void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request, int32_t code);
 
-    void PlaylistUpdatesLoop();
     void FragmentDownloadLoop();
-
 private:
-    size_t fragmentCounter_ {1};
     std::shared_ptr<RingBuffer> buffer_;
     std::shared_ptr<Downloader> downloader_;
     std::shared_ptr<DownloadRequest> downloadRequest_;
@@ -55,13 +53,9 @@ private:
 
     std::shared_ptr<AdaptiveStreaming> adaptiveStreaming_;
 
-    std::shared_ptr<OSAL::Task> updateTask_;
     std::shared_ptr<OSAL::Task> downloadTask_;
-
-    std::shared_ptr<BlockingQueue<std::string>> downloadList_;
-
+    std::shared_ptr<BlockingQueue<std::string>> fragmentList_;
     std::map<std::string, bool> fragmentDownloadStart;
-    std::map<size_t, std::string> fragmentList_;
 };
 }
 }

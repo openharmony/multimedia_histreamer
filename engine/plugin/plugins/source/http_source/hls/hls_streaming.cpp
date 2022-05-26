@@ -13,57 +13,45 @@
  * limitations under the License.
  */
 #define HST_LOG_TAG "HlsStreaming"
+#include <mutex>
 #include "hls_streaming.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-HLSStreaming::HLSStreaming(const std::string& url) : AdaptiveStreaming(url)
+void HLSStreaming::FragmentListUpdateLoop()
 {
+    OSAL::SleepFor(5000); // 5000 how often is playlist updated
+    UpdateManifest();
 }
 
-void HLSStreaming::SetCurrentVariant(std::shared_ptr<M3U8VariantStream>& variant)
+void HLSStreaming::ProcessManifest(std::string url)
 {
-    currentVariant_ = variant;
-}
-
-bool HLSStreaming::UpdateM3U8()
-{
-    if (GetPlaylist(currentVariant_->m3u8_->uri_)) {
-        return currentVariant_->m3u8_->Update(playList_);
+    Open(url);
+    master_ = std::make_shared<M3U8MasterPlaylist>(playList_, url);
+    currentVariant_ = master_->defaultVariant_;
+    if (!master_->isSimple_) {
+        UpdateManifest();
     }
-    MEDIA_LOG_E("HLSStreaming::UpdateM3U8 Error");
-    return false;
 }
 
-bool HLSStreaming::ProcessManifest()
+void HLSStreaming::UpdateManifest()
 {
-    auto uri = GetUri();
-    if (GetPlaylist(uri)) {
-        master_ = std::make_shared<M3U8MasterPlaylist>(playList_, uri);
-        SetCurrentVariant(master_->defaultVariant_);
-        if (!master_->isSimple_) {
-            return UpdateM3U8();
-        }
-        return true;
+    Open(currentVariant_->m3u8_->uri_);
+    currentVariant_->m3u8_->Update(playList_);
+    auto files = currentVariant_->m3u8_->files_;
+    auto fragmentList = std::vector<std::string>();
+    fragmentList.reserve(files.size());
+    for (auto& file :  files) {
+        fragmentList.push_back(file->uri_);
     }
-    MEDIA_LOG_E("HLSStreaming::ProcessManifest Error");
-    return false;
+    callback_->OnFragmentListChanged(fragmentList);
 }
 
-bool HLSStreaming::UpdateManifest()
+void HLSStreaming::SetFragmentListCallback(FragmentListChangeCallback* callback)
 {
-    return UpdateM3U8();
-}
-
-bool HLSStreaming::GetDownloadList(std::shared_ptr<BlockingQueue<std::string>>& downloadList)
-{
-    std::shared_ptr<M3U8> m3u8 = currentVariant_->m3u8_;
-    for (auto& file : m3u8->files_) {
-        downloadList->Push(file->uri_);
-    }
-    return true;
+    callback_ = callback;
 }
 }
 }

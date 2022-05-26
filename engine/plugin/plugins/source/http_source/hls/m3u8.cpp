@@ -49,26 +49,26 @@ M3U8::M3U8(std::string uri, std::string name) : uri_(std::move(uri)), name_(std:
 {
 }
 
-bool M3U8::Update(std::string& playlist)
+bool M3U8::Update(std::string& playList)
 {
-    if (playList_ == playlist) {
+    if (playList_ == playList) {
         MEDIA_LOG_I("playlist does not change ");
         return true;
     }
-    if (!StrHasPrefix(playlist, "#EXTM3U")) {
-        MEDIA_LOG_I("playlist doesn't start with #EXTM3U " PUBLIC_LOG_S, playlist.c_str());
+    if (!StrHasPrefix(playList, "#EXTM3U")) {
+        MEDIA_LOG_I("playlist doesn't start with #EXTM3U " PUBLIC_LOG_S, playList.c_str());
         return false;
     }
-    if (playlist.find("\n#EXT-X-STREAM-INF:") != std::string::npos) {
-        MEDIA_LOG_I("Not a media playlist, but a master playlist! " PUBLIC_LOG_S, playlist.c_str());
+    if (playList.find("\n#EXT-X-STREAM-INF:") != std::string::npos) {
+        MEDIA_LOG_I("Not a media playlist, but a master playlist! " PUBLIC_LOG_S, playList.c_str());
         return false;
     }
     files_.clear();
-    MEDIA_LOG_I("media playlist " PUBLIC_LOG_S, playlist.c_str());
-    auto tags = ParseEntries(playlist);
+    MEDIA_LOG_I("media playlist " PUBLIC_LOG_S, playList.c_str());
+    auto tags = ParseEntries(playList);
     UpdateFromTags(tags);
     tags.clear();
-    playList_ = playlist;
+    playList_ = playList;
     return true;
 }
 
@@ -143,9 +143,9 @@ M3U8VariantStream::M3U8VariantStream(std::string name, std::string uri, std::sha
 {
 }
 
-M3U8MasterPlaylist::M3U8MasterPlaylist(std::string& playlist, const std::string& uri)
+M3U8MasterPlaylist::M3U8MasterPlaylist(std::string& playList, const std::string& uri)
 {
-    playList_ = playlist;
+    playList_ = playList;
     uri_ = uri;
     if (!StrHasPrefix(playList_, "#EXTM3U")) {
         MEDIA_LOG_I("playlist doesn't start with #EXTM3U " PUBLIC_LOG_S, uri.c_str());

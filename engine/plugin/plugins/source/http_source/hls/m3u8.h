@@ -55,7 +55,7 @@ struct M3U8Fragment {
 
 struct M3U8 {
     M3U8(std::string uri, std::string name);
-    bool Update(std::string& playlist);
+    bool Update(std::string& playList);
     void UpdateFromTags(std::list<std::shared_ptr<Tag>>& tags);
     void GetExtInf(const std::shared_ptr<Tag>& tag, double& duration, std::string& title) const;
     bool isLive() const;
@@ -101,7 +101,7 @@ struct M3U8VariantStream {
 };
 
 struct M3U8MasterPlaylist {
-    M3U8MasterPlaylist(std::string& playlist, const std::string& uri);
+    M3U8MasterPlaylist(std::string& playList, const std::string& uri);
     void UpdateMediaPlaylist();
     void UpdateMasterPlaylist();
     std::list<std::shared_ptr<M3U8VariantStream>> variants_;
