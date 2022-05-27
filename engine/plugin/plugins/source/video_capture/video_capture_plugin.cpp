@@ -335,10 +335,9 @@ Status VideoCapturePlugin::GetSize(size_t& size)
     return Status::OK;
 }
 
-Status VideoCapturePlugin::IsSeekable(bool& seekable)
+Seekable VideoCapturePlugin::GetSeekable()
 {
-    seekable = false;
-    return Status::OK;
+    return Seekable::UNSEEKABLE;
 }
 
 Status VideoCapturePlugin::SeekTo(uint64_t offset)

@@ -32,7 +32,7 @@ public:
 
     // file path sink
     Status SetSink(const MediaSink& sink) override;
-    bool IsSeekable()  override;
+    Seekable GetSeekable()  override;
     Status SeekTo(uint64_t offset)  override;
     Status Write(const std::shared_ptr<Buffer>& buffer) override;
     Status Flush() override;
@@ -42,7 +42,7 @@ private:
 
     std::string fileName_ {};
     std::FILE* fp_;
-    bool isSeekable_;
+    Seekable seekable_;
 };
 }
 }

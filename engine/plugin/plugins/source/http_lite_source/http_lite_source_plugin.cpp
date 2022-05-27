@@ -306,12 +306,11 @@ Status HttpSourcePlugin::GetSize(size_t &size)
     return Status::OK;
 }
 
-Status HttpSourcePlugin::IsSeekable(bool& seekable)
+Seekable HttpSourcePlugin::GetSeekable()
 {
     OSAL::ScopedLock lock(httpMutex_);
     MEDIA_LOG_D("IN");
-    seekable = !isStream_;
-    return Status::OK;
+    return !isStream_ ? Seekable::SEEKABLE : Seekable::UNSEEKABLE;
 }
 
 Status HttpSourcePlugin::SeekTo(uint64_t offset)

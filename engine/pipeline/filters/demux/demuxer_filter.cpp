@@ -37,6 +37,7 @@ public:
     ~DataSourceImpl() override = default;
     Plugin::Status ReadAt(int64_t offset, std::shared_ptr<Plugin::Buffer>& buffer, size_t expectedLen) override;
     Plugin::Status GetSize(size_t& size) override;
+    Plugin::Seekable GetSeekable() override;
 
 private:
     const DemuxerFilter& filter;
@@ -96,8 +97,14 @@ Plugin::Status DemuxerFilter::DataSourceImpl::GetSize(size_t& size)
     return (filter.mediaDataSize_ > 0) ? Plugin::Status::OK : Plugin::Status::ERROR_WRONG_STATE;
 }
 
+Plugin::Seekable DemuxerFilter::DataSourceImpl::GetSeekable()
+{
+    return filter.seekable_;
+}
+
 DemuxerFilter::DemuxerFilter(std::string name)
     : FilterBase(std::move(name)),
+      seekable_(Plugin::Seekable::INVALID),
       uriSuffix_(),
       mediaDataSize_(0),
       task_(nullptr),
@@ -231,6 +238,10 @@ bool DemuxerFilter::Negotiate(const std::string& inPort,
 bool DemuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     (void)upstreamMeta->GetUint64(Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
+    int32_t seekable = static_cast<int32_t>(seekable_);
+    if (upstreamMeta->GetInt32(Plugin::MetaID::MEDIA_SEEKABLE, seekable)) {
+        seekable_ = static_cast<Plugin::Seekable>(seekable);
+    }
     return upstreamMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_);
 }
 

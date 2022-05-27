@@ -49,14 +49,14 @@ public:
     Status SetSource(std::shared_ptr<MediaSource> source) override;
     Status Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen) override;
     Status GetSize(size_t& size) override;
-    Status IsSeekable(bool& seekable) override;
+    Seekable GetSeekable() override;
     Status SeekTo(uint64_t offset) override;
 
 private:
     std::string fileName_ {};
     std::FILE* fp_;
     size_t fileSize_;
-    bool isSeekable_;
+    Seekable seekable_;
     uint64_t position_;
     std::shared_ptr<FileSourceAllocator> mAllocator_ {nullptr};
 

@@ -60,7 +60,7 @@ WavDemuxerPlugin::WavDemuxerPlugin(std::string name)
       fileSize_(0),
       ioContext_(),
       dataOffset_(0),
-      isSeekable_(true),
+      seekable_(Seekable::INVALID),
       wavHeadLength_(0)
 {
     MEDIA_LOG_I("WavDemuxerPlugin, plugin name: " PUBLIC_LOG_S, pluginName_.c_str());
@@ -74,13 +74,7 @@ WavDemuxerPlugin::~WavDemuxerPlugin()
 Status WavDemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& source)
 {
     ioContext_.dataSource = source;
-    if (ioContext_.dataSource != nullptr) {
-        ioContext_.dataSource->GetSize(fileSize_);
-    }
-    if (fileSize_ == 0) {
-        isSeekable_ = false;
-    }
-    MEDIA_LOG_I("fileSize_ " PUBLIC_LOG_ZU, fileSize_);
+    seekable_ = source->GetSeekable();
     return Status::OK;
 }
 
@@ -140,7 +134,7 @@ Status WavDemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
 
 Status WavDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
 {
-    if (fileSize_ <= 0 || !isSeekable_) {
+    if (fileSize_ <= 0 || seekable_ == Seekable::INVALID || seekable_ == Seekable::UNSEEKABLE) {
         return Status::ERROR_INVALID_OPERATION;
     }
 
@@ -174,7 +168,7 @@ Status WavDemuxerPlugin::Reset()
 {
     dataOffset_ = 0;
     fileSize_ = 0;
-    isSeekable_ = true;
+    seekable_ = Seekable::SEEKABLE;
     return Status::OK;
 }
 

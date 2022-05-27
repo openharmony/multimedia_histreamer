@@ -79,7 +79,7 @@ private:
     size_t              fileSize_;
     IOContext           ioContext_;
     uint32_t            dataOffset_;
-    bool                isSeekable_;
+    Seekable            seekable_;
     uint32_t            wavHeadLength_;
     WavHeadAttr         wavHeader_;
 };

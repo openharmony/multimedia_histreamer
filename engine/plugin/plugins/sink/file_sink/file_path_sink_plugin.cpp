@@ -40,7 +40,7 @@ Status FilePathSinkRegister(const std::shared_ptr<Register>& reg)
 PLUGIN_DEFINITION(FilePathSink, LicenseType::APACHE_V2, FilePathSinkRegister, [] {});
 
 FilePathSinkPlugin::FilePathSinkPlugin(std::string name)
-    : OutputSinkPlugin(std::move(name)), fp_(nullptr), isSeekable_(true)
+    : OutputSinkPlugin(std::move(name)), fp_(nullptr), seekable_(Seekable::SEEKABLE)
 {
 }
 
@@ -58,9 +58,9 @@ Status FilePathSinkPlugin::SetSink(const MediaSink& sink)
     return OpenFile();
 }
 
-bool FilePathSinkPlugin::IsSeekable()
+Seekable FilePathSinkPlugin::GetSeekable()
 {
-    return isSeekable_;
+    return seekable_;
 }
 
 Status FilePathSinkPlugin::SeekTo(uint64_t offset)

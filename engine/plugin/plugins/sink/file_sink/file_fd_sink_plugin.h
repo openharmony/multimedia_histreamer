@@ -29,13 +29,13 @@ public:
     ~FileFdSinkPlugin() override = default;
     // file fd sink
     Status SetSink(const MediaSink& sink) override;
-    bool IsSeekable()  override;
+    Seekable GetSeekable()  override;
     Status SeekTo(uint64_t offset)  override;
     Status Write(const std::shared_ptr<Buffer>& buffer) override;
     Status Flush() override;
 private:
     int32_t fd_;
-    bool isSeekable_;
+    Seekable seekable_;
 };
 }
 }

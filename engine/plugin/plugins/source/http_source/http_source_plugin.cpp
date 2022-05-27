@@ -202,12 +202,11 @@ Status HttpSourcePlugin::GetSize(size_t &size)
     return Status::OK;
 }
 
-Status HttpSourcePlugin::IsSeekable(bool& seekable)
+Seekable HttpSourcePlugin::GetSeekable()
 {
     MEDIA_LOG_D("IN");
-    FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
-    seekable = !executor_->IsStreaming();
-    return Status::OK;
+    FALSE_RETURN_V(executor_ != nullptr, Seekable::INVALID);
+    return !executor_->IsStreaming() ? Seekable::SEEKABLE : Seekable::UNSEEKABLE;
 }
 
 Status HttpSourcePlugin::SeekTo(uint64_t offset)

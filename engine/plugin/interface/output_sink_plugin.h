@@ -38,7 +38,7 @@ struct OutputSinkPlugin : public Plugin::PluginBase {
         return Status::ERROR_UNIMPLEMENTED;
     }
     virtual Status SetSink(const MediaSink& sink) = 0;
-    virtual bool IsSeekable() = 0;
+    virtual Seekable GetSeekable() = 0;
     virtual Status SeekTo(uint64_t offset) = 0;
     virtual Status Write(const std::shared_ptr<Buffer>& buffer) = 0;
     virtual Status Flush() = 0;

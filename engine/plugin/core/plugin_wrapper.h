@@ -44,6 +44,11 @@ struct DataSourceWrapper : DataSource {
         return helper->GetSize(size);
     }
 
+    Seekable GetSeekable() override
+    {
+        return helper->GetSeekable();
+    }
+
 private:
     MEDIA_UNUSED uint32_t version;
     std::shared_ptr<DataSourceHelper> helper;

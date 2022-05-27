@@ -42,14 +42,14 @@ public:
     Status SetSource(std::shared_ptr<MediaSource> source) override;
     Status Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen) override;
     Status GetSize(size_t& size) override;
-    Status IsSeekable(bool& seekable) override;
+    Seekable GetSeekable() override;
     Status SeekTo(uint64_t offset) override;
 
 private:
     std::shared_ptr<Buffer> WrapDataBuffer(const std::shared_ptr<DataBuffer>& dataBuffer);
 
 private:
-    bool isSeekable_ {false};
+    Seekable seekable_ {Seekable::UNSEEKABLE};
     OSAL::Mutex mutex_ {};
     std::shared_ptr<DataConsumer> stream_ {nullptr};
 };

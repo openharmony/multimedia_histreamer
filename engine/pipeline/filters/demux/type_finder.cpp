@@ -158,6 +158,11 @@ Plugin::Status TypeFinder::GetSize(size_t& size)
     return (mediaDataSize_ > 0) ? Plugin::Status::OK : Plugin::Status::ERROR_UNKNOWN;
 }
 
+Plugin::Seekable TypeFinder::GetSeekable()
+{
+    return Plugin::Seekable::INVALID;
+}
+
 void TypeFinder::DoTask()
 {
     if (sniffNeeded_) {

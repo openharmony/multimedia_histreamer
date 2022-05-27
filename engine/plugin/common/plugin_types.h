@@ -54,6 +54,18 @@ enum struct SeekMode : uint32_t {
 };
 
 /**
+ * @enum Seekable Status.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+enum class Seekable : int32_t {
+    INVALID = -1,
+    UNSEEKABLE = 0,
+    SEEKABLE = 1
+};
+
+/**
  * @enum Api Return Status.
  *
  * @since 1.0

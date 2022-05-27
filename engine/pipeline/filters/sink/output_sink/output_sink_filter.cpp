@@ -110,7 +110,8 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, const AVBufferPt
 {
     auto ret = ErrorCode::SUCCESS;
     if (offset >= 0 && offset != currentPos_) {
-        if (!plugin_->IsSeekable()) {
+        auto seekable = plugin_->GetSeekable();
+        if (seekable == Plugin::Seekable::UNSEEKABLE || seekable == Plugin::Seekable::INVALID) {
             MEDIA_LOG_E("plugin " PUBLIC_LOG_S " does not support seekable", pluginInfo_->name.c_str());
             return ErrorCode::ERROR_INVALID_OPERATION;
         } else {

@@ -31,7 +31,7 @@ public:
     ~OutputSink() override = default;
 
     Status SetSink(const MediaSink& sink);
-    bool IsSeekable();
+    Seekable GetSeekable();
     Status SeekTo(uint64_t offset);
     Status Write(const std::shared_ptr<Buffer>& buffer);
     Status Flush();

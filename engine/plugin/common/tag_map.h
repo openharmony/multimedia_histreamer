@@ -17,6 +17,7 @@
 #define HISTREAMER_PLUGIN_TAG_VALUE_MAP_H
 
 #include "plugin_tags.h"
+#include "plugin_types.h"
 #include "plugin_source_tags.h"
 #include "plugin_audio_tags.h"
 #include "plugin_video_tags.h"
@@ -65,6 +66,7 @@ public:
     DEFINE_INSERT_GET_FUNC(tag == Tag::AUDIO_AAC_PROFILE, AudioAacProfile);
     DEFINE_INSERT_GET_FUNC(tag == Tag::AUDIO_AAC_STREAM_FORMAT, AudioAacStreamFormat);
     DEFINE_INSERT_GET_FUNC(tag == Tag::VIDEO_PIXEL_FORMAT, VideoPixelFormat);
+    DEFINE_INSERT_GET_FUNC(tag == Tag::MEDIA_SEEKABLE, Seekable);
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::TRACK_ID or
         tag == Tag::REQUIRED_OUT_BUFFER_CNT or

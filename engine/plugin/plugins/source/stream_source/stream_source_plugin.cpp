@@ -147,11 +147,10 @@ Status StreamSourcePlugin::GetSize(size_t& size)
     return Status::ERROR_WRONG_STATE;
 }
 
-Status StreamSourcePlugin::IsSeekable(bool& seekable)
+Seekable StreamSourcePlugin::GetSeekable()
 {
     MEDIA_LOG_D("IN");
-    seekable = isSeekable_;
-    return Status::OK;
+    return seekable_;
 }
 
 Status StreamSourcePlugin::SeekTo(uint64_t offset)
