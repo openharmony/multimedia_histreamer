@@ -69,15 +69,15 @@ Status FileFdSinkPlugin::SeekTo(uint64_t offset)
     int64_t ret = lseek(fd_, offset, SEEK_SET);
     if (ret != -1) {
         MEDIA_LOG_I("now seek to " PUBLIC_LOG_D64, ret);
-    } else {
-        MEDIA_LOG_E("seek to " PUBLIC_LOG_U64 " failed due to " PUBLIC_LOG_S, offset, strerror(errno));
+        return Status::OK;
     }
+    MEDIA_LOG_E("seek to " PUBLIC_LOG_U64 " failed due to " PUBLIC_LOG_S, offset, strerror(errno));
     return Status::ERROR_UNKNOWN;
 }
 
 Status FileFdSinkPlugin::Write(const std::shared_ptr<Buffer>& buffer)
 {
-    MEDIA_LOG_D("Write begin");
+    MEDIA_LOG_DD("Write into fd");
     if (buffer == nullptr || buffer->IsEmpty()) {
         return Status::OK;
     }
