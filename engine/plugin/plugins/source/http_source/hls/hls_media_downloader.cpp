@@ -71,6 +71,7 @@ bool HlsMediaDownloader::Open(const std::string& url)
 void HlsMediaDownloader::Close()
 {
     buffer_->SetActive(false);
+    fragmentList_->SetActive(false);
     adaptiveStreaming_->Stop();
     downloadTask_->Stop();
     downloader_->Stop();
