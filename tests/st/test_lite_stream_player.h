@@ -22,7 +22,7 @@
 
 int StartLiteStreamPlayer(std::string dataPath);
 
-// @fixture(tags=fast)
+// @fixture(tags=audio_play_fast)
 FIXTURE(TestLiteStreamPlayerFast)
 {
     DATA_PROVIDER(musicUrls, 1,

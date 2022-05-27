@@ -43,6 +43,8 @@ declare_args() {
 if (!defined(ohos_lite) || !ohos_lite) {
   hst_is_lite_sys = false
   multimedia_histreamer_enable_plugin_audio_server_sink = true
+  multimedia_histreamer_enable_recorder = true
+  multimedia_histreamer_enable_plugin_file_sink = true
 } else {
   hst_is_lite_sys = true
 }

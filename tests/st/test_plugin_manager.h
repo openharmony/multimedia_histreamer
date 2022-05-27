@@ -17,7 +17,7 @@
 
 using namespace OHOS::Media::Plugin;
 
-// @fixture(tags=debug)
+// @fixture(tags=audio_play_fast)
 FIXTURE(PluginsEnableAndDisable)
 {
     /**

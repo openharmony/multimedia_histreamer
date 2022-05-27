@@ -51,7 +51,7 @@ private:
     int32_t channel_;
     int32_t bitRate_;
     int32_t outFD_;
-    bool isFD_;
+    bool isFD_ {false};
     AudioSourceType sourceType_;
     AudioCodecFormat encodeType_;
     OutputFormatType outputFormat_;

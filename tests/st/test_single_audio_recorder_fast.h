@@ -42,6 +42,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
 
     SETUP()
     {
+        OHOS::Media::OSAL::FileSystem::MakeMultipleDir(TestRecorder::GetOutputDir());
         OHOS::Media::OSAL::FileSystem::RemoveFilesInDir(TestRecorder::GetOutputDir());
     }
 
@@ -56,7 +57,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
          // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY);
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -72,6 +73,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
         ASSERT_EQ(0, player->Stop());
     }
+
     // @test(data="pcmSources", tags=fast)
     PTEST((AudioRecordSource recordSource), Test single audio recorder)
     {

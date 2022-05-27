@@ -25,6 +25,8 @@
 #include "foundation/log.h"
 
 using namespace OHOS::Media::Test;
+
+// @fixture(tags=audio_play_fast)
 FIXTURE(DataDrivenSinglePlayerTestFast)
 {
     bool CheckTimeEquality(int32_t expectValue, int32_t currentValue)

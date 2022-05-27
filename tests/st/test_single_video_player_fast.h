@@ -19,7 +19,7 @@
 
 using namespace OHOS::Media::Test;
 
-
+// @fixture(tags=video_play_fast)
 FIXTURE(DataDrivenSingleVideoPlayerTestFast)
 {
     DATA_PROVIDER(myurls, 1,
