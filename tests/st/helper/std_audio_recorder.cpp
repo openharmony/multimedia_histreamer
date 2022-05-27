@@ -88,8 +88,15 @@ int32_t TestRecorderImpl::Configure(const AudioRecordSource& recordSource)
     recorder_->Configure(audioSourceId, audBitRate);
     recorder_->Configure(audioSourceId, auEncoder);
 
-    auto outFilePath = OutFilePath {recordSource.outputPath_};
-    return recorder_->Configure(DUMMY_SOURCE_ID, outFilePath); // result record file name
+    if (recordSource.isFD_) {
+        auto outFileFD = OutFd {recordSource.outFD_};
+        return recorder_->Configure(DUMMY_SOURCE_ID, outFileFD);
+    } else {
+        auto outFilePath = OutFilePath {recordSource.outputPath_};
+        return recorder_->Configure(DUMMY_SOURCE_ID, outFilePath); // result record file name
+    }
+
+    return 0;
 }
 
 int32_t TestRecorderImpl::Prepare()

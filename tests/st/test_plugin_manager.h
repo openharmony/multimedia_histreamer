@@ -40,7 +40,7 @@ FIXTURE(PluginsEnableAndDisable)
     PluginManager& pluginManager = PluginManager::Instance();
     int pluginCounts = pluginManager.GetAllRegisteredPluginCount();
 
-    DATA_PROVIDER(plugins, 10,
+    DATA_PROVIDER(plugins, 2,
     DATA_GROUP(OHOS::Media::Plugin::PluginType::SOURCE, std::string("FileSource")),
     DATA_GROUP(OHOS::Media::Plugin::PluginType::SOURCE, std::string("HttpSource")),
     DATA_GROUP(OHOS::Media::Plugin::PluginType::DEMUXER, std::string("FFmpegDemuxer")),

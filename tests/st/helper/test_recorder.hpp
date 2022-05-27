@@ -39,11 +39,19 @@ public:
                                outputFormat_(outputFormat),
                                outputPath_(std::move(outputPath))
                                {}
+public:
+    void UseOutFd(int32_t fdUri)
+    {
+        isFD_ = true;
+        outFD_ = fdUri;
+    }
 private:
     std::string pcmPath_;
     int32_t sampleRate_;
     int32_t channel_;
     int32_t bitRate_;
+    int32_t outFD_;
+    bool isFD_;
     AudioSourceType sourceType_;
     AudioCodecFormat encodeType_;
     OutputFormatType outputFormat_;

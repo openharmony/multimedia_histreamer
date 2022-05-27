@@ -21,7 +21,7 @@ using namespace OHOS::Media::Test;
 
 // Run these http tests, should run hfs.exe and add resource folder to it.
 
-// @fixture(tags=fast)
+// @fixture(tags=audio_play_fast)
 FIXTURE(TestPlayerExit)
 {
     bool StartPlayer(std::string url)
