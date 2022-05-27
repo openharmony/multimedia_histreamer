@@ -118,6 +118,7 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, const AVBufferPt
             if (ret != ErrorCode::SUCCESS) {
                 MEDIA_LOG_E("plugin " PUBLIC_LOG_S " seek to " PUBLIC_LOG_D64 " failed",
                             pluginInfo_->name.c_str(), offset);
+                // should call back to client here
                 return ErrorCode::ERROR_INVALID_OPERATION;
             }
             currentPos_ = offset;

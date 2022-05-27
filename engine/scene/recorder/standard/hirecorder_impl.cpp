@@ -420,7 +420,6 @@ ErrorCode HiRecorderImpl::SetAudioSourceInternal(AudioSourceType source, int32_t
     FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "muxer AddTrack fail");
     ret = pipeline_->LinkPorts(audioEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
     FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "LinkPorts audioEncoderOutPort and muxerInPort fail");
-    MEDIA_LOG_E("SendEvent: SET_AUDIO_SOURCE");
     return fsm_.SendEvent(Intent::SET_AUDIO_SOURCE,
                           std::pair<int32_t, Plugin::SrcInputType>(sourceId, TransAudioInputType(source)));
 }
