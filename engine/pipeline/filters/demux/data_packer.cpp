@@ -40,6 +40,8 @@ DataPacker::DataPacker() : mutex_(), que_(), size_(0), mediaOffset_(0), pts_(0),
 DataPacker::~DataPacker()
 {
     MEDIA_LOG_I("DataPacker dtor...");
+    cvEmpty_.NotifyAll();
+    cvFull_.NotifyAll();
 }
 
 inline static size_t AudioBufferSize(AVBufferPtr& ptr)
