@@ -92,6 +92,11 @@ size_t HttpMediaDownloader::GetContentLength() const
     return downloadRequest_->GetFileContentLength();
 }
 
+double HttpMediaDownloader::GetDuration() const
+{
+    return 0;
+}
+
 bool HttpMediaDownloader::IsStreaming() const
 {
     return downloadRequest_->IsChunked();

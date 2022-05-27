@@ -36,6 +36,7 @@ public:
     virtual void UpdateManifest() = 0;
     virtual void FragmentListUpdateLoop() = 0;
     virtual void SetFragmentListCallback(FragmentListChangeCallback* callback) = 0;
+    virtual double GetDuration() const = 0;
     void Start()
     {
         updateTask_->Start();

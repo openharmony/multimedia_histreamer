@@ -32,6 +32,7 @@ public:
     virtual bool Seek(int offset) = 0;
 
     virtual size_t GetContentLength() const = 0;
+    virtual double GetDuration() const = 0;
     virtual bool IsStreaming() const = 0;
     virtual void SetCallback(Callback* cb) = 0;
 };

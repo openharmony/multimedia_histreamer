@@ -53,6 +53,11 @@ void HLSStreaming::SetFragmentListCallback(FragmentListChangeCallback* callback)
 {
     callback_ = callback;
 }
+
+double HLSStreaming::GetDuration() const
+{
+    return master_->duration_;
+}
 }
 }
 }

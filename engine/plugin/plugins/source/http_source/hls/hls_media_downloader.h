@@ -34,6 +34,7 @@ public:
     bool Seek(int offset) override;
 
     size_t GetContentLength() const override;
+    double GetDuration() const override;
     bool IsStreaming() const override;
     void SetCallback(Callback* cb) override;
     void OnFragmentListChanged(const std::vector<std::string>& fragmentList) override;

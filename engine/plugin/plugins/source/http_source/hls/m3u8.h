@@ -58,6 +58,7 @@ struct M3U8 {
     bool Update(std::string& playList);
     void UpdateFromTags(std::list<std::shared_ptr<Tag>>& tags);
     void GetExtInf(const std::shared_ptr<Tag>& tag, double& duration, std::string& title) const;
+    double GetDuration() const;
     bool isLive() const;
 
     std::string uri_;
@@ -111,6 +112,7 @@ struct M3U8MasterPlaylist {
     int version_ {};
     bool isSimple_ {false};
     std::string playList_;
+    double duration_ {0};
 };
 }
 }

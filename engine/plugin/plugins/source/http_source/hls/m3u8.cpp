@@ -133,6 +133,15 @@ void M3U8::GetExtInf(const std::shared_ptr<Tag>& tag, double& duration, std::str
     title = item ->GetAttributeByName("TITLE")->QuotedString();
 }
 
+double M3U8::GetDuration() const
+{
+    double duration = 0;
+    for (auto e : files_) {
+        duration += e->duration_;
+    }
+    return duration;
+}
+
 bool M3U8::isLive() const
 {
     return true;
@@ -166,6 +175,8 @@ void M3U8MasterPlaylist::UpdateMediaPlaylist()
     variants_.emplace_back(stream);
     defaultVariant_ = stream;
     m3u8->Update(playList_);
+    duration_ = m3u8->GetDuration();
+    MEDIA_LOG_D("UpdateMediaPlaylist called" PUBLIC_LOG_F, duration_);
 }
 
 void M3U8MasterPlaylist::UpdateMasterPlaylist()

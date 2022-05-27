@@ -32,6 +32,7 @@ public:
     void UpdateManifest() override;
     void FragmentListUpdateLoop() override;
     void SetFragmentListCallback(FragmentListChangeCallback* callback) override;
+    double GetDuration() const;
 private:
     FragmentListChangeCallback* callback_ {nullptr};
     std::shared_ptr<M3U8MasterPlaylist> master_;

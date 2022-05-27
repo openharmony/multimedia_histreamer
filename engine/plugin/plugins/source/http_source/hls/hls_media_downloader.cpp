@@ -106,6 +106,11 @@ size_t HlsMediaDownloader::GetContentLength() const
     return 0;
 }
 
+double HlsMediaDownloader::GetDuration() const
+{
+    return adaptiveStreaming_->GetDuration();
+}
+
 bool HlsMediaDownloader::IsStreaming() const
 {
     return true;
