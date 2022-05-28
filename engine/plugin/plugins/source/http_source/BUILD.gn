@@ -29,6 +29,11 @@ source_set("httpsource") {
     "download/client_factory.cpp",
     "download/downloader.cpp",
     "download/http_curl_client.cpp",
+    "hls/adaptive_streaming.cpp",
+    "hls/hls_media_downloader.cpp",
+    "hls/hls_streaming.cpp",
+    "hls/m3u8.cpp",
+    "hls/tags.cpp",
     "http/http_media_downloader.cpp",
     "http_source_plugin.cpp",
   ]

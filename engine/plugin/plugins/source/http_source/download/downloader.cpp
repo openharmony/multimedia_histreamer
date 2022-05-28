@@ -30,6 +30,7 @@ namespace {
 constexpr int PER_REQUEST_SIZE = 48 * 1024;
 constexpr unsigned int SLEEP_TIME = 5;    // Sleep 5ms
 constexpr size_t RETRY_TIMES = 200;  // Retry 200 times
+constexpr size_t REQUEST_QUEUE_SIZE = 50;
 }
 
 DownloadRequest::DownloadRequest(const std::string& url, DataSaveFunc saveData, StatusCallbackFunc statusCallback)
@@ -58,6 +59,11 @@ bool DownloadRequest::IsChunked() const
     return headerInfo_.isChunked;
 };
 
+bool DownloadRequest::IsEos() const
+{
+    return isEos_;
+}
+
 void DownloadRequest::WaitHeaderUpdated() const
 {
     size_t times = 0;
@@ -74,10 +80,10 @@ Downloader::Downloader() noexcept
 
     factory_ = std::make_shared<ClientFactory>(&RxHeaderData, &RxBodyData, this);
     requestQue_ = std::make_shared<BlockingQueue<std::shared_ptr<DownloadRequest>>>("downloadRequestQue",
-                                                                                    10); // 10 que size
+                                                                                    REQUEST_QUEUE_SIZE);
 
     task_ = std::make_shared<OSAL::Task>(std::string("HttpDownloader"));
-    task_->RegisterHandler(std::bind(&Downloader::HttpDownloadLoop, this));
+    task_->RegisterHandler([this] { HttpDownloadLoop(); });
 }
 
 bool Downloader::Download(const std::shared_ptr<DownloadRequest>& request, int32_t waitMs)
@@ -120,6 +126,7 @@ bool Downloader::Seek(int64_t offset)
     int64_t temp = currentRequest_->GetFileContentLength() - offset;
     temp = temp >= 0 ? temp : PER_REQUEST_SIZE;
     currentRequest_->requestSize_ = static_cast<int>(std::min(temp, static_cast<int64_t>(PER_REQUEST_SIZE)));
+    currentRequest_->isEos_ = false;
     shouldStartNextRequest = false; // Reuse last request when seek
     return true;
 }
@@ -137,7 +144,7 @@ bool Downloader::BeginDownload()
 
     client_->Open(url);
 
-    currentRequest_->requestSize_ = PER_REQUEST_SIZE;
+    currentRequest_->requestSize_ = 1;
     currentRequest_->startPos_ = 0;
     currentRequest_->isEos_ = false;
 
@@ -145,7 +152,6 @@ bool Downloader::BeginDownload()
     MEDIA_LOG_I("End");
     return true;
 }
-
 
 void Downloader::EndDownload()
 {
@@ -159,24 +165,25 @@ void Downloader::HttpDownloadLoop()
         shouldStartNextRequest = false;
     }
     FALSE_RETURN_W(currentRequest_ != nullptr);
-
     NetworkClientErrorCode clientCode;
     NetworkServerErrorCode serverCode;
     Status ret = client_->RequestData(currentRequest_->startPos_, currentRequest_->requestSize_,
                                       serverCode, clientCode);
     if (ret == Status::ERROR_CLIENT) {
         MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, clientCode);
-        currentRequest_->statusCallback_(DownloadStatus::CLIENT_ERROR, static_cast<int32_t>(clientCode));
+        currentRequest_->statusCallback_(DownloadStatus::CLIENT_ERROR, currentRequest_,
+                                         static_cast<int32_t>(clientCode));
     } else if (ret == Status::ERROR_SERVER) {
         MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32, serverCode);
-        currentRequest_->statusCallback_(DownloadStatus::SERVER_ERROR, static_cast<int32_t>(serverCode));
+        currentRequest_->statusCallback_(DownloadStatus::SERVER_ERROR, currentRequest_,
+                                         static_cast<int32_t>(serverCode));
     }
     FALSE_LOG(ret == Status::OK);
-
     int64_t remaining = currentRequest_->headerInfo_.fileContentLen - currentRequest_->startPos_;
     if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
-        MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64, currentRequest_->startPos_);
-        currentRequest_->statusCallback_(DownloadStatus::FINISHED, 0);
+        MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,
+                    currentRequest_->startPos_, currentRequest_->url_.c_str());
+        currentRequest_->isEos_ = true;
         if (requestQue_->Empty()) {
             task_->PauseAsync();
         }
@@ -184,13 +191,15 @@ void Downloader::HttpDownloadLoop()
         shouldStartNextRequest = true;
     } else if (remaining < PER_REQUEST_SIZE) {
         currentRequest_->requestSize_ = remaining;
+    } else {
+        currentRequest_->requestSize_ = PER_REQUEST_SIZE;
     }
 }
 
-size_t Downloader::RxBodyData(void *buffer, size_t size, size_t nitems, void *userParam)
+size_t Downloader::RxBodyData(void* buffer, size_t size, size_t nitems, void* userParam)
 {
     auto mediaDownloader = static_cast<Downloader *>(userParam);
-    HeaderInfo *header = &(mediaDownloader->currentRequest_->headerInfo_);
+    HeaderInfo* header = &(mediaDownloader->currentRequest_->headerInfo_);
     size_t dataLen = size * nitems;
 
     if (header->fileContentLen == 0) {
@@ -216,13 +225,13 @@ size_t Downloader::RxBodyData(void *buffer, size_t size, size_t nitems, void *us
 }
 
 namespace {
-char *StringTrim(char *str)
+char* StringTrim(char* str)
 {
     if (str == nullptr) {
         return nullptr;
     }
-    char *p = str;
-    char *p1 = p + strlen(str) - 1;
+    char* p = str;
+    char* p1 = p + strlen(str) - 1;
 
     while (*p && isspace(static_cast<int>(*p))) {
         p++;
@@ -234,33 +243,33 @@ char *StringTrim(char *str)
 }
 }
 
-size_t Downloader::RxHeaderData(void *buffer, size_t size, size_t nitems, void *userParam)
+size_t Downloader::RxHeaderData(void* buffer, size_t size, size_t nitems, void* userParam)
 {
     auto mediaDownloader = reinterpret_cast<Downloader *>(userParam);
-    HeaderInfo *info = &(mediaDownloader->currentRequest_->headerInfo_);
-    char *next = nullptr;
-    char *key = strtok_s(reinterpret_cast<char *>(buffer), ":", &next);
+    HeaderInfo* info = &(mediaDownloader->currentRequest_->headerInfo_);
+    char* next = nullptr;
+    char* key = strtok_s(reinterpret_cast<char*>(buffer), ":", &next);
     FALSE_RETURN_V(key != nullptr, size * nitems);
     if (!strncmp(key, "Content-Type", strlen("Content-Type"))) {
-        char *token = strtok_s(nullptr, ":", &next);
+        char* token = strtok_s(nullptr, ":", &next);
         FALSE_RETURN_V(token != nullptr, size * nitems);
-        char *type = StringTrim(token);
+        char* type = StringTrim(token);
         (void)memcpy_s(info->contentType, sizeof(info->contentType), type, sizeof(info->contentType));
     }
 
     if (!strncmp(key, "Content-Length", strlen("Content-Length")) ||
         !strncmp(key, "content-length", strlen("content-length"))) {
-        char *token = strtok_s(nullptr, ":", &next);
+        char* token = strtok_s(nullptr, ":", &next);
         FALSE_RETURN_V(token != nullptr, size * nitems);
-        char *contLen = StringTrim(token);
+        char* contLen = StringTrim(token);
         info->contentLen = atol(contLen);
     }
 
     if (!strncmp(key, "Transfer-Encoding", strlen("Transfer-Encoding")) ||
         !strncmp(key, "transfer-encoding", strlen("transfer-encoding"))) {
-        char *token = strtok_s(nullptr, ":", &next);
+        char* token = strtok_s(nullptr, ":", &next);
         FALSE_RETURN_V(token != nullptr, size * nitems);
-        char *transEncode = StringTrim(token);
+        char* transEncode = StringTrim(token);
         if (!strncmp(transEncode, "chunked", strlen("chunked"))) {
             info->isChunked = true;
         }
@@ -268,9 +277,9 @@ size_t Downloader::RxHeaderData(void *buffer, size_t size, size_t nitems, void *
 
     if (!strncmp(key, "Content-Range", strlen("Content-Range")) ||
         !strncmp(key, "content-range", strlen("content-range"))) {
-        char *token = strtok_s(nullptr, ":", &next);
+        char* token = strtok_s(nullptr, ":", &next);
         FALSE_RETURN_V(token != nullptr, size * nitems);
-        char *strRange = StringTrim(token);
+        char* strRange = StringTrim(token);
         size_t start, end, fileLen;
         FALSE_LOG_MSG(sscanf_s(strRange, "bytes %ld-%ld/%ld", &start, &end, &fileLen) != -1,
             "sscanf get range failed");

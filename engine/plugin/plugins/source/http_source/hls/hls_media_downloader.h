@@ -16,47 +16,47 @@
 #ifndef HISTREAMER_HLS_MEDIA_DOWNLOADER_H
 #define HISTREAMER_HLS_MEDIA_DOWNLOADER_H
 
-#include <string>
-#include <memory>
-#include "plugin/plugins/source/http_source/download/client_factory.h"
-#include "plugin/plugins/source/http_source/download/downloader.h"
-#include "plugin/plugins/source/http_source/media_downloader.h"
+#include "adaptive_streaming.h"
 #include "ring_buffer.h"
-#include "plugin/plugins/source/http_source/download/network_client.h"
-#include "osal/thread/task.h"
-#include "plugin/interface/plugin_base.h"
+#include "plugin/plugins/source/http_source/media_downloader.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-class HlsMediaDownloader : public MediaDownloader {
+class HlsMediaDownloader : public MediaDownloader, public FragmentListChangeCallback {
 public:
-    HlsMediaDownloader() noexcept {}
-    ~HlsMediaDownloader() override {}
-    bool Open(const std::string &url) override
-    {
-        return false;
-    }
-    void Close() override {}
-    bool Read(unsigned char *buff, unsigned int wantReadLength, unsigned int &realReadLength, bool &isEos) override
-    {
-        return false;
-    }
-    bool Seek(int offset) override
-    {
-        return false;
-    }
+    HlsMediaDownloader() noexcept;
+    ~HlsMediaDownloader() override = default;
+    bool Open(const std::string& url) override;
+    void Close() override;
+    bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) override;
+    bool Seek(int offset) override;
 
-    size_t GetContentLength() const override
-    {
-        return 0;
-    }
-    bool IsStreaming() const override
-    {
-        return false;
-    }
-    void SetCallback(Callback* cb) override {}
+    size_t GetContentLength() const override;
+    double GetDuration() const override;
+    bool IsStreaming() const override;
+    void SetCallback(Callback* cb) override;
+    void OnFragmentListChanged(const std::vector<std::string>& fragmentList) override;
+private:
+    void SaveData(uint8_t* data, uint32_t len, int64_t offset);
+    void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request, int32_t code);
+
+    void FragmentDownloadLoop();
+private:
+    std::shared_ptr<RingBuffer> buffer_;
+    std::shared_ptr<Downloader> downloader_;
+    std::shared_ptr<DownloadRequest> downloadRequest_;
+
+    Callback* callback_ {nullptr};
+    DataSaveFunc dataSave_;
+    StatusCallbackFunc statusCallback_;
+
+    std::shared_ptr<AdaptiveStreaming> adaptiveStreaming_;
+
+    std::shared_ptr<OSAL::Task> downloadTask_;
+    std::shared_ptr<BlockingQueue<std::string>> fragmentList_;
+    std::map<std::string, bool> fragmentDownloadStart;
 };
 }
 }

@@ -14,10 +14,10 @@
  */
 #define HST_LOG_TAG "HttpSourcePlugin"
 
-#include "http_source_plugin.h"
-#include "plugins/source/http_source/hls/hls_media_downloader.h"
-#include "utils/util.h"
+#include "hls/hls_media_downloader.h"
+#include "http/http_media_downloader.h"
 #include "foundation/log.h"
+#include "http_source_plugin.h"
 
 namespace OHOS {
 namespace Media {
@@ -27,7 +27,7 @@ namespace {
 constexpr int DEFAULT_BUFFER_SIZE = 200 * 1024;
 }
 
-std::shared_ptr<SourcePlugin> HttpSourcePluginCreater(const std::string &name)
+std::shared_ptr<SourcePlugin> HttpSourcePluginCreater(const std::string& name)
 {
     return std::make_shared<HttpSourcePlugin>(name);
 }
@@ -79,7 +79,10 @@ Status HttpSourcePlugin::Deinit()
 Status HttpSourcePlugin::Prepare()
 {
     MEDIA_LOG_D("IN");
-    return Status::ERROR_DELAY_READY;
+    if (delayReady) {
+        return Status::ERROR_DELAY_READY;
+    }
+    return Status::OK;
 }
 
 Status HttpSourcePlugin::Reset()
@@ -104,7 +107,7 @@ Status HttpSourcePlugin::Stop()
 
 #undef ERROR_INVALID_PARAMETER
 
-Status HttpSourcePlugin::GetParameter(Tag tag, ValueType &value)
+Status HttpSourcePlugin::GetParameter(Tag tag, ValueType& value)
 {
     MEDIA_LOG_D("IN");
     switch (tag) {
@@ -119,7 +122,7 @@ Status HttpSourcePlugin::GetParameter(Tag tag, ValueType &value)
     }
 }
 
-Status HttpSourcePlugin::SetParameter(Tag tag, const ValueType &value)
+Status HttpSourcePlugin::SetParameter(Tag tag, const ValueType& value)
 {
     MEDIA_LOG_D("IN");
     switch (tag) {
@@ -150,6 +153,7 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     auto uri = source->GetSourceUri();
     if (uri.find(".m3u8") != std::string::npos) {
         executor_ = std::make_shared<HlsMediaDownloader>();
+        delayReady = false;
     } else if (uri.compare(0, 4, "http") == 0) { // 0 : position, 4: count
         executor_ = std::make_shared<HttpMediaDownloader>();
     }
@@ -170,7 +174,7 @@ std::shared_ptr<Allocator> HttpSourcePlugin::GetAllocator()
     return nullptr;
 }
 
-Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLen)
+Status HttpSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
 {
     MEDIA_LOG_D("Read in");
     FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
@@ -194,7 +198,7 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
     return result ? Status::OK : Status::END_OF_STREAM;
 }
 
-Status HttpSourcePlugin::GetSize(size_t &size)
+Status HttpSourcePlugin::GetSize(size_t& size)
 {
     MEDIA_LOG_D("IN");
     FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);

@@ -21,8 +21,8 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-using RxBody = size_t(*)(void *buffer, size_t size, size_t nitems, void *userParam);
-using RxHeader = size_t(*)(void *buffer, size_t size, size_t nitems, void *userParam);
+using RxBody = size_t(*)(void* buffer, size_t size, size_t nitems, void* userParam);
+using RxHeader = size_t(*)(void* buffer, size_t size, size_t nitems, void* userParam);
 }
 }
 }

@@ -92,7 +92,7 @@ int32_t TestRecorderImpl::Configure(const AudioRecordSource& recordSource)
         auto outFileFD = OutFd {recordSource.outFD_};
         return recorder_->Configure(DUMMY_SOURCE_ID, outFileFD);
     } else {
-        auto outFilePath = OutFilePath {recordSource.outputPath_};
+        auto outFilePath = OutFilePath {TestRecorder::GetOutputDir()};
         return recorder_->Configure(DUMMY_SOURCE_ID, outFilePath); // result record file name
     }
 

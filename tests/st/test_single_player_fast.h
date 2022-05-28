@@ -25,6 +25,8 @@
 #include "foundation/log.h"
 
 using namespace OHOS::Media::Test;
+
+// @fixture(tags=audio_play_fast)
 FIXTURE(DataDrivenSinglePlayerTestFast)
 {
     bool CheckTimeEquality(int32_t expectValue, int32_t currentValue)
@@ -72,6 +74,10 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     DATA_GROUP(std::string(RESOURCE_DIR "/MP3/MP3_48000_32_SHORT.mp3"), 24697),
     DATA_GROUP(std::string(RESOURCE_DIR "/OGG/OGG_48000_SHORT.ogg"), 30912),
     DATA_GROUP(std::string(RESOURCE_DIR "/APE/MPEG-4_48000_32_SHORT.ape"), 161018));
+
+    DATA_PROVIDER(hlsLinks, 100,
+    DATA_GROUP(std::string("http://ls-open.qingting.fm/live/389/64k.m3u8?"
+                           "deviceid=00000000-0000-0000-0000-000000000000&format=aac")));
 
     // @test(data="shortMusicUrls", tags=fast)
     PTEST((std::string url), Test single player play url music, and finished automatically)
@@ -213,11 +219,9 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
         ASSERT_EQ(0, player->Stop());
     }
 
-    // @test(tags=debug)
-    TEST(Test hls audio broadcast)
+    // @test(data="hlsLinks", tags=debuging)
+    PTEST((std::string url), Test hls audio broadcast)
     {
-        std::string url = "http://ls-open.qingting.fm/live/389/64k.m3u8?"
-                          "deviceid=00000000-0000-0000-0000-000000000000&format=aac";
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(url)));
         ASSERT_EQ(0, player->Prepare());

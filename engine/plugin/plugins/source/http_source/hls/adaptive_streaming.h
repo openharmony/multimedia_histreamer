@@ -12,44 +12,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-#ifndef HISTREAMER_HTTP_MEDIA_DOWNLOADER_H
-#define HISTREAMER_HTTP_MEDIA_DOWNLOADER_H
 
-#include <string>
-#include <memory>
-#include "plugin/interface/plugin_base.h"
+#ifndef HISTREAMER_ADAPTIVE_STREAMING_H
+#define HISTREAMER_ADAPTIVE_STREAMING_H
+
+#include <vector>
 #include "plugin/plugins/source/http_source/download/downloader.h"
-#include "plugin/plugins/source/http_source/media_downloader.h"
-#include "ring_buffer.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-class HttpMediaDownloader : public MediaDownloader {
+struct FragmentListChangeCallback {
+    virtual ~FragmentListChangeCallback() = default;
+    virtual void OnFragmentListChanged(const std::vector<std::string>& fragmentList) = 0;
+};
+class AdaptiveStreaming {
 public:
-    HttpMediaDownloader() noexcept;
-    ~HttpMediaDownloader() override = default;
-    bool Open(const std::string& url) override;
-    void Close() override;
-    bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) override;
-    bool Seek(int offset) override;
+    AdaptiveStreaming();
+    virtual ~AdaptiveStreaming();
 
-    size_t GetContentLength() const override;
-    double GetDuration() const override;
-    bool IsStreaming() const override;
-    void SetCallback(Callback* cb) override;
-private:
+    virtual void ProcessManifest(std::string url) = 0;
+    virtual void UpdateManifest() = 0;
+    virtual void FragmentListUpdateLoop() = 0;
+    virtual void SetFragmentListCallback(FragmentListChangeCallback* callback) = 0;
+    virtual double GetDuration() const = 0;
+    void Start()
+    {
+        updateTask_->Start();
+    }
+    void Stop()
+    {
+        updateTask_->Stop();
+    }
+protected:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
     void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request, int32_t code);
-
-private:
-    std::shared_ptr<RingBuffer> buffer_;
-    std::shared_ptr<Downloader> downloader_;
+    void Open(const std::string& url);
+protected:
+    std::shared_ptr<Downloader> downloader;
     std::shared_ptr<DownloadRequest> downloadRequest_;
-    Callback* callback_ {nullptr};
-    bool aboveWaterline_ {false};
+    std::shared_ptr<OSAL::Task> updateTask_;
+    DataSaveFunc dataSave_;
+    StatusCallbackFunc statusCallback_;
+    std::string playList_;
 };
 }
 }

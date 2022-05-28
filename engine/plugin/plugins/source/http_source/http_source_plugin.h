@@ -15,10 +15,9 @@
 #ifndef HISTREAMER_HTTP_SOURCE_PLUGIN_H
 #define HISTREAMER_HTTP_SOURCE_PLUGIN_H
 
-#include "foundation/osal/thread/scoped_lock.h"
+#include "media_downloader.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
-#include "plugin/plugins/source/http_source/http/http_media_downloader.h"
 
 namespace OHOS {
 namespace Media {
@@ -34,8 +33,8 @@ public:
     Status Reset() override;
     Status Start() override;
     Status Stop() override;
-    Status GetParameter(Tag tag, ValueType &value) override;
-    Status SetParameter(Tag tag, const ValueType &value) override;
+    Status GetParameter(Tag tag, ValueType& value) override;
+    Status SetParameter(Tag tag, const ValueType& value) override;
     std::shared_ptr<Allocator> GetAllocator() override;
     Status SetCallback(Callback* cb) override;
     Status SetSource(std::shared_ptr<MediaSource> source) override;
@@ -51,6 +50,7 @@ private:
     uint32_t waterline_;
     Callback* callback_ {};
     std::shared_ptr<MediaDownloader> executor_;
+    bool delayReady {true};
 };
 } // namespace HttpPluginLite
 } // namespace Plugin 

@@ -77,7 +77,7 @@ ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param) const
 
 ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param)
 {
-    constexpr int timeoutMs = 20000;
+    constexpr int timeoutMs = 30000;
     ErrorCode errorCode = ErrorCode::ERROR_TIMED_OUT;
     if (!intentSync_.WaitFor(
         intent, [this, intent, param] { return SendEventAsync(intent, param) == ErrorCode::SUCCESS; },

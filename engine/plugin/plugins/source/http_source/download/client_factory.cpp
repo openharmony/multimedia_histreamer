@@ -21,7 +21,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-ClientFactory::ClientFactory(RxHeader headCallback, RxBody bodyCallback, void *userParam)
+ClientFactory::ClientFactory(RxHeader headCallback, RxBody bodyCallback, void* userParam)
     : rxHeader_(headCallback), rxBody_(bodyCallback), userParam_(userParam)
 {
     MEDIA_LOG_I("ClientFactory ctor");

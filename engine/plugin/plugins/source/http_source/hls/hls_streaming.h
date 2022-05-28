@@ -13,31 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_CLIENT_FACTORY_H
-#define HISTREAMER_CLIENT_FACTORY_H
+#ifndef HISTREAMER_HLS_STREAMING_H
+#define HISTREAMER_HLS_STREAMING_H
 
-#include <memory>
-#include <string>
-#include "network_client.h"
+#include "adaptive_streaming.h"
+#include "m3u8.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-class ClientFactory {
+class HLSStreaming : public AdaptiveStreaming {
 public:
-    ClientFactory(RxHeader headCallback, RxBody bodyCallback, void* userParam);
-    ~ClientFactory();
+    HLSStreaming() = default;
+    ~HLSStreaming() override = default;
 
-    std::shared_ptr<NetworkClient> GetClient(const std::string& protocol);
-
-    static std::string GetProtocol(const std::string& url);
-
+    void ProcessManifest(std::string url) override;
+    void UpdateManifest() override;
+    void FragmentListUpdateLoop() override;
+    void SetFragmentListCallback(FragmentListChangeCallback* callback) override;
+    double GetDuration() const override;
 private:
-    RxHeader rxHeader_;
-    RxBody rxBody_;
-    void* userParam_;
-    std::shared_ptr<NetworkClient> httpClient_;
+    FragmentListChangeCallback* callback_ {nullptr};
+    std::shared_ptr<M3U8MasterPlaylist> master_;
+    std::shared_ptr<M3U8VariantStream> currentVariant_;
+    std::shared_ptr<M3U8VariantStream> previousVariant_;
 };
 }
 }

@@ -30,15 +30,14 @@ namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
 enum struct DownloadStatus {
-    FINISHED,
     SERVER_ERROR,
     CLIENT_ERROR
 };
 
 struct HeaderInfo {
     char contentType[32]; // 32 chars
-    size_t fileContentLen;
-    long contentLen;
+    size_t fileContentLen {0};
+    long contentLen {0};
     bool isChunked {false};
 
     void Update(const HeaderInfo* info)
@@ -61,8 +60,8 @@ struct HeaderInfo {
 // uint8_t* : the data should save
 // uint32_t : length
 using DataSaveFunc = std::function<void(uint8_t*, uint32_t, int64_t)>;
-
-using StatusCallbackFunc = std::function<void(DownloadStatus, int32_t)>;
+class DownloadRequest;
+using StatusCallbackFunc = std::function<void(DownloadStatus, std::shared_ptr<DownloadRequest>&, int32_t)>;
 
 class DownloadRequest {
 public:
@@ -70,6 +69,8 @@ public:
     size_t GetFileContentLength() const;
     void SaveHeader(const HeaderInfo* header);
     bool IsChunked() const;
+    bool IsEos() const;
+
 private:
     void WaitHeaderUpdated() const;
 
@@ -102,8 +103,8 @@ private:
     void EndDownload();
 
     void HttpDownloadLoop();
-    static size_t RxBodyData(void *buffer, size_t size, size_t nitems, void *userParam);
-    static size_t RxHeaderData(void *buffer, size_t size, size_t nitems, void *userParam);
+    static size_t RxBodyData(void* buffer, size_t size, size_t nitems, void* userParam);
+    static size_t RxHeaderData(void* buffer, size_t size, size_t nitems, void* userParam);
 
     std::shared_ptr<ClientFactory> factory_;
     std::shared_ptr<NetworkClient> client_;

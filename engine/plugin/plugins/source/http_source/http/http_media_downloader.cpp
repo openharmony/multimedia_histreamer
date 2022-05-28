@@ -15,10 +15,6 @@
 #define HST_LOG_TAG "HttpMediaDownloader"
 
 #include "http_media_downloader.h"
-#include <algorithm>
-#include <functional>
-#include "securec.h"
-#include "osal/utils/util.h"
 
 namespace OHOS {
 namespace Media {
@@ -29,42 +25,43 @@ constexpr int RING_BUFFER_SIZE = 5 * 48 * 1024;
 constexpr int WATER_LINE = RING_BUFFER_SIZE * 0.1;
 }
 
-using namespace std::placeholders;
-
 HttpMediaDownloader::HttpMediaDownloader() noexcept
 {
     buffer_ = std::make_shared<RingBuffer>(RING_BUFFER_SIZE);
     buffer_->Init();
 
-    downloader = std::make_shared<Downloader>();
+    downloader_ = std::make_shared<Downloader>();
 }
 
-HttpMediaDownloader::~HttpMediaDownloader() {}
-
-bool HttpMediaDownloader::Open(const std::string &url)
+bool HttpMediaDownloader::Open(const std::string& url)
 {
     MEDIA_LOG_I("Open download " PUBLIC_LOG_S, url.c_str());
-    isEos_ = false;
-    request_ = std::make_shared<DownloadRequest>(url,
-        std::bind(&HttpMediaDownloader::SaveData, this, _1, _2, _3),
-        std::bind(&HttpMediaDownloader::OnDownloadStatus, this, _1, _2));
-    downloader->Download(request_, -1);
-    downloader->Start();
+    auto saveData =  [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
+        SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
+                 std::forward<decltype(offset)>(offset));
+    };
+    auto statusCallback = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request, int32_t code) {
+        OnDownloadStatus(std::forward<decltype(status)>(status), std::forward<decltype(request)>(request),
+            std::forward<decltype(code)>(code));
+    };
+    downloadRequest_ = std::make_shared<DownloadRequest>(url, saveData, statusCallback);
+    downloader_->Download(downloadRequest_, -1); // -1
+    downloader_->Start();
     return true;
 }
 
 void HttpMediaDownloader::Close()
 {
     buffer_->SetActive(false);
-    downloader->Stop();
+    downloader_->Stop();
 }
 
-bool HttpMediaDownloader::Read(unsigned char *buff, unsigned int wantReadLength,
-                               unsigned int &realReadLength, bool &isEos)
+bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
+                               unsigned int& realReadLength, bool& isEos)
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
     isEos = false;
-    if (isEos_ && buffer_->GetSize() == 0) {
+    if (downloadRequest_->IsEos() && buffer_->GetSize() == 0) {
         isEos = true;
         realReadLength = 0;
         return false;
@@ -83,22 +80,26 @@ bool HttpMediaDownloader::Seek(int offset)
         return true;
     }
     buffer_->Clear(); // First clear buffer, avoid no available buffer then task pause never exit.
-    downloader->Pause();
+    downloader_->Pause();
     buffer_->Clear();
-    downloader->Seek(offset);
-    downloader->Start();
-    isEos_ = false;
+    downloader_->Seek(offset);
+    downloader_->Start();
     return true;
 }
 
 size_t HttpMediaDownloader::GetContentLength() const
 {
-    return request_->GetFileContentLength();
+    return downloadRequest_->GetFileContentLength();
+}
+
+double HttpMediaDownloader::GetDuration() const
+{
+    return 0;
 }
 
 bool HttpMediaDownloader::IsStreaming() const
 {
-    return request_->IsChunked();
+    return downloadRequest_->IsChunked();
 }
 
 void HttpMediaDownloader::SetCallback(Callback* cb)
@@ -109,10 +110,10 @@ void HttpMediaDownloader::SetCallback(Callback* cb)
 void HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 {
     buffer_->WriteBuffer(data, len, offset);
-
     size_t bufferSize = buffer_->GetSize();
     double ratio = (static_cast<double>(bufferSize)) / RING_BUFFER_SIZE;
-    if ((bufferSize >= WATER_LINE || bufferSize >= request_->GetFileContentLength() / 2) && !aboveWaterline_) { // 2
+    if ((bufferSize >= WATER_LINE ||
+        bufferSize >= downloadRequest_->GetFileContentLength() / 2) && !aboveWaterline_) { // 2
         aboveWaterline_ = true;
         MEDIA_LOG_I("Send http aboveWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
         callback_->OnEvent({PluginEventType::ABOVE_LOW_WATERLINE, {ratio}, "http"});
@@ -123,13 +124,12 @@ void HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
     }
 }
 
-void HttpMediaDownloader::OnDownloadStatus(DownloadStatus status, int32_t code)
+void HttpMediaDownloader::OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request,
+                                           int32_t code)
 {
     MEDIA_LOG_I("OnDownloadStatus " PUBLIC_LOG_D32, status);
+    (void)request;
     switch (status) {
-        case DownloadStatus::FINISHED:
-            isEos_ = true;
-            break;
         case DownloadStatus::CLIENT_ERROR:
             MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, code);
             callback_->OnEvent({PluginEventType::CLIENT_ERROR, {code}, "http"});
