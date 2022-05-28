@@ -144,7 +144,7 @@ bool Downloader::BeginDownload()
 
     client_->Open(url);
 
-    currentRequest_->requestSize_ = PER_REQUEST_SIZE;
+    currentRequest_->requestSize_ = 1;
     currentRequest_->startPos_ = 0;
     currentRequest_->isEos_ = false;
 
