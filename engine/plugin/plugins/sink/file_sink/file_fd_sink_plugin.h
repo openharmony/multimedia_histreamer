@@ -26,7 +26,7 @@ namespace FileSink {
 class FileFdSinkPlugin : public OutputSinkPlugin {
 public:
     explicit FileFdSinkPlugin(std::string name);
-    ~FileFdSinkPlugin() override = default;
+    ~FileFdSinkPlugin() override;
     // file fd sink
     Status SetSink(const MediaSink& sink) override;
     Seekable GetSeekable()  override;
@@ -36,6 +36,7 @@ public:
 private:
     int32_t fd_;
     Seekable seekable_;
+    void CloseFd();
 };
 }
 }

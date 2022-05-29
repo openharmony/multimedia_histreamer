@@ -51,6 +51,11 @@ FileFdSinkPlugin::FileFdSinkPlugin(std::string name)
 {
 }
 
+FileFdSinkPlugin::~FileFdSinkPlugin()
+{
+    CloseFd();
+}
+
 Status FileFdSinkPlugin::SetSink(const MediaSink& sink)
 {
     FALSE_RETURN_V((sink.GetProtocolType() == ProtocolType::FD && sink.GetFd() != -1), Status::ERROR_INVALID_DATA);
@@ -90,6 +95,15 @@ Status FileFdSinkPlugin::Flush()
 {
     MEDIA_LOG_D("OUT");
     return Status::OK;
+}
+
+void FileFdSinkPlugin::CloseFd()
+{
+    if (fd_ != -1) {
+        MEDIA_LOG_D("close fd");
+        close(fd_);
+        fd_ = -1;
+    }
 }
 } // namespace FileSink
 } // namespace Plugin
