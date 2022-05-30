@@ -34,9 +34,9 @@ public:
     Status Write(const std::shared_ptr<Buffer>& buffer) override;
     Status Flush() override;
 private:
-    int32_t fd_;
-    Seekable seekable_;
     void CloseFd();
+    int32_t fd_ {-1};
+    Seekable seekable_;
 };
 }
 }
