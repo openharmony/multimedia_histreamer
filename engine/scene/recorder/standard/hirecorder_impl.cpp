@@ -565,8 +565,10 @@ ErrorCode HiRecorderImpl::DoConfigureOther(const HstRecParam& param) const
         case RecorderPublicParamType::OUT_FD: {
             auto ptr = param.GetValPtr<OutFd>();
             FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            int32_t fd = dup(ptr->fd);
+            FALSE_RETURN_V(fd >= 0, ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
             MediaSink mediaSink {Plugin::ProtocolType::FD};
-            mediaSink.SetFd(ptr->fd);
+            mediaSink.SetFd(fd);
             return outputSink_->SetSink(mediaSink);
         }
         case RecorderPublicParamType::MAX_DURATION: {
