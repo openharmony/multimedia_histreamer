@@ -48,10 +48,12 @@ public:
 
 private:
     ErrorCode ConfigureToPreparePlugin();
+
     std::shared_ptr<Plugin::OutputSink> plugin_;
     Plugin::ProtocolType protocolType_ {Plugin::ProtocolType::UNKNOWN};
     int64_t currentPos_ {0};
     MediaSink sink_ {Plugin::ProtocolType::UNKNOWN};
+    bool bufferEos_ {true};
 };
 } // Pipeline
 } // Media

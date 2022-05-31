@@ -28,7 +28,7 @@ public:
     void SetFd(const int32_t fd);
     void SetPath(const std::string& path);
     ProtocolType GetProtocolType() const;
-    const std::string& GetPath() const;
+    std::string GetPath() const;
     int32_t GetFd() const;
 private:
     std::string path_ {};

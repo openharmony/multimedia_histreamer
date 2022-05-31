@@ -26,7 +26,7 @@ namespace FileSink {
 class FilePathSinkPlugin : public OutputSinkPlugin {
 public:
     explicit FilePathSinkPlugin(std::string name);
-    ~FilePathSinkPlugin() override = default;
+    ~FilePathSinkPlugin() override;
 
     Status Stop() override;
 
@@ -41,6 +41,7 @@ private:
     void CloseFile();
 
     std::string fileName_ {};
+    std::string tmpFileName_ {};
     std::FILE* fp_;
     Seekable seekable_;
 };

@@ -20,7 +20,7 @@ namespace Plugin {
 MediaSink::MediaSink(ProtocolType protocolType) : protocolType_(std::move(protocolType))
 {
 }
-const std::string& MediaSink::GetPath() const
+std::string MediaSink::GetPath() const
 {
     return path_;
 }
