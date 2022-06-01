@@ -73,6 +73,9 @@ void HttpCurlClient::InitCurlEnvironment(const std::string& url)
 
     curl_easy_setopt(easyHandle_, CURLOPT_VERBOSE, 1);
 
+    curl_easy_setopt(easyHandle_,  CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(easyHandle_,  CURLOPT_SSL_VERIFYHOST, 0L);
+
     curl_easy_setopt(easyHandle_, CURLOPT_WRITEFUNCTION, rxBody_);
     curl_easy_setopt(easyHandle_, CURLOPT_WRITEDATA, userParam_);
 
