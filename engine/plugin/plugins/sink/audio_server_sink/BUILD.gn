@@ -21,7 +21,7 @@ if (!hst_is_lite_sys) {
     include_dirs = [ "//third_party/ffmpeg" ]
     sources = [ "audio_server_sink_plugin.cpp" ]
     public_deps = [
-      "//foundation/multimedia/audio_standard/interfaces/inner_api/native/audiorenderer:audio_renderer",
+      "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiorenderer:audio_renderer",
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
       "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
@@ -29,7 +29,7 @@ if (!hst_is_lite_sys) {
     ]
     public_configs = [
       "//foundation/multimedia/histreamer:histreamer_presets",
-      "//foundation/multimedia/audio_standard/interfaces/inner_api/native/audiorenderer:audio_renderer_config",
+      "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiorenderer:audio_renderer_config",
     ]
   }
 
