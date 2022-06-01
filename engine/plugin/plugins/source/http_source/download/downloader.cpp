@@ -33,8 +33,10 @@ constexpr size_t RETRY_TIMES = 200;  // Retry 200 times
 constexpr size_t REQUEST_QUEUE_SIZE = 50;
 }
 
-DownloadRequest::DownloadRequest(const std::string& url, DataSaveFunc saveData, StatusCallbackFunc statusCallback)
-    : url_(url), saveData_(std::move(saveData)), statusCallback_(std::move(statusCallback))
+DownloadRequest::DownloadRequest(const std::string& url, DataSaveFunc saveData, StatusCallbackFunc statusCallback,
+                                 bool requestWholeFile)
+    : url_(url), saveData_(std::move(saveData)), statusCallback_(std::move(statusCallback)),
+    requestWholeFile_(requestWholeFile)
 {
     (void)memset_s(&headerInfo_, sizeof(HeaderInfo), 0x00, sizeof(HeaderInfo));
     headerInfo_.fileContentLen = 0;
@@ -167,14 +169,19 @@ void Downloader::HttpDownloadLoop()
     FALSE_RETURN_W(currentRequest_ != nullptr);
     NetworkClientErrorCode clientCode;
     NetworkServerErrorCode serverCode;
-    Status ret = client_->RequestData(currentRequest_->startPos_, currentRequest_->requestSize_,
+    long startPos = currentRequest_->startPos_;
+    if (currentRequest_->requestWholeFile_) {
+        startPos = -1;
+    }
+    Status ret = client_->RequestData(startPos, currentRequest_->requestSize_,
                                       serverCode, clientCode);
     if (ret == Status::ERROR_CLIENT) {
         MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, clientCode);
         currentRequest_->statusCallback_(DownloadStatus::CLIENT_ERROR, currentRequest_,
                                          static_cast<int32_t>(clientCode));
     } else if (ret == Status::ERROR_SERVER) {
-        MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32, serverCode);
+        MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32 " " PUBLIC_LOG_ZU, serverCode,
+                    currentRequest_->headerInfo_.fileContentLen);
         currentRequest_->statusCallback_(DownloadStatus::SERVER_ERROR, currentRequest_,
                                          static_cast<int32_t>(serverCode));
     }

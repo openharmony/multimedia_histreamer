@@ -52,7 +52,8 @@ void HlsMediaDownloader::FragmentDownloadLoop()
     std::string url = fragmentList_->Pop();
     if (!fragmentDownloadStart[url]) {
         fragmentDownloadStart[url] = true;
-        downloadRequest_ = std::make_shared<DownloadRequest>(url, dataSave_, statusCallback_);
+        // TO DO: If the fragment file is too large, should not requestWholeFile.
+        downloadRequest_ = std::make_shared<DownloadRequest>(url, dataSave_, statusCallback_, true);
         downloader_->Download(downloadRequest_, -1); // -1
         downloader_->Start();
     }

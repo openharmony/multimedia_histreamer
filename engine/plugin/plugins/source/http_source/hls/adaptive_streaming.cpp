@@ -44,7 +44,7 @@ AdaptiveStreaming::~AdaptiveStreaming()
 void AdaptiveStreaming::Open(const std::string& url)
 {
     playList_.clear();
-    downloadRequest_ = std::make_shared<DownloadRequest>(url, dataSave_, statusCallback_);
+    downloadRequest_ = std::make_shared<DownloadRequest>(url, dataSave_, statusCallback_, true);
     downloader->Download(downloadRequest_, -1); // -1
     downloader->Start();
     while (!downloadRequest_->IsEos()) {
