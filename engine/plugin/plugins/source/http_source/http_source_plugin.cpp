@@ -57,10 +57,7 @@ HttpSourcePlugin::HttpSourcePlugin(std::string name) noexcept
 HttpSourcePlugin::~HttpSourcePlugin()
 {
     MEDIA_LOG_D("~HttpSourcePlugin IN");
-    if (executor_ != nullptr) {
-        executor_->Close();
-        executor_ = nullptr;
-    }
+    CloseUri();
 }
 
 Status HttpSourcePlugin::Init()
@@ -141,6 +138,7 @@ Status HttpSourcePlugin::SetCallback(Callback* cb)
 {
     MEDIA_LOG_D("IN");
     callback_ = cb;
+    OSAL::ScopedLock lock(mutex_);
     if (executor_ != nullptr) {
         executor_->SetCallback(cb);
     }
@@ -150,6 +148,7 @@ Status HttpSourcePlugin::SetCallback(Callback* cb)
 Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 {
     MEDIA_LOG_D("SetSource IN");
+    OSAL::ScopedLock lock(mutex_);
     auto uri = source->GetSourceUri();
     if (uri.find(".m3u8") != std::string::npos) {
         executor_ = std::make_shared<HlsMediaDownloader>();
@@ -177,6 +176,7 @@ std::shared_ptr<Allocator> HttpSourcePlugin::GetAllocator()
 Status HttpSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
 {
     MEDIA_LOG_D("Read in");
+    OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
 
     if (buffer == nullptr) {
@@ -201,6 +201,7 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLe
 Status HttpSourcePlugin::GetSize(size_t& size)
 {
     MEDIA_LOG_D("IN");
+    OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
     size = executor_->GetContentLength();
     return Status::OK;
@@ -209,12 +210,14 @@ Status HttpSourcePlugin::GetSize(size_t& size)
 Seekable HttpSourcePlugin::GetSeekable()
 {
     MEDIA_LOG_D("IN");
+    OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(executor_ != nullptr, Seekable::INVALID);
     return !executor_->IsStreaming() ? Seekable::SEEKABLE : Seekable::UNSEEKABLE;
 }
 
 Status HttpSourcePlugin::SeekTo(uint64_t offset)
 {
+    OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
     FALSE_RETURN_V(!executor_->IsStreaming(), Status::ERROR_INVALID_OPERATION);
     FALSE_RETURN_V(offset <= executor_->GetContentLength(), Status::ERROR_INVALID_PARAMETER);
@@ -224,6 +227,7 @@ Status HttpSourcePlugin::SeekTo(uint64_t offset)
 
 void HttpSourcePlugin::CloseUri()
 {
+    OSAL::ScopedLock lock(mutex_);
     if (executor_ != nullptr) {
         MEDIA_LOG_D("Close uri");
         executor_->Close();

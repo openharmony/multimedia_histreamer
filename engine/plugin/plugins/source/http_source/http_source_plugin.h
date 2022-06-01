@@ -50,6 +50,7 @@ private:
     uint32_t waterline_;
     Callback* callback_ {};
     std::shared_ptr<MediaDownloader> executor_;
+    OSAL::Mutex mutex_ {};
     bool delayReady {true};
 };
 } // namespace HttpPluginLite

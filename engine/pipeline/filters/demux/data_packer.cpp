@@ -70,7 +70,14 @@ void DataPacker::PushData(AVBufferPtr bufferPtr, uint64_t offset)
     OSAL::ScopedLock lock(mutex_);
     if (que_.size() >= capacity_) {
         MEDIA_LOG_D("DataPacker is full, waiting for pop.");
-        cvFull_.Wait(lock, [this] { return que_.size() < capacity_; });
+        do {
+            cvFull_.WaitFor(lock, 1000,  // 1000 ms
+                            [this] { return que_.size() < capacity_ || stopped_.load(); });
+            if (stopped_.load()) {
+                MEDIA_LOG_D("DataPacker stopped, so return.");
+                return;
+            }
+        } while (que_.size() >= capacity_);
     }
 
     size_ += AudioBufferSize(bufferPtr);
@@ -167,7 +174,9 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
     } else { // first buffer not enough
         // Find the first buffer that should copy
         uint64_t prevOffset; // The media offset of the startIndex buffer start byte
-        FALSE_RETURN_V(FindFirstBufferToCopy(offset, startIndex, prevOffset), false);
+        FALSE_RETURN_V_MSG_E(FindFirstBufferToCopy(offset, startIndex, prevOffset), false,
+            "Read offset(" PUBLIC_LOG_D64 ") size(" PUBLIC_LOG_D32 ") from " PUBLIC_LOG_S,
+            offset, size, ToString().c_str());
         auto bufferOffset = static_cast<int32_t>(offset - prevOffset);
         FALSE_RETURN_V_MSG_E(bufferOffset >= 0, false, "Copy buffer start position error.");
         firstBufferOffset = bufferOffset;
@@ -300,6 +309,20 @@ bool DataPacker::IsEmpty()
 {
     OSAL::ScopedLock lock(mutex_);
     return size_ > 0;
+}
+
+void DataPacker::Start()
+{
+    MEDIA_LOG_I("DataPacker Start called.");
+    stopped_.store(false);
+}
+
+void DataPacker::Stop()
+{
+    MEDIA_LOG_I("DataPacker Stop called.");
+    stopped_.store(true);
+    cvEmpty_.NotifyAll(); // avoid some thread can not exit
+    cvFull_.NotifyAll();
 }
 
 void DataPacker::FlushInternal()
