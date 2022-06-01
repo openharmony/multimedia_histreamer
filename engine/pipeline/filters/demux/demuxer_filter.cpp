@@ -156,6 +156,7 @@ ErrorCode DemuxerFilter::Start()
 ErrorCode DemuxerFilter::Stop()
 {
     MEDIA_LOG_I("Stop called.");
+    dataPacker_->Stop();
     if (task_) {
         task_->Stop();
     }
@@ -196,6 +197,7 @@ ErrorCode DemuxerFilter::Prepare()
 {
     MEDIA_LOG_I("Prepare called");
     DUMP_BUFFER2FILE_PREPARE();
+    dataPacker_->Start();
     pluginState_ = DemuxerState::DEMUXER_STATE_NULL;
     task_->RegisterHandler([this] { DemuxerLoop(); });
     Pipeline::WorkMode mode;

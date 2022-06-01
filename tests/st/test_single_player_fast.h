@@ -75,7 +75,11 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     DATA_GROUP(std::string(RESOURCE_DIR "/OGG/OGG_48000_SHORT.ogg"), 30912),
     DATA_GROUP(std::string(RESOURCE_DIR "/APE/MPEG-4_48000_32_SHORT.ape"), 161018));
 
-    DATA_PROVIDER(hlsLinks, 100,
+    DATA_PROVIDER(httpLinks, 1,
+    DATA_GROUP(std::string("http://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3")),
+    DATA_GROUP(std::string("https://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3")));
+
+    DATA_PROVIDER(hlsLinks, 1,
     DATA_GROUP(std::string("http://ls-open.qingting.fm/live/389/64k.m3u8?"
                            "deviceid=00000000-0000-0000-0000-000000000000&format=aac")));
 
@@ -219,7 +223,18 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
         ASSERT_EQ(0, player->Stop());
     }
 
-    // @test(data="hlsLinks", tags=debuging)
+    // @test(data="httpLinks", tags=http)
+    PTEST((std::string url), Test http audio play)
+    {
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(url)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        std::this_thread::sleep_for(std::chrono::seconds(20));
+        player->Stop();
+    }
+
+    // @test(data="hlsLinks", tags=http)
     PTEST((std::string url), Test hls audio broadcast)
     {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();

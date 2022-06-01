@@ -52,6 +52,10 @@ public:
 
     bool IsEmpty();
 
+    void Start();
+
+    void Stop();
+
     // Record the position that GerRange copy start or end.
     struct Position {
         int32_t index; // Buffer index, -1 means this Position is invalid
@@ -121,6 +125,7 @@ private:
     OSAL::ConditionVariable cvFull_;
     OSAL::ConditionVariable cvEmpty_;
     const size_t capacity_;
+    std::atomic<bool> stopped_ {false};
 };
 } // namespace Media
 } // namespace OHOS

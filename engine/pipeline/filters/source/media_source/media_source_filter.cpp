@@ -202,17 +202,17 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
 ErrorCode MediaSourceFilter::Stop()
 {
     MEDIA_LOG_I("Stop entered.");
+    ErrorCode ret = ErrorCode::SUCCESS;
+    if (plugin_) {
+        ret = TranslatePluginStatus(plugin_->Stop()); // stop plugin first, then stop thread
+    }
     if (taskPtr_) {
-        taskPtr_->StopAsync();
+        taskPtr_->Stop();
     }
     mediaOffset_ = 0;
     seekable_ = Seekable::INVALID;
     protocol_.clear();
     uri_.clear();
-    ErrorCode ret = ErrorCode::SUCCESS;
-    if (plugin_) {
-        ret = TranslatePluginStatus(plugin_->Stop());
-    }
     return ret;
 }
 
