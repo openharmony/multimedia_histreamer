@@ -65,7 +65,8 @@ using StatusCallbackFunc = std::function<void(DownloadStatus, std::shared_ptr<Do
 
 class DownloadRequest {
 public:
-    DownloadRequest(const std::string& url, DataSaveFunc saveData, StatusCallbackFunc statusCallback);
+    DownloadRequest(const std::string& url, DataSaveFunc saveData, StatusCallbackFunc statusCallback,
+                    bool requestWholeFile = false);
     size_t GetFileContentLength() const;
     void SaveHeader(const HeaderInfo* header);
     bool IsChunked() const;
@@ -83,6 +84,7 @@ private:
     bool isEos_ {false}; // file download finished
     int64_t startPos_;
     bool isDownloading_;
+    bool requestWholeFile_ {false};
     int requestSize_;
 
     friend class Downloader;
