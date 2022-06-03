@@ -59,16 +59,13 @@ struct M3U8 {
     void UpdateFromTags(std::list<std::shared_ptr<Tag>>& tags);
     void GetExtInf(const std::shared_ptr<Tag>& tag, double& duration, std::string& title) const;
     double GetDuration() const;
-    bool isLive() const;
+    bool IsLive() const;
 
     std::string uri_;
     std::string name_;
 
-    bool endlist_;
-    int version_;
     double targetDuration_;
-    bool allowCache_;
-    
+    bool bLive_ {};
     std::list<std::shared_ptr<M3U8Fragment>> files_;
     int64_t sequence_ {1}; // default 1
     int discontSequence_;
@@ -106,13 +103,12 @@ struct M3U8MasterPlaylist {
     void UpdateMediaPlaylist();
     void UpdateMasterPlaylist();
     std::list<std::shared_ptr<M3U8VariantStream>> variants_;
-    std::list<M3U8VariantStream> iframeVariants_;
     std::shared_ptr<M3U8VariantStream> defaultVariant_;
     std::string uri_;
-    int version_ {};
     bool isSimple_ {false};
     std::string playList_;
     double duration_ {0};
+    bool bLive_ {};
 };
 }
 }
