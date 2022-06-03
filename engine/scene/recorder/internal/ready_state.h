@@ -45,6 +45,13 @@ public:
         Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_INIT : Action::TRANS_TO_ERROR;
         return {ret, action};
     }
+
+    std::tuple<ErrorCode, Action> Pause() override
+    {
+        MEDIA_LOG_D("Start in pause state.");
+        return {ErrorCode::SUCCESS, Action::TRANS_TO_PAUSE};
+    }
+
 private:
     OSAL::Mutex mutex_ {};
 };
