@@ -33,6 +33,7 @@ public:
     void FragmentListUpdateLoop() override;
     void SetFragmentListCallback(FragmentListChangeCallback* callback) override;
     double GetDuration() const override;
+    bool IsStreaming() const override;
 private:
     FragmentListChangeCallback* callback_ {nullptr};
     std::shared_ptr<M3U8MasterPlaylist> master_;

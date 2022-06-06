@@ -29,13 +29,15 @@ bool StrHasPrefix(std::string& str, const std::string& prefix)
     return str.find(prefix) == 0;
 }
 
-std::string UriJoin(std::string& baseUri, const std::string& name)
+std::string UriJoin(std::string& baseUrl, const std::string& uri)
 {
-    if (baseUri.find("qingting") != std::string::npos) {
-        return "https:" + name;
+    if ((uri.find("http://") != std::string::npos) || (uri.find("https://") != std::string::npos)) {
+        return uri;
+    } else if (!uri.find("//")) {
+        return baseUrl.substr(0, baseUrl.find('/')) + uri;
     } else {
-        std::string::size_type pos = baseUri.rfind('/');
-        return baseUri.substr(0, pos + 1) + name;
+        std::string::size_type pos = baseUrl.rfind('/');
+        return baseUrl.substr(0, pos + 1) + uri;
     }
 }
 }
@@ -77,10 +79,12 @@ void M3U8::UpdateFromTags(std::list<std::shared_ptr<Tag>>& tags)
     std::string uri, title;
     double duration = 0;
     bool discontinuity = false;
+    auto bVod = !tags.empty() && tags.back()->GetType() == HlsTag::EXTXENDLIST;
+    bLive_ = !bVod;
     for (auto& tag : tags) {
         switch (tag->GetType()) {
-            case HlsTag::EXTXVERSION:
-                version_ = std::static_pointer_cast<SingleValueTag>(tag)->GetValue().Decimal();
+            case HlsTag::EXTXPLAYLISTTYPE:
+                bLive_ = !bVod && (std::static_pointer_cast<SingleValueTag>(tag)->GetValue().QuotedString() != "VOD");
                 break;
             case HlsTag::EXTXTARGETDURATION:
                 targetDuration_ = std::static_pointer_cast<SingleValueTag>(tag)->GetValue().FloatingPoint();
@@ -107,9 +111,6 @@ void M3U8::UpdateFromTags(std::list<std::shared_ptr<Tag>>& tags)
                 discontinuity = true;
                 break;
             }
-            case HlsTag::EXTXENDLIST:
-                endlist_ = true;
-                break;
             case HlsTag::EXTXKEY:
                 MEDIA_LOG_I("need to parse EXTXKEY");
                 break;
@@ -136,15 +137,15 @@ void M3U8::GetExtInf(const std::shared_ptr<Tag>& tag, double& duration, std::str
 double M3U8::GetDuration() const
 {
     double duration = 0;
-    for (auto e : files_) {
-        duration += e->duration_;
+    for (auto file : files_) {
+        duration += file->duration_;
     }
     return duration;
 }
 
-bool M3U8::isLive() const
+bool M3U8::IsLive() const
 {
-    return true;
+    return bLive_;
 }
 
 M3U8VariantStream::M3U8VariantStream(std::string name, std::string uri, std::shared_ptr<M3U8> m3u8)
@@ -176,6 +177,7 @@ void M3U8MasterPlaylist::UpdateMediaPlaylist()
     defaultVariant_ = stream;
     m3u8->Update(playList_);
     duration_ = m3u8->GetDuration();
+    bLive_ = m3u8->IsLive();
     MEDIA_LOG_D("UpdateMediaPlaylist called" PUBLIC_LOG_F, duration_);
 }
 
@@ -185,9 +187,6 @@ void M3U8MasterPlaylist::UpdateMasterPlaylist()
     auto tags = ParseEntries(playList_);
     for (auto& tag : tags) {
         switch (tag->GetType()) {
-            case HlsTag::EXTXVERSION:
-                version_ = std::static_pointer_cast<SingleValueTag>(tag)->GetValue().Decimal();
-                break;
             case HlsTag::EXTXSTREAMINF:
             case HlsTag::EXTXIFRAMESTREAMINF: {
                 auto item = std::static_pointer_cast<AttributesTag>(tag);

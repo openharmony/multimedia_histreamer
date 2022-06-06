@@ -58,6 +58,11 @@ double HLSStreaming::GetDuration() const
 {
     return master_->duration_;
 }
+
+bool HLSStreaming::IsStreaming() const
+{
+    return master_->bLive_;
+}
 }
 }
 }
