@@ -233,6 +233,10 @@ int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
     if (mSeconds >= durationMs) { // if exceeds change to duration
         mSeconds = durationMs;
     }
+    if (audioSource_->GetSeekable() != Plugin::Seekable::SEEKABLE) {
+        MEDIA_LOG_E("Seek, invalid operation, audio source is unseekable or invalid");
+        return MSERR_INVALID_OPERATION;
+    }
     if (!Plugin::Ms2HstTime(mSeconds, hstTime)) {
         return TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }

@@ -74,6 +74,10 @@ WavDemuxerPlugin::~WavDemuxerPlugin()
 Status WavDemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& source)
 {
     ioContext_.dataSource = source;
+    if (ioContext_.dataSource != nullptr) {
+        ioContext_.dataSource->GetSize(fileSize_);
+    }
+    MEDIA_LOG_I("fileSize_ " PUBLIC_LOG_ZU, fileSize_);
     seekable_ = source->GetSeekable();
     return Status::OK;
 }
