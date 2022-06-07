@@ -367,7 +367,7 @@ ErrorCode HiRecorderImpl::DoStart()
 
 ErrorCode HiRecorderImpl::DoPause()
 {
-    return pipeline_->Pause();
+    return curFsmState_ == StateId::READY ? ErrorCode::SUCCESS: pipeline_->Pause();
 }
 
 ErrorCode HiRecorderImpl::DoResume()
