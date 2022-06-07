@@ -66,11 +66,10 @@ bool Thread::CreateThread(const std::function<void()>& func)
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-#ifdef MEDIA_OHOS
-    pthread_attr_setschedpolicy(&attr, SCHED_RR);
-#endif
 #ifdef OHOS_LITE
+    // Only OHOS_LITE can set inheritsched and schedpolicy.
     pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+    pthread_attr_setschedpolicy(&attr, SCHED_RR);
 #endif
     struct sched_param sched = {static_cast<int>(priority_)};
     pthread_attr_setschedparam(&attr, &sched);
@@ -80,11 +79,11 @@ bool Thread::CreateThread(const std::function<void()>& func)
 #endif
     int rtv = pthread_create(&id_, &attr, Thread::Run, state_.get());
     if (rtv == 0) {
-        MEDIA_LOG_I("thread " PUBLIC_LOG_S " create succ", name_.c_str());
+        MEDIA_LOG_I("thread " PUBLIC_LOG_S " create success", name_.c_str());
         SetNameInternal();
     } else {
         state_.reset();
-        MEDIA_LOG_E("thread create failed, rtv: " PUBLIC_LOG_D32, rtv);
+        MEDIA_LOG_E("thread create failed, name: " PUBLIC_LOG_S ", rtv: " PUBLIC_LOG_D32, name_.c_str(), rtv);
     }
     return rtv == 0;
 }
@@ -109,8 +108,8 @@ void* Thread::Run(void* arg) // NOLINT: void*
     auto state = static_cast<State*>(arg);
     if (state && state->func) {
         state->func();
+        MEDIA_LOG_W("Thread " PUBLIC_LOG_S " exited...", state->name.c_str());
     }
-    MEDIA_LOG_W("Thread " PUBLIC_LOG_S " exited...", state->name.c_str());
     return nullptr;
 }
 } // namespace OSAL

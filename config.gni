@@ -45,6 +45,7 @@ if (!defined(ohos_lite) || !ohos_lite) {
   multimedia_histreamer_enable_plugin_audio_server_sink = true
   multimedia_histreamer_enable_recorder = true
   multimedia_histreamer_enable_plugin_file_sink = true
+  multimedia_histreamer_enable_plugin_std_audio_capture = true
 } else {
   hst_is_lite_sys = true
 }
