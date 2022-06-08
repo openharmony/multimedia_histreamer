@@ -72,7 +72,7 @@ bool MuxerFilter::UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::Plugin
     if (plugin_ != nullptr) {
         if (targetPluginInfo_ != nullptr && targetPluginInfo_->name == selectedPluginInfo->name) {
             if (plugin_->Reset() == Plugin::Status::OK) {
-                return true;
+                // return true;
             }
             MEDIA_LOG_W("reuse previous plugin " PUBLIC_LOG_S " failed, will create new plugin",
                         targetPluginInfo_->name.c_str());

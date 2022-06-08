@@ -136,7 +136,7 @@ int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
     outputFormatType_ = format;
     auto ret = fsm_.SendEvent(Intent::SET_OUTPUT_FORMAT, outputFormatType_);
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("SetOutputFormat failed with error " PUBLIC_LOG_D32, static_cast<int>(ret));
+        MEDIA_LOG_E("SetOutputFormat failed with error " PUBLIC_LOG_S, GetErrorName(ret));
     }
     return TransErrorCode(ret);
 }
@@ -157,7 +157,7 @@ int32_t HiRecorderImpl::Configure(int32_t sourceId, const RecorderParam& recPara
     FALSE_RETURN_V(castRet, TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
     auto ret = fsm_.SendEvent(Intent::CONFIGURE, hstRecParam);
     if (ret != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("Configure failed with error " PUBLIC_LOG_D32, static_cast<int>(ret));
+        MEDIA_LOG_E("Configure failed with error " PUBLIC_LOG_S, GetErrorName(ret));
     }
     return TransErrorCode(ret);
 }
@@ -391,6 +391,10 @@ ErrorCode HiRecorderImpl::DoStop(const Plugin::Any& param)
     } else {
         ret = muxer_->SendEos();
     }
+    audioCount_ = 0;
+    videoCount_ = 0;
+    audioSourceId_ = 0;
+    videoSourceId_ = 0;
     return ret;
 }
 
@@ -401,25 +405,28 @@ ErrorCode HiRecorderImpl::DoOnComplete()
 
 ErrorCode HiRecorderImpl::SetAudioSourceInternal(AudioSourceType source, int32_t sourceId)
 {
-    audioCapture_ = FilterFactory::Instance().CreateFilterWithType<AudioCaptureFilter>(
-            "builtin.recorder.audiocapture", "audiocapture");
-    audioEncoder_ = FilterFactory::Instance().CreateFilterWithType<AudioEncoderFilter>(
-            "builtin.recorder.audioencoder", "audioencoder");
+    if (!audioCapture_) {
+        audioCapture_ = FilterFactory::Instance().CreateFilterWithType<AudioCaptureFilter>(
+                "builtin.recorder.audiocapture", "audiocapture");
+        audioEncoder_ = FilterFactory::Instance().CreateFilterWithType<AudioEncoderFilter>(
+                "builtin.recorder.audioencoder", "audioencoder");
+        auto ret = pipeline_->AddFilters({audioCapture_.get(), audioEncoder_.get()});
+        FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "AddFilters audioCapture to pipeline fail");
+        ret = pipeline_->LinkFilters({audioCapture_.get(), audioEncoder_.get()});
+        FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "LinkFilters audioCapture and audioEncoder fail");
+        std::shared_ptr<InPort> muxerInPort {nullptr};
+        ret = muxer_->AddTrack(muxerInPort);
+        FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "muxer AddTrack fail");
+        ret = pipeline_->LinkPorts(audioEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
+        FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "LinkPorts audioEncoderOutPort and muxerInPort fail");
+
+    }
     FALSE_RETURN_V_MSG_E(audioCapture_ != nullptr && audioEncoder_ != nullptr, ErrorCode::ERROR_UNKNOWN,
                          "create audioCapture/audioEncoder filter fail");
     appTokenId_ = IPCSkeleton::GetCallingTokenID();
     appUid_ = IPCSkeleton::GetCallingUid();
     audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::APP_TOKEN_ID), appTokenId_);
     audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::APP_UID), appUid_);
-    auto ret = pipeline_->AddFilters({audioCapture_.get(), audioEncoder_.get()});
-    FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "AddFilters audioCapture to pipeline fail");
-    ret = pipeline_->LinkFilters({audioCapture_.get(), audioEncoder_.get()});
-    FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "LinkFilters audioCapture and audioEncoder fail");
-    std::shared_ptr<InPort> muxerInPort {nullptr};
-    ret = muxer_->AddTrack(muxerInPort);
-    FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "muxer AddTrack fail");
-    ret = pipeline_->LinkPorts(audioEncoder_->GetOutPort(PORT_NAME_DEFAULT), muxerInPort);
-    FALSE_RETURN_V_MSG_E(ret == ErrorCode::SUCCESS, ret, "LinkPorts audioEncoderOutPort and muxerInPort fail");
     return fsm_.SendEvent(Intent::SET_AUDIO_SOURCE,
                           std::pair<int32_t, Plugin::SrcInputType>(sourceId, TransAudioInputType(source)));
 }
