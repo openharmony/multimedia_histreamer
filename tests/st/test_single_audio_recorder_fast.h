@@ -138,6 +138,5 @@ PTEST((AudioRecordSource recordSource), The recorder can be stopped and set sour
     ASSERT_EQ(0, player->Play());
     std::this_thread::sleep_for(std::chrono::milliseconds(3000));
     ASSERT_EQ(0, player->Stop());
-
 }
 };

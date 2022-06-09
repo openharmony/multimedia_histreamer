@@ -48,7 +48,7 @@ public:
     ErrorCode StartNextSegment();
     ErrorCode SendEos();
     ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
-    ErrorCode Start();
+    ErrorCode Start() override;
 private:
     class MuxerDataSink : public Plugin::DataSinkHelper {
     public:
