@@ -48,7 +48,7 @@ Thread::~Thread() noexcept
     }
 }
 
-Thread::operator bool() const noexcept
+bool Thread::HasThread() const noexcept
 {
     return state_ != nullptr;
 }
@@ -107,8 +107,9 @@ void* Thread::Run(void* arg) // NOLINT: void*
 {
     auto state = static_cast<State*>(arg);
     if (state && state->func) {
+        const std::string name = state->name;
         state->func();
-        MEDIA_LOG_W("Thread " PUBLIC_LOG_S " exited...", state->name.c_str());
+        MEDIA_LOG_W("Thread " PUBLIC_LOG_S " exited...", name.c_str());
     }
     return nullptr;
 }

@@ -63,9 +63,10 @@ private:
     void Run();
 
     const std::string name_;
+    const ThreadPriority priority_;
     std::atomic<RunningState> runningState_{RunningState::PAUSED};
     std::function<void()> handler_ = [this] { DoTask(); };
-    OSAL::Thread loop_;
+    std::shared_ptr<OSAL::Thread> loop_;
     OSAL::Mutex stateMutex_{};
     OSAL::ConditionVariable syncCond_{};
 };

@@ -132,6 +132,7 @@ PTEST((AudioRecordSource recordSource), The recorder can be stopped and set sour
 
     ASSERT_TRUE(recorder->GetRecordedFile(filePath) > 0);
 
+    ASSERT_EQ(0, player->Reset());
     ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
     ASSERT_EQ(0, player->Prepare());
     ASSERT_EQ(0, player->Play());

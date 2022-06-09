@@ -46,7 +46,7 @@ public:
 
     virtual ~Thread() noexcept;
 
-    explicit operator bool() const noexcept;
+    bool HasThread() const noexcept;
 
     void SetName(const std::string& name);
 

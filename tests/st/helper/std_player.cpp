@@ -61,6 +61,7 @@ public:
     int32_t Play() override;
     int32_t Pause() override;
     int32_t Stop() override;
+    int32_t Reset() override;
     int32_t Seek(int64_t timeMs) override;
     int32_t GetCurrentTime(int64_t& currentMs) override;
     int32_t GetDuration(int64_t& durationMs) override;
@@ -111,6 +112,11 @@ int32_t TestPlayerImpl::Pause()
 int32_t TestPlayerImpl::Stop()
 {
     return player_->Stop();
+}
+
+int32_t TestPlayerImpl::Reset()
+{
+    return player_->Reset();
 }
 
 int32_t TestPlayerImpl::Seek(int64_t timeMs)

@@ -72,7 +72,7 @@ bool MuxerFilter::UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::Plugin
     if (plugin_ != nullptr) {
         if (targetPluginInfo_ != nullptr && targetPluginInfo_->name == selectedPluginInfo->name) {
             if (plugin_->Reset() == Plugin::Status::OK) {
-                // return true;
+                return true;
             }
             MEDIA_LOG_W("reuse previous plugin " PUBLIC_LOG_S " failed, will create new plugin",
                         targetPluginInfo_->name.c_str());
@@ -261,6 +261,7 @@ ErrorCode MuxerFilter::SendEos()
     auto buf = std::make_shared<AVBuffer>();
     buf->flag |= BUFFER_FLAG_EOS;
     outPorts_[0]->PushData(buf, -1);
+    metaCache_.clear();
     return ErrorCode::SUCCESS;
 }
 
@@ -320,6 +321,12 @@ Plugin::Status MuxerFilter::MuxerDataSink::WriteAt(int64_t offset, const std::sh
         muxerFilter_->outPorts_[0]->PushData(buffer, offset);
     }
     return Plugin::Status::OK;
+}
+
+ErrorCode MuxerFilter::Start()
+{
+    eos_ = false;
+    return FilterBase::Start();
 }
 } // Pipeline
 } // Media
