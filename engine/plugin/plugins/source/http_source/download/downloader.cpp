@@ -41,6 +41,10 @@ DownloadRequest::DownloadRequest(const std::string& url, DataSaveFunc saveData, 
     (void)memset_s(&headerInfo_, sizeof(HeaderInfo), 0x00, sizeof(HeaderInfo));
     headerInfo_.fileContentLen = 0;
     headerInfo_.contentLen = 0;
+    (void)memset_s(&requestInfo_, sizeof(RequestInfo), 0x00, sizeof(RequestInfo));
+    requestInfo_.fileContentLen = 0;
+    requestInfo_.downloadPos = 0;
+    requestInfo_.retryTimes = 0;
 }
 
 size_t DownloadRequest::GetFileContentLength() const
@@ -64,6 +68,12 @@ bool DownloadRequest::IsChunked() const
 bool DownloadRequest::IsEos() const
 {
     return isEos_;
+}
+
+bool DownloadRequest::GetRequestInfo(RequestInfo &requestInfo)
+{
+    requestInfo_ = requestInfo;
+    return true;
 }
 
 void DownloadRequest::WaitHeaderUpdated() const
@@ -109,6 +119,16 @@ void Downloader::Pause()
 {
     MEDIA_LOG_I("Begin");
     task_->Pause();
+    client_->Close();
+    MEDIA_LOG_I("End");
+}
+
+void Downloader::Resume()
+{
+    MEDIA_LOG_I("Begin");
+    client_->Open(currentRequest_->url_);
+    currentRequest_->isEos_ = false;
+    Start();
     MEDIA_LOG_I("End");
 }
 
@@ -124,12 +144,25 @@ void Downloader::Stop()
 bool Downloader::Seek(int64_t offset)
 {
     MEDIA_LOG_I("Begin");
-    currentRequest_->startPos_ = offset;
+    currentRequest_->startPos_ = offset >=0 ? offset : currentRequest_->startPos_;
+    currentRequest_->requestInfo_.downloadPos = offset;
     int64_t temp = currentRequest_->GetFileContentLength() - offset;
     temp = temp >= 0 ? temp : PER_REQUEST_SIZE;
     currentRequest_->requestSize_ = static_cast<int>(std::min(temp, static_cast<int64_t>(PER_REQUEST_SIZE)));
     currentRequest_->isEos_ = false;
     shouldStartNextRequest = false; // Reuse last request when seek
+    return true;
+}
+
+bool Downloader::Retry(std::string &url, int64_t offset)
+{
+    MEDIA_LOG_I("Begin");
+    FALSE_RETURN_V(!url.empty(), false);
+    FALSE_RETURN_V(client_ != nullptr, false);
+    currentRequest_->requestInfo_.retryTimes++;
+    Pause();
+    Seek(offset);
+    Resume();
     return true;
 }
 
@@ -145,6 +178,16 @@ bool Downloader::BeginDownload()
     FALSE_RETURN_V(client_ != nullptr, false);
 
     client_->Open(url);
+    (void)memset_s(&currentRequest_->requestInfo_, sizeof(RequestInfo), 0x00, sizeof(RequestInfo));
+    currentRequest_->requestInfo_.fileContentLen = 0;
+    currentRequest_->requestInfo_.downloadPos = 0;
+    currentRequest_->requestInfo_.retryTimes = 0;
+    size_t length = url.copy(currentRequest_->requestInfo_.url, 2048 - 1);
+    if (length + 1 > 2048) {    // 2048
+        MEDIA_LOG_E("copy url failed");
+        return false;
+    }
+    currentRequest_->requestInfo_.url[length] = '\0';
 
     currentRequest_->requestSize_ = 1;
     currentRequest_->startPos_ = 0;
@@ -157,6 +200,33 @@ bool Downloader::BeginDownload()
 
 void Downloader::EndDownload()
 {
+}
+
+void Downloader::DealDownloadResult(Status ret, NetworkServerErrorCode &serverCode,
+                                    NetworkClientErrorCode &clientCode)
+{
+    FALSE_LOG(ret == Status::OK);
+    if ((ret == Status::OK) && (currentRequest_->requestInfo_.retryTimes > 0)) {
+        currentRequest_->requestInfo_.retryTimes = 0;
+        return;
+    }
+    if ((ret == Status::OK) && (currentRequest_->requestInfo_.retryTimes < 3)) {    // 3
+        MEDIA_LOG_I("Retry http client error, code" PUBLIC_LOG_D32, clientCode);
+        currentRequest_->statusCallback_(DownloadStatus::PARTTAL_DOWNLOAD, currentRequest_,
+                                         static_cast<int32_t>(clientCode));
+        return;
+    }
+    if (ret == Status::ERROR_CLIENT) {
+        MEDIA_LOG_I("Send http client error, code" PUBLIC_LOG_D32, clientCode);
+        currentRequest_->statusCallback_(DownloadStatus::CLIENT_ERROR, currentRequest_,
+                                         static_cast<int32_t>(clientCode));
+        return;
+    } else if (ret == Status::ERROR_SERVER) {
+        MEDIA_LOG_I("Send http server error, code" PUBLIC_LOG_D32, serverCode);
+        currentRequest_->statusCallback_(DownloadStatus::SERVER_ERROR, currentRequest_,
+                                         static_cast<int32_t>(serverCode));
+        return;
+    }
 }
 
 void Downloader::HttpDownloadLoop()
@@ -175,6 +245,7 @@ void Downloader::HttpDownloadLoop()
     }
     Status ret = client_->RequestData(startPos, currentRequest_->requestSize_,
                                       serverCode, clientCode);
+    DealDownloadResult(ret, serverCode, clientCode);
     if (ret == Status::ERROR_CLIENT) {
         MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, clientCode);
         currentRequest_->statusCallback_(DownloadStatus::CLIENT_ERROR, currentRequest_,
@@ -227,6 +298,7 @@ size_t Downloader::RxBodyData(void* buffer, size_t size, size_t nitems, void* us
     MEDIA_LOG_I("RxBodyData: dataLen " PUBLIC_LOG_ZU ", startPos_ " PUBLIC_LOG_D64, dataLen,
                 mediaDownloader->currentRequest_->startPos_);
     mediaDownloader->currentRequest_->startPos_ = mediaDownloader->currentRequest_->startPos_ + dataLen;
+    mediaDownloader->currentRequest_->requestInfo_.downloadPos = mediaDownloader->currentRequest_->startPos_;
 
     return dataLen;
 }
@@ -298,6 +370,7 @@ size_t Downloader::RxHeaderData(void* buffer, size_t size, size_t nitems, void* 
         }
     }
     mediaDownloader->currentRequest_->SaveHeader(info);
+    mediaDownloader->currentRequest_->requestInfo_.fileContentLen = info->fileContentLen;
     return size * nitems;
 }
 }

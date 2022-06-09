@@ -78,6 +78,14 @@ void HlsMediaDownloader::Close()
     downloader_->Stop();
 }
 
+void HlsMediaDownloader::Pause()
+{
+}
+
+void HlsMediaDownloader::Resume()
+{
+}
+
 bool HlsMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
                               unsigned int& realReadLength, bool& isEos)
 {

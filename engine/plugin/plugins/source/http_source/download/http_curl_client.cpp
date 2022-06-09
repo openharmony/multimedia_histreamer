@@ -39,13 +39,13 @@ HttpCurlClient::~HttpCurlClient()
 Status HttpCurlClient::Init()
 {
     curl_global_init(CURL_GLOBAL_ALL);
-    easyHandle_ = curl_easy_init();
-    FALSE_RETURN_V(easyHandle_ != nullptr, Status::ERROR_NULL_POINTER);
     return Status::OK;
 }
 
 Status HttpCurlClient::Open(const std::string& url)
 {
+    easyHandle_ = curl_easy_init();
+    FALSE_RETURN_V(easyHandle_ != nullptr, Status::ERROR_NULL_POINTER);
     InitCurlEnvironment(url);
     return Status::OK;
 }
@@ -54,6 +54,10 @@ Status HttpCurlClient::Close()
 {
     MEDIA_LOG_I("Close client");
     curl_easy_setopt(easyHandle_, CURLOPT_TIMEOUT, 1);
+    if (easyHandle_) {
+        curl_easy_cleanup(easyHandle_);
+        easyHandle_ = nullptr;
+    }
     return Status::OK;
 }
 

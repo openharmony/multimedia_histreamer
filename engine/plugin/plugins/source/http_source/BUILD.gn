@@ -36,6 +36,7 @@ source_set("httpsource") {
     "hls/tags.cpp",
     "http/http_media_downloader.cpp",
     "http_source_plugin.cpp",
+    "monitor/download_monitor.cpp",
   ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",

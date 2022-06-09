@@ -56,6 +56,21 @@ void HttpMediaDownloader::Close()
     downloader_->Stop();
 }
 
+void HttpMediaDownloader::Pause()
+{
+    downloader_->Pause();
+}
+
+void HttpMediaDownloader::Resume()
+{
+    downloader_->Resume();
+}
+
+bool HttpMediaDownloader::Retry(std::string &url, int64_t offset)
+{
+    return downloader_->Retry(url, offset);
+}
+
 bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
                                unsigned int& realReadLength, bool& isEos)
 {
@@ -107,6 +122,11 @@ void HttpMediaDownloader::SetCallback(Callback* cb)
     callback_ = cb;
 }
 
+void HttpMediaDownloader::SetMonitorCallback(MonitorCallback *cb)
+{
+    monitorCallback_ = cb;
+}
+
 void HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 {
     buffer_->WriteBuffer(data, len, offset);
@@ -130,6 +150,10 @@ void HttpMediaDownloader::OnDownloadStatus(DownloadStatus status, std::shared_pt
     MEDIA_LOG_I("OnDownloadStatus " PUBLIC_LOG_D32, status);
     (void)request;
     switch (status) {
+        case DownloadStatus::PARTTAL_DOWNLOAD:
+            if (code != static_cast<int32_t>(NetworkClientErrorCode::ERROR_NOT_RETRY)) {
+                monitorCallback_->OnDownloadStatus(request);
+            }
         case DownloadStatus::CLIENT_ERROR:
             MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, code);
             callback_->OnEvent({PluginEventType::CLIENT_ERROR, {code}, "http"});

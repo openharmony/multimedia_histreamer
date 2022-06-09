@@ -30,6 +30,7 @@ namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
 enum struct DownloadStatus {
+    PARTTAL_DOWNLOAD,
     SERVER_ERROR,
     CLIENT_ERROR
 };
@@ -57,6 +58,12 @@ struct HeaderInfo {
     }
 };
 
+struct RequestInfo {
+    char url[2048];
+    int64_t fileContentLen;
+    int64_t downloadPos;
+    int retryTimes;
+};
 // uint8_t* : the data should save
 // uint32_t : length
 using DataSaveFunc = std::function<void(uint8_t*, uint32_t, int64_t)>;
@@ -71,6 +78,7 @@ public:
     void SaveHeader(const HeaderInfo* header);
     bool IsChunked() const;
     bool IsEos() const;
+    bool GetRequestInfo(RequestInfo& requestInfo);
 
 private:
     void WaitHeaderUpdated() const;
@@ -80,6 +88,8 @@ private:
     StatusCallbackFunc statusCallback_;
 
     HeaderInfo headerInfo_;
+    RequestInfo requestInfo_;
+
     bool isHeaderUpdated {false};
     bool isEos_ {false}; // file download finished
     int64_t startPos_;
@@ -98,11 +108,14 @@ public:
     bool Download(const std::shared_ptr<DownloadRequest>& request, int32_t waitMs);
     void Start();
     void Pause();
+    void Resume();
     void Stop();
     bool Seek(int64_t offset);
+    bool Retry(std::string& url, int64_t offset);
 private:
     bool BeginDownload();
     void EndDownload();
+    void DealDownloadResult(Status ret, NetworkServerErrorCode & serverCode, NetworkClientErrorCode& clientCode);
 
     void HttpDownloadLoop();
     static size_t RxBodyData(void* buffer, size_t size, size_t nitems, void* userParam);

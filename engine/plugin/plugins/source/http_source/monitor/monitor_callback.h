@@ -13,39 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_PLUGIN_EVENT_H
-#define HISTREAMER_PLUGIN_EVENT_H
+#ifndef HISTREAMER_MONITOR_CALLBACK_H
+#define HISTREAMER_MONITOR_CALLBACK_H
 
-#include <cstdint> // NOLINT: using int32_t in this file
 #include <string>
-#include "any.h"
+#include <memory>
+#include "plugin/interface/plugin_base.h"
+#include "plugin/plugins/source/http_source/download/downloader.h"
+#include "plugin/plugins/source/http_source/media_downloader.h"
+#include "ring_buffer.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-enum struct PluginEventType : int32_t {
-    CLIENT_ERROR,
-    SERVER_ERROR,
-    OTHER_ERROR,
-    BELOW_LOW_WATERLINE,
-    ABOVE_LOW_WATERLINE,
+namespace HttpPlugin {
+class MonitorCallback {
+public:
+    virtual ~MonitorCallback() = default;
+    virtual void OnDownloadStatus(std::shared_ptr<DownloadRequest>& request) = 0;
 };
-
-enum class NetworkClientErrorCode : int32_t {
-    ERROR_OK,
-    ERROR_TIME_OUT,
-    ERROR_NOT_RETRY,
-    ERROR_UNKNOWN,
-};
-
-using NetworkServerErrorCode = int;
-
-struct PluginEvent {
-    PluginEventType type;
-    Any param;
-    std::string description;
-};
-} // namespace Plugin
-} // namespace Media
-} // namespace OHOS
-#endif // HISTREAMER_PLUGIN_TYPES_H
+}
+}
+}
+}
+#endif
