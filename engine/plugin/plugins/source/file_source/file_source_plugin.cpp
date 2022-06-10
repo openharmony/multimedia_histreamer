@@ -284,6 +284,7 @@ Status FileSourcePlugin::OpenFile()
         return Status::ERROR_UNKNOWN;
     }
     fileSize_ = GetFileSize(fileName_);
+    position_ = 0;
     MEDIA_LOG_D("fileName_: " PUBLIC_LOG_S ", fileSize_: " PUBLIC_LOG_ZU, fileName_.c_str(), fileSize_);
     return Status::OK;
 }

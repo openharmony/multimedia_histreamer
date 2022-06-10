@@ -47,15 +47,8 @@ public:
     ErrorCode SetMaxSize(uint64_t maxSize);
     ErrorCode StartNextSegment();
     ErrorCode SendEos();
-
-    /**
-     *
-     * @param inPort
-     * @param buffer
-     * @param offset always ignore this parameter
-     * @return
-     */
     ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
+    ErrorCode Start() override;
 private:
     class MuxerDataSink : public Plugin::DataSinkHelper {
     public:

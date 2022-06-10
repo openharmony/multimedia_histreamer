@@ -213,8 +213,8 @@ ErrorCode StateMachine::TransitionTo(const std::shared_ptr<State>& state)
 void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode result)
 {
     MEDIA_LOG_D("OnIntentExecuted, curState: " PUBLIC_LOG_S ", intent: " PUBLIC_LOG_D32 ", action: " PUBLIC_LOG
-                "d, result: " PUBLIC_LOG_D32, curState_->GetName().c_str(),
-                static_cast<int>(intent), static_cast<int>(action), static_cast<int>(result));
+                "d, result: " PUBLIC_LOG_S, curState_->GetName().c_str(),
+                static_cast<int>(intent), static_cast<int>(action), GetErrorName(result));
     if (action == Action::ACTION_PENDING) {
         return;
     }

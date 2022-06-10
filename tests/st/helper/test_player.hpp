@@ -37,6 +37,7 @@ public:
     virtual int32_t Play() = 0;
     virtual int32_t Pause() = 0;
     virtual int32_t Stop() = 0;
+    virtual int32_t Reset() = 0;
     virtual int32_t Seek(int64_t timeMs) = 0;
     virtual int32_t GetCurrentTime(int64_t& currentMs) = 0;
     virtual int32_t GetDuration(int64_t& durationMs) = 0;

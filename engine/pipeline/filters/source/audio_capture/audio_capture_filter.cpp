@@ -245,6 +245,7 @@ ErrorCode AudioCaptureFilter::Prepare()
 ErrorCode AudioCaptureFilter::Start()
 {
     MEDIA_LOG_I("Start entered.");
+    eos_ = false;
     auto res = ErrorCode::SUCCESS;
     bufferCalibration_->Enable();
     // start plugin firstly

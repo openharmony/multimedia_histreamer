@@ -15,17 +15,18 @@
 #define HST_LOG_TAG "Task"
 
 #include "task.h"
-
+#include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/log.h"
 
 namespace OHOS {
 namespace Media {
 namespace OSAL {
 Task::Task(std::string name, ThreadPriority priority)
-    : name_(std::move(name)), runningState_(RunningState::STOPPED), loop_(priority)
+    : name_(std::move(name)), priority_(priority), runningState_(RunningState::STOPPED)
 {
     MEDIA_LOG_D("task " PUBLIC_LOG_S " ctor called", name_.c_str());
-    loop_.SetName(name_);
+    loop_ = CppExt::make_unique<OSAL::Thread>(priority);
+    loop_->SetName(name_);
 }
 
 Task::Task(std::string name, std::function<void()> handler, ThreadPriority priority)
@@ -47,7 +48,10 @@ void Task::Start()
 #ifndef START_FAKE_TASK
     OSAL::ScopedLock lock(stateMutex_);
     runningState_ = RunningState::STARTED;
-    if (!loop_ && !loop_.CreateThread([this] { Run(); })) {
+    if (!loop_) { // thread not exist
+        loop_ = CppExt::make_unique<OSAL::Thread>(priority_);
+    }
+    if (!loop_->HasThread() && !loop_->CreateThread([this] { Run(); })) {
         MEDIA_LOG_E("task " PUBLIC_LOG_S " create failed", name_.c_str());
     } else {
         syncCond_.NotifyAll();
@@ -145,6 +149,7 @@ void Task::Run()
             break;
         }
     }
+    loop_ = nullptr;
 }
 } // namespace OSAL
 } // namespace Media
