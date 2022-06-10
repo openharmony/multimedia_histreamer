@@ -68,6 +68,10 @@ HiStreamer插件列表如下:
 
 ## 相关仓<a name="section1533973044317"></a>
 
-- media_standard: <br>https://gitee.com/openharmony/multimedia_media_standard
+- [媒体子系统](https://gitee.com/openharmony/docs/blob/master/zh-cn/readme/%E5%AA%92%E4%BD%93%E5%AD%90%E7%B3%BB%E7%BB%9F.md)
 
-- media_lite: <br>https://gitee.com/openharmony/multimedia_media_lite
+- [media_standard](https://gitee.com/openharmony/multimedia_media_standard)
+
+- [media_lite](https://gitee.com/openharmony/multimedia_media_lite)
+
+- **multimedia_histreamer**
