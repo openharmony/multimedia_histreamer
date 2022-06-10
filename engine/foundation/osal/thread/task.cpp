@@ -15,7 +15,7 @@
 #define HST_LOG_TAG "Task"
 
 #include "task.h"
-#include "cpp_ext/memory_ext.h"
+#include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/log.h"
 
 namespace OHOS {
