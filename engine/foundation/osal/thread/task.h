@@ -66,7 +66,7 @@ private:
     const ThreadPriority priority_;
     std::atomic<RunningState> runningState_{RunningState::PAUSED};
     std::function<void()> handler_ = [this] { DoTask(); };
-    std::shared_ptr<OSAL::Thread> loop_;
+    std::unique_ptr<OSAL::Thread> loop_;
     OSAL::Mutex stateMutex_{};
     OSAL::ConditionVariable syncCond_{};
 };
