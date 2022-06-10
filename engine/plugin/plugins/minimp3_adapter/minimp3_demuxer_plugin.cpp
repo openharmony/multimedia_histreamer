@@ -305,7 +305,6 @@ Status Minimp3DemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode m
     } else {
         return Status::ERROR_INVALID_PARAMETER;
     }
-
     return Status::OK;
 }
 

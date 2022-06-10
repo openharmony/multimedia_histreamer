@@ -56,7 +56,7 @@ void HLSStreaming::SetFragmentListCallback(FragmentListChangeCallback* callback)
 
 double HLSStreaming::GetDuration() const
 {
-    return master_->duration_;
+    return master_->bLive_ ? -1.0 : master_->duration_; // -1.0
 }
 
 bool HLSStreaming::IsStreaming() const

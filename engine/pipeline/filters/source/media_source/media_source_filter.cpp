@@ -249,6 +249,11 @@ void MediaSourceFilter::ActivateMode()
     }
 }
 
+Plugin::Seekable MediaSourceFilter::GetSeekable() const
+{
+    return seekable_;
+}
+
 ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& source)
 {
     MEDIA_LOG_D("IN");

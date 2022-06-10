@@ -50,6 +50,7 @@ public:
     ErrorCode Stop() override;
     void FlushStart() override;
     void FlushEnd() override;
+    Plugin::Seekable GetSeekable() const;
 
 private:
     void InitPorts() override;
