@@ -15,7 +15,7 @@
 #define HST_LOG_TAG "Task"
 
 #include "task.h"
-
+#include "cpp_ext/memory_ext.h"
 #include "foundation/log.h"
 
 namespace OHOS {
@@ -25,7 +25,7 @@ Task::Task(std::string name, ThreadPriority priority)
     : name_(std::move(name)), priority_(priority), runningState_(RunningState::STOPPED)
 {
     MEDIA_LOG_D("task " PUBLIC_LOG_S " ctor called", name_.c_str());
-    loop_ = std::make_unique<OSAL::Thread>(priority);
+    loop_ = CppExt::make_unique<OSAL::Thread>(priority);
     loop_->SetName(name_);
 }
 
@@ -49,7 +49,7 @@ void Task::Start()
     OSAL::ScopedLock lock(stateMutex_);
     runningState_ = RunningState::STARTED;
     if (!loop_) { // thread not exist
-        loop_ = std::make_unique<OSAL::Thread>(priority_);
+        loop_ = CppExt::make_unique<OSAL::Thread>(priority_);
     }
     if (!loop_->HasThread() && !loop_->CreateThread([this] { Run(); })) {
         MEDIA_LOG_E("task " PUBLIC_LOG_S " create failed", name_.c_str());
