@@ -62,9 +62,11 @@ public:
     int32_t Pause() override;
     int32_t Stop() override;
     int32_t Reset() override;
+    int32_t Release() override;
     int32_t Seek(int64_t timeMs) override;
     int32_t GetCurrentTime(int64_t& currentMs) override;
     int32_t GetDuration(int64_t& durationMs) override;
+    int32_t SetVolume(float leftVolume, float rightVolume) override;
 private:
     std::unique_ptr<IPlayerEngine> player_;
 };
@@ -119,6 +121,12 @@ int32_t TestPlayerImpl::Reset()
     return player_->Reset();
 }
 
+int32_t TestPlayerImpl::Release()
+{
+    player_ = nullptr;
+    return ERR_OK;
+}
+
 int32_t TestPlayerImpl::Seek(int64_t timeMs)
 {
     int32_t ret = player_->Seek(timeMs, PlayerSeekMode::SEEK_CLOSEST);
@@ -144,6 +152,12 @@ int32_t TestPlayerImpl::GetDuration(int64_t& durationMs)
     int32_t duration;
     int32_t ret = player_->GetDuration(duration);
     durationMs = duration;
+    return ret;
+}
+
+int32_t TestPlayerImpl::SetVolume(float leftVolume, float rightVolume)
+{
+    int32_t ret = player_->SetVolume(leftVolume, rightVolume);
     return ret;
 }
 }
