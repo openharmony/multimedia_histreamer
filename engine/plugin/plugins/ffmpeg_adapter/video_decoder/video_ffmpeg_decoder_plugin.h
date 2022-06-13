@@ -130,6 +130,8 @@ private:
     std::vector<uint8_t> paddedBuffer_;
     size_t paddedBufferSize_ {0};
     std::shared_ptr<AVFrame> cachedFrame_ {nullptr};
+    std::shared_ptr<AVPacket> avPacket_ {};
+
     uint8_t* scaleData_[AV_NUM_DATA_POINTERS];
     int32_t scaleLineSize_[AV_NUM_DATA_POINTERS];
     bool isAllocScaleData_ {false};

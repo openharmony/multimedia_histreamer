@@ -293,6 +293,9 @@ do { \
         OSAL::ScopedLock lock(avMutex_);
         avCodecContext_ = tmpCtx;
     }
+    avPacket_ = std::shared_ptr<AVPacket>(av_packet_alloc(), [](AVPacket* ptr) {
+        av_packet_free(&ptr);
+    });
     return Status::OK;
 #undef FAIL_RET_WHEN_ASSIGN_LOCKED
 }
@@ -444,16 +447,10 @@ Status AudioFfmpegDecoderPlugin::SendOutputBuffer()
 
 Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer)
 {
-    AVPacket packet;
-    size_t bufferLength = 0;
-    bool eos = false;
-    if (inputBuffer == nullptr || (inputBuffer->flag & BUFFER_FLAG_EOS) != 0) {
-        // eos buffer
-        eos = true;
-    } else {
+    if (inputBuffer && !(inputBuffer->flag & BUFFER_FLAG_EOS)) {
         auto inputMemory = inputBuffer->GetMemory();
         const uint8_t* ptr = inputMemory->GetReadOnlyData();
-        bufferLength = inputMemory->GetSize();
+        auto bufferLength = inputMemory->GetSize();
         // pad to data if needed
         if (bufferLength % AV_INPUT_BUFFER_PADDING_SIZE != 0) {
             if (paddedBufferSize_ < bufferLength + AV_INPUT_BUFFER_PADDING_SIZE) {
@@ -465,16 +462,12 @@ Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
             paddedBuffer_.insert(paddedBuffer_.end(), AV_INPUT_BUFFER_PADDING_SIZE, 0);
             ptr = paddedBuffer_.data();
         }
-        av_init_packet(&packet);
-        packet.data = const_cast<uint8_t*>(ptr);
-        packet.size = bufferLength;
-        packet.pts = inputBuffer->pts;
+        avPacket_->data = const_cast<uint8_t*>(ptr);
+        avPacket_->size = bufferLength;
+        avPacket_->pts = inputBuffer->pts;
     }
-    AVPacket* packetPtr = nullptr;
-    if (!eos) {
-        packetPtr = &packet;
-    }
-    auto ret = avcodec_send_packet(avCodecContext_.get(), packetPtr);
+    auto ret = avcodec_send_packet(avCodecContext_.get(), avPacket_.get());
+    av_packet_unref(avPacket_.get());
     if (ret == 0) {
         return Status::OK;
     } else if (ret == AVERROR(EAGAIN)) {

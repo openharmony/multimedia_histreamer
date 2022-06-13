@@ -112,6 +112,7 @@ private:
     std::shared_ptr<const AVCodec> avCodec_ {};
     std::shared_ptr<AVCodecContext> avCodecContext_ {};
     std::shared_ptr<AVFrame> cachedFrame_ {};
+    std::shared_ptr<AVPacket> avPacket_ {};
 
     std::vector<uint8_t> paddedBuffer_ {};
     size_t paddedBufferSize_ {0};
