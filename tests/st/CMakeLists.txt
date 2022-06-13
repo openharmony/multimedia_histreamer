@@ -133,6 +133,7 @@ if (${OHOS_LITE})
     set(TEST_HELPER_SRCS
             ${TOP_DIR}/histreamer/tests/st/helper/lite_player.cpp
             ${TOP_DIR}/histreamer/tests/st/helper/lite_stream_player.cpp
+            ${TOP_DIR}/histreamer/tests/st/helper/lite_audio_recorder.cpp
             ${OSAL_THREAD_SRCS}
             ${TOP_DIR}/histreamer/engine/foundation/osal/utils/util.cpp
             ${TOP_DIR}/histreamer/engine/scene/common/data_stream.cpp

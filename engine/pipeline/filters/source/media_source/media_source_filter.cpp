@@ -298,7 +298,9 @@ void MediaSourceFilter::ReadLoop()
     AVBufferPtr bufferPtr = nullptr;
     ErrorCode result = TranslatePluginStatus(plugin_->Read(bufferPtr, DEFAULT_READ_SIZE));
     if (result == ErrorCode::END_OF_STREAM) {
-        Stop();
+        if (taskPtr_) {
+            taskPtr_->StopAsync();
+        }
         bufferPtr->flag |= BUFFER_FLAG_EOS;
         outPorts_[0]->PushData(bufferPtr, mediaOffset_);
     } else if (result == ErrorCode::SUCCESS) {
@@ -307,7 +309,9 @@ void MediaSourceFilter::ReadLoop()
         auto size = memory->GetSize();
         FALSE_RETURN_MSG(size > 0 || (bufferPtr->flag & BUFFER_FLAG_EOS), "Read data size zero.");
         if (bufferPtr->flag & BUFFER_FLAG_EOS) {
-            Stop();
+            if (taskPtr_) {
+                taskPtr_->StopAsync();
+            }
         }
         outPorts_[0]->PushData(bufferPtr, mediaOffset_);
         mediaOffset_ += size;
