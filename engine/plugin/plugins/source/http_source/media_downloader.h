@@ -18,7 +18,7 @@
 
 #include <string>
 #include "plugin/interface/plugin_base.h"
-#include "monitor/monitor_callback.h"
+#include "download/downloader.h"
 
 namespace OHOS {
 namespace Media {
@@ -39,7 +39,7 @@ public:
     virtual double GetDuration() const = 0;
     virtual bool IsStreaming() const = 0;
     virtual void SetCallback(Callback* cb) = 0;
-    virtual void SetMonitorCallback(MonitorCallback* cb) = 0;
+    virtual void SetDownloadStatusCallback(StatusCallbackFunc cb) = 0;
 };
 }
 }

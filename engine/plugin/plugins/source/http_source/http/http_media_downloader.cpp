@@ -40,10 +40,8 @@ bool HttpMediaDownloader::Open(const std::string& url)
         SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
                  std::forward<decltype(offset)>(offset));
     };
-    auto statusCallback = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request) {
-        OnDownloadStatus(std::forward<decltype(status)>(status), std::forward<decltype(request)>(request));
-    };
-    downloadRequest_ = std::make_shared<DownloadRequest>(url, saveData, statusCallback);
+    FALSE_RETURN_V(statusCallback_ != nullptr, false);
+    downloadRequest_ = std::make_shared<DownloadRequest>(url, saveData, statusCallback_);
     downloader_->Download(downloadRequest_, -1); // -1
     downloader_->Start();
     return true;
@@ -121,9 +119,9 @@ void HttpMediaDownloader::SetCallback(Callback* cb)
     callback_ = cb;
 }
 
-void HttpMediaDownloader::SetMonitorCallback(MonitorCallback *cb)
+void HttpMediaDownloader::SetDownloadStatusCallback(StatusCallbackFunc cb)
 {
-    monitorCallback_ = cb;
+    statusCallback_ = cb;
 }
 
 void HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
@@ -140,18 +138,6 @@ void HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
         aboveWaterline_ = false;
         MEDIA_LOG_I("Send http belowWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
         callback_->OnEvent({PluginEventType::BELOW_LOW_WATERLINE, {ratio}, "http"});
-    }
-}
-
-void HttpMediaDownloader::OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest> &request)
-{
-    MEDIA_LOG_I("OnDownloadStatus " PUBLIC_LOG_D32, status);
-    switch (status) {
-        case DownloadStatus::PARTTAL_DOWNLOAD:
-            monitorCallback_->OnDownloadStatus(request);
-            break;
-        default:
-            MEDIA_LOG_E("Unknown download status.");
     }
 }
 }

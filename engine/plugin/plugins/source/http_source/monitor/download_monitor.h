@@ -30,7 +30,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-class DownloadMonitor : public MediaDownloader, public MonitorCallback {
+class DownloadMonitor : public MediaDownloader {
 public:
     explicit DownloadMonitor(std::shared_ptr<MediaDownloader> downloader) noexcept;
     ~DownloadMonitor() override = default;
@@ -46,12 +46,12 @@ public:
     double GetDuration() const override;
     bool IsStreaming() const override;
     void SetCallback(Callback *cb) override;
-    void OnDownloadStatus(std::shared_ptr<DownloadRequest>& request) override;
-    void SetMonitorCallback(MonitorCallback* cb) override;
+    void SetDownloadStatusCallback(StatusCallbackFunc cb) override;
 
 private:
     void HttpMonitorLoop();
     void ProcessLoop();
+    void OnDownloadStatus(std::shared_ptr<DownloadRequest>& request);
     bool NeedRetry(const std::shared_ptr<DownloadRequest>& request);
     void DealDownloaderEvent(const std::shared_ptr<DownloadRequest>& request);
     std::shared_ptr<MediaDownloader> downloader_;

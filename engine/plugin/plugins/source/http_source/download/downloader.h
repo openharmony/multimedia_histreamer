@@ -31,8 +31,6 @@ namespace Plugin {
 namespace HttpPlugin {
 enum struct DownloadStatus {
     PARTTAL_DOWNLOAD,
-    SERVER_ERROR,
-    CLIENT_ERROR
 };
 
 struct HeaderInfo {
@@ -58,12 +56,6 @@ struct HeaderInfo {
     }
 };
 
-struct RequestInfo {
-    char url[2048];
-    int64_t fileContentLen;
-    int64_t downloadPos;
-    int retryTimes;
-};
 // uint8_t* : the data should save
 // uint32_t : length
 using DataSaveFunc = std::function<void(uint8_t*, uint32_t, int64_t)>;

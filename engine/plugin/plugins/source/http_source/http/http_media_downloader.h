@@ -43,7 +43,7 @@ public:
     double GetDuration() const override;
     bool IsStreaming() const override;
     void SetCallback(Callback* cb) override;
-    void SetMonitorCallback(MonitorCallback* cb) override;
+    void SetDownloadStatusCallback(StatusCallbackFunc cb) override;
 private:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
     void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest> &request);
@@ -53,7 +53,7 @@ private:
     std::shared_ptr<Downloader> downloader_;
     std::shared_ptr<DownloadRequest> downloadRequest_;
     Callback* callback_ {nullptr};
-    MonitorCallback* monitorCallback_ {nullptr};
+    StatusCallbackFunc statusCallback_ {nullptr};
     bool aboveWaterline_ {false};
 };
 }

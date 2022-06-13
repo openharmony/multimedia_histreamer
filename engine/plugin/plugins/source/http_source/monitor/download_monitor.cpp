@@ -29,7 +29,10 @@ DownloadMonitor::DownloadMonitor(std::shared_ptr<MediaDownloader> downloader) no
 {
     taskQue_ = std::make_shared<BlockingQueue<std::function<void()>>>("monitorQue",
                                                                       MONITOR_QUEUE_SIZE);
-    downloader_->SetMonitorCallback(this);
+    auto statusCallback = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request) {
+        OnDownloadStatus(std::forward<decltype(request)>(request));
+    };
+    downloader_->SetDownloadStatusCallback(statusCallback);
     taskProcess_ = std::make_shared<OSAL::Task>(std::string("DownloaderMonitorPop"));
     taskProcess_->RegisterHandler([this] { ProcessLoop(); });
     task_ = std::make_shared<OSAL::Task>(std::string("DownloaderMonitor"));
@@ -127,7 +130,7 @@ void DownloadMonitor::SetCallback(Callback* cb)
     downloader_->SetCallback(cb);
 }
 
-void DownloadMonitor::SetMonitorCallback(MonitorCallback *cb)
+void DownloadMonitor::SetDownloadStatusCallback(StatusCallbackFunc cb)
 {
 }
 

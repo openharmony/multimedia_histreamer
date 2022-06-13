@@ -166,7 +166,6 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 
     if (callback_ != nullptr) {
         executor_->SetCallback(callback_);
-        executor_->SetMonitorCallback(nullptr);
     }
 
     MEDIA_LOG_I("SetSource: " PUBLIC_LOG_S, uri.c_str());
