@@ -17,6 +17,10 @@
 #include "foundation/log.h"
 #include "securec.h"
 
+#ifndef CA_DIR
+#define CA_DIR "/etc/ssl/certs/"
+#endif
+
 namespace OHOS {
 namespace Media {
 namespace Plugin {
@@ -72,9 +76,7 @@ void HttpCurlClient::InitCurlEnvironment(const std::string& url)
     curl_easy_setopt(easyHandle_, CURLOPT_FOLLOWLOCATION, 1L);
 
     curl_easy_setopt(easyHandle_, CURLOPT_VERBOSE, 1);
-
-    curl_easy_setopt(easyHandle_,  CURLOPT_SSL_VERIFYPEER, 0L);
-    curl_easy_setopt(easyHandle_,  CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(easyHandle_,  CURLOPT_CAINFO, CA_DIR "cacert.pem");
 
     curl_easy_setopt(easyHandle_, CURLOPT_WRITEFUNCTION, rxBody_);
     curl_easy_setopt(easyHandle_, CURLOPT_WRITEDATA, userParam_);
