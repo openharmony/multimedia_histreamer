@@ -27,9 +27,9 @@ AdaptiveStreaming::AdaptiveStreaming()
         SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
                  std::forward<decltype(offset)>(offset));
     };
-    statusCallback_ = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request, int32_t code) {
+    statusCallback_ = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request) {
         OnDownloadStatus(std::forward<decltype(status)>(status),
-            std::forward<decltype(request)>(request), std::forward<decltype(code)>(code));
+            std::forward<decltype(request)>(request));
     };
     updateTask_ = std::make_shared<OSAL::Task>(std::string("FragmentListUpdate"));
     updateTask_->RegisterHandler([this] { FragmentListUpdateLoop(); });
@@ -58,17 +58,10 @@ void AdaptiveStreaming::SaveData(uint8_t* data, uint32_t len, int64_t offset)
     playList_.append(reinterpret_cast<const char*>(data), len);
 }
 
-void AdaptiveStreaming::OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request,
-                                         int32_t code)
+void AdaptiveStreaming::OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request)
 {
     MEDIA_LOG_I("OnDownloadStatus " PUBLIC_LOG_D32, status);
     switch (status) {
-        case DownloadStatus::CLIENT_ERROR:
-            MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, code);
-            break;
-        case DownloadStatus::SERVER_ERROR:
-            MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32, code);
-            break;
         default:
             MEDIA_LOG_E("Unknown download status.");
     }

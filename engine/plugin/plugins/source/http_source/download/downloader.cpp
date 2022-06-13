@@ -76,6 +76,21 @@ int64_t DownloadRequest::GetDownloadPos()
     return startPos_;
 }
 
+int DownloadRequest::GetRetryTimes()
+{
+    return retryTimes_;
+}
+
+NetworkClientErrorCode DownloadRequest::GetClientError()
+{
+    return clientError_;
+}
+
+NetworkServerErrorCode DownloadRequest::GetServerError()
+{
+    return serverError_;
+}
+
 void DownloadRequest::WaitHeaderUpdated() const
 {
     size_t times = 0;
@@ -212,25 +227,17 @@ void Downloader::HttpDownloadLoop()
     }
     Status ret = client_->RequestData(startPos, currentRequest_->requestSize_,
                                       serverCode, clientCode);
-    if (ret == Status::ERROR_CLIENT) {
-        MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, clientCode);
-        currentRequest_->statusCallback_(DownloadStatus::CLIENT_ERROR, currentRequest_,
-                                         static_cast<int32_t>(clientCode));
-    } else if (ret == Status::ERROR_SERVER) {
-        MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32 " " PUBLIC_LOG_ZU, serverCode,
-                    currentRequest_->headerInfo_.fileContentLen);
-        currentRequest_->statusCallback_(DownloadStatus::SERVER_ERROR, currentRequest_,
-                                         static_cast<int32_t>(serverCode));
-    } else if (ret == Status::OK) {
+    FALSE_LOG(ret == Status::OK);
+    if (ret == Status::OK) {
         if (currentRequest_->retryTimes_ > 0) {
             currentRequest_->retryTimes_ = 0;
         }
     }
     currentRequest_->clientError_ = clientCode;
     currentRequest_->serverError_ = serverCode;
-    currentRequest_->statusCallback_(DownloadStatus::PARTTAL_DOWNLOAD, currentRequest_,
-                                     static_cast<int32_t>(clientCode));
-    FALSE_LOG(ret == Status::OK);
+    if (ret != Status::OK || currentRequest_->retryTimes_ > 0) {
+        currentRequest_->statusCallback_(DownloadStatus::PARTTAL_DOWNLOAD, currentRequest_);
+    }
     int64_t remaining = currentRequest_->headerInfo_.fileContentLen - currentRequest_->startPos_;
     if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
         MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,

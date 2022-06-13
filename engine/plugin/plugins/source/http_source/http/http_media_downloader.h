@@ -46,7 +46,7 @@ public:
     void SetMonitorCallback(MonitorCallback* cb) override;
 private:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
-    void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request, int32_t code);
+    void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest> &request);
 
 private:
     std::shared_ptr<RingBuffer> buffer_;

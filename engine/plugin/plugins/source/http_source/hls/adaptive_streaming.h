@@ -48,7 +48,7 @@ public:
     }
 protected:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
-    void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request, int32_t code);
+    void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request);
     void Open(const std::string& url);
 protected:
     std::shared_ptr<Downloader> downloader;

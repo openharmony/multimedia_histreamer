@@ -40,9 +40,8 @@ bool HttpMediaDownloader::Open(const std::string& url)
         SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
                  std::forward<decltype(offset)>(offset));
     };
-    auto statusCallback = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request, int32_t code) {
-        OnDownloadStatus(std::forward<decltype(status)>(status), std::forward<decltype(request)>(request),
-            std::forward<decltype(code)>(code));
+    auto statusCallback = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request) {
+        OnDownloadStatus(std::forward<decltype(status)>(status), std::forward<decltype(request)>(request));
     };
     downloadRequest_ = std::make_shared<DownloadRequest>(url, saveData, statusCallback);
     downloader_->Download(downloadRequest_, -1); // -1
@@ -144,23 +143,12 @@ void HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
     }
 }
 
-void HttpMediaDownloader::OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request,
-                                           int32_t code)
+void HttpMediaDownloader::OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest> &request)
 {
     MEDIA_LOG_I("OnDownloadStatus " PUBLIC_LOG_D32, status);
-    (void)request;
     switch (status) {
         case DownloadStatus::PARTTAL_DOWNLOAD:
-            if (code != static_cast<int32_t>(NetworkClientErrorCode::ERROR_NOT_RETRY)) {
-                monitorCallback_->OnDownloadStatus(request);
-            }
-        case DownloadStatus::CLIENT_ERROR:
-            MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, code);
-            callback_->OnEvent({PluginEventType::CLIENT_ERROR, {code}, "http"});
-            break;
-        case DownloadStatus::SERVER_ERROR:
-            MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32, code);
-            callback_->OnEvent({PluginEventType::SERVER_ERROR, {code}, "http"});
+            monitorCallback_->OnDownloadStatus(request);
             break;
         default:
             MEDIA_LOG_E("Unknown download status.");

@@ -20,7 +20,10 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-constexpr size_t MONITOR_QUEUE_SIZE = 50;
+namespace {
+    constexpr size_t MONITOR_QUEUE_SIZE = 50;
+    constexpr int MAX_RETRY_TIMES = 3;
+}
 DownloadMonitor::DownloadMonitor(std::shared_ptr<MediaDownloader> downloader) noexcept
     : downloader_(std::move(downloader))
 {
@@ -120,7 +123,8 @@ bool DownloadMonitor::IsStreaming() const
 
 void DownloadMonitor::SetCallback(Callback* cb)
 {
-    return downloader_->SetCallback(cb);
+    callback_ = cb;
+    downloader_->SetCallback(cb);
 }
 
 void DownloadMonitor::SetMonitorCallback(MonitorCallback *cb)
@@ -133,10 +137,36 @@ void DownloadMonitor::DealDownloaderEvent(const std::shared_ptr<DownloadRequest>
     downloader_->Retry(url_, request->GetDownloadPos());
 }
 
+bool DownloadMonitor::NeedRetry(const std::shared_ptr<DownloadRequest>& request)
+{
+    auto clientError = request->GetClientError();
+    auto serverError = request->GetServerError();
+    auto retryTimes = request->GetRetryTimes();
+    if (clientError != NetworkClientErrorCode::ERROR_OK && clientError != NetworkClientErrorCode::ERROR_NOT_RETRY
+        || serverError != 0) {
+        MEDIA_LOG_I("NeedRetry: clientError = " PUBLIC_LOG_D32 ", serverError = " PUBLIC_LOG_D32
+            ", retryTimes = " PUBLIC_LOG_D32, clientError, serverError, retryTimes);
+        if (retryTimes > MAX_RETRY_TIMES) { // Report error to upper layer
+            if (clientError != NetworkClientErrorCode::ERROR_OK) {
+                MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, static_cast<int32_t>(clientError));
+                callback_->OnEvent({PluginEventType::CLIENT_ERROR, {clientError}, "http"});
+            }
+            if (serverError != 0) {
+                MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32, serverError);
+                callback_->OnEvent({PluginEventType::SERVER_ERROR, {serverError}, "http"});
+            }
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
 void DownloadMonitor::OnDownloadStatus(std::shared_ptr<DownloadRequest>& request)
 {
-    taskQue_->Push([this, request] { DealDownloaderEvent(request); });
-    return;
+    if (NeedRetry(request)) {
+        taskQue_->Push([this, request] { DealDownloaderEvent(request); });
+    }
 }
 }
 }

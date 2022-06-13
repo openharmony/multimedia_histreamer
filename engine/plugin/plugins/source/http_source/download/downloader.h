@@ -68,7 +68,7 @@ struct RequestInfo {
 // uint32_t : length
 using DataSaveFunc = std::function<void(uint8_t*, uint32_t, int64_t)>;
 class DownloadRequest;
-using StatusCallbackFunc = std::function<void(DownloadStatus, std::shared_ptr<DownloadRequest>&, int32_t)>;
+using StatusCallbackFunc = std::function<void(DownloadStatus, std::shared_ptr<DownloadRequest>&)>;
 
 class DownloadRequest {
 public:
@@ -80,6 +80,9 @@ public:
     bool IsEos() const;
     bool IsValidRequestFor(const std::string& url);
     int64_t GetDownloadPos();
+    int GetRetryTimes();
+    NetworkClientErrorCode GetClientError();
+    NetworkServerErrorCode GetServerError();
 
 private:
     void WaitHeaderUpdated() const;

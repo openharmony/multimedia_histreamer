@@ -41,9 +41,8 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
         SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
                  std::forward<decltype(offset)>(offset));
     };
-    statusCallback_ = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request, int32_t code) {
-        OnDownloadStatus(std::forward<decltype(status)>(status), std::forward<decltype(request)>(request),
-            std::forward<decltype(code)>(code));
+    statusCallback_ = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request) {
+        OnDownloadStatus(std::forward<decltype(status)>(status), std::forward<decltype(request)>(request));
     };
 }
 
@@ -143,17 +142,10 @@ void HlsMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
     buffer_->WriteBuffer(data, len, offset);
 }
 
-void HlsMediaDownloader::OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request,
-                                          int32_t code)
+void HlsMediaDownloader::OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request)
 {
     MEDIA_LOG_I("OnDownloadStatus " PUBLIC_LOG_D32, status);
     switch (status) {
-        case DownloadStatus::CLIENT_ERROR:
-            MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, code);
-            break;
-        case DownloadStatus::SERVER_ERROR:
-            MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32, code);
-            break;
         default:
             MEDIA_LOG_E("Unknown download status.");
     }
