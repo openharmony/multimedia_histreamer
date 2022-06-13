@@ -311,7 +311,7 @@ void FilterBase::OnEvent(const Plugin::PluginEvent &event)
     }
 }
 
-void FilterBase::SetSyncCenter(IMediaSyncCenter* syncCenter)
+void FilterBase::SetSyncCenter(std::weak_ptr<IMediaSyncCenter> syncCenter)
 {
     syncCenter_ = syncCenter;
 }

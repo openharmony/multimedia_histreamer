@@ -42,10 +42,10 @@ HiPlayerImpl::HiPlayerImpl()
 {
     MEDIA_LOG_I("hiPlayerImpl ctor");
     FilterFactory::Instance().Init();
+    syncManager_ = std::make_shared<MediaSyncManager>();
 
     audioSource_ =
         FilterFactory::Instance().CreateFilterWithType<MediaSourceFilter>("builtin.player.mediasource", "mediaSource");
-
 #ifdef UNIT_TEST
     demuxer_ = FilterFactory::Instance().CreateFilterWithType<DemuxerFilter>("builtin.player.demuxer", "demuxer");
     audioDecoder_ = FilterFactory::Instance().CreateFilterWithType<AudioDecoderFilter>("builtin.player.audiodecoder",
@@ -60,13 +60,13 @@ HiPlayerImpl::HiPlayerImpl()
     videoSink_ =
         FilterFactory::Instance().CreateFilterWithType<VideoSinkFilter>("builtin.player.videosink", "videoSink");
     FALSE_RETURN(videoSink_ != nullptr);
-    videoSink_->SetSyncCenter(&syncManager_);
+    videoSink_->SetSyncCenter(syncManager_);
 #endif
 #endif
     FALSE_RETURN(audioSource_ != nullptr);
     FALSE_RETURN(demuxer_ != nullptr);
     FALSE_RETURN(audioSink_ != nullptr);
-    audioSink_->SetSyncCenter(&syncManager_);
+    audioSink_->SetSyncCenter(syncManager_);
     pipeline_ = std::make_shared<PipelineCore>();
     callbackLooper_.SetPlayEngine(this);
 }
@@ -76,6 +76,11 @@ HiPlayerImpl::~HiPlayerImpl()
     MEDIA_LOG_I("dtor called.");
     fsm_.SendEventAsync(Intent::STOP);
     fsm_.Stop();
+    audioSink_.reset();
+#ifdef VIDEO_SUPPORT
+    videoSink_.reset();
+#endif
+    syncManager_.reset();
 }
 void HiPlayerImpl::UpdateStateNoLock(PlayerStates newState, bool notifyUpward)
 {
@@ -385,7 +390,7 @@ ErrorCode HiPlayerImpl::PrepareFilters()
 
 ErrorCode HiPlayerImpl::DoPlay()
 {
-    syncManager_.Resume();
+    syncManager_->Resume();
     auto ret = pipeline_->Start();
     if (ret != ErrorCode::SUCCESS) {
         UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
@@ -396,7 +401,7 @@ ErrorCode HiPlayerImpl::DoPlay()
 ErrorCode HiPlayerImpl::DoPause()
 {
     auto ret = pipeline_->Pause();
-    syncManager_.Pause();
+    syncManager_->Pause();
     if (ret != ErrorCode::SUCCESS) {
         UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }
@@ -405,7 +410,7 @@ ErrorCode HiPlayerImpl::DoPause()
 
 ErrorCode HiPlayerImpl::DoResume()
 {
-    syncManager_.Resume();
+    syncManager_->Resume();
     auto ret = pipeline_->Resume();
     if (ret != ErrorCode::SUCCESS) {
         UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
@@ -417,7 +422,7 @@ ErrorCode HiPlayerImpl::DoStop()
 {
     mediaStats_.Reset();
     auto ret = pipeline_->Stop();
-    syncManager_.Reset();
+    syncManager_->Reset();
     if (ret != ErrorCode::SUCCESS) {
         UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }
@@ -446,7 +451,7 @@ ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode m
         pipeline_->FlushEnd();
         PROFILE_END("Flush end");
         PROFILE_RESET();
-        syncManager_.Seek(seekPos);
+        syncManager_->Seek(seekPos);
         rtv = demuxer_->SeekTo(seekPos, seekMode);
         PROFILE_END("SeekTo");
     }
@@ -575,7 +580,7 @@ int32_t HiPlayerImpl::Reset()
 
 int32_t HiPlayerImpl::GetCurrentTime(int32_t& currentPositionMs)
 {
-    currentPositionMs = Plugin::HstTime2Ms(syncManager_.GetMediaTimeNow());
+    currentPositionMs = Plugin::HstTime2Ms(syncManager_->GetMediaTimeNow());
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 

@@ -425,9 +425,13 @@ ErrorCode VideoSinkFilter::SetVideoSurface(sptr<Surface> surface)
 bool VideoSinkFilter::CheckBufferLatenessMayWait(AVBufferPtr buffer)
 {
     bool tooLate = false;
-    auto ct4Buffer = syncCenter_->GetClockTime(buffer->pts);
+    auto syncCenter = syncCenter_.lock();
+    if (!syncCenter) {
+        return false;
+    }
+    auto ct4Buffer = syncCenter->GetClockTime(buffer->pts);
     if (ct4Buffer != HST_TIME_NONE) {
-        auto nowCt = syncCenter_->GetClockTimeNow();
+        auto nowCt = syncCenter->GetClockTimeNow();
         uint64_t latency = 0;
         plugin_->GetLatency(latency);
         auto diff = nowCt + (int64_t) latency - ct4Buffer;
@@ -455,12 +459,18 @@ ErrorCode VideoSinkFilter::DoSyncWrite(const AVBufferPtr& buffer)
     bool shouldDrop = false;
     if ((buffer->flag & BUFFER_FLAG_EOS) == 0) {
         if (isFirstFrame_) {
-            auto nowCt = syncCenter_->GetClockTimeNow();
+            int64_t nowCt = 0;
+            auto syncCenter = syncCenter_.lock();
+            if (syncCenter) {
+                nowCt = syncCenter->GetClockTimeNow();
+            }
             uint64_t latency = 0;
             if (plugin_->GetLatency(latency) != Plugin::Status::OK) {
                 MEDIA_LOG_I("failed to get latency, treat as 0");
             }
-            syncCenter_->UpdateTimeAnchor(nowCt + latency, buffer->pts, this);
+            if (syncCenter) {
+                syncCenter->UpdateTimeAnchor(nowCt + latency, buffer->pts, this);
+            }
             shouldDrop = false;
             isFirstFrame_ = false;
         } else {

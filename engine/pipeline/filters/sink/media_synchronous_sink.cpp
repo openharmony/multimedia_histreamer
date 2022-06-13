@@ -21,11 +21,18 @@ namespace Pipeline {
 void MediaSynchronousSink::Init(EventReceiver *receiver, FilterCallback *callback)
 {
     FilterBase::Init(receiver, callback);
-    syncCenter_->AddSynchronizer(this);
+    auto syncCenter = syncCenter_.lock();
+    if (syncCenter) {
+        syncCenter->AddSynchronizer(this);
+    }
 }
 MediaSynchronousSink::~MediaSynchronousSink()
 {
-    syncCenter_->RemoveSynchronizer(this);
+    MEDIA_LOG_I("~MediaSynchronousSink enter .");
+    auto syncCenter = syncCenter_.lock();
+    if (syncCenter) {
+        syncCenter->RemoveSynchronizer(this);
+    }
 }
 void MediaSynchronousSink::WaitAllPrerolled(bool shouldWait)
 {
@@ -44,7 +51,10 @@ void MediaSynchronousSink::ResetPrerollReported()
 ErrorCode MediaSynchronousSink::WriteToPluginRefTimeSync(const AVBufferPtr& buffer)
 {
     if (!hasReportedPreroll_) {
-        syncCenter_->ReportPrerolled(this);
+        auto syncCenter = syncCenter_.lock();
+        if (syncCenter) {
+            syncCenter->ReportPrerolled(this);
+        }
         hasReportedPreroll_ = true;
     }
     if (waitForPrerolled_) {
@@ -72,12 +82,19 @@ void MediaSynchronousSink::UpdateMediaTimeRange(const Plugin::Meta& meta)
     meta.GetInt64(Plugin::MetaID::MEDIA_START_TIME, trackStartTime);
     uint32_t trackId = 0;
     meta.GetUint32(Plugin::MetaID::TRACK_ID, trackId);
-    syncCenter_->SetMediaTimeRangeStart(trackStartTime, trackId);
+    auto syncCenter = syncCenter_.lock();
+    if (syncCenter) {
+        syncCenter->SetMediaTimeRangeStart(trackStartTime, trackId);
+    }
     int64_t trackDuration = 0;
     if (meta.GetInt64(Plugin::MetaID::MEDIA_DURATION, trackDuration)) {
-        syncCenter_->SetMediaTimeRangeEnd(trackDuration + trackStartTime, trackId);
+        if (syncCenter) {
+            syncCenter->SetMediaTimeRangeEnd(trackDuration + trackStartTime, trackId);
+        }
     } else {
-        syncCenter_->SetMediaTimeRangeEnd(INT64_MAX, trackId);
+        if (syncCenter) {
+            syncCenter->SetMediaTimeRangeEnd(INT64_MAX, trackId);
+        }
     }
 }
 } // namespace Pipeline

@@ -31,6 +31,12 @@ namespace {
 #define MEDIA_TUPLE_START_INDEX 1
 #define MEDIA_TUPLE_END_INDEX 2
 }
+
+MediaSyncManager::~MediaSyncManager()
+{
+    MEDIA_LOG_I("~MediaSyncManager enter .");
+}
+
 void MediaSyncManager::AddSynchronizer(IMediaSynchronizer* syncer)
 {
     if (syncer != nullptr) {

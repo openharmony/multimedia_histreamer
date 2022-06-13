@@ -164,7 +164,7 @@ private:
     float volume_;
     MediaStatStub mediaStats_;
 
-    Pipeline::MediaSyncManager syncManager_;
+    std::shared_ptr<Pipeline::MediaSyncManager> syncManager_;
 };
 } // namespace Media
 } // namespace OHOS

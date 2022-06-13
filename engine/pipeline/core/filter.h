@@ -119,7 +119,7 @@ public:
     virtual void UnlinkPrevFilters() = 0;
     virtual std::vector<Filter*> GetNextFilters() = 0;
     virtual std::vector<Filter*> GetPreFilters() = 0;
-    virtual void SetSyncCenter(IMediaSyncCenter* mediaSyncCenter) = 0;
+    virtual void SetSyncCenter(std::weak_ptr<IMediaSyncCenter> mediaSyncCenter) = 0;
 };
 } // namespace Pipeline
 } // namespace Media

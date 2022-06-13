@@ -15,7 +15,7 @@
 
 #ifndef HISTREAMER_PIPELINE_CORE_PIPELINE_CLOCK_H
 #define HISTREAMER_PIPELINE_CORE_PIPELINE_CLOCK_H
-
+#include <memory>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -27,10 +27,10 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class MediaSyncManager : public IMediaSyncCenter {
+class MediaSyncManager : public IMediaSyncCenter, public std::enable_shared_from_this<MediaSyncManager> {
 public:
     MediaSyncManager() = default;
-    ~MediaSyncManager() = default;
+    virtual ~MediaSyncManager();
     // interfaces called by hiplayer hirecoder etc.
     ErrorCode SetPlaybackRate(float rate);
     float GetPlaybackRate();

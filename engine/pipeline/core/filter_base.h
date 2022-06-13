@@ -92,7 +92,7 @@ public:
     // Port调用此方法向Filter报告事件
     void OnEvent(const Event& event) override;
 
-    void SetSyncCenter(IMediaSyncCenter* syncCenter) final;
+    void SetSyncCenter(std::weak_ptr<IMediaSyncCenter> syncCenter) final;
 protected:
     virtual void InitPorts();
 
@@ -138,8 +138,7 @@ protected:
 
     std::shared_ptr<Plugin::PluginInfo> pluginInfo_{};
 
-    IMediaSyncCenter* syncCenter_ {nullptr};
-
+    std::weak_ptr<IMediaSyncCenter> syncCenter_ {};
 private:
     template <typename T>
     static T FindPort(const std::vector<T>& list, const std::string& name);

@@ -345,7 +345,7 @@ void PipelineCore::ReorderFilters()
     }
 }
 
-void PipelineCore::SetSyncCenter(IMediaSyncCenter* syncCenter)
+void PipelineCore::SetSyncCenter(std::weak_ptr<IMediaSyncCenter> syncCenter)
 {
     syncCenter_ = syncCenter;
 }
