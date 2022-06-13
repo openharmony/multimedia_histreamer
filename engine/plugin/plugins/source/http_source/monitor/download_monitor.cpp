@@ -24,7 +24,7 @@ constexpr size_t MONITOR_QUEUE_SIZE = 50;
 DownloadMonitor::DownloadMonitor(std::shared_ptr<MediaDownloader> downloader) noexcept
     : downloader_(std::move(downloader))
 {
-    taskque_ = std::make_shared<BlockingQueue<std::function<void()>>>("monitorQue",
+    taskQue_ = std::make_shared<BlockingQueue<std::function<void()>>>("monitorQue",
                                                                       MONITOR_QUEUE_SIZE);
     downloader_->SetMonitorCallback(this);
     taskProcess_ = std::make_shared<OSAL::Task>(std::string("DownloaderMonitorPop"));
@@ -49,8 +49,8 @@ void DownloadMonitor::HttpMonitorLoop()
 void DownloadMonitor::ProcessLoop()
 {
     if (isPlaying_) {
-        if (!taskque_->Empty()) {
-            auto f = taskque_->Pop();
+        if (!taskQue_->Empty()) {
+            auto f = taskQue_->Pop();
             f();
         }
         OSAL::SleepFor(50); // 50
@@ -127,32 +127,15 @@ void DownloadMonitor::SetMonitorCallback(MonitorCallback *cb)
 {
 }
 
-bool DownloadMonitor::CheckRequestInfoValid(RequestInfo info)
-{
-    std::string url(info.url);
-    if ((url.empty() || (url_ != url) || (info.downloadPos < 0) || (info.fileContentLen < info.downloadPos))) {
-        MEDIA_LOG_E("requestInfo is invalid");
-        return false;
-    }
-    return true;
-}
-
 void DownloadMonitor::DealDownloaderEvent(const std::shared_ptr<DownloadRequest>& request)
 {
-    if ((request == nullptr) || (downloader_ == nullptr)) {
-        return;
-    }
-    RequestInfo info;
-    request->GetRequestInfo(info);
-    if (CheckRequestInfoValid(info)) {
-        std::string url(info.url);
-        downloader_->Retry(url, info.downloadPos);
-    }
+    FALSE_RETURN(request->IsValidRequestFor(url_));
+    downloader_->Retry(url_, request->GetDownloadPos());
 }
 
 void DownloadMonitor::OnDownloadStatus(std::shared_ptr<DownloadRequest>& request)
 {
-    taskque_->Push([this, request] { DealDownloaderEvent(request); });
+    taskQue_->Push([this, request] { DealDownloaderEvent(request); });
     return;
 }
 }

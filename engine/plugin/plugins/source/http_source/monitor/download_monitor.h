@@ -52,10 +52,10 @@ public:
 private:
     void HttpMonitorLoop();
     void ProcessLoop();
-    bool CheckRequestInfoValid(RequestInfo info);
+    bool CheckRequestInfoValid(const std::shared_ptr<DownloadRequest>& request);
     void DealDownloaderEvent(const std::shared_ptr<DownloadRequest>& request);
     std::shared_ptr<MediaDownloader> downloader_;
-    std::shared_ptr<BlockingQueue<std::function<void()>>> taskque_;
+    std::shared_ptr<BlockingQueue<std::function<void()>>> taskQue_;
     std::atomic<bool> isPlaying_ {false};
     std::shared_ptr<OSAL::Task> task_;
     std::shared_ptr<OSAL::Task> taskProcess_;

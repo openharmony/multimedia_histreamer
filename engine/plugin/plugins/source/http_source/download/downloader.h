@@ -78,7 +78,8 @@ public:
     void SaveHeader(const HeaderInfo* header);
     bool IsChunked() const;
     bool IsEos() const;
-    bool GetRequestInfo(RequestInfo& requestInfo);
+    bool IsValidRequestFor(const std::string& url);
+    int64_t GetDownloadPos();
 
 private:
     void WaitHeaderUpdated() const;
@@ -88,7 +89,6 @@ private:
     StatusCallbackFunc statusCallback_;
 
     HeaderInfo headerInfo_;
-    RequestInfo requestInfo_;
 
     bool isHeaderUpdated {false};
     bool isEos_ {false}; // file download finished
@@ -96,6 +96,9 @@ private:
     bool isDownloading_;
     bool requestWholeFile_ {false};
     int requestSize_;
+    int retryTimes_ {0};
+    NetworkClientErrorCode clientError_ {NetworkClientErrorCode::ERROR_OK};
+    NetworkServerErrorCode serverError_ {0};
 
     friend class Downloader;
 };
@@ -115,7 +118,6 @@ public:
 private:
     bool BeginDownload();
     void EndDownload();
-    void DealDownloadResult(Status ret, NetworkServerErrorCode & serverCode, NetworkClientErrorCode& clientCode);
 
     void HttpDownloadLoop();
     static size_t RxBodyData(void* buffer, size_t size, size_t nitems, void* userParam);
