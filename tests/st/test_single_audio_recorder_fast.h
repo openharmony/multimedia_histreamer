@@ -103,40 +103,71 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, player->Stop());
     }
 
-// @test(data="pcmSources", tags=debuging)
-PTEST((AudioRecordSource recordSource), The recorder can be stopped and set source again)
-{
-    std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
-    ASSERT_EQ(0, recorder->Configure(recordSource));
-    ASSERT_EQ(0, recorder->Prepare());
-    ASSERT_EQ(0, recorder->Start());
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    ASSERT_EQ(0, recorder->Stop());
+    // @test(data="pcmSources", tags=fast)
+    PTEST((AudioRecordSource recordSource), The recorder can be stopped and set source again)
+    {
+        std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        ASSERT_EQ(0, recorder->Configure(recordSource));
+        ASSERT_EQ(0, recorder->Prepare());
+        ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        ASSERT_EQ(0, recorder->Stop());
 
-    std::string filePath;
-    ASSERT_TRUE(recorder->GetRecordedFile(filePath) > 0);
+        std::string filePath;
+        ASSERT_TRUE(recorder->GetRecordedFile(filePath) > 0);
 
-    std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-    ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
-    ASSERT_EQ(0, player->Prepare());
-    ASSERT_EQ(0, player->Play());
-    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-    ASSERT_EQ(0, player->Stop());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        ASSERT_EQ(0, player->Stop());
 
-    // set source and record again
-    ASSERT_EQ(0, recorder->Configure(recordSource));
-    ASSERT_EQ(0, recorder->Prepare());
-    ASSERT_EQ(0, recorder->Start());
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    ASSERT_EQ(0, recorder->Stop());
+        // set source and record again
+        ASSERT_EQ(0, recorder->Configure(recordSource));
+        ASSERT_EQ(0, recorder->Prepare());
+        ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        ASSERT_EQ(0, recorder->Stop());
 
-    ASSERT_TRUE(recorder->GetRecordedFile(filePath) > 0);
+        ASSERT_TRUE(recorder->GetRecordedFile(filePath) > 0);
 
-    ASSERT_EQ(0, player->Reset());
-    ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
-    ASSERT_EQ(0, player->Prepare());
-    ASSERT_EQ(0, player->Play());
-    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-    ASSERT_EQ(0, player->Stop());
-}
+        ASSERT_EQ(0, player->Reset());
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        ASSERT_EQ(0, player->Stop());
+    }
+
+    // @test(data="pcmSources", tags=debuging)
+    PTEST((AudioRecordSource recordSource), The can not stop after prepare, then can prepare after reset)
+    {
+        std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        ASSERT_EQ(0, recorder->Configure(recordSource));
+        ASSERT_EQ(0, recorder->Prepare());
+        ASSERT_NE(0, recorder->Stop());
+        ASSERT_EQ(0, recorder->Reset());
+        ASSERT_EQ(0, recorder->Prepare());
+        ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        ASSERT_EQ(0, recorder->Stop());
+
+        std::string filePath;
+        ASSERT_TRUE(recorder->GetRecordedFile(filePath) > 0);
+
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        ASSERT_EQ(0, player->Stop());
+
+        ASSERT_EQ(0, recorder->Reset());
+        ASSERT_EQ(0, recorder->Prepare());
+        ASSERT_EQ(0, recorder->Reset());
+        ASSERT_NE(0, recorder->Stop());
+        ASSERT_EQ(0, recorder->Prepare());
+        ASSERT_EQ(0, recorder->Release());
+    }
 };
