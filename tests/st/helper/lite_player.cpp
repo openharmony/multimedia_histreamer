@@ -21,6 +21,7 @@
 
 #include "scene/lite/hiplayer.h"
 #include "foundation/log.h"
+#include "foundation/cpp_ext/memory_ext.h"
 
 using namespace OHOS::Media;
 
@@ -68,6 +69,7 @@ public:
     int32_t Play() override;
     int32_t Pause() override;
     int32_t Stop() override;
+    int32_t Reset() override;
     int32_t Seek(int64_t timeMs) override;
     int32_t GetCurrentTime(int64_t& currentMS) override;
     int32_t GetDuration(int64_t& durationMs) override;
@@ -81,7 +83,7 @@ std::unique_ptr<TestPlayer> TestPlayer::Create()
     FALSE_LOG(player->Init() == 0);
     player->SetPlayerCallback(gCallback);
     g_playFinished = false;
-    return std::make_unique<TestPlayerImpl>(player);
+    return CppExt::make_unique<TestPlayerImpl>(player);
 }
 
 int32_t TestPlayerImpl::SetSource(const TestSource& source)
@@ -119,6 +121,11 @@ int32_t TestPlayerImpl::Pause()
 int32_t TestPlayerImpl::Stop()
 {
     return player_->Stop();
+}
+
+int32_t TestPlayerImpl::Reset()
+{
+    return player_->Reset();
 }
 
 int32_t TestPlayerImpl::Seek(int64_t timeMs)

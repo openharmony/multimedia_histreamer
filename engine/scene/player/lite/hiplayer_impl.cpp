@@ -149,10 +149,18 @@ int32_t HiPlayerImpl::Prepare()
     if (ret != ErrorCode::SUCCESS) {
         PROFILE_END("Prepare failed,");
         MEDIA_LOG_E("prepare failed with error " PUBLIC_LOG_D32, ret);
-    } else {
-        PROFILE_END("Prepare successfully,");
+        return CppExt::to_underlying(ret);
     }
-    return CppExt::to_underlying(ret);
+    OSAL::ScopedLock lock(stateMutex_);
+    if (curFsmState_ == StateId::PREPARING) { // Wait state change to ready
+        cond_.Wait(lock, [this] { return curFsmState_ != StateId::PREPARING; });
+    }
+    MEDIA_LOG_D("Prepare finished, current fsm state: " PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
+    PROFILE_END("Prepare finished, current fsm state: " PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
+    if (curFsmState_ == StateId::READY) {
+        return CppExt::to_underlying(ErrorCode::SUCCESS);
+    }
+    return CppExt::to_underlying(ErrorCode::ERROR_UNKNOWN);
 }
 
 PFilter HiPlayerImpl::CreateAudioDecoder(const std::string& desc)
@@ -594,12 +602,12 @@ int32_t HiPlayerImpl::SetParameter(const Format& params)
 void HiPlayerImpl::OnStateChanged(StateId state)
 {
     MEDIA_LOG_I("OnStateChanged from " PUBLIC_LOG_D32 " to " PUBLIC_LOG_D32, curFsmState_.load(), state);
+    UpdateStateNoLock(TransStateId2PlayerState(state));
     {
         OSAL::ScopedLock lock(stateMutex_);
         curFsmState_ = state;
         cond_.NotifyOne();
     }
-    UpdateStateNoLock(TransStateId2PlayerState(state));
 }
 
 ErrorCode HiPlayerImpl::OnCallback(const FilterCallbackType& type, Filter* filter, const Plugin::Any& parameter)

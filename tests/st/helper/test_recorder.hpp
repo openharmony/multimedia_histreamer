@@ -14,6 +14,8 @@
  */
 #ifndef HISTREAMER_ST_TEST_RECORDER
 #define HISTREAMER_ST_TEST_RECORDER
+#include <memory>
+#include <string>
 #include "audio_capture_creator.h"
 #include "i_recorder_engine.h"
 
