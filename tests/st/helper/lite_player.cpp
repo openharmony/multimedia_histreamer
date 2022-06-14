@@ -118,6 +118,12 @@ int32_t TestPlayerImpl::Pause()
     return player_->Pause();
 }
 
+int32_t TestPlayerImpl::Release()
+{
+    player_ = nullptr;
+    return ERR_OK;
+}
+
 int32_t TestPlayerImpl::Stop()
 {
     return player_->Stop();
@@ -148,6 +154,12 @@ int32_t TestPlayerImpl::GetCurrentTime(int64_t& currentMS)
 int32_t TestPlayerImpl::GetDuration(int64_t& durationMs)
 {
     return player_->GetDuration(durationMs);
+}
+
+int32_t TestPlayerImpl::SetVolume(float leftVolume, float rightVolume)
+{
+    int32_t ret = player_->SetVolume(leftVolume, rightVolume);
+    return ret;
 }
 }
 #endif
