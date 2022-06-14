@@ -62,6 +62,14 @@ public:
         return {ret, action};
     }
 
+    std::tuple<ErrorCode, Action> Reset() override
+    {
+        OSAL::ScopedLock lock(mutex_);
+        // No executor_.Reset, call stop, but not discard record
+        FALSE_LOG(executor_.DoStop(false) == ErrorCode::SUCCESS);
+        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
+    }
+
     std::tuple<ErrorCode, Action> OnComplete() override
     {
         OSAL::ScopedLock lock(mutex_);
