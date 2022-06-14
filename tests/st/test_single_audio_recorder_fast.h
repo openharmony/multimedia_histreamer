@@ -63,11 +63,11 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         ASSERT_EQ(0, recorder->Pause());
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         ASSERT_EQ(0, recorder->Resume());
-        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, close(fd));
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -85,11 +85,11 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         ASSERT_EQ(0, recorder->Pause());
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         ASSERT_EQ(0, recorder->Resume());
-        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         ASSERT_EQ(0, recorder->Stop());
 
         std::string filePath;
