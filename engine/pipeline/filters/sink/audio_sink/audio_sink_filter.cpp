@@ -298,14 +298,20 @@ ErrorCode AudioSinkFilter::DoSyncWrite(const AVBufferPtr &buffer)
 {
     if ((buffer->flag & BUFFER_FLAG_EOS) == 0) { // only need to update when not eos
         // audio sink always report time anchor and do not drop
-        auto nowCt = syncCenter_->GetClockTimeNow();
+        int64_t nowCt = 0;
+        auto syncCenter = syncCenter_.lock();
+        if (syncCenter) {
+            nowCt = syncCenter->GetClockTimeNow();
+        }
         if (lastReportedClockTime_ == HST_TIME_NONE || lastReportedClockTime_ + reportAnchorDuration_ <= nowCt ||
             forceUpdateTimeAnchorNextTime_) {
             uint64_t latency = 0;
             if (plugin_->GetLatency(latency) != Plugin::Status::OK) {
                 MEDIA_LOG_W("failed to get latency");
             }
-            syncCenter_->UpdateTimeAnchor(nowCt + latency, buffer->pts, this);
+            if (syncCenter) {
+                syncCenter->UpdateTimeAnchor(nowCt + latency, buffer->pts, this);
+            }
             lastReportedClockTime_ = nowCt;
             forceUpdateTimeAnchorNextTime_ = true;
         }

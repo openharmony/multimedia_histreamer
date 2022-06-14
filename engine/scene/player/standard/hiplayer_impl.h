@@ -142,8 +142,7 @@ private:
     std::shared_ptr<Pipeline::VideoSinkFilter> videoSink_;
 #endif
     std::unordered_map<std::string, std::shared_ptr<Pipeline::AudioDecoderFilter>> audioDecoderMap_;
-    Pipeline::MediaSyncManager syncManager_;
-
+    std::shared_ptr<Pipeline::MediaSyncManager> syncManager_;
     HiPlayerCallbackLooper callbackLooper_ {};
 };
 }  // namespace Media

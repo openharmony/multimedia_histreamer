@@ -146,7 +146,7 @@ public:
         return ErrorCode::ERROR_UNIMPLEMENTED;
     }
 
-    void SetSyncCenter(IMediaSyncCenter* syncCenter) final;
+    void SetSyncCenter(std::weak_ptr<IMediaSyncCenter> syncCenter) final;
 
     void InitFilters(const std::vector<Filter*>& filters);
 
@@ -169,7 +169,7 @@ private:
     FilterCallback* filterCallback_;
     std::shared_ptr<MetaBundle> metaBundle_;
     std::vector<Filter*> filtersToRemove_ {};
-    IMediaSyncCenter* syncCenter_ {nullptr};
+    std::weak_ptr<IMediaSyncCenter> syncCenter_ {};
 };
 } // namespace Pipeline
 } // namespace Media
