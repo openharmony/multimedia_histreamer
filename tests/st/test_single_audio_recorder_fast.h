@@ -140,8 +140,8 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, player->Stop());
     }
 
-    // @test(data="pcmSources", tags=debuging)
-    PTEST((AudioRecordSource recordSource), The can not stop after prepare, then can prepare after reset)
+    // @test(data="pcmSources", tags=fast)
+    PTEST((AudioRecordSource recordSource), The recorder can not stop after prepare, then can prepare after reset)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -171,6 +171,27 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_NE(0, recorder->Stop());
         (void)recorder->Configure(recordSource); // errorState configure fail.
         (void)recorder->Prepare(); // prepare fail.
+        ASSERT_EQ(0, recorder->Release());
+    }
+
+    // @test(data="pcmSources", tags=fast)
+    PTEST((AudioRecordSource recordSource), The recorder can prepare reset release)
+    {
+        std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        ASSERT_EQ(0, recorder->Configure(recordSource));
+        ASSERT_EQ(0, recorder->Prepare());
+        ASSERT_EQ(0, recorder->Reset());
+        ASSERT_EQ(0, recorder->Release());
+    }
+
+    // @test(data="pcmSources", tags=debuging)
+    PTEST((AudioRecordSource recordSource), The recorder can prepare start reset release)
+    {
+        std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        ASSERT_EQ(0, recorder->Configure(recordSource));
+        ASSERT_EQ(0, recorder->Prepare());
+        ASSERT_EQ(0, recorder->Start());
+        ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
     }
 };
