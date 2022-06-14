@@ -53,6 +53,8 @@ public:
     int32_t Pause() override;
     int32_t Resume() override;
     int32_t Stop() override;
+    int32_t Reset() override;
+    int32_t Release() override;
     int32_t GetRecordedFile(std::string& path) override;
 private:
     std::unique_ptr<IRecorderEngine> recorder_;
@@ -122,6 +124,16 @@ int32_t TestRecorderImpl::Resume()
 int32_t TestRecorderImpl::Stop()
 {
     return recorder_->Stop();
+}
+
+int32_t TestRecorderImpl::Reset()
+{
+    return recorder_->Reset();
+}
+
+int32_t TestRecorderImpl::Release()
+{
+    return 0;
 }
 
 // The file in output dir is the latest recorded file.

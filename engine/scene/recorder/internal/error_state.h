@@ -40,6 +40,13 @@ public:
         Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_INIT : Action::ACTION_BUTT;
         return {ret, action};
     }
+
+    std::tuple<ErrorCode, Action> Reset() override
+    {
+        OSAL::ScopedLock lock(mutex_);
+        auto ret = executor_.DoStop(false);
+        return {ret, Action::TRANS_TO_INIT};
+    }
 private:
     OSAL::Mutex mutex_ {};
 };

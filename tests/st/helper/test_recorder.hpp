@@ -70,6 +70,8 @@ public:
     virtual int32_t Pause() = 0;
     virtual int32_t Resume() = 0;
     virtual int32_t Stop() = 0;
+    virtual int32_t Reset() = 0;
+    virtual int32_t Release() = 0;
     virtual int32_t GetRecordedFile(std::string& path) = 0; // for testing, return file size
 };
 }

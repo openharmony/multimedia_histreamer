@@ -50,7 +50,14 @@ public:
 
     std::tuple<ErrorCode, Action> Stop(const Plugin::Any& param) override
     {
-        return {ErrorCode::SUCCESS, Action::ACTION_BUTT};
+        return {ErrorCode::ERROR_INVALID_OPERATION, Action::TRANS_TO_ERROR};
+    }
+
+    std::tuple<ErrorCode, Action> OnComplete() override
+    {
+        OSAL::ScopedLock lock(mutex_);
+        auto ret = executor_.DoOnComplete();
+        return {ret, Action::ACTION_BUTT};
     }
 private:
     OSAL::Mutex mutex_ {};

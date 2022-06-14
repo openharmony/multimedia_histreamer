@@ -40,10 +40,14 @@ public:
 
     std::tuple<ErrorCode, Action> Stop(const Plugin::Any& param) override
     {
+        return {ErrorCode::ERROR_INVALID_OPERATION, Action::TRANS_TO_ERROR};
+    }
+
+    std::tuple<ErrorCode, Action> Reset() override
+    {
         OSAL::ScopedLock lock(mutex_);
-        auto ret = executor_.DoStop(param);
-        Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_INIT : Action::TRANS_TO_ERROR;
-        return {ret, action};
+        FALSE_LOG(executor_.DoStop(false) == ErrorCode::SUCCESS);
+        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
     }
 
     std::tuple<ErrorCode, Action> Pause() override
