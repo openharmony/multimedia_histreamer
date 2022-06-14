@@ -254,7 +254,7 @@ ErrorCode MuxerFilter::SendEos()
     OSAL::ScopedLock lock(pushDataMutex_);
     MEDIA_LOG_I("SendEos entered.");
     eos_ = true;
-    if (plugin_) {
+    if (hasWriteHeader_ && plugin_) {
         plugin_->WriteTrailer();
     }
     hasWriteHeader_ = false;

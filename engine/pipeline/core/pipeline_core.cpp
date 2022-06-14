@@ -280,6 +280,7 @@ void PipelineCore::OnEvent(const Event& event)
     readyEventCnt_++;
     MEDIA_LOG_I("OnEvent readyCnt: " PUBLIC_LOG_ZU " / " PUBLIC_LOG_ZU, readyEventCnt_, filters_.size());
     if (readyEventCnt_ == filters_.size()) {
+        state_ = FilterState::READY;
         NotifyEvent(event);
         readyEventCnt_ = 0;
     }

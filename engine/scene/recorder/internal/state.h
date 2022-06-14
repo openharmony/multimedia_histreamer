@@ -49,6 +49,7 @@ enum class Intent {
     PAUSE,
     RESUME,
     STOP,
+    RESET,
     NOTIFY_READY,
     NOTIFY_COMPLETE,
     NOTIFY_ERROR,
@@ -87,6 +88,7 @@ public:
     virtual std::tuple<ErrorCode, Action> Stop(const Plugin::Any& param);
     virtual std::tuple<ErrorCode, Action> Pause();
     virtual std::tuple<ErrorCode, Action> Resume();
+    virtual std::tuple<ErrorCode, Action> Reset();
     virtual std::tuple<ErrorCode, Action> OnReady();
     virtual std::tuple<ErrorCode, Action> OnError(const Plugin::Any& param) final;
     virtual std::tuple<ErrorCode, Action> OnComplete();
@@ -108,6 +110,7 @@ protected:
         {Intent::PAUSE, "PAUSE"},
         {Intent::RESUME, "RESUME"},
         {Intent::STOP, "STOP"},
+        {Intent::RESET, "RESET"},
         {Intent::NOTIFY_READY, "NOTIFY_READY"},
         {Intent::NOTIFY_COMPLETE, "NOTIFY_COMPLETE"},
         {Intent::NOTIFY_ERROR, "NOTIFY_ERROR"},

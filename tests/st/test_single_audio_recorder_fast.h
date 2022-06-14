@@ -148,6 +148,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_NE(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Reset());
+        ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -164,10 +165,12 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, player->Stop());
 
         ASSERT_EQ(0, recorder->Reset());
+        ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_NE(0, recorder->Stop());
-        ASSERT_EQ(0, recorder->Prepare());
+        (void)recorder->Configure(recordSource); // errorState configure fail.
+        (void)recorder->Prepare(); // prepare fail.
         ASSERT_EQ(0, recorder->Release());
     }
 };

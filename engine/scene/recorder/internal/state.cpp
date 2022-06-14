@@ -112,6 +112,11 @@ std::tuple<ErrorCode, Action> State::Resume()
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 
+std::tuple<ErrorCode, Action> State::Reset()
+{
+    return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
+}
+
 std::tuple<ErrorCode, Action> State::OnReady()
 {
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
@@ -158,6 +163,9 @@ std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin:
             break;
         case Intent::RESUME:
             std::tie(rtv, nextAction) = Resume();
+            break;
+        case Intent::RESET:
+            std::tie(rtv, nextAction) = Reset();
             break;
         case Intent::STOP:
             std::tie(rtv, nextAction) = Stop(param);

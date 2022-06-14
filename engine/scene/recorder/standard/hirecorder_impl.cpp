@@ -74,6 +74,7 @@ ErrorCode HiRecorderImpl::Init()
 
 int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId)
 {
+    MEDIA_LOG_I("SetAudioSource enter");
     PROFILE_BEGIN("SetAudioSource begin");
     sourceId = INVALID_SOURCE_ID;
     FALSE_RETURN_V(source != AudioSourceType::AUDIO_SOURCE_INVALID,
@@ -94,6 +95,7 @@ int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId
 int32_t HiRecorderImpl::SetVideoSource(VideoSourceType source, int32_t& sourceId)
 {
 #ifdef VIDEO_SUPPORT
+    MEDIA_LOG_I("SetVideoSource enter");
     PROFILE_BEGIN("SetVideoSource begin");
     sourceId = INVALID_SOURCE_ID;
     FALSE_RETURN_V(source != VideoSourceType::VIDEO_SOURCE_BUTT,
@@ -130,6 +132,7 @@ sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
 
 int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
 {
+    MEDIA_LOG_I("OutputFormatType enter, format = " PUBLIC_LOG_D32, static_cast<int32_t>(format));
     FALSE_RETURN_V(format != OutputFormatType::FORMAT_BUTT, TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
     FALSE_RETURN_V((audioCount_ + videoCount_) > static_cast<uint32_t>(0),
                    TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
@@ -143,12 +146,14 @@ int32_t HiRecorderImpl::SetOutputFormat(OutputFormatType format)
 
 int32_t HiRecorderImpl::SetObs(const std::weak_ptr<IRecorderEngineObs>& obs)
 {
+    MEDIA_LOG_I("SetObs enter");
     obs_ = obs;
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 
 int32_t HiRecorderImpl::Configure(int32_t sourceId, const RecorderParam& recParam)
 {
+    MEDIA_LOG_I("Configure enter");
     FALSE_RETURN_V(outputFormatType_ != OutputFormatType::FORMAT_BUTT,
                    TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
     FALSE_RETURN_V(CheckParamType(sourceId, recParam), TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE));
@@ -169,7 +174,7 @@ int32_t HiRecorderImpl::Prepare()
     auto ret = fsm_.SendEvent(Intent::PREPARE);
     if (ret != ErrorCode::SUCCESS) {
         PROFILE_END("Prepare failed,");
-        MEDIA_LOG_E("prepare failed with error " PUBLIC_LOG_D32, ret);
+        MEDIA_LOG_E("Prepare failed with error " PUBLIC_LOG_S, GetErrorName(ret));
     } else {
         PROFILE_END("Prepare successfully,");
     }
@@ -178,6 +183,7 @@ int32_t HiRecorderImpl::Prepare()
 
 int32_t HiRecorderImpl::Start()
 {
+    MEDIA_LOG_I("Start enter");
     PROFILE_BEGIN();
     ErrorCode ret;
     if (curFsmState_ == StateId::PAUSE) {
@@ -191,6 +197,7 @@ int32_t HiRecorderImpl::Start()
 
 int32_t HiRecorderImpl::Pause()
 {
+    MEDIA_LOG_I("Pause enter");
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::PAUSE));
     PROFILE_END("Pause ret = " PUBLIC_LOG_D32, ret);
@@ -199,6 +206,7 @@ int32_t HiRecorderImpl::Pause()
 
 int32_t HiRecorderImpl::Resume()
 {
+    MEDIA_LOG_I("Resume enter");
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::RESUME));
     PROFILE_END("Resume ret = " PUBLIC_LOG_D32, ret);
@@ -207,6 +215,7 @@ int32_t HiRecorderImpl::Resume()
 
 int32_t HiRecorderImpl::Stop(bool isDrainAll)
 {
+    MEDIA_LOG_I("Stop enter");
     PROFILE_BEGIN();
     MEDIA_LOG_D("Stop start, isDrainAll: " PUBLIC_LOG_U32, static_cast<uint32_t>(isDrainAll));
     outputFormatType_ = OutputFormatType::FORMAT_BUTT;
@@ -223,7 +232,11 @@ int32_t HiRecorderImpl::Stop(bool isDrainAll)
 
 int32_t HiRecorderImpl::Reset()
 {
-    return Stop(false);
+    MEDIA_LOG_I("Reset enter");
+    PROFILE_BEGIN();
+    auto ret = TransErrorCode(fsm_.SendEvent(Intent::RESET));
+    PROFILE_END("Resume ret = " PUBLIC_LOG_D32, ret);
+    return ret;
 }
 
 int32_t HiRecorderImpl::SetParameter(int32_t sourceId, const RecorderParam &recParam)
