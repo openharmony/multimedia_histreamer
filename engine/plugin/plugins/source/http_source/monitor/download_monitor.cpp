@@ -35,6 +35,7 @@ DownloadMonitor::DownloadMonitor(std::shared_ptr<MediaDownloader> downloader) no
     downloader_->SetStatusCallback(statusCallback);
     task_ = std::make_shared<OSAL::Task>(std::string("HttpMonitor"));
     task_->RegisterHandler([this] { HttpMonitorLoop(); });
+    task_->Start();
 }
 
 void DownloadMonitor::HttpMonitorLoop()

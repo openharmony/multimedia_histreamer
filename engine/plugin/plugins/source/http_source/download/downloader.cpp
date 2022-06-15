@@ -165,13 +165,16 @@ bool Downloader::Seek(int64_t offset)
 bool Downloader::Retry(const std::shared_ptr<DownloadRequest>& request)
 {
     MEDIA_LOG_I("Downloader Retry Begin");
-    OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(client_ != nullptr, false);
-    FALSE_RETURN_V(currentRequest_ != nullptr, false);
-    FALSE_RETURN_V(currentRequest_->IsSame(request), false);
-    currentRequest_->retryTimes_++;
+    {
+        OSAL::ScopedLock lock(mutex_);
+        FALSE_RETURN_V(currentRequest_ != nullptr, false);
+        FALSE_RETURN_V(currentRequest_->IsSame(request), false);
+        currentRequest_->retryTimes_++;
+    }
     Pause();
     Resume();
+    MEDIA_LOG_I("Downloader Retry End");
     return true;
 }
 
@@ -195,48 +198,54 @@ bool Downloader::BeginDownload()
 
 void Downloader::HttpDownloadLoop()
 {
-    OSAL::ScopedLock lock(mutex_);
-    if (shouldStartNextRequest) {
-        currentRequest_ = requestQue_->Pop(); // 1000);
-        if (!currentRequest_) {
-            return;
+    Status ret = Status::OK;
+    {
+        OSAL::ScopedLock lock(mutex_);
+        if (shouldStartNextRequest) {
+            currentRequest_ = requestQue_->Pop(); // 1000);
+            if (!currentRequest_) {
+                return;
+            }
+            BeginDownload();
+            shouldStartNextRequest = false;
         }
-        BeginDownload();
-        shouldStartNextRequest = false;
-    }
-    FALSE_RETURN_W(currentRequest_ != nullptr);
-    NetworkClientErrorCode clientCode = NetworkClientErrorCode::ERROR_OK;
-    NetworkServerErrorCode serverCode = 0;
-    long startPos = currentRequest_->startPos_;
-    if (currentRequest_->requestWholeFile_) {
-        startPos = -1;
-    }
-    Status ret = client_->RequestData(startPos, currentRequest_->requestSize_,
-                                      serverCode, clientCode);
-    FALSE_LOG(ret == Status::OK);
-    if (ret == Status::OK) {
-        if (currentRequest_->retryTimes_ > 0) {
-            currentRequest_->retryTimes_ = 0;
+        FALSE_RETURN_W(currentRequest_ != nullptr);
+        NetworkClientErrorCode clientCode = NetworkClientErrorCode::ERROR_OK;
+        NetworkServerErrorCode serverCode = 0;
+        long startPos = currentRequest_->startPos_;
+        if (currentRequest_->requestWholeFile_) {
+            startPos = -1;
+        }
+        ret = client_->RequestData(startPos, currentRequest_->requestSize_,
+                                          serverCode, clientCode);
+        FALSE_LOG(ret == Status::OK);
+        if (ret == Status::OK) {
+            if (currentRequest_->retryTimes_ > 0) {
+                currentRequest_->retryTimes_ = 0;
+            }
+        }
+        currentRequest_->clientError_ = clientCode;
+        currentRequest_->serverError_ = serverCode;
+        if (ret != Status::OK || currentRequest_->retryTimes_ > 0) {
+            currentRequest_->statusCallback_(DownloadStatus::PARTTAL_DOWNLOAD, currentRequest_);
+        }
+        int64_t remaining = currentRequest_->headerInfo_.fileContentLen - currentRequest_->startPos_;
+        if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
+            MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,
+                        currentRequest_->startPos_, currentRequest_->url_.c_str());
+            currentRequest_->isEos_ = true;
+            if (requestQue_->Empty()) {
+                task_->PauseAsync();
+            }
+            shouldStartNextRequest = true;
+        } else if (remaining < PER_REQUEST_SIZE) {
+            currentRequest_->requestSize_ = remaining;
+        } else {
+            currentRequest_->requestSize_ = PER_REQUEST_SIZE;
         }
     }
-    currentRequest_->clientError_ = clientCode;
-    currentRequest_->serverError_ = serverCode;
-    if (ret != Status::OK || currentRequest_->retryTimes_ > 0) {
-        currentRequest_->statusCallback_(DownloadStatus::PARTTAL_DOWNLOAD, currentRequest_);
-    }
-    int64_t remaining = currentRequest_->headerInfo_.fileContentLen - currentRequest_->startPos_;
-    if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
-        MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,
-                    currentRequest_->startPos_, currentRequest_->url_.c_str());
-        currentRequest_->isEos_ = true;
-        if (requestQue_->Empty()) {
-            task_->PauseAsync();
-        }
-        shouldStartNextRequest = true;
-    } else if (remaining < PER_REQUEST_SIZE) {
-        currentRequest_->requestSize_ = remaining;
-    } else {
-        currentRequest_->requestSize_ = PER_REQUEST_SIZE;
+    if (ret != Status::OK) { // If request data failed, sleep, avoid always take the mutex
+        OSAL::SleepFor(200); // 200
     }
 }
 

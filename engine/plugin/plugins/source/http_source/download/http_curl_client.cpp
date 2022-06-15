@@ -97,6 +97,10 @@ void HttpCurlClient::InitCurlEnvironment(const std::string& url)
     curl_easy_setopt(easyHandle_, CURLOPT_TCP_KEEPINTVL, 5L); // 5 心跳
 }
 
+// RequestData run in HttpDownload thread,
+// Open, Close, Deinit run in other thread.
+// Should call Open before start HttpDownload thread.
+// Should Pause HttpDownload thread then Close, Deinit.
 Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCode& serverCode,
                                    NetworkClientErrorCode& clientCode)
 {
