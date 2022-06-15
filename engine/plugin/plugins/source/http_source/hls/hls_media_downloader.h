@@ -30,6 +30,8 @@ public:
     ~HlsMediaDownloader() override = default;
     bool Open(const std::string& url) override;
     void Close() override;
+    void Pause() override;
+    void Resume() override;
     bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) override;
     bool Seek(int offset) override;
 
@@ -38,9 +40,12 @@ public:
     bool IsStreaming() const override;
     void SetCallback(Callback* cb) override;
     void OnFragmentListChanged(const std::vector<std::string>& fragmentList) override;
+    void SetStatusCallback(StatusCallbackFunc cb) override;
+    bool Retry(const std::shared_ptr<DownloadRequest> &request) override;
+
 private:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
-    void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request, int32_t code);
+    void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request);
 
     void FragmentDownloadLoop();
 private:

@@ -30,7 +30,7 @@ HttpMediaDownloader::HttpMediaDownloader() noexcept
     buffer_ = std::make_shared<RingBuffer>(RING_BUFFER_SIZE);
     buffer_->Init();
 
-    downloader_ = std::make_shared<Downloader>();
+    downloader_ = std::make_shared<Downloader>("http");
 }
 
 bool HttpMediaDownloader::Open(const std::string& url)
@@ -40,11 +40,8 @@ bool HttpMediaDownloader::Open(const std::string& url)
         SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
                  std::forward<decltype(offset)>(offset));
     };
-    auto statusCallback = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request, int32_t code) {
-        OnDownloadStatus(std::forward<decltype(status)>(status), std::forward<decltype(request)>(request),
-            std::forward<decltype(code)>(code));
-    };
-    downloadRequest_ = std::make_shared<DownloadRequest>(url, saveData, statusCallback);
+    FALSE_RETURN_V(statusCallback_ != nullptr, false);
+    downloadRequest_ = std::make_shared<DownloadRequest>(url, saveData, statusCallback_);
     downloader_->Download(downloadRequest_, -1); // -1
     downloader_->Start();
     return true;
@@ -54,6 +51,21 @@ void HttpMediaDownloader::Close()
 {
     buffer_->SetActive(false);
     downloader_->Stop();
+}
+
+void HttpMediaDownloader::Pause()
+{
+    downloader_->Pause();
+}
+
+void HttpMediaDownloader::Resume()
+{
+    downloader_->Resume();
+}
+
+bool HttpMediaDownloader::Retry(const std::shared_ptr<DownloadRequest> &request)
+{
+    return downloader_->Retry(request);
 }
 
 bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
@@ -83,7 +95,7 @@ bool HttpMediaDownloader::Seek(int offset)
     downloader_->Pause();
     buffer_->Clear();
     downloader_->Seek(offset);
-    downloader_->Start();
+    downloader_->Resume();
     return true;
 }
 
@@ -107,6 +119,11 @@ void HttpMediaDownloader::SetCallback(Callback* cb)
     callback_ = cb;
 }
 
+void HttpMediaDownloader::SetStatusCallback(StatusCallbackFunc cb)
+{
+    statusCallback_ = cb;
+}
+
 void HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 {
     buffer_->WriteBuffer(data, len, offset);
@@ -121,25 +138,6 @@ void HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
         aboveWaterline_ = false;
         MEDIA_LOG_I("Send http belowWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
         callback_->OnEvent({PluginEventType::BELOW_LOW_WATERLINE, {ratio}, "http"});
-    }
-}
-
-void HttpMediaDownloader::OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request,
-                                           int32_t code)
-{
-    MEDIA_LOG_I("OnDownloadStatus " PUBLIC_LOG_D32, status);
-    (void)request;
-    switch (status) {
-        case DownloadStatus::CLIENT_ERROR:
-            MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, code);
-            callback_->OnEvent({PluginEventType::CLIENT_ERROR, {code}, "http"});
-            break;
-        case DownloadStatus::SERVER_ERROR:
-            MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32, code);
-            callback_->OnEvent({PluginEventType::SERVER_ERROR, {code}, "http"});
-            break;
-        default:
-            MEDIA_LOG_E("Unknown download status.");
     }
 }
 }

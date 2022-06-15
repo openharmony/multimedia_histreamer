@@ -31,7 +31,7 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
     buffer_ = std::make_shared<RingBuffer>(RING_BUFFER_SIZE);
     buffer_->Init();
 
-    downloader_ = std::make_shared<Downloader>();
+    downloader_ = std::make_shared<Downloader>("hlsMedia");
     downloadTask_ = std::make_shared<OSAL::Task>(std::string("FragmentDownload"));
     downloadTask_->RegisterHandler([this] { FragmentDownloadLoop(); });
 
@@ -40,10 +40,6 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
     dataSave_ =  [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
         SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
                  std::forward<decltype(offset)>(offset));
-    };
-    statusCallback_ = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request, int32_t code) {
-        OnDownloadStatus(std::forward<decltype(status)>(status), std::forward<decltype(request)>(request),
-            std::forward<decltype(code)>(code));
     };
 }
 
@@ -76,6 +72,14 @@ void HlsMediaDownloader::Close()
     adaptiveStreaming_->Stop();
     downloadTask_->Stop();
     downloader_->Stop();
+}
+
+void HlsMediaDownloader::Pause()
+{
+}
+
+void HlsMediaDownloader::Resume()
+{
 }
 
 bool HlsMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
@@ -135,20 +139,14 @@ void HlsMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
     buffer_->WriteBuffer(data, len, offset);
 }
 
-void HlsMediaDownloader::OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request,
-                                          int32_t code)
+void HlsMediaDownloader::SetStatusCallback(StatusCallbackFunc cb)
 {
-    MEDIA_LOG_I("OnDownloadStatus " PUBLIC_LOG_D32, status);
-    switch (status) {
-        case DownloadStatus::CLIENT_ERROR:
-            MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, code);
-            break;
-        case DownloadStatus::SERVER_ERROR:
-            MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32, code);
-            break;
-        default:
-            MEDIA_LOG_E("Unknown download status.");
-    }
+    statusCallback_ = cb;
+}
+
+bool HlsMediaDownloader::Retry(const std::shared_ptr<DownloadRequest> &request)
+{
+    return downloader_->Retry(request);
 }
 }
 }

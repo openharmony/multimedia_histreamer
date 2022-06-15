@@ -19,7 +19,6 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include "client_factory.h"
 #include "network_client.h"
 #include "osal/thread/task.h"
 #include "blocking_queue.h"
@@ -30,8 +29,7 @@ namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
 enum struct DownloadStatus {
-    SERVER_ERROR,
-    CLIENT_ERROR
+    PARTTAL_DOWNLOAD,
 };
 
 struct HeaderInfo {
@@ -61,7 +59,7 @@ struct HeaderInfo {
 // uint32_t : length
 using DataSaveFunc = std::function<void(uint8_t*, uint32_t, int64_t)>;
 class DownloadRequest;
-using StatusCallbackFunc = std::function<void(DownloadStatus, std::shared_ptr<DownloadRequest>&, int32_t)>;
+using StatusCallbackFunc = std::function<void(DownloadStatus, std::shared_ptr<DownloadRequest>&)>;
 
 class DownloadRequest {
 public:
@@ -71,6 +69,13 @@ public:
     void SaveHeader(const HeaderInfo* header);
     bool IsChunked() const;
     bool IsEos() const;
+    int GetRetryTimes();
+    NetworkClientErrorCode GetClientError();
+    NetworkServerErrorCode GetServerError();
+    bool IsSame(const std::shared_ptr<DownloadRequest>& other)
+    {
+        return url_ == other->url_ && startPos_ == other->startPos_;
+    }
 
 private:
     void WaitHeaderUpdated() const;
@@ -80,35 +85,40 @@ private:
     StatusCallbackFunc statusCallback_;
 
     HeaderInfo headerInfo_;
+
     bool isHeaderUpdated {false};
     bool isEos_ {false}; // file download finished
     int64_t startPos_;
     bool isDownloading_;
     bool requestWholeFile_ {false};
     int requestSize_;
+    int retryTimes_ {0};
+    NetworkClientErrorCode clientError_ {NetworkClientErrorCode::ERROR_OK};
+    NetworkServerErrorCode serverError_ {0};
 
     friend class Downloader;
 };
 
 class Downloader {
 public:
-    Downloader() noexcept;
+    explicit Downloader(std::string name) noexcept;
     ~Downloader() = default;
 
     bool Download(const std::shared_ptr<DownloadRequest>& request, int32_t waitMs);
     void Start();
     void Pause();
+    void Resume();
     void Stop();
     bool Seek(int64_t offset);
+    bool Retry(const std::shared_ptr<DownloadRequest>& request);
 private:
     bool BeginDownload();
-    void EndDownload();
 
     void HttpDownloadLoop();
     static size_t RxBodyData(void* buffer, size_t size, size_t nitems, void* userParam);
     static size_t RxHeaderData(void* buffer, size_t size, size_t nitems, void* userParam);
 
-    std::shared_ptr<ClientFactory> factory_;
+    std::string name_;
     std::shared_ptr<NetworkClient> client_;
     std::shared_ptr<OSAL::Task> task_;
     std::shared_ptr<BlockingQueue<std::shared_ptr<DownloadRequest>>> requestQue_;

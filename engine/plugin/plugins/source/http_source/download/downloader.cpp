@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "foundation/log.h"
+#include "http_curl_client.h"
 #include "osal/utils/util.h"
 #include "securec.h"
 #include "steady_clock.h"
@@ -66,6 +67,21 @@ bool DownloadRequest::IsEos() const
     return isEos_;
 }
 
+int DownloadRequest::GetRetryTimes()
+{
+    return retryTimes_;
+}
+
+NetworkClientErrorCode DownloadRequest::GetClientError()
+{
+    return clientError_;
+}
+
+NetworkServerErrorCode DownloadRequest::GetServerError()
+{
+    return serverError_;
+}
+
 void DownloadRequest::WaitHeaderUpdated() const
 {
     size_t times = 0;
@@ -76,15 +92,16 @@ void DownloadRequest::WaitHeaderUpdated() const
     MEDIA_LOG_D("isHeaderUpdated " PUBLIC_LOG_D32 ", times " PUBLIC_LOG_ZU, isHeaderUpdated, times);
 }
 
-Downloader::Downloader() noexcept
+Downloader::Downloader(std::string name) noexcept : name_(std::move(name))
 {
     shouldStartNextRequest = true;
 
-    factory_ = std::make_shared<ClientFactory>(&RxHeaderData, &RxBodyData, this);
-    requestQue_ = std::make_shared<BlockingQueue<std::shared_ptr<DownloadRequest>>>("downloadRequestQue",
+    client_ = std::make_shared<HttpCurlClient>(&RxHeaderData, &RxBodyData, this);
+    client_->Init();
+    requestQue_ = std::make_shared<BlockingQueue<std::shared_ptr<DownloadRequest>>>(name_ + "RequestQue",
                                                                                     REQUEST_QUEUE_SIZE);
 
-    task_ = std::make_shared<OSAL::Task>(std::string("HttpDownloader"));
+    task_ = std::make_shared<OSAL::Task>(std::string(name_ + "Downloader"));
     task_->RegisterHandler([this] { HttpDownloadLoop(); });
 }
 
@@ -109,6 +126,16 @@ void Downloader::Pause()
 {
     MEDIA_LOG_I("Begin");
     task_->Pause();
+    client_->Close();
+    MEDIA_LOG_I("End");
+}
+
+void Downloader::Resume()
+{
+    MEDIA_LOG_I("Begin");
+    client_->Open(currentRequest_->url_);
+    currentRequest_->isEos_ = false;
+    Start();
     MEDIA_LOG_I("End");
 }
 
@@ -117,19 +144,34 @@ void Downloader::Stop()
     MEDIA_LOG_I("Begin");
     requestQue_->SetActive(false);
     task_->Stop();
-    EndDownload();
     MEDIA_LOG_I("End");
 }
 
 bool Downloader::Seek(int64_t offset)
 {
     MEDIA_LOG_I("Begin");
-    currentRequest_->startPos_ = offset;
-    int64_t temp = currentRequest_->GetFileContentLength() - offset;
-    temp = temp >= 0 ? temp : PER_REQUEST_SIZE;
+    if (offset >= 0 && offset < currentRequest_->GetFileContentLength()) {
+        currentRequest_->startPos_ = offset;
+    }
+    int64_t temp = currentRequest_->GetFileContentLength() - currentRequest_->startPos_;
     currentRequest_->requestSize_ = static_cast<int>(std::min(temp, static_cast<int64_t>(PER_REQUEST_SIZE)));
     currentRequest_->isEos_ = false;
     shouldStartNextRequest = false; // Reuse last request when seek
+    return true;
+}
+
+// Pause download thread before use currentRequest_
+bool Downloader::Retry(const std::shared_ptr<DownloadRequest>& request)
+{
+    MEDIA_LOG_I("Downloader Retry Begin");
+    FALSE_RETURN_V(client_ != nullptr, false);
+    Pause();
+    if (currentRequest_ != nullptr && currentRequest_->IsSame(request) && !shouldStartNextRequest) {
+        currentRequest_->retryTimes_++;
+        MEDIA_LOG_D("Do retry.");
+    }
+    Resume();
+    MEDIA_LOG_I("Downloader Retry End");
     return true;
 }
 
@@ -139,53 +181,48 @@ bool Downloader::BeginDownload()
     std::string url = currentRequest_->url_;
     FALSE_RETURN_V(!url.empty(), false);
 
-    std::string protocol = ClientFactory::GetProtocol(url);
-    FALSE_RETURN_V(!protocol.empty(), false);
-    client_ = factory_->GetClient(protocol);
-    FALSE_RETURN_V(client_ != nullptr, false);
-
     client_->Open(url);
 
     currentRequest_->requestSize_ = 1;
     currentRequest_->startPos_ = 0;
     currentRequest_->isEos_ = false;
+    currentRequest_->retryTimes_ = 0;
 
     task_->Start();
     MEDIA_LOG_I("End");
     return true;
 }
 
-void Downloader::EndDownload()
-{
-}
-
 void Downloader::HttpDownloadLoop()
 {
     if (shouldStartNextRequest) {
         currentRequest_ = requestQue_->Pop(); // 1000);
+        if (!currentRequest_) {
+            return;
+        }
         BeginDownload();
         shouldStartNextRequest = false;
     }
     FALSE_RETURN_W(currentRequest_ != nullptr);
-    NetworkClientErrorCode clientCode;
-    NetworkServerErrorCode serverCode;
+    NetworkClientErrorCode clientCode = NetworkClientErrorCode::ERROR_OK;
+    NetworkServerErrorCode serverCode = 0;
     long startPos = currentRequest_->startPos_;
     if (currentRequest_->requestWholeFile_) {
         startPos = -1;
     }
     Status ret = client_->RequestData(startPos, currentRequest_->requestSize_,
                                       serverCode, clientCode);
-    if (ret == Status::ERROR_CLIENT) {
-        MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, clientCode);
-        currentRequest_->statusCallback_(DownloadStatus::CLIENT_ERROR, currentRequest_,
-                                         static_cast<int32_t>(clientCode));
-    } else if (ret == Status::ERROR_SERVER) {
-        MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32 " " PUBLIC_LOG_ZU, serverCode,
-                    currentRequest_->headerInfo_.fileContentLen);
-        currentRequest_->statusCallback_(DownloadStatus::SERVER_ERROR, currentRequest_,
-                                         static_cast<int32_t>(serverCode));
+    currentRequest_->clientError_ = clientCode;
+    currentRequest_->serverError_ = serverCode;
+    if (ret == Status::OK) {
+        if (currentRequest_->retryTimes_ > 0) {
+            currentRequest_->retryTimes_ = 0;
+        }
+    } else {
+        MEDIA_LOG_E("Client request data failed. ret = " PUBLIC_LOG_D32, static_cast<int32_t>(ret));
+        currentRequest_->statusCallback_(DownloadStatus::PARTTAL_DOWNLOAD, currentRequest_);
     }
-    FALSE_LOG(ret == Status::OK);
+
     int64_t remaining = currentRequest_->headerInfo_.fileContentLen - currentRequest_->startPos_;
     if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
         MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,
@@ -194,7 +231,6 @@ void Downloader::HttpDownloadLoop()
         if (requestQue_->Empty()) {
             task_->PauseAsync();
         }
-        EndDownload();
         shouldStartNextRequest = true;
     } else if (remaining < PER_REQUEST_SIZE) {
         currentRequest_->requestSize_ = remaining;

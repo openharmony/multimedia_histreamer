@@ -14,10 +14,11 @@
  */
 #define HST_LOG_TAG "HttpSourcePlugin"
 
+#include "http_source_plugin.h"
+#include "foundation/log.h"
 #include "hls/hls_media_downloader.h"
 #include "http/http_media_downloader.h"
-#include "foundation/log.h"
-#include "http_source_plugin.h"
+#include "monitor/download_monitor.h"
 
 namespace OHOS {
 namespace Media {
@@ -151,10 +152,10 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     OSAL::ScopedLock lock(mutex_);
     auto uri = source->GetSourceUri();
     if (uri.find(".m3u8") != std::string::npos) {
-        executor_ = std::make_shared<HlsMediaDownloader>();
+        executor_ = std::make_shared<DownloadMonitor>(std::make_shared<HlsMediaDownloader>());
         delayReady = false;
     } else if (uri.compare(0, 4, "http") == 0) { // 0 : position, 4: count
-        executor_ = std::make_shared<HttpMediaDownloader>();
+        executor_ = std::make_shared<DownloadMonitor>(std::make_shared<HttpMediaDownloader>());
     }
     FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
 

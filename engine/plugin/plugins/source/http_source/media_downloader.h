@@ -18,6 +18,7 @@
 
 #include <string>
 #include "plugin/interface/plugin_base.h"
+#include "download/downloader.h"
 
 namespace OHOS {
 namespace Media {
@@ -28,13 +29,17 @@ public:
     virtual ~MediaDownloader() = default;
     virtual bool Open(const std::string& url) = 0;
     virtual void Close() = 0;
+    virtual void Pause() = 0;
+    virtual void Resume() = 0;
     virtual bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) = 0;
     virtual bool Seek(int offset) = 0;
+    virtual bool Retry(const std::shared_ptr<DownloadRequest> &request) = 0;
 
     virtual size_t GetContentLength() const = 0;
     virtual double GetDuration() const = 0;
     virtual bool IsStreaming() const = 0;
     virtual void SetCallback(Callback* cb) = 0;
+    virtual void SetStatusCallback(StatusCallbackFunc cb) = 0;
 };
 }
 }

@@ -231,6 +231,8 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
         ASSERT_EQ(0, player->Prepare());
         ASSERT_EQ(0, player->Play());
         std::this_thread::sleep_for(std::chrono::seconds(20));
+        ASSERT_EQ(0, player->Seek(10000));
+        std::this_thread::sleep_for(std::chrono::seconds(10));
         player->Stop();
     }
 
