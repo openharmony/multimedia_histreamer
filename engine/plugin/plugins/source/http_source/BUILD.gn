@@ -26,7 +26,6 @@ config("plugin_http_source_config") {
 
 source_set("httpsource") {
   sources = [
-    "download/client_factory.cpp",
     "download/downloader.cpp",
     "download/http_curl_client.cpp",
     "hls/adaptive_streaming.cpp",

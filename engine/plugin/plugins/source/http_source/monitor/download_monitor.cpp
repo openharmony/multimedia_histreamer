@@ -59,7 +59,6 @@ void DownloadMonitor::HttpMonitorLoop()
 bool DownloadMonitor::Open(const std::string &url)
 {
     isPlaying_ = true;
-    url_ = url;
     return downloader_->Open(url);
 }
 

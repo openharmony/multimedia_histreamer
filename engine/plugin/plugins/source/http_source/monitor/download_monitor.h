@@ -59,7 +59,6 @@ private:
     std::shared_ptr<OSAL::Task> task_;
     time_t lastReadTime_ {0};
     Callback* callback_ {nullptr};
-    std::string url_;
 };
 }
 }
