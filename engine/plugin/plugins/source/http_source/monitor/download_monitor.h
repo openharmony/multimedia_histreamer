@@ -50,7 +50,6 @@ public:
 
 private:
     void HttpMonitorLoop();
-    void ProcessLoop();
     void OnDownloadStatus(std::shared_ptr<DownloadRequest>& request);
     bool NeedRetry(const std::shared_ptr<DownloadRequest>& request);
     void DealDownloaderEvent(const std::shared_ptr<DownloadRequest>& request);
@@ -58,7 +57,6 @@ private:
     std::shared_ptr<BlockingQueue<std::function<void()>>> taskQue_;
     std::atomic<bool> isPlaying_ {false};
     std::shared_ptr<OSAL::Task> task_;
-    std::shared_ptr<OSAL::Task> taskProcess_;
     time_t lastReadTime_ {0};
     Callback* callback_ {nullptr};
     std::string url_;

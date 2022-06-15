@@ -27,15 +27,13 @@ namespace {
 DownloadMonitor::DownloadMonitor(std::shared_ptr<MediaDownloader> downloader) noexcept
     : downloader_(std::move(downloader))
 {
-    taskQue_ = std::make_shared<BlockingQueue<std::function<void()>>>("monitorQue",
+    taskQue_ = std::make_shared<BlockingQueue<std::function<void()>>>("retryQue",
                                                                       MONITOR_QUEUE_SIZE);
     auto statusCallback = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request) {
         OnDownloadStatus(std::forward<decltype(request)>(request));
     };
     downloader_->SetStatusCallback(statusCallback);
-    taskProcess_ = std::make_shared<OSAL::Task>(std::string("DownloaderMonitorPop"));
-    taskProcess_->RegisterHandler([this] { ProcessLoop(); });
-    task_ = std::make_shared<OSAL::Task>(std::string("DownloaderMonitor"));
+    task_ = std::make_shared<OSAL::Task>(std::string("HttpMonitor"));
     task_->RegisterHandler([this] { HttpMonitorLoop(); });
 }
 
@@ -47,20 +45,14 @@ void DownloadMonitor::HttpMonitorLoop()
         if ((lastReadTime_ != 0) && (nowTime - lastReadTime_ >= 10)) {  // 10
             MEDIA_LOG_E("HttpMonitorLoop" PUBLIC_LOG_D64, nowTime);
             Pause();
+        } else {
+            if (!taskQue_->Empty()) {
+                auto f = taskQue_->Pop();
+                f();
+            }
         }
     }
     OSAL::SleepFor(50); // 50
-}
-
-void DownloadMonitor::ProcessLoop()
-{
-    if (isPlaying_) {
-        if (!taskQue_->Empty()) {
-            auto f = taskQue_->Pop();
-            f();
-        }
-        OSAL::SleepFor(50); // 50
-    }
 }
 
 bool DownloadMonitor::Open(const std::string &url)
@@ -145,7 +137,7 @@ bool DownloadMonitor::NeedRetry(const std::shared_ptr<DownloadRequest>& request)
     auto clientError = request->GetClientError();
     auto serverError = request->GetServerError();
     auto retryTimes = request->GetRetryTimes();
-    if (clientError != NetworkClientErrorCode::ERROR_OK && clientError != NetworkClientErrorCode::ERROR_NOT_RETRY
+    if ((clientError != NetworkClientErrorCode::ERROR_OK && clientError != NetworkClientErrorCode::ERROR_NOT_RETRY)
         || serverError != 0) {
         MEDIA_LOG_I("NeedRetry: clientError = " PUBLIC_LOG_D32 ", serverError = " PUBLIC_LOG_D32
             ", retryTimes = " PUBLIC_LOG_D32, clientError, serverError, retryTimes);
