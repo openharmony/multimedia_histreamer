@@ -119,7 +119,6 @@ private:
     static size_t RxHeaderData(void* buffer, size_t size, size_t nitems, void* userParam);
 
     std::string name_;
-    OSAL::Mutex mutex_ {};
     std::shared_ptr<NetworkClient> client_;
     std::shared_ptr<OSAL::Task> task_;
     std::shared_ptr<BlockingQueue<std::shared_ptr<DownloadRequest>>> requestQue_;
