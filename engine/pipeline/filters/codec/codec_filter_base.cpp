@@ -203,6 +203,130 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
                 MEDIA_LOG_W("one cap of plugin " PUBLIC_LOG_S " mismatch upstream cap", candidate.first->name.c_str());
                 continue;
             }
+            MEDIA_LOG_D("IN CODEC FILTER BASE: merge codec caps: ");
+            MEDIA_LOG_D("before merge: upstreamCap keys: ");
+            for (auto iter = upstreamCap->keys.begin(); iter != upstreamCap->keys.end(); iter++) {
+                switch (iter->first) {
+                    case Plugin::Capability::Key::MEDIA_BITRATE :
+                        MEDIA_LOG_D("upstreamCap key is: Plugin::Capability::Key::MEDIA_BITRATE");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_SAMPLE_RATE :
+                        MEDIA_LOG_D("upstreamCap key is: Plugin::Capability::Key::AUDIO_SAMPLE_RATE");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_CHANNELS :
+                        MEDIA_LOG_D("upstreamCap key is: Plugin::Capability::Key::AUDIO_CHANNELS");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_CHANNEL_LAYOUT :
+                        MEDIA_LOG_D("upstreamCap key is: Plugin::Capability::Key::AUDIO_CHANNEL_LAYOUT");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_SAMPLE_FORMAT :
+                        MEDIA_LOG_D("upstreamCap key is: Plugin::Capability::Key::AUDIO_SAMPLE_FORMAT");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_MPEG_VERSION :
+                        MEDIA_LOG_D("upstreamCap key is: Plugin::Capability::Key::AUDIO_MPEG_VERSION");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_MPEG_LAYER :
+                        MEDIA_LOG_D("upstreamCap key is: Plugin::Capability::Key::AUDIO_MPEG_LAYER");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_PROFILE :
+                        MEDIA_LOG_D("upstreamCap key is: Plugin::Capability::Key::AUDIO_AAC_PROFILE");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_LEVEL :
+                        MEDIA_LOG_D("upstreamCap key is: Plugin::Capability::Key::AUDIO_AAC_LEVEL");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_STREAM_FORMAT :
+                        MEDIA_LOG_D("upstreamCap key is: Plugin::Capability::Key::AUDIO_AAC_STREAM_FORMAT");
+                        break;
+                    case Plugin::Capability::Key::VIDEO_PIXEL_FORMAT :
+                        MEDIA_LOG_D("upstreamCap key is: Plugin::Capability::Key::VIDEO_PIXEL_FORMAT");
+                        break;
+                    default:
+                        MEDIA_LOG_D("upstreamCap keys not find");
+                        break;
+                }
+            }
+            MEDIA_LOG_D("before merge: outCap keys: ");
+            for (auto iter = outCap.keys.begin(); iter != outCap.keys.end(); iter++) {
+                switch (iter->first) {
+                    case Plugin::Capability::Key::MEDIA_BITRATE :
+                        MEDIA_LOG_D("outCap key is: Plugin::Capability::Key::MEDIA_BITRATE");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_SAMPLE_RATE :
+                        MEDIA_LOG_D("outCap key is: Plugin::Capability::Key::AUDIO_SAMPLE_RATE");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_CHANNELS :
+                        MEDIA_LOG_D("outCap key is: Plugin::Capability::Key::AUDIO_CHANNELS");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_CHANNEL_LAYOUT :
+                        MEDIA_LOG_D("outCap key is: Plugin::Capability::Key::AUDIO_CHANNEL_LAYOUT");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_SAMPLE_FORMAT :
+                        MEDIA_LOG_D("outCap key is: Plugin::Capability::Key::AUDIO_SAMPLE_FORMAT");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_MPEG_VERSION :
+                        MEDIA_LOG_D("outCap key is: Plugin::Capability::Key::AUDIO_MPEG_VERSION");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_MPEG_LAYER :
+                        MEDIA_LOG_D("outCap key is: Plugin::Capability::Key::AUDIO_MPEG_LAYER");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_PROFILE :
+                        MEDIA_LOG_D("outCap key is: Plugin::Capability::Key::AUDIO_AAC_PROFILE");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_LEVEL :
+                        MEDIA_LOG_D("outCap key is: Plugin::Capability::Key::AUDIO_AAC_LEVEL");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_STREAM_FORMAT :
+                        MEDIA_LOG_D("outCap key is: Plugin::Capability::Key::AUDIO_AAC_STREAM_FORMAT");
+                        break;
+                    case Plugin::Capability::Key::VIDEO_PIXEL_FORMAT :
+                        MEDIA_LOG_D("outCap key is: Plugin::Capability::Key::VIDEO_PIXEL_FORMAT");
+                        break;
+                    default:
+                        MEDIA_LOG_D("outCap keys not find");
+                        break;
+                }
+            }
+            MEDIA_LOG_D("after merge: thisOut keys: ");
+            for (auto iter = thisOut->keys.begin(); iter != thisOut->keys.end(); iter++) {
+                switch (iter->first) {
+                    case Plugin::Capability::Key::MEDIA_BITRATE :
+                        MEDIA_LOG_D("thisOut key is: Plugin::Capability::Key::MEDIA_BITRATE");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_SAMPLE_RATE :
+                        MEDIA_LOG_D("thisOut key is: Plugin::Capability::Key::AUDIO_SAMPLE_RATE");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_CHANNELS :
+                        MEDIA_LOG_D("thisOut key is: Plugin::Capability::Key::AUDIO_CHANNELS");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_CHANNEL_LAYOUT :
+                        MEDIA_LOG_D("thisOut key is: Plugin::Capability::Key::AUDIO_CHANNEL_LAYOUT");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_SAMPLE_FORMAT :
+                        MEDIA_LOG_D("thisOut key is: Plugin::Capability::Key::AUDIO_SAMPLE_FORMAT");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_MPEG_VERSION :
+                        MEDIA_LOG_D("thisOut key is: Plugin::Capability::Key::AUDIO_MPEG_VERSION");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_MPEG_LAYER :
+                        MEDIA_LOG_D("thisOut key is: Plugin::Capability::Key::AUDIO_MPEG_LAYER");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_PROFILE :
+                        MEDIA_LOG_D("thisOut key is: Plugin::Capability::Key::AUDIO_AAC_PROFILE");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_LEVEL :
+                        MEDIA_LOG_D("thisOut key is: Plugin::Capability::Key::AUDIO_AAC_LEVEL");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_STREAM_FORMAT :
+                        MEDIA_LOG_D("thisOut key is: Plugin::Capability::Key::AUDIO_AAC_STREAM_FORMAT");
+                        break;
+                    case Plugin::Capability::Key::VIDEO_PIXEL_FORMAT :
+                        MEDIA_LOG_D("thisOut key is: Plugin::Capability::Key::VIDEO_PIXEL_FORMAT");
+                        break;
+                    default:
+                        MEDIA_LOG_D("thisOut keys not find");
+                        break;
+                }
+            }
             atLeastOutCapMatched = true;
             thisOut->mime = outCap.mime;
 
@@ -256,9 +380,12 @@ bool CodecFilterBase::Configure(const std::string &inPort, const std::shared_ptr
         return false;
     }
     sinkParams_ = downstreamParams;
-    uint32_t bufferSize = CalculateBufferSize(thisMeta);
-    if (bufferSize == 0) {
-        bufferSize = MAX_OUT_DECODED_DATA_SIZE_PER_FRAME;
+    uint32_t bufferSize = 0;
+    if (GetPluginParameterLocked(Tag::VIDEO_HDI_BUFFER_SIZE, bufferSize) != ErrorCode::SUCCESS) {
+        bufferSize = CalculateBufferSize(thisMeta);
+        if (bufferSize == 0) {
+            bufferSize = MAX_OUT_DECODED_DATA_SIZE_PER_FRAME;
+        }
     }
     std::shared_ptr<Allocator> outAllocator = GetAllocator();
     codecMode_->CreateOutBufferPool(outAllocator, bufferCnt, bufferSize, bufferMetaType_);

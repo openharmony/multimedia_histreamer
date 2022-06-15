@@ -367,6 +367,88 @@ bool CapabilityValueCheck(CapabilityID key, std::pair<const Plugin::ValueType&, 
 bool MergeCapabilityKeys(const Capability& originCap, const Capability& otherCap, Capability& resCap)
 {
     resCap.keys.clear();
+    if (originCap.mime == "video/raw") {
+        for (auto iter = originCap.keys.begin(); iter != originCap.keys.end(); iter++) {
+            switch (iter->first) {
+                case Plugin::Capability::Key::MEDIA_BITRATE :
+                    MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::MEDIA_BITRATE");
+                    break;
+                case Plugin::Capability::Key::AUDIO_SAMPLE_RATE :
+                    MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_SAMPLE_RATE");
+                    break;
+                case Plugin::Capability::Key::AUDIO_CHANNELS :
+                    MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_CHANNELS");
+                    break;
+                case Plugin::Capability::Key::AUDIO_CHANNEL_LAYOUT :
+                    MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_CHANNEL_LAYOUT");
+                    break;
+                case Plugin::Capability::Key::AUDIO_SAMPLE_FORMAT :
+                    MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_SAMPLE_FORMAT");
+                    break;
+                case Plugin::Capability::Key::AUDIO_MPEG_VERSION :
+                    MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_MPEG_VERSION");
+                    break;
+                case Plugin::Capability::Key::AUDIO_MPEG_LAYER :
+                    MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_MPEG_LAYER");
+                    break;
+                case Plugin::Capability::Key::AUDIO_AAC_PROFILE :
+                    MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_AAC_PROFILE");
+                    break;
+                case Plugin::Capability::Key::AUDIO_AAC_LEVEL :
+                    MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_AAC_LEVEL");
+                    break;
+                case Plugin::Capability::Key::AUDIO_AAC_STREAM_FORMAT :
+                    MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_AAC_STREAM_FORMAT");
+                    break;
+                case Plugin::Capability::Key::VIDEO_PIXEL_FORMAT :
+                    MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::VIDEO_PIXEL_FORMAT");
+                    break;
+                default:
+                    MEDIA_LOG_D("upStreamCaps keys not find");
+                    break;
+            }
+        }
+        for (auto iter = otherCap.keys.begin(); iter != otherCap.keys.end(); iter++) {
+            switch (iter->first) {
+                case Plugin::Capability::Key::MEDIA_BITRATE :
+                    MEDIA_LOG_D("otherCap key is: Plugin::Capability::Key::MEDIA_BITRATE");
+                    break;
+                case Plugin::Capability::Key::AUDIO_SAMPLE_RATE :
+                    MEDIA_LOG_D("otherCap key is: Plugin::Capability::Key::AUDIO_SAMPLE_RATE");
+                    break;
+                case Plugin::Capability::Key::AUDIO_CHANNELS :
+                    MEDIA_LOG_D("otherCap key is: Plugin::Capability::Key::AUDIO_CHANNELS");
+                    break;
+                case Plugin::Capability::Key::AUDIO_CHANNEL_LAYOUT :
+                    MEDIA_LOG_D("otherCap key is: Plugin::Capability::Key::AUDIO_CHANNEL_LAYOUT");
+                    break;
+                case Plugin::Capability::Key::AUDIO_SAMPLE_FORMAT :
+                    MEDIA_LOG_D("otherCap key is: Plugin::Capability::Key::AUDIO_SAMPLE_FORMAT");
+                    break;
+                case Plugin::Capability::Key::AUDIO_MPEG_VERSION :
+                    MEDIA_LOG_D("otherCap key is: Plugin::Capability::Key::AUDIO_MPEG_VERSION");
+                    break;
+                case Plugin::Capability::Key::AUDIO_MPEG_LAYER :
+                    MEDIA_LOG_D("otherCap key is: Plugin::Capability::Key::AUDIO_MPEG_LAYER");
+                    break;
+                case Plugin::Capability::Key::AUDIO_AAC_PROFILE :
+                    MEDIA_LOG_D("otherCap key is: Plugin::Capability::Key::AUDIO_AAC_PROFILE");
+                    break;
+                case Plugin::Capability::Key::AUDIO_AAC_LEVEL :
+                    MEDIA_LOG_D("otherCap key is: Plugin::Capability::Key::AUDIO_AAC_LEVEL");
+                    break;
+                case Plugin::Capability::Key::AUDIO_AAC_STREAM_FORMAT :
+                    MEDIA_LOG_D("otherCap key is: Plugin::Capability::Key::AUDIO_AAC_STREAM_FORMAT");
+                    break;
+                case Plugin::Capability::Key::VIDEO_PIXEL_FORMAT :
+                    MEDIA_LOG_D("otherCap key is: Plugin::Capability::Key::VIDEO_PIXEL_FORMAT");
+                    break;
+                default:
+                    MEDIA_LOG_D("otherCap keys not find");
+                    break;
+            }
+        }
+    }
     for (const auto& pairKey : originCap.keys) {
         auto oIte = otherCap.keys.find(pairKey.first);
         if (oIte == otherCap.keys.end()) {
@@ -386,6 +468,48 @@ bool MergeCapabilityKeys(const Capability& originCap, const Capability& otherCap
         } else {
             //  if no intersections return false
             resCap.keys.clear();
+            if (originCap.mime == "video/raw") {
+                MEDIA_LOG_D("no intersections return false");
+                switch (pairKey.first) {
+                    case Plugin::Capability::Key::MEDIA_BITRATE :
+                        MEDIA_LOG_D("pairKey.first is: Plugin::Capability::Key::MEDIA_BITRATE");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_SAMPLE_RATE :
+                        MEDIA_LOG_D("pairKey.first is: Plugin::Capability::Key::AUDIO_SAMPLE_RATE");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_CHANNELS :
+                        MEDIA_LOG_D("pairKey.first is: Plugin::Capability::Key::AUDIO_CHANNELS");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_CHANNEL_LAYOUT :
+                        MEDIA_LOG_D("pairKey.first is: Plugin::Capability::Key::AUDIO_CHANNEL_LAYOUT");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_SAMPLE_FORMAT :
+                        MEDIA_LOG_D("pairKey.first is: Plugin::Capability::Key::AUDIO_SAMPLE_FORMAT");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_MPEG_VERSION :
+                        MEDIA_LOG_D("pairKey.first is: Plugin::Capability::Key::AUDIO_MPEG_VERSION");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_MPEG_LAYER :
+                        MEDIA_LOG_D("pairKey.first is: Plugin::Capability::Key::AUDIO_MPEG_LAYER");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_PROFILE :
+                        MEDIA_LOG_D("pairKey.first is: Plugin::Capability::Key::AUDIO_AAC_PROFILE");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_LEVEL :
+                        MEDIA_LOG_D("pairKey.first is: Plugin::Capability::Key::AUDIO_AAC_LEVEL");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_STREAM_FORMAT :
+                        MEDIA_LOG_D("pairKey.first is: Plugin::Capability::Key::AUDIO_AAC_STREAM_FORMAT");
+                        break;
+                    case Plugin::Capability::Key::VIDEO_PIXEL_FORMAT :
+                        MEDIA_LOG_D("pairKey.first is: Plugin::Capability::Key::VIDEO_PIXEL_FORMAT");
+                        break;
+                    default:
+                        MEDIA_LOG_D("pairKey.first not find");
+                        break;
+                }
+                MEDIA_LOG_D("pairKey.first is: " PUBLIC_LOG_D32, pairKey.first);
+            }
             return false;
         }
     }
@@ -403,9 +527,12 @@ bool MergeCapability(const Capability& originCap, const Capability& otherCap, Ca
     resCap.mime.clear();
     resCap.keys.clear();
     if (!IsSubsetMime(originCap.mime, otherCap.mime)) {
+//        MEDIA_LOG_D("IsSubsetMime return false, originCap.mime = " PUBLIC_LOG_S ", otherCap.mime = " PUBLIC_LOG_S, originCap.mime.c_str(), otherCap.mime.c_str());
         return false;
     }
+//    MEDIA_LOG_D("IsSubsetMime return true, originCap.mime = " PUBLIC_LOG_S ", otherCap.mime = " PUBLIC_LOG_S, originCap.mime.c_str(), otherCap.mime.c_str());
     if (!MergeCapabilityKeys(originCap, otherCap, resCap)) {
+        MEDIA_LOG_D("MergeCapabilityKeys return false");
         return false;
     }
     resCap.mime = originCap.mime;

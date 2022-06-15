@@ -162,6 +162,7 @@ enum struct Tag : uint32_t {
     VIDEO_SPECIFIC_H264_START = MAKE_VIDEO_SPECIFIC_START(VideoFormat::H264),
     VIDEO_H264_PROFILE,      ///< @see VideoH264Profile
     VIDEO_H264_LEVEL,        ///< uint32_t, h264 level
+    VIDEO_HDI_BUFFER_SIZE    ///< uint32_t, HDI out buffer size
 };
 /**
  * @enum Media protocol type.

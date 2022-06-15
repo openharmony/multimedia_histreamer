@@ -61,6 +61,7 @@ include_directories(
         ${TOP_DIR}/engine/foundation/osal
         ${TOP_DIR}/engine/foundation/utils
         ${TOP_DIR}/engine/pipeline/filters
+        ${TOP_DIR}/engine/pipeline/filters/common
         ${TOP_DIR}/engine/pipeline/filters/player
         ${TOP_DIR}/engine/plugin
 )

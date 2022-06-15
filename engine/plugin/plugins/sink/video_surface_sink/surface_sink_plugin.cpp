@@ -33,7 +33,7 @@ using namespace OHOS::Media::Plugin;
 using namespace VidSurfaceSinkPlugin;
 constexpr uint32_t DEFAULT_WIDTH = 640;
 constexpr uint32_t DEFAULT_HEIGHT = 480;
-constexpr uint32_t DEFAULT_BUFFER_NUM = 10;
+constexpr uint32_t DEFAULT_BUFFER_NUM = 25;
 constexpr int32_t DEFAULT_STRIDE_ALIGN = 8;
 
 std::shared_ptr<VideoSinkPlugin> VideoSinkPluginCreator(const std::string& name)

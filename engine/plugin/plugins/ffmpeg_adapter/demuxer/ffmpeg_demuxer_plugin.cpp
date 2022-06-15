@@ -673,7 +673,7 @@ Status RegisterPlugins(const std::shared_ptr<Register>& reg)
 void FfmpegLogPrint(void* avcl, int level, const char* fmt, va_list vl)
 {
     (void)avcl;
-    switch (level) {
+/*    switch (level) {
         case AV_LOG_INFO:
         case AV_LOG_DEBUG:
             HILOG_DEBUG(LOG_CORE, fmt, vl);
@@ -687,13 +687,13 @@ void FfmpegLogPrint(void* avcl, int level, const char* fmt, va_list vl)
         case AV_LOG_FATAL:
             HILOG_FATAL(LOG_CORE, fmt, vl);
             break;
-    }
+    }*/
 }
 #else
 void FfmpegLogPrint(void* avcl, int level, const char* fmt, va_list vl)
 {
     (void)avcl;
-    char buf[500] = {0};  // 500
+/*    char buf[500] = {0};  // 500
     (void)vsnprintf_s(buf, sizeof(buf), fmt, vl);
     switch (level) {
         case AV_LOG_WARNING:
@@ -709,7 +709,7 @@ void FfmpegLogPrint(void* avcl, int level, const char* fmt, va_list vl)
             break;
         default:
             break;
-    }
+    }*/
 }
 #endif
 

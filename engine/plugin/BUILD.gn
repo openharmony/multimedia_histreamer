@@ -45,9 +45,9 @@ config("hst_plugin_intf_config") {
     if (multimedia_histreamer_enable_video) {
       include_dirs += [
         "//commonlibrary/c_utils/base/include",
+        "//drivers/peripheral/display/interfaces/include",
         "//foundation/graphic/graphic_2d/frameworks/surface/include",
         "//foundation/graphic/graphic_2d/interfaces/inner_api/",
-        "//drivers/peripheral/display/interfaces/include",
         "//foundation/graphic/graphic_2d/utils/sync_fence/export",
       ]
     }
@@ -99,6 +99,7 @@ config("hst_plugin_core_config") {
   } else {
     include_dirs += [
       "//commonlibrary/c_utils/base/include",
+      "//drivers/peripheral/display/interfaces/include",
       "//foundation/graphic/graphic_2d/frameworks/surface/include",
       "//foundation/graphic/graphic_2d/interfaces/inner_api/",
       "//foundation/multimedia/player_framework/interfaces/inner_api/native",
@@ -113,6 +114,8 @@ source_set("histreamer_plugin_core") {
     "core/base.cpp",
     "core/codec.cpp",
     "core/demuxer.cpp",
+    "core/hdi_adapter.cpp",
+    "core/hdi_utils.cpp",
     "core/muxer.cpp",
     "core/output_sink.cpp",
     "core/plugin_core_utils.cpp",
@@ -160,7 +163,20 @@ source_set("histreamer_plugin_core") {
       public_deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
     }
   } else {
-    public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+    include_dirs = [
+      "//drivers/hdf_core/adapter/uhdf2/osal/include",
+      "//drivers/hdf_core/framework/include/utils",
+      "//drivers/peripheral/base",
+      "//drivers/peripheral/codec/hal/include",
+      "//drivers/peripheral/codec/interfaces/include",
+      "//drivers/peripheral/display/interfaces/include",
+      "//foundation/multimedia/histreamer/engine/pipeline/filters/common",
+      "//third_party/openmax/api/1.1.2",
+    ]
+    public_deps += [
+      "//drivers/peripheral/codec/hal:libcodec_hdi_omx_client",
+      "//third_party/bounds_checking_function:libsec_static",
+    ]
   }
   public_deps += [ "plugins:gen_plugin_static_header" ]
 }

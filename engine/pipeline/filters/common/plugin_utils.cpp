@@ -361,9 +361,89 @@ std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>>
     FindAvailablePlugins(const Plugin::Capability& upStreamCaps, Plugin::PluginType pluginType)
 {
     auto pluginNames = Plugin::PluginManager::Instance().ListPlugins(pluginType);
+/*    MEDIA_LOG_I("pluginName and pluginType is:");
+    std::string pluginTypeName {};
+    switch (pluginType) {
+        case Plugin::PluginType::SOURCE :
+            pluginTypeName = "SOURCE";
+            break;
+        case Plugin::PluginType::DEMUXER :
+            pluginTypeName = "DEMUXER";
+            break;
+        case Plugin::PluginType::CODEC :
+            pluginTypeName = "CODEC";
+            break;
+        case Plugin::PluginType::AUDIO_SINK :
+            pluginTypeName = "AUDIO_SINK";
+            break;
+        case Plugin::PluginType::VIDEO_SINK :
+            pluginTypeName = "VIDEO_SINK";
+            break;
+        default :
+            pluginTypeName = "MUXER or OUTPUT_SINK";
+            break;
+    }
+    for(auto iter = pluginNames.begin(); iter != pluginNames.end(); iter++) {
+        MEDIA_LOG_D(PUBLIC_LOG_S " : " PUBLIC_LOG_S, (*iter).c_str(), pluginTypeName.c_str());
+    }*/
     std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>> infos;
     for (const auto& name : pluginNames) {
         auto tmpInfo = Plugin::PluginManager::Instance().GetPluginInfo(pluginType, name);
+        if (pluginType == Plugin::PluginType::VIDEO_SINK) {
+            MEDIA_LOG_D("tmpInfo is: " PUBLIC_LOG_P, tmpInfo.get());
+            MEDIA_LOG_D("upStreamCaps: ");
+            for (auto iter = upStreamCaps.keys.begin(); iter != upStreamCaps.keys.end(); iter++) {
+                switch (iter->first) {
+                    case Plugin::Capability::Key::MEDIA_BITRATE :
+                        MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::MEDIA_BITRATE");
+                    break;
+                    case Plugin::Capability::Key::AUDIO_SAMPLE_RATE :
+                        MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_SAMPLE_RATE");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_CHANNELS :
+                        MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_CHANNELS");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_CHANNEL_LAYOUT :
+                        MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_CHANNEL_LAYOUT");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_SAMPLE_FORMAT :
+                        MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_SAMPLE_FORMAT");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_MPEG_VERSION :
+                        MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_MPEG_VERSION");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_MPEG_LAYER :
+                        MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_MPEG_LAYER");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_PROFILE :
+                        MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_AAC_PROFILE");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_LEVEL :
+                        MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_AAC_LEVEL");
+                        break;
+                    case Plugin::Capability::Key::AUDIO_AAC_STREAM_FORMAT :
+                        MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::AUDIO_AAC_STREAM_FORMAT");
+                        break;
+                    case Plugin::Capability::Key::VIDEO_PIXEL_FORMAT :
+                        MEDIA_LOG_D("upStreamCaps key is: Plugin::Capability::Key::VIDEO_PIXEL_FORMAT");
+                        break;
+                    default:
+                        MEDIA_LOG_D("upStreamCaps keys not find");
+                    break;
+                }
+            }
+            MEDIA_LOG_D("upStreamCaps keys size is " PUBLIC_LOG_D32, (int)upStreamCaps.keys.size());
+            MEDIA_LOG_D("tmpInfo->inCaps size is: " PUBLIC_LOG_D32, (int)tmpInfo->inCaps.size());
+            MEDIA_LOG_D("originCap.mime is: " PUBLIC_LOG_S, upStreamCaps.mime.c_str());
+            Capability cap;
+            for (const auto& capt : tmpInfo->inCaps) {
+                if (MergeCapability(upStreamCaps, capt, cap)) {
+                    MEDIA_LOG_D("MergeCapability(upStreamCaps, capt, cap) true");
+                } else {
+                    MEDIA_LOG_D("MergeCapability(upStreamCaps, capt, cap) false");
+                }
+            }
+        }
         Capability cap;
         if (ApplyCapabilitySet(upStreamCaps, tmpInfo->inCaps, cap)) {
             infos.emplace_back(tmpInfo, cap);
