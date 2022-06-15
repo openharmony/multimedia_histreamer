@@ -17,6 +17,7 @@
 #include "downloader.h"
 #include <algorithm>
 
+#include "http_curl_client.h"
 #include "foundation/log.h"
 #include "osal/utils/util.h"
 #include "securec.h"
@@ -66,16 +67,6 @@ bool DownloadRequest::IsEos() const
     return isEos_;
 }
 
-bool DownloadRequest::IsValidRequestFor(const std::string& url)
-{
-    return (url_ == url) && (startPos_ >= 0) && (startPos_ < GetFileContentLength());
-}
-
-int64_t DownloadRequest::GetDownloadPos()
-{
-    return startPos_;
-}
-
 int DownloadRequest::GetRetryTimes()
 {
     return retryTimes_;
@@ -105,7 +96,8 @@ Downloader::Downloader() noexcept
 {
     shouldStartNextRequest = true;
 
-    factory_ = std::make_shared<ClientFactory>(&RxHeaderData, &RxBodyData, this);
+    client_ = std::make_shared<HttpCurlClient>(&RxHeaderData, &RxBodyData, this);
+    client_->Init();
     requestQue_ = std::make_shared<BlockingQueue<std::shared_ptr<DownloadRequest>>>("downloadRequestQue",
                                                                                     REQUEST_QUEUE_SIZE);
 
@@ -152,7 +144,6 @@ void Downloader::Stop()
     MEDIA_LOG_I("Begin");
     requestQue_->SetActive(false);
     task_->Stop();
-    EndDownload();
     MEDIA_LOG_I("End");
 }
 
@@ -187,11 +178,6 @@ bool Downloader::BeginDownload()
     std::string url = currentRequest_->url_;
     FALSE_RETURN_V(!url.empty(), false);
 
-    std::string protocol = ClientFactory::GetProtocol(url);
-    FALSE_RETURN_V(!protocol.empty(), false);
-    client_ = factory_->GetClient(protocol);
-    FALSE_RETURN_V(client_ != nullptr, false);
-
     client_->Open(url);
 
     currentRequest_->requestSize_ = 1;
@@ -202,10 +188,6 @@ bool Downloader::BeginDownload()
     task_->Start();
     MEDIA_LOG_I("End");
     return true;
-}
-
-void Downloader::EndDownload()
-{
 }
 
 void Downloader::HttpDownloadLoop()
@@ -246,7 +228,6 @@ void Downloader::HttpDownloadLoop()
         if (requestQue_->Empty()) {
             task_->PauseAsync();
         }
-        EndDownload();
         shouldStartNextRequest = true;
     } else if (remaining < PER_REQUEST_SIZE) {
         currentRequest_->requestSize_ = remaining;

@@ -19,7 +19,6 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include "client_factory.h"
 #include "network_client.h"
 #include "osal/thread/task.h"
 #include "blocking_queue.h"
@@ -70,8 +69,6 @@ public:
     void SaveHeader(const HeaderInfo* header);
     bool IsChunked() const;
     bool IsEos() const;
-    bool IsValidRequestFor(const std::string& url);
-    int64_t GetDownloadPos();
     int GetRetryTimes();
     NetworkClientErrorCode GetClientError();
     NetworkServerErrorCode GetServerError();
@@ -116,13 +113,11 @@ public:
     bool Retry(const std::shared_ptr<DownloadRequest>& request);
 private:
     bool BeginDownload();
-    void EndDownload();
 
     void HttpDownloadLoop();
     static size_t RxBodyData(void* buffer, size_t size, size_t nitems, void* userParam);
     static size_t RxHeaderData(void* buffer, size_t size, size_t nitems, void* userParam);
 
-    std::shared_ptr<ClientFactory> factory_;
     std::shared_ptr<NetworkClient> client_;
     std::shared_ptr<OSAL::Task> task_;
     std::shared_ptr<BlockingQueue<std::shared_ptr<DownloadRequest>>> requestQue_;
