@@ -36,6 +36,7 @@ public:
     Status SeekTo(uint64_t offset)  override;
     Status Write(const std::shared_ptr<Buffer>& buffer) override;
     Status Flush() override;
+    Status Reset() override;
 private:
     Status OpenFile();
     void CloseFile();
