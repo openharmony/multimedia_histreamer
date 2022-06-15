@@ -59,11 +59,13 @@ void DownloadMonitor::HttpMonitorLoop()
 bool DownloadMonitor::Open(const std::string &url)
 {
     isPlaying_ = true;
+    taskQue_->Clear();
     return downloader_->Open(url);
 }
 
 void DownloadMonitor::Pause()
 {
+    taskQue_->Clear();
     downloader_->Pause();
     isPlaying_ = false;
 }
@@ -76,6 +78,7 @@ void DownloadMonitor::Resume()
 
 void DownloadMonitor::Close()
 {
+    taskQue_->Clear();
     downloader_->Close();
     task_->Stop();
     isPlaying_ = false;
@@ -98,6 +101,7 @@ bool DownloadMonitor::Read(unsigned char *buff, unsigned int wantReadLength,
 bool DownloadMonitor::Seek(int offset)
 {
     isPlaying_ = true;
+    taskQue_->Clear();
     return downloader_->Seek(offset);
 }
 
@@ -124,11 +128,6 @@ void DownloadMonitor::SetCallback(Callback* cb)
 
 void DownloadMonitor::SetStatusCallback(StatusCallbackFunc cb)
 {
-}
-
-void DownloadMonitor::DealDownloaderEvent(const std::shared_ptr<DownloadRequest>& request)
-{
-    downloader_->Retry(request);
 }
 
 bool DownloadMonitor::NeedRetry(const std::shared_ptr<DownloadRequest>& request)
@@ -159,7 +158,7 @@ bool DownloadMonitor::NeedRetry(const std::shared_ptr<DownloadRequest>& request)
 void DownloadMonitor::OnDownloadStatus(std::shared_ptr<DownloadRequest>& request)
 {
     if (NeedRetry(request)) {
-        taskQue_->Push([this, request] { DealDownloaderEvent(request); });
+        taskQue_->Push([this, request] { downloader_->Retry(request); });
     }
 }
 }

@@ -61,10 +61,6 @@ void AdaptiveStreaming::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 void AdaptiveStreaming::OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request)
 {
     MEDIA_LOG_I("OnDownloadStatus " PUBLIC_LOG_D32, status);
-    switch (status) {
-        default:
-            MEDIA_LOG_E("Unknown download status.");
-    }
 }
 }
 }

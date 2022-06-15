@@ -52,7 +52,7 @@ private:
     void HttpMonitorLoop();
     void OnDownloadStatus(std::shared_ptr<DownloadRequest>& request);
     bool NeedRetry(const std::shared_ptr<DownloadRequest>& request);
-    void DealDownloaderEvent(const std::shared_ptr<DownloadRequest>& request);
+
     std::shared_ptr<MediaDownloader> downloader_;
     std::shared_ptr<BlockingQueue<std::function<void()>>> taskQue_;
     std::atomic<bool> isPlaying_ {false};
