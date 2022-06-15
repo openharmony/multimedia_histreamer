@@ -119,7 +119,7 @@ void HttpMediaDownloader::SetCallback(Callback* cb)
     callback_ = cb;
 }
 
-void HttpMediaDownloader::SetDownloadStatusCallback(StatusCallbackFunc cb)
+void HttpMediaDownloader::SetStatusCallback(StatusCallbackFunc cb)
 {
     statusCallback_ = cb;
 }

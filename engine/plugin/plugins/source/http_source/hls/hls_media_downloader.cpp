@@ -139,7 +139,7 @@ void HlsMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
     buffer_->WriteBuffer(data, len, offset);
 }
 
-void HlsMediaDownloader::SetDownloadStatusCallback(StatusCallbackFunc cb)
+void HlsMediaDownloader::SetStatusCallback(StatusCallbackFunc cb)
 {
     statusCallback_ = cb;
 }

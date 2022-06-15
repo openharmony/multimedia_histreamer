@@ -40,7 +40,7 @@ public:
     bool IsStreaming() const override;
     void SetCallback(Callback* cb) override;
     void OnFragmentListChanged(const std::vector<std::string>& fragmentList) override;
-    void SetDownloadStatusCallback(StatusCallbackFunc cb) override;
+    void SetStatusCallback(StatusCallbackFunc cb) override;
     bool Retry(std::string& url, int64_t offset) override
     {
         return false;

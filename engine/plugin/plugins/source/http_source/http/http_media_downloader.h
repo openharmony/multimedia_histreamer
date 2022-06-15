@@ -43,7 +43,7 @@ public:
     double GetDuration() const override;
     bool IsStreaming() const override;
     void SetCallback(Callback* cb) override;
-    void SetDownloadStatusCallback(StatusCallbackFunc cb) override;
+    void SetStatusCallback(StatusCallbackFunc cb) override;
 private:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
     void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest> &request);

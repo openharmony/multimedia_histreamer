@@ -39,7 +39,7 @@ public:
     virtual double GetDuration() const = 0;
     virtual bool IsStreaming() const = 0;
     virtual void SetCallback(Callback* cb) = 0;
-    virtual void SetDownloadStatusCallback(StatusCallbackFunc cb) = 0;
+    virtual void SetStatusCallback(StatusCallbackFunc cb) = 0;
 };
 }
 }

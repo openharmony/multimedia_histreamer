@@ -32,7 +32,7 @@ DownloadMonitor::DownloadMonitor(std::shared_ptr<MediaDownloader> downloader) no
     auto statusCallback = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request) {
         OnDownloadStatus(std::forward<decltype(request)>(request));
     };
-    downloader_->SetDownloadStatusCallback(statusCallback);
+    downloader_->SetStatusCallback(statusCallback);
     taskProcess_ = std::make_shared<OSAL::Task>(std::string("DownloaderMonitorPop"));
     taskProcess_->RegisterHandler([this] { ProcessLoop(); });
     task_ = std::make_shared<OSAL::Task>(std::string("DownloaderMonitor"));
@@ -130,7 +130,7 @@ void DownloadMonitor::SetCallback(Callback* cb)
     downloader_->SetCallback(cb);
 }
 
-void DownloadMonitor::SetDownloadStatusCallback(StatusCallbackFunc cb)
+void DownloadMonitor::SetStatusCallback(StatusCallbackFunc cb)
 {
 }
 
