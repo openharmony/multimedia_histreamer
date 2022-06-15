@@ -33,7 +33,7 @@ public:
     virtual void Resume() = 0;
     virtual bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) = 0;
     virtual bool Seek(int offset) = 0;
-    virtual bool Retry(std::string& url, int64_t offset) = 0;
+    virtual bool Retry(const std::shared_ptr<DownloadRequest> &request) = 0;
 
     virtual size_t GetContentLength() const = 0;
     virtual double GetDuration() const = 0;

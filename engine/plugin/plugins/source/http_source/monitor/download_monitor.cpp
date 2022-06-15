@@ -81,9 +81,10 @@ void DownloadMonitor::Close()
     isPlaying_ = false;
 }
 
-bool DownloadMonitor::Retry(std::string &url, int64_t offset)
+bool DownloadMonitor::Retry(const std::shared_ptr<DownloadRequest> &request)
 {
-    return downloader_->Retry(url, offset);
+    MEDIA_LOG_E("DownloadMonitor Retry called, it should not happen.");
+    return false;
 }
 
 bool DownloadMonitor::Read(unsigned char *buff, unsigned int wantReadLength,
@@ -128,8 +129,7 @@ void DownloadMonitor::SetStatusCallback(StatusCallbackFunc cb)
 
 void DownloadMonitor::DealDownloaderEvent(const std::shared_ptr<DownloadRequest>& request)
 {
-    FALSE_RETURN(request->IsValidRequestFor(url_));
-    downloader_->Retry(url_, request->GetDownloadPos());
+    downloader_->Retry(request);
 }
 
 bool DownloadMonitor::NeedRetry(const std::shared_ptr<DownloadRequest>& request)

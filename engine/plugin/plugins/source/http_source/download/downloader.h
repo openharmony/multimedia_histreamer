@@ -75,6 +75,10 @@ public:
     int GetRetryTimes();
     NetworkClientErrorCode GetClientError();
     NetworkServerErrorCode GetServerError();
+    bool IsSame(const std::shared_ptr<DownloadRequest>& other)
+    {
+        return url_ == other->url_ && startPos_ == other->startPos_;
+    }
 
 private:
     void WaitHeaderUpdated() const;
@@ -109,7 +113,7 @@ public:
     void Resume();
     void Stop();
     bool Seek(int64_t offset);
-    bool Retry(std::string& url, int64_t offset);
+    bool Retry(const std::shared_ptr<DownloadRequest>& request);
 private:
     bool BeginDownload();
     void EndDownload();

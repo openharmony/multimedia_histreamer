@@ -40,7 +40,7 @@ public:
     bool Seek(int offset) override;
     void Pause() override;
     void Resume() override;
-    bool Retry(std::string& url, int64_t offset) override;
+    bool Retry(const std::shared_ptr<DownloadRequest> &request) override;
 
     size_t GetContentLength() const override;
     double GetDuration() const override;

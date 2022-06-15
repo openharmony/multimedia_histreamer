@@ -63,9 +63,9 @@ void HttpMediaDownloader::Resume()
     downloader_->Resume();
 }
 
-bool HttpMediaDownloader::Retry(std::string &url, int64_t offset)
+bool HttpMediaDownloader::Retry(const std::shared_ptr<DownloadRequest> &request)
 {
-    return downloader_->Retry(url, offset);
+    return downloader_->Retry(request);
 }
 
 bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,

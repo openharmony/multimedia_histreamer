@@ -37,7 +37,7 @@ public:
     void Resume() override;
     bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) override;
     bool Seek(int offset) override;
-    bool Retry(std::string& url, int64_t offset) override;
+    bool Retry(const std::shared_ptr<DownloadRequest> &request) override;
 
     size_t GetContentLength() const override;
     double GetDuration() const override;

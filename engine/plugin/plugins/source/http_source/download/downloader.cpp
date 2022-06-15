@@ -169,14 +169,14 @@ bool Downloader::Seek(int64_t offset)
     return true;
 }
 
-bool Downloader::Retry(std::string &url, int64_t offset)
+bool Downloader::Retry(const std::shared_ptr<DownloadRequest>& request)
 {
     MEDIA_LOG_I("Begin");
-    FALSE_RETURN_V(!url.empty(), false);
     FALSE_RETURN_V(client_ != nullptr, false);
+    FALSE_RETURN_V(currentRequest_ != nullptr, false);
+    FALSE_RETURN_V(currentRequest_->IsSame(request), false);
     currentRequest_->retryTimes_++;
     Pause();
-    Seek(offset);
     Resume();
     return true;
 }

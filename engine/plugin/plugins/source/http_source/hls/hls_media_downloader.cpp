@@ -143,6 +143,11 @@ void HlsMediaDownloader::SetStatusCallback(StatusCallbackFunc cb)
 {
     statusCallback_ = cb;
 }
+
+bool HlsMediaDownloader::Retry(const std::shared_ptr<DownloadRequest> &request)
+{
+    return downloader_->Retry(request);
+}
 }
 }
 }
