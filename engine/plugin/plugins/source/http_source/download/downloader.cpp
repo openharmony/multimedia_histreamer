@@ -133,6 +133,7 @@ void Downloader::Pause()
 void Downloader::Resume()
 {
     MEDIA_LOG_I("Begin");
+    OSAL::ScopedLock lock(mutex_);
     client_->Open(currentRequest_->url_);
     currentRequest_->isEos_ = false;
     Start();
@@ -150,6 +151,7 @@ void Downloader::Stop()
 bool Downloader::Seek(int64_t offset)
 {
     MEDIA_LOG_I("Begin");
+    OSAL::ScopedLock lock(mutex_);
     if (offset >= 0 && offset < currentRequest_->GetFileContentLength()) {
         currentRequest_->startPos_ = offset;
     }
@@ -162,7 +164,8 @@ bool Downloader::Seek(int64_t offset)
 
 bool Downloader::Retry(const std::shared_ptr<DownloadRequest>& request)
 {
-    MEDIA_LOG_I("Begin");
+    MEDIA_LOG_I("Downloader Retry Begin");
+    OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(client_ != nullptr, false);
     FALSE_RETURN_V(currentRequest_ != nullptr, false);
     FALSE_RETURN_V(currentRequest_->IsSame(request), false);
@@ -192,6 +195,7 @@ bool Downloader::BeginDownload()
 
 void Downloader::HttpDownloadLoop()
 {
+    OSAL::ScopedLock lock(mutex_);
     if (shouldStartNextRequest) {
         currentRequest_ = requestQue_->Pop(); // 1000);
         if (!currentRequest_) {
@@ -201,8 +205,8 @@ void Downloader::HttpDownloadLoop()
         shouldStartNextRequest = false;
     }
     FALSE_RETURN_W(currentRequest_ != nullptr);
-    NetworkClientErrorCode clientCode;
-    NetworkServerErrorCode serverCode;
+    NetworkClientErrorCode clientCode = NetworkClientErrorCode::ERROR_OK;
+    NetworkServerErrorCode serverCode = 0;
     long startPos = currentRequest_->startPos_;
     if (currentRequest_->requestWholeFile_) {
         startPos = -1;

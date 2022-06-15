@@ -95,7 +95,7 @@ bool HttpMediaDownloader::Seek(int offset)
     downloader_->Pause();
     buffer_->Clear();
     downloader_->Seek(offset);
-    downloader_->Start();
+    downloader_->Resume();
     return true;
 }
 
