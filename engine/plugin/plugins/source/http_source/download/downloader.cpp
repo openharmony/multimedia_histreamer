@@ -17,8 +17,8 @@
 #include "downloader.h"
 #include <algorithm>
 
-#include "http_curl_client.h"
 #include "foundation/log.h"
+#include "http_curl_client.h"
 #include "osal/utils/util.h"
 #include "securec.h"
 #include "steady_clock.h"
@@ -212,18 +212,17 @@ void Downloader::HttpDownloadLoop()
     }
     Status ret = client_->RequestData(startPos, currentRequest_->requestSize_,
                                       serverCode, clientCode);
+    currentRequest_->clientError_ = clientCode;
+    currentRequest_->serverError_ = serverCode;
     if (ret == Status::OK) {
         if (currentRequest_->retryTimes_ > 0) {
             currentRequest_->retryTimes_ = 0;
         }
     } else {
         MEDIA_LOG_E("Client request data failed. ret = " PUBLIC_LOG_D32, static_cast<int32_t>(ret));
-    }
-    currentRequest_->clientError_ = clientCode;
-    currentRequest_->serverError_ = serverCode;
-    if (ret != Status::OK || currentRequest_->retryTimes_ > 0) {
         currentRequest_->statusCallback_(DownloadStatus::PARTTAL_DOWNLOAD, currentRequest_);
     }
+
     int64_t remaining = currentRequest_->headerInfo_.fileContentLen - currentRequest_->startPos_;
     if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
         MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,
