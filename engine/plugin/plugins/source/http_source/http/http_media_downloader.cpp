@@ -30,7 +30,7 @@ HttpMediaDownloader::HttpMediaDownloader() noexcept
     buffer_ = std::make_shared<RingBuffer>(RING_BUFFER_SIZE);
     buffer_->Init();
 
-    downloader_ = std::make_shared<Downloader>();
+    downloader_ = std::make_shared<Downloader>("http");
 }
 
 bool HttpMediaDownloader::Open(const std::string& url)

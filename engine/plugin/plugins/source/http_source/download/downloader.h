@@ -101,7 +101,7 @@ private:
 
 class Downloader {
 public:
-    Downloader() noexcept;
+    explicit Downloader(std::string name) noexcept;
     ~Downloader() = default;
 
     bool Download(const std::shared_ptr<DownloadRequest>& request, int32_t waitMs);
@@ -118,6 +118,7 @@ private:
     static size_t RxBodyData(void* buffer, size_t size, size_t nitems, void* userParam);
     static size_t RxHeaderData(void* buffer, size_t size, size_t nitems, void* userParam);
 
+    std::string name_;
     std::shared_ptr<NetworkClient> client_;
     std::shared_ptr<OSAL::Task> task_;
     std::shared_ptr<BlockingQueue<std::shared_ptr<DownloadRequest>>> requestQue_;

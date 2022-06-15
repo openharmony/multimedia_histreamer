@@ -31,7 +31,7 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
     buffer_ = std::make_shared<RingBuffer>(RING_BUFFER_SIZE);
     buffer_->Init();
 
-    downloader_ = std::make_shared<Downloader>();
+    downloader_ = std::make_shared<Downloader>("hlsMedia");
     downloadTask_ = std::make_shared<OSAL::Task>(std::string("FragmentDownload"));
     downloadTask_->RegisterHandler([this] { FragmentDownloadLoop(); });
 

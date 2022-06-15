@@ -22,7 +22,7 @@ namespace Plugin {
 namespace HttpPlugin {
 AdaptiveStreaming::AdaptiveStreaming()
 {
-    downloader = std::make_shared<Downloader>();
+    downloader = std::make_shared<Downloader>("hlsPlayList");
     dataSave_ = [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
         SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
                  std::forward<decltype(offset)>(offset));

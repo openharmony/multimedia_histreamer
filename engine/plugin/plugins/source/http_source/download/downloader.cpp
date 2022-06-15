@@ -92,16 +92,16 @@ void DownloadRequest::WaitHeaderUpdated() const
     MEDIA_LOG_D("isHeaderUpdated " PUBLIC_LOG_D32 ", times " PUBLIC_LOG_ZU, isHeaderUpdated, times);
 }
 
-Downloader::Downloader() noexcept
+Downloader::Downloader(std::string name) noexcept : name_(std::move(name))
 {
     shouldStartNextRequest = true;
 
     client_ = std::make_shared<HttpCurlClient>(&RxHeaderData, &RxBodyData, this);
     client_->Init();
-    requestQue_ = std::make_shared<BlockingQueue<std::shared_ptr<DownloadRequest>>>("downloadRequestQue",
+    requestQue_ = std::make_shared<BlockingQueue<std::shared_ptr<DownloadRequest>>>(name_ + "RequestQue",
                                                                                     REQUEST_QUEUE_SIZE);
 
-    task_ = std::make_shared<OSAL::Task>(std::string("HttpDownloader"));
+    task_ = std::make_shared<OSAL::Task>(std::string(name_ + "Downloader"));
     task_->RegisterHandler([this] { HttpDownloadLoop(); });
 }
 
