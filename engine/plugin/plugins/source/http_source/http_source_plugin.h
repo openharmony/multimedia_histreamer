@@ -23,13 +23,6 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-enum class HttpType : int32_t {
-    Http_TYPE_INVALID = -1,
-    Http_TYPE_M3U8,
-    Http_TYPE_DASH,
-    Http_TYPE,
-};
-
 class HttpSourcePlugin : public SourcePlugin {
 public:
     explicit HttpSourcePlugin(std::string name) noexcept;
@@ -59,7 +52,6 @@ private:
     std::shared_ptr<MediaDownloader> executor_;
     OSAL::Mutex mutex_ {};
     bool delayReady {true};
-    HttpType type_;
 };
 } // namespace HttpPluginLite
 } // namespace Plugin 

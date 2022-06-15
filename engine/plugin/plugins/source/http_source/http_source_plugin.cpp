@@ -15,10 +15,10 @@
 #define HST_LOG_TAG "HttpSourcePlugin"
 
 #include "http_source_plugin.h"
-#include "monitor/download_monitor.h"
+#include "foundation/log.h"
 #include "hls/hls_media_downloader.h"
 #include "http/http_media_downloader.h"
-#include "foundation/log.h"
+#include "monitor/download_monitor.h"
 
 namespace OHOS {
 namespace Media {
@@ -50,8 +50,7 @@ HttpSourcePlugin::HttpSourcePlugin(std::string name) noexcept
     : SourcePlugin(std::move(name)),
       bufferSize_(DEFAULT_BUFFER_SIZE),
       waterline_(0),
-      executor_(nullptr),
-      type_(HttpType::Http_TYPE)
+      executor_(nullptr)
 {
     MEDIA_LOG_D("HttpSourcePlugin IN");
 }
@@ -78,12 +77,10 @@ Status HttpSourcePlugin::Deinit()
 Status HttpSourcePlugin::Prepare()
 {
     MEDIA_LOG_D("IN");
-    if (type_ == HttpType::Http_TYPE_M3U8) {
-        return Status::OK;
-    } else if (type_ == HttpType::Http_TYPE) {
+    if (delayReady) {
         return Status::ERROR_DELAY_READY;
     }
-    return Status::ERROR_UNKNOWN;
+    return Status::OK;
 }
 
 Status HttpSourcePlugin::Reset()
@@ -156,11 +153,9 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     auto uri = source->GetSourceUri();
     if (uri.find(".m3u8") != std::string::npos) {
         executor_ = std::make_shared<DownloadMonitor>(std::make_shared<HlsMediaDownloader>());
-        type_ = HttpType::Http_TYPE_M3U8;
         delayReady = false;
     } else if (uri.compare(0, 4, "http") == 0) { // 0 : position, 4: count
         executor_ = std::make_shared<DownloadMonitor>(std::make_shared<HttpMediaDownloader>());
-        type_ = HttpType::Http_TYPE;
     }
     FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
 
