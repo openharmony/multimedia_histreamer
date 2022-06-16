@@ -73,6 +73,8 @@ public:
     int32_t Seek(int64_t timeMs) override;
     int32_t GetCurrentTime(int64_t& currentMS) override;
     int32_t GetDuration(int64_t& durationMs) override;
+    int32_t Release();
+    int32_t SetVolume(float leftVolume, float rightVolume);
 private:
     std::shared_ptr<Media::PlayerInterface> player_;
 };
@@ -121,7 +123,7 @@ int32_t TestPlayerImpl::Pause()
 int32_t TestPlayerImpl::Release()
 {
     player_ = nullptr;
-    return ERR_OK;
+    return 0;
 }
 
 int32_t TestPlayerImpl::Stop()
