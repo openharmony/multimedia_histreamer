@@ -15,6 +15,7 @@
 #define HST_LOG_TAG "DownloadMonitor"
 
 #include "download_monitor.h"
+#include "foundation/cpp_ext/algorithm_ext.h"
 
 namespace OHOS {
 namespace Media {
@@ -157,7 +158,7 @@ void DownloadMonitor::OnDownloadStatus(std::shared_ptr<DownloadRequest>& request
 {
     if (NeedRetry(request)) {
         OSAL::ScopedLock lock(taskMutex_);
-        bool exists = std::any_of(retryTasks_.begin(), retryTasks_.end(), [&](const RetryRequest& item){
+        bool exists = CppExt::AnyOf(retryTasks_.begin(), retryTasks_.end(), [&](const RetryRequest& item){
             return item.request->IsSame(request);
         });
         if (!exists) {
