@@ -46,11 +46,11 @@ void DownloadMonitor::HttpMonitorLoop()
         if ((lastReadTime_ != 0) && (nowTime - lastReadTime_ >= 10)) {  // 10
             MEDIA_LOG_D("HttpMonitorLoop : too long without reading data, paused");
             Pause();
-        } else {
-            if (!taskQue_->Empty()) {
-                auto f = taskQue_->Pop();
-                f();
-            }
+        }
+    } else {
+        if (!taskQue_->Empty()) {
+            auto f = taskQue_->Pop();
+            f();
         }
     }
     OSAL::SleepFor(50); // 50
