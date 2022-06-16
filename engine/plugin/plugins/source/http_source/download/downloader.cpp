@@ -163,7 +163,7 @@ bool Downloader::Seek(int64_t offset)
 // Pause download thread before use currentRequest_
 bool Downloader::Retry(const std::shared_ptr<DownloadRequest>& request)
 {
-    MEDIA_LOG_I("Downloader Retry Begin");
+    MEDIA_LOG_I(PUBLIC_LOG_S " Retry Begin, url : " PUBLIC_LOG_S, name_.c_str(), request->url_.c_str());
     FALSE_RETURN_V(client_ != nullptr, false);
     Pause();
     if (currentRequest_ != nullptr && currentRequest_->IsSame(request) && !shouldStartNextRequest) {
@@ -234,7 +234,8 @@ void Downloader::HttpDownloadLoop()
         }
     } else {
         MEDIA_LOG_E("Client request data failed. ret = " PUBLIC_LOG_D32, static_cast<int32_t>(ret));
-        currentRequest_->statusCallback_(DownloadStatus::PARTTAL_DOWNLOAD, currentRequest_);
+        std::shared_ptr<Downloader> unused;
+        currentRequest_->statusCallback_(DownloadStatus::PARTTAL_DOWNLOAD, unused, currentRequest_);
         task_->PauseAsync();
     }
 }

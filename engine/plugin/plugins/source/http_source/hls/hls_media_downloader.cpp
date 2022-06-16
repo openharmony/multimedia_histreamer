@@ -41,6 +41,9 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
         SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
                  std::forward<decltype(offset)>(offset));
     };
+
+    adaptiveStreaming_ = std::make_shared<HLSStreaming>();
+    adaptiveStreaming_->SetFragmentListCallback(this);
 }
 
 void HlsMediaDownloader::FragmentDownloadLoop()
@@ -48,8 +51,12 @@ void HlsMediaDownloader::FragmentDownloadLoop()
     std::string url = fragmentList_->Pop();
     if (!fragmentDownloadStart[url]) {
         fragmentDownloadStart[url] = true;
+        auto realStatusCallback = [this] (DownloadStatus&& status, std::shared_ptr<Downloader>& downloader,
+                                          std::shared_ptr<DownloadRequest>& request) {
+            statusCallback_(status, downloader_, std::forward<decltype(request)>(request));
+        };
         // TO DO: If the fragment file is too large, should not requestWholeFile.
-        downloadRequest_ = std::make_shared<DownloadRequest>(url, dataSave_, statusCallback_, true);
+        downloadRequest_ = std::make_shared<DownloadRequest>(url, dataSave_, realStatusCallback, true);
         downloader_->Download(downloadRequest_, -1); // -1
         downloader_->Start();
     }
@@ -57,8 +64,6 @@ void HlsMediaDownloader::FragmentDownloadLoop()
 
 bool HlsMediaDownloader::Open(const std::string& url)
 {
-    adaptiveStreaming_ = std::make_shared<HLSStreaming>();
-    adaptiveStreaming_->SetFragmentListCallback(this);
     adaptiveStreaming_->ProcessManifest(url);
     adaptiveStreaming_->Start();
     downloadTask_->Start();
@@ -142,11 +147,7 @@ void HlsMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 void HlsMediaDownloader::SetStatusCallback(StatusCallbackFunc cb)
 {
     statusCallback_ = cb;
-}
-
-bool HlsMediaDownloader::Retry(const std::shared_ptr<DownloadRequest> &request)
-{
-    return downloader_->Retry(request);
+    adaptiveStreaming_->SetStatusCallback(cb);
 }
 }
 }

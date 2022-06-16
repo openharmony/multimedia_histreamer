@@ -27,8 +27,9 @@ namespace {
 DownloadMonitor::DownloadMonitor(std::shared_ptr<MediaDownloader> downloader) noexcept
     : downloader_(std::move(downloader))
 {
-    auto statusCallback = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request) {
-        OnDownloadStatus(std::forward<decltype(request)>(request));
+    auto statusCallback = [this] (DownloadStatus&& status, std::shared_ptr<Downloader>& downloader,
+        std::shared_ptr<DownloadRequest>& request) {
+        OnDownloadStatus(std::forward<decltype(downloader)>(downloader), std::forward<decltype(request)>(request));
     };
     downloader_->SetStatusCallback(statusCallback);
     task_ = std::make_shared<OSAL::Task>(std::string("HttpMonitor"));
@@ -82,12 +83,6 @@ void DownloadMonitor::Close()
     downloader_->Close();
     task_->Stop();
     isPlaying_ = false;
-}
-
-bool DownloadMonitor::Retry(const std::shared_ptr<DownloadRequest> &request)
-{
-    MEDIA_LOG_E("DownloadMonitor Retry called, it should not happen.");
-    return false;
 }
 
 bool DownloadMonitor::Read(unsigned char *buff, unsigned int wantReadLength,
@@ -154,15 +149,17 @@ bool DownloadMonitor::NeedRetry(const std::shared_ptr<DownloadRequest>& request)
     return false;
 }
 
-void DownloadMonitor::OnDownloadStatus(std::shared_ptr<DownloadRequest>& request)
+void DownloadMonitor::OnDownloadStatus(std::shared_ptr<Downloader>& downloader,
+                                       std::shared_ptr<DownloadRequest>& request)
 {
+    FALSE_RETURN_MSG(downloader != nullptr, "downloader is null, url is " PUBLIC_LOG_S, request->GetUrl().c_str());
     if (NeedRetry(request)) {
         OSAL::ScopedLock lock(taskMutex_);
         bool exists = CppExt::AnyOf(retryTasks_.begin(), retryTasks_.end(), [&](const RetryRequest& item){
             return item.request->IsSame(request);
         });
         if (!exists) {
-            RetryRequest retryRequest{request, [this, request] { downloader_->Retry(request); }};
+            RetryRequest retryRequest{request, [downloader, request] { downloader->Retry(request); }};
             retryTasks_.emplace_back(std::move(retryRequest));
         }
     }

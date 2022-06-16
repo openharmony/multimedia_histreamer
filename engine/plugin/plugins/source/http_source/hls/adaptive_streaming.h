@@ -34,6 +34,7 @@ public:
 
     virtual void ProcessManifest(std::string url) = 0;
     virtual void UpdateManifest() = 0;
+    virtual void ParseManifest() = 0;
     virtual void FragmentListUpdateLoop() = 0;
     virtual void SetFragmentListCallback(FragmentListChangeCallback* callback) = 0;
     virtual double GetDuration() const = 0;
@@ -46,9 +47,12 @@ public:
     {
         updateTask_->Stop();
     }
+    void SetStatusCallback(StatusCallbackFunc cb);
+
 protected:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
-    void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request);
+    void OnDownloadStatus(DownloadStatus status, std::shared_ptr<Downloader>&,
+                          std::shared_ptr<DownloadRequest>& request);
     void Open(const std::string& url);
 protected:
     std::shared_ptr<Downloader> downloader;

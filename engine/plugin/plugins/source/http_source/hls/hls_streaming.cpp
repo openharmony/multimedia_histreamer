@@ -28,25 +28,14 @@ void HLSStreaming::FragmentListUpdateLoop()
 
 void HLSStreaming::ProcessManifest(std::string url)
 {
+    url_ = url;
+    master_ = nullptr;
     Open(url);
-    master_ = std::make_shared<M3U8MasterPlaylist>(playList_, url);
-    currentVariant_ = master_->defaultVariant_;
-    if (!master_->isSimple_) {
-        UpdateManifest();
-    }
 }
 
 void HLSStreaming::UpdateManifest()
 {
     Open(currentVariant_->m3u8_->uri_);
-    currentVariant_->m3u8_->Update(playList_);
-    auto files = currentVariant_->m3u8_->files_;
-    auto fragmentList = std::vector<std::string>();
-    fragmentList.reserve(files.size());
-    for (auto& file :  files) {
-        fragmentList.push_back(file->uri_);
-    }
-    callback_->OnFragmentListChanged(fragmentList);
 }
 
 void HLSStreaming::SetFragmentListCallback(FragmentListChangeCallback* callback)
@@ -56,12 +45,38 @@ void HLSStreaming::SetFragmentListCallback(FragmentListChangeCallback* callback)
 
 double HLSStreaming::GetDuration() const
 {
+    if (!master_) {
+        return 0;
+    }
     return master_->bLive_ ? -1.0 : master_->duration_; // -1.0
 }
 
 bool HLSStreaming::IsStreaming() const
 {
+    if (master_ == nullptr) {
+        return true;
+    }
     return master_->bLive_;
+}
+
+void HLSStreaming::ParseManifest()
+{
+    if (!master_) {
+        master_ = std::make_shared<M3U8MasterPlaylist>(playList_, url_);
+        currentVariant_ = master_->defaultVariant_;
+        if (!master_->isSimple_) {
+            UpdateManifest();
+        }
+    } else {
+        currentVariant_->m3u8_->Update(playList_);
+        auto files = currentVariant_->m3u8_->files_;
+        auto fragmentList = std::vector<std::string>();
+        fragmentList.reserve(files.size());
+        for (auto &file: files) {
+            fragmentList.push_back(file->uri_);
+        }
+        callback_->OnFragmentListChanged(fragmentList);
+    }
 }
 }
 }

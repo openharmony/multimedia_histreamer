@@ -47,8 +47,6 @@ public:
     bool Seek(int offset) override;
     void Pause() override;
     void Resume() override;
-    bool Retry(const std::shared_ptr<DownloadRequest> &request) override;
-
     size_t GetContentLength() const override;
     double GetDuration() const override;
     bool IsStreaming() const override;
@@ -57,7 +55,7 @@ public:
 
 private:
     void HttpMonitorLoop();
-    void OnDownloadStatus(std::shared_ptr<DownloadRequest>& request);
+    void OnDownloadStatus(std::shared_ptr<Downloader>& downloader, std::shared_ptr<DownloadRequest>& request);
     bool NeedRetry(const std::shared_ptr<DownloadRequest>& request);
 
     std::shared_ptr<MediaDownloader> downloader_;
