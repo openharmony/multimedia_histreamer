@@ -12,23 +12,13 @@
 # limitations under the License.
 #
 import("//foundation/multimedia/histreamer/config.gni")
-if (!hst_is_lite_sys) {
-  ohos_kernel_type = ""
-}
 
 group("plugin_stream_source") {
   deps = [ ":histreamer_plugin_StreamSource" ]
 }
 
-if (ohos_kernel_type == "liteos_m") {
-  target_type = "static_library"
-} else {
-  target_type = "shared_library"
-}
-
-target(target_type, "histreamer_plugin_StreamSource") {
+source_set("streamsource") {
   sources = [ "stream_source_plugin.cpp" ]
-  include_dirs = [ "//foundation/multimedia/utils/lite/interfaces/kits" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
@@ -37,5 +27,27 @@ target(target_type, "histreamer_plugin_StreamSource") {
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
   if (hst_is_lite_sys) {
     public_deps += [ "//foundation/multimedia/utils/lite:media_common" ]
+  }
+}
+
+if (hst_is_lite_sys) {
+  #lite
+  import("//build/lite/config/component/lite_component.gni")
+  lite_library("histreamer_plugin_StreamSource") {
+    if (ohos_kernel_type == "liteos_m") {
+      target_type = "static_library"
+    } else {
+      target_type = "shared_library"
+    }
+    deps = [ ":streamsource" ]
+  }
+} else {
+  #standard
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer_plugin_StreamSource") {
+    deps = [ ":streamsource" ]
+    relative_install_dir = "media/histreamer_plugins"
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
   }
 }
