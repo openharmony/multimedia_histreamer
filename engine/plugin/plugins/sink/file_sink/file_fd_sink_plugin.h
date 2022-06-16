@@ -18,7 +18,6 @@
 #include "plugin/common/media_sink.h"
 #include "plugin/interface/output_sink_plugin.h"
 
-
 namespace OHOS {
 namespace Media {
 namespace Plugin {
@@ -33,6 +32,7 @@ public:
     Status SeekTo(uint64_t offset)  override;
     Status Write(const std::shared_ptr<Buffer>& buffer) override;
     Status Flush() override;
+    Status Reset() override;
 private:
     void CloseFd();
     int32_t fd_ {-1};

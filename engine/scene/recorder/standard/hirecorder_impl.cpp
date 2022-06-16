@@ -45,6 +45,7 @@ HiRecorderImpl::HiRecorderImpl() : fsm_(*this), curFsmState_(StateId::INIT)
 
 HiRecorderImpl::~HiRecorderImpl()
 {
+    fsm_.SendEventAsync(Intent::RESET);
     fsm_.Stop();
     MEDIA_LOG_D("dtor called.");
 }
@@ -177,6 +178,17 @@ int32_t HiRecorderImpl::Prepare()
         MEDIA_LOG_E("Prepare failed with error " PUBLIC_LOG_S, GetErrorName(ret));
     } else {
         PROFILE_END("Prepare successfully,");
+    }
+    OSAL::ScopedLock lock(stateMutex_);
+    if (curFsmState_ == StateId::RECORDING_SETTING) { // Wait state change to ready
+        cond_.Wait(lock, [this] { return curFsmState_ != StateId::RECORDING_SETTING; });
+    }
+    MEDIA_LOG_D("Prepare finished, current fsm state: " PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
+    PROFILE_END("Prepare finished, current fsm state: " PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
+    if (curFsmState_ == StateId::READY) {
+        ret = ErrorCode::SUCCESS;
+    } else {
+        ret = ErrorCode::ERROR_UNKNOWN;
     }
     return TransErrorCode(ret);
 }

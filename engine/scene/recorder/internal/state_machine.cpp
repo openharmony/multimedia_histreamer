@@ -16,6 +16,7 @@
 #define HST_LOG_TAG "StateMachine"
 
 #include "state_machine.h"
+#include "osal/utils/util.h"
 #include "utils/steady_clock.h"
 
 namespace OHOS {
@@ -38,6 +39,9 @@ StateMachine::StateMachine(RecorderExecutor& executor)
 void StateMachine::Stop()
 {
     MEDIA_LOG_D("Stop called.");
+    while (!jobs_.Empty()) {
+        OSAL::SleepFor(10); // 10
+    }
     jobs_.SetActive(false);
     Task::Stop();
 }
@@ -64,7 +68,7 @@ ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param) const
 
 ErrorCode StateMachine::SendEvent(Intent intent, const Plugin::Any& param)
 {
-    constexpr int timeoutMs = 5000; /// magic number
+    constexpr int timeoutMs = 30000; /// 30000 ms
     ErrorCode errorCode = ErrorCode::ERROR_TIMED_OUT;
     if (!intentSync_.WaitFor(intent,
                              [this, intent, param] { return SendEventAsync(intent, param) == ErrorCode::SUCCESS; },

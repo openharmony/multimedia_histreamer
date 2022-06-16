@@ -19,8 +19,8 @@
 #include <fcntl.h>
 #else
 #include <sys/types.h>
-#include <unistd.h>
 #endif
+#include <unistd.h>
 #include "foundation/log.h"
 
 namespace OHOS {
@@ -93,7 +93,19 @@ Status FileFdSinkPlugin::Write(const std::shared_ptr<Buffer>& buffer)
 
 Status FileFdSinkPlugin::Flush()
 {
-    MEDIA_LOG_D("OUT");
+    MEDIA_LOG_D("Flush");
+    return Status::OK;
+}
+
+Status FileFdSinkPlugin::Reset()
+{
+    MEDIA_LOG_D("Reset");
+    if (fd_ != -1) {
+        MEDIA_LOG_D("close fd");
+        ftruncate(fd_, 0);
+        close(fd_);
+        fd_ = -1;
+    }
     return Status::OK;
 }
 

@@ -49,6 +49,11 @@ public:
         return {ErrorCode::SUCCESS, Action::ACTION_BUTT};
     }
 
+    std::tuple<ErrorCode, Action> Resume() override
+    {
+        return {ErrorCode::SUCCESS, Action::ACTION_BUTT};
+    }
+
     std::tuple<ErrorCode, Action> Pause() override
     {
         return {ErrorCode::SUCCESS, Action::TRANS_TO_PAUSE};
