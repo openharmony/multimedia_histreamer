@@ -157,9 +157,9 @@ void DownloadMonitor::OnDownloadStatus(std::shared_ptr<DownloadRequest>& request
 {
     if (NeedRetry(request)) {
         OSAL::ScopedLock lock(taskMutex_);
-        bool exists = std::find_if(retryTasks_.begin(), retryTasks_.end(), [&](const RetryRequest& item){
+        bool exists = std::any_of(retryTasks_.begin(), retryTasks_.end(), [&](const RetryRequest& item){
             return item.request->IsSame(request);
-        }) != std::end(retryTasks_);
+        });
         if (!exists) {
             RetryRequest retryRequest{request, [this, request] { downloader_->Retry(request); }};
             retryTasks_.emplace_back(std::move(retryRequest));
