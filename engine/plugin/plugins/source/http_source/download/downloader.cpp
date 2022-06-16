@@ -218,24 +218,24 @@ void Downloader::HttpDownloadLoop()
         if (currentRequest_->retryTimes_ > 0) {
             currentRequest_->retryTimes_ = 0;
         }
+        int64_t remaining = currentRequest_->headerInfo_.fileContentLen - currentRequest_->startPos_;
+        if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
+            MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,
+                        currentRequest_->startPos_, currentRequest_->url_.c_str());
+            currentRequest_->isEos_ = true;
+            if (requestQue_->Empty()) {
+                task_->PauseAsync();
+            }
+            shouldStartNextRequest = true;
+        } else if (remaining < PER_REQUEST_SIZE) {
+            currentRequest_->requestSize_ = remaining;
+        } else {
+            currentRequest_->requestSize_ = PER_REQUEST_SIZE;
+        }
     } else {
         MEDIA_LOG_E("Client request data failed. ret = " PUBLIC_LOG_D32, static_cast<int32_t>(ret));
         currentRequest_->statusCallback_(DownloadStatus::PARTTAL_DOWNLOAD, currentRequest_);
-    }
-
-    int64_t remaining = currentRequest_->headerInfo_.fileContentLen - currentRequest_->startPos_;
-    if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
-        MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,
-                    currentRequest_->startPos_, currentRequest_->url_.c_str());
-        currentRequest_->isEos_ = true;
-        if (requestQue_->Empty()) {
-            task_->PauseAsync();
-        }
-        shouldStartNextRequest = true;
-    } else if (remaining < PER_REQUEST_SIZE) {
-        currentRequest_->requestSize_ = remaining;
-    } else {
-        currentRequest_->requestSize_ = PER_REQUEST_SIZE;
+        task_->PauseAsync();
     }
 }
 
