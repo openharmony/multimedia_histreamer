@@ -40,7 +40,6 @@ source_set("std_video_surface_sink") {
       "//foundation/graphic/graphic_2d/utils/sync_fence/export",
       "//utils/native/base/include",
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
-      "//drivers/framework/include/utils",
       "//third_party/bounds_checking_function/include",
     ]
     public_deps += [
