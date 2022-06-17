@@ -83,7 +83,8 @@ Status Base::Reset()
 {
     MEDIA_LOG_D(PUBLIC_LOG_S " Enter.", __FUNCTION__);
     OSAL::ScopedLock lock(stateChangeMutex_);
-    RETURN_WRONG_STATE_IF_CON_TRUE(pluginState_ == State::DESTROYED, plugin_, pluginState_.load());
+    RETURN_WRONG_STATE_IF_CON_TRUE(pluginState_ == State::RUNNING || pluginState_ == State::PAUSED ||
+        pluginState_ == State::DESTROYED, plugin_, pluginState_.load());
     if (pluginState_ == State::CREATED || pluginState_ == State::INITIALIZED) {
         MEDIA_LOG_I("plugin " PUBLIC_LOG_S " no need to reset in state " PUBLIC_LOG_S,
                     plugin_->GetName().c_str(), GetStateString(pluginState_.load()));
