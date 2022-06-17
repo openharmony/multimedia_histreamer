@@ -81,6 +81,7 @@ public:
     ErrorCode DoPause() override;
     ErrorCode DoResume() override;
     ErrorCode DoStop(const Plugin::Any& param) override;
+    ErrorCode DoReset() override;
     ErrorCode DoOnComplete() override;
 private:
     ErrorCode SetAudioSourceInternal(AudioSourceType source, int32_t sourceId);

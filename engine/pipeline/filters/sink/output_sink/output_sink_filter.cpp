@@ -178,10 +178,12 @@ ErrorCode OutputSinkFilter::Stop()
 {
     FilterBase::Stop();
     currentPos_ = 0;
-    if (plugin_ && bufferEos_) {
-        plugin_->Stop();
-    } else {
-        plugin_->Reset();
+    if (plugin_) {
+        if (bufferEos_) {
+            plugin_->Stop();
+        } else {
+            plugin_->Reset();
+        }
     }
     return ErrorCode::SUCCESS;
 }

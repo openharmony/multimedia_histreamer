@@ -61,29 +61,17 @@ public:
 
     std::tuple<ErrorCode, Action> Stop(const Plugin::Any& param) override
     {
-        OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoStop(param);
         Action action = (ret == ErrorCode::SUCCESS) ? Action::ACTION_BUTT : Action::TRANS_TO_ERROR;
         return {ret, action};
     }
 
-    std::tuple<ErrorCode, Action> Reset() override
-    {
-        OSAL::ScopedLock lock(mutex_);
-        // No executor_.Reset, call stop, but not discard record
-        FALSE_LOG(executor_.DoStop(false) == ErrorCode::SUCCESS);
-        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
-    }
-
     std::tuple<ErrorCode, Action> OnComplete() override
     {
-        OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoOnComplete();
         Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_INIT : Action::ACTION_BUTT;
         return {ret, action};
     }
-private:
-    OSAL::Mutex mutex_ {};
 };
 } // namespace Record
 } // namespace Media

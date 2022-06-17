@@ -34,7 +34,6 @@ public:
 
     std::tuple<ErrorCode, Action> SetVideoSource(const Plugin::Any& param) override
     {
-        OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoSetVideoSource(param);
         Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_RECORDING_SETTING : Action::ACTION_BUTT;
         return {ret, action};
@@ -42,7 +41,6 @@ public:
 
     std::tuple<ErrorCode, Action> SetAudioSource(const Plugin::Any& param) override
     {
-        OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoSetAudioSource(param);
         Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_RECORDING_SETTING : Action::ACTION_BUTT;
         return {ret, action};
@@ -55,12 +53,9 @@ public:
 
     std::tuple<ErrorCode, Action> OnComplete() override
     {
-        OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoOnComplete();
         return {ret, Action::ACTION_BUTT};
     }
-private:
-    OSAL::Mutex mutex_ {};
 };
 } // namespace Record
 } // namespace Media

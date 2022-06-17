@@ -81,6 +81,11 @@ public:
     {
         return ErrorCode::SUCCESS;
     }
+
+    virtual ErrorCode DoReset()
+    {
+        return ErrorCode::SUCCESS;
+    }
 };
 } // namespace Media
 } // namespace OHOS

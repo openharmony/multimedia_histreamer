@@ -43,21 +43,11 @@ public:
         return {ErrorCode::ERROR_INVALID_OPERATION, Action::TRANS_TO_ERROR};
     }
 
-    std::tuple<ErrorCode, Action> Reset() override
-    {
-        OSAL::ScopedLock lock(mutex_);
-        FALSE_LOG(executor_.DoStop(false) == ErrorCode::SUCCESS);
-        return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
-    }
-
     std::tuple<ErrorCode, Action> Pause() override
     {
         MEDIA_LOG_D("Start in pause state.");
         return {ErrorCode::SUCCESS, Action::TRANS_TO_PAUSE};
     }
-
-private:
-    OSAL::Mutex mutex_ {};
 };
 } // namespace Record
 } // namespace Media

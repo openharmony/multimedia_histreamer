@@ -1179,7 +1179,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     }
 
     // The recorder prepare start reset prepare start pause resume stop reset release
-    // @test(data="pcmSources", tags=audio_record_fast)
+    // @test(data="pcmSources", tags=audio_record_fast_debuging)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AUDIO_FUNCTION_06_0900)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
@@ -1202,7 +1202,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     }
 
     // The recorder prepare start reset prepare start pause stop reset release
-    // @test(data="pcmSources", tags=audio_record_fast)
+    // @test(data="pcmSources", tags=audio_record_fast_debuging)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AUDIO_FUNCTION_06_1000)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
@@ -1224,7 +1224,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     }
 
     // The recorder prepare start reset prepare start stop release
-    // @test(data="pcmSources", tags=audio_record_fast)
+    // @test(data="pcmSources", tags=audio_record_fast_debuging)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AUDIO_FUNCTION_06_1100)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
