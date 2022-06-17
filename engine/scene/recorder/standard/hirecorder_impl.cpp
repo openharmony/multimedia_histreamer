@@ -176,6 +176,7 @@ int32_t HiRecorderImpl::Prepare()
     if (ret != ErrorCode::SUCCESS) {
         PROFILE_END("Prepare failed,");
         MEDIA_LOG_E("Prepare failed with error " PUBLIC_LOG_S, GetErrorName(ret));
+        return TransErrorCode(ret);
     } else {
         PROFILE_END("Prepare successfully,");
     }
