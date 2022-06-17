@@ -326,6 +326,7 @@ Plugin::Status MuxerFilter::MuxerDataSink::WriteAt(int64_t offset, const std::sh
 ErrorCode MuxerFilter::Start()
 {
     eos_ = false;
+    hasWriteHeader_ = false;
     return FilterBase::Start();
 }
 } // Pipeline
