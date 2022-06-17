@@ -204,7 +204,6 @@ public:
     {
         return OHOS::Media::Plugin::Seekable::SEEKABLE;
     }
-
 };
 
 
