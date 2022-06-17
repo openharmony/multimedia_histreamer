@@ -17,7 +17,7 @@
 #ifndef WIN32
 #include <sys/types.h>
 #include <unistd.h>
-#define O_BINARY 0 //which is not defined for Linux
+#define O_BINARY 0 // which is not defined for Linux
 #else
 #include <direct.h>
 #endif

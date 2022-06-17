@@ -29,7 +29,7 @@ public:
     PlayExecutorStub() noexcept : isLooping_(false), stateMachine_(nullptr)
     {
     }
-     bool IsSingleLoop() override
+    bool IsSingleLoop() override
     {
         return isLooping_;
     }

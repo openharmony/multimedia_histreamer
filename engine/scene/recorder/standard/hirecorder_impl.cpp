@@ -26,7 +26,7 @@
 #include "utils/steady_clock.h"
 
 #ifndef WIN32
-    #include <unistd.h> //include the dup function on Linux system
+    #include <unistd.h> // include the dup function on Linux system
 #endif
 
 

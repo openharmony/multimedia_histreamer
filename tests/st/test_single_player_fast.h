@@ -17,7 +17,7 @@
 #ifndef WIN32
 #include <sys/types.h>
 #include <unistd.h>
-#define O_BINARY 0 //which is not defined for Linux
+#define O_BINARY 0 // which is not defined for Linux
 #endif
 #include <math.h>
 #include <thread>
@@ -255,7 +255,7 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
         uri += std::to_string(fileSize);
         int32_t fd = open(url.c_str(), O_RDONLY|O_BINARY);
         char ch[256];
-        std::string fdStr = itoa(fd, ch, 256); //TODO: implement the itoa method for linux system
+        std::string fdStr = itoa(fd, ch, 256);
         uri.insert(5, fdStr);
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(uri)));

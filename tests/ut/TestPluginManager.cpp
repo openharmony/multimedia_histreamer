@@ -183,7 +183,6 @@ public:
     {
         return OHOS::Media::Plugin::Seekable::SEEKABLE;
     }
-
 };
 
 class UtDataSourceHelperTest2 : public DataSourceHelper {
