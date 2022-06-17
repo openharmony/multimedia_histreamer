@@ -30,11 +30,13 @@ public:
 
     void ProcessManifest(std::string url) override;
     void UpdateManifest() override;
+    void ParseManifest() override;
     void FragmentListUpdateLoop() override;
     void SetFragmentListCallback(FragmentListChangeCallback* callback) override;
     double GetDuration() const override;
     bool IsStreaming() const override;
 private:
+    std::string url_ {};
     FragmentListChangeCallback* callback_ {nullptr};
     std::shared_ptr<M3U8MasterPlaylist> master_;
     std::shared_ptr<M3U8VariantStream> currentVariant_;

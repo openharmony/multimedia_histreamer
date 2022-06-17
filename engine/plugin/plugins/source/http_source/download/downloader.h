@@ -58,8 +58,10 @@ struct HeaderInfo {
 // uint8_t* : the data should save
 // uint32_t : length
 using DataSaveFunc = std::function<void(uint8_t*, uint32_t, int64_t)>;
+class Downloader;
 class DownloadRequest;
-using StatusCallbackFunc = std::function<void(DownloadStatus, std::shared_ptr<DownloadRequest>&)>;
+using StatusCallbackFunc = std::function<void(DownloadStatus, std::shared_ptr<Downloader>&,
+    std::shared_ptr<DownloadRequest>&)>;
 
 class DownloadRequest {
 public:
@@ -75,6 +77,10 @@ public:
     bool IsSame(const std::shared_ptr<DownloadRequest>& other)
     {
         return url_ == other->url_ && startPos_ == other->startPos_;
+    }
+    std::string GetUrl()
+    {
+        return url_;
     }
 
 private:

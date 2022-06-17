@@ -37,13 +37,12 @@ public:
     void Resume() override;
     bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) override;
     bool Seek(int offset) override;
-    bool Retry(const std::shared_ptr<DownloadRequest> &request) override;
-
     size_t GetContentLength() const override;
     double GetDuration() const override;
     bool IsStreaming() const override;
     void SetCallback(Callback* cb) override;
     void SetStatusCallback(StatusCallbackFunc cb) override;
+
 private:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
     void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest> &request);

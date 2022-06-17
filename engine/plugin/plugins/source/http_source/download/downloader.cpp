@@ -163,7 +163,7 @@ bool Downloader::Seek(int64_t offset)
 // Pause download thread before use currentRequest_
 bool Downloader::Retry(const std::shared_ptr<DownloadRequest>& request)
 {
-    MEDIA_LOG_I("Downloader Retry Begin");
+    MEDIA_LOG_I(PUBLIC_LOG_S " Retry Begin, url : " PUBLIC_LOG_S, name_.c_str(), request->url_.c_str());
     FALSE_RETURN_V(client_ != nullptr, false);
     Pause();
     if (currentRequest_ != nullptr && currentRequest_->IsSame(request) && !shouldStartNextRequest) {
@@ -218,24 +218,25 @@ void Downloader::HttpDownloadLoop()
         if (currentRequest_->retryTimes_ > 0) {
             currentRequest_->retryTimes_ = 0;
         }
+        int64_t remaining = currentRequest_->headerInfo_.fileContentLen - currentRequest_->startPos_;
+        if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
+            MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,
+                        currentRequest_->startPos_, currentRequest_->url_.c_str());
+            currentRequest_->isEos_ = true;
+            if (requestQue_->Empty()) {
+                task_->PauseAsync();
+            }
+            shouldStartNextRequest = true;
+        } else if (remaining < PER_REQUEST_SIZE) {
+            currentRequest_->requestSize_ = remaining;
+        } else {
+            currentRequest_->requestSize_ = PER_REQUEST_SIZE;
+        }
     } else {
         MEDIA_LOG_E("Client request data failed. ret = " PUBLIC_LOG_D32, static_cast<int32_t>(ret));
-        currentRequest_->statusCallback_(DownloadStatus::PARTTAL_DOWNLOAD, currentRequest_);
-    }
-
-    int64_t remaining = currentRequest_->headerInfo_.fileContentLen - currentRequest_->startPos_;
-    if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
-        MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,
-                    currentRequest_->startPos_, currentRequest_->url_.c_str());
-        currentRequest_->isEos_ = true;
-        if (requestQue_->Empty()) {
-            task_->PauseAsync();
-        }
-        shouldStartNextRequest = true;
-    } else if (remaining < PER_REQUEST_SIZE) {
-        currentRequest_->requestSize_ = remaining;
-    } else {
-        currentRequest_->requestSize_ = PER_REQUEST_SIZE;
+        std::shared_ptr<Downloader> unused;
+        currentRequest_->statusCallback_(DownloadStatus::PARTTAL_DOWNLOAD, unused, currentRequest_);
+        task_->PauseAsync();
     }
 }
 

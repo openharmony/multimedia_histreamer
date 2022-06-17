@@ -41,7 +41,6 @@ public:
     void SetCallback(Callback* cb) override;
     void OnFragmentListChanged(const std::vector<std::string>& fragmentList) override;
     void SetStatusCallback(StatusCallbackFunc cb) override;
-    bool Retry(const std::shared_ptr<DownloadRequest> &request) override;
 
 private:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);

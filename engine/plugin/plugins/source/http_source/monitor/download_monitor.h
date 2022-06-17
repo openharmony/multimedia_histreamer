@@ -16,20 +16,27 @@
 #ifndef HISTREAMER_DOWNLOAD_MONITOR_H
 #define HISTREAMER_DOWNLOAD_MONITOR_H
 
-#include <string>
-#include <memory>
 #include <ctime>
+#include <list>
+#include <memory>
+#include <string>
 #include "blocking_queue.h"
 #include "plugin/interface/plugin_base.h"
 #include "plugin/plugins/source/http_source/download/downloader.h"
 #include "plugin/plugins/source/http_source/media_downloader.h"
 #include "ring_buffer.h"
 #include "osal/thread/task.h"
+#include "osal/thread/mutex.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
+struct RetryRequest {
+    std::shared_ptr<DownloadRequest> request;
+    std::function<void()> function;
+};
+
 class DownloadMonitor : public MediaDownloader {
 public:
     explicit DownloadMonitor(std::shared_ptr<MediaDownloader> downloader) noexcept;
@@ -40,8 +47,6 @@ public:
     bool Seek(int offset) override;
     void Pause() override;
     void Resume() override;
-    bool Retry(const std::shared_ptr<DownloadRequest> &request) override;
-
     size_t GetContentLength() const override;
     double GetDuration() const override;
     bool IsStreaming() const override;
@@ -50,15 +55,16 @@ public:
 
 private:
     void HttpMonitorLoop();
-    void OnDownloadStatus(std::shared_ptr<DownloadRequest>& request);
+    void OnDownloadStatus(std::shared_ptr<Downloader>& downloader, std::shared_ptr<DownloadRequest>& request);
     bool NeedRetry(const std::shared_ptr<DownloadRequest>& request);
 
     std::shared_ptr<MediaDownloader> downloader_;
-    std::shared_ptr<BlockingQueue<std::function<void()>>> taskQue_;
+    std::list<RetryRequest> retryTasks_;
     std::atomic<bool> isPlaying_ {false};
     std::shared_ptr<OSAL::Task> task_;
     time_t lastReadTime_ {0};
     Callback* callback_ {nullptr};
+    OSAL::Mutex taskMutex_ {};
 };
 }
 }

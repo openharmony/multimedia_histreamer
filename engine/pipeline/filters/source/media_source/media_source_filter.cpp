@@ -119,7 +119,7 @@ ErrorCode MediaSourceFilter::SetBufferSize(size_t size)
 
 std::vector<WorkMode> MediaSourceFilter::GetWorkModes()
 {
-    MEDIA_LOG_DD("IN, isSeekable_: " PUBLIC_LOG_D32, static_cast<int32_t>(isSeekable_));
+    MEDIA_LOG_DD("IN, isSeekable_: " PUBLIC_LOG_D32, static_cast<int32_t>(seekable_));
     if (seekable_ == Seekable::SEEKABLE) {
         return {WorkMode::PUSH, WorkMode::PULL};
     } else {

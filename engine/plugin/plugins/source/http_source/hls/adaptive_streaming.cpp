@@ -27,8 +27,10 @@ AdaptiveStreaming::AdaptiveStreaming()
         SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
                  std::forward<decltype(offset)>(offset));
     };
-    statusCallback_ = [this] (DownloadStatus&& status, std::shared_ptr<DownloadRequest>& request) {
-        OnDownloadStatus(std::forward<decltype(status)>(status),
+    // this is default callback
+    statusCallback_ = [this] (DownloadStatus&& status, std::shared_ptr<Downloader> d,
+            std::shared_ptr<DownloadRequest>& request) {
+        OnDownloadStatus(std::forward<decltype(status)>(status), downloader,
             std::forward<decltype(request)>(request));
     };
     updateTask_ = std::make_shared<OSAL::Task>(std::string("FragmentListUpdate"));
@@ -44,23 +46,41 @@ AdaptiveStreaming::~AdaptiveStreaming()
 void AdaptiveStreaming::Open(const std::string& url)
 {
     playList_.clear();
-    downloadRequest_ = std::make_shared<DownloadRequest>(url, dataSave_, statusCallback_, true);
+    auto realStatusCallback = [this] (DownloadStatus&& status, std::shared_ptr<Downloader>& downloader,
+                                      std::shared_ptr<DownloadRequest>& request) {
+        statusCallback_(status, downloader, std::forward<decltype(request)>(request));
+    };
+    downloadRequest_ = std::make_shared<DownloadRequest>(url, dataSave_, realStatusCallback, true);
     downloader->Download(downloadRequest_, -1); // -1
     downloader->Start();
-    while (!downloadRequest_->IsEos()) {
-        OSAL::SleepFor(200); // 200 time to download playlist, size is not more than 5*1024 usually
-    }
 }
 
 void AdaptiveStreaming::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 {
     (void)offset;
     playList_.append(reinterpret_cast<const char*>(data), len);
+    ParseManifest();
 }
 
-void AdaptiveStreaming::OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request)
+void AdaptiveStreaming::OnDownloadStatus(DownloadStatus status, std::shared_ptr<Downloader>&,
+                                         std::shared_ptr<DownloadRequest>& request)
 {
-    MEDIA_LOG_I("OnDownloadStatus " PUBLIC_LOG_D32, status);
+    // This should not be called normally
+    MEDIA_LOG_D("Should not call this OnDownloadStatus, should call monitor.");
+    if (request->GetClientError() != NetworkClientErrorCode::ERROR_OK || request->GetServerError() != 0) {
+        MEDIA_LOG_E("OnDownloadStatus " PUBLIC_LOG_D32 ", url : " PUBLIC_LOG_S,
+                    status, request->GetUrl().c_str());
+    }
+}
+
+void AdaptiveStreaming::SetStatusCallback(StatusCallbackFunc cb)
+{
+    statusCallback_ = cb;
+}
+
+void AdaptiveStreaming::ParseManifest()
+{
+    MEDIA_LOG_E("Should not call this ParseManifest");
 }
 }
 }

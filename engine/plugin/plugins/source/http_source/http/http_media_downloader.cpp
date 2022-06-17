@@ -41,7 +41,11 @@ bool HttpMediaDownloader::Open(const std::string& url)
                  std::forward<decltype(offset)>(offset));
     };
     FALSE_RETURN_V(statusCallback_ != nullptr, false);
-    downloadRequest_ = std::make_shared<DownloadRequest>(url, saveData, statusCallback_);
+    auto realStatusCallback = [this] (DownloadStatus&& status, std::shared_ptr<Downloader>& downloader,
+                                  std::shared_ptr<DownloadRequest>& request) {
+        statusCallback_(status, downloader_, std::forward<decltype(request)>(request));
+    };
+    downloadRequest_ = std::make_shared<DownloadRequest>(url, saveData, realStatusCallback);
     downloader_->Download(downloadRequest_, -1); // -1
     downloader_->Start();
     return true;
@@ -61,11 +65,6 @@ void HttpMediaDownloader::Pause()
 void HttpMediaDownloader::Resume()
 {
     downloader_->Resume();
-}
-
-bool HttpMediaDownloader::Retry(const std::shared_ptr<DownloadRequest> &request)
-{
-    return downloader_->Retry(request);
 }
 
 bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
