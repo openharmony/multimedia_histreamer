@@ -155,11 +155,11 @@ void DownloadMonitor::OnDownloadStatus(std::shared_ptr<Downloader>& downloader,
     FALSE_RETURN_MSG(downloader != nullptr, "downloader is null, url is " PUBLIC_LOG_S, request->GetUrl().c_str());
     if (NeedRetry(request)) {
         OSAL::ScopedLock lock(taskMutex_);
-        bool exists = CppExt::AnyOf(retryTasks_.begin(), retryTasks_.end(), [&](const RetryRequest& item){
+        bool exists = CppExt::AnyOf(retryTasks_.begin(), retryTasks_.end(), [&](const RetryRequest& item) {
             return item.request->IsSame(request);
         });
         if (!exists) {
-            RetryRequest retryRequest{request, [downloader, request] { downloader->Retry(request); }};
+            RetryRequest retryRequest {request, [downloader, request] { downloader->Retry(request); }};
             retryTasks_.emplace_back(std::move(retryRequest));
         }
     }
