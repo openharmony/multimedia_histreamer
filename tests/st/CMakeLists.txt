@@ -17,9 +17,15 @@ IF(UNIX OR MINGW)
 ADD_DEFINITIONS(
     -g -ggdb
 )
+IF(UNIX)
+ADD_LINK_OPTIONS(
+    -rdynamic
+)
+ELSE()
 ADD_LINK_OPTIONS(
     -Wl,--export-all-symbols
 )
+ENDIF(UNIX)
 ENDIF(UNIX OR MINGW)
 
 ADD_DEFINITIONS(-D__STDC_FORMAT_MACROS -DHST_WORKING_DIR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
@@ -115,16 +121,22 @@ if (MINGW)
     set(sdl_lib_path ${TOP_DIR}/3rdparty/SDL2.0/windows/lib/x64)
     set(curl_lib_path ${TOP_DIR}/3rdparty/curl/lib/windows)
 else ()
-    set(CMAKE_CXX_FLAGS "-g -ggdb3 -O0 -std=c++11 -Wall")
-    set(ffmpeg_lib_path /usr/local/ffmpeg/lib)
-    set(sdl_lib_path /usr/lib/x86_64-linux-gnu/)
+    if (${OHOS_LITE})
+        set(CMAKE_CXX_FLAGS "-g -ggdb3 -O0 -std=c++11 -Wall")
+    else()
+        set(CMAKE_CXX_FLAGS "-g -ggdb3 -O0 -std=c++17 -Wall")
+    endif()
+    set(ffmpeg_lib_path ${TOP_DIR}/3rdparty/ffmpeg/linux/lib)
+    set(sdl_lib_path ${TOP_DIR}/3rdparty/SDL2.0/linux/lib)
     set(curl_lib_path ${TOP_DIR}/3rdparty/curl/lib/linux)
+    set(z_lib_path /usr/lib/x86_64-linux-gnu)
 endif ()
 
 link_directories(
         ${ffmpeg_lib_path}
         ${sdl_lib_path}
         ${curl_lib_path}
+        ${z_lib_path}
 )
 
 if (${OHOS_LITE})
@@ -153,7 +165,23 @@ link_directories(${TOP_DIR}/3rdparty/testngpp2/lib)
 ADD_EXECUTABLE(histreamer_st ${TESTSUITE_SRCS} ${TEST_HELPER_SRCS} ${3RDPARTY_SRCS} ${TEST_PLUGIN_SRCS})
 
 IF(UNIX)
-TARGET_LINK_LIBRARIES(histreamer_st testngpp2 dl)
+TARGET_LINK_LIBRARIES(histreamer_st
+                      ${TOP_DIR}/3rdparty/testngpp2/lib/libtestngpp.a
+                      dl
+                      histreamer
+                      pthread
+                      ${ffmpeg_lib_path}/libavformat.a
+                      ${ffmpeg_lib_path}/libavcodec.a
+                      ${ffmpeg_lib_path}/libavdevice.a
+                      ${ffmpeg_lib_path}/libavfilter.a
+                      ${ffmpeg_lib_path}/libavutil.a
+                      ${ffmpeg_lib_path}/libswscale.a
+                      ${ffmpeg_lib_path}/libswresample.a
+                      ${ffmpeg_lib_path}/liblzma.a
+                      curl
+                      SDL2-2.0
+                      z
+                      )
 ELSE()
 TARGET_LINK_LIBRARIES(histreamer_st testngpp2 histreamer)
 ENDIF()

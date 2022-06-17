@@ -17,6 +17,7 @@
 #ifndef WIN32
 #include <sys/types.h>
 #include <unistd.h>
+#define O_BINARY 0 //which is not defined for Linux
 #endif
 #include <math.h>
 #include <thread>
@@ -41,7 +42,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         uri += std::to_string(fileSize);
         int32_t fd = open(url.c_str(), O_RDONLY|O_BINARY);
         char ch[256];
-        std::string fdStr = itoa(fd, ch, 256);
+        std::string fdStr = itoa(fd, ch, 256); //TODO: implement the itoa method for linux system
         uri.insert(5, fdStr); // 5 ---fd:://
         return uri;
     }

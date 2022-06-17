@@ -35,7 +35,9 @@ public:
 
     Status GetSize(size_t &size) override;
 
-    Status IsSeekable(bool& seekable) override;
+    Status IsSeekable(bool& seekable);
+
+    Seekable GetSeekable() override;
 
     Status SeekTo(uint64_t offset) override;
 

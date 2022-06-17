@@ -22,6 +22,7 @@ else()
     set(sdl_lib_path ${THIRD_PARTY_DIR}/SDL2.0/linux/lib)
     set(sdl_inc_path ${THIRD_PARTY_DIR}/SDL2.0/linux/include)
     set(gtest_lib_path ${THIRD_PARTY_DIR}/gtest/linux/lib)
+    set(curl_lib_path ${THIRD_PARTY_DIR}/curl/lib/linux)
     message(STATUS "ut ${ffmpeg_lib_path}")
 endif()
 
@@ -33,6 +34,7 @@ link_directories(
         ${ffmpeg_lib_path}
         ${sdl_lib_path}
         ${gtest_lib_path}
+        ${curl_lib_path}
 )
 
 file(GLOB UT_TEST_SRCS ./*.cpp)
@@ -96,11 +98,12 @@ else ()
             ${ffmpeg_lib_path}/liblzma.a
             m
             /usr/lib/x86_64-linux-gnu/libz.so.1
-            ${sdl_lib_path}/libSDL2.a
+            SDL2-2.0
             gtest
             gtest_main
             pthread
             ${MOCKCPP_DIR}/lib/libmockcpp.a
+            curl
             )
 endif ()
 add_test(Test histreamer_ut)
