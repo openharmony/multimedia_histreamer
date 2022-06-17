@@ -126,7 +126,7 @@ ErrorCode AudioCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value
             bitRateSpecified_ = AssignParameterIfMatch(tag, bitRate_, value);
             break;
         case Tag::AUDIO_SAMPLE_FORMAT:
-            sampleRateSpecified_ = AssignParameterIfMatch(tag, sampleFormat_, value);
+            sampleFormatSpecified_ = AssignParameterIfMatch(tag, sampleFormat_, value);
             break;
         case Tag::AUDIO_CHANNEL_LAYOUT:
             channelLayoutSpecified_ = AssignParameterIfMatch(tag, channelLayout_, value);
