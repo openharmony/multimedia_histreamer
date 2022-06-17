@@ -39,7 +39,7 @@ int32_t HstEngineFactory::Score(Scene scene, const std::string& uri)
     return MIN_SCORE;
 }
 
-std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine()
+std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine(int32_t uid, int32_t pid)
 {
     MEDIA_LOG_I("CreatePlayerEngine enter.");
     auto player = std::unique_ptr<HiPlayerImpl>(new (std::nothrow) HiPlayerImpl());
