@@ -17,8 +17,8 @@
 #define HISTREAMER_HTTP_CURL_CLIENT_H
 
 #include <string>
-#include "curl/curl.h"
 #include "network_client.h"
+#include "curl/curl.h"
 
 namespace OHOS {
 namespace Media {
