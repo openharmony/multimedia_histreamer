@@ -45,7 +45,7 @@ HiRecorderImpl::HiRecorderImpl() : fsm_(*this), curFsmState_(StateId::INIT)
 
 HiRecorderImpl::~HiRecorderImpl()
 {
-    fsm_.SendEventAsync(Intent::RESET);
+    fsm_.SendEvent(Intent::RESET);
     fsm_.Stop();
     MEDIA_LOG_D("dtor called.");
 }
@@ -416,6 +416,17 @@ ErrorCode HiRecorderImpl::DoStop(const Plugin::Any& param)
     } else {
         ret = muxer_->SendEos();
     }
+    audioCount_ = 0;
+    videoCount_ = 0;
+    audioSourceId_ = 0;
+    videoSourceId_ = 0;
+    return ret;
+}
+
+ErrorCode HiRecorderImpl::DoReset()
+{
+    ErrorCode ret = pipeline_->Stop();
+    mediaStatStub_.Reset();
     audioCount_ = 0;
     videoCount_ = 0;
     audioSourceId_ = 0;

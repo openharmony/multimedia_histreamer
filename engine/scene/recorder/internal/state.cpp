@@ -114,6 +114,7 @@ std::tuple<ErrorCode, Action> State::Resume()
 
 std::tuple<ErrorCode, Action> State::Reset()
 {
+    FALSE_LOG(executor_.DoReset() == ErrorCode::SUCCESS);
     return {ErrorCode::SUCCESS, Action::TRANS_TO_INIT};
 }
 

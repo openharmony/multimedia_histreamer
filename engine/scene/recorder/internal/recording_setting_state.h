@@ -35,7 +35,6 @@ public:
 
     std::tuple<ErrorCode, Action> SetVideoSource(const Plugin::Any& param) override
     {
-        OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoSetVideoSource(param);
         Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_RECORDING_SETTING : Action::ACTION_BUTT;
         return {ret, action};
@@ -43,7 +42,6 @@ public:
 
     std::tuple<ErrorCode, Action> SetAudioSource(const Plugin::Any& param) override
     {
-        OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoSetAudioSource(param);
         Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_RECORDING_SETTING : Action::ACTION_BUTT;
         return {ret, action};
@@ -51,7 +49,6 @@ public:
 
     std::tuple<ErrorCode, Action> Configure(const Plugin::Any& param) override
     {
-        OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoConfigure(param);
         Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_RECORDING_SETTING : Action::ACTION_BUTT;
         return {ret, action};
@@ -59,7 +56,6 @@ public:
 
     std::tuple<ErrorCode, Action> SetOutputFormat(const Plugin::Any& param) override
     {
-        OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoSetOutputFormat(param);
         Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_RECORDING_SETTING : Action::ACTION_BUTT;
         return {ret, action};
@@ -67,7 +63,6 @@ public:
 
     std::tuple<ErrorCode, Action> Prepare() override
     {
-        OSAL::ScopedLock lock(mutex_);
         auto rtv = executor_.DoPrepare();
         if (rtv == ErrorCode::SUCCESS) {
             return {rtv, Action::ACTION_BUTT};
@@ -83,7 +78,6 @@ public:
 
     std::tuple<ErrorCode, Action> Stop(const Plugin::Any& param) override
     {
-        OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoStop(param);
         Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_INIT : Action::TRANS_TO_ERROR;
         return {ret, action};
@@ -93,8 +87,6 @@ public:
     {
         return {ErrorCode::SUCCESS, Action::TRANS_TO_READY};
     }
-private:
-    OSAL::Mutex mutex_ {};
 };
 } // namespace Record
 } // namespace Media

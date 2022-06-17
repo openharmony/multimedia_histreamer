@@ -251,7 +251,9 @@ ErrorCode AudioEncoderFilter::Stop()
         FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Flush()), "encoder flush error");
         FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Stop()), "encoder stop error");
     }
-    rb_->SetActive(false);
+    if (rb_) {
+        rb_->SetActive(false);
+    }
     MEDIA_LOG_I("AudioEncoderFilter stop end.");
     return FilterBase::Stop();
 }

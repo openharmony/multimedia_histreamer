@@ -59,13 +59,10 @@ public:
     std::tuple<ErrorCode, Action> Stop(const Plugin::Any& param) override
     {
         MEDIA_LOG_D("Stop called in pause state.");
-        OSAL::ScopedLock lock(mutex_);
         auto ret = executor_.DoStop(param);
         Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_INIT : Action::TRANS_TO_ERROR;
         return {ret, action};
     }
-private:
-    OSAL::Mutex mutex_ {};
 };
 } // namespace Record
 } // namespace Media
