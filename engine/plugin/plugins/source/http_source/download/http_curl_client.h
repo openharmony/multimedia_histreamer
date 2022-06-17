@@ -17,8 +17,8 @@
 #define HISTREAMER_HTTP_CURL_CLIENT_H
 
 #include <string>
-#include "network_client.h"
 #include "curl/curl.h"
+#include "network_client.h"
 
 namespace OHOS {
 namespace Media {
@@ -43,7 +43,7 @@ public:
 
 private:
     void InitCurlEnvironment(const std::string& url);
-
+    void ParseUrlAndHeaders(const std::string& url) const;
 private:
     RxHeader rxHeader_;
     RxBody rxBody_;

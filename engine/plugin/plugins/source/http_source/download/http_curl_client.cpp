@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 #define HST_LOG_TAG "HttpCurlClient"
+
 #include "http_curl_client.h"
+#include <sstream>
+#include <vector>
 #include "foundation/log.h"
 #include "securec.h"
 
@@ -73,7 +76,7 @@ Status HttpCurlClient::Deinit()
 
 void HttpCurlClient::InitCurlEnvironment(const std::string& url)
 {
-    curl_easy_setopt(easyHandle_, CURLOPT_URL, url.c_str());
+    ParseUrlAndHeaders(url);
     curl_easy_setopt(easyHandle_, CURLOPT_HTTPGET, 1L);
 
     curl_easy_setopt(easyHandle_, CURLOPT_FORBID_REUSE, 0L);
@@ -84,7 +87,6 @@ void HttpCurlClient::InitCurlEnvironment(const std::string& url)
 
     curl_easy_setopt(easyHandle_, CURLOPT_WRITEFUNCTION, rxBody_);
     curl_easy_setopt(easyHandle_, CURLOPT_WRITEDATA, userParam_);
-
     curl_easy_setopt(easyHandle_, CURLOPT_HEADERFUNCTION, rxHeader_);
     curl_easy_setopt(easyHandle_, CURLOPT_HEADERDATA, userParam_);
 
@@ -95,6 +97,36 @@ void HttpCurlClient::InitCurlEnvironment(const std::string& url)
 
     curl_easy_setopt(easyHandle_, CURLOPT_TCP_KEEPALIVE, 1L);
     curl_easy_setopt(easyHandle_, CURLOPT_TCP_KEEPINTVL, 5L); // 5 心跳
+}
+
+void HttpCurlClient::ParseUrlAndHeaders(const std::string& url) const
+{
+    auto pos = url.find('?');
+    auto s = pos != std::string::npos ? url.substr(0, pos) : url;
+    curl_easy_setopt(easyHandle_, CURLOPT_URL, s.c_str());
+    if (s != url) {
+        s = url.substr(s.length() + 1);
+        curl_slist* headers = nullptr;
+        std::stringstream ss(s);
+        std::vector<std::string> vec;
+        vec.reserve(2); // 2
+        while (std::getline(ss, s, '&')) {
+            std::stringstream keyValue(s);
+            while (std::getline(keyValue, s, '=')) {
+                vec.push_back(s);
+            }
+            std::string para;
+            para += vec[0];
+            para += ':';
+            para += vec[1];
+            headers = curl_slist_append(headers, para.c_str());
+            vec.clear();
+        }
+        if (headers != nullptr) {
+            curl_easy_setopt(easyHandle_, CURLOPT_HTTPHEADER, headers);
+            curl_slist_free_all(headers);
+        }
+    }
 }
 
 // RequestData run in HttpDownload thread,
