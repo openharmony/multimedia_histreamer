@@ -105,6 +105,7 @@ bool MuxerFilter::Negotiate(const std::string& inPort,
         MEDIA_LOG_W("muxer filter is not in preparing when negotiate");
         return false;
     }
+    hasWriteHeader_ = false;
     capabilityCache_.emplace_back(std::make_pair(inPort, *upstreamCap));
     if (capabilityCache_.size() < inPorts_.size()) {
         return true;
