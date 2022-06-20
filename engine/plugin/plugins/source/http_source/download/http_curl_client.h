@@ -43,7 +43,7 @@ public:
 
 private:
     void InitCurlEnvironment(const std::string& url);
-    void ParseUrlAndHeaders(const std::string& url) const;
+    std::string UrlParse(const std::string& url) const;
 private:
     RxHeader rxHeader_;
     RxBody rxBody_;
