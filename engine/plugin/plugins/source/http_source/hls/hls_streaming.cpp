@@ -55,12 +55,12 @@ double HLSStreaming::GetDuration() const
     return master_->bLive_ ? -1.0 : master_->duration_; // -1.0
 }
 
-bool HLSStreaming::IsStreaming() const
+Seekable HLSStreaming::GetSeekable() const
 {
     if (master_ == nullptr) {
-        return true;
+        return Seekable::INVALID;
     }
-    return master_->bLive_;
+    return master_->bLive_ ? Seekable::UNSEEKABLE : Seekable::SEEKABLE;
 }
 
 void HLSStreaming::ParseManifest()

@@ -37,7 +37,7 @@ public:
 
     size_t GetContentLength() const override;
     double GetDuration() const override;
-    bool IsStreaming() const override;
+    Seekable GetSeekable() const override;
     void SetCallback(Callback* cb) override;
     void OnFragmentListChanged(const std::vector<std::string>& fragmentList) override;
     void SetStatusCallback(StatusCallbackFunc cb) override;

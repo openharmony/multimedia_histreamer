@@ -110,9 +110,9 @@ double DownloadMonitor::GetDuration() const
     return downloader_->GetDuration();
 }
 
-bool DownloadMonitor::IsStreaming() const
+Seekable DownloadMonitor::GetSeekable() const
 {
-    return downloader_->IsStreaming();
+    return downloader_->GetSeekable();
 }
 
 void DownloadMonitor::SetCallback(Callback* cb)

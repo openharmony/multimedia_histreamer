@@ -39,7 +39,7 @@ public:
     bool Seek(int offset) override;
     size_t GetContentLength() const override;
     double GetDuration() const override;
-    bool IsStreaming() const override;
+    Seekable GetSeekable() const override;
     void SetCallback(Callback* cb) override;
     void SetStatusCallback(StatusCallbackFunc cb) override;
 
