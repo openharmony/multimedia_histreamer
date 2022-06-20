@@ -92,7 +92,7 @@ int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId
     if (ret == ErrorCode::SUCCESS) {
         audioCount_++;
         audioSourceId_ = tempSourceId;
-        sourceId = audioSourceId_;
+        sourceId = static_cast<int32_t>(audioSourceId_);
     }
     PROFILE_END("SetAudioSource end.");
     return TransErrorCode(ret);
