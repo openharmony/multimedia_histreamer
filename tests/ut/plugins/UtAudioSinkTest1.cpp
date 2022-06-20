@@ -99,6 +99,11 @@ Status UtAudioSinkTest1::Flush()
     return Status::OK;
 }
 
+Status UtAudioSinkTest1::Drain()
+{
+    return Status::OK;
+}
+
 std::shared_ptr<Allocator> UtAudioSinkTest1::GetAllocator()
 {
     return std::shared_ptr<Allocator>();

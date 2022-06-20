@@ -29,6 +29,10 @@ public:
     PlayExecutorStub() noexcept : isLooping_(false), stateMachine_(nullptr)
     {
     }
+    bool IsSingleLoop() override
+    {
+        return isLooping_;
+    }
     void SetLooping(bool looping)
     {
         isLooping_ = looping;
@@ -37,7 +41,7 @@ public:
     {
         stateMachine_ = stateMachine;
     }
-    ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source) const override
+    ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source) override
     {
         return source ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }

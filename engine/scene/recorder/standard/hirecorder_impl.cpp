@@ -25,6 +25,11 @@
 #include "recorder_utils.h"
 #include "utils/steady_clock.h"
 
+#ifndef WIN32
+    #include <unistd.h> // include the dup function on Linux system
+#endif
+
+
 namespace OHOS {
 namespace Media {
 namespace Record {

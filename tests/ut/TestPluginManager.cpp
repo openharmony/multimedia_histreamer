@@ -178,6 +178,11 @@ public:
     {
         return Status::OK;
     }
+
+    OHOS::Media::Plugin::Seekable GetSeekable() override
+    {
+        return OHOS::Media::Plugin::Seekable::SEEKABLE;
+    }
 };
 
 class UtDataSourceHelperTest2 : public DataSourceHelper {
@@ -193,6 +198,11 @@ public:
     Status GetSize(size_t &size) override
     {
         return Status::OK;
+    }
+
+    OHOS::Media::Plugin::Seekable GetSeekable() override
+    {
+        return OHOS::Media::Plugin::Seekable::SEEKABLE;
     }
 };
 

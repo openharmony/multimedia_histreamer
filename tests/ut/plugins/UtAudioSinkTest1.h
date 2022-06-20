@@ -55,6 +55,8 @@ public:
 
     Status Flush() override;
 
+    Status Drain() override;
+
     std::shared_ptr<Allocator> GetAllocator() override;
 
     Status SetCallback(Callback* cb) override;

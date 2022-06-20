@@ -15,7 +15,12 @@ IF (UNIX AND NOT CYGWIN)
     ADD_DEFINITIONS(
             -fPIC -DPROFILE
     )
-    set(CMAKE_CXX_FLAGS "-g -ggdb3 -O0 -Wall -Wl,--disable-new-dtags")
+    if (${OHOS_LITE})
+        set(CMAKE_CXX_FLAGS "-g -ggdb3 -O0 -Wall -Wl,--disable-new-dtags")
+    else()
+        set(CMAKE_CXX_FLAGS "-g -ggdb3 -O0 -std=c++17 -Wall -Wl,--disable-new-dtags")
+    endif()
+
 ENDIF (UNIX AND NOT CYGWIN)
 
 ADD_DEFINITIONS(
