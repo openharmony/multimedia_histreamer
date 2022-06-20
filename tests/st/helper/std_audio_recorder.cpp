@@ -85,10 +85,10 @@ int32_t TestRecorderImpl::Configure(const AudioRecordSource& recordSource)
     auto audBitRate = AudBitRate {recordSource.bitRate_};
     auto auEncoder = AudEnc {recordSource.encodeType_};
 
-    recorder_->Configure(audioSourceId, audSampleRate);
-    recorder_->Configure(audioSourceId, audChannel);
-    recorder_->Configure(audioSourceId, audBitRate);
-    recorder_->Configure(audioSourceId, auEncoder);
+    FALSE_RETURN_V((recorder_->Configure(audioSourceId, audSampleRate)) == 0, ERR_INVALID_VALUE);
+    FALSE_RETURN_V((recorder_->Configure(audioSourceId, audChannel)) == 0, ERR_INVALID_VALUE);
+    FALSE_RETURN_V((recorder_->Configure(audioSourceId, audBitRate)) == 0, ERR_INVALID_VALUE);
+    FALSE_RETURN_V((recorder_->Configure(audioSourceId, auEncoder)) == 0, ERR_INVALID_VALUE);
 
     if (recordSource.isFD_) {
         auto outFileFD = OutFd {recordSource.outFD_};
