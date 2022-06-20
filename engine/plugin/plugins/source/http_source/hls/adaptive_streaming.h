@@ -39,12 +39,19 @@ public:
     virtual void SetFragmentListCallback(FragmentListChangeCallback* callback) = 0;
     virtual double GetDuration() const = 0;
     virtual bool IsStreaming() const = 0;
-    void Start()
+    void Resume()
     {
-        //updateTask_->Start();
+        downloader->Resume();
+        updateTask_->Start();
+    }
+    void Pause()
+    {
+        downloader->Pause();
+        updateTask_->Pause();
     }
     void Stop()
     {
+        downloader->Stop();
         updateTask_->Stop();
     }
     void SetStatusCallback(StatusCallbackFunc cb);

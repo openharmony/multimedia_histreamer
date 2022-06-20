@@ -65,7 +65,6 @@ void HlsMediaDownloader::FragmentDownloadLoop()
 bool HlsMediaDownloader::Open(const std::string& url)
 {
     adaptiveStreaming_->ProcessManifest(url);
-    adaptiveStreaming_->Start();
     downloadTask_->Start();
     return true;
 }
@@ -81,10 +80,20 @@ void HlsMediaDownloader::Close()
 
 void HlsMediaDownloader::Pause()
 {
+    buffer_->SetActive(false);
+    fragmentList_->SetActive(false);
+    adaptiveStreaming_->Pause();
+    downloadTask_->Pause();
+    downloader_->Pause();
 }
 
 void HlsMediaDownloader::Resume()
 {
+    buffer_->SetActive(true);
+    fragmentList_->SetActive(true);
+    adaptiveStreaming_->Resume();
+    downloadTask_->Start();
+    downloader_->Resume();
 }
 
 bool HlsMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
