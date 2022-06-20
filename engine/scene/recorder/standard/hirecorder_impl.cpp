@@ -517,7 +517,8 @@ ErrorCode HiRecorderImpl::DoConfigureAudio(const HstRecParam& param) const
         }
         case RecorderPublicParamType::AUD_BITRATE: {
             auto ptr = param.GetValPtr<AudBitRate>();
-            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            FALSE_RETURN_V_MSG_E(ptr != nullptr && static_cast<int32_t>(ptr->bitRate) > 0,
+                ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             return audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
                                                static_cast<int64_t>(ptr->bitRate));
         }

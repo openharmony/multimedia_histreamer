@@ -74,7 +74,7 @@ private:
 std::unique_ptr<TestPlayer> TestPlayer::Create()
 {
     auto engineFactory = std::unique_ptr<OHOS::Media::IEngineFactory>(CreateEngineFactory());
-    auto player = engineFactory->CreatePlayerEngine();
+    auto player = engineFactory->CreatePlayerEngine(0, 0);
     player->SetObs(gCallback);
     g_playFinished = false;
     return std::make_unique<TestPlayerImpl>(std::move(player));
