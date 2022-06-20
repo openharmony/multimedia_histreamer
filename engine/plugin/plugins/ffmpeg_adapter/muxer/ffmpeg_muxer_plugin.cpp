@@ -446,7 +446,7 @@ Status FFmpegMuxerPlugin::WriteFrame(const std::shared_ptr<Plugin::Buffer>& buff
     auto memory = buffer->GetMemory();
     cachePacket_->data = const_cast<uint8_t*>(memory->GetReadOnlyData());
     cachePacket_->size = memory->GetSize();
-    cachePacket_->stream_index = static_cast<int32_t>(trackId);
+    cachePacket_->stream_index = static_cast<int>(trackId);
     cachePacket_->pts = ConvertTimeToFFmpeg(buffer->pts, formatContext_->streams[trackId]->time_base);
     cachePacket_->dts = cachePacket_->pts;
     cachePacket_->flags = 0;
