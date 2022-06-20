@@ -76,7 +76,8 @@ Status HttpCurlClient::Deinit()
 
 void HttpCurlClient::InitCurlEnvironment(const std::string& url)
 {
-    ParseUrlAndHeaders(url);
+    curl_easy_setopt(easyHandle_, CURLOPT_URL, url.c_str());
+    //ParseUrlAndHeaders(url);
     curl_easy_setopt(easyHandle_, CURLOPT_HTTPGET, 1L);
 
     curl_easy_setopt(easyHandle_, CURLOPT_FORBID_REUSE, 0L);

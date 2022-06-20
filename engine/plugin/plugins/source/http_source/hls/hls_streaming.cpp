@@ -35,7 +35,11 @@ void HLSStreaming::ProcessManifest(std::string url)
 
 void HLSStreaming::UpdateManifest()
 {
-    Open(currentVariant_->m3u8_->uri_);
+    if (currentVariant_ && currentVariant_->m3u8_ && !currentVariant_->m3u8_->uri_.empty()) {
+        Open(currentVariant_->m3u8_->uri_);
+    } else {
+        MEDIA_LOG_E("UpdateManifest currentVariant_ not ready.");
+    }
 }
 
 void HLSStreaming::SetFragmentListCallback(FragmentListChangeCallback* callback)
@@ -67,6 +71,7 @@ void HLSStreaming::ParseManifest()
         if (!master_->isSimple_) {
             UpdateManifest();
         }
+        updateTask_->Start();
     } else {
         currentVariant_->m3u8_->Update(playList_);
         auto files = currentVariant_->m3u8_->files_;

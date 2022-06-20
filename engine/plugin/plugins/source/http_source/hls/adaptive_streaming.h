@@ -41,7 +41,7 @@ public:
     virtual bool IsStreaming() const = 0;
     void Start()
     {
-        updateTask_->Start();
+        //updateTask_->Start();
     }
     void Stop()
     {
