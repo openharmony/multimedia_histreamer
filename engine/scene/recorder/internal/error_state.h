@@ -32,13 +32,6 @@ public:
     }
 
     ~ErrorState() override = default;
-
-    std::tuple<ErrorCode, Action> Stop(const Plugin::Any& param) override
-    {
-        auto ret = executor_.DoStop(param);
-        Action action = (ret == ErrorCode::SUCCESS) ? Action::TRANS_TO_INIT : Action::ACTION_BUTT;
-        return {ret, action};
-    }
 };
 } // namespace Record
 } // namespace Media
