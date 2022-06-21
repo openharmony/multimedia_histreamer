@@ -271,7 +271,7 @@ Status AudioFfmpegEncoderPlugin::Start()
         FALSE_RETURN_V_MSG_E(res == 0, Status::ERROR_UNKNOWN, "avcodec open error " PUBLIC_LOG_S " when start encoder",
                           AVStrError(res).c_str());
         FALSE_RETURN_V_MSG_E(avCodecContext_->frame_size > 0, Status::ERROR_UNKNOWN, "frame_size unknown");
-        fullInputFrameSize_ = av_samples_get_buffer_size(nullptr, avCodecContext_->channels,
+        fullInputFrameSize_ = (uint32_t)av_samples_get_buffer_size(nullptr, avCodecContext_->channels,
             avCodecContext_->frame_size, srcFmt_, 1);
         srcBytesPerSample_ = av_get_bytes_per_sample(srcFmt_) * avCodecContext_->channels;
         if (needReformat_) {
