@@ -431,7 +431,6 @@ std::string Capability2String(const Capability& capability)
         {Capability::Key::AUDIO_AAC_LEVEL, CapKeyStringiness<uint32_t>},
         {Capability::Key::AUDIO_AAC_STREAM_FORMAT, CapKeyStringiness<Plugin::AudioAacStreamFormat>},
         {Capability::Key::VIDEO_PIXEL_FORMAT, CapKeyStringiness<Plugin::VideoPixelFormat>},
-        {Capability::Key::BITS_PER_CODED_SAMPLE, CapKeyStringiness<uint32_t>},
     };
     char buffer[MAX_BUF_LEN + 1] = {0}; // one more is for \0
     int pos = 0;
