@@ -43,7 +43,7 @@ AdaptiveStreaming::~AdaptiveStreaming()
     updateTask_->Stop();
 }
 
-void AdaptiveStreaming::Open(const std::string& url)
+void AdaptiveStreaming::DoOpen(const std::string& url)
 {
     playList_.clear();
     auto realStatusCallback = [this] (DownloadStatus&& status, std::shared_ptr<Downloader>& downloader,
@@ -81,6 +81,24 @@ void AdaptiveStreaming::SetStatusCallback(StatusCallbackFunc cb)
 void AdaptiveStreaming::ParseManifest()
 {
     MEDIA_LOG_E("Should not call this ParseManifest");
+}
+
+void AdaptiveStreaming::Resume()
+{
+    downloader->Resume();
+    updateTask_->Start();
+}
+
+void AdaptiveStreaming::Pause()
+{
+    downloader->Pause();
+    updateTask_->Pause();
+}
+
+void AdaptiveStreaming::Close()
+{
+    downloader->Stop();
+    updateTask_->Stop();
 }
 }
 }

@@ -32,28 +32,24 @@ public:
     AdaptiveStreaming();
     virtual ~AdaptiveStreaming();
 
-    virtual void ProcessManifest(std::string url) = 0;
+    virtual void Open(std::string url) = 0;
     virtual void UpdateManifest() = 0;
     virtual void ParseManifest() = 0;
     virtual void FragmentListUpdateLoop() = 0;
     virtual void SetFragmentListCallback(FragmentListChangeCallback* callback) = 0;
     virtual double GetDuration() const = 0;
     virtual bool IsStreaming() const = 0;
-    void Start()
-    {
-        updateTask_->Start();
-    }
-    void Stop()
-    {
-        updateTask_->Stop();
-    }
+    void Resume();
+    void Pause();
+    void Close();
     void SetStatusCallback(StatusCallbackFunc cb);
 
 protected:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
     void OnDownloadStatus(DownloadStatus status, std::shared_ptr<Downloader>&,
                           std::shared_ptr<DownloadRequest>& request);
-    void Open(const std::string& url);
+    void DoOpen(const std::string& url);
+
 protected:
     std::shared_ptr<Downloader> downloader;
     std::shared_ptr<DownloadRequest> downloadRequest_;

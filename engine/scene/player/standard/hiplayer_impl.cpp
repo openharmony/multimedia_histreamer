@@ -722,7 +722,6 @@ ErrorCode HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin::Any& par
                 }
             }
         }
-        break;
     }
     if (!newFilters.empty()) {
         ActiveFilters(newFilters);
