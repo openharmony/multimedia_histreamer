@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#ifdef OHOS_LITE
 #include <memory>
 #include "common/any.h"
 
@@ -119,4 +120,4 @@ TEST_F(UtTestHiPlayer, Can_SetBufferSize)
     ASSERT_EQ(ErrorCode::SUCCESS, player->SetBufferSize(size));
 }
 }
-
+#endif
