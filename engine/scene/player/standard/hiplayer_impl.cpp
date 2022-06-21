@@ -309,16 +309,45 @@ int32_t HiPlayerImpl::GetVideoTrackInfo(std::vector<Format> &videoTrack)
     MEDIA_LOG_I("GetVideoTrackInfo entered.");
     return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
 }
+
 int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format> &audioTrack)
 {
     MEDIA_LOG_I("GetAudioTrackInfo entered.");
-    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+    uint32_t audioSampleRate;
+    int64_t audioBitRate;
+    std::string mime;
+    uint32_t audioChannels;
+    Format audioTrackInfo {};
+    std::vector<std::shared_ptr<Plugin::Meta>> metaInfo = demuxer_->GetStreamMetaInfo();
+    for (auto trackInfo : metaInfo) {
+        trackInfo->GetString(Plugin::MetaID::MIME, mime);
+        if (IsAudioMime(mime)) {
+            FALSE_RETURN_V(trackInfo->GetInt64(Plugin::MetaID::MEDIA_BITRATE, audioBitRate),
+                TransErrorCode(ErrorCode::ERROR_UNKNOWN));
+            FALSE_RETURN_V(trackInfo->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, audioChannels),
+                TransErrorCode(ErrorCode::ERROR_UNKNOWN));
+            FALSE_RETURN_V(trackInfo->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_RATE, audioSampleRate),
+                TransErrorCode(ErrorCode::ERROR_UNKNOWN));
+            FALSE_RETURN_V(audioTrackInfo.PutLongValue("audioBitRate", audioBitRate),
+                TransErrorCode(ErrorCode::ERROR_UNKNOWN));
+            FALSE_RETURN_V(audioTrackInfo.PutIntValue("audioChannels", audioChannels),
+                TransErrorCode(ErrorCode::ERROR_UNKNOWN));
+            FALSE_RETURN_V(audioTrackInfo.PutIntValue("audioSampleRate", audioSampleRate),
+                TransErrorCode(ErrorCode::ERROR_UNKNOWN));
+            FALSE_RETURN_V(audioTrackInfo.PutStringValue("mime", mime),
+                TransErrorCode(ErrorCode::ERROR_UNKNOWN));
+            audioTrack.push_back(audioTrackInfo);
+        }
+    }
+    return TransErrorCode(ErrorCode::SUCCESS);
 }
+
 int32_t HiPlayerImpl::GetVideoWidth()
 {
     MEDIA_LOG_I("GetVideoWidth entered.");
     return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
 }
+
 int32_t HiPlayerImpl::GetVideoHeight()
 {
     MEDIA_LOG_I("GetVideoHeight entered.");
