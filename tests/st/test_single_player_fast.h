@@ -87,7 +87,10 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
     );
 
     DATA_PROVIDER(hlsLinks, 1,
-    DATA_GROUP(std::string("http://ngcdn001.cnr.cn/live/zgzs/index.m3u8")));
+    DATA_GROUP(std::string("http://ngcdn001.cnr.cn/live/zgzs/index.m3u8")),
+    DATA_GROUP(std::string("http://ls-open.qingting.fm/live/20500010/64k.m3u8?"
+        "deviceid=00000000-0000-0000-0000-000000000000&format=aac")),
+    DATA_GROUP(std::string("https://live.ximalaya.com/radio-first-page-app/live/1011/64.m3u8?transcode=aac")));
 
     // @test(data="shortMusicUrls", tags=fast)
     PTEST((std::string url), Test single player play url music, and finished automatically)

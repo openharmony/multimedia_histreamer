@@ -42,7 +42,7 @@ void DownloadMonitor::HttpMonitorLoop()
     if (isPlaying_) {
         time_t nowTime;
         time(&nowTime);
-        if ((lastReadTime_ != 0) && (nowTime - lastReadTime_ >= 10)) {  // 10
+        if ((lastReadTime_ != 0) && (nowTime - lastReadTime_ >= 60)) {  // 60
             MEDIA_LOG_D("HttpMonitorLoop : too long without reading data, paused");
             Pause();
         }

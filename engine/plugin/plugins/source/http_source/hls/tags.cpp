@@ -377,7 +377,10 @@ std::list<std::shared_ptr<Tag>> ParseEntries(std::string& s)
 {
     std::list<std::shared_ptr<Tag>> list;
     std::shared_ptr<Tag> lastTag = nullptr;
-    auto lines = Split(s, "\n");
+    auto lines = Split(s, "\r\n");
+    if (lines.size() == 1) {  // 1
+        lines = Split(s, "\n");
+    }
     for (auto line : lines) {
         if (line[0] == '#') {
             ParseTag(list, lastTag, line);
