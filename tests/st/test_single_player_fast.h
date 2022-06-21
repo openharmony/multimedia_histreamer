@@ -262,8 +262,7 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
         std::string uri = "fd://?offset=0&size=";
         uri += std::to_string(fileSize);
         int32_t fd = open(url.c_str(), O_RDONLY|O_BINARY);
-        char ch[256];
-        std::string fdStr = itoa(fd, ch, 256);
+        std::string fdStr = std::to_string(fd);
         uri.insert(5, fdStr);
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(uri)));
