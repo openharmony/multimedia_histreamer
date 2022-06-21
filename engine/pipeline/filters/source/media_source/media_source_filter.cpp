@@ -236,9 +236,12 @@ void MediaSourceFilter::InitPorts()
 void MediaSourceFilter::ActivateMode()
 {
     MEDIA_LOG_D("IN");
-    if (plugin_) {
-        seekable_ = plugin_->GetSeekable();
-    }
+    do {
+        if (plugin_) {
+            seekable_ = plugin_->GetSeekable();
+        }
+        OSAL::SleepFor(10); // 10
+    } while (seekable_ == Seekable::INVALID);
     FALSE_LOG(seekable_ != Seekable::INVALID);
     if (seekable_ == Seekable::UNSEEKABLE) {
         if (taskPtr_ == nullptr) {

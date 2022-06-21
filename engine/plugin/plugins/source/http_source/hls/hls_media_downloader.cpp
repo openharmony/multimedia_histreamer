@@ -131,9 +131,9 @@ double HlsMediaDownloader::GetDuration() const
     return adaptiveStreaming_->GetDuration();
 }
 
-bool HlsMediaDownloader::IsStreaming() const
+Seekable HlsMediaDownloader::GetSeekable() const
 {
-    return adaptiveStreaming_->IsStreaming();
+    return adaptiveStreaming_->GetSeekable();
 }
 
 void HlsMediaDownloader::SetCallback(Callback* cb)

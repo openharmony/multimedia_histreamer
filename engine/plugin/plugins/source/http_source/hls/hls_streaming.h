@@ -34,7 +34,7 @@ public:
     void FragmentListUpdateLoop() override;
     void SetFragmentListCallback(FragmentListChangeCallback* callback) override;
     double GetDuration() const override;
-    bool IsStreaming() const override;
+    Seekable GetSeekable() const override;
 private:
     std::string url_ {};
     FragmentListChangeCallback* callback_ {nullptr};

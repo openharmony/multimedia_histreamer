@@ -110,9 +110,9 @@ double HttpMediaDownloader::GetDuration() const
     return 0;
 }
 
-bool HttpMediaDownloader::IsStreaming() const
+Seekable HttpMediaDownloader::GetSeekable() const
 {
-    return downloadRequest_->IsChunked();
+    return downloadRequest_->IsChunked() ? Seekable::UNSEEKABLE : Seekable::SEEKABLE;
 }
 
 void HttpMediaDownloader::SetCallback(Callback* cb)

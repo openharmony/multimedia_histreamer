@@ -213,14 +213,14 @@ Seekable HttpSourcePlugin::GetSeekable()
     MEDIA_LOG_D("IN");
     OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(executor_ != nullptr, Seekable::INVALID);
-    return !executor_->IsStreaming() ? Seekable::SEEKABLE : Seekable::UNSEEKABLE;
+    return executor_->GetSeekable();
 }
 
 Status HttpSourcePlugin::SeekTo(uint64_t offset)
 {
     OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
-    FALSE_RETURN_V(!executor_->IsStreaming(), Status::ERROR_INVALID_OPERATION);
+    FALSE_RETURN_V(executor_->GetSeekable() == Seekable::SEEKABLE, Status::ERROR_INVALID_OPERATION);
     FALSE_RETURN_V(offset <= executor_->GetContentLength(), Status::ERROR_INVALID_PARAMETER);
     FALSE_RETURN_V(executor_->Seek(offset), Status::ERROR_UNKNOWN);
     return Status::OK;
