@@ -33,7 +33,7 @@ std::string UriJoin(std::string& baseUrl, const std::string& uri)
 {
     if ((uri.find("http://") != std::string::npos) || (uri.find("https://") != std::string::npos)) {
         return uri;
-    } else if (uri.find("//") != std::string::npos) {
+    } else if (uri.find("//") == 0) { // start with "//"
         return baseUrl.substr(0, baseUrl.find('/')) + uri;
     } else {
         std::string::size_type pos = baseUrl.rfind('/');

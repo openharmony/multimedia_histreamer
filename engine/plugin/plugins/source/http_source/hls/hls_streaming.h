@@ -28,7 +28,7 @@ public:
     HLSStreaming() = default;
     ~HLSStreaming() override = default;
 
-    void ProcessManifest(std::string url) override;
+    void Open(std::string url) override;
     void UpdateManifest() override;
     void ParseManifest() override;
     void FragmentListUpdateLoop() override;

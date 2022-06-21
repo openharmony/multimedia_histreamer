@@ -26,17 +26,17 @@ void HLSStreaming::FragmentListUpdateLoop()
     UpdateManifest();
 }
 
-void HLSStreaming::ProcessManifest(std::string url)
+void HLSStreaming::Open(std::string url)
 {
     url_ = url;
     master_ = nullptr;
-    Open(url);
+    DoOpen(url);
 }
 
 void HLSStreaming::UpdateManifest()
 {
     if (currentVariant_ && currentVariant_->m3u8_ && !currentVariant_->m3u8_->uri_.empty()) {
-        Open(currentVariant_->m3u8_->uri_);
+        DoOpen(currentVariant_->m3u8_->uri_);
     } else {
         MEDIA_LOG_E("UpdateManifest currentVariant_ not ready.");
     }

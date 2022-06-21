@@ -64,7 +64,7 @@ void HlsMediaDownloader::FragmentDownloadLoop()
 
 bool HlsMediaDownloader::Open(const std::string& url)
 {
-    adaptiveStreaming_->ProcessManifest(url);
+    adaptiveStreaming_->Open(url);
     downloadTask_->Start();
     return true;
 }
@@ -73,7 +73,7 @@ void HlsMediaDownloader::Close()
 {
     buffer_->SetActive(false);
     fragmentList_->SetActive(false);
-    adaptiveStreaming_->Stop();
+    adaptiveStreaming_->Close();
     downloadTask_->Stop();
     downloader_->Stop();
 }
