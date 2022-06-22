@@ -67,6 +67,7 @@ public:
     int32_t GetCurrentTime(int64_t& currentMs) override;
     int32_t GetDuration(int64_t& durationMs) override;
     int32_t SetVolume(float leftVolume, float rightVolume) override;
+    int32_t GetAudioTrackInfo(std::vector<Format> &audioTrack) override;
 private:
     std::unique_ptr<IPlayerEngine> player_;
 };
@@ -158,6 +159,12 @@ int32_t TestPlayerImpl::GetDuration(int64_t& durationMs)
 int32_t TestPlayerImpl::SetVolume(float leftVolume, float rightVolume)
 {
     int32_t ret = player_->SetVolume(leftVolume, rightVolume);
+    return ret;
+}
+
+int32_t TestPlayerImpl::GetAudioTrackInfo(std::vector<Format> &audioTrack)
+{
+    int32_t ret = player_->GetAudioTrackInfo(audioTrack);
     return ret;
 }
 }

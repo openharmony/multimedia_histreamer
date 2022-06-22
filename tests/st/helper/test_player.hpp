@@ -14,8 +14,10 @@
  */
 #ifndef HISTREAMER_ST_TEST_PLAYER
 #define HISTREAMER_ST_TEST_PLAYER
-#include <string>
+#include <format.h>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace OHOS::Media::Test {
 class TestSource {
@@ -43,6 +45,7 @@ public:
     virtual int32_t GetCurrentTime(int64_t& currentMs) = 0;
     virtual int32_t GetDuration(int64_t& durationMs) = 0;
     virtual int32_t SetVolume(float leftVolume, float rightVolume) = 0;
+    virtual int32_t GetAudioTrackInfo(std::vector<Format> &audioTrack) = 0;
 };
 }
 #endif

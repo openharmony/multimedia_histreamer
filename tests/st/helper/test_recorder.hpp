@@ -45,6 +45,22 @@ public:
         isFD_ = true;
         outFD_ = fdUri;
     }
+
+    void GetBitRate(int64_t& bitrate)
+    {
+        bitrate = bitRate_;
+    }
+
+    void GetSampleRate(int32_t& sampleRate)
+    {
+        sampleRate = sampleRate_;
+    }
+
+    void GetChannel(int32_t& channel)
+    {
+        channel = channel_;
+    }
+
 private:
     std::string pcmPath_;
     int32_t sampleRate_;
