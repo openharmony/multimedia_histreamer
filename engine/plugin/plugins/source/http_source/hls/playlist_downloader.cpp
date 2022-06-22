@@ -12,15 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define HST_LOG_TAG "AdaptiveStreaming"
-#include "adaptive_streaming.h"
+#define HST_LOG_TAG "PlayListDownloader"
+#include "playlist_downloader.h"
 #include "securec.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-AdaptiveStreaming::AdaptiveStreaming()
+PlayListDownloader::PlayListDownloader()
 {
     downloader = std::make_shared<Downloader>("hlsPlayList");
     dataSave_ = [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
@@ -34,16 +34,16 @@ AdaptiveStreaming::AdaptiveStreaming()
             std::forward<decltype(request)>(request));
     };
     updateTask_ = std::make_shared<OSAL::Task>(std::string("FragmentListUpdate"));
-    updateTask_->RegisterHandler([this] { FragmentListUpdateLoop(); });
+    updateTask_->RegisterHandler([this] { PlayListUpdateLoop(); });
 }
 
-AdaptiveStreaming::~AdaptiveStreaming()
+PlayListDownloader::~PlayListDownloader()
 {
     downloader->Stop();
     updateTask_->Stop();
 }
 
-void AdaptiveStreaming::DoOpen(const std::string& url)
+void PlayListDownloader::DoOpen(const std::string& url)
 {
     playList_.clear();
     auto realStatusCallback = [this] (DownloadStatus&& status, std::shared_ptr<Downloader>& downloader,
@@ -55,15 +55,15 @@ void AdaptiveStreaming::DoOpen(const std::string& url)
     downloader->Start();
 }
 
-void AdaptiveStreaming::SaveData(uint8_t* data, uint32_t len, int64_t offset)
+void PlayListDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 {
     (void)offset;
     playList_.append(reinterpret_cast<const char*>(data), len);
     ParseManifest();
 }
 
-void AdaptiveStreaming::OnDownloadStatus(DownloadStatus status, std::shared_ptr<Downloader>&,
-                                         std::shared_ptr<DownloadRequest>& request)
+void PlayListDownloader::OnDownloadStatus(DownloadStatus status, std::shared_ptr<Downloader>&,
+                                          std::shared_ptr<DownloadRequest>& request)
 {
     // This should not be called normally
     MEDIA_LOG_D("Should not call this OnDownloadStatus, should call monitor.");
@@ -73,29 +73,29 @@ void AdaptiveStreaming::OnDownloadStatus(DownloadStatus status, std::shared_ptr<
     }
 }
 
-void AdaptiveStreaming::SetStatusCallback(StatusCallbackFunc cb)
+void PlayListDownloader::SetStatusCallback(StatusCallbackFunc cb)
 {
     statusCallback_ = cb;
 }
 
-void AdaptiveStreaming::ParseManifest()
+void PlayListDownloader::ParseManifest()
 {
     MEDIA_LOG_E("Should not call this ParseManifest");
 }
 
-void AdaptiveStreaming::Resume()
+void PlayListDownloader::Resume()
 {
     downloader->Resume();
     updateTask_->Start();
 }
 
-void AdaptiveStreaming::Pause()
+void PlayListDownloader::Pause()
 {
     downloader->Pause();
     updateTask_->Pause();
 }
 
-void AdaptiveStreaming::Close()
+void PlayListDownloader::Close()
 {
     downloader->Stop();
     updateTask_->Stop();

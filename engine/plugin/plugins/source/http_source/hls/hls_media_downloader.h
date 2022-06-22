@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_HLS_MEDIA_DOWNLOADER_H
 #define HISTREAMER_HLS_MEDIA_DOWNLOADER_H
 
-#include "adaptive_streaming.h"
+#include "playlist_downloader.h"
 #include "ring_buffer.h"
 #include "plugin/plugins/source/http_source/media_downloader.h"
 
@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-class HlsMediaDownloader : public MediaDownloader, public FragmentListChangeCallback {
+class HlsMediaDownloader : public MediaDownloader, public PlayListChangeCallback {
 public:
     HlsMediaDownloader() noexcept;
     ~HlsMediaDownloader() override = default;
@@ -39,14 +39,13 @@ public:
     double GetDuration() const override;
     Seekable GetSeekable() const override;
     void SetCallback(Callback* cb) override;
-    void OnFragmentListChanged(const std::vector<std::string>& fragmentList) override;
+    void OnPlayListChanged(const std::vector<std::string>& playList) override;
     void SetStatusCallback(StatusCallbackFunc cb) override;
 
 private:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
-    void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest>& request);
-
     void FragmentDownloadLoop();
+
 private:
     std::shared_ptr<RingBuffer> buffer_;
     std::shared_ptr<Downloader> downloader_;
@@ -56,10 +55,10 @@ private:
     DataSaveFunc dataSave_;
     StatusCallbackFunc statusCallback_;
 
-    std::shared_ptr<AdaptiveStreaming> adaptiveStreaming_;
+    std::shared_ptr<PlayListDownloader> playListDownloader_;
 
     std::shared_ptr<OSAL::Task> downloadTask_;
-    std::shared_ptr<BlockingQueue<std::string>> fragmentList_;
+    std::shared_ptr<BlockingQueue<std::string>> playList_;
     std::map<std::string, bool> fragmentDownloadStart;
 };
 }

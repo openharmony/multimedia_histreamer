@@ -14,26 +14,26 @@
  */
 #define HST_LOG_TAG "HlsStreaming"
 #include <mutex>
-#include "hls_streaming.h"
+#include "hls_playlist_downloader.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-void HLSStreaming::FragmentListUpdateLoop()
+void HlsPlayListDownloader::PlayListUpdateLoop()
 {
     OSAL::SleepFor(5000); // 5000 how often is playlist updated
     UpdateManifest();
 }
 
-void HLSStreaming::Open(std::string url)
+void HlsPlayListDownloader::Open(std::string url)
 {
     url_ = url;
     master_ = nullptr;
     DoOpen(url);
 }
 
-void HLSStreaming::UpdateManifest()
+void HlsPlayListDownloader::UpdateManifest()
 {
     if (currentVariant_ && currentVariant_->m3u8_ && !currentVariant_->m3u8_->uri_.empty()) {
         DoOpen(currentVariant_->m3u8_->uri_);
@@ -42,12 +42,12 @@ void HLSStreaming::UpdateManifest()
     }
 }
 
-void HLSStreaming::SetFragmentListCallback(FragmentListChangeCallback* callback)
+void HlsPlayListDownloader::SetPlayListCallback(PlayListChangeCallback* callback)
 {
     callback_ = callback;
 }
 
-double HLSStreaming::GetDuration() const
+double HlsPlayListDownloader::GetDuration() const
 {
     if (!master_) {
         return 0;
@@ -55,7 +55,7 @@ double HLSStreaming::GetDuration() const
     return master_->bLive_ ? -1.0 : master_->duration_; // -1.0
 }
 
-Seekable HLSStreaming::GetSeekable() const
+Seekable HlsPlayListDownloader::GetSeekable() const
 {
     if (master_ == nullptr) {
         return Seekable::INVALID;
@@ -63,7 +63,7 @@ Seekable HLSStreaming::GetSeekable() const
     return master_->bLive_ ? Seekable::UNSEEKABLE : Seekable::SEEKABLE;
 }
 
-void HLSStreaming::ParseManifest()
+void HlsPlayListDownloader::ParseManifest()
 {
     if (!master_) {
         master_ = std::make_shared<M3U8MasterPlaylist>(playList_, url_);
@@ -80,7 +80,7 @@ void HLSStreaming::ParseManifest()
         for (auto &file: files) {
             fragmentList.push_back(file->uri_);
         }
-        callback_->OnFragmentListChanged(fragmentList);
+        callback_->OnPlayListChanged(fragmentList);
     }
 }
 }

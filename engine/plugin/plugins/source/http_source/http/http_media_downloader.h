@@ -45,7 +45,6 @@ public:
 
 private:
     void SaveData(uint8_t* data, uint32_t len, int64_t offset);
-    void OnDownloadStatus(DownloadStatus status, std::shared_ptr<DownloadRequest> &request);
 
 private:
     std::shared_ptr<RingBuffer> buffer_;

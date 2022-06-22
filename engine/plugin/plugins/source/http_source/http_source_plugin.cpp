@@ -50,7 +50,7 @@ HttpSourcePlugin::HttpSourcePlugin(std::string name) noexcept
     : SourcePlugin(std::move(name)),
       bufferSize_(DEFAULT_BUFFER_SIZE),
       waterline_(0),
-      executor_(nullptr)
+      downloader_(nullptr)
 {
     MEDIA_LOG_D("HttpSourcePlugin IN");
 }
@@ -140,8 +140,8 @@ Status HttpSourcePlugin::SetCallback(Callback* cb)
     MEDIA_LOG_D("IN");
     callback_ = cb;
     OSAL::ScopedLock lock(mutex_);
-    if (executor_ != nullptr) {
-        executor_->SetCallback(cb);
+    if (downloader_ != nullptr) {
+        downloader_->SetCallback(cb);
     }
     return Status::OK;
 }
@@ -152,19 +152,19 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     OSAL::ScopedLock lock(mutex_);
     auto uri = source->GetSourceUri();
     if (uri.find(".m3u8") != std::string::npos) {
-        executor_ = std::make_shared<DownloadMonitor>(std::make_shared<HlsMediaDownloader>());
+        downloader_ = std::make_shared<DownloadMonitor>(std::make_shared<HlsMediaDownloader>());
         delayReady = false;
     } else if (uri.compare(0, 4, "http") == 0) { // 0 : position, 4: count
-        executor_ = std::make_shared<DownloadMonitor>(std::make_shared<HttpMediaDownloader>());
+        downloader_ = std::make_shared<DownloadMonitor>(std::make_shared<HttpMediaDownloader>());
     }
-    FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
+    FALSE_RETURN_V(downloader_ != nullptr, Status::ERROR_NULL_POINTER);
 
     if (callback_ != nullptr) {
-        executor_->SetCallback(callback_);
+        downloader_->SetCallback(callback_);
     }
 
     MEDIA_LOG_I("SetSource: " PUBLIC_LOG_S, uri.c_str());
-    FALSE_RETURN_V(executor_->Open(uri), Status::ERROR_UNKNOWN);
+    FALSE_RETURN_V(downloader_->Open(uri), Status::ERROR_UNKNOWN);
     return Status::OK;
 }
 
@@ -178,7 +178,7 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLe
 {
     MEDIA_LOG_D("Read in");
     OSAL::ScopedLock lock(mutex_);
-    FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
+    FALSE_RETURN_V(downloader_ != nullptr, Status::ERROR_NULL_POINTER);
 
     if (buffer == nullptr) {
         buffer = std::make_shared<Buffer>();
@@ -193,7 +193,7 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLe
 
     bool isEos = false;
     unsigned int realReadSize = 0;
-    bool result = executor_->Read(bufData->GetWritableAddr(expectedLen), expectedLen, realReadSize, isEos);
+    bool result = downloader_->Read(bufData->GetWritableAddr(expectedLen), expectedLen, realReadSize, isEos);
     bufData->UpdateDataSize(realReadSize);
     MEDIA_LOG_D("Read finished, read size = " PUBLIC_LOG_ZU ", isEos " PUBLIC_LOG_D32, bufData->GetSize(), isEos);
     return result ? Status::OK : Status::END_OF_STREAM;
@@ -203,8 +203,8 @@ Status HttpSourcePlugin::GetSize(size_t& size)
 {
     MEDIA_LOG_D("IN");
     OSAL::ScopedLock lock(mutex_);
-    FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
-    size = executor_->GetContentLength();
+    FALSE_RETURN_V(downloader_ != nullptr, Status::ERROR_NULL_POINTER);
+    size = downloader_->GetContentLength();
     return Status::OK;
 }
 
@@ -212,27 +212,27 @@ Seekable HttpSourcePlugin::GetSeekable()
 {
     MEDIA_LOG_D("IN");
     OSAL::ScopedLock lock(mutex_);
-    FALSE_RETURN_V(executor_ != nullptr, Seekable::INVALID);
-    return executor_->GetSeekable();
+    FALSE_RETURN_V(downloader_ != nullptr, Seekable::INVALID);
+    return downloader_->GetSeekable();
 }
 
 Status HttpSourcePlugin::SeekTo(uint64_t offset)
 {
     OSAL::ScopedLock lock(mutex_);
-    FALSE_RETURN_V(executor_ != nullptr, Status::ERROR_NULL_POINTER);
-    FALSE_RETURN_V(executor_->GetSeekable() == Seekable::SEEKABLE, Status::ERROR_INVALID_OPERATION);
-    FALSE_RETURN_V(offset <= executor_->GetContentLength(), Status::ERROR_INVALID_PARAMETER);
-    FALSE_RETURN_V(executor_->Seek(offset), Status::ERROR_UNKNOWN);
+    FALSE_RETURN_V(downloader_ != nullptr, Status::ERROR_NULL_POINTER);
+    FALSE_RETURN_V(downloader_->GetSeekable() == Seekable::SEEKABLE, Status::ERROR_INVALID_OPERATION);
+    FALSE_RETURN_V(offset <= downloader_->GetContentLength(), Status::ERROR_INVALID_PARAMETER);
+    FALSE_RETURN_V(downloader_->Seek(offset), Status::ERROR_UNKNOWN);
     return Status::OK;
 }
 
 void HttpSourcePlugin::CloseUri()
 {
     OSAL::ScopedLock lock(mutex_);
-    if (executor_ != nullptr) {
+    if (downloader_ != nullptr) {
         MEDIA_LOG_D("Close uri");
-        executor_->Close();
-        executor_ = nullptr;
+        downloader_->Close();
+        downloader_ = nullptr;
     }
 }
 }

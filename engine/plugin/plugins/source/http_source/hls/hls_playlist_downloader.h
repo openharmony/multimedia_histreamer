@@ -13,31 +13,32 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_HLS_STREAMING_H
-#define HISTREAMER_HLS_STREAMING_H
+#ifndef HISTREAMER_HLS_PLAYLIST_DOWNLOADER_H
+#define HISTREAMER_HLS_PLAYLIST_DOWNLOADER_H
 
-#include "adaptive_streaming.h"
+#include "playlist_downloader.h"
 #include "m3u8.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-class HLSStreaming : public AdaptiveStreaming {
+class HlsPlayListDownloader : public PlayListDownloader {
 public:
-    HLSStreaming() = default;
-    ~HLSStreaming() override = default;
+    HlsPlayListDownloader() = default;
+    ~HlsPlayListDownloader() override = default;
 
     void Open(std::string url) override;
     void UpdateManifest() override;
     void ParseManifest() override;
-    void FragmentListUpdateLoop() override;
-    void SetFragmentListCallback(FragmentListChangeCallback* callback) override;
+    void PlayListUpdateLoop() override;
+    void SetPlayListCallback(PlayListChangeCallback* callback) override;
     double GetDuration() const override;
     Seekable GetSeekable() const override;
+
 private:
     std::string url_ {};
-    FragmentListChangeCallback* callback_ {nullptr};
+    PlayListChangeCallback* callback_ {nullptr};
     std::shared_ptr<M3U8MasterPlaylist> master_;
     std::shared_ptr<M3U8VariantStream> currentVariant_;
     std::shared_ptr<M3U8VariantStream> previousVariant_;
