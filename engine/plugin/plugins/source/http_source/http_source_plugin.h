@@ -15,6 +15,8 @@
 #ifndef HISTREAMER_HTTP_SOURCE_PLUGIN_H
 #define HISTREAMER_HTTP_SOURCE_PLUGIN_H
 
+#include <memory>
+#include "download/http_curl_client.h"
 #include "media_downloader.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
@@ -46,6 +48,7 @@ public:
 private:
     void CloseUri();
 
+    std::shared_ptr<HttpCurlClient> client_;
     uint32_t bufferSize_;
     uint32_t waterline_;
     Callback* callback_ {};
