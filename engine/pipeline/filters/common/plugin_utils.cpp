@@ -310,17 +310,17 @@ OHOS::Media::ErrorCode TranslatePluginStatus(Plugin::Status pluginError)
         {Plugin::Status::OK, ErrorCode::SUCCESS},
         {Plugin::Status::NO_ERROR, ErrorCode::SUCCESS},
         {Plugin::Status::ERROR_UNKNOWN, ErrorCode::ERROR_UNKNOWN},
-        {Plugin::Status::ERROR_PLUGIN_ALREADY_EXISTS,ErrorCode::ERROR_UNKNOWN},
+        {Plugin::Status::ERROR_PLUGIN_ALREADY_EXISTS, ErrorCode::ERROR_UNKNOWN},
         {Plugin::Status::ERROR_INCOMPATIBLE_VERSION, ErrorCode::ERROR_UNKNOWN},
         {Plugin::Status::ERROR_NO_MEMORY, ErrorCode::ERROR_NO_MEMORY},
-        {Plugin::Status::ERROR_WRONG_STATE,ErrorCode::ERROR_INVALID_OPERATION},
+        {Plugin::Status::ERROR_WRONG_STATE, ErrorCode::ERROR_INVALID_OPERATION},
         {Plugin::Status::ERROR_UNIMPLEMENTED, ErrorCode::ERROR_UNIMPLEMENTED},
         {Plugin::Status::ERROR_INVALID_PARAMETER, ErrorCode::ERROR_INVALID_PARAMETER_VALUE},
         {Plugin::Status::ERROR_INVALID_DATA, ErrorCode::ERROR_UNKNOWN},
         {Plugin::Status::ERROR_MISMATCHED_TYPE, ErrorCode::ERROR_INVALID_PARAMETER_TYPE},
         {Plugin::Status::ERROR_TIMED_OUT, ErrorCode::ERROR_TIMED_OUT},
         {Plugin::Status::ERROR_UNSUPPORTED_FORMAT, ErrorCode::ERROR_UNSUPPORTED_FORMAT},
-        {Plugin::Status::ERROR_NOT_ENOUGH_DATA,ErrorCode::ERROR_UNKNOWN},
+        {Plugin::Status::ERROR_NOT_ENOUGH_DATA, ErrorCode::ERROR_UNKNOWN},
         {Plugin::Status::ERROR_NOT_EXISTED, ErrorCode::ERROR_NOT_EXISTED},
         {Plugin::Status::ERROR_AGAIN, ErrorCode::ERROR_AGAIN},
         {Plugin::Status::ERROR_PERMISSION_DENIED, ErrorCode::ERROR_PERMISSION_DENIED},
@@ -419,7 +419,7 @@ uint8_t GetBytesPerSample(Plugin::AudioSampleFormat fmt)
 
 std::string Capability2String(const Capability& capability)
 {
-    const static std::map<Capability::Key,CapStrnessFunc> capStrnessMap = {
+    const static std::map<Capability::Key, CapStrnessFunc> capStrnessMap = {
         {Capability::Key::MEDIA_BITRATE, CapKeyStringiness<int64_t>},
         {Capability::Key::AUDIO_SAMPLE_RATE, CapKeyStringiness<uint32_t>},
         {Capability::Key::AUDIO_CHANNELS, CapKeyStringiness<uint32_t>},
@@ -432,11 +432,11 @@ std::string Capability2String(const Capability& capability)
         {Capability::Key::AUDIO_AAC_STREAM_FORMAT, CapKeyStringiness<Plugin::AudioAacStreamFormat>},
         {Capability::Key::VIDEO_PIXEL_FORMAT, CapKeyStringiness<Plugin::VideoPixelFormat>},
     };
-    char buffer[MAX_BUF_LEN + 1] = {0}; // one more is for \0
+    char buffer[MAX_BUF_LEN] = {0};
     int pos = 0;
     int32_t ret = 0;
-    RETURN_IF_SNPRI_FAILED(snprintf_truncated_s(buffer, MAX_BUF_LEN, "Capability{mime:%s, ", capability.mime.c_str()),
-                           ret, {});
+    RETURN_IF_SNPRI_FAILED(
+        snprintf_truncated_s(buffer, sizeof(buffer), "Capability{mime:%s, ", capability.mime.c_str()), ret, {});
     pos += ret;
     bool needEtc = false;
     for (const auto& cap : capability.keys) {
