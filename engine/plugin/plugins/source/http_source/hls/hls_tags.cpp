@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "tags.h"
+#include "hls_tags.h"
 #include <cstring>
 #include <sstream>
 #include <stack>

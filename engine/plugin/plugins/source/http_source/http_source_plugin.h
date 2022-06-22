@@ -49,7 +49,7 @@ private:
     uint32_t bufferSize_;
     uint32_t waterline_;
     Callback* callback_ {};
-    std::shared_ptr<MediaDownloader> executor_;
+    std::shared_ptr<MediaDownloader> downloader_;
     OSAL::Mutex mutex_ {};
     bool delayReady {true};
 };

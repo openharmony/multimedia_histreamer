@@ -15,7 +15,7 @@
 #define HST_LOG_TAG "HlsMediaDownloader"
 
 #include "hls_media_downloader.h"
-#include "hls_streaming.h"
+#include "hls_playlist_downloader.h"
 #include "securec.h"
 
 namespace OHOS {
@@ -26,6 +26,9 @@ namespace {
 constexpr int RING_BUFFER_SIZE = 5 * 48 * 1024;
 }
 
+// Description:
+//   hls manifest, m3u8 --- content get from m3u8 url, we get play list from the content
+//   fragment --- one item in play list, download media data according to the fragment address.
 HlsMediaDownloader::HlsMediaDownloader() noexcept
 {
     buffer_ = std::make_shared<RingBuffer>(RING_BUFFER_SIZE);
@@ -35,20 +38,20 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
     downloadTask_ = std::make_shared<OSAL::Task>(std::string("FragmentDownload"));
     downloadTask_->RegisterHandler([this] { FragmentDownloadLoop(); });
 
-    fragmentList_ = std::make_shared<BlockingQueue<std::string>>("FragmentList", 50); // 50
+    playList_ = std::make_shared<BlockingQueue<std::string>>("PlayList", 50); // 50
 
     dataSave_ =  [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
         SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
                  std::forward<decltype(offset)>(offset));
     };
 
-    adaptiveStreaming_ = std::make_shared<HLSStreaming>();
-    adaptiveStreaming_->SetFragmentListCallback(this);
+    playListDownloader_ = std::make_shared<HlsPlayListDownloader>();
+    playListDownloader_->SetPlayListCallback(this);
 }
 
 void HlsMediaDownloader::FragmentDownloadLoop()
 {
-    std::string url = fragmentList_->Pop();
+    std::string url = playList_->Pop();
     if (!fragmentDownloadStart[url]) {
         fragmentDownloadStart[url] = true;
         auto realStatusCallback = [this] (DownloadStatus&& status, std::shared_ptr<Downloader>& downloader,
@@ -64,7 +67,7 @@ void HlsMediaDownloader::FragmentDownloadLoop()
 
 bool HlsMediaDownloader::Open(const std::string& url)
 {
-    adaptiveStreaming_->Open(url);
+    playListDownloader_->Open(url);
     downloadTask_->Start();
     return true;
 }
@@ -72,8 +75,8 @@ bool HlsMediaDownloader::Open(const std::string& url)
 void HlsMediaDownloader::Close()
 {
     buffer_->SetActive(false);
-    fragmentList_->SetActive(false);
-    adaptiveStreaming_->Close();
+    playList_->SetActive(false);
+    playListDownloader_->Close();
     downloadTask_->Stop();
     downloader_->Stop();
 }
@@ -81,8 +84,8 @@ void HlsMediaDownloader::Close()
 void HlsMediaDownloader::Pause()
 {
     buffer_->SetActive(false);
-    fragmentList_->SetActive(false);
-    adaptiveStreaming_->Pause();
+    playList_->SetActive(false);
+    playListDownloader_->Pause();
     downloadTask_->Pause();
     downloader_->Pause();
 }
@@ -90,8 +93,8 @@ void HlsMediaDownloader::Pause()
 void HlsMediaDownloader::Resume()
 {
     buffer_->SetActive(true);
-    fragmentList_->SetActive(true);
-    adaptiveStreaming_->Resume();
+    playList_->SetActive(true);
+    playListDownloader_->Resume();
     downloadTask_->Start();
     downloader_->Resume();
 }
@@ -128,12 +131,12 @@ size_t HlsMediaDownloader::GetContentLength() const
 
 double HlsMediaDownloader::GetDuration() const
 {
-    return adaptiveStreaming_->GetDuration();
+    return playListDownloader_->GetDuration();
 }
 
 Seekable HlsMediaDownloader::GetSeekable() const
 {
-    return adaptiveStreaming_->GetSeekable();
+    return playListDownloader_->GetSeekable();
 }
 
 void HlsMediaDownloader::SetCallback(Callback* cb)
@@ -141,10 +144,10 @@ void HlsMediaDownloader::SetCallback(Callback* cb)
     callback_ = cb;
 }
 
-void HlsMediaDownloader::OnFragmentListChanged(const std::vector<std::string>& fragmentList)
+void HlsMediaDownloader::OnPlayListChanged(const std::vector<std::string>& playList)
 {
-    for (auto& fragment : fragmentList) {
-        fragmentList_->Push(fragment);
+    for (auto& fragment : playList) {
+        playList_->Push(fragment);
     }
 }
 
@@ -156,7 +159,7 @@ void HlsMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 void HlsMediaDownloader::SetStatusCallback(StatusCallbackFunc cb)
 {
     statusCallback_ = cb;
-    adaptiveStreaming_->SetStatusCallback(cb);
+    playListDownloader_->SetStatusCallback(cb);
 }
 }
 }

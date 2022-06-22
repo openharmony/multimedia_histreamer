@@ -19,7 +19,7 @@
 #include <memory>
 #include <string>
 #include <list>
-#include "tags.h"
+#include "hls_tags.h"
 
 namespace OHOS {
 namespace Media {

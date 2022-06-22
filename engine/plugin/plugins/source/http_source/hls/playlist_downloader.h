@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HISTREAMER_ADAPTIVE_STREAMING_H
-#define HISTREAMER_ADAPTIVE_STREAMING_H
+#ifndef HISTREAMER_PLAYLIST_DOWNLOADER_H
+#define HISTREAMER_PLAYLIST_DOWNLOADER_H
 
 #include <vector>
 #include "plugin/plugins/source/http_source/download/downloader.h"
@@ -23,20 +23,20 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
-struct FragmentListChangeCallback {
-    virtual ~FragmentListChangeCallback() = default;
-    virtual void OnFragmentListChanged(const std::vector<std::string>& fragmentList) = 0;
+struct PlayListChangeCallback {
+    virtual ~PlayListChangeCallback() = default;
+    virtual void OnPlayListChanged(const std::vector<std::string>& playList) = 0;
 };
-class AdaptiveStreaming {
+class PlayListDownloader {
 public:
-    AdaptiveStreaming();
-    virtual ~AdaptiveStreaming();
+    PlayListDownloader();
+    virtual ~PlayListDownloader();
 
     virtual void Open(std::string url) = 0;
     virtual void UpdateManifest() = 0;
     virtual void ParseManifest() = 0;
-    virtual void FragmentListUpdateLoop() = 0;
-    virtual void SetFragmentListCallback(FragmentListChangeCallback* callback) = 0;
+    virtual void PlayListUpdateLoop() = 0;
+    virtual void SetPlayListCallback(PlayListChangeCallback* callback) = 0;
     virtual double GetDuration() const = 0;
     virtual Seekable GetSeekable() const = 0;
     void Resume();
