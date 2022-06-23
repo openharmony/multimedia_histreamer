@@ -59,7 +59,7 @@ struct DataSource {
      * @param buffer    Storage of the read data
      * @param expectedLen   Expected data size to be read
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin ReadAt succeeded.
      *  @retval ERROR_NOT_ENOUGH_DATA: Data not enough
      *  @retval END_OF_STREAM: End of stream
      */
@@ -70,7 +70,7 @@ struct DataSource {
      *
      * @param size data source size.
      * @return  Execution status return.
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin GetSize succeeded.
      */
     virtual Status GetSize(size_t& size) = 0;
 
@@ -102,7 +102,7 @@ struct DemuxerPlugin : public PluginBase {
      *
      * @param source Data source where data read from.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin SetDataSource succeeded.
      */
     virtual Status SetDataSource(const std::shared_ptr<DataSource>& source) = 0;
 
@@ -114,7 +114,7 @@ struct DemuxerPlugin : public PluginBase {
      *
      * @param mediaInfo Indicates the pointer to the source attributes
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin GetMediaInfo succeeded.
      */
     virtual Status GetMediaInfo(MediaInfo& mediaInfo) = 0;
 
@@ -134,7 +134,7 @@ struct DemuxerPlugin : public PluginBase {
      *
      * @param trackId Identifies the media track. If an invalid value is passed, the default media track specified.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin SelectTrack succeeded.
      */
     virtual Status SelectTrack(int32_t trackId) = 0;
 
@@ -145,7 +145,7 @@ struct DemuxerPlugin : public PluginBase {
      *
      * @param trackId Identifies the media track. ignore the invalid value is passed.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin UnselectTrack succeeded.
      */
     virtual Status UnselectTrack(int32_t trackId) = 0;
 
@@ -156,7 +156,7 @@ struct DemuxerPlugin : public PluginBase {
      *
      * @param trackIds Identifies the array of selected media tracks.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin GetSelectedTracks succeeded.
      */
     virtual Status GetSelectedTracks(std::vector<int32_t>& trackIds) = 0;
 
@@ -168,7 +168,7 @@ struct DemuxerPlugin : public PluginBase {
      * @param buffer Indicates the pointer to the data buffer.
      * @param timeOutMs Indicates the time required for waiting data frame read.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin ReadFrame succeeded.
      *  @retval ERROR_TIMED_OUT: Operation timeout.
      */
     virtual Status ReadFrame(Buffer& buffer, int32_t timeOutMs) = 0;
@@ -184,7 +184,7 @@ struct DemuxerPlugin : public PluginBase {
      * @param hstTime Indicates the target position, based on {@link HST_TIME_BASE} .
      * @param mode Indicates the seek mode.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin SeekTo succeeded.
      *  @retval ERROR_INVALID_DATA: The input data is invalid.
      */
     virtual Status SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode) = 0;

@@ -45,7 +45,7 @@ struct SourcePlugin : public PluginBase {
      *
      * @param source data source, uri or stream source
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin SetSource succeeded.
      *  @retval ERROR_WRONG_STATE: Call this function in non wrong state
      *  @retval ERROR_NOT_EXISTED: Uri is not existed.
      *  @retval ERROR_UNSUPPORTED_FORMAT: Uri is not supported.
@@ -61,7 +61,7 @@ struct SourcePlugin : public PluginBase {
      * @param buffer Buffer to store the data, it can be nullptr or empty to get the buffer from plugin.
      * @param expectedLen   Expected data size to be read
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin Read succeeded.
      *  @retval ERROR_NOT_ENOUGH_DATA: Data not enough
      *  @retval END_OF_STREAM: End of stream
      */
@@ -74,7 +74,7 @@ struct SourcePlugin : public PluginBase {
      *
      * @param size data source size.
      * @return  Execution status return.
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin GetSize succeeded.
      */
     virtual Status GetSize(size_t& size) = 0;
 
@@ -84,7 +84,7 @@ struct SourcePlugin : public PluginBase {
      * The function is valid only after INITIALIZED state.
      *
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin GetSeekable succeeded.
      */
     virtual Seekable GetSeekable() = 0;
 
@@ -97,7 +97,7 @@ struct SourcePlugin : public PluginBase {
      *
      * @param offset position to read data frames
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin SeekTo succeeded.
      *  @retval ERROR_INVALID_DATA: The offset is invalid.
      */
     virtual Status SeekTo(uint64_t offset) = 0;

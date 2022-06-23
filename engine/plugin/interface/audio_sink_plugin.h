@@ -43,7 +43,7 @@ struct AudioSinkPlugin : public PluginBase {
      * @param mute  Indicates the mute operation set for the audio.
      *              Value true means that the audio is muted, and false means the opposite.
      * @return   Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin GetMute succeeded.
      */
     virtual Status GetMute(bool& mute) = 0;
 
@@ -55,7 +55,7 @@ struct AudioSinkPlugin : public PluginBase {
      * @param mute  Indicates the mute operation set for the audio.
      *              Value true means that the audio is muted, and false means the opposite.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin SetMute succeeded.
      */
     virtual Status SetMute(bool mute) = 0;
 
@@ -66,7 +66,7 @@ struct AudioSinkPlugin : public PluginBase {
      *
      * @param volume    Indicates the volume to set. The value ranges from 0.0 to 1.0.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin GetVolume succeeded.
      */
     virtual Status GetVolume(float& volume) = 0;
 
@@ -77,7 +77,7 @@ struct AudioSinkPlugin : public PluginBase {
      *
      * @param volume    Indicates the volume to set. The value ranges from 0.0 to 1.0.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin SetVolume succeeded.
      *  @retval ERROR_INVALID_DATA: The value is not in the valid range.
      */
     virtual Status SetVolume(float volume) = 0;
@@ -89,7 +89,7 @@ struct AudioSinkPlugin : public PluginBase {
      *
      * @param speed Indicates the pointer to the current rendering speed to obtain.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin GetSpeed succeeded.
      */
     virtual Status GetSpeed(float& speed) = 0;
 
@@ -100,7 +100,7 @@ struct AudioSinkPlugin : public PluginBase {
      *
      * @param speed speed Indicates the pointer to the current rendering speed to obtain.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin SetSpeed succeeded.
      *  @retval ERROR_INVALID_DATA: The value is not in the valid range.
      */
     virtual Status SetSpeed(float speed) = 0;
@@ -112,7 +112,7 @@ struct AudioSinkPlugin : public PluginBase {
      * the plugin enters the PAUSED state.
      *
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin Pause succeeded.
      */
     virtual Status Pause() = 0;
 
@@ -123,7 +123,7 @@ struct AudioSinkPlugin : public PluginBase {
      * the plugin enters the RUNNING state.
      *
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin Resume succeeded.
      */
     virtual Status Resume() = 0;
 
@@ -134,7 +134,7 @@ struct AudioSinkPlugin : public PluginBase {
      *
      * @param hstTime  latency times based on {@link HST_TIME_BASE}.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin GetLatency succeeded.
      */
     virtual Status GetLatency(uint64_t& hstTime) = 0;
 
@@ -145,7 +145,7 @@ struct AudioSinkPlugin : public PluginBase {
      *
      * @param size  size Indicates the pointer to the audio frame size (in bytes).
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin GetFrameSize succeeded.
      */
     virtual Status GetFrameSize(size_t& size) = 0;
 
@@ -156,7 +156,7 @@ struct AudioSinkPlugin : public PluginBase {
      *
      * @param count Indicates the pointer to the number of audio frames in the audio buffer.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin GetFrameCount succeeded.
      */
     virtual Status GetFrameCount(uint32_t& count) = 0;
 
@@ -167,7 +167,7 @@ struct AudioSinkPlugin : public PluginBase {
      *
      * @param input Indicates the pointer to the frame to write.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin Write succeeded.
      */
     virtual Status Write(const std::shared_ptr<Buffer>& input) = 0;
 
@@ -177,7 +177,7 @@ struct AudioSinkPlugin : public PluginBase {
      * The function is valid only in after RUNNING state.
      *
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin Flush succeeded.
      */
     virtual Status Flush() = 0;
 

@@ -87,7 +87,7 @@ struct PluginBase {
      * the plugin enters the INITIALIZED state.
      *
      * @return  Execution status return
-     *  @retval OK: Plugin initialization succeeded.
+     *  @retval OK: Plugin Init succeeded.
      *  @retval ERROR_NO_MEMORY: Memory allocation or external resource loading error caused by insufficient memory.
      */
     virtual Status Init()
@@ -102,7 +102,7 @@ struct PluginBase {
      * After the function is invoked, the plugin will no longer be available.
      *
      * @return Execution status return
-     *  @retval OK: Plugin deinitialize succeeded.
+     *  @retval OK: Plugin Deinit succeeded.
      */
     virtual Status Deinit()
     {
@@ -116,7 +116,7 @@ struct PluginBase {
      * the plugin enters the PREPARED state.
      *
      * @return Execution status return
-     *  @retval OK: Plugin deinitialize succeeded.
+     *  @retval OK: Plugin Prepare succeeded.
      *  @retval ERROR_NO_MEMORY: Memory allocation error caused by insufficient memory.
      */
     virtual Status Prepare()
@@ -131,7 +131,7 @@ struct PluginBase {
      * the plugin enters the INITIALIZED state.
      *
      * @return Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin Reset succeeded.
      *  @retval ERROR_UNIMPLEMENTED: This method is not implemented and cannot respond to reset.
      */
     virtual Status Reset()
@@ -147,7 +147,7 @@ struct PluginBase {
      * the plu-in status can be changed through asynchronous callback.
      *
      * @return Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin Start succeeded.
      */
     virtual Status Start()
     {
@@ -161,7 +161,7 @@ struct PluginBase {
      * the plugin enters the PREPARED state. Temporary data generated during the operation will be cleared.
      *
      * @return Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin Stop succeeded.
      */
     virtual Status Stop()
     {
@@ -176,7 +176,7 @@ struct PluginBase {
      * @param tag   Plugin parameter type, which is described by tag.
      * @param value Plugin parameter value. which is described by Any type. Need check the real type in tag.
      * @return Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin GetParameter succeeded.
      *  @retval ERROR_INVALID_PARAMETER: The plugin does not support this parameter.
      */
     virtual Status GetParameter(Tag tag, ValueType &value)
@@ -192,7 +192,7 @@ struct PluginBase {
      * @param tag   Plugin parameter type, which is described by tag.
      * @param value Plugin parameter value. which is described by Any type. Need check the real type in tag.
      * @return Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin SetParameter succeeded.
      *  @retval ERROR_INVALID_PARAMETER: The plugin does not support this parameter.
      *  @retval ERROR_INVALID_DATA: The value is not in the valid range.
      *  @retval ERROR_MISMATCHED_TYPE: The data type is mismatched.
@@ -220,7 +220,7 @@ struct PluginBase {
      *
      * @param cb   Message callback, NULL callback listening is canceled.
      * @return Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin SetCallback succeeded.
      */
     virtual Status SetCallback(Callback* cb) = 0;
 
