@@ -36,13 +36,21 @@ HiPlayerCallbackLooper::HiPlayerCallbackLooper() : task_("callbackThread", OSAL:
 
 HiPlayerCallbackLooper::~HiPlayerCallbackLooper()
 {
-    eventQueue_.Quit();
-    task_.Stop();
+    Stop();
 }
 
 bool HiPlayerCallbackLooper::IsStarted()
 {
     return taskStarted_;
+}
+
+void HiPlayerCallbackLooper::Stop()
+{
+    if (taskStarted_) {
+        eventQueue_.Quit();
+        task_.Stop();
+        taskStarted_ = false;
+    }
 }
 
 void HiPlayerCallbackLooper::StartWithPlayerEngineObs(const std::weak_ptr<IPlayerEngineObs>& obs)
