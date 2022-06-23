@@ -416,7 +416,7 @@ Status FFmpegMuxerPlugin::AddTrack(uint32_t &trackId)
     FALSE_RETURN_V_MSG_E(st != nullptr, Status::ERROR_NO_MEMORY, "avformat_new_stream fail");
     st->codecpar->codec_type = AVMEDIA_TYPE_UNKNOWN;
     st->codecpar->codec_id = AV_CODEC_ID_NONE;
-    trackId = st->index;
+    trackId = static_cast<uint32_t>(st->index);
     return Status::OK;
 }
 
