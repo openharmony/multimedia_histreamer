@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define HST_LOG_TAG "HlsStreaming"
+#define HST_LOG_TAG "HlsPlayListDownloader"
 #include <mutex>
 #include "hls_playlist_downloader.h"
 
@@ -26,6 +26,11 @@ void HlsPlayListDownloader::PlayListUpdateLoop()
     UpdateManifest();
 }
 
+// StateMachine thread: call plugin SetSource -> call Open
+// StateMachine thread: call plugin GetSeekable -> call GetSeekable
+// PlayListDownload thread: call ParseManifest
+// First call Open, then start PlayListDownload thread, it seems no lock is required.
+// [In future] StateMachine thread: call plugin GetDuration -> call GetDuration
 void HlsPlayListDownloader::Open(std::string url)
 {
     url_ = url;
@@ -57,7 +62,7 @@ double HlsPlayListDownloader::GetDuration() const
 
 Seekable HlsPlayListDownloader::GetSeekable() const
 {
-    if (master_ == nullptr) {
+    if (!master_) {
         return Seekable::INVALID;
     }
     return master_->bLive_ ? Seekable::UNSEEKABLE : Seekable::SEEKABLE;
@@ -75,12 +80,12 @@ void HlsPlayListDownloader::ParseManifest()
     } else {
         currentVariant_->m3u8_->Update(playList_);
         auto files = currentVariant_->m3u8_->files_;
-        auto fragmentList = std::vector<std::string>();
-        fragmentList.reserve(files.size());
+        auto playList = std::vector<std::string>();
+        playList.reserve(files.size());
         for (auto &file: files) {
-            fragmentList.push_back(file->uri_);
+            playList.push_back(file->uri_);
         }
-        callback_->OnPlayListChanged(fragmentList);
+        callback_->OnPlayListChanged(playList);
     }
 }
 }
