@@ -252,6 +252,9 @@ int32_t HiRecorderImpl::Reset()
 {
     MEDIA_LOG_I("Reset enter");
     PROFILE_BEGIN();
+    if (curFsmState_ == StateId::RECORDING) {
+        Stop(false); // avoid start then reset the file is not be saved
+    }
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::RESET));
     PROFILE_END("Resume ret = " PUBLIC_LOG_D32, ret);
     return ret;
