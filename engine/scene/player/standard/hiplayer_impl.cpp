@@ -308,7 +308,7 @@ int32_t HiPlayerImpl::SetVideoSurface(sptr<Surface> surface)
 int32_t HiPlayerImpl::GetVideoTrackInfo(std::vector<Format> &videoTrack)
 {
     MEDIA_LOG_I("GetVideoTrackInfo entered.");
-    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+    return TransErrorCode(ErrorCode::SUCCESS);
 }
 
 int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format> &audioTrack)
@@ -321,22 +321,19 @@ int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format> &audioTrack)
     Format audioTrackInfo {};
     std::vector<std::shared_ptr<Plugin::Meta>> metaInfo = demuxer_->GetStreamMetaInfo();
     for (auto trackInfo : metaInfo) {
-        trackInfo->GetString(Plugin::MetaID::MIME, mime);
-        if (IsAudioMime(mime)) {
-            FALSE_RETURN_V(trackInfo->GetInt64(Plugin::MetaID::MEDIA_BITRATE, audioBitRate),
-                TransErrorCode(ErrorCode::ERROR_UNKNOWN));
-            FALSE_RETURN_V(trackInfo->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, audioChannels),
-                TransErrorCode(ErrorCode::ERROR_UNKNOWN));
-            FALSE_RETURN_V(trackInfo->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_RATE, audioSampleRate),
-                TransErrorCode(ErrorCode::ERROR_UNKNOWN));
-            FALSE_RETURN_V(audioTrackInfo.PutLongValue("audioBitRate", audioBitRate),
-                TransErrorCode(ErrorCode::ERROR_UNKNOWN));
-            FALSE_RETURN_V(audioTrackInfo.PutIntValue("audioChannels", audioChannels),
-                TransErrorCode(ErrorCode::ERROR_UNKNOWN));
-            FALSE_RETURN_V(audioTrackInfo.PutIntValue("audioSampleRate", audioSampleRate),
-                TransErrorCode(ErrorCode::ERROR_UNKNOWN));
-            FALSE_RETURN_V(audioTrackInfo.PutStringValue("mime", mime),
-                TransErrorCode(ErrorCode::ERROR_UNKNOWN));
+        if (trackInfo->GetString(Plugin::MetaID::MIME, mime)) {
+            (void)audioTrackInfo.PutStringValue("mime", mime);
+            if (IsAudioMime(mime)) {
+                if (trackInfo->GetInt64(Plugin::MetaID::MEDIA_BITRATE, audioBitRate)) {
+                    (void)audioTrackInfo.PutLongValue("audioBitRate", audioBitRate);
+                }
+                if (trackInfo->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, audioChannels)) {
+                    (void)audioTrackInfo.PutIntValue("audioChannels", audioChannels);
+                }
+                if (trackInfo->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_RATE, audioSampleRate)) {
+                    (void)audioTrackInfo.PutIntValue("audioSampleRate", audioSampleRate);
+                }
+            }
             audioTrack.push_back(audioTrackInfo);
         }
     }
