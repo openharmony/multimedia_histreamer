@@ -16,7 +16,6 @@
 #define HISTREAMER_HTTP_SOURCE_PLUGIN_H
 
 #include <memory>
-#include "download/http_curl_client.h"
 #include "media_downloader.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
@@ -25,6 +24,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
+class HttpCurlClient;
 class HttpSourcePlugin : public SourcePlugin {
 public:
     explicit HttpSourcePlugin(std::string name) noexcept;
