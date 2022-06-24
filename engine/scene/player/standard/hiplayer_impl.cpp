@@ -76,6 +76,7 @@ HiPlayerImpl::~HiPlayerImpl()
     MEDIA_LOG_I("dtor called.");
     fsm_.SendEventAsync(Intent::STOP);
     fsm_.Stop();
+    callbackLooper_.Stop();
     audioSink_.reset();
 #ifdef VIDEO_SUPPORT
     videoSink_.reset();
