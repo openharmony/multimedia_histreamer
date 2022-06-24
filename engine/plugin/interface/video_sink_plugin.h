@@ -58,7 +58,7 @@ struct VideoSinkPlugin : public PluginBase {
     virtual Status Resume() = 0;
 
     /**
-     * @brief Writes a frame of output data into the video dispaly device for rendering.
+     * @brief Writes a frame of output data into the video display device for rendering.
      *
      * The function is valid only in the RUNNING state.
      *
