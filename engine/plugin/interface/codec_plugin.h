@@ -74,7 +74,7 @@ struct CodecPlugin : public PluginBase {
      * @param inputBuffer  Indicates the pointer to the input data.
      * @param timeoutMs    Indicates the timeout duration.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin QueueInputBuffer succeeded.
      *  @retval ERROR_INVALID_DATA: The input buffer is invalid.
      *  @retval ERROR_TIMED_OUT: Operation timeout.
      */
@@ -90,7 +90,7 @@ struct CodecPlugin : public PluginBase {
      * @param outputBuffers Indicates the pointer to the output data.
      * @param timeoutMs     Indicates the timeout duration.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin QueueOutputBuffer succeeded.
      *  @retval ERROR_INVALID_DATA: The output buffer is invalid.
      *  @retval ERROR_TIMED_OUT: Operation timeout.
      */
@@ -102,7 +102,7 @@ struct CodecPlugin : public PluginBase {
      * The function is valid only in after RUNNING state.
      *
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin Flush succeeded.
      */
     virtual Status Flush() = 0;
 
@@ -113,7 +113,7 @@ struct CodecPlugin : public PluginBase {
      *
      * @param cb   Data callback, NULL callback listening is canceled.
      * @return Execution status return
-     * @retval OK: Plugin reset succeeded.
+     * @retval OK: Plugin SetDataCallback succeeded.
      */
     virtual Status SetDataCallback(DataCallback* dataCallback) = 0;
 };

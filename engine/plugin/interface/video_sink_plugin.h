@@ -42,7 +42,7 @@ struct VideoSinkPlugin : public PluginBase {
      * the plugin enters the PAUSED state.
      *
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin Pause succeeded.
      */
     virtual Status Pause() = 0;
 
@@ -53,7 +53,7 @@ struct VideoSinkPlugin : public PluginBase {
      * the plugin enters the RUNNING state.
      *
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin Resume succeeded.
      */
     virtual Status Resume() = 0;
 
@@ -64,7 +64,7 @@ struct VideoSinkPlugin : public PluginBase {
      *
      * @param input Indicates the pointer to the frame to write.
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin Write succeeded.
      */
     virtual Status Write(const std::shared_ptr<Buffer>& input) = 0;
 
@@ -74,7 +74,7 @@ struct VideoSinkPlugin : public PluginBase {
      * The function is valid only in after RUNNING state.
      *
      * @return  Execution status return
-     *  @retval OK: Plugin reset succeeded.
+     *  @retval OK: Plugin Flush succeeded.
      */
     virtual Status Flush() = 0;
 
@@ -85,7 +85,7 @@ struct VideoSinkPlugin : public PluginBase {
       *
       * @param nanoSec    Indicates the pointer to the latency (in nanoseconds) to be obtained.
       * @return  Execution status return
-      *  @retval OK: Plugin reset succeeded.
+      *  @retval OK: Plugin GetLatency succeeded.
       */
     virtual Status GetLatency(uint64_t& nanoSec) = 0;
 };
