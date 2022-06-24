@@ -40,9 +40,9 @@ public:
     Status Close() override;
 
     Status Deinit() override;
-
+    bool CheckUrl(const std::string& url);
 private:
-    void InitCurlEnvironment(const std::string& url);
+    void InitCurlEnvironment(const std::string& url, bool isChecked = false);
     std::string UrlParse(const std::string& url) const;
 private:
     RxHeader rxHeader_;

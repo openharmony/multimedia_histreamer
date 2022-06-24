@@ -58,7 +58,7 @@ void DownloadMonitor::HttpMonitorLoop()
     OSAL::SleepFor(50); // 50
 }
 
-bool DownloadMonitor::Open(const std::string &url)
+bool DownloadMonitor::Open(const std::string& url)
 {
     isPlaying_ = true;
     retryTasks_.clear();

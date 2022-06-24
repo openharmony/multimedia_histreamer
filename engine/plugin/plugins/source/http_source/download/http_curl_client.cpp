@@ -42,7 +42,7 @@ HttpCurlClient::~HttpCurlClient()
 
 Status HttpCurlClient::Init()
 {
-    curl_global_init(CURL_GLOBAL_ALL);
+    FALSE_LOG(curl_global_init(CURL_GLOBAL_ALL) == CURLE_OK);
     return Status::OK;
 }
 
@@ -75,16 +75,33 @@ Status HttpCurlClient::Deinit()
     return Status::OK;
 }
 
-void HttpCurlClient::InitCurlEnvironment(const std::string& url)
+bool HttpCurlClient::CheckUrl(const std::string& url)
+{
+    easyHandle_ = curl_easy_init();
+    FALSE_RETURN_V(easyHandle_ != nullptr, false);
+    InitCurlEnvironment(url, true);
+    int retCode {0};
+    if (curl_easy_perform(easyHandle_) == CURLE_OK) {
+        curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &retCode);
+    }
+    return retCode == 206;  // 206 part download
+}
+
+void HttpCurlClient::InitCurlEnvironment(const std::string& url, bool isChecked)
 {
     curl_easy_setopt(easyHandle_, CURLOPT_URL, UrlParse(url).c_str());
+    curl_easy_setopt(easyHandle_, CURLOPT_CONNECTTIMEOUT, 5); // 5
+    curl_easy_setopt(easyHandle_, CURLOPT_CAINFO, CA_DIR "cacert.pem");
+    if (isChecked) {
+        curl_easy_setopt(easyHandle_, CURLOPT_RANGE, "0-1");
+        return;
+    }
     curl_easy_setopt(easyHandle_, CURLOPT_HTTPGET, 1L);
 
     curl_easy_setopt(easyHandle_, CURLOPT_FORBID_REUSE, 0L);
     curl_easy_setopt(easyHandle_, CURLOPT_FOLLOWLOCATION, 1L);
 
     curl_easy_setopt(easyHandle_, CURLOPT_VERBOSE, 1);
-    curl_easy_setopt(easyHandle_,  CURLOPT_CAINFO, CA_DIR "cacert.pem");
 
     curl_easy_setopt(easyHandle_, CURLOPT_WRITEFUNCTION, rxBody_);
     curl_easy_setopt(easyHandle_, CURLOPT_WRITEDATA, userParam_);
@@ -93,8 +110,6 @@ void HttpCurlClient::InitCurlEnvironment(const std::string& url)
 
     curl_easy_setopt(easyHandle_, CURLOPT_LOW_SPEED_LIMIT, 2); // 2
     curl_easy_setopt(easyHandle_, CURLOPT_LOW_SPEED_TIME, 5); // 连续5s下载速度低于2kb/s会触发timeout
-
-    curl_easy_setopt(easyHandle_, CURLOPT_CONNECTTIMEOUT, 5); // 5
 
     curl_easy_setopt(easyHandle_, CURLOPT_TCP_KEEPALIVE, 1L);
     curl_easy_setopt(easyHandle_, CURLOPT_TCP_KEEPINTVL, 5L); // 5 心跳
