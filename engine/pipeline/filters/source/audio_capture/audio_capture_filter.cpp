@@ -94,7 +94,7 @@ ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin
     }
     int64_t bitRate = 0;
     if (audioMeta->GetInt64(MetaID::MEDIA_BITRATE, bitRate)) {
-        MEDIA_LOG_I("configure plugin with channel " PUBLIC_LOG_D64, bitRate);
+        MEDIA_LOG_I("configure plugin with bitrate " PUBLIC_LOG_D64, bitRate);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::MEDIA_BITRATE, bitRate));
         if (err != ErrorCode::SUCCESS) {
             return err;
