@@ -322,16 +322,16 @@ int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format> &audioTrack)
     std::vector<std::shared_ptr<Plugin::Meta>> metaInfo = demuxer_->GetStreamMetaInfo();
     for (auto trackInfo : metaInfo) {
         if (trackInfo->GetString(Plugin::MetaID::MIME, mime)) {
-            (void)audioTrackInfo.PutStringValue("mime", mime);
             if (IsAudioMime(mime)) {
                 if (trackInfo->GetInt64(Plugin::MetaID::MEDIA_BITRATE, audioBitRate)) {
-                    (void)audioTrackInfo.PutLongValue("audioBitRate", audioBitRate);
+                    (void)audioTrackInfo.PutLongValue("bitrate", audioBitRate);
                 }
                 if (trackInfo->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, audioChannels)) {
-                    (void)audioTrackInfo.PutIntValue("audioChannels", audioChannels);
+                    (void)audioTrackInfo.PutIntValue("channel_count", audioChannels);
                 }
+                (void)audioTrackInfo.PutStringValue("codec_mime", "audio/mpeg");
                 if (trackInfo->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_RATE, audioSampleRate)) {
-                    (void)audioTrackInfo.PutIntValue("audioSampleRate", audioSampleRate);
+                    (void)audioTrackInfo.PutIntValue("sample_rate", audioSampleRate);
                 }
             }
             audioTrack.push_back(audioTrackInfo);
