@@ -15,6 +15,7 @@
 #define HST_LOG_TAG "HttpSourcePlugin"
 
 #include "http_source_plugin.h"
+#include "download/http_curl_client.h"
 #include "foundation/log.h"
 #include "hls/hls_media_downloader.h"
 #include "http/http_media_downloader.h"
