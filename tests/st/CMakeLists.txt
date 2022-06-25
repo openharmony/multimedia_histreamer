@@ -1,3 +1,16 @@
+# Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 ###############################
 # find python3
 find_package (Python3 COMPONENTS Interpreter)
@@ -59,7 +72,8 @@ INCLUDE_DIRECTORIES(BEFORE
         ${TOP_DIR}/histreamer/engine
         ${TOP_DIR}/histreamer/engine/scene/standard
         ${TOP_DIR}/histreamer/engine/plugin
-        ${TOP_DIR}/3rdparty/ohos)
+        ${TOP_DIR}/3rdparty/ohos
+        ${TOP_DIR}/3rdparty/debug)
 IF(MSVC)
 #INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/include/msinttypes)
 ENDIF(MSVC)
@@ -157,6 +171,12 @@ else()
             ${TOP_DIR}/histreamer/tests/st/helper/std_audio_recorder.cpp
             )
 endif ()
+
+set(TEST_HELPER_SRCS
+        ${TEST_HELPER_SRCS}
+        ${TOP_DIR}/3rdparty/debug/crashdump/common/crash_handler_register.cpp
+        ${TOP_DIR}/histreamer/tests/st/helper/main.cpp
+        )
 
 ###############################
 # targets
