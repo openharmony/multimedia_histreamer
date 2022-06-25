@@ -178,7 +178,7 @@ void M3U8MasterPlaylist::UpdateMediaPlaylist()
     m3u8->Update(playList_);
     duration_ = m3u8->GetDuration();
     bLive_ = m3u8->IsLive();
-    MEDIA_LOG_D("UpdateMediaPlaylist called" PUBLIC_LOG_F, duration_);
+    MEDIA_LOG_D("UpdateMediaPlaylist called, duration_ = " PUBLIC_LOG_F, duration_);
 }
 
 void M3U8MasterPlaylist::UpdateMasterPlaylist()

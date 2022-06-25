@@ -22,7 +22,7 @@ namespace Plugin {
 namespace HttpPlugin {
 PlayListDownloader::PlayListDownloader()
 {
-    downloader = std::make_shared<Downloader>("hlsPlayList");
+    downloader_ = std::make_shared<Downloader>("hlsPlayList");
     dataSave_ = [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
         SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
                  std::forward<decltype(offset)>(offset));
@@ -30,8 +30,8 @@ PlayListDownloader::PlayListDownloader()
     // this is default callback
     statusCallback_ = [this] (DownloadStatus&& status, std::shared_ptr<Downloader> d,
             std::shared_ptr<DownloadRequest>& request) {
-        OnDownloadStatus(std::forward<decltype(status)>(status), downloader,
-            std::forward<decltype(request)>(request));
+        OnDownloadStatus(std::forward<decltype(status)>(status), downloader_,
+                         std::forward<decltype(request)>(request));
     };
     updateTask_ = std::make_shared<OSAL::Task>(std::string("FragmentListUpdate"));
     updateTask_->RegisterHandler([this] { PlayListUpdateLoop(); });
@@ -39,7 +39,7 @@ PlayListDownloader::PlayListDownloader()
 
 PlayListDownloader::~PlayListDownloader()
 {
-    downloader->Stop();
+    downloader_->Stop();
     updateTask_->Stop();
 }
 
@@ -48,11 +48,11 @@ void PlayListDownloader::DoOpen(const std::string& url)
     playList_.clear();
     auto realStatusCallback = [this] (DownloadStatus&& status, std::shared_ptr<Downloader>& downloader,
                                       std::shared_ptr<DownloadRequest>& request) {
-        statusCallback_(status, downloader, std::forward<decltype(request)>(request));
+        statusCallback_(status, downloader_, std::forward<decltype(request)>(request));
     };
     downloadRequest_ = std::make_shared<DownloadRequest>(url, dataSave_, realStatusCallback, true);
-    downloader->Download(downloadRequest_, -1); // -1
-    downloader->Start();
+    downloader_->Download(downloadRequest_, -1); // -1
+    downloader_->Start();
 }
 
 void PlayListDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
@@ -85,19 +85,19 @@ void PlayListDownloader::ParseManifest()
 
 void PlayListDownloader::Resume()
 {
-    downloader->Resume();
+    downloader_->Resume();
     updateTask_->Start();
 }
 
 void PlayListDownloader::Pause()
 {
-    downloader->Pause();
+    downloader_->Pause();
     updateTask_->Pause();
 }
 
 void PlayListDownloader::Close()
 {
-    downloader->Stop();
+    downloader_->Stop();
     updateTask_->Stop();
 }
 }
