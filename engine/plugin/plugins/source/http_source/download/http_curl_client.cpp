@@ -95,6 +95,9 @@ void HttpCurlClient::InitCurlEnvironment(const std::string& url, bool isChecked)
 {
     curl_easy_setopt(easyHandle_, CURLOPT_URL, UrlParse(url).c_str());
     curl_easy_setopt(easyHandle_, CURLOPT_CONNECTTIMEOUT, 5); // 5
+
+    curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYHOST, 0L);
     curl_easy_setopt(easyHandle_, CURLOPT_CAINFO, CA_DIR "cacert.pem");
     if (isChecked) {
         curl_easy_setopt(easyHandle_, CURLOPT_RANGE, "0-1");
