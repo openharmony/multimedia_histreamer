@@ -59,7 +59,8 @@ INCLUDE_DIRECTORIES(BEFORE
         ${TOP_DIR}/histreamer/engine
         ${TOP_DIR}/histreamer/engine/scene/standard
         ${TOP_DIR}/histreamer/engine/plugin
-        ${TOP_DIR}/3rdparty/ohos)
+        ${TOP_DIR}/3rdparty/ohos
+        ${TOP_DIR}/3rdparty/debug)
 IF(MSVC)
 #INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/include/msinttypes)
 ENDIF(MSVC)
@@ -157,6 +158,12 @@ else()
             ${TOP_DIR}/histreamer/tests/st/helper/std_audio_recorder.cpp
             )
 endif ()
+
+set(TEST_HELPER_SRCS
+        ${TEST_HELPER_SRCS}
+        ${TOP_DIR}/3rdparty/debug/crashdump/common/crash_handler_register.cpp
+        ${TOP_DIR}/histreamer/tests/st/helper/main.cpp
+        )
 
 ###############################
 # targets
