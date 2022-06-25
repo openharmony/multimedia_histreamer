@@ -21,11 +21,12 @@
 #else
 #include <direct.h>
 #endif
-#include <math.h>
-#include <thread>
+#include <format.h>
 #include <fstream>
 #include <iostream>
+#include <math.h>
 #include <sstream>
+#include <thread>
 #include "helper/test_recorder.hpp"
 #include "helper/test_player.hpp"
 #include "testngpp/testngpp.hpp"
@@ -37,6 +38,35 @@ using namespace OHOS::Media::Test;
 // @fixture(tags=fast)
 FIXTURE(DataDrivenSingleAudioRecorderTestFast)
 {
+    bool CheckDurationMs(int64_t expectValue, int64_t actualValue)
+    {
+        MEDIA_LOG_I("expectValue : %d, actualValue : %d", expectValue, actualValue);
+        return true;
+    }
+
+    bool CheckTrackInfo(std::vector<OHOS::Media::Format> &audioTrack, AudioRecordSource recordSource)
+    {
+        int32_t audioSampleRate;
+        int64_t audioBitRate;
+        std::string audioMime;
+        int32_t audioChannels;
+        audioTrack[0].GetLongValue("audioBitRate", audioBitRate);
+        audioTrack[0].GetIntValue("audioSampleRate", audioSampleRate);
+        audioTrack[0].GetIntValue("audioChannels", audioChannels);
+        audioTrack[0].GetStringValue("mime", audioMime);
+        std::string configMime = "audio/aac";
+        int32_t configSampleRate;
+        int64_t configBitRate;
+        int32_t configChannel;
+        recordSource.GetBitRate(configBitRate);
+        recordSource.GetChannel(configChannel);
+        recordSource.GetSampleRate(configSampleRate);
+        FALSE_RETURN_V(audioSampleRate == configSampleRate, false);
+        FALSE_RETURN_V(audioChannels == configChannel, false);
+        FALSE_RETURN_V(audioMime == configMime, false);
+        return true;
+    }
+
     // file name: 44100_2_02.pcm,  44100 - sample rate, 2 - channel count, 02 - file index
     DATA_PROVIDER(pcmSources, 4,
     DATA_GROUP(AudioRecordSource(std::string(RESOURCE_DIR "/PCM/44100_2_02.pcm"), 44100, 2, 320000)));
@@ -862,6 +892,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t recorderTime = 1000;
+        int64_t DurationTime;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd one channel source, start, stop, release
@@ -878,6 +921,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t recorderTime = 1000;
+        int64_t DurationTime;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd two channel source, start, stop, release
@@ -894,6 +950,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t recorderTime = 1000;
+        int64_t DurationTime;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd 2_8000 source, start, stop, release
@@ -910,6 +979,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t recorderTime = 1000;
+        int64_t DurationTime;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd 1_32000 source, start, stop, release
@@ -926,6 +1008,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t recorderTime = 1000;
+        int64_t DurationTime;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd 2_44100 source, start, stop, release
@@ -942,6 +1037,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t recorderTime = 1000;
+        int64_t DurationTime;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd 2_96000 source, start, stop, release
@@ -958,6 +1066,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t recorderTime = 1000;
+        int64_t DurationTime;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd 2_44100_8000 source, start, stop, release
@@ -974,6 +1095,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t recorderTime = 1000;
+        int64_t DurationTime;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd 2_44100_16000 source, start, stop, release
@@ -990,6 +1124,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t recorderTime = 1000;
+        int64_t DurationTime;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd 2_44100_32000 source, start, stop, release
@@ -1006,6 +1153,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t recorderTime = 1000;
+        int64_t DurationTime;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd 2_44100_64000 source, start, stop, release
@@ -1022,6 +1182,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t recorderTime = 1000;
+        int64_t DurationTime;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd 2_44100_112000 source, start, stop, release
@@ -1038,6 +1211,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t recorderTime = 1000;
+        int64_t DurationTime;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd 2_22050_22050 source, start, stop, release
@@ -1054,6 +1240,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t recorderTime = 1000;
+        int64_t DurationTime;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd source, start, stop, release
@@ -1070,6 +1269,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t recorderTime = 1000;
+        int64_t DurationTime;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd source, start, pause, stop, release
@@ -1087,6 +1299,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t DurationTime;
+        int64_t recorderTime = 1000;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd source, start, pause, resume, stop, release
@@ -1105,6 +1330,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Resume());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t DurationTime;
+        int64_t recorderTime = 1000;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd source, start, reset, release
@@ -1119,8 +1357,24 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t DurationTime;
+        int64_t recorderTime = 1000;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd, start, pause, resume, pause, stop, release
@@ -1140,6 +1394,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t DurationTime;
+        int64_t recorderTime = 1000;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd, start, pause, stop, reset, release
@@ -1158,6 +1425,21 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t DurationTime;
+        int64_t recorderTime = 1000;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare fd, start, pause, resume, stop, reset, release
@@ -1177,6 +1459,21 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t DurationTime;
+        int64_t recorderTime = 1000;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare start reset prepare start pause resume stop reset release
@@ -1191,7 +1488,11 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         ASSERT_EQ(0, recorder->Reset());
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
@@ -1200,6 +1501,21 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t DurationTime;
+        int64_t recorderTime = 1000;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare start reset prepare start pause stop reset release
@@ -1215,6 +1531,9 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Reset());
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
@@ -1222,6 +1541,21 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t DurationTime;
+        int64_t recorderTime = 1000;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare start reset prepare start stop release
@@ -1237,11 +1571,27 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Reset());
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t DurationTime;
+        int64_t recorderTime = 1000;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare start pause start stop release
@@ -1260,6 +1610,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t DurationTime;
+        int64_t recorderTime = 1000;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare start reset prepare start stop release
@@ -1277,6 +1640,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_NE(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t DurationTime;
+        int64_t recorderTime = 1000;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
     // The recorder prepare start reset prepare start stop release
@@ -1293,6 +1669,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        int64_t DurationTime;
+        int64_t recorderTime = 1000;
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetDuration(DurationTime));
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
+        ASSERT_TRUE(CheckDurationMs(recorderTime, DurationTime));
+        ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
     }
 
 };

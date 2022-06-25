@@ -133,6 +133,7 @@ int32_t TestRecorderImpl::Reset()
 
 int32_t TestRecorderImpl::Release()
 {
+    recorder_ = nullptr;
     return 0;
 }
 
