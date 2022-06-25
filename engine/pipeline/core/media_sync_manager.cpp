@@ -34,7 +34,7 @@ namespace {
 
 MediaSyncManager::~MediaSyncManager()
 {
-    MEDIA_LOG_I("~MediaSyncManager enter .");
+    MEDIA_LOG_I("~MediaSyncManager enter.");
 }
 
 void MediaSyncManager::AddSynchronizer(IMediaSynchronizer* syncer)
@@ -45,7 +45,7 @@ void MediaSyncManager::AddSynchronizer(IMediaSynchronizer* syncer)
             return;
         }
         syncers_.emplace_back(syncer);
-        MEDIA_LOG_I("add syncer supplier" PUBLIC_LOG_S, syncer->GetSynchronizerName().c_str());
+        MEDIA_LOG_I("add syncer supplier " PUBLIC_LOG_S, syncer->GetSynchronizerName().c_str());
     }
 }
 
@@ -56,7 +56,7 @@ void MediaSyncManager::RemoveSynchronizer(IMediaSynchronizer* syncer)
         auto ite = std::find(syncers_.begin(), syncers_.end(), syncer);
         if (ite != syncers_.end()) {
             syncers_.erase(ite);
-            MEDIA_LOG_I("remove syncer supplier" PUBLIC_LOG_S, syncer->GetSynchronizerName().c_str());
+            MEDIA_LOG_I("remove syncer supplier " PUBLIC_LOG_S, syncer->GetSynchronizerName().c_str());
         }
     }
 }
@@ -242,11 +242,11 @@ int64_t MediaSyncManager::ClipMediaTime(int64_t inTime)
     int64_t ret = inTime;
     if (minRangeStartOfMediaTime_ != HST_TIME_NONE && ret < minRangeStartOfMediaTime_) {
         ret = minRangeStartOfMediaTime_;
-        MEDIA_LOG_D("clip to min media time" PUBLIC_LOG_D64, ret);
+        MEDIA_LOG_D("clip to min media time " PUBLIC_LOG_D64, ret);
     }
     if (maxRangeEndOfMediaTime_ != HST_TIME_NONE && ret > maxRangeEndOfMediaTime_) {
         ret = maxRangeEndOfMediaTime_;
-        MEDIA_LOG_D("clip to max media time" PUBLIC_LOG_D64, ret);
+        MEDIA_LOG_D("clip to max media time " PUBLIC_LOG_D64, ret);
     }
     return ret;
 }

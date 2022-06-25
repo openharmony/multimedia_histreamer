@@ -51,7 +51,7 @@ protected:
     void DoOpen(const std::string& url);
 
 protected:
-    std::shared_ptr<Downloader> downloader;
+    std::shared_ptr<Downloader> downloader_;
     std::shared_ptr<DownloadRequest> downloadRequest_;
     std::shared_ptr<OSAL::Task> updateTask_;
     DataSaveFunc dataSave_;
