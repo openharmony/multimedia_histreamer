@@ -84,7 +84,11 @@ bool HttpCurlClient::CheckUrl(const std::string& url)
     if (curl_easy_perform(easyHandle_) == CURLE_OK) {
         curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &retCode);
     }
-    return retCode == 200 || retCode == 206;  // 200 request success, 206 partial download
+
+    // 200 request success, 206 partial download
+    FALSE_RETURN_V_MSG_E(retCode == 200 || retCode == 206, false,
+                         "Check url (" PUBLIC_LOG_S ") failed (" PUBLIC_LOG_D32 ").", url.c_str(), retCode);
+    return true;
 }
 
 void HttpCurlClient::InitCurlEnvironment(const std::string& url, bool isChecked)
