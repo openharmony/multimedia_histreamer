@@ -509,12 +509,14 @@ ErrorCode HiRecorderImpl::DoConfigureAudio(const HstRecParam& param) const
         case RecorderPublicParamType::AUD_SAMPLERATE: {
             auto ptr = param.GetValPtr<AudSampleRate>();
             FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            MEDIA_LOG_I("set sample rate : " PUBLIC_LOG_D32, ptr->sampleRate);
             return audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_SAMPLE_RATE),
                                                static_cast<uint32_t>(ptr->sampleRate));
         }
         case RecorderPublicParamType::AUD_CHANNEL: {
             auto ptr = param.GetValPtr<AudChannel>();
             FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            MEDIA_LOG_I("set channel : " PUBLIC_LOG_D32, ptr->channel);
             return audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::AUDIO_CHANNELS),
                                                static_cast<uint32_t>(ptr->channel));
         }
@@ -522,6 +524,7 @@ ErrorCode HiRecorderImpl::DoConfigureAudio(const HstRecParam& param) const
             auto ptr = param.GetValPtr<AudBitRate>();
             FALSE_RETURN_V_MSG_E(ptr != nullptr && static_cast<int32_t>(ptr->bitRate) > 0,
                 ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
+            MEDIA_LOG_I("set bitRate : " PUBLIC_LOG_D32, ptr->bitRate);
             return audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_BITRATE),
                                                static_cast<int64_t>(ptr->bitRate));
         }
