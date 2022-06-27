@@ -37,7 +37,6 @@ OutputSinkFilter::OutputSinkFilter(std::string name) : FilterBase(std::move(name
 OutputSinkFilter::~OutputSinkFilter()
 {
     if (!bufferEos_) {
-        OnEvent({name_, EventType::EVENT_ERROR, "No EOS Received"});
         MEDIA_LOG_E("OutputSink send EVENT_ERROR: No EOS Received");
     }
 }
