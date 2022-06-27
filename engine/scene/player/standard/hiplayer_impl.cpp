@@ -318,23 +318,23 @@ int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format> &audioTrack)
     int64_t audioBitRate;
     std::string mime;
     uint32_t audioChannels;
-    Format audioTrackInfo {};
     std::vector<std::shared_ptr<Plugin::Meta>> metaInfo = demuxer_->GetStreamMetaInfo();
-    for (auto trackInfo : metaInfo) {
+    for (const auto& trackInfo : metaInfo) {
         if (trackInfo->GetString(Plugin::MetaID::MIME, mime)) {
             if (IsAudioMime(mime)) {
+                Format audioTrackInfo {};
                 if (trackInfo->GetInt64(Plugin::MetaID::MEDIA_BITRATE, audioBitRate)) {
-                    (void)audioTrackInfo.PutLongValue("bitrate", audioBitRate);
+                    (void)audioTrackInfo.PutIntValue("bitrate", static_cast<int32_t>(audioBitRate));
                 }
                 if (trackInfo->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, audioChannels)) {
-                    (void)audioTrackInfo.PutIntValue("channel_count", audioChannels);
+                    (void)audioTrackInfo.PutIntValue("channel_count", static_cast<int32_t>(audioChannels));
                 }
                 (void)audioTrackInfo.PutStringValue("codec_mime", "audio/mpeg");
                 if (trackInfo->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_RATE, audioSampleRate)) {
-                    (void)audioTrackInfo.PutIntValue("sample_rate", audioSampleRate);
+                    (void)audioTrackInfo.PutIntValue("sample_rate", static_cast<int32_t>(audioSampleRate));
                 }
+                audioTrack.push_back(audioTrackInfo);
             }
-            audioTrack.push_back(audioTrackInfo);
         }
     }
     return TransErrorCode(ErrorCode::SUCCESS);
