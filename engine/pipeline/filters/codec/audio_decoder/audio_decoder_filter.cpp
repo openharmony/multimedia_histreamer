@@ -164,7 +164,25 @@ void AudioDecoderFilter::UpdateParams(std::shared_ptr<Plugin::Meta>& meta)
         MEDIA_LOG_W("Can't acquire samples per frame from decoder plugin: " PUBLIC_LOG_S, pluginInfo_->name.c_str());
         samplesPerFrame = MAX_SAMPLE_PER_FRAME;
     }
-    (void) meta->SetUint32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame);
+    (void)meta->SetUint32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame);
+    auto iter = sinkParams_.Find(Plugin::Tag::AUDIO_OUTPUT_CHANNELS);
+    if (iter != std::end(sinkParams_) && iter->second.SameTypeWith(typeid(uint32_t))) {
+        auto outputChannels = Plugin::AnyCast<uint32_t>(iter->second);
+        if (plugin_ != nullptr &&
+            plugin_->SetParameter(Plugin::Tag::AUDIO_OUTPUT_CHANNELS, outputChannels) != Plugin::Status::OK) {
+            MEDIA_LOG_W("Set outputChannels to plugin " PUBLIC_LOG_S " failed", plugin_->GetName().c_str());
+        }
+        (void)meta->SetUint32(Plugin::MetaID::AUDIO_OUTPUT_CHANNELS, outputChannels);
+    }
+    iter = sinkParams_.Find(Plugin::Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT);
+    if (iter != std::end(sinkParams_) && iter->second.SameTypeWith(typeid(Plugin::AudioChannelLayout))) {
+        auto outputChanLayout = Plugin::AnyCast<Plugin::AudioChannelLayout>(iter->second);
+        if (plugin_ != nullptr &&
+            plugin_->SetParameter(Plugin::Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, outputChanLayout) != Plugin::Status::OK) {
+            MEDIA_LOG_W("Set outputChannelLayout to plugin " PUBLIC_LOG_S " failed", plugin_->GetName().c_str());
+        }
+        (void)meta->SetData(Plugin::MetaID::AUDIO_OUTPUT_CHANNEL_LAYOUT, outputChanLayout);
+    }
 }
 } // Pipeline
 } // Media

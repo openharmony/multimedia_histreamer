@@ -24,9 +24,13 @@
 #include "foundation/osal/utils/util.h"
 #include "plugin/common/plugin_time.h"
 #include "utils/constants.h"
+#include "pipeline/core/plugin_attr_desc.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;
+constexpr uint32_t DEFAULT_OUTPUT_CHANNELS = 2;
+constexpr AudioChannelLayout DEFAULT_OUTPUT_CHANNEL_LAYOUT = AudioChannelLayout::STEREO;
+
 const std::pair<OHOS::AudioStandard::AudioSamplingRate, uint32_t> g_auSampleRateMap[] = {
     {OHOS::AudioStandard::SAMPLE_RATE_8000, 8000},
     {OHOS::AudioStandard::SAMPLE_RATE_11025, 11025},
@@ -96,17 +100,6 @@ bool SampleRateNum2Enum (uint32_t numVal, OHOS::AudioStandard::AudioSamplingRate
     return false;
 }
 
-bool ChannelNumEnum2Num(OHOS::AudioStandard::AudioChannel enumVal, uint32_t& numVal)
-{
-    for (const auto& item : g_auChannelsMap) {
-        if (item.first == enumVal) {
-            numVal = item.second;
-            return true;
-        }
-    }
-    return false;
-}
-
 bool ChannelNumNum2Enum(uint32_t numVal, OHOS::AudioStandard::AudioChannel& enumVal)
 {
     for (const auto& item : g_auChannelsMap) {
@@ -140,23 +133,6 @@ void UpdateSupportedSampleRate(Capability& inCaps)
     }
 }
 
-void UpdateSupportedChannels(Capability& inCaps)
-{
-    auto supportedChannelsList = OHOS::AudioStandard::AudioRenderer::GetSupportedChannels();
-    if (!supportedChannelsList.empty()) {
-        DiscreteCapability<uint32_t> values;
-        for (const auto& channel : supportedChannelsList) {
-            uint32_t channelNum = 0;
-            if (ChannelNumEnum2Num(channel, channelNum)) {
-                values.push_back(channelNum);
-            }
-        }
-        if (!values.empty()) {
-            inCaps.AppendDiscreteKeys<uint32_t>(Capability::Key::AUDIO_CHANNELS, values);
-        }
-    }
-}
-
 void UpdateSupportedSampleFormat(Capability& inCaps)
 {
     DiscreteCapability<AudioSampleFormat> values(g_aduFmtMap.size());
@@ -178,7 +154,6 @@ Status AudioServerSinkRegister(const std::shared_ptr<Register>& reg)
     definition.creator = AudioServerSinkPluginCreater;
     Capability inCaps(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
     UpdateSupportedSampleRate(inCaps);
-    UpdateSupportedChannels(inCaps);
     UpdateSupportedSampleFormat(inCaps);
     definition.inCaps.push_back(inCaps);
     return reg->AddPlugin(definition);
@@ -352,42 +327,38 @@ Status AudioServerSinkPlugin::Stop()
 
 Status AudioServerSinkPlugin::GetParameter(Tag tag, ValueType& para)
 {
-    MEDIA_LOG_I("GetParameter entered.");
+    MEDIA_LOG_I("GetParameter entered, key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
     AudioStandard::AudioRendererParams params;
-    {
-        OSAL::ScopedLock lock(renderMutex_);
-        if (audioRenderer_ == nullptr) {
-            return Status::ERROR_WRONG_STATE;
-        }
-        if (audioRenderer_->GetParams(params) != AudioStandard::SUCCESS) {
-            MEDIA_LOG_E("audio render get param failed");
-            return Status::ERROR_UNKNOWN;
-        }
-    }
+    OSAL::ScopedLock lock(renderMutex_);
     switch (tag) {
         case Tag::AUDIO_SAMPLE_RATE:
-            if (params.sampleRate != rendererParams_.sampleRate) {
-                MEDIA_LOG_W("samplingRate has changed from " PUBLIC_LOG_U32 " to " PUBLIC_LOG_U32,
-                            rendererParams_.sampleRate, params.sampleRate);
+            if (audioRenderer_ && audioRenderer_->GetParams(params) == AudioStandard::SUCCESS) {
+                if (params.sampleRate != rendererParams_.sampleRate) {
+                    MEDIA_LOG_W("samplingRate has changed from " PUBLIC_LOG_U32 " to " PUBLIC_LOG_U32,
+                                rendererParams_.sampleRate, params.sampleRate);
+                }
+                para = params.sampleRate;
             }
-            para = params.sampleRate;
             break;
-        case Tag::AUDIO_CHANNELS:
-            if (params.channelCount != rendererParams_.channelCount) {
-                MEDIA_LOG_W("channelCount has changed from " PUBLIC_LOG_U32 " to " PUBLIC_LOG_U32,
-                            rendererParams_.channelCount, params.channelCount);
-            }
-            para = params.channelCount;
+        case Tag::AUDIO_OUTPUT_CHANNELS:
+            para = DEFAULT_OUTPUT_CHANNELS; // get the real output channels from audio server here
+            MEDIA_LOG_I("Get outputChannels: " PUBLIC_LOG_U32, DEFAULT_OUTPUT_CHANNELS);
+            break;
+        case Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT:
+            para = DEFAULT_OUTPUT_CHANNEL_LAYOUT; // get the real output channel layout from audio server here
+            MEDIA_LOG_I("Get outputChannelLayout: " PUBLIC_LOG_U64, DEFAULT_OUTPUT_CHANNEL_LAYOUT);
             break;
         case Tag::MEDIA_BITRATE:
             para = bitRate_;
             break;
         case Tag::AUDIO_SAMPLE_FORMAT:
-            if (params.sampleFormat != rendererParams_.sampleFormat) {
-                MEDIA_LOG_W("sampleFormat has changed from " PUBLIC_LOG_U32 " to " PUBLIC_LOG_U32,
-                            rendererParams_.sampleFormat, params.sampleFormat);
+            if (audioRenderer_ && audioRenderer_->GetParams(params) == AudioStandard::SUCCESS) {
+                if (params.sampleFormat != rendererParams_.sampleFormat) {
+                    MEDIA_LOG_W("sampleFormat has changed from " PUBLIC_LOG_U32 " to " PUBLIC_LOG_U32,
+                                rendererParams_.sampleFormat, params.sampleFormat);
+                }
+                para = params.sampleFormat;
             }
-            para = params.sampleFormat;
             break;
         default:
             MEDIA_LOG_I("Unknown key");
@@ -476,7 +447,7 @@ bool AudioServerSinkPlugin::AssignSampleFmtIfSupported(Plugin::AudioSampleFormat
 
 Status AudioServerSinkPlugin::SetParameter(Tag tag, const ValueType& para)
 {
-    MEDIA_LOG_I("SetParameter entered.");
+    MEDIA_LOG_I("SetParameter entered, key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
     switch (tag) {
         case Tag::AUDIO_SAMPLE_RATE:
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
@@ -484,10 +455,11 @@ Status AudioServerSinkPlugin::SetParameter(Tag tag, const ValueType& para)
             FALSE_RETURN_V_MSG_E(AssignSampleRateIfSupported(Plugin::AnyCast<uint32_t>(para)),
                 Status::ERROR_INVALID_PARAMETER, "sampleRate isn't supported");
             break;
-        case Tag::AUDIO_CHANNELS:
+        case Tag::AUDIO_OUTPUT_CHANNELS:
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
                 "channels type should be uint32_t");
             channels_ = Plugin::AnyCast<uint32_t>(para);
+            MEDIA_LOG_I("Set outputChannels: " PUBLIC_LOG_U32, channels_);
             FALSE_RETURN_V_MSG_E(AssignChannelNumIfSupported(channels_), Status::ERROR_INVALID_PARAMETER,
                 "channel isn't supported");
             break;
@@ -502,10 +474,11 @@ Status AudioServerSinkPlugin::SetParameter(Tag tag, const ValueType& para)
             FALSE_RETURN_V_MSG_E(AssignSampleFmtIfSupported(Plugin::AnyCast<AudioSampleFormat>(para)),
                 Status::ERROR_INVALID_PARAMETER, "sampleFmt isn't supported by audio renderer or resample lib");
             break;
-        case Tag::AUDIO_CHANNEL_LAYOUT:
+        case Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT:
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(AudioChannelLayout)), Status::ERROR_MISMATCHED_TYPE,
                 "channel layout type should be AudioChannelLayout");
             channelLayout_ = Plugin::AnyCast<AudioChannelLayout>(para);
+            MEDIA_LOG_I("Set outputChannelLayout: " PUBLIC_LOG_U64, channelLayout_);
             break;
         case Tag::AUDIO_SAMPLE_PER_FRAME:
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,

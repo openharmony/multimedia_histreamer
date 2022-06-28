@@ -116,11 +116,13 @@ enum struct Tag : uint32_t {
     MEDIA_SEEKABLE,                        ///< enum Seekable: Seekable status of the media
 
     /* -------------------- audio universal tag -------------------- */
-    AUDIO_CHANNELS = SECTION_AUDIO_UNIVERSAL_START + 1, ///< uint32_t
-    AUDIO_CHANNEL_LAYOUT,                               ///< @see AudioChannelLayout
+    AUDIO_CHANNELS = SECTION_AUDIO_UNIVERSAL_START + 1, ///< uint32_t, stream channel num
+    AUDIO_CHANNEL_LAYOUT,                               ///< @see AudioChannelLayout, stream channel layout
     AUDIO_SAMPLE_RATE,                                  ///< uint32_t, sample rate
     AUDIO_SAMPLE_FORMAT,                                ///< @see AudioSampleFormat
     AUDIO_SAMPLE_PER_FRAME,                             ///< uint32_t, sample per frame
+    AUDIO_OUTPUT_CHANNELS,                              ///< uint32_t, sink output channel num
+    AUDIO_OUTPUT_CHANNEL_LAYOUT,                        ///< @see AudioChannelLayout, sink output channel layout
 
     /* -------------------- audio specific tag -------------------- */
     AUDIO_SPECIFIC_MPEG_START = MAKE_AUDIO_SPECIFIC_START(AudioFormat::MPEG),

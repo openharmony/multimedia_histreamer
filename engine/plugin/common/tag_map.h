@@ -61,7 +61,9 @@ public:
 #endif
     DEFINE_INSERT_GET_FUNC(tag == Tag::SRC_INPUT_TYPE, SrcInputType);
     DEFINE_INSERT_GET_FUNC(tag == Tag::MEDIA_CODEC_CONFIG, std::vector<uint8_t>);
-    DEFINE_INSERT_GET_FUNC(tag == Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout);
+    DEFINE_INSERT_GET_FUNC(
+        tag == Tag::AUDIO_CHANNEL_LAYOUT or
+        tag == Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, AudioChannelLayout);
     DEFINE_INSERT_GET_FUNC(tag == Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat);
     DEFINE_INSERT_GET_FUNC(tag == Tag::AUDIO_AAC_PROFILE, AudioAacProfile);
     DEFINE_INSERT_GET_FUNC(tag == Tag::AUDIO_AAC_STREAM_FORMAT, AudioAacStreamFormat);
@@ -76,6 +78,7 @@ public:
         tag == Tag::AUDIO_CHANNELS or
         tag == Tag::AUDIO_SAMPLE_RATE or
         tag == Tag::AUDIO_SAMPLE_PER_FRAME or
+        tag == Tag::AUDIO_OUTPUT_CHANNELS or
         tag == Tag::AUDIO_MPEG_VERSION or
         tag == Tag::AUDIO_MPEG_LAYER or
         tag == Tag::AUDIO_AAC_LEVEL or

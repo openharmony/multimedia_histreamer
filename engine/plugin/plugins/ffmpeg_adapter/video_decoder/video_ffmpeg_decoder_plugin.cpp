@@ -322,7 +322,7 @@ Status VideoFfmpegDecoderPlugin::Prepare()
         }
         InitCodecContext();
 #ifdef DUMP_RAW_DATA
-        dumpFd_ = std::fopen("./vdec_out.yuv", "w");
+        dumpFd_ = std::fopen("./vdec_out.yuv", "wb");
 #endif
         state_ = State::PREPARED;
     }

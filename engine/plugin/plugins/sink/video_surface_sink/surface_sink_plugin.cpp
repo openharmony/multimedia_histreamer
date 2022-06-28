@@ -127,7 +127,7 @@ Status SurfaceSinkPlugin::Init()
         surfaceCond_.Wait(lock, [this] { return surface_ != nullptr; });
     }
 #ifdef DUMP_RAW_DATA
-    dumpFd_ = std::fopen("./vsink_out.dat", "w");
+    dumpFd_ = std::fopen("./vsink_out.dat", "wb");
 #endif
     MEDIA_LOG_D("get surface success");
     return Status::OK;

@@ -132,7 +132,7 @@ Status SdlVideoSinkPlugin::Init()
     SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
     SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 #ifdef DUMP_RAW_DATA
-    dumpFd_ = std::fopen("./vsink_out.yuv", "w");
+    dumpFd_ = std::fopen("./vsink_out.yuv", "wb");
 #endif
     return Status::OK;
 }

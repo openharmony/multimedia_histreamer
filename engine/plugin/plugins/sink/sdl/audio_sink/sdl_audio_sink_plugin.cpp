@@ -26,11 +26,14 @@
 #include "plugin/common/plugin_time.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "utils/constants.h"
+#include "pipeline/core/plugin_attr_desc.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;
 using namespace Sdl;
 constexpr int MAX_AUDIO_FRAME_SIZE = 192000;
+constexpr uint32_t DEFAULT_OUTPUT_CHANNELS = 2;
+constexpr AudioChannelLayout DEFAULT_OUTPUT_CHANNEL_LAYOUT = AudioChannelLayout::STEREO;
 std::function<void(void*, uint8_t*, int)> g_audioCallback;
 
 void RegisterAudioCallback(std::function<void(void*, uint8_t*, int)> callback)
@@ -207,9 +210,23 @@ Status SdlAudioSinkPlugin::Stop()
 
 Status SdlAudioSinkPlugin::GetParameter(Tag tag, ValueType& value)
 {
-    UNUSED_VARIABLE(tag);
-    UNUSED_VARIABLE(value);
-    return Status::ERROR_UNIMPLEMENTED;
+    switch (tag) {
+        case Tag::AUDIO_OUTPUT_CHANNELS: {
+            value = DEFAULT_OUTPUT_CHANNELS;
+            MEDIA_LOG_D("Get outputChannels: " PUBLIC_LOG_U32, DEFAULT_OUTPUT_CHANNELS);
+            break;
+        }
+        case Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT: {
+            value = DEFAULT_OUTPUT_CHANNEL_LAYOUT;
+            break;
+            MEDIA_LOG_D("Get outputChannelLayout: " PUBLIC_LOG_U64, DEFAULT_OUTPUT_CHANNEL_LAYOUT);
+        }
+        default: {
+            MEDIA_LOG_W("receive one parameter with unconcern key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
+            break;
+        }
+    }
+    return Status::OK;
 }
 
 Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
@@ -220,9 +237,13 @@ Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
     }
 
     switch (tag) {
-        case Tag::AUDIO_CHANNELS: {
+        case Tag::AUDIO_OUTPUT_CHANNELS: {
             RETURN_ERROR_IF_CHECK_ERROR(uint32_t);
             channels_ = Plugin::AnyCast<uint32_t>(value);
+            if (channels_ > DEFAULT_OUTPUT_CHANNELS) {
+                channels_ = DEFAULT_OUTPUT_CHANNELS;
+            }
+            MEDIA_LOG_D("Set outputChannels: " PUBLIC_LOG_U32, channels_);
             break;
         }
         case Tag::AUDIO_SAMPLE_RATE: {
@@ -235,10 +256,15 @@ Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
             samplesPerFrame_ = Plugin::AnyCast<uint32_t>(value);
             break;
         }
-        case Tag::AUDIO_CHANNEL_LAYOUT: {
+        case Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT: {
             RETURN_ERROR_IF_CHECK_ERROR(AudioChannelLayout);
-            auto channelLayout = Plugin::AnyCast<AudioChannelLayout>(value);
-            channelLayout_ = Ffmpeg::ConvertChannelLayoutToFFmpeg(channelLayout);
+            auto chanLayout = Plugin::AnyCast<AudioChannelLayout>(value);
+            if (chanLayout == AudioChannelLayout::MONO) {
+                channelLayout_ = AV_CH_LAYOUT_MONO;
+            } else if (chanLayout == AudioChannelLayout::STEREO) {
+                channelLayout_ = AV_CH_LAYOUT_STEREO;
+            }
+            MEDIA_LOG_D("Set outputChannelLayout: " PUBLIC_LOG_U64, channelLayout_);
             break;
         }
         case Tag::AUDIO_SAMPLE_FORMAT: {
@@ -246,9 +272,10 @@ Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
             audioFormat_ = Plugin::AnyCast<AudioSampleFormat>(value);
             break;
         }
-        default:
-            MEDIA_LOG_W("receive one parameter with unconcern key");
+        default: {
+            MEDIA_LOG_W("receive one parameter with unconcern key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
             break;
+        }
     }
     return Status::OK;
 }

@@ -52,6 +52,14 @@ enum AudioChannelMasks : uint64_t {
     STEREO_RIGHT            = 1ULL << 30U,
     WIDE_LEFT               = 1ULL << 31U,
     WIDE_RIGHT              = 1ULL << 32U,
+    SURROUND_DIRECT_LEFT    = 1ULL << 33U,
+    SURROUND_DIRECT_RIGHT   = 1ULL << 34U,
+    LOW_FREQUENCY_2         = 1ULL << 35U,
+    TOP_SIDE_LEFT           = 1ULL << 36U,
+    TOP_SIDE_RIGHT          = 1ULL << 37U,
+    BOTTOM_FRONT_CENTER     = 1ULL << 38U,
+    BOTTOM_FRONT_LEFT       = 1ULL << 39U,
+    BOTTOM_FRONT_RIGHT      = 1ULL << 40U,
 };
 
 
@@ -65,6 +73,7 @@ enum AudioChannelMasks : uint64_t {
  * @version 1.0
  */
 enum struct AudioChannelLayout : uint64_t {
+    UNKNOWN                 = 0,
     MONO                    = (AudioChannelMasks::FRONT_CENTER),
     STEREO                  = (AudioChannelMasks::FRONT_LEFT | AudioChannelMasks::FRONT_RIGHT),
     CH_2POINT1              = (STEREO | AudioChannelMasks::LOW_FREQUENCY),
@@ -94,6 +103,29 @@ enum struct AudioChannelLayout : uint64_t {
                                 AudioChannelMasks::FRONT_RIGHT_OF_CENTER),
     CH_7POINT1_WIDE_BACK    = (CH_5POINT1_BACK | AudioChannelMasks::FRONT_LEFT_OF_CENTER |
                                 AudioChannelMasks::FRONT_RIGHT_OF_CENTER),
+    CH_3POINT1POINT2        = (CH_3POINT1 | AudioChannelMasks::TOP_FRONT_LEFT | AudioChannelMasks::TOP_FRONT_RIGHT),
+    CH_5POINT1POINT2        = (CH_5POINT1 | AudioChannelMasks::TOP_SIDE_LEFT | AudioChannelMasks::TOP_SIDE_RIGHT),
+    CH_5POINT1POINT4        = (CH_5POINT1 | AudioChannelMasks::TOP_FRONT_LEFT | AudioChannelMasks::TOP_FRONT_RIGHT |
+                                AudioChannelMasks::TOP_BACK_LEFT | AudioChannelMasks::TOP_BACK_RIGHT),
+    CH_7POINT1POINT2        = (CH_7POINT1 | AudioChannelMasks::TOP_SIDE_LEFT | AudioChannelMasks::TOP_SIDE_RIGHT),
+    CH_7POINT1POINT4        = (CH_7POINT1 | AudioChannelMasks::TOP_FRONT_LEFT | AudioChannelMasks::TOP_FRONT_RIGHT |
+                                AudioChannelMasks::TOP_BACK_LEFT | AudioChannelMasks::TOP_BACK_RIGHT),
+    CH_9POINT1POINT4        = (CH_7POINT1POINT4 | AudioChannelMasks::WIDE_LEFT |
+                                AudioChannelMasks::WIDE_RIGHT),
+    CH_9POINT1POINT6        = (CH_9POINT1POINT4 | AudioChannelMasks::TOP_SIDE_LEFT | AudioChannelMasks::TOP_SIDE_RIGHT),
+    CH_10POINT2             = (AudioChannelMasks::FRONT_LEFT | AudioChannelMasks::FRONT_RIGHT |
+                                AudioChannelMasks::FRONT_CENTER | AudioChannelMasks::TOP_FRONT_LEFT |
+                                AudioChannelMasks::TOP_FRONT_RIGHT | AudioChannelMasks::BACK_LEFT |
+                                AudioChannelMasks::BACK_RIGHT | AudioChannelMasks::BACK_CENTER |
+                                AudioChannelMasks::SIDE_LEFT | AudioChannelMasks::SIDE_RIGHT |
+                                AudioChannelMasks::WIDE_LEFT | AudioChannelMasks::WIDE_RIGHT),
+    CH_22POINT2             = (CH_7POINT1POINT4 | AudioChannelMasks::FRONT_LEFT_OF_CENTER |
+                                AudioChannelMasks::FRONT_RIGHT_OF_CENTER | AudioChannelMasks::BACK_CENTER |
+                                AudioChannelMasks::TOP_CENTER | AudioChannelMasks::TOP_FRONT_CENTER |
+                                AudioChannelMasks::TOP_BACK_CENTER | AudioChannelMasks::TOP_SIDE_LEFT |
+                                AudioChannelMasks::TOP_SIDE_RIGHT | AudioChannelMasks::BOTTOM_FRONT_LEFT |
+                                AudioChannelMasks::BOTTOM_FRONT_RIGHT | AudioChannelMasks::BOTTOM_FRONT_CENTER |
+                                AudioChannelMasks::LOW_FREQUENCY_2),
     OCTAGONAL               = (CH_5POINT0 | AudioChannelMasks::BACK_LEFT | AudioChannelMasks::BACK_CENTER |
                                 AudioChannelMasks::BACK_RIGHT),
     HEXADECAGONAL           = (OCTAGONAL | AudioChannelMasks::WIDE_LEFT | AudioChannelMasks::WIDE_RIGHT |

@@ -99,7 +99,7 @@ private:
     std::unique_ptr<RingBuffer> rb {};
     size_t srcFrameSize_ {};
     SDL_AudioSpec wantedSpec_ {};
-    uint32_t channels_ {0};
+    uint32_t channels_ {2}; // 2: STEREO
     uint32_t sampleRate_ {0};
     uint32_t samplesPerFrame_ {0};
     uint64_t channelLayout_ {0};
