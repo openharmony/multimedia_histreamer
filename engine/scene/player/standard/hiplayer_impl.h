@@ -76,8 +76,8 @@ public:
     int32_t SetPlaybackSpeed(PlaybackRateMode mode) override;
     int32_t GetPlaybackSpeed(PlaybackRateMode& mode) override;
 
-    int32_t GetVideoTrackInfo(std::vector<Format> &videoTrack) override;
-    int32_t GetAudioTrackInfo(std::vector<Format> &audioTrack) override;
+    int32_t GetVideoTrackInfo(std::vector<Format>& videoTrack) override;
+    int32_t GetAudioTrackInfo(std::vector<Format>& audioTrack) override;
     int32_t GetVideoWidth() override;
     int32_t GetVideoHeight() override;
 
