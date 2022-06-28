@@ -313,16 +313,22 @@ void FFmpegDemuxerPlugin::InitAVFormatContext()
     }
     formatContext->pb = AllocAVIOContext(AVIO_FLAG_READ);
     formatContext->flags = static_cast<uint32_t>(formatContext->flags) | static_cast<uint32_t>(AVFMT_FLAG_CUSTOM_IO);
-    formatContext_ = std::shared_ptr<AVFormatContext>(formatContext, [](AVFormatContext* ptr) {
-        if (ptr) {
-            auto ctx = ptr->pb;
-            if (ctx) {
-                av_freep(&ctx->buffer);
-                av_free(ctx);
+    int ret = avformat_open_input(&formatContext, nullptr, pluginImpl_.get(), nullptr);
+    if (ret == 0) {
+        formatContext_ = std::shared_ptr<AVFormatContext>(formatContext, [](AVFormatContext* ptr) {
+            if (ptr) {
+                auto ctx = ptr->pb;
+                if (ctx) {
+                    av_freep(&ctx->buffer);
+                    av_free(ctx);
+                }
+                avformat_close_input(&ptr);
             }
-            avformat_close_input(&ptr);
-        }
-    });
+        });
+    } else {
+        MEDIA_LOG_E("avformat_open_input using plugin " PUBLIC_LOG_S " failed with return = " PUBLIC_LOG_S,
+                    pluginImpl_->name, AVStrError(ret).c_str());
+    }
 }
 
 std::shared_ptr<AVCodecContext> FFmpegDemuxerPlugin::InitCodecContext(const AVStream& avStream)
@@ -389,12 +395,6 @@ void FFmpegDemuxerPlugin::SaveFileInfoToMetaInfo(TagMap& meta)
 bool FFmpegDemuxerPlugin::ParseMediaData()
 {
     auto formatContext = formatContext_.get();
-    int ret = avformat_open_input(&formatContext, nullptr, pluginImpl_.get(), nullptr);
-    if (ret != 0) {
-        MEDIA_LOG_E("avformat_open_input using plugin " PUBLIC_LOG_S " failed with return = " PUBLIC_LOG_S,
-                    pluginImpl_->name, AVStrError(ret).c_str());
-        return false;
-    }
     // retrieve stream information
     avformat_find_stream_info(formatContext, nullptr);
     av_dump_format(formatContext, 0, nullptr, false);
