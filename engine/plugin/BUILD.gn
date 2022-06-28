@@ -43,7 +43,8 @@ config("hst_plugin_intf_config") {
     if (multimedia_histreamer_enable_video) {
       include_dirs += [
         "//utils/native/base/include",
-        "//foundation/graphic/graphic_2d/interfaces/innerkits",
+        "//foundation/graphic/graphic_2d/frameworks/surface/include",
+        "//foundation/graphic/graphic_2d/interfaces/inner_api/",
         "//drivers/peripheral/display/interfaces/include",
         "//foundation/graphic/graphic_2d/utils/sync_fence/export",
       ]
@@ -94,7 +95,8 @@ config("hst_plugin_core_config") {
   } else {
     include_dirs += [
       "//utils/native/base/include",
-      "//foundation/graphic/graphic_2d/interfaces/innerkits",
+      "//foundation/graphic/graphic_2d/frameworks/surface/include",
+      "//foundation/graphic/graphic_2d/interfaces/inner_api/",
       "//drivers/peripheral/display/interfaces/include",
     ]
   }
