@@ -367,7 +367,8 @@ AVIOContext* FFmpegDemuxerPlugin::AllocAVIOContext(int flags)
         av_free(buffer);
         return nullptr;
     }
-    avioContext->seekable = AVIO_SEEKABLE_NORMAL;
+    MEDIA_LOG_D("seekable_ is " PUBLIC_LOG_D32, static_cast<int32_t>(seekable_));
+    avioContext->seekable = (seekable_ == Seekable::SEEKABLE) ? AVIO_SEEKABLE_NORMAL : 0;
     if (!(static_cast<uint32_t>(flags) & static_cast<uint32_t>(AVIO_FLAG_WRITE))) {
         avioContext->buf_ptr = avioContext->buf_end;
         avioContext->write_flag = 0;
@@ -396,7 +397,8 @@ bool FFmpegDemuxerPlugin::ParseMediaData()
 {
     auto formatContext = formatContext_.get();
     // retrieve stream information
-    avformat_find_stream_info(formatContext, nullptr);
+    auto ret = avformat_find_stream_info(formatContext, nullptr);
+    FALSE_RETURN_V_MSG_E(ret >= 0, false, "avformat_find_stream_info fail : " PUBLIC_LOG_S, AVStrError(ret).c_str());
     av_dump_format(formatContext, 0, nullptr, false);
 
     CppExt::make_unique<MediaInfo>().swap(mediaInfo_);
