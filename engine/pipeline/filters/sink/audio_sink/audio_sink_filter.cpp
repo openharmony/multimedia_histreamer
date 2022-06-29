@@ -120,6 +120,17 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
         [](const std::string& name) -> std::shared_ptr<Plugin::AudioSink> {
         return Plugin::PluginManager::Instance().CreateAudioSinkPlugin(name);
     });
+    Plugin::ValueType pluginValue;
+    if (plugin_->GetParameter(Tag::AUDIO_OUTPUT_CHANNELS, pluginValue) == Plugin::Status::OK) {
+        auto outputChannels = Plugin::AnyCast<uint32_t>(pluginValue);
+        downstreamParams.Insert<Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels);
+        MEDIA_LOG_D("Get support outputChannels: " PUBLIC_LOG_U32, outputChannels);
+    }
+    if (plugin_->GetParameter(Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, pluginValue) == Plugin::Status::OK) {
+        auto outputChanLayout = Plugin::AnyCast<Plugin::AudioChannelLayout>(pluginValue);
+        downstreamParams.Insert<Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT>(outputChanLayout);
+        MEDIA_LOG_D("Get support outputChannelLayout: " PUBLIC_LOG_U64, outputChanLayout);
+    }
     PROFILE_END("Audio Sink Negotiate end");
     return res;
 }

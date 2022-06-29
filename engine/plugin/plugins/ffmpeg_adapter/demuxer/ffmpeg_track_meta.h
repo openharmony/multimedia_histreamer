@@ -61,6 +61,11 @@ void ConvertFLACStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr
 void ConvertAPEStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                 const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
 
+#ifdef AVS3DA_SUPPORT
+void ConvertAVS3DAStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                   const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
+#endif
+
 #ifdef VIDEO_SUPPORT
 void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                 const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);

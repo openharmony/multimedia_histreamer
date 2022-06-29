@@ -108,6 +108,10 @@ group("histreamer_plugin_store") {
   if (multimedia_histreamer_enable_plugin_wav_demuxer) {
     deps += [ "demuxer/wav_demuxer:plugin_wav_demuxer" ]
   }
+
+  if (multimedia_histreamer_enable_plugin_avs3_audio_decoder) {
+    deps += [ "//foundation/multimedia/histreamer_plugins/codec/avs3_audio_decoder:plugin_avs3_audio_decoder" ]
+  }
 }
 
 config("gen_plugin_static_header_config") {

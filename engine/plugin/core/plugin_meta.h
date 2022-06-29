@@ -41,6 +41,8 @@ enum struct MetaID : uint32_t {
     AUDIO_SAMPLE_FORMAT = CppExt::to_underlying(Tag::AUDIO_SAMPLE_FORMAT),
     AUDIO_SAMPLE_PER_FRAME = CppExt::to_underlying(Tag::AUDIO_SAMPLE_PER_FRAME),
     AUDIO_CHANNEL_LAYOUT = CppExt::to_underlying(Tag::AUDIO_CHANNEL_LAYOUT),
+    AUDIO_OUTPUT_CHANNELS = CppExt::to_underlying(Tag::AUDIO_OUTPUT_CHANNELS),
+    AUDIO_OUTPUT_CHANNEL_LAYOUT = CppExt::to_underlying(Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT),
 
     MEDIA_TITLE = CppExt::to_underlying(Tag::MEDIA_TITLE),
     MEDIA_ARTIST = CppExt::to_underlying(Tag::MEDIA_ARTIST),

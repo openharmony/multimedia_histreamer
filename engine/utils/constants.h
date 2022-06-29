@@ -46,6 +46,7 @@ extern const char* const MEDIA_MIME_AUDIO_AC4;
 extern const char* const MEDIA_MIME_AUDIO_WMA;
 extern const char* const MEDIA_MIME_AUDIO_AMR_NB;
 extern const char* const MEDIA_MIME_AUDIO_AMR_WB;
+extern const char* const MEDIA_MIME_AUDIO_AVS3DA;
 
 // video mime
 extern const char* const MEDIA_MIME_VIDEO_RAW;

@@ -31,9 +31,11 @@ declare_args() {
   multimedia_histreamer_enable_plugin_std_video_surface_sink = false
   multimedia_histreamer_enable_plugin_std_video_capture = false
   multimedia_histreamer_enable_plugin_wav_demuxer = false
+  multimedia_histreamer_enable_plugin_avs3_audio_decoder = false
 
   multimedia_histreamer_enable_recorder = false
   multimedia_histreamer_enable_video = false
+  multimedia_histreamer_enable_avs3da = false
 
   # configuration for histreamer created thread's stack size.
   # 0 means using system default thread stack size, other positive values will be accepted.

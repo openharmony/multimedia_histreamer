@@ -84,6 +84,16 @@ std::map<uint64_t, AudioChannelMasks> g_fromFFMPEGChannelLayout = {
     {AV_CH_TOP_BACK_RIGHT, AudioChannelMasks::TOP_BACK_RIGHT},
     {AV_CH_STEREO_LEFT, AudioChannelMasks::STEREO_LEFT},
     {AV_CH_STEREO_RIGHT, AudioChannelMasks::STEREO_RIGHT},
+    {AV_CH_WIDE_LEFT, AudioChannelMasks::WIDE_LEFT},
+    {AV_CH_WIDE_RIGHT, AudioChannelMasks::WIDE_RIGHT},
+    {AV_CH_SURROUND_DIRECT_LEFT, AudioChannelMasks::SURROUND_DIRECT_LEFT},
+    {AV_CH_SURROUND_DIRECT_RIGHT, AudioChannelMasks::SURROUND_DIRECT_RIGHT},
+    {AV_CH_LOW_FREQUENCY_2, AudioChannelMasks::LOW_FREQUENCY_2},
+    {AV_CH_TOP_SIDE_LEFT, AudioChannelMasks::TOP_SIDE_LEFT},
+    {AV_CH_TOP_SIDE_RIGHT, AudioChannelMasks::TOP_SIDE_RIGHT},
+    {AV_CH_BOTTOM_FRONT_CENTER, AudioChannelMasks::BOTTOM_FRONT_CENTER},
+    {AV_CH_BOTTOM_FRONT_LEFT, AudioChannelMasks::BOTTOM_FRONT_LEFT},
+    {AV_CH_BOTTOM_FRONT_RIGHT, AudioChannelMasks::BOTTOM_FRONT_RIGHT},
 };
 
 const std::map<std::string, Tag> g_tagMap = {
@@ -307,6 +317,58 @@ AVSampleFormat ConvP2FfSampleFmt(AudioSampleFormat sampleFormat)
     return ite->second;
 }
 
+AudioChannelLayout GetDefaultChannelLayout(int channels)
+{
+    AudioChannelLayout ret;
+    switch (channels) {
+        case 1: { // 1: MONO
+            ret = AudioChannelLayout::MONO;
+            break;
+        }
+        case 2: { // 2: STEREO
+            ret = AudioChannelLayout::STEREO;
+            break;
+        }
+        case 4: { // 4: CH_4POINT0
+            ret = AudioChannelLayout::CH_4POINT0;
+            break;
+        }
+        case 6: { // 6: CH_5POINT1
+            ret = AudioChannelLayout::CH_5POINT1;
+            break;
+        }
+        case 8: { // 8: CH_5POINT1POINT2 or CH_7POINT1
+            ret = AudioChannelLayout::CH_5POINT1POINT2;
+            break;
+        }
+        case 10: { // 10: CH_7POINT1POINT2 or CH_5POINT1POINT4 ?
+            ret = AudioChannelLayout::CH_7POINT1POINT2;
+            break;
+        }
+        case 12: { // 12: CH_7POINT1POINT4 or CH_10POINT2 ?
+            ret = AudioChannelLayout::CH_7POINT1POINT4;
+            break;
+        }
+        case 14: { // 14: CH_9POINT1POINT4
+            ret = AudioChannelLayout::CH_9POINT1POINT4;
+            break;
+        }
+        case 16: { // 16: CH_9POINT1POINT6
+            ret = AudioChannelLayout::CH_9POINT1POINT6;
+            break;
+        }
+        case 24: { // 24: CH_22POINT2
+            ret = AudioChannelLayout::CH_22POINT2;
+            break;
+        }
+        default: {
+            ret = AudioChannelLayout::UNKNOWN;
+            break;
+        }
+    }
+    return ret;
+}
+
 AudioChannelLayout ConvertChannelLayoutFromFFmpeg(int channels, uint64_t ffChannelLayout)
 {
     uint64_t channelLayout = 0;
@@ -326,12 +388,7 @@ AudioChannelLayout ConvertChannelLayoutFromFFmpeg(int channels, uint64_t ffChann
     }
     auto ret = static_cast<AudioChannelLayout>(channelLayout);
     if (ffChannelLayout == 0) {
-        if (channels == 1) {
-            ret = AudioChannelLayout::MONO;
-        }
-        if (channels == 2) { // 2
-            ret = AudioChannelLayout::STEREO;
-        }
+        ret = GetDefaultChannelLayout(channels);
     }
     return ret;
 }

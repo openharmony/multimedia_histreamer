@@ -52,6 +52,9 @@ StreamConvertor g_streamConvertors[] = {{AV_CODEC_ID_PCM_S16LE, ConvertRawAudioS
                                         {AV_CODEC_ID_VORBIS, ConvertVorbisStreamToMetaInfo},
                                         {AV_CODEC_ID_FLAC, ConvertFLACStreamToMetaInfo},
                                         {AV_CODEC_ID_APE, ConvertAPEStreamToMetaInfo},
+#ifdef AVS3DA_SUPPORT
+                                        {AV_CODEC_ID_AVS3DA, ConvertAVS3DAStreamToMetaInfo},
+#endif
 #ifdef VIDEO_SUPPORT
                                         {AV_CODEC_ID_H264, ConvertAVCStreamToMetaInfo}
 #endif
@@ -121,7 +124,11 @@ void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream,
             samplesPerFrame = static_cast<uint32_t>(avCodecContext->frame_size);
         }
         meta.Insert<Tag::AUDIO_SAMPLE_PER_FRAME>(samplesPerFrame);
-        meta.Insert<Tag::AUDIO_SAMPLE_FORMAT>(ConvFf2PSampleFmt(avCodecContext->sample_fmt));
+        if (avCodecContext->sample_fmt != AV_SAMPLE_FMT_NONE) {
+            meta.Insert<Tag::AUDIO_SAMPLE_FORMAT>(ConvFf2PSampleFmt(avCodecContext->sample_fmt));
+        } else {
+            meta.Insert<Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::S16);
+        }
     }
 }
 } // namespace
@@ -215,6 +222,15 @@ void ConvertAACLatmStreamToMetaInfo(const AVStream& avStream, const std::shared_
     meta.Insert<Tag::AUDIO_AAC_STREAM_FORMAT>(AudioAacStreamFormat::MP4LOAS);
     meta.Insert<Tag::BITS_PER_CODED_SAMPLE>(avCodecContext->bits_per_coded_sample);
 }
+
+#ifdef AVS3DA_SUPPORT
+void ConvertAVS3DAStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                   const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
+{
+    meta.Insert<Tag::MIME>(MEDIA_MIME_AUDIO_AVS3DA);
+    ConvertCommonAudioStreamToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
+}
+#endif
 
 #ifdef VIDEO_SUPPORT
 void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,

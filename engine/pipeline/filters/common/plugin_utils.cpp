@@ -24,7 +24,7 @@
 #include "pipeline/core/plugin_attr_desc.h"
 
 namespace {
-constexpr int32_t MAX_BUF_LEN = 320; // 320 buffer size
+constexpr int32_t MAX_BUF_LEN = 512; // 512 buffer size
 #define RETURN_IF_FAILED(exec, errVal, retVal) \
 do { \
     auto res = exec; \
@@ -240,6 +240,8 @@ std::map<Plugin::MetaID, CapStrnessFunc> g_metaStrnessMap = {
     {Plugin::MetaID::AUDIO_SAMPLE_FORMAT, MetaIDStringiness<Plugin::AudioSampleFormat>},
     {Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, MetaIDStringiness<uint32_t>},
     {Plugin::MetaID::AUDIO_CHANNEL_LAYOUT, MetaIDStringiness<Plugin::AudioChannelLayout>},
+    {Plugin::MetaID::AUDIO_OUTPUT_CHANNELS, MetaIDStringiness<uint32_t>},
+    {Plugin::MetaID::AUDIO_OUTPUT_CHANNEL_LAYOUT, MetaIDStringiness<Plugin::AudioChannelLayout>},
     {Plugin::MetaID::MEDIA_TITLE, MetaIDStringiness<std::string>},
     {Plugin::MetaID::MEDIA_ARTIST, MetaIDStringiness<std::string>},
     {Plugin::MetaID::MEDIA_LYRICIST, MetaIDStringiness<std::string>},

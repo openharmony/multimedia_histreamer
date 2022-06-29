@@ -62,6 +62,8 @@ const std::map<FilterType, PluginParaAllowedMap> PluginParameterTable::table_ = 
         {Tag::AUDIO_SAMPLE_PER_FRAME, {CommonParameterChecker, PARAM_SET}},
         {Tag::MEDIA_CODEC_CONFIG, {CommonParameterChecker, PARAM_SET}},
         {Tag::BITS_PER_CODED_SAMPLE, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_OUTPUT_CHANNELS, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, {CommonParameterChecker, PARAM_SET}},
     }},
     {FilterType::AUDIO_SINK, {
         {Tag::AUDIO_CHANNELS, {CommonParameterChecker, PARAM_SET}},
@@ -69,6 +71,8 @@ const std::map<FilterType, PluginParaAllowedMap> PluginParameterTable::table_ = 
         {Tag::AUDIO_SAMPLE_FORMAT, {CommonParameterChecker, PARAM_SET}},
         {Tag::AUDIO_CHANNEL_LAYOUT, {CommonParameterChecker, PARAM_SET}},
         {Tag::AUDIO_SAMPLE_PER_FRAME, {CommonParameterChecker, PARAM_SET}},
+        {Tag::AUDIO_OUTPUT_CHANNELS, {CommonParameterChecker, PARAM_SET | PARAM_GET}},
+        {Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, {CommonParameterChecker, PARAM_SET | PARAM_GET}},
     }},
     {FilterType::MUXER, {
         {Tag::MIME, {CommonParameterChecker, PARAM_SET}},

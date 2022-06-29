@@ -65,6 +65,14 @@ include_directories(
         ${TOP_DIR}/engine/plugin
 )
 
+if (AVS3DA_ENABLE)
+    include_directories(
+        ${HISTREAMER_PLUGINS_DIR}/codec/avs3_audio_decoder/avs3_codec/libavs3_common
+        ${HISTREAMER_PLUGINS_DIR}/codec/avs3_audio_decoder/avs3_codec/avs3Decoder/include
+        ${HISTREAMER_PLUGINS_DIR}/codec/avs3_audio_decoder/avs3_render
+    )
+endif ()
+
 if (NOT ${OHOS_LITE})
     message(STATUS "media interface header included.")
     include_directories(
@@ -99,6 +107,15 @@ file(GLOB_RECURSE COMMON_PLUGIN_SRCS
         ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
 )
 
+if (AVS3DA_ENABLE)
+    file(GLOB_RECURSE AVS3DA_PLUGIN_SRCS
+        ${HISTREAMER_PLUGINS_DIR}/codec/avs3_audio_decoder/avs3_codec/libavs3_common/*.c
+        ${HISTREAMER_PLUGINS_DIR}/codec/avs3_audio_decoder/avs3_codec/avs3Decoder/src/*.c
+        ${HISTREAMER_PLUGINS_DIR}/codec/avs3_audio_decoder/avs3_render/*.c
+        ${HISTREAMER_PLUGINS_DIR}/codec/avs3_audio_decoder/*.cpp
+    )
+endif()
+
 if (OHOS_LITE)
     message(STATUS "#1 player lite source")
     file(GLOB_RECURSE PLAYER_SRCS
@@ -127,7 +144,7 @@ else ()
             )
 endif ()
 
-set(HISTREAMER_SRCS ${HISTREAMER_BASE_SRCS} ${PLAYER_SRCS} ${RECORDER_SRCS} ${COMMON_PLUGIN_SRCS} ${PLAT_PLUGIN_SRCS})
+set(HISTREAMER_SRCS ${HISTREAMER_BASE_SRCS} ${PLAYER_SRCS} ${RECORDER_SRCS} ${COMMON_PLUGIN_SRCS} ${AVS3DA_PLUGIN_SRCS} ${PLAT_PLUGIN_SRCS})
 
 file(GLOB_RECURSE PLUGINS_STATIC_BUILD_SRCS
         ${TOP_DIR}/engine/plugin/plugins/source/file_source/*.cpp
