@@ -305,13 +305,32 @@ int32_t HiPlayerImpl::SetVideoSurface(sptr<Surface> surface)
 #endif
 }
 
-int32_t HiPlayerImpl::GetVideoTrackInfo(std::vector<Format> &videoTrack)
+int32_t HiPlayerImpl::GetVideoTrackInfo(std::vector<Format>& videoTrack)
 {
     MEDIA_LOG_I("GetVideoTrackInfo entered.");
+    std::string mime;
+    uint32_t height;
+    uint32_t width;
+    std::vector<std::shared_ptr<Plugin::Meta>> metaInfo = demuxer_->GetStreamMetaInfo();
+    for (const auto& trackInfo : metaInfo) {
+        if (trackInfo->GetString(Plugin::MetaID::MIME, mime)) {
+            if (IsVideoMime(mime)) {
+                Format videoTrackInfo {};
+                (void)videoTrackInfo.PutStringValue("codec_mime", "video/mpeg");
+                if (trackInfo->GetUint32(Plugin::MetaID::VIDEO_HEIGHT, height)) {
+                    (void)videoTrackInfo.PutIntValue("height", static_cast<int32_t>(height));
+                }
+                if (trackInfo->GetUint32(Plugin::MetaID::VIDEO_WIDTH, width)) {
+                    (void)videoTrackInfo.PutIntValue("width", static_cast<int32_t>(width));
+                }
+                videoTrack.push_back(videoTrackInfo);
+            }
+        }
+    }
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 
-int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format> &audioTrack)
+int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format>& audioTrack)
 {
     MEDIA_LOG_I("GetAudioTrackInfo entered.");
     uint32_t audioSampleRate;
