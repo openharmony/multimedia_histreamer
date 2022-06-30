@@ -206,7 +206,7 @@ Status LiteAACDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer> &inp
 
 Status LiteAACDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
 {
-    MEDIA_LOG_D("queue out put");
+    MEDIA_LOG_DD("queue out put");
     (void)timeoutMs;
     if (outBuffer_ != nullptr) {
         return Status::ERROR_TIMED_OUT;
