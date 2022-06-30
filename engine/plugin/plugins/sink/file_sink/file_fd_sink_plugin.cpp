@@ -100,12 +100,6 @@ Status FileFdSinkPlugin::Flush()
 Status FileFdSinkPlugin::Reset()
 {
     MEDIA_LOG_D("Reset");
-    if (fd_ != -1) {
-        MEDIA_LOG_D("close fd");
-        ftruncate(fd_, 0);
-        close(fd_);
-        fd_ = -1;
-    }
     return Status::OK;
 }
 
