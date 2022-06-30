@@ -1434,8 +1434,6 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
-        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
-        ASSERT_TRUE(fd >= 0);
         CheckAudio(filePath, recordSource);
     }
 
@@ -1462,8 +1460,6 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
-        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
-        ASSERT_TRUE(fd >= 0);
         CheckAudio(filePath, recordSource);
     }
 

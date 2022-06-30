@@ -108,11 +108,6 @@ Status FilePathSinkPlugin::Flush()
 
 Status FilePathSinkPlugin::Reset()
 {
-    if (fp_) {
-        MEDIA_LOG_I("Reset file");
-        std::fclose(fp_);
-        std::remove(tmpFileName_.c_str());
-    }
     return Status::OK;
 }
 Status FilePathSinkPlugin::OpenFile()
