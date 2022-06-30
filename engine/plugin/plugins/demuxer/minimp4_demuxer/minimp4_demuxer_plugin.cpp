@@ -349,8 +349,8 @@ Status MiniMP4DemuxerPlugin::ReadFrame(Buffer &outBuffer, int32_t timeOutMs)
     if (sampleIndex_ >= miniMP4_.track->sample_count) {
         (void)memset_s(inIoBuffer_, MEDIA_IO_SIZE, 0, MEDIA_IO_SIZE);
         ioDataRemainSize_ = 0;
-        MEDIA_LOG_D("sampleIndex_ " PUBLIC_LOG_D32, sampleIndex_);
-        MEDIA_LOG_D("miniMP4_.track->sample_count " PUBLIC_LOG_D32, miniMP4_.track->sample_count);
+        MEDIA_LOG_DD("sampleIndex_ " PUBLIC_LOG_D32, sampleIndex_);
+        MEDIA_LOG_DD("miniMP4_.track->sample_count " PUBLIC_LOG_D32, miniMP4_.track->sample_count);
         return Status::END_OF_STREAM;
     }
     unsigned int frameSize = 0;
