@@ -80,7 +80,8 @@ protected:
 
     ErrorCode AllocateOutputBuffers(const std::shared_ptr<const Plugin::Meta>& meta);
 
-    virtual void UpdateParams(std::shared_ptr<Plugin::Meta>& meta);
+    virtual void UpdateParams(const std::shared_ptr<const Plugin::Meta>& upMeta,
+                              std::shared_ptr<Plugin::Meta>& meta);
 
     template<typename T>
     ErrorCode GetPluginParameterLocked(Tag tag, T& value)

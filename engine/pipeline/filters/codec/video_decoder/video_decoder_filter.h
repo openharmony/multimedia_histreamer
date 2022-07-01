@@ -61,7 +61,8 @@ private:
 
     uint32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta) override;
 
-    void UpdateParams(std::shared_ptr<Plugin::Meta>& meta) override;
+    void UpdateParams(const std::shared_ptr<const Plugin::Meta>& upMeta,
+                      std::shared_ptr<Plugin::Meta>& meta) override;
 };
 }
 }

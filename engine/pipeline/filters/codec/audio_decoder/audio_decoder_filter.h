@@ -53,7 +53,8 @@ private:
 
     std::vector<Capability::Key> GetRequiredOutCapKeys() override;
 
-    void UpdateParams(std::shared_ptr<Plugin::Meta>& meta) override;
+    void UpdateParams(const std::shared_ptr<const Plugin::Meta>& upMeta,
+                      std::shared_ptr<Plugin::Meta>& meta) override;
 };
 } // Pipeline
 } // Media
