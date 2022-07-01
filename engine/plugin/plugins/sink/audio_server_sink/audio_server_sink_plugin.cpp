@@ -485,6 +485,11 @@ Status AudioServerSinkPlugin::SetParameter(Tag tag, const ValueType& para)
                 "SAMPLE_PER_FRAME type should be uint32_t");
             samplesPerFrame_ = Plugin::AnyCast<uint32_t>(para);
             break;
+        case Tag::MEDIA_SEEKABLE:
+            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(Seekable)), Status::ERROR_MISMATCHED_TYPE,
+                                 "MEDIA_SEEKABLE type should be Seekable");
+            seekable_ = Plugin::AnyCast<Plugin::Seekable>(para);
+            break;
         default:
             MEDIA_LOG_I("Unknown key");
             break;
@@ -578,8 +583,12 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
         ret = audioRenderer_->Write(buffer, length);
         MEDIA_LOG_DD("written data size " PUBLIC_LOG_D32, ret);
         if (ret < 0) {
-            MEDIA_LOG_E("Write data error " PUBLIC_LOG_D32, ret);
-            break;
+            MEDIA_LOG_E("Write data error ret is: " PUBLIC_LOG_D32, ret);
+            if (seekable_ == Seekable::SEEKABLE) {
+                OSAL::SleepFor(5); // 5ms
+            } else {
+                break;
+            }
         } else if (static_cast<size_t>(ret) < length) {
             OSAL::SleepFor(5); // 5ms
         }

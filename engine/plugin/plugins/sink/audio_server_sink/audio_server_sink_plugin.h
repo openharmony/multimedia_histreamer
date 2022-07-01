@@ -136,6 +136,7 @@ private:
     uint32_t sampleRate_ {};
     int64_t bitRate_ {0};
     bool needReformat_ {false};
+    Plugin::Seekable seekable_ {Plugin::Seekable::INVALID};
     std::shared_ptr<SwrContext> swrCtx_ {nullptr};
     std::vector<uint8_t> resampleCache_ {};
     std::vector<uint8_t*> resampleChannelAddr_ {};
