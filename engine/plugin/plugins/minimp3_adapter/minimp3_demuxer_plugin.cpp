@@ -429,7 +429,7 @@ int Minimp3DemuxerPlugin::AudioDemuxerMp3IterateCallback(void *userData, const u
     } else {
         usedInputLength = 0;
     }
-    MEDIA_LOG_D("offset = " PUBLIC_LOG_U64 " internalRemainLen " PUBLIC_LOG_U32 " frameSize "
+    MEDIA_LOG_DD("offset = " PUBLIC_LOG_U64 " internalRemainLen " PUBLIC_LOG_U32 " frameSize "
                 PUBLIC_LOG_D32, offset, mp3Demuxer->internalRemainLen, frameSize);
 
     if (frameSize == 0) {
