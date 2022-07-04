@@ -51,6 +51,10 @@ public:
 
     void FlushEnd() override;
 
+    ErrorCode SetParameter(int32_t key, const Plugin::Any& value) override;
+
+    ErrorCode GetParameter(int32_t key, Plugin::Any& value) override;
+
     /**
      *
      * @param inPort

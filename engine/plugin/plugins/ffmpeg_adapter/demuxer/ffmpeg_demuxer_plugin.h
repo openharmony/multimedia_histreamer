@@ -93,6 +93,7 @@ private:
 
     static int64_t AVSeek(void* opaque, int64_t offset, int whence); // NOLINT: void*
 
+    double playbackSpeed_ {1.0};
     Seekable seekable_;
     IOContext ioContext_;
     Callback* callback_ {};
