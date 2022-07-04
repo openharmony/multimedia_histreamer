@@ -150,7 +150,8 @@ ErrorCode CodecFilterBase::GetParameter(int32_t key, Plugin::Any& outVal)
     return TranslatePluginStatus(plugin_->GetParameter(tag, outVal));
 }
 
-void CodecFilterBase::UpdateParams(std::shared_ptr<Plugin::Meta>& meta)
+void CodecFilterBase::UpdateParams(const std::shared_ptr<const Plugin::Meta>& upMeta,
+                                   std::shared_ptr<Plugin::Meta>& meta)
 {
 }
 
@@ -258,7 +259,7 @@ bool CodecFilterBase::Configure(const std::string &inPort, const std::shared_ptr
     auto thisMeta = std::make_shared<Plugin::Meta>();
     FALSE_RETURN_V_MSG_E(MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta), false,
                          "can't configure codec plugin since meta is not compatible with negotiated caps");
-    UpdateParams(thisMeta);
+    UpdateParams(upstreamMeta, thisMeta);
     auto targetOutPort = GetRouteOutPort(inPort);
     if (targetOutPort == nullptr || !targetOutPort->Configure(thisMeta)) {
         MEDIA_LOG_E("decoder filter downstream Configure failed");

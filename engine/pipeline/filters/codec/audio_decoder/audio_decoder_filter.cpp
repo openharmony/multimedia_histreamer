@@ -157,7 +157,8 @@ std::vector<Capability::Key> AudioDecoderFilter::GetRequiredOutCapKeys()
     return capKey;
 }
 
-void AudioDecoderFilter::UpdateParams(std::shared_ptr<Plugin::Meta>& meta)
+void AudioDecoderFilter::UpdateParams(const std::shared_ptr<const Plugin::Meta>& upMeta,
+                                      std::shared_ptr<Plugin::Meta>& meta)
 {
     uint32_t samplesPerFrame = 0;
     if (GetPluginParameterLocked(Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame) != ErrorCode::SUCCESS) {
@@ -165,9 +166,15 @@ void AudioDecoderFilter::UpdateParams(std::shared_ptr<Plugin::Meta>& meta)
         samplesPerFrame = MAX_SAMPLE_PER_FRAME;
     }
     (void)meta->SetUint32(Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame);
+    bool useStreamChannelParams {false};
     auto iter = sinkParams_.Find(Plugin::Tag::AUDIO_OUTPUT_CHANNELS);
     if (iter != std::end(sinkParams_) && iter->second.SameTypeWith(typeid(uint32_t))) {
         auto outputChannels = Plugin::AnyCast<uint32_t>(iter->second);
+        uint32_t upChannels {0};
+        if (upMeta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, upChannels) && upChannels < outputChannels) {
+            outputChannels = upChannels;
+            useStreamChannelParams = true;
+        }
         if (plugin_ != nullptr &&
             plugin_->SetParameter(Plugin::Tag::AUDIO_OUTPUT_CHANNELS, outputChannels) != Plugin::Status::OK) {
             MEDIA_LOG_W("Set outputChannels to plugin " PUBLIC_LOG_S " failed", plugin_->GetName().c_str());
@@ -177,6 +184,10 @@ void AudioDecoderFilter::UpdateParams(std::shared_ptr<Plugin::Meta>& meta)
     iter = sinkParams_.Find(Plugin::Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT);
     if (iter != std::end(sinkParams_) && iter->second.SameTypeWith(typeid(Plugin::AudioChannelLayout))) {
         auto outputChanLayout = Plugin::AnyCast<Plugin::AudioChannelLayout>(iter->second);
+        Plugin::AudioChannelLayout upAudioChannelLayout;
+        if (useStreamChannelParams && upMeta->GetData(Plugin::MetaID::AUDIO_CHANNEL_LAYOUT, upAudioChannelLayout)) {
+            outputChanLayout = upAudioChannelLayout;
+        }
         if (plugin_ != nullptr &&
             plugin_->SetParameter(Plugin::Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, outputChanLayout) != Plugin::Status::OK) {
             MEDIA_LOG_W("Set outputChannelLayout to plugin " PUBLIC_LOG_S " failed", plugin_->GetName().c_str());

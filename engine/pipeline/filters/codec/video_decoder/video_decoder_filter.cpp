@@ -199,7 +199,8 @@ std::shared_ptr<Allocator> VideoDecoderFilter::GetAllocator()
     return plugin_->GetAllocator();
 }
 
-void VideoDecoderFilter::UpdateParams(std::shared_ptr<Plugin::Meta>& meta)
+void VideoDecoderFilter::UpdateParams(const std::shared_ptr<const Plugin::Meta>& upMeta,
+                                      std::shared_ptr<Plugin::Meta>& meta)
 {
     MEDIA_LOG_D("video not need implement this func.");
 }
