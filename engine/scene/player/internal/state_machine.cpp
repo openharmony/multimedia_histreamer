@@ -247,5 +247,10 @@ void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode resu
         intentSync_.Notify(intent, result);
     }
 }
+
+void StateMachine::Notify(Intent intent, ErrorCode code)
+{
+    intentSync_.Notify(intent, code);
+}
 } // namespace Media
 } // namespace OHOS

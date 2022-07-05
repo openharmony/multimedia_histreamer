@@ -41,7 +41,7 @@ public:
     std::tuple<ErrorCode, Action> Seek(const Plugin::Any& param) override
     {
         MEDIA_LOG_I("seek in eos is useless");
-        return {ErrorCode::SUCCESS, Action::ACTION_BUTT};
+        return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
     }
 
     std::tuple<ErrorCode, Action> Enter(Intent intent) override

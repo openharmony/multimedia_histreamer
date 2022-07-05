@@ -191,6 +191,9 @@ void DemuxerFilter::FlushStart()
 void DemuxerFilter::FlushEnd()
 {
     MEDIA_LOG_I("FlushEnd entered");
+    if (task_) {
+        task_->Start();
+    }
 }
 
 ErrorCode DemuxerFilter::Prepare()
@@ -254,11 +257,7 @@ ErrorCode DemuxerFilter::SeekTo(int64_t pos, Plugin::SeekMode mode)
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     auto rtv = TranslatePluginStatus(plugin_->SeekTo(-1, pos, mode));
-    if (rtv == ErrorCode::SUCCESS) {
-        if (task_) {
-            task_->Start();
-        }
-    } else {
+    if (rtv != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("SeekTo failed with return value: " PUBLIC_LOG_D32, static_cast<int>(rtv));
     }
     return rtv;

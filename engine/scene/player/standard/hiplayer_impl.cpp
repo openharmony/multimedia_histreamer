@@ -259,7 +259,11 @@ int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
     lastSeekMode_.store(smode);
     if (!seekInProgress_.load()) {
         seekInProgress_.store(true);
-        return TransErrorCode(fsm_.SendEventAsync(Intent::SEEK, SeekInfo{hstTime, smode}));
+        auto ret = fsm_.SendEvent(Intent::SEEK, SeekInfo{hstTime, smode});
+        if (ret != ErrorCode::SUCCESS) {
+            seekInProgress_.store(false);
+        }
+        return TransErrorCode(ret);
     } else {
         MEDIA_LOG_D("Seek in progress. Record the seek request [" PUBLIC_LOG_D64 "," PUBLIC_LOG_D32 "]",
                     hstTime, static_cast<int32_t>(smode));
@@ -490,6 +494,7 @@ ErrorCode HiPlayerImpl::DoReset()
 
 ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode, bool appTriggered)
 {
+    fsm_.Notify(Intent::SEEK, ErrorCode::SUCCESS);
     PROFILE_BEGIN();
     int64_t seekPos = hstTime;
     Plugin::SeekMode seekMode = mode;
@@ -502,15 +507,18 @@ ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode m
         pipeline_->FlushStart();
         PROFILE_END("Flush start");
         PROFILE_RESET();
-        pipeline_->FlushEnd();
-        PROFILE_END("Flush end");
-        PROFILE_RESET();
+
+        MEDIA_LOG_I("Do seek ...");
         syncManager_->Seek(seekPos);
         rtv = demuxer_->SeekTo(seekPos, seekMode);
         PROFILE_END("SeekTo");
+
+        pipeline_->FlushEnd();
+        PROFILE_END("Flush end");
+        PROFILE_RESET();
     }
     if (rtv != ErrorCode::SUCCESS) {
-        callbackLooper_.OnError(PLAYER_ERROR, TransErrorCode(rtv));
+        callbackLooper_.OnError(PLAYER_ERROR, MSERR_SEEK_FAILED);
     } else {
         Format format;
         int64_t currentPos = Plugin::HstTime2Ms(seekPos);
