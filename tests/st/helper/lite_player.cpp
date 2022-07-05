@@ -75,6 +75,7 @@ public:
     int32_t GetDuration(int64_t& durationMs) override;
     int32_t Release();
     int32_t SetVolume(float leftVolume, float rightVolume);
+    int32_t GetAudioTrackInfo(std::vector<Format>& audioTrack) override;
 private:
     std::shared_ptr<Media::PlayerInterface> player_;
 };
@@ -162,6 +163,11 @@ int32_t TestPlayerImpl::SetVolume(float leftVolume, float rightVolume)
 {
     int32_t ret = player_->SetVolume(leftVolume, rightVolume);
     return ret;
+}
+
+int32_t TestPlayerImpl::GetAudioTrackInfo(std::vector<Format> &audioTrack)
+{
+    return 0;
 }
 }
 #endif

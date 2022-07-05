@@ -530,7 +530,7 @@ ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode m
         OSAL::SleepFor(10); // 10 wait seek real complete
         seekInProgress_.store(false);
     }
-    return rtv;
+    return ErrorCode::ERROR_NO_NOTIFY;
 }
 
 ErrorCode HiPlayerImpl::DoOnReady()
