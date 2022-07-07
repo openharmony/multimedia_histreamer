@@ -60,6 +60,8 @@ source_set("histreamer_plugin_intf") {
   ]
   if (!hst_is_lite_sys && multimedia_histreamer_enable_video) {
     sources += [
+      "common/share_allocator.cpp",
+      "common/share_memory.cpp",
       "common/surface_allocator.cpp",
       "common/surface_memory.cpp",
     ]
