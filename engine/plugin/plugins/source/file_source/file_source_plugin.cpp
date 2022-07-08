@@ -148,7 +148,7 @@ Status FileSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 
 Status FileSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
 {
-    if (std::feof(fp_)) {
+    if (std::feof(fp_) || (fileSize_ == position_)) {
         MEDIA_LOG_W("It is the end of file!");
         return Status::END_OF_STREAM;
     }

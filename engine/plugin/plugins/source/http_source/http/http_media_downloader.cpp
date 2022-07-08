@@ -74,10 +74,13 @@ bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
     isEos = false;
-    if (downloadRequest_->IsEos() && buffer_->GetSize() == 0) {
-        isEos = true;
-        realReadLength = 0;
-        return false;
+    while (buffer_->GetSize() == 0) {
+        if (downloadRequest_->IsEos()) {
+            isEos = true;
+            realReadLength = 0;
+            return false;
+        }
+        OSAL::SleepFor(5); // 5
     }
     realReadLength = buffer_->ReadBuffer(buff, wantReadLength, 2); // wait 2 times
     MEDIA_LOG_D("Read: wantReadLength " PUBLIC_LOG_D32 ", realReadLength " PUBLIC_LOG_D32 ", isEos "
