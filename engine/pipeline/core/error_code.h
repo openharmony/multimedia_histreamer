@@ -42,6 +42,7 @@ enum struct ErrorCode : int32_t {
     ERROR_NO_MEMORY = ERROR_UNKNOWN + 9,
     ERROR_INVALID_STATE = ERROR_UNKNOWN + 10,
     ERROR_PERMISSION_DENIED = ERROR_UNKNOWN + 11,
+    ERROR_NO_NOTIFY = ERROR_UNKNOWN + 12,
 };
 
 const char* GetErrorName(ErrorCode code);

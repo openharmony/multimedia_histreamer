@@ -241,11 +241,19 @@ void StateMachine::OnIntentExecuted(Intent intent, Action action, ErrorCode resu
     if (action == Action::ACTION_PENDING) {
         return;
     }
+    if (result == ErrorCode::ERROR_NO_NOTIFY) {
+        return;
+    }
     if (intent == Intent::NOTIFY_READY && action == Action::TRANS_TO_PLAYING) {
         intentSync_.Notify(Intent::PLAY, result);
     } else {
         intentSync_.Notify(intent, result);
     }
+}
+
+void StateMachine::Notify(Intent intent, ErrorCode code)
+{
+    intentSync_.Notify(intent, code);
 }
 } // namespace Media
 } // namespace OHOS

@@ -272,4 +272,26 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
         std::this_thread::sleep_for(std::chrono::seconds(20));
         ASSERT_EQ(0, player->Stop());
     }
+
+    // SUB_MEDIA_PLAYER_LOCAL_AUDIO_FUNCTION_LOOP
+    // @test(data="durationTestMusicUrls", tags=fast)
+    PTEST((std::string url, int32_t expectDuration), Seek to the location of the file near the end)
+    {
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(url)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        int64_t duration;
+        ASSERT_EQ(0, player->GetDuration(duration));
+        ASSERT_TRUE(CheckTimeEquality(expectDuration, duration));
+        int32_t count = 5;
+        while (count > 0) {
+            NZERO_LOG(player->Seek(duration - 100));
+            NZERO_LOG(player->Seek(0));
+            count--;
+        }
+        ASSERT_EQ(0, player->Reset());
+        ASSERT_EQ(0, player->Release());
+    }
 };

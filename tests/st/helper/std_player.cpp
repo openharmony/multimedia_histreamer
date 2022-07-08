@@ -19,10 +19,10 @@
 #include <thread>
 #include <chrono>
 
-#include "i_player_engine.h"
 #include "foundation/log.h"
-
 #include "i_engine_factory.h"
+#include "i_player_engine.h"
+#include "media_errors.h"
 
 extern "C" {
 __attribute__((visibility("default"))) OHOS::Media::IEngineFactory* CreateEngineFactory();
@@ -38,6 +38,9 @@ class PlayerCallbackImpl : public IPlayerEngineObs {
 public:
     void OnError(PlayerErrorType errorType, int32_t errorCode) override
     {
+        if (errorCode == MSERR_SEEK_FAILED) {
+            g_seekFinished = true;
+        }
     }
     void OnInfo(PlayerOnInfoType type, int32_t extra, const Format& infoBody) override
     {

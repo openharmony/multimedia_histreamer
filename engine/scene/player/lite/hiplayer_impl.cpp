@@ -240,7 +240,7 @@ int32_t HiPlayerImpl::Rewind(int64_t mSeconds, int32_t mode)
         return CppExt::to_underlying(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }
     auto smode = Transform2SeekMode(static_cast<PlayerSeekMode>(mode));
-    return CppExt::to_underlying(fsm_.SendEventAsync(Intent::SEEK, SeekInfo{hstTime, smode}));
+    return CppExt::to_underlying(fsm_.SendEvent(Intent::SEEK, SeekInfo{hstTime, smode}));
 }
 
 int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
@@ -384,6 +384,7 @@ ErrorCode HiPlayerImpl::DoReset()
 
 ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode, bool appTriggered)
 {
+    fsm_.Notify(Intent::SEEK, ErrorCode::SUCCESS);
     (void)appTriggered;
     PROFILE_BEGIN();
     auto rtv = allowed && hstTime >= 0 ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_OPERATION;
@@ -391,12 +392,14 @@ ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode m
         pipeline_->FlushStart();
         PROFILE_END("Flush start");
         PROFILE_RESET();
-        pipeline_->FlushEnd();
-        PROFILE_END("Flush end");
-        PROFILE_RESET();
+
         syncManager_->Seek(hstTime);
         rtv = demuxer_->SeekTo(hstTime, mode);
         PROFILE_END("SeekTo");
+
+        pipeline_->FlushEnd();
+        PROFILE_END("Flush end");
+        PROFILE_RESET();
     }
     auto ptr = callback_.lock();
     if (ptr != nullptr) {

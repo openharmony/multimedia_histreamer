@@ -60,6 +60,8 @@ public:
 
     ErrorCode SendEventAsync(Intent intent, const Plugin::Any& param = {}) const;
 
+    void Notify(Intent intent, ErrorCode code);
+
 private:
     using Job = std::function<Action()>;
 
