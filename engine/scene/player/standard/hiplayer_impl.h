@@ -51,7 +51,7 @@ class HiPlayerImpl : public Pipeline::EventReceiver,
     friend class StateMachine;
 
 public:
-    HiPlayerImpl();
+    HiPlayerImpl(int32_t appUid, int32_t appPid);
     ~HiPlayerImpl() override;
     HiPlayerImpl(const HiPlayerImpl& other) = delete;
     HiPlayerImpl& operator=(const HiPlayerImpl& other) = delete;
@@ -118,6 +118,8 @@ private:
     
     OSAL::Mutex stateMutex_ {};
     OSAL::ConditionVariable cond_ {};
+    int32_t appUid_ {0};
+    int32_t appPid_ {0};
     StateMachine fsm_;
     std::atomic<StateId> curFsmState_;
     std::shared_ptr<Pipeline::PipelineCore> pipeline_;

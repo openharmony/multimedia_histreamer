@@ -80,6 +80,8 @@ private:
     int64_t latestBufferPts_ {HST_TIME_NONE};
     int64_t latestBufferDuration_ {0};
     int64_t frameCnt_ {0};
+    int32_t appPid_ {0};
+    int32_t appUid_ {0};
     Plugin::Seekable seekable_ {Plugin::Seekable::INVALID};
 
     std::atomic<bool> pushThreadIsBlocking {false};

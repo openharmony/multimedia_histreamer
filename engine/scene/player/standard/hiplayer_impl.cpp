@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,8 +39,10 @@ constexpr double SPEED_1_25_X = 1.25;
 constexpr double SPEED_1_75_X = 1.75;
 constexpr double SPEED_2_00_X = 2.00;
 
-HiPlayerImpl::HiPlayerImpl()
-    : fsm_(*this),
+HiPlayerImpl::HiPlayerImpl(int32_t appUid, int32_t appPid)
+    : appUid_(appUid),
+      appPid_(appPid),
+      fsm_(*this),
       curFsmState_(StateId::IDLE),
       volume_(-1.0f), // default negative, if app not set, will not set it.
       mediaStats_()
@@ -62,6 +63,8 @@ HiPlayerImpl::HiPlayerImpl()
     demuxer_ = FilterFactory::Instance().CreateFilterWithType<DemuxerFilter>("builtin.player.demuxer", "demuxer");
     audioSink_ =
         FilterFactory::Instance().CreateFilterWithType<AudioSinkFilter>("builtin.player.audiosink", "audioSink");
+    audioSink_->SetParameter(static_cast<int32_t>(Plugin::Tag::APP_PID), appPid_);
+    audioSink_->SetParameter(static_cast<int32_t>(Plugin::Tag::APP_UID), appUid_);
 #ifdef VIDEO_SUPPORT
     videoSink_ =
         FilterFactory::Instance().CreateFilterWithType<VideoSinkFilter>("builtin.player.videosink", "videoSink");

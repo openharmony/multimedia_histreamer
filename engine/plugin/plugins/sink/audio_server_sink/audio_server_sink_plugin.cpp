@@ -194,7 +194,11 @@ Status AudioServerSinkPlugin::Init()
     MEDIA_LOG_I("Init entered.");
     OSAL::ScopedLock lock(renderMutex_);
     if (audioRenderer_ == nullptr) {
-        audioRenderer_ = AudioStandard::AudioRenderer::Create(AudioStandard::AudioStreamType::STREAM_MUSIC);
+        AudioStandard::AppInfo appInfo;
+        appInfo.appPid = appPid_;
+        appInfo.appUid = appUid_;
+        MEDIA_LOG_I("Create audio renderer for apppid_" PUBLIC_LOG_D32 " appuid_ " PUBLIC_LOG_D32, appPid_, appUid_);
+        audioRenderer_ = AudioStandard::AudioRenderer::Create(AudioStandard::AudioStreamType::STREAM_MUSIC, appInfo);
         if (audioRenderer_ == nullptr) {
             MEDIA_LOG_E("Create audioRenderer_ fail");
             return Status::ERROR_UNKNOWN;
@@ -489,6 +493,16 @@ Status AudioServerSinkPlugin::SetParameter(Tag tag, const ValueType& para)
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(Seekable)), Status::ERROR_MISMATCHED_TYPE,
                                  "MEDIA_SEEKABLE type should be Seekable");
             seekable_ = Plugin::AnyCast<Plugin::Seekable>(para);
+            break;
+        case Tag::APP_PID:
+            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(int32_t)), Status::ERROR_MISMATCHED_TYPE,
+                "APP_PID type should be int32_t");
+            appPid_ = Plugin::AnyCast<int32_t>(para);
+            break;
+        case Tag::APP_UID:
+            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(int32_t)), Status::ERROR_MISMATCHED_TYPE,
+                "APP_UID type should be int32_t");
+            appUid_ = Plugin::AnyCast<int32_t>(para);
             break;
         default:
             MEDIA_LOG_I("Unknown key");

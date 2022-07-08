@@ -94,6 +94,7 @@ const std::map<Plugin::Tag, std::tuple<const char*, const Plugin::ValueType&, co
     {Plugin::Tag::VIDEO_H264_LEVEL, {"vd_level",               g_u32Def,           "uint32_t"}},
     {Plugin::Tag::APP_TOKEN_ID, {"apptoken_id",                g_u32Def,           "uint32_t"}},
     {Plugin::Tag::APP_UID, {"app_uid",                         g_d32Def,           "int32_t"}},
+    {Plugin::Tag::APP_PID, {"app_pid",                         g_d32Def,           "int32_t"}},
 };
 
 const std::map<Plugin::AudioSampleFormat, const char*> g_auSampleFmtStrMap = {
