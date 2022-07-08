@@ -59,7 +59,7 @@ void HttpMediaDownloader::Close()
 
 void HttpMediaDownloader::Pause()
 {
-    buffer_->SetActive(false);
+    buffer_->SetActive(false, false);
     downloader_->Pause();
 }
 

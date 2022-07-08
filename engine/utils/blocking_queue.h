@@ -135,13 +135,15 @@ public:
         OSAL::ScopedLock lock(mutex_);
         ClearUnprotected();
     }
-    void SetActive(bool active)
+    void SetActive(bool active, bool cleanData = true)
     {
         OSAL::ScopedLock lock(mutex_);
         MEDIA_LOG_D("SetActive for " PUBLIC_LOG_S ": " PUBLIC_LOG_D32 ".", name_.c_str(), active);
         isActive = active;
         if (!active) {
-            ClearUnprotected();
+            if (cleanData) {
+                ClearUnprotected();
+            }
             cvEmpty_.NotifyOne();
         }
     }

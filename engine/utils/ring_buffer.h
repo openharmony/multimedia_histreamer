@@ -98,13 +98,15 @@ public:
         writeCondition_.NotifyOne();
     }
 
-    void SetActive(bool active)
+    void SetActive(bool active, bool cleanData = true)
     {
         OSAL::ScopedLock lck(writeMutex_);
         isActive_ = active;
         if (!active) {
-            head_ = 0;
-            tail_ = 0;
+            if (cleanData) {
+                head_ = 0;
+                tail_ = 0;
+            }
             writeCondition_.NotifyOne();
         }
     }
