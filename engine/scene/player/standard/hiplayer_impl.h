@@ -113,7 +113,9 @@ private:
     void ActiveFilters(const std::vector<Pipeline::Filter*>& filters);
     void HandlePluginErrorEvent(const Event& event);
     void UpdateStateNoLock(PlayerStates newState, bool notifyUpward = true);
-
+    double ChangeModeToSpeed(const PlaybackRateMode& mode) const;
+    PlaybackRateMode ChangeSpeedToMode(double rate) const;
+    
     OSAL::Mutex stateMutex_ {};
     OSAL::ConditionVariable cond_ {};
     StateMachine fsm_;
@@ -144,6 +146,7 @@ private:
     std::unordered_map<std::string, std::shared_ptr<Pipeline::AudioDecoderFilter>> audioDecoderMap_;
     std::shared_ptr<Pipeline::MediaSyncManager> syncManager_;
     HiPlayerCallbackLooper callbackLooper_ {};
+    sptr<Surface> surface_ {nullptr};
 };
 }  // namespace Media
 }  // namespace OHOS

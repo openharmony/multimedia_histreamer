@@ -122,9 +122,14 @@ Status FFmpegDemuxerPlugin::Reset()
  */
 Status FFmpegDemuxerPlugin::GetParameter(Tag tag, ValueType& value)
 {
-    (void)tag;
-    (void)value;
-    return Status::ERROR_UNIMPLEMENTED;
+    switch (tag) {
+        case Tag::MEDIA_PLAYBACK_SPEED:
+            value = playbackSpeed_;
+            break;
+        default:
+            break;
+    }
+    return Status::OK;
 }
 
 /**
@@ -133,9 +138,14 @@ Status FFmpegDemuxerPlugin::GetParameter(Tag tag, ValueType& value)
  */
 Status FFmpegDemuxerPlugin::SetParameter(Tag tag, const ValueType& value)
 {
-    (void)tag;
-    (void)value;
-    return Status::ERROR_UNIMPLEMENTED;
+    switch (tag) {
+        case Tag::MEDIA_PLAYBACK_SPEED:
+            playbackSpeed_ = Plugin::AnyCast<double>(value);
+            break;
+        default:
+            break;
+    }
+    return Status::OK;
 }
 
 std::shared_ptr<Allocator> FFmpegDemuxerPlugin::GetAllocator()

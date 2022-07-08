@@ -33,6 +33,12 @@ const float MAX_MEDIA_VOLUME = 1.0f; // standard interface volume is between 0 t
 namespace OHOS {
 namespace Media {
 using namespace Pipeline;
+constexpr double EPSINON = 0.0001;
+constexpr double SPEED_0_75_X = 0.75;
+constexpr double SPEED_1_00_X = 1.00;
+constexpr double SPEED_1_25_X = 1.25;
+constexpr double SPEED_1_75_X = 1.75;
+constexpr double SPEED_2_00_X = 2.00;
 
 HiPlayerImpl::HiPlayerImpl()
     : fsm_(*this),
@@ -299,7 +305,10 @@ int32_t HiPlayerImpl::SetVideoSurface(sptr<Surface> surface)
 {
     MEDIA_LOG_D("SetVideoSurface entered.");
 #ifdef VIDEO_SUPPORT
-    return TransErrorCode(videoSink_->SetVideoSurface(surface));
+    if (surface != nullptr) {
+        surface_ = surface;
+    }
+    return TransErrorCode(videoSink_->SetVideoSurface(surface_));
 #else
     return TransErrorCode(ErrorCode::SUCCESS);
 #endif
@@ -362,13 +371,19 @@ int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format>& audioTrack)
 int32_t HiPlayerImpl::GetVideoWidth()
 {
     MEDIA_LOG_I("GetVideoWidth entered.");
-    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+    if (surface_ != nullptr) {
+        return surface_->GetDefaultWidth();
+    }
+    return 0;
 }
 
 int32_t HiPlayerImpl::GetVideoHeight()
 {
     MEDIA_LOG_I("GetVideoHeight entered.");
-    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+    if (surface_ != nullptr) {
+        return surface_->GetDefaultHeight();
+    }
+    return 0;
 }
 
 void HiPlayerImpl::HandlePluginErrorEvent(const Event& event)
@@ -660,14 +675,18 @@ int32_t HiPlayerImpl::GetDuration(int32_t& durationMs)
 int32_t HiPlayerImpl::SetPlaybackSpeed(PlaybackRateMode mode)
 {
     MEDIA_LOG_I("SetPlaybackSpeed entered.");
-    (void)mode;
-    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+    double playbackSpeed = ChangeModeToSpeed(mode);
+    demuxer_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_PLAYBACK_SPEED), playbackSpeed);
+    return MSERR_OK;
 }
 int32_t HiPlayerImpl::GetPlaybackSpeed(PlaybackRateMode& mode)
 {
     MEDIA_LOG_I("GetPlaybackSpeed entered.");
-    (void)mode;
-    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+    Plugin::Any any;
+    demuxer_->GetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_PLAYBACK_SPEED), any);
+    auto playbackSpeed = Plugin::AnyCast<double>(any);
+    mode = ChangeSpeedToMode(playbackSpeed);
+    return MSERR_OK;
 }
 
 void HiPlayerImpl::OnStateChanged(StateId state)
@@ -801,6 +820,46 @@ void HiPlayerImpl::ActiveFilters(const std::vector<Filter*>& filters)
     for (auto it = filters.rbegin(); it != filters.rend(); ++it) {
         (*it)->Prepare();
     }
+}
+
+double HiPlayerImpl::ChangeModeToSpeed(const PlaybackRateMode& mode) const
+{
+    switch (mode) {
+        case SPEED_FORWARD_0_75_X:
+            return SPEED_0_75_X;
+        case SPEED_FORWARD_1_00_X:
+            return SPEED_1_00_X;
+        case SPEED_FORWARD_1_25_X:
+            return SPEED_1_25_X;
+        case SPEED_FORWARD_1_75_X:
+            return SPEED_1_75_X;
+        case SPEED_FORWARD_2_00_X:
+            return SPEED_2_00_X;
+        default:
+            MEDIA_LOG_I("unknown mode:" PUBLIC_LOG_D32 ", return default speed(SPEED_1_00_X)", mode);
+    }
+    return SPEED_1_00_X;
+}
+
+PlaybackRateMode HiPlayerImpl::ChangeSpeedToMode(double rate) const
+{
+    if (abs(rate - SPEED_0_75_X) < EPSINON) {
+        return SPEED_FORWARD_0_75_X;
+    }
+    if (abs(rate - SPEED_1_00_X) < EPSINON) {
+        return SPEED_FORWARD_1_00_X;
+    }
+    if (abs(rate - SPEED_1_25_X) < EPSINON) {
+        return SPEED_FORWARD_1_25_X;
+    }
+    if (abs(rate - SPEED_1_75_X) < EPSINON) {
+        return SPEED_FORWARD_1_75_X;
+    }
+    if (abs(rate - SPEED_2_00_X) < EPSINON) {
+        return SPEED_FORWARD_2_00_X;
+    }
+    MEDIA_LOG_I("unknown rate:" PUBLIC_LOG_F ", return default speed(SPEED_FORWARD_1_00_X)", rate);
+    return SPEED_FORWARD_1_00_X;
 }
 }  // namespace Media
 }  // namespace OHOS

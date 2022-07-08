@@ -114,6 +114,7 @@ enum struct Tag : uint32_t {
     MEDIA_POSITION,                        ///< uint64_t : The byte position within media stream/file
     MEDIA_START_TIME,                      ///< int64_t: The start time of one track
     MEDIA_SEEKABLE,                        ///< enum Seekable: Seekable status of the media
+    MEDIA_PLAYBACK_SPEED,                  ///< double, playback speed
 
     /* -------------------- audio universal tag -------------------- */
     AUDIO_CHANNELS = SECTION_AUDIO_UNIVERSAL_START + 1, ///< uint32_t, stream channel num

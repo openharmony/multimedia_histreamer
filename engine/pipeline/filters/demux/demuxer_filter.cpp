@@ -193,6 +193,18 @@ void DemuxerFilter::FlushEnd()
     MEDIA_LOG_I("FlushEnd entered");
 }
 
+ErrorCode DemuxerFilter::SetParameter(int32_t key, const Plugin::Any& value)
+{
+    FALSE_RETURN_V_MSG(plugin_ != nullptr, ErrorCode::ERROR_INVALID_OPERATION, "plugin is nullptr");
+    return TranslatePluginStatus(plugin_->SetParameter(static_cast<Plugin::Tag>(key), value));
+}
+
+ErrorCode DemuxerFilter::GetParameter(int32_t key, Plugin::Any& value)
+{
+    FALSE_RETURN_V_MSG(plugin_ != nullptr, ErrorCode::ERROR_INVALID_OPERATION, "plugin is nullptr");
+    return TranslatePluginStatus(plugin_->SetParameter(static_cast<Plugin::Tag>(key), value));
+}
+
 ErrorCode DemuxerFilter::Prepare()
 {
     MEDIA_LOG_I("Prepare called");
