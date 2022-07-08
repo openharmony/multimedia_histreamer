@@ -30,6 +30,7 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
+using namespace Plugin;
 namespace {
 constexpr int REPORT_DURATION = 20 * HST_MSECOND; // 20 ms
 constexpr int WAIT_PREROLLED_TIMEOUT = 80 * HST_MSECOND; // 80ms
@@ -99,6 +100,7 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
                                 Plugin::TagMap& downstreamParams)
 {
     MEDIA_LOG_I("audio sink negotiate started");
+    FALSE_LOG(downstreamParams.Get<Tag::MEDIA_SEEKABLE>(seekable_));
     PROFILE_BEGIN("Audio Sink Negotiate begin");
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::AUDIO_SINK);
     if (candidatePlugins.empty()) {
@@ -120,6 +122,7 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
         [](const std::string& name) -> std::shared_ptr<Plugin::AudioSink> {
         return Plugin::PluginManager::Instance().CreateAudioSinkPlugin(name);
     });
+    NOK_LOG(plugin_->SetParameter(Tag::MEDIA_SEEKABLE, seekable_));
     Plugin::ValueType pluginValue;
     if (plugin_->GetParameter(Tag::AUDIO_OUTPUT_CHANNELS, pluginValue) == Plugin::Status::OK) {
         auto outputChannels = Plugin::AnyCast<uint32_t>(pluginValue);

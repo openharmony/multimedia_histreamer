@@ -270,6 +270,8 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
             suffixMeta->SetUint64(Media::Plugin::MetaID::MEDIA_FILE_SIZE, fileSize);
         }
         Seekable seekable = plugin_->GetSeekable();
+        FALSE_RETURN_V_MSG_E(seekable != Plugin::Seekable::INVALID, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
+                             "media source Seekable must be SEEKABLE or UNSEEKABLE !");
         suffixMeta->SetInt32(Media::Plugin::MetaID::MEDIA_SEEKABLE, static_cast<int32_t>(seekable));
         Capability peerCap;
         auto tmpCap = MetaToCapability(*suffixMeta);

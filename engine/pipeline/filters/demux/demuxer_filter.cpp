@@ -518,6 +518,7 @@ void DemuxerFilter::NegotiateDownstream()
             auto tmpCap = MetaToCapability(*streamMeta);
             Plugin::TagMap upstreamParams;
             Plugin::TagMap downstreamParams;
+            downstreamParams.Insert<Tag::MEDIA_SEEKABLE>(seekable_);
             if (stream.port->Negotiate(tmpCap, caps, upstreamParams, downstreamParams) &&
                 stream.port->Configure(streamMeta)) {
                 stream.needNegoCaps = false;
