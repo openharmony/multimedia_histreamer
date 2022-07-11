@@ -261,27 +261,27 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
 {
     MEDIA_LOG_D("IN");
     SourceType sourceType = source->GetSourceType();
+    std::shared_ptr<Plugin::Meta> meta = std::make_shared<Plugin::Meta>();
     if (sourceType == SourceType::SOURCE_TYPE_URI) {
-        std::shared_ptr<Plugin::Meta> suffixMeta = std::make_shared<Plugin::Meta>();
         std::string suffix = GetUriSuffix(source->GetSourceUri());
-        suffixMeta->SetString(Media::Plugin::MetaID::MEDIA_FILE_EXTENSION, suffix);
-        size_t fileSize = 0;
-        if ((plugin_->GetSize(fileSize) == Status::OK) && (fileSize != 0)) {
-            suffixMeta->SetUint64(Media::Plugin::MetaID::MEDIA_FILE_SIZE, fileSize);
-        }
-        Seekable seekable = plugin_->GetSeekable();
-        FALSE_RETURN_V_MSG_E(seekable != Plugin::Seekable::INVALID, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
-                             "media source Seekable must be SEEKABLE or UNSEEKABLE !");
-        suffixMeta->SetInt32(Media::Plugin::MetaID::MEDIA_SEEKABLE, static_cast<int32_t>(seekable));
-        Capability peerCap;
-        auto tmpCap = MetaToCapability(*suffixMeta);
-        Plugin::TagMap upstreamParams;
-        Plugin::TagMap downstreamParams;
-        if (!GetOutPort(PORT_NAME_DEFAULT)->Negotiate(tmpCap, peerCap, upstreamParams, downstreamParams) ||
-            !GetOutPort(PORT_NAME_DEFAULT)->Configure(suffixMeta, upstreamParams, downstreamParams)) {
-            MEDIA_LOG_E("Negotiate fail!");
-            return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
-        }
+        meta->SetString(Media::Plugin::MetaID::MEDIA_FILE_EXTENSION, suffix);
+    }
+    Seekable seekable = plugin_->GetSeekable();
+    FALSE_RETURN_V_MSG_E(seekable != Plugin::Seekable::INVALID, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
+                         "media source Seekable must be SEEKABLE or UNSEEKABLE !");
+    meta->SetInt32(Media::Plugin::MetaID::MEDIA_SEEKABLE, static_cast<int32_t>(seekable));
+    size_t fileSize = 0;
+    if ((plugin_->GetSize(fileSize) == Status::OK) && (fileSize != 0)) {
+        meta->SetUint64(Media::Plugin::MetaID::MEDIA_FILE_SIZE, fileSize);
+    }
+    Capability peerCap;
+    auto tmpCap = MetaToCapability(*meta);
+    Plugin::TagMap upstreamParams;
+    Plugin::TagMap downstreamParams;
+    if (!GetOutPort(PORT_NAME_DEFAULT)->Negotiate(tmpCap, peerCap, upstreamParams, downstreamParams) ||
+        !GetOutPort(PORT_NAME_DEFAULT)->Configure(meta, upstreamParams, downstreamParams)) {
+        MEDIA_LOG_E("Negotiate fail!");
+        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     return ErrorCode::SUCCESS;
 }
@@ -300,7 +300,7 @@ std::string MediaSourceFilter::GetUriSuffix(const std::string& uri)
 void MediaSourceFilter::ReadLoop()
 {
     MEDIA_LOG_D("IN");
-    AVBufferPtr bufferPtr = nullptr;
+    AVBufferPtr bufferPtr = std::make_shared<Buffer>();
     ErrorCode result = TranslatePluginStatus(plugin_->Read(bufferPtr, DEFAULT_READ_SIZE));
     if (result == ErrorCode::END_OF_STREAM) {
         if (taskPtr_) {

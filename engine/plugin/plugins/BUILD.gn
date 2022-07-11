@@ -28,6 +28,8 @@ print("histreamer plugin: file_source =",
       multimedia_histreamer_enable_plugin_file_source)
 print("histreamer plugin: file_fd_source =",
       multimedia_histreamer_enable_plugin_file_fd_source)
+print("histreamer plugin: std_stream_source =",
+      multimedia_histreamer_enable_plugin_std_stream_source)
 print("histreamer plugin: http_source =",
       multimedia_histreamer_enable_plugin_http_source)
 print("histreamer plugin: stream_source =",
@@ -69,6 +71,10 @@ group("histreamer_plugin_store") {
 
   if (multimedia_histreamer_enable_plugin_file_fd_source) {
     deps += [ "source/file_source:plugin_file_fd_source" ]
+  }
+
+  if (multimedia_histreamer_enable_plugin_std_stream_source) {
+    deps += [ "source/std_stream_source:plugin_std_stream_source" ]
   }
 
   if (multimedia_histreamer_enable_plugin_http_source) {

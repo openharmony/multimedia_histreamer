@@ -75,6 +75,16 @@ private:
     std::unique_ptr<IPlayerEngine> player_;
 };
 
+TestSource TestSource::CreateTestSource(std::string& url, TestSourceType type, Plugin::Seekable seekable)
+{
+    switch (type) {
+        case TestSourceType::URI:
+            return TestSource(url);
+        case TestSourceType::STREAM:
+            return TestSource(url, seekable);
+    }
+}
+
 std::unique_ptr<TestPlayer> TestPlayer::Create()
 {
     auto engineFactory = std::unique_ptr<OHOS::Media::IEngineFactory>(CreateEngineFactory());
@@ -86,7 +96,12 @@ std::unique_ptr<TestPlayer> TestPlayer::Create()
 
 int32_t TestPlayerImpl::SetSource(const TestSource& source)
 {
-    return player_->SetSource(source.url_);
+    if (source.type_ == TestSourceType::URI) {
+        return player_->SetSource(source.url_);
+    } else if (source.type_ == TestSourceType::STREAM) {
+        auto src = std::make_shared<IMediaDataSourceImpl>(source.url_, source.seekable_);
+        return player_->SetSource(src);
+    }
 }
 
 int32_t TestPlayerImpl::SetSingleLoop(bool loop)

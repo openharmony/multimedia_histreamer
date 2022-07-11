@@ -14,18 +14,31 @@
  */
 #ifndef HISTREAMER_ST_TEST_PLAYER
 #define HISTREAMER_ST_TEST_PLAYER
+
+#include <cstring>
 #include <format.h>
-#include <memory>
 #include <string>
 #include <vector>
+#include "common/plugin_types.h"
+#include "media_data_source_impl.h"
+#include "securec.h"
 
 namespace OHOS::Media::Test {
+enum class TestSourceType : int32_t {
+    URI = 0,
+    STREAM = 1
+};
+
 class TestSource {
 public:
-    explicit TestSource(std::string url) : url_(std::move(url)) {}
-    // To Fix: support stream, TestSource(stream)
+    static TestSource CreateTestSource(std::string& url, TestSourceType type, Plugin::Seekable seekable);
+    explicit TestSource(std::string url) : url_(std::move(url)), type_(TestSourceType::URI) {}
+    TestSource(std::string url, Plugin::Seekable seekable) : url_(std::move(url)),
+        type_(TestSourceType::STREAM), seekable_(seekable) {}
 
     std::string url_;
+    TestSourceType type_;
+    Plugin::Seekable seekable_ {Plugin::Seekable::INVALID};
 };
 
 class TestPlayer {

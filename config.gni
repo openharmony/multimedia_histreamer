@@ -20,6 +20,7 @@ declare_args() {
   multimedia_histreamer_enable_plugin_http_source = true
   multimedia_histreamer_enable_plugin_file_fd_source = true
   multimedia_histreamer_enable_plugin_stream_source = false
+  multimedia_histreamer_enable_plugin_std_stream_source = false
   multimedia_histreamer_enable_plugin_http_lite_source = false
   multimedia_histreamer_enable_plugin_minimp3_adapter = false
   multimedia_histreamer_enable_plugin_minimp4_demuxer = false
@@ -48,6 +49,7 @@ if (!defined(ohos_lite) || !ohos_lite) {
   multimedia_histreamer_enable_recorder = true
   multimedia_histreamer_enable_plugin_file_sink = true
   multimedia_histreamer_enable_plugin_std_audio_capture = true
+  multimedia_histreamer_enable_plugin_std_stream_source = true
 } else {
   hst_is_lite_sys = true
 }

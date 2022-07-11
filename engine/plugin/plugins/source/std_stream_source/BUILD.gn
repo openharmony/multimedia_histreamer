@@ -1,0 +1,56 @@
+# Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+import("//foundation/multimedia/histreamer/config.gni")
+group("plugin_std_stream_source") {
+  deps = []
+  if (hst_is_lite_sys) {
+    print("std stream source plugin is not available on lite systems")
+  } else {
+    deps += [ ":histreamer_plugin_StdStreamSource" ]
+  }
+}
+
+source_set("std_stream_source") {
+  sources = [ "std_stream_source_plugin.cpp" ]
+  public_deps = [
+    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
+  ]
+
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
+  if (hst_is_lite_sys) {
+    print("std stream source plugin is not available on lite systems")
+  } else {
+    include_dirs = [
+      "//foundation/multimedia/player_framework/interfaces/inner_api/native",
+      "//foundation/multimedia/player_framework/services/utils/include",
+      "//utils/native/base/include",
+    ]
+    public_deps += [ "//foundation/multimedia/player_framework/services/utils:media_service_utils" ]
+    public_configs += [ "//foundation/multimedia/player_framework/services/utils:media_service_utils_public_config" ]
+  }
+}
+
+if (hst_is_lite_sys) {
+  print("std stream source plugin is not available on lite systems")
+} else {
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer_plugin_StdStreamSource") {
+    deps = [ ":std_stream_source" ]
+    relative_install_dir = "media/histreamer_plugins"
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
+  }
+}

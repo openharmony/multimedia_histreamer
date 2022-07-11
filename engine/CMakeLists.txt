@@ -105,6 +105,7 @@ file(GLOB_RECURSE COMMON_PLUGIN_SRCS
         ${TOP_DIR}/engine/plugin/plugins/source/http_source/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/source/http_source_test/*.cpp
         ${TOP_DIR}/engine/plugin/plugins/source/stream_source/*.cpp
+        ${TOP_DIR}/engine/plugin/plugins/source/std_stream_source/*.cpp
 )
 
 if (AVS3DA_ENABLE)

@@ -261,7 +261,8 @@ bool DemuxerFilter::Configure(const std::string &inPort, const std::shared_ptr<c
     if (upstreamMeta->GetInt32(Plugin::MetaID::MEDIA_SEEKABLE, seekable)) {
         seekable_ = static_cast<Plugin::Seekable>(seekable);
     }
-    return upstreamMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_);
+    upstreamMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_);
+    return true;
 }
 
 ErrorCode DemuxerFilter::SeekTo(int64_t pos, Plugin::SeekMode mode)
@@ -430,7 +431,10 @@ void DemuxerFilter::InitMediaMetaData(const Plugin::MediaInfoHelper& mediaInfo)
 
 bool DemuxerFilter::IsOffsetValid(int64_t offset) const
 {
-    return mediaDataSize_ == 0 || offset <= static_cast<int64_t>(mediaDataSize_);
+    if (seekable_ == Plugin::Seekable::SEEKABLE) {
+        return mediaDataSize_ == 0 || offset <= static_cast<int64_t>(mediaDataSize_);
+    }
+    return true;
 }
 
 bool DemuxerFilter::PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo)

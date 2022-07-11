@@ -28,6 +28,13 @@ MediaSource::MediaSource(std::shared_ptr<DataConsumer> dataStream)
 {
 }
 
+#ifndef OHOS_LITE
+MediaSource::MediaSource(std::shared_ptr<IMediaDataSource> dataSrc)
+    :type_(SourceType::SOURCE_TYPE_STREAM), dataSrc_(std::move(dataSrc))
+{
+}
+#endif
+
 MediaSource::MediaSource(std::string uri, std::map<std::string, std::string> header)
     : uri_(std::move(uri)), header_(std::move(header))
 {
@@ -52,6 +59,13 @@ std::shared_ptr<DataConsumer> MediaSource::GetDataConsumer() const
 {
     return dataConsumer_;
 }
+
+#ifndef OHOS_LITE
+std::shared_ptr<IMediaDataSource> MediaSource::GetDataSrc() const
+{
+    return dataSrc_;
+}
+#endif
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
