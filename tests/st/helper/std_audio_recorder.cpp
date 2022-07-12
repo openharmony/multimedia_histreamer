@@ -36,7 +36,7 @@ public:
 
     void OnError(ErrorType errorType, int32_t errorCode) override
     {
-        MEDIA_LOG_I("media_standard recorder error : " PUBLIC_LOG_D32, errorCode);
+        MEDIA_LOG_I("player_framework recorder error : " PUBLIC_LOG_D32, errorCode);
     }
 
     void OnInfo(InfoType type, int32_t extra) override

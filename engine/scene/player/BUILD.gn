@@ -21,10 +21,10 @@ config("histreamer_player_config") {
     ]
   } else {
     include_dirs += [
-      "//foundation/multimedia/media_standard/interfaces/inner_api/native",
+      "//foundation/multimedia/player_framework/interfaces/inner_api/native",
       "//foundation/multimedia/image_standard/interfaces/innerkits/include",
-      "//foundation/multimedia/media_standard/services/include",
-      "//foundation/multimedia/media_standard/services/services/engine_intf",
+      "//foundation/multimedia/player_framework/services/include",
+      "//foundation/multimedia/player_framework/services/services/engine_intf",
       "//utils/native/base/include",
     ]
   }
@@ -60,7 +60,7 @@ source_set("histreamer_player") {
     public_deps += [
       "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
       "//foundation/graphic/graphic_2d/frameworks/surface:surface",
-      "//foundation/multimedia/media_standard/services/utils:media_format",
+      "//foundation/multimedia/player_framework/services/utils:media_format",
     ]
   }
 }

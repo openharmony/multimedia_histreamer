@@ -12,7 +12,7 @@
 HiStreamer is the foundation module of the multimedia subsystem. It provides a processing pipeline and plug-ins required by the media framework, such as the file source, codecs, muxer and demuxer, and audio and video data processor.
 
 ## Logical architecture<a name="section1158716411638"></a>
-As a media engine, HiStreamer connects to media_standard (on a Standard device) or media_lite (on a Mini or Small device) and provides application apis externally. It is divided into three layers:
+As a media engine, HiStreamer connects to player_framework (on a Standard device) or media_lite (on a Mini or Small device) and provides application apis externally. It is divided into three layers:
 - Application scenario Encapsulation layer: for example, HiPlayer and HiRecorder.
 - Pipeline framework layer: including Pipeline framework, each Filter node implementation.
 - Plug-in layer: includes plug-in framework, various plug-ins.
@@ -71,7 +71,7 @@ The structure of the repository directory is as follows:
 
 - [multimedia Subsystem](https://gitee.com/openharmony/docs/blob/master/en/readme/multimedia.md)
 
-- [media_standard](https://gitee.com/openharmony/multimedia_media_standard)
+- [player_framework](https://gitee.com/openharmony/multimedia_player_framework)
 
 - [media_lite](https://gitee.com/openharmony/multimedia_media_lite)
 
