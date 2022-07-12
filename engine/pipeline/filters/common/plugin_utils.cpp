@@ -108,7 +108,7 @@ int32_t DiscreteCapKeyStringiness(char* buf, size_t maxLen, const char* name, co
         RETURN_IF_FAILED(snprintf_truncated_s(buf + pos, maxLen - pos, ", "), -1, ret);
         pos += ret;
     }
-    if (i == length -1) {
+    if (i == length - 1) {
         RETURN_IF_FAILED(Stringiness<T>(buf + pos, maxLen - pos, name, item->at(i)), -1, ret);
         pos += ret;
     }
