@@ -530,9 +530,18 @@ void DemuxerFilter::NegotiateDownstream()
             Plugin::TagMap upstreamParams;
             Plugin::TagMap downstreamParams;
             downstreamParams.Insert<Tag::MEDIA_SEEKABLE>(seekable_);
-            if (stream.port->Negotiate(tmpCap, caps, upstreamParams, downstreamParams) &&
-                stream.port->Configure(streamMeta)) {
-                stream.needNegoCaps = false;
+            uint32_t channels = 2, outputChannels = 2;
+            FALSE_LOG(mediaMetaData_.trackMetas[0]->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels));
+            downstreamParams.Insert<Tag::AUDIO_CHANNELS>(channels);
+            if (stream.port->Negotiate(tmpCap, caps, upstreamParams, downstreamParams)) {
+                FALSE_LOG(downstreamParams.Get<Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels));
+                if (channels < outputChannels) {
+                    outputChannels = channels;
+                    streamMeta->SetUint32(Plugin::MetaID::AUDIO_OUTPUT_CHANNELS, outputChannels);
+                }
+                if (stream.port->Configure(streamMeta)) {
+                    stream.needNegoCaps = false;
+                }
             } else {
                 task_->PauseAsync();
                 MEDIA_LOG_E("NegotiateDownstream failed error.");
