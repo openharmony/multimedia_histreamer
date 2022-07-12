@@ -14,6 +14,7 @@
  */
 
 #include "plugin_buffer.h"
+#include "share_memory.h"
 #include "surface_memory.h"
 
 namespace OHOS {
@@ -71,10 +72,12 @@ size_t Memory::Write(const uint8_t* in, size_t writeSize, size_t position)
 size_t Memory::Read(uint8_t* out, size_t readSize, size_t position)
 {
     size_t start = 0;
+    size_t maxLength = size;
     if (position != INVALID_POSITION) {
-        start = std::min(position, capacity);
+        start = std::min(position, size);
+        maxLength = size - start;
     }
-    size_t length = std::min(readSize, size);
+    size_t length = std::min(readSize, maxLength);
     if (memcpy_s(out, length, GetRealAddr() + start, length) != EOK) {
         return 0;
     }
@@ -195,9 +198,10 @@ std::shared_ptr<Memory> Buffer::AllocMemory(std::shared_ptr<Allocator> allocator
             memory = std::shared_ptr<Memory>(new SurfaceMemory(capacity, allocator, align));
             break;
         }
-#endif
         case MemoryType::SHARE_MEMORY:
+            memory = std::shared_ptr<Memory>(new ShareMemory(capacity, allocator, align));
             break;
+#endif
         default:
             break;
     }

@@ -105,9 +105,9 @@ public:
     // If estimatedWriteSize doesn't equal to realWriteSize, should call UpdateDataSize
     void UpdateDataSize(size_t realWriteSize, size_t position = 0);
 
-    size_t Write(const uint8_t* in, size_t writeSize, size_t position = INVALID_POSITION);
+    virtual size_t Write(const uint8_t* in, size_t writeSize, size_t position = INVALID_POSITION);
 
-    size_t Read(uint8_t* out, size_t readSize, size_t position = INVALID_POSITION);
+    virtual size_t Read(uint8_t* out, size_t readSize, size_t position = INVALID_POSITION);
 
     void Reset();
 
