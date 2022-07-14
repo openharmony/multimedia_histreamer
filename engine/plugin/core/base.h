@@ -15,17 +15,17 @@
 
 #ifndef HISTREAMER_PLUGIN_CORE_BASE_H
 #define HISTREAMER_PLUGIN_CORE_BASE_H
+
 #include <atomic>
 #include <cstdint>
 #include <iosfwd>
 #include <memory>
+
 #include "common/plugin_types.h"
 #include "common/plugin_tags.h"
 #include "foundation/osal/thread/mutex.h"
 #include "interface/plugin_base.h"
 
-namespace OHOS::Media::Plugin {class Allocator;}
-namespace OHOS::Media::Plugin {class PluginEvent;}
 namespace OHOS {
 namespace Media {
 namespace Plugin {

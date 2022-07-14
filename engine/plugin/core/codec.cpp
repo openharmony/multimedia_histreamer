@@ -14,13 +14,11 @@
  */
 
 #include "codec.h"
+
 #include <memory>
 #include <type_traits>
-#include "core/base.h"
 #include "foundation/pre_defines.h"
 #include "interface/codec_plugin.h"
-
-namespace OHOS::Media::Plugin {class Buffer;}
 
 namespace OHOS {
 namespace Media {

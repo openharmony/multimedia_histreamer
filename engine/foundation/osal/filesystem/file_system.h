@@ -15,6 +15,7 @@
 #ifndef HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILE_SYSTEM_H
 #define HISTREAMER_FOUNDATION_OSAL_FILESYSTEM_FILE_SYSTEM_H
 
+#include <sys/stat.h>
 #include <cstdint>
 #include <iosfwd>
 

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 #include "data_stream_impl.h"
+
 #include <cstddef>
-#include <memory>
 #include "data_stream.h"
 namespace OHOS {
 namespace Media {

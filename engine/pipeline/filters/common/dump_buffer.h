@@ -22,8 +22,6 @@
 #include <iosfwd>
 #include <memory>
 
-namespace OHOS::Media::Plugin {class Buffer;}
-
 namespace OHOS {
 namespace Media {
 namespace Pipeline {

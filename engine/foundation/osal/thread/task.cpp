@@ -15,9 +15,7 @@
 #define HST_LOG_TAG "Task"
 
 #include "task.h"
-#include <atomic>
 #include <cstring>
-#include <functional>
 #include <new>
 #include <type_traits>
 #include "foundation/cpp_ext/memory_ext.h"

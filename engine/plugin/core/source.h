@@ -19,11 +19,11 @@
 #include <cstdint>
 #include <cstddef>
 #include <memory>
+
 #include "base.h"
+#include "common/media_source.h"
 #include "common/plugin_types.h"
-namespace OHOS::Media::Plugin {class Buffer;}
-namespace OHOS::Media::Plugin {class MediaSource;}
-namespace OHOS::Media::Plugin {struct SourcePlugin;}
+
 namespace OHOS {
 namespace Media {
 namespace Plugin {

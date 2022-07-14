@@ -13,11 +13,9 @@
  * limitations under the License.
  */
 
-#include <cstdlib>
-#include <cstring>
-#include <limits>
-#include <unistd.h>
 #include <util.h>
+#include <cstring>
+#include <climits>
 
 #ifdef WIN32
 #include <windows.h>

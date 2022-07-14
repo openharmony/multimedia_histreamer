@@ -17,7 +17,6 @@
 #define HISTREAMER_FOUNDATION_ERROR_CODE_H
 
 #include <cstdint>
-#include <stdint.h>
 
 #ifdef WIN32
 // Fix compile error: expected identifier before numeric constant
