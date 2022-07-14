@@ -294,4 +294,20 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
         ASSERT_EQ(0, player->Reset());
         ASSERT_EQ(0, player->Release());
     }
+
+    // @test(data="shortMusicUrls", tags=fast)
+    PTEST((std::string url), Test play finished can play again)
+    {
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(url)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        while (player->IsPlaying()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        }
+        ASSERT_EQ(0, player->Play());
+        while (player->IsPlaying()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        }
+    }
 };

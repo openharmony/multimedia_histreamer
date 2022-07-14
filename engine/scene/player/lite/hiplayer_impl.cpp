@@ -384,8 +384,9 @@ ErrorCode HiPlayerImpl::DoReset()
 
 ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode, bool appTriggered)
 {
-    fsm_.Notify(Intent::SEEK, ErrorCode::SUCCESS);
-    (void)appTriggered;
+    if (appTriggered) {
+        fsm_.Notify(Intent::SEEK, ErrorCode::SUCCESS);
+    }
     PROFILE_BEGIN();
     auto rtv = allowed && hstTime >= 0 ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_OPERATION;
     if (rtv == ErrorCode::SUCCESS) {
@@ -408,6 +409,9 @@ ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode m
         } else {
             ptr->OnRewindToComplete();
         }
+    }
+    if (appTriggered) {
+        return ErrorCode::ERROR_NO_NOTIFY;
     }
     return rtv;
 }
