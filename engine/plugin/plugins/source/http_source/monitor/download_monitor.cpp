@@ -88,11 +88,11 @@ void DownloadMonitor::Close()
 bool DownloadMonitor::Read(unsigned char *buff, unsigned int wantReadLength,
                            unsigned int &realReadLength, bool &isEos)
 {
-    bool ret = downloader_->Read(buff, wantReadLength, realReadLength, isEos);
-    time(&lastReadTime_);
     if (!isPlaying_) {
         Resume();
     }
+    bool ret = downloader_->Read(buff, wantReadLength, realReadLength, isEos);
+    time(&lastReadTime_);
     return ret;
 }
 

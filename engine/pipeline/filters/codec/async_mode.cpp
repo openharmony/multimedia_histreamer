@@ -157,7 +157,8 @@ ErrorCode AsyncMode::HandleFrame()
     do {
         DUMP_BUFFER2LOG("AsyncMode QueueInput to Plugin", oneBuffer, -1);
         status = plugin_->QueueInputBuffer(oneBuffer, 0);
-        if (status == Plugin::Status::OK || status == Plugin::Status::END_OF_STREAM || stopped_) {
+        if (status == Plugin::Status::OK || status == Plugin::Status::END_OF_STREAM
+            || status != Plugin::Status::ERROR_AGAIN || stopped_) {
             break;
         }
         MEDIA_LOG_DD("Send data to plugin error: " PUBLIC_LOG_D32, status);

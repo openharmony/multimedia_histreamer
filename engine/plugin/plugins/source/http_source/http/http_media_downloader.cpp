@@ -59,7 +59,8 @@ void HttpMediaDownloader::Close()
 
 void HttpMediaDownloader::Pause()
 {
-    buffer_->SetActive(false, false);
+    bool cleanData = GetSeekable() != Seekable::SEEKABLE;
+    buffer_->SetActive(false, cleanData);
     downloader_->Pause();
 }
 
@@ -76,6 +77,7 @@ bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
     isEos = false;
     while (buffer_->GetSize() == 0) {
         if (downloadRequest_->IsEos()) {
+            MEDIA_LOG_D("Read: IsEos");
             isEos = true;
             realReadLength = 0;
             return false;
