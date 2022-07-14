@@ -16,8 +16,11 @@
 #ifndef HISTREAMER_FOUNDATION_OSAL_CONDITION_VARIABLE_H
 #define HISTREAMER_FOUNDATION_OSAL_CONDITION_VARIABLE_H
 
-#include <cerrno>
+#include <cstdint>
 #include <ctime>
+#include <errno.h>
+#include <pthread.h>
+#include "foundation/osal/thread/mutex.h"
 #include "scoped_lock.h"
 
 namespace OHOS {

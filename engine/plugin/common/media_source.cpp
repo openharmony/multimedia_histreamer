@@ -14,7 +14,10 @@
  */
 
 #include "media_source.h"
-
+#include <map>
+#include <memory>
+#include <type_traits>
+namespace OHOS::Media{class DataConsumer;}
 namespace OHOS {
 namespace Media {
 namespace Plugin {

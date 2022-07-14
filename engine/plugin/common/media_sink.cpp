@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
+#include <cstring>
+#include <type_traits>
+#include "common/plugin_tags.h"
 #include "media_sink.h"
+
 namespace OHOS {
 namespace Media {
 namespace Plugin {

@@ -16,7 +16,14 @@
 #define HST_LOG_TAG "Thread"
 
 #include "thread.h"
+#include <functional>
+#include <memory>
+#include <new>
+#include <pthread.h>
+#include <string>
+#include <type_traits>
 #include "foundation/log.h"
+#include "sched.h"
 
 namespace OHOS {
 namespace Media {

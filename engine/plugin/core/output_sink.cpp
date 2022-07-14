@@ -14,6 +14,12 @@
  */
 
 #include "output_sink.h"
+#include <type_traits>
+#include "core/base.h"
+#include "interface/output_sink_plugin.h"
+
+namespace OHOS::Media::Plugin {class Buffer;}
+namespace OHOS::Media::Plugin {class MediaSink;}
 namespace OHOS {
 namespace Media {
 namespace Plugin {

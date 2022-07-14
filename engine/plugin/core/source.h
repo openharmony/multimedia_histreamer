@@ -16,15 +16,14 @@
 #ifndef HISTREAMER_PLUGIN_CORE_SOURCE_H
 #define HISTREAMER_PLUGIN_CORE_SOURCE_H
 
+#include <cstdint>
 #include <cstddef>
 #include <memory>
-
 #include "base.h"
-#include "common/media_source.h"
 #include "common/plugin_types.h"
-#include "common/plugin_tags.h"
-#include "common/plugin_buffer.h"
-
+namespace OHOS::Media::Plugin {class Buffer;}
+namespace OHOS::Media::Plugin {class MediaSource;}
+namespace OHOS::Media::Plugin {struct SourcePlugin;}
 namespace OHOS {
 namespace Media {
 namespace Plugin {

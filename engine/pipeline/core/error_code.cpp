@@ -14,6 +14,7 @@
  */
 #include "error_code.h"
 #include <map>
+#include <utility>
 
 namespace OHOS {
 namespace Media {

@@ -15,8 +15,14 @@
 #define HST_LOG_TAG "Task"
 
 #include "task.h"
+#include <atomic>
+#include <cstring>
+#include <functional>
+#include <new>
+#include <type_traits>
 #include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/log.h"
+#include "foundation/osal/thread/scoped_lock.h"
 
 namespace OHOS {
 namespace Media {

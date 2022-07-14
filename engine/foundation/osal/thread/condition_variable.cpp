@@ -17,6 +17,7 @@
 
 #include "condition_variable.h"
 #include "foundation/log.h"
+#include "foundation/osal/thread/scoped_lock.h"
 
 namespace {
 constexpr int32_t TIME_SCALE = 1000;

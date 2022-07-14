@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "event.h"
+#include <map>
+#include <utility>
 
 namespace OHOS {
 namespace Media {

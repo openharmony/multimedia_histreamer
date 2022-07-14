@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "buffer_calibration.h"
+#include <new>
 #include "strict_monotonic_pts_cal.h"
 namespace OHOS {
 namespace Media {

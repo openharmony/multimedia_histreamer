@@ -17,17 +17,23 @@
 #include "file_system.h"
 #ifdef _WIN32
 #include <direct.h>
+#include <dirent.h>
+#include <errno.h>
 #include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <windows.h>
 #else
-#include <sys/types.h>
 #include <unistd.h>
 #endif
-#include <cstring>
-#include <cerrno>
-#include <dirent.h>
-#include "foundation/log.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <dirent.h>
+#include <string>
+#include <sys/stat.h>
+#include "foundation/log.h"
 #ifndef _WIN32
 mode_t umask(mode_t __mask);
 #endif
