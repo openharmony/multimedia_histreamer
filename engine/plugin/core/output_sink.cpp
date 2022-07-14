@@ -15,7 +15,6 @@
 
 #include "output_sink.h"
 #include <type_traits>
-#include "interface/output_sink_plugin.h"
 
 namespace OHOS {
 namespace Media {

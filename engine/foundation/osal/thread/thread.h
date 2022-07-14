@@ -16,9 +16,7 @@
 #ifndef HISTREAMER_FOUNDATION_OSAL_THREAD_H
 #define HISTREAMER_FOUNDATION_OSAL_THREAD_H
 
-#include <cstdarg>
 #include <functional>
-#include <iosfwd>
 #include <memory> // NOLINT
 #include <pthread.h>
 #include <string>

@@ -21,8 +21,8 @@
 #include <iosfwd>
 #include <memory>
 
-#include "common/plugin_types.h"
 #include "common/plugin_tags.h"
+#include "common/plugin_types.h"
 #include "foundation/osal/thread/mutex.h"
 #include "interface/plugin_base.h"
 

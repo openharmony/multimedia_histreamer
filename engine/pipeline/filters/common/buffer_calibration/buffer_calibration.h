@@ -17,9 +17,9 @@
 #define HISTREAMER_PIPELINE_FILTER_AVBUFFER_CALIBRATION_H
 #include <memory>
 #include <type_traits>
-#include "pts_calibration_strategy.h"
-#include "plugin/common/plugin_tags.h"
 #include "pipeline/core/type_define.h"
+#include "plugin/common/plugin_tags.h"
+#include "pts_calibration_strategy.h"
 namespace OHOS {
 namespace Media {
 namespace Pipeline {

@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-#include <util.h>
-#include <cstring>
+#include "util.h"
 #include <climits>
 
 #ifdef WIN32

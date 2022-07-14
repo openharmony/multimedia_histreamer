@@ -16,8 +16,8 @@
 #ifndef HISTREAMER_PLUGIN_CORE_SOURCE_H
 #define HISTREAMER_PLUGIN_CORE_SOURCE_H
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 
 #include "base.h"

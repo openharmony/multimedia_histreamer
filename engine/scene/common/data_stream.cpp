@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "data_stream_impl.h"
 
 #include <cstddef>
-#include "data_stream.h"
+#include "data_stream_impl.h"
+
 namespace OHOS {
 namespace Media {
 std::shared_ptr<DataStream> CreateDataStream(size_t size, size_t count, MemoryType type)

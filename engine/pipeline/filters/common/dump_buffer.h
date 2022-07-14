@@ -16,11 +16,11 @@
 #ifndef HISTREAMER_PIPELINE_DUMP_BUFFER_H
 #define HISTREAMER_PIPELINE_DUMP_BUFFER_H
 
-#include "plugin/common/plugin_buffer.h"
 #include <cstddef>
 #include <cstdint>
 #include <iosfwd>
 #include <memory>
+#include "plugin/common/plugin_buffer.h"
 
 namespace OHOS {
 namespace Media {
@@ -42,7 +42,7 @@ namespace Pipeline {
 #define DUMP_BUFFER2LOG_SIZE 10 // Dump first 10 bytes of buffer.
 #if DUMP_BUFFER2LOG_ENABLE
 #define DUMP_BUFFER2LOG(desc, buffer, offset) \
-OHOS::Media::Pipeline::DumpBufferToLog(desc, buffer, offset, DUMP_BUFFER2LOG_SIZE)
+    OHOS::Media::Pipeline::DumpBufferToLog(desc, buffer, offset, DUMP_BUFFER2LOG_SIZE)
 #else
 #define DUMP_BUFFER2LOG(desc, buffer, offset)
 #endif
