@@ -69,6 +69,7 @@ void DownloadMonitor::Pause()
 {
     downloader_->Pause();
     isPlaying_ = false;
+    lastReadTime_ = 0;
 }
 
 void DownloadMonitor::Resume()
