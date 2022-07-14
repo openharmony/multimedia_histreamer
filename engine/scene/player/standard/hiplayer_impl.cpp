@@ -509,7 +509,9 @@ ErrorCode HiPlayerImpl::DoReset()
 
 ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode, bool appTriggered)
 {
-    fsm_.Notify(Intent::SEEK, ErrorCode::SUCCESS);
+    if (appTriggered) {
+        fsm_.Notify(Intent::SEEK, ErrorCode::SUCCESS);
+    }
     PROFILE_BEGIN();
     int64_t seekPos = hstTime;
     Plugin::SeekMode seekMode = mode;
@@ -545,7 +547,10 @@ ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode m
         OSAL::SleepFor(10); // 10 wait seek real complete
         seekInProgress_.store(false);
     }
-    return ErrorCode::ERROR_NO_NOTIFY;
+    if (appTriggered) {
+        return ErrorCode::ERROR_NO_NOTIFY;
+    }
+    return rtv;
 }
 
 ErrorCode HiPlayerImpl::DoOnReady()
