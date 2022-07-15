@@ -20,10 +20,10 @@ config("histreamer_recorder_config") {
     if (!hst_is_lite_sys) {
       include_dirs += [
         "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-        "//foundation/multimedia/media_standard/interfaces/inner_api/native",
+        "//foundation/multimedia/player_framework/interfaces/inner_api/native",
         "//foundation/multimedia/image_standard/interfaces/innerkits/include",
-        "//foundation/multimedia/media_standard/services/include",
-        "//foundation/multimedia/media_standard/services/services/engine_intf",
+        "//foundation/multimedia/player_framework/services/include",
+        "//foundation/multimedia/player_framework/services/services/engine_intf",
         "//utils/native/base/include",
       ]
     }

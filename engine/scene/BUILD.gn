@@ -16,7 +16,7 @@ source_set("std_engine_factory") {
   if (!hst_is_lite_sys) {
     include_dirs = [
       "//foundation/multimedia/histreamer/engine",
-      "//foundation/multimedia/media_standard/services/services/engine_intf",
+      "//foundation/multimedia/player_framework/services/services/engine_intf",
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
     ]
     public_deps = [

@@ -16,7 +16,7 @@ HiStreamer是一个轻量级的媒体引擎组件，提供播放、录制等场�
 这些节点的具体功能，主要在插件中实现。可以插件的形式扩展支持新的数据源、封装格式、编解码格式、输出方式。
 
 ## 逻辑架构<a name="section_histreamer_arch"></a>
-HiStreamer作为媒体引擎，向上对接media_standard(standard设备上)或者media_lite(mini/small设备上)，再对外提供应用API。它内部分为三层：
+HiStreamer作为媒体引擎，向上对接player_framework(standard设备上)或者media_lite(mini/small设备上)，再对外提供应用API。它内部分为三层：
 - 应用场景封装层: 比如HiPlayer, HiRecorder。
 - Pipeline框架层: 包括Pipeline框架，各个Filter节点实现。
 - 插件层: 包括插件框架，各种插件。
@@ -70,7 +70,7 @@ HiStreamer插件列表如下:
 
 - [媒体子系统](https://gitee.com/openharmony/docs/blob/master/zh-cn/readme/%E5%AA%92%E4%BD%93%E5%AD%90%E7%B3%BB%E7%BB%9F.md)
 
-- [media_standard](https://gitee.com/openharmony/multimedia_media_standard)
+- [player_framework](https://gitee.com/openharmony/multimedia_player_framework)
 
 - [media_lite](https://gitee.com/openharmony/multimedia_media_lite)
 
