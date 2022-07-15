@@ -37,8 +37,8 @@ bool HttpMediaDownloader::Open(const std::string& url)
 {
     MEDIA_LOG_I("Open download " PUBLIC_LOG_S, url.c_str());
     auto saveData =  [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
-        SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
-                 std::forward<decltype(offset)>(offset));
+        return SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
+                        std::forward<decltype(offset)>(offset));
     };
     FALSE_RETURN_V(statusCallback_ != nullptr, false);
     auto realStatusCallback = [this] (DownloadStatus&& status, std::shared_ptr<Downloader>& downloader,
@@ -130,9 +130,9 @@ void HttpMediaDownloader::SetStatusCallback(StatusCallbackFunc cb)
     statusCallback_ = cb;
 }
 
-void HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
+bool HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 {
-    buffer_->WriteBuffer(data, len, offset);
+    FALSE_RETURN_V(buffer_->WriteBuffer(data, len, offset), false);
     size_t bufferSize = buffer_->GetSize();
     double ratio = (static_cast<double>(bufferSize)) / RING_BUFFER_SIZE;
     if ((bufferSize >= WATER_LINE ||
@@ -145,6 +145,7 @@ void HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
         MEDIA_LOG_I("Send http belowWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
         callback_->OnEvent({PluginEventType::BELOW_LOW_WATERLINE, {ratio}, "http"});
     }
+    return true;
 }
 }
 }

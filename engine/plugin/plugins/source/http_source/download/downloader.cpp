@@ -233,7 +233,8 @@ void Downloader::HttpDownloadLoop()
             currentRequest_->requestSize_ = PER_REQUEST_SIZE;
         }
     } else {
-        MEDIA_LOG_E("Client request data failed. ret = " PUBLIC_LOG_D32, static_cast<int32_t>(ret));
+        MEDIA_LOG_E("Client request data failed. ret = " PUBLIC_LOG_D32 ", clientCode = " PUBLIC_LOG_D32,
+                    static_cast<int32_t>(ret), static_cast<int32_t>(clientCode));
         std::shared_ptr<Downloader> unused;
         currentRequest_->statusCallback_(DownloadStatus::PARTTAL_DOWNLOAD, unused, currentRequest_);
         task_->PauseAsync();
@@ -258,8 +259,11 @@ size_t Downloader::RxBodyData(void* buffer, size_t size, size_t nitems, void* us
     if (!mediaDownloader->currentRequest_->isDownloading_) {
         mediaDownloader->currentRequest_->isDownloading_ = true;
     }
-    mediaDownloader->currentRequest_->saveData_(static_cast<uint8_t*>(buffer), dataLen,
-                                                mediaDownloader->currentRequest_->startPos_);
+    if (!mediaDownloader->currentRequest_->saveData_(static_cast<uint8_t*>(buffer), dataLen,
+        mediaDownloader->currentRequest_->startPos_)) {
+        MEDIA_LOG_W("Save data failed.");
+        return 0; // save data failed, make perform finished.
+    }
     mediaDownloader->currentRequest_->isDownloading_ = false;
     MEDIA_LOG_I("RxBodyData: dataLen " PUBLIC_LOG_ZU ", startPos_ " PUBLIC_LOG_D64, dataLen,
                 mediaDownloader->currentRequest_->startPos_);

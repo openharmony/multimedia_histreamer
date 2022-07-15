@@ -24,8 +24,8 @@ PlayListDownloader::PlayListDownloader()
 {
     downloader_ = std::make_shared<Downloader>("hlsPlayList");
     dataSave_ = [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
-        SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
-                 std::forward<decltype(offset)>(offset));
+        return SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
+                        std::forward<decltype(offset)>(offset));
     };
     // this is default callback
     statusCallback_ = [this] (DownloadStatus&& status, std::shared_ptr<Downloader> d,
@@ -55,11 +55,12 @@ void PlayListDownloader::DoOpen(const std::string& url)
     downloader_->Start();
 }
 
-void PlayListDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
+bool PlayListDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 {
     (void)offset;
     playList_.append(reinterpret_cast<const char*>(data), len);
     ParseManifest();
+    return true;
 }
 
 void PlayListDownloader::OnDownloadStatus(DownloadStatus status, std::shared_ptr<Downloader>&,

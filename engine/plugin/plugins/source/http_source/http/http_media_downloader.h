@@ -44,7 +44,7 @@ public:
     void SetStatusCallback(StatusCallbackFunc cb) override;
 
 private:
-    void SaveData(uint8_t* data, uint32_t len, int64_t offset);
+    bool SaveData(uint8_t* data, uint32_t len, int64_t offset);
 
 private:
     std::shared_ptr<RingBuffer> buffer_;

@@ -71,16 +71,16 @@ public:
         return available;
     }
 
-    void WriteBuffer(void* ptr, size_t writeSize, uint64_t mediaOffset = 0)
+    bool WriteBuffer(void* ptr, size_t writeSize, uint64_t mediaOffset = 0)
     {
         OSAL::ScopedLock lck(writeMutex_);
         if (!isActive_) {
-            return;
+            return false;
         }
         while (writeSize + tail_ > head_ + bufferSize_) {
             writeCondition_.Wait(lck);
             if (!isActive_) {
-                return;
+                return false;
             }
         }
         size_t index = tail_ % bufferSize_;
@@ -96,6 +96,7 @@ public:
             mediaOffset_ = mediaOffset;
         }
         writeCondition_.NotifyOne();
+        return true;
     }
 
     void SetActive(bool active, bool cleanData = true)

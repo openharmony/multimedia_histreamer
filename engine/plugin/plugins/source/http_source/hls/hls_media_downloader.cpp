@@ -41,8 +41,8 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
     playList_ = std::make_shared<BlockingQueue<std::string>>("PlayList", 50); // 50
 
     dataSave_ =  [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
-        SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
-                 std::forward<decltype(offset)>(offset));
+        return SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
+                        std::forward<decltype(offset)>(offset));
     };
 
     playListDownloader_ = std::make_shared<HlsPlayListDownloader>();
@@ -152,9 +152,9 @@ void HlsMediaDownloader::OnPlayListChanged(const std::vector<std::string>& playL
     }
 }
 
-void HlsMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
+bool HlsMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 {
-    buffer_->WriteBuffer(data, len, offset);
+    return buffer_->WriteBuffer(data, len, offset);
 }
 
 void HlsMediaDownloader::SetStatusCallback(StatusCallbackFunc cb)
