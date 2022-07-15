@@ -47,13 +47,16 @@ void DownloadMonitor::HttpMonitorLoop()
             Pause();
         }
     }
+    RetryRequest task;
     {
         OSAL::ScopedLock lock(taskMutex_);
         if (!retryTasks_.empty()) {
-            RetryRequest task = retryTasks_.front();
-            task.function();
+            task = retryTasks_.front();
             retryTasks_.pop_front();
         }
+    }
+    if (task.request && task.function) {
+        task.function();
     }
     OSAL::SleepFor(50); // 50
 }
