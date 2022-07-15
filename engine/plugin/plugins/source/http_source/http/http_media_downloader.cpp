@@ -77,7 +77,7 @@ bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
     isEos = false;
     while (buffer_->GetSize() == 0) {
         if (downloadRequest_->IsEos()) {
-            MEDIA_LOG_D("Read: IsEos");
+            MEDIA_LOG_D("HttpMediaDownloader read return because of EOS");
             isEos = true;
             realReadLength = 0;
             return false;

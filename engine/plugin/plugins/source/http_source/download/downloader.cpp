@@ -108,6 +108,7 @@ Downloader::Downloader(std::string name) noexcept : name_(std::move(name))
 bool Downloader::Download(const std::shared_ptr<DownloadRequest>& request, int32_t waitMs)
 {
     MEDIA_LOG_I("In");
+    requestQue_->SetActive(true);
     if (waitMs == -1) { // wait until push success
         requestQue_->Push(request);
         return true;
@@ -125,6 +126,7 @@ void Downloader::Start()
 void Downloader::Pause()
 {
     MEDIA_LOG_I("Begin");
+    requestQue_->SetActive(false, false);
     task_->Pause();
     client_->Close();
     MEDIA_LOG_I("End");
@@ -133,6 +135,7 @@ void Downloader::Pause()
 void Downloader::Resume()
 {
     MEDIA_LOG_I("Begin");
+    requestQue_->SetActive(true);
     client_->Open(currentRequest_->url_);
     currentRequest_->isEos_ = false;
     Start();
