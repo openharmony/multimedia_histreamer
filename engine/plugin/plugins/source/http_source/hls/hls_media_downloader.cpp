@@ -52,6 +52,10 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
 void HlsMediaDownloader::FragmentDownloadLoop()
 {
     std::string url = playList_->Pop();
+    if (url.empty()) { // when monitor pause, playList_ set active false, it's empty
+        OSAL::SleepFor(10); // 10
+        return;
+    }
     if (!fragmentDownloadStart[url]) {
         fragmentDownloadStart[url] = true;
         auto realStatusCallback = [this] (DownloadStatus&& status, std::shared_ptr<Downloader>& downloader,
