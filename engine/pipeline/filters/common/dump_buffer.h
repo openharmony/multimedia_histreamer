@@ -16,6 +16,10 @@
 #ifndef HISTREAMER_PIPELINE_DUMP_BUFFER_H
 #define HISTREAMER_PIPELINE_DUMP_BUFFER_H
 
+#include <cstddef>
+#include <cstdint>
+#include <iosfwd>
+#include <memory>
 #include "plugin/common/plugin_buffer.h"
 
 namespace OHOS {

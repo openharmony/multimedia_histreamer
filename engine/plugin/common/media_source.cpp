@@ -14,7 +14,7 @@
  */
 
 #include "media_source.h"
-
+#include <type_traits>
 namespace OHOS {
 namespace Media {
 namespace Plugin {

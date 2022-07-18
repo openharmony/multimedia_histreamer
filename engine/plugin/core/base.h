@@ -17,11 +17,12 @@
 #define HISTREAMER_PLUGIN_CORE_BASE_H
 
 #include <atomic>
+#include <cstdint>
+#include <iosfwd>
 #include <memory>
 
-#include "common/plugin_types.h"
 #include "common/plugin_tags.h"
-#include "common/plugin_buffer.h"
+#include "common/plugin_types.h"
 #include "foundation/osal/thread/mutex.h"
 #include "interface/plugin_base.h"
 

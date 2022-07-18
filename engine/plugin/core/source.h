@@ -17,13 +17,12 @@
 #define HISTREAMER_PLUGIN_CORE_SOURCE_H
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 
 #include "base.h"
 #include "common/media_source.h"
 #include "common/plugin_types.h"
-#include "common/plugin_tags.h"
-#include "common/plugin_buffer.h"
 
 namespace OHOS {
 namespace Media {

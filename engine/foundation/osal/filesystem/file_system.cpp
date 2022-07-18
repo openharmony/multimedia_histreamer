@@ -20,11 +20,13 @@
 #include <fcntl.h>
 #include <windows.h>
 #else
-#include <sys/types.h>
 #include <unistd.h>
 #endif
-#include <cstring>
+
 #include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <dirent.h>
 #include "foundation/log.h"
 

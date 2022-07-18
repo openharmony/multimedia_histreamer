@@ -14,6 +14,8 @@
  */
 
 #include "media_sink.h"
+#include <type_traits>
+
 namespace OHOS {
 namespace Media {
 namespace Plugin {
