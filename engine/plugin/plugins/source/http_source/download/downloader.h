@@ -57,7 +57,7 @@ struct HeaderInfo {
 
 // uint8_t* : the data should save
 // uint32_t : length
-using DataSaveFunc = std::function<void(uint8_t*, uint32_t, int64_t)>;
+using DataSaveFunc = std::function<bool(uint8_t*, uint32_t, int64_t)>;
 class Downloader;
 class DownloadRequest;
 using StatusCallbackFunc = std::function<void(DownloadStatus, std::shared_ptr<Downloader>&,

@@ -47,13 +47,16 @@ void DownloadMonitor::HttpMonitorLoop()
             Pause();
         }
     }
+    RetryRequest task;
     {
         OSAL::ScopedLock lock(taskMutex_);
         if (!retryTasks_.empty()) {
-            RetryRequest task = retryTasks_.front();
-            task.function();
+            task = retryTasks_.front();
             retryTasks_.pop_front();
         }
+    }
+    if (task.request && task.function) {
+        task.function();
     }
     OSAL::SleepFor(50); // 50
 }
@@ -69,6 +72,7 @@ void DownloadMonitor::Pause()
 {
     downloader_->Pause();
     isPlaying_ = false;
+    lastReadTime_ = 0;
 }
 
 void DownloadMonitor::Resume()
@@ -88,11 +92,11 @@ void DownloadMonitor::Close()
 bool DownloadMonitor::Read(unsigned char *buff, unsigned int wantReadLength,
                            unsigned int &realReadLength, bool &isEos)
 {
-    bool ret = downloader_->Read(buff, wantReadLength, realReadLength, isEos);
-    time(&lastReadTime_);
     if (!isPlaying_) {
         Resume();
     }
+    bool ret = downloader_->Read(buff, wantReadLength, realReadLength, isEos);
+    time(&lastReadTime_);
     return ret;
 }
 

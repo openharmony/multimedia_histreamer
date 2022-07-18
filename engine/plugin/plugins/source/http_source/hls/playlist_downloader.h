@@ -45,7 +45,7 @@ public:
     void SetStatusCallback(StatusCallbackFunc cb);
 
 protected:
-    void SaveData(uint8_t* data, uint32_t len, int64_t offset);
+    bool SaveData(uint8_t* data, uint32_t len, int64_t offset);
     void OnDownloadStatus(DownloadStatus status, std::shared_ptr<Downloader>&,
                           std::shared_ptr<DownloadRequest>& request);
     void DoOpen(const std::string& url);

@@ -41,8 +41,8 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
     playList_ = std::make_shared<BlockingQueue<std::string>>("PlayList", 50); // 50
 
     dataSave_ =  [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
-        SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
-                 std::forward<decltype(offset)>(offset));
+        return SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
+                        std::forward<decltype(offset)>(offset));
     };
 
     playListDownloader_ = std::make_shared<HlsPlayListDownloader>();
@@ -52,6 +52,10 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
 void HlsMediaDownloader::FragmentDownloadLoop()
 {
     std::string url = playList_->Pop();
+    if (url.empty()) { // when monitor pause, playList_ set active false, it's empty
+        OSAL::SleepFor(10); // 10
+        return;
+    }
     if (!fragmentDownloadStart[url]) {
         fragmentDownloadStart[url] = true;
         auto realStatusCallback = [this] (DownloadStatus&& status, std::shared_ptr<Downloader>& downloader,
@@ -83,8 +87,9 @@ void HlsMediaDownloader::Close()
 
 void HlsMediaDownloader::Pause()
 {
-    buffer_->SetActive(false);
-    playList_->SetActive(false);
+    bool cleanData = GetSeekable() != Seekable::SEEKABLE;
+    buffer_->SetActive(false, cleanData);
+    playList_->SetActive(false, cleanData);
     playListDownloader_->Pause();
     downloadTask_->Pause();
     downloader_->Pause();
@@ -151,9 +156,9 @@ void HlsMediaDownloader::OnPlayListChanged(const std::vector<std::string>& playL
     }
 }
 
-void HlsMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
+bool HlsMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 {
-    buffer_->WriteBuffer(data, len, offset);
+    return buffer_->WriteBuffer(data, len, offset);
 }
 
 void HlsMediaDownloader::SetStatusCallback(StatusCallbackFunc cb)

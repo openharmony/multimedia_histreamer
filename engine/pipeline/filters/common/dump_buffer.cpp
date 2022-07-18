@@ -28,6 +28,9 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
+#ifdef _WIN32
+#define DUMP_FILE_DIR ""
+#endif
 // Specify the dump file dir in BUILD.gn
 #ifndef DUMP_FILE_DIR
 #define DUMP_FILE_DIR "/data/local/tmp"
