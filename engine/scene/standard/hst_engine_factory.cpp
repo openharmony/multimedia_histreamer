@@ -54,18 +54,19 @@ std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine(int32_t uid,
 std::unique_ptr<IRecorderEngine> HstEngineFactory::CreateRecorderEngine(
     int32_t appUid, int32_t appPid, uint32_t appTokenId)
 {
-    (void)appUid;
-    (void)appPid;
-    (void)appTokenId;
 #ifdef RECORDER_SUPPORT
     MEDIA_LOG_I("CreateRecorderEngine enter.");
-    auto recorder = std::unique_ptr<Record::HiRecorderImpl>(new (std::nothrow) Record::HiRecorderImpl());
+    auto recorder = std::unique_ptr<Record::HiRecorderImpl>(new (std::nothrow) Record::HiRecorderImpl(
+            appUid, appPid, appTokenId));
     if (recorder && recorder->Init() == ErrorCode::SUCCESS) {
         return recorder;
     } else {
         MEDIA_LOG_E("create recorder failed or player init failed");
     }
 #else
+    (void)appUid;
+    (void)appPid;
+    (void)appTokenId;
     MEDIA_LOG_W("CreateRecorderEngine not supported now, return nullptr.");
 #endif
     return nullptr;

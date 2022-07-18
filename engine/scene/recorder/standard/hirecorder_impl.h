@@ -46,7 +46,7 @@ class HiRecorderImpl : public Pipeline::EventReceiver,
                        public IRecorderEngine {
     friend class StateMachine;
 public:
-    HiRecorderImpl();
+    HiRecorderImpl(int32_t appUid, int32_t appPid, uint32_t appTokenId);
     ~HiRecorderImpl() override;
     HiRecorderImpl(const HiRecorderImpl& other) = delete;
     HiRecorderImpl& operator=(const HiRecorderImpl& other) = delete;
@@ -95,8 +95,9 @@ private:
     std::atomic<uint32_t> videoCount_ {0};
     std::atomic<uint32_t> audioSourceId_ {0};
     std::atomic<uint32_t> videoSourceId_ {0};
-    uint32_t appTokenId_ {0};
     int32_t appUid_ {0};
+    int32_t appPid_ {0};
+    uint32_t appTokenId_ {0};
 
     OutputFormatType outputFormatType_ {OutputFormatType::FORMAT_BUTT};
     OSAL::Mutex stateMutex_ {};

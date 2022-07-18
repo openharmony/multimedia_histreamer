@@ -69,6 +69,9 @@ ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin
     if (appUidSpecified_) {
         NOK_LOG(plugin_->SetParameter(Tag::APP_UID, appUid_));
     }
+    if (appPidSpecified_) {
+        NOK_LOG(plugin_->SetParameter(Tag::APP_PID, appPid_));
+    }
     ErrorCode err = TranslatePluginStatus(plugin_->Init());
     if (err != ErrorCode::SUCCESS) {
         return err;
@@ -136,6 +139,9 @@ ErrorCode AudioCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value
             break;
         case Tag::APP_UID:
             appUidSpecified_ = AssignParameterIfMatch(tag, appUid_, value);
+            break;
+        case Tag::APP_PID:
+            appPidSpecified_ = AssignParameterIfMatch(tag, appPid_, value);
             break;
         default:
             MEDIA_LOG_W("SetParameter: unknown key " PUBLIC_LOG_S "(" PUBLIC_LOG_D32 ")", GetTagStrName(tag), key);

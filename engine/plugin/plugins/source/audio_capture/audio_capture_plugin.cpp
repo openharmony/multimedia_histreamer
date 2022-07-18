@@ -131,6 +131,7 @@ Status AudioCapturePlugin::Init()
         AudioStandard::AppInfo appInfo;
         appInfo.appTokenId = appTokenId_;
         appInfo.appUid = appUid_;
+        appInfo.appPid = appPid_;
         audioCapturer_ = AudioStandard::AudioCapturer::Create(AudioStandard::AudioStreamType::STREAM_MUSIC, appInfo);
         if (audioCapturer_ == nullptr) {
             MEDIA_LOG_E("Create audioCapturer fail");
@@ -386,6 +387,12 @@ Status AudioCapturePlugin::SetParameter(Tag tag, const ValueType& value)
         case Tag::APP_UID: {
             if (value.SameTypeWith(typeid(int32_t))) {
                 appUid_ = Plugin::AnyCast<int32_t>(value);
+            }
+            break;
+        }
+        case Tag::APP_PID: {
+            if (value.SameTypeWith(typeid(int32_t))) {
+                appPid_ = Plugin::AnyCast<int32_t>(value);
             }
             break;
         }

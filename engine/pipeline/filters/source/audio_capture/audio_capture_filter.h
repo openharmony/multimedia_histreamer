@@ -81,6 +81,8 @@ private:
     bool appTokenIdSpecified_ {false};
     int32_t appUid_ {0};
     bool appUidSpecified_ {false};
+    int32_t appPid_ {0};
+    bool appPidSpecified_ {false};
     Plugin::AudioSampleFormat sampleFormat_ {OHOS::Media::Plugin::AudioSampleFormat::S16};
     bool sampleFormatSpecified_ {false};
     Plugin::AudioChannelLayout channelLayout_ {OHOS::Media::Plugin::AudioChannelLayout::STEREO};
