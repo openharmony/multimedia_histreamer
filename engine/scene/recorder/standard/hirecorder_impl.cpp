@@ -18,7 +18,6 @@
 #include "hirecorder_impl.h"
 #include <regex>
 #include "foundation/osal/filesystem/file_system.h"
-#include "ipc_skeleton.h"
 #include "pipeline/factory/filter_factory.h"
 #include "plugin/common/media_sink.h"
 #include "plugin/common/plugin_time.h"
@@ -35,7 +34,8 @@ namespace Media {
 namespace Record {
 using namespace Pipeline;
 
-HiRecorderImpl::HiRecorderImpl() : fsm_(*this), curFsmState_(StateId::INIT)
+HiRecorderImpl::HiRecorderImpl(int32_t appUid, int32_t appPid, uint32_t appTokenId)
+    : appUid_(appUid), appPid_(appPid), appTokenId_(appTokenId), fsm_(*this), curFsmState_(StateId::INIT)
 {
     MEDIA_LOG_I("hiRecorderImpl ctor");
     FilterFactory::Instance().Init();
@@ -467,10 +467,9 @@ ErrorCode HiRecorderImpl::SetAudioSourceInternal(AudioSourceType source, int32_t
     }
     FALSE_RETURN_V_MSG_E(audioCapture_ != nullptr && audioEncoder_ != nullptr, ErrorCode::ERROR_UNKNOWN,
                          "create audioCapture/audioEncoder filter fail");
-    appTokenId_ = IPCSkeleton::GetCallingTokenID();
-    appUid_ = IPCSkeleton::GetCallingUid();
     audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::APP_TOKEN_ID), appTokenId_);
     audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::APP_UID), appUid_);
+    audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::APP_PID), appPid_);
     return fsm_.SendEvent(Intent::SET_AUDIO_SOURCE,
                           std::pair<int32_t, Plugin::SrcInputType>(sourceId, TransAudioInputType(source)));
 }

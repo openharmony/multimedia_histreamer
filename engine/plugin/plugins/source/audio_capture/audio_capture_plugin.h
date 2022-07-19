@@ -53,11 +53,12 @@ private:
     Status GetAudioTimeLocked(int64_t& audioTimeNs);
 
     OSAL::Mutex captureMutex_ {};
-    std::shared_ptr<OHOS::AudioStandard::AudioCapturer> audioCapturer_ {nullptr};
+    std::unique_ptr<OHOS::AudioStandard::AudioCapturer> audioCapturer_ {nullptr};
     AudioStandard::AudioCapturerParams capturerParams_ {};
     int64_t bitRate_ {0};
     uint32_t appTokenId_ {0};
     int32_t appUid_ {0};
+    int32_t appPid_ {0};
     size_t bufferSize_ {0};
 };
 } // namespace AuCapturePlugin

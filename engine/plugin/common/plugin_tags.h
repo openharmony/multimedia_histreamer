@@ -92,6 +92,7 @@ enum struct Tag : uint32_t {
     BITS_PER_CODED_SAMPLE,            ///< uint32_t, bits per coded sample
     APP_TOKEN_ID,                     ///< uint32_t, app token id
     APP_UID,                          ///< int32_t, app uid
+    APP_PID,                          ///< int32_t, app pid
 
     /* -------------------- media tag -------------------- */
     MEDIA_TITLE = SECTION_MEDIA_START + 1, ///< string
