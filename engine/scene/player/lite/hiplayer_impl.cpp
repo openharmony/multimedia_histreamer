@@ -382,13 +382,13 @@ ErrorCode HiPlayerImpl::DoReset()
     return DoStop();
 }
 
-ErrorCode HiPlayerImpl::DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode, bool appTriggered)
+ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode, bool appTriggered)
 {
     if (appTriggered) {
         fsm_.Notify(Intent::SEEK, ErrorCode::SUCCESS);
     }
     PROFILE_BEGIN();
-    auto rtv = allowed && hstTime >= 0 ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_OPERATION;
+    auto rtv = hstTime >= 0 ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_OPERATION;
     if (rtv == ErrorCode::SUCCESS) {
         pipeline_->FlushStart();
         PROFILE_END("Flush start");
