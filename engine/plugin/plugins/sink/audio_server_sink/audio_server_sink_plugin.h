@@ -127,6 +127,7 @@ private:
     AudioStandard::AudioRendererParams rendererParams_ {};
 
     bool fmtSupported_ {false};
+    bool isForcePaused_ {false};
     AVSampleFormat reSrcFfFmt_ {AV_SAMPLE_FMT_NONE};
     const AudioStandard::AudioSampleFormat reStdDestFmt_ {AudioStandard::AudioSampleFormat::SAMPLE_S16LE};
     const AVSampleFormat reFfDestFmt_ {AV_SAMPLE_FMT_S16};
@@ -140,6 +141,7 @@ private:
     std::shared_ptr<SwrContext> swrCtx_ {nullptr};
     std::vector<uint8_t> resampleCache_ {};
     std::vector<uint8_t*> resampleChannelAddr_ {};
+    std::shared_ptr<OHOS::AudioStandard::AudioRendererCallback> audioRendererCallback_ {nullptr};
 };
 } // AuSrSinkPlugin
 } // Plugin

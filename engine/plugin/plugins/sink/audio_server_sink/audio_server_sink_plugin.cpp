@@ -30,7 +30,26 @@ namespace {
 using namespace OHOS::Media::Plugin;
 constexpr uint32_t DEFAULT_OUTPUT_CHANNELS = 2;
 constexpr AudioChannelLayout DEFAULT_OUTPUT_CHANNEL_LAYOUT = AudioChannelLayout::STEREO;
-
+class AudioRendererCallbackImpl : public OHOS::AudioStandard::AudioRendererCallback {
+public:
+    explicit AudioRendererCallbackImpl(bool &isPaused) : isPaused_(isPaused) {}
+private:
+    void OnInterrupt(const OHOS::AudioStandard::InterruptEvent &interruptEvent)
+    {
+        if (interruptEvent.forceType == OHOS::AudioStandard::INTERRUPT_FORCE) {
+            switch (interruptEvent.hintType) {
+                case OHOS::AudioStandard::INTERRUPT_HINT_PAUSE:
+                    isPaused_ = true;
+                    break;
+                default:
+                    isPaused_ = false;
+                    break;
+            }
+        }
+    }
+    void OnStateChange(const OHOS::AudioStandard::RendererState state) {}
+    bool isPaused_ {false};
+};
 const std::pair<OHOS::AudioStandard::AudioSamplingRate, uint32_t> g_auSampleRateMap[] = {
     {OHOS::AudioStandard::SAMPLE_RATE_8000, 8000},
     {OHOS::AudioStandard::SAMPLE_RATE_11025, 11025},
@@ -198,6 +217,10 @@ Status AudioServerSinkPlugin::Init()
         if (audioRenderer_ == nullptr) {
             MEDIA_LOG_E("Create audioRenderer_ fail");
             return Status::ERROR_UNKNOWN;
+        }
+        if (audioRendererCallback_ == nullptr) {
+            audioRendererCallback_ = std::make_shared<AudioRendererCallbackImpl>(isForcePaused_);
+            audioRenderer_->SetRendererCallback(audioRendererCallback_);
         }
     }
     return Status::OK;
@@ -576,6 +599,10 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
         }
     }
     MEDIA_LOG_DD("write data size " PUBLIC_LOG_ZU, length);
+    while (isForcePaused_ && seekable_ == Seekable::SEEKABLE) {
+        OSAL::SleepFor(5); // 5ms
+        continue;
+    }
     int32_t ret = 0;
     OSAL::ScopedLock lock(renderMutex_);
     FALSE_RETURN_V(audioRenderer_ != nullptr, Status::ERROR_WRONG_STATE);
@@ -584,11 +611,7 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
         MEDIA_LOG_DD("written data size " PUBLIC_LOG_D32, ret);
         if (ret < 0) {
             MEDIA_LOG_E("Write data error ret is: " PUBLIC_LOG_D32, ret);
-            if (seekable_ == Seekable::SEEKABLE) {
-                OSAL::SleepFor(5); // 5ms
-            } else {
-                break;
-            }
+            break;
         } else if (static_cast<size_t>(ret) < length) {
             OSAL::SleepFor(5); // 5ms
         }
