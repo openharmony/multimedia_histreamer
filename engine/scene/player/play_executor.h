@@ -73,9 +73,8 @@ public:
         return ErrorCode::SUCCESS;
     }
 
-    virtual ErrorCode DoSeek(bool allowed, int64_t hstTime, Plugin::SeekMode mode, bool appTriggered)
+    virtual ErrorCode DoSeek(int64_t hstTime, Plugin::SeekMode mode, bool appTriggered)
     {
-        (void)allowed;
         (void)hstTime;
         (void)mode;
         (void)appTriggered;

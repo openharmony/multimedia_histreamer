@@ -29,7 +29,7 @@ public:
     std::tuple<ErrorCode, Action> Play() override
     {
         MEDIA_LOG_I("play in eos state.");
-        auto ret = executor_.DoSeek(true, 0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC, false);
+        auto ret = executor_.DoSeek(0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC, false);
         if (ret == ErrorCode::SUCCESS) {
             return {ErrorCode::SUCCESS, Action::TRANS_TO_PLAYING};
         } else {
