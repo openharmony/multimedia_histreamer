@@ -24,9 +24,9 @@ namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
 struct {
-    const char* name_;
-    HlsTag type_;
-} const exttagmapping[] = {
+    const char* name;
+    HlsTag type;
+} const g_exttagmapping[] = {
     {"EXT-X-BYTERANGE",              HlsTag::EXTXBYTERANGE},
     {"EXT-X-DISCONTINUITY",          HlsTag::EXTXDISCONTINUITY},
     {"EXT-X-KEY",                    HlsTag::EXTXKEY},
@@ -253,10 +253,10 @@ std::string AttributesTag::ParseAttributeName(std::istringstream& iss, std::ostr
 
 ValuesListTag::ValuesListTag(HlsTag type, const std::string& v) : AttributesTag(type, v)
 {
-    ParseAttributes(v);
+    ParseValuesAttributes(v);
 }
 
-void ValuesListTag::ParseAttributes(const std::string& field)
+void ValuesListTag::ParseValuesAttributes(const std::string& field)
 {
     auto pos = field.find(',');
     std::shared_ptr<Attribute> attr;
@@ -279,16 +279,16 @@ void ValuesListTag::ParseAttributes(const std::string& field)
 
 std::shared_ptr<Tag> TagFactory::CreateTagByName(const std::string& name, const std::string& value)
 {
-    auto size = sizeof(exttagmapping) / sizeof(exttagmapping[0]);
+    auto size = sizeof(g_exttagmapping) / sizeof(g_exttagmapping[0]);
     for (int i = 0; i < size; i++) {
-        if (name != exttagmapping[i].name_) {
+        if (name != g_exttagmapping[i].name) {
             continue;
         }
-        switch (exttagmapping[i].type_) {
+        switch (g_exttagmapping[i].type) {
             case HlsTag::EXTXDISCONTINUITY:
             case HlsTag::EXTXENDLIST:
             case HlsTag::EXTXIFRAMESONLY:
-                return std::make_shared<Tag>(exttagmapping[i].type_);
+                return std::make_shared<Tag>(g_exttagmapping[i].type);
             case HlsTag::URI:
             case HlsTag::EXTXVERSION:
             case HlsTag::EXTXBYTERANGE:
@@ -297,9 +297,9 @@ std::shared_ptr<Tag> TagFactory::CreateTagByName(const std::string& name, const 
             case HlsTag::EXTXMEDIASEQUENCE:
             case HlsTag::EXTXDISCONTINUITYSEQUENCE:
             case HlsTag::EXTXPLAYLISTTYPE:
-                return std::make_shared<SingleValueTag>(exttagmapping[i].type_, value);
+                return std::make_shared<SingleValueTag>(g_exttagmapping[i].type, value);
             case HlsTag::EXTINF:
-                return std::make_shared<ValuesListTag>(exttagmapping[i].type_, value);
+                return std::make_shared<ValuesListTag>(g_exttagmapping[i].type, value);
             case HlsTag::EXTXKEY:
             case HlsTag::EXTXSESSIONKEY:
             case HlsTag::EXTXMAP:
@@ -307,7 +307,7 @@ std::shared_ptr<Tag> TagFactory::CreateTagByName(const std::string& name, const 
             case HlsTag::EXTXSTART:
             case HlsTag::EXTXSTREAMINF:
             case HlsTag::EXTXIFRAMESTREAMINF:
-                return std::make_shared<AttributesTag>(exttagmapping[i].type_, value);
+                return std::make_shared<AttributesTag>(g_exttagmapping[i].type, value);
             default:
                 return nullptr;
         }

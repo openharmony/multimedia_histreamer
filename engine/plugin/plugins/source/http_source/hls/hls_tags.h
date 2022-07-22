@@ -115,7 +115,7 @@ public:
     ValuesListTag(HlsTag type, const std::string& v);
     ~ValuesListTag() override = default;
 private:
-    void ParseAttributes(const std::string& field);
+    void ParseValuesAttributes(const std::string& field);
 };
 
 class TagFactory {
