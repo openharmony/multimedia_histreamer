@@ -84,8 +84,8 @@ void DownloadMonitor::Resume()
 void DownloadMonitor::Close()
 {
     retryTasks_.clear();
-    downloader_->Close();
     task_->Stop();
+    downloader_->Close();
     isPlaying_ = false;
 }
 

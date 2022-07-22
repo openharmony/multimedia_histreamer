@@ -80,8 +80,8 @@ void HlsMediaDownloader::Close()
 {
     buffer_->SetActive(false);
     playList_->SetActive(false);
-    playListDownloader_->Close();
     downloadTask_->Stop();
+    playListDownloader_->Close();
     downloader_->Stop();
 }
 
