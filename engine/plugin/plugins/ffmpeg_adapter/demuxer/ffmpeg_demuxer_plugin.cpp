@@ -46,6 +46,7 @@ std::map<std::string, std::shared_ptr<AVInputFormat>> g_pluginInputFormat;
 int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource);
 
 Status RegisterPlugins(const std::shared_ptr<Register>& reg);
+static void Sys_FfmpegLog_Init();
 } // namespace
 
 void* FFmpegDemuxerPlugin::DemuxerPluginAllocator::Alloc(size_t size)
@@ -87,6 +88,7 @@ Status FFmpegDemuxerPlugin::Init()
 {
     MEDIA_LOG_D("Init called.");
     Reset();
+    Sys_FfmpegLog_Init();
     pluginImpl_ = g_pluginInputFormat[pluginName_];
 
     return pluginImpl_ ? Status::OK : Status::ERROR_UNSUPPORTED_FORMAT;
@@ -596,6 +598,18 @@ Status RegisterPlugins(const std::shared_ptr<Register>& reg)
         }
     }
     return Status::OK;
+}
+
+static void Sys_FfmpegLog(void* avcl, int level, const char* fmt, va_list vl)
+{
+#ifdef MEDIA_OHOS
+    HILOG_INFO(LOG_CORE, fmt, vl);
+#endif
+}
+
+static void Sys_FfmpegLog_Init()
+{
+    av_log_set_callback(Sys_FfmpegLog);
 }
 } // namespace
 
