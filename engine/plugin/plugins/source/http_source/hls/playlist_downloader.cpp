@@ -39,8 +39,8 @@ PlayListDownloader::PlayListDownloader()
 
 PlayListDownloader::~PlayListDownloader()
 {
-    downloader_->Stop();
     updateTask_->Stop();
+    downloader_->Stop();
 }
 
 void PlayListDownloader::DoOpen(const std::string& url)
@@ -92,14 +92,14 @@ void PlayListDownloader::Resume()
 
 void PlayListDownloader::Pause()
 {
-    downloader_->Pause();
     updateTask_->Pause();
+    downloader_->Pause();
 }
 
 void PlayListDownloader::Close()
 {
-    downloader_->Stop();
     updateTask_->Stop();
+    downloader_->Stop();
 }
 }
 }

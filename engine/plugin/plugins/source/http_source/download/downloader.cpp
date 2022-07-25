@@ -191,7 +191,6 @@ bool Downloader::BeginDownload()
     currentRequest_->isEos_ = false;
     currentRequest_->retryTimes_ = 0;
 
-    task_->Start();
     MEDIA_LOG_I("End");
     return true;
 }
