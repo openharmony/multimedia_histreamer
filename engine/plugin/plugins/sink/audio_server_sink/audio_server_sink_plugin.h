@@ -136,6 +136,8 @@ private:
     uint32_t samplesPerFrame_ {};
     uint32_t sampleRate_ {};
     int64_t bitRate_ {0};
+    int32_t appPid_ {0};
+    int32_t appUid_ {0};
     bool needReformat_ {false};
     Plugin::Seekable seekable_ {Plugin::Seekable::INVALID};
     std::shared_ptr<SwrContext> swrCtx_ {nullptr};

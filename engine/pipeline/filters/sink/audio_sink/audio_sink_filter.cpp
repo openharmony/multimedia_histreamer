@@ -119,8 +119,11 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
     MEDIA_LOG_I("use plugin " PUBLIC_LOG_S " with negotiated " PUBLIC_LOG_S, selectedPluginInfo->name.c_str(),
                 Capability2String(negotiatedCap).c_str());
     auto res = UpdateAndInitPluginByInfo<Plugin::AudioSink>(plugin_, pluginInfo_, selectedPluginInfo,
-        [](const std::string& name) -> std::shared_ptr<Plugin::AudioSink> {
-        return Plugin::PluginManager::Instance().CreateAudioSinkPlugin(name);
+        [this](const std::string& name) -> std::shared_ptr<Plugin::AudioSink> {
+        auto plugin = Plugin::PluginManager::Instance().CreateAudioSinkPlugin(name);
+        plugin->SetParameter(Tag::APP_PID, appPid_);
+        plugin->SetParameter(Tag::APP_UID, appUid_);
+        return plugin;
     });
     NOK_LOG(plugin_->SetParameter(Tag::MEDIA_SEEKABLE, seekable_));
     Plugin::ValueType pluginValue;
