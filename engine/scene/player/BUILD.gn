@@ -12,6 +12,7 @@
 # limitations under the License.
 #
 import("//foundation/multimedia/histreamer/config.gni")
+
 config("histreamer_player_config") {
   include_dirs = [ "//foundation/multimedia/histreamer/engine/scene/player" ]
   if (hst_is_lite_sys) {
@@ -31,6 +32,7 @@ config("histreamer_player_config") {
 }
 
 source_set("histreamer_player") {
+  include_dirs = [ "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
   sources = [
     "//foundation/multimedia/histreamer/engine/scene/player/internal/state.cpp",
     "//foundation/multimedia/histreamer/engine/scene/player/internal/state_machine.cpp",

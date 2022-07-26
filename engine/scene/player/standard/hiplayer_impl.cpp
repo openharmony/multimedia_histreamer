@@ -17,6 +17,7 @@
 
 #include "hiplayer_impl.h"
 #include "foundation/log.h"
+#include "hitrace_meter.h"
 #include "pipeline/factory/filter_factory.h"
 #include "scene/player/standard/media_utils.h"
 #include "plugin/common/media_source.h"
@@ -47,6 +48,7 @@ HiPlayerImpl::HiPlayerImpl(int32_t appUid, int32_t appPid)
       volume_(-1.0f), // default negative, if app not set, will not set it.
       mediaStats_()
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst hiPlayerImpl ctor");
     MEDIA_LOG_I("hiPlayerImpl ctor");
     FilterFactory::Instance().Init();
     syncManager_ = std::make_shared<MediaSyncManager>();
@@ -78,6 +80,7 @@ HiPlayerImpl::HiPlayerImpl(int32_t appUid, int32_t appPid)
     audioSink_->SetSyncCenter(syncManager_);
     pipeline_ = std::make_shared<PipelineCore>();
     callbackLooper_.SetPlayEngine(this);
+    FinishTrace(HITRACE_TAG_ZMEDIA);
 }
 
 HiPlayerImpl::~HiPlayerImpl()
@@ -146,6 +149,7 @@ ErrorCode HiPlayerImpl::Init()
 
 int32_t HiPlayerImpl::SetSource(const std::string& uri)
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst player SetSource");
     MEDIA_LOG_I("SetSource entered source uri: " PUBLIC_LOG_S, uri.c_str());
     PROFILE_BEGIN("SetSource begin");
     auto ret = Init();
@@ -156,6 +160,7 @@ int32_t HiPlayerImpl::SetSource(const std::string& uri)
         MEDIA_LOG_E("SetSource error: " PUBLIC_LOG_S, GetErrorName(ret));
     }
     PROFILE_END("SetSource end.");
+    FinishTrace(HITRACE_TAG_ZMEDIA);
     return TransErrorCode(ret);
 }
 
@@ -167,6 +172,7 @@ int32_t HiPlayerImpl::SetSource(const std::shared_ptr<IMediaDataSource>& dataSrc
 
 int32_t HiPlayerImpl::Prepare()
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst player Prepare");
     MEDIA_LOG_I("Prepare entered, current fsm state: " PUBLIC_LOG_S ".", fsm_.GetCurrentState().c_str());
     PROFILE_BEGIN();
     auto ret = fsm_.SendEvent(Intent::PREPARE);
@@ -184,11 +190,13 @@ int32_t HiPlayerImpl::Prepare()
     if (curFsmState_ == StateId::READY) {
         return TransErrorCode(ErrorCode::SUCCESS);
     }
+    FinishTrace(HITRACE_TAG_ZMEDIA);
     return TransErrorCode(ErrorCode::ERROR_UNKNOWN);
 }
 
 int HiPlayerImpl::PrepareAsync()
 {
+    StartAsyncTrace(HITRACE_TAG_ZMEDIA, "Hst player PrepareAsync", 1);
     MEDIA_LOG_I("Prepare async entered, current fsm state: " PUBLIC_LOG_S, fsm_.GetCurrentState().c_str());
     PROFILE_BEGIN();
     auto ret = fsm_.SendEventAsync(Intent::PREPARE);
@@ -198,11 +206,13 @@ int HiPlayerImpl::PrepareAsync()
     } else {
         PROFILE_END("Prepare async successfully,");
     }
+    FinishAsyncTrace(HITRACE_TAG_ZMEDIA, "Hst player PrepareAsync", 1);
     return TransErrorCode(ret);
 }
 
 int32_t HiPlayerImpl::Play()
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst player Play");
     MEDIA_LOG_I("Play entered.");
     callbackLooper_.StartReportMediaProgress();
     PROFILE_BEGIN();
@@ -214,28 +224,33 @@ int32_t HiPlayerImpl::Play()
         ret = fsm_.SendEvent(Intent::PLAY);
     }
     PROFILE_END("Play ret = " PUBLIC_LOG_D32, TransErrorCode(ret));
+    FinishTrace(HITRACE_TAG_ZMEDIA);
     return TransErrorCode(ret);
 }
 
 int32_t HiPlayerImpl::Pause()
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst player Pause");
     MEDIA_LOG_I("Pause entered.");
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::PAUSE));
     callbackLooper_.StopReportMediaProgress();
     callbackLooper_.ManualReportMediaProgressOnce();
     PROFILE_END("Pause ret = " PUBLIC_LOG_D32, ret);
+    FinishTrace(HITRACE_TAG_ZMEDIA);
     return ret;
 }
 
 int32_t HiPlayerImpl::Stop()
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst player Stop");
     MEDIA_LOG_I("Stop entered.");
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::STOP));
     callbackLooper_.StopReportMediaProgress();
     callbackLooper_.ManualReportMediaProgressOnce();
     PROFILE_END("Stop ret = " PUBLIC_LOG_D32, ret);
+    FinishTrace(HITRACE_TAG_ZMEDIA);
     return ret;
 }
 
@@ -247,6 +262,7 @@ ErrorCode HiPlayerImpl::StopAsync()
 
 int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst player Seek");
     MEDIA_LOG_I("Seek entered. mSeconds : " PUBLIC_LOG_D32 ", seekMode : " PUBLIC_LOG_D32,
                 mSeconds, static_cast<int32_t>(mode));
     int64_t hstTime = 0;
@@ -276,6 +292,7 @@ int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
     } else {
         MEDIA_LOG_D("Seek in progress. Record the seek request [" PUBLIC_LOG_D64 "," PUBLIC_LOG_D32 "]",
                     hstTime, static_cast<int32_t>(smode));
+        FinishTrace(HITRACE_TAG_ZMEDIA);
         return MSERR_OK;
     }
 }

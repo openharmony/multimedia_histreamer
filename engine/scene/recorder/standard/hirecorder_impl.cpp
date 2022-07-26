@@ -16,6 +16,7 @@
 #define HST_LOG_TAG "HiRecorderImpl"
 
 #include "hirecorder_impl.h"
+#include "hitrace_meter.h"
 #include <regex>
 #include "foundation/osal/filesystem/file_system.h"
 #include "pipeline/factory/filter_factory.h"
@@ -37,6 +38,7 @@ using namespace Pipeline;
 HiRecorderImpl::HiRecorderImpl(int32_t appUid, int32_t appPid, uint32_t appTokenId)
     : appUid_(appUid), appPid_(appPid), appTokenId_(appTokenId), fsm_(*this), curFsmState_(StateId::INIT)
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst HiRecorderImpl ctor");
     MEDIA_LOG_I("hiRecorderImpl ctor");
     FilterFactory::Instance().Init();
     muxer_ = FilterFactory::Instance().CreateFilterWithType<MuxerFilter>(
@@ -46,6 +48,7 @@ HiRecorderImpl::HiRecorderImpl(int32_t appUid, int32_t appPid, uint32_t appToken
     FALSE_RETURN(muxer_ != nullptr);
     FALSE_RETURN(outputSink_ != nullptr);
     pipeline_ = std::make_shared<PipelineCore>();
+    FinishTrace(HITRACE_TAG_ZMEDIA);
 }
 
 HiRecorderImpl::~HiRecorderImpl()
@@ -80,6 +83,7 @@ ErrorCode HiRecorderImpl::Init()
 
 int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId)
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst recorder SetAudioSource");
     MEDIA_LOG_I("SetAudioSource enter");
     PROFILE_BEGIN("SetAudioSource begin");
     sourceId = INVALID_SOURCE_ID;
@@ -95,6 +99,7 @@ int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId
         sourceId = static_cast<int32_t>(audioSourceId_);
     }
     PROFILE_END("SetAudioSource end.");
+    FinishTrace(HITRACE_TAG_ZMEDIA);
     return TransErrorCode(ret);
 }
 
@@ -159,6 +164,7 @@ int32_t HiRecorderImpl::SetObs(const std::weak_ptr<IRecorderEngineObs>& obs)
 
 int32_t HiRecorderImpl::Configure(int32_t sourceId, const RecorderParam& recParam)
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst recorder Configure");
     MEDIA_LOG_I("Configure enter");
     FALSE_RETURN_V(outputFormatType_ != OutputFormatType::FORMAT_BUTT,
                    TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
@@ -170,11 +176,13 @@ int32_t HiRecorderImpl::Configure(int32_t sourceId, const RecorderParam& recPara
     if (ret != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("Configure failed with error " PUBLIC_LOG_S, GetErrorName(ret));
     }
+    FinishTrace(HITRACE_TAG_ZMEDIA);
     return TransErrorCode(ret);
 }
 
 int32_t HiRecorderImpl::Prepare()
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst recorder Prepare");
     MEDIA_LOG_D("Prepare entered, current fsm state: " PUBLIC_LOG_S ".", fsm_.GetCurrentState().c_str());
     PROFILE_BEGIN();
     auto ret = fsm_.SendEvent(Intent::PREPARE);
@@ -196,11 +204,13 @@ int32_t HiRecorderImpl::Prepare()
     } else {
         ret = ErrorCode::ERROR_UNKNOWN;
     }
+    FinishTrace(HITRACE_TAG_ZMEDIA);
     return TransErrorCode(ret);
 }
 
 int32_t HiRecorderImpl::Start()
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst recorder Start");
     MEDIA_LOG_I("Start enter");
     PROFILE_BEGIN();
     ErrorCode ret;
@@ -210,35 +220,42 @@ int32_t HiRecorderImpl::Start()
         ret = fsm_.SendEvent(Intent::START);
     }
     PROFILE_END("Start ret = " PUBLIC_LOG_D32, TransErrorCode(ret));
+    FinishTrace(HITRACE_TAG_ZMEDIA);
     return TransErrorCode(ret);
 }
 
 int32_t HiRecorderImpl::Pause()
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst recorder Pause");
     MEDIA_LOG_I("Pause enter");
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::PAUSE));
     PROFILE_END("Pause ret = " PUBLIC_LOG_D32, ret);
+    FinishTrace(HITRACE_TAG_ZMEDIA);
     return ret;
 }
 
 int32_t HiRecorderImpl::Resume()
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst recorder Resume");
     MEDIA_LOG_I("Resume enter");
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::RESUME));
     PROFILE_END("Resume ret = " PUBLIC_LOG_D32, ret);
+    FinishTrace(HITRACE_TAG_ZMEDIA);
     return ret;
 }
 
 int32_t HiRecorderImpl::Stop(bool isDrainAll)
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst recorder Stop");
     MEDIA_LOG_I("Stop enter");
     PROFILE_BEGIN();
     MEDIA_LOG_D("Stop start, isDrainAll: " PUBLIC_LOG_U32, static_cast<uint32_t>(isDrainAll));
     outputFormatType_ = OutputFormatType::FORMAT_BUTT;
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::STOP, isDrainAll));
     PROFILE_END("Stop ret = " PUBLIC_LOG_D32, ret);
+    FinishTrace(HITRACE_TAG_ZMEDIA);
     FALSE_RETURN_V_MSG_E(ret == ERR_OK, ret, "send STOP event to fsm fail");
     OSAL::ScopedLock lock(stateMutex_);
     cond_.WaitFor(lock, 3000, [this] { // 3000: time out
@@ -250,6 +267,7 @@ int32_t HiRecorderImpl::Stop(bool isDrainAll)
 
 int32_t HiRecorderImpl::Reset()
 {
+    StartTrace(HITRACE_TAG_ZMEDIA, "Hst recorder Reset");
     MEDIA_LOG_I("Reset enter");
     PROFILE_BEGIN();
     if (curFsmState_ == StateId::RECORDING) {
@@ -257,6 +275,7 @@ int32_t HiRecorderImpl::Reset()
     }
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::RESET));
     PROFILE_END("Resume ret = " PUBLIC_LOG_D32, ret);
+    FinishTrace(HITRACE_TAG_ZMEDIA);
     return ret;
 }
 
