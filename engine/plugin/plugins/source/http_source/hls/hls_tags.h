@@ -121,7 +121,6 @@ private:
 class TagFactory {
 public:
     static std::shared_ptr<Tag> CreateTagByName(const std::string& name, const std::string& value);
-    static std::shared_ptr<Attribute> CreateAttributeByName(const std::string&);
 };
 
 std::list<std::shared_ptr<Tag>> ParseEntries(std::string& s);
