@@ -424,6 +424,31 @@ bool FFmpegDemuxerPlugin::ParseMediaData()
             continue;
         }
         ConvertAVStreamToMetaInfo(avStream, formatContext_, codecContext, mediaInfo_->tracks[i]);
+        switch (avStream.codecpar->codec_type) {
+            case AVMEDIA_TYPE_AUDIO:
+                mediaInfo_->tracks[i].Insert<Tag::MEDIA_TYPE>(MediaType::AUDIO);
+                break;
+            case AVMEDIA_TYPE_VIDEO:
+                mediaInfo_->tracks[i].Insert<Tag::MEDIA_TYPE>(MediaType::VIDEO);
+                break;
+            case AVMEDIA_TYPE_DATA:
+                mediaInfo_->tracks[i].Insert<Tag::MEDIA_TYPE>(MediaType::DATA);
+                break;
+            case AVMEDIA_TYPE_SUBTITLE:
+                mediaInfo_->tracks[i].Insert<Tag::MEDIA_TYPE>(MediaType::SUBTITLE);
+                break;
+            case AVMEDIA_TYPE_ATTACHMENT:
+                mediaInfo_->tracks[i].Insert<Tag::MEDIA_TYPE>(MediaType::ATTACHMENT);
+                break;
+            case AVMEDIA_TYPE_NB:
+                mediaInfo_->tracks[i].Insert<Tag::MEDIA_TYPE>(MediaType::NB);
+                break;
+            case AVMEDIA_TYPE_UNKNOWN:
+                MEDIA_LOG_E("media type unknown!");
+                return false;
+            default:
+                break;
+        }
     }
     SaveFileInfoToMetaInfo(mediaInfo_->general);
     return true;

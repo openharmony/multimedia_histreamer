@@ -521,6 +521,7 @@ void DemuxerFilter::HandleFrame(const AVBufferPtr& bufferPtr, uint32_t trackId)
 void DemuxerFilter::NegotiateDownstream()
 {
     PROFILE_BEGIN("NegotiateDownstream profile begins.");
+    int32_t i = 0;
     for (auto& stream : mediaMetaData_.trackInfos) {
         if (stream.needNegoCaps) {
             Capability caps;
@@ -530,14 +531,24 @@ void DemuxerFilter::NegotiateDownstream()
             Plugin::TagMap upstreamParams;
             Plugin::TagMap downstreamParams;
             downstreamParams.Insert<Tag::MEDIA_SEEKABLE>(seekable_);
-            uint32_t channels = 2, outputChannels = 2;
-            FALSE_LOG(mediaMetaData_.trackMetas[0]->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels));
-            downstreamParams.Insert<Tag::AUDIO_CHANNELS>(channels);
             if (stream.port->Negotiate(tmpCap, caps, upstreamParams, downstreamParams)) {
-                FALSE_LOG(downstreamParams.Get<Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels));
-                if (channels < outputChannels) {
-                    outputChannels = channels;
+                auto type = Plugin::MediaType::UNKNOWN;
+                mediaMetaData_.trackMetas[i]->GetData(Plugin::MetaID::MEDIA_TYPE, type);
+                if (type == Plugin::MediaType::AUDIO) {
+                    uint32_t channels = 2, outputChannels = 2;
+                    Plugin::AudioChannelLayout channellayout, outputchannellayout;
+                    FALSE_LOG(mediaMetaData_.trackMetas[i]->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels));
+                    FALSE_LOG(mediaMetaData_.trackMetas[i]->GetData(Plugin::MetaID::AUDIO_CHANNEL_LAYOUT,
+                                                                    channellayout));
+
+                    FALSE_LOG(downstreamParams.Get<Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels));
+                    FALSE_LOG(downstreamParams.Get<Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT>(outputchannellayout));
+                    if (channels <= outputChannels) {
+                        outputChannels = channels;
+                        outputchannellayout = channellayout;
+                    }
                     streamMeta->SetUint32(Plugin::MetaID::AUDIO_OUTPUT_CHANNELS, outputChannels);
+                    streamMeta->SetData(Plugin::MetaID::AUDIO_OUTPUT_CHANNEL_LAYOUT, outputchannellayout);
                 }
                 if (stream.port->Configure(streamMeta)) {
                     stream.needNegoCaps = false;
@@ -548,6 +559,7 @@ void DemuxerFilter::NegotiateDownstream()
                 OnEvent({name_, EventType::EVENT_ERROR, ErrorCode::ERROR_UNSUPPORTED_FORMAT});
             }
         }
+        i++;
     }
     PROFILE_END("NegotiateDownstream end.");
 }
