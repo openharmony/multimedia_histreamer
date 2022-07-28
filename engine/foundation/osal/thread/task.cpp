@@ -73,6 +73,9 @@ void Task::Stop()
         runningState_ = RunningState::STOPPING;
         syncCond_.NotifyAll();
         syncCond_.Wait(lock, [this] { return runningState_.load() == RunningState::STOPPED; });
+        if (loop_ && loop_->HasThread()) {
+            loop_ = nullptr;
+        }
     }
     MEDIA_LOG_W("task " PUBLIC_LOG_S " stop exited", name_.c_str());
 }
@@ -153,7 +156,6 @@ void Task::Run()
             break;
         }
     }
-    loop_ = nullptr;
 }
 } // namespace OSAL
 } // namespace Media
