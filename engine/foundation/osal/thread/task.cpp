@@ -76,7 +76,6 @@ void Task::Stop()
         if (loop_ && loop_->HasThread()) {
             loop_ = nullptr;
         }
-
     }
     MEDIA_LOG_W("task " PUBLIC_LOG_S " stop exited", name_.c_str());
 }

@@ -46,7 +46,7 @@ Thread& Thread::operator=(Thread&& other) noexcept
 Thread::~Thread() noexcept
 {
     if (state_) {
-        pthread_join(id_, nullptr);
+        NZERO_LOG(pthread_join(id_, nullptr));
     }
 }
 
