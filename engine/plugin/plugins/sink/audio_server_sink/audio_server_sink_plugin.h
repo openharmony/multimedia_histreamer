@@ -23,16 +23,9 @@
 #include "audio_renderer.h"
 #include "foundation/osal/thread/mutex.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "plugin/interface/audio_sink_plugin.h"
 #include "timestamp.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include "libswresample/swresample.h"
-#ifdef __cplusplus
-};
-#endif
 
 namespace OHOS {
 namespace Media {
@@ -134,15 +127,14 @@ private:
     AudioChannelLayout channelLayout_ {};
     uint32_t channels_ {};
     uint32_t samplesPerFrame_ {};
+    uint32_t bitsPerSample_ {0};
     uint32_t sampleRate_ {};
     int64_t bitRate_ {0};
     int32_t appPid_ {0};
     int32_t appUid_ {0};
     bool needReformat_ {false};
     Plugin::Seekable seekable_ {Plugin::Seekable::INVALID};
-    std::shared_ptr<SwrContext> swrCtx_ {nullptr};
-    std::vector<uint8_t> resampleCache_ {};
-    std::vector<uint8_t*> resampleChannelAddr_ {};
+    std::shared_ptr<Ffmpeg::Resample> resample_ {nullptr};
     std::shared_ptr<OHOS::AudioStandard::AudioRendererCallback> audioRendererCallback_ {nullptr};
 };
 } // AuSrSinkPlugin

@@ -491,6 +491,83 @@ int32_t ConvH264ProfileToFfmpeg(VideoH264Profile profile)
     });
     return (iter == g_H264ProfileMap.end()) ? FF_PROFILE_UNKNOWN : iter->second;
 }
+
+Status Resample::Init(const ResamplePara& resamplePara)
+{
+    resamplePara_ = resamplePara;
+    if (resamplePara_.bitsPerSample_ != 8 && resamplePara_.bitsPerSample_ != 24) { // 8 24
+        auto destFrameSize = av_samples_get_buffer_size(nullptr, resamplePara_.channels_,
+                                                        resamplePara_.samplesPerFrame_, resamplePara_.destFmt_, 0);
+        resampleCache_.reserve(destFrameSize);
+        resampleChannelAddr_.reserve(resamplePara_.channels_);
+        auto tmp = resampleChannelAddr_.data();
+        av_samples_fill_arrays(tmp, nullptr, resampleCache_.data(), resamplePara_.channels_,
+                               resamplePara_.samplesPerFrame_, resamplePara_.destFmt_, 0);
+        SwrContext* swrContext = swr_alloc();
+        if (swrContext == nullptr) {
+            MEDIA_LOG_E("cannot allocate swr context");
+            return Status::ERROR_NO_MEMORY;
+        }
+        swrContext = swr_alloc_set_opts(swrContext, resamplePara_.channelLayout_, resamplePara_.destFmt_,
+                                        resamplePara_.sampleRate_, resamplePara_.channelLayout_,
+                                        resamplePara_.srcFfFmt_, resamplePara_.sampleRate_, 0, nullptr);
+        if (swr_init(swrContext) != 0) {
+            MEDIA_LOG_E("swr init error");
+            return Status::ERROR_UNKNOWN;
+        }
+        swrCtx_ = std::shared_ptr<SwrContext>(swrContext, [](SwrContext *ptr) {
+            if (ptr) {
+                swr_free(&ptr);
+            }
+        });
+    }
+    return Status::OK;
+}
+
+Status Resample::Convert(uint8_t*& destBuffer, size_t& destLength, uint8_t*& srcBuffer,
+                         const size_t& srcLength)
+{
+    if (resamplePara_.bitsPerSample_ == 8) { // 8
+        FALSE_RETURN_V_MSG(resamplePara_.destFmt_ == AV_SAMPLE_FMT_S16, Status::ERROR_UNIMPLEMENTED,
+                           "resample 8bit to other format can not support");
+        destLength = srcLength * 2;  // 2
+        resampleCache_.reserve(destLength);
+        resampleCache_.assign(destLength, 0);
+        for (size_t i {0}; i < destLength / 2; i++) { // 2
+            memcpy_s(&resampleCache_[0] + i * 2 + 1, 1, srcBuffer + i, 1); // 0 2 1
+            *(&resampleCache_[0] + i * 2 + 1) += 0x80; // 0x80
+        }
+        destBuffer = resampleCache_.data();
+    } else if (resamplePara_.bitsPerSample_ == 24) {  // 24
+        FALSE_RETURN_V_MSG(resamplePara_.destFmt_ == AV_SAMPLE_FMT_S16, Status::ERROR_UNIMPLEMENTED,
+                           "resample 24bit to other format can not support");
+        destLength = srcLength;
+        destLength /= 3; // 3
+        for (size_t i = 0; i < destLength; i++) {
+            memcpy_s(destBuffer + i * 2, 2, srcBuffer + i * 3 + 1, 2); // 2 3 1
+        }
+        destLength *= 2;  // 2
+    } else {
+        size_t lineSize = srcLength / resamplePara_.channels_;
+        std::vector<const uint8_t*> tmpInput(resamplePara_.channels_);
+        tmpInput[0] = srcBuffer;
+        if (av_sample_fmt_is_planar(resamplePara_.srcFfFmt_)) {
+            for (size_t i = 1; i < tmpInput.size(); ++i) {
+                tmpInput[i] = tmpInput[i-1] + lineSize;
+            }
+        }
+        auto samples = lineSize / av_get_bytes_per_sample(resamplePara_.srcFfFmt_);
+        auto res = swr_convert(swrCtx_.get(), resampleChannelAddr_.data(), samples, tmpInput.data(), samples);
+        if (res < 0) {
+            MEDIA_LOG_E("resample input failed");
+            destLength = 0;
+        } else {
+            destBuffer = resampleCache_.data();
+            destLength = res * av_get_bytes_per_sample(resamplePara_.destFmt_) * resamplePara_.channels_;
+        }
+    }
+    return Status::OK;
+}
 } // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media

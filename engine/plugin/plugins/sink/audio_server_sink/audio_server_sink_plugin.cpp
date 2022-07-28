@@ -253,6 +253,10 @@ Status AudioServerSinkPlugin::Prepare()
 {
     MEDIA_LOG_I("Prepare entered.");
     FALSE_RETURN_V_MSG_E(fmtSupported_, Status::ERROR_INVALID_PARAMETER, "sample fmt is not supported");
+    if (bitsPerSample_ == 8 || bitsPerSample_ == 24) { // 8 24
+        needReformat_ = true;
+        rendererParams_.sampleFormat = reStdDestFmt_;
+    }
     auto types = AudioStandard::AudioRenderer::GetSupportedEncodingTypes();
     if (!CppExt::AnyOf(types.begin(), types.end(), [](AudioStandard::AudioEncodingType tmp) -> bool {
         return tmp == AudioStandard::ENCODING_PCM;
@@ -273,21 +277,17 @@ Status AudioServerSinkPlugin::Prepare()
         }
     }
     if (needReformat_) {
-        auto resampleSize = av_samples_get_buffer_size(nullptr, channels_, samplesPerFrame_, reFfDestFmt_, 0);
-        resampleCache_ .reserve(resampleSize);
-        resampleChannelAddr_.reserve(channels_);
-        auto tmp = resampleChannelAddr_.data();
-        av_samples_fill_arrays(tmp, nullptr, resampleCache_.data(), channels_, samplesPerFrame_, reFfDestFmt_, 0);
-        SwrContext* swrContext = swr_alloc();
-        FALSE_RETURN_V_MSG_E(swrContext != nullptr, Status::ERROR_NO_MEMORY, "cannot allocate swr context");
-        swrContext = swr_alloc_set_opts(swrContext, static_cast<int64_t>(channelLayout_), reFfDestFmt_, sampleRate_,
-            static_cast<int64_t>(channelLayout_), reSrcFfFmt_, sampleRate_, 0, nullptr);
-        FALSE_RETURN_V_MSG_E(swr_init(swrContext) == 0, Status::ERROR_UNKNOWN, "swr init error");
-        swrCtx_ = std::shared_ptr<SwrContext>(swrContext, [](SwrContext* ptr) {
-            if (ptr) {
-                swr_free(&ptr);
-            }
-        });
+        resample_ = std::make_shared<Ffmpeg::Resample>();
+        Ffmpeg::ResamplePara resamplePara {
+            channels_,
+            sampleRate_,
+            samplesPerFrame_,
+            bitsPerSample_,
+            static_cast<int64_t>(channelLayout_),
+            reSrcFfFmt_,
+            reFfDestFmt_,
+        };
+        FALSE_RETURN_V_MSG(resample_->Init(resamplePara) == Status::OK, Status::ERROR_UNKNOWN, "Resample init error");
     }
     return Status::OK;
 }
@@ -316,7 +316,9 @@ Status AudioServerSinkPlugin::Reset()
     sampleRate_ = 0;
     samplesPerFrame_ = 0;
     needReformat_ = false;
-    swrCtx_.reset();
+    if (resample_) {
+        resample_.reset();
+    }
     return Status::OK;
 }
 
@@ -421,7 +423,7 @@ bool AudioServerSinkPlugin::AssignChannelNumIfSupported(uint32_t channelNum)
 {
     AudioStandard::AudioChannel aChannel = AudioStandard::MONO;
     if (!ChannelNumNum2Enum(channelNum, aChannel)) {
-        MEDIA_LOG_E("sample rate " PUBLIC_LOG_U32 "not supported", channelNum);
+        MEDIA_LOG_E("channel num " PUBLIC_LOG_U32 "not supported", channelNum);
         return false;
     }
     auto supportedChannelsList = OHOS::AudioStandard::AudioRenderer::GetSupportedChannels();
@@ -446,13 +448,12 @@ bool AudioServerSinkPlugin::AssignSampleFmtIfSupported(Plugin::AudioSampleFormat
     });
     auto stdFmt = std::get<1>(*item);
     if (stdFmt == OHOS::AudioStandard::AudioSampleFormat::INVALID_WIDTH) {
-        if (std::get<2>(*item) == AV_SAMPLE_FMT_NONE) { // secondary param
+        if (std::get<2>(*item) == AV_SAMPLE_FMT_NONE) { // 2
             fmtSupported_ = false;
-            return false;
         } else {
             fmtSupported_ = true;
             needReformat_ = true;
-            reSrcFfFmt_ = std::get<2>(*item);
+            reSrcFfFmt_ = std::get<2>(*item); // 2
             rendererParams_.sampleFormat = reStdDestFmt_;
         }
     } else {
@@ -466,10 +467,9 @@ bool AudioServerSinkPlugin::AssignSampleFmtIfSupported(Plugin::AudioSampleFormat
         } else {
             fmtSupported_ = false;
             needReformat_ = false;
-            return false;
         }
     }
-    return true;
+    return fmtSupported_;
 }
 
 Status AudioServerSinkPlugin::SetParameter(Tag tag, const ValueType& para)
@@ -511,6 +511,11 @@ Status AudioServerSinkPlugin::SetParameter(Tag tag, const ValueType& para)
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
                 "SAMPLE_PER_FRAME type should be uint32_t");
             samplesPerFrame_ = Plugin::AnyCast<uint32_t>(para);
+            break;
+        case Tag::BITS_PER_CODED_SAMPLE:
+            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
+                                 "BITS_PER_CODED_SAMPLE type should be uint32_t");
+            bitsPerSample_ = Plugin::AnyCast<uint32_t>(para);
             break;
         case Tag::MEDIA_SEEKABLE:
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(Seekable)), Status::ERROR_MISMATCHED_TYPE,
@@ -591,26 +596,10 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
 {
     FALSE_RETURN_V_MSG_W(input != nullptr && !input->IsEmpty(), Status::OK, "Receive empty buffer."); // return ok
     auto mem = input->GetMemory();
-    auto* buffer = const_cast<uint8_t *>(mem->GetReadOnlyData());
+    auto buffer = const_cast<uint8_t *>(mem->GetReadOnlyData());
     size_t length = mem->GetSize();
-    if (needReformat_ && length > 0) {
-        size_t lineSize = mem->GetSize() / channels_;
-        std::vector<const uint8_t*> tmpInput(channels_);
-        tmpInput[0] = mem->GetReadOnlyData();
-        if (av_sample_fmt_is_planar(reSrcFfFmt_)) {
-            for (size_t i = 1; i < channels_; ++i) {
-                tmpInput[i] = tmpInput[i-1] + lineSize;
-            }
-        }
-        auto samples = lineSize / av_get_bytes_per_sample(reSrcFfFmt_);
-        auto res = swr_convert(swrCtx_.get(), resampleChannelAddr_.data(), samples, tmpInput.data(), samples);
-        if (res < 0) {
-            MEDIA_LOG_E("resample input failed");
-            length = 0;
-        } else {
-            buffer = resampleCache_.data();
-            length = res * av_get_bytes_per_sample(reFfDestFmt_) * channels_;
-        }
+    if (needReformat_ && resample_ && length >0) {
+        FALSE_LOG(resample_->Convert(buffer, length, buffer, length) == Status::OK);
     }
     MEDIA_LOG_DD("write data size " PUBLIC_LOG_ZU, length);
     while (isForcePaused_ && seekable_ == Seekable::SEEKABLE) {
@@ -622,7 +611,6 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
     FALSE_RETURN_V(audioRenderer_ != nullptr, Status::ERROR_WRONG_STATE);
     for (; length > 0;) {
         ret = audioRenderer_->Write(buffer, length);
-        MEDIA_LOG_DD("written data size " PUBLIC_LOG_D32, ret);
         if (ret < 0) {
             MEDIA_LOG_E("Write data error ret is: " PUBLIC_LOG_D32, ret);
             break;
@@ -631,6 +619,7 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
         }
         buffer += ret;
         length -= ret;
+        MEDIA_LOG_DD("written data size " PUBLIC_LOG_D32, ret);
     }
     return ret >= 0 ? Status::OK : Status::ERROR_UNKNOWN;
 }
@@ -660,8 +649,8 @@ Status  AudioServerSinkPlugin::Drain()
     auto res = audioRenderer_->Drain();
     uint64_t latency = 0;
     audioRenderer_->GetLatency(latency);
-    latency /= 1000; // cast into ms
-    if (!res || latency > 50) { // latency too large
+    latency /= 1000; // 1000 cast into ms
+    if (!res || latency > 50) { // 50 latency too large
         MEDIA_LOG_W("drain failed or latency is too large, will sleep " PUBLIC_LOG_U64 " ms, aka. latency", latency);
         OSAL::SleepFor(latency);
     }

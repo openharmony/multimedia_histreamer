@@ -18,18 +18,10 @@
 
 #include <atomic>
 #include "SDL.h"
+#include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "plugin/interface/audio_sink_plugin.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "utils/ring_buffer.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include "libswresample/swresample.h"
-#include "libswscale/swscale.h"
-#ifdef __cplusplus
-};
-#endif
 
 namespace OHOS {
 namespace Media {
@@ -93,8 +85,6 @@ private:
     void AudioCallback(void* userdata, uint8_t* stream, int len); // NOLINT: void*
 
     bool needResample_ {false};
-    std::vector<uint8_t> resampleCache_ {};
-    std::vector<uint8_t*> resampleChannelAddr_ {};
     std::vector<uint8_t> mixCache_ {};
     std::unique_ptr<RingBuffer> rb {};
     size_t srcFrameSize_ {};
@@ -102,12 +92,13 @@ private:
     uint32_t channels_ {2}; // 2: STEREO
     uint32_t sampleRate_ {0};
     uint32_t samplesPerFrame_ {0};
+    uint32_t bitsPerSample_ {0};
     uint64_t channelLayout_ {0};
     AudioSampleFormat audioFormat_ {AudioSampleFormat::NONE};
-    std::shared_ptr<SwrContext> swrCtx_ {nullptr};
     int volume_;
     const AVSampleFormat reFfDestFmt_ {AV_SAMPLE_FMT_S16};
     AVSampleFormat reSrcFfFmt_ {AV_SAMPLE_FMT_NONE};
+    std::shared_ptr<Ffmpeg::Resample> resample_ {nullptr};
 };
 } // namespace Sdl
 } // namespace Plugin
