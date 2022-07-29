@@ -37,7 +37,7 @@ source_set("std_video_capture") {
       "//foundation/graphic/graphic_2d/interfaces/innerkits",
       "//drivers/peripheral/display/interfaces/include",
       "//foundation/graphic/graphic_2d/interfaces/innerkits/common",
-      "//utils/native/base/include",
+      "//commonlibrary/c_utils/base/include",
     ]
     public_deps += [
       "//foundation/graphic/graphic_2d:libsurface",

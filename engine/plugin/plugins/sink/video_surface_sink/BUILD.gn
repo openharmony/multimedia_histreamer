@@ -38,16 +38,16 @@ source_set("std_video_surface_sink") {
       "//drivers/peripheral/display/interfaces/include",
       "//foundation/graphic/graphic_2d/interfaces/innerkits/common",
       "//foundation/graphic/graphic_2d/utils/sync_fence/export",
-      "//utils/native/base/include",
+      "//commonlibrary/c_utils/base/include",
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
       "//third_party/bounds_checking_function/include",
     ]
     public_deps += [
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
+      "//commonlibrary/c_utils/base:utils",
       "//foundation/graphic/graphic_2d:libsurface",
       "//foundation/graphic/graphic_2d/utils:sync_fence",
       "//third_party/bounds_checking_function:libsec_static",
-      "//utils/native/base:utils",
     ]
   }
 }
