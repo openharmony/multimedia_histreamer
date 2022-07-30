@@ -24,7 +24,7 @@ config("histreamer_recorder_config") {
         "//foundation/multimedia/image_standard/interfaces/innerkits/include",
         "//foundation/multimedia/player_framework/services/include",
         "//foundation/multimedia/player_framework/services/services/engine_intf",
-        "//utils/native/base/include",
+        "//commonlibrary/c_utils/base/include",
       ]
     }
   }
