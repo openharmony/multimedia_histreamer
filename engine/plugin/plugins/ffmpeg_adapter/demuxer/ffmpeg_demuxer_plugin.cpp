@@ -600,16 +600,14 @@ Status RegisterPlugins(const std::shared_ptr<Register>& reg)
     return Status::OK;
 }
 
-static void FfmpegLog(void* avcl, int level, const char* fmt, va_list vl)
+#ifdef MEDIA_OHOS
+void FfmpegLogPrint(void* avcl, int level, const char* fmt, va_list vl)
 {
     (void)avcl;
-#ifdef MEDIA_OHOS
     switch (level) {
+        case AV_LOG_INFO:
         case AV_LOG_DEBUG:
             HILOG_DEBUG(LOG_CORE, fmt, vl);
-            break;
-        case AV_LOG_INFO:
-            HILOG_INFO(LOG_CORE, fmt, vl);
             break;
         case AV_LOG_WARNING:
             HILOG_WARN(LOG_CORE, fmt, vl);
@@ -621,12 +619,34 @@ static void FfmpegLog(void* avcl, int level, const char* fmt, va_list vl)
             HILOG_FATAL(LOG_CORE, fmt, vl);
             break;
     }
-#endif
 }
+#else
+void FfmpegLogPrint(void* avcl, int level, const char* fmt, va_list vl)
+{
+    (void)avcl;
+    char buf[500] = {0};  // 500
+    (void)vsnprintf_s(buf, sizeof(buf), fmt, vl);
+    switch (level) {
+        case AV_LOG_WARNING:
+            MEDIA_LOG_W("Ffmpeg Message %d %s", level, buf);
+            break;
+        case AV_LOG_ERROR:
+        case AV_LOG_FATAL:
+            MEDIA_LOG_E("Ffmpeg Message %d %s", level, buf);
+            break;
+        case AV_LOG_INFO:
+        case AV_LOG_DEBUG:
+            MEDIA_LOG_DD("Ffmpeg Message %d %s", level, buf);
+            break;
+        default:
+            break;
+    }
+}
+#endif
 
 static void FfmpegLog_Init()
 {
-    av_log_set_callback(FfmpegLog);
+    av_log_set_callback(FfmpegLogPrint);
 }
 } // namespace
 
