@@ -46,13 +46,12 @@ enum struct VideoFormat : uint8_t {
 };
 
 enum class MediaType : uint32_t {
-    UNKNOWN = 0,    ///< Usually treated as AVMEDIA_TYPE_DATA
+    UNKNOWN = 0,    ///< Usually treated as DATA
     AUDIO,
     VIDEO,
     SUBTITLE,
     ATTACHMENT,     ///< Opaque data information usually sparse
-    DATA,           ///< Opaque data information usually continuous
-    NB
+    DATA            ///< Opaque data information usually continuous
 };
 
 #define MAKE_AUDIO_SPECIFIC_START(format) (SECTION_AUDIO_SPECIFIC_START | (static_cast<uint8_t>(format) << 8U))

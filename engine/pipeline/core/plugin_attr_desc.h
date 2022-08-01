@@ -33,6 +33,7 @@ const Plugin::ValueType g_seekableDef = Plugin::Seekable::INVALID;
 const Plugin::ValueType g_srcInputTypedef = Plugin::SrcInputType::UNKNOWN;
 const Plugin::ValueType g_unknown = nullptr;
 const Plugin::ValueType g_vecBufDef = std::vector<uint8_t>();
+const Plugin::ValueType g_mediaTypeDef = Plugin::MediaType::AUDIO;
 const Plugin::ValueType g_channelLayoutDef = Plugin::AudioChannelLayout::MONO;
 const Plugin::ValueType g_auSampleFmtDef = Plugin::AudioSampleFormat::U8;
 const Plugin::ValueType g_aacProfileDef = Plugin::AudioAacProfile::LC;
@@ -50,6 +51,7 @@ const std::map<Plugin::Tag, std::tuple<const char*, const Plugin::ValueType&, co
     {Plugin::Tag::WATERLINE_HIGH, {"waterline_h",              g_u32Def,           "uint32_t"}},
     {Plugin::Tag::WATERLINE_LOW, {"waterline_l",               g_u32Def,           "uint32_t"}},
     {Plugin::Tag::SRC_INPUT_TYPE, {"src_input_typ",            g_srcInputTypedef,  "SrcInputType"}},
+    {Plugin::Tag::MEDIA_TYPE, {"media_type",                   g_mediaTypeDef,      "MediaType"}},
     {Plugin::Tag::MEDIA_TITLE, {"title",                       g_emptyString,      "string"}},
     {Plugin::Tag::MEDIA_ARTIST, {"artist",                     g_emptyString,      "string"}},
     {Plugin::Tag::MEDIA_LYRICIST, {"lyricist",                 g_emptyString,      "string"}},

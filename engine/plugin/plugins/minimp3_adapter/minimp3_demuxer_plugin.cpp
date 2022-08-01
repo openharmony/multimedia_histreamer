@@ -169,6 +169,7 @@ void Minimp3DemuxerPlugin::FillInMediaInfo(MediaInfo& mediaInfo) const
     }
     int64_t durationHst;
     Ms2HstTime(durationMs, durationHst);
+    mediaInfo.tracks[0].Insert<Tag::MEDIA_TYPE>(MediaType::AUDIO);
     mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_RATE>(mp3DemuxerRst_.frameSampleRate);
     mediaInfo.tracks[0].Insert<Tag::MEDIA_BITRATE>(mp3DemuxerRst_.frameBitrateKbps);
     mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNELS>(mp3DemuxerRst_.frameChannels);

@@ -130,6 +130,8 @@ private:
 
     void NegotiateDownstream();
 
+    void UpdateStreamMeta(std::shared_ptr<Plugin::Meta>& streamMeta, Plugin::TagMap& downstreamParams);
+
     void DemuxerLoop();
 
     Plugin::Seekable seekable_;
