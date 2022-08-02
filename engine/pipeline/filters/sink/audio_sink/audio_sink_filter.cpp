@@ -100,7 +100,7 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
                                 Plugin::TagMap& downstreamParams)
 {
     MEDIA_LOG_I("audio sink negotiate started");
-    FALSE_LOG(downstreamParams.Get<Tag::MEDIA_SEEKABLE>(seekable_));
+    FALSE_LOG(const_cast<Plugin::TagMap&>(upstreamParams).Get<Tag::MEDIA_SEEKABLE>(seekable_));
     PROFILE_BEGIN("Audio Sink Negotiate begin");
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::AUDIO_SINK);
     if (candidatePlugins.empty()) {

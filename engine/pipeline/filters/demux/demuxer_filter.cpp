@@ -494,7 +494,14 @@ ErrorCode DemuxerFilter::ReadFrame(AVBuffer& buffer, uint32_t& trackId)
 
 std::shared_ptr<Plugin::Meta> DemuxerFilter::GetTrackMeta(uint32_t trackId)
 {
-    return (trackId < mediaMetaData_.trackMetas.size()) ? mediaMetaData_.trackMetas[trackId] : nullptr;
+    uint32_t streamTrackId = 0;
+    for (auto meta : mediaMetaData_.trackMetas) {
+        if (meta->GetUint32(Plugin::MetaID::TRACK_ID, streamTrackId)
+            && streamTrackId == trackId) {
+            return meta;
+        }
+    }
+    return nullptr;
 }
 
 void DemuxerFilter::SendEventEos()
@@ -518,6 +525,28 @@ void DemuxerFilter::HandleFrame(const AVBufferPtr& bufferPtr, uint32_t trackId)
     }
 }
 
+void DemuxerFilter::UpdateStreamMeta(std::shared_ptr<Plugin::Meta>& streamMeta, Plugin::TagMap& downstreamParams)
+{
+    auto type = Plugin::MediaType::UNKNOWN;
+    streamMeta->GetData(Plugin::MetaID::MEDIA_TYPE, type);
+    if (type == Plugin::MediaType::AUDIO) {
+        uint32_t channels = 2, outputChannels = 2;
+        Plugin::AudioChannelLayout channelLayout = Plugin::AudioChannelLayout::STEREO;
+        Plugin::AudioChannelLayout outputChannelLayout = Plugin::AudioChannelLayout::STEREO;
+        FALSE_LOG(streamMeta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels));
+        FALSE_LOG(streamMeta->GetData(Plugin::MetaID::AUDIO_CHANNEL_LAYOUT, channelLayout));
+
+        FALSE_LOG(downstreamParams.Get<Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels));
+        FALSE_LOG(downstreamParams.Get<Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT>(outputChannelLayout));
+        if (channels <= outputChannels) {
+            outputChannels = channels;
+            outputChannelLayout = channelLayout;
+        }
+        streamMeta->SetUint32(Plugin::MetaID::AUDIO_OUTPUT_CHANNELS, outputChannels);
+        streamMeta->SetData(Plugin::MetaID::AUDIO_OUTPUT_CHANNEL_LAYOUT, outputChannelLayout);
+    }
+}
+
 void DemuxerFilter::NegotiateDownstream()
 {
     PROFILE_BEGIN("NegotiateDownstream profile begins.");
@@ -529,16 +558,9 @@ void DemuxerFilter::NegotiateDownstream()
             auto tmpCap = MetaToCapability(*streamMeta);
             Plugin::TagMap upstreamParams;
             Plugin::TagMap downstreamParams;
-            downstreamParams.Insert<Tag::MEDIA_SEEKABLE>(seekable_);
-            uint32_t channels = 2, outputChannels = 2;
-            FALSE_LOG(mediaMetaData_.trackMetas[0]->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels));
-            downstreamParams.Insert<Tag::AUDIO_CHANNELS>(channels);
+            upstreamParams.Insert<Tag::MEDIA_SEEKABLE>(seekable_);
             if (stream.port->Negotiate(tmpCap, caps, upstreamParams, downstreamParams)) {
-                FALSE_LOG(downstreamParams.Get<Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels));
-                if (channels < outputChannels) {
-                    outputChannels = channels;
-                    streamMeta->SetUint32(Plugin::MetaID::AUDIO_OUTPUT_CHANNELS, outputChannels);
-                }
+                UpdateStreamMeta(streamMeta, downstreamParams);
                 if (stream.port->Configure(streamMeta)) {
                     stream.needNegoCaps = false;
                 }

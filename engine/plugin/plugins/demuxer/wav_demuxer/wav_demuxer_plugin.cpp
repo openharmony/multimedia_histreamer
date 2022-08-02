@@ -102,6 +102,7 @@ Status WavDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
     } else {
         mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
     }
+    mediaInfo.tracks[0].Insert<Tag::MEDIA_TYPE>(MediaType::AUDIO);
     mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_RATE>(wavHeader_.sampleRate);
     mediaInfo.tracks[0].Insert<Tag::MEDIA_BITRATE>((wavHeader_.byteRate) * 8); // 8  byte to bit
     mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNELS>(wavHeader_.numChannels);

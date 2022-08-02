@@ -45,6 +45,15 @@ enum struct VideoFormat : uint8_t {
     MPEG4 = 2,
 };
 
+enum class MediaType : uint32_t {
+    UNKNOWN = 0,    ///< Usually treated as DATA
+    AUDIO,
+    VIDEO,
+    SUBTITLE,
+    ATTACHMENT,     ///< Opaque data information usually sparse
+    DATA            ///< Opaque data information usually continuous
+};
+
 #define MAKE_AUDIO_SPECIFIC_START(format) (SECTION_AUDIO_SPECIFIC_START | (static_cast<uint8_t>(format) << 8U))
 
 #define MAKE_VIDEO_SPECIFIC_START(format) (SECTION_VIDEO_SPECIFIC_START | (static_cast<uint8_t>(format) << 8U))
@@ -116,6 +125,7 @@ enum struct Tag : uint32_t {
     MEDIA_START_TIME,                      ///< int64_t: The start time of one track
     MEDIA_SEEKABLE,                        ///< enum Seekable: Seekable status of the media
     MEDIA_PLAYBACK_SPEED,                  ///< double, playback speed
+    MEDIA_TYPE,                            ///< enum MediaType: Auido Video Subtitle...
 
     /* -------------------- audio universal tag -------------------- */
     AUDIO_CHANNELS = SECTION_AUDIO_UNIVERSAL_START + 1, ///< uint32_t, stream channel num

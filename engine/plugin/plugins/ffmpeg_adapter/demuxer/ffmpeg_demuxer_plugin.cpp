@@ -43,6 +43,15 @@ namespace Ffmpeg {
 namespace {
 std::map<std::string, std::shared_ptr<AVInputFormat>> g_pluginInputFormat;
 
+std::map<AVMediaType, MediaType> g_MediaTypeMap = {
+    {AVMEDIA_TYPE_AUDIO, MediaType::AUDIO},
+    {AVMEDIA_TYPE_VIDEO, MediaType::VIDEO},
+    {AVMEDIA_TYPE_DATA, MediaType::DATA},
+    {AVMEDIA_TYPE_ATTACHMENT, MediaType::ATTACHMENT},
+    {AVMEDIA_TYPE_UNKNOWN, MediaType::UNKNOWN},
+    {AVMEDIA_TYPE_SUBTITLE, MediaType::SUBTITLE}
+};
+
 int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource);
 
 Status RegisterPlugins(const std::shared_ptr<Register>& reg);
@@ -424,6 +433,11 @@ bool FFmpegDemuxerPlugin::ParseMediaData()
             continue;
         }
         ConvertAVStreamToMetaInfo(avStream, formatContext_, codecContext, mediaInfo_->tracks[i]);
+        if (g_MediaTypeMap.find(avStream.codecpar->codec_type) != g_MediaTypeMap.end()) {
+            mediaInfo_->tracks[i].Insert<Tag::MEDIA_TYPE>(g_MediaTypeMap[avStream.codecpar->codec_type]);
+        } else {
+            MEDIA_LOG_E("media type not found!");
+        }
     }
     SaveFileInfoToMetaInfo(mediaInfo_->general);
     return true;

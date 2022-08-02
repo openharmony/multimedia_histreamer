@@ -171,20 +171,21 @@ Status AACDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
     if (ret == 0) {
         mediaInfo.tracks.resize(1);
         if (aacDemuxerRst_.frameChannels == 1) {
-            mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::MONO});
+            mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::MONO);
         } else {
-            mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::STEREO});
+            mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
         }
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_RATE, static_cast<uint32_t>(aacDemuxerRst_.frameSampleRate)});
-        mediaInfo.tracks[0].insert({Tag::MEDIA_BITRATE, static_cast<int64_t>(aacDemuxerRst_.frameBitrateKbps)});
-        mediaInfo.tracks[0].insert({Tag::AUDIO_CHANNELS, static_cast<uint32_t>(aacDemuxerRst_.frameChannels)});
-        mediaInfo.tracks[0].insert({Tag::TRACK_ID, static_cast<uint32_t>(0)});
-        mediaInfo.tracks[0].insert({Tag::MIME, std::string(MEDIA_MIME_AUDIO_AAC)});
-        mediaInfo.tracks[0].insert({Tag::AUDIO_MPEG_VERSION, static_cast<uint32_t>(aacDemuxerRst_.mpegVersion)});
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::S16});
-        mediaInfo.tracks[0].insert({Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(1024)});   // 1024
-        mediaInfo.tracks[0].insert({Tag::AUDIO_AAC_PROFILE, AudioAacProfile::LC});
-        mediaInfo.tracks[0].insert({Tag::AUDIO_AAC_STREAM_FORMAT, AudioAacStreamFormat::MP4ADTS});
+        mediaInfo.tracks[0].Insert<Tag::MEDIA_TYPE>(MediaType::AUDIO);
+        mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_RATE>(aacDemuxerRst_.frameSampleRate);
+        mediaInfo.tracks[0].Insert<Tag::MEDIA_BITRATE>(aacDemuxerRst_.frameBitrateKbps);
+        mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNELS>(aacDemuxerRst_.frameChannels);
+        mediaInfo.tracks[0].Insert<Tag::TRACK_ID>(0);
+        mediaInfo.tracks[0].Insert<Tag::MIME>(MEDIA_MIME_AUDIO_AAC);
+        mediaInfo.tracks[0].Insert<Tag::AUDIO_MPEG_VERSION>(aacDemuxerRst_.mpegVersion);
+        mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::S16);
+        mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_PER_FRAME>(1024);   // 1024
+        mediaInfo.tracks[0].Insert<Tag::AUDIO_AAC_PROFILE>(AudioAacProfile::LC);
+        mediaInfo.tracks[0].Insert<Tag::AUDIO_AAC_STREAM_FORMAT>(AudioAacStreamFormat::MP4ADTS);
         return Status::OK;
     } else {
         return Status::ERROR_UNSUPPORTED_FORMAT;
