@@ -17,7 +17,8 @@ source_set("std_engine_factory") {
     include_dirs = [
       "//foundation/multimedia/histreamer/engine",
       "//foundation/multimedia/player_framework/services/services/engine_intf",
-      "//base/startup/init/interfaces/innerkits/include/syspara"
+      "//base/startup/init/interfaces/innerkits/include/syspara",
+    ]
     public_deps = [
       "//base/startup/init/interfaces/innerkits:libbegetutil",
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
