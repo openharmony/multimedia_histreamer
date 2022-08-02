@@ -110,7 +110,7 @@ group("histreamer_plugin_store") {
   }
 
   if (multimedia_histreamer_enable_plugin_avs3_audio_decoder) {
-    deps += [ "//foundation/multimedia/histreamer_plugins/codec/avs3_audio_decoder:plugin_avs3_audio_decoder" ]
+    deps += [ "//foundation/multimedia/histreamer_ext/codec/avs3_audio_decoder:plugin_avs3_audio_decoder" ]
   }
 }
 
