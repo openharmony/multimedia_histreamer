@@ -31,6 +31,7 @@ extern "C" {
 #include "libavutil/frame.h"
 #include "libavutil/pixdesc.h"
 #include "libavcodec/avcodec.h"
+#include "libswresample/swresample.h"
 #ifdef __cplusplus
 };
 #endif
@@ -104,6 +105,27 @@ bool IsRgbFormat(AVPixelFormat format);
 VideoH264Profile ConvH264ProfileFromFfmpeg (int32_t ffmpegProfile);
 
 int32_t ConvH264ProfileToFfmpeg(VideoH264Profile profile);
+
+struct ResamplePara {
+    uint32_t channels_ {2}; // 2: STEREO
+    uint32_t sampleRate_ {0};
+    uint32_t samplesPerFrame_ {0};
+    uint32_t bitsPerSample_ {0};
+    int64_t channelLayout_ {0};
+    AVSampleFormat srcFfFmt_ {AV_SAMPLE_FMT_NONE};
+    AVSampleFormat destFmt_ {AV_SAMPLE_FMT_S16};
+};
+
+class Resample {
+public:
+    Status Init(const ResamplePara& resamplePara);
+    Status Convert(uint8_t*& destBuffer, size_t& destLength, uint8_t*& srcBuffer, const size_t& srcLength);
+private:
+    ResamplePara resamplePara_ {};
+    std::vector<uint8_t> resampleCache_ {};
+    std::vector<uint8_t*> resampleChannelAddr_ {};
+    std::shared_ptr<SwrContext> swrCtx_ {nullptr};
+};
 } // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media

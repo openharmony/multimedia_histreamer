@@ -133,6 +133,9 @@ Status SdlAudioSinkPlugin::Init()
 
 Status SdlAudioSinkPlugin::Deinit()
 {
+    if (resample_) {
+        resample_.reset();
+    }
     return Status::OK;
 }
 
@@ -155,36 +158,30 @@ Status SdlAudioSinkPlugin::Prepare()
         MEDIA_LOG_E("sdl cannot open audio with error: " PUBLIC_LOG_S, SDL_GetError());
         return Status::ERROR_UNKNOWN;
     }
-
+    if (bitsPerSample_ == 8 || bitsPerSample_ == 24) { // 8 24
+        needResample_ = true;
+    }
     if (needResample_) {
-        auto destFrameSize = av_samples_get_buffer_size(nullptr, channels_, samplesPerFrame_, reFfDestFmt_, 0);
-        resampleCache_.reserve(destFrameSize);
-        resampleChannelAddr_.reserve(channels_);
-        auto tmp = resampleChannelAddr_.data();
-        av_samples_fill_arrays(tmp, nullptr, resampleCache_.data(), channels_, samplesPerFrame_, reFfDestFmt_, 0);
-        SwrContext *swrContext = swr_alloc();
-        if (swrContext == nullptr) {
-            MEDIA_LOG_E("cannot allocate swr context");
-            return Status::ERROR_NO_MEMORY;
-        }
-        MEDIA_LOG_I("configure swr outSampleFmt " PUBLIC_LOG_U8, static_cast<uint8_t>(audioFormat_));
-        swrContext = swr_alloc_set_opts(swrContext, channelLayout_, reFfDestFmt_, sampleRate_, channelLayout_,
-                                        reSrcFfFmt_, sampleRate_, 0, nullptr);
-        if (swr_init(swrContext) != 0) {
-            MEDIA_LOG_E("swr init error");
-            return Status::ERROR_UNKNOWN;
-        }
-        swrCtx_ = std::shared_ptr<SwrContext>(swrContext, [](SwrContext *ptr) {
-            if (ptr) {
-                swr_free(&ptr);
-            }
-        });
+        resample_ = std::make_shared<Ffmpeg::Resample>();
+        Ffmpeg::ResamplePara resamplePara {
+            channels_,
+            sampleRate_,
+            samplesPerFrame_,
+            bitsPerSample_,
+            static_cast<int64_t>(channelLayout_),
+            reSrcFfFmt_,
+            reFfDestFmt_,
+        };
+        FALSE_RETURN_V_MSG(resample_->Init(resamplePara) == Status::OK, Status::ERROR_UNKNOWN, "Resample init error");
     }
     return Status::OK;
 }
 
 Status SdlAudioSinkPlugin::Reset()
 {
+    if (resample_) {
+        resample_.reset();
+    }
     return Status::OK;
 }
 
@@ -235,7 +232,7 @@ Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
     if (!value.SameTypeWith(typeid(typenames))) {                                                                      \
         return Status::ERROR_MISMATCHED_TYPE;                                                                          \
     }
-
+    MEDIA_LOG_I("SetParameter entered, key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
     switch (tag) {
         case Tag::AUDIO_OUTPUT_CHANNELS: {
             RETURN_ERROR_IF_CHECK_ERROR(uint32_t);
@@ -246,16 +243,14 @@ Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
             MEDIA_LOG_D("Set outputChannels: " PUBLIC_LOG_U32, channels_);
             break;
         }
-        case Tag::AUDIO_SAMPLE_RATE: {
+        case Tag::AUDIO_SAMPLE_RATE:
             RETURN_ERROR_IF_CHECK_ERROR(uint32_t);
             sampleRate_ = Plugin::AnyCast<uint32_t>(value);
             break;
-        }
-        case Tag::AUDIO_SAMPLE_PER_FRAME: {
+        case Tag::AUDIO_SAMPLE_PER_FRAME:
             RETURN_ERROR_IF_CHECK_ERROR(uint32_t);
             samplesPerFrame_ = Plugin::AnyCast<uint32_t>(value);
             break;
-        }
         case Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT: {
             RETURN_ERROR_IF_CHECK_ERROR(AudioChannelLayout);
             auto chanLayout = Plugin::AnyCast<AudioChannelLayout>(value);
@@ -267,11 +262,14 @@ Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
             MEDIA_LOG_D("Set outputChannelLayout: " PUBLIC_LOG_U64, channelLayout_);
             break;
         }
-        case Tag::AUDIO_SAMPLE_FORMAT: {
+        case Tag::AUDIO_SAMPLE_FORMAT:
             RETURN_ERROR_IF_CHECK_ERROR(AudioSampleFormat);
             audioFormat_ = Plugin::AnyCast<AudioSampleFormat>(value);
             break;
-        }
+        case Tag::BITS_PER_CODED_SAMPLE:
+            RETURN_ERROR_IF_CHECK_ERROR(uint32_t);
+            bitsPerSample_ = Plugin::AnyCast<uint32_t>(value);
+            break;
         default: {
             MEDIA_LOG_W("receive one parameter with unconcern key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
             break;
@@ -365,30 +363,13 @@ Status SdlAudioSinkPlugin::GetFrameCount(uint32_t& count)
 Status SdlAudioSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
 {
     MEDIA_LOG_DD("SdlSink Write begin");
-    if (inputInfo == nullptr || inputInfo->IsEmpty()) {
-        return Status::OK;
-    }
+    FALSE_RETURN_V_MSG_W(inputInfo != nullptr && !inputInfo->IsEmpty(), Status::OK, "Receive empty buffer.");
     auto mem = inputInfo->GetMemory();
-    auto* buffer = const_cast<uint8_t*>(mem->GetReadOnlyData());
+    auto buffer = const_cast<uint8_t*>(mem->GetReadOnlyData());
     size_t length = mem->GetSize();
-    if (needResample_) {
-        size_t lineSize = mem->GetSize() / channels_;
-        std::vector<const uint8_t*> tmpInput(channels_);
-        tmpInput[0] = mem->GetReadOnlyData();
-        if (av_sample_fmt_is_planar(reSrcFfFmt_)) {
-            for (int i = 1; i < channels_; ++i) {
-                tmpInput[i] = tmpInput[i-1] + lineSize;
-            }
-        }
-        auto samples = lineSize / av_get_bytes_per_sample(reSrcFfFmt_);
-        auto res = swr_convert(swrCtx_.get(), resampleChannelAddr_.data(), samples, tmpInput.data(), samples);
-        if (res < 0) {
-            MEDIA_LOG_E("resample input failed");
-            length = 0;
-        } else {
-            buffer = resampleCache_.data();
-            length = res * av_get_bytes_per_sample(reFfDestFmt_) * channels_;
-        }
+
+    if (needResample_ && resample_) {
+        FALSE_LOG(resample_->Convert(buffer, length, buffer, length) == Status::OK);
     }
     MEDIA_LOG_DD("SdlSink Write before ring buffer");
     rb->WriteBuffer(buffer, length);
