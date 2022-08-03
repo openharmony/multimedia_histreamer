@@ -907,6 +907,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -936,6 +937,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -965,6 +967,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -994,6 +997,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -1023,6 +1027,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -1052,6 +1057,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -1081,6 +1087,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -1110,6 +1117,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -1139,6 +1147,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -1168,6 +1177,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -1197,6 +1207,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -1226,6 +1237,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -1255,6 +1267,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -1284,6 +1297,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         CheckAudio(filePath, recordSource);
@@ -1302,6 +1316,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Pause());
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         CheckAudio(filePath, recordSource);
@@ -1319,6 +1334,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         ASSERT_EQ(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Resume());
         ASSERT_EQ(0, recorder->Stop());
@@ -1475,6 +1491,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         ASSERT_EQ(0, recorder->Reset());
         fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
@@ -1536,6 +1553,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         CheckAudio(filePath, recordSource);
