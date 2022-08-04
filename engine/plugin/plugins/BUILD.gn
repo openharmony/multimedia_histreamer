@@ -20,6 +20,8 @@ if (!hst_is_lite_sys) {
 
 print("histreamer plugin: ffmpeg_adapter =",
       multimedia_histreamer_enable_plugin_ffmpeg_adapter)
+print("histreamer plugin: wav_demuxer =",
+      multimedia_histreamer_enable_plugin_wav_demuxer)
 print("histreamer plugin: hdi_adapter =",
       multimedia_histreamer_enable_plugin_hdi_adapter)
 print("histreamer plugin: file_source =",

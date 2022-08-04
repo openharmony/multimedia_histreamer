@@ -102,6 +102,12 @@ Status WavDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
     } else {
         mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
     }
+    int64_t duration = 0;
+    if (!Sec2HstTime((fileSize_ - wavHeadLength_) * 8 /     // 8
+        (wavHeader_.sampleRate * wavHeader_.bitsPerSample * wavHeader_.numChannels), duration)) {
+        MEDIA_LOG_E("value overflow!");
+    }
+    mediaInfo.tracks[0].Insert<Tag::MEDIA_DURATION>(duration);
     mediaInfo.tracks[0].Insert<Tag::MEDIA_TYPE>(MediaType::AUDIO);
     mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_RATE>(wavHeader_.sampleRate);
     mediaInfo.tracks[0].Insert<Tag::MEDIA_BITRATE>((wavHeader_.byteRate) * 8); // 8  byte to bit
@@ -142,30 +148,18 @@ Status WavDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
     if (fileSize_ <= 0 || seekable_ == Seekable::INVALID || seekable_ == Seekable::UNSEEKABLE) {
         return Status::ERROR_INVALID_OPERATION;
     }
+    auto blockAlign = wavHeader_.bitsPerSample / 8 * wavHeader_.numChannels; // blockAlign = wavHeader_.blockAlign
+    auto byteRate = blockAlign * wavHeader_.sampleRate; // byteRate = wavHeader_.byteRate
 
     // time(sec) * byte per second= current time byte number
-    auto position = hstTime * wavHeader_.sampleRate * wavHeader_.numChannels * wavHeader_.byteRate;
+    auto position = HstTime2Sec(hstTime)  * byteRate;
 
-    // current time byte number / sample rate * numChannels
+    // current time byte number / blockAlign
     // To round and position to the starting point of a complete sample.
-    if (wavHeader_.sampleRate != 0 && wavHeader_.numChannels != 0) {
-        position = position / (wavHeader_.sampleRate * wavHeader_.numChannels) *
-                   (wavHeader_.sampleRate * wavHeader_.numChannels);
+    if (blockAlign) {
+        position = position / blockAlign * blockAlign;
     }
-    if (position) { // no loop play seek
-        if (mode == SeekMode::SEEK_NEXT_SYNC) {
-            dataOffset_ = dataOffset_ + position;
-        } else if (mode == SeekMode::SEEK_PREVIOUS_SYNC) {
-            dataOffset_ = dataOffset_ - position;
-        }
-    } else {
-        dataOffset_ = position; // loop play seek
-    }
-    if (!dataOffset_) {
-        dataOffset_ = wavHeadLength_;
-    } else if (dataOffset_ >= fileSize_) {
-        dataOffset_ = fileSize_;
-    }
+    dataOffset_ = position;
     return Status::OK;
 }
 

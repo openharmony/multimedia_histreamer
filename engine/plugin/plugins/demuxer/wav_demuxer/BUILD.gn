@@ -21,28 +21,30 @@ group("plugin_wav_demuxer") {
     deps = [ ":histreamer_plugin_wav_static" ]
   } else {
     deps = []
-    deps += [ ":histreamer_plugin_wav_Demuxer" ]
+    deps += [ ":histreamer_plugin_WavDemuxer" ]
   }
 }
 
-config("plugin_wav_demuxer_config") {
-  include_dirs = [
-    "wav_demuxer",
-    "//foundation/multimedia/histreamer/engine/foundation",
+source_set("wavdemuxer") {
+  sources = [ "wav_demuxer_plugin.cpp" ]
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
+  public_deps = [
+    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
 }
 
-if (ohos_kernel_type == "liteos_m") {
+if (hst_is_lite_sys) {
   static_library("histreamer_plugin_wav_static") {
-    sources = [ "wav_demuxer_plugin.cpp" ]
-    public_configs = [
-      ":plugin_wav_demuxer_config",
-      "//foundation/multimedia/histreamer:histreamer_presets",
-    ]
-    public_deps = [
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
-    ]
+    deps = [ ":wavdemuxer" ]
+  }
+} else {
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer_plugin_WavDemuxer") {
+    deps = [ ":wavdemuxer" ]
+    relative_install_dir = "media/histreamer_plugins"
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
   }
 }
