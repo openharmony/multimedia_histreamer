@@ -365,14 +365,15 @@ Status SdlAudioSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
     MEDIA_LOG_DD("SdlSink Write begin");
     FALSE_RETURN_V_MSG_W(inputInfo != nullptr && !inputInfo->IsEmpty(), Status::OK, "Receive empty buffer.");
     auto mem = inputInfo->GetMemory();
-    auto buffer = const_cast<uint8_t*>(mem->GetReadOnlyData());
-    size_t length = mem->GetSize();
-
+    auto srcBuffer = mem->GetReadOnlyData();
+    auto destBuffer = const_cast<uint8_t*>(srcBuffer);
+    auto srcLength = mem->GetSize();
+    auto destLength = srcLength;
     if (needResample_ && resample_) {
-        FALSE_LOG(resample_->Convert(buffer, length, buffer, length) == Status::OK);
+        FALSE_LOG(resample_->Convert(srcBuffer, srcLength, destBuffer, destLength) == Status::OK);
     }
     MEDIA_LOG_DD("SdlSink Write before ring buffer");
-    rb->WriteBuffer(buffer, length);
+    rb->WriteBuffer(destBuffer, destLength);
     MEDIA_LOG_DD("SdlSink Write end");
     return Status::OK;
 }

@@ -596,10 +596,12 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
 {
     FALSE_RETURN_V_MSG_W(input != nullptr && !input->IsEmpty(), Status::OK, "Receive empty buffer."); // return ok
     auto mem = input->GetMemory();
-    auto buffer = const_cast<uint8_t *>(mem->GetReadOnlyData());
-    size_t length = mem->GetSize();
-    if (needReformat_ && resample_ && length >0) {
-        FALSE_LOG(resample_->Convert(buffer, length, buffer, length) == Status::OK);
+    auto srcBuffer = mem->GetReadOnlyData();
+    auto destBuffer = const_cast<uint8_t*>(srcBuffer);
+    auto srcLength = mem->GetSize();
+    auto destLength = srcLength;
+    if (needReformat_ && resample_ && srcLength >0) {
+        FALSE_LOG(resample_->Convert(srcBuffer, srcLength, destBuffer, destLength) == Status::OK);
     }
     MEDIA_LOG_DD("write data size " PUBLIC_LOG_ZU, length);
     while (isForcePaused_ && seekable_ == Seekable::SEEKABLE) {
@@ -609,16 +611,16 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
     int32_t ret = 0;
     OSAL::ScopedLock lock(renderMutex_);
     FALSE_RETURN_V(audioRenderer_ != nullptr, Status::ERROR_WRONG_STATE);
-    for (; length > 0;) {
-        ret = audioRenderer_->Write(buffer, length);
+    for (; destLength > 0;) {
+        ret = audioRenderer_->Write(destBuffer, destLength);
         if (ret < 0) {
             MEDIA_LOG_E("Write data error ret is: " PUBLIC_LOG_D32, ret);
             break;
-        } else if (static_cast<size_t>(ret) < length) {
+        } else if (static_cast<size_t>(ret) < destLength) {
             OSAL::SleepFor(5); // 5ms
         }
-        buffer += ret;
-        length -= ret;
+        destBuffer += ret;
+        destLength -= ret;
         MEDIA_LOG_DD("written data size " PUBLIC_LOG_D32, ret);
     }
     return ret >= 0 ? Status::OK : Status::ERROR_UNKNOWN;

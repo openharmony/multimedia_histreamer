@@ -524,8 +524,7 @@ Status Resample::Init(const ResamplePara& resamplePara)
     return Status::OK;
 }
 
-Status Resample::Convert(uint8_t*& destBuffer, size_t& destLength, uint8_t*& srcBuffer,
-                         const size_t& srcLength)
+Status Resample::Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8_t*& destBuffer, size_t& destLength)
 {
     if (resamplePara_.bitsPerSample_ == 8) { // 8
         FALSE_RETURN_V_MSG(resamplePara_.destFmt_ == AV_SAMPLE_FMT_S16, Status::ERROR_UNIMPLEMENTED,
@@ -541,12 +540,13 @@ Status Resample::Convert(uint8_t*& destBuffer, size_t& destLength, uint8_t*& src
     } else if (resamplePara_.bitsPerSample_ == 24) {  // 24
         FALSE_RETURN_V_MSG(resamplePara_.destFmt_ == AV_SAMPLE_FMT_S16, Status::ERROR_UNIMPLEMENTED,
                            "resample 24bit to other format can not support");
-        destLength = srcLength;
-        destLength /= 3; // 3
-        for (size_t i = 0; i < destLength; i++) {
-            memcpy_s(destBuffer + i * 2, 2, srcBuffer + i * 3 + 1, 2); // 2 3 1
+        destLength = srcLength / 3 * 2; // 3 2
+        resampleCache_.reserve(destLength);
+        resampleCache_.assign(destLength, 0);
+        for (size_t i = 0; i < destLength / 2; i++) { // 2
+            memcpy_s(&resampleCache_[0] + i * 2, 2, srcBuffer + i * 3 + 1, 2); // 2 3 1
         }
-        destLength *= 2;  // 2
+        destBuffer = resampleCache_.data();
     } else {
         size_t lineSize = srcLength / resamplePara_.channels_;
         std::vector<const uint8_t*> tmpInput(resamplePara_.channels_);
@@ -556,8 +556,8 @@ Status Resample::Convert(uint8_t*& destBuffer, size_t& destLength, uint8_t*& src
                 tmpInput[i] = tmpInput[i-1] + lineSize;
             }
         }
-        auto samples = lineSize / av_get_bytes_per_sample(resamplePara_.srcFfFmt_);
-        auto res = swr_convert(swrCtx_.get(), resampleChannelAddr_.data(), samples, tmpInput.data(), samples);
+        auto res = swr_convert(swrCtx_.get(), resampleChannelAddr_.data(), resamplePara_.samplesPerFrame_,
+                               tmpInput.data(), resamplePara_.samplesPerFrame_);
         if (res < 0) {
             MEDIA_LOG_E("resample input failed");
             destLength = 0;
