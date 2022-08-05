@@ -40,6 +40,8 @@ const Plugin::ValueType g_aacProfileDef = Plugin::AudioAacProfile::LC;
 const Plugin::ValueType g_aacStFmtDef = Plugin::AudioAacStreamFormat::RAW;
 const Plugin::ValueType g_vdPixelFmtDef = Plugin::VideoPixelFormat::UNKNOWN;
 const Plugin::ValueType g_vdH264ProfileDef = Plugin::VideoH264Profile::BASELINE;
+const Plugin::ValueType g_audioRenderInfoDef = Plugin::AudioRenderInfo {};
+const Plugin::ValueType g_audioInterruptModeDef = Plugin::AudioInterruptMode::SHARE_MODE;
 
 // tuple is <tagName, default_val, typeName> default_val is used for type compare
 const std::map<Plugin::Tag, std::tuple<const char*, const Plugin::ValueType&, const char*>> g_tagInfoMap = {
@@ -97,6 +99,8 @@ const std::map<Plugin::Tag, std::tuple<const char*, const Plugin::ValueType&, co
     {Plugin::Tag::APP_TOKEN_ID, {"apptoken_id",                g_u32Def,           "uint32_t"}},
     {Plugin::Tag::APP_UID, {"app_uid",                         g_d32Def,           "int32_t"}},
     {Plugin::Tag::APP_PID, {"app_pid",                         g_d32Def,           "int32_t"}},
+    {Plugin::Tag::AUDIO_RENDER_INFO, {"audio_render_info",     g_audioRenderInfoDef, "AudioRenderInfo"}},
+    {Plugin::Tag::AUDIO_INTERRUPT_MODE, {"audio_interrupt_mode", g_audioInterruptModeDef, "AudioInterruptMode"}},
 };
 
 const std::map<Plugin::AudioSampleFormat, const char*> g_auSampleFmtStrMap = {

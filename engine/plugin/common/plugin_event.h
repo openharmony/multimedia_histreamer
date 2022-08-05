@@ -29,6 +29,7 @@ enum struct PluginEventType : int32_t {
     OTHER_ERROR,
     BELOW_LOW_WATERLINE,
     ABOVE_LOW_WATERLINE,
+    INTERRUPT
 };
 
 enum class NetworkClientErrorCode : int32_t {

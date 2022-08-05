@@ -69,7 +69,7 @@ public:
     int32_t SetVolume(float leftVolume, float rightVolume) override;
     int32_t SetVideoSurface(sptr<Surface> surface) override;
     int32_t SetLooping(bool loop) override;
-    int32_t SetParameter(const Format &param) override;
+    int32_t SetParameter(const Format& param) override;
     int32_t SetObs(const std::weak_ptr<IPlayerEngineObs>& obs) override;
     int32_t GetCurrentTime(int32_t& currentPositionMs) override;
     int32_t GetDuration(int32_t& durationMs) override;
@@ -80,6 +80,10 @@ public:
     int32_t GetAudioTrackInfo(std::vector<Format>& audioTrack) override;
     int32_t GetVideoWidth() override;
     int32_t GetVideoHeight() override;
+    int32_t SetVideoScaleType(VideoScaleType videoScaleType) override;
+    int32_t SetAudioRendererInfo(const int32_t contentType, const int32_t streamUsage,
+                                 const int32_t rendererFlag) override;
+    int32_t SetAudioInterruptMode(const int32_t interruptMode) override;
 
     // internal interfaces
     void OnEvent(const Event& event) override;

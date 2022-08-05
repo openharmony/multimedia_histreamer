@@ -77,12 +77,15 @@ private:
     ErrorCode SetPluginParameter(Tag tag, const Plugin::ValueType& value);
     ErrorCode ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta);
     ErrorCode SetVolumeToPlugin();
+    void OnEvent(const Plugin::PluginEvent& event) override;
 
     int64_t latestBufferPts_ {HST_TIME_NONE};
     int64_t latestBufferDuration_ {0};
     int64_t frameCnt_ {0};
-    int32_t appPid_ {0};
-    int32_t appUid_ {0};
+    int32_t appPid_ {};
+    int32_t appUid_ {};
+    Plugin::AudioRenderInfo audioRenderInfo_ {};
+    Plugin::AudioInterruptMode audioInterruptMode_ {Plugin::AudioInterruptMode::SHARE_MODE};
     Plugin::Seekable seekable_ {Plugin::Seekable::INVALID};
 
     std::atomic<bool> pushThreadIsBlocking {false};
