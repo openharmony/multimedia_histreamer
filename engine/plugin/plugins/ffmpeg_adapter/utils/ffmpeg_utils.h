@@ -119,7 +119,7 @@ struct ResamplePara {
 class Resample {
 public:
     Status Init(const ResamplePara& resamplePara);
-    Status Convert(uint8_t*& destBuffer, size_t& destLength, uint8_t*& srcBuffer, const size_t& srcLength);
+    Status Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8_t*& destBuffer, size_t& destLength);
 private:
     ResamplePara resamplePara_ {};
     std::vector<uint8_t> resampleCache_ {};

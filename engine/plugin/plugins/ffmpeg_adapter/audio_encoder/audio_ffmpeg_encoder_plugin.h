@@ -18,13 +18,13 @@
 #include <functional>
 #include <map>
 #include "utils/blocking_queue.h"
+#include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "plugin/interface/codec_plugin.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 #include "libavcodec/avcodec.h"
-#include "libswresample/swresample.h"
 #ifdef __cplusplus
 };
 #endif
@@ -106,10 +106,8 @@ private:
     bool needReformat_ {false};
     AVSampleFormat srcFmt_ {AVSampleFormat::AV_SAMPLE_FMT_NONE};
     uint32_t srcBytesPerSample_ {0};
-    std::shared_ptr<SwrContext> swrCtx_ {nullptr};
-    std::vector<uint8_t> resampleCache_ {};
-    std::vector<uint8_t*> resampleChannelAddr_ {};
     DataCallback* dataCallback_ {nullptr};
+    std::shared_ptr<Ffmpeg::Resample> resample_ {nullptr};
 };
 } // Ffmpeg
 } // namespace Plugin

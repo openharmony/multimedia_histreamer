@@ -245,46 +245,37 @@ bool AudioFfmpegEncoderPlugin::CheckReformat()
 
 Status AudioFfmpegEncoderPlugin::Start()
 {
-    {
-        OSAL::ScopedLock lock(avMutex_);
-        if (avCodecContext_ == nullptr) {
-            return Status::ERROR_WRONG_STATE;
-        }
-        needReformat_ = CheckReformat();
-        if (needReformat_) {
-            srcFmt_ = avCodecContext_->sample_fmt;
-            // always use the first fmt
-            avCodecContext_->sample_fmt = avCodec_->sample_fmts[0];
-            SwrContext* swrContext = swr_alloc();
-            FALSE_RETURN_V_MSG_E(swrContext != nullptr, Status::ERROR_NO_MEMORY, "cannot allocate swr context");
-            swrContext = swr_alloc_set_opts(swrContext, avCodecContext_->channel_layout, avCodecContext_->sample_fmt,
-                avCodecContext_->sample_rate, avCodecContext_->channel_layout, srcFmt_, avCodecContext_->sample_rate,
-                0, nullptr);
-            FALSE_RETURN_V_MSG_E(swr_init(swrContext) == 0, Status::ERROR_UNKNOWN, "swr init error");
-            swrCtx_ = std::shared_ptr<SwrContext>(swrContext, [](SwrContext* ptr) {
-                if (ptr) {
-                    swr_free(&ptr);
-                }
-            });
-        }
-        auto res = avcodec_open2(avCodecContext_.get(), avCodec_.get(), nullptr);
-        FALSE_RETURN_V_MSG_E(res == 0, Status::ERROR_UNKNOWN, "avcodec open error " PUBLIC_LOG_S " when start encoder",
-                          AVStrError(res).c_str());
-        FALSE_RETURN_V_MSG_E(avCodecContext_->frame_size > 0, Status::ERROR_UNKNOWN, "frame_size unknown");
-        fullInputFrameSize_ = (uint32_t)av_samples_get_buffer_size(nullptr, avCodecContext_->channels,
-            avCodecContext_->frame_size, srcFmt_, 1);
-        srcBytesPerSample_ = av_get_bytes_per_sample(srcFmt_) * avCodecContext_->channels;
-        if (needReformat_) {
-            auto resampleSize = av_samples_get_buffer_size(nullptr, avCodecContext_->channels,
-                                                           avCodecContext_->frame_size, avCodecContext_->sample_fmt, 0);
-            resampleCache_ .reserve(resampleSize);
-            resampleChannelAddr_.reserve(avCodecContext_->channels);
-            auto tmp = resampleChannelAddr_.data();
-            av_samples_fill_arrays(tmp, nullptr, resampleCache_.data(), avCodecContext_->channels,
-                                   avCodecContext_->frame_size, avCodecContext_->sample_fmt, 0);
-        }
-        SetParameter(Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(avCodecContext_->frame_size));
+    OSAL::ScopedLock lock(avMutex_);
+    if (avCodecContext_ == nullptr) {
+        return Status::ERROR_WRONG_STATE;
     }
+    needReformat_ = CheckReformat();
+    if (needReformat_) {
+        srcFmt_ = avCodecContext_->sample_fmt;
+        // always use the first fmt
+        avCodecContext_->sample_fmt = avCodec_->sample_fmts[0];
+    }
+    auto res = avcodec_open2(avCodecContext_.get(), avCodec_.get(), nullptr);
+    FALSE_RETURN_V_MSG_E(res == 0, Status::ERROR_UNKNOWN, "avcodec open error " PUBLIC_LOG_S " when start encoder",
+                      AVStrError(res).c_str());
+    FALSE_RETURN_V_MSG_E(avCodecContext_->frame_size > 0, Status::ERROR_UNKNOWN, "frame_size unknown");
+    fullInputFrameSize_ = (uint32_t)av_samples_get_buffer_size(nullptr, avCodecContext_->channels,
+        avCodecContext_->frame_size, srcFmt_, 1);
+    srcBytesPerSample_ = av_get_bytes_per_sample(srcFmt_) * avCodecContext_->channels;
+    if (needReformat_) {
+        Ffmpeg::ResamplePara resamplePara = {
+            static_cast<uint32_t>(avCodecContext_->channels),
+            static_cast<uint32_t>(avCodecContext_->sample_rate),
+            static_cast<uint32_t>(avCodecContext_->frame_size),
+            0,
+            static_cast<int64_t>(avCodecContext_->channel_layout),
+            srcFmt_,
+            avCodecContext_->sample_fmt,
+        };
+        resample_ = std::make_shared<Ffmpeg::Resample>();
+        FALSE_RETURN_V_MSG(resample_->Init(resamplePara) == Status::OK, Status::ERROR_UNKNOWN, "Resample init error");
+    }
+    SetParameter(Tag::AUDIO_SAMPLE_PER_FRAME, static_cast<uint32_t>(avCodecContext_->frame_size));
     return Status::OK;
 }
 
@@ -362,27 +353,19 @@ void AudioFfmpegEncoderPlugin::FillInFrameCache(const std::shared_ptr<Memory>& m
 {
     uint8_t* sampleData = nullptr;
     int32_t nbSamples = 0;
-    if (needReformat_) {
-        std::vector<const uint8_t*> input(avCodecContext_->channels);
-        input[0] = mem->GetReadOnlyData();
-        if (av_sample_fmt_is_planar(srcFmt_)) {
-            size_t lineSize = mem->GetSize() / avCodecContext_->channels;
-            for (int i = 1; i < avCodecContext_->channels; ++i) {
-                input[i] = input[i-1] + lineSize;
-            }
-        }
-        auto res = swr_convert(swrCtx_.get(), resampleChannelAddr_.data(), avCodecContext_->frame_size,
-                               input.data(), avCodecContext_->frame_size);
-        if (res < 0) {
-            MEDIA_LOG_E("resample input failed");
-            nbSamples = 0;
-        } else {
-            sampleData = resampleCache_.data();
-            nbSamples = res;
+    auto srcBuffer = mem->GetReadOnlyData();
+    auto destBuffer = const_cast<uint8_t*>(srcBuffer);
+    auto srcLength = mem->GetSize();
+    auto destLength = srcLength;
+    if (needReformat_ && resample_) {
+        FALSE_LOG(resample_->Convert(srcBuffer, srcLength, destBuffer, destLength) == Status::OK);
+        if (destLength) {
+            sampleData = destBuffer;
+            nbSamples = destLength / av_get_bytes_per_sample(avCodecContext_->sample_fmt) / avCodecContext_->channels;
         }
     } else {
-        sampleData = const_cast<uint8_t*>(mem->GetReadOnlyData());
-        nbSamples = mem->GetSize() / srcBytesPerSample_;
+        sampleData = destBuffer;
+        nbSamples = destLength / srcBytesPerSample_;
     }
     cachedFrame_->format = avCodecContext_->sample_fmt;
     cachedFrame_->sample_rate = avCodecContext_->sample_rate;
@@ -409,7 +392,6 @@ void AudioFfmpegEncoderPlugin::FillInFrameCache(const std::shared_ptr<Memory>& m
             avCodecContext_->channels;
     }
 }
-
 
 Status AudioFfmpegEncoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer)
 {
