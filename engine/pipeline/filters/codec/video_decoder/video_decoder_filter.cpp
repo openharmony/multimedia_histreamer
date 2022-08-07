@@ -33,7 +33,6 @@
 namespace {
 const uint32_t DEFAULT_IN_BUFFER_POOL_SIZE = 8;
 const uint32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 8;
-const uint32_t DEFAULT_HDI_OUT_BUFFER_POOL_SIZE = 21;
 const float VIDEO_PIX_DEPTH = 1.5;
 const uint32_t VIDEO_ALIGN_SIZE = 16;
 }
@@ -133,7 +132,7 @@ bool VideoDecoderFilter::Negotiate(const std::string& inPort,
 
 uint32_t VideoDecoderFilter::GetOutBufferPoolSize()
 {
-    return DEFAULT_HDI_OUT_BUFFER_POOL_SIZE;
+    return DEFAULT_OUT_BUFFER_POOL_SIZE;
 }
 
 uint32_t VideoDecoderFilter::CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta>& meta)
@@ -181,7 +180,7 @@ Plugin::TagMap VideoDecoderFilter::GetNegotiateParams(const Plugin::TagMap& upst
 {
     // video, need to get the max buffer num from plugin capability when use hdi as codec plugin interfaces
     Plugin::TagMap proposeParams = upstreamParams;
-    proposeParams.Insert<Plugin::Tag::VIDEO_MAX_SURFACE_NUM>(DEFAULT_HDI_OUT_BUFFER_POOL_SIZE);
+    proposeParams.Insert<Plugin::Tag::VIDEO_MAX_SURFACE_NUM>(DEFAULT_OUT_BUFFER_POOL_SIZE);
     return proposeParams;
 }
 
@@ -204,7 +203,7 @@ std::shared_ptr<Allocator> VideoDecoderFilter::GetAllocator()
 void VideoDecoderFilter::UpdateParams(const std::shared_ptr<const Plugin::Meta>& upMeta,
                                       std::shared_ptr<Plugin::Meta>& meta)
 {
-    MEDIA_LOG_D("video not need implement this func.");
+    MEDIA_LOG_D("UpdateParams begin");
 }
 
 void VideoDecoderFilter::OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input)

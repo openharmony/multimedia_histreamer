@@ -53,7 +53,6 @@ size_t ShareMemory::Write(const uint8_t* in, size_t writeSize, size_t position)
         start = std::min(position, capacity);
     }
     size_t length = std::min(writeSize, capacity - start);
-    MEDIA_LOG_D("writeSize: " PUBLIC_LOG_U64 ", start: " PUBLIC_LOG_U64 ", capacity: " PUBLIC_LOG_U64, writeSize, start, capacity); // writeSize: 71, start: 0, capacity: 4177920
     if (!sharedMem_->WriteToAshmem(in, (int32_t)writeSize, (int32_t)start)) {
         MEDIA_LOG_E("sharedMem_ WriteToAshmem failed");
         return 0;

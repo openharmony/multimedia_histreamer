@@ -65,34 +65,29 @@ private:
         std::shared_ptr<OmxCodecBuffer> omxBuffer;
         std::shared_ptr<ShareMemory> avSharedPtr;
         std::shared_ptr<Buffer> outputBuffer;
-        PortIndex portIndex;
-        BufferHandle* bufferHandle;
         BufferInfo()
         {
             omxBuffer = nullptr;
             avSharedPtr = nullptr;
             outputBuffer = nullptr;
-            portIndex = PortIndex::PORT_INDEX_INPUT;
-            bufferHandle = nullptr;
         }
         ~BufferInfo()
         {
             omxBuffer = nullptr;
             avSharedPtr = nullptr;
             outputBuffer = nullptr;
-            portIndex = PortIndex::PORT_INDEX_INPUT;
-            bufferHandle = nullptr;
         }
     };
     using BufferInfo = struct BufferInfo;
 
     // HDI
     static constexpr uint32_t alignment_ = 16;
-    std::map<uint32_t, std::shared_ptr<BufferInfo>> omxBuffers_;  // key is buferid
-    std::list<uint32_t> unUsedInBufferId_;
-    std::list<uint32_t> unUsedOutBufferId_;
+    std::map<uint32_t, std::shared_ptr<BufferInfo>> bufferInfoMap_;  // key is buferid
+    std::list<uint32_t> freeInBufferId_;
+    std::list<uint32_t> freeOutBufferId_;
 
     int GetFreeBufferId();
+    int GetFreeOutBufferId();
 
 private:
     template <typename T>
@@ -103,8 +98,6 @@ private:
 
     void TransInputBuffer2OmxBuffer(const std::shared_ptr<Plugin::Buffer>& inputBuffer,
                                     std::shared_ptr<BufferInfo>& bufferInfo);
-    Status TransOmxBuffer2OutputBuffer(const OmxCodecBuffer* omxBuffer,
-                                       std::shared_ptr<BufferInfo>& bufferInfo);
 
     void NotifyInputBufferDone(const std::shared_ptr<Buffer>& input);
     void NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output);
@@ -120,9 +113,9 @@ private:
     int32_t UseBufferOnOutputPort(PortIndex portIndex, int bufferCount, int bufferSize);
 
     bool FillAllTheBuffer();
-    void TransOutputBufToOmx(const std::shared_ptr<Plugin::Buffer>& outputBuffer,
-                             std::shared_ptr<BufferInfo>& bufferInfo);
-    void ReceiveFrameBuffer(std::shared_ptr<BufferInfo>& bufferInfo, HdiAdapter* hdiAdapter);
+    void TransOutputBufToOmxBuf(const std::shared_ptr<Plugin::Buffer>& outputBuffer,
+                                std::shared_ptr<OmxCodecBuffer>& omxBuffer);
+    void SendEmptyBufToHdi();
 
     // HDI callback
     static int32_t EventHandler(CodecCallbackType *self, OMX_EVENTTYPE event, EventInfo *info);
@@ -150,7 +143,8 @@ private:
     struct CompVerInfo verInfo_;
 
     OSAL::Mutex avMutex_;
-    DataCallback* dataCallback_ {};
+    Callback* callback_ {nullptr};
+    DataCallback* dataCallback_ {nullptr};
     OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufferQ_;
 
     OMX_STATETYPE curState_ {OMX_StateInvalid};
@@ -166,7 +160,8 @@ private:
     uint32_t outBufferCnt_;
 
     std::shared_ptr<ShareAllocator> shaAlloc_ {nullptr};
-    std::shared_ptr<SurfaceAllocator> surfaceAlloc_ {nullptr};
+//    bool firstFillBuffer_ = true;
+//    std::shared_ptr<OHOS::Media::OSAL::Task> fillBufferTask_ {};
 };
 } // namespace Plugin
 } // namespace Media
