@@ -187,7 +187,10 @@ if (hst_is_lite_sys) {
       target_type = "shared_library"
       sources = []
       deps = [ ":ffmpeg_audio_decoders" ]
-      ldflags = [ "-lavcodec" ]
+      ldflags = [
+        "-lavcodec",
+        "-lswresample",
+      ]
     }
     lite_library("histreamer_plugin_FFmpegDemuxer") {
       target_type = "shared_library"
