@@ -122,9 +122,11 @@ public:
     Status Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8_t*& destBuffer, size_t& destLength);
 private:
     ResamplePara resamplePara_ {};
+#if defined(_WIN32) || !defined(OHOS_LITE)
     std::vector<uint8_t> resampleCache_ {};
     std::vector<uint8_t*> resampleChannelAddr_ {};
     std::shared_ptr<SwrContext> swrCtx_ {nullptr};
+#endif
 };
 } // namespace Ffmpeg
 } // namespace Plugin
