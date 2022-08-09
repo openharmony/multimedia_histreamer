@@ -95,7 +95,8 @@ void ShareMemory::InitShareMemory(ShareMemType type)
             }
             break;
         default:
-            MEDIA_LOG_E("set share memory type failed, not find this type: " PUBLIC_LOG_D32, type);
+            MEDIA_LOG_E("set share memory type failed, not find this type: " PUBLIC_LOG_D32,
+                        static_cast<int32_t>(type));
             break;
     }
 }

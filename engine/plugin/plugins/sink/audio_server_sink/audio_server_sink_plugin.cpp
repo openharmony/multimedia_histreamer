@@ -603,7 +603,7 @@ Status AudioServerSinkPlugin::Write(const std::shared_ptr<Buffer>& input)
     if (needReformat_ && resample_ && srcLength >0) {
         FALSE_LOG(resample_->Convert(srcBuffer, srcLength, destBuffer, destLength) == Status::OK);
     }
-    MEDIA_LOG_DD("write data size " PUBLIC_LOG_ZU, length);
+    MEDIA_LOG_DD("write data size " PUBLIC_LOG_ZU, destLength);
     while (isForcePaused_ && seekable_ == Seekable::SEEKABLE) {
         OSAL::SleepFor(5); // 5ms
         continue;
