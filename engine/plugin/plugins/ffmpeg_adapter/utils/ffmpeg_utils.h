@@ -107,13 +107,13 @@ VideoH264Profile ConvH264ProfileFromFfmpeg (int32_t ffmpegProfile);
 int32_t ConvH264ProfileToFfmpeg(VideoH264Profile profile);
 
 struct ResamplePara {
-    uint32_t channels_ {2}; // 2: STEREO
-    uint32_t sampleRate_ {0};
-    uint32_t samplesPerFrame_ {0};
-    uint32_t bitsPerSample_ {0};
-    int64_t channelLayout_ {0};
-    AVSampleFormat srcFfFmt_ {AV_SAMPLE_FMT_NONE};
-    AVSampleFormat destFmt_ {AV_SAMPLE_FMT_S16};
+    uint32_t channels {2}; // 2: STEREO
+    uint32_t sampleRate {0};
+    uint32_t samplesPerFrame {0};
+    uint32_t bitsPerSample {0};
+    int64_t channelLayout {0};
+    AVSampleFormat srcFfFmt {AV_SAMPLE_FMT_NONE};
+    AVSampleFormat destFmt {AV_SAMPLE_FMT_S16};
 };
 
 class Resample {
