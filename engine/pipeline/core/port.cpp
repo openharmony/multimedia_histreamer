@@ -79,9 +79,10 @@ bool InPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstream
     return filter && filter->Negotiate(name, upstreamCap, negotiatedCap, upstreamParams, downstreamParams);
 }
 
-bool InPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+bool InPort::Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
+                       Plugin::TagMap &downstreamParams)
 {
-    return filter && filter->Configure(name, upstreamMeta);
+    return filter && filter->Configure(name, upstreamMeta, upstreamParams, downstreamParams);
 }
 
 
@@ -164,9 +165,10 @@ bool OutPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstrea
     return nextPort->Negotiate(upstreamCap, negotiatedCap, upstreamParams, downstreamParams);
 }
 
-bool OutPort::Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta)
+bool OutPort::Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
+                        Plugin::TagMap &downstreamParams)
 {
-    return nextPort->Configure(upstreamMeta);
+    return nextPort->Configure(upstreamMeta, upstreamParams, downstreamParams);
 }
 
 void OutPort::PushData(const AVBufferPtr& buffer, int64_t offset)
@@ -211,9 +213,12 @@ bool EmptyInPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& ups
     return false;
 }
 
-bool EmptyInPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+bool EmptyInPort::Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
+                            Plugin::TagMap &downstreamParams)
 {
     UNUSED_VARIABLE(upstreamMeta);
+    UNUSED_VARIABLE(upstreamParams);
+    UNUSED_VARIABLE(downstreamParams);
     MEDIA_LOG_E("Configure in EmptyInPort");
     return false;
 }
@@ -259,9 +264,12 @@ bool EmptyOutPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& up
     return false;
 }
 
-bool EmptyOutPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+bool EmptyOutPort::Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
+                             Plugin::TagMap &downstreamParams)
 {
     UNUSED_VARIABLE(upstreamMeta);
+    UNUSED_VARIABLE(upstreamParams);
+    UNUSED_VARIABLE(downstreamParams);
     MEDIA_LOG_E("Configure in EmptyOutPort");
     return false;
 }

@@ -252,8 +252,10 @@ bool DemuxerFilter::Negotiate(const std::string& inPort,
     return true;
 }
 
-bool DemuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+bool DemuxerFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
+                              Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
 {
+    (void)downstreamParams;
     (void)upstreamMeta->GetUint64(Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
     int32_t seekable = static_cast<int32_t>(seekable_);
     if (upstreamMeta->GetInt32(Plugin::MetaID::MEDIA_SEEKABLE, seekable)) {
@@ -561,7 +563,7 @@ void DemuxerFilter::NegotiateDownstream()
             upstreamParams.Insert<Tag::MEDIA_SEEKABLE>(seekable_);
             if (stream.port->Negotiate(tmpCap, caps, upstreamParams, downstreamParams)) {
                 UpdateStreamMeta(streamMeta, downstreamParams);
-                if (stream.port->Configure(streamMeta)) {
+                if (stream.port->Configure(streamMeta, upstreamParams, downstreamParams)) {
                     stream.needNegoCaps = false;
                 }
             } else {
