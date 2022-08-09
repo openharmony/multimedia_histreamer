@@ -495,6 +495,7 @@ int32_t ConvH264ProfileToFfmpeg(VideoH264Profile profile)
 Status Resample::Init(const ResamplePara& resamplePara)
 {
     resamplePara_ = resamplePara;
+#if defined(_WIN32) || !defined(OHOS_LITE)
     if (resamplePara_.bitsPerSample != 8 && resamplePara_.bitsPerSample != 24) { // 8 24
         auto destFrameSize = av_samples_get_buffer_size(nullptr, resamplePara_.channels,
                                                         resamplePara_.samplesPerFrame, resamplePara_.destFmt, 0);
@@ -521,11 +522,13 @@ Status Resample::Init(const ResamplePara& resamplePara)
             }
         });
     }
+#endif
     return Status::OK;
 }
 
 Status Resample::Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8_t*& destBuffer, size_t& destLength)
 {
+#if defined(_WIN32) || !defined(OHOS_LITE)
     if (resamplePara_.bitsPerSample == 8) { // 8
         FALSE_RETURN_V_MSG(resamplePara_.destFmt == AV_SAMPLE_FMT_S16, Status::ERROR_UNIMPLEMENTED,
                            "resample 8bit to other format can not support");
@@ -566,6 +569,7 @@ Status Resample::Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8
             destLength = res * av_get_bytes_per_sample(resamplePara_.destFmt) * resamplePara_.channels;
         }
     }
+#endif
     return Status::OK;
 }
 } // namespace Ffmpeg
