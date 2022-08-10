@@ -136,8 +136,7 @@ uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<const Plu
     return GetBytesPerSample(format) * samplesPerFrame * channels;
 }
 
-bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool AudioEncoderFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     PROFILE_BEGIN("Audio encoder configure begin");
     MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
@@ -156,8 +155,7 @@ bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_
         return false;
     }
     FAIL_LOG(UpdateMetaFromPlugin(*thisMeta));
-    FALSE_RETURN_V_MSG_E(targetOutPort->Configure(thisMeta, upstreamParams, downstreamParams), false,
-        "fail to configure downstream");
+    FALSE_RETURN_V_MSG_E(targetOutPort->Configure(thisMeta), false, "fail to configure downstream");
     state_ = FilterState::READY;
     OnEvent({name_, EventType::EVENT_READY});
     MEDIA_LOG_I("audio encoder send EVENT_READY");

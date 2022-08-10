@@ -216,9 +216,7 @@ ErrorCode AudioCaptureFilter::DoConfigure()
         MEDIA_LOG_E("cannot find available capability of plugin " PUBLIC_LOG_S, pluginInfo_->name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
-    Plugin::TagMap upstreamParams;
-    Plugin::TagMap downstreamParams;
-    if (!outPorts_[0]->Configure(audioMeta, upstreamParams, downstreamParams)) {
+    if (!outPorts_[0]->Configure(audioMeta)) {
         MEDIA_LOG_E("Configure downstream fail with " PUBLIC_LOG_S, Meta2String(*audioMeta).c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }

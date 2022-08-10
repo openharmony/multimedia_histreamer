@@ -102,7 +102,6 @@ ErrorCode VideoSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
 void VideoSinkFilter::HandleNegotiateParams(const Plugin::TagMap& upstreamParams, Plugin::TagMap& downstreamParams)
 {
 #ifndef OHOS_LITE
-    MEDIA_LOG_I("Enter set surface buffer");
     Plugin::Tag tag = Plugin::Tag::VIDEO_MAX_SURFACE_NUM;
     auto ite = upstreamParams.Find(tag);
     if (ite != std::end(upstreamParams)) {
@@ -186,13 +185,13 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort,
     if (!CreateVideoSinkPlugin(selectedPluginInfo)) {
         return false;
     }
+    HandleNegotiateParams(upstreamParams, downstreamParams);
     PROFILE_END("video sink negotiate end");
     MEDIA_LOG_D("video sink negotiate success");
     return true;
 }
 
-bool VideoSinkFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                                Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool VideoSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     PROFILE_BEGIN("video sink configure start");
     if (plugin_ == nullptr || pluginInfo_ == nullptr) {
@@ -213,7 +212,6 @@ bool VideoSinkFilter::Configure(const std::string &inPort, const std::shared_ptr
     }
     waitPrerolledTimeout_ = 1000 / frameRate_; // 1s = 1000ms
     UpdateMediaTimeRange(*upstreamMeta);
-    HandleNegotiateParams(upstreamParams, downstreamParams);
     state_ = FilterState::READY;
     OnEvent(Event{name_, EventType::EVENT_READY, {}});
     MEDIA_LOG_I("video sink send EVENT_READY");

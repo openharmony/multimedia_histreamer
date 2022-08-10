@@ -44,8 +44,7 @@ public:
 
     uint32_t CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta) override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
     /**
      *

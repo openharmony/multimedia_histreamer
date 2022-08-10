@@ -109,6 +109,23 @@ ErrorCode CodecFilterBase::SetPluginParameterLocked(Tag tag, const Plugin::Value
     return TranslatePluginStatus(plugin_->SetParameter(tag, value));
 }
 
+ErrorCode CodecFilterBase::AllocateOutputBuffers(const std::shared_ptr<const Plugin::Meta>& meta)
+{
+    uint32_t bufferCnt = 0;
+    if (GetPluginParameterLocked(Tag::REQUIRED_OUT_BUFFER_CNT, bufferCnt) != ErrorCode::SUCCESS) {
+        bufferCnt = GetOutBufferPoolSize();
+    }
+    MEDIA_LOG_D("bufferCnt: " PUBLIC_LOG_U32, bufferCnt);
+    uint32_t bufferSize = CalculateBufferSize(meta);
+    if (bufferSize == 0) {
+        bufferSize = MAX_OUT_DECODED_DATA_SIZE_PER_FRAME;
+    }
+    std::shared_ptr<Allocator> outAllocator = GetAllocator();
+    codecMode_->CreateOutBufferPool(outAllocator, bufferCnt, bufferSize, bufferMetaType_);
+    MEDIA_LOG_D("AllocateOutputBuffers success");
+    return ErrorCode::SUCCESS;
+}
+
 ErrorCode CodecFilterBase::SetParameter(int32_t key, const Plugin::Any& inVal)
 {
     if (state_.load() == FilterState::CREATED) {
@@ -206,10 +223,11 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
             thisOut->mime = outCap.mime;
 
             // need to get the max buffer num from plugin capability when use hdi as codec plugin interfaces
-            Plugin::TagMap proposeParams;
+            Plugin::TagMap proposeParams = GetNegotiateParams(upstreamParams);
             if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_, proposeParams, downstreamParams)) {
                 capNegWithUpstream_ = candidate.second;
                 selectedPluginInfo = candidate.first;
+                sinkParams_ = downstreamParams;
                 MEDIA_LOG_I("use plugin " PUBLIC_LOG_S, candidate.first->name.c_str());
                 MEDIA_LOG_I("neg upstream cap " PUBLIC_LOG_S, Capability2String(capNegWithUpstream_).c_str());
                 MEDIA_LOG_I("neg downstream cap " PUBLIC_LOG_S, Capability2String(capNegWithDownstream_).c_str());
@@ -233,8 +251,7 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
     return res;
 }
 
-bool CodecFilterBase::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                                Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool CodecFilterBase::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
     FALSE_RETURN_V_MSG_E(plugin_ != nullptr && pluginInfo_ != nullptr, false,
@@ -242,26 +259,12 @@ bool CodecFilterBase::Configure(const std::string &inPort, const std::shared_ptr
     auto thisMeta = std::make_shared<Plugin::Meta>();
     FALSE_RETURN_V_MSG_E(MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta), false,
                          "can't configure codec plugin since meta is not compatible with negotiated caps");
-    uint32_t bufferCnt = 0;
-    if (GetPluginParameterLocked(Tag::REQUIRED_OUT_BUFFER_CNT, bufferCnt) != ErrorCode::SUCCESS) {
-        bufferCnt = GetOutBufferPoolSize();
-    }
-    MEDIA_LOG_D("bufferCnt: " PUBLIC_LOG_U32, bufferCnt);
-    upstreamParams.Insert<Plugin::Tag::VIDEO_MAX_SURFACE_NUM>(bufferCnt);
     UpdateParams(upstreamMeta, thisMeta);
     auto targetOutPort = GetRouteOutPort(inPort);
-    if (targetOutPort == nullptr || !targetOutPort->Configure(thisMeta, upstreamParams, downstreamParams)) {
+    if (targetOutPort == nullptr || !targetOutPort->Configure(thisMeta)) {
         MEDIA_LOG_E("decoder filter downstream Configure failed");
         return false;
     }
-    sinkParams_ = downstreamParams;
-    uint32_t bufferSize = CalculateBufferSize(thisMeta);
-    if (bufferSize == 0) {
-        bufferSize = MAX_OUT_DECODED_DATA_SIZE_PER_FRAME;
-    }
-    std::shared_ptr<Allocator> outAllocator = GetAllocator();
-    codecMode_->CreateOutBufferPool(outAllocator, bufferCnt, bufferSize, bufferMetaType_);
-    MEDIA_LOG_D("AllocateOutputBuffers success");
     auto err = ConfigureToStartPluginLocked(thisMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("CodecFilterBase configure error");
@@ -278,6 +281,7 @@ ErrorCode CodecFilterBase::ConfigureToStartPluginLocked(const std::shared_ptr<co
 {
     MEDIA_LOG_D("CodecFilterBase configure called");
     FAIL_RETURN_MSG(ConfigPluginWithMeta(*plugin_, *meta), "configure decoder plugin error");
+    FAIL_RETURN_MSG(AllocateOutputBuffers(meta), "Alloc output buffers fail");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->SetCallback(this)), "plugin set callback fail");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->SetDataCallback(this)), "plugin set data callback fail");
     FAIL_RETURN_MSG(codecMode_->Configure(), "codec mode configure error");

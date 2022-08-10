@@ -55,8 +55,7 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
 
     void FlushStart() override;
 
@@ -78,6 +77,8 @@ protected:
     ErrorCode UpdateMetaFromPlugin(Plugin::Meta& meta);
 
     ErrorCode SetPluginParameterLocked(Tag tag, const Plugin::ValueType& value);
+
+    ErrorCode AllocateOutputBuffers(const std::shared_ptr<const Plugin::Meta>& meta);
 
     virtual void UpdateParams(const std::shared_ptr<const Plugin::Meta>& upMeta,
                               std::shared_ptr<Plugin::Meta>& meta);

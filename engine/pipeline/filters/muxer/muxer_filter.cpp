@@ -183,8 +183,7 @@ ErrorCode MuxerFilter::ConfigureToStart()
     }
     return ret;
 }
-bool MuxerFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                            Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool MuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     std::string tmp;
     if (!upstreamMeta->GetString(Plugin::MetaID::MIME, tmp)) {
@@ -203,7 +202,7 @@ bool MuxerFilter::Configure(const std::string &inPort, const std::shared_ptr<con
 
     auto meta = std::make_shared<Plugin::Meta>();
     meta->SetString(Plugin::MetaID::MIME, containerMime_);
-    if (!outPorts_[0]->Configure(meta, upstreamParams, downstreamParams)) {
+    if (!outPorts_[0]->Configure(meta)) {
         MEDIA_LOG_E("downstream of muxer filter configure failed");
         return false;
     }

@@ -168,9 +168,7 @@ ErrorCode VideoCaptureFilter::DoConfigure()
     videoMeta->SetUint32(Plugin::MetaID::VIDEO_FRAME_RATE, frameRate_);
     videoMeta->SetData(Plugin::MetaID::MIME, mime_);
     videoMeta->SetData(Plugin::MetaID::VIDEO_PIXEL_FORMAT, pixelFormat_);
-    Plugin::TagMap upstreamParams;
-    Plugin::TagMap downstreamParams;
-    if (!outPorts_[0]->Configure(videoMeta, upstreamParams, downstreamParams)) {
+    if (!outPorts_[0]->Configure(videoMeta)) {
         MEDIA_LOG_E("Configure downstream fail");
         return ErrorCode::ERROR_UNKNOWN;
     }

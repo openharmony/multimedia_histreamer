@@ -85,8 +85,7 @@ bool OutputSinkFilter::Negotiate(const std::string &inPort,
     return res;
 }
 
-bool OutputSinkFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                                 Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool OutputSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
 {
     PROFILE_BEGIN("Output sink configure begin");
     if (plugin_ == nullptr || pluginInfo_ == nullptr) {
