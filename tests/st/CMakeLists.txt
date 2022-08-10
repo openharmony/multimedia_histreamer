@@ -153,21 +153,22 @@ link_directories(
         ${z_lib_path}
 )
 
+file(GLOB OSAL_THREAD_SRCS ${TOP_DIR}/histreamer/engine/foundation/osal/thread/*.cpp)
 if (${OHOS_LITE})
     # only for lite stream source player
-    file(GLOB OSAL_THREAD_SRCS ${TOP_DIR}/histreamer/engine/foundation/osal/thread/*.cpp)
     set(TEST_HELPER_SRCS
             ${TOP_DIR}/histreamer/tests/st/helper/lite_player.cpp
             ${TOP_DIR}/histreamer/tests/st/helper/lite_stream_player.cpp
             ${TOP_DIR}/histreamer/tests/st/helper/lite_audio_recorder.cpp
             ${OSAL_THREAD_SRCS}
-            ${TOP_DIR}/histreamer/engine/foundation/osal/utils/util.cpp
             ${TOP_DIR}/histreamer/engine/scene/common/data_stream.cpp
             ${TOP_DIR}/histreamer/engine/scene/common/data_stream_impl.cpp
             )
 else()
     set(TEST_HELPER_SRCS
             ${TOP_DIR}/histreamer/tests/st/helper/std_player.cpp
+            ${OSAL_THREAD_SRCS}
+            ${TOP_DIR}/histreamer/engine/foundation/osal/utils/util.cpp
             ${TOP_DIR}/histreamer/tests/st/helper/std_audio_recorder.cpp
             )
 endif ()

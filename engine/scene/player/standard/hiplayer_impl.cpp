@@ -166,8 +166,17 @@ int32_t HiPlayerImpl::SetSource(const std::string& uri)
 
 int32_t HiPlayerImpl::SetSource(const std::shared_ptr<IMediaDataSource>& dataSrc)
 {
-    MEDIA_LOG_W("SetSource only support url format source!");
-    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+    MEDIA_LOG_I("SetSource entered source stream");
+    PROFILE_BEGIN("SetSource begin");
+    auto ret = Init();
+    if (ret == ErrorCode::SUCCESS) {
+        ret = fsm_.SendEvent(Intent::SET_SOURCE, std::make_shared<MediaSource>(dataSrc));
+    }
+    if (ret != ErrorCode::SUCCESS) {
+        MEDIA_LOG_E("SetSource error: " PUBLIC_LOG_S, GetErrorName(ret));
+    }
+    PROFILE_END("SetSource end.");
+    return TransErrorCode(ret);
 }
 
 int32_t HiPlayerImpl::Prepare()

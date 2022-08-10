@@ -38,8 +38,10 @@ config("hst_plugin_intf_config") {
   if (hst_is_lite_sys) {
     include_dirs += [ "//foundation/multimedia/utils/lite/interfaces/kits" ]
   } else {
-    include_dirs +=
-        [ "//foundation/multimedia/histreamer/engine/scene/standard" ]
+    include_dirs += [
+      "//foundation/multimedia/histreamer/engine/scene/standard",
+      "//foundation/multimedia/player_framework/interfaces/inner_api/native",
+    ]
     if (multimedia_histreamer_enable_video) {
       include_dirs += [
         "//commonlibrary/c_utils/base/include",
@@ -99,6 +101,7 @@ config("hst_plugin_core_config") {
       "//commonlibrary/c_utils/base/include",
       "//foundation/graphic/graphic_2d/frameworks/surface/include",
       "//foundation/graphic/graphic_2d/interfaces/inner_api/",
+      "//foundation/multimedia/player_framework/interfaces/inner_api/native",
       "//drivers/peripheral/display/interfaces/include",
     ]
   }
