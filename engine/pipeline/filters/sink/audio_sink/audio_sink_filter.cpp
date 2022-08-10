@@ -141,7 +141,8 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
     return res;
 }
 
-bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+bool AudioSinkFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
+                                Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
 {
     PROFILE_BEGIN("Audio sink configure begin");
     MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());

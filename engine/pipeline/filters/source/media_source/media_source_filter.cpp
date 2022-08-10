@@ -278,7 +278,7 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
         Plugin::TagMap upstreamParams;
         Plugin::TagMap downstreamParams;
         if (!GetOutPort(PORT_NAME_DEFAULT)->Negotiate(tmpCap, peerCap, upstreamParams, downstreamParams) ||
-            !GetOutPort(PORT_NAME_DEFAULT)->Configure(suffixMeta)) {
+            !GetOutPort(PORT_NAME_DEFAULT)->Configure(suffixMeta, upstreamParams, downstreamParams)) {
             MEDIA_LOG_E("Negotiate fail!");
             return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
         }

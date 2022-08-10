@@ -206,7 +206,8 @@ bool VideoEncoderFilter::Negotiate(const std::string& inPort,
     return res;
 }
 
-bool VideoEncoderFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+bool VideoEncoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
+                                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
 {
     PROFILE_BEGIN("video encoder configure start");
     MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
@@ -236,7 +237,7 @@ bool VideoEncoderFilter::Configure(const std::string& inPort, const std::shared_
         return false;
     }
     FAIL_LOG(UpdateMetaFromPlugin(*thisMeta));
-    if (!targetOutPort->Configure(thisMeta)) {
+    if (!targetOutPort->Configure(thisMeta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("encoder filter downstream Configure failed");
         return false;
     }

@@ -51,7 +51,8 @@ public:
                            Plugin::Capability& negotiatedCap,
                            const Plugin::TagMap& upstreamParams,
                            Plugin::TagMap& downstreamParams) = 0;
-    virtual bool Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta) = 0;
+    virtual bool Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
+                           Plugin::TagMap &downstreamParams) = 0;
     /**
      * push data
      * @param buffer pushed buffer
@@ -82,7 +83,8 @@ public:
                    Plugin::Capability& negotiatedCap,
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
-    bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
+    bool Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
+                   Plugin::TagMap &downstreamParams) override;
     void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
@@ -103,7 +105,8 @@ public:
                    Plugin::Capability& negotiatedCap,
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
-    bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
+    bool Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
+                   Plugin::TagMap &downstreamParams) override;
     void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
@@ -128,7 +131,8 @@ public:
                    Plugin::Capability& negotiatedCap,
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
-    bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
+    bool Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
+                   Plugin::TagMap &downstreamParams) override;
     void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
@@ -150,7 +154,8 @@ public:
                    Plugin::Capability& negotiatedCap,
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
-    bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
+    bool Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
+                   Plugin::TagMap &downstreamParams) override;
     void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 

@@ -85,10 +85,11 @@ bool AudioDecoderFilter::Negotiate(const std::string& inPort,
     return true;
 }
 
-bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta)
+bool AudioDecoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
+                                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
 {
     PROFILE_BEGIN("audio decoder configure begin");
-    FALSE_RETURN_V(CodecFilterBase::Configure(inPort, upstreamMeta), false);
+    FALSE_RETURN_V(CodecFilterBase::Configure(inPort, upstreamMeta, upstreamParams, downstreamParams), false);
     PROFILE_END("audio decoder configure end");
     return true;
 }

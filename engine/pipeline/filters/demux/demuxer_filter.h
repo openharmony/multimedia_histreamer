@@ -70,7 +70,8 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
 
-    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta) override;
+    bool Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
+                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
 
     ErrorCode SeekTo(int64_t pos, Plugin::SeekMode mode);
 
