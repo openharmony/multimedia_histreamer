@@ -266,10 +266,10 @@ Status AudioFfmpegEncoderPlugin::Start()
         Ffmpeg::ResamplePara resamplePara = {
             static_cast<uint32_t>(avCodecContext_->channels),
             static_cast<uint32_t>(avCodecContext_->sample_rate),
-            static_cast<uint32_t>(avCodecContext_->frame_size),
             0,
             static_cast<int64_t>(avCodecContext_->channel_layout),
             srcFmt_,
+            static_cast<uint32_t>(avCodecContext_->frame_size),
             avCodecContext_->sample_fmt,
         };
         resample_ = std::make_shared<Ffmpeg::Resample>();
