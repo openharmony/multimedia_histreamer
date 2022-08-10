@@ -166,10 +166,10 @@ Status SdlAudioSinkPlugin::Prepare()
         Ffmpeg::ResamplePara resamplePara {
             channels_,
             sampleRate_,
-            samplesPerFrame_,
             bitsPerSample_,
             static_cast<int64_t>(channelLayout_),
             reSrcFfFmt_,
+            samplesPerFrame_,
             reFfDestFmt_,
         };
         FALSE_RETURN_V_MSG(resample_->Init(resamplePara) == Status::OK, Status::ERROR_UNKNOWN, "Resample init error");

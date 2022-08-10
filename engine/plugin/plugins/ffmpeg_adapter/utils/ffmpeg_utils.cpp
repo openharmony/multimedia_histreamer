@@ -498,12 +498,12 @@ Status Resample::Init(const ResamplePara& resamplePara)
 #if defined(_WIN32) || !defined(OHOS_LITE)
     if (resamplePara_.bitsPerSample != 8 && resamplePara_.bitsPerSample != 24) { // 8 24
         auto destFrameSize = av_samples_get_buffer_size(nullptr, resamplePara_.channels,
-                                                        resamplePara_.samplesPerFrame, resamplePara_.destFmt, 0);
+                                                        resamplePara_.destSamplesPerFrame, resamplePara_.destFmt, 0);
         resampleCache_.reserve(destFrameSize);
         resampleChannelAddr_.reserve(resamplePara_.channels);
         auto tmp = resampleChannelAddr_.data();
         av_samples_fill_arrays(tmp, nullptr, resampleCache_.data(), resamplePara_.channels,
-                               resamplePara_.samplesPerFrame, resamplePara_.destFmt, 0);
+                               resamplePara_.destSamplesPerFrame, resamplePara_.destFmt, 0);
         SwrContext* swrContext = swr_alloc();
         if (swrContext == nullptr) {
             MEDIA_LOG_E("cannot allocate swr context");
@@ -559,8 +559,9 @@ Status Resample::Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8
                 tmpInput[i] = tmpInput[i-1] + lineSize;
             }
         }
-        auto res = swr_convert(swrCtx_.get(), resampleChannelAddr_.data(), resamplePara_.samplesPerFrame,
-                               tmpInput.data(), resamplePara_.samplesPerFrame);
+        auto samples = lineSize / av_get_bytes_per_sample(resamplePara_.srcFfFmt);
+        auto res = swr_convert(swrCtx_.get(), resampleChannelAddr_.data(), resamplePara_.destSamplesPerFrame,
+                               tmpInput.data(), samples);
         if (res < 0) {
             MEDIA_LOG_E("resample input failed");
             destLength = 0;
