@@ -67,16 +67,39 @@ ErrorCode AudioSinkFilter::SetPluginParameter(Tag tag, const Plugin::ValueType& 
 
 ErrorCode AudioSinkFilter::SetParameter(int32_t key, const Plugin::Any& value)
 {
-    if (state_.load() == FilterState::CREATED) {
-        return ErrorCode::ERROR_AGAIN;
-    }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
         MEDIA_LOG_I("SetParameter key " PUBLIC_LOG_D32 " is out of boundary", key);
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    RETURN_AGAIN_IF_NULL(plugin_);
-    return SetPluginParameter(tag, value);
+    switch (tag) {
+        case Tag::APP_PID:
+            FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(int32_t)), ErrorCode::ERROR_INVALID_PARAMETER_TYPE,
+                                 "APP_PID type should be int32_t");
+            appPid_ = Plugin::AnyCast<int32_t>(value);
+            break;
+        case Tag::APP_UID:
+            FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(int32_t)), ErrorCode::ERROR_INVALID_PARAMETER_TYPE,
+                                 "APP_UID type should be int32_t");
+            appUid_ = Plugin::AnyCast<int32_t>(value);
+            break;
+        case Tag::AUDIO_RENDER_INFO:
+            FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(AudioRenderInfo)), ErrorCode::ERROR_INVALID_PARAMETER_TYPE,
+                                 "AUDIO_RENDER_INFO type should be AudioRenderInfo");
+            audioRenderInfo_ = Plugin::AnyCast<AudioRenderInfo>(value);
+            break;
+        case Tag::AUDIO_INTERRUPT_MODE:
+            FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(int32_t)), ErrorCode::ERROR_INVALID_PARAMETER_TYPE,
+                                 "AUDIO_INTERRUPT_MODE type should be int32_t");
+            audioInterruptMode_ = static_cast<AudioInterruptMode>(Plugin::AnyCast<int32_t>(value));
+            if (plugin_) {
+                (void)plugin_->SetParameter(Tag::AUDIO_INTERRUPT_MODE, audioInterruptMode_);
+            }
+            break;
+        default:
+            break;
+    }
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode AudioSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
@@ -121,8 +144,11 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
     auto res = UpdateAndInitPluginByInfo<Plugin::AudioSink>(plugin_, pluginInfo_, selectedPluginInfo,
         [this](const std::string& name) -> std::shared_ptr<Plugin::AudioSink> {
         auto plugin = Plugin::PluginManager::Instance().CreateAudioSinkPlugin(name);
-        plugin->SetParameter(Tag::APP_PID, appPid_);
-        plugin->SetParameter(Tag::APP_UID, appUid_);
+        (void)plugin->SetParameter(Tag::APP_PID, appPid_);
+        (void)plugin->SetParameter(Tag::APP_UID, appUid_);
+        (void)plugin->SetParameter(Tag::AUDIO_RENDER_INFO, audioRenderInfo_);
+        (void)plugin->SetParameter(Tag::AUDIO_INTERRUPT_MODE, audioInterruptMode_);
+        (void)plugin->SetCallback(this);
         return plugin;
     });
     NOK_LOG(plugin_->SetParameter(Tag::MEDIA_SEEKABLE, seekable_));
@@ -154,12 +180,12 @@ bool AudioSinkFilter::Configure(const std::string &inPort, const std::shared_ptr
     auto err = ConfigureToPreparePlugin(upstreamMeta);
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("sink configure error");
-        OnEvent({name_, EventType::EVENT_ERROR, err});
+        FilterBase::OnEvent({name_, EventType::EVENT_ERROR, err});
         return false;
     }
     UpdateMediaTimeRange(*upstreamMeta);
     state_ = FilterState::READY;
-    OnEvent({name_, EventType::EVENT_READY});
+    FilterBase::OnEvent({name_, EventType::EVENT_READY});
     MEDIA_LOG_I("audio sink send EVENT_READY");
     PROFILE_END("Audio sink configure end");
     return true;
@@ -202,7 +228,7 @@ ErrorCode AudioSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
             .type = EventType::EVENT_COMPLETE,
         };
         MEDIA_LOG_D("audio sink push data send event_complete");
-        OnEvent(event);
+        FilterBase::OnEvent(event);
     }
     MEDIA_LOG_DD("audio sink push data end");
     return ErrorCode::SUCCESS;
@@ -345,6 +371,11 @@ void AudioSinkFilter::ResetSyncInfo()
     lastReportedClockTime_ = HST_TIME_NONE;
     latestBufferPts_ = HST_TIME_NONE;
     latestBufferDuration_ = HST_TIME_NONE;
+}
+
+void AudioSinkFilter::OnEvent(const Plugin::PluginEvent& event)
+{
+    FilterBase::OnEvent(Event{name_, EventType::EVENT_PLUGIN_EVENT, event});
 }
 } // namespace Pipeline
 } // namespace Media

@@ -60,6 +60,7 @@ public:
 
     Status SetCallback(Callback* cb) override
     {
+        callback_ = cb;
         return Status::OK;
     }
 
@@ -109,14 +110,29 @@ public:
 
     Status Drain() override;
 private:
+    class AudioRendererCallbackImpl : public OHOS::AudioStandard::AudioRendererCallback {
+    public:
+        AudioRendererCallbackImpl(Callback* cb, bool& isPaused);
+        void OnInterrupt(const OHOS::AudioStandard::InterruptEvent& interruptEvent) override;
+        void OnStateChange(const OHOS::AudioStandard::RendererState state) override;
+    private:
+        Callback* callback_ {};
+        bool isPaused_ {false};
+    };
     void ReleaseRender();
     bool StopRender();
     bool AssignSampleRateIfSupported(uint32_t sampleRate);
     bool AssignChannelNumIfSupported(uint32_t channelNum);
     bool AssignSampleFmtIfSupported(AudioSampleFormat sampleFormat);
+    void SetInterruptMode(AudioStandard::InterruptMode interruptMode);
 
     OSAL::Mutex renderMutex_ {};
-    std::unique_ptr<AudioStandard::AudioRenderer> audioRenderer_;
+    Callback* callback_ {};
+    AudioRenderInfo audioRenderInfo_ {};
+    AudioStandard::AudioRendererOptions rendererOptions_ {};
+    AudioStandard::InterruptMode audioInterruptMode_ {AudioStandard::InterruptMode::SHARE_MODE};
+    std::unique_ptr<AudioStandard::AudioRenderer> audioRenderer_ {nullptr};
+    std::shared_ptr<OHOS::AudioStandard::AudioRendererCallback> audioRendererCallback_ {nullptr};
     AudioStandard::AudioRendererParams rendererParams_ {};
 
     bool fmtSupported_ {false};
@@ -135,7 +151,6 @@ private:
     bool needReformat_ {false};
     Plugin::Seekable seekable_ {Plugin::Seekable::INVALID};
     std::shared_ptr<Ffmpeg::Resample> resample_ {nullptr};
-    std::shared_ptr<OHOS::AudioStandard::AudioRendererCallback> audioRendererCallback_ {nullptr};
 };
 } // AuSrSinkPlugin
 } // Plugin

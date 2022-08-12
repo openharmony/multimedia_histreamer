@@ -92,6 +92,9 @@ HiPlayerImpl::~HiPlayerImpl()
     audioSink_.reset();
 #ifdef VIDEO_SUPPORT
     videoSink_.reset();
+    if (surface_) {
+        surface_ = nullptr;
+    }
 #endif
     syncManager_.reset();
 }
@@ -460,10 +463,24 @@ void HiPlayerImpl::OnEvent(const Event& event)
             break;
         }
         case EventType::EVENT_PLUGIN_EVENT: {
-            Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
-            if (pluginEvent.type == Plugin::PluginEventType::BELOW_LOW_WATERLINE ||
-                pluginEvent.type == Plugin::PluginEventType::ABOVE_LOW_WATERLINE) {
-                MEDIA_LOG_I("Receive PLUGIN_EVENT, type:  " PUBLIC_LOG_D32, CppExt::to_underlying(pluginEvent.type));
+            auto pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
+            switch (pluginEvent.type) {
+                case Plugin::PluginEventType::INTERRUPT: {
+                    auto interruptEvent = Plugin::AnyCast<Plugin::AudioInterruptEvent>(pluginEvent.param);
+                    Format format;
+                    (void)format.PutIntValue(PlayerKeys::AUDIO_INTERRUPT_TYPE, interruptEvent.eventType);
+                    (void)format.PutIntValue(PlayerKeys::AUDIO_INTERRUPT_FORCE, interruptEvent.forceType);
+                    (void)format.PutIntValue(PlayerKeys::AUDIO_INTERRUPT_HINT, interruptEvent.hintType);
+                    callbackLooper_.OnInfo(INFO_TYPE_INTERRUPT_EVENT, 0, format);
+                    MEDIA_LOG_I("Receive Audio INTERRUPT EVENT");
+                    break;
+                }
+                case Plugin::PluginEventType::BELOW_LOW_WATERLINE:
+                case Plugin::PluginEventType::ABOVE_LOW_WATERLINE:
+                default:
+                    MEDIA_LOG_I("Receive PLUGIN_EVENT, type:  " PUBLIC_LOG_D32,
+                                CppExt::to_underlying(pluginEvent.type));
+                    break;
             }
             break;
         }
@@ -671,7 +688,26 @@ bool HiPlayerImpl::IsSingleLoop()
 int32_t HiPlayerImpl::SetParameter(const Format& params)
 {
     MEDIA_LOG_I("SetParameter entered.");
-    return CppExt::to_underlying(ErrorCode::ERROR_UNIMPLEMENTED);
+    if (params.ContainKey(PlayerKeys::VIDEO_SCALE_TYPE)) {
+        int32_t videoScaleType = 0;
+        params.GetIntValue(PlayerKeys::VIDEO_SCALE_TYPE, videoScaleType);
+        return SetVideoScaleType(VideoScaleType(videoScaleType));
+    }
+    if (params.ContainKey(PlayerKeys::CONTENT_TYPE) && params.ContainKey(PlayerKeys::STREAM_USAGE)) {
+        int32_t contentType;
+        int32_t streamUsage;
+        int32_t rendererFlag;
+        params.GetIntValue(PlayerKeys::CONTENT_TYPE, contentType);
+        params.GetIntValue(PlayerKeys::STREAM_USAGE, streamUsage);
+        params.GetIntValue(PlayerKeys::RENDERER_FLAG, rendererFlag);
+        return SetAudioRendererInfo(contentType, streamUsage, rendererFlag);
+    }
+    if (params.ContainKey(PlayerKeys::AUDIO_INTERRUPT_MODE)) {
+        int32_t interruptMode = 0;
+        params.GetIntValue(PlayerKeys::AUDIO_INTERRUPT_MODE, interruptMode);
+        return SetAudioInterruptMode(interruptMode);
+    }
+    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
 }
 
 int32_t HiPlayerImpl::SetObs(const std::weak_ptr<IPlayerEngineObs>& obs)
@@ -902,6 +938,27 @@ PlaybackRateMode HiPlayerImpl::ChangeSpeedToMode(double rate) const
     }
     MEDIA_LOG_I("unknown rate:" PUBLIC_LOG_F ", return default speed(SPEED_FORWARD_1_00_X)", rate);
     return SPEED_FORWARD_1_00_X;
+}
+
+int32_t HiPlayerImpl::SetVideoScaleType(VideoScaleType videoScaleType)
+{
+    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+}
+
+int32_t HiPlayerImpl::SetAudioRendererInfo(const int32_t contentType, const int32_t streamUsage,
+                                           const int32_t rendererFlag)
+{
+    MEDIA_LOG_I("SetAudioRendererInfo entered.");
+    Plugin::AudioRenderInfo audioRenderInfo {contentType, streamUsage, rendererFlag};
+    auto ret = audioSink_->SetParameter(static_cast<int32_t>(Tag::AUDIO_RENDER_INFO), audioRenderInfo);
+    return TransErrorCode(ret);
+}
+
+int32_t HiPlayerImpl::SetAudioInterruptMode(const int32_t interruptMode)
+{
+    MEDIA_LOG_I("SetAudioInterruptMode entered.");
+    auto ret = audioSink_->SetParameter(static_cast<int32_t>(Tag::AUDIO_INTERRUPT_MODE), interruptMode);
+    return TransErrorCode(ret);
 }
 }  // namespace Media
 }  // namespace OHOS

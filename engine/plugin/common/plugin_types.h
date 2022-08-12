@@ -114,6 +114,27 @@ enum struct PluginType : int32_t {
     MUXER,             ///< reference MuxerPlugin
     OUTPUT_SINK,       ///< reference OutputSinkPlugin
 };
+
+/*
+ * @brief Audio RenderInfo, default ContentType::CONTENT_TYPE_UNKNOWN(0) and StreamUsage::STREAM_USAGE_UNKNOWN(0)
+ *        combined into AudioStreamType::STREAM_MUSIC.
+ */
+struct AudioRenderInfo {
+    int32_t contentType {0};
+    int32_t streamUsage {0};
+    int32_t rendererFlags {0};
+};
+
+struct AudioInterruptEvent {
+    uint32_t eventType {0};
+    uint32_t forceType {0};
+    uint32_t hintType {0};
+};
+
+enum class AudioInterruptMode {
+    SHARE_MODE,
+    INDEPENDENT_MODE
+};
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

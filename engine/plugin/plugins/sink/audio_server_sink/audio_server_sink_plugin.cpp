@@ -30,26 +30,6 @@ namespace {
 using namespace OHOS::Media::Plugin;
 constexpr uint32_t DEFAULT_OUTPUT_CHANNELS = 2;
 constexpr AudioChannelLayout DEFAULT_OUTPUT_CHANNEL_LAYOUT = AudioChannelLayout::STEREO;
-class AudioRendererCallbackImpl : public OHOS::AudioStandard::AudioRendererCallback {
-public:
-    explicit AudioRendererCallbackImpl(bool &isPaused) : isPaused_(isPaused) {}
-private:
-    void OnInterrupt(const OHOS::AudioStandard::InterruptEvent &interruptEvent)
-    {
-        if (interruptEvent.forceType == OHOS::AudioStandard::INTERRUPT_FORCE) {
-            switch (interruptEvent.hintType) {
-                case OHOS::AudioStandard::INTERRUPT_HINT_PAUSE:
-                    isPaused_ = true;
-                    break;
-                default:
-                    isPaused_ = false;
-                    break;
-            }
-        }
-    }
-    void OnStateChange(const OHOS::AudioStandard::RendererState state) {}
-    bool isPaused_ {false};
-};
 const std::pair<OHOS::AudioStandard::AudioSamplingRate, uint32_t> g_auSampleRateMap[] = {
     {OHOS::AudioStandard::SAMPLE_RATE_8000, 8000},
     {OHOS::AudioStandard::SAMPLE_RATE_11025, 11025},
@@ -62,6 +42,11 @@ const std::pair<OHOS::AudioStandard::AudioSamplingRate, uint32_t> g_auSampleRate
     {OHOS::AudioStandard::SAMPLE_RATE_48000, 48000},
     {OHOS::AudioStandard::SAMPLE_RATE_64000, 64000},
     {OHOS::AudioStandard::SAMPLE_RATE_96000, 96000},
+};
+
+const std::pair<AudioInterruptMode, OHOS::AudioStandard::InterruptMode> g_auInterruptMap[] = {
+    {AudioInterruptMode::SHARE_MODE, OHOS::AudioStandard::InterruptMode::SHARE_MODE},
+    {AudioInterruptMode::INDEPENDENT_MODE, OHOS::AudioStandard::InterruptMode::INDEPENDENT_MODE},
 };
 
 const std::vector<std::tuple<AudioSampleFormat, OHOS::AudioStandard::AudioSampleFormat, AVSampleFormat>> g_aduFmtMap = {
@@ -130,6 +115,16 @@ bool ChannelNumNum2Enum(uint32_t numVal, OHOS::AudioStandard::AudioChannel& enum
     return false;
 }
 
+void AudioInterruptMode2InterruptMode(AudioInterruptMode audioInterruptMode,
+                                      OHOS::AudioStandard::InterruptMode& interruptMode)
+{
+    for (const auto& item : g_auInterruptMap) {
+        if (item.first == audioInterruptMode) {
+            interruptMode = item.second;
+        }
+    }
+}
+
 std::shared_ptr<AudioSinkPlugin> AudioServerSinkPluginCreater(const std::string& name)
 {
     return std::make_shared<OHOS::Media::Plugin::AuSrSinkPlugin::AudioServerSinkPlugin>(name);
@@ -196,6 +191,38 @@ namespace Plugin {
 namespace AuSrSinkPlugin {
 using namespace OHOS::Media::Plugin;
 
+
+AudioServerSinkPlugin::AudioRendererCallbackImpl::AudioRendererCallbackImpl(Callback* cb, bool& isPaused)
+    : callback_(cb), isPaused_(isPaused)
+{
+}
+
+void AudioServerSinkPlugin::AudioRendererCallbackImpl::OnInterrupt(
+    const OHOS::AudioStandard::InterruptEvent& interruptEvent)
+{
+    if (interruptEvent.forceType == OHOS::AudioStandard::INTERRUPT_FORCE) {
+        switch (interruptEvent.hintType) {
+            case OHOS::AudioStandard::INTERRUPT_HINT_PAUSE:
+                isPaused_ = true;
+                break;
+            default:
+                isPaused_ = false;
+                break;
+        }
+    }
+    auto audioInterruptEvent = AudioInterruptEvent {
+        static_cast<uint32_t>(interruptEvent.eventType),
+        static_cast<uint32_t>(interruptEvent.forceType),
+        static_cast<uint32_t>(interruptEvent.hintType)
+    };
+    callback_->OnEvent(PluginEvent{PluginEventType::INTERRUPT, audioInterruptEvent, "Audio interrupt event"});
+}
+
+void AudioServerSinkPlugin::AudioRendererCallbackImpl::OnStateChange(const OHOS::AudioStandard::RendererState state)
+{
+    MEDIA_LOG_D("RenderState is " PUBLIC_LOG_U32, static_cast<uint32_t>(state));
+}
+
 AudioServerSinkPlugin::AudioServerSinkPlugin(std::string name)
     : Plugin::AudioSinkPlugin(std::move(name)), audioRenderer_(nullptr)
 {
@@ -216,14 +243,27 @@ Status AudioServerSinkPlugin::Init()
         AudioStandard::AppInfo appInfo;
         appInfo.appPid = appPid_;
         appInfo.appUid = appUid_;
-        MEDIA_LOG_I("Create audio renderer for apppid_" PUBLIC_LOG_D32 " appuid_ " PUBLIC_LOG_D32, appPid_, appUid_);
-        audioRenderer_ = AudioStandard::AudioRenderer::Create(AudioStandard::AudioStreamType::STREAM_MUSIC, appInfo);
+        MEDIA_LOG_I("Create audio renderer for apppid_ " PUBLIC_LOG_D32 " appuid_ " PUBLIC_LOG_D32 " contentType "
+            PUBLIC_LOG_D32 " streamUsage " PUBLIC_LOG_D32 " rendererFlags " PUBLIC_LOG_D32 " audioInterruptMode_ "
+            PUBLIC_LOG_U32, appPid_, appUid_, audioRenderInfo_.contentType, audioRenderInfo_.streamUsage,
+            audioRenderInfo_.rendererFlags, static_cast<uint32_t>(audioInterruptMode_));
+        rendererOptions_.rendererInfo.contentType = static_cast<AudioStandard::ContentType>(
+            audioRenderInfo_.contentType);
+        rendererOptions_.rendererInfo.streamUsage = static_cast<AudioStandard::StreamUsage>(
+            audioRenderInfo_.streamUsage);
+        rendererOptions_.rendererInfo.rendererFlags = audioRenderInfo_.rendererFlags;
+        rendererOptions_.streamInfo.samplingRate = AudioStandard::SAMPLE_RATE_8000;
+        rendererOptions_.streamInfo.encoding = AudioStandard::ENCODING_PCM;
+        rendererOptions_.streamInfo.format = AudioStandard::SAMPLE_S16LE;
+        rendererOptions_.streamInfo.channels = AudioStandard::MONO;
+        audioRenderer_ = AudioStandard::AudioRenderer::Create(rendererOptions_, appInfo);
         if (audioRenderer_ == nullptr) {
             MEDIA_LOG_E("Create audioRenderer_ fail");
             return Status::ERROR_UNKNOWN;
         }
+        audioRenderer_->SetInterruptMode(audioInterruptMode_);
         if (audioRendererCallback_ == nullptr) {
-            audioRendererCallback_ = std::make_shared<AudioRendererCallbackImpl>(isForcePaused_);
+            audioRendererCallback_ = std::make_shared<AudioRendererCallbackImpl>(callback_, isForcePaused_);
             audioRenderer_->SetRendererCallback(audioRendererCallback_);
         }
     }
@@ -472,6 +512,14 @@ bool AudioServerSinkPlugin::AssignSampleFmtIfSupported(Plugin::AudioSampleFormat
     return fmtSupported_;
 }
 
+void AudioServerSinkPlugin::SetInterruptMode(AudioStandard::InterruptMode interruptMode)
+{
+    OSAL::ScopedLock lock(renderMutex_);
+    if (audioRenderer_) {
+        audioRenderer_->SetInterruptMode(interruptMode);
+    }
+}
+
 Status AudioServerSinkPlugin::SetParameter(Tag tag, const ValueType& para)
 {
     MEDIA_LOG_I("SetParameter entered, key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
@@ -531,6 +579,17 @@ Status AudioServerSinkPlugin::SetParameter(Tag tag, const ValueType& para)
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(int32_t)), Status::ERROR_MISMATCHED_TYPE,
                 "APP_UID type should be int32_t");
             appUid_ = Plugin::AnyCast<int32_t>(para);
+            break;
+        case Tag::AUDIO_RENDER_INFO:
+            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(AudioRenderInfo)), Status::ERROR_MISMATCHED_TYPE,
+                                 "AUDIO_RENDER_INFO type should be AudioRenderInfo");
+            audioRenderInfo_ = Plugin::AnyCast<AudioRenderInfo>(para);
+            break;
+        case Tag::AUDIO_INTERRUPT_MODE:
+            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(AudioInterruptMode)), Status::ERROR_MISMATCHED_TYPE,
+                                 "AUDIO_INTERRUPT_MODE type should be AudioInterruptMode");
+            AudioInterruptMode2InterruptMode(Plugin::AnyCast<AudioInterruptMode>(para), audioInterruptMode_);
+            SetInterruptMode(audioInterruptMode_);
             break;
         default:
             MEDIA_LOG_I("Unknown key");
@@ -641,7 +700,7 @@ Status AudioServerSinkPlugin::Flush()
     return Status::ERROR_UNKNOWN;
 }
 
-Status  AudioServerSinkPlugin::Drain()
+Status AudioServerSinkPlugin::Drain()
 {
     MEDIA_LOG_I("Drain entered.");
     OSAL::ScopedLock lock(renderMutex_);
