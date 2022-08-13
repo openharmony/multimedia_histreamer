@@ -171,6 +171,7 @@ Status SurfaceSinkPlugin::Prepare()
         needConvFormat = true;
     }
     uint64_t usage = BUFFER_USAGE_CPU_READ | BUFFER_USAGE_CPU_WRITE | BUFFER_USAGE_MEM_DMA;
+    surfaceFmt = PixelFormat::PIXEL_FMT_YCBCR_420_SP;
     mAllocator_->Config(static_cast<int32_t>(width_), static_cast<int32_t>(height_), usage, surfaceFmt,
                         DEFAULT_STRIDE_ALIGN, 0);
     MEDIA_LOG_D("Prepare success");

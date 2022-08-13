@@ -83,11 +83,13 @@ private:
     // HDI
     static constexpr uint32_t alignment_ = 16;
     std::map<uint32_t, std::shared_ptr<BufferInfo>> bufferInfoMap_;  // key is buferid
-    std::list<uint32_t> freeInBufferId_;
-    std::list<uint32_t> freeOutBufferId_;
+//    std::list<uint32_t> freeInBufferId_;
+//    std::list<uint32_t> freeOutBufferId_;
+    OHOS::Media::BlockingQueue<uint32_t> freeInBufferId_;
+    OHOS::Media::BlockingQueue<uint32_t> freeOutBufferId_;
+
 
     int GetFreeBufferId();
-    int GetFreeOutBufferId();
 
 private:
     template <typename T>
@@ -96,7 +98,9 @@ private:
     template <typename T>
     void InitParamInOhos(T &param);
 
-    void TransInputBuffer2OmxBuffer(const std::shared_ptr<Plugin::Buffer>& inputBuffer,
+    int isHead4_ = 0;
+    void HandleFrame();
+    Status TransInputBuffer2OmxBuffer(const std::shared_ptr<Plugin::Buffer>& inputBuffer,
                                     std::shared_ptr<BufferInfo>& bufferInfo);
 
     void NotifyInputBufferDone(const std::shared_ptr<Buffer>& input);
@@ -112,6 +116,7 @@ private:
     int32_t UseBufferOnInputPort(PortIndex portIndex, int bufferCount, int bufferSize);
     int32_t UseBufferOnOutputPort(PortIndex portIndex, int bufferCount, int bufferSize);
 
+    bool isFirstCall_ = true;
     bool FillAllTheBuffer();
     void TransOutputBufToOmxBuf(const std::shared_ptr<Plugin::Buffer>& outputBuffer,
                                 std::shared_ptr<OmxCodecBuffer>& omxBuffer);
@@ -142,10 +147,10 @@ private:
     uint32_t componentId_ {0};
     struct CompVerInfo verInfo_;
 
-    OSAL::Mutex avMutex_;
     Callback* callback_ {nullptr};
     DataCallback* dataCallback_ {nullptr};
-    OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufferQ_;
+    std::list<std::shared_ptr<Buffer>> inBufQue_ {};
+    OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufQue_ {nullptr};
 
     OMX_STATETYPE curState_ {OMX_StateInvalid};
     OMX_STATETYPE targetState_ {OMX_StateInvalid};
@@ -160,8 +165,7 @@ private:
     uint32_t outBufferCnt_;
 
     std::shared_ptr<ShareAllocator> shaAlloc_ {nullptr};
-//    bool firstFillBuffer_ = true;
-//    std::shared_ptr<OHOS::Media::OSAL::Task> fillBufferTask_ {};
+    bool isFlush_ = false;
 };
 } // namespace Plugin
 } // namespace Media
