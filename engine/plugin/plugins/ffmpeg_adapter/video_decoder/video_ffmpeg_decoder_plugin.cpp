@@ -84,6 +84,7 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
     switch (codec->id) {
         case AV_CODEC_ID_H264:
             incapBuilder.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
+            incapBuilder.SetVideoBitStreamFormatList({VideoBitStreamFormat::AVC1, VideoBitStreamFormat::ANNEXB});
             break;
         default:
             incapBuilder.SetMime("video/unknown");

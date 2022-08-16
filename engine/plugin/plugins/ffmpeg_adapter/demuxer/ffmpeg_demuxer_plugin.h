@@ -85,7 +85,7 @@ private:
 
     bool ParseMediaData();
 
-    bool ConvertAVPacketToFrameInfo(const AVStream& avStream, const AVPacket& pkt, Buffer& frameInfo);
+    bool ConvertAVPacketToFrameInfo(const AVStream& avStream, AVPacket& pkt, Buffer& frameInfo);
 
     static int AVReadPacket(void* opaque, uint8_t* buf, int bufSize); // NOLINT: void*
 
@@ -93,6 +93,12 @@ private:
 
     static int64_t AVSeek(void* opaque, int64_t offset, int whence); // NOLINT: void*
 
+    void InitConvertContext(const AVStream& avStream);
+
+    void ConvertAvcOrHevcToAnnexb(AVPacket& pkt);
+
+    VideoBitStreamFormat vdBitStreamFormat_ {VideoBitStreamFormat::UNKNOWN};
+    std::shared_ptr<AVBSFContext> avbsfContext_ {nullptr};
     double playbackSpeed_ {1.0};
     Seekable seekable_;
     IOContext ioContext_;

@@ -73,6 +73,7 @@ enum struct MetaID : uint32_t {
     VIDEO_WIDTH = CppExt::to_underlying(Tag::VIDEO_WIDTH),
     VIDEO_HEIGHT = CppExt::to_underlying(Tag::VIDEO_HEIGHT),
     VIDEO_PIXEL_FORMAT = CppExt::to_underlying(Tag::VIDEO_PIXEL_FORMAT),
+    VIDEO_BIT_STREAM_FORMAT = CppExt::to_underlying(Tag::VIDEO_BIT_STREAM_FORMAT),
     VIDEO_FRAME_RATE = CppExt::to_underlying(Tag::VIDEO_FRAME_RATE),
     VIDEO_H264_PROFILE = CppExt::to_underlying(Tag::VIDEO_H264_PROFILE),
     VIDEO_H264_LEVEL = CppExt::to_underlying(Tag::VIDEO_H264_LEVEL),

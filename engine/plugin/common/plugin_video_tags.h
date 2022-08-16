@@ -68,6 +68,19 @@ enum struct VideoH264Profile : uint32_t {
     HIGH422,   ///< High 4:2:2 profile
     HIGH444,   ///< High 4:4:4 profile
 };
+
+/**
+ * @enum Video Bit Stream format.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+enum struct VideoBitStreamFormat : uint32_t {
+    UNKNOWN,
+    AVC1,  // H264 bit stream format
+    HEVC,  // H265 bit stream format
+    ANNEXB, // H264, H265 bit stream format
+};
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
