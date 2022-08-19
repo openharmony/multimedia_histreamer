@@ -213,8 +213,7 @@ int32_t HdiAdapter::FillBufferDone(CodecCallbackType* self, int64_t appData, con
     return HDF_SUCCESS;
 }
 
-// 从 空 out buffer 里面拿一个，然后与 omxBuffer 对应，调用 FillThisBuffer 往下送
-// 循环往下送，查找所有空的buffer，类似刚开始的 FillAlltheBufferdone, 或者考虑复用
+// 从空 out buffer 里面拿，然后与 omxBuffer 对应，调用 FillThisBuffer 循环往下送
 void HdiAdapter::SendEmptyBufToHdi()
 {
     isFirstCall_ = false;
@@ -227,17 +226,15 @@ void HdiAdapter::TransOutputBufToOmxBuf(const std::shared_ptr<Plugin::Buffer>& o
 {
     omxBuffer->pts = 0;
     omxBuffer->flag = 0;
-    // outputBuffer->GetMemory() 通过验证，此处如果不加锁的话，会存在资源抢占的问题，因为该函数在 FillAllTheBuffer() 里面执行，
-    // 而 FillAllTheBuffer() 函数会在 QueueOutputBuffer() 和 FillBufferDone()回调 里面执行，如果某个时刻这两个函数同时调用该语句，则会出问题；
-    BufferHandle* bufferHandle = nullptr;
-    {
-        OSAL::ScopedLock l(lockOutputBuffers_);
-        bufferHandle = std::static_pointer_cast<Plugin::SurfaceMemory>(outputBuffer->GetMemory())->
-                GetSurfaceBuffer()->GetBufferHandle();
-        omxBuffer->bufferLen = sizeof(BufferHandle) +
-                               sizeof(int32_t) * (bufferHandle->reserveFds + bufferHandle->reserveInts);
-        omxBuffer->buffer = (uint8_t*)bufferHandle;
-    }
+    auto outMem = std::static_pointer_cast<Plugin::SurfaceMemory>(outputBuffer->GetMemory());
+    FALSE_RETURN(outMem != nullptr);
+    auto surfaceBuf = outMem->GetSurfaceBuffer();
+    FALSE_RETURN(surfaceBuf != nullptr);
+
+    BufferHandle* bufferHandle = surfaceBuf->GetBufferHandle();
+    omxBuffer->bufferLen = sizeof(BufferHandle) +
+                           sizeof(int32_t) * (bufferHandle->reserveFds + bufferHandle->reserveInts);
+    omxBuffer->buffer = (uint8_t*)bufferHandle;
     MEDIA_LOG_D("TransOutputBufToOmx end, omxBufferId: " PUBLIC_LOG_U32, omxBuffer->bufferId);
 }
 
@@ -246,7 +243,6 @@ HdiAdapter::HdiAdapter(std::string name)
     : CodecPlugin(std::forward<std::string>(name)),
       freeInBufferId_("hdiFreeInBufferId", 4),
       freeOutBufferId_("hdiFreeOutBufferId", 21),
-//      inBufQue_("hdiAdapterInQueue", DEFAULT_IN_BUFFER_QUEUE_SIZE),
       outBufQue_("hdiAdapterOutQueue", DEFAULT_OUT_BUFFER_QUEUE_SIZE)
 {
     MEDIA_LOG_D("codec adapter ctor");
@@ -304,7 +300,14 @@ Plugin::Status HdiAdapter::Deinit()
 {
     FALSE_RETURN_V_MSG(g_compManager != nullptr, Status::ERROR_INVALID_PARAMETER, "g_compManager is nullptr");
     FALSE_RETURN_V_MSG(codecComp_ != nullptr, Status::ERROR_INVALID_PARAMETER, "codecComponent is nullptr");
-    g_compManager->DestroyComponent(componentId_);
+//    codecComp_->GetState(codecComp_, &curState_);
+//    if (curState_ > OMX_StateLoaded) {
+//        // wait state change to OMX_StateLoaded
+//        MEDIA_LOG_D("DeInit, state is not OMX_StateLoaded");
+//        return Status::ERROR_WRONG_STATE;
+//    }
+    auto ret = g_compManager->DestroyComponent(componentId_);
+    FALSE_RETURN_V_MSG_E(ret != HDF_SUCCESS, Status::ERROR_INVALID_OPERATION, "HDI destroy component failed");
     codecComp_ = nullptr;
     curState_ = OMX_StateInvalid;
     outBufQue_.SetActive(false);
@@ -384,6 +387,7 @@ Plugin::Status HdiAdapter::Stop()
         err = codecComp_->GetState(codecComp_, &state);
         OSAL::SleepFor(15);
     }
+//    err = codecComp_->SendCommand(codecComp_, OMX_CommandStateSet, OMX_StateLoaded, NULL, 0);
     MEDIA_LOG_D("change state to idle success, state: " PUBLIC_LOG_D32, static_cast<int32_t>(state));
     MEDIA_LOG_D("Stop end");
     return Status::OK;
@@ -454,7 +458,7 @@ Status HdiAdapter::QueueInputBuffer(const std::shared_ptr<Plugin::Buffer>& input
     {
         OSAL::ScopedLock l(lockInputBuffers_);
         inBufQue_.push_back(inputBuffer);
-        MEDIA_LOG_D("QueueInputBuffer end, inBufQue_.size: " PUBLIC_LOG_U64, inBufQue_.size());
+        MEDIA_LOG_D("QueueInputBuffer end, inBufQue_.size: " PUBLIC_LOG_ZU, inBufQue_.size());
     }
     HandleFrame();
     return Status::OK;
@@ -481,6 +485,7 @@ void HdiAdapter::HandleFrame()
         auto inBufferId = freeInBufferId_.Pop();
         auto iter = bufferInfoMap_.find(inBufferId);
         auto bufferInfo = iter->second;
+
         auto err = TransInputBuffer2OmxBuffer(inputBuffer, bufferInfo);
         if (err != Status::OK) {
             MEDIA_LOG_D("TransInputBuffer2OmxBuffer() fail");
@@ -517,7 +522,6 @@ Status HdiAdapter::TransInputBuffer2OmxBuffer(const std::shared_ptr<Plugin::Buff
         return Status::ERROR_INVALID_DATA;
     }
     size_t bufLen = mem->GetSize();
-    MEDIA_LOG_D("write: " PUBLIC_LOG_P " to share memory, size: " PUBLIC_LOG_U64, memAddr, bufLen);
 
     (void)bufferInfo->avSharedPtr->Write(memAddr, bufLen, 0);
     bufferInfo->omxBuffer->offset = 0;
@@ -549,14 +553,16 @@ bool HdiAdapter::FillAllTheBuffer() // freeOutBufferId_ is blocking que
                 MEDIA_LOG_D("outBufQue_ have data, but freeOutBufferId_ is empty");
                 return false;
             }
-            int outBufferID = static_cast<int>(freeOutBufferId_.Pop());
+            int outBufferID = static_cast<int>(freeOutBufferId_.Pop(1));
+            FALSE_RETURN_V(outBufferID != 0, false);
             auto iter = bufferInfoMap_.find(outBufferID);
             auto bufferInfo = iter->second;
             auto omxBuffer = bufferInfo->omxBuffer;
 
-            auto outputBuffer = outBufQue_.Pop();
+            auto outputBuffer = outBufQue_.Pop(1);
             if (outputBuffer == nullptr) {
-                MEDIA_LOG_D("output buffer is nullptr");
+                freeOutBufferId_.Push(outBufferID);
+                MEDIA_LOG_E("output buffer is nullptr");
                 return false;
             }
             TransOutputBufToOmxBuf(outputBuffer, omxBuffer);
@@ -569,7 +575,7 @@ bool HdiAdapter::FillAllTheBuffer() // freeOutBufferId_ is blocking que
             }
         }
     }
-    MEDIA_LOG_D("FillAllTheBuffer end, free out bufferId count: " PUBLIC_LOG_U64 ", outBufQue_.Size: " PUBLIC_LOG_ZU,
+    MEDIA_LOG_D("FillAllTheBuffer end, free out bufferId count: " PUBLIC_LOG_ZU ", outBufQue_.Size: " PUBLIC_LOG_ZU,
                 freeOutBufferId_.Size(), outBufQue_.Size());
     return true;
 }
@@ -892,7 +898,7 @@ int32_t HdiAdapter::UseBufferOnOutputPort(PortIndex portIndex, int bufferCount, 
         bufferInfoMap_.emplace(std::make_pair(omxBuffer->bufferId, bufferInfo));
         freeOutBufferId_.Push(omxBuffer->bufferId);
     }
-    MEDIA_LOG_D("UseBufferOnOutputPort end, outBufQue_.size: " PUBLIC_LOG_U64, outBufQue_.Size());
+    MEDIA_LOG_D("UseBufferOnOutputPort end, outBufQue_.size: " PUBLIC_LOG_ZU, outBufQue_.Size());
     return HDF_SUCCESS;
 }
 
