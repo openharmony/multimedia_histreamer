@@ -22,7 +22,7 @@
 // If file name and line number is need, #define HST_DEBUG at the beginning of the cpp file.
 #define HST_DEBUG
 #ifdef HST_DEBUG
-inline std::string HstGetFileName(std::string file)
+inline std::string HstGetFileName(const std::string& file)
 {
     if (file == "") {
         return "Unknown File";
@@ -76,9 +76,8 @@ inline std::string HstGetFileName(std::string file)
 #else
 #define HST_DECORATOR_HILOG(op, fmt, args...)                                                                          \
     do {                                                                                                               \
-        std::string file(__FILE__);                                                                                    \
-        std::string bareFile = HstGetFileName(file);                                                                   \
-        op(LOG_CORE, "(" PUBLIC_LOG_S ", " PUBLIC_LOG_D32 "): " fmt, bareFile.c_str(), __LINE__, ##args);              \
+        op(LOG_CORE, "(" PUBLIC_LOG_S ", " PUBLIC_LOG_D32 "): " fmt,                                                   \
+		    HstGetFileName(std::string(__FILE__)).c_str(), __LINE__, ##args);                                          \
     } while (0)
 #endif
 
