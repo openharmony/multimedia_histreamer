@@ -469,28 +469,24 @@ void HdiAdapter::HandleFrame()
     MEDIA_LOG_D("handle frame start");
     while (!freeInBufferId_.Empty()) {
         std::shared_ptr<Buffer> inputBuffer = nullptr;
+        uint32_t inBufferId = 0;
         {
             OSAL::ScopedLock l(lockInputBuffers_);
             if (inBufQue_.empty()) {
-                MEDIA_LOG_D("inBufQue_ is empty");
                 return;
             }
             inputBuffer = inBufQue_.front();
+            inBufferId = freeInBufferId_.Pop(1);
+            if (inBufferId == 0) {
+                return;
+            }
             inBufQue_.pop_front();
         }
-        if (inputBuffer == nullptr) {
-            MEDIA_LOG_D("inputBuffer = nullptr");
-            return;
-        }
-        auto inBufferId = freeInBufferId_.Pop();
         auto iter = bufferInfoMap_.find(inBufferId);
         auto bufferInfo = iter->second;
 
         auto err = TransInputBuffer2OmxBuffer(inputBuffer, bufferInfo);
-        if (err != Status::OK) {
-            MEDIA_LOG_D("TransInputBuffer2OmxBuffer() fail");
-            return;
-        }
+        FALSE_RETURN_MSG(err == Status::OK, "TransInputBuffer2OmxBuffer() fail");
         if (codecComp_ && codecComp_->EmptyThisBuffer) {
             auto ret = codecComp_->EmptyThisBuffer(codecComp_, bufferInfo->omxBuffer.get());
             FALSE_LOG_MSG(ret == HDF_SUCCESS, "call EmptyThisBuffer() error, bufferId: " PUBLIC_LOG_D32, inBufferId);
