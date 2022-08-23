@@ -165,10 +165,9 @@ int32_t HdiAdapter::EventHandler(CodecCallbackType* self, OMX_EVENTTYPE event, E
                 ", nData1: " PUBLIC_LOG_U32 ", nData2: " PUBLIC_LOG_U32,
                 info->appData, static_cast<int>(event), info->data1, info->data2);
     switch (event) {
-        case OMX_EventCmdComplete: {
+        case OMX_EventCmdComplete:
             hdiAdapter->HandelEventCmdComplete(info->data1, info->data2);
             break;
-        }
         default:
             break;
     }
@@ -178,7 +177,7 @@ int32_t HdiAdapter::EventHandler(CodecCallbackType* self, OMX_EVENTTYPE event, E
 
 int32_t HdiAdapter::EmptyBufferDone(CodecCallbackType* self, int64_t appData, const OmxCodecBuffer* buffer)
 {
-    MEDIA_LOG_D("EmptyBufferDone-callback start");
+    MEDIA_LOG_DD("EmptyBufferDone-callback start");
     auto hdiAdapter = reinterpret_cast<HdiAdapter*>(appData);
     hdiAdapter->freeInBufferId_.Push(buffer->bufferId);
     hdiAdapter->HandleFrame();
@@ -188,12 +187,12 @@ int32_t HdiAdapter::EmptyBufferDone(CodecCallbackType* self, int64_t appData, co
 
 int32_t HdiAdapter::FillBufferDone(CodecCallbackType* self, int64_t appData, const OmxCodecBuffer* omxBuffer)
 {
-    MEDIA_LOG_D("FillBufferDone-callback begin, bufferId: " PUBLIC_LOG_U32 ", flag: " PUBLIC_LOG_U32 ", pts: " PUBLIC_LOG_D64,
+    MEDIA_LOG_DD("FillBufferDone-callback begin, bufferId: " PUBLIC_LOG_U32 ", flag: " PUBLIC_LOG_U32 ", pts: " PUBLIC_LOG_D64,
                 omxBuffer->bufferId, omxBuffer->flag, omxBuffer->pts);
     auto hdiAdapter = reinterpret_cast<HdiAdapter*>(appData);
     auto iter = hdiAdapter->bufferInfoMap_.find(omxBuffer->bufferId);
     if ((iter == hdiAdapter->bufferInfoMap_.end()) || (iter->second == nullptr)) {
-        MEDIA_LOG_D("iter == hdiAdapter->omxBuffers_.end() || iter->second == nullptr");
+        MEDIA_LOG_DD("iter == hdiAdapter->omxBuffers_.end() || iter->second == nullptr");
         return HDF_ERR_INVALID_PARAM;
     }
     auto bufferInfo = iter->second;
@@ -203,7 +202,6 @@ int32_t HdiAdapter::FillBufferDone(CodecCallbackType* self, int64_t appData, con
     hdiAdapter->NotifyOutputBufferDone(outputBuffer);
     bufferInfo->outputBuffer = nullptr; // Need: to release output buffer, Decrease the reference count
     hdiAdapter->freeOutBufferId_.Push(omxBuffer->bufferId);
-
     // call FillThisBuffer() again
     (void)hdiAdapter->FillAllTheOutBuffer();
     MEDIA_LOG_D("FillBufferDone-callback end, free out bufferId count: " PUBLIC_LOG_ZU, hdiAdapter->freeOutBufferId_.Size());
@@ -255,14 +253,15 @@ Plugin::Status HdiAdapter::Init()
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     std::string compName = pluginName_.substr(firstDotPos + 1); // ComponentCapability.compName
-
+    g_compManager_ = GetCodecComponentManager();
     codecCallback_ = CodecCallbackTypeStubGetInstance();
     FALSE_RETURN_V_MSG(codecCallback_ != nullptr, Status::ERROR_NULL_POINTER, "create callback_ failed");
+    FALSE_RETURN_V_MSG(g_compManager_ != nullptr, Status::ERROR_NULL_POINTER, "create component manager failed");
     codecCallback_->EventHandler = &HdiAdapter::EventHandler;
     codecCallback_->EmptyBufferDone = &HdiAdapter::EmptyBufferDone;
     codecCallback_->FillBufferDone = &HdiAdapter::FillBufferDone;
 
-    int32_t ret = g_compManager->CreateComponent(&codecComp_, &componentId_, const_cast<char*>(compName.c_str()),
+    int32_t ret = g_compManager_->CreateComponent(&codecComp_, &componentId_, const_cast<char*>(compName.c_str()),
                                                  (int64_t)this, codecCallback_);
     FALSE_RETURN_V_MSG(codecComp_ != nullptr, Status::ERROR_NULL_POINTER,
                        "create component failed, retVal = " PUBLIC_LOG_D32, (int)ret);
@@ -279,18 +278,21 @@ Plugin::Status HdiAdapter::Init()
 
 Plugin::Status HdiAdapter::Deinit()
 {
-    FALSE_RETURN_V_MSG(g_compManager != nullptr, Status::ERROR_INVALID_PARAMETER, "g_compManager is nullptr");
-    FALSE_RETURN_V_MSG(codecComp_ != nullptr, Status::ERROR_INVALID_PARAMETER, "codecComponent is nullptr");
-
-    auto ret = g_compManager->DestroyComponent(componentId_);
+    MEDIA_LOG_D("HdiAdapter DeInit enter");
+    (void)codecComp_->SendCommand(codecComp_, OMX_CommandStateSet, OMX_StateIdle, NULL, 0);
+    OSAL::SleepFor(20);
+    FreeBuffers();
+    auto ret = g_compManager_->DestroyComponent(componentId_);
     FALSE_RETURN_V_MSG_E(ret != HDF_SUCCESS, Status::ERROR_INVALID_OPERATION, "HDI destroy component failed");
+    CodecComponentTypeRelease(codecComp_);
     codecComp_ = nullptr;
     curState_ = OMX_StateInvalid;
     outBufQue_.SetActive(false);
     outBufQue_.Clear();
+    CodecComponentManagerRelease();
     CodecCallbackTypeStubRelease(codecCallback_);
     codecCallback_ = nullptr;
-    MEDIA_LOG_D("DeInit end");
+    MEDIA_LOG_D("HdiAdapter DeInit end");
     return Status::OK;
 }
 
@@ -446,7 +448,6 @@ void HdiAdapter::HandleFrame()
         }
         auto iter = bufferInfoMap_.find(inBufferId);
         auto bufferInfo = iter->second;
-
         auto err = TransInputBuffer2OmxBuffer(inputBuffer, bufferInfo);
         FALSE_RETURN_MSG(err == Status::OK, "TransInputBuffer2OmxBuffer() fail");
         if (codecComp_ && codecComp_->EmptyThisBuffer) {
@@ -455,7 +456,7 @@ void HdiAdapter::HandleFrame()
         }
         NotifyInputBufferDone(inputBuffer);
     }
-    MEDIA_LOG_D("handle frame end");
+    MEDIA_LOG_DD("handle frame end");
 }
 
 Status HdiAdapter::TransInputBuffer2OmxBuffer(const std::shared_ptr<Plugin::Buffer>& pluginBuffer,
@@ -463,20 +464,20 @@ Status HdiAdapter::TransInputBuffer2OmxBuffer(const std::shared_ptr<Plugin::Buff
 {
     bufferInfo->omxBuffer->flag = Translate2omxFlagSet(pluginBuffer->flag);
     bufferInfo->omxBuffer->pts = pluginBuffer->pts;
-    MEDIA_LOG_D("plugin flag: " PUBLIC_LOG_U32 ", pts: " PUBLIC_LOG_D64,
+    MEDIA_LOG_DD("plugin flag: " PUBLIC_LOG_U32 ", pts: " PUBLIC_LOG_D64,
                 bufferInfo->omxBuffer->flag, bufferInfo->omxBuffer->pts);
     if (pluginBuffer->flag == 1) {
-        MEDIA_LOG_D("EOS flag receive, return");
+        MEDIA_LOG_DD("EOS flag receive, return");
         return Status::ERROR_INVALID_DATA;
     }
     auto mem = pluginBuffer->GetMemory();
     if (mem == nullptr) {
-        MEDIA_LOG_D("pluginBuffer->GetMemory() return nullptr");
+        MEDIA_LOG_DD("pluginBuffer->GetMemory() return nullptr");
         return Status::ERROR_INVALID_DATA;
     }
     const uint8_t* memAddr = mem->GetReadOnlyData();
     if (memAddr == nullptr) {
-        MEDIA_LOG_D("mem->GetReadOnlyData() return nullptr");
+        MEDIA_LOG_DD("mem->GetReadOnlyData() return nullptr");
         return Status::ERROR_INVALID_DATA;
     }
     size_t bufLen = mem->GetSize();
@@ -484,13 +485,13 @@ Status HdiAdapter::TransInputBuffer2OmxBuffer(const std::shared_ptr<Plugin::Buff
     (void)bufferInfo->avSharedPtr->Write(memAddr, bufLen, 0);
     bufferInfo->omxBuffer->offset = 0;
     bufferInfo->omxBuffer->filledLen = bufLen;
-    MEDIA_LOG_D("TransBuffer2OmxBuffer end, bufferId: " PUBLIC_LOG_U32, bufferInfo->omxBuffer->bufferId);
+    MEDIA_LOG_DD("TransBuffer2OmxBuffer end, bufferId: " PUBLIC_LOG_U32, bufferInfo->omxBuffer->bufferId);
     return Status::OK;
 }
 
 bool HdiAdapter::FillAllTheOutBuffer()
 {
-    MEDIA_LOG_D("FillAllTheBuffer begin");
+    MEDIA_LOG_DD("FillAllTheBuffer begin");
     if (isFirstCall_) {
         isFirstCall_ = false;
         for (uint32_t i = 0; i < outBufferCnt_; ++i) {
@@ -533,6 +534,7 @@ bool HdiAdapter::FillAllTheOutBuffer()
             }
         }
     }
+
     MEDIA_LOG_D("FillAllTheBuffer end, free out bufferId count: " PUBLIC_LOG_ZU ", outBufQue_.Size: " PUBLIC_LOG_ZU,
                 freeOutBufferId_.Size(), outBufQue_.Size());
     return true;
@@ -544,7 +546,7 @@ Status HdiAdapter::QueueOutputBuffer(const std::shared_ptr<Plugin::Buffer>& outp
     if (curState_ == OMX_StateExecuting) {
         FillAllTheOutBuffer();
     }
-    MEDIA_LOG_D("QueueOutputBuffer end");
+    MEDIA_LOG_DD("QueueOutputBuffer end");
     return Status::OK;
 }
 
@@ -581,7 +583,7 @@ void HdiAdapter::NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output)
 {
     if (dataCallback_ != nullptr) {
         dataCallback_->OnOutputBufferDone(output);
-        MEDIA_LOG_D("NotifyOutputBufferDone end");
+        MEDIA_LOG_DD("NotifyOutputBufferDone end");
     }
 }
 
@@ -755,6 +757,7 @@ Status HdiAdapter::UseBufferOnPort(PortIndex portIndex, int bufferCount, int buf
         bufferInfo->omxBuffer = omxBuffer;
         bufferInfo->avSharedPtr = sharedMem;
         bufferInfo->outputBuffer = outputBuffer;
+        bufferInfo->portIndex = portIndex;
         bufferInfoMap_.emplace(std::make_pair(omxBuffer->bufferId, bufferInfo));
         if (portIndex == PortIndex::PORT_INDEX_INPUT) {
             freeInBufferId_.Push(omxBuffer->bufferId);
@@ -798,6 +801,30 @@ std::shared_ptr<OmxCodecBuffer> HdiAdapter::InitOmxBuffer(std::shared_ptr<ShareM
     }
     return omxBuffer;
 }
+
+void HdiAdapter::FreeBuffers()
+{
+    ChangeState(OMX_StateLoaded);
+    auto iter = bufferInfoMap_.begin();
+    while (iter != bufferInfoMap_.end()) {
+        auto bufferInfo = iter->second;
+        bufferInfo->omxBuffer->bufferLen = 0;
+        iter = bufferInfoMap_.erase(iter);
+        (void)codecComp_->FreeBuffer(codecComp_, (uint32_t)bufferInfo->portIndex, bufferInfo->omxBuffer.get());
+    }
+    freeOutBufferId_.Clear();
+    freeInBufferId_.Clear();
+    OMX_STATETYPE status;
+    auto err = codecComp_->GetState(codecComp_, &status);
+    FALSE_LOG_MSG_W(err == HDF_SUCCESS, "codeComp get status failed");
+    if (status != OMX_StateLoaded) {
+        MEDIA_LOG_I("Wait for OMX_StateLoaded status");
+        WaitForState(OMX_StateLoaded);
+    } else {
+        MEDIA_LOG_I("status is" PUBLIC_LOG_D32, status);
+    }
+}
+
 
 void HdiAdapter::WaitForEvent(OMX_U32 cmd)
 {
@@ -850,7 +877,7 @@ void HdiAdapter::HandelEventCmdComplete(OMX_U32 data1, OMX_U32 data2)
         default:
             break;
     }
-    cond_.NotifyOne();
+    cond_.NotifyAll();
 }
 
 void HdiAdapter::HandelEventStateSet(OMX_U32 data)

@@ -65,11 +65,13 @@ private:
     struct BufferInfo {
         std::shared_ptr<OmxCodecBuffer> omxBuffer;
         std::shared_ptr<ShareMemory> avSharedPtr;
+        PortIndex portIndex;
         std::shared_ptr<Buffer> outputBuffer;
         BufferInfo()
         {
             omxBuffer = nullptr;
             avSharedPtr = nullptr;
+            portIndex = PortIndex::PORT_INDEX_INPUT;
             outputBuffer = nullptr;
         }
         ~BufferInfo()
@@ -77,6 +79,7 @@ private:
             omxBuffer = nullptr;
             avSharedPtr = nullptr;
             outputBuffer = nullptr;
+            portIndex = PortIndex::PORT_INDEX_INPUT;
         }
     };
     using BufferInfo = struct BufferInfo;
@@ -117,7 +120,7 @@ private:
     bool FillAllTheOutBuffer();
     void TransOutputBufToOmxBuf(const std::shared_ptr<Plugin::Buffer>& outputBuffer,
                                 std::shared_ptr<OmxCodecBuffer>& omxBuffer);
-
+    void FreeBuffers();
     // HDI callback
     static int32_t EventHandler(CodecCallbackType *self, OMX_EVENTTYPE event, EventInfo *info);
     static int32_t EmptyBufferDone(CodecCallbackType *self, int64_t appData, const OmxCodecBuffer *buffer);
@@ -139,6 +142,7 @@ private:
 private:
     struct CodecComponentType* codecComp_ {nullptr};
     struct CodecCallbackType* codecCallback_ {nullptr};
+    CodecComponentManager* g_compManager_ {nullptr};
     uint32_t componentId_;
     struct CompVerInfo verInfo_;
 
