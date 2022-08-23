@@ -80,14 +80,14 @@ bool HttpCurlClient::CheckUrl(const std::string& url)
     easyHandle_ = curl_easy_init();
     FALSE_RETURN_V(easyHandle_ != nullptr, false);
     InitCurlEnvironment(url, true);
-    int serverCode {0};
+    int64_t serverCode {0};
     int clientCode = curl_easy_perform(easyHandle_);
     if (clientCode == CURLE_OK) {
         curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &serverCode);
     }
     // 200 request success, 206 partial download
     FALSE_RETURN_V_MSG_E(serverCode == 200 || serverCode == 206, false, "Check url (" PUBLIC_LOG_S ") failed, "
-        "client code(" PUBLIC_LOG_D32 "), server code(" PUBLIC_LOG_D32 ").", url.c_str(), clientCode, serverCode);
+        "client code(" PUBLIC_LOG_D32 "), server code(" PUBLIC_LOG_D64 ").", url.c_str(), clientCode, serverCode);
     return true;
 }
 
@@ -170,10 +170,10 @@ Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCod
         }
         return Status::ERROR_CLIENT;
     } else {
-        int httpCode = 0;
+        int64_t httpCode = 0;
         curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
         if (httpCode >= 400) { // 400
-            MEDIA_LOG_E("Http error " PUBLIC_LOG_D32, httpCode);
+            MEDIA_LOG_E("Http error " PUBLIC_LOG_D64, httpCode);
             serverCode = httpCode;
             return Status::ERROR_SERVER;
         }
