@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+
 #ifndef HISTREAMER_PLUGIN_CORE_CODEC_ADAPTER_H
 #define HISTREAMER_PLUGIN_CORE_CODEC_ADAPTER_H
 
@@ -81,15 +83,9 @@ private:
     using BufferInfo = struct BufferInfo;
 
     // HDI
-    static constexpr uint32_t alignment_ = 16;
-    std::map<uint32_t, std::shared_ptr<BufferInfo>> bufferInfoMap_;  // key is buferid
-//    std::list<uint32_t> freeInBufferId_;
-//    std::list<uint32_t> freeOutBufferId_;
+    std::map<uint32_t, std::shared_ptr<BufferInfo>> bufferInfoMap_;  // key is buffer id
     OHOS::Media::BlockingQueue<uint32_t> freeInBufferId_;
     OHOS::Media::BlockingQueue<uint32_t> freeOutBufferId_;
-
-
-    int GetFreeBufferId();
 
 private:
     template <typename T>
@@ -98,7 +94,6 @@ private:
     template <typename T>
     void InitParamInOhos(T &param);
 
-    int isHead4_ = 0;
     void HandleFrame();
     Status TransInputBuffer2OmxBuffer(const std::shared_ptr<Plugin::Buffer>& inputBuffer,
                                     std::shared_ptr<BufferInfo>& bufferInfo);
@@ -108,19 +103,21 @@ private:
 
     // HDI
     void ConfigOmx();
-    void ConfigOmxPortDefine();
+    void ConfigOmxPortDefine(PortIndex portIndex);
     int32_t CheckAndUseBufferHandle();
 
     void UseOmxBuffers();
     void GetBufferInfoOnPort(PortIndex portIndex);
-    int32_t UseBufferOnInputPort(PortIndex portIndex, int bufferCount, int bufferSize);
-    int32_t UseBufferOnOutputPort(PortIndex portIndex, int bufferCount, int bufferSize);
+    std::shared_ptr<OmxCodecBuffer> InitOmxBuffer(std::shared_ptr<ShareMemory> sharedMem,
+                                                  std::shared_ptr<Buffer> outputBuffer,
+                                                  PortIndex portIndex,
+                                                  int bufferSize);
+    Status UseBufferOnPort(PortIndex portIndex, int bufferCount, int bufferSize);
 
     bool isFirstCall_ = true;
-    bool FillAllTheBuffer();
+    bool FillAllTheOutBuffer();
     void TransOutputBufToOmxBuf(const std::shared_ptr<Plugin::Buffer>& outputBuffer,
                                 std::shared_ptr<OmxCodecBuffer>& omxBuffer);
-    void SendEmptyBufToHdi();
 
     // HDI callback
     static int32_t EventHandler(CodecCallbackType *self, OMX_EVENTTYPE event, EventInfo *info);
@@ -139,7 +136,6 @@ private:
     bool eventDone_ = false;
 
     OSAL::Mutex lockInputBuffers_;
-    OSAL::Mutex lockOutputBuffers_;
 
 private:
     struct CodecComponentType* codecComp_ {nullptr};
@@ -171,3 +167,4 @@ private:
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_CORE_CODEC_ADAPTER_H
+#endif

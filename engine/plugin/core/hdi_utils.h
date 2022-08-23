@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #ifndef HISTREAMER_PLUGIN_CORE_HDI_UTILS_H
 #define HISTREAMER_PLUGIN_CORE_HDI_UTILS_H
 
@@ -50,3 +51,4 @@ uint32_t Translate2omxFlagSet(uint64_t pluginFlags);
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_CORE_HDI_UTILS_H
+#endif

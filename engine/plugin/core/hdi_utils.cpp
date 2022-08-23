@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #define HST_LOG_TAG "HdiUtils"
 
 #include "hdi_utils.h"
@@ -109,3 +110,4 @@ uint32_t Translate2omxFlagSet(uint64_t pluginFlags)
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
+#endif

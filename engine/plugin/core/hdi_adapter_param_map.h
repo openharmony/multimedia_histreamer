@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #ifndef HISTREAMER_PLUGIN_CORE_HDI_ADAPTER_PARAMS_MAP_H
 #define HISTREAMER_PLUGIN_CORE_HDI_ADAPTER_PARAMS_MAP_H
 
@@ -96,3 +97,4 @@ static std::unordered_map<OMX_STATETYPE, std::string> omxStateToString = {
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_CORE_HDI_ADAPTER_PARAMS_MAP_H
+#endif
