@@ -131,6 +131,7 @@ private:
     Status ChangeState(OMX_STATETYPE state);
     void HandelEventCmdComplete(OMX_U32 data1, OMX_U32 data2);
     void HandelEventStateSet(OMX_U32 data);
+    Status ResetLocked();
 
     OSAL::Mutex mutex_;
     OSAL::ConditionVariable cond_;

@@ -242,7 +242,7 @@ HdiAdapter::~HdiAdapter()
     }
 }
 
-Plugin::Status HdiAdapter::Init()
+Status HdiAdapter::Init()
 {
     MEDIA_LOG_D("codec adapter init begin");
     auto firstDotPos = pluginName_.find_first_of('.');
@@ -276,27 +276,42 @@ Plugin::Status HdiAdapter::Init()
     return Status::OK;
 }
 
-Plugin::Status HdiAdapter::Deinit()
+Status HdiAdapter::Deinit()
 {
-    MEDIA_LOG_D("HdiAdapter DeInit enter");
-    (void)codecComp_->SendCommand(codecComp_, OMX_CommandStateSet, OMX_StateIdle, NULL, 0);
-    OSAL::SleepFor(20);
-    FreeBuffers();
+    MEDIA_LOG_D("HdiAdapter DeInit Enter");
+    (void)ResetLocked();
     auto ret = g_compManager_->DestroyComponent(componentId_);
     FALSE_RETURN_V_MSG_E(ret != HDF_SUCCESS, Status::ERROR_INVALID_OPERATION, "HDI destroy component failed");
     CodecComponentTypeRelease(codecComp_);
+    CodecComponentManagerRelease();
+    CodecCallbackTypeStubRelease(codecCallback_);
+    MEDIA_LOG_D("HdiAdapter DeInit End;");
+    return  Status::OK;
+}
+
+Status HdiAdapter::ResetLocked()
+{
+    (void)codecComp_->SendCommand(codecComp_, OMX_CommandStateSet, OMX_StateIdle, NULL, 0);
+    FreeBuffers();
     codecComp_ = nullptr;
     curState_ = OMX_StateInvalid;
     outBufQue_.SetActive(false);
     outBufQue_.Clear();
-    CodecComponentManagerRelease();
-    CodecCallbackTypeStubRelease(codecCallback_);
+    inBufQue_.clear();
     codecCallback_ = nullptr;
-    MEDIA_LOG_D("HdiAdapter DeInit end");
+    componentId_ = 0;
+    width_ = 0;
+    height_ = 0;
+    stride_ = 0;
+    inBufferSize_ = 0;
+    inBufferCnt_ = 0;
+    outBufferSize_= 0;
+    outBufferCnt_ = 0;
+    shaAlloc_ = nullptr;
     return Status::OK;
 }
 
-Plugin::Status HdiAdapter::Prepare()
+Status HdiAdapter::Prepare()
 {
     int32_t ret = HDF_SUCCESS;
     outBufQue_.SetActive(true);
@@ -305,12 +320,12 @@ Plugin::Status HdiAdapter::Prepare()
     return TranslateRets(ret);
 }
 
-Plugin::Status HdiAdapter::Reset()
+Status HdiAdapter::Reset()
 {
-    return Status::OK;
+    return ResetLocked();
 }
 
-Plugin::Status HdiAdapter::Start()
+Status HdiAdapter::Start()
 {
     MEDIA_LOG_D("start begin");
     auto err = codecComp_->SendCommand(codecComp_, OMX_CommandStateSet, OMX_StateExecuting, NULL, 0);
@@ -336,28 +351,17 @@ Plugin::Status HdiAdapter::Start()
     return Status::OK;
 }
 
-Plugin::Status HdiAdapter::Stop()
+Status HdiAdapter::Stop()
 {
-    MEDIA_LOG_D("Stop begin");
-    outBufQue_.SetActive(false);
-    auto err = codecComp_->SendCommand(codecComp_, OMX_CommandStateSet, OMX_StateIdle, NULL, 0);
-    if (err != HDF_SUCCESS) {
-        MEDIA_LOG_D("failed to SendCommand with OMX_StateIdle");
-        return Status::ERROR_UNKNOWN;
-    }
-    OSAL::SleepFor(30);
-    enum OMX_STATETYPE state = OMX_StateInvalid;
-    err = codecComp_->GetState(codecComp_, &state);
-    while (state != OMX_StateIdle) {
-        err = codecComp_->GetState(codecComp_, &state);
-        OSAL::SleepFor(15);
-    }
-    MEDIA_LOG_D("change state to idle success, state: " PUBLIC_LOG_D32, static_cast<int32_t>(state));
-    MEDIA_LOG_D("Stop end");
+    MEDIA_LOG_D("HdiAdapter Stop Enter");
+    (void)ResetLocked();
+    auto ret = g_compManager_->DestroyComponent(componentId_);
+    FALSE_RETURN_V_MSG_E(ret != HDF_SUCCESS, Status::ERROR_INVALID_OPERATION, "HDI destroy component failed");
+    MEDIA_LOG_D("HdiAdapter Stop End");
     return Status::OK;
 }
 
-Plugin::Status HdiAdapter::GetParameter(Plugin::Tag tag, ValueType& value)
+Status HdiAdapter::GetParameter(Plugin::Tag tag, ValueType& value)
 {
     MEDIA_LOG_D("GetParameter begin");
     switch (tag) {
@@ -377,7 +381,7 @@ Plugin::Status HdiAdapter::GetParameter(Plugin::Tag tag, ValueType& value)
     return Status::OK;
 }
 
-Plugin::Status HdiAdapter::SetParameter(Plugin::Tag tag, const ValueType& value)
+Status HdiAdapter::SetParameter(Plugin::Tag tag, const ValueType& value)
 {
     MEDIA_LOG_D("SetParameter begin");
     switch (tag) {
@@ -406,7 +410,7 @@ std::shared_ptr<Plugin::Allocator> HdiAdapter::GetAllocator()
     return nullptr;
 }
 
-Plugin::Status HdiAdapter::SetCallback(Callback* cb)
+Status HdiAdapter::SetCallback(Callback* cb)
 {
     MEDIA_LOG_D("SetCallback begin");
     callback_ = cb;
