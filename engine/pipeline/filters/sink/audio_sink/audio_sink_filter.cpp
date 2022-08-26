@@ -19,7 +19,7 @@
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
 #include "foundation/osal/utils/util.h"
-#include "pipeline/filters/common/dump_buffer.h"
+#include "utils/dump_buffer.h"
 #include "pipeline/filters/common/plugin_settings.h"
 #include "pipeline/core/plugin_attr_desc.h"
 #include "plugin/common/plugin_time.h"

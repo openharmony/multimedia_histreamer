@@ -26,7 +26,6 @@ source_set("std_video_capture") {
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
 
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]

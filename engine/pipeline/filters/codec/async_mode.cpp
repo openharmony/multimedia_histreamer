@@ -17,7 +17,7 @@
 
 #include "async_mode.h"
 #include "common/plugin_utils.h"
-#include "common/dump_buffer.h"
+#include "utils/dump_buffer.h"
 #include "osal/utils/util.h"
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #include "plugin/common/surface_memory.h"

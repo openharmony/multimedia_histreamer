@@ -24,7 +24,7 @@
 #include "plugin/common/plugin_time.h"
 #include "utils/constants.h"
 #include "utils/steady_clock.h"
-#include "filters/common/dump_buffer.h"
+#include "utils/dump_buffer.h"
 
 namespace OHOS {
 namespace Media {

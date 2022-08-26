@@ -45,7 +45,6 @@ source_set("histreamer_recorder") {
     public_deps = [
       "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
     ]
     if (!hst_is_lite_sys) {
       sources += [

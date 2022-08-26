@@ -19,7 +19,7 @@
 #include "common/plugin_utils.h"
 #include "compatible_check.h"
 #include "factory/filter_factory.h"
-#include "filters/common/dump_buffer.h"
+#include "utils/dump_buffer.h"
 #include "pipeline/core/type_define.h"
 #include "plugin/interface/source_plugin.h"
 #include "plugin/core/plugin_meta.h"

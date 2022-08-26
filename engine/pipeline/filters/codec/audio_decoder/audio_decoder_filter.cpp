@@ -17,7 +17,7 @@
 
 #include "audio_decoder_filter.h"
 #include "factory/filter_factory.h"
-#include "filters/common/dump_buffer.h"
+#include "utils/dump_buffer.h"
 #include "osal/utils/util.h"
 #include "pipeline/core/filter_codec_mode.h"
 #include "pipeline/filters/codec/codec_filter_base.h"

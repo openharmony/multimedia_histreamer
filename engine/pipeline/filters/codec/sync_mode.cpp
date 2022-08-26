@@ -17,7 +17,7 @@
 
 #include "sync_mode.h"
 #include "common/plugin_utils.h"
-#include "filters/common/dump_buffer.h"
+#include "utils/dump_buffer.h"
 #include "foundation/log.h"
 #include "utils/steady_clock.h"
 
