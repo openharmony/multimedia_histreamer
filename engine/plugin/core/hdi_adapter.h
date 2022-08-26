@@ -30,6 +30,7 @@
 #include "osal/thread/task.h"
 #include "utils/blocking_queue.h"
 
+
 namespace OHOS {
 namespace Media {
 namespace Plugin {
@@ -163,9 +164,7 @@ private:
     uint32_t inBufferCnt_;
     uint32_t outBufferSize_;
     uint32_t outBufferCnt_;
-
     std::shared_ptr<ShareAllocator> shaAlloc_ {nullptr};
-    bool isFlush_ = false;
 };
 } // namespace Plugin
 } // namespace Media

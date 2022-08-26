@@ -31,6 +31,7 @@
 #include "pipeline/core/plugin_attr_desc.h"
 #include "plugin/common/plugin_caps_builder.h"
 
+
 namespace OHOS {
 namespace Media {
 namespace Plugin {
@@ -556,15 +557,16 @@ Status HdiAdapter::QueueOutputBuffer(const std::shared_ptr<Plugin::Buffer>& outp
 
 Status HdiAdapter::Flush()
 {
-    MEDIA_LOG_D("Flush begin");
-    isFlush_ = true;
+    MEDIA_LOG_D("HdiAdapter Flush begin");
+    ChangeState(OMX_StatePause);
     {
         OSAL::ScopedLock l(lockInputBuffers_);
         inBufQue_.clear();
     }
-    outBufQue_.SetActive(true);
     outBufQue_.Clear();
-    MEDIA_LOG_D("flush end");
+    codecComp_->SendCommand(codecComp_, OMX_CommandFlush, (uint32_t)PortIndex::PORT_INDEX_INPUT, NULL, 0);
+    codecComp_->SendCommand(codecComp_, OMX_CommandFlush, (uint32_t)PortIndex::PORT_INDEX_OUTPUT, NULL, 0);
+    MEDIA_LOG_D("HdiAdapter Flush end");
     return Status::OK;
 }
 
@@ -877,6 +879,9 @@ void HdiAdapter::HandelEventCmdComplete(OMX_U32 data1, OMX_U32 data2)
     switch (data1) {
         case OMX_CommandStateSet:
             HandelEventStateSet(data2);
+            break;
+        case OMX_CommandFlush:
+            ChangeState(OMX_StateExecuting);
             break;
         default:
             break;
