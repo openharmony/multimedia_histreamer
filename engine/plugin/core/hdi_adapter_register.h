@@ -16,8 +16,6 @@
 #ifndef HISTREAMER_PLUGIN_CORE_CODEC_ADAPTER_REGISTER_H
 #define HISTREAMER_PLUGIN_CORE_CODEC_ADAPTER_REGISTER_H
 
-#include "plugin/interface/hcodec_plugin.h"
-
 namespace OHOS {
 namespace Media {
 namespace Plugin {
@@ -27,12 +25,12 @@ extern void UnRegisterOneCodecPackage(const std::string& packageName);
 
 void RegisterHdiCodecPackages(std::shared_ptr<OHOS::Media::Plugin::Register> reg)
 {
-    RegisterOneCodecPackage(reg, "HDI_Test");
+    RegisterOneCodecPackage(reg, "HdiAdapter");
 }
 
 void UnRegisterHdiCodecPackage()
 {
-    UnRegisterOneCodecPackage("HDI_Test");
+    UnRegisterOneCodecPackage("HdiAdapter");
 }
 } // namespace Plugin
 } // namespace Media

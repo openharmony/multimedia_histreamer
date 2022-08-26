@@ -47,6 +47,8 @@ bool Translates(const T&, U&);
 uint64_t Translate2PluginFlagSet(uint32_t omxBufFlag);
 
 uint32_t Translate2omxFlagSet(uint64_t pluginFlags);
+
+VideoPixelFormat ConvertPixelFormatFromHdi(int32_t HdiPixelFormat);
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

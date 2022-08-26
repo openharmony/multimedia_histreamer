@@ -17,6 +17,7 @@
 #define HST_LOG_TAG "HdiUtils"
 
 #include "hdi_utils.h"
+#include "display_type.h"
 #include "hdi_adapter_param_map.h"
 
 namespace OHOS {
@@ -106,6 +107,20 @@ uint32_t Translate2omxFlagSet(uint64_t pluginFlags)
         ret = OMX_BUFFERFLAG_EOS;
     }
     return ret;
+}
+
+VideoPixelFormat ConvertPixelFormatFromHdi(int32_t HdiPixelFormat)
+{
+    // Histreamer pixel format to HDI pixel format
+    std::map<VideoPixelFormat, PixelFormat> pixelFormatMap = { // 是否可以改为常量
+        {VideoPixelFormat::NV21, PIXEL_FMT_YCBCR_420_SP}, // 需要补充完整
+        {VideoPixelFormat::NV12, PIXEL_FMT_YCRCB_420_SP},
+    };
+    auto iter = std::find_if(pixelFormatMap.begin(), pixelFormatMap.end(),
+                             [&] (const std::pair<VideoPixelFormat, PixelFormat>& tmp) -> bool {
+                                 return tmp.second == HdiPixelFormat;
+                             });
+    return iter == pixelFormatMap.end() ? VideoPixelFormat::UNKNOWN : iter->first;
 }
 } // namespace Plugin
 } // namespace Media

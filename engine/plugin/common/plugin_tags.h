@@ -93,6 +93,7 @@ enum struct Tag : uint32_t {
     MIME = SECTION_REGULAR_START + 1, ///< std::string
     TRACK_ID,                         ///< uint32_t, track id
     REQUIRED_OUT_BUFFER_CNT,          ///< uint32_t, required buffer count of plugin; read only tag
+    REQUIRED_OUT_BUFFER_SIZE,         ///< uint32_t, required buffer size of plugin; read only tag
     BUFFER_ALLOCATOR,                 ///< Allocator, allocator to alloc buffers
     BUFFERING_SIZE,                   ///< uint32_t, download buffer size
     WATERLINE_HIGH,                   ///< uint32_t, high waterline
@@ -162,7 +163,6 @@ enum struct Tag : uint32_t {
     VIDEO_SPECIFIC_H264_START = MAKE_VIDEO_SPECIFIC_START(VideoFormat::H264),
     VIDEO_H264_PROFILE,      ///< @see VideoH264Profile
     VIDEO_H264_LEVEL,        ///< uint32_t, h264 level
-    VIDEO_HDI_BUFFER_SIZE    ///< uint32_t, HDI out buffer size
 };
 /**
  * @enum Media protocol type.

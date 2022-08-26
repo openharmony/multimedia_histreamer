@@ -97,10 +97,10 @@ static PixelFormat TranslatePixelFormat(const VideoPixelFormat pixelFormat)
         case VideoPixelFormat::YUVJ444P:
             break;
         case VideoPixelFormat::NV12:
-            surfaceFormat = PixelFormat::PIXEL_FMT_YCBCR_420_SP;
+            surfaceFormat = PixelFormat::PIXEL_FMT_YCRCB_420_SP;
             break;
         case VideoPixelFormat::NV21:
-            surfaceFormat = PixelFormat::PIXEL_FMT_YCRCB_420_SP;
+            surfaceFormat = PixelFormat::PIXEL_FMT_YCBCR_420_SP;
             break;
         default:
             break;
@@ -157,21 +157,28 @@ Status SurfaceSinkPlugin::Prepare()
         return Status::ERROR_UNKNOWN;
     }
     const std::string surfaceFmtStr = "SURFACE_FORMAT";
+    auto ret = surface_->SetUserData(surfaceFmtStr, std::to_string(PixelFormat::PIXEL_FMT_YCBCR_420_SP));
+    if (ret != GSError::GSERROR_OK) { // 运行结果表明，这个地方是可以设置的
+        MEDIA_LOG_E("SetUserData failed");
+    }
     std::string formatStr = surface_->GetUserData(surfaceFmtStr);
+    MEDIA_LOG_D("formatStr: " PUBLIC_LOG_S ", to_string(PIXEL_FMT_RGBA_8888): " PUBLIC_LOG_S,
+                formatStr.c_str(), std::to_string(PixelFormat::PIXEL_FMT_RGBA_8888).c_str());
     PixelFormat surfaceFmt;
     if (formatStr == std::to_string(PixelFormat::PIXEL_FMT_RGBA_8888)) {
         surfaceFmt = PixelFormat::PIXEL_FMT_RGBA_8888;
     } else {
-        surfaceFmt = PixelFormat::PIXEL_FMT_YCRCB_420_SP;
+        surfaceFmt = PixelFormat::PIXEL_FMT_YCBCR_420_SP; // PIXEL_FMT_YCRCB_420_SP 在 hdi 上面播放颜色不对
     }
     if (pluginFmt != surfaceFmt) {
-        MEDIA_LOG_D("plugin format: " PUBLIC_LOG_U32 " is diff from surface format: " PUBLIC_LOG_U32,
+        MEDIA_LOG_W("plugin format: " PUBLIC_LOG_U32 " is diff from surface format: " PUBLIC_LOG_U32,
                     static_cast<uint32_t>(pluginFmt), static_cast<uint32_t>(surfaceFmt));
         // need to convert pixel format when write
         needConvFormat = true;
     }
     uint64_t usage = BUFFER_USAGE_CPU_READ | BUFFER_USAGE_CPU_WRITE | BUFFER_USAGE_MEM_DMA;
     surfaceFmt = PixelFormat::PIXEL_FMT_YCBCR_420_SP;
+    MEDIA_LOG_D("surfaceFmt: " PUBLIC_LOG_U32, static_cast<uint32_t>(surfaceFmt));
     mAllocator_->Config(static_cast<int32_t>(width_), static_cast<int32_t>(height_), usage, surfaceFmt,
                         DEFAULT_STRIDE_ALIGN, 0);
     MEDIA_LOG_D("Prepare success");

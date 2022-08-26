@@ -21,7 +21,6 @@
 #include "codec_callback_type_stub.h"
 #include "codec_omx_ext.h"
 #include "common/surface_memory.h"
-#include "dump_buffer.h"
 #include "display_type.h"
 #include "foundation/log.h"
 #include "hdi_adapter_param_map.h"
@@ -46,12 +45,12 @@ void UpdateInCaps(const CodecCompCapability& cap, CodecPluginDef& definition)
     switch (cap.role) {
         case MEDIA_ROLETYPE_VIDEO_AVC:
             incapBuilder.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_H264);
+            incapBuilder.SetVideoBitStreamFormatList({VideoBitStreamFormat::ANNEXB});
             break;
         default:
             incapBuilder.SetMime("video/unknown");
             break;
     }
-//    incapBuilder.SetBitRateRange(cap.bitRate.min, cap.bitRate.max);
     definition.inCaps.push_back(incapBuilder.Build());
 }
 
@@ -61,9 +60,11 @@ void UpdateOutCaps(const CodecCompCapability& cap, CodecPluginDef& definition)
     outcapBuilder.SetMime(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
     int32_t index = 0;
     std::vector<Plugin::VideoPixelFormat> formats;
-    for (int i = 0; cap.port.video.supportPixFmts[i] != 0; ++i) {
-        MEDIA_LOG_D("i = " PUBLIC_LOG_D32 ", support pixfmts: " PUBLIC_LOG_D32,
-                    i, (int32_t)cap.port.video.supportPixFmts[i]);
+    for (index = 0; cap.port.video.supportPixFmts[index] != 0; ++index) {
+        auto supportFormat = ConvertPixelFormatFromHdi(cap.port.video.supportPixFmts[index]);
+        if (supportFormat != VideoPixelFormat::UNKNOWN) {
+            formats.push_back(supportFormat);
+        }
     }
     if (index) {
         outcapBuilder.SetVideoPixelFormatList(formats);
@@ -102,12 +103,12 @@ bool TranslateCapToPluginDef(const CodecCompCapability& capability,
                              CodecPluginDef& def, const std::string& packageName)
 {
     if (!Translates(capability.type, def.codecType)) {
-        MEDIA_LOG_E("codec type of plugin " PUBLIC_LOG_S "." PUBLIC_LOG_S " mismatched",
+        MEDIA_LOG_E("Codec type of plugin " PUBLIC_LOG_S "." PUBLIC_LOG_S " mismatched",
                     packageName.c_str(), capability.compName);
         return false;
     }
     if (!TranslateCapability(capability, def)) {
-        MEDIA_LOG_W("codec capability of plugin " PUBLIC_LOG_S "." PUBLIC_LOG_S " translate failed",
+        MEDIA_LOG_W("Codec capability of plugin " PUBLIC_LOG_S "." PUBLIC_LOG_S " translate failed",
                     packageName.c_str(), capability.compName);
         return false;
     }
@@ -124,14 +125,14 @@ Status RegisterOneCodecPackage(const std::shared_ptr<OHOS::Media::Plugin::Regist
 {
     g_compManager = GetCodecComponentManager();
     if (g_compManager == nullptr) {
-        MEDIA_LOG_E("codec package " PUBLIC_LOG_S " has no valid component manager", packageName.c_str());
+        MEDIA_LOG_E("Codec package " PUBLIC_LOG_S " has no valid component manager", packageName.c_str());
         return Status::ERROR_INVALID_DATA;
     }
     std::dynamic_pointer_cast<OHOS::Media::Plugin::PackageRegister>(reg)->AddPackage(
             {PLUGIN_INTERFACE_VERSION, packageName, OHOS::Media::Plugin::LicenseType::APACHE_V2});
 
     int32_t count = g_compManager->GetComponentNum();
-    MEDIA_LOG_D("component number is: " PUBLIC_LOG_D32, count);
+    MEDIA_LOG_D("Component number is: " PUBLIC_LOG_D32, count);
     CodecCompCapability capList[count];
     g_compManager->GetComponentCapabilityList(capList, count);
     for (int32_t i = 0; i < count; i++) {
@@ -142,11 +143,11 @@ Status RegisterOneCodecPackage(const std::shared_ptr<OHOS::Media::Plugin::Regist
         if (TranslateCapToPluginDef(capList[i], definition, packageName)) {
             definition.rank = 100;
             if (reg->AddPlugin(definition) != Status::OK) {
-                MEDIA_LOG_E("add plugin " PUBLIC_LOG_S " failed", definition.name.c_str());
+                MEDIA_LOG_E("Add plugin " PUBLIC_LOG_S " failed", definition.name.c_str());
             }
         }
     }
-    MEDIA_LOG_D("registering video HDI decoders done");
+    MEDIA_LOG_D("Register HDI adapter done");
     return Status::OK;
 }
 
@@ -364,10 +365,10 @@ Plugin::Status HdiAdapter::GetParameter(Plugin::Tag tag, ValueType& value)
             GetBufferInfoOnPort(PortIndex::PORT_INDEX_OUTPUT);
             value = outBufferCnt_;
             break;
-        case Tag::VIDEO_HDI_BUFFER_SIZE:
+        case Tag::REQUIRED_OUT_BUFFER_SIZE:
             value = outBufferSize_;
             break;
-        default :
+        default:
             MEDIA_LOG_W("ignore this tag: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
             break;
     }
@@ -378,18 +379,18 @@ Plugin::Status HdiAdapter::SetParameter(Plugin::Tag tag, const ValueType& value)
 {
     MEDIA_LOG_D("SetParameter begin");
     switch (tag) {
-        case Tag::VIDEO_WIDTH :
+        case Tag::VIDEO_WIDTH:
             width_ = Plugin::AnyCast<uint32_t>(value);
             stride_ = AlignUp(width_, 16);
             break;
-        case Tag::VIDEO_HEIGHT :
+        case Tag::VIDEO_HEIGHT:
             height_ = Plugin::AnyCast<uint32_t>(value);
             break;
-        case Tag::VIDEO_PIXEL_FORMAT :
+        case Tag::VIDEO_PIXEL_FORMAT:
             pixelFormat_ = Plugin::AnyCast<VideoPixelFormat>(value);
             MEDIA_LOG_D("pixelFormat: " PUBLIC_LOG_U32, static_cast<uint32_t>(pixelFormat_));
             break;
-        default :
+        default:
             MEDIA_LOG_W("ignore this tag: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
             break;
     }

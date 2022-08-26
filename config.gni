@@ -50,7 +50,6 @@ if (!defined(ohos_lite) || !ohos_lite) {
   multimedia_histreamer_enable_plugin_file_sink = true
   multimedia_histreamer_enable_plugin_std_audio_capture = true
   multimedia_histreamer_enable_plugin_std_stream_source = true
-  multimedia_histreamer_enable_plugin_hdi_adapter = true
   multimedia_histreamer_enable_video = true
   multimedia_histreamer_enable_plugin_std_video_surface_sink = true
 } else {

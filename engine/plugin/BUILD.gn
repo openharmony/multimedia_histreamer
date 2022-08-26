@@ -170,7 +170,6 @@ source_set("histreamer_plugin_core") {
       "//drivers/peripheral/codec/hal/include",
       "//drivers/peripheral/codec/interfaces/include",
       "//drivers/peripheral/display/interfaces/include",
-      "//foundation/multimedia/histreamer/engine/pipeline/filters/common",
       "//third_party/openmax/api/1.1.2",
     ]
     public_deps += [

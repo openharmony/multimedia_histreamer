@@ -16,6 +16,9 @@
 
 #define HST_LOG_TAG "FFmpegDemuxerPlugin"
 
+// Modify FFMPEG_LOG_DEBUG_ENABLE to 1 to show Ffmpeg log.
+#define FFMPEG_LOG_DEBUG_ENABLE 0
+
 #include "ffmpeg_demuxer_plugin.h"
 #include <algorithm>
 #include <cstdio>
@@ -669,11 +672,12 @@ Status RegisterPlugins(const std::shared_ptr<Register>& reg)
     return Status::OK;
 }
 
+#if FFMPEG_LOG_DEBUG_ENABLE
 #ifdef MEDIA_OHOS
 void FfmpegLogPrint(void* avcl, int level, const char* fmt, va_list vl)
 {
     (void)avcl;
-/*    switch (level) {
+    switch (level) {
         case AV_LOG_INFO:
         case AV_LOG_DEBUG:
             HILOG_DEBUG(LOG_CORE, fmt, vl);
@@ -687,13 +691,13 @@ void FfmpegLogPrint(void* avcl, int level, const char* fmt, va_list vl)
         case AV_LOG_FATAL:
             HILOG_FATAL(LOG_CORE, fmt, vl);
             break;
-    }*/
+    }
 }
 #else
 void FfmpegLogPrint(void* avcl, int level, const char* fmt, va_list vl)
 {
     (void)avcl;
-/*    char buf[500] = {0};  // 500
+    char buf[500] = {0};  // 500
     (void)vsnprintf_s(buf, sizeof(buf), fmt, vl);
     switch (level) {
         case AV_LOG_WARNING:
@@ -709,13 +713,16 @@ void FfmpegLogPrint(void* avcl, int level, const char* fmt, va_list vl)
             break;
         default:
             break;
-    }*/
+    }
 }
+#endif
 #endif
 
 static void FfmpegLogInit()
 {
+#if FFMPEG_LOG_DEBUG_ENABLE
     av_log_set_callback(FfmpegLogPrint);
+#endif
 }
 } // namespace
 

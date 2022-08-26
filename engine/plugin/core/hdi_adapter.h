@@ -28,7 +28,6 @@
 #include "interface/codec_plugin.h"
 #include "OMX_Component.h"
 #include "osal/thread/task.h"
-#include "plugin/interface/hcodec_plugin.h"
 #include "utils/blocking_queue.h"
 
 namespace OHOS {
