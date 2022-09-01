@@ -70,6 +70,7 @@ public:
     DEFINE_INSERT_GET_FUNC(tag == Tag::VIDEO_PIXEL_FORMAT, VideoPixelFormat);
     DEFINE_INSERT_GET_FUNC(tag == Tag::MEDIA_SEEKABLE, Seekable);
     DEFINE_INSERT_GET_FUNC(tag == Tag::MEDIA_TYPE, MediaType);
+    DEFINE_INSERT_GET_FUNC(tag == Tag::VIDEO_BIT_STREAM_FORMAT, std::vector<VideoBitStreamFormat>);
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::TRACK_ID or
         tag == Tag::REQUIRED_OUT_BUFFER_CNT or

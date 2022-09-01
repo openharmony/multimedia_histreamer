@@ -39,6 +39,7 @@ const Plugin::ValueType g_auSampleFmtDef = Plugin::AudioSampleFormat::U8;
 const Plugin::ValueType g_aacProfileDef = Plugin::AudioAacProfile::LC;
 const Plugin::ValueType g_aacStFmtDef = Plugin::AudioAacStreamFormat::RAW;
 const Plugin::ValueType g_vdPixelFmtDef = Plugin::VideoPixelFormat::UNKNOWN;
+const Plugin::ValueType g_vdBitStreamFmtDef = Plugin::VideoBitStreamFormat::UNKNOWN;
 const Plugin::ValueType g_vdH264ProfileDef = Plugin::VideoH264Profile::BASELINE;
 const Plugin::ValueType g_audioRenderInfoDef = Plugin::AudioRenderInfo {};
 const Plugin::ValueType g_audioInterruptModeDef = Plugin::AudioInterruptMode::SHARE_MODE;
@@ -92,6 +93,7 @@ const std::map<Plugin::Tag, std::tuple<const char*, const Plugin::ValueType&, co
     {Plugin::Tag::VIDEO_SURFACE, {"surface",                   g_unknown,          "Surface"}},
     {Plugin::Tag::VIDEO_MAX_SURFACE_NUM, {"surface_num",       g_u32Def,           "uint32_t"}},
     {Plugin::Tag::VIDEO_CAPTURE_RATE, {"capture_rate",         g_doubleDef,        "double"}},
+    {Plugin::Tag::VIDEO_BIT_STREAM_FORMAT, {"vd_bit_stream_fmt", g_vdBitStreamFmtDef, "VideoBitStreamFormat"}},
     {Plugin::Tag::BITS_PER_CODED_SAMPLE, {"bits_per_coded_sample", g_u32Def,       "uint32_t"}},
     {Plugin::Tag::MEDIA_START_TIME, {"med_start_time",         g_d64Def,           "int64_t"}},
     {Plugin::Tag::VIDEO_H264_PROFILE, {"h264_profile",         g_vdH264ProfileDef, "VideoH264Profile"}},
@@ -195,6 +197,13 @@ const std::map<Plugin::VideoPixelFormat, const char*> g_videoPixelFormatStrMap =
     {Plugin::VideoPixelFormat::YUVJ420P, "YUVJ420P"},
     {Plugin::VideoPixelFormat::YUVJ422P, "YUVJ422P"},
     {Plugin::VideoPixelFormat::YUVJ444P, "YUVJ444P"},
+};
+
+const std::map<Plugin::VideoBitStreamFormat, const char*> g_vdBitStreamFormatStrMap = {
+    {Plugin::VideoBitStreamFormat::UNKNOWN, "UNKNOWN"},
+    {Plugin::VideoBitStreamFormat::AVC1, "AVC1"},
+    {Plugin::VideoBitStreamFormat::HEVC, "HEVC"},
+    {Plugin::VideoBitStreamFormat::ANNEXB, "ANNEXB"},
 };
 
 const std::map<Plugin::AudioAacProfile, const char*> g_auAacProfileNameStrMap = {

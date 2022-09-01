@@ -193,6 +193,16 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::Vi
 }
 
 template<>
+int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::VideoBitStreamFormat& val)
+{
+    if (Pipeline::g_vdBitStreamFormatStrMap.count(val) == 0) {
+        MEDIA_LOG_W("video bit stream format " PUBLIC_LOG_U32 " is unknown", static_cast<uint32_t>(val));
+        return 0;
+    }
+    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::g_vdBitStreamFormatStrMap.at(val));
+}
+
+template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::AudioAacProfile& val)
 {
     if (Pipeline::g_auAacProfileNameStrMap.count(val) == 0) {
@@ -224,6 +234,8 @@ int32_t MetaIDStringiness(char* buf, size_t maxLen, const char* name, const char
 {
     if (val.SameTypeWith(typeid(T))) {
         return FixedCapKeyStringiness<T>(buf, maxLen, name, typeName, val);
+    } else if (val.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
+        return DiscreteCapKeyStringiness<T>(buf, maxLen, name, typeName, val);
     } else {
         MEDIA_LOG_W("meta " PUBLIC_LOG_S " type mismatches when cast to string", name);
     }
@@ -268,6 +280,7 @@ std::map<Plugin::MetaID, CapStrnessFunc> g_metaStrnessMap = {
     {Plugin::MetaID::VIDEO_HEIGHT, MetaIDStringiness<uint32_t>},
     {Plugin::MetaID::VIDEO_FRAME_RATE, MetaIDStringiness<uint32_t>},
     {Plugin::MetaID::VIDEO_PIXEL_FORMAT, MetaIDStringiness<Plugin::VideoPixelFormat>},
+    {Plugin::MetaID::VIDEO_BIT_STREAM_FORMAT, MetaIDStringiness<Plugin::VideoBitStreamFormat>},
     {Plugin::MetaID::BITS_PER_CODED_SAMPLE, MetaIDStringiness<uint32_t>},
 };
 }
@@ -433,6 +446,7 @@ std::string Capability2String(const Capability& capability)
         {Capability::Key::AUDIO_AAC_LEVEL, CapKeyStringiness<uint32_t>},
         {Capability::Key::AUDIO_AAC_STREAM_FORMAT, CapKeyStringiness<Plugin::AudioAacStreamFormat>},
         {Capability::Key::VIDEO_PIXEL_FORMAT, CapKeyStringiness<Plugin::VideoPixelFormat>},
+        {Capability::Key::VIDEO_BIT_STREAM_FORMAT, CapKeyStringiness<Plugin::VideoBitStreamFormat>},
     };
     char buffer[MAX_BUF_LEN] = {0};
     int pos = 0;

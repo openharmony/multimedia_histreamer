@@ -52,6 +52,7 @@ std::set<OHOS::Media::Plugin::MetaID> g_metaIdSet = {
     OHOS::Media::Plugin::MetaID::VIDEO_WIDTH,
     OHOS::Media::Plugin::MetaID::VIDEO_HEIGHT,
     OHOS::Media::Plugin::MetaID::VIDEO_PIXEL_FORMAT,
+    OHOS::Media::Plugin::MetaID::VIDEO_BIT_STREAM_FORMAT,
     OHOS::Media::Plugin::MetaID::VIDEO_FRAME_RATE,
     OHOS::Media::Plugin::MetaID::VIDEO_H264_LEVEL,
     OHOS::Media::Plugin::MetaID::VIDEO_H264_PROFILE,

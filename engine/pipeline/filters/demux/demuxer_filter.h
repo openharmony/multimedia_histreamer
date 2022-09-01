@@ -131,7 +131,8 @@ private:
 
     void NegotiateDownstream();
 
-    void UpdateStreamMeta(std::shared_ptr<Plugin::Meta>& streamMeta, Plugin::TagMap& downstreamParams);
+    void UpdateStreamMeta(std::shared_ptr<Plugin::Meta>& streamMeta,
+        Plugin::Capability& negotiatedCap, Plugin::TagMap& downstreamParams);
 
     void DemuxerLoop();
 

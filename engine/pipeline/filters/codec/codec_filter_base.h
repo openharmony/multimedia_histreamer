@@ -101,7 +101,6 @@ protected:
 
 private:
     virtual std::shared_ptr<Allocator> GetAllocator();
-    Capability capNegWithUpstream_ {};
     Capability capNegWithDownstream_ {};
 };
 } // namespace Pipeline

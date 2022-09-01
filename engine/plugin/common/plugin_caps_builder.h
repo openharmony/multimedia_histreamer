@@ -103,6 +103,8 @@ public:
 
     DECL_SET_FL_CAP_FUNCS(Capability::Key::VIDEO_PIXEL_FORMAT, VideoPixelFormat, VideoPixelFormat);
 
+    DECL_SET_FL_CAP_FUNCS(Capability::Key::VIDEO_BIT_STREAM_FORMAT, VideoBitStreamFormat, VideoBitStreamFormat);
+
     /**
      *  @brief Build one Capability.
      *

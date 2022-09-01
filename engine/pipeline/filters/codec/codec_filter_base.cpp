@@ -208,10 +208,10 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
             // need to get the max buffer num from plugin capability when use hdi as codec plugin interfaces
             Plugin::TagMap proposeParams;
             if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_, proposeParams, downstreamParams)) {
-                capNegWithUpstream_ = candidate.second;
+                negotiatedCap = candidate.second;
                 selectedPluginInfo = candidate.first;
                 MEDIA_LOG_I("use plugin " PUBLIC_LOG_S, candidate.first->name.c_str());
-                MEDIA_LOG_I("neg upstream cap " PUBLIC_LOG_S, Capability2String(capNegWithUpstream_).c_str());
+                MEDIA_LOG_I("neg upstream cap " PUBLIC_LOG_S, Capability2String(negotiatedCap).c_str());
                 MEDIA_LOG_I("neg downstream cap " PUBLIC_LOG_S, Capability2String(capNegWithDownstream_).c_str());
                 break;
             }

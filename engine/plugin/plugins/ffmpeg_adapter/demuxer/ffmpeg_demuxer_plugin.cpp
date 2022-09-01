@@ -105,6 +105,8 @@ Status FFmpegDemuxerPlugin::Init()
 
 Status FFmpegDemuxerPlugin::Deinit()
 {
+    avbsfContext_.reset();
+    vdBitStreamFormat_ = VideoBitStreamFormat{VideoBitStreamFormat::UNKNOWN};
     return Status::OK;
 }
 
@@ -124,6 +126,8 @@ Status FFmpegDemuxerPlugin::Reset()
     ioContext_.offset = 0;
     ioContext_.eos = false;
     selectedTrackIds_.clear();
+    avbsfContext_.reset();
+    vdBitStreamFormat_ = VideoBitStreamFormat{VideoBitStreamFormat::UNKNOWN};
     return Status::OK;
 }
 
@@ -152,6 +156,9 @@ Status FFmpegDemuxerPlugin::SetParameter(Tag tag, const ValueType& value)
     switch (tag) {
         case Tag::MEDIA_PLAYBACK_SPEED:
             playbackSpeed_ = Plugin::AnyCast<double>(value);
+            break;
+        case Tag::VIDEO_BIT_STREAM_FORMAT:
+            vdBitStreamFormat_ = Plugin::AnyCast<VideoBitStreamFormat>(value);
             break;
         default:
             break;
@@ -233,7 +240,7 @@ Status FFmpegDemuxerPlugin::GetSelectedTracks(std::vector<int32_t>& trackIds)
     return Status::OK;
 }
 
-bool FFmpegDemuxerPlugin::ConvertAVPacketToFrameInfo(const AVStream& avStream, const AVPacket& pkt, Buffer& frameInfo)
+bool FFmpegDemuxerPlugin::ConvertAVPacketToFrameInfo(const AVStream& avStream, AVPacket& pkt, Buffer& frameInfo)
 {
     frameInfo.trackID = static_cast<uint32_t>(pkt.stream_index);
     int64_t pts = (pkt.pts > 0) ? pkt.pts : 0;
@@ -250,6 +257,14 @@ bool FFmpegDemuxerPlugin::ConvertAVPacketToFrameInfo(const AVStream& avStream, c
             MEDIA_LOG_W("unsupport raw video");
             return false;
         }
+        if (vdBitStreamFormat_ == VideoBitStreamFormat::ANNEXB) {
+            if (!avbsfContext_) {
+                InitConvertContext(avStream);
+            }
+            if (avbsfContext_) {
+                ConvertAvcOrHevcToAnnexb(pkt);
+            }
+        }
         frameSize = pkt.size;
     } else {
         MEDIA_LOG_W("unsupported codec type: " PUBLIC_LOG_D32, static_cast<int32_t>(avStream.codecpar->codec_type));
@@ -261,6 +276,37 @@ bool FFmpegDemuxerPlugin::ConvertAVPacketToFrameInfo(const AVStream& avStream, c
         FALSE_LOG_MSG(writeSize == static_cast<size_t>(frameSize), "Copy data failed.");
     }
     return data != nullptr;
+}
+
+void FFmpegDemuxerPlugin::InitConvertContext(const AVStream& avStream)
+{
+    const AVBitStreamFilter* avBitStreamFilter {nullptr};
+    char codeTag[AV_FOURCC_MAX_STRING_SIZE] {0};
+    av_fourcc_make_string(codeTag, avStream.codecpar->codec_tag);
+    if (strncmp(codeTag, "avc1", strlen("avc1")) == 0) {
+        avBitStreamFilter = av_bsf_get_by_name("h264_mp4toannexb");
+    } else if (strncmp(codeTag, "hevc", strlen("hevc")) == 0) {
+        avBitStreamFilter = av_bsf_get_by_name("hevc_mp4toannexb");
+    }
+    if (avBitStreamFilter && !avbsfContext_) {
+        AVBSFContext* avbsfContext {nullptr};
+        (void)av_bsf_alloc(avBitStreamFilter, &avbsfContext);
+        (void)avcodec_parameters_copy(avbsfContext->par_in, avStream.codecpar);
+        av_bsf_init(avbsfContext);
+        avbsfContext_ = std::shared_ptr<AVBSFContext>(avbsfContext, [](AVBSFContext* ptr) {
+            if (ptr) {
+                av_bsf_free(&ptr);
+            }
+        });
+    }
+    FALSE_LOG_MSG(!avbsfContext_, "the av bit stream convert can't support, codec_tag: " PUBLIC_LOG_S, codeTag);
+}
+
+void FFmpegDemuxerPlugin::ConvertAvcOrHevcToAnnexb(AVPacket& pkt)
+{
+    (void)av_bsf_send_packet(avbsfContext_.get(), &pkt);
+    (void)av_packet_unref(&pkt);
+    (void)av_bsf_receive_packet(avbsfContext_.get(), &pkt);
 }
 
 Status FFmpegDemuxerPlugin::ReadFrame(Buffer& info, int32_t timeOutMs)
@@ -428,6 +474,16 @@ bool FFmpegDemuxerPlugin::ParseMediaData()
     mediaInfo_->tracks.resize(streamCnt);
     for (size_t i = 0; i < streamCnt; ++i) {
         auto& avStream = *formatContext_->streams[i];
+        if (avStream.codecpar->codec_type == AVMEDIA_TYPE_VIDEO
+            && avStream.codecpar->codec_id != AV_CODEC_ID_RAWVIDEO) {
+            if (avStream.codecpar->codec_id == AV_CODEC_ID_H264) {
+                mediaInfo_->tracks[i].Insert<Tag::VIDEO_BIT_STREAM_FORMAT>(
+                    std::vector<VideoBitStreamFormat>{VideoBitStreamFormat::AVC1, VideoBitStreamFormat::ANNEXB});
+            } else if (avStream.codecpar->codec_id == AV_CODEC_ID_H265) {
+                mediaInfo_->tracks[i].Insert<Tag::VIDEO_BIT_STREAM_FORMAT>(
+                    std::vector<VideoBitStreamFormat>{VideoBitStreamFormat::HEVC, VideoBitStreamFormat::ANNEXB});
+            }
+        }
         auto codecContext = InitCodecContext(avStream);
         if (codecContext == nullptr) {
             continue;
