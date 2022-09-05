@@ -50,6 +50,7 @@ ErrorCode CodecFilterBase::Stop()
 {
     MEDIA_LOG_D("CodecFilterBase stop start.");
     // 先改变底层状态 然后停掉上层线程 否则会产生死锁
+    RETURN_AGAIN_IF_NULL(plugin_);
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Flush()), "Flush plugin fail");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Stop()), "Stop plugin fail");
     FAIL_RETURN_MSG(codecMode_->Stop(), "Codec mode stop fail");
