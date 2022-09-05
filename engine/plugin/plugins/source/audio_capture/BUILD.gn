@@ -40,8 +40,7 @@ source_set("std_audio_capture") {
       "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiocommon/include",
       "//commonlibrary/c_utils/base/include/",
     ]
-    public_deps += [ "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiocapturer:audio_capturer" ]
-    public_configs += [ "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiocapturer:audio_capturer_config" ]
+    public_configs += [ "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config" ]
   }
 }
 
@@ -51,6 +50,7 @@ if (hst_is_lite_sys) {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_StdAudioCapture") {
     deps = [ ":std_audio_capture" ]
+    external_deps = [ "multimedia_audio_framework:audio_capturer" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"
