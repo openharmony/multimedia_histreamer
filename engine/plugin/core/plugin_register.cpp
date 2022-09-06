@@ -124,7 +124,7 @@ std::shared_ptr<PluginRegInfo> PluginRegister::RegisterImpl::BuildRegInfo(const 
 
 bool PluginRegister::RegisterImpl::Verification(const PluginDefBase& definition)
 {
-    if (definition.rank < 0 || definition.rank > 100) {
+    if (definition.rank < 0 || definition.rank > 100) { // 100
         return false;
     }
     return (definition.pluginType != PluginType::INVALID_TYPE);
