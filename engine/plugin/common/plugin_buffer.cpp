@@ -36,11 +36,11 @@ Memory::Memory(size_t capacity, std::shared_ptr<Allocator> allocator, size_t ali
     size_t allocSize = align ? (capacity + align - 1) : capacity;
     if (this->allocator) {
         addr = std::shared_ptr<uint8_t>(static_cast<uint8_t*>(this->allocator->Alloc(allocSize)),
-                                        [this](uint8_t* ptr) { this->allocator->Free((void*)ptr); });
+                                        [this](uint8_t* ptr) { this->allocator->Free(static_cast<void*>(ptr)); });
     } else {
         addr = std::shared_ptr<uint8_t>(new uint8_t[allocSize], std::default_delete<uint8_t[]>());
     }
-    offset = static_cast<size_t>(AlignUp((uintptr_t)addr.get(), (uintptr_t)align) - (uintptr_t)addr.get());
+    offset = static_cast<size_t>(AlignUp(reinterpret_cast<uintptr_t>(addr.get()), static_cast<uintptr_t>(align)) - reinterpret_cast<uintptr_t>(addr.get()));
 }
 
 size_t Memory::GetCapacity()

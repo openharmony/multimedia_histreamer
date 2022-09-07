@@ -141,7 +141,7 @@ Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCod
         char requestRange[128] = {0};
         if (len > 0) {
             snprintf_s(requestRange, sizeof(requestRange), sizeof(requestRange) - 1, "%ld-%ld",
-                       startPos, startPos + len -1);
+                       startPos, startPos + len - 1);
         } else {
             snprintf_s(requestRange, sizeof(requestRange), sizeof(requestRange) - 1, "%ld-", startPos);
         }
