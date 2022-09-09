@@ -23,7 +23,7 @@ config("histreamer_player_config") {
   } else {
     include_dirs += [
       "//foundation/multimedia/player_framework/interfaces/inner_api/native",
-      "//foundation/multimedia/image_standard/interfaces/innerkits/include",
+      "//foundation/multimedia/image_framework/interfaces/innerkits/include",
       "//foundation/multimedia/player_framework/services/include",
       "//foundation/multimedia/player_framework/services/services/engine_intf",
       "//commonlibrary/c_utils/base/include",
