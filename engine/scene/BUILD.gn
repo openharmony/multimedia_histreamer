@@ -12,6 +12,8 @@
 # limitations under the License.
 #
 import("//foundation/multimedia/histreamer/config.gni")
+import("//foundation/multimedia/player_framework/config.gni")
+
 source_set("std_engine_factory") {
   if (!hst_is_lite_sys) {
     include_dirs = [
@@ -29,6 +31,8 @@ source_set("std_engine_factory") {
     if (multimedia_histreamer_enable_recorder) {
       deps += [ "recorder:histreamer_recorder" ]
     }
+    defines = []
+    defines += player_framework_defines
   }
 }
 
