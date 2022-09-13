@@ -33,7 +33,6 @@ if (ohos_kernel_type == "liteos_m") {
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
     ]
   }
 } else {
@@ -46,7 +45,6 @@ if (ohos_kernel_type == "liteos_m") {
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-      "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
     ]
   }
 }

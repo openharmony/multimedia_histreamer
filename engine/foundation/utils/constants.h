@@ -20,7 +20,6 @@
 
 namespace OHOS {
 namespace Media {
-
 constexpr size_t DEFAULT_QUEUE_SIZE = 10;
 constexpr int DEFAULT_FRAME_SIZE = 2 * 1024; // 2kb
 constexpr size_t DEFAULT_POOL_SIZE = 10;

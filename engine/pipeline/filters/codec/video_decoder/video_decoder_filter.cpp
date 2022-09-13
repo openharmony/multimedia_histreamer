@@ -19,7 +19,7 @@
 
 #include "video_decoder_filter.h"
 #include "factory/filter_factory.h"
-#include "filters/common/dump_buffer.h"
+#include "utils/dump_buffer.h"
 #include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/log.h"
 #include "osal/utils/util.h"

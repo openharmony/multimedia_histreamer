@@ -45,7 +45,6 @@ source_set("histreamer_player") {
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline",
     "//foundation/multimedia/histreamer/engine/scene:scene_common",
-    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
   if (hst_is_lite_sys) {
     sources += [

@@ -40,7 +40,6 @@ source_set("httpsource") {
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
   if (hst_is_lite_sys) {
     if (ohos_kernel_type == "liteos_m") {

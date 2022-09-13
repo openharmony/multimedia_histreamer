@@ -151,7 +151,6 @@ source_set("histreamer_plugin_core") {
   public_deps = [
     ":histreamer_plugin_intf",
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/utils:histreamer_utils",
   ]
 
   if (hst_is_lite_sys) {

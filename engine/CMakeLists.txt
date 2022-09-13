@@ -59,7 +59,7 @@ include_directories(
         ${TOP_DIR}/engine/pipeline/core
         ${TOP_DIR}/engine/foundation
         ${TOP_DIR}/engine/foundation/osal
-        ${TOP_DIR}/engine/utils
+        ${TOP_DIR}/engine/foundation/utils
         ${TOP_DIR}/engine/pipeline/filters
         ${TOP_DIR}/engine/pipeline/filters/player
         ${TOP_DIR}/engine/plugin
@@ -91,7 +91,7 @@ file(GLOB_RECURSE HISTREAMER_BASE_SRCS
         ${TOP_DIR}/engine/scene/recorder/internal/*.cpp
         ${TOP_DIR}/engine/scene/common/*.cpp
         ${TOP_DIR}/engine/foundation/*.cpp
-        ${TOP_DIR}/engine/utils/*.cpp
+        ${TOP_DIR}/engine/foundation/utils/*.cpp
         )
 
 file(GLOB_RECURSE COMMON_PLUGIN_SRCS
