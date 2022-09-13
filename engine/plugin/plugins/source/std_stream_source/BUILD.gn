@@ -35,7 +35,7 @@ source_set("std_stream_source") {
     include_dirs = [
       "//foundation/multimedia/player_framework/interfaces/inner_api/native",
       "//foundation/multimedia/player_framework/services/utils/include",
-      "//utils/native/base/include",
+      "//commonlibrary/c_utils/base/include",
     ]
     public_deps += [ "//foundation/multimedia/player_framework/services/utils:media_service_utils" ]
     public_configs += [ "//foundation/multimedia/player_framework/services/utils:media_service_utils_public_config" ]
