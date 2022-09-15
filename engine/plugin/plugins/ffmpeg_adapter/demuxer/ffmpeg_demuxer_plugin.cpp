@@ -361,11 +361,10 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mo
             ffTime = avStream->index_entries[keyFrameIdx].timestamp;
 #endif
         }
+        ffTime = ConvertTimeFromFFmpeg(ffTime, avStream->time_base);
     }
-    auto newTime = ConvertTimeFromFFmpeg(ffTime, avStream->time_base);
-    MEDIA_LOG_I("SeekTo " PUBLIC_LOG_U64 " / " PUBLIC_LOG_D64 ", ffTime: " PUBLIC_LOG_D64,
-                newTime, hstTime, ffTime);
-    auto rtv = av_seek_frame(formatContext_.get(), trackId, newTime, AVSEEK_FLAG_BACKWARD);
+    MEDIA_LOG_I("SeekTo " PUBLIC_LOG_U64 " / " PUBLIC_LOG_D64, ffTime, hstTime);
+    auto rtv = av_seek_frame(formatContext_.get(), trackId, ffTime, AVSEEK_FLAG_BACKWARD);
     if (rtv < 0) {
         MEDIA_LOG_E("seek failed, return value: " PUBLIC_LOG_D32, rtv);
     }
