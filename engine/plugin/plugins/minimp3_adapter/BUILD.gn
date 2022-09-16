@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import("//build/ohos.gni")
 import("//foundation/multimedia/histreamer/config.gni")
 if (!hst_is_lite_sys) {
   ohos_kernel_type = ""
@@ -22,6 +23,7 @@ group("plugin_minimp3_adapter") {
   } else {
     deps = []
     deps += [ ":histreamer_plugin_Minimp3Demuxer" ]
+    deps += [ ":histreamer_plugin_Minimp3Decoder" ]
   }
 }
 
@@ -50,7 +52,7 @@ if (ohos_kernel_type == "liteos_m") {
     ]
   }
 } else {
-  shared_library("histreamer_plugin_Minimp3Demuxer") {
+  ohos_shared_library("histreamer_plugin_Minimp3Demuxer") {
     sources = [
       "minimp3_demuxer_plugin.cpp",
       "minimp3_wrapper.c",
@@ -63,9 +65,11 @@ if (ohos_kernel_type == "liteos_m") {
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     ]
+    relative_install_dir = "media/histreamer_plugins"
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
   }
-
-  shared_library("histreamer_plugin_Minimp3Decoder") {
+  ohos_shared_library("histreamer_plugin_Minimp3Decoder") {
     sources = [
       "minimp3_decoder_plugin.cpp",
       "minimp3_wrapper.c",
@@ -78,5 +82,8 @@ if (ohos_kernel_type == "liteos_m") {
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     ]
+    relative_install_dir = "media/histreamer_plugins"
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
   }
 }
