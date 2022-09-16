@@ -27,16 +27,6 @@ config("histreamer_foundation_config") {
   } else {
     include_dirs +=
         [ "//base/hiviewdfx/hilog/interfaces/native/innerkits/include" ]
-    if (multimedia_histreamer_enable_video) {
-      include_dirs += [
-        "//drivers/peripheral/base",
-        "//drivers/peripheral/display/interfaces/include",
-        "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-        "//foundation/graphic/graphic_2d/interfaces/inner_api/",
-        "//foundation/graphic/graphic_2d/interfaces/inner_api/common",
-        "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
-      ]
-    }
   }
 }
 
@@ -69,7 +59,10 @@ source_set("histreamer_foundation") {
     }
   } else {
     deps = [ "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog" ]
-    public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+    public_deps += [
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+      "//third_party/bounds_checking_function:libsec_static",
+    ]
   }
 
   if (defined(config_ohos_multimedia_histreamer_stack_size) &&
