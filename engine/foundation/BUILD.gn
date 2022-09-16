@@ -59,7 +59,10 @@ source_set("histreamer_foundation") {
     }
   } else {
     deps = [ "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog" ]
-    public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+    public_deps += [
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+      "//third_party/bounds_checking_function:libsec_static",
+    ]
   }
 
   if (defined(config_ohos_multimedia_histreamer_stack_size) &&

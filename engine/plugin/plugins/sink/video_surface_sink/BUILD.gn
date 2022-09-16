@@ -33,9 +33,9 @@ source_set("std_video_surface_sink") {
     print("std video surface sink plugin is not available on lite systems")
   } else {
     include_dirs = [
-      "//foundation/graphic/graphic_2d/interfaces/innerkits",
+      "//foundation/graphic/graphic_2d/interfaces/inner_api",
       "//drivers/peripheral/display/interfaces/include",
-      "//foundation/graphic/graphic_2d/interfaces/innerkits/common",
+      "//foundation/graphic/graphic_2d/interfaces/inner_api/common",
       "//foundation/graphic/graphic_2d/utils/sync_fence/export",
       "//commonlibrary/c_utils/base/include",
       "//base/startup/init/interfaces/innerkits/include/syspara",
