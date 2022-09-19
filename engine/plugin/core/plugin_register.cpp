@@ -18,7 +18,7 @@
 #include <dirent.h>
 
 #include "all_plugin_static.h"
-#include "hdi_adapter_register.h"
+#include "core/hdi_codec/hdi_adapter_register.h"
 #include "foundation/log.h"
 #include "interface/audio_sink_plugin.h"
 #include "interface/codec_plugin.h"

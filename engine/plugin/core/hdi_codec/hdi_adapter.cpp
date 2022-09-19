@@ -859,7 +859,7 @@ Status HdiAdapter::WaitForState(OMX_STATETYPE state)
 Status HdiAdapter::ChangeState(OMX_STATETYPE state)
 {
     MEDIA_LOG_I("change state from " PUBLIC_LOG_S " to " PUBLIC_LOG_S,
-                omxStateToString[targetState_].c_str(), omxStateToString[state].c_str());
+                omxStateToString.at(targetState_).c_str(), omxStateToString.at(state).c_str());
     if (targetState_ != state && curState_ != state) {
         if (codecComp_ && codecComp_->SendCommand) {
             auto ret = codecComp_->SendCommand(codecComp_, OMX_CommandStateSet, state, nullptr, 0);
@@ -893,7 +893,7 @@ void HdiAdapter::HandelEventStateSet(OMX_U32 data)
 {
     MEDIA_LOG_D("HandelEventStateSet-callback begin");
     MEDIA_LOG_I("change curState_ from " PUBLIC_LOG_S " to " PUBLIC_LOG_S,
-                omxStateToString[curState_].c_str(), omxStateToString[static_cast<OMX_STATETYPE>(data)].c_str());
+                omxStateToString.at(curState_).c_str(), omxStateToString.at(static_cast<OMX_STATETYPE>(data)).c_str());
     curState_ = static_cast<OMX_STATETYPE>(data);
     eventDone_ = true;
 }

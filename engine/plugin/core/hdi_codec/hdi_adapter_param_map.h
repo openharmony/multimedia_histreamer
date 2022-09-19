@@ -29,10 +29,6 @@ const static std::pair<::CodecType, Plugin::CodecType> codecTypeMap[] = {
     {::CodecType::AUDIO_ENCODER, Plugin::CodecType::AUDIO_ENCODER},
 };
 
-const static std::pair<::AvCodecRole, std::string> mimeMap[] = {
-    {::AvCodecRole::MEDIA_ROLETYPE_VIDEO_AVC, OHOS::Media::MEDIA_MIME_VIDEO_H264},
-};
-
 const static std::pair<int32_t, Status> retStatusMap[] = {
     {HDF_SUCCESS, Status::OK},
     {HDF_FAILURE, Status::ERROR_UNKNOWN},
@@ -81,7 +77,7 @@ const static std::map<OMX_ERRORTYPE, std::string> omxStatusMap = {
     {OMX_ErrorPortUnpopulated, "OMX_ErrorPortUnpopulated"},
 };
 
-static std::unordered_map<OMX_STATETYPE, std::string> omxStateToString = {
+const static std::unordered_map<OMX_STATETYPE, std::string> omxStateToString = {
     {OMX_StateInvalid, "OMX_StateInvalid"},
     {OMX_StateLoaded, "OMX_StateLoaded"},
     {OMX_StateLoaded, "OMX_StateLoaded"},
