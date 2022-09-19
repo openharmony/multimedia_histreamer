@@ -240,7 +240,11 @@ void MediaSourceFilter::ActivateMode()
         if (plugin_) {
             seekable_ = plugin_->GetSeekable();
         }
-        OSAL::SleepFor(10); // 10
+
+        if(seekable_ == Seekable::INVALID){
+            OSAL::SleepFor(10); // 10
+        }
+
     } while (seekable_ == Seekable::INVALID);
     FALSE_LOG(seekable_ != Seekable::INVALID);
     if (seekable_ == Seekable::UNSEEKABLE) {
