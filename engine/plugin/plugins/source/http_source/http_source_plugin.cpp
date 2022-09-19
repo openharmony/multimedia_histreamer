@@ -54,7 +54,6 @@ HttpSourcePlugin::HttpSourcePlugin(std::string name) noexcept
       waterline_(0),
       downloader_(nullptr)
 {
-    client_ = std::make_shared<HttpCurlClient>(nullptr, nullptr, this);
     MEDIA_LOG_D("HttpSourcePlugin IN");
 }
 
@@ -67,7 +66,6 @@ HttpSourcePlugin::~HttpSourcePlugin()
 Status HttpSourcePlugin::Init()
 {
     MEDIA_LOG_D("Init IN");
-    client_->Init();
     return Status::OK;
 }
 
@@ -75,7 +73,6 @@ Status HttpSourcePlugin::Deinit()
 {
     MEDIA_LOG_D("IN");
     CloseUri();
-    client_->Deinit();
     return Status::OK;
 }
 
@@ -156,7 +153,6 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     MEDIA_LOG_D("SetSource IN");
     OSAL::ScopedLock lock(mutex_);
     auto uri = source->GetSourceUri();
-    FALSE_RETURN_V(client_->CheckUrl(uri), Status::ERROR_UNKNOWN);
     if (uri.find(".m3u8") != std::string::npos) {
         downloader_ = std::make_shared<DownloadMonitor>(std::make_shared<HlsMediaDownloader>());
         delayReady = false;

@@ -132,6 +132,11 @@ void DownloadMonitor::SetStatusCallback(StatusCallbackFunc cb)
 {
 }
 
+bool DownloadMonitor::GetStartedStatus()
+{
+    return downloader_->GetStartedStatus();
+}
+
 bool DownloadMonitor::NeedRetry(const std::shared_ptr<DownloadRequest>& request)
 {
     auto clientError = request->GetClientError();
@@ -149,6 +154,11 @@ bool DownloadMonitor::NeedRetry(const std::shared_ptr<DownloadRequest>& request)
             if (serverError != 0) {
                 MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32, serverError);
                 callback_->OnEvent({PluginEventType::SERVER_ERROR, {serverError}, "http"});
+            }
+            if (!downloader_->GetStartedStatus()) {
+                task_->Stop();
+                downloader_->Close();
+                return false;
             }
         }
         return true;

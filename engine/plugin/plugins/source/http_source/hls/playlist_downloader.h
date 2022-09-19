@@ -39,10 +39,12 @@ public:
     virtual void SetPlayListCallback(PlayListChangeCallback* callback) = 0;
     virtual double GetDuration() const = 0;
     virtual Seekable GetSeekable() const = 0;
+
     void Resume();
     void Pause();
     void Close();
     void SetStatusCallback(StatusCallbackFunc cb);
+    bool GetPlayListDownloadStatus();
 
 protected:
     bool SaveData(uint8_t* data, uint32_t len, int64_t offset);
@@ -57,6 +59,7 @@ protected:
     DataSaveFunc dataSave_;
     StatusCallbackFunc statusCallback_;
     std::string playList_;
+    bool startedDownloadStatus_ {false};
 };
 }
 }

@@ -22,7 +22,7 @@ namespace Plugin {
 namespace HttpPlugin {
 namespace {
 constexpr int RING_BUFFER_SIZE = 5 * 48 * 1024;
-constexpr int WATER_LINE = RING_BUFFER_SIZE * 0.1;
+constexpr int WATER_LINE = RING_BUFFER_SIZE / 30; //30  WATER_LINE:8192
 }
 
 HttpMediaDownloader::HttpMediaDownloader() noexcept
@@ -130,6 +130,11 @@ void HttpMediaDownloader::SetStatusCallback(StatusCallbackFunc cb)
     statusCallback_ = cb;
 }
 
+bool HttpMediaDownloader::GetStartedStatus()
+{
+    return startedPlayStatus_;
+}
+
 bool HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 {
     FALSE_RETURN_V(buffer_->WriteBuffer(data, len, offset), false);
@@ -140,6 +145,7 @@ bool HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
         aboveWaterline_ = true;
         MEDIA_LOG_I("Send http aboveWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
         callback_->OnEvent({PluginEventType::ABOVE_LOW_WATERLINE, {ratio}, "http"});
+        startedPlayStatus_ = true;
     } else if (bufferSize < WATER_LINE && aboveWaterline_) {
         aboveWaterline_ = false;
         MEDIA_LOG_I("Send http belowWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
