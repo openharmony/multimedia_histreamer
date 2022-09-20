@@ -40,7 +40,8 @@ Memory::Memory(size_t capacity, std::shared_ptr<Allocator> allocator, size_t ali
     } else {
         addr = std::shared_ptr<uint8_t>(new uint8_t[allocSize], std::default_delete<uint8_t[]>());
     }
-    offset = static_cast<size_t>(AlignUp(reinterpret_cast<uintptr_t>(addr.get()), static_cast<uintptr_t>(align)) - reinterpret_cast<uintptr_t>(addr.get()));
+    offset = static_cast<size_t>(AlignUp(reinterpret_cast<uintptr_t>(addr.get()), static_cast<uintptr_t>(align)) -
+        reinterpret_cast<uintptr_t>(addr.get()));
 }
 
 size_t Memory::GetCapacity()
