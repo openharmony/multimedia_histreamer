@@ -170,7 +170,7 @@ Status SurfaceSinkPlugin::Prepare()
         // need to convert pixel format when write
         needConvFormat = true;
     }
-    int32_t usage = HBM_USE_CPU_READ | HBM_USE_CPU_WRITE | HBM_USE_MEM_DMA;
+    int32_t usage = BUFFER_USAGE_CPU_READ | BUFFER_USAGE_CPU_WRITE | BUFFER_USAGE_MEM_DMA;
     mAllocator_->Config(static_cast<int32_t>(width_), static_cast<int32_t>(height_), usage, surfaceFmt,
                         DEFAULT_STRIDE_ALIGN, 0);
     MEDIA_LOG_D("Prepare success");
