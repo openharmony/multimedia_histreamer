@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#define MEDIA_LOG_DEBUG_DETAIL 1
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
 #define HST_LOG_TAG "HdiAdapter"
@@ -254,15 +254,15 @@ Status HdiAdapter::Init()
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     std::string compName = pluginName_.substr(firstDotPos + 1); // ComponentCapability.compName
-    g_compManager_ = GetCodecComponentManager();
+    compManager_ = GetCodecComponentManager();
     codecCallback_ = CodecCallbackTypeStubGetInstance();
     FALSE_RETURN_V_MSG(codecCallback_ != nullptr, Status::ERROR_NULL_POINTER, "create callback_ failed");
-    FALSE_RETURN_V_MSG(g_compManager_ != nullptr, Status::ERROR_NULL_POINTER, "create component manager failed");
+    FALSE_RETURN_V_MSG(compManager_ != nullptr, Status::ERROR_NULL_POINTER, "create component manager failed");
     codecCallback_->EventHandler = &HdiAdapter::EventHandler;
     codecCallback_->EmptyBufferDone = &HdiAdapter::EmptyBufferDone;
     codecCallback_->FillBufferDone = &HdiAdapter::FillBufferDone;
 
-    int32_t ret = g_compManager_->CreateComponent(&codecComp_, &componentId_, const_cast<char*>(compName.c_str()),
+    int32_t ret = compManager_->CreateComponent(&codecComp_, &componentId_, const_cast<char*>(compName.c_str()),
                                                  (int64_t)this, codecCallback_);
     FALSE_RETURN_V_MSG(codecComp_ != nullptr, Status::ERROR_NULL_POINTER,
                        "create component failed, retVal = " PUBLIC_LOG_D32, (int)ret);
@@ -273,7 +273,7 @@ Status HdiAdapter::Init()
     FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, Status::ERROR_INVALID_DATA,
                          "get component version failed, ret: " PUBLIC_LOG_D32, ret);
     outBufQue_.SetActive(true);
-    MEDIA_LOG_D("codec adapter init end");
+    MEDIA_LOG_D("codec adapter init end, componentId_ = " PUBLIC_LOG_D32, componentId_);
     return Status::OK;
 }
 
@@ -281,8 +281,8 @@ Status HdiAdapter::Deinit()
 {
     MEDIA_LOG_D("HdiAdapter DeInit Enter");
     (void)ResetLocked();
-    auto ret = g_compManager_->DestroyComponent(componentId_);
-    FALSE_RETURN_V_MSG_E(ret != HDF_SUCCESS, Status::ERROR_INVALID_OPERATION, "HDI destroy component failed");
+    auto ret = compManager_->DestroyComponent(componentId_);
+    FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, Status::ERROR_INVALID_OPERATION, "HDI destroy component failed");
     CodecComponentTypeRelease(codecComp_);
     CodecComponentManagerRelease();
     CodecCallbackTypeStubRelease(codecCallback_);
@@ -300,7 +300,6 @@ Status HdiAdapter::ResetLocked()
     outBufQue_.Clear();
     inBufQue_.clear();
     codecCallback_ = nullptr;
-    componentId_ = 0;
     width_ = 0;
     height_ = 0;
     stride_ = 0;
@@ -356,8 +355,9 @@ Status HdiAdapter::Stop()
 {
     MEDIA_LOG_D("HdiAdapter Stop Enter");
     (void)ResetLocked();
-    auto ret = g_compManager_->DestroyComponent(componentId_);
-    FALSE_RETURN_V_MSG_E(ret != HDF_SUCCESS, Status::ERROR_INVALID_OPERATION, "HDI destroy component failed");
+    auto ret = compManager_->DestroyComponent(componentId_);
+    FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, Status::ERROR_INVALID_OPERATION,
+                         "HDI destroy component failed, ret = " PUBLIC_LOG_S, TransHdfStatus2String(ret).c_str());
     MEDIA_LOG_D("HdiAdapter Stop End");
     return Status::OK;
 }
@@ -826,11 +826,8 @@ void HdiAdapter::FreeBuffers()
     if (status != OMX_StateLoaded) {
         MEDIA_LOG_I("Wait for OMX_StateLoaded status");
         WaitForState(OMX_StateLoaded);
-    } else {
-        MEDIA_LOG_I("status is" PUBLIC_LOG_D32, status);
     }
 }
-
 
 void HdiAdapter::WaitForEvent(OMX_U32 cmd)
 {

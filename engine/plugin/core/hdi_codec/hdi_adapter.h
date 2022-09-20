@@ -144,7 +144,7 @@ private:
 private:
     struct CodecComponentType* codecComp_ {nullptr};
     struct CodecCallbackType* codecCallback_ {nullptr};
-    CodecComponentManager* g_compManager_ {nullptr};
+    CodecComponentManager* compManager_ {nullptr};
     uint32_t componentId_;
     struct CompVerInfo verInfo_;
 
