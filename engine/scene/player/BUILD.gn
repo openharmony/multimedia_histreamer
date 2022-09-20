@@ -59,9 +59,8 @@ source_set("histreamer_player") {
       "//foundation/multimedia/histreamer/engine/scene/player/standard/media_utils.cpp",
     ]
     public_deps += [
-      "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
-      "//foundation/graphic/graphic_2d/frameworks/surface:surface",
       "//foundation/multimedia/player_framework/services/utils:media_format",
     ]
+    deps = [ "//foundation/graphic/graphic_2d/frameworks/surface:surface" ]
   }
 }

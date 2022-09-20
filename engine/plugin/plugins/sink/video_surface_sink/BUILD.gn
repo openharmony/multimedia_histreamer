@@ -42,7 +42,6 @@ source_set("std_video_surface_sink") {
       "//third_party/bounds_checking_function/include",
     ]
     public_deps += [
-      "//base/startup/init/interfaces/innerkits:libbegetutil",
       "//commonlibrary/c_utils/base:utils",
       "//foundation/graphic/graphic_2d:libsurface",
       "//foundation/graphic/graphic_2d/utils:sync_fence",
