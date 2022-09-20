@@ -42,16 +42,13 @@ source_set("histreamer_recorder") {
       "//foundation/communication/ipc/interfaces/innerkits/ipc_core:libipc_core_private_config",
       "//foundation/multimedia/histreamer:histreamer_presets",
     ]
-    public_deps = [
-      "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    ]
+    deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
     if (!hst_is_lite_sys) {
       sources += [
         "standard/hirecorder_impl.cpp",
         "standard/recorder_utils.cpp",
       ]
-      public_deps += [
+      deps += [
         "//foundation/graphic/graphic_2d/frameworks/surface:surface",
         "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline",
       ]

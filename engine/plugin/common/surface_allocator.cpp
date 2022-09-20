@@ -35,7 +35,7 @@ SurfaceAllocator::SurfaceAllocator(sptr<Surface> surface)
 {
     requestConfig_ = {
         DEFAULT_SURFACE_WIDTH, DEFAULT_SURFACE_HEIGHT, DEFAULT_SURFACE_STRIDE_ALIGN,
-        PixelFormat ::PIXEL_FMT_RGBA_8888, HBM_USE_CPU_READ | HBM_USE_CPU_WRITE | HBM_USE_MEM_DMA, 0};
+        PixelFormat ::PIXEL_FMT_RGBA_8888, BUFFER_USAGE_CPU_READ | BUFFER_USAGE_CPU_WRITE | BUFFER_USAGE_MEM_DMA, 0};
 }
 
 sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer(size_t size)

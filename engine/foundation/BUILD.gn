@@ -18,6 +18,7 @@ config("histreamer_foundation_config") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine/foundation",
     "//foundation/multimedia/histreamer/engine/foundation/utils",
+    "//foundation/graphic/graphic_2d/frameworks/surface/include",
   ]
   if (hst_is_lite_sys) {
     include_dirs += [
