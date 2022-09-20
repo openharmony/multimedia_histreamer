@@ -41,6 +41,7 @@ public:
     void SetCallback(Callback* cb) override;
     void OnPlayListChanged(const std::vector<std::string>& playList) override;
     void SetStatusCallback(StatusCallbackFunc cb) override;
+    bool GetStartedStatus() override;
 
 private:
     bool SaveData(uint8_t* data, uint32_t len, int64_t offset);
@@ -54,6 +55,7 @@ private:
     Callback* callback_ {nullptr};
     DataSaveFunc dataSave_;
     StatusCallbackFunc statusCallback_;
+    bool startedPlayStatus_ {false};
 
     std::shared_ptr<PlayListDownloader> playListDownloader_;
 

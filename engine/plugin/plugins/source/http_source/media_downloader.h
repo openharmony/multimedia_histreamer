@@ -38,6 +38,7 @@ public:
     virtual Seekable GetSeekable() const = 0;
     virtual void SetCallback(Callback* cb) = 0;
     virtual void SetStatusCallback(StatusCallbackFunc cb) = 0;
+    virtual bool GetStartedStatus() = 0;
 };
 }
 }

@@ -75,23 +75,7 @@ Status HttpCurlClient::Deinit()
     return Status::OK;
 }
 
-bool HttpCurlClient::CheckUrl(const std::string& url)
-{
-    easyHandle_ = curl_easy_init();
-    FALSE_RETURN_V(easyHandle_ != nullptr, false);
-    InitCurlEnvironment(url, true);
-    int64_t serverCode {0};
-    int clientCode = curl_easy_perform(easyHandle_);
-    if (clientCode == CURLE_OK) {
-        curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &serverCode);
-    }
-    // 200 request success, 206 partial download
-    FALSE_RETURN_V_MSG_E(serverCode == 200 || serverCode == 206, false, "Check url (" PUBLIC_LOG_S ") failed, "
-        "client code(" PUBLIC_LOG_D32 "), server code(" PUBLIC_LOG_D64 ").", url.c_str(), clientCode, serverCode);
-    return true;
-}
-
-void HttpCurlClient::InitCurlEnvironment(const std::string& url, bool isChecked)
+void HttpCurlClient::InitCurlEnvironment(const std::string& url)
 {
     curl_easy_setopt(easyHandle_, CURLOPT_URL, UrlParse(url).c_str());
     curl_easy_setopt(easyHandle_, CURLOPT_CONNECTTIMEOUT, 5); // 5
@@ -99,10 +83,7 @@ void HttpCurlClient::InitCurlEnvironment(const std::string& url, bool isChecked)
     curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYHOST, 0L);
     curl_easy_setopt(easyHandle_, CURLOPT_CAINFO, CA_DIR "cacert.pem");
-    if (isChecked) {
-        curl_easy_setopt(easyHandle_, CURLOPT_RANGE, "0-1");
-        return;
-    }
+
     curl_easy_setopt(easyHandle_, CURLOPT_HTTPGET, 1L);
 
     curl_easy_setopt(easyHandle_, CURLOPT_FORBID_REUSE, 0L);

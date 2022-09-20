@@ -156,8 +156,14 @@ void HlsMediaDownloader::OnPlayListChanged(const std::vector<std::string>& playL
     }
 }
 
+bool HlsMediaDownloader::GetStartedStatus()
+{
+    return playListDownloader_->GetPlayListDownloadStatus() && startedPlayStatus_;
+}
+
 bool HlsMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 {
+    startedPlayStatus_ = true;
     return buffer_->WriteBuffer(data, len, offset);
 }
 
