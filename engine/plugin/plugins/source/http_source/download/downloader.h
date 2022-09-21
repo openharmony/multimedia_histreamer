@@ -130,7 +130,7 @@ private:
     std::shared_ptr<BlockingQueue<std::shared_ptr<DownloadRequest>>> requestQue_;
 
     std::shared_ptr<DownloadRequest> currentRequest_;
-    bool shouldStartNextRequest;
+    bool shouldStartNextRequest {false};
 };
 }
 }

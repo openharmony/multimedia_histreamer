@@ -72,10 +72,10 @@ private:
     void RegisterDynamicPlugins();
     void RegisterPluginsFromPath(const char* libDirPath);
     void UnregisterAllPlugins();
-    void EraseRegisteredPluginsByPackageName(std::string name);
+    void EraseRegisteredPluginsByPackageName(const std::string& name);
     void EraseRegisteredPluginsByLoader(const std::shared_ptr<PluginLoader>& loader);
     void SaveDisabledPackage(std::pair<std::string, std::shared_ptr<PluginRegInfo>> info);
-    void RecoverDisabledPackage(PluginType type, std::string name);
+    void RecoverDisabledPackage(PluginType type, const std::string& name);
 
 private:
     using REGISTERED_TABLE = std::map<PluginType, std::map<std::string, std::shared_ptr<PluginRegInfo>>>;
@@ -88,7 +88,7 @@ private:
     };
 
     struct RegisterImpl : PackageRegister {
-        RegisterImpl(std::shared_ptr<RegisterData> data, std::shared_ptr<PluginLoader> loader = nullptr)
+        explicit RegisterImpl(std::shared_ptr<RegisterData> data, std::shared_ptr<PluginLoader> loader = nullptr)
             : pluginLoader(std::move(loader)), registerData(std::move(data)) {}
 
         ~RegisterImpl() override = default;

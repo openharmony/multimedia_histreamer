@@ -923,6 +923,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
         ASSERT_EQ(0, player->Stop());
         ASSERT_EQ(0, player->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd one channel source, start, stop, release
@@ -953,6 +954,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
         ASSERT_EQ(0, player->Stop());
         ASSERT_EQ(0, player->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd two channel source, start, stop, release
@@ -983,6 +985,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
         ASSERT_EQ(0, player->Stop());
         ASSERT_EQ(0, player->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd 2_8000 source, start, stop, release
@@ -1013,6 +1016,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
         ASSERT_EQ(0, player->Stop());
         ASSERT_EQ(0, player->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd 1_32000 source, start, stop, release
@@ -1043,6 +1047,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
         ASSERT_EQ(0, player->Stop());
         ASSERT_EQ(0, player->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd 2_44100 source, start, stop, release
@@ -1073,6 +1078,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
         ASSERT_EQ(0, player->Stop());
         ASSERT_EQ(0, player->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd 2_96000 source, start, stop, release
@@ -1103,6 +1109,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
         ASSERT_EQ(0, player->Stop());
         ASSERT_EQ(0, player->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd 2_44100_8000 source, start, stop, release
@@ -1133,6 +1140,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
         ASSERT_EQ(0, player->Stop());
         ASSERT_EQ(0, player->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd 2_44100_16000 source, start, stop, release
@@ -1163,6 +1171,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
         ASSERT_EQ(0, player->Stop());
         ASSERT_EQ(0, player->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd 2_44100_32000 source, start, stop, release
@@ -1193,6 +1202,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
         ASSERT_EQ(0, player->Stop());
         ASSERT_EQ(0, player->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd 2_44100_64000 source, start, stop, release
@@ -1223,6 +1233,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
         ASSERT_EQ(0, player->Stop());
         ASSERT_EQ(0, player->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd 2_44100_112000 source, start, stop, release
@@ -1253,6 +1264,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
         ASSERT_EQ(0, player->Stop());
         ASSERT_EQ(0, player->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd 2_22050_22050 source, start, stop, release
@@ -1283,6 +1295,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_TRUE(CheckTrackInfo(audioTrack, recordSource));
         ASSERT_EQ(0, player->Stop());
         ASSERT_EQ(0, player->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd source, start, stop, release
@@ -1301,6 +1314,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         CheckAudio(filePath, recordSource);
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd source, start, pause, stop, release
@@ -1320,6 +1334,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         CheckAudio(filePath, recordSource);
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd source, start, pause, resume, stop, release
@@ -1340,6 +1355,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         CheckAudio(filePath, recordSource);
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd source, start, reset, release
@@ -1360,6 +1376,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         CheckAudio(filePath, recordSource);
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd, start, pause, resume, pause, stop, release
@@ -1380,6 +1397,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         CheckAudio(filePath, recordSource);
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd, start, pause, stop, reset, release
@@ -1401,6 +1419,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         CheckAudio(filePath, recordSource);
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare fd, start, pause, resume, stop, reset, release
@@ -1423,6 +1442,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         CheckAudio(filePath, recordSource);
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare start reset prepare start pause resume stop reset release
@@ -1451,6 +1471,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
         CheckAudio(filePath, recordSource);
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare start reset prepare start pause stop reset release
@@ -1477,6 +1498,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
         CheckAudio(filePath, recordSource);
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare start reset prepare start stop release
@@ -1502,6 +1524,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         CheckAudio(filePath, recordSource);
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare start pause start stop release
@@ -1521,6 +1544,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         CheckAudio(filePath, recordSource);
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare start reset prepare start stop release
@@ -1539,6 +1563,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_NE(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Release());
         CheckAudio(filePath, recordSource);
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare start reset prepare start stop release
@@ -1557,5 +1582,6 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
         CheckAudio(filePath, recordSource);
+        ASSERT_EQ(0, close(fd));
     }
 };

@@ -28,7 +28,7 @@ public:
     HlsPlayListDownloader() = default;
     ~HlsPlayListDownloader() override = default;
 
-    void Open(std::string url) override;
+    void Open(const std::string& url) override;
     void UpdateManifest() override;
     void ParseManifest() override;
     void PlayListUpdateLoop() override;

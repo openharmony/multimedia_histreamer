@@ -50,7 +50,7 @@ public:
     }
 
 private:
-    CallbackWrap* callbackWrap_;
+    CallbackWrap* callbackWrap_ {nullptr};
 };
 
 class Base {

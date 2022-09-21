@@ -66,11 +66,11 @@ private:
     std::shared_ptr<Callback> callback_ {nullptr};
     MP4D_demux_t miniMP4_;
     size_t fileSize_;
-    unsigned int sampleIndex_;
     std::unique_ptr<MediaInfo> mediaInfo_;
     unsigned char *inIoBuffer_;
     unsigned int  ioDataRemainSize_;
     int           inIoBufferSize_;
+    unsigned int sampleIndex_;
 };
 } // namespace Minimp4
 } // namespace Plugin

@@ -389,7 +389,7 @@ int PluginRegister::GetRegisteredPluginCountByPackageName(std::string& name)
     return counts;
 }
 
-void PluginRegister::EraseRegisteredPluginsByPackageName(std::string name)
+void PluginRegister::EraseRegisteredPluginsByPackageName(const std::string& name)
 {
     for (auto& it : registerData->registerTable) {
         PluginType type = it.first;
@@ -441,7 +441,7 @@ void PluginRegister::PrintRegisteredPluginInfo()
     }
 }
 
-void PluginRegister::RecoverDisabledPackage(PluginType type, std::string name)
+void PluginRegister::RecoverDisabledPackage(PluginType type, const std::string& name)
 {
     for (auto it = registerData->disabledPackage.begin(); it != registerData->disabledPackage.end();) {
         if (it->second->packageDef->name == name) {

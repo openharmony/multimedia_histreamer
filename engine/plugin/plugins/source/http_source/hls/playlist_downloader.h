@@ -32,7 +32,7 @@ public:
     PlayListDownloader();
     virtual ~PlayListDownloader();
 
-    virtual void Open(std::string url) = 0;
+    virtual void Open(const std::string& url) = 0;
     virtual void UpdateManifest() = 0;
     virtual void ParseManifest() = 0;
     virtual void PlayListUpdateLoop() = 0;
