@@ -101,7 +101,7 @@ private:
     void ReceiveBuffer();
 
 #ifdef DUMP_RAW_DATA
-    std::FILE* dumpFd_;
+    std::FILE* dumpFd_ {nullptr};
 #endif
 
     void NotifyInputBufferDone(const std::shared_ptr<Buffer> &input);

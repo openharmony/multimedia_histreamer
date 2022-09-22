@@ -592,7 +592,7 @@ int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource)
     auto bufferInfo = std::make_shared<Buffer>();
     auto bufData = bufferInfo->WrapMemory(buff.data(), bufferSize, bufferSize);
     int confidence = 0;
-    if (dataSource->ReadAt(0, bufferInfo, bufferSize) == Status::OK) {
+    if (bufData && dataSource->ReadAt(0, bufferInfo, bufferSize) == Status::OK) {
         AVProbeData probeData{"", buff.data(), static_cast<int>(bufferInfo->GetMemory()->GetSize()), ""};
         confidence = plugin->read_probe(&probeData);
     }

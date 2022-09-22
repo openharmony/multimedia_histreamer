@@ -32,12 +32,13 @@ public:
         explicit MediaStat(std::string rep) : reporter(std::move(rep))
         {
         }
-        MediaStat(const MediaStat& other) : reporter(other.reporter)
+        MediaStat(const MediaStat& other)
+            : reporter(other.reporter), completeEventReceived(other.completeEventReceived.load())
         {
-            completeEventReceived = other.completeEventReceived.load();
         }
         MediaStat& operator=(const MediaStat& other)
         {
+            reporter = other.reporter;
             completeEventReceived = other.completeEventReceived.load();
             return *this;
         }
