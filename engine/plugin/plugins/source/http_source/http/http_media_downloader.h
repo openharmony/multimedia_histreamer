@@ -42,6 +42,7 @@ public:
     Seekable GetSeekable() const override;
     void SetCallback(Callback* cb) override;
     void SetStatusCallback(StatusCallbackFunc cb) override;
+    bool GetStartedStatus() override;
 
 private:
     bool SaveData(uint8_t* data, uint32_t len, int64_t offset);
@@ -53,6 +54,7 @@ private:
     Callback* callback_ {nullptr};
     StatusCallbackFunc statusCallback_ {nullptr};
     bool aboveWaterline_ {false};
+    bool startedPlayStatus_ {false};
 };
 }
 }

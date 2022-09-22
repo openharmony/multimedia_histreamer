@@ -48,7 +48,6 @@ public:
 private:
     void CloseUri();
 
-    std::shared_ptr<HttpCurlClient> client_;
     uint32_t bufferSize_;
     uint32_t waterline_;
     Callback* callback_ {};

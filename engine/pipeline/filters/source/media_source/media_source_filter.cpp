@@ -236,15 +236,18 @@ void MediaSourceFilter::InitPorts()
 void MediaSourceFilter::ActivateMode()
 {
     MEDIA_LOG_D("IN");
+    int32_t retry {0};
     do {
         if (plugin_) {
             seekable_ = plugin_->GetSeekable();
         }
-
-        if(seekable_ == Seekable::INVALID){
+        retry++;
+        if (seekable_ == Seekable::INVALID) {
+            if (retry >= 10) { // 10
+                break;
+            }
             OSAL::SleepFor(10); // 10
         }
-
     } while (seekable_ == Seekable::INVALID);
     FALSE_LOG(seekable_ != Seekable::INVALID);
     if (seekable_ == Seekable::UNSEEKABLE) {
@@ -420,7 +423,7 @@ ErrorCode MediaSourceFilter::FindPlugin(const std::shared_ptr<MediaSource>& sour
     return ErrorCode::ERROR_UNSUPPORTED_FORMAT;
 }
 
-void MediaSourceFilter::OnEvent(const Plugin::PluginEvent &event)
+void MediaSourceFilter::OnEvent(const Plugin::PluginEvent& event)
 {
     if (event.type == PluginEventType::ABOVE_LOW_WATERLINE) {
         isAboveWaterline_ = true;
@@ -429,8 +432,9 @@ void MediaSourceFilter::OnEvent(const Plugin::PluginEvent &event)
             isAboveWaterline_ = false;
             isPluginReady_ = false;
         }
+    } else if (event.type == PluginEventType::CLIENT_ERROR || event.type == PluginEventType::SERVER_ERROR) {
+        FilterBase::OnEvent(Event{name_, EventType::EVENT_PLUGIN_ERROR, event});
     }
-    FilterBase::OnEvent(event);
 }
 } // namespace Pipeline
 } // namespace Media

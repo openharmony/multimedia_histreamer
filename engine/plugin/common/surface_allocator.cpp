@@ -46,7 +46,7 @@ sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer(size_t size)
         return nullptr;
     }
     MEDIA_LOG_D("width: " PUBLIC_LOG_D32 ", height :" PUBLIC_LOG_D32 ", align: " PUBLIC_LOG_D32
-                ", format: " PUBLIC_LOG_D32 ", usage: " PUBLIC_LOG_D32 ", timeout: " PUBLIC_LOG_D32,
+                ", format: " PUBLIC_LOG_D32 ", usage: " PUBLIC_LOG_U64 ", timeout: " PUBLIC_LOG_D32,
                 requestConfig_.width, requestConfig_.height, requestConfig_.strideAlignment, requestConfig_.format,
                 requestConfig_.usage, requestConfig_.timeout);
     OHOS::sptr<OHOS::SurfaceBuffer> surfaceBuffer = nullptr;

@@ -52,6 +52,7 @@ public:
     Seekable GetSeekable() const override;
     void SetCallback(Callback *cb) override;
     void SetStatusCallback(StatusCallbackFunc cb) override;
+    bool GetStartedStatus() override;
 
 private:
     void HttpMonitorLoop();

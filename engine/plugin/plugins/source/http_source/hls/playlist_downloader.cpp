@@ -55,10 +55,16 @@ void PlayListDownloader::DoOpen(const std::string& url)
     downloader_->Start();
 }
 
+bool PlayListDownloader::GetPlayListDownloadStatus()
+{
+    return startedDownloadStatus_;
+}
+
 bool PlayListDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
 {
     (void)offset;
     playList_.append(reinterpret_cast<const char*>(data), len);
+    startedDownloadStatus_ = true;
     ParseManifest();
     return true;
 }
