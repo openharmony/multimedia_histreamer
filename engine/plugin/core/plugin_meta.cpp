@@ -142,13 +142,11 @@ bool Meta::SetPointer(Plugin::MetaID id, const void* ptr, size_t size) // NOLINT
     if (size == 0) {
         return false;
     }
-    auto tmp = new (std::nothrow) uint8_t[size];
-    if (tmp == nullptr) {
+    std::shared_ptr<uint8_t> savePtr(new (std::nothrow) uint8_t[size], std::default_delete<uint8_t[]>());
+    if (!savePtr) {
         return false;
     }
-    std::shared_ptr<uint8_t> savePtr(tmp, std::default_delete<uint8_t[]>());
     if (memcpy_s(savePtr.get(), size, ptr, size) != EOK) {
-        delete[] tmp;
         return false;
     }
     return SetData<std::pair<std::shared_ptr<uint8_t>, size_t>>(id, std::make_pair(savePtr, size));

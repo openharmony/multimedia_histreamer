@@ -49,7 +49,7 @@ namespace Pipeline {
 
 void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin::Buffer>& buffer);
 void PrepareDumpDir();
-void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugin::Buffer>& buffer, uint64_t offset, size_t size);
+void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugin::Buffer>& buffer, uint64_t offset, size_t dumpSize);
 } // Pipeline
 } // Media
 } // OHOS

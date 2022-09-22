@@ -34,7 +34,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace Ffmpeg {
-void ConfigVideoEncoder(AVCodecContext& codecContext, const std::map<Tag, ValueType>& source);
+void ConfigVideoEncoder(AVCodecContext& codecContext, const std::map<Tag, ValueType>& tagStore);
 Status GetVideoEncoderParameters(const AVCodecContext& codecContext, Tag tag, Plugin::ValueType& outVal);
 } // namespace Ffmpeg
 } // namespace Plugin

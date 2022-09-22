@@ -43,8 +43,8 @@ public:
     Status SetCallback(Callback* cb) override;
     Status SetDataSource(const std::shared_ptr<DataSource>& source) override;
     Status GetMediaInfo(MediaInfo& mediaInfo) override;
-    Status ReadFrame(Buffer& info, int32_t timeOutMs) override;
-    Status SeekTo(int32_t trackId, int64_t timeStampUs, SeekMode mode) override;
+    Status ReadFrame(Buffer& outBuffer, int32_t timeOutMs) override;
+    Status SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode) override;
     size_t GetTrackCount() override;
     Status SelectTrack(int32_t trackId) override;
     Status UnselectTrack(int32_t trackId) override;
@@ -52,11 +52,11 @@ public:
     size_t GetFileSize();
     std::shared_ptr<DataSource> GetInputBuffer();
     Status AudioAdapterForDecoder();
-    Status DoReadFromSource(uint32_t ioNeedReadSize);
+    Status DoReadFromSource(uint32_t readSize);
     Status GetDataFromSource();
 private:
     void FillADTSHead(std::shared_ptr<Memory> &data, unsigned int frameSize);
-    static int ReadCallback(int64_t offset, void *buffer, size_t size, void *token);
+    static int ReadCallback(int64_t offset, void* buffer, size_t size, void* token);
     struct IOContext {
         std::shared_ptr<DataSource> dataSource {nullptr};
         int64_t offset {0};

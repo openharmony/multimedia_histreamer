@@ -99,15 +99,15 @@ private:
 
         Status SetPackageDef(const PackageDef& def);
 
-        std::shared_ptr<PluginRegInfo> BuildRegInfo(const PluginDefBase& definition);
+        std::shared_ptr<PluginRegInfo> BuildRegInfo(const PluginDefBase& def);
 
-        void SetPluginInfo(std::shared_ptr<PluginInfo>& pluginInfo, const PluginDefBase& definition);
+        void SetPluginInfo(std::shared_ptr<PluginInfo>& info, const PluginDefBase& def);
 
-        Status InitSourceInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& definition);
+        Status InitSourceInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def);
 
         static Status SourceCapabilityConvert(std::shared_ptr<PluginInfo>& info, const PluginDefBase& def);
 
-        Status InitDemuxerInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& definition);
+        Status InitDemuxerInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def);
 
         static Status DemuxerCapabilityConvert(std::shared_ptr<PluginInfo>& info, const PluginDefBase& def);
 
@@ -131,7 +131,7 @@ private:
 
         bool VersionMatched(const PluginDefBase& definition);
 
-        bool MoreAcceptable(std::shared_ptr<PluginRegInfo>& regInfo, const PluginDefBase& definition);
+        bool MoreAcceptable(std::shared_ptr<PluginRegInfo>& regInfo, const PluginDefBase& def);
 
         std::shared_ptr<PluginLoader> pluginLoader;
         std::shared_ptr<RegisterData> registerData;
