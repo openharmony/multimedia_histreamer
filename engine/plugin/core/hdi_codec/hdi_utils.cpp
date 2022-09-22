@@ -18,12 +18,95 @@
 
 #include "hdi_utils.h"
 #include "display_type.h"
-#include "hdi_adapter_param_map.h"
+#include "hdf_base.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-std::string TransHdfStatus2String(int32_t status)
+const static std::pair<::CodecType, Plugin::CodecType> codecTypeMap[] = {
+    {::CodecType::VIDEO_DECODER, Plugin::CodecType::VIDEO_DECODER},
+    {::CodecType::VIDEO_ENCODER, Plugin::CodecType::VIDEO_ENCODER},
+    {::CodecType::AUDIO_DECODER, Plugin::CodecType::AUDIO_DECODER},
+    {::CodecType::AUDIO_ENCODER, Plugin::CodecType::AUDIO_ENCODER},
+};
+
+const static std::pair<int32_t, Status> retStatusMap[] = {
+    {HDF_SUCCESS, Status::OK},
+    {HDF_FAILURE, Status::ERROR_UNKNOWN},
+    {HDF_ERR_NOT_SUPPORT, Status::ERROR_INVALID_OPERATION},
+    {HDF_ERR_INVALID_PARAM, Status::ERROR_INVALID_PARAMETER},
+    {HDF_ERR_NOT_SUPPORT, Status::ERROR_AGAIN},
+    {HDF_ERR_MALLOC_FAIL, Status::ERROR_NO_MEMORY},
+};
+
+const static std::map<HDF_STATUS, std::string> hdfStatusMap = {
+    {HDF_STATUS::HDF_SUCCESS, "HDF_SUCCESS"},
+    {HDF_STATUS::HDF_FAILURE, "HDF_FAILURE"},
+    {HDF_STATUS::HDF_ERR_NOT_SUPPORT, "HDF_ERR_NOT_SUPPORT"},
+    {HDF_STATUS::HDF_ERR_INVALID_PARAM, "HDF_ERR_INVALID_PARAM"},
+    {HDF_STATUS::HDF_ERR_INVALID_OBJECT, "HDF_ERR_INVALID_OBJECT"},
+    {HDF_STATUS::HDF_ERR_MALLOC_FAIL, "HDF_ERR_MALLOC_FAIL"},
+    {HDF_STATUS::HDF_ERR_TIMEOUT, "HDF_ERR_TIMEOUT"},
+    {HDF_STATUS::HDF_ERR_THREAD_CREATE_FAIL, "HDF_ERR_THREAD_CREATE_FAIL"},
+    {HDF_STATUS::HDF_ERR_QUEUE_FULL, "HDF_ERR_QUEUE_FULL"},
+    {HDF_STATUS::HDF_ERR_DEVICE_BUSY, "HDF_ERR_DEVICE_BUSY"},
+    {HDF_STATUS::HDF_ERR_IO, "HDF_ERR_IO"},
+    {HDF_STATUS::HDF_ERR_BAD_FD, "HDF_ERR_BAD_FD"},
+    {HDF_STATUS::HDF_ERR_NOPERM, "HDF_ERR_NOPERM"},
+    {HDF_STATUS::HDF_BSP_ERR_OP, "HDF_BSP_ERR_OP"},
+    {HDF_STATUS::HDF_ERR_BSP_PLT_API_ERR, "HDF_ERR_BSP_PLT_API_ERR"},
+    {HDF_STATUS::HDF_PAL_ERR_DEV_CREATE, "HDF_PAL_ERR_DEV_CREATE"},
+    {HDF_STATUS::HDF_PAL_ERR_INNER, "HDF_PAL_ERR_INNER"},
+    {HDF_STATUS::HDF_DEV_ERR_NO_MEMORY, "HDF_DEV_ERR_NO_MEMORY"},
+    {HDF_STATUS::HDF_DEV_ERR_NO_DEVICE, "HDF_DEV_ERR_NO_DEVICE"},
+    {HDF_STATUS::HDF_DEV_ERR_NO_DEVICE_SERVICE, "HDF_DEV_ERR_NO_DEVICE_SERVICE"},
+    {HDF_STATUS::HDF_DEV_ERR_DEV_INIT_FAIL, "HDF_DEV_ERR_DEV_INIT_FAIL"},
+    {HDF_STATUS::HDF_DEV_ERR_PUBLISH_FAIL, "HDF_DEV_ERR_PUBLISH_FAIL"},
+    {HDF_STATUS::HDF_DEV_ERR_ATTACHDEV_FAIL, "HDF_DEV_ERR_ATTACHDEV_FAIL"},
+    {HDF_STATUS::HDF_DEV_ERR_NODATA, "HDF_DEV_ERR_NODATA"},
+    {HDF_STATUS::HDF_DEV_ERR_NORANGE, "HDF_DEV_ERR_NORANGE"},
+    {HDF_STATUS::HDF_DEV_ERR_OP, "HDF_DEV_ERR_OP"},
+};
+
+const static std::map<OMX_ERRORTYPE, std::string> omxStatusMap = {
+    {OMX_ErrorPortUnresponsiveDuringStop, "OMX_ErrorPortUnresponsiveDuringStop"},
+    {OMX_ErrorIncorrectStateTransition, "OMX_ErrorIncorrectStateTransition"},
+    {OMX_ErrorIncorrectStateOperation, "OMX_ErrorIncorrectStateOperation"},
+    {OMX_ErrorUnsupportedSetting, "OMX_ErrorUnsupportedSetting"},
+    {OMX_ErrorUnsupportedIndex, "OMX_ErrorUnsupportedIndex"},
+    {OMX_ErrorBadPortIndex, "OMX_ErrorBadPortIndex"},
+    {OMX_ErrorPortUnpopulated, "OMX_ErrorPortUnpopulated"},
+};
+
+const static std::unordered_map<OMX_STATETYPE, std::string> omxStateMap = {
+    {OMX_StateInvalid, "OMX_StateInvalid"},
+    {OMX_StateLoaded, "OMX_StateLoaded"},
+    {OMX_StateLoaded, "OMX_StateLoaded"},
+    {OMX_StateIdle, "OMX_StateIdle"},
+    {OMX_StateExecuting, "OMX_StateExecuting"},
+    {OMX_StatePause, "OMX_StatePause"},
+    {OMX_StateWaitForResources, "OMX_StateWaitForResources"},
+    {OMX_StateKhronosExtensions, "OMX_StateKhronosExtensions"},
+    {OMX_StateVendorStartUnused, "OMX_StateVendorStartUnused"},
+    {OMX_StateMax, "OMX_StateMax"},
+};
+
+const std::map<VideoPixelFormat, PixelFormat> pixelFormatMap = {
+    {VideoPixelFormat::NV21, PIXEL_FMT_YCBCR_420_SP}, // 需要补充完整
+    {VideoPixelFormat::NV12, PIXEL_FMT_YCRCB_420_SP},
+};
+
+std::string OmxStateToString(OMX_STATETYPE state)
+{
+    auto iter = omxStateMap.find(state);
+    if (iter != omxStateMap.end()) {
+        return iter->second;
+    }
+    MEDIA_LOG_W("Not find value, maybe update the map");
+    return "null";
+}
+
+std::string HdfStatus2String(int32_t status)
 {
     auto it1 = hdfStatusMap.find(static_cast<HDF_STATUS>(status));
     auto it2 = omxStatusMap.find(static_cast<OMX_ERRORTYPE>(status));
@@ -32,10 +115,11 @@ std::string TransHdfStatus2String(int32_t status)
     } else if (it2 != omxStatusMap.end()) {
         return it2->second;
     }
+    MEDIA_LOG_W("Not find value, maybe update the map");
     return "null";
 }
 
-std::string TransPortIndex2String(PortIndex portIndex)
+std::string PortIndex2String(PortIndex portIndex)
 {
     std::map<PortIndex, std::string> portIndexMap = {
         {PortIndex::PORT_INDEX_INPUT, "PORT_INDEX_INPUT"},
@@ -45,6 +129,7 @@ std::string TransPortIndex2String(PortIndex portIndex)
     if (it != portIndexMap.end()) {
         return it->second;
     }
+    MEDIA_LOG_W("Not find value, maybe update the map");
     return "null";
 }
 
@@ -112,10 +197,6 @@ uint32_t Translate2omxFlagSet(uint64_t pluginFlags)
 VideoPixelFormat ConvertPixelFormatFromHdi(int32_t HdiPixelFormat)
 {
     // Histreamer pixel format to HDI pixel format
-    std::map<VideoPixelFormat, PixelFormat> pixelFormatMap = { // 是否可以改为常量
-        {VideoPixelFormat::NV21, PIXEL_FMT_YCBCR_420_SP}, // 需要补充完整
-        {VideoPixelFormat::NV12, PIXEL_FMT_YCRCB_420_SP},
-    };
     auto iter = std::find_if(pixelFormatMap.begin(), pixelFormatMap.end(),
                              [&] (const std::pair<VideoPixelFormat, PixelFormat>& tmp) -> bool {
                                  return tmp.second == HdiPixelFormat;

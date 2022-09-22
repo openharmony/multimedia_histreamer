@@ -23,9 +23,11 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-std::string TransHdfStatus2String(int32_t status);
+std::string OmxStateToString(OMX_STATETYPE state);
 
-std::string TransPortIndex2String(PortIndex portIndex);
+std::string HdfStatus2String(int32_t status);
+
+std::string PortIndex2String(PortIndex portIndex);
 
 template<typename T, typename U>
 bool TranslatesByMap(const T& t, U& u, const std::pair<T, U>* transMap, size_t mapSize);
@@ -39,9 +41,9 @@ Status TranslateRets(const int32_t& ret);
  * @tparam U
  * @return success to translate
  */
-template<typename T,typename U,
+template<typename T, typename U,
          typename std::enable_if<!std::is_same<typename std::decay<T>::type,
-                typename std::decay<U>::type>::value, bool>::type = true>
+         typename std::decay<U>::type>::value, bool>::type = true>
 bool Translates(const T&, U&);
 
 uint64_t Translate2PluginFlagSet(uint32_t omxBufFlag);
@@ -49,6 +51,22 @@ uint64_t Translate2PluginFlagSet(uint32_t omxBufFlag);
 uint32_t Translate2omxFlagSet(uint64_t pluginFlags);
 
 VideoPixelFormat ConvertPixelFormatFromHdi(int32_t HdiPixelFormat);
+
+template <typename T>
+inline void InitOmxParam(T& param, CompVerInfo& verInfo)
+{
+    memset_s(&param, sizeof(param), 0x0, sizeof(param));
+    param.nSize = sizeof(param);
+    param.nVersion.s.nVersionMajor = verInfo.compVersion.s.nVersionMajor;
+}
+
+template <typename T>
+inline void InitHdiParam(T& param, CompVerInfo& verInfo)
+{
+    memset_s(&param, sizeof(param), 0x0, sizeof(param));
+    param.size = sizeof(param);
+    param.version.s.nVersionMajor = verInfo.compVersion.s.nVersionMajor;
+}
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

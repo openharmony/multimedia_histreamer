@@ -30,7 +30,6 @@
 #include "osal/thread/task.h"
 #include "utils/blocking_queue.h"
 
-
 namespace OHOS {
 namespace Media {
 namespace Plugin {
@@ -91,31 +90,26 @@ private:
     OHOS::Media::BlockingQueue<uint32_t> freeOutBufferId_;
 
 private:
-    template <typename T>
-    void InitParam(T& param);
-
-    template <typename T>
-    void InitParamInOhos(T &param);
-
     void HandleFrame();
     Status TransInputBuffer2OmxBuffer(const std::shared_ptr<Plugin::Buffer>& inputBuffer,
-                                    std::shared_ptr<BufferInfo>& bufferInfo);
+                                      std::shared_ptr<BufferInfo>& bufferInfo);
 
     void NotifyInputBufferDone(const std::shared_ptr<Buffer>& input);
     void NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output);
 
     // HDI
-    void ConfigOmx();
-    void ConfigOmxPortDefine(PortIndex portIndex);
-    int32_t CheckAndUseBufferHandle();
+    Status ConfigOmx();
+    Status ConfigOmxPortDefine(PortIndex portIndex);
+    Status ConfigOutPortBufType();
+    Status ConfigInPortVideoFormat();
 
-    void UseOmxBuffers();
-    void GetBufferInfoOnPort(PortIndex portIndex);
+    void InitOmxBuffers();
+    void GetBufferInfoOnPort(PortIndex portIndex, uint32_t& bufCount, uint32_t& bufSize);
     std::shared_ptr<OmxCodecBuffer> InitOmxBuffer(std::shared_ptr<ShareMemory> sharedMem,
                                                   std::shared_ptr<Buffer> outputBuffer,
                                                   PortIndex portIndex,
-                                                  int bufferSize);
-    Status UseBufferOnPort(PortIndex portIndex, int bufferCount, int bufferSize);
+                                                  uint32_t bufferSize);
+    Status InitBufferOnPort(PortIndex portIndex, uint32_t bufferCount, uint32_t bufferSize);
 
     bool isFirstCall_ = true;
     bool FillAllTheOutBuffer();
@@ -123,16 +117,16 @@ private:
                                 std::shared_ptr<OmxCodecBuffer>& omxBuffer);
     void FreeBuffers();
     // HDI callback
-    static int32_t EventHandler(CodecCallbackType *self, OMX_EVENTTYPE event, EventInfo *info);
-    static int32_t EmptyBufferDone(CodecCallbackType *self, int64_t appData, const OmxCodecBuffer *buffer);
-    static int32_t FillBufferDone(CodecCallbackType *self, int64_t appData, const OmxCodecBuffer *buffer);
+    static int32_t EventHandler(CodecCallbackType* self, OMX_EVENTTYPE event, EventInfo* info);
+    static int32_t EmptyBufferDone(CodecCallbackType* self, int64_t appData, const OmxCodecBuffer* buffer);
+    static int32_t FillBufferDone(CodecCallbackType* self, int64_t appData, const OmxCodecBuffer* buffer);
 
     void WaitForEvent(OMX_U32 cmd);
     Status WaitForState(OMX_STATETYPE state);
     Status ChangeState(OMX_STATETYPE state);
-    void HandelEventCmdComplete(OMX_U32 data1, OMX_U32 data2);
+    void HandelCmdCompleteEvent(OMX_U32 data1, OMX_U32 data2);
     void HandelEventStateSet(OMX_U32 data);
-    Status ResetLocked();
+    Status DoReset();
 
     OSAL::Mutex mutex_;
     OSAL::ConditionVariable cond_;
@@ -146,7 +140,8 @@ private:
     struct CodecCallbackType* codecCallback_ {nullptr};
     CodecComponentManager* compManager_ {nullptr};
     uint32_t componentId_;
-    struct CompVerInfo verInfo_;
+    std::string componentName_ {};
+    CompVerInfo verInfo_ {};
 
     Callback* callback_ {nullptr};
     DataCallback* dataCallback_ {nullptr};
@@ -159,7 +154,8 @@ private:
     uint32_t width_;
     uint32_t height_;
     int32_t stride_;
-    VideoPixelFormat pixelFormat_;
+    VideoPixelFormat pixelFormat_ {0};
+    uint32_t frameRate_;
     uint32_t inBufferSize_;
     uint32_t inBufferCnt_;
     uint32_t outBufferSize_;

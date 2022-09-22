@@ -172,7 +172,7 @@ source_set("histreamer_plugin_core") {
       "//drivers/peripheral/display/interfaces/include",
       "//third_party/openmax/api/1.1.2",
     ]
-    public_deps += [
+    deps = [
       "//drivers/peripheral/codec/hal:libcodec_hdi_omx_client",
       "//third_party/bounds_checking_function:libsec_static",
     ]
