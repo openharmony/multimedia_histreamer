@@ -307,9 +307,9 @@ void MiniMP4DemuxerPlugin::FillADTSHead(std::shared_ptr<Memory> &data, unsigned 
     data->Write(adtsHeader, ADTS_HEADER_SIZE, 0);
 }
 
-int MiniMP4DemuxerPlugin::ReadCallback(int64_t offset, void *buffer, size_t size, void *token)
+int MiniMP4DemuxerPlugin::ReadCallback(int64_t offset, void* buffer, size_t size, void* token)
 {
-    MiniMP4DemuxerPlugin *mp4Demuxer = (MiniMP4DemuxerPlugin *)token;
+    MiniMP4DemuxerPlugin* mp4Demuxer = reinterpret_cast<MiniMP4DemuxerPlugin*>(token);
     unsigned int file_size = mp4Demuxer->GetFileSize();
     if (offset >= file_size) {
         MEDIA_LOG_E("ReadCallback offset is bigger");

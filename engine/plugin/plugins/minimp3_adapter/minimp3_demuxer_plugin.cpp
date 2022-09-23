@@ -479,10 +479,10 @@ int  Minimp3DemuxerPlugin::AudioDemuxerMp3Close()
     return 0;
 }
 
-Status Minimp3DemuxerPlugin::AudioDemuxerMp3Prepare(AudioDemuxerMp3Attr *mp3DemuxerAttr, uint8_t *buf, uint32_t len,
-                                                    AudioDemuxerRst *mp3DemuxerRst)
+Status Minimp3DemuxerPlugin::AudioDemuxerMp3Prepare(AudioDemuxerMp3Attr *mp3DemuxerAttr, uint8_t *inputBuffer,
+                                                    uint32_t inputLength, AudioDemuxerRst *mp3DemuxerRst)
 {
-    return AudioDemuxerMp3Probe(mp3DemuxerAttr, buf, len, mp3DemuxerRst);
+    return AudioDemuxerMp3Probe(mp3DemuxerAttr, inputBuffer, inputLength, mp3DemuxerRst);
 }
 
 int Minimp3DemuxerPlugin::AudioDemuxerMp3Process(uint8_t *buf, uint32_t len)

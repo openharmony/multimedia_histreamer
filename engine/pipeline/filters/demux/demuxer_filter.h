@@ -127,7 +127,7 @@ private:
 
     void SendEventEos();
 
-    void HandleFrame(const AVBufferPtr& buffer, uint32_t trackId);
+    void HandleFrame(const AVBufferPtr& bufferPtr, uint32_t trackId);
 
     void NegotiateDownstream();
 

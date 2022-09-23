@@ -31,7 +31,7 @@ namespace Media {
 namespace Plugin {
 namespace FFCodecMap {
 bool CodecId2Cap(AVCodecID codecId, bool encoder, Capability& cap);
-bool FormatName2Cap(const std::string& fmtName, CapabilitySet& outCap);
+bool FormatName2Cap(const std::string& fmtName, CapabilitySet& outCaps);
 bool Mime2CodecId(const std::string& mime, AVCodecID& codecId);
 } // FFCodecMap
 } // Plugin

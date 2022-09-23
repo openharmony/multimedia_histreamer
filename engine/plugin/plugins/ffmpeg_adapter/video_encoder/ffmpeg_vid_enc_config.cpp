@@ -226,11 +226,11 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace Ffmpeg {
-void ConfigVideoEncoder(AVCodecContext& codecContext, const std::map<Tag, ValueType>& tagStore)
+void ConfigVideoEncoder(AVCodecContext& codecContext, const std::map<Tag, ValueType>& tagMap)
 {
-    ConfigVideoCommonAttr(codecContext, tagStore);
+    ConfigVideoCommonAttr(codecContext, tagMap);
     if (g_videoConfigFuncMap.count(codecContext.codec_id) != 0) {
-        g_videoConfigFuncMap.at(codecContext.codec_id)(codecContext, tagStore);
+        g_videoConfigFuncMap.at(codecContext.codec_id)(codecContext, tagMap);
     }
 }
 

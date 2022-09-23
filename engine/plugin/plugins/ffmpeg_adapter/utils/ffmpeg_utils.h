@@ -76,7 +76,7 @@ void ReplaceDelimiter(const std::string& delmiters, char newDelimiter, std::stri
 
 std::vector<std::string> SplitString(const char* str, char delimiter);
 
-std::vector<std::string> SplitString(const std::string& string, char delimiter);
+std::vector<std::string> SplitString(const std::string& str, char delimiter);
 
 AudioSampleFormat ConvFf2PSampleFmt(AVSampleFormat sampleFormat);
 

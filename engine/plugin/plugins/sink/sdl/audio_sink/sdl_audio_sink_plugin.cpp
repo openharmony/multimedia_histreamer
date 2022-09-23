@@ -360,11 +360,11 @@ Status SdlAudioSinkPlugin::GetFrameCount(uint32_t& count)
     return Status::ERROR_UNIMPLEMENTED;
 }
 
-Status SdlAudioSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
+Status SdlAudioSinkPlugin::Write(const std::shared_ptr<Buffer>& buffer)
 {
     MEDIA_LOG_DD("SdlSink Write begin");
-    FALSE_RETURN_V_MSG_W(inputInfo != nullptr && !inputInfo->IsEmpty(), Status::OK, "Receive empty buffer.");
-    auto mem = inputInfo->GetMemory();
+    FALSE_RETURN_V_MSG_W(buffer != nullptr && !buffer->IsEmpty(), Status::OK, "Receive empty buffer.");
+    auto mem = buffer->GetMemory();
     auto srcBuffer = mem->GetReadOnlyData();
     auto destBuffer = const_cast<uint8_t*>(srcBuffer);
     auto srcLength = mem->GetSize();

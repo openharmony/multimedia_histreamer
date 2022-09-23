@@ -66,9 +66,9 @@ private:
     DataCallbackHelper* dataCallbackHelper;
 };
 
-Status Codec::SetDataCallback(DataCallbackHelper* helper)
+Status Codec::SetDataCallback(DataCallbackHelper* dataCallback)
 {
-    dataCallback_ = std::make_shared<DataCallbackWrapper>(pkgVersion_, helper);
+    dataCallback_ = std::make_shared<DataCallbackWrapper>(pkgVersion_, dataCallback);
     return codec_->SetDataCallback(dataCallback_.get());
 }
 } // namespace Plugin

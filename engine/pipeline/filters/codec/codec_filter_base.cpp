@@ -110,7 +110,7 @@ ErrorCode CodecFilterBase::SetPluginParameterLocked(Tag tag, const Plugin::Value
     return TranslatePluginStatus(plugin_->SetParameter(tag, value));
 }
 
-ErrorCode CodecFilterBase::SetParameter(int32_t key, const Plugin::Any& inVal)
+ErrorCode CodecFilterBase::SetParameter(int32_t key, const Plugin::Any& value)
 {
     if (state_.load() == FilterState::CREATED) {
         return ErrorCode::ERROR_AGAIN;
@@ -119,7 +119,7 @@ ErrorCode CodecFilterBase::SetParameter(int32_t key, const Plugin::Any& inVal)
     FALSE_RETURN_V_MSG_E(TranslateIntoParameter(key, tag), ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
                          "key " PUBLIC_LOG_D32 " is out of boundary", key);
     RETURN_AGAIN_IF_NULL(plugin_);
-    return SetPluginParameterLocked(tag, inVal);
+    return SetPluginParameterLocked(tag, value);
 }
 
 ErrorCode CodecFilterBase::GetParameter(int32_t key, Plugin::Any& outVal)

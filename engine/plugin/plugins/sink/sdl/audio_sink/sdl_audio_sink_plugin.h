@@ -76,7 +76,7 @@ public:
 
     Status GetFrameCount(uint32_t &count) override;
 
-    Status Write(const std::shared_ptr<Buffer> &input) override;
+    Status Write(const std::shared_ptr<Buffer>& buffer) override;
 
     Status Flush() override;
 

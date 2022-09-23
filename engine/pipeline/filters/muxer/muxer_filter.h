@@ -69,7 +69,7 @@ private:
     bool UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo);
 
     ErrorCode ConfigureToStart();
-    ErrorCode AddTrackThenConfigure(const std::pair<std::string, Plugin::Meta>& meta);
+    ErrorCode AddTrackThenConfigure(const std::pair<std::string, Plugin::Meta>& metaPair);
 
     bool AllTracksEos();
     void UpdateEosState(const std::string& inPort);

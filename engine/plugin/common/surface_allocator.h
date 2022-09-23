@@ -35,7 +35,7 @@ public:
     void* Alloc(size_t size) override;
     void Free(void* ptr) override; // NOLINT: void*
 
-    void Config(int32_t width, int32_t height, int32_t usage, int32_t format, int32_t strideAlign, int32_t timeout);
+    void Config(int32_t width, int32_t height, uint64_t usage, int32_t format, int32_t strideAlign, int32_t timeout);
 
 private:
     sptr<Surface> surface_ {nullptr};
