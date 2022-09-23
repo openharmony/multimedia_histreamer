@@ -77,7 +77,7 @@ public:
     std::tuple<ErrorCode, Action> Execute(Intent intent, const Plugin::Any& param);
     const std::string& GetName();
     StateId GetStateId();
-    virtual std::tuple<ErrorCode, Action> SetSource(const Plugin::Any& source);
+    virtual std::tuple<ErrorCode, Action> SetSource(const Plugin::Any& param);
     virtual std::tuple<ErrorCode, Action> Prepare();
     virtual std::tuple<ErrorCode, Action> Play();
     virtual std::tuple<ErrorCode, Action> Stop();

@@ -98,9 +98,9 @@ StateId State::GetStateId()
 {
     return stateId_;
 }
-std::tuple<ErrorCode, Action> State::SetSource(const Plugin::Any& source)
+std::tuple<ErrorCode, Action> State::SetSource(const Plugin::Any& param)
 {
-    (void)source;
+    (void)param;
     return {ErrorCode::ERROR_INVALID_OPERATION, Action::ACTION_BUTT};
 }
 std::tuple<ErrorCode, Action> State::Prepare()

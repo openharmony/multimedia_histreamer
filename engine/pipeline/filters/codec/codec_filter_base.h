@@ -45,7 +45,7 @@ public:
 
     ErrorCode Prepare() override;
 
-    ErrorCode SetParameter(int32_t key, const Plugin::Any& inVal) override;
+    ErrorCode SetParameter(int32_t key, const Plugin::Any& value) override;
 
     ErrorCode GetParameter(int32_t key, Plugin::Any& outVal) override;
 

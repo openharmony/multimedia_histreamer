@@ -50,7 +50,7 @@ public:
 
     Status Flush();
 
-    Status SetDataCallback(DataCallbackHelper* helper);
+    Status SetDataCallback(DataCallbackHelper* dataCallback);
 
 private:
     friend class PluginManager;
