@@ -52,7 +52,7 @@ public:
         }
         val = 0;
         uint8_t remainBits = bits;
-        for (uint8_t toRead; remainBits; remainBits -= toRead) {
+        for (uint8_t toRead = 0; remainBits; remainBits -= toRead) {
             if (availBits_ == 0) {
                 ++cur_;
                 availBits_ = 8; // 8

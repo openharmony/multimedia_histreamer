@@ -118,6 +118,7 @@ Status StreamSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 
 std::shared_ptr<Buffer> StreamSourcePlugin::WrapDataBuffer(const std::shared_ptr<DataBuffer>& dataBuffer)
 {
+    FALSE_RETURN_V(dataBuffer != nullptr, nullptr);
     std::shared_ptr<Buffer> buffer = std::make_shared<Buffer>();
     auto deleter = [this](uint8_t* ptr) {  FALSE_LOG(stream_->QueueEmptyBuffer(ptr));  };
     std::shared_ptr<uint8_t> address = std::shared_ptr<uint8_t>(dataBuffer->GetAddress(), deleter);

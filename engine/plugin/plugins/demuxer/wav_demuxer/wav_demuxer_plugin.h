@@ -81,7 +81,7 @@ private:
     uint32_t            dataOffset_;
     Seekable            seekable_;
     uint32_t            wavHeadLength_;
-    WavHeadAttr         wavHeader_;
+    WavHeadAttr         wavHeader_ {};
 };
 } // namespace WavPlugin
 } // namespace Plugin

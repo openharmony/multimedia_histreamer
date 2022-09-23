@@ -63,8 +63,8 @@ protected:
     std::string codecName_ {};
 
 private:
-    uint32_t inBufPoolSize_;
-    uint32_t outBufPoolSize_;
+    uint32_t inBufPoolSize_ {0};
+    uint32_t outBufPoolSize_ {0};
 };
 } // namespace Pipeline
 } // namespace Media

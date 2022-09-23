@@ -159,7 +159,7 @@ int ReadDataFromFile(std::string dataPath)
     return testData.size() * 4; // 4
 }
 
-int StartLiteStreamPlayer(std::string dataPath)
+int StartLiteStreamPlayer(const std::string& dataPath)
 {
     MEDIA_LOG_I("Use media_lite interface player.");
     g_playFinished = false;

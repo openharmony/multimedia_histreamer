@@ -89,8 +89,8 @@ private:
     size_t fileSize_;
     bool isSeekable_;
     unsigned char *inIoBuffer_;
-    unsigned int ioDataRemainSize_;
     int inIoBufferSize_;
+    unsigned int ioDataRemainSize_;
 };
 } // namespace AacDemuxer
 } // namespace Plugin
