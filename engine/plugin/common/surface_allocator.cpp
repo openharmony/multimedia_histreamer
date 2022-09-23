@@ -78,7 +78,7 @@ void SurfaceAllocator::Free(void* ptr) // NOLINT: void*
     (void)ptr;
 }
 
-void SurfaceAllocator::Config(int32_t width, int32_t height, int32_t usage, int32_t format, int32_t strideAlign,
+void SurfaceAllocator::Config(int32_t width, int32_t height, uint64_t usage, int32_t format, int32_t strideAlign,
                               int32_t timeout)
 {
     requestConfig_ = {
