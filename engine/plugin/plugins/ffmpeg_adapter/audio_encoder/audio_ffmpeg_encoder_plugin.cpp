@@ -76,10 +76,10 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
 {
     CapabilityBuilder capBuilder;
     capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
-    size_t index = 0;
     if (codec->supported_samplerates != nullptr) {
         DiscreteCapability<uint32_t> values;
-        for (index = 0; codec->supported_samplerates[index] != 0; ++index) {
+        size_t index = 0;
+        for (; codec->supported_samplerates[index] != 0; ++index) {
             values.push_back(codec->supported_samplerates[index]);
         }
         if (index) {

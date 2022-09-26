@@ -372,7 +372,7 @@ AudioChannelLayout GetDefaultChannelLayout(int channels)
 AudioChannelLayout ConvertChannelLayoutFromFFmpeg(int channels, uint64_t ffChannelLayout)
 {
     uint64_t channelLayout = 0;
-    uint64_t mask = 1;
+    uint64_t mask;
     for (uint8_t bitPos = 0, channelNum = 0; (bitPos < 64) && (channelNum < channels); ++bitPos) { // 64
         mask = 1ULL << bitPos;
         if (!(mask & ffChannelLayout)) {

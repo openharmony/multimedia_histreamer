@@ -575,10 +575,7 @@ void HiPlayerImpl::HandlePluginErrorEvent(const Event& event)
         pluginEvent.param.SameTypeWith(typeid(Plugin::NetworkClientErrorCode))) {
         auto netClientErrorCode = Plugin::AnyCast<Plugin::NetworkClientErrorCode>(pluginEvent.param);
         auto errorCode {-1};
-        if (pluginEvent.type == Plugin::PluginEventType::CLIENT_ERROR &&
-            pluginEvent.param.SameTypeWith(typeid(Plugin::NetworkClientErrorCode))&&
-            Plugin::AnyCast<Plugin::NetworkClientErrorCode>(pluginEvent.param)
-            == Plugin::NetworkClientErrorCode::ERROR_TIME_OUT) {
+        if (netClientErrorCode == Plugin::NetworkClientErrorCode::ERROR_TIME_OUT) {
             errorCode = CppExt::to_underlying(Plugin::NetworkClientErrorCode::ERROR_TIME_OUT);
         }
         auto ptr = callback_.lock();

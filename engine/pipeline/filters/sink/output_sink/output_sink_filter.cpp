@@ -150,7 +150,7 @@ ErrorCode OutputSinkFilter::PushData(const std::string &inPort, const AVBufferPt
         OnEvent(event);
         bufferEos_ = true;
     }
-    return ErrorCode::SUCCESS;
+    return ret;
 }
 
 ErrorCode OutputSinkFilter::Prepare()

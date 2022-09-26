@@ -372,14 +372,13 @@ int AACDemuxerPlugin::AudioDemuxerAACProcess(const uint8_t *buffer, uint32_t buf
     rst->frameBuffer = nullptr;
     rst->usedInputLength = 0;
 
-    unsigned int length = 0;
     do {
         if (IsAACPattern(buffer) == 0) {
             MEDIA_LOG_D("Err: IsAACPattern");
             break;
         }
 
-        length = static_cast<unsigned int>(GetFrameLength(buffer));
+        auto length = static_cast<unsigned int>(GetFrameLength(buffer));
         if (length + 2 > bufferLen) { // 2
             rst->usedInputLength = bufferLen;
             return 0;
@@ -427,16 +426,13 @@ namespace {
 
     int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource)
     {
-        Status status = Status::ERROR_UNKNOWN;
         auto buffer = std::make_shared<Buffer>();
         auto bufData = buffer->AllocMemory(nullptr, PROBE_READ_LENGTH);
-        int processLoop = 1;
-        uint8_t *inputDataPtr = nullptr;
         auto result = dataSource->ReadAt(0, buffer, static_cast<size_t>(PROBE_READ_LENGTH));
         if (result != Status::OK) {
             return 0;
         }
-        inputDataPtr = const_cast<uint8_t *>(bufData->GetReadOnlyData());
+        auto inputDataPtr = const_cast<uint8_t *>(bufData->GetReadOnlyData());
         if (IsAACPattern(inputDataPtr) == 0) {
             MEDIA_LOG_W("Not AAC format");
             return 0;

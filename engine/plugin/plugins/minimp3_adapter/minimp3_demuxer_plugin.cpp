@@ -184,7 +184,7 @@ void Minimp3DemuxerPlugin::FillInMediaInfo(MediaInfo& mediaInfo) const
 Status Minimp3DemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
 {
     int processLoop = 1;
-    Status status = Status::ERROR_UNKNOWN;
+    Status status;
     while (processLoop) {
         status = GetDataFromSource();
         if (status != Status::OK) {
@@ -210,7 +210,6 @@ Status Minimp3DemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
                 return Status::ERROR_UNSUPPORTED_FORMAT;
             case Status::ERROR_UNKNOWN:
             default:
-                processLoop = 0;
                 MEDIA_LOG_I("AUDIO_DEMUXER_PREPARE_UNMATCHED_FORMAT " PUBLIC_LOG_D32, status);
                 return Status::ERROR_UNKNOWN;
         }
@@ -673,7 +672,7 @@ Status AudioDemuxerMp3Probe(AudioDemuxerMp3Attr* mp3DemuxerAttr, uint8_t* inputB
 int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource)
 {
     MEDIA_LOG_I("Sniff in");
-    Status status = Status::ERROR_UNKNOWN;
+    Status status;
     auto buffer = std::make_shared<Buffer>();
     auto bufData = buffer->AllocMemory(nullptr, PROBE_READ_LENGTH);
     int processLoop = 1;
@@ -708,7 +707,6 @@ int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource)
                 return 0;
             case Status::ERROR_UNKNOWN:
             default:
-                processLoop = 0;
                 MEDIA_LOG_I("AUDIO_DEMUXER_PREPARE_UNMATCHED_FORMAT " PUBLIC_LOG_D32, status);
                 return 0;
         }

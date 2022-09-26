@@ -117,10 +117,10 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
             MEDIA_LOG_I("codec is not supported right now");
     }
 
-    size_t index = 0;
     if (codec->supported_samplerates != nullptr) {
         DiscreteCapability<uint32_t> values;
-        for (index = 0; codec->supported_samplerates[index] != 0; ++index) {
+        size_t index {0};
+        for (; codec->supported_samplerates[index] != 0; ++index) {
             values.push_back(codec->supported_samplerates[index]);
         }
         if (index) {
@@ -130,7 +130,8 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
 
     if (codec->channel_layouts != nullptr) {
         DiscreteCapability<AudioChannelLayout> values;
-        for (index = 0; codec->channel_layouts[index] != 0; ++index) {
+        size_t index {0};
+        for (; codec->channel_layouts[index] != 0; ++index) {
             values.push_back(AudioChannelLayout(codec->channel_layouts[index]));
         }
         if (index) {
@@ -144,10 +145,10 @@ void UpdateOutCaps(const AVCodec* codec, CodecPluginDef& definition)
 {
     CapabilityBuilder capBuilder;
     capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
-    size_t index = 0;
     if (codec->sample_fmts != nullptr) {
         DiscreteCapability<AudioSampleFormat> values;
-        for (index = 0; codec->sample_fmts[index] != AV_SAMPLE_FMT_NONE; ++index) {
+        size_t index {0};
+        for (; codec->sample_fmts[index] != AV_SAMPLE_FMT_NONE; ++index) {
             values.push_back(ConvFf2PSampleFmt(codec->sample_fmts[index]));
         }
         if (index) {

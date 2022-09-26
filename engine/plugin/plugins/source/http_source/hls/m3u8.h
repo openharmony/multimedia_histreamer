@@ -64,7 +64,7 @@ struct M3U8 {
     std::string uri_;
     std::string name_;
 
-    double targetDuration_ {};
+    double targetDuration_ {0.0};
     bool bLive_ {};
     std::list<std::shared_ptr<M3U8Fragment>> files_;
     int64_t sequence_ {1}; // default 1

@@ -66,7 +66,7 @@ private:
     int32_t sampleRate_;
     int32_t channel_;
     int32_t bitRate_;
-    int32_t outFD_ {0};
+    int32_t outFD_ {-1};
     bool isFD_ {false};
     AudioSourceType sourceType_;
     AudioCodecFormat encodeType_;

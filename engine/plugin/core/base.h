@@ -100,7 +100,7 @@ protected:
     OHOS::Media::OSAL::Mutex stateChangeMutex_ {};
     std::atomic<State> pluginState_ {State::CREATED};
 private:
-    CallbackImpl pluginCallback_;
+    CallbackImpl pluginCallback_ {};
 };
 } // namespace Plugin
 } // namespace Media
