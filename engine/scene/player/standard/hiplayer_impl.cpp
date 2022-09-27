@@ -300,6 +300,7 @@ int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
         if (ret != ErrorCode::SUCCESS) {
             seekInProgress_.store(false);
         }
+        FinishTrace(HITRACE_TAG_ZMEDIA);
         return TransErrorCode(ret);
     } else {
         MEDIA_LOG_D("Seek in progress. Record the seek request [" PUBLIC_LOG_D64 "," PUBLIC_LOG_D32 "]",
