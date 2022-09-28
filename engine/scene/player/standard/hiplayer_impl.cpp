@@ -864,6 +864,7 @@ ErrorCode HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin::Any& par
                     mediaStats_.Append(videoSink_->GetName());
                 }
             }
+            break;
         }
     }
     if (!newFilters.empty()) {
