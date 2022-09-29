@@ -730,8 +730,8 @@ ErrorCode HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin::Any& par
                     mediaStats_.Append(videoSink->GetName());
                 }
             }
+            break;
         }
-        break;
     }
     if (!newFilters.empty()) {
         ActiveFilters(newFilters);
