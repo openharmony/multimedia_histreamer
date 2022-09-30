@@ -33,12 +33,13 @@ source_set("std_video_capture") {
     print("std video capture plugin is not available on lite systems")
   } else {
     include_dirs = [
-      "//foundation/graphic/graphic_2d/interfaces/innerkits",
+      "//foundation/graphic/graphic_2d/interfaces/inner_api/surface",
       "//drivers/peripheral/display/interfaces/include",
-      "//foundation/graphic/graphic_2d/interfaces/innerkits/common",
+      "//foundation/graphic/graphic_2d/interfaces/inner_api/common",
       "//commonlibrary/c_utils/base/include",
     ]
     public_deps += [
+      "//commonlibrary/c_utils/base:utilsbase_rtti",
       "//foundation/graphic/graphic_2d:libsurface",
       "//foundation/graphic/graphic_2d/utils:sync_fence",
     ]
