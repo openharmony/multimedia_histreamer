@@ -73,5 +73,3 @@ HiStreamer插件列表如下:
 - [player_framework](https://gitee.com/openharmony/multimedia_player_framework)
 
 - [media_lite](https://gitee.com/openharmony/multimedia_media_lite)
-
-- **multimedia_histreamer**
