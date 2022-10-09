@@ -137,7 +137,7 @@ struct Capability {
         return *this;
     }
 
-    /// mime of capability
+    /// mime of capability. For details, see {@link constants.h}
     std::string mime;
 
     /// Store the parameters(Capability::Key, value pairs), which should be negotiated

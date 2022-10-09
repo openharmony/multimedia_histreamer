@@ -16,6 +16,9 @@
 
 #define HST_LOG_TAG "FFmpegDemuxerPlugin"
 
+// Modify FFMPEG_LOG_DEBUG_ENABLE to 1 to show Ffmpeg log.
+#define FFMPEG_LOG_DEBUG_ENABLE 0
+
 #include "ffmpeg_demuxer_plugin.h"
 #include <algorithm>
 #include <cstdio>
@@ -669,6 +672,7 @@ Status RegisterPlugins(const std::shared_ptr<Register>& reg)
     return Status::OK;
 }
 
+#if FFMPEG_LOG_DEBUG_ENABLE
 #ifdef MEDIA_OHOS
 void FfmpegLogPrint(void* avcl, int level, const char* fmt, va_list vl)
 {
@@ -712,10 +716,13 @@ void FfmpegLogPrint(void* avcl, int level, const char* fmt, va_list vl)
     }
 }
 #endif
+#endif
 
 static void FfmpegLogInit()
 {
+#if FFMPEG_LOG_DEBUG_ENABLE
     av_log_set_callback(FfmpegLogPrint);
+#endif
 }
 } // namespace
 

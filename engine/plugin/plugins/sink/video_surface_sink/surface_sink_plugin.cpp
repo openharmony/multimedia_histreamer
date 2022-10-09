@@ -33,8 +33,8 @@ using namespace OHOS::Media::Plugin;
 using namespace VidSurfaceSinkPlugin;
 constexpr uint32_t DEFAULT_WIDTH = 640;
 constexpr uint32_t DEFAULT_HEIGHT = 480;
-constexpr uint32_t DEFAULT_BUFFER_NUM = 10;
-constexpr int32_t DEFAULT_STRIDE_ALIGN = 8;
+constexpr uint32_t DEFAULT_BUFFER_NUM = 25;
+constexpr int32_t DEFAULT_STRIDE_ALIGN = 16;
 
 std::shared_ptr<VideoSinkPlugin> VideoSinkPluginCreator(const std::string& name)
 {
@@ -49,7 +49,7 @@ Status SurfaceSinkRegister(const std::shared_ptr<Register>& reg)
     Capability cap(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
     cap.AppendDiscreteKeys<VideoPixelFormat>(
         Capability::Key::VIDEO_PIXEL_FORMAT,
-        {VideoPixelFormat::RGBA, VideoPixelFormat::NV21});
+        {VideoPixelFormat::RGBA, VideoPixelFormat::NV12});
     definition.inCaps.emplace_back(cap);
     definition.creator = VideoSinkPluginCreator;
     return reg->AddPlugin(definition);
@@ -158,19 +158,26 @@ Status SurfaceSinkPlugin::Prepare()
     }
     const std::string surfaceFmtStr = "SURFACE_FORMAT";
     std::string formatStr = surface_->GetUserData(surfaceFmtStr);
-    PixelFormat surfaceFmt;
+    PixelFormat surfaceFmt = PIXEL_FMT_BUTT;
     if (formatStr == std::to_string(PixelFormat::PIXEL_FMT_RGBA_8888)) {
         surfaceFmt = PixelFormat::PIXEL_FMT_RGBA_8888;
-    } else {
-        surfaceFmt = PixelFormat::PIXEL_FMT_YCRCB_420_SP;
     }
     if (pluginFmt != surfaceFmt) {
-        MEDIA_LOG_D("plugin format: " PUBLIC_LOG_U32 " is diff from surface format: " PUBLIC_LOG_U32,
+        MEDIA_LOG_W("plugin format: " PUBLIC_LOG_U32 " is diff from surface format: " PUBLIC_LOG_U32,
                     static_cast<uint32_t>(pluginFmt), static_cast<uint32_t>(surfaceFmt));
-        // need to convert pixel format when write
-        needConvFormat = true;
+        if (pixelFormat_ != VideoPixelFormat::NV12) {
+            // need to convert pixel format when write
+            needConvFormat = true;
+        }
     }
     uint64_t usage = BUFFER_USAGE_CPU_READ | BUFFER_USAGE_CPU_WRITE | BUFFER_USAGE_MEM_DMA;
+    if (pixelFormat_ == VideoPixelFormat::NV12) {
+        surfaceFmt = PixelFormat::PIXEL_FMT_YCBCR_420_SP;
+    } else if (pixelFormat_ == VideoPixelFormat::NV21) {
+        surfaceFmt = PixelFormat::PIXEL_FMT_YCRCB_420_SP;
+    }
+    MEDIA_LOG_D("pixelFormat: " PUBLIC_LOG_U32 ", surfaceFmt: " PUBLIC_LOG_U32,
+                static_cast<uint32_t>(pixelFormat_), static_cast<uint32_t>(surfaceFmt));
     mAllocator_->Config(static_cast<int32_t>(width_), static_cast<int32_t>(height_), usage, surfaceFmt,
                         DEFAULT_STRIDE_ALIGN, 0);
     MEDIA_LOG_D("Prepare success");

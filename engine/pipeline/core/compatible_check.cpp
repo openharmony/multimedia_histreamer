@@ -16,13 +16,11 @@
 #define HST_LOG_TAG "Compatible_Check"
 
 #include "compatible_check.h"
-
 #include <algorithm>
 #include <functional>
 #include <map>
-
-#include "pipeline/core/plugin_attr_desc.h"
 #include "foundation/log.h"
+#include "pipeline/core/plugin_attr_desc.h"
 
 namespace OHOS {
 namespace Media {
@@ -376,8 +374,8 @@ bool MergeCapabilityKeys(const Capability& originCap, const Capability& otherCap
         }
         // if key is in otherCap, calculate the intersections
         if (g_capabilityValueCheckMap.count(pairKey.first) == 0) {
-            MEDIA_LOG_W("capability " PUBLIC_LOG_D32 " cannot be applied, may be update the check map?",
-                        static_cast<int32_t>(pairKey.first));
+            MEDIA_LOG_W("capability " PUBLIC_LOG_S " cannot be applied, may be update the check map?",
+                        Tag2String(static_cast<Plugin::Tag>(pairKey.first)));
             continue;
         }
         Plugin::ValueType tmp;
@@ -386,6 +384,8 @@ bool MergeCapabilityKeys(const Capability& originCap, const Capability& otherCap
         } else {
             //  if no intersections return false
             resCap.keys.clear();
+            MEDIA_LOG_W("No intersections, originCap.mime: " PUBLIC_LOG_S ", tag: " PUBLIC_LOG_S,
+                        originCap.mime.c_str(), Tag2String(static_cast<Plugin::Tag>(pairKey.first)));
             return false;
         }
     }

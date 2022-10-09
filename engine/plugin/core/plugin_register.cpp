@@ -18,6 +18,7 @@
 #include <dirent.h>
 
 #include "all_plugin_static.h"
+#include "core/hdi_codec/hdi_adapter_register.h"
 #include "foundation/log.h"
 #include "interface/audio_sink_plugin.h"
 #include "interface/codec_plugin.h"
@@ -309,6 +310,9 @@ void PluginRegister::RegisterPlugins()
 void PluginRegister::RegisterStaticPlugins()
 {
     RegisterPluginStatic(std::make_shared<RegisterImpl>(registerData));
+#if defined(MEDIA_OHOS) && !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+    RegisterHdiCodecPackages(std::make_shared<RegisterImpl>(registerData));
+#endif
 }
 
 void PluginRegister::RegisterDynamicPlugins()
@@ -349,6 +353,9 @@ void PluginRegister::RegisterPluginsFromPath(const char* libDirPath)
 void PluginRegister::UnregisterAllPlugins()
 {
     UnregisterPluginStatic();
+#if defined(MEDIA_OHOS) && !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+    UnRegisterHdiCodecPackage();
+#endif
 #ifdef DYNAMIC_PLUGINS
     for (auto& loader : registeredLoaders) {
         EraseRegisteredPluginsByLoader(loader);

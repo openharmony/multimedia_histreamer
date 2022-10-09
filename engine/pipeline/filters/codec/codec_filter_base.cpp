@@ -243,22 +243,32 @@ bool CodecFilterBase::Configure(const std::string &inPort, const std::shared_ptr
     auto thisMeta = std::make_shared<Plugin::Meta>();
     FALSE_RETURN_V_MSG_E(MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta), false,
                          "can't configure codec plugin since meta is not compatible with negotiated caps");
+    UpdateParams(upstreamMeta, thisMeta);
+
+    // HDI: must set width & height into hdi, hid use these params calc out buffer size & count then return to filter
+    if (ConfigPluginWithMeta(*plugin_, *thisMeta) != ErrorCode::SUCCESS) {
+        MEDIA_LOG_E("set params into plugin failed");
+        return false;
+    }
     uint32_t bufferCnt = 0;
     if (GetPluginParameterLocked(Tag::REQUIRED_OUT_BUFFER_CNT, bufferCnt) != ErrorCode::SUCCESS) {
         bufferCnt = GetOutBufferPoolSize();
     }
     MEDIA_LOG_D("bufferCnt: " PUBLIC_LOG_U32, bufferCnt);
+
     upstreamParams.Insert<Plugin::Tag::VIDEO_MAX_SURFACE_NUM>(bufferCnt);
-    UpdateParams(upstreamMeta, thisMeta);
     auto targetOutPort = GetRouteOutPort(inPort);
     if (targetOutPort == nullptr || !targetOutPort->Configure(thisMeta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("decoder filter downstream Configure failed");
         return false;
     }
     sinkParams_ = downstreamParams;
-    uint32_t bufferSize = CalculateBufferSize(thisMeta);
-    if (bufferSize == 0) {
-        bufferSize = MAX_OUT_DECODED_DATA_SIZE_PER_FRAME;
+    uint32_t bufferSize = 0;
+    if (GetPluginParameterLocked(Tag::REQUIRED_OUT_BUFFER_SIZE, bufferSize) != ErrorCode::SUCCESS) {
+        bufferSize = CalculateBufferSize(thisMeta);
+        if (bufferSize == 0) {
+            bufferSize = MAX_OUT_DECODED_DATA_SIZE_PER_FRAME;
+        }
     }
     std::shared_ptr<Allocator> outAllocator = GetAllocator();
     codecMode_->CreateOutBufferPool(outAllocator, bufferCnt, bufferSize, bufferMetaType_);
@@ -278,7 +288,6 @@ bool CodecFilterBase::Configure(const std::string &inPort, const std::shared_ptr
 ErrorCode CodecFilterBase::ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     MEDIA_LOG_D("CodecFilterBase configure called");
-    FAIL_RETURN_MSG(ConfigPluginWithMeta(*plugin_, *meta), "configure decoder plugin error");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->SetCallback(this)), "plugin set callback fail");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->SetDataCallback(this)), "plugin set data callback fail");
     FAIL_RETURN_MSG(codecMode_->Configure(), "codec mode configure error");
