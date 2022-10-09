@@ -37,6 +37,10 @@ if (!hst_is_lite_sys) {
   # only for standard
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_AudioServerSink") {
+    sanitize = {
+      cfi = true
+      debug = true
+    }
     deps = [ ":audio_server_sink" ]
     external_deps = [ "multimedia_audio_framework:audio_renderer" ]
     relative_install_dir = "media/histreamer_plugins"

@@ -73,9 +73,17 @@ if (hst_is_lite_sys) {
   # standard
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_HttpSource") {
+    sanitize = {
+      cfi = true
+      debug = true
+    }
     deps = [ ":httpsource" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"
+    sanitize = {
+      cfi = true
+      debug = true
+    }
   }
 }

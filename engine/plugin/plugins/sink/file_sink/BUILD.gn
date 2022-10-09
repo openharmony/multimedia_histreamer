@@ -60,12 +60,20 @@ if (hst_is_lite_sys) {
 } else {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_FileFdSink") {
+    sanitize = {
+      cfi = true
+      debug = true
+    }
     deps = [ ":file_fd_sink" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"
   }
   ohos_shared_library("histreamer_plugin_FilePathSink") {
+    sanitize = {
+      cfi = true
+      debug = true
+    }
     deps = [ ":file_path_sink" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
