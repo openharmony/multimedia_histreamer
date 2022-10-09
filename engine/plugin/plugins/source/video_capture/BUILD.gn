@@ -53,7 +53,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_StdVideoCapture") {
     sanitize = {
       cfi = true
-      debug = true
+      debug = false
     }
     deps = [ ":std_video_capture" ]
     relative_install_dir = "media/histreamer_plugins"

@@ -75,7 +75,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_HttpSource") {
     sanitize = {
       cfi = true
-      debug = true
+      debug = false
     }
     deps = [ ":httpsource" ]
     relative_install_dir = "media/histreamer_plugins"

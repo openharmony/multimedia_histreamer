@@ -62,7 +62,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FileFdSink") {
     sanitize = {
       cfi = true
-      debug = true
+      debug = false
     }
     deps = [ ":file_fd_sink" ]
     relative_install_dir = "media/histreamer_plugins"
@@ -72,7 +72,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FilePathSink") {
     sanitize = {
       cfi = true
-      debug = true
+      debug = false
     }
     deps = [ ":file_path_sink" ]
     relative_install_dir = "media/histreamer_plugins"

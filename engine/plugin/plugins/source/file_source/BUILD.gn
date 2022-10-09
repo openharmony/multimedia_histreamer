@@ -65,7 +65,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FileSource") {
     sanitize = {
       cfi = true
-      debug = true
+      debug = false
     }
     deps = [ ":filesource" ]
     relative_install_dir = "media/histreamer_plugins"
@@ -75,7 +75,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FileFdSource") {
     sanitize = {
       cfi = true
-      debug = true
+      debug = false
     }
     deps = [ ":filefdsource" ]
     relative_install_dir = "media/histreamer_plugins"

@@ -202,7 +202,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FFmpegAudioDecoders") {
     sanitize = {
       cfi = true
-      debug = true
+      debug = false
     }
     deps = [ ":ffmpeg_audio_decoders" ]
     relative_install_dir = "media/histreamer_plugins"
@@ -212,7 +212,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FFmpegVideoDecoders") {
     sanitize = {
       cfi = true
-      debug = true
+      debug = false
     }
     deps = [ ":ffmpeg_video_decoders" ]
     relative_install_dir = "media/histreamer_plugins"
@@ -222,7 +222,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FFmpegDemuxer") {
     sanitize = {
       cfi = true
-      debug = true
+      debug = false
     }
     deps = [ ":ffmpeg_demuxers" ]
     relative_install_dir = "media/histreamer_plugins"
@@ -232,7 +232,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FFmpegAudioEncoders") {
     sanitize = {
       cfi = true
-      debug = true
+      debug = false
     }
     deps = [ ":ffmpeg_audio_encoders" ]
     relative_install_dir = "media/histreamer_plugins"
@@ -242,7 +242,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FFmpegVideoEncoders") {
     sanitize = {
       cfi = true
-      debug = true
+      debug = false
     }
     deps = [ ":ffmpeg_video_encoders" ]
     relative_install_dir = "media/histreamer_plugins"
@@ -252,7 +252,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FFmpegMuxers") {
     sanitize = {
       cfi = true
-      debug = true
+      debug = false
     }
     deps = [ ":ffmpeg_muxers" ]
     relative_install_dir = "media/histreamer_plugins"

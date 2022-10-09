@@ -47,7 +47,7 @@ if (hst_is_lite_sys) {
     part_name = "multimedia_histreamer"
     sanitize = {
       cfi = true
-      debug = true
+      debug = false
     }
   }
 }
