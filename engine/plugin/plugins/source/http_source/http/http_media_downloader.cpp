@@ -21,8 +21,13 @@ namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
 namespace {
+#ifdef OHOS_LITE
 constexpr int RING_BUFFER_SIZE = 5 * 48 * 1024;
 constexpr int WATER_LINE = RING_BUFFER_SIZE / 30; //30  WATER_LINE:8192
+#else
+constexpr int RING_BUFFER_SIZE = 5 * 1024 * 1024;
+constexpr int WATER_LINE = 8192; //  WATER_LINE:8192
+#endif
 }
 
 HttpMediaDownloader::HttpMediaDownloader() noexcept
