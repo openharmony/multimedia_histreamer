@@ -92,8 +92,14 @@ const static std::unordered_map<OMX_STATETYPE, std::string> omxStateMap = {
 };
 
 const std::map<VideoPixelFormat, PixelFormat> pixelFormatMap = {
-    {VideoPixelFormat::NV21, PIXEL_FMT_YCBCR_420_SP}, // 需要补充完整
-    {VideoPixelFormat::NV12, PIXEL_FMT_YCRCB_420_SP},
+    {VideoPixelFormat::YUV420P, PIXEL_FMT_YCBCR_420_P},
+    {VideoPixelFormat::NV12, PIXEL_FMT_YCBCR_420_SP},
+    {VideoPixelFormat::NV21, PIXEL_FMT_YCRCB_420_SP},
+    {VideoPixelFormat::YUYV422, PIXEL_FMT_YUYV_422_PKG},
+    {VideoPixelFormat::YUV422P, PIXEL_FMT_YUV_422_I},
+    {VideoPixelFormat::RGBA, PIXEL_FMT_RGBA_8888},
+    {VideoPixelFormat::BGRA, PIXEL_FMT_BGRA_8888},
+    {VideoPixelFormat::RGB24, PIXEL_FMT_RGB_888},
 };
 
 std::string OmxStateToString(OMX_STATETYPE state)

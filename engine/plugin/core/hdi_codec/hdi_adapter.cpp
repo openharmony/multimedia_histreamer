@@ -633,7 +633,7 @@ Status HdiAdapter::ConfigOmxPortDefine(PortIndex portIndex)
                 portDef.format.video.eColorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
                 break;
             default:
-                MEDIA_LOG_E("Current color format not support");
+                MEDIA_LOG_E("Current color format not support, pixelFormat: " PUBLIC_LOG_U32, pixelFormat_);
                 break;
         }
     }

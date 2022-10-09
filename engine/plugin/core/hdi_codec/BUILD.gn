@@ -23,11 +23,10 @@ group("hdi_codec_adapter") {
 
 config("hdi_codec_adapter_config") {
   include_dirs = [
-    "hdi_codec",
-    "//foundation/multimedia/histreamer/engine/foundation",
-    "//foundation/multimedia/histreamer/engine/utils",
     "//foundation/multimedia/histreamer/engine/",
+    "//foundation/multimedia/histreamer/engine/foundation",
     "//foundation/multimedia/histreamer/engine/plugin",
+    "//foundation/multimedia/histreamer/engine/utils",
     "//drivers/hdf_core/adapter/uhdf2/osal/include",
     "//drivers/hdf_core/framework/include/utils",
     "//drivers/peripheral/base",
