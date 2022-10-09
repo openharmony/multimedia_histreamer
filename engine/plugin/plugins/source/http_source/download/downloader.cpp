@@ -128,7 +128,6 @@ void Downloader::Pause()
     MEDIA_LOG_I("Begin");
     requestQue_->SetActive(false, false);
     task_->Pause();
-    client_->Close();
     MEDIA_LOG_I("End");
 }
 
@@ -136,7 +135,6 @@ void Downloader::Resume()
 {
     MEDIA_LOG_I("Begin");
     requestQue_->SetActive(true);
-    client_->Open(currentRequest_->url_);
     currentRequest_->isEos_ = false;
     Start();
     MEDIA_LOG_I("End");
@@ -169,10 +167,12 @@ bool Downloader::Retry(const std::shared_ptr<DownloadRequest>& request)
     MEDIA_LOG_I(PUBLIC_LOG_S " Retry Begin, url : " PUBLIC_LOG_S, name_.c_str(), request->url_.c_str());
     FALSE_RETURN_V(client_ != nullptr, false);
     Pause();
+    client_->Close();
     if (currentRequest_ != nullptr && currentRequest_->IsSame(request) && !shouldStartNextRequest) {
         currentRequest_->retryTimes_++;
         MEDIA_LOG_D("Do retry.");
     }
+    client_->Open(currentRequest_->url_);
     Resume();
     MEDIA_LOG_I("Downloader Retry End");
     return true;
