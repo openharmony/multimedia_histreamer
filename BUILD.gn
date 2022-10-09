@@ -72,7 +72,7 @@ if (ohos_kernel_type != "liteos_m") {
     ohos_shared_library("media_engine_histreamer") {
       sanitize = {
         cfi = true
-        debug = true
+        debug = false
       }
       sources = []
       deps = [ "engine/scene:std_engine_factory" ]
