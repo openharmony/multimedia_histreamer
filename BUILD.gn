@@ -70,6 +70,10 @@ if (ohos_kernel_type != "liteos_m") {
   } else {
     import("//build/ohos.gni")
     ohos_shared_library("media_engine_histreamer") {
+      sanitize = {
+        cfi = true
+        debug = false
+      }
       sources = []
       deps = [ "engine/scene:std_engine_factory" ]
       external_deps = [ "hitrace_native:hitrace_meter" ]

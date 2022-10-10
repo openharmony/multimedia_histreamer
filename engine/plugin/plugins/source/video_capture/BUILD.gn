@@ -51,6 +51,10 @@ if (hst_is_lite_sys) {
 } else {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_StdVideoCapture") {
+    sanitize = {
+      cfi = true
+      debug = false
+    }
     deps = [ ":std_video_capture" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"

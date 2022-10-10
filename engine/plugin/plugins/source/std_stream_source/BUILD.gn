@@ -47,6 +47,10 @@ if (hst_is_lite_sys) {
 } else {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_StdStreamSource") {
+    sanitize = {
+      cfi = true
+      debug = false
+    }
     deps = [ ":std_stream_source" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
