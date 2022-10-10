@@ -615,6 +615,7 @@ void DemuxerFilter::DemuxerLoop()
         if (plugin_->GetMediaInfo(mediaInfo) == Plugin::Status::OK && PrepareStreams(mediaInfo)) {
             PROFILE_END("Succeed to extract mediainfo.");
             NegotiateDownstream();
+            ReportVideoSize(mediaInfo);
             pluginState_ = DemuxerState::DEMUXER_STATE_PARSE_FRAME;
             state_ = FilterState::READY;
             OnEvent({name_, EventType::EVENT_READY, {}});
@@ -622,6 +623,29 @@ void DemuxerFilter::DemuxerLoop()
             task_->PauseAsync();
             MEDIA_LOG_E("demuxer filter parse meta failed");
             OnEvent({name_, EventType::EVENT_ERROR, ErrorCode::ERROR_UNKNOWN});
+        }
+    }
+}
+
+void DemuxerFilter::ReportVideoSize(const Plugin::MediaInfoHelper& mediaInfo)
+{
+    std::string mime;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    int streamCnt = mediaInfo.trackMeta.size();
+    for (int i = 0; i < streamCnt; ++i) {
+        if (!mediaInfo.trackMeta[i].GetString(Plugin::MetaID::MIME, mime)) {
+            MEDIA_LOG_E("PrepareStreams failed to extract mime.");
+            continue;
+        }
+        if (IsVideoMime(mime)) {
+            (void)mediaInfo.trackMeta[i].GetUint32(Plugin::MetaID::VIDEO_WIDTH, width);
+            (void)mediaInfo.trackMeta[i].GetUint32(Plugin::MetaID::VIDEO_HEIGHT, height);
+            MEDIA_LOG_I("mime-width-height: " PUBLIC_LOG_S "-" PUBLIC_LOG_U32 "-" PUBLIC_LOG_U32,
+                        mime.c_str(), width, height);
+            auto resolution = std::make_pair(static_cast<int32_t>(width), static_cast<int32_t>(height));
+            FilterBase::OnEvent({name_, EventType::EVENT_RESOLUTION_CHANGE, resolution});
+            break;
         }
     }
 }

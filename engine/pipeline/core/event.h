@@ -34,6 +34,7 @@ enum struct EventType : uint32_t {
     EVENT_BUFFERING,
     EVENT_BUFFER_PROGRESS,
     EVENT_DECODER_ERROR,
+    EVENT_RESOLUTION_CHANGE,
 };
 
 struct Event {

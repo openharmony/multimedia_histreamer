@@ -138,6 +138,8 @@ private:
 
     void DemuxerLoop();
 
+    void ReportVideoSize(const Plugin::MediaInfoHelper& mediaInfo);
+
     Plugin::Seekable seekable_;
     std::string uriSuffix_;
     uint64_t mediaDataSize_;

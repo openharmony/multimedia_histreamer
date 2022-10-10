@@ -92,9 +92,6 @@ HiPlayerImpl::~HiPlayerImpl()
     audioSink_.reset();
 #ifdef VIDEO_SUPPORT
     videoSink_.reset();
-    if (surface_) {
-        surface_ = nullptr;
-    }
 #endif
     syncManager_.reset();
 }
@@ -333,10 +330,9 @@ int32_t HiPlayerImpl::SetVideoSurface(sptr<Surface> surface)
 {
     MEDIA_LOG_D("SetVideoSurface entered.");
 #ifdef VIDEO_SUPPORT
-    if (surface != nullptr) {
-        surface_ = surface;
-    }
-    return TransErrorCode(videoSink_->SetVideoSurface(surface_));
+    FALSE_RETURN_V_MSG_E(surface != nullptr, TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE),
+                         "Set video surface failed, surface == nullptr");
+    return TransErrorCode(videoSink_->SetVideoSurface(surface));
 #else
     return TransErrorCode(ErrorCode::SUCCESS);
 #endif
@@ -416,20 +412,14 @@ int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format>& audioTrack)
 
 int32_t HiPlayerImpl::GetVideoWidth()
 {
-    MEDIA_LOG_I("GetVideoWidth entered.");
-    if (surface_ != nullptr) {
-        return surface_->GetDefaultWidth();
-    }
-    return 0;
+    MEDIA_LOG_I("GetVideoWidth entered. video width: " PUBLIC_LOG_D32, videoWidth_);
+    return videoWidth_;
 }
 
 int32_t HiPlayerImpl::GetVideoHeight()
 {
-    MEDIA_LOG_I("GetVideoHeight entered.");
-    if (surface_ != nullptr) {
-        return surface_->GetDefaultHeight();
-    }
-    return 0;
+    MEDIA_LOG_I("GetVideoHeight entered. video height: " PUBLIC_LOG_D32, videoHeight_);
+    return videoHeight_;
 }
 
 void HiPlayerImpl::HandlePluginErrorEvent(const Event& event)
@@ -472,26 +462,11 @@ void HiPlayerImpl::OnEvent(const Event& event)
             HandlePluginErrorEvent(event);
             break;
         }
+        case EventType::EVENT_RESOLUTION_CHANGE:
+            HandleResolutionChangeEvent(event);
+            break;
         case EventType::EVENT_PLUGIN_EVENT: {
-            auto pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
-            switch (pluginEvent.type) {
-                case Plugin::PluginEventType::INTERRUPT: {
-                    auto interruptEvent = Plugin::AnyCast<Plugin::AudioInterruptEvent>(pluginEvent.param);
-                    Format format;
-                    (void)format.PutIntValue(PlayerKeys::AUDIO_INTERRUPT_TYPE, interruptEvent.eventType);
-                    (void)format.PutIntValue(PlayerKeys::AUDIO_INTERRUPT_FORCE, interruptEvent.forceType);
-                    (void)format.PutIntValue(PlayerKeys::AUDIO_INTERRUPT_HINT, interruptEvent.hintType);
-                    callbackLooper_.OnInfo(INFO_TYPE_INTERRUPT_EVENT, 0, format);
-                    MEDIA_LOG_I("Receive Audio INTERRUPT EVENT");
-                    break;
-                }
-                case Plugin::PluginEventType::BELOW_LOW_WATERLINE:
-                case Plugin::PluginEventType::ABOVE_LOW_WATERLINE:
-                default:
-                    MEDIA_LOG_I("Receive PLUGIN_EVENT, type:  " PUBLIC_LOG_D32,
-                                CppExt::to_underlying(pluginEvent.type));
-                    break;
-            }
+            HandlePluginEvent(event);
             break;
         }
         default:
@@ -982,6 +957,42 @@ void HiPlayerImpl::NotifyBufferingUpdate(const std::string_view& type, int32_t p
     Format format;
     format.PutIntValue(std::string(type), param);
     callbackLooper_.OnInfo(INFO_TYPE_BUFFERING_UPDATE, 0, format);
+}
+
+void HiPlayerImpl::HandleResolutionChangeEvent(const Event& event)
+{
+    auto resolution = Plugin::AnyCast<std::pair<int32_t, int32_t>>(event.param);
+    Format format;
+    (void)format.PutIntValue(PlayerKeys::PLAYER_WIDTH, resolution.first);
+    (void)format.PutIntValue(PlayerKeys::PLAYER_HEIGHT, resolution.second);
+    callbackLooper_.OnInfo(INFO_TYPE_RESOLUTION_CHANGE, 0, format);
+    MEDIA_LOG_I("Receive plugin RESOLUTION_CHANGE, video_width: " PUBLIC_LOG_U32
+                ", video_height: " PUBLIC_LOG_U32, resolution.first, resolution.second);
+    videoWidth_ = resolution.first;
+    videoHeight_ = resolution.second;
+}
+
+void HiPlayerImpl::HandlePluginEvent(const Event& event)
+{
+    auto pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
+    switch (pluginEvent.type) {
+        case Plugin::PluginEventType::INTERRUPT: {
+            auto interruptEvent = Plugin::AnyCast<Plugin::AudioInterruptEvent>(pluginEvent.param);
+            Format format;
+            (void)format.PutIntValue(PlayerKeys::AUDIO_INTERRUPT_TYPE, interruptEvent.eventType);
+            (void)format.PutIntValue(PlayerKeys::AUDIO_INTERRUPT_FORCE, interruptEvent.forceType);
+            (void)format.PutIntValue(PlayerKeys::AUDIO_INTERRUPT_HINT, interruptEvent.hintType);
+            callbackLooper_.OnInfo(INFO_TYPE_INTERRUPT_EVENT, 0, format);
+            MEDIA_LOG_I("Receive Audio INTERRUPT EVENT");
+            break;
+        }
+        case Plugin::PluginEventType::BELOW_LOW_WATERLINE:
+        case Plugin::PluginEventType::ABOVE_LOW_WATERLINE:
+        default:
+            MEDIA_LOG_I("Receive PLUGIN_EVENT, type:  " PUBLIC_LOG_D32,
+                        CppExt::to_underlying(pluginEvent.type));
+            break;
+    }
 }
 }  // namespace Media
 }  // namespace OHOS
