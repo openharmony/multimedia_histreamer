@@ -166,6 +166,9 @@ Status VideoFfmpegDecoderPlugin::Deinit()
         decodeTask_->Stop();
         decodeTask_.reset();
     }
+    if (scale_) {
+        scale_.reset();
+    }
     state_ = State::DESTROYED;
     return Status::OK;
 }
@@ -173,7 +176,11 @@ Status VideoFfmpegDecoderPlugin::Deinit()
 Status VideoFfmpegDecoderPlugin::SetParameter(Tag tag, const ValueType& value)
 {
     OSAL::ScopedLock l(avMutex_);
-    videoDecParams_.insert(std::make_pair(tag, value));
+    if (videoDecParams_.count(tag)) {
+        videoDecParams_[tag] = value;
+    } else {
+        videoDecParams_.insert(std::make_pair(tag, value));
+    }
     return Status::OK;
 }
 
@@ -511,42 +518,6 @@ void VideoFfmpegDecoderPlugin::DumpVideoRawOutData()
 }
 #endif
 
-Status VideoFfmpegDecoderPlugin::CreateSwsContext()
-{
-    if (swsCtx_ != nullptr) {
-        return Status::OK;
-    }
-    auto swsContext = sws_getContext(cachedFrame_->width, cachedFrame_->height,
-                                     static_cast<enum AVPixelFormat>(cachedFrame_->format),
-                                     static_cast<int32_t>(width_), static_cast<int32_t>(height_),
-                                     ConvertPixelFormatToFFmpeg(pixelFormat_), SWS_BILINEAR, NULL, NULL, NULL);
-    FALSE_RETURN_V_MSG_E(swsContext != nullptr, Status::ERROR_UNKNOWN, "sws_getContext fail");
-    swsCtx_ = std::shared_ptr<struct SwsContext>(swsContext, [](struct SwsContext *ptr) {
-        if (ptr != nullptr) {
-            sws_freeContext(ptr);
-        }
-    });
-    FALSE_RETURN_V_MSG_E(swsCtx_ != nullptr, Status::ERROR_NO_MEMORY, "create swsCtx fail");
-    if (scaleData_[0] == nullptr && !isAllocScaleData_) {
-        auto ret = av_image_alloc(scaleData_, scaleLineSize_, width_, height_,
-                                  ConvertPixelFormatToFFmpeg(pixelFormat_), STRIDE_ALIGN);
-        FALSE_RETURN_V_MSG_E(ret >= 0, Status::ERROR_UNKNOWN, "av_image_fill_linesizes fail: " PUBLIC_LOG_D32, ret);
-        MEDIA_LOG_D("pixelFormat_: " PUBLIC_LOG_U32 ", pix_fmt: " PUBLIC_LOG_D32,
-                    pixelFormat_, ConvertPixelFormatToFFmpeg(pixelFormat_));
-        for (int32_t i = 0; i < AV_NUM_DATA_POINTERS; i++) {
-            MEDIA_LOG_D("scaleData[" PUBLIC_LOG_D32 "]: " PUBLIC_LOG_P ", scaleLineSize[" PUBLIC_LOG_D32 "]: "
-                        PUBLIC_LOG_D32, i, scaleData_[i], i, scaleLineSize_[i]);
-            if (scaleData_[i] && !scaleLineSize_[i]) {
-                MEDIA_LOG_E("scaleFrame is broken, i: " PUBLIC_LOG_D32, i);
-                return Status::ERROR_UNKNOWN;
-            }
-        }
-        isAllocScaleData_ = true;
-    }
-    MEDIA_LOG_D("CreateSwsContext success");
-    return Status::OK;
-}
-
 Status VideoFfmpegDecoderPlugin::ScaleVideoFrame()
 {
     if (ConvertPixelFormatFromFFmpeg(static_cast<AVPixelFormat>(cachedFrame_->format)) == pixelFormat_ &&
@@ -558,11 +529,23 @@ Status VideoFfmpegDecoderPlugin::ScaleVideoFrame()
         }
         return Status::OK;
     }
-    auto ret = CreateSwsContext();
-    FALSE_RETURN_V_MSG_E(ret == Status::OK, ret, "CreateSwsContext fail: " PUBLIC_LOG_D32, ret);
-    int32_t res = sws_scale(swsCtx_.get(), cachedFrame_->data, cachedFrame_->linesize, 0, cachedFrame_->height,
-                            scaleData_, scaleLineSize_);
-    FALSE_RETURN_V_MSG_E(res >= 0, Status::ERROR_UNKNOWN, "sws_scale fail: " PUBLIC_LOG_D32, ret);
+    if (!scale_) {
+        scale_ = std::make_shared<Ffmpeg::Scale>();
+        Ffmpeg::ScalePara scalePara {
+            static_cast<int32_t>(cachedFrame_->width),
+            static_cast<int32_t>(cachedFrame_->height),
+            static_cast<AVPixelFormat>(cachedFrame_->format),
+            static_cast<int32_t>(width_),
+            static_cast<int32_t>(height_),
+            Ffmpeg::ConvertPixelFormatToFFmpeg(pixelFormat_),
+            STRIDE_ALIGN
+        };
+        FALSE_RETURN_V_MSG(scale_->Init(scalePara, scaleData_, scaleLineSize_) == Status::OK,
+            Status::ERROR_UNKNOWN, "Scale init error");
+        isAllocScaleData_ = true;
+    }
+    auto res = scale_->Convert(cachedFrame_->data, cachedFrame_->linesize, scaleData_, scaleLineSize_);
+    FALSE_RETURN_V_MSG_E(res == Status::OK, Status::ERROR_UNKNOWN, "Scale convert fail.");
     MEDIA_LOG_D("ScaleVideoFrame success");
     return Status::OK;
 }

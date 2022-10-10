@@ -19,8 +19,6 @@
 #include <functional>
 
 #include "foundation/log.h"
-#include "libavutil/channel_layout.h"
-#include "libavutil/pixfmt.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_time.h"
 
@@ -504,7 +502,7 @@ Status Resample::Init(const ResamplePara& resamplePara)
         auto tmp = resampleChannelAddr_.data();
         av_samples_fill_arrays(tmp, nullptr, resampleCache_.data(), resamplePara_.channels,
                                resamplePara_.destSamplesPerFrame, resamplePara_.destFmt, 0);
-        SwrContext* swrContext = swr_alloc();
+        auto swrContext = swr_alloc();
         if (swrContext == nullptr) {
             MEDIA_LOG_E("cannot allocate swr context");
             return Status::ERROR_NO_MEMORY;
@@ -573,7 +571,46 @@ Status Resample::Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8
 #endif
     return Status::OK;
 }
-} // namespace Ffmpeg
+
+Status Scale::Init(const ScalePara& scalePara, uint8_t** dstData, int32_t* dstLineSize)
+{
+    scalePara_ = scalePara;
+    if (swsCtx_ != nullptr) {
+        return Status::OK;
+    }
+    auto swsContext = sws_getContext(scalePara_.srcWidth, scalePara_.srcHeight, scalePara_.srcFfFmt,
+        scalePara_.dstWidth, scalePara_.dstHeight, scalePara_.dstFfFmt,
+        SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
+    FALSE_RETURN_V_MSG_E(swsContext != nullptr, Status::ERROR_UNKNOWN, "sws_getContext fail");
+    swsCtx_ = std::shared_ptr<SwsContext>(swsContext, [](struct SwsContext *ptr) {
+        if (ptr != nullptr) {
+            sws_freeContext(ptr);
+        }
+    });
+    auto ret = av_image_alloc(dstData, dstLineSize, scalePara_.dstWidth, scalePara_.dstHeight,
+        scalePara_.dstFfFmt, scalePara_.align);
+    FALSE_RETURN_V_MSG_E(ret >= 0, Status::ERROR_UNKNOWN, "could not allocate destination image" PUBLIC_LOG_D32, ret);
+    MEDIA_LOG_D("av_image_alloc call, ret: " PUBLIC_LOG_U32 "dstPixelFormat_: " PUBLIC_LOG_U32,
+        ret, scalePara_.dstFfFmt);
+    // av_image_alloc can make sure that dstLineSize last element is 0
+    for (int32_t i = 0; dstLineSize[i] > 0; i++) {
+        MEDIA_LOG_D("dstLineSize[" PUBLIC_LOG_D32 "]: " PUBLIC_LOG_D32, i, dstLineSize[i]);
+        if (dstData[i] && !dstLineSize[i]) {
+            MEDIA_LOG_E("scale frame is broken, i: " PUBLIC_LOG_D32, i);
+            return Status::ERROR_UNKNOWN;
+        }
+    }
+    return Status::OK;
+}
+
+Status Scale::Convert(uint8_t** srcData, const int32_t* srcLineSize, uint8_t** dstData, int32_t* dstLineSize)
+{
+    auto res = sws_scale(swsCtx_.get(), srcData, srcLineSize, 0, scalePara_.srcHeight,
+        dstData, dstLineSize);
+    FALSE_RETURN_V_MSG_E(res >= 0, Status::ERROR_UNKNOWN, "sws_scale fail: " PUBLIC_LOG_D32, res);
+    return Status::OK;
+}
+}// namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

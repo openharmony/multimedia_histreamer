@@ -403,12 +403,12 @@ Status SdlVideoSinkPlugin::VideoImageDisaplay(const std::shared_ptr<Buffer>& inp
         }
         ret = UpdateNVTexture(data, lineSize, videoMeta, ySize, ptr);
     } else if (IsFormatRGB()) {
-        ret = SDL_UpdateTexture(texture_.get(), NULL, data[0], lineSize[0]);
+        ret = SDL_UpdateTexture(texture_.get(), nullptr, data[0], lineSize[0]);
     } else {
         MEDIA_LOG_E("Unsupported pixel format");
     }
     SDL_RenderClear(renderer_.get());
-    SDL_RenderCopy(renderer_.get(), texture_.get(), NULL, &textureRect_);
+    SDL_RenderCopy(renderer_.get(), texture_.get(), nullptr, &textureRect_);
     SDL_RenderPresent(renderer_.get());
     return (ret != 0) ? Status::ERROR_UNKNOWN : Status::OK;
 }
@@ -433,7 +433,7 @@ int32_t SdlVideoSinkPlugin::UpdateNVTexture(const uint8_t** data, int32_t* lineS
                     1, dumpFd_);
     }
 #endif
-    ret = SDL_UpdateTexture(texture_.get(), NULL, data[0], lineSize[0]);
+    ret = SDL_UpdateTexture(texture_.get(), nullptr, data[0], lineSize[0]);
     return ret;
 }
 
@@ -501,7 +501,7 @@ Status SdlVideoSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
     if (inputInfo == nullptr || inputInfo->IsEmpty()) {
         return Status::OK;
     }
-    if (HandleSdlEvent() == true) {
+    if (HandleSdlEvent()) {
         MEDIA_LOG_W("SDL_QUIT, write nothing");
         return Status::ERROR_NOT_ENOUGH_DATA;
     }
