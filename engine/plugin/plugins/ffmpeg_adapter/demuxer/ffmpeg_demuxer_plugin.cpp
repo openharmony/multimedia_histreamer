@@ -350,7 +350,7 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mo
     auto avStream = formatContext_->streams[trackId];
     int64_t ffTime = ConvertTimeToFFmpeg(hstTime, avStream->time_base);
     if (avStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-        int keyFrameIdx = av_index_search_timestamp(avStream, ffTime, AVSEEK_FLAG_BACKWARD);
+        int keyFrameIdx = av_index_search_timestamp(avStream, ffTime, AVSEEK_FLAG_ANY | AVSEEK_FLAG_BACKWARD);
         MEDIA_LOG_I("SeekTo " PUBLIC_LOG_D64 "ns, ffTime: " PUBLIC_LOG_D64 ", key frame index: "
                     PUBLIC_LOG_D32, hstTime, ffTime, keyFrameIdx);
         if (keyFrameIdx >= 0) {
@@ -364,10 +364,9 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mo
             ffTime = avStream->index_entries[keyFrameIdx].timestamp;
 #endif
         }
-        ffTime = ConvertTimeFromFFmpeg(ffTime, avStream->time_base);
     }
     MEDIA_LOG_I("SeekTo " PUBLIC_LOG_U64 " / " PUBLIC_LOG_D64, ffTime, hstTime);
-    auto rtv = av_seek_frame(formatContext_.get(), trackId, ffTime, AVSEEK_FLAG_BACKWARD);
+    auto rtv = av_seek_frame(formatContext_.get(), trackId, ffTime, AVSEEK_FLAG_ANY | AVSEEK_FLAG_BACKWARD);
     if (rtv < 0) {
         MEDIA_LOG_E("seek failed, return value: " PUBLIC_LOG_D32, rtv);
     }

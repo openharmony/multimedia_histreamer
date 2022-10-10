@@ -416,7 +416,7 @@ Status VideoFfmpegDecoderPlugin::Flush()
 {
     OSAL::ScopedLock l(avMutex_);
     if (avCodecContext_ != nullptr) {
-        // flush avcodec buffers
+        avcodec_flush_buffers(avCodecContext_.get());
     }
     return Status::OK;
 }
