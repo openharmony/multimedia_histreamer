@@ -16,7 +16,10 @@ if (!hst_is_lite_sys) {
   ohos_kernel_type = ""
 }
 config("histreamer_presets") {
-  include_dirs = [ "//foundation/multimedia/histreamer/engine" ]
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine",
+    "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
+  ]
   defines = [ "MEDIA_OHOS" ]
   cflags = [
     "-O2",
