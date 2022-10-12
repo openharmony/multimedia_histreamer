@@ -200,7 +200,7 @@ ErrorCode MediaSyncManager::Pause()
 
 ErrorCode MediaSyncManager::Seek(int64_t mediaTime)
 {
-    AUTO_SYNC_TRACE("MediaSyncManager Seek");
+    SYNC_TRACER();
     OSAL::ScopedLock lock(clockMutex_);
     if (minRangeStartOfMediaTime_ == HST_TIME_NONE || maxRangeEndOfMediaTime_ == HST_TIME_NONE) {
         return ErrorCode::ERROR_INVALID_OPERATION;

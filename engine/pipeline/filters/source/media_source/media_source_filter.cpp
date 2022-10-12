@@ -101,7 +101,7 @@ ErrorCode MediaSourceFilter::SetSource(const std::shared_ptr<MediaSource>& sourc
 
 ErrorCode MediaSourceFilter::InitPlugin(const std::shared_ptr<MediaSource>& source)
 {
-    AUTO_SYNC_TRACE("MediaSourceFilter InitPlugin");
+    SYNC_TRACER();
     MEDIA_LOG_D("IN");
     ErrorCode err = TranslatePluginStatus(plugin_->Init());
     if (err != ErrorCode::SUCCESS) {
@@ -269,7 +269,7 @@ Plugin::Seekable MediaSourceFilter::GetSeekable() const
 ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& source)
 {
     MEDIA_LOG_D("IN");
-    AUTO_SYNC_TRACE("MediaSourceFilter DoNegotiate");
+    SYNC_TRACER();
     SourceType sourceType = source->GetSourceType();
     std::shared_ptr<Plugin::Meta> meta = std::make_shared<Plugin::Meta>();
     if (sourceType == SourceType::SOURCE_TYPE_URI) {
@@ -396,7 +396,7 @@ ErrorCode MediaSourceFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& inf
 
 ErrorCode MediaSourceFilter::FindPlugin(const std::shared_ptr<MediaSource>& source)
 {
-    AUTO_SYNC_TRACE("MediaSourceFilter FindPlugin");
+    SYNC_TRACER();
     if (!ParseProtocol(source)) {
         MEDIA_LOG_E("Invalid source!");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;

@@ -39,7 +39,7 @@ using namespace Pipeline;
 HiRecorderImpl::HiRecorderImpl(int32_t appUid, int32_t appPid, uint32_t appTokenId)
     : appUid_(appUid), appPid_(appPid), appTokenId_(appTokenId), fsm_(*this), curFsmState_(StateId::INIT)
 {
-    AUTO_SYNC_TRACE("Hst HiRecorderImpl ctor");
+    SYNC_TRACER();
     MEDIA_LOG_I("hiRecorderImpl ctor");
     FilterFactory::Instance().Init();
     muxer_ = FilterFactory::Instance().CreateFilterWithType<MuxerFilter>(
@@ -83,7 +83,7 @@ ErrorCode HiRecorderImpl::Init()
 
 int32_t HiRecorderImpl::SetAudioSource(AudioSourceType source, int32_t& sourceId)
 {
-    AUTO_SYNC_TRACE("Hst recorder SetAudioSource");
+    SYNC_TRACER();
     MEDIA_LOG_I("SetAudioSource enter");
     PROFILE_BEGIN("SetAudioSource begin");
     sourceId = INVALID_SOURCE_ID;
@@ -163,7 +163,7 @@ int32_t HiRecorderImpl::SetObs(const std::weak_ptr<IRecorderEngineObs>& obs)
 
 int32_t HiRecorderImpl::Configure(int32_t sourceId, const RecorderParam& recParam)
 {
-    AUTO_SYNC_TRACE("Hst recorder Configure");
+    SYNC_TRACER();
     MEDIA_LOG_I("Configure enter");
     FALSE_RETURN_V(outputFormatType_ != OutputFormatType::FORMAT_BUTT,
                    TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION));
@@ -180,7 +180,7 @@ int32_t HiRecorderImpl::Configure(int32_t sourceId, const RecorderParam& recPara
 
 int32_t HiRecorderImpl::Prepare()
 {
-    AUTO_SYNC_TRACE("Hst recorder Prepare");
+    SYNC_TRACER();
     MEDIA_LOG_D("Prepare entered, current fsm state: " PUBLIC_LOG_S ".", fsm_.GetCurrentState().c_str());
     PROFILE_BEGIN();
     auto ret = fsm_.SendEvent(Intent::PREPARE);
@@ -207,7 +207,7 @@ int32_t HiRecorderImpl::Prepare()
 
 int32_t HiRecorderImpl::Start()
 {
-    AUTO_SYNC_TRACE("Hst recorder Start");
+    SYNC_TRACER();
     MEDIA_LOG_I("Start enter");
     PROFILE_BEGIN();
     ErrorCode ret;
@@ -222,7 +222,7 @@ int32_t HiRecorderImpl::Start()
 
 int32_t HiRecorderImpl::Pause()
 {
-    AUTO_SYNC_TRACE("Hst recorder Pause");
+    SYNC_TRACER();
     MEDIA_LOG_I("Pause enter");
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::PAUSE));
@@ -232,7 +232,7 @@ int32_t HiRecorderImpl::Pause()
 
 int32_t HiRecorderImpl::Resume()
 {
-    AUTO_SYNC_TRACE("Hst recorder Resume");
+    SYNC_TRACER();
     MEDIA_LOG_I("Resume enter");
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::RESUME));
@@ -242,14 +242,14 @@ int32_t HiRecorderImpl::Resume()
 
 int32_t HiRecorderImpl::Stop(bool isDrainAll)
 {
-    MANUAL_SYNC_TRACE("Hst recorder Stop");
+    SYNC_TRACE_START("Hst recorder Stop");
     MEDIA_LOG_I("Stop enter");
     PROFILE_BEGIN();
     MEDIA_LOG_D("Stop start, isDrainAll: " PUBLIC_LOG_U32, static_cast<uint32_t>(isDrainAll));
     outputFormatType_ = OutputFormatType::FORMAT_BUTT;
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::STOP, isDrainAll));
     PROFILE_END("Stop ret = " PUBLIC_LOG_D32, ret);
-    MANUAL_SYNC_TRACE_END();
+    SYNC_TRACE_END();
     FALSE_RETURN_V_MSG_E(ret == ERR_OK, ret, "send STOP event to fsm fail");
     OSAL::ScopedLock lock(stateMutex_);
     cond_.WaitFor(lock, 3000, [this] { // 3000: time out
@@ -261,7 +261,7 @@ int32_t HiRecorderImpl::Stop(bool isDrainAll)
 
 int32_t HiRecorderImpl::Reset()
 {
-    AUTO_SYNC_TRACE("Hst recorder Reset");
+    SYNC_TRACER();
     MEDIA_LOG_I("Reset enter");
     PROFILE_BEGIN();
     if (curFsmState_ == StateId::RECORDING) {

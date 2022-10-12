@@ -169,7 +169,7 @@ ErrorCode PipelineCore::Stop()
 
 void PipelineCore::FlushStart()
 {
-    AUTO_SYNC_TRACE("Pipeline FlushStart");
+    SYNC_TRACER();
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
         MEDIA_LOG_I("FlushStart for filter: " PUBLIC_LOG_S, (*it)->GetName().c_str());
         (*it)->FlushStart();
@@ -178,7 +178,7 @@ void PipelineCore::FlushStart()
 
 void PipelineCore::FlushEnd()
 {
-    AUTO_SYNC_TRACE("Pipeline FlushEnd");
+    SYNC_TRACER();
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
         MEDIA_LOG_I("FlushEnd for filter: " PUBLIC_LOG_S, (*it)->GetName().c_str());
         (*it)->FlushEnd();

@@ -48,7 +48,7 @@ HiPlayerImpl::HiPlayerImpl(int32_t appUid, int32_t appPid)
       volume_(-1.0f), // default negative, if app not set, will not set it.
       mediaStats_()
 {
-    AUTO_SYNC_TRACE("Hst hiPlayerImpl ctor");
+    SYNC_TRACER();
     MEDIA_LOG_I("hiPlayerImpl ctor");
     FilterFactory::Instance().Init();
     syncManager_ = std::make_shared<MediaSyncManager>();
@@ -151,7 +151,7 @@ ErrorCode HiPlayerImpl::Init()
 
 int32_t HiPlayerImpl::SetSource(const std::string& uri)
 {
-    AUTO_SYNC_TRACE("Hst player SetSource");
+    SYNC_TRACER();
     MEDIA_LOG_I("SetSource entered source uri: " PUBLIC_LOG_S, uri.c_str());
     PROFILE_BEGIN("SetSource begin");
     auto ret = Init();
@@ -182,7 +182,7 @@ int32_t HiPlayerImpl::SetSource(const std::shared_ptr<IMediaDataSource>& dataSrc
 
 int32_t HiPlayerImpl::Prepare()
 {
-    AUTO_SYNC_TRACE("Hst player Prepare");
+    SYNC_TRACER();
     MEDIA_LOG_I("Prepare entered, current fsm state: " PUBLIC_LOG_S ".", fsm_.GetCurrentState().c_str());
     PROFILE_BEGIN();
     auto ret = fsm_.SendEvent(Intent::PREPARE);
@@ -206,7 +206,7 @@ int32_t HiPlayerImpl::Prepare()
 
 int HiPlayerImpl::PrepareAsync()
 {
-    AUTO_ASYNC_TRACE("Hst player PrepareAsync", 1);
+    ASYNC_TRACER();
     MEDIA_LOG_I("Prepare async entered, current fsm state: " PUBLIC_LOG_S, fsm_.GetCurrentState().c_str());
     PROFILE_BEGIN();
     auto ret = fsm_.SendEventAsync(Intent::PREPARE);
@@ -221,7 +221,7 @@ int HiPlayerImpl::PrepareAsync()
 
 int32_t HiPlayerImpl::Play()
 {
-    AUTO_SYNC_TRACE("Hst player Play");
+    SYNC_TRACER();
     MEDIA_LOG_I("Play entered.");
     callbackLooper_.StartReportMediaProgress();
     PROFILE_BEGIN();
@@ -238,7 +238,7 @@ int32_t HiPlayerImpl::Play()
 
 int32_t HiPlayerImpl::Pause()
 {
-    AUTO_SYNC_TRACE("Hst player Pause");
+    SYNC_TRACER();
     MEDIA_LOG_I("Pause entered.");
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::PAUSE));
@@ -250,7 +250,7 @@ int32_t HiPlayerImpl::Pause()
 
 int32_t HiPlayerImpl::Stop()
 {
-    AUTO_SYNC_TRACE("Hst player Stop");
+    SYNC_TRACER();
     MEDIA_LOG_I("Stop entered.");
     PROFILE_BEGIN();
     auto ret = TransErrorCode(fsm_.SendEvent(Intent::STOP));
@@ -268,7 +268,7 @@ ErrorCode HiPlayerImpl::StopAsync()
 
 int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
 {
-    AUTO_SYNC_TRACE("Hst player Seek");
+    SYNC_TRACER();
     MEDIA_LOG_I("Seek entered. mSeconds : " PUBLIC_LOG_D32 ", seekMode : " PUBLIC_LOG_D32,
                 mSeconds, static_cast<int32_t>(mode));
     int64_t hstTime = 0;
@@ -548,7 +548,7 @@ ErrorCode HiPlayerImpl::DoReset()
 
 ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode, bool appTriggered)
 {
-    AUTO_SYNC_TRACE("Hst player DoSeek");
+    SYNC_TRACER();
     if (appTriggered) {
         fsm_.Notify(Intent::SEEK, ErrorCode::SUCCESS);
     }

@@ -17,33 +17,45 @@
 #define HISTREAMER_HITRACE_UTILS_H
 #include "hitrace_meter.h"
 
-#define AUTO_SYNC_TRACE(value) SyncScopedTracer __autoSyncTrace(HITRACE_TAG_ZMEDIA, value, 0)
-#define MANUAL_SYNC_TRACE(value) StartTrace(HITRACE_TAG_ZMEDIA, value, 0)
-#define MANUAL_SYNC_TRACE_END() FinishTrace(HITRACE_TAG_ZMEDIA)
-#define AUTO_ASYNC_TRACE(value, taskId) AsyncScopedTracer __autoAsyncTrace(HITRACE_TAG_ZMEDIA, value, taskId, 0)
-#define MANUAL_ASYNC_TRACE(value, taskId) StartAsyncTrace(HITRACE_TAG_ZMEDIA, value, taskId, 0)
-#define MANUAL_ASYNC_TRACE_END(value, taskId) FinishAsyncTrace(value, taskId, HITRACE_TAG_ZMEDIA)
+#ifdef NDEBUG
+#define SYNC_TRACER()
+#define SYNC_TRACE_START(title)
+#define SYNC_TRACE_END()
+#define ASYNC_TRACER()
+#define ASYNC_TRACE_START(title, taskId)
+#define ASYNC_TRACE_END(title, taskId)
+#define COUNT_TRACE(title, count)
+
+#else
+#define DEFAULT_LIMIT -1
+#define DEFAULT_TAG HITRACE_TAG_ZMEDIA
+#define DEFAULT_TASK_ID 1
+
+#define SYNC_TRACER() SyncTracker __syncTracker(__FUNCTION__)
+#define SYNC_TRACE_START(title) StartTrace(DEFAULT_TAG, title, DEFAULT_LIMIT)
+#define SYNC_TRACE_END() FinishTrace(DEFAULT_TAG)
+#define ASYNC_TRACER() AsyncTracker __asyncTracker(__FUNCTION__, DEFAULT_TASK_ID)
+#define ASYNC_TRACE_START(title, taskId) StartAsyncTrace(DEFAULT_TAG, title, taskId, DEFAULT_LIMIT)
+#define ASYNC_TRACE_END(title, taskId) FinishAsyncTrace(title, taskId, DEFAULT_TAG)
+#define COUNT_TRACE(title, count) CountTrace(DEFAULT_TAG, title, count);
 
 namespace OHOS {
 namespace Media {
+    class SyncTracker {
+    public:
+        SyncTracker(const std::string &title);
+        ~SyncTracker();
+    };
 
-class SyncScopedTracer {
-public:
-    SyncScopedTracer(uint64_t label, const std::string &value, float limit);
-    ~SyncScopedTracer();
-private:
-    uint64_t label_;
-};
-
-class AsyncScopedTracer {
-public:
-    AsyncScopedTracer(uint64_t label, const std::string &value, int32_t taskId, float limit);
-    ~AsyncScopedTracer();
-private:
-    uint64_t label_;
-    const std::string value_;
-    int32_t taskId_;
-};
+    class AsyncTracker {
+    public:
+        AsyncTracker(const std::string &title, int32_t taskId);
+        ~AsyncTracker();
+    private:
+        const std::string title_;
+        int32_t taskId_;
+    };
 }
 }
+#endif
 #endif // HISTREAMER_HITRACE_UTILS_H

@@ -14,28 +14,29 @@
  */
 #include "hitrace_utils.h"
 
+#ifndef NDEBUG
 namespace OHOS {
 namespace Media {
-    SyncScopedTracer::SyncScopedTracer(uint64_t label, const std::string &value, float limit) : label_(label)
+    SyncTracker::SyncTracker(const std::string &value)
     {
-        StartTrace(label, value, limit);
+        StartTrace(DEFAULT_TAG, value, DEFAULT_LIMIT);
     }
 
-    SyncScopedTracer::~SyncScopedTracer()
+    SyncTracker::~SyncTracker()
     {
-        FinishTrace(label_);
+        FinishTrace(DEFAULT_TAG);
     }
 
-    AsyncScopedTracer::AsyncScopedTracer(uint64_t label, const std::string &value, int32_t taskId, float limit)
-        :label_(label), value_(value), taskId_(taskId)
+    AsyncTracker::AsyncTracker(const std::string &title, int32_t taskId)
+        :title_(title), taskId_(taskId)
     {
-        StartAsyncTrace(label, value, taskId, limit);
+        StartAsyncTrace(DEFAULT_TAG, title, taskId, DEFAULT_LIMIT);
     }
 
-    AsyncScopedTracer::~AsyncScopedTracer()
+    AsyncTracker::~AsyncTracker()
     {
-        FinishAsyncTrace(label_, value_, taskId_);
+        FinishAsyncTrace(DEFAULT_TAG, title_, taskId_);
     }
-
 }
 }
+#endif
