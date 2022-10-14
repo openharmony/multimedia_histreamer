@@ -18,7 +18,9 @@
 #include <dirent.h>
 
 #include "all_plugin_static.h"
+#if defined(MEDIA_OHOS) && !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #include "core/hdi_codec/hdi_adapter_register.h"
+#endif
 #include "foundation/log.h"
 #include "interface/audio_sink_plugin.h"
 #include "interface/codec_plugin.h"
