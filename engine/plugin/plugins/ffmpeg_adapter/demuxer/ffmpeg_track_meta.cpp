@@ -99,12 +99,12 @@ void ConvertCommonVideoTrackToMetaInfo(const AVStream& avStream,
     meta.Insert<Tag::VIDEO_WIDTH>(avCodecContext->width);
     meta.Insert<Tag::VIDEO_HEIGHT>(avCodecContext->height);
     uint32_t frameRate = 0;
-    if (avCodecContext->framerate.den != 0) {
-        frameRate = avCodecContext->framerate.num / avCodecContext->framerate.den;
+    if (avStream.avg_frame_rate.den) {
+        static constexpr int32_t factor = 100;
+        frameRate = static_cast<uint32_t>(
+            static_cast<float>(avStream.avg_frame_rate.num) / avStream.avg_frame_rate.den * factor);
     }
-    if (frameRate > 0) {
-        meta.Insert<Tag::VIDEO_FRAME_RATE>(avCodecContext->framerate.num / avCodecContext->framerate.den);
-    }
+    meta.Insert<Tag::VIDEO_FRAME_RATE>(frameRate);
 }
 #endif
 

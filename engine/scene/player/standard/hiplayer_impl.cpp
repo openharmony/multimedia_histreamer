@@ -24,6 +24,7 @@
 #include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_meta.h"
 #include "utils/steady_clock.h"
+#include "av_common.h"
 #include "media_errors.h"
 
 namespace {
@@ -355,14 +356,27 @@ int32_t HiPlayerImpl::GetVideoTrackInfo(std::vector<Format>& videoTrack)
 {
     MEDIA_LOG_I("GetVideoTrackInfo entered.");
     std::string mime;
-    uint32_t height;
-    uint32_t width;
     std::vector<std::shared_ptr<Plugin::Meta>> metaInfo = demuxer_->GetStreamMetaInfo();
     for (const auto& trackInfo : metaInfo) {
         if (trackInfo->GetString(Plugin::MetaID::MIME, mime)) {
             if (IsVideoMime(mime)) {
+                int64_t bitRate;
+                uint32_t frameRate;
+                uint32_t height;
+                uint32_t width;
+                uint32_t trackIndex;
                 Format videoTrackInfo {};
-                (void)videoTrackInfo.PutStringValue("codec_mime", "video/mpeg");
+                (void)videoTrackInfo.PutStringValue("codec_mime", mime);
+                (void)videoTrackInfo.PutIntValue("track_type", MediaType::MEDIA_TYPE_VID);
+                if (trackInfo->GetUint32(Plugin::MetaID::TRACK_ID, trackIndex)) {
+                    (void)videoTrackInfo.PutIntValue("track_index", static_cast<int32_t>(trackIndex));
+                }
+                if (trackInfo->GetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate)) {
+                    (void)videoTrackInfo.PutIntValue("bitrate", static_cast<int32_t>(bitRate));
+                }
+                if (trackInfo->GetUint32(Plugin::MetaID::VIDEO_FRAME_RATE, frameRate)) {
+                    (void)videoTrackInfo.PutIntValue("frame_rate", static_cast<int32_t>(frameRate));
+                }
                 if (trackInfo->GetUint32(Plugin::MetaID::VIDEO_HEIGHT, height)) {
                     (void)videoTrackInfo.PutIntValue("height", static_cast<int32_t>(height));
                 }
@@ -379,22 +393,27 @@ int32_t HiPlayerImpl::GetVideoTrackInfo(std::vector<Format>& videoTrack)
 int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format>& audioTrack)
 {
     MEDIA_LOG_I("GetAudioTrackInfo entered.");
-    uint32_t audioSampleRate;
-    int64_t audioBitRate;
     std::string mime;
-    uint32_t audioChannels;
     std::vector<std::shared_ptr<Plugin::Meta>> metaInfo = demuxer_->GetStreamMetaInfo();
     for (const auto& trackInfo : metaInfo) {
         if (trackInfo->GetString(Plugin::MetaID::MIME, mime)) {
             if (IsAudioMime(mime)) {
+                int64_t bitRate;
+                uint32_t audioChannels;
+                uint32_t audioSampleRate;
+                uint32_t trackIndex;
                 Format audioTrackInfo {};
-                if (trackInfo->GetInt64(Plugin::MetaID::MEDIA_BITRATE, audioBitRate)) {
-                    (void)audioTrackInfo.PutIntValue("bitrate", static_cast<int32_t>(audioBitRate));
+                (void)audioTrackInfo.PutStringValue("codec_mime", mime);
+                (void)audioTrackInfo.PutIntValue("track_type", MediaType::MEDIA_TYPE_AUD);
+                if (trackInfo->GetUint32(Plugin::MetaID::TRACK_ID, trackIndex)) {
+                    (void)audioTrackInfo.PutIntValue("track_index", static_cast<int32_t>(trackIndex));
+                }
+                if (trackInfo->GetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate)) {
+                    (void)audioTrackInfo.PutIntValue("bitrate", static_cast<int32_t>(bitRate));
                 }
                 if (trackInfo->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, audioChannels)) {
                     (void)audioTrackInfo.PutIntValue("channel_count", static_cast<int32_t>(audioChannels));
                 }
-                (void)audioTrackInfo.PutStringValue("codec_mime", "audio/mpeg");
                 if (trackInfo->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_RATE, audioSampleRate)) {
                     (void)audioTrackInfo.PutIntValue("sample_rate", static_cast<int32_t>(audioSampleRate));
                 }
