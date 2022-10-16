@@ -14,28 +14,27 @@
  */
 #include "hitrace_utils.h"
 
-#ifndef NDEBUG
 namespace OHOS {
 namespace Media {
     SyncTracker::SyncTracker(const std::string &value)
     {
-        StartTrace(DEFAULT_TAG, value, DEFAULT_LIMIT);
+        StartTrace(DEFAULT_HITRACE_TAG, value, DEFAULT_HITRACE_LIMIT);
     }
 
     SyncTracker::~SyncTracker()
     {
-        FinishTrace(DEFAULT_TAG);
+        FinishTrace(DEFAULT_HITRACE_TAG);
     }
 
     AsyncTracker::AsyncTracker(const std::string &title, int32_t taskId)
         :title_(title), taskId_(taskId)
     {
-        StartAsyncTrace(DEFAULT_TAG, title, taskId, DEFAULT_LIMIT);
+        StartAsyncTrace(DEFAULT_HITRACE_TAG, title, taskId, DEFAULT_HITRACE_LIMIT);
     }
 
     AsyncTracker::~AsyncTracker()
     {
-        FinishAsyncTrace(DEFAULT_TAG, title_, taskId_);
+        FinishAsyncTrace(DEFAULT_HITRACE_TAG, title_, taskId_);
     }
 }
 }
