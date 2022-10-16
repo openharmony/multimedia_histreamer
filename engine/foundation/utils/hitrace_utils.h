@@ -22,7 +22,7 @@
 #define DEFAULT_HITRACE_TASK_ID 1
 #define DEFAULT_HITRACE_PREFIX "HiStreamer::"
 #define BUILD_TRACE_TITLE() ((DEFAULT_HITRACE_PREFIX) + (std::string(__FUNCTION__)))
-#define WRAP_TITLE_PREFIX(title) ((DEFAULT_HITRACE_PREFIX) + (std::string(__FUNCTION__)) + " : " + title)
+#define WRAP_TITLE_PREFIX(title) ((DEFAULT_HITRACE_PREFIX) + (std::string(__FUNCTION__)) + " : " + (title))
 #define SYNC_TRACER() SyncTracker __syncTracker(BUILD_TRACE_TITLE())
 #define SYNC_TRACE_START(title) StartTrace(DEFAULT_HITRACE_TAG, WRAP_TITLE_PREFIX(title), DEFAULT_HITRACE_LIMIT)
 #define SYNC_TRACE_END() FinishTrace(DEFAULT_HITRACE_TAG)
