@@ -47,5 +47,5 @@ namespace Media {
     };
 }
 }
-#endif
+
 #endif // HISTREAMER_HITRACE_UTILS_H
