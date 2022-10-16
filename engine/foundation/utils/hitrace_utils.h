@@ -20,11 +20,13 @@
 #define DEFAULT_HITRACE_LIMIT -1
 #define DEFAULT_HITRACE_TAG HITRACE_TAG_ZMEDIA
 #define DEFAULT_HITRACE_TASK_ID 1
-#define __FUNC_TITLE(title) std::string(__FUNCTION__) + " : " + title
-#define SYNC_TRACER() SyncTracker __syncTracker(__FUNCTION__)
+#define DEFAULT_HITRACE_PREFIX "HiStreamer::"
+#define __BUILD_TITLE() DEFAULT_HITRACE_PREFIX + std::string(__FUNCTION__)
+#define __FUNC_TITLE(title) DEFAULT_HITRACE_PREFIX + std::string(__FUNCTION__) + " : " + title
+#define SYNC_TRACER() SyncTracker __syncTracker(__BUILD_TITLE())
 #define SYNC_TRACE_START(title) StartTrace(DEFAULT_HITRACE_TAG, __FUNC_TITLE(title), DEFAULT_HITRACE_LIMIT)
 #define SYNC_TRACE_END() FinishTrace(DEFAULT_HITRACE_TAG)
-#define ASYNC_TRACER() AsyncTracker __asyncTracker(__FUNCTION__, DEFAULT_HITRACE_TASK_ID)
+#define ASYNC_TRACER() AsyncTracker __asyncTracker(__BUILD_TITLE(), DEFAULT_HITRACE_TASK_ID)
 #define ASYNC_TRACE_START(title, taskId) StartAsyncTrace(DEFAULT_HITRACE_TAG, __FUNC_TITLE(title), taskId, DEFAULT_HITRACE_LIMIT)
 #define ASYNC_TRACE_END(title, taskId) FinishAsyncTrace(__FUNC_TITLE(title), taskId, DEFAULT_HITRACE_TAG)
 #define COUNT_TRACE(title, count) CountTrace(DEFAULT_HITRACE_TAG, __FUNC_TITLE(title), count);
