@@ -17,25 +17,26 @@
 #define HISTREAMER_HITRACE_UTILS_H
 #include "hitrace_meter.h"
 
-#define DEFAULT_HITRACE_LIMIT -1
+#define DEFAULT_HITRACE_LIMIT (-1)
 #define DEFAULT_HITRACE_TAG HITRACE_TAG_ZMEDIA
 #define DEFAULT_HITRACE_TASK_ID 1
 #define DEFAULT_HITRACE_PREFIX "HiStreamer::"
-#define __BUILD_TITLE() DEFAULT_HITRACE_PREFIX + std::string(__FUNCTION__)
-#define __WRAP_PREFIX(title) DEFAULT_HITRACE_PREFIX + std::string(__FUNCTION__) + " : " + title
-#define SYNC_TRACER() SyncTracker __syncTracker(__BUILD_TITLE())
-#define SYNC_TRACE_START(title) StartTrace(DEFAULT_HITRACE_TAG, __WRAP_PREFIX(title), DEFAULT_HITRACE_LIMIT)
+#define BUILD_TRACE_TITLE() ((DEFAULT_HITRACE_PREFIX) + (std::string(__FUNCTION__)))
+#define WRAP_TITLE_PREFIX(title) ((DEFAULT_HITRACE_PREFIX) + (std::string(__FUNCTION__)) + " : " + title)
+#define SYNC_TRACER() SyncTracker __syncTracker(BUILD_TRACE_TITLE())
+#define SYNC_TRACE_START(title) StartTrace(DEFAULT_HITRACE_TAG, WRAP_TITLE_PREFIX(title), DEFAULT_HITRACE_LIMIT)
 #define SYNC_TRACE_END() FinishTrace(DEFAULT_HITRACE_TAG)
-#define ASYNC_TRACER() AsyncTracker __asyncTracker(__BUILD_TITLE(), DEFAULT_HITRACE_TASK_ID)
-#define ASYNC_TRACE_START(title, taskId) StartAsyncTrace(DEFAULT_HITRACE_TAG, __WRAP_PREFIX(title), taskId, DEFAULT_HITRACE_LIMIT)
-#define ASYNC_TRACE_END(title, taskId) FinishAsyncTrace(__WRAP_PREFIX(title), taskId, DEFAULT_HITRACE_TAG)
-#define COUNT_TRACE(title, count) CountTrace(DEFAULT_HITRACE_TAG, __WRAP_PREFIX(title), count);
+#define ASYNC_TRACER() AsyncTracker __asyncTracker(BUILD_TRACE_TITLE(), DEFAULT_HITRACE_TASK_ID)
+#define ASYNC_TRACE_START(title, taskId) \
+StartAsyncTrace(DEFAULT_HITRACE_TAG, WRAP_TITLE_PREFIX(title), taskId, DEFAULT_HITRACE_LIMIT)
+#define ASYNC_TRACE_END(title, taskId) FinishAsyncTrace(WRAP_TITLE_PREFIX(title), taskId, DEFAULT_HITRACE_TAG)
+#define COUNT_TRACE(title, count) CountTrace(DEFAULT_HITRACE_TAG, WRAP_TITLE_PREFIX(title), count)
 
 namespace OHOS {
 namespace Media {
     class SyncTracker {
     public:
-        SyncTracker(const std::string &title);
+        explicit SyncTracker(const std::string &title);
         ~SyncTracker();
     };
 
