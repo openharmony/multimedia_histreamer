@@ -72,8 +72,8 @@ source_set("histreamer_foundation") {
   }
 
   if (defined(config_ohos_multimedia_histreamer_stack_size) &&
-  config_ohos_multimedia_histreamer_stack_size > 0) {
+      config_ohos_multimedia_histreamer_stack_size > 0) {
     defines =
-    [ "THREAD_STACK_SIZE=$config_ohos_multimedia_histreamer_stack_size" ]
+        [ "THREAD_STACK_SIZE=$config_ohos_multimedia_histreamer_stack_size" ]
   }
 }
