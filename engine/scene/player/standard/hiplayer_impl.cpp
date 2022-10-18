@@ -660,7 +660,7 @@ ErrorCode HiPlayerImpl::SetVolumeToSink(float volume, bool reportUpward)
 {
     MEDIA_LOG_I("SetVolumeToSink entered.");
     ErrorCode ret = ErrorCode::SUCCESS;
-    if (volume_ > 0) {
+    if (volume_ >= 0) {
         MEDIA_LOG_I("set volume " PUBLIC_LOG_F, volume);
         ret = audioSink_->SetVolume(volume);
     }
