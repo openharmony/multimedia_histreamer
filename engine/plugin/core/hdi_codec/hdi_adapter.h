@@ -115,7 +115,7 @@ private:
     bool FillAllTheOutBuffer();
     void TransOutputBufToOmxBuf(const std::shared_ptr<Plugin::Buffer>& outputBuffer,
                                 std::shared_ptr<OmxCodecBuffer>& omxBuffer);
-    void FreeBuffers();
+    Status FreeBuffers();
     // HDI callback
     static int32_t EventHandler(CodecCallbackType* self, OMX_EVENTTYPE event, EventInfo* info);
     static int32_t EmptyBufferDone(CodecCallbackType* self, int64_t appData, const OmxCodecBuffer* buffer);
@@ -126,7 +126,6 @@ private:
     Status ChangeState(OMX_STATETYPE state);
     void HandelCmdCompleteEvent(OMX_U32 data1, OMX_U32 data2);
     void HandelEventStateSet(OMX_U32 data);
-    Status DoReset();
 
     OSAL::Mutex mutex_;
     OSAL::ConditionVariable cond_;
