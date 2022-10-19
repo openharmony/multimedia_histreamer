@@ -15,10 +15,7 @@
 
 #ifndef HISTREAMER_HITRACE_UTILS_H
 #define HISTREAMER_HITRACE_UTILS_H
-#include "hitrace_meter.h"
 
-#define DEFAULT_HITRACE_LIMIT (-1)
-#define DEFAULT_HITRACE_TAG HITRACE_TAG_ZMEDIA
 #ifdef OHOS_LITE
 #define SYNC_TRACER()
 #define SYNC_TRACE_START(title)
@@ -28,6 +25,9 @@
 #define ASYNC_TRACE_END(title, taskId)
 #define COUNT_TRACE(title, count)
 #else
+#include "hitrace_meter.h"
+#define DEFAULT_HITRACE_LIMIT (-1)
+#define DEFAULT_HITRACE_TAG HITRACE_TAG_ZMEDIA
 #define DEFAULT_HITRACE_TASK_ID 1
 #define DEFAULT_HITRACE_PREFIX "HiStreamer::"
 #define BUILD_TRACE_TITLE() ((DEFAULT_HITRACE_PREFIX) + (std::string(__FUNCTION__)))

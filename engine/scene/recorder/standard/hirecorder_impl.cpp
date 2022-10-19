@@ -16,7 +16,6 @@
 #define HST_LOG_TAG "HiRecorderImpl"
 
 #include "hirecorder_impl.h"
-#include "hitrace_meter.h"
 #include <regex>
 #include "utils/hitrace_utils.h"
 #include "foundation/osal/filesystem/file_system.h"
