@@ -133,6 +133,7 @@ private:
     bool eventDone_ = false;
 
     OSAL::Mutex lockInputBuffers_;
+    OSAL::Mutex lockFlushing_;
 
 private:
     struct CodecComponentType* codecComp_ {nullptr};
@@ -160,6 +161,8 @@ private:
     uint32_t outBufferSize_;
     uint32_t outBufferCnt_;
     std::shared_ptr<ShareAllocator> shaAlloc_ {nullptr};
+
+    bool isFlushing_ {false};
 };
 } // namespace Plugin
 } // namespace Media
