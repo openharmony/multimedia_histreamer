@@ -21,7 +21,6 @@
 #include "foundation/log.h"
 #include "osal/thread/scoped_lock.h"
 #include "utils/steady_clock.h"
-#include "utils/hitrace_utils.h"
 
 namespace OHOS {
 namespace Media {
@@ -169,7 +168,6 @@ ErrorCode PipelineCore::Stop()
 
 void PipelineCore::FlushStart()
 {
-    SYNC_TRACER();
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
         MEDIA_LOG_I("FlushStart for filter: " PUBLIC_LOG_S, (*it)->GetName().c_str());
         (*it)->FlushStart();
@@ -178,7 +176,6 @@ void PipelineCore::FlushStart()
 
 void PipelineCore::FlushEnd()
 {
-    SYNC_TRACER();
     for (auto it = filters_.rbegin(); it != filters_.rend(); ++it) {
         MEDIA_LOG_I("FlushEnd for filter: " PUBLIC_LOG_S, (*it)->GetName().c_str());
         (*it)->FlushEnd();

@@ -32,7 +32,6 @@ config("histreamer_foundation_config") {
 }
 
 source_set("histreamer_foundation") {
-  include_dirs = [ "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
   sources = [
     "osal/filesystem/file_system.cpp",
     "osal/thread/condition_variable.cpp",
@@ -43,7 +42,6 @@ source_set("histreamer_foundation") {
     "osal/utils/util.cpp",
     "utils/constants.cpp",
     "utils/dump_buffer.cpp",
-    "utils/hitrace_utils.cpp",
     "utils/steady_clock.cpp",
   ]
   public_configs = [
@@ -61,10 +59,7 @@ source_set("histreamer_foundation") {
       public_deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
     }
   } else {
-    deps = [
-      "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
-      "//base/hiviewdfx/hitrace/interfaces/native/innerkits:hitrace_meter",
-    ]
+    deps = [ "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog" ]
     public_deps += [
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
       "//third_party/bounds_checking_function:libsec_static",

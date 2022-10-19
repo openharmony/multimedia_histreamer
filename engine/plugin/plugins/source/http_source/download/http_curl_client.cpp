@@ -20,7 +20,6 @@
 #include <vector>
 #include "foundation/log.h"
 #include "securec.h"
-#include "hitrace_utils.h"
 
 #ifndef CA_DIR
 #define CA_DIR "/etc/ssl/certs/"
@@ -118,7 +117,6 @@ std::string HttpCurlClient::UrlParse(const std::string& url) const
 Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCode& serverCode,
                                    NetworkClientErrorCode& clientCode)
 {
-    SYNC_TRACER();
     FALSE_RETURN_V(easyHandle_ != nullptr, Status::ERROR_NULL_POINTER);
     if (startPos >= 0) {
         char requestRange[128] = {0};
