@@ -245,9 +245,6 @@ HdiAdapter::~HdiAdapter()
         CodecCallbackTypeStubRelease(codecCallback_);
         codecCallback_ = nullptr;
     }
-    if (shaAlloc_) {
-        shaAlloc_ = nullptr;
-    }
 }
 
 Status HdiAdapter::Init()
@@ -279,7 +276,6 @@ Status HdiAdapter::Init()
     ret = codecComp_->GetComponentVersion(codecComp_, &verInfo_);
     FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, Status::ERROR_INVALID_DATA,
                          "get component version failed, ret: " PUBLIC_LOG_D32, ret);
-    outBufQue_.SetActive(true);
     MEDIA_LOG_D("codec adapter init end, componentId_ = " PUBLIC_LOG_D32, componentId_);
     return Status::OK;
 }
@@ -287,26 +283,43 @@ Status HdiAdapter::Init()
 Status HdiAdapter::Deinit()
 {
     MEDIA_LOG_D("HdiAdapter DeInit Enter");
-    (void)DoReset();
+    FALSE_RETURN_V_MSG_E(Reset() == Status::OK, Status::ERROR_INVALID_DATA, "Reset value failed");
     auto ret = compManager_->DestroyComponent(componentId_);
-    FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, Status::ERROR_INVALID_OPERATION, "HDI destroy component failed");
-    CodecComponentTypeRelease(codecComp_);
-    CodecComponentManagerRelease();
-    CodecCallbackTypeStubRelease(codecCallback_);
+    FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, Status::ERROR_INVALID_OPERATION,
+                         "HDI destroy component failed, ret = " PUBLIC_LOG_S, HdfStatus2String(ret).c_str());
+    if (codecComp_) {
+        CodecComponentTypeRelease(codecComp_);
+        codecComp_ = nullptr;
+    }
+    if (codecCallback_) {
+        CodecCallbackTypeStubRelease(codecCallback_);
+        codecCallback_ = nullptr;
+    }
+    if (compManager_) {
+        CodecComponentManagerRelease();
+        compManager_ = nullptr;
+    }
     MEDIA_LOG_D("HdiAdapter DeInit End;");
     return  Status::OK;
 }
 
-Status HdiAdapter::DoReset()
+Status HdiAdapter::Prepare()
 {
-    (void)codecComp_->SendCommand(codecComp_, OMX_CommandStateSet, OMX_StateIdle, NULL, 0);
-    FreeBuffers();
-    codecComp_ = nullptr;
-    curState_ = OMX_StateInvalid;
+    outBufQue_.SetActive(true);
+    InitOmxBuffers(); // 申请 omx buffer
+    MEDIA_LOG_D("prepare end");
+    return Status::OK;
+}
+
+Status HdiAdapter::Reset()
+{
+    auto ret = codecComp_->SendCommand(codecComp_, OMX_CommandStateSet, OMX_StateIdle, nullptr, 0);
+    FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, TransHdiRetVal2Status(ret), "Change omx state to Idle failed");
+    auto val = FreeBuffers();
+    FALSE_RETURN_V_MSG_E(val == Status::OK, val, "free buffers failed");
     outBufQue_.SetActive(false);
     outBufQue_.Clear();
     inBufQue_.clear();
-    codecCallback_ = nullptr;
     width_ = 0;
     height_ = 0;
     stride_ = 0;
@@ -314,28 +327,17 @@ Status HdiAdapter::DoReset()
     inBufferCnt_ = 0;
     outBufferSize_= 0;
     outBufferCnt_ = 0;
+    curState_ = OMX_StateInvalid;
     return Status::OK;
-}
-
-Status HdiAdapter::Prepare()
-{
-    int32_t ret = HDF_SUCCESS;
-    outBufQue_.SetActive(true);
-    InitOmxBuffers(); // 申请 omx buffer
-    MEDIA_LOG_D("prepare end");
-    return TranslateRets(ret);
-}
-
-Status HdiAdapter::Reset()
-{
-    return DoReset();
 }
 
 Status HdiAdapter::Start()
 {
     MEDIA_LOG_D("start begin");
-    ChangeState(OMX_StateExecuting);
-    WaitForState(OMX_StateExecuting);
+    FALSE_RETURN_V_MSG_E(ChangeState(OMX_StateExecuting) == Status::OK, Status::ERROR_WRONG_STATE,
+                         "Change omx state to executing failed");
+    FALSE_RETURN_V_MSG_E(WaitForState(OMX_StateExecuting) == Status::OK, Status::ERROR_WRONG_STATE,
+                         "Wait omx state to executing failed");
     if (!FillAllTheOutBuffer()) {
         MEDIA_LOG_E("Fill all buffer error");
         return Status::ERROR_UNKNOWN;
@@ -349,10 +351,7 @@ Status HdiAdapter::Start()
 Status HdiAdapter::Stop()
 {
     MEDIA_LOG_D("HdiAdapter Stop Enter");
-    (void)DoReset();
-    auto ret = compManager_->DestroyComponent(componentId_);
-    FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, Status::ERROR_INVALID_OPERATION,
-                         "HDI destroy component failed, ret = " PUBLIC_LOG_S, HdfStatus2String(ret).c_str());
+    outBufQue_.SetActive(false);
     MEDIA_LOG_D("HdiAdapter Stop End");
     return Status::OK;
 }
@@ -396,7 +395,7 @@ Status HdiAdapter::SetParameter(Plugin::Tag tag, const ValueType& value)
             break;
     }
     if (width_ != 0 && height_ != 0 && pixelFormat_ != VideoPixelFormat::UNKNOWN) {
-        (void)ConfigOmx();
+        FALSE_RETURN_V_MSG_E(ConfigOmx() == Status::OK, Status::ERROR_INVALID_OPERATION, "Configure omx failed");
     }
     MEDIA_LOG_D("SetParameter end");
     return Status::OK;
@@ -505,8 +504,9 @@ bool HdiAdapter::FillAllTheOutBuffer()
             int32_t ret = HDF_SUCCESS;
             if (codecComp_ && codecComp_->FillThisBuffer) {
                 ret = codecComp_->FillThisBuffer(codecComp_, omxBuffer.get());
-                FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, false,
-                                     "call FillThisBuffer() error, bufferId: " PUBLIC_LOG_U32, omxBuffer->bufferId);
+                FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, false, "call FillThisBuffer() error, bufferId: "
+                    PUBLIC_LOG_U32 ", ret: " PUBLIC_LOG_S ", isFirstCall: " PUBLIC_LOG_D32, omxBuffer->bufferId,
+                    HdfStatus2String(ret).c_str(), isFirstCall_);
             }
         }
     } else {
@@ -532,8 +532,9 @@ bool HdiAdapter::FillAllTheOutBuffer()
             int32_t ret = HDF_SUCCESS;
             if (codecComp_ && codecComp_->FillThisBuffer) {
                 ret = codecComp_->FillThisBuffer(codecComp_, omxBuffer.get());
-                FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, false,
-                                     "call FillThisBuffer() error, bufferId: " PUBLIC_LOG_U32, omxBuffer->bufferId);
+                FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, false, "call FillThisBuffer() error, bufferId: "
+                    PUBLIC_LOG_U32 ", ret: " PUBLIC_LOG_S ", isFirstCall: " PUBLIC_LOG_D32, omxBuffer->bufferId,
+                    HdfStatus2String(ret).c_str(), isFirstCall_);
             }
         }
     }
@@ -555,14 +556,14 @@ Status HdiAdapter::QueueOutputBuffer(const std::shared_ptr<Plugin::Buffer>& outp
 Status HdiAdapter::Flush()
 {
     MEDIA_LOG_D("HdiAdapter Flush begin");
-    ChangeState(OMX_StatePause);
+    FALSE_RETURN_V_MSG_E(ChangeState(OMX_StatePause) == Status::OK, Status::ERROR_WRONG_STATE,
+                         "Change hdi state to pause failed");
     {
         OSAL::ScopedLock l(lockInputBuffers_);
         inBufQue_.clear();
     }
     outBufQue_.Clear();
-    codecComp_->SendCommand(codecComp_, OMX_CommandFlush, (uint32_t)PortIndex::PORT_INDEX_INPUT, NULL, 0);
-    codecComp_->SendCommand(codecComp_, OMX_CommandFlush, (uint32_t)PortIndex::PORT_INDEX_OUTPUT, NULL, 0);
+    codecComp_->SendCommand(codecComp_, OMX_CommandFlush, -1, nullptr, 0); // -1: Refresh input and output ports
     MEDIA_LOG_D("HdiAdapter Flush end");
     return Status::OK;
 }
@@ -604,8 +605,8 @@ Status HdiAdapter::ConfigOmx()
     ret = ConfigOmxPortDefine(PortIndex::PORT_INDEX_OUTPUT);
     FALSE_RETURN_V_MSG(ret == Status::OK, ret, "ConfigOmxPortDefine of OUTPUT failed, retVal = " PUBLIC_LOG_D32, ret);
 
-    (void)GetBufferInfoOnPort(PortIndex::PORT_INDEX_INPUT, inBufferCnt_, inBufferSize_);
-    (void)GetBufferInfoOnPort(PortIndex::PORT_INDEX_OUTPUT, outBufferCnt_, outBufferSize_);
+    GetBufferInfoOnPort(PortIndex::PORT_INDEX_INPUT, inBufferCnt_, inBufferSize_);
+    GetBufferInfoOnPort(PortIndex::PORT_INDEX_OUTPUT, outBufferCnt_, outBufferSize_);
     MEDIA_LOG_D("ConfigOmx end");
     return ret;
 }
@@ -622,7 +623,8 @@ Status HdiAdapter::ConfigOmxPortDefine(PortIndex portIndex)
 
     // Get other default value, cause InitOmxParam set value = 0
     ret = codecComp_->GetParameter(codecComp_, OMX_IndexParamPortDefinition, (int8_t*) &portDef, sizeof(portDef));
-    FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, TranslateRets(ret), "GetParameter failed, retVal = " PUBLIC_LOG_D32, ret);
+    FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, TransHdiRetVal2Status(ret),
+                       "GetParameter failed, retVal = " PUBLIC_LOG_D32, ret);
     MEDIA_LOG_I("eCompressionFormat = " PUBLIC_LOG_D32 ", eColorFormat = " PUBLIC_LOG_D32,
                 portDef.format.video.eCompressionFormat, portDef.format.video.eColorFormat);
     if (portIndex == PortIndex::PORT_INDEX_INPUT) {
@@ -642,9 +644,10 @@ Status HdiAdapter::ConfigOmxPortDefine(PortIndex portIndex)
     portDef.format.video.nStride = stride_;
     portDef.format.video.nSliceHeight = height_;
     ret = codecComp_->SetParameter(codecComp_, OMX_IndexParamPortDefinition, (int8_t*) &portDef, sizeof(portDef));
-    FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, TranslateRets(ret), "SetParameter failed, ret = " PUBLIC_LOG_D32, ret);
+    FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, TransHdiRetVal2Status(ret),
+                       "SetParameter failed, ret = " PUBLIC_LOG_D32, ret);
     MEDIA_LOG_D("ConfigOmxPortDefine end");
-    return TranslateRets(ret);
+    return TransHdiRetVal2Status(ret);
 }
 
 Status HdiAdapter::ConfigInPortVideoFormat()
@@ -656,7 +659,7 @@ Status HdiAdapter::ConfigInPortVideoFormat()
     videoFormat.nPortIndex = (uint32_t)PortIndex::PORT_INDEX_INPUT;
     ret = codecComp_->GetParameter(codecComp_, OMX_IndexParamVideoPortFormat,
                                    (int8_t *)&videoFormat, sizeof(videoFormat));
-    FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, TranslateRets(ret),
+    FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, TransHdiRetVal2Status(ret),
                        "GetParameter OMX_IndexParamVideoPortFormat failed, ret = " PUBLIC_LOG_D32, ret);
     MEDIA_LOG_D("set Format PORT_INDEX_INPUT eCompressionFormat = " PUBLIC_LOG_D32 ", eColorFormat = " PUBLIC_LOG_D32,
                 videoFormat.eCompressionFormat, videoFormat.eColorFormat);
@@ -673,7 +676,7 @@ Status HdiAdapter::ConfigInPortVideoFormat()
     ret = codecComp_->SetParameter(codecComp_, OMX_IndexParamVideoPortFormat,
                                    (int8_t *)&videoFormat, sizeof(videoFormat));
     FALSE_LOG_MSG(ret == HDF_SUCCESS, "SetParameter OMX_IndexParamVideoPortFormat failed, ret = " PUBLIC_LOG_D32, ret);
-    return TranslateRets(ret);
+    return TransHdiRetVal2Status(ret);
 }
 
 Status HdiAdapter::ConfigOutPortBufType()
@@ -687,7 +690,7 @@ Status HdiAdapter::ConfigOutPortBufType()
     FALSE_LOG_MSG(ret == HDF_SUCCESS, "PORT_INDEX_OUTPUT, bufferTypes: " PUBLIC_LOG_D32 ", ret: " PUBLIC_LOG_S,
                   type.bufferType, HdfStatus2String(ret).c_str());
     MEDIA_LOG_D("ConfigOutPortBufType end");
-    return TranslateRets(ret);
+    return TransHdiRetVal2Status(ret);
 }
 
 // 将状态改为Idle, 并根据buffer大小和个数 初始化HDI组件的输入输出 buffer
@@ -725,8 +728,8 @@ void HdiAdapter::GetBufferInfoOnPort(PortIndex portIndex, uint32_t& bufCount, ui
 
     bufSize = param.nBufferSize;
     bufCount = param.nBufferCountActual;
-    MEDIA_LOG_D("PortIndex: " PUBLIC_LOG_S ", bufferCnt_: " PUBLIC_LOG_D32 ", bufferSize_: " PUBLIC_LOG_D32,
-                PortIndex2String(portIndex).c_str(), outBufferCnt_, outBufferSize_);
+    MEDIA_LOG_D("PortIndex: " PUBLIC_LOG_S ", bufCnt: " PUBLIC_LOG_D32 ", bufSize: " PUBLIC_LOG_D32,
+                PortIndex2String(portIndex).c_str(), bufCount, bufSize);
 
     portEnable = param.bEnabled;
     MEDIA_LOG_D("portEnable: " PUBLIC_LOG_D8, portEnable);
@@ -810,15 +813,18 @@ std::shared_ptr<OmxCodecBuffer> HdiAdapter::InitOmxBuffer(std::shared_ptr<ShareM
     return omxBuffer;
 }
 
-void HdiAdapter::FreeBuffers()
+Status HdiAdapter::FreeBuffers()
 {
-    ChangeState(OMX_StateLoaded);
+    FALSE_RETURN_V_MSG_E(ChangeState(OMX_StateLoaded) == Status::OK, Status::ERROR_WRONG_STATE,
+                         "Change omx state to loaded failed");
     auto iter = bufferInfoMap_.begin();
     while (iter != bufferInfoMap_.end()) {
         auto bufferInfo = iter->second;
         bufferInfo->omxBuffer->bufferLen = 0;
         iter = bufferInfoMap_.erase(iter);
-        (void)codecComp_->FreeBuffer(codecComp_, (uint32_t)bufferInfo->portIndex, bufferInfo->omxBuffer.get());
+        auto ret = codecComp_->FreeBuffer(codecComp_, (uint32_t)bufferInfo->portIndex, bufferInfo->omxBuffer.get());
+        FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, TransHdiRetVal2Status(ret),
+                             "codec component free buffer failed, omxBufId: " PUBLIC_LOG_U32, iter->first);
     }
     freeOutBufferId_.Clear();
     freeInBufferId_.Clear();
@@ -826,9 +832,10 @@ void HdiAdapter::FreeBuffers()
     auto err = codecComp_->GetState(codecComp_, &status);
     FALSE_LOG_MSG_W(err == HDF_SUCCESS, "codeComp get status failed");
     if (status != OMX_StateLoaded) {
-        MEDIA_LOG_I("Wait for OMX_StateLoaded status");
-        WaitForState(OMX_StateLoaded);
+        FALSE_RETURN_V_MSG_E(WaitForState(OMX_StateLoaded) == Status::OK, Status::ERROR_WRONG_STATE,
+                             "Wait omx state to loaded failed");
     }
+    return Status::OK;
 }
 
 void HdiAdapter::WaitForEvent(OMX_U32 cmd)
@@ -879,9 +886,12 @@ void HdiAdapter::HandelCmdCompleteEvent(OMX_U32 data1, OMX_U32 data2)
         case OMX_CommandStateSet:
             HandelEventStateSet(data2);
             break;
-        case OMX_CommandFlush:
-            ChangeState(OMX_StateExecuting);
+        case OMX_CommandFlush: {
+            auto ret = ChangeState(OMX_StateExecuting);
+            FALSE_LOG_MSG(ret == Status::OK,
+                          "Flush cmd callback, change hdi state to exe failed, ret: " PUBLIC_LOG_D32, ret);
             break;
+        }
         default:
             break;
     }

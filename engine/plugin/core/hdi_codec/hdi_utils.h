@@ -32,7 +32,7 @@ std::string PortIndex2String(PortIndex portIndex);
 template<typename T, typename U>
 bool TranslatesByMap(const T& t, U& u, const std::pair<T, U>* transMap, size_t mapSize);
 
-Status TranslateRets(const int32_t& ret);
+Status TransHdiRetVal2Status(const int32_t& ret);
 
 /**
  * translate type T into type U

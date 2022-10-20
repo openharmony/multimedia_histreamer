@@ -151,7 +151,7 @@ bool TranslatesByMap(const T& t, U& u, const std::pair<T, U>* transMap, size_t m
     return false;
 }
 
-Status TranslateRets(const int32_t& ret)
+Status TransHdiRetVal2Status(const int32_t& ret)
 {
     Status status = Status::ERROR_UNKNOWN;
     TranslatesByMap(ret, status, retStatusMap, sizeof(retStatusMap) / sizeof(retStatusMap[0]));
