@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define MEDIA_LOG_DEBUG_DETAIL 1
+#define MEDIA_LOG_DEBUG_DETAIL 0
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
 #define HST_LOG_TAG "HdiAdapter"
@@ -182,11 +182,8 @@ int32_t HdiAdapter::EmptyBufferDone(CodecCallbackType* self, int64_t appData, co
     MEDIA_LOG_DD("EmptyBufferDone-callback begin, bufferId: " PUBLIC_LOG_U32, buffer->bufferId);
     auto hdiAdapter = reinterpret_cast<HdiAdapter*>(appData);
     hdiAdapter->freeInBufferId_.Push(buffer->bufferId);
-    {
-        OSAL::ScopedLock lock(hdiAdapter->lockFlushing_);
-        if (!hdiAdapter->isFlushing_) {
-            hdiAdapter->HandleFrame();
-        }
+    if (!hdiAdapter->isFlushing_) {
+        hdiAdapter->HandleFrame();
     }
     MEDIA_LOG_D("EmptyBufferDone-callback end, free in bufferId count: " PUBLIC_LOG_ZU,
                 hdiAdapter->freeInBufferId_.Size());
@@ -205,19 +202,17 @@ int32_t HdiAdapter::FillBufferDone(CodecCallbackType* self, int64_t appData, con
         return HDF_ERR_INVALID_PARAM;
     }
     auto bufferInfo = iter->second;
-    {
-        OSAL::ScopedLock lock(hdiAdapter->lockFlushing_);
-        if (hdiAdapter->isFlushing_) {
-            MEDIA_LOG_I("hdi adapter is flushing, ignore this data");
-            bufferInfo->outputBuffer = nullptr;
-            return HDF_SUCCESS;
-        }
-    }
     auto outputBuffer = bufferInfo->outputBuffer;
+    bufferInfo->outputBuffer = nullptr; // Need: to release output buffer, Decrease the reference count
+    if (hdiAdapter->isFlushing_) {
+        MEDIA_LOG_DD("hdi adapter is flushing, ignore this data");
+        outputBuffer = nullptr;
+        return HDF_SUCCESS;
+    }
     outputBuffer->flag = Translate2PluginFlagSet(omxBuffer->flag);
     outputBuffer->pts = omxBuffer->pts;
     hdiAdapter->NotifyOutputBufferDone(outputBuffer);
-    bufferInfo->outputBuffer = nullptr; // Need: to release output buffer, Decrease the reference count
+
     (void) hdiAdapter->FillAllTheOutBuffer(); // call FillThisBuffer() again
     MEDIA_LOG_D("FillBufferDone-callback end, free out bufferId count: " PUBLIC_LOG_ZU,
                 hdiAdapter->freeOutBufferId_.Size());
@@ -437,7 +432,6 @@ Status HdiAdapter::QueueInputBuffer(const std::shared_ptr<Plugin::Buffer>& input
         inBufQue_.push_back(inputBuffer);
         MEDIA_LOG_D("QueueInputBuffer end, inBufQue_.size: " PUBLIC_LOG_ZU, inBufQue_.size());
     }
-    OSAL::ScopedLock lock(lockFlushing_);
     if (isFlushing_) {
         MEDIA_LOG_I("HdiAdapter is flushing, do not process in data temporarily");
         return Status::OK;
@@ -563,12 +557,9 @@ bool HdiAdapter::FillAllTheOutBuffer()
 Status HdiAdapter::QueueOutputBuffer(const std::shared_ptr<Plugin::Buffer>& outputBuffers, int32_t timeoutMs)
 {
     outBufQue_.Push(outputBuffers);
-    {
-        OSAL::ScopedLock lock(lockFlushing_);
-        if (isFlushing_) {
-            MEDIA_LOG_I("HdiAdapter is flushing, do not process out data temporarily");
-            return Status::OK;
-        }
+    if (isFlushing_) {
+        MEDIA_LOG_I("HdiAdapter is flushing, do not process out data temporarily");
+        return Status::OK;
     }
     if (curState_ == OMX_StateExecuting) {
         FillAllTheOutBuffer();
@@ -580,15 +571,11 @@ Status HdiAdapter::QueueOutputBuffer(const std::shared_ptr<Plugin::Buffer>& outp
 Status HdiAdapter::Flush()
 {
     MEDIA_LOG_D("HdiAdapter Flush begin");
-    {
-        OSAL::ScopedLock lock(lockFlushing_);
-        isFlushing_ = true;
-    }
+    isFlushing_ = true;
     {
         OSAL::ScopedLock l(lockInputBuffers_);
         inBufQue_.clear();
     }
-//    outBufQue_.Clear();
     // -1: Refresh input and output ports
     auto ret = codecComp_->SendCommand(codecComp_, OMX_CommandFlush, -1, nullptr, 0);
     FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, TransHdiRetVal2Status(ret), "Flush in/out port failed, ret: " PUBLIC_LOG_S,
@@ -596,28 +583,6 @@ Status HdiAdapter::Flush()
     MEDIA_LOG_D("HdiAdapter Flush end");
     return Status::OK;
 }
-
-/*Status HdiAdapter::Flush()
-{
-    MEDIA_LOG_D("HdiAdapter Flush begin");
-    {
-        OSAL::ScopedLock lock(lockFlushing_); // 这个地方和hdi的回调不构成冲突，然后，该函数需要wait，等待回调执行完成，该函数才能返回
-        isFlushing_ = true;
-    }
-    {
-        OSAL::ScopedLock l(lockInputBuffers_);
-        inBufQue_.clear();
-    }
-    // -1: Refresh input and output ports
-    auto ret = codecComp_->SendCommand(codecComp_, OMX_CommandFlush, -1, nullptr, 0);
-    FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, TransHdiRetVal2Status(ret), "Flush in/out port failed, ret: " PUBLIC_LOG_S,
-                         HdfStatus2String(ret).c_str());
-    flushCond_.Wait(lock, [this]() {
-        return !isFlushing_;
-    });
-    MEDIA_LOG_D("HdiAdapter Flush end");
-    return Status::OK;
-}*/
 
 Status HdiAdapter::SetDataCallback(DataCallback* dataCallback)
 {
@@ -940,7 +905,6 @@ void HdiAdapter::HandelCmdCompleteEvent(OMX_U32 data1, OMX_U32 data2)
         case OMX_CommandFlush:
             MEDIA_LOG_I("OMX_CommandFlush, data1: " PUBLIC_LOG_U32 ", data2: " PUBLIC_LOG_U32, data1, data2);
             if (data2 == static_cast<uint32_t>(PortIndex::PORT_INDEX_OUTPUT)) {
-                OSAL::ScopedLock lock(lockFlushing_);
                 isFlushing_ = false;
             }
             break;

@@ -133,7 +133,6 @@ private:
     bool eventDone_ = false;
 
     OSAL::Mutex lockInputBuffers_;
-    OSAL::Mutex lockFlushing_;
 
 private:
     struct CodecComponentType* codecComp_ {nullptr};
