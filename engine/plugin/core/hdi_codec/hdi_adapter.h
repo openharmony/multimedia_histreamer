@@ -162,6 +162,8 @@ private:
     std::shared_ptr<ShareAllocator> shaAlloc_ {nullptr};
 
     bool isFlushing_ {false};
+    OSAL::Mutex lockFlush_;
+    OSAL::ConditionVariable flushCond_;
 };
 } // namespace Plugin
 } // namespace Media
