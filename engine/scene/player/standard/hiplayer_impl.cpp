@@ -289,18 +289,12 @@ int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
     auto smode = Transform2SeekMode(mode);
     lastSeekPosition_.store(hstTime);
     lastSeekMode_.store(smode);
-    if (!seekInProgress_.load()) {
-        seekInProgress_.store(true);
-        auto ret = fsm_.SendEvent(Intent::SEEK, SeekInfo{hstTime, smode});
-        if (ret != ErrorCode::SUCCESS) {
-            seekInProgress_.store(false);
-        }
-        return TransErrorCode(ret);
-    } else {
-        MEDIA_LOG_D("Seek in progress. Record the seek request [" PUBLIC_LOG_D64 "," PUBLIC_LOG_D32 "]",
-                    hstTime, static_cast<int32_t>(smode));
-        return MSERR_OK;
+    seekInProgress_.store(true);
+    auto ret = fsm_.SendEvent(Intent::SEEK, SeekInfo{hstTime, smode});
+    if (ret != ErrorCode::SUCCESS) {
+        seekInProgress_.store(false);
     }
+    return TransErrorCode(ret);
 }
 
 int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
