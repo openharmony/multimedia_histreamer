@@ -35,11 +35,6 @@ const std::pair<ErrorCode, int32_t> g_errorCodePair[] = {
     {ErrorCode::ERROR_NO_MEMORY, MSERR_EXT_NO_MEMORY},
     {ErrorCode::ERROR_INVALID_STATE, MSERR_INVALID_STATE},
 };
-const std::map<OutputFormatType, std::string> g_outputFormatToFormat = {
-    {OutputFormatType::FORMAT_DEFAULT, std::string("audio_%Y%m%d%H%M%S.m4a")},
-    {OutputFormatType::FORMAT_MPEG_4, std::string("video_%Y%m%d%H%M%S.mp4")},
-    {OutputFormatType::FORMAT_M4A, std::string("audio_%Y%m%d%H%M%S.m4a")},
-};
 }  // namespace
 namespace Record {
 int TransErrorCode(ErrorCode errorCode)
@@ -110,22 +105,6 @@ bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::Meta& e
     return ret;
 }
 
-bool GenerateFilePath(const std::string& dirPath, OutputFormatType outputFormatType, std::string& filePath)
-{
-    filePath = dirPath;
-    if (filePath[filePath.size() - 1] != '/') {
-        filePath += "/";
-    }
-    if (g_outputFormatToFormat.count(outputFormatType) != 0) {
-        char fileName[32] = { 0 }; /// magic number 32
-        auto tm = time(nullptr);
-        strftime(fileName, sizeof(fileName), g_outputFormatToFormat.at(outputFormatType).c_str(), localtime(&tm));
-        filePath += fileName;
-        return true;
-    } else {
-        return false;
-    }
-}
 namespace {
 #define CAST_TO_ASSIGN(type, param, any) \
 (any) = static_cast<const type&>(param)

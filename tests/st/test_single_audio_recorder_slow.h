@@ -13,6 +13,19 @@
  * limitations under the License.
  */
 #include <chrono>
+#include <fcntl.h>
+#ifndef WIN32
+#include <sys/types.h>
+#include <unistd.h>
+#define O_BINARY 0 // which is not defined for Linux
+#else
+#include <direct.h>
+#endif
+#include <format.h>
+#include <fstream>
+#include <iostream>
+#include <math.h>
+#include <sstream>
 #include <thread>
 #include "helper/test_recorder.hpp"
 #include "helper/test_player.hpp"
@@ -66,15 +79,21 @@ FIXTURE(DataDrivenSingleAudioRecorderTestSlow)
     PTEST((AudioRecordSource recordSource), Test single audio recorder)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
+
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         std::this_thread::sleep_for(std::chrono::seconds(30));
         ASSERT_EQ(0, recorder->Stop());
         std::this_thread::sleep_for(std::chrono::seconds(2));
+        close(fd);
 
-        std::string filePath;
-        ASSERT_TRUE(recorder->GetRecordedFile(filePath) > 0);
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
         ASSERT_EQ(0, player->Prepare());
