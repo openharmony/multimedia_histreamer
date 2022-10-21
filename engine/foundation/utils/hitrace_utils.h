@@ -40,7 +40,6 @@
 StartAsyncTrace(DEFAULT_HITRACE_TAG, WRAP_TITLE_PREFIX(title), taskId, DEFAULT_HITRACE_LIMIT)
 #define ASYNC_TRACE_END(title, taskId) FinishAsyncTrace(WRAP_TITLE_PREFIX(title), taskId, DEFAULT_HITRACE_TAG)
 #define COUNT_TRACE(title, count) CountTrace(DEFAULT_HITRACE_TAG, WRAP_TITLE_PREFIX(title), count)
-#endif
 
 namespace OHOS {
 namespace Media {
@@ -60,5 +59,5 @@ namespace Media {
     };
 }
 }
-
+#endif
 #endif // HISTREAMER_HITRACE_UTILS_H
