@@ -119,6 +119,7 @@ private:
     void UpdateStateNoLock(PlayerStates newState, bool notifyUpward = true);
     double ChangeModeToSpeed(const PlaybackRateMode& mode) const;
     PlaybackRateMode ChangeSpeedToMode(double rate) const;
+    void NotifyBufferingUpdate(const std::string_view& type, int32_t param);
     
     OSAL::Mutex stateMutex_ {};
     OSAL::ConditionVariable cond_ {};

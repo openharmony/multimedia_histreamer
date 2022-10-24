@@ -184,6 +184,7 @@ int32_t HiPlayerImpl::SetSource(const std::shared_ptr<IMediaDataSource>& dataSrc
 int32_t HiPlayerImpl::Prepare()
 {
     SYNC_TRACER();
+    NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_START, 0);
     MEDIA_LOG_I("Prepare entered, current fsm state: " PUBLIC_LOG_S ".", fsm_.GetCurrentState().c_str());
     PROFILE_BEGIN();
     auto ret = fsm_.SendEvent(Intent::PREPARE);
@@ -199,6 +200,7 @@ int32_t HiPlayerImpl::Prepare()
     MEDIA_LOG_D("Prepare finished, current fsm state: " PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
     PROFILE_END("Prepare finished, current fsm state: " PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
     if (curFsmState_ == StateId::READY) {
+        NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_END, 0);
         return TransErrorCode(ErrorCode::SUCCESS);
     }
 
@@ -208,6 +210,7 @@ int32_t HiPlayerImpl::Prepare()
 int HiPlayerImpl::PrepareAsync()
 {
     ASYNC_TRACER();
+    NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_START, 0);
     MEDIA_LOG_I("Prepare async entered, current fsm state: " PUBLIC_LOG_S, fsm_.GetCurrentState().c_str());
     PROFILE_BEGIN();
     auto ret = fsm_.SendEventAsync(Intent::PREPARE);
@@ -217,6 +220,7 @@ int HiPlayerImpl::PrepareAsync()
     } else {
         PROFILE_END("Prepare async successfully,");
     }
+    NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_END, 0);
     return TransErrorCode(ret);
 }
 
@@ -973,6 +977,13 @@ int32_t HiPlayerImpl::SetAudioInterruptMode(const int32_t interruptMode)
     MEDIA_LOG_I("SetAudioInterruptMode entered.");
     auto ret = audioSink_->SetParameter(static_cast<int32_t>(Tag::AUDIO_INTERRUPT_MODE), interruptMode);
     return TransErrorCode(ret);
+}
+
+void HiPlayerImpl::NotifyBufferingUpdate(const std::string_view& type, int32_t param)
+{
+    Format format;
+    format.PutIntValue(std::string(type), param);
+    callbackLooper_.OnInfo(INFO_TYPE_BUFFERING_UPDATE, 0, format);
 }
 }  // namespace Media
 }  // namespace OHOS
