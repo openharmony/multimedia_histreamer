@@ -611,22 +611,6 @@ ErrorCode HiRecorderImpl::DoConfigureOther(const HstRecParam& param) const
     FALSE_RETURN_V_MSG_E(muxer_ != nullptr && outputSink_ != nullptr, ErrorCode::ERROR_INVALID_OPERATION,
                          "muxer/outputSink is NULL");
     switch (param.stdParamType) {
-        case RecorderPublicParamType::OUT_PATH: {
-            auto ptr = param.GetValPtr<OutFilePath>();
-            FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
-            auto dirPath = ptr->path;
-            std::regex reg("\\\\");
-            dirPath= std::regex_replace(dirPath, reg, "/");
-            FALSE_RETURN_V_MSG_E(!OSAL::FileSystem::IsRegularFile(dirPath)
-                && OSAL::FileSystem::MakeMultipleDir(dirPath),
-                ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "OutFilePath is not a valid directory path");
-            std::string filePath;
-            FALSE_RETURN_V_MSG_E(GenerateFilePath(dirPath, outputFormatType_, filePath),
-                                 ErrorCode::ERROR_INVALID_PARAMETER_VALUE, "generate file path error");
-            MediaSink mediaSink {Plugin::ProtocolType::FILE};
-            mediaSink.SetPath(filePath);
-            return outputSink_->SetSink(mediaSink);
-        }
         case RecorderPublicParamType::OUT_FD: {
             auto ptr = param.GetValPtr<OutFd>();
             FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);

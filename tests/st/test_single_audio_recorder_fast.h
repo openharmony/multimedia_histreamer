@@ -169,6 +169,12 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), Test single audio recorder)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
@@ -178,30 +184,31 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Resume());
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         ASSERT_EQ(0, recorder->Stop());
-
-        std::string filePath;
-        ASSERT_TRUE(recorder->GetRecordedFile(filePath) > 0);
-
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
         ASSERT_EQ(0, player->Prepare());
         ASSERT_EQ(0, player->Play());
         std::this_thread::sleep_for(std::chrono::seconds(1));
         ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, close(fd));
     }
 
     // @test(data="pcmSources", tags=audio_record_fast)
     PTEST((AudioRecordSource recordSource), The recorder can be stopped and set source again)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         ASSERT_EQ(0, recorder->Stop());
-
-        std::string filePath;
-        ASSERT_TRUE(recorder->GetRecordedFile(filePath) > 0);
+        ASSERT_EQ(0, close(fd));
 
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
@@ -210,14 +217,17 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         ASSERT_EQ(0, player->Stop());
 
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         // set source and record again
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         ASSERT_EQ(0, recorder->Stop());
-
-        ASSERT_TRUE(recorder->GetRecordedFile(filePath) > 0);
+        ASSERT_EQ(0, close(fd));
 
         ASSERT_EQ(0, player->Reset());
         ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
@@ -240,8 +250,15 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Prepare_API_0100)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder start error prepare release
@@ -249,10 +266,17 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Prepare_API_0200)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_NE(0, recorder->Start());
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare start pause prepare release
@@ -260,13 +284,24 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Prepare_API_0300)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Pause());
+        ASSERT_EQ(0, close(fd));
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_NE(0, recorder->Configure(recordSource));
         ASSERT_NE(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare, start, pause, resume, prepare error, release
@@ -274,14 +309,26 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Prepare_API_0400)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Resume());
+        ASSERT_EQ(0, close(fd));
+        
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_NE(0, recorder->Configure(recordSource));
         ASSERT_NE(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare, start, stop, reset, prepare, release
@@ -289,14 +336,27 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Prepare_API_0500)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
+
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Reset());
+        ASSERT_EQ(0, close(fd));
+
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare, start, reset, prepare, release
@@ -304,13 +364,25 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Prepare_API_0600)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Reset());
+        ASSERT_EQ(0, close(fd));
+
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // the recorder prepare start prepare stop prepare reset prepare release
@@ -318,18 +390,40 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Prepare_API_0800)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
+        ASSERT_EQ(0, close(fd));
+
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_NE(0, recorder->Configure(recordSource));
         ASSERT_NE(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Stop());
+        ASSERT_EQ(0, close(fd));
+
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Reset());
+        ASSERT_EQ(0, close(fd));
+
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare start prepare stop prepare reset prepare release
@@ -337,13 +431,30 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Prepare_API_0900)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
+        ASSERT_EQ(0, close(fd));
+
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_NE(0, recorder->Configure(recordSource));
         ASSERT_NE(0, recorder->Prepare());
+        ASSERT_EQ(0, close(fd));
+
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_NE(0, recorder->Configure(recordSource));
         ASSERT_NE(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare wrong channel
@@ -351,9 +462,16 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Prepare_API_1000)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_NE(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare wrong samplerate
@@ -361,9 +479,16 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Prepare_API_1100)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_NE(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare wrong bitrate
@@ -371,9 +496,16 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Prepare_API_1200)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_NE(0, recorder->Configure(recordSource));
         ASSERT_NE(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder  start error and release
@@ -390,10 +522,17 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Start_API_0200)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can  prepare, start, pause, start error, release
@@ -401,12 +540,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Start_API_0300)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can  prepare, start, pause, resume, start, release
@@ -414,6 +560,12 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Start_API_0400)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
@@ -421,6 +573,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Resume());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can  prepare, start, stop, start, release
@@ -428,12 +581,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Start_API_0500)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_NE(0, recorder->Start());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can  prepare, start, reset, start, release
@@ -441,12 +601,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Start_API_0600)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_NE(0, recorder->Start());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare  start stop prepare  start reset start prepare start release
@@ -454,20 +621,38 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Start_API_0800)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
+
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_NE(0, recorder->Start());
+        ASSERT_EQ(0, close(fd));
+
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_NE(0, recorder->Start());
+        ASSERT_EQ(0, close(fd));
+
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can  prepare start start start release
@@ -475,12 +660,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Start_API_0900)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder pause error, release
@@ -497,10 +689,17 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Pause_API_0200)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_NE(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can  prepare, start, pause, release
@@ -508,11 +707,18 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Pause_API_0300)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can  prepare, start, pause, resume, pause, release
@@ -520,6 +726,12 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Pause_API_0400)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
@@ -527,6 +739,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Resume());
         ASSERT_EQ(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare, start, stop, pause error, release
@@ -534,12 +747,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Pause_API_0500)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_NE(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can  prepare, start, reset, pause error, release
@@ -547,12 +767,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Pause_API_0600)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_NE(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare start pause resume pause stop pause error reset pause release
@@ -560,6 +787,12 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Pause_API_0800)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
@@ -571,6 +804,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_NE(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can  prepare, start, pause, pause, pause, release
@@ -578,6 +812,12 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Pause_API_0900)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
@@ -585,6 +825,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder stop error, release
@@ -601,10 +842,17 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Stop_API_0200)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_NE(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare, start, stop, release
@@ -612,11 +860,18 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Stop_API_0300)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare, start, pause, stop, release
@@ -624,12 +879,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Stop_API_0400)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare, start, pause, resume, stop, release
@@ -637,6 +899,12 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Stop_API_0500)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
@@ -644,6 +912,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Resume());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can preapre, start, reset, stop error, release
@@ -651,12 +920,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Stop_API_0600)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_NE(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can not stop after prepare, then can prepare after reset
@@ -664,18 +940,27 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Stop_API_0800)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_NE(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Reset());
+        ASSERT_EQ(0, close(fd));
+
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         ASSERT_EQ(0, recorder->Stop());
-
-        std::string filePath;
-        ASSERT_TRUE(recorder->GetRecordedFile(filePath) > 0);
+        ASSERT_EQ(0, close(fd));
 
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(filePath)));
@@ -684,6 +969,9 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         ASSERT_EQ(0, player->Stop());
 
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
@@ -692,6 +980,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         (void)recorder->Configure(recordSource); // errorState configure fail.
         (void)recorder->Prepare(); // prepare fail.
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare, start, stop, stop error, stop error, release
@@ -699,6 +988,12 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Stop_API_0900)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
@@ -706,6 +1001,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_NE(0, recorder->Stop());
         ASSERT_NE(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can  reset release
@@ -722,10 +1018,17 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Reset_API_0200)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare start reset release
@@ -733,11 +1036,18 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Reset_API_0300)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare start reset release
@@ -745,12 +1055,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Reset_API_0400)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare start, pause, resume, reset, release
@@ -758,6 +1075,12 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Reset_API_0500)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
@@ -765,6 +1088,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Resume());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare start, pause, resume, reset, release
@@ -772,12 +1096,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Reset_API_0600)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder prepare reset prepare start reset prepare start stop reset prepare start release
@@ -785,22 +1116,44 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Reset_API_0800)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Reset());
+        ASSERT_EQ(0, close(fd));
+
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Reset());
+        ASSERT_EQ(0, close(fd));
+
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Reset());
+        ASSERT_EQ(0, close(fd));
+
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare, start, reset, reset, reset, release
@@ -808,6 +1161,12 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Reset_API_0900)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
@@ -815,6 +1174,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can release
@@ -830,9 +1190,16 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Release_API_0200)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare, start, release
@@ -840,10 +1207,17 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Release_API_0300)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare, start, pause, release
@@ -851,11 +1225,18 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Release_API_0400)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare, start, pause, resume, release
@@ -863,12 +1244,19 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Release_API_0500)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Pause());
         ASSERT_EQ(0, recorder->Resume());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare start stop release
@@ -876,11 +1264,18 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Release_API_0600)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Stop());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare start pause reset release
@@ -888,11 +1283,18 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     PTEST((AudioRecordSource recordSource), SUB_MEDIA_RECORDER_AudioRecorder_Release_API_0700)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
+        std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
+
+        // Don't add O_APPEND, or else seek fail, can not write the file length.
+        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        ASSERT_TRUE(fd >= 0);
+        recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
         ASSERT_EQ(0, recorder->Prepare());
         ASSERT_EQ(0, recorder->Start());
         ASSERT_EQ(0, recorder->Reset());
         ASSERT_EQ(0, recorder->Release());
+        ASSERT_EQ(0, close(fd));
     }
 
     // The recorder can prepare fd source, start, stop, release

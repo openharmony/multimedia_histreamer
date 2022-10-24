@@ -55,7 +55,6 @@ public:
     int32_t Stop() override;
     int32_t Reset() override;
     int32_t Release() override;
-    int32_t GetRecordedFile(std::string& path) override;
 private:
     std::unique_ptr<IRecorderEngine> recorder_;
 };
@@ -135,30 +134,6 @@ int32_t TestRecorderImpl::Release()
 {
     recorder_ = nullptr;
     return 0;
-}
-
-// The file in output dir is the latest recorded file.
-int32_t TestRecorderImpl::GetRecordedFile(std::string& path)
-{
-    DIR *directory;
-    struct dirent *info;
-    if ((directory = opendir(GetOutputDir().c_str())) != nullptr) {
-        while ((info = readdir(directory)) != nullptr) {
-            if (strcmp(info->d_name, ".") == 0 || strcmp(info->d_name, "..") == 0) {
-                continue;
-            }
-            path = GetOutputDir() + "/" + info->d_name;
-            MEDIA_LOG_D("GetRecordedFile : " PUBLIC_LOG_S, path.c_str());
-        }
-        closedir(directory);
-    }
-
-    int32_t fileSize = 0;
-    struct stat fileStatus {};
-    if (stat(path.c_str(), &fileStatus) == 0) {
-        fileSize = static_cast<int32_t>(fileStatus.st_size);
-    }
-    return fileSize;
 }
 }
 #endif
