@@ -679,7 +679,7 @@ bool HdiSink::HandleInterleaveData(uint8_t* origData, int32_t frameCnt)
     }
     bool isHandled = true;
     switch (sampleAttributes_.format) {
-        case AUDIO_FORMAT_PCM_16_BIT:
+        case AUDIO_FORMAT_TYPE_PCM_16_BIT:
             Deinterleave16(origData, cacheData_.data(), frameCnt);
             break;
         default:
