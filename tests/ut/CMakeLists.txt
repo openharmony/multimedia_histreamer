@@ -70,13 +70,13 @@ elseif (MINGW)
     target_link_libraries(HiStreamerUtTests
             # dl
             ${sdl_path}/lib/x64/SDL2.lib
-            ${ffmpeg_path}/lib/avcodec.lib
-            ${ffmpeg_path}/lib/swresample.lib
-            ${ffmpeg_path}/lib/avformat.lib
-            ${ffmpeg_path}/lib/avutil.lib
-            ${ffmpeg_path}/lib/avdevice.lib
-            ${ffmpeg_path}/lib/avfilter.lib
-            ${ffmpeg_path}/lib/swscale.lib
+            ${ffmpeg_path}/lib/libavcodec.dll.a
+            ${ffmpeg_path}/lib/libswresample.dll.a
+            ${ffmpeg_path}/lib/libavformat.dll.a
+            ${ffmpeg_path}/lib/libavutil.dll.a
+            ${ffmpeg_path}/lib/libavdevice.dll.a
+            ${ffmpeg_path}/lib/libavfilter.dll.a
+            ${ffmpeg_path}/lib/libswscale.dll.a
             gtest
             ${MOCKCPP_DIR}/lib/libmockcpp_mingw8.a
             )

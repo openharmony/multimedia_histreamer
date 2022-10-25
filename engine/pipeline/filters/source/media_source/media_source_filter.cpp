@@ -406,7 +406,7 @@ ErrorCode MediaSourceFilter::FindPlugin(const std::shared_ptr<MediaSource>& sour
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
     PluginManager& pluginManager = PluginManager::Instance();
-    std::set<std::string> nameList = pluginManager.ListPlugins(PluginType::SOURCE);
+    auto nameList = pluginManager.ListPlugins(PluginType::SOURCE);
     for (const std::string& name : nameList) {
         std::shared_ptr<PluginInfo> info = pluginManager.GetPluginInfo(PluginType::SOURCE, name);
         MEDIA_LOG_I("name: " PUBLIC_LOG_S ", info->name: " PUBLIC_LOG_S, name.c_str(), info->name.c_str());

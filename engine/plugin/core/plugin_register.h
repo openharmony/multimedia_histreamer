@@ -48,8 +48,7 @@ public:
     PluginRegister operator=(const PluginRegister&) = delete;
     ~PluginRegister();
 
-    std::set<std::string> ListPlugins(PluginType type);
-
+    std::vector<std::string> ListPlugins(PluginType type, CodecMode preferredCodecMode = CodecMode::HARDWARE);
     int GetAllRegisteredPluginCount();
 
     std::shared_ptr<PluginRegInfo> GetPluginRegInfo(PluginType type, const std::string& name);
@@ -62,8 +61,6 @@ public:
 
     bool IsPackageExist(PluginType type, const std::string& name);
     void PrintRegisteredPluginInfo();
-
-    int GetPackageCounts(std::string& name);
 
     void RegisterPlugins();
 
@@ -81,7 +78,7 @@ private:
     using REGISTERED_TABLE = std::map<PluginType, std::map<std::string, std::shared_ptr<PluginRegInfo>>>;
 
     struct RegisterData {
-        std::map<PluginType, std::set<std::string>> registerNames;
+        std::map<PluginType, std::vector<std::string>> registerNames;
         REGISTERED_TABLE registerTable;
         std::vector<std::pair<std::string, std::shared_ptr<PluginRegInfo>>> disabledPackage;
         bool IsPluginExist(PluginType type, const std::string& name);
@@ -99,7 +96,7 @@ private:
 
         Status SetPackageDef(const PackageDef& def);
 
-        std::shared_ptr<PluginRegInfo> BuildRegInfo(const PluginDefBase& def);
+        void UpdateRegisterTableAndRegisterNames(const PluginDefBase& def);
 
         void SetPluginInfo(std::shared_ptr<PluginInfo>& info, const PluginDefBase& def);
 
@@ -137,9 +134,10 @@ private:
         std::shared_ptr<RegisterData> registerData;
         std::shared_ptr<PackageDef> packageDef {nullptr};
     };
-
-    std::shared_ptr<RegisterData> registerData = std::make_shared<RegisterData>();
-    std::vector<std::shared_ptr<PluginLoader>> registeredLoaders;
+    void DeletePlugin(std::map<std::string, std::shared_ptr<PluginRegInfo>>& plugins,
+        std::map<std::string, std::shared_ptr<PluginRegInfo>>::iterator& info);
+    std::shared_ptr<RegisterData> registerData_ = std::make_shared<RegisterData>();
+    std::vector<std::shared_ptr<PluginLoader>> registeredLoaders_;
 };
 } // namespace Plugin
 } // namespace Media

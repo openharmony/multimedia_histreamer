@@ -85,23 +85,30 @@ protected:
 
 StateMachine TestStateMachine::stateMachine(g_playExecutorStub);
 
-TEST_F(TestStateMachine, test_init_state)
+TEST_F(TestStateMachine, test_Idle_state)
 {
-    EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
+    EXPECT_TRUE(stateMachine.GetCurrentState() == "IdleState");
 }
 
 TEST_F(TestStateMachine, test_set_invalid_source)
 {
-    EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
+    EXPECT_TRUE(stateMachine.GetCurrentState() == "IdleState");
     EXPECT_EQ(ErrorCode::ERROR_INVALID_PARAMETER_TYPE, stateMachine.SendEvent(Intent::SET_SOURCE));
-    EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
+    EXPECT_TRUE(stateMachine.GetCurrentState() == "IdleState");
 }
 
 TEST_F(TestStateMachine, test_set_valid_source)
 {
-    EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
+    EXPECT_TRUE(stateMachine.GetCurrentState() == "IdleState");
     auto source = std::make_shared<MediaSource>("FakeUri");
     EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::SET_SOURCE, source));
+    EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
+}
+
+TEST_F(TestStateMachine, test_prepare_after_set_source)
+{
+    EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
+    EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::PREPARE));
     EXPECT_TRUE(stateMachine.GetCurrentState() == "PreparingState");
 }
 
@@ -117,6 +124,8 @@ TEST_F(TestStateMachine, test_notify_ready)
     EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
     auto source = std::make_shared<MediaSource>("FakeUri");
     EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::SET_SOURCE, source));
+    EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
+    EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::PREPARE));
     EXPECT_TRUE(stateMachine.GetCurrentState() == "PreparingState");
     EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::NOTIFY_READY));
     EXPECT_TRUE(stateMachine.GetCurrentState() == "ReadyState");
@@ -157,7 +166,7 @@ TEST_F(TestStateMachine, test_play_complete_nolooping)
     EXPECT_TRUE(stateMachine.GetCurrentState() == "PlayingState");
     EXPECT_EQ(ErrorCode::SUCCESS, stateMachine.SendEvent(Intent::NOTIFY_COMPLETE));
     OSAL::SleepFor(100);
-    EXPECT_TRUE(stateMachine.GetCurrentState() == "InitState");
+    EXPECT_TRUE(stateMachine.GetCurrentState() == "StoppedState");
 }
 } // namespace Test
 } // namespace Media

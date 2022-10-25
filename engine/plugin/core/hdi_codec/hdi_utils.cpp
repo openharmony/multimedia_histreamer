@@ -23,11 +23,11 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-const static std::pair<::CodecType, Plugin::CodecType> codecTypeMap[] = {
-    {::CodecType::VIDEO_DECODER, Plugin::CodecType::VIDEO_DECODER},
-    {::CodecType::VIDEO_ENCODER, Plugin::CodecType::VIDEO_ENCODER},
-    {::CodecType::AUDIO_DECODER, Plugin::CodecType::AUDIO_DECODER},
-    {::CodecType::AUDIO_ENCODER, Plugin::CodecType::AUDIO_ENCODER},
+const static std::pair<::CodecType, Plugin::PluginType> codecTypeToPluginTypeMap[] = {
+    {::CodecType::VIDEO_DECODER, Plugin::PluginType::VIDEO_DECODER},
+    {::CodecType::VIDEO_ENCODER, Plugin::PluginType::VIDEO_ENCODER},
+    {::CodecType::AUDIO_DECODER, Plugin::PluginType::AUDIO_DECODER},
+    {::CodecType::AUDIO_ENCODER, Plugin::PluginType::AUDIO_ENCODER},
 };
 
 const static std::pair<int32_t, Status> retStatusMap[] = {
@@ -177,9 +177,10 @@ bool Translates(const T& src, U& dest)
 }
 
 template<>
-bool Translates(const ::CodecType& codecType, Plugin::CodecType& pluginCodecType)
+bool Translates(const ::CodecType& codecType, Plugin::PluginType& pluginType)
 {
-    return TranslatesByMap(codecType, pluginCodecType, codecTypeMap, sizeof(codecTypeMap) / sizeof(codecTypeMap[0]));
+    return TranslatesByMap(codecType, pluginType, codecTypeToPluginTypeMap,
+        sizeof(codecTypeToPluginTypeMap) / sizeof(codecTypeToPluginTypeMap[0]));
 }
 
 uint64_t Translate2PluginFlagSet(uint32_t omxBufFlag)

@@ -35,7 +35,10 @@ using namespace OHOS::Media::Plugin;
 static std::map<PluginType, int> g_apiVersionMap = {
     {PluginType::SOURCE,      SOURCE_API_VERSION},
     {PluginType::DEMUXER,     DEMUXER_API_VERSION},
-    {PluginType::CODEC,       CODEC_API_VERSION},
+    {PluginType::AUDIO_DECODER, CODEC_API_VERSION},
+    {PluginType::VIDEO_DECODER, CODEC_API_VERSION},
+    {PluginType::AUDIO_ENCODER, CODEC_API_VERSION},
+    {PluginType::VIDEO_ENCODER, CODEC_API_VERSION},
     {PluginType::AUDIO_SINK,  AUDIO_SINK_API_VERSION},
     {PluginType::VIDEO_SINK,  VIDEO_SINK_API_VERSION},
     {PluginType::MUXER,       MUXER_API_VERSION},
@@ -54,8 +57,8 @@ static std::string g_libFileTail = HST_PLUGIN_FILE_TAIL;
 PluginRegister::~PluginRegister()
 {
     UnregisterAllPlugins();
-    registerData->registerNames.clear();
-    registerData->registerTable.clear();
+    registerData_->registerNames.clear();
+    registerData_->registerTable.clear();
 }
 
 Status PluginRegister::RegisterImpl::AddPackage(const PackageDef& def)
@@ -87,12 +90,11 @@ Status PluginRegister::RegisterImpl::AddPlugin(const PluginDefBase& def)
             return Status::ERROR_PLUGIN_ALREADY_EXISTS;
         }
     }
-    registerData->registerNames[def.pluginType].insert(def.name);
-    registerData->registerTable[def.pluginType][def.name] = BuildRegInfo(def);
+    UpdateRegisterTableAndRegisterNames(def);
     return Status::OK;
 }
 
-std::shared_ptr<PluginRegInfo> PluginRegister::RegisterImpl::BuildRegInfo(const PluginDefBase& def)
+void PluginRegister::RegisterImpl::UpdateRegisterTableAndRegisterNames(const PluginDefBase& def)
 {
     std::shared_ptr<PluginRegInfo> regInfo = std::make_shared<PluginRegInfo>();
     regInfo->packageDef = packageDef;
@@ -106,7 +108,10 @@ std::shared_ptr<PluginRegInfo> PluginRegister::RegisterImpl::BuildRegInfo(const 
         case PluginType::MUXER:
             InitMuxerInfo(regInfo, def);
             break;
-        case PluginType::CODEC:
+        case PluginType::AUDIO_DECODER:
+        case PluginType::VIDEO_DECODER:
+        case PluginType::AUDIO_ENCODER:
+        case PluginType::VIDEO_ENCODER:
             InitCodecInfo(regInfo, def);
             break;
         case PluginType::AUDIO_SINK:
@@ -119,10 +124,18 @@ std::shared_ptr<PluginRegInfo> PluginRegister::RegisterImpl::BuildRegInfo(const 
             InitOutputSinkInfo(regInfo, def);
             break;
         default:
-            return {};
+            return;
     }
     regInfo->loader = std::move(pluginLoader);
-    return regInfo;
+    registerData->registerTable[def.pluginType][def.name] = regInfo;
+    if ((def.pluginType == PluginType::AUDIO_DECODER || def.pluginType == PluginType::VIDEO_DECODER
+        || def.pluginType == PluginType::AUDIO_ENCODER || def.pluginType == PluginType::VIDEO_ENCODER)
+        && AnyCast<CodecMode>(regInfo->info->extra[PLUGIN_INFO_EXTRA_CODEC_MODE]) == CodecMode::HARDWARE) {
+        registerData->registerNames[def.pluginType].insert(registerData->registerNames[def.pluginType].begin(),
+            def.name);
+    } else {
+        registerData->registerNames[def.pluginType].push_back(def.name);
+    }
 }
 
 bool PluginRegister::RegisterImpl::Verification(const PluginDefBase& definition)
@@ -202,7 +215,7 @@ Status PluginRegister::RegisterImpl::InitCodecInfo(std::shared_ptr<PluginRegInfo
     reg->creator = reinterpret_cast<PluginCreatorFunc<PluginBase>>(base.creator);
     std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
     SetPluginInfo(info, def);
-    info->extra.insert({PLUGIN_INFO_EXTRA_CODEC_TYPE, base.codecType});
+    info->extra.insert({PLUGIN_INFO_EXTRA_CODEC_MODE, base.codecMode});
     CodecCapabilityConvert(info, def);
     reg->info = info;
     return Status::OK;
@@ -281,15 +294,23 @@ Status PluginRegister::RegisterImpl::VideoSinkCapabilityConvert(std::shared_ptr<
     return Status::OK;
 }
 
-std::set<std::string> PluginRegister::ListPlugins(PluginType type)
+std::vector<std::string> PluginRegister::ListPlugins(PluginType type, CodecMode preferredCodecMode)
 {
-    return registerData->registerNames[type];
+    if ((type == PluginType::AUDIO_DECODER || type == PluginType::VIDEO_DECODER
+        || type == PluginType::AUDIO_ENCODER || type == PluginType::VIDEO_ENCODER)
+        && preferredCodecMode != CodecMode::HARDWARE) {
+        std::vector<std::string> pluginNames {registerData_->registerNames[type]};
+        std::reverse(pluginNames.begin(), pluginNames.end());
+        return pluginNames;
+    } else {
+        return registerData_->registerNames[type];
+    }
 }
 
 int PluginRegister::GetAllRegisteredPluginCount()
 {
     int count = 0;
-    for (auto it : registerData->registerTable) {
+    for (auto it : registerData_->registerTable) {
         count += it.second.size();
     }
     return count;
@@ -297,8 +318,8 @@ int PluginRegister::GetAllRegisteredPluginCount()
 
 std::shared_ptr<PluginRegInfo> PluginRegister::GetPluginRegInfo(PluginType type, const std::string& name)
 {
-    if (registerData->IsPluginExist(type, name)) {
-        return registerData->registerTable[type][name];
+    if (registerData_->IsPluginExist(type, name)) {
+        return registerData_->registerTable[type][name];
     }
     return {};
 }
@@ -311,9 +332,9 @@ void PluginRegister::RegisterPlugins()
 
 void PluginRegister::RegisterStaticPlugins()
 {
-    RegisterPluginStatic(std::make_shared<RegisterImpl>(registerData));
+    RegisterPluginStatic(std::make_shared<RegisterImpl>(registerData_));
 #if defined(MEDIA_OHOS) && !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
-    RegisterHdiCodecPackages(std::make_shared<RegisterImpl>(registerData));
+    RegisterHdiCodecPackages(std::make_shared<RegisterImpl>(registerData_));
 #endif
 }
 
@@ -343,8 +364,8 @@ void PluginRegister::RegisterPluginsFromPath(const char* libDirPath)
             std::string libPath = libDirPath + g_fileSeparator + lib->d_name;
             loader = PluginLoader::Create(pluginName, libPath);
             if (loader) {
-                loader->FetchRegisterFunction()(std::make_shared<RegisterImpl>(registerData, loader));
-                registeredLoaders.push_back(loader);
+                loader->FetchRegisterFunction()(std::make_shared<RegisterImpl>(registerData_, loader));
+                registeredLoaders_.push_back(loader);
             }
         }
         closedir(libDir);
@@ -359,24 +380,37 @@ void PluginRegister::UnregisterAllPlugins()
     UnRegisterHdiCodecPackage();
 #endif
 #ifdef DYNAMIC_PLUGINS
-    for (auto& loader : registeredLoaders) {
+    for (auto& loader : registeredLoaders_) {
         EraseRegisteredPluginsByLoader(loader);
         loader->FetchUnregisterFunction()();
         loader.reset();
     }
 #endif
-    registeredLoaders.clear();
+    registeredLoaders_.clear();
 }
 
+void PluginRegister::DeletePlugin(std::map<std::string, std::shared_ptr<PluginRegInfo>>& plugins,
+    std::map<std::string, std::shared_ptr<PluginRegInfo>>::iterator& info)
+{
+    auto type = info->second->info->pluginType;
+    for (auto it = registerData_->registerNames[type].begin();
+         it != registerData_->registerNames[type].end();) {
+        if (*it == info->first) {
+            it = registerData_->registerNames[type].erase(it);
+        } else {
+            ++it;
+        }
+    }
+    info = plugins.erase(info);
+}
 void PluginRegister::EraseRegisteredPluginsByLoader(const std::shared_ptr<PluginLoader>& loader)
 {
-    for (auto& it : registerData->registerTable) {
-        PluginType type = it.first;
+    for (auto& it : registerData_->registerTable) {
         auto plugins = it.second;
         for (auto info = plugins.begin(); info != plugins.end();) {
             if (info->second->loader == loader) {
-                registerData->registerNames[type].erase(info->first);
-                info = plugins.erase(info);
+                SaveDisabledPackage(*info);
+                DeletePlugin(plugins, info);
             } else {
                 info++;
             }
@@ -387,7 +421,7 @@ void PluginRegister::EraseRegisteredPluginsByLoader(const std::shared_ptr<Plugin
 int PluginRegister::GetRegisteredPluginCountByPackageName(std::string& name)
 {
     int counts = 0;
-    for (auto it :registerData->registerTable) {
+    for (auto it :registerData_->registerTable) {
         auto plugins = it.second;
         for (auto plugin : plugins) {
             if (plugin.second->packageDef->name == name) {
@@ -400,15 +434,12 @@ int PluginRegister::GetRegisteredPluginCountByPackageName(std::string& name)
 
 void PluginRegister::EraseRegisteredPluginsByPackageName(const std::string& name)
 {
-    for (auto& it : registerData->registerTable) {
-        PluginType type = it.first;
+    for (auto& it : registerData_->registerTable) {
         auto plugins = it.second;
         for (auto info = plugins.begin(); info != plugins.end();) {
             if (info->second->packageDef->name == name) {
                 SaveDisabledPackage(*info);
-                registerData->registerNames[type].erase(info->first);
-                registerData->registerTable[type].erase(info->first);
-                info = plugins.erase(info);
+                DeletePlugin(plugins, info);
             } else {
                 info++;
             }
@@ -418,7 +449,7 @@ void PluginRegister::EraseRegisteredPluginsByPackageName(const std::string& name
 
 void PluginRegister::SaveDisabledPackage(std::pair<std::string, std::shared_ptr<PluginRegInfo>> info)
 {
-    registerData->disabledPackage.push_back(info);
+    registerData_->disabledPackage.push_back(info);
 }
 
 bool PluginRegister::RegisterData::IsPluginExist(PluginType type, const std::string& name)
@@ -429,8 +460,8 @@ bool PluginRegister::RegisterData::IsPluginExist(PluginType type, const std::str
 
 bool PluginRegister::IsPackageExist(PluginType type, const std::string& name)
 {
-    if (registerData->registerTable.find(type) != registerData->registerTable.end()) {
-        for (auto plugin : registerData->registerTable[type]) {
+    if (registerData_->registerTable.find(type) != registerData_->registerTable.end()) {
+        for (auto plugin : registerData_->registerTable[type]) {
             if (plugin.second->packageDef->name == name) {
                 return true;
             }
@@ -441,7 +472,7 @@ bool PluginRegister::IsPackageExist(PluginType type, const std::string& name)
 
 void PluginRegister::PrintRegisteredPluginInfo()
 {
-    for (auto it : registerData->registerTable) {
+    for (auto it : registerData_->registerTable) {
         auto plugins = it.second;
         for (auto plugin : plugins) {
             MEDIA_LOG_I("Plugin " PUBLIC_LOG_S " belongs to package " PUBLIC_LOG_S, plugin.first.c_str(),
@@ -452,11 +483,18 @@ void PluginRegister::PrintRegisteredPluginInfo()
 
 void PluginRegister::RecoverDisabledPackage(PluginType type, const std::string& name)
 {
-    for (auto it = registerData->disabledPackage.begin(); it != registerData->disabledPackage.end();) {
+    for (auto it = registerData_->disabledPackage.begin(); it != registerData_->disabledPackage.end();) {
         if (it->second->packageDef->name == name) {
-            registerData->registerTable[type].insert(*it);
-            registerData->registerNames[type].insert(it->first);
-            it = registerData->disabledPackage.erase(it);
+            if ((type == PluginType::AUDIO_DECODER || type == PluginType::VIDEO_DECODER
+                || type == PluginType::AUDIO_ENCODER || type == PluginType::VIDEO_ENCODER)
+                && AnyCast<CodecMode>(registerData_->registerTable[type]
+                [name]->info->extra[PLUGIN_INFO_EXTRA_CODEC_MODE]) == CodecMode::HARDWARE) {
+                registerData_->registerNames[type].insert(registerData_->registerNames[type].begin(), it->first);
+            } else {
+                registerData_->registerNames[type].push_back(it->first);
+            }
+            registerData_->registerTable[type].insert(*it);
+            it = registerData_->disabledPackage.erase(it);
         } else {
             it++;
         }

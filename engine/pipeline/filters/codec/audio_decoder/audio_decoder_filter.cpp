@@ -41,6 +41,7 @@ AudioDecoderFilter::AudioDecoderFilter(const std::string& name, std::shared_ptr<
     MEDIA_LOG_D("audio decoder ctor called");
     filterType_ = FilterType::AUDIO_DECODER;
     bufferMetaType_ = Plugin::BufferMetaType::AUDIO;
+    pluginType_ = Plugin::PluginType::AUDIO_DECODER;
     codecMode_ = codecMode;
 }
 

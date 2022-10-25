@@ -59,7 +59,7 @@ Status RegisterVideoEncoderPlugins(const std::shared_ptr<Register>& reg)
         }
         CodecPluginDef definition;
         definition.name = "video_encoder_" + std::string(codec->name);
-        definition.codecType = CodecType::VIDEO_ENCODER;
+        definition.pluginType = PluginType::VIDEO_ENCODER;
         definition.rank = 100; // 100
         definition.creator = [](const std::string& name) -> std::shared_ptr<CodecPlugin> {
             return std::make_shared<VideoFfmpegEncoderPlugin>(name);
