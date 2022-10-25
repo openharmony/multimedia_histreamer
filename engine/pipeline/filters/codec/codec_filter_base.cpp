@@ -190,7 +190,7 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
     FALSE_RETURN_V_MSG_W(targetOutPort != nullptr, false, "codec outPort is not found");
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
     bool atLeastOutCapMatched = false;
-    auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::CODEC);
+    auto candidatePlugins = FindAvailablePlugins(*upstreamCap, pluginType_, preferredCodecMode_);
     for (const auto& candidate : candidatePlugins) {
         FALSE_LOG_MSG(!candidate.first->outCaps.empty(),
                       "plugin " PUBLIC_LOG_S " has no out caps", candidate.first->name.c_str());
@@ -225,8 +225,8 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
         "can't find available codec plugin with " PUBLIC_LOG_S, Capability2String(*upstreamCap).c_str());
 
     auto res = UpdateAndInitPluginByInfo<Plugin::Codec>(plugin_, pluginInfo_, selectedPluginInfo,
-        [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
-            return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
+        [this](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
+            return Plugin::PluginManager::Instance().CreateCodecPlugin(name, pluginType_);
     });
     FALSE_RETURN_V(codecMode_->Init(plugin_, outPorts_), false);
     PROFILE_END("async codec negotiate end");

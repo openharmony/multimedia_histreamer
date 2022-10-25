@@ -65,6 +65,10 @@ enum class Seekable : int32_t {
     SEEKABLE = 1
 };
 
+enum struct CodecMode {
+    HARDWARE, ///<  HARDWARE CODEC
+    SOFTWARE, ///<  SOFTWARE CODEC
+};
 /**
  * @enum Api Return Status.
  *
@@ -108,7 +112,10 @@ enum struct PluginType : int32_t {
     INVALID_TYPE = -1, ///< Invalid plugin
     SOURCE = 1,        ///< reference SourcePlugin
     DEMUXER,           ///< reference DemuxerPlugin
-    CODEC,             ///< reference CodecPlugin
+    AUDIO_DECODER,     ///< reference CodecPlugin
+    AUDIO_ENCODER,     ///< reference CodecPlugin
+    VIDEO_DECODER,     ///< reference CodecPlugin
+    VIDEO_ENCODER,     ///< reference CodecPlugin
     AUDIO_SINK,        ///< reference AudioSinkPlugin
     VIDEO_SINK,        ///< reference VideoSinkPlugin
     MUXER,             ///< reference MuxerPlugin
