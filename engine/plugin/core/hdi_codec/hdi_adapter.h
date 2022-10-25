@@ -125,10 +125,11 @@ private:
     Status WaitForState(OMX_STATETYPE state);
     Status ChangeState(OMX_STATETYPE state);
     void HandelCmdCompleteEvent(OMX_U32 data1, OMX_U32 data2);
-    void HandelEventStateSet(OMX_U32 data);
+    void HandelEventStateSet(OMX_U32 data1, OMX_U32 data2);
+    void HandelEventFlush(OMX_U32 data1, OMX_U32 data2);
 
-    OSAL::Mutex mutex_;
-    OSAL::ConditionVariable cond_;
+    OSAL::Mutex stateSetMutex_;
+    OSAL::ConditionVariable stateSetCond_;
     int lastCmd_ = -2; // -1 for error cmd and -2 for invaild
     bool eventDone_ = false;
 
@@ -150,6 +151,7 @@ private:
     OMX_STATETYPE curState_ {OMX_StateInvalid};
     OMX_STATETYPE targetState_ {OMX_StateInvalid};
 
+    bool bufferConfigured_ {false};
     uint32_t width_;
     uint32_t height_;
     int32_t stride_;
@@ -162,7 +164,7 @@ private:
     std::shared_ptr<ShareAllocator> shaAlloc_ {nullptr};
 
     bool isFlushing_ {false};
-    OSAL::Mutex lockFlush_;
+    OSAL::Mutex flushMutex_;
     OSAL::ConditionVariable flushCond_;
 };
 } // namespace Plugin
