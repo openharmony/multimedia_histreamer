@@ -468,9 +468,9 @@ Status HdiAdapter::TransInputBuffer2OmxBuffer(const std::shared_ptr<Plugin::Buff
     bufferInfo->omxBuffer->pts = pluginBuffer->pts;
     MEDIA_LOG_DD("plugin flag: " PUBLIC_LOG_U32 ", pts: " PUBLIC_LOG_D64,
                  bufferInfo->omxBuffer->flag, bufferInfo->omxBuffer->pts);
-    if (pluginBuffer->flag == 1) {
-        MEDIA_LOG_DD("EOS flag receive, return");
-        return Status::ERROR_INVALID_DATA;
+    if (pluginBuffer->flag & BUFFER_FLAG_EOS) {
+        MEDIA_LOG_D("EOS flag receive, return");
+        return Status::OK;
     }
     auto mem = pluginBuffer->GetMemory();
     if (mem == nullptr) {
