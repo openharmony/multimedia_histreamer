@@ -48,7 +48,7 @@ Status RegisterDecoderPlugin(const std::shared_ptr<Register>& reg)
 
     CodecPluginDef definition;
     definition.name      = "LiteAACDecoderPlugin";
-    definition.codecType = CodecType::AUDIO_DECODER;
+    definition.pluginType = PluginType::AUDIO_DECODER;
     definition.rank      = RANK_MAX;
     definition.creator   = LiteAACDecoderCreator;
     UpdatePluginDefinition(definition);

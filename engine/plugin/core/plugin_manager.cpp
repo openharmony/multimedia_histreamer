@@ -32,9 +32,9 @@ PluginManager::PluginManager()
     Init();
 }
 
-std::set<std::string> PluginManager::ListPlugins(PluginType type)
+std::vector<std::string> PluginManager::ListPlugins(PluginType pluginType, CodecMode preferredCodecMode)
 {
-    return pluginRegister_->ListPlugins(type);
+    return pluginRegister_->ListPlugins(pluginType, preferredCodecMode);
 }
 
 std::shared_ptr<PluginInfo> PluginManager::GetPluginInfo(PluginType type, const std::string& name)
@@ -112,9 +112,9 @@ std::shared_ptr<Source> PluginManager::CreateSourcePlugin(const std::string& nam
     return CreatePlugin<Source, SourcePlugin>(name, PluginType::SOURCE);
 }
 
-std::shared_ptr<Codec> PluginManager::CreateCodecPlugin(const std::string& name)
+std::shared_ptr<Codec> PluginManager::CreateCodecPlugin(const std::string& name, PluginType type)
 {
-    return CreatePlugin<Codec, CodecPlugin>(name, PluginType::CODEC);
+    return CreatePlugin<Codec, CodecPlugin>(name, type);
 }
 
 std::shared_ptr<AudioSink> PluginManager::CreateAudioSinkPlugin(const std::string& name)
