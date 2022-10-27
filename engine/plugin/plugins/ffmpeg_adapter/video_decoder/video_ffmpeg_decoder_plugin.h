@@ -33,7 +33,7 @@ extern "C" {
 #ifdef __cplusplus
 };
 #endif
-
+#include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #ifdef DUMP_RAW_DATA
 #include <cstdio>
 #endif
@@ -95,8 +95,6 @@ private:
 
     Status SendBufferLocked(const std::shared_ptr<Buffer>& inputBuffer);
 
-    Status CreateSwsContext();
-
     Status ScaleVideoFrame();
 
     Status WriteYuvData(const std::shared_ptr<Buffer>& frameBuffer);
@@ -131,12 +129,12 @@ private:
     size_t paddedBufferSize_ {0};
     std::shared_ptr<AVFrame> cachedFrame_ {nullptr};
     std::shared_ptr<AVPacket> avPacket_ {};
-
     uint8_t* scaleData_[AV_NUM_DATA_POINTERS];
     int32_t scaleLineSize_[AV_NUM_DATA_POINTERS];
     bool isAllocScaleData_ {false};
-    DataCallback* dataCb_ {};
+    std::shared_ptr<Ffmpeg::Scale> scale_ {nullptr};
 
+    DataCallback* dataCb_ {};
     uint32_t width_;
     uint32_t height_;
     VideoPixelFormat pixelFormat_;

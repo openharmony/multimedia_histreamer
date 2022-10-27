@@ -85,7 +85,7 @@ private:
     OSAL::ConditionVariable surfaceCond_;
     uint32_t width_;
     uint32_t height_;
-    VideoPixelFormat pixelFormat_;
+    VideoPixelFormat decodeOutputPixelFmt_;
     sptr<Surface> surface_ {nullptr};
     std::shared_ptr<SurfaceAllocator> mAllocator_ {nullptr};
     uint32_t maxSurfaceNum_;

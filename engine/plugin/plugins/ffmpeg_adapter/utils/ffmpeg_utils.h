@@ -27,11 +27,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "libavcodec/avcodec.h"
+#include "libavutil/channel_layout.h"
 #include "libavutil/error.h"
 #include "libavutil/frame.h"
+#include "libavutil/imgutils.h"
 #include "libavutil/pixdesc.h"
-#include "libavcodec/avcodec.h"
+#include "libavutil/pixfmt.h"
 #include "libswresample/swresample.h"
+#include "libswscale/swscale.h"
 #ifdef __cplusplus
 };
 #endif
@@ -127,6 +131,25 @@ private:
     std::vector<uint8_t*> resampleChannelAddr_ {};
     std::shared_ptr<SwrContext> swrCtx_ {nullptr};
 #endif
+};
+
+struct ScalePara {
+    int32_t srcWidth {0};
+    int32_t srcHeight {0};
+    AVPixelFormat srcFfFmt {AVPixelFormat::AV_PIX_FMT_NONE};
+    int32_t dstWidth {0};
+    int32_t dstHeight {0};
+    AVPixelFormat dstFfFmt {AVPixelFormat::AV_PIX_FMT_RGBA};
+    int32_t align {16};
+};
+
+struct Scale {
+public:
+    Status Init(const ScalePara& scalePara, uint8_t** dstData, int32_t* dstLineSize);
+    Status Convert(uint8_t** srcData, const int32_t* srcLineSize, uint8_t** dstData, int32_t* dstLineSize);
+private:
+    ScalePara scalePara_ {};
+    std::shared_ptr<SwsContext> swsCtx_ {nullptr};
 };
 } // namespace Ffmpeg
 } // namespace Plugin

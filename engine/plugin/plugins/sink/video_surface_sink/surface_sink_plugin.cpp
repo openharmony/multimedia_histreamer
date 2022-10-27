@@ -18,11 +18,7 @@
 #define HST_LOG_TAG "SurfaceSinkPlugin"
 
 #include "surface_sink_plugin.h"
-#include <functional>
 #include <algorithm>
-#include "string_ex.h"
-#include "param_wrapper.h"
-#include "surface_buffer_impl.h"
 #include "securec.h"
 #include "foundation/log.h"
 #include "utils/constants.h"
@@ -49,7 +45,7 @@ Status SurfaceSinkRegister(const std::shared_ptr<Register>& reg)
     Capability cap(OHOS::Media::MEDIA_MIME_VIDEO_RAW);
     cap.AppendDiscreteKeys<VideoPixelFormat>(
         Capability::Key::VIDEO_PIXEL_FORMAT,
-        {VideoPixelFormat::RGBA, VideoPixelFormat::NV12});
+        {VideoPixelFormat::RGBA, VideoPixelFormat::NV12, VideoPixelFormat::NV21});
     definition.inCaps.emplace_back(cap);
     definition.creator = VideoSinkPluginCreator;
     return reg->AddPlugin(definition);
@@ -112,7 +108,7 @@ SurfaceSinkPlugin::SurfaceSinkPlugin(std::string name)
     : VideoSinkPlugin(std::move(name)),
       width_(DEFAULT_WIDTH),
       height_(DEFAULT_HEIGHT),
-      pixelFormat_(VideoPixelFormat::NV21),
+      decodeOutputPixelFmt_(VideoPixelFormat::NV21),
       maxSurfaceNum_(DEFAULT_BUFFER_NUM),
       needConvFormat(false)
 {
@@ -151,34 +147,27 @@ Status SurfaceSinkPlugin::Prepare()
                          Status::ERROR_UNKNOWN, "need surface config first");
     FALSE_RETURN_V_MSG_E(surface_->SetQueueSize(maxSurfaceNum_) == OHOS::SurfaceError::SURFACE_ERROR_OK,
                          Status::ERROR_UNKNOWN, "surface SetQueueSize fail");
-    PixelFormat pluginFmt = TranslatePixelFormat(pixelFormat_);
-    if (pluginFmt == PixelFormat::PIXEL_FMT_BUTT) {
-        MEDIA_LOG_E("surface can not support pixel format: " PUBLIC_LOG_U32, pixelFormat_);
+    PixelFormat decodeOutputSurfacePixelFmt = TranslatePixelFormat(decodeOutputPixelFmt_);
+    if (decodeOutputSurfacePixelFmt == PixelFormat::PIXEL_FMT_BUTT) {
+        MEDIA_LOG_E("surface can not support decode output pixel fmt: " PUBLIC_LOG_U32, decodeOutputPixelFmt_);
         return Status::ERROR_UNKNOWN;
     }
-    const std::string surfaceFmtStr = "SURFACE_FORMAT";
-    std::string formatStr = surface_->GetUserData(surfaceFmtStr);
-    PixelFormat surfaceFmt = PIXEL_FMT_BUTT;
-    if (formatStr == std::to_string(PixelFormat::PIXEL_FMT_RGBA_8888)) {
-        surfaceFmt = PixelFormat::PIXEL_FMT_RGBA_8888;
-    }
-    if (pluginFmt != surfaceFmt) {
-        MEDIA_LOG_W("plugin format: " PUBLIC_LOG_U32 " is diff from surface format: " PUBLIC_LOG_U32,
-                    static_cast<uint32_t>(pluginFmt), static_cast<uint32_t>(surfaceFmt));
-        if (pixelFormat_ != VideoPixelFormat::NV12) {
+    auto surfacePixelFmt = static_cast<PixelFormat>(std::stoi(surface_->GetUserData("SURFACE_FORMAT")));
+    if (decodeOutputSurfacePixelFmt != surfacePixelFmt) {
+        MEDIA_LOG_W("decode output surface pixel fmt: " PUBLIC_LOG_U32 " is diff from surface pixel fmt: "
+            PUBLIC_LOG_U32, static_cast<uint32_t>(decodeOutputSurfacePixelFmt), static_cast<uint32_t>(surfacePixelFmt));
+        if (decodeOutputPixelFmt_ == VideoPixelFormat::RGBA || decodeOutputPixelFmt_ == VideoPixelFormat::NV12 ||
+            decodeOutputPixelFmt_ == VideoPixelFormat::NV21) {
+            surfacePixelFmt = decodeOutputSurfacePixelFmt;
+        } else {
             // need to convert pixel format when write
             needConvFormat = true;
         }
     }
     uint64_t usage = BUFFER_USAGE_CPU_READ | BUFFER_USAGE_CPU_WRITE | BUFFER_USAGE_MEM_DMA;
-    if (pixelFormat_ == VideoPixelFormat::NV12) {
-        surfaceFmt = PixelFormat::PIXEL_FMT_YCBCR_420_SP;
-    } else if (pixelFormat_ == VideoPixelFormat::NV21) {
-        surfaceFmt = PixelFormat::PIXEL_FMT_YCRCB_420_SP;
-    }
-    MEDIA_LOG_D("pixelFormat: " PUBLIC_LOG_U32 ", surfaceFmt: " PUBLIC_LOG_U32,
-                static_cast<uint32_t>(pixelFormat_), static_cast<uint32_t>(surfaceFmt));
-    mAllocator_->Config(static_cast<int32_t>(width_), static_cast<int32_t>(height_), usage, surfaceFmt,
+    MEDIA_LOG_D("decode output pixel fmt: " PUBLIC_LOG_U32 ", surface pixel fmt: " PUBLIC_LOG_U32,
+        static_cast<uint32_t>(decodeOutputPixelFmt_), static_cast<uint32_t>(surfacePixelFmt));
+    mAllocator_->Config(static_cast<int32_t>(width_), static_cast<int32_t>(height_), usage, surfacePixelFmt,
                         DEFAULT_STRIDE_ALIGN, 0);
     MEDIA_LOG_D("Prepare success");
     return Status::OK;
@@ -236,8 +225,8 @@ Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
         }
         case Tag::VIDEO_PIXEL_FORMAT: {
             if (value.SameTypeWith(typeid(VideoPixelFormat))) {
-                pixelFormat_ = Plugin::AnyCast<VideoPixelFormat>(value);
-                MEDIA_LOG_D("pixelFormat: " PUBLIC_LOG_U32, static_cast<uint32_t>(pixelFormat_));
+                decodeOutputPixelFmt_ = Plugin::AnyCast<VideoPixelFormat>(value);
+                MEDIA_LOG_D("decode output pixel fmt: " PUBLIC_LOG_U32, static_cast<uint32_t>(decodeOutputPixelFmt_));
             }
             break;
         }
