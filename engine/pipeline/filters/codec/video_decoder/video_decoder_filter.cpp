@@ -46,7 +46,6 @@ VideoDecoderFilter::VideoDecoderFilter(const std::string& name, std::shared_ptr<
     MEDIA_LOG_I("video decoder ctor called");
     filterType_ = FilterType::VIDEO_DECODER;
     bufferMetaType_ = Plugin::BufferMetaType::VIDEO;
-    pluginType_ = Plugin::PluginType::VIDEO_DECODER;
     codecMode_ = codecMode;
 }
 

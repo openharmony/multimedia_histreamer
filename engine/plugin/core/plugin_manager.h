@@ -42,7 +42,7 @@ public:
         return impl;
     }
 
-    std::vector<std::string> ListPlugins(PluginType pluginType, CodecMode preferredCodecMode = CodecMode::HARDWARE);
+    std::set<std::string> ListPlugins(PluginType type);
 
     std::shared_ptr<PluginInfo> GetPluginInfo(PluginType type, const std::string& name);
 
@@ -52,7 +52,7 @@ public:
 
     std::shared_ptr<Muxer> CreateMuxerPlugin(const std::string& name);
 
-    std::shared_ptr<Codec> CreateCodecPlugin(const std::string& name, PluginType type);
+    std::shared_ptr<Codec> CreateCodecPlugin(const std::string& name);
 
     std::shared_ptr<AudioSink> CreateAudioSinkPlugin(const std::string& name);
 

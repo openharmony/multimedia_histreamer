@@ -66,7 +66,6 @@ VideoEncoderFilter::VideoEncoderFilter(const std::string& name)
 {
     MEDIA_LOG_I("video encoder ctor called");
     filterType_ = FilterType::VIDEO_ENCODER;
-    pluginType_ = Plugin::PluginType::VIDEO_ENCODER;
     vencFormat_.width = 0;
     vencFormat_.height = 0;
     vencFormat_.bitRate = -1;
@@ -166,7 +165,7 @@ bool VideoEncoderFilter::Negotiate(const std::string& inPort,
     FALSE_RETURN_V_MSG_E(targetOutPort != nullptr, false, "out port not found");
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
     bool atLeastOutCapMatched = false;
-    auto candidatePlugins = FindAvailablePlugins(*upstreamCap, pluginType_, preferredCodecMode_);
+    auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::CODEC);
     for (const auto& candidate : candidatePlugins) {
         FALSE_LOG_MSG(!candidate.first->outCaps.empty(), "encoder plugin must have out caps");
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
@@ -199,8 +198,8 @@ bool VideoEncoderFilter::Negotiate(const std::string& inPort,
                          "can't find available encoder plugin with " PUBLIC_LOG_S,
                          Capability2String(*upstreamCap).c_str());
     auto res = UpdateAndInitPluginByInfo<Plugin::Codec>(plugin_, pluginInfo_, selectedPluginInfo,
-        [this](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
-        return Plugin::PluginManager::Instance().CreateCodecPlugin(name, pluginType_);
+        [](const std::string& name)-> std::shared_ptr<Plugin::Codec> {
+        return Plugin::PluginManager::Instance().CreateCodecPlugin(name);
     });
     negotiatedCap = *upstreamCap;
     PROFILE_END("video encoder negotiate end");
