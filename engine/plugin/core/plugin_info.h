@@ -75,11 +75,12 @@ struct PluginInfo {
 
 /**
  * Extra information about the plugin.
- * Describes the CodecMode supported by the Codec plugin.
+ * Describes the codec type supported by the Codec plugin.
  *
- * ValueType: enum Plugin::CodecMode
+ * ValueType: enum Plugin::CodecType
  */
-#define PLUGIN_INFO_EXTRA_CODEC_MODE        "codec_mode" // NOLINT: macro constant
+#define PLUGIN_INFO_EXTRA_CODEC_TYPE        "codec_type" // NOLINT: macro constant
+
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

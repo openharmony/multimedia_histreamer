@@ -98,8 +98,7 @@ protected:
     std::shared_ptr<Plugin::Codec> plugin_ {};
     Plugin::BufferMetaType bufferMetaType_ = {};
     std::shared_ptr<CodecMode> codecMode_ {nullptr};
-    Plugin::PluginType pluginType_ {};
-    Plugin::CodecMode preferredCodecMode_ {Plugin::CodecMode::HARDWARE};
+
 private:
     virtual std::shared_ptr<Allocator> GetAllocator();
     Capability capNegWithDownstream_ {};

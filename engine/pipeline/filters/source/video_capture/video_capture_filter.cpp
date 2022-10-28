@@ -334,7 +334,7 @@ ErrorCode VideoCaptureFilter::FindPlugin()
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
     PluginManager& pluginManager = PluginManager::Instance();
-    auto nameList = pluginManager.ListPlugins(PluginType::SOURCE);
+    std::set<std::string> nameList = pluginManager.ListPlugins(PluginType::SOURCE);
     for (const std::string& name : nameList) {
         std::shared_ptr<PluginInfo> info = pluginManager.GetPluginInfo(PluginType::SOURCE, name);
         MEDIA_LOG_I("name: " PUBLIC_LOG_S ", info->name: " PUBLIC_LOG_S, name.c_str(), info->name.c_str());

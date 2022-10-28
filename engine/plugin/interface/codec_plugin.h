@@ -128,19 +128,33 @@ struct CodecPlugin : public PluginBase {
 #define CODEC_API_VERSION MAKE_VERSION(CODEC_API_VERSION_MAJOR, CODEC_API_VERSION_MINOR)
 
 /**
+ * @brief The Codec Type.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+enum struct CodecType {
+    AUDIO_DECODER, ///< Audio decoder
+    AUDIO_ENCODER, ///< Audio encoder
+    VIDEO_DECODER, ///< video decoder
+    VIDEO_ENCODER, ///< video encoder
+};
+
+/**
  * @brief Describes the codec plugin information.
  *
  * @since 1.0
  * @version 1.0
  */
 struct CodecPluginDef : public PluginDefBase {
-    CodecMode codecMode {CodecMode::SOFTWARE};
+    CodecType codecType {};
     CapabilitySet inCaps {};                   ///< Plug-in input capability, For details, @see Capability.
     CapabilitySet outCaps {};                  ///< Plug-in output capability, For details, @see Capability.
     PluginCreatorFunc<CodecPlugin> creator {nullptr}; ///< Codec plugin create function.
     CodecPluginDef()
     {
         apiVersion = CODEC_API_VERSION; ///< Codec plugin version
+        pluginType = PluginType::CODEC; ///< Plugin type, MUST be CODEC.
     }
 };
 } // namespace Plugin

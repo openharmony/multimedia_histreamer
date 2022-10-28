@@ -54,7 +54,7 @@ Status RegisterAudioEncoderPlugins(const std::shared_ptr<Register>& reg)
         }
         CodecPluginDef definition;
         definition.name = "ffmpegAuEnc_" + std::string(codec->name);
-        definition.pluginType = PluginType::AUDIO_ENCODER;
+        definition.codecType = CodecType::AUDIO_ENCODER;
         definition.rank = 100; // 100
         definition.creator = AuFfmpegEncoderCreator;
         UpdatePluginDefinition(codec, definition);
