@@ -369,9 +369,9 @@ ErrorCode HiPlayerImpl::DoStop()
 {
     MEDIA_LOG_I("HiPlayerImpl DoStop called, stop pipeline.");
     mediaStats_.Reset();
-    // 先关闭demuxer线程，防止出现并发问题
+    // 先先关闭demuxer线程，防止元数据解析prepare过程中出现并发问题
     if (demuxer_) {
-        demuxer_->StopTask();
+        demuxer_->StopTask(false);
     }
     auto ret = pipeline_->Stop();
     syncManager_->Reset();
