@@ -120,6 +120,8 @@ private:
     double ChangeModeToSpeed(const PlaybackRateMode& mode) const;
     PlaybackRateMode ChangeSpeedToMode(double rate) const;
     void NotifyBufferingUpdate(const std::string_view& type, int32_t param);
+    void HandleResolutionChangeEvent(const Event& event);
+    void HandlePluginEvent(const Event& event);
     
     OSAL::Mutex stateMutex_ {};
     OSAL::ConditionVariable cond_ {};
@@ -154,6 +156,9 @@ private:
     std::shared_ptr<Pipeline::MediaSyncManager> syncManager_;
     HiPlayerCallbackLooper callbackLooper_ {};
     sptr<Surface> surface_ {nullptr};
+
+    int32_t videoWidth_ {0};
+    int32_t videoHeight_ {0};
 };
 }  // namespace Media
 }  // namespace OHOS

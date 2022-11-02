@@ -127,11 +127,15 @@ private:
     void HandelCmdCompleteEvent(OMX_U32 data1, OMX_U32 data2);
     void HandelEventStateSet(OMX_U32 data1, OMX_U32 data2);
     void HandelEventFlush(OMX_U32 data1, OMX_U32 data2);
+    void HandlePortSettingsChangedEvent(OMX_U32 data1, OMX_U32 data2);
+    void HandleErrorEvent(OMX_U32 data1);
 
     OSAL::Mutex stateSetMutex_;
     OSAL::ConditionVariable stateSetCond_;
-    int lastCmd_ = -2; // -1 for error cmd and -2 for invaild
-    bool eventDone_ = false;
+    int lastState_ = -1; // -1 for invalid state
+    bool stateChangeDone_ = false;
+    OMX_STATETYPE curState_ {OMX_StateInvalid};
+    OMX_STATETYPE targetState_ {OMX_StateInvalid};
 
     OSAL::Mutex lockInputBuffers_;
 
@@ -147,9 +151,6 @@ private:
     DataCallback* dataCallback_ {nullptr};
     std::list<std::shared_ptr<Buffer>> inBufQue_ {};
     OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufQue_ {nullptr};
-
-    OMX_STATETYPE curState_ {OMX_StateInvalid};
-    OMX_STATETYPE targetState_ {OMX_StateInvalid};
 
     bool bufferConfigured_ {false};
     uint32_t width_;
