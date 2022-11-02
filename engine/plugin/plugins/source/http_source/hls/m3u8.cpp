@@ -14,10 +14,10 @@
  */
 #define HST_LOG_TAG "M3U8"
 
+#include <algorithm>
+#include <utility>
 #include "foundation/log.h"
 #include "m3u8.h"
-
-#include <utility>
 
 namespace OHOS {
 namespace Media {
@@ -185,33 +185,39 @@ void M3U8MasterPlaylist::UpdateMasterPlaylist()
 {
     MEDIA_LOG_I("master playlist " PUBLIC_LOG_S, playList_.c_str());
     auto tags = ParseEntries(playList_);
-    for (auto& tag : tags) {
+    std::for_each(tags.begin(), tags.end(), [this] (std::shared_ptr<Tag>& tag) {
         switch (tag->GetType()) {
             case HlsTag::EXTXSTREAMINF:
             case HlsTag::EXTXIFRAMESTREAMINF: {
                 auto item = std::static_pointer_cast<AttributesTag>(tag);
-                auto name = item->GetAttributeByName("URI")->QuotedString();
-                auto uri = UriJoin(uri_, name);
-                auto stream = std::make_shared<M3U8VariantStream>(name, uri, std::make_shared<M3U8>(uri, name));
-                if (tag->GetType() == HlsTag::EXTXIFRAMESTREAMINF) {
-                    stream->iframe_ = true;
-                }
-                stream->bandWidth_ = item->GetAttributeByName("BANDWIDTH")->Decimal();
-                auto resolution = item->GetAttributeByName("RESOLUTION");
-                if (resolution) {
-                    stream->width_ = resolution->GetResolution().first;
-                    stream->height_ = resolution->GetResolution().second;
-                }
-                variants_.emplace_back(stream);
-                if (defaultVariant_ == nullptr) {
-                    defaultVariant_ = stream;
+                auto uriAttribute = item->GetAttributeByName("URI");
+                if (uriAttribute) {
+                    auto name = uriAttribute->QuotedString();
+                    auto uri = UriJoin(uri_, name);
+                    auto stream = std::make_shared<M3U8VariantStream>(name, uri, std::make_shared<M3U8>(uri, name));
+                    if (tag->GetType() == HlsTag::EXTXIFRAMESTREAMINF) {
+                        stream->iframe_ = true;
+                    }
+                    auto bandWidthAttribute = item->GetAttributeByName("BANDWIDTH");
+                    if (bandWidthAttribute) {
+                        stream->bandWidth_ = bandWidthAttribute->Decimal();
+                    }
+                    auto resolutionAttribute = item->GetAttributeByName("RESOLUTION");
+                    if (resolutionAttribute) {
+                        stream->width_ = resolutionAttribute->GetResolution().first;
+                        stream->height_ = resolutionAttribute->GetResolution().second;
+                    }
+                    variants_.emplace_back(stream);
+                    if (defaultVariant_ == nullptr) {
+                        defaultVariant_ = stream;
+                    }
                 }
                 break;
             }
             default:
                 break;
         }
-    }
+    });
     tags.clear();
 }
 }

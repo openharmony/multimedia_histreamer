@@ -245,7 +245,7 @@ void MediaSourceFilter::ActivateMode()
         }
         retry++;
         if (seekable_ == Seekable::INVALID) {
-            if (retry >= 10) { // 10
+            if (retry >= 20) { // 20
                 break;
             }
             OSAL::SleepFor(10); // 10
@@ -255,7 +255,7 @@ void MediaSourceFilter::ActivateMode()
     if (seekable_ == Seekable::UNSEEKABLE) {
         if (taskPtr_ == nullptr) {
             taskPtr_ = std::make_shared<OSAL::Task>("DataReader");
-            taskPtr_->RegisterHandler(std::bind(&MediaSourceFilter::ReadLoop, this));
+            taskPtr_->RegisterHandler([this] { ReadLoop(); });
         }
         taskPtr_->Start();
     }

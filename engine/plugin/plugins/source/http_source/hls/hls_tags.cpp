@@ -201,9 +201,11 @@ void AttributesTag::ParseAttributes(const std::string& field)
         oss.str("");
         std::string attrValue = ParseAttributeValue(iss, oss);
         oss.str("");
-        auto attribute = std::make_shared<Attribute>(attrName, attrValue);
-        if (attribute) {
-            attributes.push_back(attribute);
+        if (!attrName.empty())  {
+            auto attribute = std::make_shared<Attribute>(attrName, attrValue);
+            if (attribute) {
+                attributes.push_back(attribute);
+            }
         }
     }
 }
@@ -253,10 +255,10 @@ std::string AttributesTag::ParseAttributeName(std::istringstream& iss, std::ostr
 
 ValuesListTag::ValuesListTag(HlsTag type, const std::string& v) : AttributesTag(type, v)
 {
-    ParseValuesAttributes(v);
+    ParseAttributes(v);
 }
 
-void ValuesListTag::ParseValuesAttributes(const std::string& field)
+void ValuesListTag::ParseAttributes(const std::string& field)
 {
     auto pos = field.find(',');
     std::shared_ptr<Attribute> attr;
