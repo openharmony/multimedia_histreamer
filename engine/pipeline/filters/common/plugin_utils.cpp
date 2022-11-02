@@ -357,10 +357,10 @@ bool TranslateIntoParameter(const int& key, OHOS::Media::Plugin::Tag& tag)
     return true;
 }
 
-std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>>
-    FindAvailablePlugins(const Plugin::Capability& upStreamCaps, Plugin::PluginType pluginType)
+std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>> FindAvailablePlugins(
+    const Plugin::Capability& upStreamCaps, Plugin::PluginType pluginType, Plugin::CodecMode preferredCodecMode)
 {
-    auto pluginNames = Plugin::PluginManager::Instance().ListPlugins(pluginType);
+    auto pluginNames = Plugin::PluginManager::Instance().ListPlugins(pluginType, preferredCodecMode);
     std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>> infos;
     for (const auto& name : pluginNames) {
         auto tmpInfo = Plugin::PluginManager::Instance().GetPluginInfo(pluginType, name);
@@ -371,6 +371,7 @@ std::vector<std::pair<std::shared_ptr<Plugin::PluginInfo>, Plugin::Capability>>
     }
     return infos;
 }
+
 std::vector<std::shared_ptr<Plugin::PluginInfo>> FindAvailablePluginsByOutputMime(const std::string& outputMime,
                                                                                   Plugin::PluginType pluginType)
 {

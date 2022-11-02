@@ -26,6 +26,7 @@ static Status CodecRegister(const std::shared_ptr<Register> &reg)
 {
     CodecPluginDef definition;
     definition.name = "UtCodecTest2";
+    definition.pluginType = PluginType::AUDIO_DECODER;
     definition.description = "unit test codec test2";
     definition.rank = 100; // 100
     definition.creator = PluginCreator;

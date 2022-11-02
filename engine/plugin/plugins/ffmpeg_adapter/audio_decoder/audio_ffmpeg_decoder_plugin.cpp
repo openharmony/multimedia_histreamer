@@ -69,7 +69,7 @@ Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
         }
         CodecPluginDef definition;
         definition.name = "ffmpegAuDec_" + std::string(codec->name);
-        definition.codecType = CodecType::AUDIO_DECODER;
+        definition.pluginType = PluginType::AUDIO_DECODER;
         definition.rank = 100; // 100
         definition.creator = [] (const std::string& name) -> std::shared_ptr<CodecPlugin> {
             return std::make_shared<AudioFfmpegDecoderPlugin>(name);

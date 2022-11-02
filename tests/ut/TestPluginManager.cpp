@@ -32,7 +32,7 @@ TEST(TestPluginManager, ListPlugins_case3)
 {
     UtSourceTest1::available = true;
     UtSourceTest2::available = true;
-    std::set<std::string> plugins = PluginManager::Instance().ListPlugins(PluginType::SOURCE);
+    std::vector<std::string> plugins = PluginManager::Instance().ListPlugins(PluginType::SOURCE);
     ASSERT_TRUE(plugins.size() > 1);
     for (const auto & plugin : plugins) {
         ASSERT_NE(plugin, "");
@@ -41,7 +41,7 @@ TEST(TestPluginManager, ListPlugins_case3)
 
 TEST(TestPluginManager, ListPlugins_case4)
 {
-    std::set<std::string> plugins = PluginManager::Instance().ListPlugins(PluginType::DEMUXER);
+    std::vector<std::string> plugins = PluginManager::Instance().ListPlugins(PluginType::DEMUXER);
     ASSERT_TRUE(plugins.size() > 1);
     for (const auto & plugin : plugins) {
         ASSERT_NE(plugin, "");
@@ -50,7 +50,7 @@ TEST(TestPluginManager, ListPlugins_case4)
 
 TEST(TestPluginManager, ListPlugins_case5)
 {
-    std::set<std::string> plugins = PluginManager::Instance().ListPlugins(PluginType::CODEC);
+    std::vector<std::string> plugins = PluginManager::Instance().ListPlugins(PluginType::AUDIO_DECODER);
     ASSERT_TRUE(plugins.size() > 1);
     for (const auto & plugin : plugins) {
         ASSERT_NE(plugin, "");
@@ -59,7 +59,7 @@ TEST(TestPluginManager, ListPlugins_case5)
 
 TEST(TestPluginManager, ListPlugins_case6)
 {
-    std::set<std::string> plugins = PluginManager::Instance().ListPlugins(PluginType::AUDIO_SINK);
+    std::vector<std::string> plugins = PluginManager::Instance().ListPlugins(PluginType::AUDIO_SINK);
     ASSERT_TRUE(plugins.size() > 1);
     for (const auto & plugin : plugins) {
         ASSERT_NE(plugin, "");
@@ -136,17 +136,17 @@ TEST(TestPluginManager, CreateDemuxerPlugin_case3)
 
 TEST(TestPluginManager, CreateCodecPlugin_case1)
 {
-    ASSERT_TRUE(PluginManager::Instance().CreateCodecPlugin("UtCodecTest1") != nullptr);
+    ASSERT_TRUE(PluginManager::Instance().CreateCodecPlugin("UtCodecTest1", PluginType::AUDIO_DECODER) != nullptr);
 }
 
 TEST(TestPluginManager, CreateCodecPlugin_case2)
 {
-    ASSERT_TRUE(PluginManager::Instance().CreateCodecPlugin("UtCodecTest3") == nullptr);
+    ASSERT_TRUE(PluginManager::Instance().CreateCodecPlugin("UtCodecTest3", PluginType::AUDIO_DECODER) == nullptr);
 }
 
 TEST(TestPluginManager, CreateCodecPlugin_case3)
 {
-    ASSERT_TRUE(PluginManager::Instance().CreateCodecPlugin("") == nullptr);
+    ASSERT_TRUE(PluginManager::Instance().CreateCodecPlugin("", PluginType::AUDIO_DECODER) == nullptr);
 }
 
 TEST(TestPluginManager, CreateAudioSinkPlugin_case1)

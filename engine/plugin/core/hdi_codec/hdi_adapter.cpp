@@ -103,7 +103,7 @@ bool TranslateCapability(const CodecCompCapability& cap, CodecPluginDef& def)
 bool TranslateCapToPluginDef(const CodecCompCapability& capability,
                              CodecPluginDef& def, const std::string& packageName)
 {
-    if (!Translates(capability.type, def.codecType)) {
+    if (!Translates(capability.type, def.pluginType)) {
         MEDIA_LOG_E("Codec type of plugin " PUBLIC_LOG_S "." PUBLIC_LOG_S " mismatched",
                     packageName.c_str(), capability.compName);
         return false;
@@ -143,6 +143,7 @@ Status RegisterOneCodecPackage(const std::shared_ptr<OHOS::Media::Plugin::Regist
         CodecPluginDef definition;
         if (TranslateCapToPluginDef(capList[i], definition, packageName)) {
             definition.rank = 100; // 100 default rank
+            definition.codecMode = CodecMode::HARDWARE;
             if (reg->AddPlugin(definition) != Status::OK) {
                 MEDIA_LOG_E("Add plugin " PUBLIC_LOG_S " failed", definition.name.c_str());
             }

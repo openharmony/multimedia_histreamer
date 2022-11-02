@@ -247,7 +247,7 @@ Status RegisterDecoderPlugin(const std::shared_ptr<Register>& reg)
 
     CodecPluginDef definition;
     definition.name      = "Minimp3DecoderPlugin";
-    definition.codecType = CodecType::AUDIO_DECODER;
+    definition.pluginType = PluginType::AUDIO_DECODER;
     definition.rank      = MAX_RANK;
     definition.creator   = Minimp3DecoderCreator;
     UpdatePluginDefinition(definition);
