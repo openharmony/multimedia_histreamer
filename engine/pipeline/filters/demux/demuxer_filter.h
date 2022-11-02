@@ -79,7 +79,7 @@ public:
 
     std::shared_ptr<Plugin::Meta> GetGlobalMetaInfo() const;
 
-    void StopTask();
+    void StopTask(bool force);
 
 private:
     class DataSourceImpl;

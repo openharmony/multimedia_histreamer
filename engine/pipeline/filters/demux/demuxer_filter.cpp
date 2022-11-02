@@ -126,7 +126,7 @@ DemuxerFilter::DemuxerFilter(std::string name)
 DemuxerFilter::~DemuxerFilter()
 {
     MEDIA_LOG_I("dtor called");
-    StopTask();
+    StopTask(true);
     if (plugin_) {
         plugin_->Deinit();
     }
@@ -155,7 +155,7 @@ ErrorCode DemuxerFilter::Stop()
 {
     MEDIA_LOG_I("Stop called.");
     dataPacker_->Stop();
-    StopTask();
+    StopTask(true);
     Reset();
     if (!outPorts_.empty()) {
         PortInfo portInfo;
@@ -284,10 +284,12 @@ std::shared_ptr<Plugin::Meta> DemuxerFilter::GetGlobalMetaInfo() const
     return mediaMetaData_.globalMeta;
 }
 
-void DemuxerFilter::StopTask()
+void DemuxerFilter::StopTask(bool force)
 {
-    if (task_) {
-        task_->Stop();
+    if (force || pluginState_.load() != DemuxerState::DEMUXER_STATE_PARSE_FRAME) {
+        if (task_) {
+            task_->Stop();
+        }
     }
 }
 
