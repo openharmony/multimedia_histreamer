@@ -103,9 +103,9 @@ public:
     std::shared_ptr<Attribute> GetAttributeByName(const char* name) const;
     void AddAttribute(std::shared_ptr<Attribute>& attr);
 protected:
+    virtual void ParseAttributes(const std::string& field);
     std::list<std::shared_ptr<Attribute>> attributes;
 private:
-    void ParseAttributes(const std::string& field);
     std::string ParseAttributeName(std::istringstream& iss, std::ostringstream& oss) const;
     std::string ParseAttributeValue(std::istringstream& iss, std::ostringstream& oss);
 };
@@ -114,8 +114,8 @@ class ValuesListTag : public AttributesTag {
 public:
     ValuesListTag(HlsTag type, const std::string& v);
     ~ValuesListTag() override = default;
-private:
-    void ParseValuesAttributes(const std::string& field);
+protected:
+    void ParseAttributes(const std::string& field) override;
 };
 
 class TagFactory {
