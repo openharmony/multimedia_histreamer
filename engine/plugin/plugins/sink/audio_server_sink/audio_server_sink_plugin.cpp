@@ -218,7 +218,8 @@ void AudioServerSinkPlugin::AudioRendererCallbackImpl::OnInterrupt(
     callback_->OnEvent(PluginEvent{PluginEventType::INTERRUPT, audioInterruptEvent, "Audio interrupt event"});
 }
 
-void AudioServerSinkPlugin::AudioRendererCallbackImpl::OnStateChange(const OHOS::AudioStandard::RendererState state)
+void AudioServerSinkPlugin::AudioRendererCallbackImpl::OnStateChange(const OHOS::AudioStandard::RendererState state,
+    const AudioStandard::StateChangeCmdType __attribute__((unused)) cmdType)
 {
     MEDIA_LOG_D("RenderState is " PUBLIC_LOG_U32, static_cast<uint32_t>(state));
 }
