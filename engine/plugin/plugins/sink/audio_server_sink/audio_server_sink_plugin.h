@@ -114,7 +114,8 @@ private:
     public:
         AudioRendererCallbackImpl(Callback* cb, bool& isPaused);
         void OnInterrupt(const OHOS::AudioStandard::InterruptEvent& interruptEvent) override;
-        void OnStateChange(const OHOS::AudioStandard::RendererState state) override;
+        void OnStateChange(const OHOS::AudioStandard::RendererState state,
+            const AudioStandard::StateChangeCmdType __attribute__((unused)) cmdType) override;
     private:
         Callback* callback_ {};
         bool isPaused_ {false};
