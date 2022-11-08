@@ -48,6 +48,9 @@ VideoSinkFilter::VideoSinkFilter(const std::string& name) : MediaSynchronousSink
 VideoSinkFilter::~VideoSinkFilter()
 {
     MEDIA_LOG_D("VideoSinkFilter deCtor.");
+    if (renderTask_) {
+        renderTask_->Stop();
+    }
     if (plugin_) {
         plugin_->Stop();
         plugin_->Deinit();
@@ -337,7 +340,7 @@ ErrorCode VideoSinkFilter::Stop()
         startWorkingCondition_.NotifyOne();
     }
     inBufQueue_->SetActive(false);
-    renderTask_->Pause();
+    renderTask_->Stop();
     return ErrorCode::SUCCESS;
 }
 
