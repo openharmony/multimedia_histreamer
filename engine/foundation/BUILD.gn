@@ -22,7 +22,7 @@ config("histreamer_foundation_config") {
   ]
   if (hst_is_lite_sys) {
     include_dirs += [
-      "//foundation/multimedia/utils/lite/interfaces/kits",
+      "//foundation/multimedia/media_utils_lite/interfaces/kits",
       "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits",
     ]
   } else {
@@ -52,7 +52,7 @@ source_set("histreamer_foundation") {
   ]
   public_deps = []
   if (hst_is_lite_sys) {
-    deps = [ "//foundation/multimedia/utils/lite:media_common" ]
+    deps = [ "//foundation/multimedia/media_utils_lite:media_common" ]
     if (ohos_kernel_type == "liteos_m") {
       deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_static" ]
       public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]

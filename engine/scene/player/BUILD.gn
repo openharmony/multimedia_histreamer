@@ -51,7 +51,7 @@ source_set("histreamer_player") {
       "//foundation/multimedia/histreamer/engine/scene/player/lite/hiplayer.cpp",
       "//foundation/multimedia/histreamer/engine/scene/player/lite/hiplayer_impl.cpp",
     ]
-    public_deps += [ "//foundation/multimedia/utils/lite:media_common" ]
+    public_deps += [ "//foundation/multimedia/media_utils_lite:media_common" ]
   } else {
     sources += [
       "//foundation/multimedia/histreamer/engine/scene/player/standard/hiplayer_callback_looper.cpp",
