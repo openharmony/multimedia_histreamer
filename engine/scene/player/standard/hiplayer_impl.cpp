@@ -84,6 +84,8 @@ HiPlayerImpl::HiPlayerImpl(int32_t appUid, int32_t appPid)
 HiPlayerImpl::~HiPlayerImpl()
 {
     MEDIA_LOG_I("dtor called.");
+    DoStop();
+    OnStateChanged(StateId::STOPPED);
     callbackLooper_.Stop();
     audioSink_.reset();
 #ifdef VIDEO_SUPPORT
@@ -254,6 +256,7 @@ int32_t HiPlayerImpl::Stop()
     MEDIA_LOG_I("Stop entered.");
     PROFILE_BEGIN();
     auto ret = TransErrorCode(DoStop());
+    OnStateChanged(StateId::STOPPED);
     callbackLooper_.StopReportMediaProgress();
     callbackLooper_.ManualReportMediaProgressOnce();
     PROFILE_END("Stop ret = " PUBLIC_LOG_D32, ret);
@@ -630,8 +633,10 @@ ErrorCode HiPlayerImpl::DoOnComplete()
 {
     MEDIA_LOG_I("OnComplete looping: " PUBLIC_LOG_D32 ".", singleLoop_.load());
     Format format;
-    callbackLooper_.OnInfo(INFO_TYPE_EOS, static_cast<int32_t>(singleLoop_.load()), format);
-    if (!singleLoop_.load()) {
+    if (singleLoop_.load()) {
+        callbackLooper_.OnInfo(INFO_TYPE_EOS, static_cast<int32_t>(singleLoop_.load()), format);
+    } else {
+        callbackLooper_.OnInfo(INFO_TYPE_STATE_CHANGE, static_cast<int32_t>(PLAYER_PLAYBACK_COMPLETE), format);
         callbackLooper_.StopReportMediaProgress();
         callbackLooper_.ManualReportMediaProgressOnce();
     }
