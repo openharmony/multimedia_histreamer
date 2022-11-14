@@ -127,8 +127,6 @@ private:
     OSAL::ConditionVariable cond_ {};
     int32_t appUid_ {0};
     int32_t appPid_ {0};
-    StateMachine fsm_;
-    std::atomic<StateId> curFsmState_;
     std::shared_ptr<Pipeline::PipelineCore> pipeline_;
     std::atomic<PlayerStates> pipelineStates_ {PlayerStates::PLAYER_IDLE}; // only update in UpdateStateNoLock()
     std::queue<PlayerStates> pendingStates_ {};

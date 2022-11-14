@@ -44,8 +44,6 @@ constexpr double SPEED_2_00_X = 2.00;
 HiPlayerImpl::HiPlayerImpl(int32_t appUid, int32_t appPid)
     : appUid_(appUid),
       appPid_(appPid),
-      fsm_(*this),
-      curFsmState_(StateId::IDLE),
       volume_(-1.0f), // default negative, if app not set, will not set it.
       mediaStats_()
 {
@@ -86,8 +84,8 @@ HiPlayerImpl::HiPlayerImpl(int32_t appUid, int32_t appPid)
 HiPlayerImpl::~HiPlayerImpl()
 {
     MEDIA_LOG_I("dtor called.");
-    fsm_.SendEventAsync(Intent::STOP);
-    fsm_.Stop();
+    DoStop();
+    OnStateChanged(StateId::STOPPED);
     callbackLooper_.Stop();
     audioSink_.reset();
 #ifdef VIDEO_SUPPORT
@@ -136,8 +134,6 @@ ErrorCode HiPlayerImpl::Init()
         ret = pipeline_->LinkFilters({audioSource_.get(), demuxer_.get()});
     }
     if (ret == ErrorCode::SUCCESS) {
-        fsm_.SetStateCallback(this);
-        fsm_.Start();
         initialized_ = true;
     } else {
         pipeline_->UnlinkPrevFilters();
@@ -154,7 +150,7 @@ int32_t HiPlayerImpl::SetSource(const std::string& uri)
     PROFILE_BEGIN("SetSource begin");
     auto ret = Init();
     if (ret == ErrorCode::SUCCESS) {
-        ret = fsm_.SendEvent(Intent::SET_SOURCE, std::make_shared<MediaSource>(uri));
+        ret = DoSetSource(std::make_shared<MediaSource>(uri));
     }
     if (ret != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("SetSource error: " PUBLIC_LOG_S, GetErrorName(ret));
@@ -169,7 +165,7 @@ int32_t HiPlayerImpl::SetSource(const std::shared_ptr<IMediaDataSource>& dataSrc
     PROFILE_BEGIN("SetSource begin");
     auto ret = Init();
     if (ret == ErrorCode::SUCCESS) {
-        ret = fsm_.SendEvent(Intent::SET_SOURCE, std::make_shared<MediaSource>(dataSrc));
+        ret = DoSetSource(std::make_shared<MediaSource>(dataSrc));
     }
     if (ret != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("SetSource error: " PUBLIC_LOG_S, GetErrorName(ret));
@@ -182,21 +178,22 @@ int32_t HiPlayerImpl::Prepare()
 {
     SYNC_TRACER();
     NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_START, 0);
-    MEDIA_LOG_I("Prepare entered, current fsm state: " PUBLIC_LOG_S ".", fsm_.GetCurrentState().c_str());
+    MEDIA_LOG_I("Prepare entered, current pipeline state: " PUBLIC_LOG_S ".", StringnessPlayerState(pipelineStates_).c_str());
     PROFILE_BEGIN();
-    auto ret = fsm_.SendEvent(Intent::PREPARE);
+    auto ret = PrepareFilters();
     if (ret != ErrorCode::SUCCESS) {
         PROFILE_END("Prepare failed,");
         MEDIA_LOG_E("Prepare failed with error " PUBLIC_LOG_D32, ret);
         return TransErrorCode(ret);
     }
+    OnStateChanged(StateId::PREPARING);
     OSAL::ScopedLock lock(stateMutex_);
-    if (curFsmState_ == StateId::PREPARING) { // Wait state change to ready
-        cond_.Wait(lock, [this] { return curFsmState_ != StateId::PREPARING; });
+    if (pipelineStates_ == PlayerStates::PLAYER_PREPARING) { // Wait state change to ready
+        cond_.Wait(lock, [this] { return pipelineStates_ != PlayerStates::PLAYER_PREPARING; });
     }
-    MEDIA_LOG_D("Prepare finished, current fsm state: " PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
-    PROFILE_END("Prepare finished, current fsm state: " PUBLIC_LOG "s.", fsm_.GetCurrentState().c_str());
-    if (curFsmState_ == StateId::READY) {
+    MEDIA_LOG_D("Prepare finished, current pipeline state: " PUBLIC_LOG "s.", StringnessPlayerState(pipelineStates_).c_str());
+    PROFILE_END("Prepare finished, current pipeline state: " PUBLIC_LOG "s.", StringnessPlayerState(pipelineStates_).c_str());
+    if (pipelineStates_ == PlayerStates::PLAYER_PREPARED) {
         NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_END, 0);
         return TransErrorCode(ErrorCode::SUCCESS);
     }
@@ -208,15 +205,16 @@ int HiPlayerImpl::PrepareAsync()
 {
     ASYNC_TRACER();
     NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_START, 0);
-    MEDIA_LOG_I("Prepare async entered, current fsm state: " PUBLIC_LOG_S, fsm_.GetCurrentState().c_str());
+    MEDIA_LOG_I("Prepare async entered, current pipeline state: " PUBLIC_LOG_S, StringnessPlayerState(pipelineStates_).c_str());
     PROFILE_BEGIN();
-    auto ret = fsm_.SendEventAsync(Intent::PREPARE);
+    auto ret = PrepareFilters();
     if (ret != ErrorCode::SUCCESS) {
         PROFILE_END("Prepare async failed,");
         MEDIA_LOG_E("Prepare async failed with error " PUBLIC_LOG_D32, ret);
     } else {
         PROFILE_END("Prepare async successfully,");
     }
+    OnStateChanged(StateId::PREPARING);
     NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_END, 0);
     return TransErrorCode(ret);
 }
@@ -230,10 +228,11 @@ int32_t HiPlayerImpl::Play()
     seekInProgress_.store(false);
     ErrorCode ret;
     if (pipelineStates_ == PlayerStates::PLAYER_PAUSED) {
-        ret = fsm_.SendEvent(Intent::RESUME);
+        ret = DoResume();
     } else {
-        ret = fsm_.SendEvent(Intent::PLAY);
+        ret = DoPlay();
     }
+    OnStateChanged(StateId::PLAYING);
     PROFILE_END("Play ret = " PUBLIC_LOG_D32, TransErrorCode(ret));
     return TransErrorCode(ret);
 }
@@ -243,9 +242,10 @@ int32_t HiPlayerImpl::Pause()
     SYNC_TRACER();
     MEDIA_LOG_I("Pause entered.");
     PROFILE_BEGIN();
-    auto ret = TransErrorCode(fsm_.SendEvent(Intent::PAUSE));
+    auto ret = TransErrorCode(DoPause());
     callbackLooper_.StopReportMediaProgress();
     callbackLooper_.ManualReportMediaProgressOnce();
+    OnStateChanged(StateId::PAUSE);
     PROFILE_END("Pause ret = " PUBLIC_LOG_D32, ret);
     return ret;
 }
@@ -255,7 +255,8 @@ int32_t HiPlayerImpl::Stop()
     SYNC_TRACER();
     MEDIA_LOG_I("Stop entered.");
     PROFILE_BEGIN();
-    auto ret = TransErrorCode(fsm_.SendEvent(Intent::STOP));
+    auto ret = TransErrorCode(DoStop());
+    OnStateChanged(StateId::STOPPED);
     callbackLooper_.StopReportMediaProgress();
     callbackLooper_.ManualReportMediaProgressOnce();
     PROFILE_END("Stop ret = " PUBLIC_LOG_D32, ret);
@@ -265,7 +266,9 @@ int32_t HiPlayerImpl::Stop()
 ErrorCode HiPlayerImpl::StopAsync()
 {
     MEDIA_LOG_I("StopAsync entered.");
-    return fsm_.SendEventAsync(Intent::STOP);
+    ErrorCode ret = DoStop();
+    OnStateChanged(StateId::STOPPED);
+    return ret;
 }
 
 int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
@@ -290,10 +293,13 @@ int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
     auto smode = Transform2SeekMode(mode);
     lastSeekPosition_.store(hstTime);
     lastSeekMode_.store(smode);
-    seekInProgress_.store(true);
-    auto ret = fsm_.SendEvent(Intent::SEEK, SeekInfo{hstTime, smode});
-    if (ret != ErrorCode::SUCCESS) {
-        seekInProgress_.store(false);
+    auto ret = ErrorCode::SUCCESS;
+    if (!seekInProgress_.load()) {
+        seekInProgress_.store(true);
+        ret = DoSeek(hstTime, smode, true);
+        if (ret != ErrorCode::SUCCESS) {
+            seekInProgress_.store(false);
+        }
     }
     return TransErrorCode(ret);
 }
@@ -446,25 +452,37 @@ void HiPlayerImpl::OnEvent(const Event& event)
     }
     switch (event.type) {
         case EventType::EVENT_ERROR: {
-            fsm_.SendEventAsync(Intent::NOTIFY_ERROR, event.param);
+            ErrorCode errorCode = ErrorCode::ERROR_UNKNOWN;
+            if (event.param.SameTypeWith(typeid(ErrorCode))) {
+                errorCode = Plugin::AnyCast<ErrorCode>(event.param);
+            }
+            DoOnError(errorCode);
             break;
         }
-        case EventType::EVENT_READY:
-            fsm_.SendEventAsync(Intent::NOTIFY_READY);
-            break;
-        case EventType::EVENT_COMPLETE:
-            mediaStats_.ReceiveEvent(event);
-            if (mediaStats_.IsEventCompleteAllReceived()) {
-                fsm_.SendEventAsync(Intent::NOTIFY_COMPLETE);
+        case EventType::EVENT_READY: {
+            ErrorCode errorCode = DoOnReady();
+            if (errorCode == ErrorCode::SUCCESS) {
+                OnStateChanged(StateId::READY);
+            } else {
+                OnStateChanged(StateId::INIT);
             }
             break;
+        }
+        case EventType::EVENT_COMPLETE: {
+            mediaStats_.ReceiveEvent(event);
+            if (mediaStats_.IsEventCompleteAllReceived()) {
+                DoOnComplete();
+            }
+            break;
+        }
         case EventType::EVENT_PLUGIN_ERROR: {
             HandlePluginErrorEvent(event);
             break;
         }
-        case EventType::EVENT_RESOLUTION_CHANGE:
+        case EventType::EVENT_RESOLUTION_CHANGE: {
             HandleResolutionChangeEvent(event);
             break;
+        }
         case EventType::EVENT_PLUGIN_EVENT: {
             HandlePluginEvent(event);
             break;
@@ -545,9 +563,6 @@ ErrorCode HiPlayerImpl::DoReset()
 ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode, bool appTriggered)
 {
     SYNC_TRACER();
-    if (appTriggered) {
-        fsm_.Notify(Intent::SEEK, ErrorCode::SUCCESS);
-    }
     PROFILE_BEGIN();
     int64_t seekPos = hstTime;
     Plugin::SeekMode seekMode = mode;
@@ -618,8 +633,10 @@ ErrorCode HiPlayerImpl::DoOnComplete()
 {
     MEDIA_LOG_I("OnComplete looping: " PUBLIC_LOG_D32 ".", singleLoop_.load());
     Format format;
-    callbackLooper_.OnInfo(INFO_TYPE_EOS, static_cast<int32_t>(singleLoop_.load()), format);
-    if (!singleLoop_.load()) {
+    if (singleLoop_.load()) {
+        callbackLooper_.OnInfo(INFO_TYPE_EOS, static_cast<int32_t>(singleLoop_.load()), format);
+    } else {
+        callbackLooper_.OnInfo(INFO_TYPE_STATE_CHANGE, static_cast<int32_t>(PLAYER_PLAYBACK_COMPLETE), format);
         callbackLooper_.StopReportMediaProgress();
         callbackLooper_.ManualReportMediaProgressOnce();
     }
@@ -712,7 +729,7 @@ int32_t HiPlayerImpl::Reset()
     MEDIA_LOG_I("Reset entered.");
     singleLoop_ = false;
     mediaStats_.Reset();
-    return TransErrorCode(fsm_.SendEvent(Intent::RESET));
+    return TransErrorCode(DoReset());
 }
 
 int32_t HiPlayerImpl::GetCurrentTime(int32_t& currentPositionMs)
@@ -759,11 +776,10 @@ int32_t HiPlayerImpl::GetPlaybackSpeed(PlaybackRateMode& mode)
 
 void HiPlayerImpl::OnStateChanged(StateId state)
 {
-    MEDIA_LOG_I("OnStateChanged from " PUBLIC_LOG_D32 " to " PUBLIC_LOG_D32, curFsmState_.load(), state);
+    MEDIA_LOG_I("OnStateChanged from " PUBLIC_LOG_D32 " to " PUBLIC_LOG_D32, pipelineStates_.load(), TransStateId2PlayerState(state));
     UpdateStateNoLock(TransStateId2PlayerState(state));
     {
         OSAL::ScopedLock lock(stateMutex_);
-        curFsmState_ = state;
         cond_.NotifyOne();
     }
 }
