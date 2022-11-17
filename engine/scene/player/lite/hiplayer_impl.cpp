@@ -398,8 +398,11 @@ ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode, bool appT
         PROFILE_END("Flush start");
         PROFILE_RESET();
 
-        syncManager_->Seek(hstTime);
-        rtv = demuxer_->SeekTo(hstTime, mode);
+        int64_t realSeekTime = hstTime;
+        rtv = demuxer_->SeekTo(hstTime, mode, realSeekTime);
+        if (rtv == ErrorCode::SUCCESS) {
+            syncManager_->Seek(realSeekTime);
+        }
         PROFILE_END("SeekTo");
 
         pipeline_->FlushEnd();

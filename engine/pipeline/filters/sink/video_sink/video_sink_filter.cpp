@@ -462,6 +462,7 @@ bool VideoSinkFilter::CheckBufferLatenessMayWait(AVBufferPtr buffer)
 ErrorCode VideoSinkFilter::DoSyncWrite(const AVBufferPtr& buffer)
 {
     bool shouldDrop = false;
+    bool render = true;
     if ((buffer->flag & BUFFER_FLAG_EOS) == 0) {
         if (isFirstFrame_) {
             int64_t nowCt = 0;
@@ -474,9 +475,8 @@ ErrorCode VideoSinkFilter::DoSyncWrite(const AVBufferPtr& buffer)
                 MEDIA_LOG_I("failed to get latency, treat as 0");
             }
             if (syncCenter) {
-                syncCenter->UpdateTimeAnchor(nowCt + latency, buffer->pts, this);
+                render = syncCenter->UpdateTimeAnchor(nowCt + latency, buffer->pts, this);
             }
-            shouldDrop = false;
             isFirstFrame_ = false;
         } else {
             shouldDrop = CheckBufferLatenessMayWait(buffer);
@@ -488,6 +488,9 @@ ErrorCode VideoSinkFilter::DoSyncWrite(const AVBufferPtr& buffer)
     }
     if (shouldDrop) {
         MEDIA_LOG_DD("drop buffer with pts " PUBLIC_LOG_D64 " due to too late", buffer->pts);
+        return ErrorCode::SUCCESS;
+    } else if (!render) {
+        MEDIA_LOG_DD("drop buffer with pts " PUBLIC_LOG_D64 " due to seek not need to render", buffer->pts);
         return ErrorCode::SUCCESS;
     } else {
         return TranslatePluginStatus(plugin_->Write(buffer));

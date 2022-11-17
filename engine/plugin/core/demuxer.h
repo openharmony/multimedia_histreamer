@@ -47,7 +47,7 @@ public:
     Demuxer operator=(const Demuxer &) = delete;
     ~Demuxer() override = default;
 
-    Status SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode);
+    Status SeekTo(int32_t trackId, int64_t seekTime, SeekMode mode, int64_t& realSeekTime);
 
     Status SetDataSource(const std::shared_ptr<DataSourceHelper> &source);
 

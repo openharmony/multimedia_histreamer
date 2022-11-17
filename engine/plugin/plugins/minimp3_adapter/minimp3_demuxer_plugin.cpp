@@ -292,10 +292,10 @@ Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
     return retResult;
 }
 
-Status Minimp3DemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
+Status Minimp3DemuxerPlugin::SeekTo(int32_t trackId, int64_t seekTime, SeekMode mode, int64_t& realSeekTime)
 {
     uint64_t pos = 0;
-    uint32_t targetTimeMs = static_cast<uint32_t>(HstTime2Ms(hstTime));
+    uint32_t targetTimeMs = static_cast<uint32_t>(HstTime2Ms(seekTime));
     if (AudioDemuxerMp3GetSeekPosition(targetTimeMs, &pos) == 0) {
         ioContext_.offset = pos;
         ioDataRemainSize_ = 0;

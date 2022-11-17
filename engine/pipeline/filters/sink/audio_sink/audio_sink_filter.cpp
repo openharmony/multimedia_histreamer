@@ -340,6 +340,7 @@ ErrorCode AudioSinkFilter::SetVolume(float volume)
 
 ErrorCode AudioSinkFilter::DoSyncWrite(const AVBufferPtr &buffer)
 {
+    bool render = true;
     if ((buffer->flag & BUFFER_FLAG_EOS) == 0) { // only need to update when not eos
         // audio sink always report time anchor and do not drop
         int64_t nowCt = 0;
@@ -354,7 +355,7 @@ ErrorCode AudioSinkFilter::DoSyncWrite(const AVBufferPtr &buffer)
                 MEDIA_LOG_W("failed to get latency");
             }
             if (syncCenter) {
-                syncCenter->UpdateTimeAnchor(nowCt + latency, buffer->pts, this);
+                render = syncCenter->UpdateTimeAnchor(nowCt + latency, buffer->pts, this);
             }
             lastReportedClockTime_ = nowCt;
             forceUpdateTimeAnchorNextTime_ = true;
@@ -362,7 +363,12 @@ ErrorCode AudioSinkFilter::DoSyncWrite(const AVBufferPtr &buffer)
         latestBufferPts_ = buffer->pts;
         latestBufferDuration_ = buffer->duration;
     }
-    return TranslatePluginStatus(plugin_->Write(buffer));
+    if (!render) {
+        MEDIA_LOG_DD("drop buffer with pts " PUBLIC_LOG_D64 " due to seek not need to render", buffer->pts);
+        return ErrorCode::SUCCESS;
+    } else {
+        return TranslatePluginStatus(plugin_->Write(buffer));
+    }
 }
 
 void AudioSinkFilter::ResetSyncInfo()

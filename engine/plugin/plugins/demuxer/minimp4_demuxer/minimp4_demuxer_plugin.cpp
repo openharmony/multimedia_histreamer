@@ -386,7 +386,7 @@ Status MiniMP4DemuxerPlugin::ReadFrame(Buffer &outBuffer, int32_t timeOutMs)
     return Status::OK;
 }
 
-Status MiniMP4DemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
+Status MiniMP4DemuxerPlugin::SeekTo(int32_t trackId, int64_t seekTime, SeekMode mode, int64_t& realSeekTime)
 {
     unsigned int frameSize = 0;
     unsigned int timeStamp = 0;
@@ -394,7 +394,7 @@ Status MiniMP4DemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode m
     uint64_t offsetStart = MP4D_frame_offset(&miniMP4_, 0, 0, &frameSize, &timeStamp, &duration);
     uint64_t offsetEnd =
         MP4D_frame_offset(&miniMP4_, 0, miniMP4_.track->sample_count - 1, &frameSize, &timeStamp, &duration);
-    uint64_t targetPos = (Plugin::HstTime2Ms(hstTime) * static_cast<int64_t>(miniMP4_.track->avg_bitrate_bps)) / 8 +
+    uint64_t targetPos = (Plugin::HstTime2Ms(seekTime) * static_cast<int64_t>(miniMP4_.track->avg_bitrate_bps)) / 8 +
         offsetStart;
     if (targetPos >= offsetEnd) {
         sampleIndex_ = miniMP4_.track->sample_count;
@@ -414,6 +414,7 @@ Status MiniMP4DemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode m
     ioDataRemainSize_ = 0;
     MEDIA_LOG_D("ioContext_.offset " PUBLIC_LOG_D32, static_cast<uint32_t>(ioContext_.offset));
     (void)memset_s(inIoBuffer_, inIoBufferSize_, 0x00, inIoBufferSize_);
+    realSeekTime = seekTime;
     return Status::OK;
 }
 

@@ -229,7 +229,7 @@ Status AACDemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
     return Status::OK;
 }
 
-Status AACDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
+Status AACDemuxerPlugin::SeekTo(int32_t trackId, int64_t seekTime, SeekMode mode, int64_t& realSeekTime)
 {
     return Status::OK;
 }

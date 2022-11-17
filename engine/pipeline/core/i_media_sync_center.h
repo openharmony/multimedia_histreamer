@@ -44,9 +44,9 @@ struct IMediaSyncCenter {
      * @param clockTime based on HST_TIME_BASE
      * @param mediaTime media time based on HST_TIME_BASE
      * @param supplier which report this time anchor
-     * @retval error code
+     * @retval current frame Whether rendering is required
      */
-    virtual ErrorCode UpdateTimeAnchor(int64_t clockTime, int64_t mediaTime, IMediaSynchronizer* supplier) = 0;
+    virtual bool UpdateTimeAnchor(int64_t clockTime, int64_t mediaTime, IMediaSynchronizer* supplier) = 0;
 
     /**
      * get media time currently
@@ -79,6 +79,8 @@ struct IMediaSyncCenter {
     virtual void SetMediaTimeRangeStart(int64_t startMediaTime, int32_t trackId) = 0;
 
     virtual void SetMediaTimeRangeEnd(int64_t endMediaTime, int32_t trackId) = 0;
+
+    virtual void UpdateSeekMediaTime(int64_t mediaTime) = 0;
 };
 } // namespace Pipeline
 } // namespace Media
