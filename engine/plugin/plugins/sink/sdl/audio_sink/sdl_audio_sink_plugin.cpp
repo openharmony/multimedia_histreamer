@@ -141,6 +141,7 @@ Status SdlAudioSinkPlugin::Deinit()
 
 Status SdlAudioSinkPlugin::Prepare()
 {
+    MEDIA_LOG_I("SDL SINK Prepare enter...");
     reSrcFfFmt_ = TranslateFormat(audioFormat_);
     srcFrameSize_ = av_samples_get_buffer_size(nullptr, channels_, samplesPerFrame_, reSrcFfFmt_, 1);
     rb = CppExt::make_unique<RingBuffer>(srcFrameSize_ * 10); // 最大缓存10帧

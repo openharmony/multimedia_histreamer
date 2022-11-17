@@ -36,6 +36,11 @@ bool g_seekFinished = false;
 
 class PlayerCallbackImpl : public IPlayerEngineObs {
 public:
+    void SetPlayer(IPlayerEngine* player)
+    {
+        player_ = player;
+    }
+
     void OnError(PlayerErrorType errorType, int32_t errorCode) override
     {
         if (errorCode == MSERR_SEEK_FAILED) {
@@ -45,12 +50,20 @@ public:
     void OnInfo(PlayerOnInfoType type, int32_t extra, const Format& infoBody) override
     {
         if (type == INFO_TYPE_EOS) {
+            player_->Seek(0, PlayerSeekMode::SEEK_PREVIOUS_SYNC);
+        }
+        if (type == INFO_TYPE_STATE_CHANGE && extra == PLAYER_PLAYBACK_COMPLETE) {
+            g_playFinished = true;
+        }
+        if (type == INFO_TYPE_STATE_CHANGE && extra == PLAYER_STATE_ERROR) {
             g_playFinished = true;
         }
         if (type == INFO_TYPE_SEEKDONE) {
             g_seekFinished = true;
         }
     }
+private:
+    IPlayerEngine* player_ {nullptr};
 };
 std::shared_ptr<IPlayerEngineObs> gCallback = std::make_shared<PlayerCallbackImpl>();
 
@@ -71,6 +84,8 @@ public:
     int32_t GetDuration(int64_t& durationMs) override;
     int32_t SetVolume(float leftVolume, float rightVolume) override;
     int32_t GetAudioTrackInfo(std::vector<Format> &audioTrack) override;
+    int32_t SetPlaybackSpeed(PlaybackRateMode mode) override;
+    int32_t GetPlaybackSpeed(PlaybackRateMode &mode) override;
 private:
     std::unique_ptr<IPlayerEngine> player_;
 };
@@ -89,6 +104,7 @@ std::unique_ptr<TestPlayer> TestPlayer::Create()
 {
     auto engineFactory = std::unique_ptr<OHOS::Media::IEngineFactory>(CreateEngineFactory());
     auto player = engineFactory->CreatePlayerEngine(0, 0);
+    std::static_pointer_cast<PlayerCallbackImpl>(gCallback)->SetPlayer(player.get());
     player->SetObs(gCallback);
     g_playFinished = false;
     return std::make_unique<TestPlayerImpl>(std::move(player));
@@ -172,6 +188,15 @@ int32_t TestPlayerImpl::GetDuration(int64_t& durationMs)
     int32_t ret = player_->GetDuration(duration);
     durationMs = duration;
     return ret;
+}
+int32_t TestPlayerImpl::SetPlaybackSpeed(PlaybackRateMode mode)
+{
+    return player_->SetPlaybackSpeed(mode);
+}
+
+int32_t TestPlayerImpl::GetPlaybackSpeed(PlaybackRateMode& mode)
+{
+    return player_->GetPlaybackSpeed(mode);
 }
 
 int32_t TestPlayerImpl::SetVolume(float leftVolume, float rightVolume)
