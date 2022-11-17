@@ -21,7 +21,7 @@ set(TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 include_directories(
     ${TOP_DIR}/../3rdparty/ohos/foundation/multimedia/media_lite/interfaces/innerkits
-    ${TOP_DIR}/../3rdparty/ohos/foundation/multimedia/utils/lite/interfaces/kits
+    ${TOP_DIR}/../3rdparty/ohos/foundation/multimedia/media_utils_lite/interfaces/kits
     ${TOP_DIR}/engine/scene/player/lite
 )
 

@@ -31,7 +31,7 @@
 #include "scene/lite/hiplayer.h"
 #include "securec.h"
 #include "foundation/log.h"
-#include "foundation/multimedia/utils/lite/interfaces/kits/data_stream.h"
+#include "foundation/multimedia/media_utils_lite/interfaces/kits/data_stream.h"
 #include "foundation/osal/utils/util.h"
 #include "foundation/osal/thread/task.h"
 

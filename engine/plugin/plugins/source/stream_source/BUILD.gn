@@ -25,7 +25,7 @@ source_set("streamsource") {
   ]
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
   if (hst_is_lite_sys) {
-    public_deps += [ "//foundation/multimedia/utils/lite:media_common" ]
+    public_deps += [ "//foundation/multimedia/media_utils_lite:media_common" ]
   }
 }
 
