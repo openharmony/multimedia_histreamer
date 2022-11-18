@@ -762,6 +762,9 @@ int32_t HiPlayerImpl::SetPlaybackSpeed(PlaybackRateMode mode)
     MEDIA_LOG_I("SetPlaybackSpeed entered.");
     double playbackSpeed = ChangeModeToSpeed(mode);
     demuxer_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_PLAYBACK_SPEED), playbackSpeed);
+    Format format;
+    callbackLooper_.OnInfo(INFO_TYPE_SPEEDDONE, 0, format);
+    MEDIA_LOG_D("SetPlaybackSpeed entered end.");
     return MSERR_OK;
 }
 int32_t HiPlayerImpl::GetPlaybackSpeed(PlaybackRateMode& mode)
