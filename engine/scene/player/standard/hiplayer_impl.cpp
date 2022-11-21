@@ -154,6 +154,8 @@ int32_t HiPlayerImpl::SetSource(const std::string& uri)
     }
     if (ret != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("SetSource error: " PUBLIC_LOG_S, GetErrorName(ret));
+    } else {
+        OnStateChanged(StateId::INIT);
     }
     PROFILE_END("SetSource end.");
     return TransErrorCode(ret);
@@ -169,6 +171,8 @@ int32_t HiPlayerImpl::SetSource(const std::shared_ptr<IMediaDataSource>& dataSrc
     }
     if (ret != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("SetSource error: " PUBLIC_LOG_S, GetErrorName(ret));
+    } else {
+        OnStateChanged(StateId::INIT);
     }
     PROFILE_END("SetSource end.");
     return TransErrorCode(ret);
@@ -176,6 +180,9 @@ int32_t HiPlayerImpl::SetSource(const std::shared_ptr<IMediaDataSource>& dataSrc
 
 int32_t HiPlayerImpl::Prepare()
 {
+    if (pipelineStates_ != PlayerStates::PLAYER_INITIALIZED) {
+        return TransErrorCode(ErrorCode::ERROR_UNKNOWN);
+    }
     SYNC_TRACER();
     NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_START, 0);
     MEDIA_LOG_I("Prepare entered, current pipeline state: " PUBLIC_LOG_S ".", StringnessPlayerState(pipelineStates_).c_str());
@@ -203,6 +210,9 @@ int32_t HiPlayerImpl::Prepare()
 
 int HiPlayerImpl::PrepareAsync()
 {
+    if (pipelineStates_ != PlayerStates::PLAYER_INITIALIZED) {
+        return TransErrorCode(ErrorCode::ERROR_UNKNOWN);
+    }
     ASYNC_TRACER();
     NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_START, 0);
     MEDIA_LOG_I("Prepare async entered, current pipeline state: " PUBLIC_LOG_S, StringnessPlayerState(pipelineStates_).c_str());
@@ -283,6 +293,7 @@ int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
     if (mSeconds >= durationMs) { // if exceeds change to duration
         mSeconds = durationMs;
     }
+    mSeconds = mSeconds < 0 ? 0 : mSeconds;
     if (audioSource_->GetSeekable() != Plugin::Seekable::SEEKABLE) {
         MEDIA_LOG_E("Seek, invalid operation, audio source is unseekable or invalid");
         return MSERR_INVALID_OPERATION;
@@ -320,12 +331,10 @@ int32_t HiPlayerImpl::SetVolume(float leftVolume, float rightVolume)
         volume = (leftVolume + rightVolume) / 2;  // 2
     }
     volume /= MAX_MEDIA_VOLUME;  // normalize to 0~1
-    if (pipelineStates_ == PlayerStates::PLAYER_STOPPED) {
-        return TransErrorCode(ErrorCode::ERROR_INVALID_OPERATION);
-    }
     volume_ = volume;
     if (pipelineStates_ == PlayerStates::PLAYER_IDLE || pipelineStates_ == PlayerStates::PLAYER_INITIALIZED ||
-        pipelineStates_ == PlayerStates::PLAYER_PREPARING || audioSink_ == nullptr) {
+        pipelineStates_ == PlayerStates::PLAYER_PREPARING || pipelineStates_ == PlayerStates::PLAYER_STOPPED ||
+        audioSink_ == nullptr) {
         MEDIA_LOG_W("cannot set volume, will do this onReady");
         return TransErrorCode(ErrorCode::SUCCESS);
     }

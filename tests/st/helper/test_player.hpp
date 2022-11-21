@@ -22,6 +22,7 @@
 #include "common/plugin_types.h"
 #include "media_data_source_impl.h"
 #include "securec.h"
+#include "player.h"
 
 namespace OHOS::Media::Test {
 enum class TestSourceType : int32_t {
@@ -59,6 +60,8 @@ public:
     virtual int32_t GetDuration(int64_t& durationMs) = 0;
     virtual int32_t SetVolume(float leftVolume, float rightVolume) = 0;
     virtual int32_t GetAudioTrackInfo(std::vector<Format> &audioTrack) = 0;
+    virtual int32_t SetPlaybackSpeed(PlaybackRateMode mode)  = 0;
+    virtual int32_t GetPlaybackSpeed(PlaybackRateMode &mode) = 0;
 };
 }
 #endif

@@ -31,10 +31,11 @@ using namespace OHOS::Media::Test;
 FIXTURE(DataDrivenSingleVideoPlayerTestFast)
 {
     DATA_PROVIDER(myurls, 1,
-    DATA_GROUP(std::string(RESOURCE_DIR "/MP4/9_AVC_1280x720_59.940fps_AAC_128Kbps_2channels.mp4")));
+    DATA_GROUP(std::string(RESOURCE_DIR "/MP4/11_AVC_640x480_25.000fps.mp4")));
 
     DATA_PROVIDER(myfdurl, 2,
-    DATA_GROUP(std::string(RESOURCE_DIR "/MP4/9_AVC_1280x720_59.940fps_AAC_128Kbps_2channels.mp4"), 34373632));
+    DATA_GROUP(std::string(RESOURCE_DIR "/MP4/9_AVC_1280x720_59.940fps_AAC_128Kbps_2channels.mp4"), 34373632),
+    DATA_GROUP(std::string(RESOURCE_DIR "/MP4/11_AVC_640x480_25.000fps.mp4"), 5632639));
 
     std::string FilePathToFd(std::string url, int32_t fileSize)
     {
@@ -77,7 +78,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         }
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_fdSrc_CALLBACK_0100
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_fdSrc_CALLBACK_0100
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test single player wrong fd)
     {
@@ -90,7 +91,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_fdSrc_CALLBACK_0200
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_fdSrc_CALLBACK_0200
     // @test(data="myurls", tags=video_play_fast)
     PTEST((std::string url), Test fdsource prepare, play, pause, release)
     {
@@ -102,7 +103,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_fdSrc_CALLBACK_0300
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_fdSrc_CALLBACK_0300
     // @test(data="myurls", tags=video_play_fast)
     PTEST((std::string url), Test fdsource prepare, play, pause, release)
     {
@@ -115,7 +116,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_fdSrc_CALLBACK_0400
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_fdSrc_CALLBACK_0400
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare then release)
     {
@@ -128,7 +129,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_0100
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_0100
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare then release)
     {
@@ -139,7 +140,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_0200
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_0200
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, prepare, release)
     {
@@ -153,7 +154,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_0300
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_0300
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, pause, prepare, release)
     {
@@ -168,7 +169,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_0400
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_0400
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, stop, prpeare, release)
     {
@@ -183,7 +184,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_0500
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_0500
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, reset, setsource, prepare, release)
     {
@@ -199,7 +200,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_0600/0700
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_0600/0700
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, Seek, prepare, release)
     {
@@ -219,7 +220,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_0800
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_0800
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, setvolume, prepare, release)
     {
@@ -235,7 +236,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_1000
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_1000
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, release)
     {
@@ -246,7 +247,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_1200
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PREPARE_CALLBACK_1200
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, prepare, prepare, release)
     {
@@ -254,12 +255,12 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(uri)));
         ASSERT_EQ(0, player->Prepare());
-        ASSERT_EQ(0, player->Prepare());
-        ASSERT_EQ(0, player->Prepare());
+        ASSERT_NE(0, player->Prepare());
+        ASSERT_NE(0, player->Prepare());
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0100
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0100
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource create, play, release)
     {
@@ -269,7 +270,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // // SUB_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0200
+    // // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0200
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, release)
     {
@@ -282,7 +283,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0300
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0300
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, pause, play, release)
     {
@@ -298,7 +299,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0400
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0400
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, stop, play, release)
     {
@@ -313,9 +314,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0500
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0500
     // @test(data="myfdurl", tags=video_play_fast)
-    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, stop, play, release)
+    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, reset, play, release)
     {
         std::string uri = FilePathToFd(url, fileSize);
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -328,7 +329,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0600 /0700
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0600 /0700
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, release)
     {
@@ -347,7 +348,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0800
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0800
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, setvolume, release)
     {
@@ -362,7 +363,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_1000
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_1000
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource  play, release)
     {
@@ -373,7 +374,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_1200
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_1200
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, play, play, release)
     {
@@ -383,14 +384,14 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Prepare());
         ASSERT_EQ(0, player->Play());
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-        ASSERT_EQ(0, player->Play());
+        ASSERT_NE(0, player->Play());
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        ASSERT_EQ(0, player->Play());
+        ASSERT_NE(0, player->Play());
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_0100
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_0100
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource create pause, release)
     {
@@ -400,9 +401,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_0200
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_0200
     // @test(data="myfdurl", tags=video_play_fast)
-    PTEST((std::string url, int32_t fileSize), Test fdsource prepare,  pause, release)
+    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, pause, release)
     {
         std::string uri = FilePathToFd(url, fileSize);
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -412,7 +413,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_0300
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_0300
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, relese)
     {
@@ -426,7 +427,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_0400
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_0400
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, stop, pause, release)
     {
@@ -441,7 +442,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_0500
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_0500
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, reset, pause, release)
     {
@@ -456,7 +457,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_0600/0700
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_0600/0700
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, pause, relase)
     {
@@ -476,7 +477,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_0800
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_0800
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, setvolume, pause, release)
     {
@@ -493,7 +494,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_1000
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_1000
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource create, setsource, pause, release)
     {
@@ -504,7 +505,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_1200
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PAUSE_CALLBACK_1200
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, pause, pause, pause, release)
     {
@@ -520,7 +521,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_0100
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_0100
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource create, stop, release)
     {
@@ -530,7 +531,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_020
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_020
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, stop, release)
     {
@@ -542,7 +543,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // 'SUB_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_0300
+    // 'SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_0300
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, stop, release)
     {
@@ -556,7 +557,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_0400
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_0400
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, pause, stop, release)
     {
@@ -571,7 +572,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_0500
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_0500
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, reset, stop, relese)
     {
@@ -586,7 +587,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_0600/0700
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_0600/0700
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, stop, release)
     {
@@ -606,22 +607,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_0800
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_0800
     // @test(data="myfdurl", tags=video_play_fast)
-    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, setvolume, prepare, release)
-    {
-        float leftVolume {1};
-        float rightVolume {1};
-        std::string uri = FilePathToFd(url, fileSize);
-        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-        ASSERT_EQ(0, player->SetSource(TestSource(uri)));
-        ASSERT_NE(0, player->Stop());
-        ASSERT_EQ(0, player->Release());
-    }
-
-    // SUB_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_0900
-    // @test(data="myfdurl", tags=video_play_fast)
-    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, setvolume, prepare, release)
+    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, setvolume, stop, release)
     {
         float leftVolume {1};
         float rightVolume {1};
@@ -635,7 +623,21 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_1000
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_0900
+    // @test(data="myfdurl", tags=video_play_fast)
+    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, speed, stop, release)
+    {
+        std::string uri = FilePathToFd(url, fileSize);
+        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
+        ASSERT_EQ(0, player->SetSource(TestSource(uri)));
+        ASSERT_EQ(0, player->Prepare());
+        ASSERT_EQ(0, player->Play());
+        ASSERT_EQ(0, player->SetPlaybackSpeed(OHOS::Media::PlaybackRateMode::SPEED_FORWARD_1_00_X));
+        ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Release());
+    }
+
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_1000
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource create, setsource, stop, release)
     {
@@ -646,7 +648,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_1200
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_STOP_CALLBACK_1200
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, stop, stop, stop, release)
     {
@@ -662,7 +664,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    //  SUB_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_0100
+    //  SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_0100
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource create, stop, release)
     {
@@ -672,7 +674,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_0200
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_0200
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, reset, release)
     {
@@ -684,7 +686,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_0300
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_0300
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, reset, release)
     {
@@ -697,7 +699,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_0400
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_0400
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, pause, reset, release)
     {
@@ -712,7 +714,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_0500
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_0500
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, stop, reset, release)
     {
@@ -727,9 +729,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    //  SUB_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_0600/0700
+    //  SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_0600/0700
     // @test(data="myfdurl", tags=video_play_fast)
-    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, stop, reset, release)
+    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, reset, release)
     {
         int64_t seekPos {5000};
         int64_t currentMS {0};
@@ -747,7 +749,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_0800
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_0800
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, setvolume, release)
     {
@@ -762,9 +764,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_1000
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_1000
     // @test(data="myfdurl", tags=video_play_fast)
-    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, stop, reset, release)
+    PTEST((std::string url, int32_t fileSize), Test setSource prepare, reset, release)
     {
         std::string uri = FilePathToFd(url, fileSize);
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -773,7 +775,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_1200
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RESET_CALLBACK_1200
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, reset, reset, reset, release)
     {
@@ -787,7 +789,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    //  SUB_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0100
+    //  SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0100
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource create, reset)
     {
@@ -796,7 +798,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0200
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0200
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, release)
     {
@@ -807,7 +809,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0300
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0300
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, release)
     {
@@ -820,7 +822,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0400
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0400
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, pause, release)
     {
@@ -834,7 +836,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0500
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0500
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, stop, release)
     {
@@ -848,7 +850,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0600/0700
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0600/0700
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, release)
     {
@@ -867,7 +869,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0800
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0800
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, setvolume, release)
     {
@@ -882,7 +884,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_1000
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_1000
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource setSource, release)
     {
@@ -892,7 +894,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_1200
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_1200
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, reset, release)
     {
@@ -904,7 +906,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0100
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0100
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource create, seek, release)
     {
@@ -917,7 +919,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0200
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0200
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, seek, release)
     {
@@ -933,7 +935,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0300
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0300
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, release)
     {
@@ -952,7 +954,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0400
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0400
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, pause, seek, release)
     {
@@ -972,7 +974,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    //  SUB_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0500
+    //  SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0500
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, pause, seek, release)
     {
@@ -991,7 +993,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0600
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0600
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, pause, seek, release)
     {
@@ -1009,7 +1011,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    //  SUB_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0700
+    //  SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0700
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, setvolume, seek, release)
     {
@@ -1026,7 +1028,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0900
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0900
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, pause, seek, release)
     {
@@ -1040,7 +1042,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_1100
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_1100
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, seek, seek, release)
     {
@@ -1067,7 +1069,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    //  SUB_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_1300
+    //  SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_1300
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, -1, release)
     {
@@ -1085,7 +1087,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_1400
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_1400
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, durationTime + 1000, release)
     {
@@ -1107,7 +1109,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_0100
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_0100
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, setvolume, release)
     {
@@ -1119,7 +1121,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_0200
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_0200
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, setvolume, release)
     {
@@ -1133,7 +1135,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0300
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0300
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, setvolume, release)
     {
@@ -1148,7 +1150,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    //  SUB_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_0400
+    //  SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_0400
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, pause, setvolume, release)
     {
@@ -1164,7 +1166,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_0500
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_0500
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, stop, setvolume, release)
     {
@@ -1180,7 +1182,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_0600
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_0600
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, reset, setvolume, release)
     {
@@ -1196,7 +1198,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_0700
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_0700
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, setvolume, release)
     {
@@ -1215,7 +1217,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_0900
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_0900
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource setsourse, setvolume, release)
     {
@@ -1228,7 +1230,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_1100
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_1100
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, setvolume, setvolume, setvolume, release)
     {
@@ -1245,7 +1247,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    //  SUB_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_1300
+    //  SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_1300
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, setVolume, -1, release)
     {
@@ -1261,7 +1263,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    //  SUB_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_1400
+    //  SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SETVOLUME_CALLBACK_1400
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, setVolume, 2, release)
     {
@@ -1277,7 +1279,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    //  SUB_MEDIA_VIDEO_PLAYER_FUNCTION_CALLBACK_LOOP
+    //  SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_FUNCTION_CALLBACK_LOOP
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, setsingleloop true, play, seek, durationtime
         3 times, setsingleloop flase, release)
@@ -1305,7 +1307,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MEDIA_VIDEO_PLAYER_FUNCTION_CALLBACK_BASE
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_FUNCTION_CALLBACK_BASE
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, setsingleloop true, play, seek, set fd, seek
         2 times, setsingleloop false, release)
