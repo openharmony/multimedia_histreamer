@@ -478,6 +478,7 @@ ErrorCode VideoSinkFilter::DoSyncWrite(const AVBufferPtr& buffer)
             }
             shouldDrop = false;
             isFirstFrame_ = false;
+            OnEvent(Event{name_, EventType::EVENT_VIDEO_RENDERING_START, {}});
         } else {
             shouldDrop = CheckBufferLatenessMayWait(buffer);
         }
