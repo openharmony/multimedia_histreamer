@@ -174,7 +174,7 @@ const Attribute& SingleValueTag::GetValue() const
 
 AttributesTag::AttributesTag(HlsTag type, const std::string& v) : Tag(type)
 {
-    ParseAttributes(v);
+    AttributesTag::ParseAttributes(v);
 }
 
 std::shared_ptr<Attribute> AttributesTag::GetAttributeByName(const char* name) const
@@ -203,9 +203,7 @@ void AttributesTag::ParseAttributes(const std::string& field)
         oss.str("");
         if (!attrName.empty())  {
             auto attribute = std::make_shared<Attribute>(attrName, attrValue);
-            if (attribute) {
-                attributes.push_back(attribute);
-            }
+            attributes.push_back(attribute);
         }
     }
 }

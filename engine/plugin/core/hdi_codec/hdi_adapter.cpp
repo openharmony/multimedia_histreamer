@@ -298,9 +298,12 @@ Status HdiAdapter::Deinit()
 {
     MEDIA_LOG_D("HdiAdapter DeInit Enter");
     FALSE_RETURN_V_MSG_E(Reset() == Status::OK, Status::ERROR_INVALID_DATA, "Reset value failed");
-    auto ret = compManager_->DestroyComponent(componentId_);
-    FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, Status::ERROR_INVALID_OPERATION,
-                         "HDI destroy component failed, ret = " PUBLIC_LOG_S, HdfStatus2String(ret).c_str());
+    if (compManager_) {
+        auto ret = compManager_->DestroyComponent(componentId_);
+        FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, Status::ERROR_INVALID_OPERATION,
+                             "HDI destroy component failed, ret = " PUBLIC_LOG_S, HdfStatus2String(ret).c_str());
+    }
+
     if (codecComp_) {
         CodecComponentTypeRelease(codecComp_);
         codecComp_ = nullptr;

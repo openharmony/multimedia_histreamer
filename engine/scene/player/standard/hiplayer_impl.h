@@ -44,7 +44,6 @@
 namespace OHOS {
 namespace Media {
 class HiPlayerImpl : public Pipeline::EventReceiver,
-                     public PlayExecutor,
                      public StateChangeCallback,
                      public Pipeline::FilterCallback,
                      public IPlayerEngine {
@@ -92,18 +91,18 @@ public:
                          const Plugin::Any& parameter) override;
 
     // interface from PlayExecutor
-    bool IsSingleLoop() override;
-    ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source) override;
-    ErrorCode PrepareFilters() override;
-    ErrorCode DoPlay() override;
-    ErrorCode DoPause() override;
-    ErrorCode DoResume() override;
-    ErrorCode DoStop() override;
-    ErrorCode DoReset() override;
-    ErrorCode DoSeek(int64_t hstTime, Plugin::SeekMode mode, bool appTriggered) override;
-    ErrorCode DoOnReady() override;
-    ErrorCode DoOnComplete() override;
-    ErrorCode DoOnError(ErrorCode) override;
+    bool IsSingleLoop();
+    ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source);
+    ErrorCode PrepareFilters();
+    ErrorCode DoPlay();
+    ErrorCode DoPause();
+    ErrorCode DoResume();
+    ErrorCode DoStop();
+    ErrorCode DoReset();
+    ErrorCode DoSeek(int64_t hstTime, Plugin::SeekMode mode, bool appTriggered);
+    ErrorCode DoOnReady();
+    ErrorCode DoOnComplete();
+    ErrorCode DoOnError(ErrorCode);
 
 private:
     ErrorCode StopAsync();

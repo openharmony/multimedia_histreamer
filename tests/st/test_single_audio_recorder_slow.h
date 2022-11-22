@@ -38,6 +38,7 @@ using namespace OHOS::Media::Test;
 // @fixture(tags=audio_record_slow)
 FIXTURE(DataDrivenSingleAudioRecorderTestSlow)
 {
+    int32_t fd;
     // file name: 44100_2_02.pcm,  44100 - sample rate, 2 - channel count, 02 - file index
     DATA_PROVIDER(pcmSources, 1,
     DATA_GROUP(AudioRecordSource(std::string(RESOURCE_DIR "/PCM/8000_1_01.pcm"), 8000, 1, 320000)),
@@ -73,6 +74,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestSlow)
 
     TEARDOWN()
     {
+        close(fd);
     }
 
     // @test(data="pcmSources", tags=recorderdebug)
@@ -82,7 +84,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestSlow)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
 
