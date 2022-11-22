@@ -38,6 +38,7 @@ using namespace OHOS::Media::Test;
 // @fixture(tags=fast)
 FIXTURE(DataDrivenSingleAudioRecorderTestFast)
 {
+    int32_t fd;
     bool CheckDurationMs(int64_t expectValue, int64_t actualValue)
     {
         MEDIA_LOG_I("expectValue : %d, actualValue : %d", expectValue, actualValue);
@@ -135,6 +136,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
 
     TEARDOWN()
     {
+        close(fd);
     }
 
     // @test(data="pcmSources", tags=audio_record_fast)
@@ -144,7 +146,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
          // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -172,7 +174,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -200,7 +202,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -253,7 +255,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -269,7 +271,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_NE(0, recorder->Start());
@@ -287,7 +289,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -312,7 +314,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -339,7 +341,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
 
@@ -367,7 +369,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -393,7 +395,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -434,7 +436,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -465,7 +467,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -482,7 +484,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -499,7 +501,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_NE(0, recorder->Configure(recordSource));
@@ -525,7 +527,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -543,7 +545,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -563,7 +565,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -584,7 +586,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -604,7 +606,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -624,7 +626,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
 
@@ -663,7 +665,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -692,7 +694,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -710,7 +712,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -729,7 +731,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -750,7 +752,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -770,7 +772,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -790,7 +792,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -815,7 +817,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -845,7 +847,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -863,7 +865,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -882,7 +884,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -902,7 +904,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -923,7 +925,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -943,7 +945,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -991,7 +993,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1021,7 +1023,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1039,7 +1041,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1058,7 +1060,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1078,7 +1080,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1099,7 +1101,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1119,7 +1121,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1164,7 +1166,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1193,7 +1195,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1210,7 +1212,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1228,7 +1230,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1247,7 +1249,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1267,7 +1269,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1286,7 +1288,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
 
         // Don't add O_APPEND, or else seek fail, can not write the file length.
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1303,7 +1305,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1334,7 +1336,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1365,7 +1367,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1396,7 +1398,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1427,7 +1429,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1458,7 +1460,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1489,7 +1491,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1520,7 +1522,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1551,7 +1553,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1582,7 +1584,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1613,7 +1615,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1644,7 +1646,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1675,7 +1677,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1706,7 +1708,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1725,7 +1727,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1745,7 +1747,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1766,7 +1768,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1787,7 +1789,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1808,7 +1810,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1830,7 +1832,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1853,7 +1855,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1882,7 +1884,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1909,7 +1911,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1935,7 +1937,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1955,7 +1957,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));
@@ -1974,7 +1976,7 @@ FIXTURE(DataDrivenSingleAudioRecorderTestFast)
     {
         std::unique_ptr<TestRecorder> recorder = TestRecorder::CreateAudioRecorder();
         std::string filePath = std::string(recorder->GetOutputDir() + "/test.m4a");
-        int32_t fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
+        fd = open(filePath.c_str(), O_RDWR | O_CREAT | O_BINARY, 0644); // 0644, permission
         ASSERT_TRUE(fd >= 0);
         recordSource.UseOutFd(fd);
         ASSERT_EQ(0, recorder->Configure(recordSource));

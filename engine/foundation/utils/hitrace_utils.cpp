@@ -16,9 +16,9 @@
 #include "hitrace_utils.h"
 namespace OHOS {
 namespace Media {
-    SyncTracker::SyncTracker(const std::string &value)
+    SyncTracker::SyncTracker(const std::string &title)
     {
-        StartTrace(DEFAULT_HITRACE_TAG, value, DEFAULT_HITRACE_LIMIT);
+        StartTrace(DEFAULT_HITRACE_TAG, title, DEFAULT_HITRACE_LIMIT);
     }
 
     SyncTracker::~SyncTracker()
