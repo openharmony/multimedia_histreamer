@@ -496,6 +496,10 @@ void HiPlayerImpl::OnEvent(const Event& event)
             HandlePluginEvent(event);
             break;
         }
+        case EventType::EVENT_VIDEO_RENDERING_START: {
+            Format format;
+            callbackLooper_.OnInfo(INFO_TYPE_MESSAGE, PlayerMessageType::PLAYER_INFO_VIDEO_RENDERING_START, format);
+        }
         default:
             MEDIA_LOG_E("Unknown event(" PUBLIC_LOG_U32 ")", event.type);
     }

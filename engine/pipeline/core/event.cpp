@@ -28,7 +28,8 @@ static const std::map<EventType, const char*> g_EventTypeMap = {
     {EventType::EVENT_BUFFERING, "EVENT_BUFFERING"},
     {EventType::EVENT_BUFFER_PROGRESS, "EVENT_BUFFER_PROGRESS"},
     {EventType::EVENT_DECODER_ERROR, "EVENT_DECODER_ERROR"},
-    {EventType::EVENT_RESOLUTION_CHANGE, "EVENT_RESOLUTION_CHANGE"}
+    {EventType::EVENT_RESOLUTION_CHANGE, "EVENT_RESOLUTION_CHANGE"},
+    {EventType::EVENT_VIDEO_RENDERING_START, "EVENT_VIDEO_RENDERING_START"}
 };
 
 const char* GetEventName(EventType type)

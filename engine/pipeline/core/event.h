@@ -35,6 +35,7 @@ enum struct EventType : uint32_t {
     EVENT_BUFFER_PROGRESS,
     EVENT_DECODER_ERROR,
     EVENT_RESOLUTION_CHANGE,
+    EVENT_VIDEO_RENDERING_START
 };
 
 struct Event {
