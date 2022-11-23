@@ -253,7 +253,7 @@ std::string AttributesTag::ParseAttributeName(std::istringstream& iss, std::ostr
 
 ValuesListTag::ValuesListTag(HlsTag type, const std::string& v) : AttributesTag(type, v)
 {
-    ParseAttributes(v);
+    ValuesListTag::ParseAttributes(v);
 }
 
 void ValuesListTag::ParseAttributes(const std::string& field)
