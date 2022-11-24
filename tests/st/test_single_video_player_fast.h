@@ -516,8 +516,8 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Play());
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
         ASSERT_EQ(0, player->Pause());
-        ASSERT_EQ(0, player->Pause());
-        ASSERT_EQ(0, player->Pause());
+        ASSERT_NE(0, player->Pause());
+        ASSERT_NE(0, player->Pause());
         ASSERT_EQ(0, player->Release());
     }
 
@@ -659,8 +659,8 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Play());
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
         ASSERT_EQ(0, player->Stop());
-        ASSERT_EQ(0, player->Stop());
-        ASSERT_EQ(0, player->Stop());
+        ASSERT_NE(0, player->Stop());
+        ASSERT_NE(0, player->Stop());
         ASSERT_EQ(0, player->Release());
     }
 
@@ -784,8 +784,8 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->SetSource(TestSource(uri)));
         ASSERT_EQ(0, player->Prepare());
         ASSERT_EQ(0, player->Reset());
-        ASSERT_EQ(0, player->Reset());
-        ASSERT_EQ(0, player->Reset());
+        ASSERT_NE(0, player->Reset());
+        ASSERT_NE(0, player->Reset());
         ASSERT_EQ(0, player->Release());
     }
 
