@@ -100,6 +100,8 @@ Status FileFdSinkPlugin::Flush()
 Status FileFdSinkPlugin::Reset()
 {
     MEDIA_LOG_D("Reset");
+    ftruncate(fd_, 0);
+    lseek(fd_, 0, SEEK_SET);
     return Status::OK;
 }
 

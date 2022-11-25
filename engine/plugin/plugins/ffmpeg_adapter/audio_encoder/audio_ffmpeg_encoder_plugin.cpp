@@ -227,6 +227,10 @@ Status AudioFfmpegEncoderPlugin::Reset()
 {
     OSAL::ScopedLock lock(avMutex_);
     OSAL::ScopedLock lock1(parameterMutex_);
+    fullInputFrameSize_ = 0;
+    needReformat_ = false;
+    prev_pts_ = 0;
+    srcBytesPerSample_ = 0;
     return ResetLocked();
 }
 
