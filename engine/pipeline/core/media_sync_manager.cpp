@@ -291,8 +291,8 @@ bool MediaSyncManager::IsSupplierValid(IMediaSynchronizer* supplier)
 }
 bool MediaSyncManager::UpdateTimeAnchor(int64_t clockTime, int64_t mediaTime, IMediaSynchronizer* supplier)
 {
-    OSAL::ScopedLock lock(clockMutex_);
     bool render = true;
+    OSAL::ScopedLock lock(clockMutex_);
     if (clockTime == HST_TIME_NONE || mediaTime == HST_TIME_NONE || supplier == nullptr) {
         return render;
     }
