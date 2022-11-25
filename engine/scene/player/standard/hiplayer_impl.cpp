@@ -590,8 +590,11 @@ ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode, bool appT
         PROFILE_RESET();
 
         MEDIA_LOG_I("Do seek ...");
-        syncManager_->Seek(seekPos);
-        rtv = demuxer_->SeekTo(seekPos, seekMode);
+        int64_t realSeekTime = seekPos;
+        rtv = demuxer_->SeekTo(seekPos, seekMode, realSeekTime);
+        if (rtv == ErrorCode::SUCCESS) {
+            syncManager_->Seek(realSeekTime);
+        }
         PROFILE_END("SeekTo");
 
         pipeline_->FlushEnd();

@@ -261,13 +261,13 @@ bool DemuxerFilter::Configure(const std::string &inPort, const std::shared_ptr<c
     return true;
 }
 
-ErrorCode DemuxerFilter::SeekTo(int64_t pos, Plugin::SeekMode mode)
+ErrorCode DemuxerFilter::SeekTo(int64_t seekTime, Plugin::SeekMode mode, int64_t& realSeekTime)
 {
     if (!plugin_) {
         MEDIA_LOG_E("SeekTo failed due to no valid plugin");
         return ErrorCode::ERROR_INVALID_OPERATION;
     }
-    auto rtv = TranslatePluginStatus(plugin_->SeekTo(-1, pos, mode));
+    auto rtv = TranslatePluginStatus(plugin_->SeekTo(-1, seekTime, mode, realSeekTime));
     if (rtv != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("SeekTo failed with return value: " PUBLIC_LOG_D32, static_cast<int>(rtv));
     }

@@ -50,9 +50,9 @@ public:
      * @param clockTime based on HST_TIME_BASE
      * @param mediaTime media time based on HST_TIME_BASE
      * @param supplier which report this time anchor
-     * @retval error code
+     * @retval current frame Whether rendering is required
      */
-    ErrorCode UpdateTimeAnchor(int64_t clockTime, int64_t mediaTime, IMediaSynchronizer* supplier) override;
+    bool UpdateTimeAnchor(int64_t clockTime, int64_t mediaTime, IMediaSynchronizer* supplier) override;
 
     /**
      * get media time currently
@@ -86,6 +86,7 @@ public:
 
     void SetMediaTimeRangeStart(int64_t startMediaTime, int32_t trackId) override;
 
+    void UpdateSeekMediaTime(int64_t mediaTime) override;
 private:
     enum class State {
         RESUMED,

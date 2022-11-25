@@ -143,7 +143,7 @@ Status WavDemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
     return retResult;
 }
 
-Status WavDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
+Status WavDemuxerPlugin::SeekTo(int32_t trackId, int64_t seekTime, SeekMode mode, int64_t& realSeekTime)
 {
     if (fileSize_ <= 0 || seekable_ == Seekable::INVALID || seekable_ == Seekable::UNSEEKABLE) {
         return Status::ERROR_INVALID_OPERATION;
@@ -152,7 +152,7 @@ Status WavDemuxerPlugin::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
     auto byteRate = blockAlign * wavHeader_.sampleRate; // byteRate = wavHeader_.byteRate
 
     // time(sec) * byte per second= current time byte number
-    auto position = HstTime2Sec(hstTime)  * byteRate;
+    auto position = HstTime2Sec(seekTime)  * byteRate;
 
     // current time byte number / blockAlign
     // To round and position to the starting point of a complete sample.

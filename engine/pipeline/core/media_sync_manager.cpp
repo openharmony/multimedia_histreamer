@@ -216,6 +216,19 @@ ErrorCode MediaSyncManager::Seek(int64_t mediaTime)
     return ErrorCode::SUCCESS;
 }
 
+void MediaSyncManager::UpdateSeekMediaTime(int64_t mediaTime)
+{
+    SYNC_TRACER();
+    OSAL::ScopedLock lock(clockMutex_);
+    if (minRangeStartOfMediaTime_ == HST_TIME_NONE || maxRangeEndOfMediaTime_ == HST_TIME_NONE) {
+        return;
+    }
+    if (mediaTime > maxRangeEndOfMediaTime_ || mediaTime < minRangeStartOfMediaTime_) {
+        return;
+    }
+    seekingMediaTime_ = mediaTime;
+}
+
 ErrorCode MediaSyncManager::Reset()
 {
     MEDIA_LOG_I("do Reset");
@@ -276,11 +289,12 @@ bool MediaSyncManager::IsSupplierValid(IMediaSynchronizer* supplier)
     OSAL::ScopedLock lock(syncersMutex_);
     return std::find(syncers_.begin(), syncers_.end(), supplier) != syncers_.end();
 }
-ErrorCode MediaSyncManager::UpdateTimeAnchor(int64_t clockTime, int64_t mediaTime, IMediaSynchronizer* supplier)
+bool MediaSyncManager::UpdateTimeAnchor(int64_t clockTime, int64_t mediaTime, IMediaSynchronizer* supplier)
 {
+    bool render = true;
     OSAL::ScopedLock lock(clockMutex_);
     if (clockTime == HST_TIME_NONE || mediaTime == HST_TIME_NONE || supplier == nullptr) {
-        return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
+        return render;
     }
     if (IsSupplierValid(supplier) && supplier->GetPriority() >= currentSyncerPriority_) {
         currentSyncerPriority_ = supplier->GetPriority();
@@ -288,11 +302,14 @@ ErrorCode MediaSyncManager::UpdateTimeAnchor(int64_t clockTime, int64_t mediaTim
         MEDIA_LOG_DD("update time anchor to priority " PUBLIC_LOG_D32 ", mediaTime " PUBLIC_LOG_D64 ", clockTime "
         PUBLIC_LOG_D64, currentSyncerPriority_, currentAnchorMediaTime_, currentAnchorClockTime_);
     }
-    if (isSeeking_ && seekingMediaTime_ <= currentAnchorMediaTime_)  {
-        MEDIA_LOG_I("leaving seeking");
+    if (isSeeking_ && Plugin::HstTime2Ms(abs(mediaTime - seekingMediaTime_)) <= 100) { // 100 ms
+        MEDIA_LOG_I("leaving seeking_");
         isSeeking_ = false;
     }
-    return ErrorCode::SUCCESS;
+    if (isSeeking_) {
+        render = false;
+    }
+    return render;
 }
 int64_t MediaSyncManager::SimpleGetMediaTime(int64_t anchorClockTime, int64_t nowClockTime, int64_t anchorMediaTime,
                                              float playRate)

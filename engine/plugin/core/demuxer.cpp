@@ -26,9 +26,9 @@ Demuxer::Demuxer(uint32_t pkgVer, uint32_t apiVer, std::shared_ptr<DemuxerPlugin
 {
 }
 
-Status Demuxer::SeekTo(int32_t trackId, int64_t hstTime, SeekMode mode)
+Status Demuxer::SeekTo(int32_t trackId, int64_t seekTime, SeekMode mode, int64_t& realSeekTime)
 {
-    return demuxer_->SeekTo(trackId, hstTime, mode);
+    return demuxer_->SeekTo(trackId, seekTime, mode, realSeekTime);
 }
 
 Status Demuxer::SetDataSource(const std::shared_ptr<DataSourceHelper>& source)
