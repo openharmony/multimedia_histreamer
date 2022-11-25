@@ -216,19 +216,6 @@ ErrorCode MediaSyncManager::Seek(int64_t mediaTime)
     return ErrorCode::SUCCESS;
 }
 
-void MediaSyncManager::UpdateSeekMediaTime(int64_t mediaTime)
-{
-    SYNC_TRACER();
-    OSAL::ScopedLock lock(clockMutex_);
-    if (minRangeStartOfMediaTime_ == HST_TIME_NONE || maxRangeEndOfMediaTime_ == HST_TIME_NONE) {
-        return;
-    }
-    if (mediaTime > maxRangeEndOfMediaTime_ || mediaTime < minRangeStartOfMediaTime_) {
-        return;
-    }
-    seekingMediaTime_ = mediaTime;
-}
-
 ErrorCode MediaSyncManager::Reset()
 {
     MEDIA_LOG_I("do Reset");

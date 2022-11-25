@@ -79,8 +79,6 @@ struct IMediaSyncCenter {
     virtual void SetMediaTimeRangeStart(int64_t startMediaTime, int32_t trackId) = 0;
 
     virtual void SetMediaTimeRangeEnd(int64_t endMediaTime, int32_t trackId) = 0;
-
-    virtual void UpdateSeekMediaTime(int64_t mediaTime) = 0;
 };
 } // namespace Pipeline
 } // namespace Media
