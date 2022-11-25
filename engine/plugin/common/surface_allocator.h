@@ -19,6 +19,7 @@
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
 #include "plugin_memory.h"
+#include "plugin_types.h"
 #include "refbase.h"
 #include "surface/surface.h"
 
@@ -36,10 +37,12 @@ public:
     void Free(void* ptr) override; // NOLINT: void*
 
     void Config(int32_t width, int32_t height, uint64_t usage, int32_t format, int32_t strideAlign, int32_t timeout);
+    void SetScaleType(VideoScaleType videoScaleType);
 
 private:
     sptr<Surface> surface_ {nullptr};
     BufferRequestConfig requestConfig_;
+    ScalingMode scalingMode_ {ScalingMode::SCALING_MODE_SCALE_TO_WINDOW};
 };
 } // namespace Plugin
 } // namespace Media

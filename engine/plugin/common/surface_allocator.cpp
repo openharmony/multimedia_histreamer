@@ -25,6 +25,19 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+const std::unordered_map<VideoScaleType, ScalingMode> scaleTypeMap = {
+    { VideoScaleType::VIDEO_SCALE_TYPE_FIT, ScalingMode::SCALING_MODE_SCALE_TO_WINDOW },
+    { VideoScaleType::VIDEO_SCALE_TYPE_FIT_CROP, ScalingMode::SCALING_MODE_SCALE_CROP}
+};
+
+OHOS::ScalingMode GetScaleType(VideoScaleType scaleType)
+{
+    if (!scaleTypeMap.count(scaleType)) {
+        return OHOS::SCALING_MODE_SCALE_TO_WINDOW;
+    }
+    return scaleTypeMap.at(scaleType);
+}
+
 constexpr int32_t DEFAULT_SURFACE_WIDTH = 640;
 constexpr int32_t DEFAULT_SURFACE_HEIGHT = 480;
 constexpr int32_t DEFAULT_SURFACE_STRIDE_ALIGN = 8;
@@ -35,7 +48,7 @@ SurfaceAllocator::SurfaceAllocator(sptr<Surface> surface)
 {
     requestConfig_ = {
         DEFAULT_SURFACE_WIDTH, DEFAULT_SURFACE_HEIGHT, DEFAULT_SURFACE_STRIDE_ALIGN,
-        PixelFormat ::PIXEL_FMT_RGBA_8888, BUFFER_USAGE_CPU_READ | BUFFER_USAGE_CPU_WRITE | BUFFER_USAGE_MEM_DMA, 0};
+        PixelFormat::PIXEL_FMT_RGBA_8888, BUFFER_USAGE_CPU_READ | BUFFER_USAGE_CPU_WRITE | BUFFER_USAGE_MEM_DMA, 0};
 }
 
 sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer(size_t size)
@@ -64,6 +77,12 @@ sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer(size_t size)
     if (autoFence != nullptr) {
         autoFence->Wait(100); // 100ms
     }
+    surface_->SetScalingMode(surfaceBuffer->GetSeqNum(), scalingMode_);
+    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
+        MEDIA_LOG_E("surface buffer set scaling mode failed");
+        surface_->CancelBuffer(surfaceBuffer);
+        return nullptr;
+    }
     MEDIA_LOG_D("request surface buffer success, releaseFence: " PUBLIC_LOG_D32, releaseFence);
     return surfaceBuffer;
 }
@@ -84,6 +103,11 @@ void SurfaceAllocator::Config(int32_t width, int32_t height, uint64_t usage, int
     requestConfig_ = {
         width, height, strideAlign, format, usage, timeout
     };
+}
+
+void SurfaceAllocator::SetScaleType(VideoScaleType videoScaleType)
+{
+    scalingMode_ = GetScaleType(videoScaleType);
 }
 } // namespace Plugin
 } // namespace Media

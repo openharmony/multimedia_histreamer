@@ -61,5 +61,12 @@ bool MediaStatStub::IsEventCompleteAllReceived()
         return stat.completeEventReceived.load();
     });
 }
+
+void MediaStatStub::ResetEventCompleteAllReceived()
+{
+    for (auto& mediaStat : mediaStats_) {
+        mediaStat.completeEventReceived = false;
+    }
+}
 } // Media
 } // OHOS

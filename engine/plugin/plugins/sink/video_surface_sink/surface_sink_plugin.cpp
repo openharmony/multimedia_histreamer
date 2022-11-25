@@ -238,6 +238,7 @@ Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
                     return Status::ERROR_INVALID_PARAMETER;
                 }
                 mAllocator_ = std::make_shared<SurfaceAllocator>(surface_);
+                mAllocator_->SetScaleType(scalingType_);
                 surfaceCond_.NotifyAll();
             }
             break;
@@ -249,6 +250,16 @@ Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
                     maxSurfaceNum_ = bufferNum;
                 }
                 MEDIA_LOG_D("maxSurfaceNum_: " PUBLIC_LOG_U32, maxSurfaceNum_);
+            }
+            break;
+        }
+        case Tag::VIDEO_SCALE_TYPE: {
+            if (value.SameTypeWith(typeid(Plugin::VideoScaleType))) {
+                scalingType_ = Plugin::AnyCast<Plugin::VideoScaleType>(value);
+                MEDIA_LOG_D("scalingType_: " PUBLIC_LOG_U32, static_cast<uint32_t>(scalingType_));
+                if (mAllocator_) {
+                    mAllocator_->SetScaleType(scalingType_);
+                }
             }
             break;
         }
