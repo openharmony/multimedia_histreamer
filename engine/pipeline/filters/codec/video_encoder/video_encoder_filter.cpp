@@ -464,6 +464,7 @@ void VideoEncoderFilter::FlushEnd()
 
 ErrorCode VideoEncoderFilter::Stop()
 {
+    FALSE_RETURN_V_MSG_W(plugin_!= nullptr, ErrorCode::ERROR_NULL_POINTER, "plugin is null");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Flush()), "Flush plugin fail");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Stop()), "Stop plugin fail");
     isStop_ = true;
