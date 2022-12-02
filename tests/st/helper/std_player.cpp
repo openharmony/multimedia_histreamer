@@ -79,7 +79,7 @@ public:
     int32_t Stop() override;
     int32_t Reset() override;
     int32_t Release() override;
-    int32_t Seek(int64_t timeMs) override;
+    int32_t Seek(int64_t timeMs, PlayerSeekMode mode = PlayerSeekMode::SEEK_CLOSEST) override;
     int32_t GetCurrentTime(int64_t& currentMs) override;
     int32_t GetDuration(int64_t& durationMs) override;
     int32_t SetVolume(float leftVolume, float rightVolume) override;
@@ -210,9 +210,9 @@ int32_t TestPlayerImpl::Release()
     return ERR_OK;
 }
 
-int32_t TestPlayerImpl::Seek(int64_t timeMs)
+int32_t TestPlayerImpl::Seek(int64_t timeMs,PlayerSeekMode mode)
 {
-    int32_t ret = player_->Seek(timeMs, PlayerSeekMode::SEEK_CLOSEST);
+    int32_t ret = player_->Seek(timeMs, mode);
     NZERO_RETURN(ret);
     while (!g_seekFinished) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50)); // 50

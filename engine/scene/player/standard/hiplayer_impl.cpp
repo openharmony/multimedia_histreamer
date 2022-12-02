@@ -617,9 +617,6 @@ ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode, bool appT
         OSAL::SleepFor(10); // 10 wait seek real complete
         seekInProgress_.store(false);
     }
-    if (appTriggered) {
-        return ErrorCode::ERROR_NO_NOTIFY;
-    }
     return rtv;
 }
 
