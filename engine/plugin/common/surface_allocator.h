@@ -31,14 +31,15 @@ public:
     explicit SurfaceAllocator(sptr<Surface> surface = nullptr);
     ~SurfaceAllocator() override = default;
 
-    sptr<SurfaceBuffer> AllocSurfaceBuffer(size_t size);
+    sptr<SurfaceBuffer> AllocSurfaceBuffer();
+    void ReleaseSurfaceBuffer(sptr<SurfaceBuffer>& surfaceBuffer, bool needRender);
 
     void* Alloc(size_t size) override;
     void Free(void* ptr) override; // NOLINT: void*
 
     void Config(int32_t width, int32_t height, uint64_t usage, int32_t format, int32_t strideAlign, int32_t timeout);
     void SetScaleType(VideoScaleType videoScaleType);
-
+    void UpdateSurfaceBufferScaleMode(sptr<SurfaceBuffer>& surfaceBuffer);
 private:
     sptr<Surface> surface_ {nullptr};
     BufferRequestConfig requestConfig_;

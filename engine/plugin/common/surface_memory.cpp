@@ -44,7 +44,7 @@ void SurfaceMemory::AllocSurfaceBuffer()
     if (surfaceAllocator_ == nullptr || bufferSize_ == 0 || surfaceBuffer_ != nullptr) {
         return;
     }
-    surfaceBuffer_ = surfaceAllocator_->AllocSurfaceBuffer(bufferSize_);
+    surfaceBuffer_ = surfaceAllocator_->AllocSurfaceBuffer();
     if (surfaceBuffer_ != nullptr) {
         auto bufferHandle = surfaceBuffer_->GetBufferHandle();
         if (bufferHandle != nullptr) {
@@ -57,18 +57,19 @@ void SurfaceMemory::AllocSurfaceBuffer()
 sptr<SurfaceBuffer> SurfaceMemory::GetSurfaceBuffer()
 {
     OSAL::ScopedLock l(memMutex_);
-    if (surfaceBuffer_ != nullptr) {
-        return surfaceBuffer_;
+    if (!surfaceBuffer_) {
+        // request surface buffer again when old buffer flush to nullptr
+        AllocSurfaceBuffer();
     }
-    // request surface buffer again when old buffer flush to nullptr
-    AllocSurfaceBuffer();
     return surfaceBuffer_;
 }
 
 void SurfaceMemory::ReleaseSurfaceBuffer()
 {
     OSAL::ScopedLock l(memMutex_);
-    surfaceBuffer_ = nullptr;
+    if (surfaceBuffer_ != nullptr) {
+        surfaceAllocator_->ReleaseSurfaceBuffer(surfaceBuffer_, needRender_);
+    }
 }
 
 int32_t SurfaceMemory::GetFlushFence()
@@ -84,6 +85,12 @@ BufferHandle *SurfaceMemory::GetBufferHandle()
         return surfaceBuffer_->GetBufferHandle();
     }
     return nullptr;
+}
+
+void SurfaceMemory::SetNeedRender(bool needRender)
+{
+    OSAL::ScopedLock l(memMutex_);
+    needRender_ = needRender;
 }
 
 uint32_t SurfaceMemory::GetSurfaceBufferStride()

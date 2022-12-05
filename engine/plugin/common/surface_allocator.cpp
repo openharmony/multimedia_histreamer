@@ -51,10 +51,9 @@ SurfaceAllocator::SurfaceAllocator(sptr<Surface> surface)
         PixelFormat::PIXEL_FMT_RGBA_8888, BUFFER_USAGE_CPU_READ | BUFFER_USAGE_CPU_WRITE | BUFFER_USAGE_MEM_DMA, 0};
 }
 
-sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer(size_t size)
+sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer()
 {
-    (void)size;
-    if (surface_ == nullptr) {
+    if (!surface_) {
         MEDIA_LOG_E("surface is nullptr");
         return nullptr;
     }
@@ -73,6 +72,11 @@ sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer(size_t size)
         }
         return nullptr;
     }
+    if (surfaceBuffer->Map() != OHOS::SurfaceError::SURFACE_ERROR_OK) {
+        MEDIA_LOG_E("surface buffer Map failed");
+        surface_->CancelBuffer(surfaceBuffer);
+        return nullptr;
+    }
     sptr<SyncFence> autoFence = new(std::nothrow) SyncFence(releaseFence);
     if (autoFence != nullptr) {
         autoFence->Wait(100); // 100ms
@@ -85,6 +89,17 @@ sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer(size_t size)
     }
     MEDIA_LOG_D("request surface buffer success, releaseFence: " PUBLIC_LOG_D32, releaseFence);
     return surfaceBuffer;
+}
+
+void SurfaceAllocator::ReleaseSurfaceBuffer(sptr<SurfaceBuffer>& surfaceBuffer, bool needRender)
+{
+    if (!needRender) {
+        auto ret = surface_->CancelBuffer(surfaceBuffer);
+        if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
+            MEDIA_LOG_E("surface CancelBuffer fail, ret: " PUBLIC_LOG_U64, static_cast<uint64_t>(ret));
+        }
+    }
+    surfaceBuffer = nullptr;
 }
 
 void* SurfaceAllocator::Alloc(size_t size)
@@ -108,6 +123,14 @@ void SurfaceAllocator::Config(int32_t width, int32_t height, uint64_t usage, int
 void SurfaceAllocator::SetScaleType(VideoScaleType videoScaleType)
 {
     scalingMode_ = GetScaleType(videoScaleType);
+}
+
+void SurfaceAllocator::UpdateSurfaceBufferScaleMode(sptr<SurfaceBuffer>& surfaceBuffer)
+{
+    auto ret = surface_->SetScalingMode(surfaceBuffer->GetSeqNum(), scalingMode_);
+    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
+        MEDIA_LOG_E("update surface buffer scaling mode fail, ret: " PUBLIC_LOG_U64, static_cast<uint64_t>(ret));
+    }
 }
 } // namespace Plugin
 } // namespace Media

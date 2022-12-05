@@ -35,14 +35,13 @@ public:
 
     sptr<SurfaceBuffer> GetSurfaceBuffer();
 
-    void ReleaseSurfaceBuffer();
-
     int32_t GetFlushFence();
 
     BufferHandle *GetBufferHandle();
 
     uint32_t GetSurfaceBufferStride();
 
+    void SetNeedRender(bool needRender);
 private:
     explicit SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr, size_t align = 1);
 
@@ -50,6 +49,7 @@ private:
 
 private:
     void AllocSurfaceBuffer();
+    void ReleaseSurfaceBuffer();
 
     mutable OSAL::Mutex memMutex_ {};
 
@@ -64,6 +64,8 @@ private:
     size_t bufferSize_ {0};
 
     uint32_t stride_ {0};
+
+    bool needRender_ {false};
 
     friend class Buffer;
 };
