@@ -88,6 +88,7 @@ public:
     int32_t GetPlaybackSpeed(PlaybackRateMode &mode) override;
 private:
     std::unique_ptr<IPlayerEngine> player_;
+    std::atomic<PlayerStates> pipelineStates_ {PlayerStates::PLAYER_IDLE};
 };
 
 TestSource TestSource::CreateTestSource(std::string& url, TestSourceType type, Plugin::Seekable seekable)
@@ -112,12 +113,17 @@ std::unique_ptr<TestPlayer> TestPlayer::Create()
 
 int32_t TestPlayerImpl::SetSource(const TestSource& source)
 {
+    int32_t ret = -1;
     if (source.type_ == TestSourceType::URI) {
-        return player_->SetSource(source.url_);
+        ret = player_->SetSource(source.url_);
     } else if (source.type_ == TestSourceType::STREAM) {
         auto src = std::make_shared<IMediaDataSourceImpl>(source.url_, source.seekable_);
-        return player_->SetSource(src);
+        ret = player_->SetSource(src);
     }
+    if (ret == 0) {
+        pipelineStates_.store(PlayerStates::PLAYER_INITIALIZED);
+    }
+    return ret;
 }
 
 int32_t TestPlayerImpl::SetSingleLoop(bool loop)
@@ -132,28 +138,70 @@ bool TestPlayerImpl::IsPlaying()
 
 int32_t TestPlayerImpl::Prepare()
 {
-    return player_->Prepare();
+    if (pipelineStates_.load() == PlayerStates::PLAYER_STOPPED) {
+        return MSERR_OK;
+    }
+
+    int32_t ret = player_->Prepare();
+    if (ret == 0) {
+        pipelineStates_.store(PlayerStates::PLAYER_PREPARED);
+    }
+    return ret;
 }
 
 int32_t TestPlayerImpl::Play()
 {
-    g_playFinished = false;
-    return player_->Play();
+    if (pipelineStates_.load()  == PlayerStates::PLAYER_PREPARED ||
+        pipelineStates_.load()  == PlayerStates::PLAYER_PLAYBACK_COMPLETE ||
+        pipelineStates_.load()  == PlayerStates::PLAYER_PAUSED) {
+        g_playFinished = false;
+        int32_t ret = player_->Play();
+        if (ret == 0) {
+            pipelineStates_.store(PlayerStates::PLAYER_STARTED);
+        }
+        return ret;
+    }
+    return MSERR_INVALID_OPERATION;
 }
 
 int32_t TestPlayerImpl::Pause()
 {
-    return player_->Pause();
+    if (pipelineStates_.load()  != PlayerStates::PLAYER_STARTED) {
+        return MSERR_INVALID_OPERATION;
+    }
+
+    int32_t ret = player_->Pause();
+    if (ret == 0) {
+        pipelineStates_.store(PlayerStates::PLAYER_PAUSED);
+    }
+    return ret;
 }
 
 int32_t TestPlayerImpl::Stop()
 {
-    return player_->Stop();
+    if (pipelineStates_.load() == PlayerStates::PLAYER_PREPARED ||
+        pipelineStates_.load() == PlayerStates::PLAYER_STARTED ||
+        pipelineStates_.load() == PlayerStates::PLAYER_PLAYBACK_COMPLETE ||
+        pipelineStates_.load()== PlayerStates::PLAYER_PAUSED) {
+        int32_t ret = player_->Stop();
+        if (ret == 0) {
+            pipelineStates_.store(PlayerStates::PLAYER_STOPPED);
+        }
+        return ret;
+    }
+    return MSERR_INVALID_OPERATION;
 }
 
 int32_t TestPlayerImpl::Reset()
 {
-    return player_->Reset();
+    if (pipelineStates_.load()  == PlayerStates::PLAYER_IDLE) {
+        return MSERR_INVALID_OPERATION;
+    }
+    int32_t ret = player_->Reset();
+    if (ret == 0) {
+        pipelineStates_.store(PlayerStates::PLAYER_IDLE);
+    }
+    return ret;
 }
 
 int32_t TestPlayerImpl::Release()

@@ -180,8 +180,8 @@ int32_t HiPlayerImpl::SetSource(const std::shared_ptr<IMediaDataSource>& dataSrc
 
 int32_t HiPlayerImpl::Prepare()
 {
-    if (pipelineStates_ != PlayerStates::PLAYER_INITIALIZED) {
-        return TransErrorCode(ErrorCode::ERROR_UNKNOWN);
+    if (!(pipelineStates_ == PlayerStates::PLAYER_INITIALIZED || pipelineStates_ == PlayerStates::PLAYER_STOPPED)) {
+        return MSERR_INVALID_OPERATION;
     }
     SYNC_TRACER();
     NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_START, 0);
@@ -210,8 +210,8 @@ int32_t HiPlayerImpl::Prepare()
 
 int HiPlayerImpl::PrepareAsync()
 {
-    if (pipelineStates_ != PlayerStates::PLAYER_INITIALIZED) {
-        return TransErrorCode(ErrorCode::ERROR_UNKNOWN);
+    if (!(pipelineStates_ == PlayerStates::PLAYER_INITIALIZED || pipelineStates_ == PlayerStates::PLAYER_STOPPED)) {
+        return MSERR_INVALID_OPERATION;
     }
     ASYNC_TRACER();
     NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_START, 0);
