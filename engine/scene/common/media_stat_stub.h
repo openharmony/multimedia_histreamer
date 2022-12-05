@@ -49,6 +49,7 @@ public:
     void Append(const std::string& reporter);
     void ReceiveEvent(const Event& event);
     bool IsEventCompleteAllReceived();
+    void ResetEventCompleteAllReceived();
 
 private:
     std::vector<MediaStat> mediaStats_;

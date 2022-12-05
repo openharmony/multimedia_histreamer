@@ -90,8 +90,6 @@ public:
     ErrorCode OnCallback(const Pipeline::FilterCallbackType& type, Pipeline::Filter* filter,
                          const Plugin::Any& parameter) override;
 
-    // interface from PlayExecutor
-    bool IsSingleLoop();
     ErrorCode DoSetSource(const std::shared_ptr<MediaSource>& source);
     ErrorCode PrepareFilters();
     ErrorCode DoPlay();

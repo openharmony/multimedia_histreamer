@@ -90,6 +90,7 @@ private:
     std::shared_ptr<SurfaceAllocator> mAllocator_ {nullptr};
     uint32_t maxSurfaceNum_;
     bool needConvFormat {false};
+    VideoScaleType scalingType_ {VideoScaleType::VIDEO_SCALE_TYPE_FIT};
 
 #ifdef DUMP_RAW_DATA
     std::FILE* dumpFd_;

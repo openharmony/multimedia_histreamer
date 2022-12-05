@@ -233,16 +233,19 @@ int32_t HiPlayerImpl::Play()
 {
     SYNC_TRACER();
     MEDIA_LOG_I("Play entered.");
-    callbackLooper_.StartReportMediaProgress();
     PROFILE_BEGIN();
-    seekInProgress_.store(false);
-    ErrorCode ret;
-    if (pipelineStates_ == PlayerStates::PLAYER_PAUSED) {
+    auto ret {ErrorCode::SUCCESS};
+    callbackLooper_.StartReportMediaProgress();
+    if (pipelineStates_ == PlayerStates::PLAYER_PLAYBACK_COMPLETE) {
+        ret = DoSeek(0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC, false);
+    } else if (pipelineStates_ == PlayerStates::PLAYER_PAUSED) {
         ret = DoResume();
     } else {
         ret = DoPlay();
     }
-    OnStateChanged(StateId::PLAYING);
+    if (ret == ErrorCode::SUCCESS) {
+        OnStateChanged(StateId::PLAYING);
+    }
     PROFILE_END("Play ret = " PUBLIC_LOG_D32, TransErrorCode(ret));
     return TransErrorCode(ret);
 }
@@ -652,10 +655,11 @@ ErrorCode HiPlayerImpl::DoOnComplete()
     if (singleLoop_.load()) {
         callbackLooper_.OnInfo(INFO_TYPE_EOS, static_cast<int32_t>(singleLoop_.load()), format);
     } else {
-        callbackLooper_.OnInfo(INFO_TYPE_STATE_CHANGE, static_cast<int32_t>(PLAYER_PLAYBACK_COMPLETE), format);
+        OnStateChanged(StateId::EOS);
         callbackLooper_.StopReportMediaProgress();
         callbackLooper_.ManualReportMediaProgressOnce();
     }
+    mediaStats_.ResetEventCompleteAllReceived();
     return ErrorCode::SUCCESS;
 }
 
@@ -700,12 +704,6 @@ int32_t HiPlayerImpl::SetLooping(bool loop)
     MEDIA_LOG_I("SetLooping entered, loop: " PUBLIC_LOG_D32, loop);
     singleLoop_ = loop;
     return TransErrorCode(ErrorCode::SUCCESS);
-}
-
-bool HiPlayerImpl::IsSingleLoop()
-{
-    // note that we should also consider the live source, which cannot be singleLoop!
-    return singleLoop_;
 }
 
 int32_t HiPlayerImpl::SetParameter(const Format& params)
@@ -795,7 +793,8 @@ int32_t HiPlayerImpl::GetPlaybackSpeed(PlaybackRateMode& mode)
 
 void HiPlayerImpl::OnStateChanged(StateId state)
 {
-    MEDIA_LOG_I("OnStateChanged from " PUBLIC_LOG_D32 " to " PUBLIC_LOG_D32, pipelineStates_.load(), TransStateId2PlayerState(state));
+    MEDIA_LOG_I("OnStateChanged from " PUBLIC_LOG_D32 " to " PUBLIC_LOG_D32, pipelineStates_.load(),
+        TransStateId2PlayerState(state));
     UpdateStateNoLock(TransStateId2PlayerState(state));
     {
         OSAL::ScopedLock lock(stateMutex_);
@@ -968,7 +967,10 @@ PlaybackRateMode HiPlayerImpl::ChangeSpeedToMode(double rate) const
 
 int32_t HiPlayerImpl::SetVideoScaleType(VideoScaleType videoScaleType)
 {
-    return TransErrorCode(ErrorCode::ERROR_UNIMPLEMENTED);
+    MEDIA_LOG_I("SetVideoScaleType entered.");
+    auto ret = videoSink_->SetParameter(static_cast<int32_t>(Tag::VIDEO_SCALE_TYPE),
+        static_cast<Plugin::VideoScaleType>(static_cast<uint32_t>(videoScaleType)));
+    return TransErrorCode(ret);
 }
 
 int32_t HiPlayerImpl::SetAudioRendererInfo(const int32_t contentType, const int32_t streamUsage,

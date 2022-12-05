@@ -76,16 +76,24 @@ void VideoSinkFilter::Init(EventReceiver* receiver, FilterCallback* callback)
 
 ErrorCode VideoSinkFilter::SetParameter(int32_t key, const Plugin::Any& value)
 {
-    if (state_.load() == FilterState::CREATED) {
-        return ErrorCode::ERROR_AGAIN;
-    }
     Tag tag = Tag::INVALID;
     if (!TranslateIntoParameter(key, tag)) {
-        MEDIA_LOG_I("SetParameter key " PUBLIC_LOG_D32 "is out of boundary", key);
+        MEDIA_LOG_I("SetParameter key " PUBLIC_LOG_D32 " is out of boundary", key);
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    RETURN_AGAIN_IF_NULL(plugin_);
-    return TranslatePluginStatus(plugin_->SetParameter(tag, value));
+    switch (tag) {
+        case Tag::VIDEO_SCALE_TYPE:
+            FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(Plugin::VideoScaleType)),
+                ErrorCode::ERROR_INVALID_PARAMETER_TYPE, "VIDEO_SCALE_TYPE type should be Plugin::VideoScaleType");
+            videoScaleType_ = Plugin::AnyCast<Plugin::VideoScaleType>(value);
+            if (plugin_) {
+                (void)plugin_->SetParameter(Tag::VIDEO_SCALE_TYPE, videoScaleType_);
+            }
+            break;
+        default:
+            break;
+    }
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode VideoSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
@@ -143,6 +151,7 @@ bool VideoSinkFilter::CreateVideoSinkPlugin(const std::shared_ptr<Plugin::Plugin
         return false;
     }
 #ifndef OHOS_LITE
+    (void)plugin_->SetParameter(Tag::VIDEO_SCALE_TYPE, videoScaleType_);
     if (surface_ != nullptr) {
         auto ret = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_SURFACE, surface_));
         if (ret != ErrorCode::SUCCESS) {

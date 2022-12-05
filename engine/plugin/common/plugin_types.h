@@ -142,6 +142,11 @@ enum class AudioInterruptMode {
     SHARE_MODE,
     INDEPENDENT_MODE
 };
+
+enum class VideoScaleType {
+    VIDEO_SCALE_TYPE_FIT,
+    VIDEO_SCALE_TYPE_FIT_CROP,
+};
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

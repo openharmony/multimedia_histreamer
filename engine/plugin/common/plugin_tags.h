@@ -105,6 +105,7 @@ enum struct Tag : uint32_t {
     APP_PID,                          ///< int32_t, app pid
     AUDIO_RENDER_INFO,                ///< AudioRenderInfo, audio render info
     AUDIO_INTERRUPT_MODE,             ///< AudioInterruptMode, audio interrupt mode
+    VIDEO_SCALE_TYPE,                 ///< VideoScaleType, video scale type
 
     /* -------------------- media tag -------------------- */
     MEDIA_TITLE = SECTION_MEDIA_START + 1, ///< string

@@ -105,6 +105,7 @@ private:
     bool isFirstFrame_ {true};
     uint32_t frameRate_ {0};
     bool forceRenderNextFrame_ {false};
+    Plugin::VideoScaleType videoScaleType_ {Plugin::VideoScaleType::VIDEO_SCALE_TYPE_FIT};
 };
 } // namespace Pipeline
 } // namespace Media
