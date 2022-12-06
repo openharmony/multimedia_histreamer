@@ -968,9 +968,13 @@ PlaybackRateMode HiPlayerImpl::ChangeSpeedToMode(double rate) const
 int32_t HiPlayerImpl::SetVideoScaleType(VideoScaleType videoScaleType)
 {
     MEDIA_LOG_I("SetVideoScaleType entered.");
+#ifdef VIDEO_SUPPORT
     auto ret = videoSink_->SetParameter(static_cast<int32_t>(Tag::VIDEO_SCALE_TYPE),
         static_cast<Plugin::VideoScaleType>(static_cast<uint32_t>(videoScaleType)));
     return TransErrorCode(ret);
+#else
+    return TransErrorCode(ErrorCode::SUCCESS);
+#endif
 }
 
 int32_t HiPlayerImpl::SetAudioRendererInfo(const int32_t contentType, const int32_t streamUsage,

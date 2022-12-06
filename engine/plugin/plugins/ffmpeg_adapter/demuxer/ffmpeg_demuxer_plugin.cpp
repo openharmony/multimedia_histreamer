@@ -24,6 +24,7 @@
 #include <cstdio>
 #include <cstring>
 #include <new>
+#include <unordered_map>
 #include "ffmpeg_track_meta.h"
 #include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/log.h"
