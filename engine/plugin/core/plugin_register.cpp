@@ -15,6 +15,7 @@
 
 #include "plugin_register.h"
 
+#include <algorithm>
 #include <dirent.h>
 
 #include "all_plugin_static.h"
