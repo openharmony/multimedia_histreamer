@@ -20,6 +20,11 @@
 #include "foundation/osal/thread/task.h"
 #include "utils/blocking_queue.h"
 
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/osal/thread/scoped_lock.h"
+#include <atomic>
+
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
@@ -47,6 +52,8 @@ public:
 protected:
     ErrorCode HandleFrame();
 
+    ErrorCode DecodeFrame();
+
     ErrorCode FinishFrame();
 
     ErrorCode QueueAllBufferInPoolToPluginLocked();
@@ -57,6 +64,9 @@ private:
     // dequeue from es bufferQ then enqueue to plugin
     std::shared_ptr<OHOS::Media::OSAL::Task> handleFrameTask_ {};
 
+    // this task will queue output buffer and decode
+    std::shared_ptr<OHOS::Media::OSAL::Task> decodeFrameTask_ {};
+
     // this task will dequeue from the plugin and then push to downstream
     std::shared_ptr<OHOS::Media::OSAL::Task> pushTask_ {nullptr};
 
@@ -64,6 +74,10 @@ private:
     std::queue<AVBufferPtr> outBufQue_;  // PCM data
     mutable OSAL::Mutex renderMutex_ {};
     bool stopped_ {false};
+
+    mutable OSAL::ConditionVariable cv_;
+    std::atomic<bool> isNeedQueueInputBuffer_;
+    mutable OSAL::Mutex mutex_;
 };
 } // namespace Pipeline
 } // namespace Media
