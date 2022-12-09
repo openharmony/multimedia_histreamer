@@ -216,8 +216,8 @@ Status SdlAudioSinkPlugin::GetParameter(Tag tag, ValueType& value)
         }
         case Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT: {
             value = DEFAULT_OUTPUT_CHANNEL_LAYOUT;
-            break;
             MEDIA_LOG_D("Get outputChannelLayout: " PUBLIC_LOG_U64, DEFAULT_OUTPUT_CHANNEL_LAYOUT);
+            break;
         }
         default: {
             MEDIA_LOG_W("receive one parameter with unconcern key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));

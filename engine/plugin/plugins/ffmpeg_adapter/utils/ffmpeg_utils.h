@@ -133,6 +133,7 @@ private:
 #endif
 };
 
+#if defined(VIDEO_SUPPORT)
 struct ScalePara {
     int32_t srcWidth {0};
     int32_t srcHeight {0};
@@ -151,6 +152,7 @@ private:
     ScalePara scalePara_ {};
     std::shared_ptr<SwsContext> swsCtx_ {nullptr};
 };
+#endif
 } // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media

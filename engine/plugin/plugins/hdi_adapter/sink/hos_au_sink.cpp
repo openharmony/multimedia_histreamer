@@ -23,6 +23,7 @@
 #include "foundation/osal/thread/scoped_lock.h"
 #include "foundation/osal/utils/util.h"
 #include "foundation/pre_defines.h"
+#include "pipeline/core/plugin_attr_desc.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_time.h"
 #include "plugins/hdi_adapter/utils/hdi_au_utils.h"
@@ -37,7 +38,7 @@ constexpr int32_t MAX_RETRY_CNT = 3;
 constexpr int32_t RETRY_INTERVAL = 100; // 100ms
 constexpr int32_t HI_ERR_VI_BUF_FULL = 0xA016800F;
 constexpr int32_t RANK100 = 100;
-constexpr int32_t PCM_CHAN_CNT = 2;
+constexpr uint32_t PCM_CHAN_CNT = 2;
 static std::map<std::string, std::pair<uint32_t, bool>> g_sinkInfos;
 
 Status LoadAndInitAdapter(AudioManager* audioManager, AudioAdapterDescriptor* descriptor, AudioAdapter** adapter)
@@ -315,15 +316,21 @@ Status HdiSink::ProcessInputSampleFormat(const ValueType& value)
 Status HdiSink::SetParameter(Tag tag, const ValueType& value)
 {
     switch (tag) {
-        case Tag::AUDIO_CHANNELS:
-            return AssignIfCastSuccess<uint32_t>(sampleAttributes_.channelCount, value, "channel");
+        case Tag::AUDIO_OUTPUT_CHANNELS: {
+            auto ret = AssignIfCastSuccess<uint32_t>(sampleAttributes_.channelCount, value, "channel");
+            FALSE_RETURN_V_MSG_E(ret == Status::OK, ret, "set parm AUDIO_OUTPUT_CHANNELS failed");
+            if (sampleAttributes_.channelCount > PCM_CHAN_CNT) {
+                sampleAttributes_.channelCount = PCM_CHAN_CNT;
+            }
+            return Status::OK;
+        }
         case Tag::AUDIO_SAMPLE_RATE:
             return AssignIfCastSuccess<uint32_t>(sampleAttributes_.sampleRate, value, "sampleRate");
         case Tag::AUDIO_SAMPLE_FORMAT:
             return ProcessInputSampleFormat(value);
         case Tag::AUDIO_SAMPLE_PER_FRAME:
             return AssignIfCastSuccess<uint32_t>(sampleAttributes_.period, value, "samples per frame");
-        case Tag::AUDIO_CHANNEL_LAYOUT: {
+        case Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT: {
             AudioChannelLayout layout;
             auto ret = AssignIfCastSuccess<AudioChannelLayout>(layout, value, "audioChannelLayout");
             if (ret != Status::OK) {
@@ -337,16 +344,32 @@ Status HdiSink::SetParameter(Tag tag, const ValueType& value)
             }
         }
         default:
-            MEDIA_LOG_I("receive one parameter with unconcern tag, ignore it");
+            MEDIA_LOG_W("receive one parameter with unconcern key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
     }
     return Status::OK;
 }
 
 Status HdiSink::GetParameter(Tag tag, ValueType& value)
 {
-    UNUSED_VARIABLE(tag);
-    UNUSED_VARIABLE(value);
-    return Status::ERROR_UNIMPLEMENTED;
+    switch (tag) {
+        case Tag::AUDIO_OUTPUT_CHANNELS: {
+            value = PCM_CHAN_CNT;
+            MEDIA_LOG_D("Get outputChannels: " PUBLIC_LOG_U32, PCM_CHAN_CNT);
+            break;
+        }
+        case Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT: {
+            AudioChannelLayout pluginLayout;
+            HdiMask2PluginChannelLayout(channelMask_, pluginLayout);
+            value = pluginLayout;
+            MEDIA_LOG_D("Get outputChannelLayout: " PUBLIC_LOG_U64, static_cast<uint64_t>(pluginLayout));
+            break;
+        }
+        default: {
+            MEDIA_LOG_W("receive one parameter with unconcern key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
+            break;
+        }
+    }
+    return Status::OK;
 }
 
 Status HdiSink::Prepare()
