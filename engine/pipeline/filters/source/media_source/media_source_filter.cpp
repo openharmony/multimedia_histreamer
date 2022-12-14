@@ -423,7 +423,7 @@ ErrorCode MediaSourceFilter::FindPlugin(const std::shared_ptr<MediaSource>& sour
             }
         }
     }
-    MEDIA_LOG_I("Cannot find any plugin");
+    MEDIA_LOG_E("Cannot find any plugin");
     return ErrorCode::ERROR_UNSUPPORTED_FORMAT;
 }
 

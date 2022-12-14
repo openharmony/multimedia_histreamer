@@ -14,24 +14,44 @@
 
 declare_args() {
   # build histreamer plugin feature ability
+  # only for small and std (mini device does not support dynamic libraries)
   multimedia_histreamer_enable_plugin_ffmpeg_adapter = true
-  multimedia_histreamer_enable_plugin_hdi_adapter = false
-  multimedia_histreamer_enable_plugin_file_source = true
+
+  # only tested on std device
   multimedia_histreamer_enable_plugin_http_source = true
-  multimedia_histreamer_enable_plugin_file_fd_source = true
+
+  # depends on lite audio hdi interface (small device)
+  multimedia_histreamer_enable_plugin_hdi_adapter = false
+
+  # depends on lite media api
   multimedia_histreamer_enable_plugin_stream_source = false
-  multimedia_histreamer_enable_plugin_std_stream_source = false
+
+  # only support mini device bes2600 tech (L0)
+  multimedia_histreamer_enable_plugin_lite_aac_decoder = false
   multimedia_histreamer_enable_plugin_http_lite_source = false
+
+  # no external dependence
+  multimedia_histreamer_enable_plugin_file_source = true
+  multimedia_histreamer_enable_plugin_file_fd_source = true
+  multimedia_histreamer_enable_plugin_file_fd_sink = false
+  multimedia_histreamer_enable_plugin_aac_demuxer = false
+  multimedia_histreamer_enable_plugin_wav_demuxer = false
+
+  # no release (https://gitee.com/histreamer/minimp3)
   multimedia_histreamer_enable_plugin_minimp3_adapter = false
   multimedia_histreamer_enable_plugin_minimp4_demuxer = false
-  multimedia_histreamer_enable_plugin_aac_demuxer = false
+
+  # depends on std media api
+  multimedia_histreamer_enable_plugin_std_stream_source = false
+
+  # depends on std audio service
   multimedia_histreamer_enable_plugin_std_audio_capture = false
-  multimedia_histreamer_enable_plugin_file_fd_sink = false
   multimedia_histreamer_enable_plugin_audio_server_sink = false
-  multimedia_histreamer_enable_plugin_lite_aac_decoder = false
+
+  # depends on std surface
   multimedia_histreamer_enable_plugin_std_video_surface_sink = false
   multimedia_histreamer_enable_plugin_std_video_capture = false
-  multimedia_histreamer_enable_plugin_wav_demuxer = false
+
   multimedia_histreamer_enable_plugin_avs3_audio_decoder = false
 
   multimedia_histreamer_enable_recorder = false
@@ -54,4 +74,5 @@ if (!defined(ohos_lite) || !ohos_lite) {
   multimedia_histreamer_enable_plugin_std_video_surface_sink = true
 } else {
   hst_is_lite_sys = true
+  multimedia_histreamer_enable_plugin_hdi_adapter = true
 }

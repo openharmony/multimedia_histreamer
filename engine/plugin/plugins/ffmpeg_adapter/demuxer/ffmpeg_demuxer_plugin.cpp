@@ -24,7 +24,6 @@
 #include <cstdio>
 #include <cstring>
 #include <new>
-#include <unordered_map>
 #include "ffmpeg_track_meta.h"
 #include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/log.h"
@@ -56,7 +55,7 @@ std::map<AVMediaType, MediaType> g_MediaTypeMap = {
     {AVMEDIA_TYPE_SUBTITLE, MediaType::SUBTITLE}
 };
 
-static const std::unordered_map<SeekMode, int32_t> seekModeToFfmpegSeekFlags = {
+static const std::map<SeekMode, int32_t> seekModeToFfmpegSeekFlags = {
     { SeekMode::SEEK_PREVIOUS_SYNC, AVSEEK_FLAG_FRAME | AVSEEK_FLAG_BACKWARD },
     { SeekMode::SEEK_NEXT_SYNC, AVSEEK_FLAG_FRAME },
     { SeekMode::SEEK_CLOSEST_SYNC, AVSEEK_FLAG_FRAME | AVSEEK_FLAG_ANY },
