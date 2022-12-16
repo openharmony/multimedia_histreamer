@@ -210,18 +210,16 @@ void AudioServerSinkPlugin::AudioRendererCallbackImpl::OnInterrupt(
                 break;
         }
     }
-    auto audioInterruptEvent = AudioInterruptEvent {
-        static_cast<uint32_t>(interruptEvent.eventType),
-        static_cast<uint32_t>(interruptEvent.forceType),
-        static_cast<uint32_t>(interruptEvent.hintType)
-    };
-    callback_->OnEvent(PluginEvent{PluginEventType::INTERRUPT, audioInterruptEvent, "Audio interrupt event"});
+    callback_->OnEvent(PluginEvent{PluginEventType::AUDIO_INTERRUPT, interruptEvent, "Audio interrupt event"});
 }
 
 void AudioServerSinkPlugin::AudioRendererCallbackImpl::OnStateChange(const OHOS::AudioStandard::RendererState state,
-    const AudioStandard::StateChangeCmdType __attribute__((unused)) cmdType)
+    const OHOS::AudioStandard::StateChangeCmdType cmdType)
 {
     MEDIA_LOG_D("RenderState is " PUBLIC_LOG_U32, static_cast<uint32_t>(state));
+    if (cmdType == AudioStandard::StateChangeCmdType::CMD_FROM_SYSTEM) {
+        callback_->OnEvent(PluginEvent{PluginEventType::AUDIO_STATE_CHANGE, state});
+    }
 }
 
 AudioServerSinkPlugin::AudioServerSinkPlugin(std::string name)
@@ -635,15 +633,13 @@ Status AudioServerSinkPlugin::Pause()
 {
     MEDIA_LOG_I("Pause entered.");
     OSAL::ScopedLock lock(renderMutex_);
-    if (audioRenderer_ != nullptr) {
-        if (audioRenderer_->Pause()) {
-            MEDIA_LOG_I("audio renderer pause success");
-            return Status::OK;
-        } else {
-            MEDIA_LOG_E("audio renderer pause fail");
-        }
+    if (audioRenderer_ && audioRenderer_->GetStatus() == OHOS::AudioStandard::RENDERER_RUNNING
+        && !audioRenderer_->Pause()) {
+        MEDIA_LOG_E("audio renderer pause fail");
+        return Status::ERROR_UNKNOWN;
     }
-    return Status::ERROR_WRONG_STATE;
+    MEDIA_LOG_I("audio renderer pause success");
+    return Status::OK;
 }
 
 Status AudioServerSinkPlugin::GetLatency(uint64_t& hstTime)

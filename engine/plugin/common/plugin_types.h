@@ -132,12 +132,6 @@ struct AudioRenderInfo {
     int32_t rendererFlags {0};
 };
 
-struct AudioInterruptEvent {
-    uint32_t eventType {0};
-    uint32_t forceType {0};
-    uint32_t hintType {0};
-};
-
 enum class AudioInterruptMode {
     SHARE_MODE,
     INDEPENDENT_MODE
