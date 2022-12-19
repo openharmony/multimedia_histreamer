@@ -15,17 +15,18 @@
 
 #define HST_LOG_TAG "HiPlayerImpl"
 
+#include "audio_info.h"
+#include "av_common.h"
 #include "hiplayer_impl.h"
 #include "foundation/log.h"
+#include "media_errors.h"
 #include "pipeline/factory/filter_factory.h"
-#include "scene/player/standard/media_utils.h"
 #include "plugin/common/media_source.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_meta.h"
-#include "utils/steady_clock.h"
-#include "av_common.h"
-#include "media_errors.h"
+#include "scene/player/standard/media_utils.h"
 #include "utils/hitrace_utils.h"
+#include "utils/steady_clock.h"
 
 namespace {
 const float MAX_MEDIA_VOLUME = 1.0f; // standard interface volume is between 0 to 1.
@@ -1017,14 +1018,26 @@ void HiPlayerImpl::HandlePluginEvent(const Event& event)
 {
     auto pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
     switch (pluginEvent.type) {
-        case Plugin::PluginEventType::INTERRUPT: {
-            auto interruptEvent = Plugin::AnyCast<Plugin::AudioInterruptEvent>(pluginEvent.param);
+        case Plugin::PluginEventType::AUDIO_INTERRUPT: {
+            auto interruptEvent = Plugin::AnyCast<AudioStandard::InterruptEvent>(pluginEvent.param);
+            MEDIA_LOG_I("Receive Audio AUDIO_INTERRUPT EVENT, eventType: " PUBLIC_LOG_U32
+                ", forceType: " PUBLIC_LOG_U32 ", hintType: " PUBLIC_LOG_U32,
+                interruptEvent.eventType, interruptEvent.forceType, interruptEvent.hintType);
             Format format;
             (void)format.PutIntValue(PlayerKeys::AUDIO_INTERRUPT_TYPE, interruptEvent.eventType);
             (void)format.PutIntValue(PlayerKeys::AUDIO_INTERRUPT_FORCE, interruptEvent.forceType);
             (void)format.PutIntValue(PlayerKeys::AUDIO_INTERRUPT_HINT, interruptEvent.hintType);
             callbackLooper_.OnInfo(INFO_TYPE_INTERRUPT_EVENT, 0, format);
-            MEDIA_LOG_I("Receive Audio INTERRUPT EVENT");
+            break;
+        }
+        case Plugin::PluginEventType::AUDIO_STATE_CHANGE: {
+            auto renderState = Plugin::AnyCast<AudioStandard::RendererState>(pluginEvent.param);
+            MEDIA_LOG_I("Receive Audio STATE_CHANGE EVENT, renderState: " PUBLIC_LOG_U32,
+                static_cast<uint32_t>(renderState));
+            if (renderState == AudioStandard::RendererState::RENDERER_PAUSED) {
+                Format format;
+                callbackLooper_.OnInfo(INFO_TYPE_STATE_CHANGE_BY_AUDIO, PlayerStates::PLAYER_PAUSED, format);
+            }
             break;
         }
         case Plugin::PluginEventType::BELOW_LOW_WATERLINE:

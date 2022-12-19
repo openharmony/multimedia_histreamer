@@ -29,8 +29,7 @@ int32_t HstEngineFactory::Score(Scene scene, const std::string& uri)
     MEDIA_LOG_I("Score in");
     if (scene == Scene::SCENE_PLAYBACK || scene == Scene::SCENE_RECORDER) {
         char useHistreamer[10] = {0}; // 10 for system parameter usage
-        auto res = GetParameter("debug.media_service.histreamer", "0", useHistreamer,
-            sizeof(useHistreamer));
+        auto res = GetParameter("debug.media_service.histreamer", "0", useHistreamer, sizeof(useHistreamer));
         if (res == 1 && useHistreamer[0] == '1') {
             MEDIA_LOG_I("enable histreamer");
             return MAX_SCORE;
@@ -39,45 +38,43 @@ int32_t HstEngineFactory::Score(Scene scene, const std::string& uri)
     return MIN_SCORE;
 }
 
+#ifdef SUPPORT_PLAYER
 std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine(int32_t appUid, int32_t appPid)
 {
     MEDIA_LOG_I("CreatePlayerEngine enter.");
     auto player = std::unique_ptr<HiPlayerImpl>(new (std::nothrow) HiPlayerImpl(appUid, appPid));
     if (player && player->Init() == ErrorCode::SUCCESS) {
         return player;
-    } else {
-        MEDIA_LOG_E("create player failed or player init failed");
     }
+    MEDIA_LOG_E("create player failed or player init failed");
     return nullptr;
 }
+#endif
 
+#ifdef SUPPORT_RECORDER
 std::unique_ptr<IRecorderEngine> HstEngineFactory::CreateRecorderEngine(
     int32_t appUid, int32_t appPid, uint32_t appTokenId)
 {
-#ifdef RECORDER_SUPPORT
     MEDIA_LOG_I("CreateRecorderEngine enter.");
     auto recorder = std::unique_ptr<Record::HiRecorderImpl>(new (std::nothrow) Record::HiRecorderImpl(
-            appUid, appPid, appTokenId));
+        appUid, appPid, appTokenId));
     if (recorder && recorder->Init() == ErrorCode::SUCCESS) {
         return recorder;
-    } else {
-        MEDIA_LOG_E("create recorder failed or player init failed");
     }
-#else
-    (void)appUid;
-    (void)appPid;
-    (void)appTokenId;
-    MEDIA_LOG_W("CreateRecorderEngine not supported now, return nullptr.");
-#endif
+    MEDIA_LOG_E("create recorder failed or recorder init failed");
     return nullptr;
 }
+#endif
 
+#ifdef SUPPORT_METADATA
 std::unique_ptr<IAVMetadataHelperEngine> HstEngineFactory::CreateAVMetadataHelperEngine()
 {
     MEDIA_LOG_W("CreateAVMetadataHelperEngine not supported now, return nullptr.");
     return nullptr;
 }
+#endif
 
+#ifdef SUPPORT_CODEC
 std::unique_ptr<IAVCodecEngine> HstEngineFactory::CreateAVCodecEngine()
 {
     MEDIA_LOG_W("CreateAVCodecEngine not supported now, return nullptr.");
@@ -89,6 +86,15 @@ std::unique_ptr<IAVCodecListEngine> HstEngineFactory::CreateAVCodecListEngine()
     MEDIA_LOG_W("CreateAVCodecListEngine not supported now, return nullptr.");
     return nullptr;
 }
+#endif
+
+#ifdef SUPPORT_MUXER
+std::unique_ptr<IAVMuxerEngine> HstEngineFactory::CreateAVMuxerEngine()
+{
+    MEDIA_LOG_W("CreateAVMuxerEngine not supported now, return nullptr.");
+    return nullptr;
+}
+#endif
 }  // namespace Media
 }  // namespace OHOS
 

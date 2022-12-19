@@ -26,6 +26,7 @@ config("histreamer_player_config") {
       "//foundation/multimedia/image_framework/interfaces/innerkits/include",
       "//foundation/multimedia/player_framework/services/include",
       "//foundation/multimedia/player_framework/services/services/engine_intf",
+      "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiocommon/include",
       "//commonlibrary/c_utils/base/include",
     ]
   }
