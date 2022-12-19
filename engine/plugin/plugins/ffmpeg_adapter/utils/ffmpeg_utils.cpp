@@ -572,6 +572,7 @@ Status Resample::Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8
     return Status::OK;
 }
 
+#if defined(VIDEO_SUPPORT)
 Status Scale::Init(const ScalePara& scalePara, uint8_t** dstData, int32_t* dstLineSize)
 {
     scalePara_ = scalePara;
@@ -610,6 +611,7 @@ Status Scale::Convert(uint8_t** srcData, const int32_t* srcLineSize, uint8_t** d
     FALSE_RETURN_V_MSG_E(res >= 0, Status::ERROR_UNKNOWN, "sws_scale fail: " PUBLIC_LOG_D32, res);
     return Status::OK;
 }
+#endif
 }// namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
