@@ -79,7 +79,7 @@ public:
     int32_t Stop() override;
     int32_t Reset() override;
     int32_t Release() override;
-    int32_t Seek(int64_t timeMs, PlayerSeekMode mode = PlayerSeekMode::SEEK_CLOSEST) override;
+    int32_t Seek(int64_t timeMs, PlayerSeekMode mode = PlayerSeekMode::SEEK_NEXT_SYNC) override;
     int32_t GetCurrentTime(int64_t& currentMs) override;
     int32_t GetDuration(int64_t& durationMs) override;
     int32_t SetVolume(float leftVolume, float rightVolume) override;

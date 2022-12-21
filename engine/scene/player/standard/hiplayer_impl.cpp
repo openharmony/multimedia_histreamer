@@ -238,7 +238,7 @@ int32_t HiPlayerImpl::Play()
     auto ret {ErrorCode::SUCCESS};
     callbackLooper_.StartReportMediaProgress();
     if (pipelineStates_ == PlayerStates::PLAYER_PLAYBACK_COMPLETE) {
-        ret = DoSeek(0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC, false);
+        ret = DoSeek(0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC);
     } else if (pipelineStates_ == PlayerStates::PLAYER_PAUSED) {
         ret = DoResume();
     } else {
@@ -306,16 +306,8 @@ int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
         return TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }
     auto smode = Transform2SeekMode(mode);
-    lastSeekPosition_.store(hstTime);
-    lastSeekMode_.store(smode);
     auto ret = ErrorCode::SUCCESS;
-    if (!seekInProgress_.load()) {
-        seekInProgress_.store(true);
-        ret = DoSeek(hstTime, smode, true);
-        if (ret != ErrorCode::SUCCESS) {
-            seekInProgress_.store(false);
-        }
-    }
+    ret = DoSeek(hstTime, smode);
     return TransErrorCode(ret);
 }
 
@@ -577,16 +569,12 @@ ErrorCode HiPlayerImpl::DoReset()
     return DoStop();
 }
 
-ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode, bool appTriggered)
+ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode)
 {
     SYNC_TRACER();
     PROFILE_BEGIN();
     int64_t seekPos = hstTime;
     Plugin::SeekMode seekMode = mode;
-    if (appTriggered && (hstTime != lastSeekPosition_.load() || mode != lastSeekMode_.load())) { // Newer seek happened
-        seekPos = lastSeekPosition_.load();
-        seekMode = lastSeekMode_.load();
-    }
     auto rtv = seekPos >= 0 ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_OPERATION;
     if (rtv == ErrorCode::SUCCESS) {
         pipeline_->FlushStart();
@@ -610,14 +598,10 @@ ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode, bool appT
     } else {
         Format format;
         int64_t currentPos = Plugin::HstTime2Ms(seekPos);
-        MEDIA_LOG_I("Seek done, currentPos : " PUBLIC_LOG_D64 ", appTriggered: " PUBLIC_LOG_D32,
-                    currentPos, appTriggered);
+        MEDIA_LOG_I("Seek done, currentPos : " PUBLIC_LOG_D64, currentPos);
         callbackLooper_.OnInfo(INFO_TYPE_SEEKDONE, static_cast<int32_t>(currentPos), format);
     }
-    if (appTriggered && seekInProgress_.load()) {
-        OSAL::SleepFor(10); // 10 wait seek real complete
-        seekInProgress_.store(false);
-    }
+
     return rtv;
 }
 

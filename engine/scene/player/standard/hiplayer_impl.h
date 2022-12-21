@@ -97,7 +97,7 @@ public:
     ErrorCode DoResume();
     ErrorCode DoStop();
     ErrorCode DoReset();
-    ErrorCode DoSeek(int64_t hstTime, Plugin::SeekMode mode, bool appTriggered);
+    ErrorCode DoSeek(int64_t hstTime, Plugin::SeekMode mode);
     ErrorCode DoOnReady();
     ErrorCode DoOnComplete();
     ErrorCode DoOnError(ErrorCode);
@@ -135,9 +135,6 @@ private:
     std::atomic<bool> singleLoop_ {false};
     float volume_;
     MediaStatStub mediaStats_;
-    std::atomic<int64_t> lastSeekPosition_ {-1};
-    std::atomic<Plugin::SeekMode> lastSeekMode_ {Plugin::SeekMode::SEEK_PREVIOUS_SYNC};
-    std::atomic<bool> seekInProgress_ {false};
 
     std::shared_ptr<Pipeline::MediaSourceFilter> audioSource_;
     std::shared_ptr<Pipeline::DemuxerFilter> demuxer_;
