@@ -30,12 +30,15 @@ using namespace OHOS::Media::Test;
 // @fixture(tags=video_play_fast)
 FIXTURE(DataDrivenSingleVideoPlayerTestFast)
 {
+
     DATA_PROVIDER(myurls, 1,
-    DATA_GROUP(std::string(RESOURCE_DIR "/MP4/11_AVC_640x480_25.000fps.mp4")));
+    DATA_GROUP(std::string(RESOURCE_DIR "/MP4/H264_AAC.mp4")));
 
     DATA_PROVIDER(myfdurl, 2,
-    DATA_GROUP(std::string(RESOURCE_DIR "/MP4/9_AVC_1280x720_59.940fps_AAC_128Kbps_2channels.mp4"), 34373632),
-    DATA_GROUP(std::string(RESOURCE_DIR "/MP4/11_AVC_640x480_25.000fps.mp4"), 5632639));
+    DATA_GROUP(std::string(RESOURCE_DIR "/MP4/H264_AAC.mp4"), 1894335));
+
+    const int64_t NEXT_FRAME_TIME {8333};
+    const int64_t PREV_FRAME_TIME {4166};
 
     std::string FilePathToFd(std::string url, int32_t fileSize)
     {
@@ -213,9 +216,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Play());
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        ASSERT_EQ(0, player->Seek(seekPos));
+        ASSERT_EQ(0, player->Seek(seekPos, OHOS::Media::PlayerSeekMode::SEEK_NEXT_SYNC));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
+        EXPECT_TRUE(CheckTimeEquality(NEXT_FRAME_TIME, currentMS));
         ASSERT_NE(0, player->Prepare());
         ASSERT_EQ(0, player->Release());
     }
@@ -329,9 +332,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0600 /0700
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_PLAY_CALLBACK_0600
     // @test(data="myfdurl", tags=video_play_fast)
-    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, release)
+    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, release, 600)
     {
         int64_t seekPos {5000};
         int64_t currentMS {0};
@@ -342,9 +345,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Play());
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-        ASSERT_EQ(0, player->Seek(seekPos));
+        ASSERT_EQ(0, player->Seek(seekPos, OHOS::Media::PlayerSeekMode::SEEK_NEXT_SYNC));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
+        EXPECT_TRUE(CheckTimeEquality(NEXT_FRAME_TIME, currentMS));
         ASSERT_EQ(0, player->Release());
     }
 
@@ -470,9 +473,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Play());
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-        ASSERT_EQ(0, player->Seek(seekPos));
+        ASSERT_EQ(0, player->Seek(seekPos, OHOS::Media::PlayerSeekMode::SEEK_NEXT_SYNC));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
+        EXPECT_TRUE(CheckTimeEquality(NEXT_FRAME_TIME, currentMS));
         ASSERT_EQ(0, player->Pause());
         ASSERT_EQ(0, player->Release());
     }
@@ -600,9 +603,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Play());
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-        ASSERT_EQ(0, player->Seek(seekPos));
+        ASSERT_EQ(0, player->Seek(seekPos, OHOS::Media::PlayerSeekMode::SEEK_NEXT_SYNC));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
+        EXPECT_TRUE(CheckTimeEquality(NEXT_FRAME_TIME, currentMS));
         ASSERT_EQ(0, player->Stop());
         ASSERT_EQ(0, player->Release());
     }
@@ -742,9 +745,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Play());
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-        ASSERT_EQ(0, player->Seek(seekPos));
+        ASSERT_EQ(0, player->Seek(seekPos, OHOS::Media::PlayerSeekMode::SEEK_NEXT_SYNC));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
+        EXPECT_TRUE(CheckTimeEquality(NEXT_FRAME_TIME, currentMS));
         ASSERT_EQ(0, player->Reset());
         ASSERT_EQ(0, player->Release());
     }
@@ -850,9 +853,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Release());
     }
 
-    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0600/0700
+    // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_RELEASE_CALLBACK_0700
     // @test(data="myfdurl", tags=video_play_fast)
-    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, release)
+    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, release, 700)
     {
         int64_t seekPos {5000};
         int64_t currentMS {0};
@@ -863,9 +866,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Play());
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-        ASSERT_EQ(0, player->Seek(seekPos));
+        ASSERT_EQ(0, player->Seek(seekPos, OHOS::Media::PlayerSeekMode::SEEK_NEXT_SYNC));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
+        EXPECT_TRUE(CheckTimeEquality(NEXT_FRAME_TIME, currentMS));
         ASSERT_EQ(0, player->Release());
     }
 
@@ -937,7 +940,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
 
     // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0300
     // @test(data="myfdurl", tags=video_play_fast)
-    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, release)
+    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, release, 300)
     {
         int64_t seekPos {5000};
         int64_t currentMS {0};
@@ -948,9 +951,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Play());
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-        ASSERT_EQ(0, player->Seek(seekPos));
+        ASSERT_EQ(0, player->Seek(seekPos, OHOS::Media::PlayerSeekMode::SEEK_NEXT_SYNC));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
+        EXPECT_TRUE(CheckTimeEquality(NEXT_FRAME_TIME, currentMS));
         ASSERT_EQ(0, player->Release());
     }
 
@@ -976,7 +979,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
 
     //  SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0500
     // @test(data="myfdurl", tags=video_play_fast)
-    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, pause, seek, release)
+    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, stop, seek, release)
     {
         int64_t seekPos {5000};
         int64_t currentMS {0};
@@ -995,7 +998,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
 
     // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0600
     // @test(data="myfdurl", tags=video_play_fast)
-    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, pause, seek, release)
+    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, reset, seek, release)
     {
         int64_t seekPos {5000};
         int64_t currentMS {0};
@@ -1030,7 +1033,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
 
     // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_SEEK_CALLBACK_0900
     // @test(data="myfdurl", tags=video_play_fast)
-    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, pause, seek, release)
+    PTEST((std::string url, int32_t fileSize), Test fdsource prepare, play, seek, release, 900)
     {
         int64_t seekPos {5000};
         int64_t currentMS {0};
@@ -1055,17 +1058,17 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Play());
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-        ASSERT_EQ(0, player->Seek(seekPos));
+        ASSERT_EQ(0, player->Seek(seekPos, OHOS::Media::PlayerSeekMode::SEEK_NEXT_SYNC));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
+        EXPECT_TRUE(CheckTimeEquality(NEXT_FRAME_TIME, currentMS));
         seekPos = 5000;
-        ASSERT_EQ(0, player->Seek(seekPos));
+        ASSERT_EQ(0, player->Seek(seekPos, OHOS::Media::PlayerSeekMode::SEEK_PREVIOUS_SYNC));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
+        EXPECT_TRUE(CheckTimeEquality(PREV_FRAME_TIME, currentMS));
         seekPos = 5000;
-        ASSERT_EQ(0, player->Seek(seekPos));
+        ASSERT_EQ(0, player->Seek(seekPos, OHOS::Media::PlayerSeekMode::SEEK_NEXT_SYNC));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
+        EXPECT_TRUE(CheckTimeEquality(NEXT_FRAME_TIME, currentMS));
         ASSERT_EQ(0, player->Release());
     }
 
@@ -1082,7 +1085,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Play());
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-        ASSERT_NE(0, player->Seek(seekPos));
+        ASSERT_EQ(0, player->Seek(seekPos));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
         ASSERT_EQ(0, player->Release());
     }
@@ -1094,6 +1097,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         int64_t seekPos {0};
         int64_t currentMS {0};
         int64_t durationMs {0};
+        int64_t realSeekTime {8300};
         std::string uri = FilePathToFd(url, fileSize);
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
         ASSERT_EQ(0, player->SetSource(TestSource(uri)));
@@ -1103,9 +1107,9 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         ASSERT_EQ(0, player->GetDuration(durationMs));
         seekPos = durationMs + 1000;
-        ASSERT_EQ(0, player->Seek(seekPos));
+        ASSERT_EQ(0, player->Seek(seekPos, OHOS::Media::PlayerSeekMode::SEEK_PREVIOUS_SYNC));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
+        EXPECT_TRUE(CheckTimeEquality(realSeekTime, currentMS));
         ASSERT_EQ(0, player->Release());
     }
 

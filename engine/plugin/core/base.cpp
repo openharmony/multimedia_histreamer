@@ -120,7 +120,7 @@ Status Base::Stop()
 {
     MEDIA_LOG_D(PUBLIC_LOG_S " Enter.", __FUNCTION__);
     OSAL::ScopedLock lock(stateChangeMutex_);
-    if (pluginState_ != State::RUNNING && pluginState_ != State::PAUSED) {
+    if (pluginState_ != State::RUNNING && pluginState_ != State::PAUSED && pluginState_ != State::PREPARED) {
         MEDIA_LOG_I("plugin " PUBLIC_LOG_S " not running or paused, no need to stop", plugin_->GetName().c_str());
         return Status::OK;
     }
