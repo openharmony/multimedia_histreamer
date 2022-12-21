@@ -268,6 +268,7 @@ void MediaSyncManager::SimpleUpdatePlayRate(float playRate)
 
 void MediaSyncManager::SimpleUpdateTimeAnchor(int64_t clockTime, int64_t mediaTime)
 {
+    MEDIA_LOG_I("chw-clockTime: " PUBLIC_LOG_D64 ", mediaTime: " PUBLIC_LOG_D64, clockTime, mediaTime);
     currentAnchorMediaTime_ = mediaTime;
     currentAnchorClockTime_ = clockTime;
 }
@@ -283,14 +284,18 @@ bool MediaSyncManager::UpdateTimeAnchor(int64_t clockTime, int64_t mediaTime, IM
     if (clockTime == HST_TIME_NONE || mediaTime == HST_TIME_NONE || supplier == nullptr) {
         return render;
     }
+    bool validSup = IsSupplierValid(supplier);
+    bool big = supplier->GetPriority() >= currentSyncerPriority_;
+    MEDIA_LOG_I("validSup: " PUBLIC_LOG_D32 ", supplier->GetPriority(): " PUBLIC_LOG_D8 ", currentSyncerPriority: " PUBLIC_LOG_D8 ", big: " PUBLIC_LOG_D32,
+                validSup, supplier->GetPriority(), currentSyncerPriority_, big);
     if (IsSupplierValid(supplier) && supplier->GetPriority() >= currentSyncerPriority_) {
         currentSyncerPriority_ = supplier->GetPriority();
         SimpleUpdateTimeAnchor(clockTime, mediaTime);
-        MEDIA_LOG_DD("update time anchor to priority " PUBLIC_LOG_D32 ", mediaTime " PUBLIC_LOG_D64 ", clockTime "
+        MEDIA_LOG_D("update time anchor to priority " PUBLIC_LOG_D32 ", mediaTime " PUBLIC_LOG_D64 ", clockTime "
         PUBLIC_LOG_D64, currentSyncerPriority_, currentAnchorMediaTime_, currentAnchorClockTime_);
     }
-    if (isSeeking_ && Plugin::HstTime2Ms(abs(mediaTime - seekingMediaTime_)) <= 100) { // 100 ms
-        MEDIA_LOG_I("leaving seeking_");
+    if (isSeeking_ && Plugin::HstTime2Ms(abs(mediaTime - seekingMediaTime_)) <= 50) { // 100 ms
+        MEDIA_LOG_I("chw-leaving seeking_");
         isSeeking_ = false;
     }
     if (isSeeking_) {
@@ -313,6 +318,7 @@ int64_t MediaSyncManager::GetMediaTimeNow()
 {
     OSAL::ScopedLock lock(clockMutex_);
     if (isSeeking_) {
+        MEDIA_LOG_I("chw-isSeeking, return seekingMediaTime_: " PUBLIC_LOG_D64, seekingMediaTime_);
         return seekingMediaTime_;
     }
     if (clockState_ == State::PAUSED) {
@@ -321,7 +327,12 @@ int64_t MediaSyncManager::GetMediaTimeNow()
         }
         return pausedMediaTime_;
     }
-    auto ret = SimpleGetMediaTime(currentAnchorClockTime_, GetSystemClock(), currentAnchorMediaTime_, playRate_);
+    int64_t currentAnchorClockTime = currentAnchorClockTime_;
+    int64_t systemClock = GetSystemClock();
+    int64_t currentAnchorMediaTime = currentAnchorMediaTime_;
+    auto ret = SimpleGetMediaTime(currentAnchorClockTime, systemClock, currentAnchorMediaTime, playRate_);
+    MEDIA_LOG_I("chw-SimpleGetMediaTime ret: " PUBLIC_LOG_D64 ", clockTime: " PUBLIC_LOG_D64 ", systemTime: " PUBLIC_LOG_D64
+        ", mediaTime: " PUBLIC_LOG_D64 ", playRate: " PUBLIC_LOG_F, ret, currentAnchorClockTime, systemClock, currentAnchorMediaTime, playRate_);
     // clip into min&max media time
     return ClipMediaTime(ret);
 }

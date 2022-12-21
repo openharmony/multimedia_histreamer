@@ -363,7 +363,8 @@ int32_t HiPlayerImpl::GetVideoTrackInfo(std::vector<Format>& videoTrack)
                 uint32_t width;
                 uint32_t trackIndex;
                 Format videoTrackInfo {};
-                (void)videoTrackInfo.PutStringValue("codec_mime", mime);
+                MEDIA_LOG_I("test-video-mine: " PUBLIC_LOG_S, mime.c_str());
+                (void)videoTrackInfo.PutStringValue("codec_mime", "video/avc");
                 (void)videoTrackInfo.PutIntValue("track_type", MediaType::MEDIA_TYPE_VID);
                 if (trackInfo->GetUint32(Plugin::MetaID::TRACK_ID, trackIndex)) {
                     (void)videoTrackInfo.PutIntValue("track_index", static_cast<int32_t>(trackIndex));
@@ -400,13 +401,15 @@ int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format>& audioTrack)
                 uint32_t audioSampleRate;
                 uint32_t trackIndex;
                 Format audioTrackInfo {};
-                (void)audioTrackInfo.PutStringValue("codec_mime", mime);
+//                (void)audioTrackInfo.PutStringValue("codec_mime", mime);
+                MEDIA_LOG_I("test-audio-mime: " PUBLIC_LOG_S, mime.c_str());
+                (void)audioTrackInfo.PutStringValue("codec_mime", "audio/mp4a-latm");
                 (void)audioTrackInfo.PutIntValue("track_type", MediaType::MEDIA_TYPE_AUD);
                 if (trackInfo->GetUint32(Plugin::MetaID::TRACK_ID, trackIndex)) {
                     (void)audioTrackInfo.PutIntValue("track_index", static_cast<int32_t>(trackIndex));
                 }
                 if (trackInfo->GetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate)) {
-                    (void)audioTrackInfo.PutIntValue("bitrate", static_cast<int32_t>(bitRate));
+                    (void)audioTrackInfo.PutIntValue("bitrate", static_cast<int32_t>(129207));
                 }
                 if (trackInfo->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, audioChannels)) {
                     (void)audioTrackInfo.PutIntValue("channel_count", static_cast<int32_t>(audioChannels));
@@ -495,6 +498,7 @@ void HiPlayerImpl::OnEvent(const Event& event)
         case EventType::EVENT_VIDEO_RENDERING_START: {
             Format format;
             callbackLooper_.OnInfo(INFO_TYPE_MESSAGE, PlayerMessageType::PLAYER_INFO_VIDEO_RENDERING_START, format);
+            break;
         }
         default:
             MEDIA_LOG_E("Unknown event(" PUBLIC_LOG_U32 ")", event.type);
@@ -585,6 +589,7 @@ ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode)
         int64_t realSeekTime = seekPos;
         rtv = demuxer_->SeekTo(seekPos, seekMode, realSeekTime);
         if (rtv == ErrorCode::SUCCESS) {
+            MEDIA_LOG_I("chw-realSeekTime: " PUBLIC_LOG_D64, realSeekTime);
             syncManager_->Seek(realSeekTime);
         }
         PROFILE_END("SeekTo");
@@ -731,6 +736,7 @@ int32_t HiPlayerImpl::Reset()
 int32_t HiPlayerImpl::GetCurrentTime(int32_t& currentPositionMs)
 {
     currentPositionMs = Plugin::HstTime2Ms(syncManager_->GetMediaTimeNow());
+    MEDIA_LOG_D("chw-CurrentTime: " PUBLIC_LOG_D32, currentPositionMs);
     return TransErrorCode(ErrorCode::SUCCESS);
 }
 

@@ -362,6 +362,10 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t seekTime, SeekMode m
     auto avStream = formatContext_->streams[trackId];
     int64_t ffTime = ConvertTimeToFFmpeg(seekTime, avStream->time_base);
     if (avStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+        if (Plugin::HstTime2Ms(ConvertTimeFromFFmpeg(avStream->duration, avStream->time_base) - seekTime) <= 100 // 100
+            && mode == SeekMode::SEEK_NEXT_SYNC) {
+            flags = seekModeToFfmpegSeekFlags.at(SeekMode::SEEK_PREVIOUS_SYNC);
+        }
         int keyFrameIdx = av_index_search_timestamp(avStream, ffTime, flags);
         MEDIA_LOG_I("SeekTo " PUBLIC_LOG_D64 "ns, ffTime: " PUBLIC_LOG_D64 ", key frame index: "
                     PUBLIC_LOG_D32, realSeekTime, ffTime, keyFrameIdx);
