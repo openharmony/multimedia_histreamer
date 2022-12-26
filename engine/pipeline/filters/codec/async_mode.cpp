@@ -34,6 +34,7 @@ namespace Pipeline {
 AsyncMode::AsyncMode(std::string name) : CodecMode(std::move(name))
 {
     MEDIA_LOG_I(PUBLIC_LOG_S " ThreadMode: ASYNC", codecName_.c_str());
+    isNeedQueueInputBuffer_ = true;
 }
 
 AsyncMode::~AsyncMode()
@@ -116,7 +117,7 @@ ErrorCode AsyncMode::PushData(const std::string &inPort, const AVBufferPtr& buff
 
 ErrorCode AsyncMode::Stop()
 {
-    MEDIA_LOG_I("AsyncMode stop start.");
+    MEDIA_LOG_D("AsyncMode stop start.");
     stopped_ = true;
     if (decodeFrameTask_) {
         decodeFrameTask_->Stop();
@@ -140,7 +141,7 @@ ErrorCode AsyncMode::Stop()
         handleFrameTask_->Stop();
     }
     outBufPool_.reset();
-    MEDIA_LOG_I("AsyncMode stop end.");
+    MEDIA_LOG_D("AsyncMode stop end.");
     return ErrorCode::SUCCESS;
 }
 
@@ -170,7 +171,7 @@ void AsyncMode::FlushStart()
 
 void AsyncMode::FlushEnd()
 {
-    MEDIA_LOG_I("AsyncMode FlushEnd entered");
+    MEDIA_LOG_D("AsyncMode FlushEnd entered");
     stopped_ = false;
     if (inBufQue_) {
         inBufQue_->SetActive(true);
@@ -192,6 +193,7 @@ void AsyncMode::FlushEnd()
     if (plugin_) {
         QueueAllBufferInPoolToPluginLocked();
     }
+    MEDIA_LOG_D("AsyncMode FlushEnd exit");
 }
 
 ErrorCode AsyncMode::HandleFrame()
@@ -223,7 +225,7 @@ ErrorCode AsyncMode::DecodeFrame()
 {
     MEDIA_LOG_DD("AsyncMode decode frame called");
     Plugin::Status status = Plugin::Status::OK;
-    auto newOutBuffer = outBufPool_->AllocateBuffer();
+    auto newOutBuffer = outBufPool_->AllocateBufferNonBlocking();
     if (CheckBufferValidity(newOutBuffer) == ErrorCode::SUCCESS) {
         newOutBuffer->Reset();
         status = plugin_->QueueOutputBuffer(newOutBuffer, 0);
@@ -270,8 +272,10 @@ ErrorCode AsyncMode::FinishFrame()
 
 void AsyncMode::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& buffer)
 {
-    OSAL::ScopedLock l(renderMutex_);
-    outBufQue_.push(buffer);
+    {
+        OSAL::ScopedLock l(renderMutex_);
+        outBufQue_.push(buffer);
+    }
     if (!isNeedQueueInputBuffer_) {
         OSAL::ScopedLock lock(mutex_);
         isNeedQueueInputBuffer_ = true;
