@@ -121,7 +121,9 @@ ErrorCode AsyncMode::Stop()
     if (decodeFrameTask_) {
         decodeFrameTask_->Stop();
     }
-    pushTask_->Stop();
+    if (pushTask_) {
+        pushTask_->Stop();
+    }
     inBufQue_->SetActive(false);
     {
         OSAL::ScopedLock l(renderMutex_);
