@@ -117,7 +117,7 @@ ErrorCode AsyncMode::PushData(const std::string &inPort, const AVBufferPtr& buff
 
 ErrorCode AsyncMode::Stop()
 {
-    MEDIA_LOG_D("AsyncMode stop start.");
+    MEDIA_LOG_I("AsyncMode stop start.");
     stopped_ = true;
     if (decodeFrameTask_) {
         decodeFrameTask_->Stop();
@@ -141,13 +141,13 @@ ErrorCode AsyncMode::Stop()
         handleFrameTask_->Stop();
     }
     outBufPool_.reset();
-    MEDIA_LOG_D("AsyncMode stop end.");
+    MEDIA_LOG_I("AsyncMode stop end.");
     return ErrorCode::SUCCESS;
 }
 
 void AsyncMode::FlushStart()
 {
-    MEDIA_LOG_D("AsyncMode FlushStart entered.");
+    MEDIA_LOG_I("AsyncMode FlushStart entered.");
     stopped_ = true; // thread will pause, should not enter endless loop
     if (inBufQue_) {
         inBufQue_->SetActive(false);
@@ -166,12 +166,12 @@ void AsyncMode::FlushStart()
     if (pushTask_) {
         pushTask_->Pause();
     }
-    MEDIA_LOG_D("AsyncMode FlushStart exit.");
+    MEDIA_LOG_I("AsyncMode FlushStart exit.");
 }
 
 void AsyncMode::FlushEnd()
 {
-    MEDIA_LOG_D("AsyncMode FlushEnd entered");
+    MEDIA_LOG_I("AsyncMode FlushEnd entered");
     stopped_ = false;
     if (inBufQue_) {
         inBufQue_->SetActive(true);
@@ -193,7 +193,7 @@ void AsyncMode::FlushEnd()
     if (plugin_) {
         QueueAllBufferInPoolToPluginLocked();
     }
-    MEDIA_LOG_D("AsyncMode FlushEnd exit");
+    MEDIA_LOG_I("AsyncMode FlushEnd exit");
 }
 
 ErrorCode AsyncMode::HandleFrame()
