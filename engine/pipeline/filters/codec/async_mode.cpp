@@ -24,7 +24,7 @@
 #endif
 
 namespace {
-constexpr uint32_t DEFAULT_TRY_DECODE_TIME = 5;
+constexpr uint32_t DEFAULT_TRY_DECODE_TIME = 20;
 constexpr uint32_t DEFAULT_TRY_RENDER_TIME = 5;
 }
 
@@ -34,6 +34,7 @@ namespace Pipeline {
 AsyncMode::AsyncMode(std::string name) : CodecMode(std::move(name))
 {
     MEDIA_LOG_I(PUBLIC_LOG_S " ThreadMode: ASYNC", codecName_.c_str());
+    isNeedQueueInputBuffer_ = true;
 }
 
 AsyncMode::~AsyncMode()
@@ -47,9 +48,18 @@ ErrorCode AsyncMode::Release()
     stopped_ = true;
 
     // 先停止线程 然后释放bufferQ 如果顺序反过来 可能导致线程访问已经释放的锁
+    if (!isNeedQueueInputBuffer_) {
+        OSAL::ScopedLock lock(mutex_);
+        isNeedQueueInputBuffer_ = true;
+        cv_.NotifyOne();
+    }
     if (handleFrameTask_) {
         handleFrameTask_->Stop();
         handleFrameTask_.reset();
+    }
+    if (decodeFrameTask_) {
+        decodeFrameTask_->Stop();
+        decodeFrameTask_.reset();
     }
     if (pushTask_ != nullptr) {
         pushTask_->Stop();
@@ -75,8 +85,16 @@ ErrorCode AsyncMode::Configure()
     FALSE_LOG_MSG_W(QueueAllBufferInPoolToPluginLocked() == ErrorCode::SUCCESS,
                     "Can not configure all output buffers to plugin before start.");
     FAIL_RETURN(CodecMode::Configure());
+    if (!isNeedQueueInputBuffer_) {
+        OSAL::ScopedLock lock(mutex_);
+        isNeedQueueInputBuffer_ = true;
+        cv_.NotifyOne();
+    }
     if (handleFrameTask_) {
         handleFrameTask_->Start();
+    }
+    if (decodeFrameTask_) {
+        decodeFrameTask_->Start();
     }
     if (pushTask_) {
         pushTask_->Start();
@@ -87,7 +105,13 @@ ErrorCode AsyncMode::Configure()
 ErrorCode AsyncMode::PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     DUMP_BUFFER2LOG("AsyncMode in", buffer, offset);
-    inBufQue_->Push(buffer);
+    MEDIA_LOG_DD("PushData.");
+    if (buffer != nullptr) {
+        inBufQue_->Push(buffer);
+    } else {
+        MEDIA_LOG_DD("PushData buffer = nullptr.");
+        OSAL::SleepFor(DEFAULT_TRY_DECODE_TIME);
+    }
     return ErrorCode::SUCCESS;
 }
 
@@ -95,13 +119,23 @@ ErrorCode AsyncMode::Stop()
 {
     MEDIA_LOG_I("AsyncMode stop start.");
     stopped_ = true;
-    pushTask_->Stop();
+    if (decodeFrameTask_) {
+        decodeFrameTask_->Stop();
+    }
+    if (pushTask_) {
+        pushTask_->Stop();
+    }
     inBufQue_->SetActive(false);
     {
         OSAL::ScopedLock l(renderMutex_);
         while (!outBufQue_.empty()) {
             outBufQue_.pop();
         }
+    }
+    if (!isNeedQueueInputBuffer_) {
+        OSAL::ScopedLock lock(mutex_);
+        isNeedQueueInputBuffer_ = true;
+        cv_.NotifyOne();
     }
     if (handleFrameTask_) {
         handleFrameTask_->Stop();
@@ -113,18 +147,26 @@ ErrorCode AsyncMode::Stop()
 
 void AsyncMode::FlushStart()
 {
-    MEDIA_LOG_D("AsyncMode FlushStart entered.");
+    MEDIA_LOG_I("AsyncMode FlushStart entered.");
     stopped_ = true; // thread will pause, should not enter endless loop
     if (inBufQue_) {
         inBufQue_->SetActive(false);
     }
+    if (!isNeedQueueInputBuffer_) {
+        OSAL::ScopedLock lock(mutex_);
+        isNeedQueueInputBuffer_ = true;
+        cv_.NotifyOne();
+    }
     if (handleFrameTask_) {
         handleFrameTask_->Pause();
+    }
+    if (decodeFrameTask_) {
+        decodeFrameTask_->Pause();
     }
     if (pushTask_) {
         pushTask_->Pause();
     }
-    MEDIA_LOG_D("AsyncMode FlushStart exit.");
+    MEDIA_LOG_I("AsyncMode FlushStart exit.");
 }
 
 void AsyncMode::FlushEnd()
@@ -134,8 +176,16 @@ void AsyncMode::FlushEnd()
     if (inBufQue_) {
         inBufQue_->SetActive(true);
     }
+    if (!isNeedQueueInputBuffer_) {
+        OSAL::ScopedLock lock(mutex_);
+        isNeedQueueInputBuffer_ = true;
+        cv_.NotifyOne();
+    }
     if (handleFrameTask_) {
         handleFrameTask_->Start();
+    }
+    if (decodeFrameTask_) {
+        decodeFrameTask_->Start();
     }
     if (pushTask_) {
         pushTask_->Start();
@@ -143,12 +193,13 @@ void AsyncMode::FlushEnd()
     if (plugin_) {
         QueueAllBufferInPoolToPluginLocked();
     }
+    MEDIA_LOG_I("AsyncMode FlushEnd exit");
 }
 
 ErrorCode AsyncMode::HandleFrame()
 {
     MEDIA_LOG_DD("AsyncMode handle frame called");
-    auto oneBuffer = inBufQue_->Pop(200); // timeout 200 ms
+    auto oneBuffer = inBufQue_->Pop(200);
     if (oneBuffer == nullptr) {
         MEDIA_LOG_DD("decoder find nullptr in esBufferQ");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
@@ -162,40 +213,55 @@ ErrorCode AsyncMode::HandleFrame()
             break;
         }
         MEDIA_LOG_DD("Send data to plugin error: " PUBLIC_LOG_D32, status);
-        OSAL::SleepFor(DEFAULT_TRY_DECODE_TIME);
+        OSAL::ScopedLock lock(mutex_);
+        isNeedQueueInputBuffer_ = false;
+        cv_.Wait(lock);
     } while (true);
     MEDIA_LOG_DD("Async handle frame finished");
     return TranslatePluginStatus(status);
+}
+
+ErrorCode AsyncMode::DecodeFrame()
+{
+    MEDIA_LOG_DD("AsyncMode decode frame called");
+    Plugin::Status status = Plugin::Status::OK;
+    auto newOutBuffer = outBufPool_->AllocateBufferNonBlocking();
+    if (CheckBufferValidity(newOutBuffer) == ErrorCode::SUCCESS) {
+        newOutBuffer->Reset();
+        status = plugin_->QueueOutputBuffer(newOutBuffer, 0);
+        if (status == Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
+            OSAL::SleepFor(DEFAULT_TRY_DECODE_TIME);
+        }
+    } else {
+        OSAL::SleepFor(DEFAULT_TRY_DECODE_TIME);
+    }
+    MEDIA_LOG_DD("Async decode frame finished");
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode AsyncMode::FinishFrame()
 {
     MEDIA_LOG_DD("FinishFrame begin");
     bool isRendered = false;
+    std::shared_ptr<AVBuffer> frameBuffer = nullptr;
     {
         OSAL::ScopedLock l(renderMutex_);
-        std::shared_ptr<AVBuffer> frameBuffer = nullptr;
         if (!outBufQue_.empty()) {
             frameBuffer = outBufQue_.front();
-        }
-        if (frameBuffer != nullptr) {
-            auto oPort = outPorts_[0];
-            if (oPort->GetWorkMode() == WorkMode::PUSH) {
-                DUMP_BUFFER2LOG("AsyncMode PushData to Sink", frameBuffer, -1);
-                oPort->PushData(frameBuffer, -1);
-                isRendered = true;
-                outBufQue_.pop();
-            } else {
-                MEDIA_LOG_W("decoder out port works in pull mode");
-                return ErrorCode::ERROR_INVALID_OPERATION;
-            }
-            frameBuffer.reset();
+            outBufQue_.pop();
         }
     }
-    auto newOutBuffer = outBufPool_->AllocateBufferNonBlocking();
-    if (CheckBufferValidity(newOutBuffer) == ErrorCode::SUCCESS) {
-        newOutBuffer->Reset();
-        plugin_->QueueOutputBuffer(newOutBuffer, 0);
+    if (frameBuffer != nullptr) {
+        auto oPort = outPorts_[0];
+        if (oPort->GetWorkMode() == WorkMode::PUSH) {
+            DUMP_BUFFER2LOG("AsyncMode PushData to Sink", frameBuffer, -1);
+            oPort->PushData(frameBuffer, -1);
+            isRendered = true;
+        } else {
+            MEDIA_LOG_W("decoder out port works in pull mode");
+            return ErrorCode::ERROR_INVALID_OPERATION;
+        }
+        frameBuffer.reset();
     }
     if (!isRendered) {
         OSAL::SleepFor(DEFAULT_TRY_RENDER_TIME);
@@ -206,8 +272,15 @@ ErrorCode AsyncMode::FinishFrame()
 
 void AsyncMode::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& buffer)
 {
-    OSAL::ScopedLock l(renderMutex_);
-    outBufQue_.push(buffer);
+    {
+        OSAL::ScopedLock l(renderMutex_);
+        outBufQue_.push(buffer);
+    }
+    if (!isNeedQueueInputBuffer_) {
+        OSAL::ScopedLock lock(mutex_);
+        isNeedQueueInputBuffer_ = true;
+        cv_.NotifyOne();
+    }
 }
 
 ErrorCode AsyncMode::Prepare()
@@ -221,6 +294,10 @@ ErrorCode AsyncMode::Prepare()
     if (!handleFrameTask_) {
         handleFrameTask_ = std::make_shared<OSAL::Task>(codecName_ + "AsyncHandleFrame");
         handleFrameTask_->RegisterHandler([this] { (void)HandleFrame(); });
+    }
+    if (!decodeFrameTask_) {
+        decodeFrameTask_ = std::make_shared<OSAL::Task>(codecName_ + "AsyncDecodeFrame");
+        decodeFrameTask_->RegisterHandler([this] { (void)DecodeFrame(); });
     }
     if (!pushTask_) {
         pushTask_ = std::make_shared<OSAL::Task>(codecName_ + "AsyncPush");
