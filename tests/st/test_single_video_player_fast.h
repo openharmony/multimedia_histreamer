@@ -32,12 +32,12 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
 {
 
     DATA_PROVIDER(myurls, 1,
-    DATA_GROUP(std::string(RESOURCE_DIR "/MP4/H264_AAC.mp4")));
+                  DATA_GROUP(std::string(RESOURCE_DIR "/MP4/H264_AAC.mp4")));
 
     DATA_PROVIDER(myfdurl, 2,
-    DATA_GROUP(std::string(RESOURCE_DIR "/MP4/H264_AAC.mp4"), 1894335));
+                  DATA_GROUP(std::string(RESOURCE_DIR "/MP4/H264_AAC.mp4"), 1894335));
 
-    const int64_t NEXT_FRAME_TIME {8333};
+    const int64_t NEXT_FRAME_TIME {8300};
     const int64_t PREV_FRAME_TIME {4166};
 
     std::string FilePathToFd(std::string url, int32_t fileSize)
@@ -934,7 +934,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Prepare());
         ASSERT_EQ(0, player->Seek(seekPos));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
+        EXPECT_TRUE(CheckTimeEquality(NEXT_FRAME_TIME, currentMS));
         ASSERT_EQ(0, player->Release());
     }
 
@@ -973,7 +973,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Pause());
         ASSERT_EQ(0, player->Seek(seekPos));
         ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
+        EXPECT_TRUE(CheckTimeEquality(NEXT_FRAME_TIME, currentMS));
         ASSERT_EQ(0, player->Release());
     }
 
@@ -1286,7 +1286,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
     //  SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_FUNCTION_CALLBACK_LOOP
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, setsingleloop true, play, seek, durationtime
-        3 times, setsingleloop flase, release)
+            3 times, setsingleloop flase, release)
     {
         int64_t durationMs {0};
         std::string uri = FilePathToFd(url, fileSize);
@@ -1296,16 +1296,16 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->SetSingleLoop(true));
         ASSERT_EQ(0, player->Play());
         ASSERT_EQ(0, player->GetDuration(durationMs));
-        ASSERT_EQ(0, player->Seek(durationMs));
+        ASSERT_EQ(0, player->Seek(durationMs, OHOS::Media::PlayerSeekMode::SEEK_PREVIOUS_SYNC));
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         ASSERT_EQ(0, player->GetDuration(durationMs));
-        ASSERT_EQ(0, player->Seek(durationMs));
+        ASSERT_EQ(0, player->Seek(durationMs, OHOS::Media::PlayerSeekMode::SEEK_PREVIOUS_SYNC));
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
         ASSERT_EQ(0, player->GetDuration(durationMs));
-        ASSERT_EQ(0, player->Seek(durationMs));
+        ASSERT_EQ(0, player->Seek(durationMs, OHOS::Media::PlayerSeekMode::SEEK_PREVIOUS_SYNC));
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         ASSERT_EQ(0, player->GetDuration(durationMs));
-        ASSERT_EQ(0, player->Seek(durationMs));
+        ASSERT_EQ(0, player->Seek(durationMs, OHOS::Media::PlayerSeekMode::SEEK_PREVIOUS_SYNC));
         std::this_thread::sleep_for(std::chrono::milliseconds(8000));
         ASSERT_EQ(0, player->SetSingleLoop(false));
         ASSERT_EQ(0, player->Release());
@@ -1314,7 +1314,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
     // SUB_MULTIMEDIA_MEDIA_VIDEO_PLAYER_FUNCTION_CALLBACK_BASE
     // @test(data="myfdurl", tags=video_play_fast)
     PTEST((std::string url, int32_t fileSize), Test fdsource prepare, setsingleloop true, play, seek, set fd, seek
-        2 times, setsingleloop false, release)
+            2 times, setsingleloop false, release)
     {
         int64_t durationMs {0};
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -1339,7 +1339,7 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         ASSERT_EQ(0, player->Seek(0));
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         ASSERT_EQ(0, player->GetDuration(durationMs));
-        ASSERT_EQ(0, player->Seek(durationMs));
+        ASSERT_EQ(0, player->Seek(durationMs, OHOS::Media::PlayerSeekMode::SEEK_PREVIOUS_SYNC));
         std::this_thread::sleep_for(std::chrono::milliseconds(8000));
         ASSERT_EQ(0, player->SetSingleLoop(false));
         ASSERT_EQ(0, player->Release());
