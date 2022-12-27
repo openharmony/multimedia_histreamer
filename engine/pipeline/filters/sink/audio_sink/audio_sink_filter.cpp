@@ -309,8 +309,6 @@ void AudioSinkFilter::FlushStart()
     if (pushThreadIsBlocking) {
         startWorkingCondition_.NotifyOne();
     }
-    plugin_->Pause();
-    plugin_->Flush();
 }
 
 void AudioSinkFilter::FlushEnd()
