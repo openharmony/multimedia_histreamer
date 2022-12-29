@@ -57,6 +57,9 @@ ErrorCode AsyncMode::Release()
         handleFrameTask_->Stop();
         handleFrameTask_.reset();
     }
+    if (outBufPool_) {
+        outBufPool_->SetActive(false);
+    }
     if (decodeFrameTask_) {
         decodeFrameTask_->Stop();
         decodeFrameTask_.reset();
@@ -106,7 +109,7 @@ ErrorCode AsyncMode::PushData(const std::string &inPort, const AVBufferPtr& buff
 {
     DUMP_BUFFER2LOG("AsyncMode in", buffer, offset);
     MEDIA_LOG_DD("PushData.");
-    if (buffer != nullptr) {
+    if (buffer != nullptr && !stopped_) {
         inBufQue_->Push(buffer);
     } else {
         MEDIA_LOG_DD("PushData buffer = nullptr.");
@@ -119,6 +122,9 @@ ErrorCode AsyncMode::Stop()
 {
     MEDIA_LOG_I("AsyncMode stop start.");
     stopped_ = true;
+    if (outBufPool_) {
+        outBufPool_->SetActive(false);
+    }
     if (decodeFrameTask_) {
         decodeFrameTask_->Stop();
     }
@@ -160,6 +166,9 @@ void AsyncMode::FlushStart()
     if (handleFrameTask_) {
         handleFrameTask_->Pause();
     }
+    if (outBufPool_) {
+        outBufPool_->SetActive(false);
+    }
     if (decodeFrameTask_) {
         decodeFrameTask_->Pause();
     }
@@ -183,6 +192,9 @@ void AsyncMode::FlushEnd()
     }
     if (handleFrameTask_) {
         handleFrameTask_->Start();
+    }
+    if (outBufPool_) {
+        outBufPool_->SetActive(true);
     }
     if (decodeFrameTask_) {
         decodeFrameTask_->Start();
@@ -225,7 +237,7 @@ ErrorCode AsyncMode::DecodeFrame()
 {
     MEDIA_LOG_DD("AsyncMode decode frame called");
     Plugin::Status status = Plugin::Status::OK;
-    auto newOutBuffer = outBufPool_->AllocateBufferNonBlocking();
+    auto newOutBuffer = outBufPool_->AllocateBuffer();
     if (CheckBufferValidity(newOutBuffer) == ErrorCode::SUCCESS) {
         newOutBuffer->Reset();
         status = plugin_->QueueOutputBuffer(newOutBuffer, 0);
