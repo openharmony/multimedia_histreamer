@@ -402,6 +402,7 @@ void PluginRegister::DeletePlugin(std::map<std::string, std::shared_ptr<PluginRe
             ++it;
         }
     }
+    registerData_->registerTable[type].erase(info->first);
     info = plugins.erase(info);
 }
 void PluginRegister::EraseRegisteredPluginsByLoader(const std::shared_ptr<PluginLoader>& loader)
@@ -488,8 +489,7 @@ void PluginRegister::RecoverDisabledPackage(PluginType type, const std::string& 
         if (it->second->packageDef->name == name) {
             if ((type == PluginType::AUDIO_DECODER || type == PluginType::VIDEO_DECODER
                 || type == PluginType::AUDIO_ENCODER || type == PluginType::VIDEO_ENCODER)
-                && AnyCast<CodecMode>(registerData_->registerTable[type]
-                [name]->info->extra[PLUGIN_INFO_EXTRA_CODEC_MODE]) == CodecMode::HARDWARE) {
+                && AnyCast<CodecMode>(it->second->info->extra[PLUGIN_INFO_EXTRA_CODEC_MODE]) == CodecMode::HARDWARE) {
                 registerData_->registerNames[type].insert(registerData_->registerNames[type].begin(), it->first);
             } else {
                 registerData_->registerNames[type].push_back(it->first);
