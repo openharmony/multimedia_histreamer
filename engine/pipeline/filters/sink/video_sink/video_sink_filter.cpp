@@ -484,7 +484,6 @@ ErrorCode VideoSinkFilter::DoSyncWrite(const AVBufferPtr& buffer)
                 MEDIA_LOG_I("failed to get latency, treat as 0");
             }
             if (syncCenter) {
-                MEDIA_LOG_I("chw-video-nowCt: " PUBLIC_LOG_D64 ", latency: " PUBLIC_LOG_D64 ", buffer->pts: " PUBLIC_LOG_D64, nowCt, latency, buffer->pts);
                 render = syncCenter->UpdateTimeAnchor(nowCt + latency, buffer->pts, this);
             }
             isFirstFrame_ = false;

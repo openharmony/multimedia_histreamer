@@ -355,7 +355,6 @@ ErrorCode AudioSinkFilter::DoSyncWrite(const AVBufferPtr &buffer)
                 MEDIA_LOG_W("failed to get latency");
             }
             if (syncCenter) {
-                MEDIA_LOG_I("chw-audio-nowCt: " PUBLIC_LOG_D64 ", latency: " PUBLIC_LOG_D64 ", buffer->pts: " PUBLIC_LOG_D64, nowCt, latency, buffer->pts);
                 render = syncCenter->UpdateTimeAnchor(nowCt + latency, buffer->pts, this);
             }
             lastReportedClockTime_ = nowCt;
