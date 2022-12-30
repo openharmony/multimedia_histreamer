@@ -133,6 +133,9 @@ int32_t TestPlayerImpl::SetSingleLoop(bool loop)
 
 bool TestPlayerImpl::IsPlaying()
 {
+    if (g_playFinished) {
+        pipelineStates_.store(PlayerStates::PLAYER_PLAYBACK_COMPLETE);
+    }
     return !g_playFinished;
 }
 
