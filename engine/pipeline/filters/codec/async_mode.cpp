@@ -48,6 +48,10 @@ ErrorCode AsyncMode::Release()
     stopped_ = true;
 
     // 先停止线程 然后释放bufferQ 如果顺序反过来 可能导致线程访问已经释放的锁
+    if (inBufQue_) {
+        inBufQue_->SetActive(false);
+        inBufQue_.reset();
+    }
     if (!isNeedQueueInputBuffer_) {
         OSAL::ScopedLock lock(mutex_);
         isNeedQueueInputBuffer_ = true;
@@ -67,10 +71,6 @@ ErrorCode AsyncMode::Release()
     if (pushTask_ != nullptr) {
         pushTask_->Stop();
         pushTask_.reset();
-    }
-    if (inBufQue_) {
-        inBufQue_->SetActive(false);
-        inBufQue_.reset();
     }
     {
         OSAL::ScopedLock l(renderMutex_);
@@ -211,7 +211,7 @@ void AsyncMode::FlushEnd()
 ErrorCode AsyncMode::HandleFrame()
 {
     MEDIA_LOG_DD("AsyncMode handle frame called");
-    auto oneBuffer = inBufQue_->Pop(200);
+    auto oneBuffer = inBufQue_->Pop();
     if (oneBuffer == nullptr) {
         MEDIA_LOG_DD("decoder find nullptr in esBufferQ");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
