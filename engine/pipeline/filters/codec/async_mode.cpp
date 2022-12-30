@@ -48,6 +48,10 @@ ErrorCode AsyncMode::Release()
     stopped_ = true;
 
     // 先停止线程 然后释放bufferQ 如果顺序反过来 可能导致线程访问已经释放的锁
+    if (inBufQue_) {
+        inBufQue_->SetActive(false);
+        inBufQue_.reset();
+    }
     if (!isNeedQueueInputBuffer_) {
         OSAL::ScopedLock lock(mutex_);
         isNeedQueueInputBuffer_ = true;
@@ -57,6 +61,9 @@ ErrorCode AsyncMode::Release()
         handleFrameTask_->Stop();
         handleFrameTask_.reset();
     }
+    if (outBufPool_) {
+        outBufPool_->SetActive(false);
+    }
     if (decodeFrameTask_) {
         decodeFrameTask_->Stop();
         decodeFrameTask_.reset();
@@ -64,10 +71,6 @@ ErrorCode AsyncMode::Release()
     if (pushTask_ != nullptr) {
         pushTask_->Stop();
         pushTask_.reset();
-    }
-    if (inBufQue_) {
-        inBufQue_->SetActive(false);
-        inBufQue_.reset();
     }
     {
         OSAL::ScopedLock l(renderMutex_);
@@ -106,7 +109,7 @@ ErrorCode AsyncMode::PushData(const std::string &inPort, const AVBufferPtr& buff
 {
     DUMP_BUFFER2LOG("AsyncMode in", buffer, offset);
     MEDIA_LOG_DD("PushData.");
-    if (buffer != nullptr) {
+    if (buffer != nullptr && !stopped_) {
         inBufQue_->Push(buffer);
     } else {
         MEDIA_LOG_DD("PushData buffer = nullptr.");
@@ -119,6 +122,9 @@ ErrorCode AsyncMode::Stop()
 {
     MEDIA_LOG_I("AsyncMode stop start.");
     stopped_ = true;
+    if (outBufPool_) {
+        outBufPool_->SetActive(false);
+    }
     if (decodeFrameTask_) {
         decodeFrameTask_->Stop();
     }
@@ -160,6 +166,9 @@ void AsyncMode::FlushStart()
     if (handleFrameTask_) {
         handleFrameTask_->Pause();
     }
+    if (outBufPool_) {
+        outBufPool_->SetActive(false);
+    }
     if (decodeFrameTask_) {
         decodeFrameTask_->Pause();
     }
@@ -184,6 +193,9 @@ void AsyncMode::FlushEnd()
     if (handleFrameTask_) {
         handleFrameTask_->Start();
     }
+    if (outBufPool_) {
+        outBufPool_->SetActive(true);
+    }
     if (decodeFrameTask_) {
         decodeFrameTask_->Start();
     }
@@ -199,7 +211,7 @@ void AsyncMode::FlushEnd()
 ErrorCode AsyncMode::HandleFrame()
 {
     MEDIA_LOG_DD("AsyncMode handle frame called");
-    auto oneBuffer = inBufQue_->Pop(200);
+    auto oneBuffer = inBufQue_->Pop();
     if (oneBuffer == nullptr) {
         MEDIA_LOG_DD("decoder find nullptr in esBufferQ");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
@@ -225,7 +237,7 @@ ErrorCode AsyncMode::DecodeFrame()
 {
     MEDIA_LOG_DD("AsyncMode decode frame called");
     Plugin::Status status = Plugin::Status::OK;
-    auto newOutBuffer = outBufPool_->AllocateBufferNonBlocking();
+    auto newOutBuffer = outBufPool_->AllocateBuffer();
     if (CheckBufferValidity(newOutBuffer) == ErrorCode::SUCCESS) {
         newOutBuffer->Reset();
         status = plugin_->QueueOutputBuffer(newOutBuffer, 0);
