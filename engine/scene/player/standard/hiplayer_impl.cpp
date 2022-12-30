@@ -85,8 +85,11 @@ HiPlayerImpl::HiPlayerImpl(int32_t appUid, int32_t appPid)
 HiPlayerImpl::~HiPlayerImpl()
 {
     MEDIA_LOG_I("dtor called.");
-    DoStop();
-    HiPlayerImpl::OnStateChanged(StateId::STOPPED);
+    if (pipelineStates_ == PLAYER_PREPARING || pipelineStates_ == PLAYER_PREPARED
+    || pipelineStates_ == PLAYER_STARTED || pipelineStates_ == PLAYER_PAUSED) {
+        DoStop();
+        HiPlayerImpl::OnStateChanged(StateId::STOPPED);
+    }
     callbackLooper_.Stop();
     audioSink_.reset();
 #ifdef VIDEO_SUPPORT
