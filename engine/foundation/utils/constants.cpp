@@ -25,7 +25,7 @@ const char* const MEDIA_MIME_AUDIO_FLAC = "audio/flac";
 const char* const MEDIA_MIME_AUDIO_RAW = "audio/raw";
 const char* const MEDIA_MIME_AUDIO_APE = "audio/ape";
 const char* const MEDIA_MIME_AUDIO_WAV = "audio/wav";
-const char* const MEDIA_MIME_AUDIO_AAC = "audio/aac";
+const char* const MEDIA_MIME_AUDIO_AAC = "audio/mp4a-latm";
 const char* const MEDIA_MIME_AUDIO_AAC_ADTS = "audio/aac-adts";
 const char* const MEDIA_MIME_AUDIO_AAC_LATM = "audio/aac-latm";
 const char* const MEDIA_MIME_AUDIO_VORBIS = "audio/vorbis";
@@ -40,7 +40,7 @@ const char* const MEDIA_MIME_AUDIO_AMR_WB = "audio/amr-wb";
 const char* const MEDIA_MIME_AUDIO_AVS3DA = "audio/avs-3da";
 
 const char* const MEDIA_MIME_VIDEO_RAW = "video/raw";
-const char* const MEDIA_MIME_VIDEO_H264 = "video/x-h264";
+const char* const MEDIA_MIME_VIDEO_H264 = "video/avc";
 const char* const MEDIA_MIME_VIDEO_MPEG4 = "video/mpeg4";
 
 const char* const MEDIA_MIME_CONTAINER_MP4 = "video/mp4";

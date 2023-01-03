@@ -289,7 +289,7 @@ bool MediaSyncManager::UpdateTimeAnchor(int64_t clockTime, int64_t mediaTime, IM
         MEDIA_LOG_DD("update time anchor to priority " PUBLIC_LOG_D32 ", mediaTime " PUBLIC_LOG_D64 ", clockTime "
         PUBLIC_LOG_D64, currentSyncerPriority_, currentAnchorMediaTime_, currentAnchorClockTime_);
     }
-    if (isSeeking_ && Plugin::HstTime2Ms(abs(mediaTime - seekingMediaTime_)) <= 100) { // 100 ms
+    if (isSeeking_ && Plugin::HstTime2Ms(abs(mediaTime - seekingMediaTime_)) <= 50) { // 50 ms
         MEDIA_LOG_I("leaving seeking_");
         isSeeking_ = false;
     }
