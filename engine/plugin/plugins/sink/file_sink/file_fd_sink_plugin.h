@@ -33,6 +33,7 @@ public:
     Status Write(const std::shared_ptr<Buffer>& buffer) override;
     Status Flush() override;
     Status Reset() override;
+    Status Stop() override;
 private:
     void CloseFd();
     int32_t fd_ {-1};

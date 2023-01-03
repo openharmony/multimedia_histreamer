@@ -113,6 +113,12 @@ void FileFdSinkPlugin::CloseFd()
         fd_ = -1;
     }
 }
+
+Status FileFdSinkPlugin::Stop()
+{
+    CloseFd();
+    return Status::OK;
+}
 } // namespace FileSink
 } // namespace Plugin
 } // namespace Media
