@@ -205,6 +205,8 @@ int32_t HiPlayerImpl::Prepare()
     PROFILE_END("Prepare finished, current pipeline state: " PUBLIC_LOG "s.", StringnessPlayerState(pipelineStates_).c_str());
     if (pipelineStates_ == PlayerStates::PLAYER_PREPARED) {
         NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_END, 0);
+        Format format;
+        callbackLooper_.OnInfo(INFO_TYPE_POSITION_UPDATE, 0, format);
         return TransErrorCode(ErrorCode::SUCCESS);
     }
 
@@ -470,6 +472,8 @@ void HiPlayerImpl::OnEvent(const Event& event)
             ErrorCode errorCode = DoOnReady();
             if (errorCode == ErrorCode::SUCCESS) {
                 OnStateChanged(StateId::READY);
+                Format format;
+                callbackLooper_.OnInfo(INFO_TYPE_POSITION_UPDATE, 0, format);
             } else {
                 OnStateChanged(StateId::INIT);
             }
@@ -603,6 +607,7 @@ ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode)
         int64_t currentPos = Plugin::HstTime2Ms(seekPos);
         MEDIA_LOG_I("Seek done, currentPos : " PUBLIC_LOG_D64, currentPos);
         callbackLooper_.OnInfo(INFO_TYPE_SEEKDONE, static_cast<int32_t>(currentPos), format);
+        callbackLooper_.OnInfo(INFO_TYPE_POSITION_UPDATE, static_cast<int32_t>(currentPos), format);
     }
 
     return rtv;
@@ -763,6 +768,14 @@ int32_t HiPlayerImpl::SetPlaybackSpeed(PlaybackRateMode mode)
     demuxer_->SetParameter(static_cast<int32_t>(Plugin::Tag::MEDIA_PLAYBACK_SPEED), playbackSpeed);
     Format format;
     callbackLooper_.OnInfo(INFO_TYPE_SPEEDDONE, 0, format);
+
+    int32_t currentPosMs  = 0;
+    int32_t durationMs = 0;
+    NZERO_RETURN(GetDuration(durationMs));
+    NZERO_RETURN(GetCurrentTime(currentPosMs ));
+    currentPosMs  = std::min(currentPosMs , durationMs);
+    currentPosMs  = currentPosMs  < 0 ? 0 : currentPosMs ;
+    callbackLooper_.OnInfo(INFO_TYPE_POSITION_UPDATE, currentPosMs , format);
     MEDIA_LOG_D("SetPlaybackSpeed entered end.");
     return MSERR_OK;
 }
