@@ -78,13 +78,7 @@ FIXTURE(DataDrivenSinglePlayerTestFast)
 
     DATA_PROVIDER(httpLinks, 1,
     DATA_GROUP(std::string("http://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3")),
-    DATA_GROUP(std::string("https://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3")),
-    DATA_GROUP(std::string("https://music-common-ucdn-drcn.dbankcdn.com/29c9ac31326661bb9aaf1206c66e58d5/"
-        "8e0271ac3819c5d724e0b999577c0763/8e0271ac3819c5d724e0b999577c0763_c7697dac-a62c-4764-9627-d16d808abe99_1_MQ"
-        ".mp3?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=MPXW6JOQOEGGIVNZK2PN 2F20220614 2Fcn-north-2 2Fs3 2Fa"
-        "ws4_request&X-Amz-Date=20220614T014334Z&X-Amz-Expires=173000&X-Amz-SignedHeaders=host&X-Amz-Signature=912078"
-        "155a6e32a00a0faed839f17dc95b69a34db0ff1cc73b7a72964f15610b"))
-    );
+    DATA_GROUP(std::string("https://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3")));
 
     DATA_PROVIDER(hlsLinks, 1,
     DATA_GROUP(std::string("http://ngcdn001.cnr.cn/live/zgzs/index.m3u8")),

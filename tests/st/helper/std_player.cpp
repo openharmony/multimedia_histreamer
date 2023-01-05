@@ -49,7 +49,7 @@ public:
     }
     void OnInfo(PlayerOnInfoType type, int32_t extra, const Format& infoBody) override
     {
-        if (type == INFO_TYPE_EOS) {
+        if (type == INFO_TYPE_EOS && !g_playFinished) {
             player_->Seek(0, PlayerSeekMode::SEEK_PREVIOUS_SYNC);
         }
         if (type == INFO_TYPE_STATE_CHANGE && extra == PLAYER_PLAYBACK_COMPLETE) {
@@ -133,6 +133,9 @@ int32_t TestPlayerImpl::SetSingleLoop(bool loop)
 
 bool TestPlayerImpl::IsPlaying()
 {
+    if (g_playFinished) {
+        pipelineStates_.store(PlayerStates::PLAYER_PLAYBACK_COMPLETE);
+    }
     return !g_playFinished;
 }
 
@@ -183,6 +186,7 @@ int32_t TestPlayerImpl::Stop()
         pipelineStates_.load() == PlayerStates::PLAYER_STARTED ||
         pipelineStates_.load() == PlayerStates::PLAYER_PLAYBACK_COMPLETE ||
         pipelineStates_.load()== PlayerStates::PLAYER_PAUSED) {
+        g_playFinished = true;
         int32_t ret = player_->Stop();
         if (ret == 0) {
             pipelineStates_.store(PlayerStates::PLAYER_STOPPED);
