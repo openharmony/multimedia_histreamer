@@ -85,7 +85,10 @@ bool ConditionVariable::WaitFor(ScopedLock& lock, int timeoutMs)
     clock_gettime(CLOCK_MONOTONIC, &timeout);
 #endif
     timeout.tv_sec += timeoutMs / TIME_SCALE;
-    timeout.tv_nsec += (timeoutMs % TIME_SCALE) * TIME_SCALE * TIME_SCALE;
+    uint64_t us = timeout.tv_nsec / TIME_SCALE + TIME_SCALE * (timeoutMs % TIME_SCALE);
+    timeout.tv_sec += us / (TIME_SCALE * TIME_SCALE);
+    us = us % (TIME_SCALE * TIME_SCALE);
+    timeout.tv_nsec = us * TIME_SCALE;
     return pthread_cond_timedwait(&cond_, &(lock.mutex_->nativeHandle_),
         &timeout) == 0;
 }
