@@ -496,29 +496,34 @@ bool FFmpegDemuxerPlugin::ParseMediaData()
     CppExt::make_unique<MediaInfo>().swap(mediaInfo_);
     size_t streamCnt = formatContext_->nb_streams;
     mediaInfo_->general.Clear();
-    mediaInfo_->tracks.resize(streamCnt);
+    mediaInfo_->tracks.reserve(streamCnt);
     for (size_t i = 0; i < streamCnt; ++i) {
         auto& avStream = *formatContext_->streams[i];
+        auto codecContext = InitCodecContext(avStream);
+        if (!codecContext) {
+            continue;
+        }
+        TagMap track;
         if (avStream.codecpar->codec_type == AVMEDIA_TYPE_VIDEO
             && avStream.codecpar->codec_id != AV_CODEC_ID_RAWVIDEO) {
+            if (!codecContext->width ||!codecContext->height) {
+                continue;
+            }
             if (avStream.codecpar->codec_id == AV_CODEC_ID_H264) {
-                mediaInfo_->tracks[i].Insert<Tag::VIDEO_BIT_STREAM_FORMAT>(
+                track.Insert<Tag::VIDEO_BIT_STREAM_FORMAT>(
                     std::vector<VideoBitStreamFormat>{VideoBitStreamFormat::AVC1, VideoBitStreamFormat::ANNEXB});
             } else if (avStream.codecpar->codec_id == AV_CODEC_ID_H265) {
-                mediaInfo_->tracks[i].Insert<Tag::VIDEO_BIT_STREAM_FORMAT>(
+                track.Insert<Tag::VIDEO_BIT_STREAM_FORMAT>(
                     std::vector<VideoBitStreamFormat>{VideoBitStreamFormat::HEVC, VideoBitStreamFormat::ANNEXB});
             }
         }
-        auto codecContext = InitCodecContext(avStream);
-        if (codecContext == nullptr) {
-            continue;
-        }
-        ConvertAVStreamToMetaInfo(avStream, formatContext_, codecContext, mediaInfo_->tracks[i]);
+        ConvertAVStreamToMetaInfo(avStream, formatContext_, codecContext, track);
         if (g_MediaTypeMap.find(avStream.codecpar->codec_type) != g_MediaTypeMap.end()) {
-            mediaInfo_->tracks[i].Insert<Tag::MEDIA_TYPE>(g_MediaTypeMap[avStream.codecpar->codec_type]);
+            track.Insert<Tag::MEDIA_TYPE>(g_MediaTypeMap[avStream.codecpar->codec_type]);
         } else {
             MEDIA_LOG_E("media type not found!");
         }
+        mediaInfo_->tracks.push_back(std::move(track));
     }
     SaveFileInfoToMetaInfo(mediaInfo_->general);
     return true;
