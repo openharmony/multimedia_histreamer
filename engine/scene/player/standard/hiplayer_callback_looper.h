@@ -37,7 +37,7 @@ public:
 
     void SetPlayEngine(IPlayerEngine* engine);
 
-    void StartReportMediaProgress(int64_t updateIntervalMs = 100);
+    void StartReportMediaProgress(int64_t updateIntervalMs = 1000);
 
     void StopReportMediaProgress();
 
