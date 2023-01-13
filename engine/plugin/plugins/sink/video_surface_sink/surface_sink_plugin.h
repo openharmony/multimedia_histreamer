@@ -28,6 +28,7 @@
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
 #include "plugin/common/surface_allocator.h"
+#include "plugin/common/surface_memory.h"
 #include "plugin/common/plugin_video_tags.h"
 #include "plugin/interface/video_sink_plugin.h"
 
@@ -79,7 +80,7 @@ private:
     void SetDumpFrameFromSysPara();
     void SetDumpFrameInternalFromSysPara();
     void SetKpiLogFromSysPara();
-    Status UpdateSurfaceBuffer(sptr<SurfaceBuffer> surfaceBuffer, int32_t fence);
+    Status UpdateSurfaceMemory(std::shared_ptr<SurfaceMemory>& surfaceMemory, int64_t pts);
 
     OSAL::Mutex mutex_ {};
     OSAL::ConditionVariable surfaceCond_;

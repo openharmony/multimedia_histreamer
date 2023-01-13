@@ -308,7 +308,8 @@ void FFmpegDemuxerPlugin::InitConvertContext(const AVStream& avStream)
             }
         });
     }
-    FALSE_LOG_MSG(!avbsfContext_, "the av bit stream convert can't support, codec_tag: " PUBLIC_LOG_S, codeTag);
+    FALSE_LOG_MSG(avbsfContext_ != nullptr, "the av bit stream convert can't support, codec_tag: " PUBLIC_LOG_S,
+        codeTag);
 }
 
 void FFmpegDemuxerPlugin::ConvertAvcOrHevcToAnnexb(AVPacket& pkt)

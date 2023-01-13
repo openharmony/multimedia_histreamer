@@ -22,15 +22,14 @@
 #include "securec.h"
 #include "foundation/log.h"
 #include "utils/constants.h"
-#include "plugin/common/surface_memory.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;
 using namespace VidSurfaceSinkPlugin;
 constexpr uint32_t DEFAULT_WIDTH = 640;
 constexpr uint32_t DEFAULT_HEIGHT = 480;
-constexpr uint32_t DEFAULT_BUFFER_NUM = 25;
-constexpr int32_t DEFAULT_STRIDE_ALIGN = 16;
+constexpr uint32_t DEFAULT_BUFFER_NUM = 32;
+constexpr int32_t DEFAULT_STRIDE_ALIGN = 8;
 
 std::shared_ptr<VideoSinkPlugin> VideoSinkPluginCreator(const std::string& name)
 {
@@ -290,8 +289,9 @@ Status SurfaceSinkPlugin::Resume()
     return Status::OK;
 }
 
-Status SurfaceSinkPlugin::UpdateSurfaceBuffer(sptr<SurfaceBuffer> surfaceBuffer, int32_t fence)
+Status SurfaceSinkPlugin::UpdateSurfaceMemory(std::shared_ptr<SurfaceMemory>& surfaceMemory, int64_t pts)
 {
+    auto surfaceBuffer = surfaceMemory->GetSurfaceBuffer();
     FALSE_RETURN_V_MSG_E(surfaceBuffer != nullptr, Status::ERROR_NULL_POINTER, "surfaceBuffer is NULL");
 #ifdef DUMP_RAW_DATA
     if (dumpFd_ && surfaceBuffer->GetVirAddr()) {
@@ -300,15 +300,19 @@ Status SurfaceSinkPlugin::UpdateSurfaceBuffer(sptr<SurfaceBuffer> surfaceBuffer,
     }
 #endif
     FALSE_RETURN_V_MSG_E(needConvFormat == false, Status::ERROR_UNIMPLEMENTED, "Need to convert format");
+    if (!pts) {
+        pts = 1;
+    }
     OHOS::BufferFlushConfig flushConfig = {
-        {0, 0, surfaceBuffer->GetWidth(), surfaceBuffer->GetHeight()},
+        {0, 0, surfaceBuffer->GetWidth(), surfaceBuffer->GetHeight()}, pts
     };
-    auto res = surface_->FlushBuffer(surfaceBuffer, fence, flushConfig);
+    surfaceMemory->SetNeedRender(true);
+    mAllocator_->UpdateSurfaceBufferScaleMode(surfaceBuffer);
+    auto res = surface_->FlushBuffer(surfaceBuffer, surfaceMemory->GetFlushFence(), flushConfig);
     if (res != OHOS::SurfaceError::SURFACE_ERROR_OK) {
         MEDIA_LOG_W("surface FlushBuffer fail: " PUBLIC_LOG_D32, res);
-        res = surface_->CancelBuffer(surfaceBuffer);
-        FALSE_RETURN_V_MSG_W(res == OHOS::SurfaceError::SURFACE_ERROR_OK, Status::ERROR_UNKNOWN,
-                             "surface CancelBuffer fail: " PUBLIC_LOG_D32, res);
+        surfaceMemory->SetNeedRender(false);
+        return Status::ERROR_UNKNOWN;
     }
     return Status::OK;
 }
@@ -324,15 +328,13 @@ Status SurfaceSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
     FALSE_RETURN_V_MSG_E(memory->GetMemoryType() == MemoryType::SURFACE_BUFFER, Status::ERROR_INVALID_PARAMETER,
                          "memory type is not SURFACE_BUFFER");
     std::shared_ptr<SurfaceMemory> surfaceMemory = ReinterpretPointerCast<SurfaceMemory>(memory);
-    auto ret = UpdateSurfaceBuffer(surfaceMemory->GetSurfaceBuffer(), surfaceMemory->GetFlushFence());
+    auto ret = UpdateSurfaceMemory(surfaceMemory, inputInfo->pts);
     if (ret != Status::OK) {
-        MEDIA_LOG_W("UpdateSurfaceBuffer fail: " PUBLIC_LOG_U32, ret);
+        MEDIA_LOG_W("UpdateSurfaceMemory fail: " PUBLIC_LOG_D32, static_cast<int32_t>(ret));
+    } else {
+        MEDIA_LOG_D("SurfaceSink write success");
     }
-    // After surface buffer sending to surface, we need to clear sptr.
-    // So that we can request again surface buffer on the same SurfaceMemory
-    surfaceMemory->ReleaseSurfaceBuffer();
-    MEDIA_LOG_D("SurfaceSink write success");
-    return Status::OK;
+    return ret;
 }
 
 Status SurfaceSinkPlugin::Flush()
