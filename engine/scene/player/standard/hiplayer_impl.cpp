@@ -271,6 +271,9 @@ int32_t HiPlayerImpl::Stop()
     SYNC_TRACER();
     MEDIA_LOG_I("Stop entered.");
     PROFILE_BEGIN();
+    if (pipelineStates_ == PlayerStates::PLAYER_STOPPED) {
+        return TransErrorCode(ErrorCode::SUCCESS);
+    }
     auto ret = TransErrorCode(DoStop());
     OnStateChanged(StateId::STOPPED);
     callbackLooper_.StopReportMediaProgress();
@@ -282,6 +285,9 @@ int32_t HiPlayerImpl::Stop()
 ErrorCode HiPlayerImpl::StopAsync()
 {
     MEDIA_LOG_I("StopAsync entered.");
+    if (pipelineStates_ == PlayerStates::PLAYER_STOPPED) {
+        return ErrorCode::SUCCESS;
+    }
     ErrorCode ret = DoStop();
     OnStateChanged(StateId::STOPPED);
     return ret;
@@ -726,9 +732,14 @@ int32_t HiPlayerImpl::SetObs(const std::weak_ptr<IPlayerEngineObs>& obs)
 int32_t HiPlayerImpl::Reset()
 {
     MEDIA_LOG_I("Reset entered.");
+    if (pipelineStates_ == PlayerStates::PLAYER_STOPPED) {
+        return TransErrorCode(ErrorCode::SUCCESS);
+    }
     singleLoop_ = false;
     mediaStats_.Reset();
-    return TransErrorCode(DoReset());
+    auto ret = DoReset();
+    OnStateChanged(StateId::STOPPED);
+    return TransErrorCode(ret);
 }
 
 int32_t HiPlayerImpl::GetCurrentTime(int32_t& currentPositionMs)
