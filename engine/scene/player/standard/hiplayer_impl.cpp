@@ -154,6 +154,7 @@ int32_t HiPlayerImpl::SetSource(const std::string& uri)
     auto ret = Init();
     if (ret == ErrorCode::SUCCESS) {
         ret = DoSetSource(std::make_shared<MediaSource>(uri));
+        url_ = uri;
     }
     if (ret != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("SetSource error: " PUBLIC_LOG_S, GetErrorName(ret));
@@ -186,6 +187,9 @@ int32_t HiPlayerImpl::Prepare()
     if (!(pipelineStates_ == PlayerStates::PLAYER_INITIALIZED || pipelineStates_ == PlayerStates::PLAYER_STOPPED)) {
         return MSERR_INVALID_OPERATION;
     }
+    if (pipelineStates_ == PlayerStates::PLAYER_STOPPED) {
+        SetSource(url_);
+    }
     SYNC_TRACER();
     NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_START, 0);
     MEDIA_LOG_I("Prepare entered, current pipeline state: " PUBLIC_LOG_S ".", StringnessPlayerState(pipelineStates_).c_str());
@@ -217,6 +221,9 @@ int HiPlayerImpl::PrepareAsync()
 {
     if (!(pipelineStates_ == PlayerStates::PLAYER_INITIALIZED || pipelineStates_ == PlayerStates::PLAYER_STOPPED)) {
         return MSERR_INVALID_OPERATION;
+    }
+    if (pipelineStates_ == PlayerStates::PLAYER_STOPPED) {
+        SetSource(url_);
     }
     ASYNC_TRACER();
     NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_START, 0);

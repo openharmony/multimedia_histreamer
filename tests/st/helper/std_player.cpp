@@ -141,10 +141,6 @@ bool TestPlayerImpl::IsPlaying()
 
 int32_t TestPlayerImpl::Prepare()
 {
-    if (pipelineStates_.load() == PlayerStates::PLAYER_STOPPED) {
-        return MSERR_OK;
-    }
-
     int32_t ret = player_->Prepare();
     if (ret == 0) {
         pipelineStates_.store(PlayerStates::PLAYER_PREPARED);

@@ -402,6 +402,7 @@ void FFmpegDemuxerPlugin::InitAVFormatContext()
 {
     AVFormatContext* formatContext = avformat_alloc_context();
     if (formatContext == nullptr) {
+        MEDIA_LOG_E("InitAVFormatContext  failed.");
         return;
     }
     formatContext->pb = AllocAVIOContext(AVIO_FLAG_READ);

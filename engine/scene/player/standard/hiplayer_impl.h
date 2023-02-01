@@ -151,6 +151,7 @@ private:
 
     int32_t videoWidth_ {0};
     int32_t videoHeight_ {0};
+    std::string url_;
 };
 }  // namespace Media
 }  // namespace OHOS
