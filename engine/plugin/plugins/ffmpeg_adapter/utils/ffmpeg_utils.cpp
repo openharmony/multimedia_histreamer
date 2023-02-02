@@ -116,7 +116,9 @@ std::map<std::string, std::function<void(TagMap&, AVDictionaryEntry*)>> g_MediaM
     {"album", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_ALBUM>(tag->value); }},
     {"album-artist", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_ALBUM_ARTIST>(tag->value); }},
     {"date", [](TagMap& meta, AVDictionaryEntry* tag) {
-        uint32_t year, month, day = 0;
+        uint32_t year;
+        uint32_t month;
+        uint32_t day = 0;
         if (sscanf_s(tag->value, "%04u-%02u-%02u", &year, &month, &day) == 3) { // 3
             meta.Insert<Tag::MEDIA_DATE>(RemoveDelimiter(tag->value, '-'));
         }
