@@ -139,7 +139,6 @@ Status SdlVideoSinkPlugin::Init()
 
 Status SdlVideoSinkPlugin::Deinit()
 {
-    // SDL_Quit(); // avoid video/audio duplicate quit hang on.
 #ifdef DUMP_RAW_DATA
     if (dumpFd_) {
         std::fclose(dumpFd_);

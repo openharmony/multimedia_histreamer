@@ -143,7 +143,8 @@ bool AVCConfigDataParser::ParseNalUnitSizeLen()
 
 bool AVCConfigDataParser::GetSpsOrPpsLen(uint32_t& len)
 {
-    uint8_t tmp1, tmp2;
+    uint8_t tmp1;
+    uint8_t tmp2;
     if (!bitReader_.ReadBits(1, tmp1) || !bitReader_.ReadBits(1, tmp2)) {
         return false;
     }
