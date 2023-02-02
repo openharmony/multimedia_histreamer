@@ -156,7 +156,8 @@ bool DataPacker::PeekRangeInternal(uint64_t offset, uint32_t size, AVBufferPtr &
     MEDIA_LOG_DD("PeekRangeInternal (offset, size) = (" PUBLIC_LOG_U64 ", " PUBLIC_LOG_U32 ")...", offset, size);
     int32_t startIndex = 0; // The index of buffer that we first use
     size_t copySize = 0;
-    uint32_t needCopySize = size, firstBufferOffset = 0;
+    uint32_t needCopySize = size;
+    uint32_t firstBufferOffset = 0;
     uint8_t* dstPtr = AudioBufferWritableData(bufferPtr, needCopySize);
     FALSE_RETURN_V(dstPtr != nullptr, false);
 
