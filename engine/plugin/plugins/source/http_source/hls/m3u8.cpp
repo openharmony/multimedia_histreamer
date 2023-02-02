@@ -76,7 +76,8 @@ bool M3U8::Update(std::string& playList)
 
 void M3U8::UpdateFromTags(std::list<std::shared_ptr<Tag>>& tags)
 {
-    std::string uri, title;
+    std::string uri;
+    std::string title;
     double duration = 0;
     bool discontinuity = false;
     auto bVod = !tags.empty() && tags.back()->GetType() == HlsTag::EXTXENDLIST;

@@ -542,7 +542,8 @@ void DemuxerFilter::UpdateStreamMeta(std::shared_ptr<Plugin::Meta>& streamMeta, 
     auto type = Plugin::MediaType::UNKNOWN;
     streamMeta->GetData(Plugin::MetaID::MEDIA_TYPE, type);
     if (type == Plugin::MediaType::AUDIO) {
-        uint32_t channels = 2, outputChannels = 2;
+        uint32_t channels = 2;
+        uint32_t outputChannels = 2;
         Plugin::AudioChannelLayout channelLayout = Plugin::AudioChannelLayout::STEREO;
         Plugin::AudioChannelLayout outputChannelLayout = Plugin::AudioChannelLayout::STEREO;
         FALSE_LOG(streamMeta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels));
