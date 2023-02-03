@@ -330,7 +330,9 @@ size_t Downloader::RxHeaderData(void* buffer, size_t size, size_t nitems, void* 
         char* token = strtok_s(nullptr, ":", &next);
         FALSE_RETURN_V(token != nullptr, size * nitems);
         char* strRange = StringTrim(token);
-        size_t start, end, fileLen;
+        size_t start;
+        size_t end;
+        size_t fileLen;
         FALSE_LOG_MSG(sscanf_s(strRange, "bytes %ld-%ld/%ld", &start, &end, &fileLen) != -1,
             "sscanf get range failed");
         if (info->fileContentLen > 0 && info->fileContentLen != fileLen) {
