@@ -30,7 +30,22 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace CodecAdapter {
-HdiCodecAdapter::HdiCodecAdapter(std::string componentName) : CodecPlugin(std::move(componentName))
+Status RegisterHdiAdapterPlugins(const std::shared_ptr<OHOS::Media::Plugin::Register>& reg)
+{
+    g_compManager = std::make_shared<HdiCodecManager>();
+    return g_compManager->RegisterCodecPlugins(reg);
+}
+
+void UnRegisterHdiAdapterPlugins()
+{
+    g_compManager->UnRegisterCodecPlugins();
+    g_compManager = nullptr;
+}
+
+PLUGIN_DEFINITION(HdiAdapter, LicenseType::APACHE_V2, RegisterHdiAdapterPlugins, UnRegisterHdiAdapterPlugins);
+
+HdiCodecAdapter::HdiCodecAdapter(std::string componentName, std::shared_ptr<CodecManager>& codecManager)
+    : CodecPlugin(std::move(componentName)), codecMgr_(codecManager)
 {
 }
 

@@ -15,8 +15,8 @@
 
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
-#ifndef HISTREAMER_PLUGIN_CORE_HDI_CODEC_ADAPTER_H
-#define HISTREAMER_PLUGIN_CORE_HDI_CODEC_ADAPTER_H
+#ifndef HISTREAMER_PLUGIN_HDI_CODEC_ADAPTER_H
+#define HISTREAMER_PLUGIN_HDI_CODEC_ADAPTER_H
 
 #include "codec_manager.h"
 #include "codec_component_manager.h"
@@ -26,9 +26,10 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace CodecAdapter {
+std::shared_ptr<CodecManager>  g_compManager {nullptr};
 class HdiCodecAdapter : public CodecPlugin {
 public:
-    explicit HdiCodecAdapter(std::string componentName);
+    explicit HdiCodecAdapter(std::string componentName, std::shared_ptr<CodecManager>& codecManager);
     ~HdiCodecAdapter() override = default;
     Status Init() override;
     Status Deinit() override;
@@ -63,5 +64,5 @@ private:
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-#endif // HISTREAMER_PLUGIN_CORE_HDI_CODEC_ADAPTER_H
+#endif // HISTREAMER_PLUGIN_HDI_CODEC_ADAPTER_H
 #endif

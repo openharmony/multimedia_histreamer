@@ -14,11 +14,14 @@
  */
 
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
-
-#ifndef HISTREAMER_PLUGIN_CORE_HDI_CODEC_MANAGER_H
-#define HISTREAMER_PLUGIN_CORE_HDI_CODEC_MANAGER_H
-
+#ifndef HISTREAMER_PLUGIN_HDI_CODEC_MANAGER_H
+#define HISTREAMER_PLUGIN_HDI_CODEC_MANAGER_H
 #include "codec_manager.h"
+#include <unordered_map>
+#include "avcodec_info.h"
+#include "codec_component_manager.h"
+#include "codec_callback_type_stub.h"
+#include "codec_omx_ext.h"
 
 namespace OHOS {
 namespace Media {
@@ -26,12 +29,31 @@ namespace Plugin {
 namespace CodecAdapter {
 class HdiCodecManager : public CodecManager {
 public:
-    HdiCodecManager() = default;
-    ~HdiCodecManager() override = default;
+    HdiCodecManager();
+    ~HdiCodecManager() override;
+
+    int32_t CreateComponent(const Plugin::Any& component, uint32_t& id, std::string name,
+                                 const Plugin::Any& appData, const Plugin::Any& callbacks) override;
+    int32_t DestroyComponent(const Plugin::Any& component, uint32_t id) override;
+
+    Status RegisterCodecPlugins(const std::shared_ptr<OHOS::Media::Plugin::Register>& reg) override;
+    Status UnRegisterCodecPlugins() override;
+private:
+    void Init();
+    void Reset();
+    void AddHdiCap(const CodecCompCapability& hdiCap);
+    void InitCaps();
+    static std::vector<VideoPixelFormat> GetCodecFormats(const CodecVideoPortCap& port);
+    static std::string GetCodecMime(const AvCodecRole& role);
+    static PluginType GetCodecType(const CodecType& hdiType);
+
+    CodecComponentManager* mgr_ {nullptr};
+    std::vector<CodecCapability> codecCapabilitys_;
+    std::map<CodecComponentType*, uint32_t> handleMap_;
 };
 } // namespace CodecAdapter
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-#endif // HISTREAMER_PLUGIN_CORE_HDI_CODEC_MANAGER_H
+#endif // HISTREAMER_PLUGIN_HDI_CODEC_MANAGER_H
 #endif
