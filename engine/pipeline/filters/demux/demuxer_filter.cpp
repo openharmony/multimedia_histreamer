@@ -105,7 +105,7 @@ Plugin::Seekable DemuxerFilter::DataSourceImpl::GetSeekable()
 DemuxerFilter::DemuxerFilter(std::string name)
     : FilterBase(std::move(name)),
       seekable_(Plugin::Seekable::INVALID),
-      uriSuffix_(),
+      uri_(),
       mediaDataSize_(0),
       task_(nullptr),
       typeFinder_(nullptr),
@@ -257,7 +257,7 @@ bool DemuxerFilter::Configure(const std::string &inPort, const std::shared_ptr<c
     if (upstreamMeta->GetInt32(Plugin::MetaID::MEDIA_SEEKABLE, seekable)) {
         seekable_ = static_cast<Plugin::Seekable>(seekable);
     }
-    upstreamMeta->GetString(Plugin::MetaID::MEDIA_FILE_EXTENSION, uriSuffix_);
+    upstreamMeta->GetString(Plugin::MetaID::MEDIA_FILE_URI, uri_);
     return true;
 }
 
@@ -385,10 +385,10 @@ void DemuxerFilter::ActivatePullMode()
         }
         return false;
     };
-    typeFinder_->Init(uriSuffix_, mediaDataSize_, checkRange_, peekRange_);
+    typeFinder_->Init(uri_, mediaDataSize_, checkRange_, peekRange_);
     std::string type = typeFinder_->FindMediaType();
-    MEDIA_LOG_I("FindMediaType result : type : " PUBLIC_LOG_S ", uriSuffix_ : " PUBLIC_LOG_S ", mediaDataSize_ : "
-        PUBLIC_LOG_D64, type.c_str(), uriSuffix_.c_str(), mediaDataSize_);
+    MEDIA_LOG_I("FindMediaType result : type : " PUBLIC_LOG_S ", uri_ : " PUBLIC_LOG_S ", mediaDataSize_ : "
+        PUBLIC_LOG_D64, type.c_str(), uri_.c_str(), mediaDataSize_);
     MediaTypeFound(std::move(type));
 }
 
@@ -406,7 +406,7 @@ void DemuxerFilter::ActivatePushMode()
         // In push mode, ignore offset, always get data from the start of the data packer.
         return dataPacker_->GetRange(size, bufferPtr);
     };
-    typeFinder_->Init(uriSuffix_, mediaDataSize_, checkRange_, peekRange_);
+    typeFinder_->Init(uri_, mediaDataSize_, checkRange_, peekRange_);
     typeFinder_->FindMediaTypeAsync([this](std::string pluginName) { MediaTypeFound(std::move(pluginName)); });
 }
 

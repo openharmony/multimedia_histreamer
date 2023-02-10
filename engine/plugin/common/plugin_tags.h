@@ -123,7 +123,7 @@ enum struct Tag : uint32_t {
     MEDIA_DURATION,                        ///< int64_t, duration based on {@link HST_TIME_BASE}
     MEDIA_FILE_SIZE,                       ///< uint64_t, file size
     MEDIA_BITRATE,                         ///< int64_t, bite rate
-    MEDIA_FILE_EXTENSION,                  ///< std::string, file extension
+    MEDIA_FILE_URI,                        ///< std::string, file uri
     MEDIA_CODEC_CONFIG,                    ///< std::vector<uint8_t>, codec config. e.g. AudioSpecificConfig for mp4
     MEDIA_POSITION,                        ///< uint64_t : The byte position within media stream/file
     MEDIA_START_TIME,                      ///< int64_t: The start time of one track

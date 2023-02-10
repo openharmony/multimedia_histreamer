@@ -268,7 +268,7 @@ std::map<Plugin::MetaID, CapStrnessFunc> g_metaStrnessMap = {
     {Plugin::MetaID::MEDIA_LYRICS, MetaIDStringiness<std::string>},
     {Plugin::MetaID::MEDIA_DURATION, MetaIDStringiness<int64_t>},
     {Plugin::MetaID::MEDIA_BITRATE, MetaIDStringiness<int64_t>},
-    {Plugin::MetaID::MEDIA_FILE_EXTENSION, MetaIDStringiness<std::string>},
+    {Plugin::MetaID::MEDIA_FILE_URI, MetaIDStringiness<std::string>},
     {Plugin::MetaID::MEDIA_FILE_SIZE, MetaIDStringiness<uint64_t>},
     {Plugin::MetaID::MEDIA_SEEKABLE, MetaIDStringiness<Plugin::Seekable>},
     {Plugin::MetaID::AUDIO_MPEG_VERSION, MetaIDStringiness<uint32_t>},

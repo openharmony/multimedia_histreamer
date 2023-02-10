@@ -40,7 +40,7 @@ std::set<OHOS::Media::Plugin::MetaID> g_metaIdSet = {
     OHOS::Media::Plugin::MetaID::MEDIA_LANGUAGE,
     OHOS::Media::Plugin::MetaID::MEDIA_LYRICS,
     OHOS::Media::Plugin::MetaID::MEDIA_DURATION,
-    OHOS::Media::Plugin::MetaID::MEDIA_FILE_EXTENSION,
+    OHOS::Media::Plugin::MetaID::MEDIA_FILE_URI,
     OHOS::Media::Plugin::MetaID::MEDIA_FILE_SIZE,
     OHOS::Media::Plugin::MetaID::MEDIA_SEEKABLE,
     OHOS::Media::Plugin::MetaID::MEDIA_TYPE,
