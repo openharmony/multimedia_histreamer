@@ -18,9 +18,12 @@
 #ifndef HISTREAMER_PLUGIN_HDI_CODEC_ADAPTER_H
 #define HISTREAMER_PLUGIN_HDI_CODEC_ADAPTER_H
 
-#include "codec_manager.h"
+#include <list>
+#include "codec_buffer_pool.h"
 #include "codec_component_manager.h"
+#include "codec_manager.h"
 #include "interface/codec_plugin.h"
+#include "utils/blocking_queue.h"
 
 namespace OHOS {
 namespace Media {
@@ -40,10 +43,17 @@ public:
     Status Flush() override;
     Status GetParameter(Plugin::Tag tag, Plugin::ValueType& value) override;
     Status SetParameter(Plugin::Tag tag, const Plugin::ValueType& value) override;
+
+    std::shared_ptr<Plugin::Allocator> GetAllocator() override;
     Status QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
     Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) override;
     Status SetCallback(Callback* cb) override;
     Status SetDataCallback(DataCallback* dataCallback) override;
+
+private:
+    void HandleFrame();
+    bool isFirstCall_ = true;
+    bool FillAllTheOutBuffer();
 
 private:
     void NotifyInputBufferDone(const std::shared_ptr<Buffer>& input);
@@ -55,10 +65,40 @@ private:
     static int32_t FillBufferDone(CodecCallbackType* self, int64_t appData, const OmxCodecBuffer* buffer);
 
     std::shared_ptr<CodecManager> codecMgr_;
-    struct CodecComponentType* codecComp_ {nullptr};
-    struct CodecCallbackType* codecCallback_ {nullptr};
+    CodecComponentType* codecComp_ {nullptr};
+    CodecCallbackType* codecCallback_ {nullptr};
+    std::string componentName_ {};
     uint32_t componentId_;
+
+    std::list<std::shared_ptr<Buffer>> inBufQue_ {};
+    OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufQue_;
+
+    uint32_t inBufferSize_;
+    uint32_t inBufferCnt_;
+    uint32_t outBufferSize_;
+    uint32_t outBufferCnt_;
+    std::shared_ptr<CodecBufferPool> inBufPool_ {nullptr};
+    std::shared_ptr<CodecBufferPool> outBufPool_ {nullptr};
+
+    uint32_t width_;
+    uint32_t height_;
+    int32_t stride_;
+
+    Callback* callback_ {nullptr};
+    DataCallback* dataCallback_ {nullptr};
+
+    OSAL::Mutex lockInputBuffers_;
+
+    std::shared_ptr<ShareAllocator> shaAlloc_ {nullptr};
+
+    OMX_STATETYPE curState_ {OMX_StateInvalid};
+
+    bool isFlushing_ {false};
+
+    uint32_t portIndexInput_;
+    uint32_t portIndexOutput_;
     CompVerInfo verInfo_ {};
+    OMX_PORT_PARAM_TYPE portParam_ = {};
 };
 } // namespace CodecAdapter
 } // namespace Plugin

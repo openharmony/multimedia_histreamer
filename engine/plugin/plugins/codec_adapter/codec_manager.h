@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 #if /*defined(MEDIA_OHOS) &&*/ !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
-#ifndef HISTREAMER_PLUGIN_CODEC_MANAGER_H
-#define HISTREAMER_PLUGIN_CODEC_MANAGER_H
+#ifndef HISTREAMER_PLUGIN_PLUGINS_CODEC_MANAGER_H
+#define HISTREAMER_PLUGIN_PLUGINS_CODEC_MANAGER_H
 #include "interface/codec_plugin.h"
 
 namespace OHOS {
@@ -45,5 +45,5 @@ public:
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS
-#endif // HISTREAMER_PLUGIN_CODEC_MANAGER_H
+#endif // HISTREAMER_PLUGIN_PLUGINS_CODEC_MANAGER_H
 #endif

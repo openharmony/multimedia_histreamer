@@ -18,8 +18,14 @@
 #ifndef HISTREAMER_PLUGIN_CODEC_BUFFER_POOL_H
 #define HISTREAMER_PLUGIN_CODEC_BUFFER_POOL_H
 
+#include "codec_buffer.h"
+#include "codec_component_if.h"
 #include "codec_component_type.h"
 #include "common/plugin_types.h"
+#include "common/share_allocator.h"
+#include "common/share_memory.h"
+#include "hdi_codec_adapter.h"
+#include "utils/blocking_queue.h"
 
 namespace OHOS {
 namespace Media {
@@ -27,17 +33,31 @@ namespace Plugin {
 namespace CodecAdapter {
 class CodecBufferPool {
 public:
-    CodecBufferPool() = default;
+    CodecBufferPool(CodecComponentType* compType, CompVerInfo verInfo, uint32_t portIndex);
+
     ~CodecBufferPool() = default;
 
-    Status ConfigOutPortBufType();
-    Status AllocBuffer(OmxCodecBuffer& buffer);
-    Status FreeBuffer();
-    Status UseBuffer(uint32_t size, uint32_t count); //fill buffer into hdi
+    Status UseBuffers(OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>>& bufQue, MemoryType bufMemType);
+
+    Status FreeBuffers(); // 释放所有buffer
+
+    uint32_t EmptyBufferCount();
+
+    Status EmptyBuffer(uint32_t bufId); // 根据该bufferId，重置omxBuffer对应的CodecBuffer
+
+    std::shared_ptr<CodecBuffer> GetBuffer(uint32_t bufferId = 0, bool useParam = false);
 
 private:
-//    shared_ptr<BufferInfoMap> BufMap_;
-//    BlockingQueue<uint32_t> freeBufferId_;
+    Status ConfigBufType(const MemoryType& bufMemType);
+
+private:
+    CompVerInfo verInfo_;
+    uint32_t bufSize_;
+    CodecComponentType* codecComp_ {nullptr};
+
+    uint32_t portIndex_;
+    OHOS::Media::BlockingQueue<uint32_t> freeBufferId_;
+    std::map<uint32_t, std::shared_ptr<CodecBuffer>> codecBufMap_;  // key is buffer id
 };
 } // namespace CodecAdapter
 } // namespace Plugin
