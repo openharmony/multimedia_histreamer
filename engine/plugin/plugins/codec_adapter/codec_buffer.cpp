@@ -134,11 +134,13 @@ Status CodecBuffer::Rebind(const std::shared_ptr<Plugin::Buffer>& buffer)
     MEDIA_LOG_D("SetBuffer end, omxBufferId: " PUBLIC_LOG_U32, omxBuffer_->bufferId);
 }
 
-Status CodecBuffer::Unbind(std::shared_ptr<Plugin::Buffer>& buffer)
+Status CodecBuffer::Unbind(std::shared_ptr<Plugin::Buffer>& buffer, const OmxCodecBuffer* omxBuffer)
 {
     // 因为Rebind()里面用buffer_保存了PluginBuf，所以这里的buffer_需要主动释放，减少智能指针的引用计数
     // PluginBuf 的真正释放时机应该是在sink节点，该数据送显后才能释放
     buffer = buffer_;
+    buffer->flag = Translate2PluginFlagSet(omxBuffer->flag);
+    buffer->pts = omxBuffer->pts;
     buffer_ = nullptr;
     return Status::OK;
 }

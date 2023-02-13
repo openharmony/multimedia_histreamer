@@ -44,6 +44,8 @@ print("histreamer plugin: std_video_capture =",
       multimedia_histreamer_enable_plugin_std_video_capture)
 print("histreamer plugin: file_fd_sink =",
       multimedia_histreamer_enable_plugin_file_fd_sink)
+print("histreamer plugin: codec_adapter =",
+      multimedia_histreamer_enable_plugin_codec_adapter)
 
 group("histreamer_plugin_store") {
   deps = []
@@ -121,6 +123,10 @@ group("histreamer_plugin_store") {
 
   if (multimedia_histreamer_enable_plugin_avs3_audio_decoder) {
     deps += [ "//foundation/multimedia/histreamer_ext/codec/avs3_audio_decoder:plugin_avs3_audio_decoder" ]
+  }
+
+  if (multimedia_histreamer_enable_plugin_codec_adapter) {
+    deps += [ "codec_adapter:plugin_codec_adapter" ]
   }
 }
 

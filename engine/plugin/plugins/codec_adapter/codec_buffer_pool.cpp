@@ -108,16 +108,16 @@ uint32_t CodecBufferPool::EmptyBufferCount()
     return freeBufferId_.Size();
 }
 
-Status CodecBufferPool::EmptyBuffer(uint32_t bufId)
+Status CodecBufferPool::UseBufferDone(uint32_t bufId)
 {
     freeBufferId_.Push(bufId);
     return Status::OK;
 }
 
-std::shared_ptr<CodecBuffer> CodecBufferPool::GetBuffer(uint32_t bufferId, bool useParam)
+std::shared_ptr<CodecBuffer> CodecBufferPool::GetBuffer(uint32_t bufferId)
 {
     uint32_t bufId = 0;
-    if (useParam) {
+    if (bufferId >= 0) {
         bufId = bufferId;
     } else {
         bufId = freeBufferId_.Pop(1);

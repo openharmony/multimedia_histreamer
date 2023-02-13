@@ -39,8 +39,13 @@ config("plugin_codec_adapter_config") {
 
 source_set("std_plugin_codec_adapter") {
   sources = [
-    "hdi_adapter.cpp",
-    "hdi_utils.cpp",
+    codec_buffer.cpp,
+    coec_buffer_pool.cpp,
+    codec_cmd_executor.cpp,
+    codec_port.cpp,
+    codec_utils.cpp,
+    hdi_codec_adapter.cpp,
+    hdi_codec_manager.cpp,
   ]
   public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
   public_configs = [
@@ -52,10 +57,17 @@ source_set("std_plugin_codec_adapter") {
 if (hst_is_lite_sys) {
   print("std hdi codec adapter is not available on lite systems")
 } else {
-  static_library("histreamer_plugin_codec_adapter") {
+  ohos_shared_library("histreamer_plugin_codec_adapter") {
+    sanitize = {
+      cfi = true
+      debug = false
+    }
     deps = [
       ":std_plugin_codec_adapter",
       "//drivers/peripheral/codec/hal:libcodec_hdi_omx_client",
     ]
+    relative_install_dir = "media/histreamer_plugins"
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
   }
 }

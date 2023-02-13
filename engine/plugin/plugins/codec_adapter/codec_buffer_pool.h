@@ -43,9 +43,9 @@ public:
 
     uint32_t EmptyBufferCount();
 
-    Status EmptyBuffer(uint32_t bufId); // 根据该bufferId，重置omxBuffer对应的CodecBuffer
+    Status UseBufferDone(uint32_t bufId); // 根据该bufferId，重置omxBuffer对应的CodecBuffer
 
-    std::shared_ptr<CodecBuffer> GetBuffer(uint32_t bufferId = 0, bool useParam = false);
+    std::shared_ptr<CodecBuffer> GetBuffer(uint32_t bufferId = -1);
 
 private:
     Status ConfigBufType(const MemoryType& bufMemType);

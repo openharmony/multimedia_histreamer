@@ -43,7 +43,7 @@ public:
 
     Status Rebind(const std::shared_ptr<Plugin::Buffer>& buffer); // 重新申请内存时， CodecBuffer都要重新创建
 
-    Status Unbind(std::shared_ptr<Plugin::Buffer>& buffer);
+    Status Unbind(std::shared_ptr<Plugin::Buffer>& buffer, const OmxCodecBuffer* omxBuffer);
 
 private:
     Status Init();
