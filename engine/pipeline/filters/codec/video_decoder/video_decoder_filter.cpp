@@ -99,9 +99,9 @@ void VideoDecoderFilter::FlushEnd()
 bool VideoDecoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
                                    Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
 {
-    PROFILE_BEGIN("audio decoder configure begin");
+    PROFILE_BEGIN("video decoder configure begin");
     FALSE_RETURN_V(CodecFilterBase::Configure(inPort, upstreamMeta, upstreamParams, downstreamParams), false);
-    PROFILE_END("audio decoder configure end");
+    PROFILE_END("video decoder configure end");
     return true;
 }
 

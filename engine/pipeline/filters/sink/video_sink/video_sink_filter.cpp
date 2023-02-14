@@ -449,8 +449,8 @@ bool VideoSinkFilter::CheckBufferLatenessMayWait(AVBufferPtr buffer)
         uint64_t latency = 0;
         plugin_->GetLatency(latency);
         auto diff = nowCt + (int64_t) latency - ct4Buffer;
-        // diff < 0 && 0 - diff < latency  or 0 < diff < 40ms(25Hz) render it
-        if (diff < 0 && 0 - diff > latency) { // using latency as vsync
+        // diff < 0 or 0 < diff < 40ms(25Hz) render it
+        if (diff < 0) {
             // buffer is early
             auto waitTimeMs = Plugin::HstTime2Ms(0 - diff);
             MEDIA_LOG_DD("buffer is eary, sleep for " PUBLIC_LOG_D64 " ms", waitTimeMs);
