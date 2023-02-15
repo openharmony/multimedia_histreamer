@@ -82,7 +82,7 @@ int32_t HdiCodecManager::DestroyComponent(const Plugin::Any& component, uint32_t
 
 Status HdiCodecManager::RegisterCodecPlugins(const std::shared_ptr<OHOS::Media::Plugin::Register>& reg)
 {
-    std::string packageName = "HdiAdapter";
+    std::string packageName = "HdiCodecAdapter";
     if (!mgr_) {
         MEDIA_LOG_E("Codec package " PUBLIC_LOG_S " has no valid component manager", packageName.c_str());
         return Status::ERROR_INVALID_DATA;

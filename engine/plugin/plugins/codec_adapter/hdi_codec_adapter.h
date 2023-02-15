@@ -34,7 +34,7 @@ namespace CodecAdapter {
 class HdiCodecAdapter : public CodecPlugin {
 public:
     HdiCodecAdapter(std::string componentName, std::shared_ptr<CodecManager>& codecManager);
-    ~HdiCodecAdapter() override = default;
+    ~HdiCodecAdapter() override;
     Status Init() override;
     Status Deinit() override;
     Status Prepare() override;

@@ -86,6 +86,15 @@ HdiCodecAdapter::HdiCodecAdapter(std::string componentName, std::shared_ptr<Code
       outBufQue_("hdiAdapterOutQueue", DEFAULT_OUT_BUFFER_QUEUE_SIZE)
 {
     shaAlloc_ = std::make_shared<ShareAllocator>(Plugin::ShareMemType::READ_WRITE_TYPE);
+    FALSE_LOG_MSG(codecMgr_ != nullptr, "Get codec manager failed");
+}
+
+HdiCodecAdapter::~HdiCodecAdapter()
+{
+    if (codecCallback_) {
+        CodecCallbackTypeStubRelease(codecCallback_);
+        codecCallback_ = nullptr;
+    }
 }
 
 Status HdiCodecAdapter::Init()
@@ -99,8 +108,6 @@ Status HdiCodecAdapter::Init()
         return Status::ERROR_UNSUPPORTED_FORMAT;
     }
     componentName_ = pluginName_.substr(firstDotPos + 1); // ComponentCapability.compName
-    codecMgr_ = std::shared_ptr<CodecManager>();
-    FALSE_RETURN_V_MSG(codecMgr_ != nullptr, Status::ERROR_NULL_POINTER, "create codec manager failed");
     codecCallback_ = CodecCallbackTypeStubGetInstance();
     FALSE_RETURN_V_MSG(codecCallback_ != nullptr, Status::ERROR_NULL_POINTER, "create callback_ failed");
 
@@ -138,6 +145,7 @@ Status HdiCodecAdapter::Deinit()
             "HDI destroy component failed, ret = " PUBLIC_LOG_S, HdfStatus2String(ret).c_str());
     }
     if (codecComp_) {
+        CodecComponentTypeRelease(codecComp_);
         codecComp_ = nullptr;
     }
     if (codecCallback_) {
@@ -368,8 +376,6 @@ void HdiCodecAdapter::HandleFrame()
 Status HdiCodecAdapter::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
 {
     outBufQue_.Push(outputBuffers);
-
-    // 状态判断待实现
     if (curState_ == OMX_StateExecuting) {
         FillAllTheOutBuffer();
     }
@@ -420,7 +426,7 @@ bool HdiCodecAdapter::FillAllTheOutBuffer()
         }
     } else {
         while (!outBufQue_.Empty()) {
-            if (outBufPool_->EmptyBufferCount()) {
+            if (!outBufPool_->EmptyBufferCount()) {
                 MEDIA_LOG_D("outBufQue_ have data, but freeBufferId is empty");
                 return false;
             }

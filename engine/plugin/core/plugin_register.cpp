@@ -334,9 +334,9 @@ void PluginRegister::RegisterPlugins()
 void PluginRegister::RegisterStaticPlugins()
 {
     RegisterPluginStatic(std::make_shared<RegisterImpl>(registerData_));
-#if defined(MEDIA_OHOS) && !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
-    RegisterHdiCodecPackages(std::make_shared<RegisterImpl>(registerData_));
-#endif
+//#if defined(MEDIA_OHOS) && !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+//    RegisterHdiCodecPackages(std::make_shared<RegisterImpl>(registerData_));
+//#endif
 }
 
 void PluginRegister::RegisterDynamicPlugins()
@@ -377,9 +377,9 @@ void PluginRegister::RegisterPluginsFromPath(const char* libDirPath)
 void PluginRegister::UnregisterAllPlugins()
 {
     UnregisterPluginStatic();
-#if defined(MEDIA_OHOS) && !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
-    UnRegisterHdiCodecPackage();
-#endif
+//#if defined(MEDIA_OHOS) && !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+//    UnRegisterHdiCodecPackage();
+//#endif
 #ifdef DYNAMIC_PLUGINS
     for (auto& loader : registeredLoaders_) {
         EraseRegisteredPluginsByLoader(loader);
