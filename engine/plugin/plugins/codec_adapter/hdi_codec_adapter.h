@@ -29,10 +29,9 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace CodecAdapter {
-std::shared_ptr<CodecManager>  g_compManager {nullptr};
 class HdiCodecAdapter : public CodecPlugin {
 public:
-    explicit HdiCodecAdapter(std::string componentName, std::shared_ptr<CodecManager>& codecManager);
+    HdiCodecAdapter(std::string componentName, std::shared_ptr<CodecManager>& codecManager);
     ~HdiCodecAdapter() override = default;
     Status Init() override;
     Status Deinit() override;
@@ -77,8 +76,8 @@ private:
     uint32_t inBufferCnt_;
     uint32_t outBufferSize_;
     uint32_t outBufferCnt_;
-    std::shared_ptr<CodecBufferPool> inBufPool_ {nullptr};
-    std::shared_ptr<CodecBufferPool> outBufPool_ {nullptr};
+    std::shared_ptr<CodecBufferPool> inBufPool_ {};
+    std::shared_ptr<CodecBufferPool> outBufPool_ {};
 
     uint32_t width_;
     uint32_t height_;
@@ -98,7 +97,6 @@ private:
     uint32_t portIndexInput_;
     uint32_t portIndexOutput_;
     CompVerInfo verInfo_ {};
-    OMX_PORT_PARAM_TYPE portParam_ = {};
 };
 } // namespace CodecAdapter
 } // namespace Plugin

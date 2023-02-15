@@ -29,7 +29,7 @@ namespace Plugin {
 namespace CodecAdapter {
 class CodecBuffer {
 public:
-    CodecBuffer(std::shared_ptr<Buffer> buffer, CompVerInfo& verInfo, uint32_t bufferSize);
+    CodecBuffer(std::shared_ptr<Buffer>& buffer, CompVerInfo& verInfo, uint32_t bufferSize);
 
     ~CodecBuffer() = default;
 
@@ -48,9 +48,9 @@ public:
 private:
     Status Init();
 
+    std::shared_ptr<Buffer> buffer_;
     CompVerInfo verInfo_ {};
     uint32_t bufferSize_;
-    std::shared_ptr<Buffer> buffer_;
     std::shared_ptr<Memory> memory_;
     std::shared_ptr<OmxCodecBuffer> omxBuffer_;
 };

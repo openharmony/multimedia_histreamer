@@ -24,7 +24,6 @@
 #include "common/plugin_types.h"
 #include "common/share_allocator.h"
 #include "common/share_memory.h"
-#include "hdi_codec_adapter.h"
 #include "utils/blocking_queue.h"
 
 namespace OHOS {
@@ -33,7 +32,7 @@ namespace Plugin {
 namespace CodecAdapter {
 class CodecBufferPool {
 public:
-    CodecBufferPool(CodecComponentType* compType, CompVerInfo verInfo, uint32_t portIndex);
+    CodecBufferPool(CodecComponentType* compType, CompVerInfo& verInfo, uint32_t portIndex);
 
     ~CodecBufferPool() = default;
 
@@ -51,9 +50,9 @@ private:
     Status ConfigBufType(const MemoryType& bufMemType);
 
 private:
+    CodecComponentType* codecComp_ {nullptr};
     CompVerInfo verInfo_;
     uint32_t bufSize_;
-    CodecComponentType* codecComp_ {nullptr};
 
     uint32_t portIndex_;
     OHOS::Media::BlockingQueue<uint32_t> freeBufferId_;

@@ -17,7 +17,7 @@ group("plugin_codec_adapter") {
   if (hst_is_lite_sys) {
     print("std hdi codec adapter is not available on lite systems")
   } else {
-    deps += [ ":histreamer_plugin_codec_adapter" ]
+    deps += [ ":histreamer_plugin_CodecAdapter" ]
   }
 }
 
@@ -39,13 +39,13 @@ config("plugin_codec_adapter_config") {
 
 source_set("std_plugin_codec_adapter") {
   sources = [
-    codec_buffer.cpp,
-    coec_buffer_pool.cpp,
-    codec_cmd_executor.cpp,
-    codec_port.cpp,
-    codec_utils.cpp,
-    hdi_codec_adapter.cpp,
-    hdi_codec_manager.cpp,
+    "codec_buffer.cpp",
+    "codec_buffer_pool.cpp",
+    "codec_cmd_executor.cpp",
+    "codec_port.cpp",
+    "codec_utils.cpp",
+    "hdi_codec_adapter.cpp",
+    "hdi_codec_manager.cpp",
   ]
   public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
   public_configs = [
@@ -57,7 +57,8 @@ source_set("std_plugin_codec_adapter") {
 if (hst_is_lite_sys) {
   print("std hdi codec adapter is not available on lite systems")
 } else {
-  ohos_shared_library("histreamer_plugin_codec_adapter") {
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer_plugin_CodecAdapter") {
     sanitize = {
       cfi = true
       debug = false

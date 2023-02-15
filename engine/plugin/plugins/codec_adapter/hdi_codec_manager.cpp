@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#if /*defined(MEDIA_OHOS) &&*/ !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #include "hdi_codec_manager.h"
 #include <hdf_base.h>
 #include "common/plugin_caps_builder.h"
@@ -24,6 +24,21 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace CodecAdapter {
+std::shared_ptr<CodecManager>  g_codecMgr {nullptr};
+Status RegisterHdiAdapterPlugins(const std::shared_ptr<OHOS::Media::Plugin::Register>& reg)
+{
+    g_codecMgr = std::make_shared<HdiCodecManager>();
+    return g_codecMgr->RegisterCodecPlugins(reg);
+}
+
+void UnRegisterHdiAdapterPlugins()
+{
+    g_codecMgr->UnRegisterCodecPlugins();
+    g_codecMgr = nullptr;
+}
+
+PLUGIN_DEFINITION(HdiCodecAdapter, LicenseType::APACHE_V2, RegisterHdiAdapterPlugins, UnRegisterHdiAdapterPlugins);
+
 HdiCodecManager::HdiCodecManager()
 {
     Init();
@@ -35,7 +50,7 @@ HdiCodecManager::~HdiCodecManager()
 }
 
 int32_t HdiCodecManager::CreateComponent(const Plugin::Any& component, uint32_t& id, std::string name,
-                                              const Plugin::Any& appData, const Plugin::Any& callbacks)
+                                         const Plugin::Any& appData, const Plugin::Any& callbacks)
 {
     if (!mgr_) {
         Init();
@@ -82,7 +97,7 @@ Status HdiCodecManager::RegisterCodecPlugins(const std::shared_ptr<OHOS::Media::
         def.inCaps = codecCapability.inCaps;
         def.outCaps = codecCapability.outCaps;
         def.creator = [] (const std::string& name) -> std::shared_ptr<CodecPlugin> {
-            return std::make_shared<HdiCodecAdapter>(name, g_compManager);
+            return std::make_shared<HdiCodecAdapter>(name, g_codecMgr);
         };
         if (reg->AddPlugin(def) != Status::OK) {
             MEDIA_LOG_E("Add plugin " PUBLIC_LOG_S " failed", def.name.c_str());
@@ -153,7 +168,7 @@ std::vector<VideoPixelFormat> HdiCodecManager::GetCodecFormats(const CodecVideoP
                 formats.push_back(VideoPixelFormat::RGBA);
                 break;
             default:
-                MEDIA_LOG_W("Unknow Format" PUBLIC_LOG_D32, port.supportPixFmts[index]);
+                MEDIA_LOG_W("Unknown Format" PUBLIC_LOG_D32, port.supportPixFmts[index]);
         }
         index++;
     }

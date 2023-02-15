@@ -25,8 +25,8 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace CodecAdapter {
-CodecBuffer::CodecBuffer(std::shared_ptr<Buffer> buffer, CompVerInfo& verInfo, uint32_t bufferSize)
-    : buffer_(std::move(buffer)),
+CodecBuffer::CodecBuffer(std::shared_ptr<Buffer>& buffer, CompVerInfo& verInfo, uint32_t bufferSize)
+    : buffer_(buffer),
       verInfo_(verInfo),
       bufferSize_(bufferSize)
 {
@@ -132,6 +132,7 @@ Status CodecBuffer::Rebind(const std::shared_ptr<Plugin::Buffer>& buffer)
     // 这里buffer需要保存一下，为了方便往下一节点传数据，通过GetBuffer()获取
     buffer_ = buffer;
     MEDIA_LOG_D("SetBuffer end, omxBufferId: " PUBLIC_LOG_U32, omxBuffer_->bufferId);
+    return Status::OK;
 }
 
 Status CodecBuffer::Unbind(std::shared_ptr<Plugin::Buffer>& buffer, const OmxCodecBuffer* omxBuffer)

@@ -28,12 +28,11 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace CodecAdapter {
-constexpr size_t DEFAULT_IN_BUFFER_ID_QUEUE_SIZE = 4;
-constexpr size_t DEFAULT_OUT_BUFFER_ID_QUEUE_SIZE = 21;
+constexpr size_t DEFAULT_BUFFER_ID_QUEUE_SIZE = 21;
 
-CodecBufferPool::CodecBufferPool(CodecComponentType* compType, CompVerInfo verInfo, uint32_t portIndex)
+CodecBufferPool::CodecBufferPool(CodecComponentType* compType, CompVerInfo& verInfo, uint32_t portIndex)
     : codecComp_(compType), verInfo_(verInfo), portIndex_(portIndex),
-      freeBufferId_("hdiFreeInBufferId", DEFAULT_IN_BUFFER_ID_QUEUE_SIZE)
+      freeBufferId_("hdiFreeInBufferId", DEFAULT_BUFFER_ID_QUEUE_SIZE)
 {
 }
 
