@@ -12,25 +12,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
 #ifndef HISTREAMER_PLUGIN_CODEC_PORT_H
 #define HISTREAMER_PLUGIN_CODEC_PORT_H
-
-
+#include <common/plugin_types.h>
+#include <codec_component_if.h>
+#include <common/tag_map.h>
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
+#include <OMX_Component.h>
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace CodecAdapter {
+struct PortInfo {
+    uint32_t bufferCount{};
+    uint32_t bufferSize {};
+    bool bEnabled {false};
+};
+
 class CodecPort {
 public:
-    CodecPort() = default;
+    CodecPort(CodecComponentType* component, uint32_t portIndex, const CompVerInfo& verInfo);
     ~CodecPort() = default;
-
+    Status Config(TagMap& tagMap);
+    Status QueryParam(PortInfo& portInfo);
 private:
-    struct CodecComponentType* codecComp_ {nullptr};
+    CodecComponentType* codecComp_ {nullptr};
+    OMX_PARAM_PORTDEFINITIONTYPE portDef_ {};
+    CompVerInfo verInfo_ {};
 };
 } // namespace CodecAdapter
 } // namespace Plugin

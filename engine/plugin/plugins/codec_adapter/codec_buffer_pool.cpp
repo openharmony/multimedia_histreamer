@@ -45,12 +45,10 @@ Status CodecBufferPool::UseBuffers(OHOS::Media::BlockingQueue<std::shared_ptr<Bu
         auto pluginBuffer = bufQue.Pop();
         auto codecBuffer = std::make_shared<CodecBuffer>(pluginBuffer, verInfo_, bufSize_);
         FALSE_RETURN_V_MSG(codecBuffer == nullptr, Status::ERROR_INVALID_DATA, "Create codec buffer failed");
-        if (codecComp_ && codecComp_->UseBuffer) {
-            auto err = codecComp_->UseBuffer(codecComp_, portIndex_, codecBuffer->GetOmxBuffer().get());
-            if (err != HDF_SUCCESS) {
-                MEDIA_LOG_E("failed to UseBuffer");
-                return Status::ERROR_INVALID_DATA;
-            }
+        auto err = codecComp_->UseBuffer(codecComp_, portIndex_, codecBuffer->GetOmxBuffer().get());
+        if (err != HDF_SUCCESS) {
+            MEDIA_LOG_E("failed to UseBuffer");
+            return Status::ERROR_INVALID_DATA;
         }
         // 这一步是否是必须的，待验证，如果能够去掉最好了
         codecBuffer->ResetBufferLen();
@@ -66,15 +64,14 @@ Status CodecBufferPool::UseBuffers(OHOS::Media::BlockingQueue<std::shared_ptr<Bu
 Status CodecBufferPool::FreeBuffers()
 {
     MEDIA_LOG_D("Free omx buffer begin");
-    auto iter = codecBufMap_.begin();
-    while (iter != codecBufMap_.end()) {
-        auto codecBuffer = iter->second;
+    for (auto& codecBuf : codecBufMap_) {
+        auto& codecBuffer = codecBuf.second;
         codecBuffer->ResetBufferLen(); // 这里是否必须执行？去掉是否影响程序执行！待测试
-        iter = codecBufMap_.erase(iter);
         auto ret = codecComp_->FreeBuffer(codecComp_, portIndex_, codecBuffer->GetOmxBuffer().get());
         FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, TransHdiRetVal2Status(ret),
             "codec component free buffer failed, omxBufId: " PUBLIC_LOG_U32, codecBuffer->GetBufferId());
     }
+    codecBufMap_.clear();
     freeBufferId_.Clear();
     MEDIA_LOG_D("FreeBuffers end");
     return Status::OK;

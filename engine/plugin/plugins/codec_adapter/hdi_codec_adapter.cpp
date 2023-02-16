@@ -118,6 +118,12 @@ Status HdiCodecAdapter::Init()
     ret = codecComp_->GetComponentVersion(codecComp_, &verInfo_);
     FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, Status::ERROR_INVALID_DATA,
                          "get component version failed, ret: " PUBLIC_LOG_D32, ret);
+    inPortIndex_ = portParam_.nStartPortNumber;
+    outPortIndex_ = portParam_.nStartPortNumber + 1;
+    inCodecPort_ = std::make_shared<CodecPort>(codecComp_, inPortIndex_, verInfo_);
+    outCodecPort_ = std::make_shared<CodecPort>(codecComp_, outPortIndex_, verInfo_);
+    codecCmdExecutor_ = std::make_shared<CodecCmdExecutor>(codecComp_, inPortIndex_);
+    portConfigured_ = false;
     MEDIA_LOG_D("codec adapter init end, component Id = " PUBLIC_LOG_D32, componentId_);
     return Status::OK;
 }
@@ -129,7 +135,7 @@ Status HdiCodecAdapter::Deinit()
     if (codecMgr_) {
         auto ret = codecMgr_->DestroyComponent(codecComp_, componentId_);
         FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, Status::ERROR_INVALID_OPERATION,
-                             "HDI destroy component failed, ret = " PUBLIC_LOG_S, HdfStatus2String(ret).c_str());
+            "HDI destroy component failed, ret = " PUBLIC_LOG_S, HdfStatus2String(ret).c_str());
     }
     if (codecComp_) {
         codecComp_ = nullptr;
@@ -147,33 +153,30 @@ Status HdiCodecAdapter::Deinit()
 
 Status HdiCodecAdapter::Prepare() 
 {
+    FALSE_RETURN_V_MSG_E(ChangeState(OMX_StateIdle) == Status::OK,
+        Status::ERROR_WRONG_STATE, "Change omx state to idle failed");
+    FALSE_RETURN_V_MSG_E(WaitForState(OMX_StateIdle) == Status::OK,
+        Status::ERROR_WRONG_STATE, "Wait omx state to idle failed");
     outBufQue_.SetActive(true);
-    inBufPool_ = std::make_shared<CodecBufferPool>(codecComp_, verInfo_, portIndexInput_);
-    outBufPool_ = std::make_shared<CodecBufferPool>(codecComp_, verInfo_, portIndexOutput_);
-
-//    ChangeState(OMX_StateIdle) 待实现
-
+    inBufPool_ = std::make_shared<CodecBufferPool>(codecComp_, verInfo_, inPortIndex_);
+    outBufPool_ = std::make_shared<CodecBufferPool>(codecComp_, verInfo_, outPortIndex_);
     OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> inBufQue("TempInBufferQue", inBufferCnt_);
     for (uint32_t i = 0; i < inBufferCnt_; i++) {
-        std::shared_ptr<Buffer> buffer = Buffer::CreateDefaultBuffer(BufferMetaType::VIDEO, inBufferSize_, shaAlloc_);
-        inBufQue.Push(buffer);
+        inBufQue.Push(Buffer::CreateDefaultBuffer(BufferMetaType::VIDEO, inBufferSize_, shaAlloc_));
     }
-//    inBufPool_->UseBuffers(inBufferCnt_, inBufferSize_); // count size type
     inBufPool_->UseBuffers(inBufQue, MemoryType::SHARE_MEMORY);
     outBufPool_->UseBuffers(outBufQue_, MemoryType::SURFACE_BUFFER);
-
-//    WaitForState(OMX_StateIdle) 待实现
     MEDIA_LOG_D("prepare end");
     return Status::OK;
 }
 
 Status HdiCodecAdapter::Reset()
 {
-//    如下待实现:
-//    FALSE_RETURN_V_MSG_E(ChangeState(OMX_StateIdle) == Status::OK, Status::ERROR_WRONG_STATE,
-//                         "Change omx state to idle failed");
-//    FALSE_RETURN_V_MSG_E(WaitForState(OMX_StateIdle) == Status::OK, Status::ERROR_WRONG_STATE,
-//                         "Wait omx state to idle failed");
+    FALSE_RETURN_V_MSG_E(ChangeState(OMX_StateIdle) == Status::OK,
+        Status::ERROR_WRONG_STATE, "Change omx state to idle failed");
+    FALSE_RETURN_V_MSG_E(WaitForState(OMX_StateIdle) == Status::OK,
+        Status::ERROR_WRONG_STATE, "Wait omx state to idle failed");
+    curState_ = OMX_StateIdle;
     auto val = inBufPool_->FreeBuffers();
     FALSE_RETURN_V_MSG_E(val == Status::OK, val, "free buffers failed");
     val = outBufPool_->FreeBuffers();
@@ -188,18 +191,17 @@ Status HdiCodecAdapter::Reset()
     inBufferCnt_ = 0;
     outBufferSize_= 0;
     outBufferCnt_ = 0;
-//    curState_ = OMX_StateInvalid;
     return Status::OK;
 }
 
 Status HdiCodecAdapter::Start()
 {
     MEDIA_LOG_D("start begin");
-//    如下待实现:
-//    FALSE_RETURN_V_MSG_E(ChangeState(OMX_StateExecuting) == Status::OK, Status::ERROR_WRONG_STATE,
-//                         "Change omx state to executing failed");
-//    FALSE_RETURN_V_MSG_E(WaitForState(OMX_StateExecuting) == Status::OK, Status::ERROR_WRONG_STATE,
-//                         "Wait omx state to executing failed");
+    FALSE_RETURN_V_MSG_E(ChangeState(OMX_StateExecuting) == Status::OK,
+        Status::ERROR_WRONG_STATE, "Change omx state to idle failed");
+    FALSE_RETURN_V_MSG_E(WaitForState(OMX_StateExecuting) == Status::OK,
+        Status::ERROR_WRONG_STATE, "Wait omx state to idle failed");
+    curState_ = OMX_StateExecuting;
     outBufQue_.SetActive(true);
     if (!FillAllTheOutBuffer()) {
         MEDIA_LOG_E("Fill all buffer error");
@@ -265,21 +267,51 @@ Status HdiCodecAdapter::SetParameter(Plugin::Tag tag, const ValueType &value)
         case Tag::VIDEO_HEIGHT:
             height_ = Plugin::AnyCast<uint32_t>(value);
             break;
-//        case Tag::VIDEO_PIXEL_FORMAT: // 待实现
-//            pixelFormat_ = Plugin::AnyCast<VideoPixelFormat>(value);
-//            break;
-//        case Tag::VIDEO_FRAME_RATE:
-//            frameRate_ = Plugin::AnyCast<uint32_t>(value);
-//            break;
+        case Tag::VIDEO_PIXEL_FORMAT:
+            pixelFormat_ = Plugin::AnyCast<VideoPixelFormat>(value);
+            break;
+        case Tag::VIDEO_FRAME_RATE:
+            frameRate_ = Plugin::AnyCast<uint32_t>(value);
+            break;
         default:
             MEDIA_LOG_W("ignore this tag: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
             break;
     }
-//    待实现：
-//    if (width_ != 0 && height_ != 0 && pixelFormat_ != VideoPixelFormat::UNKNOWN && !bufferConfigured_) {
-//        FALSE_RETURN_V_MSG_E(ConfigOmx() == Status::OK, Status::ERROR_INVALID_OPERATION, "Configure omx failed");
-//    }
+    if (width_ != 0 && height_ != 0 && pixelFormat_ != VideoPixelFormat::UNKNOWN && !portConfigured_) {
+        FALSE_RETURN_V_MSG_E(ConfigOmx() == Status::OK, Status::ERROR_INVALID_OPERATION, "Configure omx failed");
+    }
     MEDIA_LOG_D("SetParameter end");
+    return Status::OK;
+}
+
+Status HdiCodecAdapter::ConfigOmx()
+{
+    TagMap tagMap;
+    tagMap.Insert<Tag::MIME>(ComponentNameToMime(componentName_));
+    tagMap.Insert<Tag::VIDEO_WIDTH>(width_);
+    tagMap.Insert<Tag::VIDEO_HEIGHT>(height_);
+    tagMap.Insert<Tag::VIDEO_FRAME_RATE>(frameRate_);
+    tagMap.Insert<Tag::VIDEO_PIXEL_FORMAT>(pixelFormat_);
+    auto ret = inCodecPort_->Config(tagMap);
+    FALSE_RETURN_V_MSG_E(ret == Status::OK, Status::ERROR_INVALID_OPERATION, "Configure inCodecPort failed");
+    ret = outCodecPort_->Config(tagMap);
+    FALSE_RETURN_V_MSG_E(ret == Status::OK, Status::ERROR_INVALID_OPERATION, "Configure outCodecPort failed");
+    PortInfo portInfo;
+    inCodecPort_->QueryParam(portInfo);
+    inBufferCnt_ = portInfo.bufferCount;
+    inBufferSize_ = portInfo.bufferSize;
+    if (!portInfo.bEnabled) {
+        codecCmdExecutor_->SendCmd(OMX_CommandPortEnable, inPortIndex_);
+        (void)codecCmdExecutor_->WaitForCmd(OMX_CommandPortEnable, inPortIndex_);
+    }
+    outCodecPort_->QueryParam(portInfo);
+    outBufferCnt_ = portInfo.bufferCount;
+    outBufferSize_ = portInfo.bufferSize;
+    if (!portInfo.bEnabled) {
+        codecCmdExecutor_->SendCmd(OMX_CommandPortEnable, outPortIndex_);
+        (void)codecCmdExecutor_->WaitForCmd(OMX_CommandPortEnable, outPortIndex_);
+    }
+    portConfigured_ = true;
     return Status::OK;
 }
 
@@ -326,10 +358,8 @@ void HdiCodecAdapter::HandleFrame()
         }
         FALSE_RETURN_MSG(codecBuffer->Copy(inputBuffer) == Status::OK,
                          "Copy inBuffer into codecBuffer fail");
-        if (codecComp_ && codecComp_->EmptyThisBuffer) {
-            auto ret = codecComp_->EmptyThisBuffer(codecComp_, codecBuffer->GetOmxBuffer().get());
-            FALSE_LOG_MSG(ret == HDF_SUCCESS, "call EmptyThisBuffer() error, bufferId: " PUBLIC_LOG_D32, inBufferId);
-        }
+        auto ret = HdiEmptyThisBuffer(codecComp_, codecBuffer->GetOmxBuffer().get());
+        FALSE_LOG_MSG(ret == HDF_SUCCESS, "call EmptyThisBuffer() error, bufferId: " PUBLIC_LOG_D32, inBufferId);
         NotifyInputBufferDone(inputBuffer);
     }
     MEDIA_LOG_DD("handle frame end");
@@ -384,12 +414,9 @@ bool HdiCodecAdapter::FillAllTheOutBuffer()
         isFirstCall_ = false;
         for (uint32_t i = 0; i < outBufferCnt_; ++i) {
             auto codecBuffer = outBufPool_->GetBuffer();
-            int32_t ret = HDF_SUCCESS;
-            if (codecComp_ && codecComp_->FillThisBuffer) {
-                ret = codecComp_->FillThisBuffer(codecComp_, codecBuffer->GetOmxBuffer().get());
-                FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, false, "call FillThisBuffer() error, ret: " PUBLIC_LOG_S
-                    ", isFirstCall: " PUBLIC_LOG_D32, HdfStatus2String(ret).c_str(), isFirstCall_);
-            }
+            auto ret = HdiFillThisBuffer(codecComp_, codecBuffer->GetOmxBuffer().get());
+            FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, false, "call FillThisBuffer() error, ret: " PUBLIC_LOG_S
+                ", isFirstCall: " PUBLIC_LOG_D32, HdfStatus2String(ret).c_str(), isFirstCall_);
         }
     } else {
         while (!outBufQue_.Empty()) {
@@ -405,17 +432,39 @@ bool HdiCodecAdapter::FillAllTheOutBuffer()
             auto codecBuffer = outBufPool_->GetBuffer();
             FALSE_RETURN_V(codecBuffer != nullptr, false);
             codecBuffer->Rebind(outputBuffer); // 这里outBuf需要保存到codecBuffer里面，方便往下一节点传数据
-            int32_t ret = HDF_SUCCESS;
-            if (codecComp_ && codecComp_->FillThisBuffer) {
-                ret = codecComp_->FillThisBuffer(codecComp_, codecBuffer->GetOmxBuffer().get());
-                FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, false, "call FillThisBuffer() error, ret: " PUBLIC_LOG_S
-                    ", isFirstCall: " PUBLIC_LOG_D32, HdfStatus2String(ret).c_str(), isFirstCall_);
-            }
+            auto ret = HdiFillThisBuffer(codecComp_, codecBuffer->GetOmxBuffer().get());
+            FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, false, "call FillThisBuffer() error, ret: " PUBLIC_LOG_S
+                ", isFirstCall: " PUBLIC_LOG_D32, HdfStatus2String(ret).c_str(), isFirstCall_);
         }
     }
     MEDIA_LOG_D("FillAllTheBuffer end, free out bufferId count: " PUBLIC_LOG_ZU ", outBufQue_.Size: " PUBLIC_LOG_ZU,
                 outBufPool_->EmptyBufferCount(), outBufQue_.Size());
     return true;
+}
+
+Status HdiCodecAdapter::ChangeState(OMX_STATETYPE state)
+{
+    MEDIA_LOG_I("change state from " PUBLIC_LOG_S " to " PUBLIC_LOG_S,
+                OmxStateToString(targetState_).c_str(), OmxStateToString(state).c_str());
+    if (targetState_ != state && curState_ != state) {
+        auto ret = codecCmdExecutor_->SendCmd(OMX_CommandStateSet, state);
+        FALSE_RETURN_V_MSG(ret == Status::OK, Status::ERROR_INVALID_OPERATION, "HdiSendCommand failed");
+        targetState_ = state;
+    }
+    return Status::OK;
+}
+
+Status HdiCodecAdapter::WaitForState(OMX_STATETYPE state)
+{
+    MEDIA_LOG_D("WaitForState begin");
+    auto ret = codecCmdExecutor_->WaitForCmd(OMX_CommandStateSet, state);
+    if (!ret) {
+        MEDIA_LOG_E("Wait state failed");
+        return Status::ERROR_WRONG_STATE;
+    }
+    curState_ = state;
+    MEDIA_LOG_D("WaitForState end");
+    return Status::OK;
 }
 } // namespace CodecAdapter
 } // namespace Plugin

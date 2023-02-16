@@ -17,40 +17,49 @@
 
 #ifndef HISTREAMER_PLUGIN_CODEC_CMD_EXECUTOR_H
 #define HISTREAMER_PLUGIN_CODEC_CMD_EXECUTOR_H
-
-#include "codec_component_type.h"
+#include <map>
+#include <vector>
+#include "codec_component_if.h"
+#include "common/any.h"
 #include "common/plugin_types.h"
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
+#include "interface/plugin_base.h"
 #include "OMX_Core.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace CodecAdapter {
+enum Result {
+    INVALID,
+    SUCCESS,
+    FAIL
+};
 class CodecCmdExecutor {
 public:
-    CodecCmdExecutor() = default;
+    CodecCmdExecutor(CodecComponentType* component, uint32_t inPortIndex);
     ~CodecCmdExecutor() = default;
 
     Status OnEvent(OMX_EVENTTYPE event, EventInfo* info);
-
-    Status SendCmd(OMX_COMMANDTYPE cmd, bool wait);
-    Status WaitCmdComplete();
-
+    Status SendCmd(OMX_COMMANDTYPE cmd, const Plugin::Any& param);
+    bool WaitForCmd(OMX_COMMANDTYPE cmd, const Plugin::Any& param);
+    Status SetCallback(Callback* cb);
 private:
-    void HandelEventCmdComplete(uint32_t data1, uint32_t data2);
-    void HandelEventCmdCompleteEvent(OMX_U32 data1, OMX_U32 data2);
-    void HandelEventStateSet(OMX_U32 data1, OMX_U32 data2);
-    void HandelEventFlush(OMX_U32 data1, OMX_U32 data2);
-    void HandleEventPortSettingsChangedEvent(OMX_U32 data1, OMX_U32 data2);
+    void HandleEventCmdComplete(uint32_t data1, uint32_t data2);
+    void HandleEventPortSettingsChanged(OMX_U32 data1, OMX_U32 data2);
+    void HandleEventBufferFlag(OMX_U32 data1, OMX_U32 data2);
     void HandleEventError(OMX_U32 data1);
 
-    struct CodecComponentType* codecComp_ {nullptr};
+    Callback* callback_ {nullptr};
+
+    CodecComponentType* codecComp_ {nullptr};
+    uint32_t inPortIndex_;
     OSAL::Mutex mutex_;
     OSAL::ConditionVariable cond_;
+
     int lastCmd_ = -2; // -1 for error cmd and -2 for invaild
-    bool eventDone_ = false;
+    std::map<OMX_COMMANDTYPE, Any> resultMap_{};
 };
 } // namespace CodecAdapter
 } // namespace Plugin

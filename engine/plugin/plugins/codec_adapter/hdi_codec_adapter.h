@@ -20,8 +20,10 @@
 
 #include <list>
 #include "codec_buffer_pool.h"
+#include "codec_cmd_executor.h"
 #include "codec_component_manager.h"
 #include "codec_manager.h"
+#include "codec_port.h"
 #include "interface/codec_plugin.h"
 #include "utils/blocking_queue.h"
 
@@ -63,6 +65,11 @@ private:
     static int32_t EmptyBufferDone(CodecCallbackType* self, int64_t appData, const OmxCodecBuffer* buffer);
     static int32_t FillBufferDone(CodecCallbackType* self, int64_t appData, const OmxCodecBuffer* buffer);
 
+    Status ConfigOmx();
+
+    Status ChangeState(OMX_STATETYPE state);
+    Status WaitForState(OMX_STATETYPE state);
+
     std::shared_ptr<CodecManager> codecMgr_;
     CodecComponentType* codecComp_ {nullptr};
     CodecCallbackType* codecCallback_ {nullptr};
@@ -79,9 +86,12 @@ private:
     std::shared_ptr<CodecBufferPool> inBufPool_ {};
     std::shared_ptr<CodecBufferPool> outBufPool_ {};
 
-    uint32_t width_;
-    uint32_t height_;
-    int32_t stride_;
+    bool portConfigured_ {false};
+    uint32_t width_{};
+    uint32_t height_{};
+    uint32_t frameRate_;
+    int32_t stride_{};
+    VideoPixelFormat pixelFormat_ {};
 
     Callback* callback_ {nullptr};
     DataCallback* dataCallback_ {nullptr};
@@ -89,14 +99,19 @@ private:
     OSAL::Mutex lockInputBuffers_;
 
     std::shared_ptr<ShareAllocator> shaAlloc_ {nullptr};
-
-    OMX_STATETYPE curState_ {OMX_StateInvalid};
-
+    
     bool isFlushing_ {false};
 
-    uint32_t portIndexInput_;
-    uint32_t portIndexOutput_;
+    uint32_t inPortIndex_;
+    uint32_t outPortIndex_;
     CompVerInfo verInfo_ {};
+    OMX_PORT_PARAM_TYPE portParam_ = {};
+    std::shared_ptr<CodecPort> inCodecPort_{};
+    std::shared_ptr<CodecPort> outCodecPort_{};
+
+    std::shared_ptr<CodecCmdExecutor> codecCmdExecutor_{};
+    OMX_STATETYPE curState_ {OMX_StateInvalid};
+    OMX_STATETYPE targetState_ {OMX_StateInvalid};
 };
 } // namespace CodecAdapter
 } // namespace Plugin

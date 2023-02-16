@@ -125,6 +125,70 @@ uint64_t Translate2PluginFlagSet(uint32_t omxBufFlag)
     }
     return ret;
 }
+
+static const std::map<std::string, OMX_VIDEO_CODINGTYPE> compressHstOmx = {
+    {MEDIA_MIME_VIDEO_H264, OMX_VIDEO_CodingAVC},
+    {MEDIA_MIME_VIDEO_H265, static_cast<OMX_VIDEO_CODINGTYPE>(CODEC_OMX_VIDEO_CodingHEVC)}
+};
+
+OMX_VIDEO_CODINGTYPE HdiCodecUtil::CompressionHstToHdi(const std::string& format)
+{
+    if (compressHstOmx.find(format) != compressHstOmx.end()) {
+        return compressHstOmx.at(format);
+    }
+    return OMX_VIDEO_CodingUnused;
+}
+
+static const std::map<VideoPixelFormat, OMX_COLOR_FORMATTYPE> formatHstOmx = {
+    {VideoPixelFormat::NV12, OMX_COLOR_FormatYUV420SemiPlanar}
+};
+
+OMX_COLOR_FORMATTYPE HdiCodecUtil::FormatHstToOmx(const VideoPixelFormat format)
+{
+    if (formatHstOmx.find(format) != formatHstOmx.end()) {
+        return formatHstOmx.at(format);
+    }
+    MEDIA_LOG_W("Unknow VideoPixelFormat" PUBLIC_LOG_U32, static_cast<uint32_t>(format));
+    return OMX_COLOR_FormatUnused;
+}
+
+static const  std::map<OMX_STATETYPE, std::string> omxStateMap = {
+    {OMX_StateInvalid, "OMX_StateInvalid"},
+    {OMX_StateLoaded, "OMX_StateLoaded"},
+    {OMX_StateLoaded, "OMX_StateLoaded"},
+    {OMX_StateIdle, "OMX_StateIdle"},
+    {OMX_StateExecuting, "OMX_StateExecuting"},
+    {OMX_StatePause, "OMX_StatePause"},
+    {OMX_StateWaitForResources, "OMX_StateWaitForResources"},
+    {OMX_StateKhronosExtensions, "OMX_StateKhronosExtensions"},
+    {OMX_StateVendorStartUnused, "OMX_StateVendorStartUnused"},
+    {OMX_StateMax, "OMX_StateMax"},
+};
+
+std::string OmxStateToString(OMX_STATETYPE state)
+{
+    auto iter = omxStateMap.find(state);
+    if (iter != omxStateMap.end()) {
+        return iter->second;
+    }
+    MEDIA_LOG_W("Not find value, maybe update the map");
+    return "null";
+}
+
+static const std::map<std::string, std::string> componentNameToMime = {
+    {MEDIA_MIME_VIDEO_H264, "OMX.rk.video_decoder.avc"},
+    {MEDIA_MIME_VIDEO_H265, "OMX.rk.video_decoder.hevc"}
+};
+
+std::string ComponentNameToMime(const std::string& componentName)
+{
+    auto iter = componentNameToMime.find(componentName);
+    if (iter != componentNameToMime.end()) {
+        return iter->second;
+    }
+    MEDIA_LOG_W("Not find value, maybe update the map");
+    return "null";
+}
 } // namespace CodecAdapter
 } // namespace Plugin
 } // namespace Media

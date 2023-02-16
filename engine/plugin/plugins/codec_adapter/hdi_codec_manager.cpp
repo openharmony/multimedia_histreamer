@@ -127,13 +127,20 @@ void HdiCodecManager::AddHdiCap(const CodecCompCapability& hdiCap)
 {
     CodecCapability codecCapability;
     CapabilityBuilder incapBuilder;
-    incapBuilder.SetMime(GetCodecMime(hdiCap.role));
     CapabilityBuilder outcapBuilder;
-    outcapBuilder.SetMime(MEDIA_MIME_VIDEO_RAW);
+    auto mime = GetCodecMime(hdiCap.role);
+    incapBuilder.SetMime(mime);
+    auto pluginType = GetCodecType(hdiCap.type);
+    if (pluginType == PluginType::VIDEO_DECODER) {
+        if (mime == MEDIA_MIME_VIDEO_H264 || mime == MEDIA_MIME_VIDEO_H265) {
+            incapBuilder.SetVideoBitStreamFormatList({VideoBitStreamFormat::ANNEXB});
+        }
+        outcapBuilder.SetMime(MEDIA_MIME_VIDEO_RAW);
+    }
     outcapBuilder.SetVideoPixelFormatList(GetCodecFormats(hdiCap.port.video));
     codecCapability.inCaps.push_back(incapBuilder.Build());
     codecCapability.outCaps.push_back(outcapBuilder.Build());
-    codecCapability.pluginType = GetCodecType(hdiCap.type);
+    codecCapability.pluginType = pluginType;
     codecCapability.name = hdiCap.compName;
     codecCapabilitys_.push_back(codecCapability);
 }

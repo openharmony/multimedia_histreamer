@@ -20,6 +20,8 @@
 
 #include <iostream>
 #include "codec_buffer_pool.h"
+#include "display_type.h"
+#include "OMX_Video.h"
 
 namespace OHOS {
 namespace Media {
@@ -32,14 +34,63 @@ Status TransHdiRetVal2Status(const int32_t& ret);
 uint32_t Translate2omxFlagSet(uint64_t pluginFlags);
 
 uint64_t Translate2PluginFlagSet(uint32_t omxBufFlag);
+std::string OmxStateToString(OMX_STATETYPE state);
+std::string ComponentNameToMime(const std::string& componentName);
+
+class HdiCodecUtil {
+public:
+    static OMX_VIDEO_CODINGTYPE CompressionHstToHdi(const std::string& format);
+    static OMX_COLOR_FORMATTYPE FormatHstToOmx(const VideoPixelFormat format);
+    HdiCodecUtil() = delete;
+    ~HdiCodecUtil() = delete;
+};
 
 template <typename T>
 inline void InitHdiParam(T& param, CompVerInfo& verInfo)
 {
     memset_s(&param, sizeof(param), 0x0, sizeof(param));
     param.size = sizeof(param);
-    param.version.s.nVersionMajor = verInfo.compVersion.s.nVersionMajor;
+    param.version = verInfo.compVersion;
 }
+
+template <typename T>
+inline void InitParam(T& param, CompVerInfo& verInfo)
+{
+    memset_s(&param, sizeof(param), 0x0, sizeof(param));
+    param.nSize = sizeof(param);
+    param.nVersion = verInfo.compVersion;
+}
+
+template <typename T, typename U>
+inline int32_t HdiSetParameter(T* component, uint32_t paramIndex, U& param)
+{
+    return component->SetParameter(component, paramIndex, reinterpret_cast<int8_t*>(&param), sizeof(param));
+}
+
+template <typename T, typename U>
+inline int32_t HdiGetParameter(T* component, uint32_t paramIndex, U& param)
+{
+    return component->GetParameter(component, paramIndex, reinterpret_cast<int8_t*>(&param), sizeof(param));
+}
+
+template <typename T, typename U>
+inline int32_t HdiSendCommand(T* component, OMX_COMMANDTYPE cmd, uint32_t param, U&& cmdData)
+{
+    return component->SendCommand(component, cmd, param, reinterpret_cast<int8_t*>(&cmdData), sizeof(cmdData));
+}
+
+template <typename T, typename U>
+inline int32_t HdiFillThisBuffer(T* component, U* buffer)
+{
+    return component->FillThisBuffer(component, buffer);
+}
+
+template <typename T, typename U>
+inline int32_t HdiEmptyThisBuffer(T* component, U* buffer)
+{
+    return component->EmptyThisBuffer(component, buffer);
+}
+
 } // namespace CodecAdapter
 } // namespace Plugin
 } // namespace Media
