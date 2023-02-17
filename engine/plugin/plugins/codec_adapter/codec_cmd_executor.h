@@ -43,7 +43,7 @@ public:
 
     Status OnEvent(OMX_EVENTTYPE event, EventInfo* info);
     Status SendCmd(OMX_COMMANDTYPE cmd, const Plugin::Any& param);
-    bool WaitForCmd(OMX_COMMANDTYPE cmd, const Plugin::Any& param);
+    bool WaitCmdResult(OMX_COMMANDTYPE cmd, const Plugin::Any& param);
     Status SetCallback(Callback* cb);
 private:
     void HandleEventCmdComplete(uint32_t data1, uint32_t data2);

@@ -58,26 +58,15 @@ int32_t HdiCodecManager::CreateComponent(const Plugin::Any& component, uint32_t&
     }
     auto codecComponent = Plugin::AnyCast<CodecComponentType**>(component);
     FALSE_RETURN_V_MSG(codecComponent != nullptr, HDF_FAILURE, "component is nullptr");
-    auto ret = mgr_->CreateComponent(codecComponent, &id, const_cast<char *>(name.c_str()),
+    return mgr_->CreateComponent(codecComponent, &id, const_cast<char *>(name.c_str()),
         Plugin::AnyCast<int64_t>(appData), Plugin::AnyCast<CodecCallbackType*>(callbacks));
-    if (ret == HDF_SUCCESS) {
-        handleMap_[*codecComponent] = id;
-    }
-    return ret;
 }
 
 int32_t HdiCodecManager::DestroyComponent(const Plugin::Any& component, uint32_t id)
 {
     FALSE_RETURN_V_MSG(mgr_ != nullptr, HDF_FAILURE, "mgr_ is nullptr");
-    auto codecComponent = Plugin::AnyCast<CodecComponentType*>(component);
-    auto iter = handleMap_.find(codecComponent);
-    FALSE_RETURN_V_MSG(iter != handleMap_.end(), HDF_SUCCESS, "The handle has been released!");
-    FALSE_RETURN_V_MSG(iter->second == id, HDF_FAILURE, "Handle and id do not match!");
-    int32_t ret =  mgr_->DestroyComponent(id);
-    if (ret == HDF_SUCCESS) {
-        handleMap_.erase(iter);
-    }
-    return ret;
+    (void)component;
+    return mgr_->DestroyComponent(id);
 }
 
 Status HdiCodecManager::RegisterCodecPlugins(const std::shared_ptr<OHOS::Media::Plugin::Register>& reg)
@@ -120,7 +109,6 @@ void HdiCodecManager::Reset()
 {
     CodecComponentManagerRelease();
     mgr_ = nullptr;
-    handleMap_.clear();
 }
 
 void HdiCodecManager::AddHdiCap(const CodecCompCapability& hdiCap)
@@ -203,6 +191,8 @@ std::string HdiCodecManager::GetCodecMime(const AvCodecRole& role)
     switch (role) {
         case MEDIA_ROLETYPE_VIDEO_AVC:
             return MEDIA_MIME_VIDEO_H264;
+        case MEDIA_ROLETYPE_VIDEO_HEVC:
+            return MEDIA_MIME_VIDEO_H265;
         default:
             return "video/unknown";
     }

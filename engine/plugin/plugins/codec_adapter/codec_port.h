@@ -29,8 +29,8 @@ namespace Plugin {
 namespace CodecAdapter {
 struct PortInfo {
     uint32_t bufferCount{};
-    uint32_t bufferSize {};
-    bool bEnabled {false};
+    uint32_t bufferSize{};
+    bool enabled{false};
 };
 
 class CodecPort {

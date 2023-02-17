@@ -37,13 +37,8 @@ uint64_t Translate2PluginFlagSet(uint32_t omxBufFlag);
 std::string OmxStateToString(OMX_STATETYPE state);
 std::string ComponentNameToMime(const std::string& componentName);
 
-class HdiCodecUtil {
-public:
-    static OMX_VIDEO_CODINGTYPE CompressionHstToHdi(const std::string& format);
-    static OMX_COLOR_FORMATTYPE FormatHstToOmx(const VideoPixelFormat format);
-    HdiCodecUtil() = delete;
-    ~HdiCodecUtil() = delete;
-};
+OMX_VIDEO_CODINGTYPE CodingTypeHstToHdi(const std::string& format);
+OMX_COLOR_FORMATTYPE FormatHstToOmx(const VideoPixelFormat format);
 
 template <typename T>
 inline void InitHdiParam(T& param, CompVerInfo& verInfo)
@@ -54,7 +49,7 @@ inline void InitHdiParam(T& param, CompVerInfo& verInfo)
 }
 
 template <typename T>
-inline void InitParam(T& param, CompVerInfo& verInfo)
+inline void InitOmxParam(T& param, CompVerInfo& verInfo)
 {
     memset_s(&param, sizeof(param), 0x0, sizeof(param));
     param.nSize = sizeof(param);

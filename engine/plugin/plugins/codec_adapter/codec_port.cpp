@@ -31,7 +31,7 @@ namespace CodecAdapter {
 CodecPort::CodecPort(CodecComponentType* component, uint32_t portIndex, const CompVerInfo& verInfo)
     : codecComp_(component), verInfo_(verInfo)
 {
-    InitParam(portDef_, verInfo_);
+    InitOmxParam(portDef_, verInfo_);
     portDef_.nPortIndex = portIndex;
     verInfo_ = verInfo;
 }
@@ -40,10 +40,9 @@ Status CodecPort::Config(TagMap& tagMap)
 {
     auto ret = HdiGetParameter(codecComp_, OMX_IndexParamPortDefinition, portDef_);
     FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, Status::ERROR_INVALID_PARAMETER, "HdiGetParameter failed");
-    portDef_.format.video.eCompressionFormat = HdiCodecUtil::CompressionHstToHdi(
-        Plugin::AnyCast<std::string>(tagMap[Tag::MIME]));
-    portDef_.format.video.eColorFormat = HdiCodecUtil::FormatHstToOmx(
-        Plugin::AnyCast<VideoPixelFormat>(tagMap[Tag::VIDEO_PIXEL_FORMAT]));
+    portDef_.format.video.eCompressionFormat = CodingTypeHstToHdi(Plugin::AnyCast<std::string>(tagMap[Tag::MIME]));
+    portDef_.format.video.eColorFormat = FormatHstToOmx(Plugin::AnyCast<VideoPixelFormat>(
+        tagMap[Tag::VIDEO_PIXEL_FORMAT]));
     portDef_.format.video.nFrameHeight = Plugin::AnyCast<uint32_t>(tagMap[Tag::VIDEO_HEIGHT]);
     portDef_.format.video.nFrameWidth = Plugin::AnyCast<uint32_t>(tagMap[Tag::VIDEO_WIDTH]);
     portDef_.format.video.xFramerate = Plugin::AnyCast<uint32_t>(tagMap[Tag::VIDEO_FRAME_RATE])
@@ -60,7 +59,7 @@ Status CodecPort::QueryParam(PortInfo& portInfo)
     FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, Status::ERROR_INVALID_PARAMETER, "HdiGetParameter failed");
     portInfo.bufferCount = portDef_.nBufferCountActual;
     portInfo.bufferSize = portDef_.nBufferSize;
-    portInfo.bEnabled = portDef_.bEnabled;
+    portInfo.enabled = portDef_.bEnabled;
     return Status::OK;
 }
 } // namespace CodecAdapter

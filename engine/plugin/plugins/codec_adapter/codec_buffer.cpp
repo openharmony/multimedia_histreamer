@@ -25,10 +25,9 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace CodecAdapter {
-CodecBuffer::CodecBuffer(std::shared_ptr<Buffer>& buffer, CompVerInfo& verInfo, uint32_t bufferSize)
+CodecBuffer::CodecBuffer(std::shared_ptr<Buffer>& buffer, CompVerInfo& verInfo)
     : buffer_(buffer),
-      verInfo_(verInfo),
-      bufferSize_(bufferSize)
+      verInfo_(verInfo)
 {
     Init();
 }
@@ -38,7 +37,7 @@ Status CodecBuffer::Init()
     omxBuffer_ = std::make_shared<OmxCodecBuffer>();
     omxBuffer_->size = sizeof(OmxCodecBuffer);
     omxBuffer_->version.s.nVersionMajor = verInfo_.compVersion.s.nVersionMajor;
-    omxBuffer_->allocLen = bufferSize_;
+    omxBuffer_->allocLen = buffer_->GetMemory()->GetCapacity();
     omxBuffer_->fenceFd = -1; // check use -1 first with no window
     omxBuffer_->pts = 0;
     omxBuffer_->flag = 0;

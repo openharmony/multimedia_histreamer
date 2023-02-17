@@ -49,7 +49,6 @@ private:
 
     CodecComponentManager* mgr_ {nullptr};
     std::vector<CodecCapability> codecCapabilitys_;
-    std::map<CodecComponentType*, uint32_t> handleMap_;
 };
 } // namespace CodecAdapter
 } // namespace Plugin

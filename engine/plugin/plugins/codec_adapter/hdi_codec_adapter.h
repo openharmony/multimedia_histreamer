@@ -17,7 +17,7 @@
 
 #ifndef HISTREAMER_PLUGIN_HDI_CODEC_ADAPTER_H
 #define HISTREAMER_PLUGIN_HDI_CODEC_ADAPTER_H
-
+#include <limits>
 #include <list>
 #include "codec_buffer_pool.h"
 #include "codec_cmd_executor.h"
@@ -81,8 +81,8 @@ private:
 
     uint32_t inBufferSize_;
     uint32_t inBufferCnt_;
-    uint32_t outBufferSize_;
-    uint32_t outBufferCnt_;
+    uint32_t outBufferSize_ {std::numeric_limits<uint32_t>::max()};
+    uint32_t outBufferCnt_ {std::numeric_limits<uint32_t>::max()};
     std::shared_ptr<CodecBufferPool> inBufPool_ {};
     std::shared_ptr<CodecBufferPool> outBufPool_ {};
 
@@ -99,9 +99,7 @@ private:
     OSAL::Mutex lockInputBuffers_;
 
     std::shared_ptr<ShareAllocator> shaAlloc_ {nullptr};
-    
     bool isFlushing_ {false};
-
     uint32_t inPortIndex_;
     uint32_t outPortIndex_;
     CompVerInfo verInfo_ {};

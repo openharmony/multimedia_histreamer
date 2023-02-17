@@ -43,7 +43,7 @@ Status CodecBufferPool::UseBuffers(OHOS::Media::BlockingQueue<std::shared_ptr<Bu
     FALSE_RETURN_V_MSG_E(ConfigBufType(bufMemType) == Status::OK, Status::ERROR_INVALID_DATA, "ConfigBufType failed");
     for (uint32_t i = 0; i < bufQue.Size(); i++) {
         auto pluginBuffer = bufQue.Pop();
-        auto codecBuffer = std::make_shared<CodecBuffer>(pluginBuffer, verInfo_, bufSize_);
+        auto codecBuffer = std::make_shared<CodecBuffer>(pluginBuffer, verInfo_);
         FALSE_RETURN_V_MSG(codecBuffer == nullptr, Status::ERROR_INVALID_DATA, "Create codec buffer failed");
         auto err = codecComp_->UseBuffer(codecComp_, portIndex_, codecBuffer->GetOmxBuffer().get());
         if (err != HDF_SUCCESS) {
@@ -112,12 +112,7 @@ Status CodecBufferPool::UseBufferDone(uint32_t bufId)
 
 std::shared_ptr<CodecBuffer> CodecBufferPool::GetBuffer(uint32_t bufferId)
 {
-    uint32_t bufId = 0;
-    if (bufferId >= 0) {
-        bufId = bufferId;
-    } else {
-        bufId = freeBufferId_.Pop(1);
-    }
+    auto bufId = bufferId >= 0 ? bufferId : freeBufferId_.Pop(1);
     auto iter = codecBufMap_.find(bufId);
     if (iter == codecBufMap_.end()) {
         return nullptr;

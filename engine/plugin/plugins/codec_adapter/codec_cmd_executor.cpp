@@ -61,6 +61,7 @@ Status CodecCmdExecutor::SendCmd(OMX_COMMANDTYPE cmd, const Plugin::Any& param)
 {
     switch (cmd) {
         case OMX_CommandStateSet: {
+            resultMap_[cmd] = OMX_StateInvalid;
             auto ret = HdiSendCommand(codecComp_, cmd,  Plugin::AnyCast<OMX_STATETYPE>(param), 0);
             FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, Status::ERROR_INVALID_OPERATION, "HdiSendCommand failed");
             break;
@@ -88,7 +89,7 @@ Status CodecCmdExecutor::SendCmd(OMX_COMMANDTYPE cmd, const Plugin::Any& param)
     return Status::OK;
 }
 
-bool CodecCmdExecutor::WaitForCmd(OMX_COMMANDTYPE cmd, const Plugin::Any& param)
+bool CodecCmdExecutor::WaitCmdResult(OMX_COMMANDTYPE cmd, const Plugin::Any& param)
 {
     OSAL::ScopedLock lock(mutex_);
     MEDIA_LOG_D("lastCmd: " PUBLIC_LOG_D32 ", cmd:" PUBLIC_LOG_D32, lastCmd_,  static_cast<int32_t>(cmd));
@@ -102,11 +103,7 @@ bool CodecCmdExecutor::WaitForCmd(OMX_COMMANDTYPE cmd, const Plugin::Any& param)
                     result = false;
                     return true;
                 }
-                if (Plugin::AnyCast<OMX_STATETYPE>(resultMap_[cmd]) != AnyCast<OMX_STATETYPE>(param)) {
-                    return false;
-                }
-                resultMap_[cmd] = OMX_StateInvalid;
-                return true;
+                return Plugin::AnyCast<OMX_STATETYPE>(resultMap_[cmd]) == AnyCast<OMX_STATETYPE>(param);
             });
             return result;
         }
