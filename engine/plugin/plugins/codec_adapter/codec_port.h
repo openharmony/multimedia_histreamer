@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+#if defined(VIDEO_SUPPORT)
 
 #ifndef HISTREAMER_PLUGIN_CODEC_PORT_H
 #define HISTREAMER_PLUGIN_CODEC_PORT_H

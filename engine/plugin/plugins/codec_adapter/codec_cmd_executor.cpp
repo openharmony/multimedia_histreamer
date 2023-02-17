@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+#if defined(VIDEO_SUPPORT)
 
 #define HST_LOG_TAG "CodecCmdExecutor"
 
@@ -28,10 +28,10 @@ namespace CodecAdapter {
 CodecCmdExecutor::CodecCmdExecutor(CodecComponentType* component, uint32_t inPortIndex)
     : codecComp_(component), inPortIndex_(inPortIndex)
 {
-   resultMap_[OMX_CommandStateSet] = OMX_StateInvalid;
-   resultMap_[OMX_CommandFlush] = std::pair<Result, Result>{Result::INVALID, Result::INVALID};
-   resultMap_[OMX_CommandPortEnable] = std::pair<Result, Result>{Result::INVALID, Result::INVALID};
-   resultMap_[OMX_CommandPortDisable] = std::pair<Result, Result>{Result::INVALID, Result::INVALID};
+    resultMap_[OMX_CommandStateSet] = OMX_StateInvalid;
+    resultMap_[OMX_CommandFlush] = std::pair<Result, Result>{Result::INVALID, Result::INVALID};
+    resultMap_[OMX_CommandPortEnable] = std::pair<Result, Result>{Result::INVALID, Result::INVALID};
+    resultMap_[OMX_CommandPortDisable] = std::pair<Result, Result>{Result::INVALID, Result::INVALID};
 }
 
 Status CodecCmdExecutor::OnEvent(OMX_EVENTTYPE event, EventInfo* info)
@@ -99,7 +99,7 @@ bool CodecCmdExecutor::WaitCmdResult(OMX_COMMANDTYPE cmd, const Plugin::Any& par
     static constexpr int32_t timeout = 2000; // ms
     switch (cmd) {
         case OMX_CommandStateSet: {
-            cond_.WaitFor(lock, timeout, [&]{
+            cond_.WaitFor(lock, timeout, [&] {
                 if (lastCmd_ == -1) {
                     resultMap_[cmd] = OMX_StateInvalid;
                     result = false;
@@ -113,7 +113,7 @@ bool CodecCmdExecutor::WaitCmdResult(OMX_COMMANDTYPE cmd, const Plugin::Any& par
         case OMX_CommandPortEnable:
         case OMX_CommandPortDisable: {
             auto portIndex = AnyCast<uint32_t>(param);
-            cond_.WaitFor(lock, timeout, [&]{
+            cond_.WaitFor(lock, timeout, [&] {
                 auto tempPair = AnyCast<std::pair<Result, Result>>(resultMap_[cmd]);
                 if (lastCmd_ == -1) {
                     if (portIndex == inPortIndex_) {

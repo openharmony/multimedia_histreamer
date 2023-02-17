@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+#if defined(VIDEO_SUPPORT)
 
 #define HST_LOG_TAG "HdiCodecAdapter"
 
@@ -135,7 +135,7 @@ Status HdiCodecAdapter::Init()
     return Status::OK;
 }
 
-Status HdiCodecAdapter::Deinit() 
+Status HdiCodecAdapter::Deinit()
 {
     MEDIA_LOG_D("HdiAdapter DeInit Enter");
     FALSE_RETURN_V_MSG_E(Reset() == Status::OK, Status::ERROR_INVALID_DATA, "Reset value failed");
@@ -156,7 +156,7 @@ Status HdiCodecAdapter::Deinit()
     return Status::OK;
 }
 
-Status HdiCodecAdapter::Prepare() 
+Status HdiCodecAdapter::Prepare()
 {
     MEDIA_LOG_D("Prepare Start");
     FALSE_RETURN_V_MSG_E(ChangeState(OMX_StateIdle) == Status::OK,
@@ -223,7 +223,7 @@ Status HdiCodecAdapter::Start()
     return Status::OK;
 }
 
-Status HdiCodecAdapter::Stop() 
+Status HdiCodecAdapter::Stop()
 {
     MEDIA_LOG_D("Stop Enter");
     outBufQue_.SetActive(false);
@@ -231,7 +231,7 @@ Status HdiCodecAdapter::Stop()
     return Status::OK;
 }
 
-Status HdiCodecAdapter::Flush() 
+Status HdiCodecAdapter::Flush()
 {
     MEDIA_LOG_D("HdiCodecAdapter Flush begin");
     isFlushing_ = true;
@@ -251,7 +251,7 @@ Status HdiCodecAdapter::Flush()
     return Status::OK;
 }
 
-Status HdiCodecAdapter::GetParameter(Plugin::Tag tag, ValueType &value) 
+Status HdiCodecAdapter::GetParameter(Plugin::Tag tag, ValueType &value)
 {
     MEDIA_LOG_D("GetParameter begin");
     switch (tag) {
@@ -274,7 +274,7 @@ Status HdiCodecAdapter::GetParameter(Plugin::Tag tag, ValueType &value)
     return Status::OK;
 }
 
-Status HdiCodecAdapter::SetParameter(Plugin::Tag tag, const ValueType &value) 
+Status HdiCodecAdapter::SetParameter(Plugin::Tag tag, const ValueType &value)
 {
     MEDIA_LOG_D("SetParameter begin");
     switch (tag) {

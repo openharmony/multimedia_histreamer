@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#define HDI_REFACTOR_ENABLE 0
 #include "plugin_register.h"
 
 #include <algorithm>
 #include <dirent.h>
 
 #include "all_plugin_static.h"
-#if defined(MEDIA_OHOS) && !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+#if !HDI_REFACTOR_ENABLE && defined(MEDIA_OHOS) && !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #include "core/hdi_codec/hdi_adapter_register.h"
 #endif
 #include "foundation/log.h"
@@ -334,9 +334,9 @@ void PluginRegister::RegisterPlugins()
 void PluginRegister::RegisterStaticPlugins()
 {
     RegisterPluginStatic(std::make_shared<RegisterImpl>(registerData_));
-//#if defined(MEDIA_OHOS) && !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
-//    RegisterHdiCodecPackages(std::make_shared<RegisterImpl>(registerData_));
-//#endif
+#if !HDI_REFACTOR_ENABLE && defined(MEDIA_OHOS) && !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+    RegisterHdiCodecPackages(std::make_shared<RegisterImpl>(registerData_));
+#endif
 }
 
 void PluginRegister::RegisterDynamicPlugins()
@@ -377,9 +377,9 @@ void PluginRegister::RegisterPluginsFromPath(const char* libDirPath)
 void PluginRegister::UnregisterAllPlugins()
 {
     UnregisterPluginStatic();
-//#if defined(MEDIA_OHOS) && !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
-//    UnRegisterHdiCodecPackage();
-//#endif
+#if !HDI_REFACTOR_ENABLE && defined(MEDIA_OHOS) && !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+    UnRegisterHdiCodecPackage();
+#endif
 #ifdef DYNAMIC_PLUGINS
     for (auto& loader : registeredLoaders_) {
         EraseRegisteredPluginsByLoader(loader);

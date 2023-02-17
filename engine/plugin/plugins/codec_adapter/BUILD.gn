@@ -23,17 +23,19 @@ group("plugin_codec_adapter") {
 
 config("plugin_codec_adapter_config") {
   include_dirs = [
+    "//drivers/hdf_core/adapter/uhdf2/osal/include/",
+    "//drivers/hdf_core/framework/include/utils/",
+    "//drivers/hdf_core/adapter/uhdf2/osal/include/",
+    "//drivers/hdf_core/framework/include/utils/",
+    "//drivers/peripheral/base/",
+    "//drivers/peripheral/codec/hal/include/",
+    "//drivers/peripheral/codec/interfaces/include/",
+    "//drivers/peripheral/display/interfaces/include/",
     "//foundation/multimedia/histreamer/engine/",
-    "//foundation/multimedia/histreamer/engine/foundation",
-    "//foundation/multimedia/histreamer/engine/plugin",
-    "//foundation/multimedia/histreamer/engine/utils",
-    "//drivers/hdf_core/adapter/uhdf2/osal/include",
-    "//drivers/hdf_core/framework/include/utils",
-    "//drivers/peripheral/base",
-    "//drivers/peripheral/codec/hal/include",
-    "//drivers/peripheral/codec/interfaces/include",
-    "//drivers/peripheral/display/interfaces/include",
-    "//third_party/openmax/api/1.1.2",
+    "//foundation/multimedia/histreamer/engine/foundation/",
+    "//foundation/multimedia/histreamer/engine/plugin/",
+    "//foundation/multimedia/histreamer/engine/utils/",
+    "//third_party/openmax/api/1.1.2/",
   ]
 }
 
@@ -47,10 +49,10 @@ source_set("std_plugin_codec_adapter") {
     "hdi_codec_adapter.cpp",
     "hdi_codec_manager.cpp",
   ]
-  public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
+  public_deps = [ "foundation:histreamer_foundation" ]
   public_configs = [
     ":plugin_codec_adapter_config",
-    "//foundation/multimedia/histreamer:histreamer_presets",
+    "histreamer:histreamer_presets",
   ]
 }
 
@@ -63,10 +65,8 @@ if (hst_is_lite_sys) {
       cfi = true
       debug = false
     }
-    deps = [
-      ":std_plugin_codec_adapter",
-      "//drivers/peripheral/codec/hal:libcodec_hdi_omx_client",
-    ]
+    deps = [ ":std_plugin_codec_adapter" ]
+    external_deps = [ "drivers_peripheral_codec:libcodec_hdi_omx_client" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"

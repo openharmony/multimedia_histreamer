@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+#if defined(VIDEO_SUPPORT)
 
 #ifndef HISTREAMER_PLUGIN_PLUGINS_CODEC_UTILS_H
 #define HISTREAMER_PLUGIN_PLUGINS_CODEC_UTILS_H
