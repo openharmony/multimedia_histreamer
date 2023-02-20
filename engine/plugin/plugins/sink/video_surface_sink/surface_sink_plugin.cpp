@@ -304,7 +304,7 @@ Status SurfaceSinkPlugin::UpdateSurfaceMemory(std::shared_ptr<SurfaceMemory>& su
         pts = 1;
     }
     OHOS::BufferFlushConfig flushConfig = {
-        {0, 0, surfaceBuffer->GetWidth(), surfaceBuffer->GetHeight()}, pts
+        {0, 0, surfaceBuffer->GetWidth(), surfaceBuffer->GetHeight()}, {}, pts
     };
     surfaceMemory->SetNeedRender(true);
     mAllocator_->UpdateSurfaceBufferScaleMode(surfaceBuffer);
