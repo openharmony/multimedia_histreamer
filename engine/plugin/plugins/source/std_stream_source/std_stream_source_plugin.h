@@ -17,9 +17,9 @@
 
 #ifndef OHOS_LITE
 
-#include "avsharedmemorypool.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
+#include "avdatasrcmemory.h"
 
 namespace OHOS {
 namespace Media {
@@ -45,15 +45,11 @@ public:
     Seekable GetSeekable() override;
     Status SeekTo(uint64_t offset) override;
 private:
-    std::shared_ptr<Buffer> WrapAVSharedMemory(const std::shared_ptr<AVSharedMemory>& avSharedMemory, int32_t realLen);
-    void InitPool();
-    std::shared_ptr<AVSharedMemory> GetMemory();
-    void ResetPool();
     Seekable seekable_ {Seekable::INVALID};
     std::shared_ptr<IMediaDataSource> dataSrc_;
-    std::shared_ptr<AVSharedMemoryPool> pool_;
     int64_t size_ {0};
     uint64_t offset_ {0};
+    std::shared_ptr<AVSharedMemory> avSharedMemory_{};
 };
 } // namespace StdStreamSource
 } // namespace Plugin

@@ -22,10 +22,9 @@ namespace Media {
 namespace Plugin {
 namespace StdStreamSource {
 namespace {
-    constexpr uint32_t INIT_MEM_CNT = 10;
-    constexpr int32_t MEM_SIZE = 10240;
-    constexpr uint32_t MAX_MEM_CNT = 100;
+    constexpr uint32_t DEFAULT_BUFFER_SIZE = 4096;
 }
+
 std::shared_ptr<SourcePlugin> StdStreamSourcePluginCreator(const std::string& name)
 {
     return std::make_shared<StdStreamSourcePlugin>(name);
@@ -48,14 +47,11 @@ StdStreamSourcePlugin::StdStreamSourcePlugin(std::string name)
     : SourcePlugin(std::move(name))
 {
     MEDIA_LOG_D("ctor called");
-    pool_ = std::make_shared<AVSharedMemoryPool>("pool");
-    InitPool();
 }
 
 StdStreamSourcePlugin::~StdStreamSourcePlugin()
 {
     MEDIA_LOG_D("dtor called");
-    ResetPool();
 }
 
 Status StdStreamSourcePlugin::Init()
@@ -117,71 +113,45 @@ Status StdStreamSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
     dataSrc_ = source->GetDataSrc();
     FALSE_RETURN_V(dataSrc_ != nullptr, Status::ERROR_INVALID_PARAMETER);
     int64_t size = 0;
-    if (dataSrc_->GetSize(size) != MSERR_OK) {
-        MEDIA_LOG_E("Get size failed");
-    }
+    auto ret = dataSrc_->GetSize(size);
+    FALSE_RETURN_V_MSG(ret == MSERR_OK, Status::ERROR_INVALID_DATA, "Media data source get size failed!");
+    FALSE_RETURN_V_MSG(size >= -1, Status::ERROR_INVALID_DATA,
+        "invalid file size, if unknow file size please set size = -1");
     size_ = size;
-    seekable_ = size == -1 ? Seekable::UNSEEKABLE : Seekable::SEEKABLE;
+    seekable_ = size_ == -1 ? Seekable::UNSEEKABLE : Seekable::SEEKABLE;
+    avSharedMemory_ = AVDataSrcMemory::CreateFromLocal(
+        DEFAULT_BUFFER_SIZE, AVSharedMemory::Flags::FLAGS_READ_WRITE, "AppSrc");
+    FALSE_RETURN_V_MSG(avSharedMemory_ != nullptr, Status::ERROR_NO_MEMORY, "init AVSharedMemory failed");
+    offset_ = 0;
     return Status::OK;
-}
-
-std::shared_ptr<Buffer> StdStreamSourcePlugin::WrapAVSharedMemory(const std::shared_ptr<AVSharedMemory>& avSharedMemory,
-                                                                  int32_t realLen)
-{
-    std::shared_ptr<Buffer> buffer = std::make_shared<Buffer>();
-    std::shared_ptr<uint8_t> address = std::shared_ptr<uint8_t>(avSharedMemory->GetBase(),
-                                                                [avSharedMemory](uint8_t* ptr) { ptr = nullptr; });
-    buffer->WrapMemoryPtr(address, avSharedMemory->GetSize(), realLen);
-    return buffer;
-}
-
-void StdStreamSourcePlugin::InitPool()
-{
-    AVSharedMemoryPool::InitializeOption InitOption {
-        INIT_MEM_CNT,
-        MEM_SIZE,
-        MAX_MEM_CNT,
-        AVSharedMemory::Flags::FLAGS_READ_WRITE,
-        true,
-        nullptr,
-    };
-    pool_->Init(InitOption);
-}
-
-std::shared_ptr<AVSharedMemory> StdStreamSourcePlugin::GetMemory()
-{
-    return pool_->AcquireMemory(MEM_SIZE); // 10240
-}
-
-void StdStreamSourcePlugin::ResetPool()
-{
-    pool_->Reset();
 }
 
 Status StdStreamSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
 {
-    std::shared_ptr<AVSharedMemory> memory = GetMemory();
-    FALSE_RETURN_V_MSG(memory != nullptr, Status::ERROR_NO_MEMORY, "allocate memory failed!");
+    FALSE_RETURN_V_MSG(avSharedMemory_ != nullptr, Status::ERROR_NO_MEMORY, "no mem");
+    expectedLen = std::min(DEFAULT_BUFFER_SIZE, static_cast<uint32_t>(expectedLen));
+    std::static_pointer_cast<AVDataSrcMemory>(avSharedMemory_)->SetOffset(0);
     int32_t realLen;
-    if (seekable_ == Seekable::SEEKABLE) {
-        FALSE_RETURN_V(static_cast<int64_t>(offset_) < size_, Status::END_OF_STREAM);
-        expectedLen = std::min(static_cast<size_t>(size_ - offset_), expectedLen);
-        expectedLen = std::min(static_cast<size_t>(memory->GetSize()), expectedLen);
-        realLen = dataSrc_->ReadAt(static_cast<int64_t>(offset_), expectedLen, memory);
+    if (size_ == -1) {
+        MEDIA_LOG_D("Read length is " PUBLIC_LOG_U32, expectedLen);
+        realLen = dataSrc_->ReadAt(avSharedMemory_, expectedLen);
     } else {
-        expectedLen = std::min(static_cast<size_t>(memory->GetSize()), expectedLen);
-        realLen = dataSrc_->ReadAt(expectedLen, memory);
+        MEDIA_LOG_D("Read length is " PUBLIC_LOG_U32 ", pos is " PUBLIC_LOG_U64, expectedLen, offset_);
+        realLen = dataSrc_->ReadAt(avSharedMemory_, expectedLen, offset_);
     }
+    MEDIA_LOG_D("ReadAt end");
     if (realLen == MediaDataSourceError::SOURCE_ERROR_IO) {
         MEDIA_LOG_E("read data source error");
         return Status::ERROR_UNKNOWN;
-    }
-    if (realLen == MediaDataSourceError::SOURCE_ERROR_EOF) {
+    } else if (realLen == MediaDataSourceError::SOURCE_ERROR_EOF) {
         MEDIA_LOG_I("eos reached");
         return Status::END_OF_STREAM;
+    } else if (realLen > 0) {
+        offset_ += realLen;
+        MEDIA_LOG_D("offset_ update to " PUBLIC_LOG_U64, offset_);
     }
-    offset_ += realLen;
-    buffer = WrapAVSharedMemory(memory, realLen);
+    buffer->AllocMemory(nullptr, realLen);
+    buffer->GetMemory()->Write(avSharedMemory_->GetBase(), realLen);
     return Status::OK;
 }
 
