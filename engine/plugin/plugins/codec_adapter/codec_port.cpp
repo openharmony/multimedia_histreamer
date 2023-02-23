@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
 #define HST_LOG_TAG "CodecPort"
+
 #include "codec_port.h"
 #include "codec_utils.h"
 #include "foundation/log.h"
@@ -38,6 +38,7 @@ CodecPort::CodecPort(CodecComponentType* component, uint32_t portIndex, const Co
 
 Status CodecPort::Config(TagMap& tagMap)
 {
+    MEDIA_LOG_D("Config Start");
     auto ret = HdiGetParameter(codecComp_, OMX_IndexParamPortDefinition, portDef_);
     FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, Status::ERROR_INVALID_PARAMETER, "HdiGetParameter failed");
     portDef_.format.video.eCompressionFormat = CodingTypeHstToHdi(Plugin::AnyCast<std::string>(tagMap[Tag::MIME]));
@@ -47,7 +48,7 @@ Status CodecPort::Config(TagMap& tagMap)
     portDef_.format.video.nFrameWidth = Plugin::AnyCast<uint32_t>(tagMap[Tag::VIDEO_WIDTH]);
     portDef_.format.video.xFramerate = Plugin::AnyCast<uint32_t>(tagMap[Tag::VIDEO_FRAME_RATE])
         << HDI_FRAME_RATE_MOVE;
-    MEDIA_LOG_D("frame_rate" PUBLIC_LOG_U32, portDef_.format.video.xFramerate);
+    MEDIA_LOG_D("frame_rate: " PUBLIC_LOG_U32, portDef_.format.video.xFramerate);
     ret = HdiSetParameter(codecComp_, OMX_IndexParamPortDefinition, portDef_);
     FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, Status::ERROR_INVALID_PARAMETER, "HdiSetParameter failed");
     return Status::OK;
@@ -55,6 +56,7 @@ Status CodecPort::Config(TagMap& tagMap)
 
 Status CodecPort::QueryParam(PortInfo& portInfo)
 {
+    MEDIA_LOG_D("QueryParam Start");
     auto ret = HdiGetParameter(codecComp_, OMX_IndexParamPortDefinition, portDef_);
     FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, Status::ERROR_INVALID_PARAMETER, "HdiGetParameter failed");
     portInfo.bufferCount = portDef_.nBufferCountActual;

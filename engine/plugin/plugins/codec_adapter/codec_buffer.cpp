@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
 #define HST_LOG_TAG "CodecBuffer"
@@ -32,16 +31,17 @@ CodecBuffer::CodecBuffer(std::shared_ptr<Buffer>& buffer, CompVerInfo& verInfo)
     Init();
 }
 
-Status CodecBuffer::Init()
+void CodecBuffer::Init()
 {
+    MEDIA_LOG_DD("CodecBuffer Init Start");
     omxBuffer_ = std::make_shared<OmxCodecBuffer>();
     omxBuffer_->size = sizeof(OmxCodecBuffer);
     omxBuffer_->version.s.nVersionMajor = verInfo_.compVersion.s.nVersionMajor;
-    omxBuffer_->allocLen = buffer_->GetMemory()->GetCapacity();
+    memory_ = buffer_->GetMemory();
+    omxBuffer_->allocLen = memory_->GetCapacity();
     omxBuffer_->fenceFd = -1; // check use -1 first with no window
     omxBuffer_->pts = 0;
     omxBuffer_->flag = 0;
-    memory_ = buffer_->GetMemory();
     switch (memory_->GetMemoryType()) {
         case MemoryType::SURFACE_BUFFER: {
             omxBuffer_->bufferType = CODEC_BUFFER_TYPE_HANDLE;
@@ -66,10 +66,9 @@ Status CodecBuffer::Init()
             break;
         }
         default:
-            MEDIA_LOG_W("UnKnow MemoryType!");
+            MEDIA_LOG_W("UnKnow MemoryType: " PUBLIC_LOG_D32, (int)memory_->GetMemoryType());
             break;
     }
-    return Status::OK;
 }
 
 std::shared_ptr<OmxCodecBuffer> CodecBuffer::GetOmxBuffer()
@@ -80,12 +79,6 @@ std::shared_ptr<OmxCodecBuffer> CodecBuffer::GetOmxBuffer()
 uint32_t CodecBuffer::GetBufferId()
 {
     return omxBuffer_->bufferId;
-}
-
-Status CodecBuffer::ResetBufferLen()
-{
-    omxBuffer_->bufferLen = 0;
-    return Status::OK;
 }
 
 Status CodecBuffer::Copy(const std::shared_ptr<Plugin::Buffer>& pluginBuffer)
@@ -116,6 +109,7 @@ Status CodecBuffer::Copy(const std::shared_ptr<Plugin::Buffer>& pluginBuffer)
 
 Status CodecBuffer::Rebind(const std::shared_ptr<Plugin::Buffer>& buffer)
 {
+    MEDIA_LOG_I("CodecBuffer Rebind Start");
     omxBuffer_->pts = 0;
     omxBuffer_->flag = 0;
     auto outMem = std::static_pointer_cast<Plugin::SurfaceMemory>(buffer->GetMemory());

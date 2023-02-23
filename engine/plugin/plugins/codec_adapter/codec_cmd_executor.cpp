@@ -12,9 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+
 #define HST_LOG_TAG "CodecCmdExecutor"
+
 #include "codec_cmd_executor.h"
 #include "codec_utils.h"
 #include "foundation/log.h"
@@ -59,6 +60,7 @@ Status CodecCmdExecutor::OnEvent(OMX_EVENTTYPE event, EventInfo* info)
 
 Status CodecCmdExecutor::SendCmd(OMX_COMMANDTYPE cmd, const Plugin::Any& param)
 {
+    MEDIA_LOG_D("SendCmd Start");
     switch (cmd) {
         case OMX_CommandStateSet: {
             resultMap_[cmd] = OMX_StateInvalid;

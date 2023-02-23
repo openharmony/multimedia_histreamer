@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
 #define HST_LOG_TAG "HdiCodecAdapter"
@@ -38,8 +37,7 @@ constexpr size_t DEFAULT_OUT_BUFFER_QUEUE_SIZE = 21;
 // hdi adapter callback
 int32_t HdiCodecAdapter::EventHandler(CodecCallbackType* self, OMX_EVENTTYPE event, EventInfo* info)
 {
-//    auto hdiAdapter = reinterpret_cast<HdiCodecAdapter*>(info->appData);
-    MEDIA_LOG_I("appData: " PUBLIC_LOG_D64 ", eEvent: " PUBLIC_LOG_D32
+    MEDIA_LOG_I("Start, appData: " PUBLIC_LOG_D64 ", eEvent: " PUBLIC_LOG_D32
                 ", nData1: " PUBLIC_LOG_U32 ", nData2: " PUBLIC_LOG_U32,
                 info->appData, static_cast<int>(event), info->data1, info->data2);
     auto hdiAdapter = reinterpret_cast<HdiCodecAdapter*>(info->appData);
@@ -102,7 +100,7 @@ HdiCodecAdapter::~HdiCodecAdapter()
 Status HdiCodecAdapter::Init()
 {
     MEDIA_LOG_D("codec adapter init begin");
-    auto firstDotPos = pluginName_.find_first_of('.');
+    auto firstDotPos = pluginName_.find_first_of('.'); // pluginName_: HdiCodecAdapter.OMX.rk.video_decoder.avc
     MEDIA_LOG_D("pluginName_: " PUBLIC_LOG_S, pluginName_.c_str());
     if (firstDotPos == std::string::npos) {
         MEDIA_LOG_E("create codec handle error with plugin name " PUBLIC_LOG_S ", which is wrong format",
@@ -160,6 +158,7 @@ Status HdiCodecAdapter::Deinit()
 
 Status HdiCodecAdapter::Prepare() 
 {
+    MEDIA_LOG_D("Prepare Start");
     FALSE_RETURN_V_MSG_E(ChangeState(OMX_StateIdle) == Status::OK,
         Status::ERROR_WRONG_STATE, "Change omx state to idle failed");
     FALSE_RETURN_V_MSG_E(WaitForState(OMX_StateIdle) == Status::OK,
@@ -169,7 +168,12 @@ Status HdiCodecAdapter::Prepare()
     outBufPool_ = std::make_shared<CodecBufferPool>(codecComp_, verInfo_, outPortIndex_);
     OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> inBufQue("TempInBufferQue", inBufferCnt_);
     for (uint32_t i = 0; i < inBufferCnt_; i++) {
-        inBufQue.Push(Buffer::CreateDefaultBuffer(BufferMetaType::VIDEO, inBufferSize_, shaAlloc_));
+        auto buf = std::make_shared<Buffer>(BufferMetaType::VIDEO);
+        if (buf == nullptr || buf->AllocMemory(shaAlloc_, inBufferSize_) == nullptr) {
+            MEDIA_LOG_I("alloc buffer " PUBLIC_LOG_U32 " fail, i: ", static_cast<uint32_t>(i));
+            continue;
+        }
+        inBufQue.Push(buf);
     }
     inBufPool_->UseBuffers(inBufQue, MemoryType::SHARE_MEMORY);
     outBufPool_->UseBuffers(outBufQue_, MemoryType::SURFACE_BUFFER);
@@ -179,6 +183,7 @@ Status HdiCodecAdapter::Prepare()
 
 Status HdiCodecAdapter::Reset()
 {
+    MEDIA_LOG_D("Reset Start");
     FALSE_RETURN_V_MSG_E(ChangeState(OMX_StateIdle) == Status::OK,
         Status::ERROR_WRONG_STATE, "Change omx state to idle failed");
     FALSE_RETURN_V_MSG_E(WaitForState(OMX_StateIdle) == Status::OK,
@@ -299,6 +304,7 @@ Status HdiCodecAdapter::SetParameter(Plugin::Tag tag, const ValueType &value)
 
 Status HdiCodecAdapter::ConfigOmx()
 {
+    MEDIA_LOG_D("ConfigOmx Start");
     TagMap tagMap;
     tagMap.Insert<Tag::MIME>(ComponentNameToMime(componentName_));
     tagMap.Insert<Tag::VIDEO_WIDTH>(width_);
@@ -313,6 +319,7 @@ Status HdiCodecAdapter::ConfigOmx()
     inCodecPort_->QueryParam(portInfo);
     inBufferCnt_ = portInfo.bufferCount;
     inBufferSize_ = portInfo.bufferSize;
+    MEDIA_LOG_D("inBufCnt: " PUBLIC_LOG_D32 ", inBufSize: " PUBLIC_LOG_D32, inBufferCnt_, inBufferSize_);
     if (!portInfo.enabled) {
         codecCmdExecutor_->SendCmd(OMX_CommandPortEnable, inPortIndex_);
         (void) codecCmdExecutor_->WaitCmdResult(OMX_CommandPortEnable, inPortIndex_);
@@ -320,6 +327,7 @@ Status HdiCodecAdapter::ConfigOmx()
     outCodecPort_->QueryParam(portInfo);
     outBufferCnt_ = portInfo.bufferCount;
     outBufferSize_ = portInfo.bufferSize;
+    MEDIA_LOG_D("outBufCnt: " PUBLIC_LOG_D32 ", outBufSize: " PUBLIC_LOG_D32, outBufferCnt_, outBufferSize_);
     if (!portInfo.enabled) {
         codecCmdExecutor_->SendCmd(OMX_CommandPortEnable, outPortIndex_);
         (void) codecCmdExecutor_->WaitCmdResult(OMX_CommandPortEnable, outPortIndex_);
@@ -336,6 +344,7 @@ std::shared_ptr<Plugin::Allocator> HdiCodecAdapter::GetAllocator()
 
 Status HdiCodecAdapter::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs)
 {
+    MEDIA_LOG_DD("QueueInputBuffer Start");
     if (inputBuffer->IsEmpty() && !(inputBuffer->flag & BUFFER_FLAG_EOS)) {
         MEDIA_LOG_E("empty input buffer without eos flag");
         return Status::ERROR_INVALID_DATA;
@@ -345,7 +354,9 @@ Status HdiCodecAdapter::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuf
         inBufQue_.push_back(inputBuffer);
         MEDIA_LOG_D("QueueInputBuffer end, inBufQue_.size: " PUBLIC_LOG_ZU, inBufQue_.size());
     }
-    HandleFrame();
+    if (!isFlushing_) {
+        HandleFrame();
+    }
     return Status::OK;
 }
 
@@ -356,7 +367,6 @@ void HdiCodecAdapter::HandleFrame()
     while (inBufPool_->EmptyBufferCount()) {
         std::shared_ptr<Buffer> inputBuffer = nullptr;
         std::shared_ptr<CodecBuffer> codecBuffer = nullptr;
-        uint32_t inBufferId = 0;
         {
             OSAL::ScopedLock l(lockInputBuffers_);
             if (inBufQue_.empty()) {
@@ -364,15 +374,14 @@ void HdiCodecAdapter::HandleFrame()
             }
             inputBuffer = inBufQue_.front();
             codecBuffer = inBufPool_->GetBuffer();
-            if (!codecBuffer) {
-                return;
-            }
+            FALSE_RETURN(codecBuffer != nullptr);
             inBufQue_.pop_front();
         }
         FALSE_RETURN_MSG(codecBuffer->Copy(inputBuffer) == Status::OK,
                          "Copy inBuffer into codecBuffer fail");
         auto ret = HdiEmptyThisBuffer(codecComp_, codecBuffer->GetOmxBuffer().get());
-        FALSE_LOG_MSG(ret == HDF_SUCCESS, "call EmptyThisBuffer() error, bufferId: " PUBLIC_LOG_D32, inBufferId);
+        FALSE_LOG_MSG(ret == HDF_SUCCESS, "call EmptyThisBuffer() error, ret: " PUBLIC_LOG_S,
+                      HdfStatus2String(ret).c_str());
         NotifyInputBufferDone(inputBuffer);
     }
     MEDIA_LOG_DD("handle frame end");
@@ -381,7 +390,7 @@ void HdiCodecAdapter::HandleFrame()
 Status HdiCodecAdapter::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
 {
     outBufQue_.Push(outputBuffers);
-    if (curState_ == OMX_StateExecuting) {
+    if (curState_ == OMX_StateExecuting && !isFlushing_) {
         FillAllTheOutBuffer();
     }
     MEDIA_LOG_DD("QueueOutputBuffer end");
@@ -423,9 +432,11 @@ bool HdiCodecAdapter::FillAllTheOutBuffer()
 {
     MEDIA_LOG_DD("FillAllTheBuffer begin");
     if (isFirstCall_) {
+        MEDIA_LOG_I("isFirstCall: " PUBLIC_LOG_D32, isFirstCall_);
         isFirstCall_ = false;
         for (uint32_t i = 0; i < outBufferCnt_; ++i) {
             auto codecBuffer = outBufPool_->GetBuffer();
+            FALSE_RETURN_V_MSG_E(codecBuffer != nullptr, false, "Get codecBuffer failed");
             auto ret = HdiFillThisBuffer(codecComp_, codecBuffer->GetOmxBuffer().get());
             FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, false, "call FillThisBuffer() error, ret: " PUBLIC_LOG_S
                 ", isFirstCall: " PUBLIC_LOG_D32, HdfStatus2String(ret).c_str(), isFirstCall_);

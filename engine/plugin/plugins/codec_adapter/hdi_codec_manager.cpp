@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+
+#define HST_LOG_TAG "HdiCodecManager"
+
 #include "hdi_codec_manager.h"
 #include <hdf_base.h>
 #include "common/plugin_caps_builder.h"
@@ -20,25 +23,32 @@
 #include "foundation/log.h"
 #include "hdi_codec_adapter.h"
 
-namespace OHOS {
-namespace Media {
-namespace Plugin {
-namespace CodecAdapter {
+namespace {
+// register plugins
+using namespace OHOS::Media::Plugin;
+using namespace CodecAdapter;
 std::shared_ptr<CodecManager>  g_codecMgr {nullptr};
 Status RegisterHdiAdapterPlugins(const std::shared_ptr<OHOS::Media::Plugin::Register>& reg)
 {
+    MEDIA_LOG_I("RegisterHdiAdapterPlugins Start");
     g_codecMgr = std::make_shared<HdiCodecManager>();
     return g_codecMgr->RegisterCodecPlugins(reg);
 }
 
 void UnRegisterHdiAdapterPlugins()
 {
+    MEDIA_LOG_I("UnRegisterHdiAdapterPlugins Start");
     g_codecMgr->UnRegisterCodecPlugins();
     g_codecMgr = nullptr;
 }
+} // namespace
 
-PLUGIN_DEFINITION(HdiCodecAdapter, LicenseType::APACHE_V2, RegisterHdiAdapterPlugins, UnRegisterHdiAdapterPlugins);
+PLUGIN_DEFINITION(CodecAdapter, LicenseType::APACHE_V2, RegisterHdiAdapterPlugins, UnRegisterHdiAdapterPlugins);
 
+namespace OHOS {
+namespace Media {
+namespace Plugin {
+namespace CodecAdapter {
 HdiCodecManager::HdiCodecManager()
 {
     Init();
@@ -52,6 +62,7 @@ HdiCodecManager::~HdiCodecManager()
 int32_t HdiCodecManager::CreateComponent(const Plugin::Any& component, uint32_t& id, std::string name,
                                          const Plugin::Any& appData, const Plugin::Any& callbacks)
 {
+    MEDIA_LOG_I("CreateComponent Start");
     if (!mgr_) {
         Init();
         FALSE_RETURN_V_MSG(mgr_ != nullptr, HDF_FAILURE, "mgr is nullptr");
@@ -64,6 +75,7 @@ int32_t HdiCodecManager::CreateComponent(const Plugin::Any& component, uint32_t&
 
 int32_t HdiCodecManager::DestroyComponent(const Plugin::Any& component, uint32_t id)
 {
+    MEDIA_LOG_I("DestroyComponent Start");
     FALSE_RETURN_V_MSG(mgr_ != nullptr, HDF_FAILURE, "mgr_ is nullptr");
     (void)component;
     return mgr_->DestroyComponent(id);
@@ -71,6 +83,7 @@ int32_t HdiCodecManager::DestroyComponent(const Plugin::Any& component, uint32_t
 
 Status HdiCodecManager::RegisterCodecPlugins(const std::shared_ptr<OHOS::Media::Plugin::Register>& reg)
 {
+    MEDIA_LOG_I("RegisterCodecPlugins Start");
     std::string packageName = "HdiCodecAdapter";
     if (!mgr_) {
         MEDIA_LOG_E("Codec package " PUBLIC_LOG_S " has no valid component manager", packageName.c_str());
@@ -97,22 +110,26 @@ Status HdiCodecManager::RegisterCodecPlugins(const std::shared_ptr<OHOS::Media::
 
 Status HdiCodecManager::UnRegisterCodecPlugins()
 {
+    MEDIA_LOG_I("UnRegisterCodecPlugins Start");
     return Status::OK;
 }
 
 void HdiCodecManager::Init()
 {
+    MEDIA_LOG_I("Init Start");
     mgr_ = GetCodecComponentManager();
 }
 
 void HdiCodecManager::Reset()
 {
+    MEDIA_LOG_I("Reset Start");
     CodecComponentManagerRelease();
     mgr_ = nullptr;
 }
 
 void HdiCodecManager::AddHdiCap(const CodecCompCapability& hdiCap)
 {
+    MEDIA_LOG_I("AddHdiCap Start");
     CodecCapability codecCapability;
     CapabilityBuilder incapBuilder;
     CapabilityBuilder outcapBuilder;
@@ -135,6 +152,7 @@ void HdiCodecManager::AddHdiCap(const CodecCompCapability& hdiCap)
 
 void HdiCodecManager::InitCaps()
 {
+    MEDIA_LOG_I("InitCaps Start");
     auto len = mgr_->GetComponentNum();
     CodecCompCapability hdiCaps[len];
     auto ret = mgr_->GetComponentCapabilityList(hdiCaps, len);

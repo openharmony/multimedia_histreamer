@@ -18,7 +18,7 @@ declare_args() {
   multimedia_histreamer_enable_plugin_ffmpeg_adapter = true
 
   # hdi codec adapter, only for std device (Omx has not been implemented)
-  multimedia_histreamer_enable_plugin_codec_adapter = true
+  multimedia_histreamer_enable_plugin_codec_adapter = false
 
   # only tested on std device
   multimedia_histreamer_enable_plugin_http_source = true
@@ -75,6 +75,7 @@ if (!defined(ohos_lite) || !ohos_lite) {
   multimedia_histreamer_enable_plugin_std_stream_source = true
   multimedia_histreamer_enable_video = true
   multimedia_histreamer_enable_plugin_std_video_surface_sink = true
+  multimedia_histreamer_enable_plugin_codec_adapter = true
 } else {
   hst_is_lite_sys = true
   multimedia_histreamer_enable_plugin_hdi_adapter = true

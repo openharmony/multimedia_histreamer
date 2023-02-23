@@ -37,8 +37,6 @@ public:
 
     uint32_t GetBufferId();
 
-    Status ResetBufferLen();
-
     Status Copy(const std::shared_ptr<Plugin::Buffer>& Buffer);
 
     Status Rebind(const std::shared_ptr<Plugin::Buffer>& buffer); // 重新申请内存时， CodecBuffer都要重新创建
@@ -46,7 +44,7 @@ public:
     Status Unbind(std::shared_ptr<Plugin::Buffer>& buffer, const OmxCodecBuffer* omxBuffer);
 
 private:
-    Status Init();
+    void Init();
 
     std::shared_ptr<Buffer> buffer_;
     CompVerInfo verInfo_ {};

@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
 #define HST_LOG_TAG "CodecBufferPool"
@@ -32,7 +31,7 @@ constexpr size_t DEFAULT_BUFFER_ID_QUEUE_SIZE = 21;
 
 CodecBufferPool::CodecBufferPool(CodecComponentType* compType, CompVerInfo& verInfo, uint32_t portIndex)
     : codecComp_(compType), verInfo_(verInfo), portIndex_(portIndex),
-      freeBufferId_("hdiFreeInBufferId", DEFAULT_BUFFER_ID_QUEUE_SIZE)
+      freeBufferId_("hdiFreeBufferId", DEFAULT_BUFFER_ID_QUEUE_SIZE)
 {
 }
 
@@ -41,32 +40,31 @@ Status CodecBufferPool::UseBuffers(OHOS::Media::BlockingQueue<std::shared_ptr<Bu
 {
     MEDIA_LOG_D("UseBuffers begin");
     FALSE_RETURN_V_MSG_E(ConfigBufType(bufMemType) == Status::OK, Status::ERROR_INVALID_DATA, "ConfigBufType failed");
-    for (uint32_t i = 0; i < bufQue.Size(); i++) {
+    auto count = bufQue.Size();
+    for (uint32_t i = 0; i < count; i++) {
         auto pluginBuffer = bufQue.Pop();
         auto codecBuffer = std::make_shared<CodecBuffer>(pluginBuffer, verInfo_);
-        FALSE_RETURN_V_MSG(codecBuffer == nullptr, Status::ERROR_INVALID_DATA, "Create codec buffer failed");
+        FALSE_RETURN_V_MSG(codecBuffer != nullptr, Status::ERROR_INVALID_DATA, "Create codec buffer failed");
         auto err = codecComp_->UseBuffer(codecComp_, portIndex_, codecBuffer->GetOmxBuffer().get());
         if (err != HDF_SUCCESS) {
             MEDIA_LOG_E("failed to UseBuffer");
             return Status::ERROR_INVALID_DATA;
         }
-        // 这一步是否是必须的，待验证，如果能够去掉最好了
-        codecBuffer->ResetBufferLen();
         MEDIA_LOG_D("UseBuffer returned bufferID: " PUBLIC_LOG_D32 ", PortIndex: " PUBLIC_LOG_D32,
                     (int)codecBuffer->GetBufferId(), portIndex_);
         codecBufMap_.emplace(std::make_pair(codecBuffer->GetBufferId(), codecBuffer));
         freeBufferId_.Push(codecBuffer->GetBufferId());
     }
-    MEDIA_LOG_D("UseBuffers end");
+    MEDIA_LOG_D("UseBuffers end, freeBufId.size: " PUBLIC_LOG_D32 ", portIndex: " PUBLIC_LOG_U32,
+                freeBufferId_.Size(), portIndex_);
     return Status::OK;
 }
 
 Status CodecBufferPool::FreeBuffers()
 {
-    MEDIA_LOG_D("Free omx buffer begin");
+    MEDIA_LOG_D("FreeBuffers begin");
     for (auto& codecBuf : codecBufMap_) {
         auto& codecBuffer = codecBuf.second;
-        codecBuffer->ResetBufferLen(); // 这里是否必须执行？去掉是否影响程序执行！待测试
         auto ret = codecComp_->FreeBuffer(codecComp_, portIndex_, codecBuffer->GetOmxBuffer().get());
         FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, TransHdiRetVal2Status(ret),
             "codec component free buffer failed, omxBufId: " PUBLIC_LOG_U32, codecBuffer->GetBufferId());
@@ -110,13 +108,11 @@ Status CodecBufferPool::UseBufferDone(uint32_t bufId)
     return Status::OK;
 }
 
-std::shared_ptr<CodecBuffer> CodecBufferPool::GetBuffer(uint32_t bufferId)
+std::shared_ptr<CodecBuffer> CodecBufferPool::GetBuffer(int32_t bufferId)
 {
     auto bufId = bufferId >= 0 ? bufferId : freeBufferId_.Pop(1);
     auto iter = codecBufMap_.find(bufId);
-    if (iter == codecBufMap_.end()) {
-        return nullptr;
-    }
+    FALSE_RETURN_V_MSG_E(iter != codecBufMap_.end(), nullptr, "No value found in BufMap");
     return iter->second;
 }
 } // namespace CodecAdapter

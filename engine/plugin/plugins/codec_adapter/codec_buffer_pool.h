@@ -44,7 +44,7 @@ public:
 
     Status UseBufferDone(uint32_t bufId); // 根据该bufferId，重置omxBuffer对应的CodecBuffer
 
-    std::shared_ptr<CodecBuffer> GetBuffer(uint32_t bufferId = -1);
+    std::shared_ptr<CodecBuffer> GetBuffer(int32_t bufferId = -1);
 
 private:
     Status ConfigBufType(const MemoryType& bufMemType);
@@ -52,7 +52,6 @@ private:
 private:
     CodecComponentType* codecComp_ {nullptr};
     CompVerInfo verInfo_;
-    uint32_t bufSize_;
 
     uint32_t portIndex_;
     OHOS::Media::BlockingQueue<uint32_t> freeBufferId_;
