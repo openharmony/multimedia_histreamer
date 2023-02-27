@@ -34,7 +34,7 @@ public:
 
     ~TypeFinder() override;
 
-    void Init(std::string uriSuffix, size_t mediaDataSize, std::function<bool(uint64_t, size_t)> checkRange,
+    void Init(std::string uri, size_t mediaDataSize, std::function<bool(uint64_t, size_t)> checkRange,
               std::function<bool(uint64_t, size_t, AVBufferPtr&)> peekRange);
 
     std::string FindMediaType();
@@ -56,14 +56,14 @@ private:
 
     bool IsOffsetValid(int64_t offset) const;
 
-    bool IsSniffNeeded(std::string suffix);
+    bool IsSniffNeeded(std::string uri);
 
     bool GetPlugins();
 
     void SortPlugins(const std::string& uriSuffix);
 
     bool sniffNeeded_;
-    std::string uriSuffix_;
+    std::string uri_;
     size_t mediaDataSize_;
     std::string pluginName_;
     std::vector<std::shared_ptr<Plugin::PluginInfo>> plugins_;

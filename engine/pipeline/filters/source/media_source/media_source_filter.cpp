@@ -270,12 +270,8 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
 {
     MEDIA_LOG_D("IN");
     SYNC_TRACER();
-    SourceType sourceType = source->GetSourceType();
     std::shared_ptr<Plugin::Meta> meta = std::make_shared<Plugin::Meta>();
-    if (sourceType == SourceType::SOURCE_TYPE_URI) {
-        std::string suffix = GetUriSuffix(source->GetSourceUri());
-        meta->SetString(Media::Plugin::MetaID::MEDIA_FILE_EXTENSION, suffix);
-    }
+    meta->SetString(Media::Plugin::MetaID::MEDIA_FILE_URI, source->GetSourceUri());
     Seekable seekable = plugin_->GetSeekable();
     FALSE_RETURN_V_MSG_E(seekable != Plugin::Seekable::INVALID, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
                          "media source Seekable must be SEEKABLE or UNSEEKABLE !");

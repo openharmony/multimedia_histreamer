@@ -25,6 +25,16 @@ namespace OHOS {
 namespace Media {
 namespace Pipeline {
 namespace {
+std::string GetUriSuffix(const std::string& uri)
+{
+    std::string suffix {""};
+    auto const pos = uri.find_last_of('.');
+    if (pos != std::string::npos) {
+        suffix = uri.substr(pos + 1);
+    }
+    return suffix;
+}
+
 bool IsPluginSupportedExtension(Plugin::PluginInfo& pluginInfo, const std::string& extension)
 {
     if (pluginInfo.pluginType != Plugin::PluginType::DEMUXER) {
@@ -48,13 +58,11 @@ void ToLower(std::string& str)
     std::transform(str.begin(), str.end(), str.begin(), [](unsigned char ch) { return std::tolower(ch); });
 }
 
-// lowercase suffix
-std::vector<std::string> g_findTypeNeededForSameSuffix = {"aac"};
 } // namespace
 
 TypeFinder::TypeFinder()
     : sniffNeeded_(true),
-      uriSuffix_(),
+      uri_(),
       mediaDataSize_(0),
       pluginName_(),
       plugins_(),
@@ -75,29 +83,28 @@ TypeFinder::~TypeFinder()
     }
 }
 
-bool TypeFinder::IsSniffNeeded(std::string suffix)
+bool TypeFinder::IsSniffNeeded(std::string uri)
 {
-    ToLower(suffix);
-    bool suffixChanged = uriSuffix_ != suffix;
-    if (suffixChanged || pluginRegistryChanged_) {
+    ToLower(uri);
+    bool uriChanged = uri_ != uri;
+    if (uriChanged || pluginRegistryChanged_ || uri.empty()) {
         return true;
     }
-    return std::any_of(g_findTypeNeededForSameSuffix.begin(), g_findTypeNeededForSameSuffix.end(),
-                       [&suffix](const std::string& uriSuffix) { return suffix == uriSuffix; });
+    return uriChanged;
 }
 
-void TypeFinder::Init(std::string uriSuffix, size_t mediaDataSize, std::function<bool(uint64_t, size_t)> checkRange,
+void TypeFinder::Init(std::string uri, size_t mediaDataSize, std::function<bool(uint64_t, size_t)> checkRange,
                       std::function<bool(uint64_t, size_t, AVBufferPtr&)> peekRange)
 {
     mediaDataSize_ = mediaDataSize;
     checkRange_ = std::move(checkRange);
     peekRange_ = std::move(peekRange);
-    sniffNeeded_ = IsSniffNeeded(uriSuffix);
+    sniffNeeded_ = IsSniffNeeded(uri);
     if (sniffNeeded_) {
-        uriSuffix_.swap(uriSuffix);
+        uri_.swap(uri);
         pluginName_.clear();
         if (GetPlugins()) {
-            SortPlugins(uriSuffix_);
+            SortPlugins(GetUriSuffix(uri_));
         } else {
             MEDIA_LOG_E("TypeFinder Init failed due to no demuxer plugins...");
         }
@@ -203,8 +210,12 @@ std::string TypeFinder::SniffMediaType()
 std::string TypeFinder::GuessMediaType() const
 {
     std::string pluginName;
+    std::string uriSuffix = GetUriSuffix(uri_);
+    if (uriSuffix.empty()) {
+        return "";
+    }
     for (const auto& pluginInfo : plugins_) {
-        if (IsPluginSupportedExtension(*pluginInfo, uriSuffix_)) {
+        if (IsPluginSupportedExtension(*pluginInfo, uriSuffix)) {
             pluginName = pluginInfo->name;
             break;
         }

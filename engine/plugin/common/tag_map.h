@@ -99,7 +99,7 @@ public:
         tag == Tag::VIDEO_CAPTURE_RATE, double);
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::MIME or
-        tag == Tag::MEDIA_FILE_EXTENSION or
+        tag == Tag::MEDIA_FILE_URI or
         tag == Tag::MEDIA_TITLE or
         tag == Tag::MEDIA_ARTIST or
         tag == Tag::MEDIA_LYRICIST or

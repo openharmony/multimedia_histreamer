@@ -71,7 +71,7 @@ const std::map<Plugin::Tag, std::tuple<const char*, const Plugin::ValueType&, co
     {Plugin::Tag::MEDIA_FILE_SIZE, {"file_size",               g_u64Def,           "uint64_t"}},
     {Plugin::Tag::MEDIA_SEEKABLE, {"media_seekable",           g_seekableDef,      "Seekable"}},
     {Plugin::Tag::MEDIA_BITRATE, {"bit_rate",                  g_d64Def,           "int64_t"}},
-    {Plugin::Tag::MEDIA_FILE_EXTENSION, {"file_ext",           g_emptyString,      "string"}},
+    {Plugin::Tag::MEDIA_FILE_URI, {"file_uri",                 g_emptyString,      "string"}},
     {Plugin::Tag::MEDIA_CODEC_CONFIG, {"codec_config",         g_vecBufDef,        "std::vector<uint8_t>"}},
     {Plugin::Tag::MEDIA_POSITION, {"position",                 g_u64Def,           "uint64_t"}},
     {Plugin::Tag::AUDIO_CHANNELS, {"channels",                 g_u32Def,           "uint32_t"}},

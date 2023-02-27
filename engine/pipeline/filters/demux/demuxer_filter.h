@@ -141,7 +141,7 @@ private:
     void ReportVideoSize(const Plugin::MediaInfoHelper& mediaInfo);
 
     Plugin::Seekable seekable_;
-    std::string uriSuffix_;
+    std::string uri_;
     uint64_t mediaDataSize_;
     std::shared_ptr<OSAL::Task> task_;
     std::shared_ptr<TypeFinder> typeFinder_;
