@@ -1,0 +1,74 @@
+# Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+import("//foundation/multimedia/histreamer/config.gni")
+group("plugin_codec_adapter") {
+  deps = []
+  if (hst_is_lite_sys) {
+    print("std hdi codec adapter is not available on lite systems")
+  } else {
+    deps += [ ":histreamer_plugin_CodecAdapter" ]
+  }
+}
+
+config("plugin_codec_adapter_config") {
+  include_dirs = [
+    "//drivers/hdf_core/adapter/uhdf2/osal/include/",
+    "//drivers/hdf_core/framework/include/utils/",
+    "//drivers/hdf_core/adapter/uhdf2/osal/include/",
+    "//drivers/hdf_core/framework/include/utils/",
+    "//drivers/peripheral/base/",
+    "//drivers/peripheral/codec/hal/include/",
+    "//drivers/peripheral/codec/interfaces/include/",
+    "//drivers/peripheral/display/interfaces/include/",
+    "//foundation/multimedia/histreamer/engine/",
+    "//foundation/multimedia/histreamer/engine/foundation/",
+    "//foundation/multimedia/histreamer/engine/plugin/",
+    "//foundation/multimedia/histreamer/engine/utils/",
+    "//third_party/openmax/api/1.1.2/",
+  ]
+}
+
+source_set("std_plugin_codec_adapter") {
+  sources = [
+    "codec_buffer.cpp",
+    "codec_buffer_pool.cpp",
+    "codec_cmd_executor.cpp",
+    "codec_port.cpp",
+    "codec_utils.cpp",
+    "hdi_codec_adapter.cpp",
+    "hdi_codec_manager.cpp",
+  ]
+  public_deps = [ "foundation:histreamer_foundation" ]
+  public_configs = [
+    ":plugin_codec_adapter_config",
+    "histreamer:histreamer_presets",
+  ]
+}
+
+if (hst_is_lite_sys) {
+  print("std hdi codec adapter is not available on lite systems")
+} else {
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer_plugin_CodecAdapter") {
+    sanitize = {
+      cfi = true
+      debug = false
+    }
+    deps = [ ":std_plugin_codec_adapter" ]
+    external_deps = [ "drivers_peripheral_codec:libcodec_hdi_omx_client" ]
+    relative_install_dir = "media/histreamer_plugins"
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
+  }
+}

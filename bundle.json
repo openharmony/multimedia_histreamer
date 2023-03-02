@@ -35,7 +35,8 @@
           "multimedia_histreamer_enable_plugin_avs3_audio_decoder",
           "multimedia_histreamer_enable_recorder",
           "multimedia_histreamer_enable_video",
-          "multimedia_histreamer_enable_avs3da"
+          "multimedia_histreamer_enable_avs3da",
+          "multimedia_histreamer_enable_plugin_codec_adapter"
         ],
         "adapted_system_type": [
             "mini",

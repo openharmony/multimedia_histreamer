@@ -31,8 +31,6 @@ class SurfaceMemory : public Memory {
 public:
     ~SurfaceMemory();
 
-    size_t GetCapacity() override;
-
     sptr<SurfaceBuffer> GetSurfaceBuffer();
 
     int32_t GetFlushFence();

@@ -652,6 +652,7 @@ Status HdiAdapter::ConfigOmxPortDefine(PortIndex portIndex)
     MEDIA_LOG_I("eCompressionFormat = " PUBLIC_LOG_D32 ", eColorFormat = " PUBLIC_LOG_D32,
                 portDef.format.video.eCompressionFormat, portDef.format.video.eColorFormat);
     if (portIndex == PortIndex::PORT_INDEX_INPUT) {
+        // OMX.rk.video_decoder.avc 做一个和名称的映射不够，插件定义里面应该还需要一个tag
         portDef.format.video.eCompressionFormat = OMX_VIDEO_CodingAVC;
     } else {
         switch (pixelFormat_) {

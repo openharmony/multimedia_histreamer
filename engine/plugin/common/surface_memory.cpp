@@ -107,15 +107,6 @@ uint8_t* SurfaceMemory::GetRealAddr() const
     }
     return nullptr;
 }
-
-size_t SurfaceMemory::GetCapacity()
-{
-    OSAL::ScopedLock l(memMutex_);
-    if (surfaceBuffer_) {
-        return static_cast<size_t>(surfaceBuffer_->GetSize());
-    }
-    return 0;
-}
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

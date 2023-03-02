@@ -41,6 +41,7 @@ const char* const MEDIA_MIME_AUDIO_AVS3DA = "audio/avs-3da";
 
 const char* const MEDIA_MIME_VIDEO_RAW = "video/raw";
 const char* const MEDIA_MIME_VIDEO_H264 = "video/avc";
+const char* const MEDIA_MIME_VIDEO_H265 = "video/hevc";
 const char* const MEDIA_MIME_VIDEO_MPEG4 = "video/mpeg4";
 
 const char* const MEDIA_MIME_CONTAINER_MP4 = "video/mp4";

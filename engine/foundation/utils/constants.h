@@ -50,6 +50,7 @@ extern const char* const MEDIA_MIME_AUDIO_AVS3DA;
 // video mime
 extern const char* const MEDIA_MIME_VIDEO_RAW;
 extern const char* const MEDIA_MIME_VIDEO_H264;
+extern const char* const MEDIA_MIME_VIDEO_H265;
 extern const char* const MEDIA_MIME_VIDEO_MPEG4;
 
 // container mime
