@@ -51,6 +51,8 @@ public:
     Status SetDataCallback(DataCallback* dataCallback) override;
 
 private:
+    Status InitPortIndex();
+    Status FreeBuffers();
     void HandleFrame();
     bool isFirstCall_ = true;
     bool FillAllTheOutBuffer();

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define HDI_REFACTOR_ENABLE 0
+#define HDI_REFACTOR_ENABLE 1
 #include "plugin_register.h"
 
 #include <algorithm>

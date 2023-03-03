@@ -28,6 +28,7 @@ namespace CodecAdapter {
 CodecCmdExecutor::CodecCmdExecutor(CodecComponentType* component, uint32_t inPortIndex)
     : codecComp_(component), inPortIndex_(inPortIndex)
 {
+    MEDIA_LOG_I("ctor called");
     resultMap_[OMX_CommandStateSet] = OMX_StateInvalid;
     resultMap_[OMX_CommandFlush] = std::pair<Result, Result>{Result::INVALID, Result::INVALID};
     resultMap_[OMX_CommandPortEnable] = std::pair<Result, Result>{Result::INVALID, Result::INVALID};
@@ -36,7 +37,7 @@ CodecCmdExecutor::CodecCmdExecutor(CodecComponentType* component, uint32_t inPor
 
 Status CodecCmdExecutor::OnEvent(OMX_EVENTTYPE event, EventInfo* info)
 {
-    MEDIA_LOG_I("eEvent: " PUBLIC_LOG_D32 ", nData1: " PUBLIC_LOG_U32 ", nData2: " PUBLIC_LOG_U32,
+    MEDIA_LOG_I("OnEvent begin - eEvent: " PUBLIC_LOG_D32 ", nData1: " PUBLIC_LOG_U32 ", nData2: " PUBLIC_LOG_U32,
         static_cast<int>(event), info->data1, info->data2);
     switch (event) {
         case OMX_EventCmdComplete:
@@ -54,7 +55,7 @@ Status CodecCmdExecutor::OnEvent(OMX_EVENTTYPE event, EventInfo* info)
         default:
             break;
     }
-    MEDIA_LOG_D("EventHandler-callback end");
+    MEDIA_LOG_D("OnEvent end");
     return Status::OK;
 }
 
@@ -94,7 +95,7 @@ Status CodecCmdExecutor::SendCmd(OMX_COMMANDTYPE cmd, const Plugin::Any& param)
 bool CodecCmdExecutor::WaitCmdResult(OMX_COMMANDTYPE cmd, const Plugin::Any& param)
 {
     OSAL::ScopedLock lock(mutex_);
-    MEDIA_LOG_D("lastCmd: " PUBLIC_LOG_D32 ", cmd:" PUBLIC_LOG_D32, lastCmd_,  static_cast<int32_t>(cmd));
+    MEDIA_LOG_D("WaitCmdResult lastCmd: " PUBLIC_LOG_D32 ", cmd:" PUBLIC_LOG_D32, lastCmd_,  static_cast<int32_t>(cmd));
     bool result {true};
     static constexpr int32_t timeout = 2000; // ms
     switch (cmd) {
@@ -179,11 +180,13 @@ void CodecCmdExecutor::HandleEventCmdComplete(uint32_t data1, uint32_t data2)
 
 void CodecCmdExecutor::HandleEventPortSettingsChanged(OMX_U32 data1, OMX_U32 data2)
 {
+    MEDIA_LOG_I("HandleEventPortSettingsChanged begin");
     OSAL::ScopedLock lock(mutex_);
 }
 
 void CodecCmdExecutor::HandleEventBufferFlag(OMX_U32 data1, OMX_U32 data2)
 {
+    MEDIA_LOG_I("HandleEventBufferFlag begin");
     OSAL::ScopedLock lock(mutex_);
     if (data1 == 1 && (data2 & OMX_BUFFERFLAG_EOS)) {
         MEDIA_LOG_D("it is eos, wait buffer eos");
@@ -192,6 +195,7 @@ void CodecCmdExecutor::HandleEventBufferFlag(OMX_U32 data1, OMX_U32 data2)
 
 void CodecCmdExecutor::HandleEventError(OMX_U32 data1)
 {
+    MEDIA_LOG_I("HandleEventError begin");
     OSAL::ScopedLock lock(mutex_);
     (void)data1;
     lastCmd_ = -1;
