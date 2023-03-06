@@ -35,26 +35,6 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class MetaBundle {
-public:
-    MetaBundle() = default;
-    ~MetaBundle() = default;
-    std::shared_ptr<const Plugin::Meta> GetGlobalMeta()
-    {
-        return globalMeta_;
-    }
-
-    std::shared_ptr<const Plugin::Meta> GeTrackMeta(int32_t trackId);
-
-    void UpdateGlobalMeta(const Plugin::Meta& meta);
-
-    void UpdateTrackMeta(const Plugin::Meta& meta);
-
-private:
-    std::shared_ptr<Plugin::Meta> globalMeta_;
-    std::vector<std::shared_ptr<Plugin::Meta>> trackMeta_;
-};
-
 class PipelineCore : public Pipeline {
 public:
     explicit PipelineCore(const std::string& name = "pipeline_core");
@@ -149,12 +129,6 @@ public:
     void SetSyncCenter(std::weak_ptr<IMediaSyncCenter> syncCenter) final;
 
     void InitFilters(const std::vector<Filter*>& filters);
-
-    std::shared_ptr<MetaBundle> GetMetaBundle()
-    {
-        return metaBundle_;
-    }
-
 private:
     void ReorderFilters();
 
@@ -167,7 +141,6 @@ private:
     std::vector<Filter*> filters_ {};
     EventReceiver* eventReceiver_;
     FilterCallback* filterCallback_;
-    std::shared_ptr<MetaBundle> metaBundle_;
     std::vector<Filter*> filtersToRemove_ {};
     std::weak_ptr<IMediaSyncCenter> syncCenter_ {};
 };
