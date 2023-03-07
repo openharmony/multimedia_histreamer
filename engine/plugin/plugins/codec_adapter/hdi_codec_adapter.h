@@ -32,7 +32,7 @@ namespace Plugin {
 namespace CodecAdapter {
 class HdiCodecAdapter : public CodecPlugin {
 public:
-    HdiCodecAdapter(std::string componentName, std::shared_ptr<CodecManager>& codecManager);
+    HdiCodecAdapter(std::string componentName);
     ~HdiCodecAdapter() override;
     Status Init() override;
     Status Deinit() override;
@@ -71,7 +71,6 @@ private:
     Status ChangeState(OMX_STATETYPE state);
     Status WaitForState(OMX_STATETYPE state);
 
-    std::shared_ptr<CodecManager> codecMgr_;
     CodecComponentType* codecComp_ {nullptr};
     CodecCallbackType* codecCallback_ {nullptr};
     std::string componentName_ {};

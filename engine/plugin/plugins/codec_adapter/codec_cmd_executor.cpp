@@ -28,7 +28,6 @@ namespace CodecAdapter {
 CodecCmdExecutor::CodecCmdExecutor(CodecComponentType* component, uint32_t inPortIndex)
     : codecComp_(component), inPortIndex_(inPortIndex)
 {
-    MEDIA_LOG_I("ctor called");
     resultMap_[OMX_CommandStateSet] = OMX_StateInvalid;
     resultMap_[OMX_CommandFlush] = std::pair<Result, Result>{Result::INVALID, Result::INVALID};
     resultMap_[OMX_CommandPortEnable] = std::pair<Result, Result>{Result::INVALID, Result::INVALID};
@@ -195,7 +194,7 @@ void CodecCmdExecutor::HandleEventBufferFlag(OMX_U32 data1, OMX_U32 data2)
 
 void CodecCmdExecutor::HandleEventError(OMX_U32 data1)
 {
-    MEDIA_LOG_I("HandleEventError begin");
+    MEDIA_LOG_E("HandleEventError begin, error msg: " PUBLIC_LOG_S, OmxErrorType2String(data1).c_str());
     OSAL::ScopedLock lock(mutex_);
     (void)data1;
     lastCmd_ = -1;

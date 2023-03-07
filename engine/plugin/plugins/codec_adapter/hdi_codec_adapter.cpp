@@ -28,6 +28,24 @@
 #include "hdi_codec_manager.h"
 #include "pipeline/core/plugin_attr_desc.h"
 
+namespace {
+using namespace OHOS::Media::Plugin;
+using namespace CodecAdapter;
+Status RegisterHdiAdapterPlugins(const std::shared_ptr<OHOS::Media::Plugin::Register>& reg)
+{
+    MEDIA_LOG_I("RegisterHdiAdapterPlugins Start");
+    return HdiCodecManager::GetInstance().RegisterCodecPlugins(reg);
+}
+
+void UnRegisterHdiAdapterPlugins()
+{
+    MEDIA_LOG_I("UnRegisterHdiAdapterPlugins Start");
+    HdiCodecManager::GetInstance().UnRegisterCodecPlugins();
+}
+} // namespace
+
+PLUGIN_DEFINITION(CodecAdapter, LicenseType::APACHE_V2, RegisterHdiAdapterPlugins, UnRegisterHdiAdapterPlugins);
+
 namespace OHOS {
 namespace Media {
 namespace Plugin {
@@ -80,14 +98,12 @@ int32_t HdiCodecAdapter::FillBufferDone(CodecCallbackType* self, int64_t appData
     return HDF_SUCCESS;
 }
 
-HdiCodecAdapter::HdiCodecAdapter(std::string componentName, std::shared_ptr<CodecManager>& codecManager)
+HdiCodecAdapter::HdiCodecAdapter(std::string componentName)
     : CodecPlugin(std::move(componentName)),
-      codecMgr_(codecManager),
       outBufQue_("hdiAdapterOutQueue", DEFAULT_OUT_BUFFER_QUEUE_SIZE)
 {
     MEDIA_LOG_I("ctor called");
     shaAlloc_ = std::make_shared<ShareAllocator>(Plugin::ShareMemType::READ_WRITE_TYPE);
-    FALSE_LOG_MSG(codecMgr_ != nullptr, "Get codec manager failed");
 }
 
 HdiCodecAdapter::~HdiCodecAdapter()
@@ -117,8 +133,9 @@ Status HdiCodecAdapter::Init()
     codecCallback_->EmptyBufferDone = &HdiCodecAdapter::EmptyBufferDone;
     codecCallback_->FillBufferDone = &HdiCodecAdapter::FillBufferDone;
 
-    int32_t ret = codecMgr_->CreateComponent(&codecComp_, componentId_, const_cast<char*>(componentName_.c_str()),
-                                             (int64_t)this, codecCallback_);
+    int32_t ret = HdiCodecManager::GetInstance().CreateComponent(&codecComp_, componentId_,
+                                                                 const_cast<char*>(componentName_.c_str()),
+                                                                 (int64_t)this, codecCallback_);
     FALSE_RETURN_V_MSG(codecComp_ != nullptr, Status::ERROR_NULL_POINTER,
                        "create component failed, retVal = " PUBLIC_LOG_D32, (int)ret);
 
@@ -153,11 +170,9 @@ Status HdiCodecAdapter::Deinit()
 {
     MEDIA_LOG_D("DeInit Enter");
     FALSE_RETURN_V_MSG_E(Reset() == Status::OK, Status::ERROR_INVALID_DATA, "Reset value failed");
-    if (codecMgr_) {
-        auto ret = codecMgr_->DestroyComponent(codecComp_, componentId_);
-        FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, Status::ERROR_INVALID_OPERATION,
-            "HDI destroy component failed, ret = " PUBLIC_LOG_S, HdfStatus2String(ret).c_str());
-    }
+    auto ret = HdiCodecManager::GetInstance().DestroyComponent(codecComp_, componentId_);
+    FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, Status::ERROR_INVALID_OPERATION,
+        "HDI destroy component failed, ret = " PUBLIC_LOG_S, HdfStatus2String(ret).c_str());
     if (codecComp_) {
         CodecComponentTypeRelease(codecComp_);
         codecComp_ = nullptr;

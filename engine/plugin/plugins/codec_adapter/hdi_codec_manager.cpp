@@ -23,32 +23,16 @@
 #include "foundation/log.h"
 #include "hdi_codec_adapter.h"
 
-namespace {
-// register plugins
-using namespace OHOS::Media::Plugin;
-using namespace CodecAdapter;
-std::shared_ptr<CodecManager>  g_codecMgr {nullptr};
-Status RegisterHdiAdapterPlugins(const std::shared_ptr<OHOS::Media::Plugin::Register>& reg)
-{
-    MEDIA_LOG_I("RegisterHdiAdapterPlugins Start");
-    g_codecMgr = std::make_shared<HdiCodecManager>();
-    return g_codecMgr->RegisterCodecPlugins(reg);
-}
-
-void UnRegisterHdiAdapterPlugins()
-{
-    MEDIA_LOG_I("UnRegisterHdiAdapterPlugins Start");
-    g_codecMgr->UnRegisterCodecPlugins();
-    g_codecMgr = nullptr;
-}
-} // namespace
-
-PLUGIN_DEFINITION(CodecAdapter, LicenseType::APACHE_V2, RegisterHdiAdapterPlugins, UnRegisterHdiAdapterPlugins);
-
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace CodecAdapter {
+HdiCodecManager& HdiCodecManager::GetInstance()
+{
+    static HdiCodecManager impl;
+    return impl;
+}
+
 HdiCodecManager::HdiCodecManager()
 {
     Init();
@@ -99,7 +83,7 @@ Status HdiCodecManager::RegisterCodecPlugins(const std::shared_ptr<OHOS::Media::
         def.inCaps = codecCapability.inCaps;
         def.outCaps = codecCapability.outCaps;
         def.creator = [] (const std::string& name) -> std::shared_ptr<CodecPlugin> {
-            return std::make_shared<HdiCodecAdapter>(name, g_codecMgr);
+            return std::make_shared<HdiCodecAdapter>(name);
         };
         if (reg->AddPlugin(def) != Status::OK) {
             MEDIA_LOG_E("Add plugin " PUBLIC_LOG_S " failed", def.name.c_str());

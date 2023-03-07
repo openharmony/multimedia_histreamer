@@ -65,11 +65,8 @@ if (hst_is_lite_sys) {
       cfi = true
       debug = false
     }
-    deps = [
-      ":std_plugin_codec_adapter",
-      "//drivers/peripheral/codec/hal:libcodec_hdi_omx_client",
-    ]
-#    external_deps = [ "drivers_peripheral_codec:libcodec_hdi_omx_client" ]
+    deps = [ ":std_plugin_codec_adapter" ]
+    external_deps = [ "//drivers/peripheral/codec/hal:libcodec_hdi_omx_client" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"

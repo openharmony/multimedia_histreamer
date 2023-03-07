@@ -75,7 +75,6 @@ if (!defined(ohos_lite) || !ohos_lite) {
   multimedia_histreamer_enable_plugin_std_stream_source = true
   multimedia_histreamer_enable_video = true
   multimedia_histreamer_enable_plugin_std_video_surface_sink = true
-  multimedia_histreamer_enable_plugin_codec_adapter = true
 } else {
   hst_is_lite_sys = true
   multimedia_histreamer_enable_plugin_hdi_adapter = true

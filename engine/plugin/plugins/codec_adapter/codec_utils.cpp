@@ -56,7 +56,30 @@ const static std::map<HDF_STATUS, std::string> hdfStatusMap = {
     {HDF_STATUS::HDF_DEV_ERR_OP, "HDF_DEV_ERR_OP"},
 };
 
-const static std::map<OMX_ERRORTYPE, std::string> omxStatusMap = {
+const static std::map<OMX_ERRORTYPE, std::string> omxErrorTypeMap = {
+    {OMX_ErrorNone, "OMX_ErrorNone"},
+    {OMX_ErrorInsufficientResources, "OMX_ErrorInsufficientResources"},
+    {OMX_ErrorUndefined, "OMX_ErrorUndefined"},
+    {OMX_ErrorInvalidComponentName, "OMX_ErrorInvalidComponentName"},
+    {OMX_ErrorComponentNotFound, "OMX_ErrorComponentNotFound"},
+    {OMX_ErrorInvalidComponent, "OMX_ErrorInvalidComponent"},
+    {OMX_ErrorBadParameter, "OMX_ErrorBadParameter"},
+    {OMX_ErrorNotImplemented, "OMX_ErrorNotImplemented"},
+    {OMX_ErrorUnderflow, "OMX_ErrorUnderflow"},
+    {OMX_ErrorOverflow, "OMX_ErrorOverflow"},
+    {OMX_ErrorHardware, "OMX_ErrorHardware"},
+    {OMX_ErrorInvalidState, "OMX_ErrorInvalidState"},
+    {OMX_ErrorStreamCorrupt, "OMX_ErrorStreamCorrupt"},
+    {OMX_ErrorPortsNotCompatible, "OMX_ErrorPortsNotCompatible"},
+    {OMX_ErrorResourcesLost, "OMX_ErrorResourcesLost"},
+    {OMX_ErrorNoMore, "OMX_ErrorNoMore"},
+    {OMX_ErrorVersionMismatch, "OMX_ErrorVersionMismatch"},
+    {OMX_ErrorNotReady, "OMX_ErrorNotReady"},
+    {OMX_ErrorTimeout, "OMX_ErrorTimeout"},
+    {OMX_ErrorSameState, "OMX_ErrorSameState"},
+    {OMX_ErrorResourcesPreempted, "OMX_ErrorResourcesPreempted"},
+    {OMX_ErrorPortUnresponsiveDuringAllocation, "OMX_ErrorPortUnresponsiveDuringAllocation"},
+    {OMX_ErrorPortUnresponsiveDuringDeallocation, "OMX_ErrorPortUnresponsiveDuringDeallocation"},
     {OMX_ErrorPortUnresponsiveDuringStop, "OMX_ErrorPortUnresponsiveDuringStop"},
     {OMX_ErrorIncorrectStateTransition, "OMX_ErrorIncorrectStateTransition"},
     {OMX_ErrorIncorrectStateOperation, "OMX_ErrorIncorrectStateOperation"},
@@ -64,6 +87,17 @@ const static std::map<OMX_ERRORTYPE, std::string> omxStatusMap = {
     {OMX_ErrorUnsupportedIndex, "OMX_ErrorUnsupportedIndex"},
     {OMX_ErrorBadPortIndex, "OMX_ErrorBadPortIndex"},
     {OMX_ErrorPortUnpopulated, "OMX_ErrorPortUnpopulated"},
+    {OMX_ErrorComponentSuspended, "OMX_ErrorComponentSuspended"},
+    {OMX_ErrorDynamicResourcesUnavailable, "OMX_ErrorDynamicResourcesUnavailable"},
+    {OMX_ErrorMbErrorsInFrame, "OMX_ErrorMbErrorsInFrame"},
+    {OMX_ErrorFormatNotDetected, "OMX_ErrorFormatNotDetected"},
+    {OMX_ErrorContentPipeOpenFailed, "OMX_ErrorContentPipeOpenFailed"},
+    {OMX_ErrorContentPipeCreationFailed, "OMX_ErrorContentPipeCreationFailed"},
+    {OMX_ErrorSeperateTablesUsed, "OMX_ErrorSeperateTablesUsed"},
+    {OMX_ErrorTunnelingUnsupported, "OMX_ErrorTunnelingUnsupported"},
+    {OMX_ErrorKhronosExtensions, "OMX_ErrorKhronosExtensions"},
+    {OMX_ErrorVendorStartUnused, "OMX_ErrorVendorStartUnused"},
+    {OMX_ErrorMax, "OMX_ErrorMax"},
 };
 
 const static std::pair<int32_t, Status> retStatusMap[] = {
@@ -76,14 +110,21 @@ const static std::pair<int32_t, Status> retStatusMap[] = {
 
 std::string HdfStatus2String(int32_t status)
 {
-    auto it1 = hdfStatusMap.find(static_cast<HDF_STATUS>(status));
-    auto it2 = omxStatusMap.find(static_cast<OMX_ERRORTYPE>(status));
-    if (it1 != hdfStatusMap.end()) {
-        return it1->second;
-    } else if (it2 != omxStatusMap.end()) {
-        return it2->second;
+    auto it = hdfStatusMap.find(static_cast<HDF_STATUS>(status));
+    if (it != hdfStatusMap.end()) {
+        return it->second;
     }
-    MEDIA_LOG_W("Not find value, maybe update the map");
+    MEDIA_LOG_E("Not find value: " PUBLIC_LOG_D32 " in hdfStatusMap", status);
+    return "null";
+}
+
+std::string OmxErrorType2String(uint32_t errorType)
+{
+    auto it = omxErrorTypeMap.find(static_cast<OMX_ERRORTYPE>(errorType));
+    if (it != omxErrorTypeMap.end()) {
+        return it->second;
+    }
+    MEDIA_LOG_E("Not find value: " PUBLIC_LOG_U32 " in omxErrorTypeMap", errorType);
     return "null";
 }
 
