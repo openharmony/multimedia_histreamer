@@ -162,10 +162,7 @@ source_set("histreamer_plugin_core") {
       public_deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
     }
   } else {
-    public_deps += [
-      "//foundation/multimedia/histreamer/engine/plugin/core/hdi_codec:hdi_codec_adapter",
-      "//third_party/bounds_checking_function:libsec_static",
-    ]
+    public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
   }
   public_deps += [ "plugins:gen_plugin_static_header" ]
 }
