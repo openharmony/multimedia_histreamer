@@ -86,7 +86,6 @@ file(GLOB_RECURSE HISTREAMER_BASE_SRCS
         ${TOP_DIR}/engine/pipeline/*.cpp
         ${TOP_DIR}/engine/plugin/common/*.cpp
         ${TOP_DIR}/engine/plugin/core/*.cpp
-        ${TOP_DIR}/engine/plugin/core/hdi_codec/*.cpp
         ${TOP_DIR}/engine/plugin/types/*.cpp
         ${TOP_DIR}/engine/scene/player/internal/*.cpp
         ${TOP_DIR}/engine/scene/recorder/internal/*.cpp
