@@ -49,10 +49,10 @@ source_set("std_plugin_codec_adapter") {
     "hdi_codec_adapter.cpp",
     "hdi_codec_manager.cpp",
   ]
-  public_deps = [ "foundation:histreamer_foundation" ]
+  public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
   public_configs = [
     ":plugin_codec_adapter_config",
-    "histreamer:histreamer_presets",
+    "//foundation/multimedia/histreamer:histreamer_presets",
   ]
 }
 
@@ -66,7 +66,7 @@ if (hst_is_lite_sys) {
       debug = false
     }
     deps = [ ":std_plugin_codec_adapter" ]
-    external_deps = [ "drivers_peripheral_codec:libcodec_hdi_omx_client" ]
+    external_deps = [ "//drivers/peripheral/codec/hal:libcodec_hdi_omx_client" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"

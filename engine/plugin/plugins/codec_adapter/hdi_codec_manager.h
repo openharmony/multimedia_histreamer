@@ -28,7 +28,7 @@ namespace Plugin {
 namespace CodecAdapter {
 class HdiCodecManager : public CodecManager {
 public:
-    HdiCodecManager();
+    static HdiCodecManager& GetInstance();
     ~HdiCodecManager() override;
 
     int32_t CreateComponent(const Plugin::Any& component, uint32_t& id, std::string name,
@@ -38,6 +38,7 @@ public:
     Status RegisterCodecPlugins(const std::shared_ptr<OHOS::Media::Plugin::Register>& reg) override;
     Status UnRegisterCodecPlugins() override;
 private:
+    HdiCodecManager();
     void Init();
     void Reset();
     void AddHdiCap(const CodecCompCapability& hdiCap);

@@ -29,6 +29,8 @@ namespace Plugin {
 namespace CodecAdapter {
 std::string HdfStatus2String(int32_t status);
 
+std::string OmxErrorType2String(uint32_t errorType);
+
 Status TransHdiRetVal2Status(const int32_t& ret);
 
 uint32_t Translate2omxFlagSet(uint64_t pluginFlags);
