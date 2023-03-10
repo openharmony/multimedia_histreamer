@@ -35,14 +35,16 @@ CodecBufferPool::CodecBufferPool(CodecComponentType* compType, CompVerInfo& verI
 }
 
 // 当前实现仅仅支持异步模式，hdi的工作模式决定了仅支持异步，要求提前将所有 out buffer 配置好
-Status CodecBufferPool::UseBuffers(OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>>& bufQue, MemoryType bufMemType)
+Status CodecBufferPool::UseBuffers(OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>>& bufQue, MemoryType bufMemType,
+                                   bool isInput)
 {
     MEDIA_LOG_D("UseBuffers begin");
-    FALSE_RETURN_V_MSG_E(ConfigBufType(bufMemType) == Status::OK, Status::ERROR_INVALID_DATA, "ConfigBufType failed");
+    FALSE_RETURN_V_MSG_E(ConfigBufType(bufMemType, isInput) == Status::OK, Status::ERROR_INVALID_DATA,
+                         "ConfigBufType failed");
     auto count = bufQue.Size();
     for (uint32_t i = 0; i < count; i++) {
         auto pluginBuffer = bufQue.Pop();
-        auto codecBuffer = std::make_shared<CodecBuffer>(pluginBuffer, verInfo_);
+        auto codecBuffer = std::make_shared<CodecBuffer>(pluginBuffer, verInfo_, isInput);
         FALSE_RETURN_V_MSG(codecBuffer != nullptr, Status::ERROR_INVALID_DATA, "Create codec buffer failed");
         auto err = codecComp_->UseBuffer(codecComp_, portIndex_, codecBuffer->GetOmxBuffer().get());
         if (err != HDF_SUCCESS) {
@@ -74,24 +76,15 @@ Status CodecBufferPool::FreeBuffers()
     return Status::OK;
 }
 
-Status CodecBufferPool::ConfigBufType(const MemoryType& bufMemType)
+Status CodecBufferPool::ConfigBufType(const MemoryType& bufMemType, bool isInput)
 {
-    UseBufferType type;
-    InitHdiParam(type, verInfo_);
-    type.portIndex = portIndex_;
-    switch (bufMemType) {
-        case MemoryType::SHARE_MEMORY:
-            type.bufferType = CODEC_BUFFER_TYPE_AVSHARE_MEM_FD;
-            break;
-        case MemoryType::SURFACE_BUFFER:
-            type.bufferType = CODEC_BUFFER_TYPE_HANDLE;
-            break;
-        default:
-            MEDIA_LOG_E("MemoryType Error");
-    }
-    auto ret = codecComp_->SetParameter(codecComp_, OMX_IndexParamUseBufferType, (int8_t *)&type, sizeof(type));
+    UseBufferType bufType;
+    InitHdiParam(bufType, verInfo_);
+    bufType.portIndex = portIndex_;
+    bufType.bufferType = GetOmxBufferType(bufMemType, isInput);
+    auto ret = codecComp_->SetParameter(codecComp_, OMX_IndexParamUseBufferType, (int8_t *)&bufType, sizeof(bufType));
     FALSE_LOG_MSG(ret == HDF_SUCCESS, "PORT_INDEX_OUTPUT, bufferTypes: " PUBLIC_LOG_D32 ", ret: " PUBLIC_LOG_S,
-                  type.bufferType, HdfStatus2String(ret).c_str());
+                  bufType.bufferType, HdfStatus2String(ret).c_str());
     MEDIA_LOG_D("ConfigOutPortBufType end");
     return TransHdiRetVal2Status(ret);
 }

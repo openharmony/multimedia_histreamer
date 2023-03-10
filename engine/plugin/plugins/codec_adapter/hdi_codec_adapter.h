@@ -32,7 +32,7 @@ namespace Plugin {
 namespace CodecAdapter {
 class HdiCodecAdapter : public CodecPlugin {
 public:
-    HdiCodecAdapter(std::string componentName);
+    HdiCodecAdapter(std::string componentName, PluginType pluginType);
     ~HdiCodecAdapter() override;
     Status Init() override;
     Status Deinit() override;
@@ -43,7 +43,6 @@ public:
     Status Flush() override;
     Status GetParameter(Plugin::Tag tag, Plugin::ValueType& value) override;
     Status SetParameter(Plugin::Tag tag, const Plugin::ValueType& value) override;
-
     std::shared_ptr<Plugin::Allocator> GetAllocator() override;
     Status QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
     Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) override;
@@ -51,6 +50,7 @@ public:
     Status SetDataCallback(DataCallback* dataCallback) override;
 
 private:
+    Status InitVersion();
     Status InitPortIndex();
     Status FreeBuffers();
     void HandleFrame();
@@ -75,6 +75,7 @@ private:
     CodecCallbackType* codecCallback_ {nullptr};
     std::string componentName_ {};
     uint32_t componentId_;
+    PluginType pluginType_{};
 
     std::list<std::shared_ptr<Buffer>> inBufQue_ {};
     OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufQue_;
@@ -92,6 +93,7 @@ private:
     uint32_t frameRate_;
     int32_t stride_{};
     VideoPixelFormat pixelFormat_ {};
+    int64_t bitRate_;
 
     Callback* callback_ {nullptr};
     DataCallback* dataCallback_ {nullptr};

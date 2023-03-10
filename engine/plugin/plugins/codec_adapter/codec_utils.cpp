@@ -228,6 +228,26 @@ std::string ComponentNameToMime(const std::string& componentName)
     MEDIA_LOG_W("Not find value, maybe update the map");
     return "null";
 }
+
+uint32_t GetOmxBufferType(const MemoryType& bufMemType, bool isInput)
+{
+    uint32_t bufferType;
+    switch (bufMemType) {
+        case MemoryType::SHARE_MEMORY:
+            bufferType = CODEC_BUFFER_TYPE_AVSHARE_MEM_FD;
+            break;
+        case MemoryType::SURFACE_BUFFER:
+            bufferType = CODEC_BUFFER_TYPE_HANDLE;
+            if (isInput) {
+                bufferType = CODEC_BUFFER_TYPE_DYNAMIC_HANDLE;
+            }
+            break;
+        default:
+            bufferType = CODEC_BUFFER_TYPE_INVALID;
+            MEDIA_LOG_E("MemoryType Error");
+    }
+    return bufferType;
+}
 } // namespace CodecAdapter
 } // namespace Plugin
 } // namespace Media

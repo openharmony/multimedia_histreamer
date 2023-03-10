@@ -260,19 +260,9 @@ ErrorCode VideoEncoderFilter::AllocateOutputBuffers()
         bufferCnt = DEFAULT_OUT_BUFFER_POOL_SIZE;
     }
     outBufPool_ = std::make_shared<BufferPool<AVBuffer>>(bufferCnt);
-    // YUV420: size = stride * height * 1.5
     uint32_t bufferSize = 0;
-    uint32_t stride = Plugin::AlignUp(vencFormat_.width, VIDEO_ALIGN_SIZE);
-    if (vencFormat_.format == Plugin::VideoPixelFormat::YUV420P ||
-        vencFormat_.format == Plugin::VideoPixelFormat::NV21 ||
-        vencFormat_.format == Plugin::VideoPixelFormat::NV12) {
-        bufferSize = static_cast<uint32_t>(Plugin::AlignUp(stride, VIDEO_ALIGN_SIZE) *
-                                           Plugin::AlignUp(vencFormat_.height, VIDEO_ALIGN_SIZE) * VIDEO_PIX_DEPTH);
-        MEDIA_LOG_D("Output buffer size: " PUBLIC_LOG_U32, bufferSize);
-    } else {
-        // need to check video sink support and calc buffer size
-        MEDIA_LOG_E("Unsupported video pixel format: " PUBLIC_LOG_S, GetVideoPixelFormatNameStr(vencFormat_.format));
-        return ErrorCode::ERROR_UNIMPLEMENTED;
+    if (GetPluginParameterLocked(Tag::REQUIRED_OUT_BUFFER_SIZE, bufferSize) != ErrorCode::SUCCESS) {
+        bufferSize = CalculateBufferSize(nullptr);
     }
     auto outAllocator = plugin_->GetAllocator(); // zero copy need change to use sink allocator
     if (outAllocator == nullptr) {
@@ -287,6 +277,26 @@ ErrorCode VideoEncoderFilter::AllocateOutputBuffers()
         }
     }
     return ErrorCode::SUCCESS;
+}
+
+uint32_t VideoEncoderFilter::CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta>& meta)
+{
+    (void)meta;
+    uint32_t bufferSize = vencFormat_.width * vencFormat_.height;
+
+    // YUV420: size = stride * height * 1.5
+    uint32_t stride = Plugin::AlignUp(vencFormat_.width, VIDEO_ALIGN_SIZE);
+    if (vencFormat_.format == Plugin::VideoPixelFormat::YUV420P ||
+        vencFormat_.format == Plugin::VideoPixelFormat::NV21 ||
+        vencFormat_.format == Plugin::VideoPixelFormat::NV12) {
+        bufferSize = static_cast<uint32_t>(Plugin::AlignUp(stride, VIDEO_ALIGN_SIZE) *
+                                           Plugin::AlignUp(vencFormat_.height, VIDEO_ALIGN_SIZE) * VIDEO_PIX_DEPTH);
+        MEDIA_LOG_D("Output buffer size: " PUBLIC_LOG_U32, bufferSize);
+    } else {
+        // need to check video sink support and calc buffer size
+        MEDIA_LOG_E("Unsupported video pixel format: " PUBLIC_LOG_S, GetVideoPixelFormatNameStr(vencFormat_.format));
+    }
+    return bufferSize;
 }
 
 ErrorCode VideoEncoderFilter::SetVideoEncoderFormat(const std::shared_ptr<const Plugin::Meta>& meta)
@@ -382,7 +392,6 @@ ErrorCode VideoEncoderFilter::ConfigurePlugin()
 {
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->SetDataCallback(dataCallback_)),
         "Set plugin callback fail");
-    FAIL_RETURN_MSG(ConfigurePluginParams(), "Configure plugin params error");
     FAIL_RETURN_MSG(ConfigurePluginOutputBuffers(), "Configure plugin output buffers error");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Prepare()), "Prepare plugin fail");
     return TranslatePluginStatus(plugin_->Start());
@@ -392,6 +401,7 @@ ErrorCode VideoEncoderFilter::ConfigureNoLocked(const std::shared_ptr<const Plug
 {
     MEDIA_LOG_D("video encoder configure called");
     FAIL_RETURN_MSG(SetVideoEncoderFormat(meta), "Set video encoder format fail");
+    FAIL_RETURN_MSG(ConfigurePluginParams(), "Configure plugin params error");
     FAIL_RETURN_MSG(AllocateOutputBuffers(), "Alloc output buffers fail");
     FAIL_RETURN_MSG(ConfigurePlugin(), "Config plugin fail");
     if (handleFrameTask_) {

@@ -97,6 +97,8 @@ private:
 
     void FinishFrame();
 
+    uint32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta>& meta) override;
+
     bool isFlushing_ {false};
     bool isStop_ {false};
     Capability capNegWithDownstream_;

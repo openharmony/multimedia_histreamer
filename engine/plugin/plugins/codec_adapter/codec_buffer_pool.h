@@ -36,7 +36,15 @@ public:
 
     ~CodecBufferPool() = default;
 
-    Status UseBuffers(OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>>& bufQue, MemoryType bufMemType);
+    /**
+     * Init codec buffer and create buffer map
+     * Encoder:
+     * inBuf is surfaceBuf and allocated dynamic, outBuf is sharedBuf (READ_WRITE_TYPE)
+     * Decoder:
+     * inBuf is sharedBuf (READ_ONLY_TYPE),  outBuf is surfaceBuf and pre-allocation
+     */
+    Status UseBuffers(OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>>& bufQue, MemoryType bufMemType,
+                      bool isInput);
 
     Status FreeBuffers(); // 释放所有buffer
 
@@ -47,7 +55,7 @@ public:
     std::shared_ptr<CodecBuffer> GetBuffer(int32_t bufferId = -1);
 
 private:
-    Status ConfigBufType(const MemoryType& bufMemType);
+    Status ConfigBufType(const MemoryType& bufMemType, bool isInput);
 
 private:
     CodecComponentType* codecComp_ {nullptr};
