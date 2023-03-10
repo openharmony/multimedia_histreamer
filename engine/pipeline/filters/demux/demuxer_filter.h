@@ -150,7 +150,7 @@ private:
     std::string pluginName_;
     std::shared_ptr<Plugin::Demuxer> plugin_;
     std::atomic<DemuxerState> pluginState_;
-    std::shared_ptr<Plugin::AllocatorHelper> pluginAllocator_;
+    std::shared_ptr<Plugin::Allocator> pluginAllocator_;
     std::shared_ptr<DataSourceImpl> dataSource_;
     MediaMetaData mediaMetaData_;
 

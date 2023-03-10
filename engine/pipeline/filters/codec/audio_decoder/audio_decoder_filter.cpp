@@ -17,13 +17,9 @@
 
 #include "audio_decoder_filter.h"
 #include "factory/filter_factory.h"
-#include "utils/dump_buffer.h"
 #include "osal/utils/util.h"
-#include "pipeline/core/filter_codec_mode.h"
-#include "pipeline/filters/codec/codec_filter_base.h"
 #include "pipeline/filters/codec/codec_filter_factory.h"
-#include "pipeline/filters/codec/sync_mode.h"
-#include "pipeline/filters/codec/async_mode.h"
+#include "utils/dump_buffer.h"
 #include "utils/steady_clock.h"
 
 namespace {
@@ -35,14 +31,22 @@ constexpr int32_t MAX_SAMPLE_PER_FRAME = 10240; // 10240 set max samples per fra
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-AudioDecoderFilter::AudioDecoderFilter(const std::string& name, std::shared_ptr<CodecMode>& codecMode)
+#ifdef OHOS_LITE
+static AutoRegisterFilter<AudioDecoderFilter> g_registerAudioDecoderFilter("builtin.player.audiodecoder",
+    [](const std::string& name) { return CreateCodecFilter(name, FilterCodecMode::AUDIO_SYNC_DECODER); });
+#else
+static AutoRegisterFilter<AudioDecoderFilter> g_registerAudioDecoderFilter("builtin.player.audiodecoder",
+    [](const std::string& name) { return CreateCodecFilter(name, FilterCodecMode::AUDIO_ASYNC_DECODER); });
+#endif
+
+AudioDecoderFilter::AudioDecoderFilter(const std::string& name, std::shared_ptr<CodecMode> codecMode)
     : CodecFilterBase(name)
 {
     MEDIA_LOG_D("audio decoder ctor called");
     filterType_ = FilterType::AUDIO_DECODER;
     bufferMetaType_ = Plugin::BufferMetaType::AUDIO;
     pluginType_ = Plugin::PluginType::AUDIO_DECODER;
-    codecMode_ = codecMode;
+    codecMode_ = std::move(codecMode);
 }
 
 AudioDecoderFilter::~AudioDecoderFilter()

@@ -21,18 +21,15 @@
 #include <set>
 #include <utility>
 #include "common/any.h"
-#include "interface/audio_sink_plugin.h"
-#include "interface/codec_plugin.h"
-#include "interface/demuxer_plugin.h"
-#include "interface/plugin_base.h"
-#include "interface/source_plugin.h"
-#include "plugin_loader.h"
 
+#include "plugin_loader.h"
 #include "plugin_info.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+struct DataSource;
+using DemuxerPluginSnifferFunc = int (*)(const std::string& name, std::shared_ptr<DataSource> dataSource);
 struct PluginRegInfo {
     std::shared_ptr<PackageDef> packageDef;
     std::shared_ptr<PluginInfo> info;

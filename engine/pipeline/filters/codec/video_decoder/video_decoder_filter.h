@@ -25,7 +25,7 @@ namespace Media {
 namespace Pipeline {
 class VideoDecoderFilter : public CodecFilterBase {
 public:
-    explicit VideoDecoderFilter(const std::string &name, std::shared_ptr<CodecMode>& codecMode);
+    explicit VideoDecoderFilter(const std::string &name, std::shared_ptr<CodecMode> codecMode);
     ~VideoDecoderFilter() override;
 
     ErrorCode Prepare() override;

@@ -23,7 +23,7 @@ namespace Media {
 namespace Pipeline {
 class AudioDecoderFilter : public CodecFilterBase {
 public:
-    AudioDecoderFilter(const std::string& name, std::shared_ptr<CodecMode>& codecMode);
+    AudioDecoderFilter(const std::string& name, std::shared_ptr<CodecMode> codecMode);
     ~AudioDecoderFilter() override;
 
     ErrorCode Prepare() override;

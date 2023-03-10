@@ -15,8 +15,6 @@
 
 #include "demuxer.h"
 #include "interface/demuxer_plugin.h"
-#include "interface/plugin_definition.h"
-
 #include "plugin_wrapper.h"
 
 using namespace OHOS::Media::Plugin;

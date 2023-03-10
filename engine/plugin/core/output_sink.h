@@ -18,12 +18,12 @@
 
 #include "base.h"
 #include "common/plugin_buffer.h"
-#include "plugin/common/media_sink.h"
-#include "plugin/interface/output_sink_plugin.h"
+#include "common/media_sink.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+struct OutputSinkPlugin;
 class OutputSink : public Base {
 public:
     OutputSink(const OutputSink &) = delete;

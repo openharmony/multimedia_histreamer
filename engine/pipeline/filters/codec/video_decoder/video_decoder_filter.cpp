@@ -40,14 +40,21 @@ const uint32_t VIDEO_ALIGN_SIZE = 16;
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-VideoDecoderFilter::VideoDecoderFilter(const std::string& name, std::shared_ptr<CodecMode>& codecMode)
+#ifdef OHOS_LITE
+static AutoRegisterFilter<VideoDecoderFilter> g_registerVideoDecoderFilter("builtin.player.videodecoder",
+    [](const std::string& name) { return CreateCodecFilter(name, FilterCodecMode::VIDEO_ASYNC_DECODER); });
+#else
+static AutoRegisterFilter<VideoDecoderFilter> g_registerVideoDecoderFilter("builtin.player.videodecoder",
+    [](const std::string& name) { return CreateCodecFilter(name, FilterCodecMode::VIDEO_ASYNC_DECODER); });
+#endif
+VideoDecoderFilter::VideoDecoderFilter(const std::string& name, std::shared_ptr<CodecMode> codecMode)
     : CodecFilterBase(name)
 {
     MEDIA_LOG_I("video decoder ctor called");
     filterType_ = FilterType::VIDEO_DECODER;
     bufferMetaType_ = Plugin::BufferMetaType::VIDEO;
     pluginType_ = Plugin::PluginType::VIDEO_DECODER;
-    codecMode_ = codecMode;
+    codecMode_ = std::move(codecMode);
 }
 
 VideoDecoderFilter::~VideoDecoderFilter()

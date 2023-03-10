@@ -43,7 +43,7 @@ public:
 
     Status ReadFrame(Buffer &buffer, int32_t timeOutMs) override;
 
-    Status SeekTo(int32_t trackId, int64_t timeStampUs, SeekMode mode) override;
+    Status SeekTo(int32_t trackId, int64_t seekTime, SeekMode mode, int64_t& realSeekTime) override;
 
     std::shared_ptr<Allocator> GetAllocator() override;
 

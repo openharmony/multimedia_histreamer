@@ -14,15 +14,8 @@
  */
 
 #include "plugin_manager.h"
-#include "interface/audio_sink_plugin.h"
-#include "interface/codec_plugin.h"
-#include "interface/demuxer_plugin.h"
-#include "interface/source_plugin.h"
-#include "interface/video_sink_plugin.h"
-#include "plugin_register.h"
-#include "plugin_wrapper.h"
-
 #include <utility>
+#include "plugin_wrapper.h"
 
 namespace OHOS {
 namespace Media {
@@ -39,7 +32,7 @@ std::vector<std::string> PluginManager::ListPlugins(PluginType pluginType, Codec
 
 std::shared_ptr<PluginInfo> PluginManager::GetPluginInfo(PluginType type, const std::string& name)
 {
-    std::shared_ptr<PluginRegInfo> regInfo = pluginRegister_->GetPluginRegInfo(type, name);
+    auto regInfo = pluginRegister_->GetPluginRegInfo(type, name);
     if (regInfo && regInfo->info && regInfo->info->pluginType == type) {
         return regInfo->info;
     }
@@ -48,10 +41,10 @@ std::shared_ptr<PluginInfo> PluginManager::GetPluginInfo(PluginType type, const 
 
 int32_t PluginManager::Sniffer(const std::string& name, std::shared_ptr<DataSourceHelper> source)
 {
-    if (source == nullptr) {
+    if (!source) {
         return 0;
     }
-    std::shared_ptr<PluginRegInfo> regInfo = pluginRegister_->GetPluginRegInfo(PluginType::DEMUXER, name);
+    auto regInfo = pluginRegister_->GetPluginRegInfo(PluginType::DEMUXER, name);
     if (!regInfo) {
         return 0;
     }

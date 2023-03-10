@@ -80,8 +80,12 @@ Status UtDemuxerTest1::ReadFrame(Buffer &buffer, int32_t timeOutMs)
     return Status::OK;
 }
 
-Status UtDemuxerTest1::SeekTo(int32_t trackId, int64_t timeStampUs, SeekMode mode)
+Status UtDemuxerTest1::SeekTo(int32_t trackId, int64_t seekTime, SeekMode mode, int64_t& realSeekTime)
 {
+    (void)trackId;
+    (void)seekTime;
+    (void)mode;
+    (void)realSeekTime;
     return Status::OK;
 }
 

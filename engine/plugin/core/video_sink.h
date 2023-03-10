@@ -17,11 +17,11 @@
 #define HISTREAMER_PLUGIN_CORE_VIDEO_SINK_H
 
 #include <cstddef>
+#include <memory>
 #include "base.h"
 #include "common/plugin_buffer.h"
 #include "common/plugin_tags.h"
 #include "common/plugin_types.h"
-#include "memory"
 
 namespace OHOS {
 namespace Media {
