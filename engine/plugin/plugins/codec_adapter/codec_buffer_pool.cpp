@@ -55,7 +55,7 @@ Status CodecBufferPool::UseBuffers(OHOS::Media::BlockingQueue<std::shared_ptr<Bu
         codecBufMap_.emplace(std::make_pair(codecBuffer->GetBufferId(), codecBuffer));
         freeBufferId_.Push(codecBuffer->GetBufferId());
     }
-    MEDIA_LOG_D("UseBuffers end, freeBufId.size: " PUBLIC_LOG_D32 ", portIndex: " PUBLIC_LOG_U32,
+    MEDIA_LOG_D("UseBuffers end, freeBufId.size: " PUBLIC_LOG_ZU ", portIndex: " PUBLIC_LOG_U32,
                 freeBufferId_.Size(), portIndex_);
     return Status::OK;
 }

@@ -72,7 +72,7 @@ int32_t HdiCodecAdapter::EmptyBufferDone(CodecCallbackType* self, int64_t appDat
     if (!hdiAdapter->isFlushing_) {
         hdiAdapter->HandleFrame();
     }
-    MEDIA_LOG_D("EmptyBufferDone-callback end, free in buffer count: " PUBLIC_LOG_ZU,
+    MEDIA_LOG_D("EmptyBufferDone-callback end, free in buffer count: " PUBLIC_LOG_U32,
                 hdiAdapter->inBufPool_->EmptyBufferCount());
     return HDF_SUCCESS;
 }
@@ -93,7 +93,7 @@ int32_t HdiCodecAdapter::FillBufferDone(CodecCallbackType* self, int64_t appData
     }
     hdiAdapter->NotifyOutputBufferDone(outputBuffer);
     (void)hdiAdapter->FillAllTheOutBuffer(); // call FillThisBuffer() again
-    MEDIA_LOG_D("FillBufferDone-callback end, free out buffer count: " PUBLIC_LOG_ZU,
+    MEDIA_LOG_D("FillBufferDone-callback end, free out buffer count: " PUBLIC_LOG_U32,
                 hdiAdapter->outBufPool_->EmptyBufferCount());
     return HDF_SUCCESS;
 }
@@ -490,7 +490,7 @@ bool HdiCodecAdapter::FillAllTheOutBuffer()
                 ", isFirstCall: " PUBLIC_LOG_D32, HdfStatus2String(ret).c_str(), isFirstCall_);
         }
     }
-    MEDIA_LOG_D("FillAllTheBuffer end, free out bufferId count: " PUBLIC_LOG_ZU ", outBufQue_.Size: " PUBLIC_LOG_ZU,
+    MEDIA_LOG_D("FillAllTheBuffer end, free out bufferId count: " PUBLIC_LOG_U32 ", outBufQue_.Size: " PUBLIC_LOG_ZU,
                 outBufPool_->EmptyBufferCount(), outBufQue_.Size());
     return true;
 }
