@@ -82,7 +82,7 @@ private:
     template<typename T, typename U>
     std::shared_ptr<T> CreatePlugin(const std::string& name, PluginType pluginType)
     {
-        std::shared_ptr<PluginRegInfo> regInfo = pluginRegister_->GetPluginRegInfo(pluginType, name);
+        auto regInfo = pluginRegister_->GetPluginRegInfo(pluginType, name);
         if (!regInfo) {
             return {};
         }

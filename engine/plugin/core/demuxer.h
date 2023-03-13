@@ -25,8 +25,6 @@
 namespace OHOS {
 namespace Media {
 namespace Plugin {
-using AllocatorHelper = Allocator;
-
 struct MediaInfoHelper {
     Meta globalMeta;
     std::vector<Meta> trackMeta;

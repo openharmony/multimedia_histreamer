@@ -21,6 +21,7 @@
 #include <sstream>
 
 #include "foundation/log.h"
+#include "foundation/pre_defines.h"
 #include "pipeline/core/plugin_attr_desc.h"
 
 namespace {

@@ -25,6 +25,16 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
+enum struct FilterCodecMode : uint32_t {
+    AUDIO_SYNC_DECODER = 1,
+    AUDIO_ASYNC_DECODER,
+    AUDIO_SYNC_ENCODER,
+    AUDIO_ASYNC_ENCODER,
+    VIDEO_SYNC_DECODER,
+    VIDEO_ASYNC_DECODER,
+    VIDEO_SYNC_ENCODER,
+    VIDEO_ASYNC_ENCODER,
+};
 class CodecMode {
 public:
     explicit CodecMode(std::string name) : codecName_(std::move(name)) {}

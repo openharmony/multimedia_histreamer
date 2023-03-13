@@ -15,80 +15,35 @@
 
 #ifndef HISTREAMER_PLUGIN_CORE_WRAPPER_H
 #define HISTREAMER_PLUGIN_CORE_WRAPPER_H
-
 #include "demuxer.h"
-#include "output_sink.h"
+#include "foundation/pre_defines.h"
 #include "interface/demuxer_plugin.h"
 #include "interface/muxer_plugin.h"
-#include "interface/plugin_base.h"
 #include "muxer.h"
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
 struct DataSourceWrapper : DataSource {
-    DataSourceWrapper(uint32_t pkgVersion, std::shared_ptr<DataSourceHelper> dataSource)
-        : version(pkgVersion), helper(std::move(dataSource))
-    {
-    }
-
+    DataSourceWrapper(uint32_t pkgVersion, std::shared_ptr<DataSourceHelper> dataSource);
     ~DataSourceWrapper() override = default;
 
-    Status ReadAt(int64_t offset, std::shared_ptr<Buffer>& buffer, size_t expectedLen) override
-    {
-        return helper->ReadAt(offset, buffer, expectedLen);
-    }
-
-    Status GetSize(size_t& size) override
-    {
-        return helper->GetSize(size);
-    }
-
-    Seekable GetSeekable() override
-    {
-        return helper->GetSeekable();
-    }
-
+    Status ReadAt(int64_t offset, std::shared_ptr<Buffer>& buffer, size_t expectedLen) override;
+    Status GetSize(size_t& size) override;
+    Seekable GetSeekable() override;
 private:
     MEDIA_UNUSED uint32_t version;
     std::shared_ptr<DataSourceHelper> helper;
 };
 
 struct DataSinkWrapper : DataSink {
-    DataSinkWrapper(uint32_t pkgVersion, std::shared_ptr<DataSinkHelper> dataSink)
-        : version_(pkgVersion), helper_(std::move(dataSink)) {}
+    DataSinkWrapper(uint32_t pkgVersion, std::shared_ptr<DataSinkHelper> dataSink);
     ~DataSinkWrapper() override = default;
-
-    Status WriteAt(int64_t offset, const std::shared_ptr<Buffer>& buffer) override
-    {
-        return helper_->WriteAt(offset, buffer);
-    }
+    Status WriteAt(int64_t offset, const std::shared_ptr<Buffer>& buffer) override;
 private:
-    MEDIA_UNUSED uint32_t version_;
-    std::shared_ptr<DataSinkHelper> helper_;
+    MEDIA_UNUSED uint32_t version;
+    std::shared_ptr<DataSinkHelper> helper;
 };
-
-struct AllocatorHelperWrapper : AllocatorHelper {
-    AllocatorHelperWrapper(uint32_t pkgVersion, std::shared_ptr<Allocator> alloc)
-        : version_(pkgVersion), allocator_(std::move(alloc)) {}
-
-    ~AllocatorHelperWrapper() override = default;
-
-    void* Alloc(size_t size) override
-    {
-        return allocator_->Alloc(size);
-    }
-
-    void Free(void* ptr) override // NOLINT: void*
-    {
-        allocator_->Free(ptr);
-    }
-
-private:
-    MEDIA_UNUSED uint32_t version_;
-    std::shared_ptr<Allocator> allocator_;
-};
-
 void ConvertToMediaInfoHelper(uint32_t pkgVersion, const MediaInfo& src, MediaInfoHelper& dest);
 } // namespace Plugin
 } // namespace Media

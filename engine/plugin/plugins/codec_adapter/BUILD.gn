@@ -34,7 +34,6 @@ config("plugin_codec_adapter_config") {
     "//foundation/multimedia/histreamer/engine/",
     "//foundation/multimedia/histreamer/engine/foundation/",
     "//foundation/multimedia/histreamer/engine/plugin/",
-    "//foundation/multimedia/histreamer/engine/utils/",
     "//third_party/openmax/api/1.1.2/",
   ]
 }

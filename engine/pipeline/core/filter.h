@@ -24,7 +24,6 @@
 #include "utils/constants.h"
 #include "i_media_sync_center.h"
 #include "event.h"
-#include "parameter.h"
 #include "port.h"
 #include "plugin/core/plugin_meta.h"
 

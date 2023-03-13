@@ -22,55 +22,27 @@
 #include "codec/audio_encoder/audio_encoder_filter.h"
 #include "codec/video_decoder/video_decoder_filter.h"
 #include "factory/filter_factory.h"
-#include "pipeline/core/filter_codec_mode.h"
 #include "sync_mode.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-#ifdef OHOS_LITE
-static AutoRegisterFilter<AudioDecoderFilter> g_registerAudioDecoderFilter("builtin.player.audiodecoder",
-    [](const std::string& name) { return CreateCodecFilter(name, FilterCodecMode::AUDIO_SYNC_DECODER); });
-#ifdef VIDEO_SUPPORT
-static AutoRegisterFilter<VideoDecoderFilter> g_registerVideoDecoderFilter("builtin.player.videodecoder",
-    [](const std::string& name) { return CreateCodecFilter(name, FilterCodecMode::VIDEO_ASYNC_DECODER); });
-#endif
-#else
-static AutoRegisterFilter<AudioDecoderFilter> g_registerAudioDecoderFilter("builtin.player.audiodecoder",
-    [](const std::string& name) { return CreateCodecFilter(name, FilterCodecMode::AUDIO_ASYNC_DECODER); });
-#ifdef VIDEO_SUPPORT
-static AutoRegisterFilter<VideoDecoderFilter> g_registerVideoDecoderFilter("builtin.player.videodecoder",
-    [](const std::string& name) { return CreateCodecFilter(name, FilterCodecMode::VIDEO_ASYNC_DECODER); });
-#endif
-#endif
-
 std::shared_ptr<CodecFilterBase> CreateCodecFilter(const std::string& name, FilterCodecMode type)
 {
-    std::shared_ptr<CodecMode> codecMode {nullptr};
-    std::shared_ptr<CodecFilterBase> filter {nullptr};
     switch (type) {
         case FilterCodecMode::AUDIO_SYNC_DECODER:
-            codecMode = std::make_shared<SyncMode>("audioDec");
-            filter = std::make_shared<AudioDecoderFilter>(name, codecMode);
-            break;
+            return std::make_shared<AudioDecoderFilter>(name, std::make_shared<SyncMode>("audioDec"));
         case FilterCodecMode::AUDIO_ASYNC_DECODER:
-            codecMode = std::make_shared<AsyncMode>("audioDec");
-            filter = std::make_shared<AudioDecoderFilter>(name, codecMode);
-            break;
+            return std::make_shared<AudioDecoderFilter>(name, std::make_shared<AsyncMode>("audioDec"));
 #ifdef VIDEO_SUPPORT
         case FilterCodecMode::VIDEO_SYNC_DECODER:
-            codecMode = std::make_shared<SyncMode>("videoDec");
-            filter = std::make_shared<VideoDecoderFilter>(name, codecMode);
-            break;
+            return std::make_shared<VideoDecoderFilter>(name, std::make_shared<SyncMode>("videoDec"));
         case FilterCodecMode::VIDEO_ASYNC_DECODER:
-            codecMode = std::make_shared<AsyncMode>("videoDec");
-            filter = std::make_shared<VideoDecoderFilter>(name, codecMode);
-            break;
+            return std::make_shared<VideoDecoderFilter>(name, std::make_shared<AsyncMode>("videoDec"));
 #endif
         default:
-            break;
+            return nullptr;
     }
-    return filter;
 }
 } // Pipeline
 } // Media

@@ -63,6 +63,34 @@ std::set<OHOS::Media::Plugin::MetaID> g_metaIdSet = {
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+DataSourceWrapper::DataSourceWrapper(uint32_t pkgVersion, std::shared_ptr<DataSourceHelper> dataSource)
+    : version(pkgVersion), helper(std::move(dataSource))
+{
+}
+
+Status DataSourceWrapper::ReadAt(int64_t offset, std::shared_ptr<Buffer>& buffer, size_t expectedLen)
+{
+    return helper->ReadAt(offset, buffer, expectedLen);
+}
+
+Status DataSourceWrapper::GetSize(size_t& size)
+{
+    return helper->GetSize(size);
+}
+
+Seekable DataSourceWrapper::GetSeekable()
+{
+    return helper->GetSeekable();
+}
+
+DataSinkWrapper::DataSinkWrapper(uint32_t pkgVersion, std::shared_ptr<DataSinkHelper> dataSink)
+    : version(pkgVersion), helper(std::move(dataSink)) {}
+
+Status DataSinkWrapper::WriteAt(int64_t offset, const std::shared_ptr<Buffer>& buffer)
+{
+    return helper->WriteAt(offset, buffer);
+}
+
 void ConvertToMediaInfoHelper(uint32_t pkgVersion, const MediaInfo& src, MediaInfoHelper& dest)
 {
     (void)(pkgVersion);

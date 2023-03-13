@@ -172,7 +172,7 @@ Status PluginRegister::RegisterImpl::InitSourceInfo(std::shared_ptr<PluginRegInf
 {
     auto& base = (SourcePluginDef&)def;
     reg->creator = reinterpret_cast<PluginCreatorFunc<PluginBase>>(base.creator);
-    std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
+    auto info = std::make_shared<PluginInfo>();
     SetPluginInfo(info, def);
     info->extra.insert({PLUGIN_INFO_EXTRA_PROTOCOL, base.protocol});
     info->extra.insert({PLUGIN_INFO_EXTRA_INPUT_TYPE, base.inputType});
@@ -186,7 +186,7 @@ Status PluginRegister::RegisterImpl::InitDemuxerInfo(std::shared_ptr<PluginRegIn
     auto& base = (DemuxerPluginDef&)def;
     reg->creator = reinterpret_cast<PluginCreatorFunc<PluginBase>>(base.creator);
     reg->sniffer = base.sniffer;
-    std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
+    auto info = std::make_shared<PluginInfo>();
     SetPluginInfo(info, def);
     info->extra.insert({PLUGIN_INFO_EXTRA_EXTENSIONS, base.extensions});
     DemuxerCapabilityConvert(info, def);
@@ -198,7 +198,7 @@ Status PluginRegister::RegisterImpl::InitMuxerInfo(std::shared_ptr<PluginRegInfo
 {
     auto& base = (MuxerPluginDef&)def;
     reg->creator = reinterpret_cast<PluginCreatorFunc<PluginBase>>(base.creator);
-    std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
+    auto info = std::make_shared<PluginInfo>();
     SetPluginInfo(info, def);
     info->inCaps = base.inCaps;
     info->outCaps = base.outCaps;
@@ -210,7 +210,7 @@ Status PluginRegister::RegisterImpl::InitCodecInfo(std::shared_ptr<PluginRegInfo
 {
     auto& base = (CodecPluginDef&)def;
     reg->creator = reinterpret_cast<PluginCreatorFunc<PluginBase>>(base.creator);
-    std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
+    auto info = std::make_shared<PluginInfo>();
     SetPluginInfo(info, def);
     info->extra.insert({PLUGIN_INFO_EXTRA_CODEC_MODE, base.codecMode});
     CodecCapabilityConvert(info, def);
@@ -221,7 +221,7 @@ Status PluginRegister::RegisterImpl::InitCodecInfo(std::shared_ptr<PluginRegInfo
 Status PluginRegister::RegisterImpl::InitAudioSinkInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def)
 {
     reg->creator = reinterpret_cast<PluginCreatorFunc<PluginBase>>(((AudioSinkPluginDef&)def).creator);
-    std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
+    auto info = std::make_shared<PluginInfo>();
     SetPluginInfo(info, def);
     AudioSinkCapabilityConvert(info, def);
     reg->info = info;
@@ -231,7 +231,7 @@ Status PluginRegister::RegisterImpl::InitAudioSinkInfo(std::shared_ptr<PluginReg
 Status PluginRegister::RegisterImpl::InitVideoSinkInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def)
 {
     reg->creator = reinterpret_cast<PluginCreatorFunc<PluginBase>>(((VideoSinkPluginDef&)def).creator);
-    std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
+    auto info = std::make_shared<PluginInfo>();
     SetPluginInfo(info, def);
     VideoSinkCapabilityConvert(info, def);
     reg->info = info;
