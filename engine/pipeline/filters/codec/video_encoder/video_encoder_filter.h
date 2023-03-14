@@ -18,8 +18,8 @@
 
 #if defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
 
-#include "filters/codec/codec_filter_base.h"
 #include "pipeline/core/type_define.h"
+#include "pipeline/filters/codec/codec_filter_base.h"
 #include "plugin/common/plugin_tags.h"
 
 namespace OHOS {

@@ -50,7 +50,7 @@ source_set("histreamer_recorder") {
       ]
       deps += [
         "//foundation/graphic/graphic_2d/frameworks/surface:surface",
-        "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline",
+        "//foundation/multimedia/histreamer/engine/pipeline:histreamer_engine_filters",
       ]
     }
   }

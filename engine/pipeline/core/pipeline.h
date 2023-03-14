@@ -24,9 +24,19 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class Pipeline : public Filter {
+class Pipeline : public EventReceiver {
 public:
     ~Pipeline() override = default;
+    virtual void Init(EventReceiver* receiver, FilterCallback* callback) = 0;
+    virtual ErrorCode Prepare() = 0;
+    virtual ErrorCode Start() = 0;
+    virtual ErrorCode Pause() = 0;
+    virtual ErrorCode Resume() = 0;
+    virtual ErrorCode Stop() = 0;
+
+    // 清除缓存
+    virtual void FlushStart() = 0;
+    virtual void FlushEnd() = 0;
 
     /**
      * 添加Filter到Pipeline

@@ -19,7 +19,6 @@
 #include <list>
 #include <memory>
 
-#include "filter_callback.h"
 #include "error_code.h"
 #include "utils/constants.h"
 #include "i_media_sync_center.h"
@@ -47,6 +46,13 @@ enum class FilterState {
     PAUSED,      // Pause called
 };
 
+enum class FilterCallbackType { PORT_ADDED, PORT_REMOVE };
+
+class FilterCallback {
+public:
+    virtual ~FilterCallback() = default;
+    virtual ErrorCode OnCallback(const FilterCallbackType& type, Filter* filter, const Plugin::Any& parameter) = 0;
+};
 // EventReceiver:
 //   1. Port使用此接口传递事件给Filter
 //   2. Filter使用此接口传递事件给Pipeline

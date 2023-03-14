@@ -44,7 +44,7 @@ source_set("histreamer_player") {
   ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline",
+    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_engine_filters",
     "//foundation/multimedia/histreamer/engine/scene:scene_common",
   ]
   if (hst_is_lite_sys) {

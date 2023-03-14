@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_PIPELINE_OUTPUT_SINK_FILTER_H
 #define HISTREAMER_PIPELINE_OUTPUT_SINK_FILTER_H
 #ifdef RECORDER_SUPPORT
-#include "filter_base.h"
+#include "pipeline/core/filter_base.h"
 #include "plugin/common/media_sink.h"
 #include "plugin/common/plugin_tags.h"
 #include "plugin/core/output_sink.h"

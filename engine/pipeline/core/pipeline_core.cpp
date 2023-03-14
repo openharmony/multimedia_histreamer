@@ -26,21 +26,6 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-PipelineCore::PipelineCore(const std::string& name)
-    : name_(name), eventReceiver_(nullptr), filterCallback_(nullptr)
-{
-}
-
-const std::string& PipelineCore::GetName()
-{
-    return name_;
-}
-
-const EventReceiver* PipelineCore::GetOwnerPipeline() const
-{
-    return eventReceiver_;
-}
-
 void PipelineCore::Init(EventReceiver* receiver, FilterCallback* callback)
 {
     eventReceiver_ = receiver;
@@ -309,11 +294,6 @@ void PipelineCore::ReorderFilters()
         filters_.clear();
         filters_.assign(result.begin(), result.end());
     }
-}
-
-void PipelineCore::SetSyncCenter(std::weak_ptr<IMediaSyncCenter> syncCenter)
-{
-    syncCenter_ = syncCenter;
 }
 } // namespace Pipeline
 } // namespace Media

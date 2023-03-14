@@ -139,7 +139,7 @@ ErrorCode HiPlayerImpl::Init()
     if (ret == ErrorCode::SUCCESS) {
         initialized_ = true;
     } else {
-        pipeline_->UnlinkPrevFilters();
+        //pipeline_->UnlinkPrevFilters();
         pipeline_->RemoveFilterChain(audioSource_.get());
         UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }

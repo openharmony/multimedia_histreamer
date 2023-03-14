@@ -29,7 +29,17 @@ namespace OHOS {
 namespace Media {
 namespace Pipeline {
 class InfoTransfer;
+enum class PortType { IN, OUT };
 
+struct PortDesc {
+    std::string name;
+    bool isPcm;
+};
+
+struct PortInfo {
+    PortType type;
+    std::vector<PortDesc> ports;
+};
 enum class WorkMode { PUSH, PULL };
 
 class Port {

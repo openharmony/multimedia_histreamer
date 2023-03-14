@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_PIPELINE_MUXER_FILTER_H
 #define HISTREAMER_PIPELINE_MUXER_FILTER_H
 #ifdef RECORDER_SUPPORT
-#include "filter_base.h"
+#include "pipeline/core/filter_base.h"
 #include "plugin/core/muxer.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/interface/muxer_plugin.h"

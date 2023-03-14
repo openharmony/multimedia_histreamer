@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include "common/plugin_utils.h"
+#include "pipeline/filters/common/plugin_utils.h"
 #include "foundation/osal/thread/task.h"
 #include "plugin/common/plugin_tags.h"
 #include "pipeline/core/filter_base.h"
@@ -33,7 +33,6 @@
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-using MapCandidate = std::pair<std::shared_ptr<Plugin::PluginInfo>, Capability>;
 class CodecFilterBase : public FilterBase, public Plugin::DataCallbackHelper {
 public:
     explicit CodecFilterBase(const std::string &name);

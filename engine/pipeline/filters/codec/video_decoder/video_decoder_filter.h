@@ -18,7 +18,7 @@
 
 #ifdef VIDEO_SUPPORT
 
-#include "filters/codec/codec_filter_base.h"
+#include "pipeline/filters/codec/codec_filter_base.h"
 
 namespace OHOS {
 namespace Media {

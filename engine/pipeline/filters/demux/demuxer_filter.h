@@ -18,10 +18,10 @@
 
 #include <atomic>
 #include <string>
-#include "core/filter_base.h"
 #include "data_packer.h"
 #include "osal/thread/mutex.h"
 #include "osal/thread/task.h"
+#include "pipeline/core/filter_base.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/core/demuxer.h"
 #include "plugin/core/plugin_meta.h"

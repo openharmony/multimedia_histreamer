@@ -25,7 +25,6 @@
 #include <vector>
 #include <stack>
 
-#include "filter_base.h"
 #include "error_code.h"
 #include "osal/thread/mutex.h"
 #include "plugin/common/plugin_types.h"
@@ -37,13 +36,7 @@ namespace Media {
 namespace Pipeline {
 class PipelineCore : public Pipeline {
 public:
-    explicit PipelineCore(const std::string& name = "pipeline_core");
-
     ~PipelineCore() override = default;
-
-    const std::string& GetName() override;
-
-    const EventReceiver* GetOwnerPipeline() const override;
 
     void Init(EventReceiver* receiver, FilterCallback* callback) override;
 
@@ -61,6 +54,8 @@ public:
 
     void FlushEnd() override;
 
+    void OnEvent(const Event& event) override;
+
     FilterState GetState();
 
     ErrorCode AddFilters(std::initializer_list<Filter*> filtersIn) override;
@@ -68,65 +63,6 @@ public:
     ErrorCode RemoveFilterChain(Filter* firstFilter) override;
     ErrorCode LinkFilters(std::initializer_list<Filter*> filters) override;
     ErrorCode LinkPorts(std::shared_ptr<OutPort> port1, std::shared_ptr<InPort> port2) override;
-
-    void OnEvent(const Event& event) override;
-
-    void UnlinkPrevFilters() override
-    {
-    }
-    std::vector<Filter*> GetNextFilters() override
-    {
-        return {};
-    }
-    std::vector<Filter*> GetPreFilters() override
-    {
-        return {};
-    }
-    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override
-    {
-        UNUSED_VARIABLE(inPort);
-        UNUSED_VARIABLE(buffer);
-        UNUSED_VARIABLE(offset);
-        return ErrorCode::ERROR_UNIMPLEMENTED;
-    }
-    ErrorCode PullData(const std::string& outPort, uint64_t offset, size_t size, AVBufferPtr& data) override
-    {
-        UNUSED_VARIABLE(outPort);
-        UNUSED_VARIABLE(offset);
-        UNUSED_VARIABLE(size);
-        UNUSED_VARIABLE(data);
-        return ErrorCode::ERROR_UNIMPLEMENTED;
-    }
-    std::vector<WorkMode> GetWorkModes() override
-    {
-        return {WorkMode::PUSH};
-    }
-
-    PInPort GetInPort(const std::string& name) override
-    {
-        UNUSED_VARIABLE(name);
-        return nullptr;
-    }
-    POutPort GetOutPort(const std::string& name) override
-    {
-        UNUSED_VARIABLE(name);
-        return nullptr;
-    }
-
-    ErrorCode SetParameter(int32_t key, const Plugin::Any& value) override
-    {
-        UNUSED_VARIABLE(key);
-        UNUSED_VARIABLE(value);
-        return ErrorCode::ERROR_UNIMPLEMENTED;
-    }
-    ErrorCode GetParameter(int32_t key, Plugin::Any& value) override
-    {
-        UNUSED_VARIABLE(key);
-        UNUSED_VARIABLE(value);
-        return ErrorCode::ERROR_UNIMPLEMENTED;
-    }
-
-    void SetSyncCenter(std::weak_ptr<IMediaSyncCenter> syncCenter) final;
 
     void InitFilters(const std::vector<Filter*>& filters);
 private:
@@ -139,10 +75,9 @@ private:
     FilterState state_ {FilterState::CREATED};
     OSAL::Mutex mutex_ {};
     std::vector<Filter*> filters_ {};
-    EventReceiver* eventReceiver_;
-    FilterCallback* filterCallback_;
+    EventReceiver* eventReceiver_ {nullptr};
+    FilterCallback* filterCallback_ {nullptr};
     std::vector<Filter*> filtersToRemove_ {};
-    std::weak_ptr<IMediaSyncCenter> syncCenter_ {};
 };
 } // namespace Pipeline
 } // namespace Media

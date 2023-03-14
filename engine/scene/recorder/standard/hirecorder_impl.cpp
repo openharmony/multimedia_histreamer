@@ -74,7 +74,7 @@ ErrorCode HiRecorderImpl::Init()
         fsm_.Start();
         initialized_ = true;
     } else {
-        pipeline_->UnlinkPrevFilters();
+        //pipeline_->UnlinkPrevFilters();
         pipeline_->RemoveFilterChain(muxer_.get());
     }
     return ret;

@@ -17,8 +17,8 @@
 #define HISTREAMER_PIPELINE_FILTER_CODEC_MODE_H
 
 #include <iostream>
-#include "filter.h"
 #include "pipeline/core/error_code.h"
+#include "pipeline/core/filter.h"
 #include "pipeline/core/type_define.h"
 #include "plugin/core/codec.h"
 

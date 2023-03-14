@@ -43,7 +43,7 @@ source_set("scene_common") {
   include_dirs = [ "//foundation/multimedia/histreamer/engine" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline",
+    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_engine_filters",
   ]
   sources = [
     "common/data_stream.cpp",
