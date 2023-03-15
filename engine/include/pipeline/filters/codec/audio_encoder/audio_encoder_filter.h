@@ -19,8 +19,8 @@
 #ifdef RECORDER_SUPPORT
 
 #include "pipeline/filters/codec/codec_filter_base.h"
+#include "foundation/utils/ring_buffer.h"
 #include "plugin/common/plugin_tags.h"
-#include "utils/ring_buffer.h"
 
 namespace OHOS {
 namespace Media {

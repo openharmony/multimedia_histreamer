@@ -18,11 +18,10 @@
 #ifdef RECORDER_SUPPORT
 #include <memory>
 #include <unordered_map>
-
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
+#include <i_recorder_engine.h>
 #include "hst_recorder_param.h"
-#include "i_recorder_engine.h"
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/pipeline.h"
 #include "pipeline/core/pipeline_core.h"

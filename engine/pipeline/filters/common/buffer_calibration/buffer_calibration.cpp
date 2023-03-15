@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "buffer_calibration.h"
+#include "pipeline/filters/common/buffer_calibration/buffer_calibration.h"
 #include <new>
-#include "strict_monotonic_pts_cal.h"
+#include "pipeline/filters/common/buffer_calibration/strict_monotonic_pts_cal.h"
 namespace OHOS {
 namespace Media {
 namespace Pipeline {

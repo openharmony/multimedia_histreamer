@@ -15,7 +15,7 @@
 
 #define HST_LOG_TAG "AudioBufferCalibration"
 
-#include "audio_buffer_calibration.h"
+#include "pipeline/filters/common/buffer_calibration/audio_buffer_calibration.h"
 #include <cmath>
 #include "foundation/log.h"
 #include "pipeline/filters/common/plugin_utils.h"

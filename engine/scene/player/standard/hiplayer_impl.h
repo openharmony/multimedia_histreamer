@@ -20,7 +20,7 @@
 #include <unordered_map>
 
 #include "hiplayer_callback_looper.h"
-#include "i_player_engine.h"
+#include <i_player_engine.h>
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
 #include "hiplayer_callback_looper.h"
@@ -30,13 +30,13 @@
 #include "pipeline/core/pipeline.h"
 #include "pipeline/core/pipeline_core.h"
 #include "pipeline/filters/codec/audio_decoder/audio_decoder_filter.h"
-#ifdef VIDEO_SUPPORT
-#include "pipeline/filters/codec/video_decoder/video_decoder_filter.h"
 #include "pipeline/filters/demux/demuxer_filter.h"
-#include "pipeline/filters/sink/video_sink/video_sink_filter.h"
-#endif
 #include "pipeline/filters/sink/audio_sink/audio_sink_filter.h"
 #include "pipeline/filters/source/media_source/media_source_filter.h"
+#ifdef VIDEO_SUPPORT
+#include "pipeline/filters/codec/video_decoder/video_decoder_filter.h"
+#include "pipeline/filters/sink/video_sink/video_sink_filter.h"
+#endif
 #include "scene/common/media_stat_stub.h"
 #include "play_executor.h"
 

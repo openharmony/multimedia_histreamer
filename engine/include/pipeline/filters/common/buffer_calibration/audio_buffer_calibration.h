@@ -15,7 +15,8 @@
 
 #ifndef HISTREAMER_PIPELINE_AUDIO_BUFFER_CALIBRATION_H
 #define HISTREAMER_PIPELINE_AUDIO_BUFFER_CALIBRATION_H
-#include "buffer_calibration.h"
+#include "pipeline/filters/common/buffer_calibration/buffer_calibration.h"
+
 namespace OHOS {
 namespace Media {
 namespace Pipeline {

@@ -17,18 +17,17 @@
 #define HISTREAMER_PIPELINE_FILTER_CODEC_BASE_H
 
 #include <string>
-
-#include "pipeline/filters/common/plugin_utils.h"
 #include "foundation/osal/thread/task.h"
-#include "plugin/common/plugin_tags.h"
+#include "foundation/utils/blocking_queue.h"
+#include "foundation/utils/buffer_pool.h"
 #include "pipeline/core/filter_base.h"
 #include "pipeline/core/type_define.h"
 #include "pipeline/filters/codec/codec_mode.h"
+#include "pipeline/filters/common/plugin_utils.h"
+#include "plugin/common/plugin_tags.h"
 #include "plugin/core/codec.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/plugin_meta.h"
-#include "utils/blocking_queue.h"
-#include "utils/buffer_pool.h"
 
 namespace OHOS {
 namespace Media {

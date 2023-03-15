@@ -15,10 +15,10 @@
 
 #define HST_LOG_TAG "AsyncMode"
 
-#include "async_mode.h"
-#include "common/plugin_utils.h"
-#include "utils/dump_buffer.h"
-#include "osal/utils/util.h"
+#include "pipeline/filters/codec/async_mode.h"
+#include "foundation/osal/utils/util.h"
+#include "foundation/utils/dump_buffer.h"
+#include "pipeline/filters/common/plugin_utils.h"
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #include "plugin/common/surface_memory.h"
 #endif

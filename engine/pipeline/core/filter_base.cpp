@@ -17,10 +17,10 @@
 
 #include "pipeline/core/filter_base.h"
 #include <algorithm>
-#include "common/plugin_settings.h"
-#include "common/plugin_utils.h"
 #include "foundation/log.h"
 #include "pipeline/core/plugin_attr_desc.h"
+#include "pipeline/filters/common/plugin_settings.h"
+#include "pipeline/filters/common/plugin_utils.h"
 
 namespace OHOS {
 namespace Media {

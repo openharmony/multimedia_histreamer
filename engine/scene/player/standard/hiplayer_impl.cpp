@@ -15,18 +15,18 @@
 
 #define HST_LOG_TAG "HiPlayerImpl"
 
-#include "audio_info.h"
-#include "av_common.h"
 #include "hiplayer_impl.h"
+#include <audio_info.h>
+#include <av_common.h>
+#include <media_errors.h>
 #include "foundation/log.h"
-#include "media_errors.h"
+#include "foundation/utils/hitrace_utils.h"
+#include "foundation/utils/steady_clock.h"
+#include "media_utils.h"
 #include "pipeline/factory/filter_factory.h"
 #include "plugin/common/media_source.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_meta.h"
-#include "scene/player/standard/media_utils.h"
-#include "utils/hitrace_utils.h"
-#include "utils/steady_clock.h"
 
 namespace {
 const float MAX_MEDIA_VOLUME = 1.0f; // standard interface volume is between 0 to 1.

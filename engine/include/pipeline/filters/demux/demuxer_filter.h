@@ -18,15 +18,15 @@
 
 #include <atomic>
 #include <string>
-#include "data_packer.h"
-#include "osal/thread/mutex.h"
-#include "osal/thread/task.h"
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/osal/thread/task.h"
 #include "pipeline/core/filter_base.h"
+#include "pipeline/core/type_define.h"
+#include "pipeline/filters/demux/data_packer.h"
+#include "pipeline/filters/demux/type_finder.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/core/demuxer.h"
 #include "plugin/core/plugin_meta.h"
-#include "type_finder.h"
-#include "pipeline/core/type_define.h"
 
 namespace OHOS {
 namespace Media {

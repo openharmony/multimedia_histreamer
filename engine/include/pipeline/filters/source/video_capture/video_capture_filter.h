@@ -12,33 +12,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MEDIA_PIPELINE_AUDIO_CAPTURE_FILTER_H
-#define MEDIA_PIPELINE_AUDIO_CAPTURE_FILTER_H
+#ifndef MEDIA_PIPELINE_VIDEO_CAPTURE_FILTER_H
+#define MEDIA_PIPELINE_VIDEO_CAPTURE_FILTER_H
 
-#ifdef RECORDER_SUPPORT
+#if defined(RECORDER_SUPPORT) && defined(VIDEO_SUPPORT)
 
 #include <memory>
 #include <string>
 
-#include "pipeline/filters/common/buffer_calibration/buffer_calibration.h"
-#include "osal/thread/task.h"
-#include "osal/utils/util.h"
+#include "foundation/osal/thread/task.h"
+#include "foundation/osal/utils/util.h"
+#include "foundation/utils/constants.h"
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_base.h"
-#include "plugin/core/plugin_manager.h"
 #include "pipeline/core/type_define.h"
-#include "plugin/interface/source_plugin.h"
-#include "plugin/common/plugin_audio_tags.h"
-#include "plugin/common/plugin_time.h"
-#include "utils/constants.h"
+#include "plugin/common/plugin_video_tags.h"
+#include "plugin/core/plugin_manager.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-class AudioCaptureFilter : public FilterBase {
+class VideoCaptureFilter : public FilterBase {
 public:
-    explicit AudioCaptureFilter(const std::string& name);
-    ~AudioCaptureFilter() override;
+    explicit VideoCaptureFilter(const std::string& name);
+    ~VideoCaptureFilter() override;
 
     std::vector<WorkMode> GetWorkModes() override;
     ErrorCode SetParameter(int32_t key, const Plugin::Any& value) override;
@@ -51,19 +48,14 @@ public:
     ErrorCode SendEos();
 private:
     void InitPorts() override;
-    ErrorCode InitAndConfigWithMeta(const std::shared_ptr<Plugin::Meta>& audioMeta);
+    ErrorCode InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& videoMeta);
     void ReadLoop();
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);
     ErrorCode FindPlugin();
     bool DoNegotiate(const CapabilitySet& outCaps);
-    bool CheckSampleRate(const Plugin::Capability& cap);
-    bool CheckChannels(const Plugin::Capability& cap);
-    bool CheckSampleFormat(const Plugin::Capability& cap);
     ErrorCode DoConfigure();
     void SendBuffer(const std::shared_ptr<AVBuffer>& buffer);
-    void PickPreferSampleFmt(const std::shared_ptr<Plugin::Meta>& meta, const Plugin::ValueType& val);
-    std::shared_ptr<Plugin::Meta> PickPreferParameters();
 
     std::shared_ptr<OSAL::Task> taskPtr_ {nullptr};
     std::shared_ptr<Plugin::Source> plugin_ {nullptr};
@@ -71,35 +63,20 @@ private:
     std::shared_ptr<Plugin::PluginInfo> pluginInfo_ {nullptr};
     Plugin::SrcInputType inputType_ {};
     bool inputTypeSpecified_ {false};
-    uint32_t sampleRate_ {0};
-    bool sampleRateSpecified_ {false};
-    uint32_t channelNum_ {0};
-    bool channelNumSpecified_ {false};
+    std::string mime_ {"video/raw"};
+    uint32_t videoWidth_ {0};
+    uint32_t videoHeight_ {0};
+    double captureRate_ {0};
     int64_t bitRate_ {0};
-    bool bitRateSpecified_ {false};
-    uint32_t appTokenId_ {0};
-    bool appTokenIdSpecified_ {false};
-    int32_t appUid_ {0};
-    bool appUidSpecified_ {false};
-    int32_t appPid_ {0};
-    bool appPidSpecified_ {false};
-    Plugin::AudioSampleFormat sampleFormat_ {OHOS::Media::Plugin::AudioSampleFormat::S16};
-    bool sampleFormatSpecified_ {false};
-    Plugin::AudioChannelLayout channelLayout_ {OHOS::Media::Plugin::AudioChannelLayout::STEREO};
-    bool channelLayoutSpecified_ {false};
+    uint32_t frameRate_ {0};
+    Plugin::VideoPixelFormat pixelFormat_ {Plugin::VideoPixelFormat::YUV420P};
     Capability capNegWithDownstream_ {};
-
-    std::unique_ptr<BufferCalibration> bufferCalibration_ {};
-    bool refreshTotalPauseTime_ {false};
-    int64_t latestBufferTime_ {HST_TIME_NONE};
-    int64_t latestPausedTime_ {HST_TIME_NONE};
-    int64_t totalPausedTime_ {0};
-    std::atomic<bool> eos_ {false};
-    OSAL::Mutex pushDataMutex_ {};
+    std::atomic<bool> isEos_ {false};
+    OSAL::Mutex pushMutex_ {};
 };
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
 #endif
-#endif // MEDIA_PIPELINE_AUDIO_CAPTURE_FILTER_H
+#endif // MEDIA_PIPELINE_VIDEO_CAPTURE_FILTER_H
 

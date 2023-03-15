@@ -15,7 +15,7 @@
 
 #include "media_utils.h"
 #include <cmath>
-#include "media_errors.h"
+#include <media_errors.h>
 
 namespace OHOS {
 namespace Media {

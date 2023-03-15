@@ -15,15 +15,14 @@
 
 #ifndef HISTREAMER_PIPELINE_FILTER_ASYNC_MODE_H
 #define HISTREAMER_PIPELINE_FILTER_ASYNC_MODE_H
-
-#include "codec_mode.h"
-#include "foundation/osal/thread/task.h"
-#include "utils/blocking_queue.h"
+#include <atomic>
 
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
 #include "foundation/osal/thread/scoped_lock.h"
-#include <atomic>
+#include "foundation/osal/thread/task.h"
+#include "foundation/utils/blocking_queue.h"
+#include "pipeline/filters/codec/codec_mode.h"
 
 namespace OHOS {
 namespace Media {

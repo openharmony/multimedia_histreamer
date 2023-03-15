@@ -15,11 +15,9 @@
 
 #define HST_LOG_TAG "Pip_Plugin_Utils"
 
-#include "plugin_utils.h"
-
+#include "pipeline/filters/common/plugin_utils.h"
 #include <cstdarg>
 #include <sstream>
-
 #include "foundation/log.h"
 #include "foundation/pre_defines.h"
 #include "pipeline/core/plugin_attr_desc.h"

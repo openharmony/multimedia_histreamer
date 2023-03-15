@@ -15,13 +15,12 @@
 
 #define HST_LOG_TAG "PluginSettings"
 
-#include "plugin_settings.h"
-
+#include "pipeline/filters/common/plugin_settings.h"
 #include <vector>
 #include "foundation/log.h"
 #include "foundation/pre_defines.h"
-#include "plugin/common/plugin_audio_tags.h"
 #include "pipeline/core/plugin_attr_desc.h"
+#include "plugin/common/plugin_audio_tags.h"
 
 namespace OHOS {
 namespace Media {

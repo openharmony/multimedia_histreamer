@@ -15,13 +15,13 @@
 
 #define HST_LOG_TAG "CodecFilterFactory"
 
-#include "codec_filter_factory.h"
-#include "async_mode.h"
-#include "codec_filter_base.h"
-#include "codec/audio_decoder/audio_decoder_filter.h"
-#include "codec/audio_encoder/audio_encoder_filter.h"
-#include "codec/video_decoder/video_decoder_filter.h"
-#include "sync_mode.h"
+#include "pipeline/filters/codec/codec_filter_factory.h"
+#include "pipeline/filters/codec/async_mode.h"
+#include "pipeline/filters/codec/audio_decoder/audio_decoder_filter.h"
+#include "pipeline/filters/codec/audio_encoder/audio_encoder_filter.h"
+#include "pipeline/filters/codec/codec_filter_base.h"
+#include "pipeline/filters/codec/video_decoder/video_decoder_filter.h"
+#include "pipeline/filters/codec/sync_mode.h"
 
 namespace OHOS {
 namespace Media {

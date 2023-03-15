@@ -21,14 +21,13 @@
 
 #include "foundation/osal/thread/task.h"
 #include "foundation/osal/utils/util.h"
+#include "foundation/utils/blocking_queue.h"
+#include "foundation/utils/constants.h"
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_base.h"
 #include "pipeline/core/type_define.h"
 #include "plugin/common/media_source.h"
 #include "plugin/core/plugin_manager.h"
-#include "plugin/interface/source_plugin.h"
-#include "utils/blocking_queue.h"
-#include "utils/constants.h"
 
 namespace OHOS {
 namespace Media {

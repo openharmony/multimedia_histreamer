@@ -18,15 +18,9 @@
 
 #include <memory>
 #include <unordered_map>
-
-#include "common/any.h"
-#ifdef VIDEO_SUPPORT
-#include "pipeline/filters/codec/video_decoder/video_decoder_filter.h"
-#include "pipeline/filters/sink/video_sink/video_sink_filter.h"
-#endif
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
 #include "internal/state_machine.h"
-#include "osal/thread/condition_variable.h"
-#include "osal/thread/mutex.h"
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/media_sync_manager.h"
 #include "pipeline/core/pipeline.h"
@@ -35,7 +29,12 @@
 #include "pipeline/filters/demux/demuxer_filter.h"
 #include "pipeline/filters/sink/audio_sink/audio_sink_filter.h"
 #include "pipeline/filters/source/media_source/media_source_filter.h"
+#ifdef VIDEO_SUPPORT
+#include "pipeline/filters/codec/video_decoder/video_decoder_filter.h"
+#include "pipeline/filters/sink/video_sink/video_sink_filter.h"
+#endif
 #include "play_executor.h"
+#include "plugin/common/any.h"
 #include "scene/common/media_stat_stub.h"
 #include "scene/lite/hiplayer.h"
 

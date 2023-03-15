@@ -19,7 +19,6 @@
 #include "pipeline/core/filter_base.h"
 #include "plugin/core/muxer.h"
 #include "plugin/core/plugin_info.h"
-#include "plugin/interface/muxer_plugin.h"
 #include "plugin/core/plugin_meta.h"
 
 namespace OHOS {

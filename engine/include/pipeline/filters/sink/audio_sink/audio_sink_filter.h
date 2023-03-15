@@ -18,8 +18,8 @@
 
 #include <atomic>
 
-#include "osal/thread/condition_variable.h"
-#include "osal/thread/mutex.h"
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_base.h"
 #include "pipeline/filters/sink/media_synchronous_sink.h"

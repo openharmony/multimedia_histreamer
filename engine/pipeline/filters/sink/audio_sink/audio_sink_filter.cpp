@@ -14,18 +14,18 @@
  */
 
 #define HST_LOG_TAG "AudioSinkFilter"
-#include "audio_sink_filter.h"
-#include "common/plugin_utils.h"
+#include "pipeline/filters/sink/audio_sink/audio_sink_filter.h"
 #include "foundation/log.h"
 #include "foundation/osal/utils/util.h"
-#include "utils/dump_buffer.h"
+#include "foundation/utils/dump_buffer.h"
+#include "foundation/utils/steady_clock.h"
 #include "pipeline/core/plugin_attr_desc.h"
 #include "pipeline/factory/filter_factory.h"
 #include "pipeline/filters/common/plugin_settings.h"
+#include "pipeline/filters/common/plugin_utils.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/core/plugin_meta.h"
-#include "utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {

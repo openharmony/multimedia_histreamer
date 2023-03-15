@@ -16,6 +16,7 @@
 #ifndef HISTREAMER_PIPELINE_PLUGIN_CAP_DESC_H
 #define HISTREAMER_PIPELINE_PLUGIN_CAP_DESC_H
 #include <tuple>
+#include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_source_tags.h"
 #include "plugin/common/plugin_video_tags.h"
 

@@ -17,11 +17,11 @@
 
 #define HST_LOG_TAG "AudioEncoderFilter"
 
-#include "audio_encoder_filter.h"
+#include "pipeline/filters/codec/audio_encoder/audio_encoder_filter.h"
 #include "foundation/cpp_ext/memory_ext.h"
-#include "osal/utils/util.h"
+#include "foundation/osal/utils/util.h"
+#include "foundation/utils/steady_clock.h"
 #include "pipeline/factory/filter_factory.h"
-#include "utils/steady_clock.h"
 
 #define DEFAULT_OUT_BUFFER_POOL_SIZE 5
 #define MAX_OUT_DECODED_DATA_SIZE_PER_FRAME 20 * 1024 // 20kB

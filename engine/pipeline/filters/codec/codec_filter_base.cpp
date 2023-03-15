@@ -15,11 +15,11 @@
 
 #define HST_LOG_TAG "CodecFilterBase"
 
-#include "codec_filter_base.h"
+#include "pipeline/filters/codec/codec_filter_base.h"
 #include "foundation/cpp_ext/memory_ext.h"
+#include "foundation/utils/steady_clock.h"
 #include "pipeline/core/plugin_attr_desc.h"
 #include "pipeline/filters/common/plugin_settings.h"
-#include "utils/steady_clock.h"
 
 namespace {
 constexpr uint32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 5;

@@ -23,15 +23,15 @@
 #include "refbase.h"
 #include "surface/surface.h"
 #endif
-#include "osal/thread/condition_variable.h"
-#include "osal/thread/mutex.h"
-#include "osal/thread/task.h"
-#include "utils/blocking_queue.h"
+#include "foundation/osal/thread/condition_variable.h"
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/osal/thread/task.h"
+#include "foundation/utils/blocking_queue.h"
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_base.h"
+#include "pipeline/filters/sink/media_synchronous_sink.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/video_sink.h"
-#include "pipeline/filters/sink/media_synchronous_sink.h"
 
 namespace OHOS {
 namespace Media {

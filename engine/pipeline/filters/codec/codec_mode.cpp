@@ -15,11 +15,11 @@
 
 #define HST_LOG_TAG "CodecMode"
 
-#include "codec_mode.h"
-#include "common/plugin_utils.h"
-#include "foundation/log.h"
+#include "pipeline/filters/codec/codec_mode.h"
 #include "foundation/cpp_ext/memory_ext.h"
-#include "utils/steady_clock.h"
+#include "foundation/log.h"
+#include "foundation/utils/steady_clock.h"
+#include "pipeline/filters/common/plugin_utils.h"
 
 namespace OHOS {
 namespace Media {
