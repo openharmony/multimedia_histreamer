@@ -21,7 +21,6 @@
 #include "codec/audio_decoder/audio_decoder_filter.h"
 #include "codec/audio_encoder/audio_encoder_filter.h"
 #include "codec/video_decoder/video_decoder_filter.h"
-#include "factory/filter_factory.h"
 #include "sync_mode.h"
 
 namespace OHOS {

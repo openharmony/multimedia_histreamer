@@ -19,10 +19,10 @@
 
 #include "audio_capture_filter.h"
 #include "common/plugin_utils.h"
-#include "factory/filter_factory.h"
 #include "foundation/cpp_ext/algorithm_ext.h"
 #include "foundation/log.h"
 #include "pipeline/core/plugin_attr_desc.h"
+#include "pipeline/factory/filter_factory.h"
 #include "pipeline/filters/common/buffer_calibration/audio_buffer_calibration.h"
 
 namespace OHOS {

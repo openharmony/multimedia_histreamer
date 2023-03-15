@@ -16,8 +16,8 @@
 #define HST_LOG_TAG "AudioDecoderFilter"
 
 #include "audio_decoder_filter.h"
-#include "factory/filter_factory.h"
 #include "osal/utils/util.h"
+#include "pipeline/factory/filter_factory.h"
 #include "pipeline/filters/codec/codec_filter_factory.h"
 #include "utils/dump_buffer.h"
 #include "utils/steady_clock.h"

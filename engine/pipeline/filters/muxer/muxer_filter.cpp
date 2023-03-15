@@ -19,11 +19,11 @@
 #include "muxer_filter.h"
 
 #include "data_spliter.h"
-#include "factory/filter_factory.h"
 #include "foundation/log.h"
 #include "common/plugin_settings.h"
 #include "common/plugin_utils.h"
 #include "pipeline/core/plugin_attr_desc.h"
+#include "pipeline/factory/filter_factory.h"
 
 namespace OHOS {
 namespace Media {

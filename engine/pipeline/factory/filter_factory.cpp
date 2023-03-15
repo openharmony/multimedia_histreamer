@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "filter_factory.h"
+#include "pipeline/factory/filter_factory.h"
 
 namespace OHOS {
 namespace Media {

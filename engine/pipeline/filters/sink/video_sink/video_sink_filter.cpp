@@ -20,9 +20,10 @@
 #include "video_sink_filter.h"
 
 #include "common/plugin_utils.h"
-#include "factory/filter_factory.h"
 #include "foundation/log.h"
 #include "osal/utils/util.h"
+#include "pipeline/factory/filter_factory.h"
+#include "pipeline/filters/common/plugin_settings.h"
 #include "plugin/common/plugin_time.h"
 #include "utils/steady_clock.h"
 #ifndef OHOS_LITE

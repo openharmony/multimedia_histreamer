@@ -20,8 +20,8 @@
 #include "video_capture_filter.h"
 #include "common/plugin_utils.h"
 #include "foundation/log.h"
-#include "factory/filter_factory.h"
 #include "pipeline/core/plugin_attr_desc.h"
+#include "pipeline/factory/filter_factory.h"
 
 namespace OHOS {
 namespace Media {

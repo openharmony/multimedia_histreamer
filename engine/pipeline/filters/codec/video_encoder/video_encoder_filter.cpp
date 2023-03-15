@@ -19,9 +19,9 @@
 
 #include "video_encoder_filter.h"
 #include "foundation/cpp_ext/memory_ext.h"
-#include "factory/filter_factory.h"
 #include "foundation/log.h"
 #include "osal/utils/util.h"
+#include "pipeline/factory/filter_factory.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
 #include "utils/constants.h"

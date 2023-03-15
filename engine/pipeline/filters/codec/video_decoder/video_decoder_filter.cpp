@@ -18,11 +18,11 @@
 #define HST_LOG_TAG "VideoDecoderFilter"
 
 #include "video_decoder_filter.h"
-#include "factory/filter_factory.h"
 #include "utils/dump_buffer.h"
 #include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/log.h"
 #include "osal/utils/util.h"
+#include "pipeline/factory/filter_factory.h"
 #include "pipeline/filters/codec/codec_filter_factory.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
