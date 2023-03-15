@@ -15,7 +15,7 @@
 
 #define HST_LOG_TAG "MediaSyncManager"
 
-#include "media_sync_manager.h"
+#include "pipeline/core/media_sync_manager.h"
 
 #include <algorithm>
 #include <cmath>

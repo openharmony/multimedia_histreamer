@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "event.h"
+#include "pipeline/core/event.h"
 
 namespace OHOS {
 namespace Media {

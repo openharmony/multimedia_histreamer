@@ -11,12 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+config("source_config") {
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine/include",
+  ]
+}
 
 source_set("audio_capture_filter") {
   sources = [
     "audio_capture/audio_capture_filter.cpp",
   ]
   public_configs = [
+    ":source_config",
     "//foundation/multimedia/histreamer:histreamer_presets",
   ]
   public_deps = [ "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline_base" ]
@@ -25,6 +31,7 @@ source_set("audio_capture_filter") {
 source_set("media_source_filter") {
   sources = [ "media_source/media_source_filter.cpp" ]
   public_configs = [
+    ":source_config",
     "//foundation/multimedia/histreamer:histreamer_presets",
   ]
   public_deps = [ "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline_base" ]
@@ -33,6 +40,7 @@ source_set("media_source_filter") {
 source_set("video_capture_filter") {
   sources = [ "video_capture/video_capture_filter.cpp" ]
   public_configs = [
+    ":source_config",
     "//foundation/multimedia/histreamer:histreamer_presets",
   ]
   public_deps = [ "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline_base" ]

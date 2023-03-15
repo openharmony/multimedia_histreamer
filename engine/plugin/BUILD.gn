@@ -92,6 +92,7 @@ source_set("histreamer_plugin_intf") {
 
 config("hst_plugin_core_config") {
   include_dirs = [
+    "//foundation/multimedia/histreamer/engine/include",
     "//foundation/multimedia/histreamer/engine/",
     "//foundation/multimedia/histreamer/engine/plugin",
   ]

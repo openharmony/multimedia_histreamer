@@ -18,7 +18,10 @@ if (!hst_is_lite_sys) {
   }
 
   source_set("audio_server_sink") {
-    include_dirs = [ "//third_party/ffmpeg" ]
+    include_dirs = [
+      "//foundation/multimedia/histreamer/engine/include/",
+      "//third_party/ffmpeg"
+    ]
     sources = [
       "//foundation/multimedia/histreamer/engine/plugin/plugins/ffmpeg_adapter/utils/ffmpeg_utils.cpp",
       "audio_server_sink_plugin.cpp",

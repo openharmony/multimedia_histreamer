@@ -19,7 +19,7 @@
 #include <initializer_list>
 #include <memory>
 
-#include "filter.h"
+#include "pipeline/core/filter.h"
 
 namespace OHOS {
 namespace Media {

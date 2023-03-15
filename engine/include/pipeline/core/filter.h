@@ -19,12 +19,12 @@
 #include <list>
 #include <memory>
 
-#include "error_code.h"
-#include "utils/constants.h"
-#include "i_media_sync_center.h"
-#include "event.h"
-#include "port.h"
+#include "pipeline/core/error_code.h"
+#include "pipeline/core/event.h"
+#include "pipeline/core/i_media_sync_center.h"
+#include "pipeline/core/port.h"
 #include "plugin/core/plugin_meta.h"
+#include "utils/constants.h"
 
 namespace OHOS {
 namespace Media {

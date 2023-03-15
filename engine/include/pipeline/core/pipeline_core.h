@@ -25,7 +25,7 @@
 #include <vector>
 #include <stack>
 
-#include "error_code.h"
+#include "pipeline/core/error_code.h"
 #include "osal/thread/mutex.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/core/plugin_meta.h"

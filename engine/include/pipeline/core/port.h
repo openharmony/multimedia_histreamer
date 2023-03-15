@@ -20,10 +20,10 @@
 #include <string>
 #include <utility>
 
-#include "error_code.h"
-#include "utils/constants.h"
-#include "type_define.h"
+#include "pipeline/core/error_code.h"
+#include "pipeline/core/type_define.h"
 #include "plugin/core/plugin_meta.h"
+#include "utils/constants.h"
 
 namespace OHOS {
 namespace Media {

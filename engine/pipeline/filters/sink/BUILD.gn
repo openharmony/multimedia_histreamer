@@ -14,10 +14,16 @@
 
 # build plugin interface
 import("//foundation/multimedia/histreamer/config.gni")
+config("sink_config") {
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine/include",
+  ]
+}
 
 source_set("media_synchronous_sink") {
   sources = [ "media_synchronous_sink.cpp" ]
   public_configs = [
+    ":sink_config",
     "//foundation/multimedia/histreamer:histreamer_presets",
   ]
   public_deps = [ "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline_base" ]
@@ -26,6 +32,7 @@ source_set("media_synchronous_sink") {
 source_set("audio_sink_filter") {
   sources = [ "audio_sink/audio_sink_filter.cpp" ]
   public_configs = [
+    ":sink_config",
     "//foundation/multimedia/histreamer:histreamer_presets",
   ]
   public_deps = [ ":media_synchronous_sink" ]
@@ -34,6 +41,7 @@ source_set("audio_sink_filter") {
 source_set("video_sink_filter") {
   sources = [ "video_sink/video_sink_filter.cpp" ]
   public_configs = [
+    ":sink_config",
     "//foundation/multimedia/histreamer:histreamer_presets",
   ]
   public_deps = [ ":media_synchronous_sink" ]
@@ -42,6 +50,7 @@ source_set("video_sink_filter") {
 source_set("output_sink_filter") {
   sources = [ "output_sink/output_sink_filter.cpp" ]
   public_configs = [
+    ":sink_config",
     "//foundation/multimedia/histreamer:histreamer_presets",
   ]
   public_deps = [ "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline_base" ]

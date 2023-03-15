@@ -40,7 +40,10 @@ source_set("std_engine_factory") {
 }
 
 source_set("scene_common") {
-  include_dirs = [ "//foundation/multimedia/histreamer/engine" ]
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine",
+    "//foundation/multimedia/histreamer/engine/include",
+  ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/pipeline:histreamer_engine_filters",

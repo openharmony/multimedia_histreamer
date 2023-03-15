@@ -39,7 +39,10 @@ group("plugin_ffmpeg_adapter") {
   }
 }
 config("plugin_ffmpeg_adapter_config") {
-  include_dirs = [ "//third_party/ffmpeg" ]
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine/include/",
+    "//third_party/ffmpeg"
+  ]
 }
 
 source_set("ffmpeg_audio_decoders") {

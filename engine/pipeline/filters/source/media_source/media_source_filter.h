@@ -19,9 +19,9 @@
 #include <memory>
 #include <string>
 
-#include "pipeline/core/error_code.h"
 #include "foundation/osal/thread/task.h"
 #include "foundation/osal/utils/util.h"
+#include "pipeline/core/error_code.h"
 #include "pipeline/core/filter_base.h"
 #include "pipeline/core/type_define.h"
 #include "plugin/common/media_source.h"

@@ -14,10 +14,15 @@
 
 # build plugin interface
 import("//foundation/multimedia/histreamer/config.gni")
-
+config("muxer_config") {
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine/include",
+  ]
+}
 source_set("muxer_filter") {
   sources = [ "muxer_filter.cpp" ]
   public_configs = [
+    ":muxer_config",
     "//foundation/multimedia/histreamer:histreamer_presets",
   ]
   public_deps = [ "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline_base" ]

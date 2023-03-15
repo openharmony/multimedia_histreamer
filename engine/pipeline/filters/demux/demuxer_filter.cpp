@@ -17,9 +17,9 @@
 
 #include "demuxer_filter.h"
 #include <algorithm>
-#include "compatible_check.h"
 #include "factory/filter_factory.h"
 #include "foundation/log.h"
+#include "pipeline/core/compatible_check.h"
 #include "pipeline/filters/common/plugin_utils.h"
 #include "plugin/common/plugin_time.h"
 #include "utils/constants.h"

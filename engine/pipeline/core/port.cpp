@@ -15,11 +15,11 @@
 
 #define HST_LOG_TAG "FilterPort"
 
-#include "port.h"
+#include "pipeline/core/port.h"
 #include <algorithm>
-#include "filter.h"
 #include "foundation/log.h"
 #include "foundation/pre_defines.h"
+#include "pipeline/core/filter.h"
 
 namespace OHOS {
 namespace Media {

@@ -29,6 +29,7 @@ config("plugin_codec_adapter_config") {
     "//drivers/peripheral/display/interfaces/include/",
     "//foundation/multimedia/histreamer/engine/",
     "//foundation/multimedia/histreamer/engine/foundation/",
+    "//foundation/multimedia/histreamer/engine/include/",
     "//foundation/multimedia/histreamer/engine/plugin/",
     "//third_party/openmax/api/1.1.2/",
   ]

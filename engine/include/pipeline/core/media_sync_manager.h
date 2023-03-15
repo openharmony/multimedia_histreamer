@@ -19,9 +19,9 @@
 #include <string>
 #include <tuple>
 #include <vector>
-#include "error_code.h"
 #include "foundation/osal/thread/mutex.h"
-#include "i_media_sync_center.h"
+#include "pipeline/core/error_code.h"
+#include "pipeline/core/i_media_sync_center.h"
 #include "plugin/common/plugin_time.h"
 
 namespace OHOS {

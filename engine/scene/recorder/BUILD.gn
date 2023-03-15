@@ -15,8 +15,10 @@ import("//foundation/multimedia/histreamer/config.gni")
 
 config("histreamer_recorder_config") {
   if (multimedia_histreamer_enable_recorder) {
-    include_dirs =
-        [ "//foundation/multimedia/histreamer/engine/scene/recorder" ]
+    include_dirs = [
+      "//foundation/multimedia/histreamer/engine/include",
+      "//foundation/multimedia/histreamer/engine/scene/recorder"
+    ]
     if (!hst_is_lite_sys) {
       include_dirs += [
         "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",

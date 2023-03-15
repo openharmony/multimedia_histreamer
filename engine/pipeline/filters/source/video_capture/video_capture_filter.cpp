@@ -21,7 +21,7 @@
 #include "common/plugin_utils.h"
 #include "foundation/log.h"
 #include "factory/filter_factory.h"
-#include <plugin_attr_desc.h>
+#include "pipeline/core/plugin_attr_desc.h"
 
 namespace OHOS {
 namespace Media {

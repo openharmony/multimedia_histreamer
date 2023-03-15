@@ -15,7 +15,7 @@
 
 #define HST_LOG_TAG "Compatible_Check"
 
-#include "compatible_check.h"
+#include "pipeline/core/compatible_check.h"
 #include <algorithm>
 #include <functional>
 #include <map>

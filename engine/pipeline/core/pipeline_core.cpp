@@ -15,7 +15,7 @@
 
 #define HST_LOG_TAG "PipelineCore"
 
-#include "pipeline_core.h"
+#include "pipeline/core/pipeline_core.h"
 #include <queue>
 #include <stack>
 #include "foundation/log.h"

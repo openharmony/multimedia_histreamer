@@ -14,7 +14,10 @@
 import("//foundation/multimedia/histreamer/config.gni")
 
 config("histreamer_player_config") {
-  include_dirs = [ "//foundation/multimedia/histreamer/engine/scene/player" ]
+  include_dirs = [
+      "//foundation/multimedia/histreamer/engine/include",
+      "//foundation/multimedia/histreamer/engine/scene/player"
+  ]
   if (hst_is_lite_sys) {
     include_dirs += [
       "//foundation/multimedia/media_lite/interfaces/innerkits",

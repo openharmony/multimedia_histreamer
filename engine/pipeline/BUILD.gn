@@ -18,7 +18,7 @@ config("histreamer_pipelin_base_config") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine/pipeline",
     "//foundation/multimedia/histreamer/engine/pipeline/filters",
-    "//foundation/multimedia/histreamer/engine/pipeline/core",
+    "//foundation/multimedia/histreamer/engine/include",
   ]
 }
 

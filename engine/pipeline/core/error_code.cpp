@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "error_code.h"
+#include "pipeline/core/error_code.h"
 #include <map>
 
 namespace OHOS {
