@@ -15,9 +15,9 @@
 #define HST_LOG_TAG "FfmpegTrackMeta"
 #include "ffmpeg_track_meta.h"
 #include "foundation/log.h"
-#include "plugins/ffmpeg_adapter/utils/aac_audio_config_parser.h"
-#include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
-#include "utils/constants.h"
+#include "foundation/utils/constants.h"
+#include "plugin/plugins/ffmpeg_adapter/utils/aac_audio_config_parser.h"
+#include "plugin/plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
 #ifdef VIDEO_SUPPORT
 #include "plugins/ffmpeg_adapter/utils/avc_config_data_parser.h"

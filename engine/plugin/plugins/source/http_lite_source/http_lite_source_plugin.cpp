@@ -15,7 +15,7 @@
 #define HST_LOG_TAG "HttpLiteSourcePlugin"
 #include "http_lite_source_plugin.h"
 #include "foundation/log.h"
-#include "osal/utils/util.h"
+#include "foundation/osal/utils/util.h"
 
 namespace OHOS {
 namespace Media {

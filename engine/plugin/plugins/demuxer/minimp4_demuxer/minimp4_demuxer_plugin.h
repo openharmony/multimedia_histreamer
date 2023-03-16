@@ -20,9 +20,8 @@
 #include <string>
 #include <vector>
 #include <set>
-
-#include "interface/demuxer_plugin.h"
 #include "minimp4.h"
+#include "plugin/interface/demuxer_plugin.h"
 
 namespace OHOS {
 namespace Media {

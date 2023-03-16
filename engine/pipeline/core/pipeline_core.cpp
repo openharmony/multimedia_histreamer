@@ -19,9 +19,9 @@
 #include <queue>
 #include <stack>
 #include "foundation/log.h"
-#include "osal/thread/scoped_lock.h"
-#include "utils/steady_clock.h"
-#include "utils/hitrace_utils.h"
+#include "foundation/osal/thread/scoped_lock.h"
+#include "foundation/utils/hitrace_utils.h"
+#include "foundation/utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {

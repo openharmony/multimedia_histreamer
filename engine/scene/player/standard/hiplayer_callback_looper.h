@@ -18,10 +18,10 @@
 
 #include <list>
 #include <utility>
-
-#include "i_player_engine.h"
 #include "foundation/osal/thread/task.h"
+#include "i_player_engine.h"
 #include "plugin/common/any.h"
+
 namespace OHOS {
 namespace Media {
 class HiPlayerCallbackLooper : public IPlayerEngineObs {

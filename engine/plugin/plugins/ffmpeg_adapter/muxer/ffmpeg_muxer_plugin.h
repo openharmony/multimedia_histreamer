@@ -16,8 +16,8 @@
 #ifndef HISTREAMER_FFMPEG_MUXER_PLUGIN_H
 #define HISTREAMER_FFMPEG_MUXER_PLUGIN_H
 
-#include "plugin/interface/muxer_plugin.h"
 #include "foundation/osal/thread/mutex.h"
+#include "plugin/interface/muxer_plugin.h"
 
 #ifdef __cplusplus
 extern "C" {

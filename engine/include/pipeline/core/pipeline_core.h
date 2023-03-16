@@ -24,12 +24,11 @@
 #include <string>
 #include <vector>
 #include <stack>
-
+#include "foundation/osal/thread/mutex.h"
 #include "pipeline/core/error_code.h"
-#include "osal/thread/mutex.h"
+#include "pipeline/core/pipeline.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/core/plugin_meta.h"
-#include "pipeline.h"
 
 namespace OHOS {
 namespace Media {
@@ -70,7 +69,6 @@ private:
 
     void NotifyEvent(const Event& event);
 
-    std::string name_;
     size_t readyEventCnt_ {0};
     FilterState state_ {FilterState::CREATED};
     OSAL::Mutex mutex_ {};

@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_FOUNDATION_OSAL_SCOPED_LOCK_H
 #define HISTREAMER_FOUNDATION_OSAL_SCOPED_LOCK_H
 
-#include "mutex.h"
+#include "foundation/osal/thread/mutex.h"
 
 namespace OHOS {
 namespace Media {

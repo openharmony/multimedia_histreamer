@@ -16,7 +16,6 @@
 #include "codec.h"
 
 #include <memory>
-#include <type_traits>
 #include "foundation/pre_defines.h"
 #include "interface/codec_plugin.h"
 

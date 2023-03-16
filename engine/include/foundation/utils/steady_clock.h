@@ -17,9 +17,6 @@
 #define HISTREAMER_STEADY_CLOCK_H
 
 #include <chrono>
-#if defined(PROFILE)
-#include "foundation/log.h"
-#endif
 
 namespace OHOS {
 namespace Media {
@@ -42,6 +39,7 @@ private:
 } // namespace OHOS
 
 #if defined(PROFILE)
+#include "foundation/log.h"
 #define PROFILE_BEGIN(message, ...)                                                                                    \
     do {                                                                                                               \
         MEDIA_LOG_I(message ", timestamp(ms): " PUBLIC_LOG_D64, ##__VA_ARGS__, SteadyClock::GetCurrentTimeMs());      \

@@ -18,10 +18,9 @@
 
 #include <string>
 #include <memory>
-#include "plugin/interface/plugin_base.h"
+#include "foundation/utils/ring_buffer.h"
 #include "plugin/plugins/source/http_source/download/downloader.h"
 #include "plugin/plugins/source/http_source/media_downloader.h"
-#include "ring_buffer.h"
 
 namespace OHOS {
 namespace Media {

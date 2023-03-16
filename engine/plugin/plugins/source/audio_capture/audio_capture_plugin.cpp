@@ -22,8 +22,8 @@
 #include "audio_type_translate.h"
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
+#include "foundation/utils/constants.h"
 #include "plugin/common/plugin_time.h"
-#include "utils/constants.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;

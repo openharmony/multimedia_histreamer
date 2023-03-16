@@ -19,9 +19,9 @@
 
 #include "surface_sink_plugin.h"
 #include <algorithm>
-#include "securec.h"
 #include "foundation/log.h"
-#include "utils/constants.h"
+#include "foundation/utils/constants.h"
+#include "securec.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;

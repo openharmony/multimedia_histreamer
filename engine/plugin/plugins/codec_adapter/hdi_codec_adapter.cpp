@@ -18,8 +18,8 @@
 
 #include "hdi_codec_adapter.h"
 #include <utility>
-#include "codec_callback_type_stub.h"
 #include "codec_callback_if.h"
+#include "codec_callback_type_stub.h"
 #include "codec_component_if.h"
 #include "codec_omx_ext.h"
 #include "codec_utils.h"

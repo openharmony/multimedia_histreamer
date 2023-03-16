@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 #ifndef OHOS_LITE
-#include "hitrace_utils.h"
+#include "foundation/utils/hitrace_utils.h"
+
 namespace OHOS {
 namespace Media {
     SyncTracker::SyncTracker(const std::string &title)

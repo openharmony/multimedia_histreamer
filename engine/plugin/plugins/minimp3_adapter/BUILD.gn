@@ -31,7 +31,7 @@ config("plugin_minimp3_adapter_config") {
   include_dirs = [
     "minimp3_adapter",
     "//third_party/minimp3",
-    "//foundation/multimedia/histreamer/engine/foundation",
+    "//foundation/multimedia/histreamer/engine/include",
   ]
 }
 

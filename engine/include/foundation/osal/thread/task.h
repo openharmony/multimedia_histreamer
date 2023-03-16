@@ -22,13 +22,11 @@
 
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
-#include "foundation/osal/thread/scoped_lock.h"
 #include "foundation/osal/thread/thread.h"
 
 namespace OHOS {
 namespace Media {
 namespace OSAL {
-
 class Task {
 public:
     explicit Task(std::string name, ThreadPriority priority = ThreadPriority::HIGH);

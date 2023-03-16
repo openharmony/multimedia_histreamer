@@ -20,11 +20,11 @@
 #include <queue>
 #include <string>
 #include <utility>
-#include "constants.h"
 #include "foundation/log.h"
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
 #include "foundation/osal/thread/scoped_lock.h"
+#include "foundation/utils/constants.h"
 
 namespace OHOS {
 namespace Media {

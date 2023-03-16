@@ -17,7 +17,7 @@
 #define private public
 #define protected public
 
-#include "osal/utils/util.h"
+#include "foundation/osal/utils/util.h"
 #include "scene/player/internal/state_machine.h"
 #include "scene/player/play_executor.h"
 

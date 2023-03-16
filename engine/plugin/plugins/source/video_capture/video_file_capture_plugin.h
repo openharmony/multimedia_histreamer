@@ -23,9 +23,6 @@
 #include "foundation/osal/thread/mutex.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
-#include "refbase.h"
-#include "surface/surface.h"
-
 namespace OHOS {
 namespace Media {
 namespace Plugin {

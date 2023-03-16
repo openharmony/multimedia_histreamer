@@ -15,7 +15,7 @@
 
 #define HST_LOG_TAG "ConditionVariable"
 
-#include "condition_variable.h"
+#include "foundation/osal/thread/condition_variable.h"
 #include "foundation/log.h"
 
 namespace {

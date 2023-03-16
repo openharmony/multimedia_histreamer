@@ -18,10 +18,10 @@
 
 #include <functional>
 #include <map>
-#include "plugin/interface/codec_plugin.h"
-#include "plugin/common/plugin_types.h"
-#include "foundation/osal/thread/scoped_lock.h"
 #include "aac_wrapper.h"
+#include "foundation/osal/thread/scoped_lock.h"
+#include "plugin/common/plugin_types.h"
+#include "plugin/interface/codec_plugin.h"
 
 namespace OHOS {
 namespace Media {

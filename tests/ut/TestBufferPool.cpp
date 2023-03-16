@@ -21,8 +21,8 @@
 
 #include <vector>
 
-#include "utils/buffer_pool.h"
-#include "utils/constants.h"
+#include "foundation/utils/buffer_pool.h"
+#include "foundation/utils/constants.h"
 #include "pipeline/core/type_define.h"
 
 namespace OHOS::Media::Test {

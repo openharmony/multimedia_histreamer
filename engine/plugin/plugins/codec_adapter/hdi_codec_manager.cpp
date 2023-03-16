@@ -17,11 +17,11 @@
 #define HST_LOG_TAG "HdiCodecManager"
 
 #include "hdi_codec_manager.h"
-#include <hdf_base.h>
-#include "common/plugin_caps_builder.h"
-#include "constants.h"
+#include "foundation/utils/constants.h"
 #include "foundation/log.h"
-#include "hdi_codec_adapter.h"
+#include "hdf_base.h"
+#include "hdi_codec_adapter.h
+#include "plugin/common/plugin_caps_builder.h""
 
 namespace OHOS {
 namespace Media {

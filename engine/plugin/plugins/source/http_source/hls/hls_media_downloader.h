@@ -17,7 +17,7 @@
 #define HISTREAMER_HLS_MEDIA_DOWNLOADER_H
 
 #include "playlist_downloader.h"
-#include "ring_buffer.h"
+#include "foundation/utils/ring_buffer.h"
 #include "plugin/plugins/source/http_source/media_downloader.h"
 
 namespace OHOS {

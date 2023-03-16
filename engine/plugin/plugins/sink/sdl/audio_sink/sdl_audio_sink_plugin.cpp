@@ -21,12 +21,12 @@
 #include "foundation/log.h"
 #include "foundation/osal/utils/util.h"
 #include "foundation/pre_defines.h"
+#include "foundation/utils/constants.h"
+#include "pipeline/core/plugin_attr_desc.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_time.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
-#include "utils/constants.h"
-#include "pipeline/core/plugin_attr_desc.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;

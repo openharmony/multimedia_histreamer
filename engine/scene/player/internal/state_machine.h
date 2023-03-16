@@ -21,14 +21,14 @@
 #include <queue>
 #include <tuple>
 #include "foundation/log.h"
-#include "osal/base/synchronizer.h"
-#include "osal/thread/mutex.h"
-#include "osal/thread/task.h"
+#include "foundation/osal/base/synchronizer.h"
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/osal/thread/task.h"
+#include "foundation/utils/blocking_queue.h"
 #include "pipeline/core/error_code.h"
 #include "play_executor.h"
 #include "plugin/common/any.h"
 #include "state.h"
-#include "utils/blocking_queue.h"
 
 namespace OHOS {
 namespace Media {

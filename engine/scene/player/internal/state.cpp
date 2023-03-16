@@ -16,8 +16,8 @@
 #define HST_LOG_TAG "State"
 
 #include "state.h"
-#include "pipeline/core/event.h"
 #include "foundation/log.h"
+#include "pipeline/core/event.h"
 
 namespace OHOS {
 namespace Media {

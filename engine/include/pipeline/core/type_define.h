@@ -17,11 +17,10 @@
 #define HISTREAMER_FOUNDATION_TYPE_DEFINE_H
 
 #include <memory>
-
+#include "foundation/utils/buffer_pool.h"
 #include "plugin/common/plugin_caps.h"
 #include "plugin/common/plugin_tags.h"
 #include "plugin/common/plugin_buffer.h"
-#include "utils/buffer_pool.h"
 
 namespace OHOS {
 namespace Media {

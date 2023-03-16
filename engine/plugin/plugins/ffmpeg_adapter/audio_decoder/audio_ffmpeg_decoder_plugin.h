@@ -19,7 +19,7 @@
 #include <functional>
 #include <map>
 #include "foundation/osal/thread/task.h"
-#include "utils/blocking_queue.h"
+#include "foundation/utils/blocking_queue.h"
 #include "plugin/interface/codec_plugin.h"
 
 #ifdef __cplusplus

@@ -17,10 +17,10 @@
 
 #include "state_machine.h"
 #include "eos_state.h"
+#include "foundation/osal/utils/util.h"
+#include "foundation/utils/steady_clock.h"
 #include "idle_state.h"
 #include "init_state.h"
-#include "utils/steady_clock.h"
-#include "osal/utils/util.h"
 #include "pause_state.h"
 #include "playing_state.h"
 #include "preparing_state.h"

@@ -22,10 +22,9 @@
 #include <new>
 #include <securec.h>
 #include "foundation/log.h"
-#include "osal/thread/scoped_lock.h"
-#include "plugin/common/plugin_buffer.h"
-#include "constants.h"
-#include "osal/utils/util.h"
+#include "foundation/osal/thread/scoped_lock.h"
+#include "foundation/osal/utils/util.h"
+#include "foundation/utils/constants.h"
 
 namespace OHOS {
 namespace Media {

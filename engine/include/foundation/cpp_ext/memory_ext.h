@@ -14,6 +14,8 @@
  */
 #ifndef HISTREAMER_FOUNDATION_CPP_EXT_MEMORY_EXT_H
 #define HISTREAMER_FOUNDATION_CPP_EXT_MEMORY_EXT_H
+#include <memory>
+
 namespace OHOS {
 namespace Media {
 namespace CppExt {

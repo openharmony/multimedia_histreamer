@@ -18,7 +18,7 @@
 
 #include <cerrno>
 #include <ctime>
-#include "scoped_lock.h"
+#include "foundation/osal/thread/scoped_lock.h"
 
 namespace OHOS {
 namespace Media {

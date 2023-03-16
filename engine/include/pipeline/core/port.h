@@ -19,11 +19,10 @@
 #include <memory>
 #include <string>
 #include <utility>
-
+#include "foundation/utils/constants.h"
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/type_define.h"
 #include "plugin/core/plugin_meta.h"
-#include "utils/constants.h"
 
 namespace OHOS {
 namespace Media {

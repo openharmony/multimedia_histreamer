@@ -16,10 +16,9 @@
 #ifndef HISTREAMER_STREAM_SOURCE_PLUGIN_H
 #define HISTREAMER_STREAM_SOURCE_PLUGIN_H
 
-#include "foundation/osal/thread/task.h"
+#include "data_stream.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
-#include "data_stream.h"
 
 namespace OHOS {
 namespace Media {
@@ -50,7 +49,6 @@ private:
 
 private:
     Seekable seekable_ {Seekable::UNSEEKABLE};
-    OSAL::Mutex mutex_ {};
     std::shared_ptr<DataConsumer> stream_ {nullptr};
 };
 } // namespace StreamSource

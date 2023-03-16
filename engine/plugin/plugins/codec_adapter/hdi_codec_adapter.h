@@ -23,8 +23,8 @@
 #include "codec_component_manager.h"
 #include "codec_manager.h"
 #include "codec_port.h"
-#include "interface/codec_plugin.h"
-#include "utils/blocking_queue.h"
+#include "foundation/utils/blocking_queue.h"
+#include "plugin/interface/codec_plugin.h"
 
 namespace OHOS {
 namespace Media {

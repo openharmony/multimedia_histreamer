@@ -19,8 +19,8 @@
 #include <regex>
 #include <vector>
 #include "foundation/log.h"
+#include "foundation/utils/hitrace_utils.h"
 #include "securec.h"
-#include "hitrace_utils.h"
 
 #ifndef CA_DIR
 #define CA_DIR "/etc/ssl/certs/"

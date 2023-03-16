@@ -19,7 +19,7 @@
 #include <memory>
 
 #include "foundation/log.h"
-#include "osal/thread/mutex.h"
+#include "foundation/osal/thread/mutex.h"
 #include "pipeline/core/error_code.h"
 #include "play_executor.h"
 #include "state.h"

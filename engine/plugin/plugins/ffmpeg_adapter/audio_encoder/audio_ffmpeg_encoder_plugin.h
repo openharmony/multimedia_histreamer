@@ -17,9 +17,9 @@
 
 #include <functional>
 #include <map>
-#include "utils/blocking_queue.h"
-#include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
+#include "foundation/utils/blocking_queue.h"
 #include "plugin/interface/codec_plugin.h"
+#include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
 #ifdef __cplusplus
 extern "C" {

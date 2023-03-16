@@ -21,10 +21,10 @@
 #include "codec_buffer.h"
 #include "codec_component_if.h"
 #include "codec_component_type.h"
-#include "common/plugin_types.h"
-#include "common/share_allocator.h"
-#include "common/share_memory.h"
-#include "utils/blocking_queue.h"
+#include "foundation/utils/blocking_queue.h"
+#include "plugin/common/plugin_types.h"
+#include "plugin/common/share_allocator.h"
+#include "plugin/common/share_memory.h"
 
 namespace OHOS {
 namespace Media {

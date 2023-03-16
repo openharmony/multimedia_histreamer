@@ -16,12 +16,12 @@
 
 #ifndef HISTREAMER_PLUGIN_CODEC_PORT_H
 #define HISTREAMER_PLUGIN_CODEC_PORT_H
-#include <common/plugin_types.h>
-#include <codec_component_if.h>
-#include <common/tag_map.h>
+#include "codec_component_if.h"
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
-#include <OMX_Component.h>
+#include "plugin/common/plugin_types.h"
+#include "plugin/common/tag_map.h"
+#include "OMX_Component.h"
 
 namespace OHOS {
 namespace Media {

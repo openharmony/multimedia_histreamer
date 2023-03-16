@@ -27,7 +27,7 @@
 #include "ffmpeg_track_meta.h"
 #include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/log.h"
-#include "osal/thread/scoped_lock.h"
+#include "foundation/osal/thread/scoped_lock.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_manager.h"

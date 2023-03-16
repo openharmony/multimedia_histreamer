@@ -15,9 +15,7 @@
 
 #define HST_LOG_TAG "Thread"
 
-#include "thread.h"
-#include <new>
-#include <type_traits>
+#include "foundation/osal/thread/thread.h"
 #include "foundation/log.h"
 
 namespace OHOS {

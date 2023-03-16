@@ -16,9 +16,6 @@
 #define HST_LOG_TAG "StreamSourcePlugin"
 
 #include "stream_source_plugin.h"
-#include "plugin/common/plugin_buffer.h"
-#include "plugin/common/plugin_source_tags.h"
-#include "plugin/core/plugin_manager.h"
 #include "foundation/log.h"
 
 namespace OHOS {

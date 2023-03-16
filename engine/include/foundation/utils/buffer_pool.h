@@ -19,10 +19,10 @@
 #include <atomic>
 #include <list>
 #include <memory>
-#include "constants.h"
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
 #include "foundation/osal/thread/scoped_lock.h"
+#include "foundation/utils/constants.h"
 #include "plugin/common/plugin_buffer.h"
 
 namespace OHOS {

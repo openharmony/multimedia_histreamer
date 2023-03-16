@@ -22,9 +22,9 @@
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
 #include "foundation/osal/utils/util.h"
-#include "plugin/common/plugin_time.h"
-#include "utils/constants.h"
+#include "foundation/utils/constants.h"
 #include "pipeline/core/plugin_attr_desc.h"
+#include "plugin/common/plugin_time.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;
