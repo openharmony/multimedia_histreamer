@@ -93,7 +93,7 @@ Status FileFdSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
     } else {
         bufData = buffer->GetMemory();
     }
-    expectedLen = std::min(static_cast<size_t>(fileSize_ - position_), expectedLen);
+    expectedLen = std::min(static_cast<size_t>(size_ + offset_ - position_), expectedLen);
     expectedLen = std::min(bufData->GetCapacity(), expectedLen);
     MEDIA_LOG_DD("buffer position " PUBLIC_LOG_U64 ", expectedLen " PUBLIC_LOG_ZU, position_, expectedLen);
     auto size = read(fd_, bufData->GetWritableAddr(expectedLen), expectedLen);
@@ -106,8 +106,8 @@ Status FileFdSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
 Status FileFdSourcePlugin::GetSize(size_t& size)
 {
     MEDIA_LOG_DD("IN");
-    size = fileSize_;
-    MEDIA_LOG_DD("fileSize_: " PUBLIC_LOG_ZU, size);
+    size = size_;
+    MEDIA_LOG_DD("size_: " PUBLIC_LOG_ZU, size);
     return Status::OK;
 }
 
@@ -121,12 +121,12 @@ Status FileFdSourcePlugin::SeekTo(uint64_t offset)
 {
     FALSE_RETURN_V_MSG_E(fd_ != -1 && seekable_ == Seekable::SEEKABLE,
                          Status::ERROR_WRONG_STATE, "no valid fd or no seekable.");
-    int32_t ret = lseek(fd_, offset, SEEK_SET);
+    int32_t ret = lseek(fd_, offset + offset_, SEEK_SET);
     if (ret == -1) {
         MEDIA_LOG_E("seek to " PUBLIC_LOG_U64 " failed due to " PUBLIC_LOG_S, offset, strerror(errno));
         return Status::ERROR_UNKNOWN;
     }
-    position_ = offset;
+    position_ = offset + offset_;
     MEDIA_LOG_D("now seek to " PUBLIC_LOG_D32, ret);
     return Status::OK;
 }
@@ -158,11 +158,12 @@ Status FileFdSourcePlugin::ParseUriInfo(const std::string& uri)
         }
     } else {
         size_ = fileSize_;
+        offset_ = 0;
     }
     position_ = offset_;
     seekable_ = OSAL::FileSystem::IsSeekable(fd_) ? Seekable::SEEKABLE : Seekable::UNSEEKABLE;
     if (seekable_ == Seekable::SEEKABLE) {
-        NOK_LOG(SeekTo(offset_));
+        NOK_LOG(SeekTo(0));
     }
     MEDIA_LOG_D("fd: " PUBLIC_LOG_D32 ", offset: " PUBLIC_LOG_D64 ", size: " PUBLIC_LOG_D64, fd_, offset_, size_);
     return Status::OK;
