@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "output_sink.h"
-#include "interface/output_sink_plugin.h"
+#include "plugin/core/output_sink.h"
+#include "plugin/interface/output_sink_plugin.h"
 
 namespace OHOS {
 namespace Media {

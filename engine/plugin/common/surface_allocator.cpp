@@ -17,9 +17,9 @@
 
 #define HST_LOG_TAG "SurfaceAllocator"
 
-#include "surface_allocator.h"
-#include "foundation/log.h"
+#include "plugin/common/surface_allocator.h"
 #include "display_type.h"
+#include "foundation/log.h"
 #include "sync_fence.h"
 
 namespace OHOS {

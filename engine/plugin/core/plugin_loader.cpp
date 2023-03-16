@@ -15,7 +15,7 @@
 
 #define HST_LOG_TAG "PluginLoader"
 
-#include "plugin_loader.h"
+#include "plugin/core/plugin_loader.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 #include <Windows.h>

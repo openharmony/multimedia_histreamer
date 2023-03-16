@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-#include "interface/demuxer_plugin.h"
+#include "plugin/interface/demuxer_plugin.h"
 
 namespace OHOS {
 namespace Media {

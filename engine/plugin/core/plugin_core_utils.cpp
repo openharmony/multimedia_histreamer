@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "plugin_core_utils.h"
+#include "plugin/core/plugin_core_utils.h"
 
 namespace OHOS {
 namespace Media {

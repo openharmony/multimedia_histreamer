@@ -14,10 +14,10 @@
  */
 
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
-#include "surface_memory.h"
+#include "plugin/common/surface_memory.h"
 #include <utility>
 #include "foundation/log.h"
-#include "surface_allocator.h"
+#include "plugin/common/surface_allocator.h"
 
 namespace OHOS {
 namespace Media {

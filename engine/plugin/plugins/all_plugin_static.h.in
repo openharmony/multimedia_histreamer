@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_PLUGIN_ALL_PLUGIN_STATIC_H
 #define HISTREAMER_PLUGIN_ALL_PLUGIN_STATIC_H
 
-#include "interface/plugin_base.h"
+#include "plugin/interface/plugin_base.h"
 
 #define PLUGIN_REGISTER_STATIC_DECLARE(name)                                                                           \
     extern "C" OHOS::Media::Plugin::Status PLUGIN_PASTE(register_,                                                     \

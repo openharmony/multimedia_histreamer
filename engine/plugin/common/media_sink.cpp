@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "media_sink.h"
+#include "plugin/common/media_sink.h"
 #include <type_traits>
 
 namespace OHOS {

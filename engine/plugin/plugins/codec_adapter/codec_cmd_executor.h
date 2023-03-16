@@ -22,9 +22,9 @@
 #include "codec_component_if.h"
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
-#include "common/any.h"
-#include "common/plugin_types.h"
-#include "interface/plugin_base.h"
+#include "plugin/common/any.h"
+#include "plugin/common/plugin_types.h"
+#include "plugin/interface/plugin_base.h"
 #include "OMX_Core.h"
 
 namespace OHOS {

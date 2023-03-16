@@ -15,12 +15,11 @@
 
 #define HST_LOG_TAG "PluginCoreViSink"
 
-#include "video_sink.h"
-
+#include "plugin/core/video_sink.h"
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
-#include "interface/video_sink_plugin.h"
-#include "plugin_core_utils.h"
+#include "plugin/core/plugin_core_utils.h"
+#include "plugin/interface/video_sink_plugin.h"
 
 using namespace OHOS::Media::Plugin;
 

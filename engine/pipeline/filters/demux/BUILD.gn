@@ -14,21 +14,16 @@
 
 # build plugin interface
 import("//foundation/multimedia/histreamer/config.gni")
-
-config("demux_config") {
+source_set("demuxer_filter") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine/include",
   ]
-}
-
-source_set("demuxer_filter") {
   sources = [
     "data_packer.cpp",
     "demuxer_filter.cpp",
     "type_finder.cpp",
   ]
   public_configs = [
-    ":demux_config",
     "//foundation/multimedia/histreamer:histreamer_presets",
   ]
   public_deps = [ "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline_base" ]

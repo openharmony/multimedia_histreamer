@@ -18,7 +18,7 @@
 
 #include "codec_buffer.h"
 #include "codec_utils.h"
-#include "common/surface_memory.h"
+#include "plugin/common/surface_memory.h"
 
 namespace OHOS {
 namespace Media {

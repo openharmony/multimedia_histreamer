@@ -22,8 +22,8 @@
 
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
-#include "plugin/plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
-#include "plugin/plugins/ffmpeg_adapter/utils/ffmpeg_codec_map.h"
+#include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
+#include "plugins/ffmpeg_adapter/utils/ffmpeg_codec_map.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;

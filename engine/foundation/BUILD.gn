@@ -17,7 +17,6 @@ import("//foundation/multimedia/histreamer/config.gni")
 config("histreamer_foundation_config") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine/include",
-    "//foundation/graphic/graphic_2d/frameworks/surface/include",
   ]
   if (hst_is_lite_sys) {
     include_dirs += [
@@ -51,20 +50,22 @@ source_set("histreamer_foundation") {
   ]
   public_deps = []
   if (hst_is_lite_sys) {
-    deps = [ "//foundation/multimedia/media_utils_lite:media_common" ]
+    public_deps += [ "//foundation/multimedia/media_utils_lite:media_common" ]
     if (ohos_kernel_type == "liteos_m") {
-      deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_static" ]
-      public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+      public_deps += [
+        "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_static",
+        "//third_party/bounds_checking_function:libsec_static",
+      ]
     } else {
-      deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
-      public_deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
+      public_deps += [
+        "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+        "//third_party/bounds_checking_function:libsec_shared",
+      ]
     }
   } else {
-    deps = [
+    public_deps += [
       "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
       "//base/hiviewdfx/hitrace/interfaces/native/innerkits:hitrace_meter",
-    ]
-    public_deps += [
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
       "//third_party/bounds_checking_function:libsec_static",
     ]

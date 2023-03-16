@@ -21,7 +21,7 @@
 #include <functional>
 #include "foundation/log.h"
 #include "plugin/common/plugin_video_tags.h"
-#include "plugin/plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
+#include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
 namespace {
 #define ASSIGN_IF_NOT_NULL(exec, target) \

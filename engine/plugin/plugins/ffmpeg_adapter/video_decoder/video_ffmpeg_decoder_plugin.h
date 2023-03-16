@@ -28,8 +28,8 @@
 extern "C" {
 #endif
 #include "libavcodec/avcodec.h"
-#include "libswscale/swscale.h"
 #include "libavutil/imgutils.h"
+#include "libswscale/swscale.h"
 #ifdef __cplusplus
 };
 #endif

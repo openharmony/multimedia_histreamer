@@ -22,7 +22,7 @@
 #include <string>
 #include <memory>
 #include "bit_reader.h"
-#include "common/plugin_audio_tags.h"
+#include "plugin/common/plugin_audio_tags.h"
 
 namespace OHOS {
 namespace Media {

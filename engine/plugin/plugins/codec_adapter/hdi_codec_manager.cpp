@@ -20,8 +20,8 @@
 #include "foundation/utils/constants.h"
 #include "foundation/log.h"
 #include "hdf_base.h"
-#include "hdi_codec_adapter.h
-#include "plugin/common/plugin_caps_builder.h""
+#include "hdi_codec_adapter.h"
+#include "plugin/common/plugin_caps_builder.h"
 
 namespace OHOS {
 namespace Media {

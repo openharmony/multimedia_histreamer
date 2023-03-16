@@ -36,7 +36,6 @@ group("histreamer_plugin") {
 config("hst_plugin_intf_config") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine/include",
-    "//foundation/multimedia/histreamer/engine/plugin",
   ]
   if (hst_is_lite_sys) {
     include_dirs +=
@@ -96,8 +95,6 @@ source_set("histreamer_plugin_intf") {
 config("hst_plugin_core_config") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine/include",
-    "//foundation/multimedia/histreamer/engine/",
-    "//foundation/multimedia/histreamer/engine/plugin",
   ]
   if (hst_is_lite_sys) {
     include_dirs +=

@@ -14,15 +14,10 @@
 
 # build plugin interface
 import("//foundation/multimedia/histreamer/config.gni")
-config("histreamer_pipelin_base_config") {
+source_set("histreamer_pipeline_base") {
   include_dirs = [
-    "//foundation/multimedia/histreamer/engine/pipeline",
-    "//foundation/multimedia/histreamer/engine/pipeline/filters",
     "//foundation/multimedia/histreamer/engine/include",
   ]
-}
-
-source_set("histreamer_pipeline_base") {
   sources = [
     "core/compatible_check.cpp",
     "core/error_code.cpp",
@@ -38,7 +33,6 @@ source_set("histreamer_pipeline_base") {
     "filters/common/plugin_utils.cpp",
   ]
   public_configs = [
-    ":histreamer_pipelin_base_config",
     "//foundation/multimedia/histreamer:histreamer_presets",
   ]
   public_deps = [

@@ -14,12 +14,10 @@
  */
 
 #include <memory>
-#include "common/any.h"
-
 #include <gtest/gtest.h>
-
 #include <test_helper.h>
 #include "pipeline/core/filter_base.h"
+#include "plugin/common/any.h"
 
 using namespace OHOS::Media::Pipeline;
 

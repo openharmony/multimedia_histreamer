@@ -21,7 +21,6 @@
 #include <set>
 #include "ffmpeg_au_enc_config.h"
 #include "plugin/common/plugin_caps_builder.h"
-#include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
 namespace {
 // register plugins

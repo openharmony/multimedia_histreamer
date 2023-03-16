@@ -41,6 +41,7 @@ group("plugin_ffmpeg_adapter") {
 config("plugin_ffmpeg_adapter_config") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine/include/",
+    "//foundation/multimedia/histreamer/engine/plugin/",
     "//third_party/ffmpeg"
   ]
 }

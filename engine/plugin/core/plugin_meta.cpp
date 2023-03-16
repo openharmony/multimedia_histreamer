@@ -13,13 +13,11 @@
  * limitations under the License.
  */
 
-#include "plugin_meta.h"
-
+#include "plugin/core/plugin_meta.h"
 #include <cinttypes>
 #include <cstring>
 #include <memory>
 #include <vector>
-
 #include "plugin/common/plugin_audio_tags.h"
 
 namespace OHOS {

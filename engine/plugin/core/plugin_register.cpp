@@ -12,20 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "plugin_register.h"
+#include "plugin/core/plugin_register.h"
 
 #include <algorithm>
 #include <dirent.h>
 
 #include "all_plugin_static.h"
 #include "foundation/log.h"
-#include "interface/audio_sink_plugin.h"
-#include "interface/codec_plugin.h"
-#include "interface/demuxer_plugin.h"
-#include "interface/muxer_plugin.h"
-#include "interface/source_plugin.h"
-#include "interface/video_sink_plugin.h"
-#include "interface/output_sink_plugin.h"
+#include "plugin/interface/audio_sink_plugin.h"
+#include "plugin/interface/codec_plugin.h"
+#include "plugin/interface/demuxer_plugin.h"
+#include "plugin/interface/muxer_plugin.h"
+#include "plugin/interface/source_plugin.h"
+#include "plugin/interface/video_sink_plugin.h"
+#include "plugin/interface/output_sink_plugin.h"
 
 using namespace OHOS::Media::Plugin;
 

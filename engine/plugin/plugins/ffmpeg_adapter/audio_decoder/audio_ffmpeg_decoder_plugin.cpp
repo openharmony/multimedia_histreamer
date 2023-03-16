@@ -22,7 +22,7 @@
 #include "foundation/utils/constants.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_caps_builder.h"
-#include "plugin/plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
+#include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;

@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "demuxer.h"
-#include "interface/demuxer_plugin.h"
-#include "plugin_wrapper.h"
+#include "plugin/core/demuxer.h"
+#include "plugin/core/plugin_wrapper.h"
+#include "plugin/interface/demuxer_plugin.h"
 
 using namespace OHOS::Media::Plugin;
 

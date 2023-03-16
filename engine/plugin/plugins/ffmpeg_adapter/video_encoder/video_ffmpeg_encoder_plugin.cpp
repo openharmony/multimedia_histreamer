@@ -21,11 +21,11 @@
 #include <cstring>
 #include <map>
 #include <set>
+#include "ffmpeg_vid_enc_config.h"
+#include "pipeline/core/plugin_attr_desc.h"
 #include "plugin/common/plugin_caps_builder.h"
 #include "plugin/common/plugin_time.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
-#include "ffmpeg_vid_enc_config.h"
-#include "pipeline/core/plugin_attr_desc.h"
 
 namespace {
 // register plugins
