@@ -23,10 +23,6 @@ group("plugin_codec_adapter") {
 
 config("plugin_codec_adapter_config") {
   include_dirs = [
-    "//drivers/hdf_core/adapter/uhdf2/osal/include/",
-    "//drivers/hdf_core/framework/include/utils/",
-    "//drivers/hdf_core/adapter/uhdf2/osal/include/",
-    "//drivers/hdf_core/framework/include/utils/",
     "//drivers/peripheral/base/",
     "//drivers/peripheral/codec/hal/include/",
     "//drivers/peripheral/codec/interfaces/include/",
@@ -48,7 +44,10 @@ source_set("std_plugin_codec_adapter") {
     "hdi_codec_adapter.cpp",
     "hdi_codec_manager.cpp",
   ]
-  public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
+  public_deps = [
+    "//drivers/hdf_core/adapter/uhdf2/pub_utils:libpub_utils",
+    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+  ]
   public_configs = [
     ":plugin_codec_adapter_config",
     "//foundation/multimedia/histreamer:histreamer_presets",
