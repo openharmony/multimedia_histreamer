@@ -443,31 +443,31 @@ bool ExtractFixedCap(const Plugin::ValueType& value, Plugin::ValueType& fixedVal
     return false;
 }
 
-std::shared_ptr<Capability> MetaToCapability(const Plugin::Meta& meta)
+std::shared_ptr<Capability> TagToCapability(Plugin::TagMap& tagMap)
 {
     auto ret = std::make_shared<Capability>();
     std::string mime;
-    if (meta.GetString(Plugin::MetaID::MIME, mime)) {
+    if (tagMap.Get<Plugin::Tag::MIME>(mime)) {
         ret->mime = mime;
     }
     for (const auto& key : g_allCapabilityId) {
         Plugin::ValueType tmp;
-        if (meta.GetData(static_cast<Plugin::MetaID>(key), tmp)) {
+        if (tagMap.GetData(static_cast<Plugin::Tag>(key), tmp)) {
             ret->keys[key] = tmp;
         }
     }
     return ret;
 }
 
-bool MergeMetaWithCapability(const Plugin::Meta& meta, const Capability& cap,  Plugin::Meta& resMeta)
+bool MergeMetaWithCapability(Plugin::TagMap& tagMap, const Capability& cap, Plugin::TagMap& resTagMap)
 {
-    resMeta.Clear();
+    resTagMap.Clear();
     // change meta into capability firstly
     Capability metaCap;
     metaCap.mime = cap.mime;
     for (const auto& key : g_allCapabilityId) {
         Plugin::ValueType tmp;
-        if (meta.GetData(static_cast<Plugin::MetaID>(key), tmp)) {
+        if (tagMap.GetData(static_cast<Plugin::Tag>(key), tmp)) {
             metaCap.keys[key] = tmp;
         }
     }
@@ -476,8 +476,8 @@ bool MergeMetaWithCapability(const Plugin::Meta& meta, const Capability& cap,  P
         return false;
     }
     // merge capability
-    resMeta.Update(meta);
-    resMeta.SetString(Plugin::MetaID::MIME, cap.mime);
+    resTagMap.Update(tagMap);
+    resTagMap.Insert<Plugin::Tag::MIME>(cap.mime);
     for (const auto& oneCap : resCap.keys) {
         if (g_capExtrMap.count(oneCap.first) == 0) {
             continue;
@@ -485,7 +485,7 @@ bool MergeMetaWithCapability(const Plugin::Meta& meta, const Capability& cap,  P
         auto func = g_capExtrMap[oneCap.first];
         Plugin::ValueType tmp;
         if (func(oneCap.second, tmp)) {
-            resMeta.SetData(static_cast<Plugin::MetaID>(oneCap.first), tmp);
+            resTagMap.SetData(static_cast<Plugin::Tag>(oneCap.first), tmp);
         }
     }
     return true;

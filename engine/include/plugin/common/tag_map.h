@@ -91,10 +91,11 @@ public:
         tag == Tag::BITS_PER_CODED_SAMPLE, uint32_t);
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::MEDIA_DURATION or
-        tag == Tag::MEDIA_FILE_SIZE or
         tag == Tag::MEDIA_BITRATE or
-        tag == Tag::MEDIA_POSITION or
         tag == Tag::MEDIA_START_TIME, int64_t);
+    DEFINE_INSERT_GET_FUNC(
+        tag == Tag::MEDIA_FILE_SIZE or
+        tag == Tag::MEDIA_POSITION, uint64_t);
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::VIDEO_CAPTURE_RATE, double);
     DEFINE_INSERT_GET_FUNC(
@@ -137,6 +138,30 @@ public:
     {
         return map_.find(tag);
     }
+
+    bool Empty() const
+    {
+        return map_.empty();
+    }
+
+    bool GetData(Tag tag, ValueType& value) const
+    {
+        auto ite = map_.find(tag);
+        if (ite == map_.end()) {
+            return false;
+        }
+        value = ite->second;
+        return true;
+    }
+
+    bool SetData(Tag tag, const ValueType& value)
+    {
+        map_[tag] = value;
+        return true;
+    }
+
+    void Update(TagMap& tagMap){}
+
 private:
     std::map<Tag, Any> map_;
 };

@@ -17,6 +17,7 @@
 #define HISTREAMER_PIPELINE_CORE_COMPATIBLE_CHECK_H
 
 #include "pipeline/core/type_define.h"
+#include "plugin/common/tag_map.h"
 #include "plugin/common/plugin_caps.h"
 #include "plugin/core/plugin_meta.h"
 
@@ -51,12 +52,12 @@ bool MergeCapability(const Capability& originCap, const Capability& otherCap, Ca
 
 
 /**
- * change meta info capability
+ * change tag info capability
  *
- * @param meta target meta
+ * @param tagMap target tag
  * @return result capability
  */
-std::shared_ptr<Capability> MetaToCapability(const Plugin::Meta& meta);
+std::shared_ptr<Capability> TagToCapability(Plugin::TagMap& tagMap);
 
 /**
  * merge meta with capability. This function firstly change meta into capability metaCap. The mime of metaCap is the
@@ -71,7 +72,7 @@ std::shared_ptr<Capability> MetaToCapability(const Plugin::Meta& meta);
  * @param resMeta result meta
  * @return success to merge
  */
-bool MergeMetaWithCapability(const Plugin::Meta& meta, const Capability& cap, Plugin::Meta& resMeta);
+bool MergeMetaWithCapability(Plugin::TagMap& tagMap, const Capability& cap, Plugin::TagMap& resTagMap);
 
 bool ApplyCapabilitySet(const Capability& originCap, const CapabilitySet& capabilitySet, Capability& resCap);
 }

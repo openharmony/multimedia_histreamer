@@ -70,14 +70,14 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
+    bool Configure(const std::string &inPort,
                    Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
 
     ErrorCode SeekTo(int64_t seekTime, Plugin::SeekMode mode, int64_t& realSeekTime);
 
-    std::vector<std::shared_ptr<Plugin::Meta>> GetStreamMetaInfo() const;
+    std::vector<std::shared_ptr<Plugin::TagMap>> GetStreamTagInfo() const;
 
-    std::shared_ptr<Plugin::Meta> GetGlobalMetaInfo() const;
+    std::shared_ptr<Plugin::TagMap> GetGlobalTagInfo() const;
 
     void StopTask(bool force);
 
@@ -97,10 +97,10 @@ private:
         }
     };
 
-    struct MediaMetaData {
+    struct MediaTagData {
         std::vector<StreamTrackInfo> trackInfos;
-        std::vector<std::shared_ptr<Plugin::Meta>> trackMetas;
-        std::shared_ptr<Plugin::Meta> globalMeta;
+        std::vector<std::shared_ptr<Plugin::TagMap>> trackTags;
+        std::shared_ptr<Plugin::TagMap> globalTag;
     };
 
     void Reset();
@@ -121,11 +121,11 @@ private:
 
     bool IsOffsetValid(int64_t offset) const;
 
-    bool PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo);
+    bool PrepareStreams(Plugin::MediaInfoHelper& mediaInfo);
 
     ErrorCode ReadFrame(AVBuffer& buffer, uint32_t& trackId);
 
-    std::shared_ptr<Plugin::Meta> GetTrackMeta(uint32_t trackId);
+    std::shared_ptr<Plugin::TagMap> GetTrackTag(uint32_t trackId);
 
     void SendEventEos();
 
@@ -133,12 +133,12 @@ private:
 
     void NegotiateDownstream();
 
-    void UpdateStreamMeta(std::shared_ptr<Plugin::Meta>& streamMeta,
+    void UpdateStreamTag(std::shared_ptr<Plugin::TagMap>& streamTag,
         Plugin::Capability& negotiatedCap, Plugin::TagMap& downstreamParams);
 
     void DemuxerLoop();
 
-    void ReportVideoSize(const Plugin::MediaInfoHelper& mediaInfo);
+    void ReportVideoSize(Plugin::MediaInfoHelper& mediaInfo);
 
     Plugin::Seekable seekable_;
     std::string uri_;
@@ -152,7 +152,7 @@ private:
     std::atomic<DemuxerState> pluginState_;
     std::shared_ptr<Plugin::Allocator> pluginAllocator_;
     std::shared_ptr<DataSourceImpl> dataSource_;
-    MediaMetaData mediaMetaData_;
+    MediaTagData mediaTagData_;
 
     std::function<bool(uint64_t, size_t)> checkRange_;
     std::function<bool(uint64_t, size_t, AVBufferPtr&)> peekRange_;
