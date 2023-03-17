@@ -28,7 +28,7 @@ namespace StdStreamSource {
 class StdStreamSourcePlugin : public SourcePlugin {
 public:
     explicit StdStreamSourcePlugin(std::string name);
-    ~StdStreamSourcePlugin();
+    ~StdStreamSourcePlugin() override;
 
     Status Init() override;
     Status Deinit() override;
