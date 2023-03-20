@@ -72,13 +72,13 @@ Plugin::SrcInputType TransVideoInputType(OHOS::Media::VideoSourceType sourceType
     }
     return Plugin::SrcInputType::UNKNOWN;
 }
-bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& encoderMeta)
+bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::TagMap& encoderMeta)
 {
     switch (aFormat) {
         case OHOS::Media::AudioCodecFormat::AUDIO_DEFAULT:
         case OHOS::Media::AudioCodecFormat::AAC_LC:
-            encoderMeta.SetString(Plugin::MetaID::MIME, MEDIA_MIME_AUDIO_AAC);
-            encoderMeta.SetData(Plugin::MetaID::AUDIO_AAC_PROFILE, Plugin::AudioAacProfile::LC);
+            encoderMeta.SetString(Plugin::Tag::MIME, MEDIA_MIME_AUDIO_AAC);
+            encoderMeta.SetData(Plugin::Tag::AUDIO_AAC_PROFILE, Plugin::AudioAacProfile::LC);
             return true;
         default:
             break;
@@ -86,17 +86,17 @@ bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& e
     return false;
 }
 
-bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::Meta& encoderMeta)
+bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::TagMap& encoderMeta)
 {
     bool ret = true;
     switch (vFormat) {
         case OHOS::Media::VideoCodecFormat::H264:
-            encoderMeta.SetString(Plugin::MetaID::MIME, MEDIA_MIME_VIDEO_H264);
-            encoderMeta.SetData(Plugin::MetaID::VIDEO_H264_PROFILE, Plugin::VideoH264Profile::BASELINE);
-            encoderMeta.SetUint32(Plugin::MetaID::VIDEO_H264_LEVEL, 32); // 32: LEVEL 3.2
+            encoderMeta.SetString(Plugin::Tag::MIME, MEDIA_MIME_VIDEO_H264);
+            encoderMeta.SetData(Plugin::Tag::VIDEO_H264_PROFILE, Plugin::VideoH264Profile::BASELINE);
+            encoderMeta.SetUint32(Plugin::Tag::VIDEO_H264_LEVEL, 32); // 32: LEVEL 3.2
             break;
         case OHOS::Media::VideoCodecFormat::MPEG4:
-            encoderMeta.SetString(Plugin::MetaID::MIME, MEDIA_MIME_VIDEO_MPEG4);
+            encoderMeta.SetString(Plugin::Tag::MIME, MEDIA_MIME_VIDEO_MPEG4);
             break;
         default:
             ret = false;

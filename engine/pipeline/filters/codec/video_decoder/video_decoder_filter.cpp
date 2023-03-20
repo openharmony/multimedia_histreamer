@@ -103,7 +103,7 @@ void VideoDecoderFilter::FlushEnd()
     codecMode_->FlushEnd();
 }
 
-bool VideoDecoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
+bool VideoDecoderFilter::Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta,
                                    Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
 {
     PROFILE_BEGIN("video decoder configure begin");
@@ -143,22 +143,22 @@ uint32_t VideoDecoderFilter::GetOutBufferPoolSize()
     return DEFAULT_OUT_BUFFER_POOL_SIZE;
 }
 
-uint32_t VideoDecoderFilter::CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta>& meta)
+uint32_t VideoDecoderFilter::CalculateBufferSize(Plugin::TagMap &meta)
 {
     uint32_t bufferSize = 0;
     uint32_t vdecWidth;
     uint32_t vdecHeight;
     Plugin::VideoPixelFormat vdecFormat;
 
-    if (!meta->GetUint32(Plugin::MetaID::VIDEO_WIDTH, vdecWidth)) {
+    if (!meta.GetUint32(Plugin::Tag::VIDEO_WIDTH, vdecWidth)) {
         MEDIA_LOG_E("Get video width fail");
         return 0;
     }
-    if (!meta->GetUint32(Plugin::MetaID::VIDEO_HEIGHT, vdecHeight)) {
+    if (!meta.GetUint32(Plugin::Tag::VIDEO_HEIGHT, vdecHeight)) {
         MEDIA_LOG_E("Get video width height");
         return 0;
     }
-    if (!meta->GetData<Plugin::VideoPixelFormat>(Plugin::MetaID::VIDEO_PIXEL_FORMAT, vdecFormat)) {
+    if (!meta.GetData<Plugin::VideoPixelFormat>(Plugin::Tag::VIDEO_PIXEL_FORMAT, vdecFormat)) {
         MEDIA_LOG_E("Get video pixel format fail");
         return 0;
     }
@@ -208,8 +208,8 @@ std::shared_ptr<Allocator> VideoDecoderFilter::GetAllocator()
     return plugin_->GetAllocator();
 }
 
-void VideoDecoderFilter::UpdateParams(const std::shared_ptr<const Plugin::Meta>& upMeta,
-                                      std::shared_ptr<Plugin::Meta>& meta)
+void VideoDecoderFilter::UpdateParams(Plugin::TagMap &upMeta,
+                                      Plugin::TagMap &meta)
 {
     MEDIA_LOG_D("UpdateParams begin");
 }

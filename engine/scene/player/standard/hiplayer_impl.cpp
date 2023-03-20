@@ -369,9 +369,9 @@ int32_t HiPlayerImpl::GetVideoTrackInfo(std::vector<Format>& videoTrack)
 {
     MEDIA_LOG_I("GetVideoTrackInfo entered.");
     std::string mime;
-    std::vector<std::shared_ptr<Plugin::Meta>> metaInfo = demuxer_->GetStreamMetaInfo();
+    std::vector<std::shared_ptr<Plugin::TagMap>> metaInfo = demuxer_->GetStreamMetaInfo();
     for (const auto& trackInfo : metaInfo) {
-        if (trackInfo->GetString(Plugin::MetaID::MIME, mime)) {
+        if (trackInfo->GetString(Plugin::Tag::MIME, mime)) {
             if (IsVideoMime(mime)) {
                 int64_t bitRate;
                 uint32_t frameRate;
@@ -381,19 +381,19 @@ int32_t HiPlayerImpl::GetVideoTrackInfo(std::vector<Format>& videoTrack)
                 Format videoTrackInfo {};
                 (void)videoTrackInfo.PutStringValue("codec_mime", mime);
                 (void)videoTrackInfo.PutIntValue("track_type", MediaType::MEDIA_TYPE_VID);
-                if (trackInfo->GetUint32(Plugin::MetaID::TRACK_ID, trackIndex)) {
+                if (trackInfo->GetUint32(Plugin::Tag::TRACK_ID, trackIndex)) {
                     (void)videoTrackInfo.PutIntValue("track_index", static_cast<int32_t>(trackIndex));
                 }
-                if (trackInfo->GetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate)) {
+                if (trackInfo->GetInt64(Plugin::Tag::MEDIA_BITRATE, bitRate)) {
                     (void)videoTrackInfo.PutIntValue("bitrate", static_cast<int32_t>(bitRate));
                 }
-                if (trackInfo->GetUint32(Plugin::MetaID::VIDEO_FRAME_RATE, frameRate)) {
+                if (trackInfo->GetUint32(Plugin::Tag::VIDEO_FRAME_RATE, frameRate)) {
                     (void)videoTrackInfo.PutIntValue("frame_rate", static_cast<int32_t>(frameRate));
                 }
-                if (trackInfo->GetUint32(Plugin::MetaID::VIDEO_HEIGHT, height)) {
+                if (trackInfo->GetUint32(Plugin::Tag::VIDEO_HEIGHT, height)) {
                     (void)videoTrackInfo.PutIntValue("height", static_cast<int32_t>(height));
                 }
-                if (trackInfo->GetUint32(Plugin::MetaID::VIDEO_WIDTH, width)) {
+                if (trackInfo->GetUint32(Plugin::Tag::VIDEO_WIDTH, width)) {
                     (void)videoTrackInfo.PutIntValue("width", static_cast<int32_t>(width));
                 }
                 videoTrack.push_back(videoTrackInfo);
@@ -407,9 +407,9 @@ int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format>& audioTrack)
 {
     MEDIA_LOG_I("GetAudioTrackInfo entered.");
     std::string mime;
-    std::vector<std::shared_ptr<Plugin::Meta>> metaInfo = demuxer_->GetStreamMetaInfo();
+    std::vector<std::shared_ptr<Plugin::TagMap>> metaInfo = demuxer_->GetStreamMetaInfo();
     for (const auto& trackInfo : metaInfo) {
-        if (trackInfo->GetString(Plugin::MetaID::MIME, mime)) {
+        if (trackInfo->GetString(Plugin::Tag::MIME, mime)) {
             if (IsAudioMime(mime)) {
                 int64_t bitRate;
                 uint32_t audioChannels;
@@ -418,16 +418,16 @@ int32_t HiPlayerImpl::GetAudioTrackInfo(std::vector<Format>& audioTrack)
                 Format audioTrackInfo {};
                 (void)audioTrackInfo.PutStringValue("codec_mime", mime);
                 (void)audioTrackInfo.PutIntValue("track_type", MediaType::MEDIA_TYPE_AUD);
-                if (trackInfo->GetUint32(Plugin::MetaID::TRACK_ID, trackIndex)) {
+                if (trackInfo->GetUint32(Plugin::Tag::TRACK_ID, trackIndex)) {
                     (void)audioTrackInfo.PutIntValue("track_index", static_cast<int32_t>(trackIndex));
                 }
-                if (trackInfo->GetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate)) {
+                if (trackInfo->GetInt64(Plugin::Tag::MEDIA_BITRATE, bitRate)) {
                     (void)audioTrackInfo.PutIntValue("bitrate", static_cast<int32_t>(bitRate));
                 }
-                if (trackInfo->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, audioChannels)) {
+                if (trackInfo->GetUint32(Plugin::Tag::AUDIO_CHANNELS, audioChannels)) {
                     (void)audioTrackInfo.PutIntValue("channel_count", static_cast<int32_t>(audioChannels));
                 }
-                if (trackInfo->GetUint32(Plugin::MetaID::AUDIO_SAMPLE_RATE, audioSampleRate)) {
+                if (trackInfo->GetUint32(Plugin::Tag::AUDIO_SAMPLE_RATE, audioSampleRate)) {
                     (void)audioTrackInfo.PutIntValue("sample_rate", static_cast<int32_t>(audioSampleRate));
                 }
                 audioTrack.push_back(audioTrackInfo);
@@ -637,14 +637,14 @@ ErrorCode HiPlayerImpl::DoOnReady()
     sourceMeta_ = tmpMeta;
     int64_t duration = 0;
     bool found = false;
-    if (tmpMeta->GetInt64(Media::Plugin::MetaID::MEDIA_DURATION, duration)) {
+    if (tmpMeta->GetInt64(Media::Plugin::Tag::MEDIA_DURATION, duration)) {
         found = true;
     }
     streamMeta_.clear();
     int64_t tmp = 0;
     for (auto& streamMeta : demuxer_->GetStreamMetaInfo()) {
         streamMeta_.push_back(streamMeta);
-        if (streamMeta->GetInt64(Media::Plugin::MetaID::MEDIA_DURATION, tmp)) {
+        if (streamMeta->GetInt64(Media::Plugin::Tag::MEDIA_DURATION, tmp)) {
             duration = std::max(duration, tmp);
             found = true;
         }

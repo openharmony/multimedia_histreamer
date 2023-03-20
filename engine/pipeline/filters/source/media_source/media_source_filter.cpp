@@ -270,21 +270,22 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
 {
     MEDIA_LOG_D("IN");
     SYNC_TRACER();
+    Plugin::TagMap meta;
     Plugin::TagMap upstreamParams;
     Plugin::TagMap downstreamParams;
-    upstreamParams.Insert<Tag::MEDIA_FILE_URI>(source->GetSourceUri());
+    meta.SetString(Media::Plugin::Tag::MEDIA_FILE_URI,source->GetSourceUri());
     Seekable seekable = plugin_->GetSeekable();
     FALSE_RETURN_V_MSG_E(seekable != Plugin::Seekable::INVALID, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
                          "media source Seekable must be SEEKABLE or UNSEEKABLE !");
-    upstreamParams.Insert<Tag::MEDIA_SEEKABLE>(seekable);
+    meta.SetInt32(Media::Plugin::Tag::MEDIA_SEEKABLE, static_cast<int32_t>(seekable));
     size_t fileSize = 0;
     if ((plugin_->GetSize(fileSize) == Status::OK) && (fileSize != 0)) {
-        upstreamParams.Insert<Tag::MEDIA_FILE_SIZE>(fileSize);
+        meta.SetUint64(Media::Plugin::Tag::MEDIA_FILE_SIZE, fileSize);
     }
     Capability peerCap;
-    auto tmpCap = TagToCapability(upstreamParams);
+    auto tmpCap = MetaToCapability(meta);
     if (!GetOutPort(PORT_NAME_DEFAULT)->Negotiate(tmpCap, peerCap, upstreamParams, downstreamParams) ||
-        !GetOutPort(PORT_NAME_DEFAULT)->Configure(upstreamParams, downstreamParams)) {
+        !GetOutPort(PORT_NAME_DEFAULT)->Configure(meta,upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("Negotiate fail!");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }

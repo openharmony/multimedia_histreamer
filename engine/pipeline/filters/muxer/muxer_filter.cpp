@@ -131,7 +131,7 @@ bool MuxerFilter::Negotiate(const std::string& inPort,
     // always use the first candidate plugin info
     return UpdateAndInitPluginByInfo(candidate[0]);
 }
-ErrorCode MuxerFilter::AddTrackThenConfigure(const std::pair<std::string, Plugin::Meta>& metaPair)
+ErrorCode MuxerFilter::AddTrackThenConfigure(std::pair<std::string, Plugin::TagMap>& metaPair)
 {
     uint32_t trackId = 0;
     ErrorCode ret = TranslatePluginStatus(plugin_->AddTrack(trackId));
@@ -142,11 +142,12 @@ ErrorCode MuxerFilter::AddTrackThenConfigure(const std::pair<std::string, Plugin
     trackInfos_.emplace_back(TrackInfo{static_cast<int32_t>(trackId), metaPair.first, false});
     auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
-        auto outValue = metaPair.second.GetData(static_cast<Plugin::MetaID>(keyPair.first));
-        if (outValue &&
+        Plugin::ValueType outValue;
+        auto ret = metaPair.second.GetData(static_cast<Plugin::Tag>(keyPair.first),outValue);
+        if (ret &&
             (keyPair.second.second & PARAM_SET) &&
-            keyPair.second.first(keyPair.first, *outValue)) {
-            plugin_->SetTrackParameter(trackId, keyPair.first, *outValue);
+            keyPair.second.first(keyPair.first, outValue)) {
+            plugin_->SetTrackParameter(trackId, keyPair.first, outValue);
         } else {
             if (!Plugin::HasTagInfo(keyPair.first)) {
                 MEDIA_LOG_W("tag " PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
@@ -162,7 +163,7 @@ ErrorCode MuxerFilter::AddTrackThenConfigure(const std::pair<std::string, Plugin
 ErrorCode MuxerFilter::ConfigureToStart()
 {
     ErrorCode ret;
-    for (const auto& cache: metaCache_) {
+    for (auto& cache: metaCache_) {
         ret = AddTrackThenConfigure(cache);
         if (ret != ErrorCode::SUCCESS) {
             MEDIA_LOG_E("add and configure for track from inPort " PUBLIC_LOG_S " failed", cache.first.c_str());
@@ -182,16 +183,16 @@ ErrorCode MuxerFilter::ConfigureToStart()
     }
     return ret;
 }
-bool MuxerFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
+bool MuxerFilter::Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta,
                             Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
 {
     std::string tmp;
-    if (!upstreamMeta->GetString(Plugin::MetaID::MIME, tmp)) {
+    if (!upstreamMeta.GetString(Plugin::Tag::MIME, tmp))  {
         MEDIA_LOG_E("stream meta must contain mime, which is not found in current stream from port " PUBLIC_LOG_S,
                     inPort.c_str());
         return false;
     }
-    metaCache_.emplace_back(std::make_pair(inPort, *upstreamMeta));
+    metaCache_.emplace_back(std::make_pair(inPort, upstreamMeta));
     if (metaCache_.size() < inPorts_.size()) {
         return true;
     }
@@ -200,9 +201,9 @@ bool MuxerFilter::Configure(const std::string &inPort, const std::shared_ptr<con
         return false;
     }
 
-    auto meta = std::make_shared<Plugin::Meta>();
-    meta->SetString(Plugin::MetaID::MIME, containerMime_);
-    if (!outPorts_[0]->Configure(meta, upstreamParams, downstreamParams)) {
+    auto meta = std::make_shared<Plugin::TagMap>();
+    meta->SetString(Plugin::Tag::MIME, containerMime_);
+    if (!outPorts_[0]->Configure(*meta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("downstream of muxer filter configure failed");
         return false;
     }

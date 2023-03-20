@@ -429,14 +429,14 @@ ErrorCode HiPlayerImpl::DoOnReady()
     sourceMeta_ = tmpMeta;
     int64_t duration = 0;
     bool found = false;
-    if (tmpMeta->GetInt64(Media::Plugin::MetaID::MEDIA_DURATION, duration)) {
+    if (tmpMeta->GetInt64(Media::Plugin::Tag::MEDIA_DURATION, tmp)) {
         found = true;
     }
     streamMeta_.clear();
     int64_t tmp = 0;
     for (auto& streamMeta : demuxer_->GetStreamMetaInfo()) {
         streamMeta_.push_back(streamMeta);
-        if (streamMeta->GetInt64(Media::Plugin::MetaID::MEDIA_DURATION, tmp)) {
+        if (streamMeta->GetInt64(Media::Plugin::Tag::MEDIA_DURATION, tmp)) {
             duration = std::max(duration, tmp);
             found = true;
         }
@@ -651,13 +651,13 @@ ErrorCode HiPlayerImpl::GetTrackCnt(size_t& cnt) const
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode HiPlayerImpl::GetSourceMeta(shared_ptr<const Plugin::Meta>& meta) const
+ErrorCode HiPlayerImpl::GetSourceMeta(shared_ptr<const Plugin::TagMap>& meta) const
 {
     meta = sourceMeta_.lock();
     return meta ? ErrorCode::SUCCESS : ErrorCode::ERROR_AGAIN;
 }
 
-ErrorCode HiPlayerImpl::GetTrackMeta(size_t id, shared_ptr<const Plugin::Meta>& meta) const
+ErrorCode HiPlayerImpl::GetTrackMeta(size_t id, shared_ptr<const Plugin::TagMap>& meta) const
 {
     if (id > streamMeta_.size() || id < 0) {
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;

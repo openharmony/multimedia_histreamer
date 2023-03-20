@@ -70,14 +70,14 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
 
-    bool Configure(const std::string &inPort,
+    bool Configure(const std::string &inPort,Plugin::TagMap &upstreamMeta,
                    Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
 
     ErrorCode SeekTo(int64_t seekTime, Plugin::SeekMode mode, int64_t& realSeekTime);
 
-    std::vector<std::shared_ptr<Plugin::TagMap>> GetStreamTagInfo() const;
+    std::vector<std::shared_ptr<Plugin::TagMap>> GetStreamMetaInfo() const;
 
-    std::shared_ptr<Plugin::TagMap> GetGlobalTagInfo() const;
+    std::shared_ptr<Plugin::TagMap> GetGlobalMetaInfo() const;
 
     void StopTask(bool force);
 
@@ -97,10 +97,10 @@ private:
         }
     };
 
-    struct MediaTagData {
+    struct MediaMetaData {
         std::vector<StreamTrackInfo> trackInfos;
-        std::vector<std::shared_ptr<Plugin::TagMap>> trackTags;
-        std::shared_ptr<Plugin::TagMap> globalTag;
+        std::vector<std::shared_ptr<Plugin::TagMap>> trackMetas;
+        std::shared_ptr<Plugin::TagMap> globalMeta;
     };
 
     void Reset();
@@ -125,7 +125,7 @@ private:
 
     ErrorCode ReadFrame(AVBuffer& buffer, uint32_t& trackId);
 
-    std::shared_ptr<Plugin::TagMap> GetTrackTag(uint32_t trackId);
+    std::shared_ptr<Plugin::TagMap> GetTrackMeta(uint32_t trackId);
 
     void SendEventEos();
 
@@ -133,7 +133,7 @@ private:
 
     void NegotiateDownstream();
 
-    void UpdateStreamTag(std::shared_ptr<Plugin::TagMap>& streamTag,
+    void UpdateStreamMeta(std::shared_ptr<Plugin::TagMap>& streamMeta,
         Plugin::Capability& negotiatedCap, Plugin::TagMap& downstreamParams);
 
     void DemuxerLoop();
@@ -152,7 +152,7 @@ private:
     std::atomic<DemuxerState> pluginState_;
     std::shared_ptr<Plugin::Allocator> pluginAllocator_;
     std::shared_ptr<DataSourceImpl> dataSource_;
-    MediaTagData mediaTagData_;
+    MediaMetaData mediaMetaData_;
 
     std::function<bool(uint64_t, size_t)> checkRange_;
     std::function<bool(uint64_t, size_t, AVBufferPtr&)> peekRange_;

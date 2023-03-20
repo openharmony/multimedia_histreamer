@@ -57,7 +57,7 @@ std::vector<WorkMode> VideoCaptureFilter::GetWorkModes()
     return {WorkMode::PUSH};
 }
 
-ErrorCode VideoCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& videoMeta)
+ErrorCode VideoCaptureFilter::InitAndConfigPlugin(const Plugin::TagMap& videoMeta)
 {
     MEDIA_LOG_D("IN");
     ErrorCode err = TranslatePluginStatus(plugin_->Init());
@@ -156,25 +156,25 @@ ErrorCode VideoCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
 
 ErrorCode VideoCaptureFilter::DoConfigure()
 {
-    auto emptyMeta = std::make_shared<Plugin::Meta>();
-    auto videoMeta = std::make_shared<Plugin::Meta>();
+    auto emptyMeta = std::make_shared<Plugin::TagMap>();
+    auto videoMeta = std::make_shared<Plugin::TagMap>();
     if (!MergeMetaWithCapability(*emptyMeta, capNegWithDownstream_, *videoMeta)) {
         MEDIA_LOG_E("cannot find available capability of plugin " PUBLIC_LOG_S, pluginInfo_->name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
-    videoMeta->SetUint32(Plugin::MetaID::VIDEO_WIDTH, videoWidth_);
-    videoMeta->SetUint32(Plugin::MetaID::VIDEO_HEIGHT, videoHeight_);
-    videoMeta->SetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate_);
-    videoMeta->SetUint32(Plugin::MetaID::VIDEO_FRAME_RATE, frameRate_);
-    videoMeta->SetData(Plugin::MetaID::MIME, mime_);
-    videoMeta->SetData(Plugin::MetaID::VIDEO_PIXEL_FORMAT, pixelFormat_);
+    videoMeta->SetUint32(Plugin::Tag::VIDEO_WIDTH, videoWidth_);
+    videoMeta->SetUint32(Plugin::Tag::VIDEO_HEIGHT, videoHeight_);
+    videoMeta->SetInt64(Plugin::Tag::MEDIA_BITRATE, bitRate_);
+    videoMeta->SetUint32(Plugin::Tag::VIDEO_FRAME_RATE, frameRate_);
+    videoMeta->SetData(Plugin::Tag::MIME, mime_);
+    videoMeta->SetData(Plugin::Tag::VIDEO_PIXEL_FORMAT, pixelFormat_);
     Plugin::TagMap upstreamParams;
     Plugin::TagMap downstreamParams;
-    if (!outPorts_[0]->Configure(videoMeta, upstreamParams, downstreamParams)) {
+    if (!outPorts_[0]->Configure(*videoMeta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("Configure downstream fail");
         return ErrorCode::ERROR_UNKNOWN;
     }
-    return InitAndConfigPlugin(videoMeta);
+    return InitAndConfigPlugin(*videoMeta);
 }
 
 ErrorCode VideoCaptureFilter::Prepare()

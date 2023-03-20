@@ -50,7 +50,7 @@ public:
     ErrorCode SendEos();
 private:
     void InitPorts() override;
-    ErrorCode InitAndConfigWithMeta(const std::shared_ptr<Plugin::Meta>& audioMeta);
+    ErrorCode InitAndConfigWithMeta(const std::shared_ptr<Plugin::TagMap>& audioMeta);
     void ReadLoop();
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);
@@ -61,8 +61,8 @@ private:
     bool CheckSampleFormat(const Plugin::Capability& cap);
     ErrorCode DoConfigure();
     void SendBuffer(const std::shared_ptr<AVBuffer>& buffer);
-    void PickPreferSampleFmt(const std::shared_ptr<Plugin::Meta>& meta, const Plugin::ValueType& val);
-    std::shared_ptr<Plugin::Meta> PickPreferParameters();
+    void PickPreferSampleFmt(const std::shared_ptr<Plugin::TagMap>& meta, const Plugin::ValueType& val);
+    std::shared_ptr<Plugin::TagMap> PickPreferParameters();
 
     std::shared_ptr<OSAL::Task> taskPtr_ {nullptr};
     std::shared_ptr<Plugin::Source> plugin_ {nullptr};

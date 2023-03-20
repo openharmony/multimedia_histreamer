@@ -86,9 +86,9 @@ public:
 
     ErrorCode SetBufferSize(size_t size);
 
-    ErrorCode GetSourceMeta(std::shared_ptr<const Plugin::Meta>& meta) const;
+    ErrorCode GetSourceMeta(std::shared_ptr<const Plugin::TagMap>& meta) const;
     ErrorCode GetTrackCnt(size_t& cnt) const;
-    ErrorCode GetTrackMeta(size_t id, std::shared_ptr<const Plugin::Meta>& meta) const;
+    ErrorCode GetTrackMeta(size_t id, std::shared_ptr<const Plugin::TagMap>& meta) const;
 
     void OnStateChanged(StateId state) override;
 
@@ -153,8 +153,8 @@ private:
 
     std::unordered_map<std::string, std::shared_ptr<Pipeline::AudioDecoderFilter>> audioDecoderMap_;
 
-    std::weak_ptr<Plugin::Meta> sourceMeta_;
-    std::vector<std::weak_ptr<Plugin::Meta>> streamMeta_;
+    std::weak_ptr<Plugin::TagMap> sourceMeta_;
+    std::vector<std::weak_ptr<Plugin::TagMap>> streamMeta_;
     int64_t duration_ {-1};
     std::atomic<bool> singleLoop_ {false};
 

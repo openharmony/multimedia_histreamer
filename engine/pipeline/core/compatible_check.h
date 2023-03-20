@@ -57,7 +57,7 @@ bool MergeCapability(const Capability& originCap, const Capability& otherCap, Ca
  * @param tagMap target tag
  * @return result capability
  */
-std::shared_ptr<Capability> TagToCapability(Plugin::TagMap& tagMap);
+std::shared_ptr<Capability> MetaToCapability(Plugin::TagMap& meta);
 
 /**
  * merge meta with capability. This function firstly change meta into capability metaCap. The mime of metaCap is the
@@ -72,7 +72,7 @@ std::shared_ptr<Capability> TagToCapability(Plugin::TagMap& tagMap);
  * @param resMeta result meta
  * @return success to merge
  */
-bool MergeMetaWithCapability(Plugin::TagMap& tagMap, const Capability& cap, Plugin::TagMap& resTagMap);
+bool MergeMetaWithCapability(Plugin::TagMap& meta, const Capability& cap, Plugin::TagMap& resTagMap);
 
 bool ApplyCapabilitySet(const Capability& originCap, const CapabilitySet& capabilitySet, Capability& resCap);
 }

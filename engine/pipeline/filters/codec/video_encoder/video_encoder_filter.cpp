@@ -141,10 +141,10 @@ ErrorCode VideoEncoderFilter::Prepare()
     return FilterBase::Prepare();
 }
 
-ErrorCode VideoEncoderFilter::SetVideoEncoder(int32_t sourceId, std::shared_ptr<Plugin::Meta> encoderMeta)
+ErrorCode VideoEncoderFilter::SetVideoEncoder(int32_t sourceId,Plugin::TagMap &encoderMeta)
 {
     std::string mime;
-    FALSE_RETURN_V_MSG_E(encoderMeta->GetString(Plugin::MetaID::MIME, mime), ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
+    FALSE_RETURN_V_MSG_E(encoderMeta.Get<Plugin::Tag::MIME>(mime), ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
                          "encoder meta must contains mime");
     vencFormat_.mime = mime;
     codecMeta_ = std::move(encoderMeta);
@@ -170,9 +170,9 @@ bool VideoEncoderFilter::Negotiate(const std::string& inPort,
     for (const auto& candidate : candidatePlugins) {
         FALSE_LOG_MSG(!candidate.first->outCaps.empty(), "encoder plugin must have out caps");
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
-            Plugin::Meta tmpMeta;
+            Plugin::TagMap tmpMeta;
             if (outCap.mime != vencFormat_.mime ||
-                !MergeMetaWithCapability(*codecMeta_, outCap, tmpMeta)) {
+                !MergeMetaWithCapability(codecMeta_, outCap, tmpMeta)) {
                 continue;
             }
             auto thisOut = std::make_shared<Plugin::Capability>();
@@ -207,17 +207,18 @@ bool VideoEncoderFilter::Negotiate(const std::string& inPort,
     return res;
 }
 
-bool VideoEncoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
+bool VideoEncoderFilter::Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta,
                                    Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
 {
     PROFILE_BEGIN("video encoder configure start");
-    MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
+    MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(upstreamMeta).c_str());
     if (plugin_ == nullptr || pluginInfo_ == nullptr) {
         MEDIA_LOG_E("cannot configure encoder when no plugin available");
         return false;
     }
-    auto thisMeta = std::make_shared<Plugin::Meta>();
-    if (!MergeMetaWithCapability(*upstreamMeta, pluginInfo_->outCaps[0], *thisMeta)) {
+
+    Plugin::TagMap thisMeta;
+    if (!MergeMetaWithCapability(upstreamMeta, pluginInfo_->outCaps[0], thisMeta)) {
         MEDIA_LOG_E("cannot configure encoder plugin since meta is not compatible with negotiated caps");
         return false;
     }
@@ -237,7 +238,7 @@ bool VideoEncoderFilter::Configure(const std::string &inPort, const std::shared_
         OnEvent(event);
         return false;
     }
-    FAIL_LOG(UpdateMetaFromPlugin(*thisMeta));
+    FAIL_LOG(UpdateMetaFromPlugin(thisMeta));
     if (!targetOutPort->Configure(thisMeta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("encoder filter downstream Configure failed");
         return false;
@@ -261,8 +262,9 @@ ErrorCode VideoEncoderFilter::AllocateOutputBuffers()
     }
     outBufPool_ = std::make_shared<BufferPool<AVBuffer>>(bufferCnt);
     uint32_t bufferSize = 0;
+    Plugin::TagMap meta;
     if (GetPluginParameterLocked(Tag::REQUIRED_OUT_BUFFER_SIZE, bufferSize) != ErrorCode::SUCCESS) {
-        bufferSize = CalculateBufferSize(nullptr);
+        bufferSize = CalculateBufferSize(meta);
     }
     auto outAllocator = plugin_->GetAllocator(); // zero copy need change to use sink allocator
     if (outAllocator == nullptr) {
@@ -279,7 +281,7 @@ ErrorCode VideoEncoderFilter::AllocateOutputBuffers()
     return ErrorCode::SUCCESS;
 }
 
-uint32_t VideoEncoderFilter::CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta>& meta)
+uint32_t VideoEncoderFilter::CalculateBufferSize(Plugin::TagMap& meta)
 {
     (void)meta;
     uint32_t bufferSize = vencFormat_.width * vencFormat_.height;
@@ -300,31 +302,32 @@ uint32_t VideoEncoderFilter::CalculateBufferSize(const std::shared_ptr<const OHO
     return bufferSize;
 }
 
-ErrorCode VideoEncoderFilter::SetVideoEncoderFormat(const std::shared_ptr<const Plugin::Meta>& meta)
+
+ErrorCode VideoEncoderFilter::SetVideoEncoderFormat(Plugin::TagMap &meta)
 {
-    if (!meta->GetData<Plugin::VideoPixelFormat>(Plugin::MetaID::VIDEO_PIXEL_FORMAT, vencFormat_.format)) {
+    if (!meta.GetData<Plugin::VideoPixelFormat>(Plugin::Tag::VIDEO_PIXEL_FORMAT, vencFormat_.format)) {
         MEDIA_LOG_E("Get video pixel format fail");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    if (!meta->GetUint32(Plugin::MetaID::VIDEO_WIDTH, vencFormat_.width)) {
+    if (!meta.GetUint32(Plugin::Tag::VIDEO_WIDTH, vencFormat_.width)) {
         MEDIA_LOG_E("Get video width fail");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    if (!meta->GetUint32(Plugin::MetaID::VIDEO_HEIGHT, vencFormat_.height)) {
+    if (!meta.GetUint32(Plugin::Tag::VIDEO_HEIGHT, vencFormat_.height)) {
         MEDIA_LOG_E("Get video width height");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    if (!meta->GetInt64(Plugin::MetaID::MEDIA_BITRATE, vencFormat_.bitRate)) {
+    if (!meta.GetInt64(Plugin::Tag::MEDIA_BITRATE, vencFormat_.bitRate)) {
         MEDIA_LOG_D("Do not have codec bit rate");
     }
-    if (!meta->GetUint32(Plugin::MetaID::VIDEO_FRAME_RATE, vencFormat_.frameRate)) {
+    if (!meta.GetUint32(Plugin::Tag::VIDEO_FRAME_RATE, vencFormat_.frameRate)) {
         MEDIA_LOG_D("Do not have codec frame rate");
     }
-    if (!meta->GetData(Plugin::MetaID::MIME, vencFormat_.mime)) {
+    if (!meta.GetData(Plugin::Tag::MIME, vencFormat_.mime)) {
         MEDIA_LOG_D("Do not have codec mime");
     }
     // Optional: codec extra data
-    if (!meta->GetData<std::vector<uint8_t>>(Plugin::MetaID::MEDIA_CODEC_CONFIG, vencFormat_.codecConfig)) {
+    if (!meta.GetData<std::vector<uint8_t>>(Plugin::Tag::MEDIA_CODEC_CONFIG, vencFormat_.codecConfig)) {
         MEDIA_LOG_D("Do not have codec extra data");
     }
     return ErrorCode::SUCCESS;
@@ -348,12 +351,12 @@ ErrorCode VideoEncoderFilter::ConfigurePluginParams()
         FALSE_RETURN_V_MSG_W(ret == ErrorCode::SUCCESS, ErrorCode::ERROR_UNKNOWN,
                              "Set framerate to plugin fail");
     }
-    if (codecMeta_->GetData<Plugin::VideoH264Profile>(Plugin::MetaID::VIDEO_H264_PROFILE, vencFormat_.profile)) {
+    if (codecMeta_.GetData<Plugin::VideoH264Profile>(Plugin::Tag::VIDEO_H264_PROFILE, vencFormat_.profile)) {
         auto ret = SetPluginParameterLocked(Tag::VIDEO_H264_PROFILE, vencFormat_.profile);
         FALSE_RETURN_V_MSG_W(ret == ErrorCode::SUCCESS, ErrorCode::ERROR_UNKNOWN,
                              "Set profile to plugin fail");
     }
-    if (codecMeta_->GetUint32(Plugin::MetaID::VIDEO_H264_LEVEL, vencFormat_.level)) {
+    if (codecMeta_.GetUint32(Plugin::Tag::VIDEO_H264_LEVEL, vencFormat_.level)) {
         auto ret = SetPluginParameterLocked(Tag::VIDEO_H264_LEVEL, vencFormat_.level);
         FALSE_RETURN_V_MSG_W(ret == ErrorCode::SUCCESS, ErrorCode::ERROR_UNKNOWN,
                              "Set level to plugin fail");
@@ -398,7 +401,7 @@ ErrorCode VideoEncoderFilter::ConfigurePlugin()
     return TranslatePluginStatus(plugin_->Start());
 }
 
-ErrorCode VideoEncoderFilter::ConfigureNoLocked(const std::shared_ptr<const Plugin::Meta>& meta)
+ErrorCode VideoEncoderFilter::ConfigureNoLocked(Plugin::TagMap &meta)
 {
     MEDIA_LOG_D("video encoder configure called");
     FAIL_RETURN_MSG(SetVideoEncoderFormat(meta), "Set video encoder format fail");

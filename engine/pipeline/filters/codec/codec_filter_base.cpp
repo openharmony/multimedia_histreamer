@@ -70,7 +70,7 @@ ErrorCode CodecFilterBase::Prepare()
     return err;
 }
 
-ErrorCode CodecFilterBase::UpdateMetaFromPlugin(Plugin::Meta& meta)
+ErrorCode CodecFilterBase::UpdateMetaFromPlugin(Plugin::TagMap& meta)
 {
     auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
@@ -100,7 +100,7 @@ ErrorCode CodecFilterBase::UpdateMetaFromPlugin(Plugin::Meta& meta)
             }
             continue;
         }
-        meta.SetData(static_cast<Plugin::MetaID>(keyPair.first), tmpVal);
+        meta.SetData(static_cast<Plugin::Tag>(keyPair.first), tmpVal);
     }
     return ErrorCode::SUCCESS;
 }
@@ -134,8 +134,8 @@ ErrorCode CodecFilterBase::GetParameter(int32_t key, Plugin::Any& outVal)
     return TranslatePluginStatus(plugin_->GetParameter(tag, outVal));
 }
 
-void CodecFilterBase::UpdateParams(const std::shared_ptr<const Plugin::Meta>& upMeta,
-                                   std::shared_ptr<Plugin::Meta>& meta)
+void CodecFilterBase::UpdateParams(Plugin::TagMap &upMeta,
+                                   Plugin::TagMap &meta)
 {
 }
 
@@ -149,7 +149,7 @@ uint32_t CodecFilterBase::GetOutBufferPoolSize()
     return DEFAULT_OUT_BUFFER_POOL_SIZE;
 }
 
-uint32_t CodecFilterBase::CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta)
+uint32_t CodecFilterBase::CalculateBufferSize(Plugin::TagMap &meta)
 {
     return 0;
 }
@@ -232,20 +232,18 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
     return res;
 }
 
-bool CodecFilterBase::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
+bool CodecFilterBase::Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta,
                                 Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
 {
-    MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
+    MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(upstreamMeta).c_str());
     FALSE_RETURN_V_MSG_E(plugin_ != nullptr && pluginInfo_ != nullptr, false,
                          "can't configure codec when no plugin available");
-    auto thisMeta = std::make_shared<Plugin::Meta>();
-    FALSE_RETURN_V_MSG_E(MergeMetaWithCapability(*upstreamMeta, capNegWithDownstream_, *thisMeta), false,
+    Plugin::TagMap thisMeta;
+    FALSE_RETURN_V_MSG_E(MergeMetaWithCapability(upstreamMeta, capNegWithDownstream_, thisMeta), false,
                          "can't configure codec plugin since meta is not compatible with negotiated caps");
     UpdateParams(upstreamMeta, thisMeta);
-
-    // When use hdi as codec plugin interfaces, must set width & height into hdi,
-    // Hdi use these params to calc out buffer size & count then return to filter
-    if (ConfigPluginWithMeta(*plugin_, *thisMeta) != ErrorCode::SUCCESS) {
+    // HDI: must set width & height into hdi, hid use these params calc out buffer size & count then return to filter
+    if (ConfigPluginWithMeta(*plugin_, thisMeta) != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("set params into plugin failed");
         return false;
     }
@@ -284,7 +282,7 @@ bool CodecFilterBase::Configure(const std::string &inPort, const std::shared_ptr
     return true;
 }
 
-ErrorCode CodecFilterBase::ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta)
+ErrorCode CodecFilterBase::ConfigureToStartPluginLocked(Plugin::TagMap &meta)
 {
     MEDIA_LOG_D("CodecFilterBase configure called");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->SetCallback(this)), "plugin set callback fail");

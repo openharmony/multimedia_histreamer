@@ -242,45 +242,45 @@ int32_t MetaIDStringiness(char* buf, size_t maxLen, const char* name, const char
 }
 using CapStrnessFunc = std::function<int32_t(char*, size_t, const char*, const char*, const Plugin::ValueType&)>;
 
-std::map<Plugin::MetaID, CapStrnessFunc> g_metaStrnessMap = {
-    {Plugin::MetaID::MIME, MetaIDStringiness<std::string>},
-    {Plugin::MetaID::TRACK_ID, MetaIDStringiness<uint32_t>},
-    {Plugin::MetaID::MEDIA_CODEC_CONFIG,MetaIDStringiness<std::vector<uint8_t>>},
-    {Plugin::MetaID::AUDIO_CHANNELS, MetaIDStringiness<uint32_t>},
-    {Plugin::MetaID::AUDIO_SAMPLE_RATE, MetaIDStringiness<uint32_t>},
-    {Plugin::MetaID::AUDIO_SAMPLE_FORMAT, MetaIDStringiness<Plugin::AudioSampleFormat>},
-    {Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME, MetaIDStringiness<uint32_t>},
-    {Plugin::MetaID::AUDIO_CHANNEL_LAYOUT, MetaIDStringiness<Plugin::AudioChannelLayout>},
-    {Plugin::MetaID::AUDIO_OUTPUT_CHANNELS, MetaIDStringiness<uint32_t>},
-    {Plugin::MetaID::AUDIO_OUTPUT_CHANNEL_LAYOUT, MetaIDStringiness<Plugin::AudioChannelLayout>},
-    {Plugin::MetaID::MEDIA_TITLE, MetaIDStringiness<std::string>},
-    {Plugin::MetaID::MEDIA_ARTIST, MetaIDStringiness<std::string>},
-    {Plugin::MetaID::MEDIA_LYRICIST, MetaIDStringiness<std::string>},
-    {Plugin::MetaID::MEDIA_ALBUM, MetaIDStringiness<std::string>},
-    {Plugin::MetaID::MEDIA_ALBUM_ARTIST, MetaIDStringiness<std::string>},
-    {Plugin::MetaID::MEDIA_DATE, MetaIDStringiness<std::string>},
-    {Plugin::MetaID::MEDIA_COMMENT, MetaIDStringiness<std::string>},
-    {Plugin::MetaID::MEDIA_GENRE, MetaIDStringiness<std::string>},
-    {Plugin::MetaID::MEDIA_DESCRIPTION, MetaIDStringiness<std::string>},
-    {Plugin::MetaID::MEDIA_COPYRIGHT, MetaIDStringiness<std::string>},
-    {Plugin::MetaID::MEDIA_LANGUAGE, MetaIDStringiness<std::string>},
-    {Plugin::MetaID::MEDIA_LYRICS, MetaIDStringiness<std::string>},
-    {Plugin::MetaID::MEDIA_DURATION, MetaIDStringiness<int64_t>},
-    {Plugin::MetaID::MEDIA_BITRATE, MetaIDStringiness<int64_t>},
-    {Plugin::MetaID::MEDIA_FILE_URI, MetaIDStringiness<std::string>},
-    {Plugin::MetaID::MEDIA_FILE_SIZE, MetaIDStringiness<uint64_t>},
-    {Plugin::MetaID::MEDIA_SEEKABLE, MetaIDStringiness<Plugin::Seekable>},
-    {Plugin::MetaID::AUDIO_MPEG_VERSION, MetaIDStringiness<uint32_t>},
-    {Plugin::MetaID::AUDIO_MPEG_LAYER ,MetaIDStringiness<uint32_t>},
-    {Plugin::MetaID::AUDIO_AAC_PROFILE, MetaIDStringiness<Plugin::AudioAacProfile>},
-    {Plugin::MetaID::AUDIO_AAC_LEVEL, MetaIDStringiness<uint32_t>},
-    {Plugin::MetaID::AUDIO_AAC_STREAM_FORMAT, MetaIDStringiness<Plugin::AudioAacStreamFormat>},
-    {Plugin::MetaID::VIDEO_WIDTH, MetaIDStringiness<uint32_t>},
-    {Plugin::MetaID::VIDEO_HEIGHT, MetaIDStringiness<uint32_t>},
-    {Plugin::MetaID::VIDEO_FRAME_RATE, MetaIDStringiness<uint32_t>},
-    {Plugin::MetaID::VIDEO_PIXEL_FORMAT, MetaIDStringiness<Plugin::VideoPixelFormat>},
-    {Plugin::MetaID::VIDEO_BIT_STREAM_FORMAT, MetaIDStringiness<Plugin::VideoBitStreamFormat>},
-    {Plugin::MetaID::BITS_PER_CODED_SAMPLE, MetaIDStringiness<uint32_t>},
+std::map<Plugin::Tag, CapStrnessFunc> g_metaStrnessMap = {
+    {Plugin::Tag::MIME, MetaIDStringiness<std::string>},
+    {Plugin::Tag::TRACK_ID, MetaIDStringiness<uint32_t>},
+    {Plugin::Tag::MEDIA_CODEC_CONFIG,MetaIDStringiness<std::vector<uint8_t>>},
+    {Plugin::Tag::AUDIO_CHANNELS, MetaIDStringiness<uint32_t>},
+    {Plugin::Tag::AUDIO_SAMPLE_RATE, MetaIDStringiness<uint32_t>},
+    {Plugin::Tag::AUDIO_SAMPLE_FORMAT, MetaIDStringiness<Plugin::AudioSampleFormat>},
+    {Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, MetaIDStringiness<uint32_t>},
+    {Plugin::Tag::AUDIO_CHANNEL_LAYOUT, MetaIDStringiness<Plugin::AudioChannelLayout>},
+    {Plugin::Tag::AUDIO_OUTPUT_CHANNELS, MetaIDStringiness<uint32_t>},
+    {Plugin::Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, MetaIDStringiness<Plugin::AudioChannelLayout>},
+    {Plugin::Tag::MEDIA_TITLE, MetaIDStringiness<std::string>},
+    {Plugin::Tag::MEDIA_ARTIST, MetaIDStringiness<std::string>},
+    {Plugin::Tag::MEDIA_LYRICIST, MetaIDStringiness<std::string>},
+    {Plugin::Tag::MEDIA_ALBUM, MetaIDStringiness<std::string>},
+    {Plugin::Tag::MEDIA_ALBUM_ARTIST, MetaIDStringiness<std::string>},
+    {Plugin::Tag::MEDIA_DATE, MetaIDStringiness<std::string>},
+    {Plugin::Tag::MEDIA_COMMENT, MetaIDStringiness<std::string>},
+    {Plugin::Tag::MEDIA_GENRE, MetaIDStringiness<std::string>},
+    {Plugin::Tag::MEDIA_DESCRIPTION, MetaIDStringiness<std::string>},
+    {Plugin::Tag::MEDIA_COPYRIGHT, MetaIDStringiness<std::string>},
+    {Plugin::Tag::MEDIA_LANGUAGE, MetaIDStringiness<std::string>},
+    {Plugin::Tag::MEDIA_LYRICS, MetaIDStringiness<std::string>},
+    {Plugin::Tag::MEDIA_DURATION, MetaIDStringiness<int64_t>},
+    {Plugin::Tag::MEDIA_BITRATE, MetaIDStringiness<int64_t>},
+    {Plugin::Tag::MEDIA_FILE_URI, MetaIDStringiness<std::string>},
+    {Plugin::Tag::MEDIA_FILE_SIZE, MetaIDStringiness<uint64_t>},
+    {Plugin::Tag::MEDIA_SEEKABLE, MetaIDStringiness<Plugin::Seekable>},
+    {Plugin::Tag::AUDIO_MPEG_VERSION, MetaIDStringiness<uint32_t>},
+    {Plugin::Tag::AUDIO_MPEG_LAYER ,MetaIDStringiness<uint32_t>},
+    {Plugin::Tag::AUDIO_AAC_PROFILE, MetaIDStringiness<Plugin::AudioAacProfile>},
+    {Plugin::Tag::AUDIO_AAC_LEVEL, MetaIDStringiness<uint32_t>},
+    {Plugin::Tag::AUDIO_AAC_STREAM_FORMAT, MetaIDStringiness<Plugin::AudioAacStreamFormat>},
+    {Plugin::Tag::VIDEO_WIDTH, MetaIDStringiness<uint32_t>},
+    {Plugin::Tag::VIDEO_HEIGHT, MetaIDStringiness<uint32_t>},
+    {Plugin::Tag::VIDEO_FRAME_RATE, MetaIDStringiness<uint32_t>},
+    {Plugin::Tag::VIDEO_PIXEL_FORMAT, MetaIDStringiness<Plugin::VideoPixelFormat>},
+    {Plugin::Tag::VIDEO_BIT_STREAM_FORMAT, MetaIDStringiness<Plugin::VideoBitStreamFormat>},
+    {Plugin::Tag::BITS_PER_CODED_SAMPLE, MetaIDStringiness<uint32_t>},
 };
 }
 
@@ -481,7 +481,7 @@ std::string Capability2String(const Capability& capability)
     return buffer;
 }
 
-std::string Meta2String(const Plugin::Meta& meta)
+std::string Meta2String(Plugin::TagMap& meta)
 {
     char buffer[MAX_BUF_LEN + 1] = {0}; // one more is for \0
     int pos = 0;
@@ -490,7 +490,7 @@ std::string Meta2String(const Plugin::Meta& meta)
     RETURN_IF_SNPRI_FAILED(snprintf_truncated_s(buffer + pos, MAX_BUF_LEN - pos, "Meta{"), ret, {});
     pos += ret;
     bool needEtc = false;
-    for (const auto & item : meta.GetMetaIDs()) {
+    for (const auto & item : meta.GettagIDs()) {
         if (pos >= MAX_BUF_LEN - 2) { // reserve for "}\0"
             needEtc = true;
             break;
@@ -499,6 +499,8 @@ std::string Meta2String(const Plugin::Meta& meta)
             MEDIA_LOG_W("meta id " PUBLIC_LOG_D32 "is not is map, may be update the info map?", item);
             continue;
         }
+        //Plugin::ValueType tmp;
+        //auto ret = meta.GetData(item,tmp);
         const Plugin::ValueType* tmp = meta.GetData(item);
         const auto& tuple = Plugin::g_tagInfoMap.at(static_cast<Tag>(item));
         if (tmp) {

@@ -443,23 +443,23 @@ bool ExtractFixedCap(const Plugin::ValueType& value, Plugin::ValueType& fixedVal
     return false;
 }
 
-std::shared_ptr<Capability> TagToCapability(Plugin::TagMap& tagMap)
+std::shared_ptr<Capability> MetaToCapability(Plugin::TagMap& meta)
 {
     auto ret = std::make_shared<Capability>();
     std::string mime;
-    if (tagMap.Get<Plugin::Tag::MIME>(mime)) {
+    if (meta.GetString(Plugin::Tag::MIME, mime)) {
         ret->mime = mime;
     }
     for (const auto& key : g_allCapabilityId) {
         Plugin::ValueType tmp;
-        if (tagMap.GetData(static_cast<Plugin::Tag>(key), tmp)) {
+        if (meta.GetData(static_cast<Plugin::Tag>(key), tmp)) {
             ret->keys[key] = tmp;
         }
     }
     return ret;
 }
 
-bool MergeMetaWithCapability(Plugin::TagMap& tagMap, const Capability& cap, Plugin::TagMap& resTagMap)
+bool MergeMetaWithCapability(Plugin::TagMap& meta, const Capability& cap, Plugin::TagMap& resTagMap)
 {
     resTagMap.Clear();
     // change meta into capability firstly
@@ -467,7 +467,7 @@ bool MergeMetaWithCapability(Plugin::TagMap& tagMap, const Capability& cap, Plug
     metaCap.mime = cap.mime;
     for (const auto& key : g_allCapabilityId) {
         Plugin::ValueType tmp;
-        if (tagMap.GetData(static_cast<Plugin::Tag>(key), tmp)) {
+        if (meta.GetData(static_cast<Plugin::Tag>(key), tmp)) {
             metaCap.keys[key] = tmp;
         }
     }
@@ -476,8 +476,8 @@ bool MergeMetaWithCapability(Plugin::TagMap& tagMap, const Capability& cap, Plug
         return false;
     }
     // merge capability
-    resTagMap.Update(tagMap);
-    resTagMap.Insert<Plugin::Tag::MIME>(cap.mime);
+    resTagMap.Update(meta);
+    resTagMap.SetString(Plugin::Tag::MIME, cap.mime);
     for (const auto& oneCap : resCap.keys) {
         if (g_capExtrMap.count(oneCap.first) == 0) {
             continue;

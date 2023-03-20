@@ -71,6 +71,8 @@ public:
     DEFINE_INSERT_GET_FUNC(tag == Tag::MEDIA_SEEKABLE, Seekable);
     DEFINE_INSERT_GET_FUNC(tag == Tag::MEDIA_TYPE, MediaType);
     DEFINE_INSERT_GET_FUNC(tag == Tag::VIDEO_BIT_STREAM_FORMAT, std::vector<VideoBitStreamFormat>);
+    DEFINE_INSERT_GET_FUNC(tag == Tag::VIDEO_H264_PROFILE, VideoH264Profile);
+    DEFINE_INSERT_GET_FUNC(tag == Tag::VIDEO_H264_LEVEL, uint32_t);
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::TRACK_ID or
         tag == Tag::REQUIRED_OUT_BUFFER_CNT or
@@ -113,7 +115,7 @@ public:
         tag == Tag::MEDIA_LANGUAGE or
         tag == Tag::MEDIA_DESCRIPTION or
         tag == Tag::MEDIA_LYRICS, std::string);
-
+    using PointerPair = std::pair<std::shared_ptr<uint8_t>, size_t>;
     ValueType& operator[](const Tag &tag)
     {
         return map_[tag];
@@ -144,13 +146,10 @@ public:
         return map_.empty();
     }
 
-    bool GetData(Tag tag, ValueType& value) const
+    template <typename T>
+    bool SetData(Plugin::Tag id, const T& value)
     {
-        auto ite = map_.find(tag);
-        if (ite == map_.end()) {
-            return false;
-        }
-        value = ite->second;
+        map_[id] = value;
         return true;
     }
 
@@ -160,7 +159,216 @@ public:
         return true;
     }
 
-    void Update(TagMap& tagMap){}
+    template <typename T>
+    bool GetData(Plugin::Tag id, T& value) const
+    {
+        auto ite = map_.find(id);
+        if (ite == map_.end() || !ite->second.SameTypeWith(typeid(T))) {
+            return false;
+        }
+        value = Plugin::AnyCast<T>(ite->second);
+        return true;
+    }
+    bool GetData(Tag tag, ValueType& value) const
+    {
+        auto ite = map_.find(tag);
+        if (ite == map_.end()) {
+            return false;
+        }
+        value = ite->second;
+        return true;
+    }
+    const ValueType* GetData(Tag id) const
+    {
+        auto ite = map_.find(id);
+        if (ite == map_.end()) {
+            return nullptr;
+        }
+        return &(ite->second);
+    }
+    bool SetString(Plugin::Tag id, const std::string& value)
+    {
+        return SetData<std::string>(id, value);
+    }
+
+    bool SetInt32(Plugin::Tag id, int32_t value)
+    {
+        return SetData<int32_t>(id, value);
+    }
+
+    bool SetUint32(Plugin::Tag id, uint32_t value)
+    {
+        return SetData<uint32_t>(id, value);
+    }
+
+    bool SetInt64(Plugin::Tag id, int64_t value)
+    {
+        return SetData<int64_t>(id, value);
+    }
+
+    bool SetUint64(Plugin::Tag id, uint64_t value)
+    {
+        return SetData<uint64_t>(id, value);
+    }
+
+    bool SetFloat(Plugin::Tag id, float value)
+    {
+        return SetData<float>(id, value);
+    }
+
+    bool GetString(Plugin::Tag id, std::string& value) const
+    {
+        auto ite = map_.find(id);
+        if (ite == map_.end()) {
+            return false;
+        }
+        if (ite->second.SameTypeWith(typeid(const char*))) {
+            value = Plugin::AnyCast<const char*>(ite->second);
+        } else if (ite->second.SameTypeWith(typeid(std::string))) {
+            value = Plugin::AnyCast<std::string>(ite->second);
+        } else if (ite->second.SameTypeWith(typeid(char*))) {
+            value = Plugin::AnyCast<char*>(ite->second);
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    bool GetInt32(Plugin::Tag id, int32_t& value) const
+    {
+        return GetData<int32_t>(id, value);
+    }
+
+    bool GetUint32(Plugin::Tag id, uint32_t& value) const
+    {
+        return GetData<uint32_t>(id, value);
+    }
+
+    bool GetInt64(Plugin::Tag id, int64_t& value) const
+    {
+        return GetData<int64_t>(id, value);
+    }
+
+    bool GetUint64(Plugin::Tag id, uint64_t& value) const
+    {
+        return GetData<uint64_t>(id, value);
+    }
+
+    bool GetFloat(Plugin::Tag id, float& value) const
+    {
+        return GetData<float>(id, value);
+    }
+
+    bool Remove(Plugin::Tag id)
+    {
+        auto ite = map_.find(id);
+        if (ite == map_.end()) {
+            return false;
+        }
+        map_.erase(ite);
+        return true;
+    }
+
+    bool SetPointer(Plugin::Tag id, const void* ptr, size_t size) // NOLINT:void*
+    {
+        if (size == 0) {
+            return false;
+        }
+        std::shared_ptr<uint8_t> savePtr(new (std::nothrow) uint8_t[size], std::default_delete<uint8_t[]>());
+        if (!savePtr) {
+            return false;
+        }
+        if (memcpy_s(savePtr.get(), size, ptr, size) != EOK) {
+            return false;
+        }
+        return SetData<std::pair<std::shared_ptr<uint8_t>, size_t>>(id, std::make_pair(savePtr, size));
+    }
+
+    bool GetPointer(Plugin::Tag id, void** ptr, size_t& size) const // NOLINT: void*
+    {
+        std::pair<std::shared_ptr<uint8_t>, size_t> item;
+        if (GetData<std::pair<std::shared_ptr<uint8_t>, size_t>>(id, item)) {
+            size = item.second;
+            if (size == 0) {
+                return false;
+            }
+            auto tmp = new (std::nothrow) uint8_t[size];
+            if (tmp == nullptr) {
+                return false;
+            }
+            if (memcpy_s(tmp, size, item.first.get(), size) != EOK) {
+                delete[] tmp;
+                return false;
+            }
+            *ptr = tmp;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    std::vector<Tag> GettagIDs() const
+    {
+        std::vector<Tag> ret (map_.size());
+        int cnt = 0;
+        for (const auto& tmp : map_) {
+            ret[cnt++] = tmp.first;
+        }
+        return ret;
+    }
+    /*
+    bool SetPointer(Tag tag, const void* ptr, size_t size) // NOLINT:void*
+    {
+        if (size == 0) {
+            return false;
+        }
+        std::shared_ptr<uint8_t> savePtr(new (std::nothrow) uint8_t[size], std::default_delete<uint8_t[]>());
+        if (!savePtr) {
+            return false;
+        }
+        if (memcpy_s(savePtr.get(), size, ptr, size) != EOK) {
+            return false;
+        }
+        return Insert(tag, std::make_pair(savePtr, size));
+    }
+
+    bool GetPointer(Tag tag, void** ptr, size_t& size) const // NOLINT: void*
+    {
+        std::pair<std::shared_ptr<uint8_t>, size_t> item;
+        if (Get<std::pair<std::shared_ptr<uint8_t>, size_t>>(tag, item))
+        {
+            size = item.second;
+            if (size == 0) {
+                return false;
+            }
+            auto tmp = new (std::nothrow) uint8_t[size];
+            if (tmp == nullptr) {
+                return false;
+            }
+            if (memcpy_s(tmp, size, item.first.get(), size) != EOK) {
+                delete[] tmp;
+                return false;
+            }
+            *ptr = tmp;
+            return true;
+        } else {
+            return false;
+        }
+    }
+*/
+    void Update(TagMap& meta)
+    {
+        //map_ =  tagMap.map_;
+        for (auto& ptr : meta.map_) {
+            // we need to copy memory for pointers
+            if (ptr.second.SameTypeWith(typeid(PointerPair))) {
+                auto pointerPair = Plugin::AnyCast<PointerPair>(ptr.second);
+                SetPointer(ptr.first, pointerPair.first.get(), pointerPair.second);
+            } else {
+                map_[ptr.first] = ptr.second;
+            }
+        }
+    }
 
 private:
     std::map<Tag, Any> map_;

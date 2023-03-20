@@ -128,8 +128,8 @@ private:
     std::queue<PlayerStates> pendingStates_ {};
     std::atomic<bool> initialized_ {false};
 
-    std::weak_ptr<Plugin::Meta> sourceMeta_ {};
-    std::vector<std::weak_ptr<Plugin::Meta>> streamMeta_ {};
+    std::weak_ptr<Plugin::TagMap> sourceMeta_ {};
+    std::vector<std::weak_ptr<Plugin::TagMap>> streamMeta_ {};
     int64_t duration_ {-1};
     std::atomic<bool> singleLoop_ {false};
     float volume_;
