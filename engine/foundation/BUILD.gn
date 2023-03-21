@@ -15,9 +15,7 @@
 import("//foundation/multimedia/histreamer/config.gni")
 
 config("histreamer_foundation_config") {
-  include_dirs = [
-    "//foundation/multimedia/histreamer/engine/include",
-  ]
+  include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
   if (hst_is_lite_sys) {
     include_dirs += [
       "//foundation/multimedia/media_utils_lite/interfaces/kits",

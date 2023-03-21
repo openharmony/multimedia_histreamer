@@ -19,8 +19,7 @@ group("plugin_http_source") {
 config("plugin_http_source_config") {
   include_dirs = [
     "//third_party/curl/include",
-    "//foundation/multimedia/histreamer/engine/utils",
-    "//foundation/multimedia/histreamer/engine/foundation/osal",
+    "//foundation/multimedia/histreamer/engine/include",
   ]
 }
 
@@ -39,7 +38,7 @@ source_set("httpsource") {
   ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
   if (hst_is_lite_sys) {
     if (ohos_kernel_type == "liteos_m") {

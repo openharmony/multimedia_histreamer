@@ -28,7 +28,7 @@ source_set("std_audio_capture") {
   ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
 
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
@@ -37,6 +37,7 @@ source_set("std_audio_capture") {
   } else {
     include_dirs = [
       "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiocommon/include",
+      "//foundation/multimedia/histreamer/engine/include",
       "//commonlibrary/c_utils/base/include/",
     ]
     public_configs += [ "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config" ]

@@ -15,9 +15,7 @@
 # build plugin interface
 import("//foundation/multimedia/histreamer/config.gni")
 source_set("histreamer_pipeline_base") {
-  include_dirs = [
-    "//foundation/multimedia/histreamer/engine/include",
-  ]
+  include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
   sources = [
     "core/compatible_check.cpp",
     "core/error_code.cpp",
@@ -32,20 +30,41 @@ source_set("histreamer_pipeline_base") {
     "filters/common/plugin_settings.cpp",
     "filters/common/plugin_utils.cpp",
   ]
-  public_configs = [
-    "//foundation/multimedia/histreamer:histreamer_presets",
-  ]
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_core",
   ]
 }
 
+if (hst_is_lite_sys) {
+  import("//build/lite/config/component/lite_component.gni")
+  lite_library("histreamer_base") {
+    if (ohos_kernel_type == "liteos_m") {
+      target_type = "static_library"
+    } else {
+      target_type = "shared_library"
+    }
+    sources = []
+    deps = [ ":histreamer_pipeline_base" ]
+  }
+} else {
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer_base") {
+    install_enable = true
+    sanitize = {
+      cfi = true
+      debug = false
+    }
+    deps = [ ":histreamer_pipeline_base" ]
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
+  }
+}
+
 source_set("histreamer_pipeline") {
   sources = []
-  public_configs = [
-    "//foundation/multimedia/histreamer:histreamer_presets",
-  ]
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
   public_deps = [
     "filters/codec:codec_filters",
     "filters/demux:demuxer_filter",
@@ -77,12 +96,12 @@ if (hst_is_lite_sys) {
 } else {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_engine_filters") {
+    install_enable = true
     sanitize = {
       cfi = true
       debug = false
     }
     deps = [ ":histreamer_pipeline" ]
-    relative_install_dir = "media/"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"
   }

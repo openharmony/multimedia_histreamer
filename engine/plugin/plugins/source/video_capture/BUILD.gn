@@ -25,7 +25,7 @@ source_set("std_video_capture") {
   sources = [ "video_capture_plugin.cpp" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
 
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
@@ -37,6 +37,7 @@ source_set("std_video_capture") {
       "//drivers/peripheral/display/interfaces/include",
       "//foundation/graphic/graphic_2d/interfaces/inner_api/common",
       "//commonlibrary/c_utils/base/include",
+      "//foundation/multimedia/histreamer/engine/include",
     ]
     public_deps += [
       "//commonlibrary/c_utils/base:utilsbase_rtti",

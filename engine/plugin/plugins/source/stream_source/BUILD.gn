@@ -18,10 +18,11 @@ group("plugin_stream_source") {
 }
 
 source_set("streamsource") {
+  include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
   sources = [ "stream_source_plugin.cpp" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
   if (hst_is_lite_sys) {

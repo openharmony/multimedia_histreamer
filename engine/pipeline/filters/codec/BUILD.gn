@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,9 +15,7 @@
 # build plugin interface
 import("//foundation/multimedia/histreamer/config.gni")
 source_set("codec_filters") {
-  include_dirs = [
-    "//foundation/multimedia/histreamer/engine/include",
-  ]
+  include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
   sources = [
     "async_mode.cpp",
     "audio_decoder/audio_decoder_filter.cpp",
@@ -33,8 +31,9 @@ source_set("codec_filters") {
       sources += [ "video_encoder/video_encoder_filter.cpp" ]
     }
   }
-  public_configs = [
-    "//foundation/multimedia/histreamer:histreamer_presets",
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
+  public_deps = [
+    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base",
   ]
-  public_deps = [ "//foundation/multimedia/histreamer/engine/pipeline:histreamer_pipeline_base" ]
 }

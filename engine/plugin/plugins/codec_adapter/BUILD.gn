@@ -27,10 +27,7 @@ config("plugin_codec_adapter_config") {
     "//drivers/peripheral/codec/hal/include/",
     "//drivers/peripheral/codec/interfaces/include/",
     "//drivers/peripheral/display/interfaces/include/",
-    "//foundation/multimedia/histreamer/engine/",
-    "//foundation/multimedia/histreamer/engine/foundation/",
     "//foundation/multimedia/histreamer/engine/include/",
-    "//foundation/multimedia/histreamer/engine/plugin/",
     "//third_party/openmax/api/1.1.2/",
   ]
 }
@@ -48,6 +45,7 @@ source_set("std_plugin_codec_adapter") {
   public_deps = [
     "//drivers/hdf_core/adapter/uhdf2/pub_utils:libpub_utils",
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
   public_configs = [
     ":plugin_codec_adapter_config",

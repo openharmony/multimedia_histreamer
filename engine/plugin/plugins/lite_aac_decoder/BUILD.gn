@@ -25,8 +25,7 @@ group("plugin_lite_aac_decoder_adapter") {
 config("plugin_lite_aac_decoder_adapter_config") {
   include_dirs = [
     "lite_aac_decoder",
-    "//foundation/multimedia/histreamer/engine/foundation",
-    "//foundation/multimedia/histreamer/engine/utils",
+    "//foundation/multimedia/histreamer/engine/include",
   ]
 }
 
@@ -38,6 +37,6 @@ static_library("histreamer_plugin_AACDecoder") {
   ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
 }

@@ -21,7 +21,7 @@ if (!hst_is_lite_sys) {
     include_dirs = [
       "//foundation/multimedia/histreamer/engine/include/",
       "//foundation/multimedia/histreamer/engine/plugin/",
-      "//third_party/ffmpeg"
+      "//third_party/ffmpeg",
     ]
     sources = [
       "//foundation/multimedia/histreamer/engine/plugin/plugins/ffmpeg_adapter/utils/ffmpeg_utils.cpp",
@@ -29,7 +29,7 @@ if (!hst_is_lite_sys) {
     ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
       "//third_party/ffmpeg:libohosffmpeg",
     ]
     public_configs = [
