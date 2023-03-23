@@ -27,6 +27,8 @@ config("histreamer_presets") {
     "-Wall",
     "-frtti",
     "-fexceptions",
+    "-Wno-unused-but-set-variable",
+    "-Wno-format",
   ]
   cflags_cc = cflags
   if (multimedia_histreamer_enable_recorder) {
