@@ -73,6 +73,12 @@ void ConvertAVCStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
 
 void ConvertAVStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
+
+void ConvertAMRnbStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                  const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
+
+void ConvertAMRwbStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                  const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta);
 } // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
