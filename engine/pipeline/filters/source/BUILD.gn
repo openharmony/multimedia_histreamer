@@ -12,18 +12,18 @@
 # limitations under the License.
 #
 config("source_config") {
-  include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
+  include_dirs = [ "../../../include" ]
 }
 
 source_set("audio_capture_filter") {
   sources = [ "audio_capture/audio_capture_filter.cpp" ]
   public_configs = [
     ":source_config",
-    "//foundation/multimedia/histreamer:histreamer_presets",
+    "../../../../:histreamer_presets",
   ]
   public_deps = [
-    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base",
+    "../../../foundation:histreamer_foundation",
+    "../../../pipeline:histreamer_base",
   ]
 }
 
@@ -31,11 +31,11 @@ source_set("media_source_filter") {
   sources = [ "media_source/media_source_filter.cpp" ]
   public_configs = [
     ":source_config",
-    "//foundation/multimedia/histreamer:histreamer_presets",
+    "../../../../:histreamer_presets",
   ]
   public_deps = [
-    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base",
+    "../../../foundation:histreamer_foundation",
+    "../../../pipeline:histreamer_base",
   ]
 }
 
@@ -43,10 +43,10 @@ source_set("video_capture_filter") {
   sources = [ "video_capture/video_capture_filter.cpp" ]
   public_configs = [
     ":source_config",
-    "//foundation/multimedia/histreamer:histreamer_presets",
+    "../../../../:histreamer_presets",
   ]
   public_deps = [
-    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base",
+    "../../../foundation:histreamer_foundation",
+    "../../../pipeline:histreamer_base",
   ]
 }

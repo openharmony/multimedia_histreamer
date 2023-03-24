@@ -15,7 +15,7 @@
 # build plugin interface
 import("//foundation/multimedia/histreamer/config.gni")
 source_set("codec_filters") {
-  include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
+  include_dirs = [ "../../../include" ]
   sources = [
     "async_mode.cpp",
     "audio_decoder/audio_decoder_filter.cpp",
@@ -31,9 +31,9 @@ source_set("codec_filters") {
       sources += [ "video_encoder/video_encoder_filter.cpp" ]
     }
   }
-  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
+  public_configs = [ "../../../../:histreamer_presets" ]
   public_deps = [
-    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base",
+    "../../../foundation:histreamer_foundation",
+    "../../../pipeline:histreamer_base",
   ]
 }

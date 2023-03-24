@@ -15,30 +15,30 @@
 # build plugin interface
 import("//foundation/multimedia/histreamer/config.gni")
 config("sink_config") {
-  include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
+  include_dirs = [ "../../../include" ]
 }
 
 source_set("media_synchronous_sink") {
   sources = [ "media_synchronous_sink.cpp" ]
   public_configs = [
     ":sink_config",
-    "//foundation/multimedia/histreamer:histreamer_presets",
+    "../../../../:histreamer_presets",
   ]
   public_deps = [
-    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base",
+    "../../../foundation:histreamer_foundation",
+    "../../../pipeline:histreamer_base",
   ]
 }
 
 source_set("audio_sink_filter") {
   sources = [ "audio_sink/audio_sink_filter.cpp" ]
-  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
+  public_configs = [ "../../../../:histreamer_presets" ]
   public_deps = [ ":media_synchronous_sink" ]
 }
 
 source_set("video_sink_filter") {
   sources = [ "video_sink/video_sink_filter.cpp" ]
-  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
+  public_configs = [ "../../../../:histreamer_presets" ]
   public_deps = [ ":media_synchronous_sink" ]
 }
 
@@ -46,10 +46,10 @@ source_set("output_sink_filter") {
   sources = [ "output_sink/output_sink_filter.cpp" ]
   public_configs = [
     ":sink_config",
-    "//foundation/multimedia/histreamer:histreamer_presets",
+    "../../../../:histreamer_presets",
   ]
   public_deps = [
-    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base",
+    "../../../foundation:histreamer_foundation",
+    "../../../pipeline:histreamer_base",
   ]
 }
