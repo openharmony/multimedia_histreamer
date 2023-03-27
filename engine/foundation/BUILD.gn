@@ -48,22 +48,20 @@ source_set("histreamer_foundation") {
   ]
   public_deps = []
   if (hst_is_lite_sys) {
-    public_deps += [ "//foundation/multimedia/media_utils_lite:media_common" ]
+    deps = [ "//foundation/multimedia/media_utils_lite:media_common" ]
     if (ohos_kernel_type == "liteos_m") {
-      public_deps += [
-        "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_static",
-        "//third_party/bounds_checking_function:libsec_static",
-      ]
+      deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_static" ]
+      public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
     } else {
-      public_deps += [
-        "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-        "//third_party/bounds_checking_function:libsec_shared",
-      ]
+      deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+      public_deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
     }
   } else {
-    public_deps += [
+    deps = [
       "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
       "//base/hiviewdfx/hitrace/interfaces/native/innerkits:hitrace_meter",
+    ]
+    public_deps += [
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
       "//third_party/bounds_checking_function:libsec_static",
     ]

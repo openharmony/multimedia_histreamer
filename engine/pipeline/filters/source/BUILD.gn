@@ -12,11 +12,18 @@
 # limitations under the License.
 #
 config("source_config") {
-  include_dirs = [ "../../../include" ]
+  include_dirs = [
+    "../../../",
+    "../../../include",
+  ]
 }
 
 source_set("audio_capture_filter") {
-  sources = [ "audio_capture/audio_capture_filter.cpp" ]
+  sources = [
+    "../common/buffer_calibration/audio_buffer_calibration.cpp",
+    "../common/buffer_calibration/buffer_calibration.cpp",
+    "audio_capture/audio_capture_filter.cpp",
+  ]
   public_configs = [
     ":source_config",
     "../../../../:histreamer_presets",

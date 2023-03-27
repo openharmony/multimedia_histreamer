@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Pipeline {
+namespace Plugin {
 const Plugin::ValueType g_emptyString = std::string();
 const Plugin::ValueType g_u8Def = (uint8_t)0;
 const Plugin::ValueType g_u32Def = (uint32_t)0;
@@ -335,7 +335,7 @@ inline const char* Tag2String(const Plugin::Tag tag)
     }
     return std::get<0>(mapIte->second);
 }
-} // Pipeline
+} // Plugin
 } // Media
 } // OHOS
 #endif // HISTREAMER_PIPELINE_PLUGIN_CAP_DESC_H

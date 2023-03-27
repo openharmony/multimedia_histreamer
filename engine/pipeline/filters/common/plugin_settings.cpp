@@ -15,11 +15,11 @@
 
 #define HST_LOG_TAG "PluginSettings"
 
-#include "pipeline/filters/common/plugin_settings.h"
+#include "plugin_settings.h"
 #include <vector>
 #include "foundation/log.h"
 #include "foundation/pre_defines.h"
-#include "pipeline/core/plugin_attr_desc.h"
+#include "plugin/common/plugin_attr_desc.h"
 #include "plugin/common/plugin_audio_tags.h"
 
 namespace OHOS {
@@ -30,7 +30,7 @@ bool CommonParameterChecker (Plugin::Tag tag, const Plugin::ValueType& val)
     // return true if not in tag in case of specially key used by plugin
     FALSE_RETURN_V_MSG_E(HasTagInfo(tag), true,
                        PUBLIC_LOG_D32 "is not found in map, may be update it?", tag);
-    const auto& tuple = g_tagInfoMap.at(tag);
+    const auto& tuple = Plugin::g_tagInfoMap.at(tag);
     return std::get<1>(tuple).SameTypeWith(val);
 }
 

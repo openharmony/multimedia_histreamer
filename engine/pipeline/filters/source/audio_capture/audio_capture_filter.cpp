@@ -20,10 +20,10 @@
 #include "pipeline/filters/source/audio_capture/audio_capture_filter.h"
 #include "foundation/cpp_ext/algorithm_ext.h"
 #include "foundation/log.h"
-#include "pipeline/core/plugin_attr_desc.h"
 #include "pipeline/factory/filter_factory.h"
 #include "pipeline/filters/common/buffer_calibration/audio_buffer_calibration.h"
 #include "pipeline/filters/common/plugin_utils.h"
+#include "plugin/common/plugin_attr_desc.h"
 
 namespace OHOS {
 namespace Media {

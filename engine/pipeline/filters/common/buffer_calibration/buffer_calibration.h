@@ -18,8 +18,8 @@
 #include <memory>
 #include <type_traits>
 #include "pipeline/core/type_define.h"
-#include "pipeline/filters/common/buffer_calibration/pts_calibration_strategy.h"
 #include "plugin/common/plugin_tags.h"
+#include "pts_calibration_strategy.h"
 
 namespace OHOS {
 namespace Media {

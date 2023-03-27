@@ -14,7 +14,7 @@
  */
 #define HST_LOG_TAG "DataPacker"
 
-#include "pipeline/filters/demux/data_packer.h"
+#include "data_packer.h"
 #include <cstring>
 #include "foundation/log.h"
 #include "foundation/utils/dump_buffer.h"

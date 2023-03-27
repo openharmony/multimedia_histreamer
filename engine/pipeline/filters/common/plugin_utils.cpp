@@ -15,12 +15,12 @@
 
 #define HST_LOG_TAG "Pip_Plugin_Utils"
 
-#include "pipeline/filters/common/plugin_utils.h"
+#include "plugin_utils.h"
 #include <cstdarg>
 #include <sstream>
 #include "foundation/log.h"
 #include "foundation/pre_defines.h"
-#include "pipeline/core/plugin_attr_desc.h"
+#include "plugin/common/plugin_attr_desc.h"
 
 namespace {
 constexpr int32_t MAX_BUF_LEN = 512; // 512 buffer size
@@ -164,61 +164,61 @@ int32_t Stringiness(char* buf, size_t maxLen, const char* name, const uint64_t& 
 template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::AudioSampleFormat& val)
 {
-    if (Pipeline::g_auSampleFmtStrMap.count(val) == 0) {
+    if (Plugin::g_auSampleFmtStrMap.count(val) == 0) {
         MEDIA_LOG_W("audio sample format " PUBLIC_LOG_D32 " is unknown", static_cast<int32_t>(val));
         return 0;
     }
-    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::g_auSampleFmtStrMap.at(val));
+    return snprintf_truncated_s(buf, maxLen, "%s", Plugin::g_auSampleFmtStrMap.at(val));
 }
 
 template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::AudioChannelLayout& val)
 {
-    if (Pipeline::g_auChannelLayoutStrMap.count(val) == 0) {
+    if (Plugin::g_auChannelLayoutStrMap.count(val) == 0) {
         MEDIA_LOG_W("audio channel layout " PUBLIC_LOG_U64 " is unknown", static_cast<uint64_t>(val));
         return 0;
     }
-    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::g_auChannelLayoutStrMap.at(val));
+    return snprintf_truncated_s(buf, maxLen, "%s", Plugin::g_auChannelLayoutStrMap.at(val));
 }
 
 template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::VideoPixelFormat& val)
 {
-    if (Pipeline::g_videoPixelFormatStrMap.count(val) == 0) {
+    if (Plugin::g_videoPixelFormatStrMap.count(val) == 0) {
         MEDIA_LOG_W("video pixel format " PUBLIC_LOG_U32 " is unknown", static_cast<uint32_t>(val));
         return 0;
     }
-    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::g_videoPixelFormatStrMap.at(val));
+    return snprintf_truncated_s(buf, maxLen, "%s", Plugin::g_videoPixelFormatStrMap.at(val));
 }
 
 template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::VideoBitStreamFormat& val)
 {
-    if (Pipeline::g_vdBitStreamFormatStrMap.count(val) == 0) {
+    if (Plugin::g_vdBitStreamFormatStrMap.count(val) == 0) {
         MEDIA_LOG_W("video bit stream format " PUBLIC_LOG_U32 " is unknown", static_cast<uint32_t>(val));
         return 0;
     }
-    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::g_vdBitStreamFormatStrMap.at(val));
+    return snprintf_truncated_s(buf, maxLen, "%s", Plugin::g_vdBitStreamFormatStrMap.at(val));
 }
 
 template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::AudioAacProfile& val)
 {
-    if (Pipeline::g_auAacProfileNameStrMap.count(val) == 0) {
+    if (Plugin::g_auAacProfileNameStrMap.count(val) == 0) {
         MEDIA_LOG_W("audio aac profile name " PUBLIC_LOG_U8 " is unknown", static_cast<uint8_t>(val));
         return 0;
     }
-    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::g_auAacProfileNameStrMap.at(val));
+    return snprintf_truncated_s(buf, maxLen, "%s", Plugin::g_auAacProfileNameStrMap.at(val));
 }
 
 template<>
 int32_t Stringiness(char* buf, size_t maxLen, const char* name, const Plugin::AudioAacStreamFormat& val)
 {
-    if (Pipeline::g_auAacStreamFormatNameStrMap.count(val) == 0) {
+    if (Plugin::g_auAacStreamFormatNameStrMap.count(val) == 0) {
         MEDIA_LOG_W("audio aac stream format name " PUBLIC_LOG_U8 " is unknown", static_cast<uint8_t>(val));
         return 0;
     }
-    return snprintf_truncated_s(buf, maxLen, "%s", Pipeline::g_auAacStreamFormatNameStrMap.at(val));
+    return snprintf_truncated_s(buf, maxLen, "%s", Plugin::g_auAacStreamFormatNameStrMap.at(val));
 }
 
 template<>
@@ -464,7 +464,7 @@ std::string Capability2String(const Capability& capability)
             MEDIA_LOG_W(PUBLIC_LOG_D32 " is not in map, may be new key which is not contained?", cap.first);
             continue;
         }
-        const auto& info = g_tagInfoMap.at(static_cast<Tag>(cap.first));
+        const auto& info = Plugin::g_tagInfoMap.at(static_cast<Tag>(cap.first));
         RETURN_IF_SNPRI_FAILED(capStrnessMap.at(cap.first)(buffer + pos, MAX_BUF_LEN - pos, std::get<0>(info),
             std::get<2>(info), cap.second), ret, buffer); // secondary parameter
         pos += ret;
@@ -500,7 +500,7 @@ std::string Meta2String(const Plugin::Meta& meta)
             continue;
         }
         const Plugin::ValueType* tmp = meta.GetData(item);
-        const auto& tuple = g_tagInfoMap.at(static_cast<Tag>(item));
+        const auto& tuple = Plugin::g_tagInfoMap.at(static_cast<Tag>(item));
         if (tmp) {
             RETURN_IF_SNPRI_FAILED(g_metaStrnessMap.at(item)(buffer + pos, MAX_BUF_LEN - pos,
                 std::get<0>(tuple), std::get<2>(tuple), *tmp), ret, buffer); // secondary parameter

@@ -23,8 +23,8 @@
 #include "foundation/osal/utils/util.h"
 #include "foundation/utils/constants.h"
 #include "foundation/utils/steady_clock.h"
-#include "pipeline/core/plugin_attr_desc.h"
 #include "pipeline/factory/filter_factory.h"
+#include "plugin/common/plugin_attr_desc.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
 

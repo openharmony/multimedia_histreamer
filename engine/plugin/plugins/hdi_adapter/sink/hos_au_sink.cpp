@@ -24,7 +24,7 @@
 #include "foundation/osal/utils/util.h"
 #include "foundation/pre_defines.h"
 #include "foundation/utils/constants.h"
-#include "pipeline/core/plugin_attr_desc.h"
+#include "plugin/common/plugin_attr_desc.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/plugins/hdi_adapter/utils/hdi_au_utils.h"
@@ -344,7 +344,7 @@ Status HdiSink::SetParameter(Tag tag, const ValueType& value)
             }
         }
         default:
-            MEDIA_LOG_W("receive one parameter with unconcern key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
+            MEDIA_LOG_W("receive one parameter with unconcern key: " PUBLIC_LOG_S, Tag2String(tag));
     }
     return Status::OK;
 }
@@ -365,7 +365,7 @@ Status HdiSink::GetParameter(Tag tag, ValueType& value)
             break;
         }
         default: {
-            MEDIA_LOG_W("receive one parameter with unconcern key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
+            MEDIA_LOG_W("receive one parameter with unconcern key: " PUBLIC_LOG_S, Tag2String(tag));
             break;
         }
     }

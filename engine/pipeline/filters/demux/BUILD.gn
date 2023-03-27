@@ -15,7 +15,10 @@
 # build plugin interface
 import("//foundation/multimedia/histreamer/config.gni")
 source_set("demuxer_filter") {
-  include_dirs = [ "../../../include" ]
+  include_dirs = [
+    "../../../",
+    "../../../include",
+  ]
   sources = [
     "data_packer.cpp",
     "demuxer_filter.cpp",

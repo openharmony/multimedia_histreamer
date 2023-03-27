@@ -15,7 +15,7 @@
 
 #define HST_LOG_TAG "TypeFinder"
 
-#include "pipeline/filters/demux/type_finder.h"
+#include "type_finder.h"
 #include <algorithm>
 #include "foundation/log.h"
 #include "foundation/osal/utils/util.h"

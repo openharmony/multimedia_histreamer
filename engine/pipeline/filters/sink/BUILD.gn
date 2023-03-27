@@ -15,7 +15,10 @@
 # build plugin interface
 import("//foundation/multimedia/histreamer/config.gni")
 config("sink_config") {
-  include_dirs = [ "../../../include" ]
+  include_dirs = [
+    "../../../",
+    "../../../include",
+  ]
 }
 
 source_set("media_synchronous_sink") {

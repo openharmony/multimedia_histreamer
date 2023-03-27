@@ -23,7 +23,7 @@
 #include "foundation/osal/thread/scoped_lock.h"
 #include "foundation/osal/utils/util.h"
 #include "foundation/utils/constants.h"
-#include "pipeline/core/plugin_attr_desc.h"
+#include "plugin/common/plugin_attr_desc.h"
 #include "plugin/common/plugin_time.h"
 
 namespace {
@@ -395,7 +395,7 @@ Status AudioServerSinkPlugin::Stop()
 
 Status AudioServerSinkPlugin::GetParameter(Tag tag, ValueType& para)
 {
-    MEDIA_LOG_I("GetParameter entered, key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
+    MEDIA_LOG_I("GetParameter entered, key: " PUBLIC_LOG_S, Tag2String(tag));
     AudioStandard::AudioRendererParams params;
     OSAL::ScopedLock lock(renderMutex_);
     switch (tag) {
@@ -521,7 +521,7 @@ void AudioServerSinkPlugin::SetInterruptMode(AudioStandard::InterruptMode interr
 
 Status AudioServerSinkPlugin::SetParameter(Tag tag, const ValueType& para)
 {
-    MEDIA_LOG_I("SetParameter entered, key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
+    MEDIA_LOG_I("SetParameter entered, key: " PUBLIC_LOG_S, Tag2String(tag));
     switch (tag) {
         case Tag::AUDIO_SAMPLE_RATE:
             FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,

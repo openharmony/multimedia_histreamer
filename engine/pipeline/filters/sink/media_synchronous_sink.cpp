@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #define HST_LOG_TAG "MediaSyncSink"
-#include "pipeline/filters/sink/media_synchronous_sink.h"
+#include "media_synchronous_sink.h"
 #include "foundation/log.h"
 
 namespace OHOS {

@@ -20,7 +20,7 @@
 #include <functional>
 #include <map>
 #include "foundation/log.h"
-#include "pipeline/core/plugin_attr_desc.h"
+#include "plugin/common/plugin_attr_desc.h"
 
 namespace OHOS {
 namespace Media {
@@ -276,7 +276,7 @@ bool DDCapabilityCheck(const Plugin::DiscreteCapability<T>& v1, const Plugin::Di
 void LogOutIncorrectType(CapabilityID key, uint8_t flags)
 {
     if (HasTagInfo(static_cast<Tag>(key))) {
-        const auto& tuple = g_tagInfoMap.at(static_cast<Tag>(key));
+        const auto& tuple = Plugin::g_tagInfoMap.at(static_cast<Tag>(key));
         const auto& typeName = std::get<2>(tuple); // secondary
         MEDIA_LOG_E("type of " PUBLIC_LOG_S " should be"
         " " PUBLIC_LOG_S "(" PUBLIC_LOG_C ")"

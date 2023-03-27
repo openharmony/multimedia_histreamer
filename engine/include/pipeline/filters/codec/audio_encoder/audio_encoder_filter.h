@@ -18,8 +18,8 @@
 
 #ifdef RECORDER_SUPPORT
 
-#include "pipeline/filters/codec/codec_filter_base.h"
 #include "foundation/utils/ring_buffer.h"
+#include "pipeline/filters/codec/codec_filter_base.h"
 #include "plugin/common/plugin_tags.h"
 
 namespace OHOS {
