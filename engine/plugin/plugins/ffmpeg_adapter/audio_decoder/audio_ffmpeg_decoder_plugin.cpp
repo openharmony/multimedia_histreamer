@@ -42,6 +42,8 @@ const std::set<AVCodecID> g_supportedCodec = {
     AV_CODEC_ID_AAC_LATM,
     AV_CODEC_ID_VORBIS,
     AV_CODEC_ID_APE,
+    AV_CODEC_ID_AMR_NB,
+    AV_CODEC_ID_AMR_WB,
 };
 
 std::map<AVCodecID, uint32_t> samplesPerFrameMap = {
@@ -51,6 +53,8 @@ std::map<AVCodecID, uint32_t> samplesPerFrameMap = {
     {AV_CODEC_ID_AAC_LATM, 2048}, // 2048
     {AV_CODEC_ID_VORBIS, 8192}, // 8192
     {AV_CODEC_ID_APE, 4608}, // 4608
+    {AV_CODEC_ID_AMR_NB, 160}, // 160
+    {AV_CODEC_ID_AMR_WB, 160}, // 160
 };
 
 Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
@@ -112,6 +116,12 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
             break;
         case AV_CODEC_ID_APE:
             capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_APE);
+            break;
+        case AV_CODEC_ID_AMR_NB:
+            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AMR_NB);
+            break;
+        case AV_CODEC_ID_AMR_WB:
+            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AMR_WB);
             break;
         default:
             MEDIA_LOG_I("codec is not supported right now");

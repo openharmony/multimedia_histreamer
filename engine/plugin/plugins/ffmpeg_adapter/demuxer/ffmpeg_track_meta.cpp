@@ -56,8 +56,10 @@ StreamConvertor g_streamConvertors[] = {{AV_CODEC_ID_PCM_S16LE, ConvertRawAudioS
                                         {AV_CODEC_ID_AVS3DA, ConvertAVS3DAStreamToMetaInfo},
 #endif
 #ifdef VIDEO_SUPPORT
-                                        {AV_CODEC_ID_H264, ConvertAVCStreamToMetaInfo}
+                                        {AV_CODEC_ID_H264, ConvertAVCStreamToMetaInfo},
 #endif
+                                        {AV_CODEC_ID_AMR_NB, ConvertAMRnbStreamToMetaInfo},
+                                        {AV_CODEC_ID_AMR_WB, ConvertAMRwbStreamToMetaInfo},
 };
 
 bool IsPcmStream(const AVStream& avStream)
@@ -178,6 +180,20 @@ void ConvertAPEStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<
                                 const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
 {
     meta.Insert<Tag::MIME>(MEDIA_MIME_AUDIO_APE);
+    ConvertCommonAudioStreamToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
+}
+
+void ConvertAMRnbStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                  const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
+{
+    meta.Insert<Tag::MIME>(MEDIA_MIME_AUDIO_AMR_NB);
+    ConvertCommonAudioStreamToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
+}
+
+void ConvertAMRwbStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                  const std::shared_ptr<AVCodecContext>& avCodecContext, TagMap& meta)
+{
+    meta.Insert<Tag::MIME>(MEDIA_MIME_AUDIO_AMR_WB);
     ConvertCommonAudioStreamToMetaInfo(avStream, avFormatContext, avCodecContext, meta);
 }
 
