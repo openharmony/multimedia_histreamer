@@ -19,14 +19,12 @@
 #include "foundation/osal/utils/util.h"
 #include "foundation/utils/dump_buffer.h"
 #include "foundation/utils/steady_clock.h"
-
 #include "pipeline/factory/filter_factory.h"
 #include "pipeline/filters/common/plugin_settings.h"
 #include "pipeline/filters/common/plugin_utils.h"
 #include "plugin/common/plugin_attr_desc.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/common/plugin_types.h"
-#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {
@@ -124,7 +122,7 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
                                 Plugin::TagMap& downstreamParams)
 {
     MEDIA_LOG_I("audio sink negotiate started");
-    FALSE_LOG(const_cast<Plugin::TagMap&>(upstreamParams).Get<Tag::MEDIA_SEEKABLE>(seekable_));
+    FALSE_LOG(upstreamParams.GetData(Tag::MEDIA_SEEKABLE,seekable_));
     PROFILE_BEGIN("Audio Sink Negotiate begin");
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::AUDIO_SINK);
     if (candidatePlugins.empty()) {

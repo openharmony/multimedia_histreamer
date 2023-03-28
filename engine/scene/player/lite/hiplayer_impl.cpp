@@ -20,8 +20,6 @@
 #include "foundation/utils/steady_clock.h"
 #include "pipeline/factory/filter_factory.h"
 #include "plugin/common/plugin_time.h"
-#include "plugin/core/plugin_meta.h"
-
 namespace {
 const float MAX_MEDIA_VOLUME = 100.0f;
 }
@@ -429,14 +427,14 @@ ErrorCode HiPlayerImpl::DoOnReady()
     sourceMeta_ = tmpMeta;
     int64_t duration = 0;
     bool found = false;
-    if (tmpMeta->GetInt64(Media::Plugin::Tag::MEDIA_DURATION, tmp)) {
+    int64_t tmp;
+    if (tmpMeta->GetData(Media::Plugin::Tag::MEDIA_DURATION, tmp)) {
         found = true;
     }
     streamMeta_.clear();
-    int64_t tmp = 0;
     for (auto& streamMeta : demuxer_->GetStreamMetaInfo()) {
         streamMeta_.push_back(streamMeta);
-        if (streamMeta->GetInt64(Media::Plugin::Tag::MEDIA_DURATION, tmp)) {
+        if (streamMeta->GetData(Media::Plugin::Tag::MEDIA_DURATION, tmp)) {
             duration = std::max(duration, tmp);
             found = true;
         }

@@ -16,10 +16,10 @@
 #ifndef HISTREAMER_PIPELINE_CORE_COMPATIBLE_CHECK_H
 #define HISTREAMER_PIPELINE_CORE_COMPATIBLE_CHECK_H
 
+
 #include "pipeline/core/type_define.h"
-#include "plugin/common/tag_map.h"
 #include "plugin/common/plugin_caps.h"
-#include "plugin/core/plugin_meta.h"
+#include "plugin/common/tag_map.h"
 
 namespace OHOS {
 namespace Media {

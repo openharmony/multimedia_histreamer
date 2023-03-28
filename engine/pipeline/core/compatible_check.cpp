@@ -447,7 +447,7 @@ std::shared_ptr<Capability> MetaToCapability(Plugin::TagMap& meta)
 {
     auto ret = std::make_shared<Capability>();
     std::string mime;
-    if (meta.GetString(Plugin::Tag::MIME, mime)) {
+    if (meta.GetData(Plugin::Tag::MIME, mime)) {
         ret->mime = mime;
     }
     for (const auto& key : g_allCapabilityId) {
@@ -477,7 +477,7 @@ bool MergeMetaWithCapability(Plugin::TagMap& meta, const Capability& cap, Plugin
     }
     // merge capability
     resTagMap.Update(meta);
-    resTagMap.SetString(Plugin::Tag::MIME, cap.mime);
+    resTagMap.SetData(Plugin::Tag::MIME, cap.mime);
     for (const auto& oneCap : resCap.keys) {
         if (g_capExtrMap.count(oneCap.first) == 0) {
             continue;

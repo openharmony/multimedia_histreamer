@@ -309,18 +309,18 @@ ErrorCode VideoEncoderFilter::SetVideoEncoderFormat(Plugin::TagMap &meta)
         MEDIA_LOG_E("Get video pixel format fail");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    if (!meta.GetUint32(Plugin::Tag::VIDEO_WIDTH, vencFormat_.width)) {
+    if (!meta.GetData(Plugin::Tag::VIDEO_WIDTH, vencFormat_.width)) {
         MEDIA_LOG_E("Get video width fail");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    if (!meta.GetUint32(Plugin::Tag::VIDEO_HEIGHT, vencFormat_.height)) {
+    if (!meta.GetData(Plugin::Tag::VIDEO_HEIGHT, vencFormat_.height)) {
         MEDIA_LOG_E("Get video width height");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    if (!meta.GetInt64(Plugin::Tag::MEDIA_BITRATE, vencFormat_.bitRate)) {
+    if (!meta.GetData(Plugin::Tag::MEDIA_BITRATE, vencFormat_.bitRate)) {
         MEDIA_LOG_D("Do not have codec bit rate");
     }
-    if (!meta.GetUint32(Plugin::Tag::VIDEO_FRAME_RATE, vencFormat_.frameRate)) {
+    if (!meta.GetData(Plugin::Tag::VIDEO_FRAME_RATE, vencFormat_.frameRate)) {
         MEDIA_LOG_D("Do not have codec frame rate");
     }
     if (!meta.GetData(Plugin::Tag::MIME, vencFormat_.mime)) {
@@ -356,7 +356,7 @@ ErrorCode VideoEncoderFilter::ConfigurePluginParams()
         FALSE_RETURN_V_MSG_W(ret == ErrorCode::SUCCESS, ErrorCode::ERROR_UNKNOWN,
                              "Set profile to plugin fail");
     }
-    if (codecMeta_.GetUint32(Plugin::Tag::VIDEO_H264_LEVEL, vencFormat_.level)) {
+    if (codecMeta_.GetData(Plugin::Tag::VIDEO_H264_LEVEL, vencFormat_.level)) {
         auto ret = SetPluginParameterLocked(Tag::VIDEO_H264_LEVEL, vencFormat_.level);
         FALSE_RETURN_V_MSG_W(ret == ErrorCode::SUCCESS, ErrorCode::ERROR_UNKNOWN,
                              "Set level to plugin fail");

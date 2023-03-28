@@ -243,7 +243,7 @@ int32_t MetaIDStringiness(char* buf, size_t maxLen, const char* name, const char
 using CapStrnessFunc = std::function<int32_t(char*, size_t, const char*, const char*, const Plugin::ValueType&)>;
 
 std::map<Plugin::Tag, CapStrnessFunc> g_metaStrnessMap = {
-    {Plugin::Tag::MIME, MetaIDStringiness<std::string>},
+    {Plugin::Tag::MIME, CapKeyStringiness<std::string>},
     {Plugin::Tag::TRACK_ID, MetaIDStringiness<uint32_t>},
     {Plugin::Tag::MEDIA_CODEC_CONFIG,MetaIDStringiness<std::vector<uint8_t>>},
     {Plugin::Tag::AUDIO_CHANNELS, MetaIDStringiness<uint32_t>},
@@ -490,7 +490,7 @@ std::string Meta2String(Plugin::TagMap& meta)
     RETURN_IF_SNPRI_FAILED(snprintf_truncated_s(buffer + pos, MAX_BUF_LEN - pos, "Meta{"), ret, {});
     pos += ret;
     bool needEtc = false;
-    for (const auto & item : meta.GettagIDs()) {
+    for (const auto & item : meta.GetMetaIDs()) {
         if (pos >= MAX_BUF_LEN - 2) { // reserve for "}\0"
             needEtc = true;
             break;
@@ -499,9 +499,8 @@ std::string Meta2String(Plugin::TagMap& meta)
             MEDIA_LOG_W("meta id " PUBLIC_LOG_D32 "is not is map, may be update the info map?", item);
             continue;
         }
-        //Plugin::ValueType tmp;
-        //auto ret = meta.GetData(item,tmp);
-        const Plugin::ValueType* tmp = meta.GetData(item);
+
+        auto tmp = meta.GetData(item);
         const auto& tuple = Plugin::g_tagInfoMap.at(static_cast<Tag>(item));
         if (tmp) {
             RETURN_IF_SNPRI_FAILED(g_metaStrnessMap.at(item)(buffer + pos, MAX_BUF_LEN - pos,

@@ -26,7 +26,6 @@
 #include "pipeline/filters/demux/type_finder.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/core/demuxer.h"
-#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {

@@ -150,11 +150,11 @@ uint32_t VideoDecoderFilter::CalculateBufferSize(Plugin::TagMap &meta)
     uint32_t vdecHeight;
     Plugin::VideoPixelFormat vdecFormat;
 
-    if (!meta.GetUint32(Plugin::Tag::VIDEO_WIDTH, vdecWidth)) {
+    if (!meta.GetData(Plugin::Tag::VIDEO_WIDTH, vdecWidth)) {
         MEDIA_LOG_E("Get video width fail");
         return 0;
     }
-    if (!meta.GetUint32(Plugin::Tag::VIDEO_HEIGHT, vdecHeight)) {
+    if (!meta.GetData(Plugin::Tag::VIDEO_HEIGHT, vdecHeight)) {
         MEDIA_LOG_E("Get video width height");
         return 0;
     }

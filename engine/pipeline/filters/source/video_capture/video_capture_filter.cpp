@@ -162,10 +162,10 @@ ErrorCode VideoCaptureFilter::DoConfigure()
         MEDIA_LOG_E("cannot find available capability of plugin " PUBLIC_LOG_S, pluginInfo_->name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
-    videoMeta->SetUint32(Plugin::Tag::VIDEO_WIDTH, videoWidth_);
-    videoMeta->SetUint32(Plugin::Tag::VIDEO_HEIGHT, videoHeight_);
-    videoMeta->SetInt64(Plugin::Tag::MEDIA_BITRATE, bitRate_);
-    videoMeta->SetUint32(Plugin::Tag::VIDEO_FRAME_RATE, frameRate_);
+    videoMeta->SetData(Plugin::Tag::VIDEO_WIDTH, videoWidth_);
+    videoMeta->SetData(Plugin::Tag::VIDEO_HEIGHT, videoHeight_);
+    videoMeta->SetData(Plugin::Tag::MEDIA_BITRATE, bitRate_);
+    videoMeta->SetData(Plugin::Tag::VIDEO_FRAME_RATE, frameRate_);
     videoMeta->SetData(Plugin::Tag::MIME, mime_);
     videoMeta->SetData(Plugin::Tag::VIDEO_PIXEL_FORMAT, pixelFormat_);
     Plugin::TagMap upstreamParams;

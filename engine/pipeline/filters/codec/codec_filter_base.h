@@ -27,7 +27,6 @@
 #include "plugin/common/plugin_tags.h"
 #include "plugin/core/codec.h"
 #include "plugin/core/plugin_info.h"
-#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {

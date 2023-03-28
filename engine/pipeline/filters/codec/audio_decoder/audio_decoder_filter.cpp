@@ -142,11 +142,11 @@ uint32_t AudioDecoderFilter::CalculateBufferSize(Plugin::TagMap &meta)
 {
     using namespace OHOS::Media;
     uint32_t samplesPerFrame;
-    if (!meta.GetUint32(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame)) {
+    if (!meta.GetData(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame)) {
         return 0;
     }
     uint32_t channels;
-    if (!meta.GetUint32(Plugin::Tag::AUDIO_CHANNELS, channels)) {
+    if (!meta.GetData(Plugin::Tag::AUDIO_CHANNELS, channels)) {
         return 0;
     }
     Plugin::AudioSampleFormat format;
@@ -171,13 +171,13 @@ void AudioDecoderFilter::UpdateParams(Plugin::TagMap &upMeta,
         MEDIA_LOG_W("Can't acquire samples per frame from decoder plugin: " PUBLIC_LOG_S, pluginInfo_->name.c_str());
         samplesPerFrame = MAX_SAMPLE_PER_FRAME;
     }
-    (void)meta.SetUint32(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame);
+    (void)meta.SetData(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, samplesPerFrame);
     bool useStreamChannelParams {false};
     auto iter = sinkParams_.Find(Plugin::Tag::AUDIO_OUTPUT_CHANNELS);
     if (iter != std::end(sinkParams_) && iter->second.SameTypeWith(typeid(uint32_t))) {
         auto outputChannels = Plugin::AnyCast<uint32_t>(iter->second);
         uint32_t upChannels {0};
-        if (upMeta.GetUint32(Plugin::Tag::AUDIO_CHANNELS, upChannels) && upChannels < outputChannels) {
+        if (upMeta.GetData(Plugin::Tag::AUDIO_CHANNELS, upChannels) && upChannels < outputChannels) {
             outputChannels = upChannels;
             useStreamChannelParams = true;
         }
@@ -185,7 +185,7 @@ void AudioDecoderFilter::UpdateParams(Plugin::TagMap &upMeta,
             plugin_->SetParameter(Plugin::Tag::AUDIO_OUTPUT_CHANNELS, outputChannels) != Plugin::Status::OK) {
             MEDIA_LOG_W("Set outputChannels to plugin " PUBLIC_LOG_S " failed", plugin_->GetName().c_str());
         }
-        (void)meta.SetUint32(Plugin::Tag::AUDIO_OUTPUT_CHANNELS, outputChannels);
+        (void)meta.SetData(Plugin::Tag::AUDIO_OUTPUT_CHANNELS, outputChannels);
     }
     iter = sinkParams_.Find(Plugin::Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT);
     if (iter != std::end(sinkParams_) && iter->second.SameTypeWith(typeid(Plugin::AudioChannelLayout))) {

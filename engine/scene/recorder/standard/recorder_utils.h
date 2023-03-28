@@ -22,7 +22,6 @@
 #include "pipeline/core/error_code.h"
 #include "plugin/common/plugin_source_tags.h"
 #include "plugin/common/tag_map.h"
-#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {

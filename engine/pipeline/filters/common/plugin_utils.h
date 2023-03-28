@@ -27,7 +27,6 @@
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/plugin_manager.h"
-#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {

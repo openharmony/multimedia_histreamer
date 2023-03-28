@@ -217,7 +217,7 @@ bool VideoSinkFilter::Configure(const std::string &inPort, Plugin::TagMap &upstr
         OnEvent(Event{name_, EventType::EVENT_ERROR, {err}});
         return false;
     }
-    if (!upstreamMeta.GetUint32(Plugin::Tag::VIDEO_FRAME_RATE, frameRate_)) {
+    if (!upstreamMeta.GetData(Plugin::Tag::VIDEO_FRAME_RATE, frameRate_)) {
         MEDIA_LOG_I("frame rate is not found");
     }
     if (frameRate_ == 0) {
@@ -237,12 +237,12 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(Plugin::TagMap& meta)
 {
     auto err = ErrorCode::SUCCESS;
     uint32_t width;
-    if (meta.GetUint32(Plugin::Tag::VIDEO_WIDTH, width)) {
+    if (meta.GetData(Plugin::Tag::VIDEO_WIDTH, width)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_WIDTH, width));
         FAIL_RETURN_MSG(err, "Set plugin width fail");
     }
     uint32_t height;
-    if (meta.GetUint32(Plugin::Tag::VIDEO_HEIGHT, height)) {
+    if (meta.GetData(Plugin::Tag::VIDEO_HEIGHT, height)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_HEIGHT, height));
         FAIL_RETURN_MSG(err, "Set plugin height fail");
     }

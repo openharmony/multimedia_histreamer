@@ -18,6 +18,7 @@
 
 #include "pipeline/filters/sink/output_sink/output_sink_filter.h"
 #include <cstdio>
+#include "foundation/cpp_ext/type_traits_ext.h"
 #include "foundation/log.h"
 #include "foundation/utils/steady_clock.h"
 #include "pipeline/factory/filter_factory.h"

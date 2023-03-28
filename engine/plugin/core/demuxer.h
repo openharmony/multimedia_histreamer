@@ -17,10 +17,8 @@
 #define HISTREAMER_PLUGIN_CORE_DEMUXER_H
 
 #include <memory>
-
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/core/base.h"
-#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {

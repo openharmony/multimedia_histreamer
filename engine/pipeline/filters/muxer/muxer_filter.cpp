@@ -187,7 +187,7 @@ bool MuxerFilter::Configure(const std::string &inPort, Plugin::TagMap &upstreamM
                             Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
 {
     std::string tmp;
-    if (!upstreamMeta.GetString(Plugin::Tag::MIME, tmp))  {
+    if (!upstreamMeta.GetData(Plugin::Tag::MIME, tmp))  {
         MEDIA_LOG_E("stream meta must contain mime, which is not found in current stream from port " PUBLIC_LOG_S,
                     inPort.c_str());
         return false;
@@ -202,7 +202,7 @@ bool MuxerFilter::Configure(const std::string &inPort, Plugin::TagMap &upstreamM
     }
 
     auto meta = std::make_shared<Plugin::TagMap>();
-    meta->SetString(Plugin::Tag::MIME, containerMime_);
+    meta->SetData(Plugin::Tag::MIME, containerMime_);
     if (!outPorts_[0]->Configure(*meta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("downstream of muxer filter configure failed");
         return false;
