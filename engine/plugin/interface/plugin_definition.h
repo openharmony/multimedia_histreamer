@@ -16,6 +16,7 @@
 #ifndef HISTREAMER_PLUGIN_INTF_PLUGIN_DEFINITION_H
 #define HISTREAMER_PLUGIN_INTF_PLUGIN_DEFINITION_H
 
+#include <functional>
 #include <string>
 #include <memory>
 #include "common/plugin_types.h"
@@ -82,7 +83,7 @@ struct PackageDef {
 
 /// Plugin create function. All plugins must implement this function.
 template <typename T>
-using PluginCreatorFunc = std::shared_ptr<T>(*)(const std::string& name);
+using PluginCreatorFunc = std::function<std::shared_ptr<T>(const std::string& name)>;
 
 /**
  * @brief Describes the basic information about the plugin.
