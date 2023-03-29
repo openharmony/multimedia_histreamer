@@ -17,10 +17,10 @@
 
 #include "hiplayer_impl.h"
 #include "foundation/log.h"
+#include "foundation/utils/steady_clock.h"
 #include "pipeline/factory/filter_factory.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/core/plugin_meta.h"
-#include "utils/steady_clock.h"
 
 namespace {
 const float MAX_MEDIA_VOLUME = 100.0f;
@@ -123,7 +123,6 @@ int32_t HiPlayerImpl::Init()
         fsm_.Start();
         initialized_ = true;
     } else {
-        pipeline_->UnlinkPrevFilters();
         pipeline_->RemoveFilterChain(audioSource_.get());
         UpdateStateNoLock(PlayerStates::PLAYER_STATE_ERROR);
     }

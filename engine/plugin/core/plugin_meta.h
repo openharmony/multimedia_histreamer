@@ -17,10 +17,9 @@
 #define HISTREAMER_PLUGIN_META_H
 
 #include <vector>
-
-#include "common/plugin_tags.h"
-#include "common/plugin_types.h"
 #include "foundation/cpp_ext/type_traits_ext.h"
+#include "plugin/common/plugin_tags.h"
+#include "plugin/common/plugin_types.h"
 
 namespace OHOS {
 namespace Media {

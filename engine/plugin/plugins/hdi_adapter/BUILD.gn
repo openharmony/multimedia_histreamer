@@ -29,8 +29,12 @@ if (hst_is_lite_sys) {
     "utils/hdi_au_utils.cpp",
   ]
   config("plugin_hdi_adapter_config") {
-    include_dirs = [ "//drivers/peripheral/audio/interfaces/include" ]
+    include_dirs = [
+      "//drivers/peripheral/audio/interfaces/include",
+      "//foundation/multimedia/histreamer/engine/include",
+    ]
     ldflags = [ "-lhdi_videodisplayer" ]
+    ldflags += [ "-laudio_hw" ]
   }
 
   lite_library("histreamer_plugin_HdiAuSink") {
@@ -46,7 +50,7 @@ if (hst_is_lite_sys) {
     ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
     ]
   }
 } else {

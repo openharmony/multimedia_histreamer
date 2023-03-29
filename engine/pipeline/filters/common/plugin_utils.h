@@ -21,13 +21,13 @@
 
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/compatible_check.h"
+#include "pipeline/core/type_define.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/common/plugin_tags.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/plugin_manager.h"
 #include "plugin/core/plugin_meta.h"
-#include "pipeline/core/type_define.h"
 
 namespace OHOS {
 namespace Media {

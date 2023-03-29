@@ -23,8 +23,8 @@
 #include <chrono>   // NOLINT
 #include <iostream> // NOLINT
 #include <memory>   // NOLINT
-#include "osal/base/synchronizer.h"
-#include "osal/thread/task.h"
+#include "foundation/osal/base/synchronizer.h"
+#include "foundation/osal/thread/task.h"
 
 namespace OHOS {
 namespace Media {

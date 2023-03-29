@@ -18,6 +18,7 @@
 #include <functional>
 #include "pipeline/core/filter_base.h"
 #include "pipeline/core/media_sync_manager.h"
+
 namespace OHOS {
 namespace Media {
 namespace Pipeline {

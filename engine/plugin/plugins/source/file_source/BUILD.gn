@@ -21,19 +21,21 @@ group("plugin_file_fd_source") {
 }
 
 source_set("filesource") {
+  include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
   sources = [ "file_source_plugin.cpp" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
 }
 
 source_set("filefdsource") {
+  include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
   sources = [ "file_fd_source_plugin.cpp" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
 }

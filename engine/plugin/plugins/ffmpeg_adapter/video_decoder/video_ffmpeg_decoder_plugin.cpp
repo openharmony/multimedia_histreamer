@@ -22,8 +22,8 @@
 #include <map>
 #include <set>
 #include "plugin/common/plugin_caps_builder.h"
-#include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "plugin/common/surface_memory.h"
+#include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
 namespace {
 // register plugins

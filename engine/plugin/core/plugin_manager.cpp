@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "plugin_manager.h"
+#include "plugin/core/plugin_manager.h"
 #include <utility>
-#include "plugin_wrapper.h"
+#include "plugin/core/plugin_wrapper.h"
 
 namespace OHOS {
 namespace Media {

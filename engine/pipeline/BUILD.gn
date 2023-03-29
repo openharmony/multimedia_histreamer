@@ -14,15 +14,8 @@
 
 # build plugin interface
 import("//foundation/multimedia/histreamer/config.gni")
-config("histreamer_pipeline_config") {
-  include_dirs = [
-    "//foundation/multimedia/histreamer/engine/pipeline",
-    "//foundation/multimedia/histreamer/engine/pipeline/filters",
-    "//foundation/multimedia/histreamer/engine/pipeline/core",
-  ]
-}
-
-source_set("histreamer_pipeline") {
+source_set("histreamer_pipeline_base") {
+  include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
   sources = [
     "core/compatible_check.cpp",
     "core/error_code.cpp",
@@ -32,46 +25,82 @@ source_set("histreamer_pipeline") {
     "core/pipeline_core.cpp",
     "core/port.cpp",
     "factory/filter_factory.cpp",
-    "filters/codec/async_mode.cpp",
-    "filters/codec/audio_decoder/audio_decoder_filter.cpp",
-    "filters/codec/audio_encoder/audio_encoder_filter.cpp",
-    "filters/codec/codec_filter_base.cpp",
-    "filters/codec/codec_filter_factory.cpp",
-    "filters/codec/codec_mode.cpp",
-    "filters/codec/sync_mode.cpp",
-    "filters/common/buffer_calibration/audio_buffer_calibration.cpp",
-    "filters/common/buffer_calibration/buffer_calibration.cpp",
     "filters/common/plugin_settings.cpp",
     "filters/common/plugin_utils.cpp",
-    "filters/demux/data_packer.cpp",
-    "filters/demux/demuxer_filter.cpp",
-    "filters/demux/type_finder.cpp",
-    "filters/muxer/muxer_filter.cpp",
-    "filters/sink/audio_sink/audio_sink_filter.cpp",
-    "filters/sink/media_synchronous_sink.cpp",
-    "filters/sink/output_sink/output_sink_filter.cpp",
-    "filters/source/audio_capture/audio_capture_filter.cpp",
-    "filters/source/media_source/media_source_filter.cpp",
   ]
-  if (multimedia_histreamer_enable_video) {
-    sources += [
-      "filters/codec/video_decoder/video_decoder_filter.cpp",
-      "filters/sink/video_sink/video_sink_filter.cpp",
-    ]
-    if (multimedia_histreamer_enable_recorder) {
-      sources += [
-        "filters/codec/video_encoder/video_encoder_filter.cpp",
-        "filters/source/video_capture/video_capture_filter.cpp",
-      ]
-    }
-  }
-  public_configs = [
-    ":histreamer_pipeline_config",
-    "//foundation/multimedia/histreamer:histreamer_presets",
-  ]
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_core",
-    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
   ]
+}
+
+if (hst_is_lite_sys) {
+  import("//build/lite/config/component/lite_component.gni")
+  lite_library("histreamer_base") {
+    if (ohos_kernel_type == "liteos_m") {
+      target_type = "static_library"
+    } else {
+      target_type = "shared_library"
+    }
+    sources = []
+    deps = [ ":histreamer_pipeline_base" ]
+  }
+} else {
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer_base") {
+    install_enable = true
+    sanitize = {
+      cfi = true
+      debug = false
+    }
+    deps = [ ":histreamer_pipeline_base" ]
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
+  }
+}
+
+source_set("histreamer_pipeline") {
+  sources = []
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
+  public_deps = [
+    "filters/codec:codec_filters",
+    "filters/demux:demuxer_filter",
+    "filters/muxer:muxer_filter",
+    "filters/sink:audio_sink_filter",
+    "filters/sink:output_sink_filter",
+    "filters/source:audio_capture_filter",
+    "filters/source:media_source_filter",
+  ]
+  if (multimedia_histreamer_enable_video) {
+    public_deps += [ "filters/sink:video_sink_filter" ]
+    if (multimedia_histreamer_enable_recorder) {
+      public_deps += [ "filters/source:video_capture_filter" ]
+    }
+  }
+}
+
+if (hst_is_lite_sys) {
+  import("//build/lite/config/component/lite_component.gni")
+  lite_library("histreamer_engine_filters") {
+    if (ohos_kernel_type == "liteos_m") {
+      target_type = "static_library"
+    } else {
+      target_type = "shared_library"
+    }
+    sources = []
+    deps = [ ":histreamer_pipeline" ]
+  }
+} else {
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer_engine_filters") {
+    install_enable = true
+    sanitize = {
+      cfi = true
+      debug = false
+    }
+    deps = [ ":histreamer_pipeline" ]
+    subsystem_name = "multimedia"
+    part_name = "multimedia_histreamer"
+  }
 }

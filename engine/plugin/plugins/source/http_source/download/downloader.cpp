@@ -19,9 +19,9 @@
 
 #include "foundation/log.h"
 #include "http_curl_client.h"
-#include "osal/utils/util.h"
+#include "foundation/osal/utils/util.h"
+#include "foundation/utils/steady_clock.h"
 #include "securec.h"
-#include "steady_clock.h"
 
 namespace OHOS {
 namespace Media {

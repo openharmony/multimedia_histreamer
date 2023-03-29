@@ -14,11 +14,10 @@
  */
 
 #include "gtest/gtest.h"
-#include "common/any.h"
+#include "plugin/common/any.h"
+#include "plugin/plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #define private public
 #define protected public
-
-#include "plugin/plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
 namespace OHOS {
 namespace Media {

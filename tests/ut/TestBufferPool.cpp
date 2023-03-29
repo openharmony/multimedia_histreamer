@@ -14,15 +14,15 @@
  */
 
 #include "gtest/gtest.h"
-#include "common/any.h"
+#include "plugin/common/any.h"
 #define private public
 #define protected public
 #define UNIT_TEST 1
 
 #include <vector>
 
-#include "utils/buffer_pool.h"
-#include "utils/constants.h"
+#include "foundation/utils/buffer_pool.h"
+#include "foundation/utils/constants.h"
 #include "pipeline/core/type_define.h"
 
 namespace OHOS::Media::Test {

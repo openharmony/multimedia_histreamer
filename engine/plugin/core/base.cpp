@@ -15,11 +15,11 @@
 
 #define HST_LOG_TAG "PluginCoreBase"
 
-#include "base.h"
+#include "plugin/core/base.h"
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
+#include "plugin/core/plugin_core_utils.h"
 #include "plugin/interface/plugin_base.h"
-#include "plugin_core_utils.h"
 
 using namespace OHOS::Media::Plugin;
 

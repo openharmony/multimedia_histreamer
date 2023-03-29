@@ -19,8 +19,8 @@
 #include <format.h>
 #include <string>
 #include <vector>
-#include "common/plugin_types.h"
 #include "media_data_source_impl.h"
+#include "plugin/common/plugin_types.h"
 #include "securec.h"
 #include "player.h"
 

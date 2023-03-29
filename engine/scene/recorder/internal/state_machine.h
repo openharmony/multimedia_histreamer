@@ -25,6 +25,7 @@
 #include "foundation/osal/base/synchronizer.h"
 #include "foundation/osal/thread/mutex.h"
 #include "foundation/osal/thread/task.h"
+#include "foundation/utils/blocking_queue.h"
 #include "init_state.h"
 #include "pause_state.h"
 #include "pipeline/core/error_code.h"
@@ -33,7 +34,6 @@
 #include "recording_setting_state.h"
 #include "recording_state.h"
 #include "recorder_executor.h"
-#include "utils/blocking_queue.h"
 
 namespace OHOS {
 namespace Media {

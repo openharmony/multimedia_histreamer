@@ -19,8 +19,8 @@
 #include <cstring>
 #include <map>
 #include <set>
-#include "utils/constants.h"
 #include "foundation/log.h"
+#include "foundation/utils/constants.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_caps_builder.h"

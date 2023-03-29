@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "plugin_buffer.h"
-#include "share_memory.h"
-#include "surface_memory.h"
+#include "plugin/common/plugin_buffer.h"
+#include "plugin/common/share_memory.h"
+#include "plugin/common/surface_memory.h"
 
 namespace OHOS {
 namespace Media {

@@ -16,8 +16,8 @@
 #ifndef HISTREAMER_PLUGIN_CORE_MUXER_H
 #define HISTREAMER_PLUGIN_CORE_MUXER_H
 
-#include "base.h"
-#include "common/plugin_buffer.h"
+#include "plugin/common/plugin_buffer.h"
+#include "plugin/core/base.h"
 
 namespace OHOS {
 namespace Media {

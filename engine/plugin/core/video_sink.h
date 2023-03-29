@@ -18,10 +18,10 @@
 
 #include <cstddef>
 #include <memory>
-#include "base.h"
-#include "common/plugin_buffer.h"
-#include "common/plugin_tags.h"
-#include "common/plugin_types.h"
+#include "plugin/common/plugin_buffer.h"
+#include "plugin/common/plugin_tags.h"
+#include "plugin/common/plugin_types.h"
+#include "plugin/core/base.h"
 
 namespace OHOS {
 namespace Media {

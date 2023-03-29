@@ -17,7 +17,7 @@
 #ifndef HISTREAMER_PLUGIN_PLUGINS_CODEC_MANAGER_H
 #define HISTREAMER_PLUGIN_PLUGINS_CODEC_MANAGER_H
 
-#include "interface/codec_plugin.h"
+#include "plugin/interface/codec_plugin.h"
 
 namespace OHOS {
 namespace Media {

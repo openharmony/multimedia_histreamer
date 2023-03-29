@@ -19,7 +19,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "common/any.h"
+#include "plugin/common/any.h"
 
 namespace OHOS {
 namespace Media {

@@ -15,15 +15,14 @@
 
 #define HST_LOG_TAG "MediaSourceFilter"
 
-#include "media_source_filter.h"
-#include "common/plugin_utils.h"
-#include "compatible_check.h"
-#include "factory/filter_factory.h"
-#include "utils/dump_buffer.h"
+#include "pipeline/filters/source/media_source/media_source_filter.h"
+#include "foundation/utils/dump_buffer.h"
+#include "foundation/utils/hitrace_utils.h"
+#include "pipeline/core/compatible_check.h"
 #include "pipeline/core/type_define.h"
-#include "plugin/interface/source_plugin.h"
+#include "pipeline/factory/filter_factory.h"
+#include "pipeline/filters/common/plugin_utils.h"
 #include "plugin/core/plugin_meta.h"
-#include "utils/hitrace_utils.h"
 
 namespace OHOS {
 namespace Media {

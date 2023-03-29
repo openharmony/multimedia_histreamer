@@ -14,7 +14,7 @@
  */
 #define HST_LOG_TAG "DumpBuffer"
 
-#include "dump_buffer.h"
+#include "foundation/utils/dump_buffer.h"
 #include <cstdio>
 #ifdef _WIN32
 #include <direct.h>

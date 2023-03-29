@@ -16,8 +16,8 @@
 #ifndef HISTREAMER_PLUGIN_LOADER_H
 #define HISTREAMER_PLUGIN_LOADER_H
 
-#include "interface/plugin_base.h"
-#include "interface/plugin_definition.h"
+#include "plugin/interface/plugin_base.h"
+#include "plugin/interface/plugin_definition.h"
 
 namespace OHOS {
 namespace Media {

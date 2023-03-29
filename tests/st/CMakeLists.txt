@@ -70,6 +70,7 @@ INCLUDE_DIRECTORIES(BEFORE
         ${TOP_DIR}/3rdparty/testngpp2/include
         ${TOP_DIR}/demo/system_tests
         ${TOP_DIR}/histreamer/engine
+        ${TOP_DIR}/histreamer/engine/include
         ${TOP_DIR}/histreamer/engine/scene/standard
         ${TOP_DIR}/histreamer/engine/plugin
         ${TOP_DIR}/3rdparty/ohos

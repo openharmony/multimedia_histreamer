@@ -18,10 +18,10 @@
 
 #include <atomic>
 #include "SDL.h"
-#include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
-#include "plugin/interface/audio_sink_plugin.h"
+#include "foundation/utils/ring_buffer.h"
 #include "plugin/common/plugin_audio_tags.h"
-#include "utils/ring_buffer.h"
+#include "plugin/interface/audio_sink_plugin.h"
+#include "plugin/plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
 namespace OHOS {
 namespace Media {

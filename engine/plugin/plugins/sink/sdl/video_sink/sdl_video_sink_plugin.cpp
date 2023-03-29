@@ -21,7 +21,7 @@
 #include <functional>
 #include "SDL_events.h"
 #include "foundation/log.h"
-#include "utils/constants.h"
+#include "foundation/utils/constants.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/common/plugin_video_tags.h"

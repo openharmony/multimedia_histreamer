@@ -19,17 +19,26 @@
 #include <memory>
 #include <string>
 #include <utility>
-
-#include "error_code.h"
-#include "utils/constants.h"
-#include "type_define.h"
+#include "foundation/utils/constants.h"
+#include "pipeline/core/error_code.h"
+#include "pipeline/core/type_define.h"
 #include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
 class InfoTransfer;
+enum class PortType { IN, OUT };
 
+struct PortDesc {
+    std::string name;
+    bool isPcm;
+};
+
+struct PortInfo {
+    PortType type;
+    std::vector<PortDesc> ports;
+};
 enum class WorkMode { PUSH, PULL };
 
 class Port {

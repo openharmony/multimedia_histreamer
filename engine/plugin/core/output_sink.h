@@ -16,9 +16,9 @@
 #ifndef HISTREAMER_PLUGIN_CORE_OUTPUT_SINK_H
 #define HISTREAMER_PLUGIN_CORE_OUTPUT_SINK_H
 
-#include "base.h"
-#include "common/plugin_buffer.h"
-#include "common/media_sink.h"
+#include "plugin/common/plugin_buffer.h"
+#include "plugin/common/media_sink.h"
+#include "plugin/core/base.h"
 
 namespace OHOS {
 namespace Media {

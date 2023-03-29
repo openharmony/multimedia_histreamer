@@ -15,16 +15,16 @@
 
 #define HST_LOG_TAG "DemuxerFilter"
 
-#include "demuxer_filter.h"
+#include "pipeline/filters/demux/demuxer_filter.h"
 #include <algorithm>
-#include "compatible_check.h"
-#include "factory/filter_factory.h"
 #include "foundation/log.h"
+#include "foundation/utils/constants.h"
+#include "foundation/utils/dump_buffer.h"
+#include "foundation/utils/steady_clock.h"
+#include "pipeline/core/compatible_check.h"
+#include "pipeline/factory/filter_factory.h"
 #include "pipeline/filters/common/plugin_utils.h"
 #include "plugin/common/plugin_time.h"
-#include "utils/constants.h"
-#include "utils/steady_clock.h"
-#include "utils/dump_buffer.h"
 
 namespace OHOS {
 namespace Media {

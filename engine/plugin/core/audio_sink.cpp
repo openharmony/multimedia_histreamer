@@ -15,12 +15,12 @@
 
 #define HST_LOG_TAG "PluginCoreAuSink"
 
-#include "audio_sink.h"
+#include "plugin/core/audio_sink.h"
 #include <atomic>
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
-#include "interface/audio_sink_plugin.h"
-#include "plugin_core_utils.h"
+#include "plugin/core/plugin_core_utils.h"
+#include "plugin/interface/audio_sink_plugin.h"
 
 using namespace OHOS::Media::Plugin;
 

@@ -17,18 +17,18 @@
 
 #define HST_LOG_TAG "VideoDecoderFilter"
 
-#include "video_decoder_filter.h"
-#include "factory/filter_factory.h"
-#include "utils/dump_buffer.h"
+#include "pipeline/filters/codec/video_decoder/video_decoder_filter.h"
 #include "foundation/cpp_ext/memory_ext.h"
 #include "foundation/log.h"
-#include "osal/utils/util.h"
+#include "foundation/osal/utils/util.h"
+#include "foundation/utils/constants.h"
+#include "foundation/utils/dump_buffer.h"
+#include "foundation/utils/steady_clock.h"
+#include "pipeline/factory/filter_factory.h"
 #include "pipeline/filters/codec/codec_filter_factory.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
 #include "plugin/common/surface_allocator.h"
-#include "utils/constants.h"
-#include "utils/steady_clock.h"
 
 namespace {
 const uint32_t DEFAULT_IN_BUFFER_POOL_SIZE = 8;

@@ -17,18 +17,15 @@
 
 #include "hirecorder_impl.h"
 #include <regex>
-#include "utils/hitrace_utils.h"
-#include "foundation/osal/filesystem/file_system.h"
+#include "foundation/utils/hitrace_utils.h"
+#include "foundation/utils/steady_clock.h"
 #include "pipeline/factory/filter_factory.h"
 #include "plugin/common/media_sink.h"
 #include "plugin/common/plugin_time.h"
 #include "recorder_utils.h"
-#include "utils/steady_clock.h"
-
 #ifndef WIN32
-    #include <unistd.h> // include the dup function on Linux system
+#include <unistd.h> // include the dup function on Linux system
 #endif
-
 
 namespace OHOS {
 namespace Media {
@@ -74,7 +71,6 @@ ErrorCode HiRecorderImpl::Init()
         fsm_.Start();
         initialized_ = true;
     } else {
-        pipeline_->UnlinkPrevFilters();
         pipeline_->RemoveFilterChain(muxer_.get());
     }
     return ret;

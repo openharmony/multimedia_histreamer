@@ -12,9 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <set>
 
-#include "plugin_wrapper.h"
+
+#include "plugin/core/plugin_wrapper.h"
+#include <set>
 
 namespace {
 std::set<OHOS::Media::Plugin::MetaID> g_metaIdSet = {

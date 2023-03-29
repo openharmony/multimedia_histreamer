@@ -18,8 +18,8 @@ group("plugin_minimp4_demuxer") {
 config("plugin_minimp4_demuxer_adapter_config") {
   include_dirs = [
     "minimp4_demuxer",
+    "//foundation/multimedia/histreamer/engine/include",
     "//third_party/minimp4",
-    "//foundation/multimedia/histreamer/engine/foundation",
   ]
 }
 
@@ -32,7 +32,7 @@ if (ohos_kernel_type == "liteos_m") {
     ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
     ]
   }
 } else {

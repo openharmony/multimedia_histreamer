@@ -18,8 +18,8 @@
 #include "hiplayer_callback_looper.h"
 #include <utility>
 #include "foundation/log.h"
+#include "foundation/utils/steady_clock.h"
 #include "media_errors.h"
-#include "utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {

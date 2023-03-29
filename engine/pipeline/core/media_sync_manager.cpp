@@ -15,15 +15,15 @@
 
 #define HST_LOG_TAG "MediaSyncManager"
 
-#include "media_sync_manager.h"
+#include "pipeline/core/media_sync_manager.h"
 
 #include <algorithm>
 #include <cmath>
 #include "foundation/log.h"
 #include "foundation/osal/thread/scoped_lock.h"
+#include "foundation/utils/steady_clock.h"
+#include "foundation/utils/hitrace_utils.h"
 #include "plugin/common/plugin_time.h"
-#include "utils/steady_clock.h"
-#include "utils/hitrace_utils.h"
 
 namespace OHOS {
 namespace Media {

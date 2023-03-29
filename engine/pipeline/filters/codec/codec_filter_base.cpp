@@ -15,11 +15,11 @@
 
 #define HST_LOG_TAG "CodecFilterBase"
 
-#include "codec_filter_base.h"
+#include "pipeline/filters/codec/codec_filter_base.h"
 #include "foundation/cpp_ext/memory_ext.h"
-#include "pipeline/core/plugin_attr_desc.h"
+#include "foundation/utils/steady_clock.h"
 #include "pipeline/filters/common/plugin_settings.h"
-#include "utils/steady_clock.h"
+#include "plugin/common/plugin_attr_desc.h"
 
 namespace {
 constexpr uint32_t DEFAULT_OUT_BUFFER_POOL_SIZE = 5;
@@ -93,7 +93,7 @@ ErrorCode CodecFilterBase::UpdateMetaFromPlugin(Plugin::Meta& meta)
         if (!keyPair.second.first(keyPair.first, tmpVal)) {
             if (HasTagInfo(keyPair.first)) {
                 MEDIA_LOG_I("Type of Tag " PUBLIC_LOG_S " should be " PUBLIC_LOG_S,
-                            GetTagStrName(keyPair.first), std::get<2>(g_tagInfoMap.at(keyPair.first)));
+                            GetTagStrName(keyPair.first), std::get<2>(Plugin::g_tagInfoMap.at(keyPair.first)));
             } else {
                 MEDIA_LOG_I("Tag " PUBLIC_LOG_D32 " is not is map, may be update it?", keyPair.first);
                 MEDIA_LOG_I("Type of Tag " PUBLIC_LOG_D32 "mismatch", keyPair.first);

@@ -17,9 +17,9 @@
 #define HISTREAMER_NETWORK_CLIENT_H
 
 #include <string>
-#include <common/plugin_event.h>
-#include "common/plugin_types.h"
 #include "network_typs.h"
+#include "plugin/common/plugin_event.h"
+#include "plugin/common/plugin_types.h"
 
 namespace OHOS {
 namespace Media {

@@ -14,7 +14,7 @@
  */
 #define HST_LOG_TAG "FileSystem"
 
-#include "file_system.h"
+#include "foundation/osal/filesystem/file_system.h"
 #ifdef _WIN32
 #include <direct.h>
 #include <fcntl.h>

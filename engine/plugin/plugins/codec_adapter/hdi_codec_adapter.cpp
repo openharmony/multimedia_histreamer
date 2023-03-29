@@ -18,15 +18,15 @@
 
 #include "hdi_codec_adapter.h"
 #include <utility>
-#include "codec_callback_type_stub.h"
 #include "codec_callback_if.h"
+#include "codec_callback_type_stub.h"
 #include "codec_component_if.h"
 #include "codec_omx_ext.h"
 #include "codec_utils.h"
 #include "foundation/log.h"
 #include "hdf_base.h"
 #include "hdi_codec_manager.h"
-#include "pipeline/core/plugin_attr_desc.h"
+#include "plugin/common/plugin_attr_desc.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;
@@ -297,7 +297,7 @@ Status HdiCodecAdapter::GetParameter(Plugin::Tag tag, ValueType &value)
             value = outBufferSize_;
             break;
         default:
-            MEDIA_LOG_W("ignore this tag: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
+            MEDIA_LOG_W("ignore this tag: " PUBLIC_LOG_S, Tag2String(tag));
             break;
     }
     return Status::OK;
@@ -321,7 +321,7 @@ Status HdiCodecAdapter::SetParameter(Plugin::Tag tag, const ValueType &value)
             frameRate_ = Plugin::AnyCast<uint32_t>(value);
             break;
         default:
-            MEDIA_LOG_W("ignore this tag: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
+            MEDIA_LOG_W("ignore this tag: " PUBLIC_LOG_S, Tag2String(tag));
             break;
     }
     if (width_ != 0 && height_ != 0 && pixelFormat_ != VideoPixelFormat::UNKNOWN && !portConfigured_) {

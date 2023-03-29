@@ -15,7 +15,7 @@
 
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 
-#include "share_memory.h"
+#include "plugin/common/share_memory.h"
 #include "foundation/log.h"
 
 namespace OHOS {

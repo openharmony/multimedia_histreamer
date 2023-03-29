@@ -20,13 +20,9 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
-#include <new>
 #include "foundation/log.h"
-#include "osal/thread/scoped_lock.h"
-#include "plugin/common/plugin_buffer.h"
+#include "foundation/utils/constants.h"
 #include "plugin/common/plugin_time.h"
-#include "osal/utils/util.h"
-#include "utils/constants.h"
 
 namespace OHOS {
 namespace Media {
@@ -217,10 +213,9 @@ bool WavSniff(const uint8_t *inputBuf)
 int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource)
 {
     MEDIA_LOG_I("Sniff in");
-    Status status = Status::ERROR_UNKNOWN;
     auto buffer = std::make_shared<Buffer>();
     auto bufData = buffer->AllocMemory(nullptr, PROBE_READ_LENGTH);
-    status = dataSource->ReadAt(0, buffer, PROBE_READ_LENGTH);
+    auto status = dataSource->ReadAt(0, buffer, PROBE_READ_LENGTH);
     if (status != Status::OK) {
         MEDIA_LOG_E("Sniff Read Data Error");
         return 0;

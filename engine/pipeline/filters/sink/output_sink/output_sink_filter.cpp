@@ -16,13 +16,14 @@
 
 #define HST_LOG_TAG "OutputSinkFilter"
 
-#include "output_sink_filter.h"
+#include "pipeline/filters/sink/output_sink/output_sink_filter.h"
 #include <cstdio>
-#include "common/plugin_utils.h"
-#include "factory/filter_factory.h"
 #include "foundation/log.h"
+#include "foundation/utils/steady_clock.h"
+#include "pipeline/factory/filter_factory.h"
+#include "pipeline/filters/common/plugin_settings.h"
+#include "pipeline/filters/common/plugin_utils.h"
 #include "plugin/common/plugin_tags.h"
-#include "utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {

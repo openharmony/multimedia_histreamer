@@ -20,8 +20,8 @@
 
 #include "codec_component_type.h"
 #include "codec_omx_ext.h"
-#include "common/plugin_buffer.h"
-#include "common/share_memory.h"
+#include "plugin/common/plugin_buffer.h"
+#include "plugin/common/share_memory.h"
 
 namespace OHOS {
 namespace Media {

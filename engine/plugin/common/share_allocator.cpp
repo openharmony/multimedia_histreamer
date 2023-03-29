@@ -17,7 +17,7 @@
 
 #define HST_LOG_TAG "ShareAllocator"
 
-#include "share_allocator.h"
+#include "plugin/common/share_allocator.h"
 #include "ashmem.h"
 
 namespace OHOS {

@@ -35,17 +35,6 @@ enum struct FilterType : uint8_t {
     VIDEO_SINK,
     OUTPUT_SINK,
 };
-inline bool IsSink(FilterType type)
-{
-    switch (type) {
-        case FilterType::AUDIO_SINK:
-        case FilterType::VIDEO_SINK:
-        case FilterType::OUTPUT_SINK:
-            return true;
-        default:
-            return false;
-    }
-}
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

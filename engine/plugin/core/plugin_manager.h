@@ -16,17 +16,16 @@
 #ifndef HISTREAMER_PLUGIN_MANAGER_H
 #define HISTREAMER_PLUGIN_MANAGER_H
 
-#include "plugin_info.h"
-#include "plugin_register.h"
-
-#include "audio_sink.h"
-#include "codec.h"
-#include "demuxer.h"
-#include "muxer.h"
-#include "output_sink.h"
 #include "plugin/common/type_cast_ext.h"
-#include "source.h"
-#include "video_sink.h"
+#include "plugin/core/audio_sink.h"
+#include "plugin/core/codec.h"
+#include "plugin/core/demuxer.h"
+#include "plugin/core/muxer.h"
+#include "plugin/core/output_sink.h"
+#include "plugin/core/plugin_info.h"
+#include "plugin/core/plugin_register.h"
+#include "plugin/core/source.h"
+#include "plugin/core/video_sink.h"
 
 namespace OHOS {
 namespace Media {

@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "muxer.h"
+#include "plugin/core/muxer.h"
+#include "plugin/core/plugin_wrapper.h"
 #include "plugin/interface/muxer_plugin.h"
-#include "plugin_wrapper.h"
 
 namespace OHOS {
 namespace Media {

@@ -19,11 +19,8 @@
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "core/plugin_register.h"
 #include "minimp3_wrapper.h"
 #include "plugin/interface/demuxer_plugin.h"
-#include "foundation/osal/thread/mutex.h"
 
 using Mp3DemuxerHandle     = Minimp3WrapperMp3dec;
 using Mp3DemuxerSampleAttr = Minimp3WrapperMp3dSample;

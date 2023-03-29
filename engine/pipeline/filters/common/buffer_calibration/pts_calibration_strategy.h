@@ -17,6 +17,7 @@
 #define HISTREAMER_AV_PTS_CALIBRATION_STRATEGY_H
 #include "pipeline/core/type_define.h"
 #include "plugin/common/plugin_time.h"
+
 namespace OHOS {
 namespace Media {
 namespace Pipeline {

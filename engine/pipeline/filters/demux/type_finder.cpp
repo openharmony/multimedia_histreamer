@@ -18,8 +18,8 @@
 #include "type_finder.h"
 #include <algorithm>
 #include "foundation/log.h"
-#include "osal/utils/util.h"
-#include "utils/steady_clock.h"
+#include "foundation/osal/utils/util.h"
+#include "foundation/utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {

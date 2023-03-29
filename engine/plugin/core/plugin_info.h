@@ -16,9 +16,9 @@
 #ifndef HISTREAMER_PLUGIN_INFO_H
 #define HISTREAMER_PLUGIN_INFO_H
 
-#include "interface/plugin_definition.h"
-#include "common/plugin_tags.h"
-#include "common/plugin_caps.h"
+#include "plugin/common/plugin_tags.h"
+#include "plugin/common/plugin_caps.h"
+#include "plugin/interface/plugin_definition.h"
 
 namespace OHOS {
 namespace Media {

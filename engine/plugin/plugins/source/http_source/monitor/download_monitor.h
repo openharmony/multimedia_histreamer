@@ -20,13 +20,13 @@
 #include <list>
 #include <memory>
 #include <string>
-#include "blocking_queue.h"
+#include "foundation/osal/thread/task.h"
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/utils/blocking_queue.h"
+#include "foundation/utils/ring_buffer.h"
 #include "plugin/interface/plugin_base.h"
 #include "plugin/plugins/source/http_source/download/downloader.h"
 #include "plugin/plugins/source/http_source/media_downloader.h"
-#include "ring_buffer.h"
-#include "osal/thread/task.h"
-#include "osal/thread/mutex.h"
 
 namespace OHOS {
 namespace Media {

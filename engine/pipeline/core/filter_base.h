@@ -21,14 +21,14 @@
 #include <memory>
 
 #include "foundation/pre_defines.h"
-#include "filter.h"
-#include "error_code.h"
-#include "utils/constants.h"
-#include "event.h"
-#include "filter_type.h"
+#include "foundation/utils/constants.h"
+#include "pipeline/core/error_code.h"
+#include "pipeline/core/event.h"
+#include "pipeline/core/filter.h"
+#include "pipeline/core/filter_type.h"
+#include "pipeline/core/port.h"
 #include "plugin/core/plugin_info.h"
 #include "plugin/core/base.h"
-#include "port.h"
 
 namespace OHOS {
 namespace Media {

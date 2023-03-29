@@ -17,7 +17,7 @@
 #include "data_packer.h"
 #include <cstring>
 #include "foundation/log.h"
-#include "utils/dump_buffer.h"
+#include "foundation/utils/dump_buffer.h"
 
 namespace OHOS {
 namespace Media {

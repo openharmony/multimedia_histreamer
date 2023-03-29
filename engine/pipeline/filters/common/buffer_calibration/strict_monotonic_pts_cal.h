@@ -16,6 +16,7 @@
 #ifndef HISTREAMER_STRICTMONOTONICPTSCAL_H
 #define HISTREAMER_STRICTMONOTONICPTSCAL_H
 #include "pts_calibration_strategy.h"
+
 namespace OHOS {
 namespace Media {
 namespace Pipeline {

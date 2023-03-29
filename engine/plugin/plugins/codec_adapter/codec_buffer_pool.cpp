@@ -17,7 +17,6 @@
 #define HST_LOG_TAG "CodecBufferPool"
 
 #include "codec_buffer_pool.h"
-
 #include <utility>
 #include "codec_utils.h"
 #include "foundation/log.h"

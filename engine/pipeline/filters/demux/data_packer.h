@@ -20,8 +20,8 @@
 #include <deque>
 #include <vector>
 
-#include "osal/thread/mutex.h"
-#include "osal/thread/scoped_lock.h"
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/osal/thread/scoped_lock.h"
 #include "pipeline/core/type_define.h"
 
 namespace OHOS {

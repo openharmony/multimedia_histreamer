@@ -15,7 +15,7 @@
 
 #define HST_LOG_TAG "Mutex"
 
-#include "mutex.h"
+#include "foundation/osal/thread/mutex.h"
 #include "foundation/log.h"
 
 namespace OHOS {

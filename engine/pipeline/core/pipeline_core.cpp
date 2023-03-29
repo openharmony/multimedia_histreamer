@@ -15,32 +15,17 @@
 
 #define HST_LOG_TAG "PipelineCore"
 
-#include "pipeline_core.h"
+#include "pipeline/core/pipeline_core.h"
 #include <queue>
 #include <stack>
 #include "foundation/log.h"
-#include "osal/thread/scoped_lock.h"
-#include "utils/steady_clock.h"
-#include "utils/hitrace_utils.h"
+#include "foundation/osal/thread/scoped_lock.h"
+#include "foundation/utils/hitrace_utils.h"
+#include "foundation/utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
-PipelineCore::PipelineCore(const std::string& name)
-    : name_(name), eventReceiver_(nullptr), filterCallback_(nullptr)
-{
-}
-
-const std::string& PipelineCore::GetName()
-{
-    return name_;
-}
-
-const EventReceiver* PipelineCore::GetOwnerPipeline() const
-{
-    return eventReceiver_;
-}
-
 void PipelineCore::Init(EventReceiver* receiver, FilterCallback* callback)
 {
     eventReceiver_ = receiver;
@@ -309,11 +294,6 @@ void PipelineCore::ReorderFilters()
         filters_.clear();
         filters_.assign(result.begin(), result.end());
     }
-}
-
-void PipelineCore::SetSyncCenter(std::weak_ptr<IMediaSyncCenter> syncCenter)
-{
-    syncCenter_ = syncCenter;
 }
 } // namespace Pipeline
 } // namespace Media

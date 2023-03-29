@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "constants.h"
+#include "foundation/utils/constants.h"
 #include <string>
 
 namespace OHOS {

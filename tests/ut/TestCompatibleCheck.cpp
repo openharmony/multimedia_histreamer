@@ -13,17 +13,15 @@
  * limitations under the License.
  */
 
-#include "common/any.h"
-
 #include <gtest/gtest.h>
 
 #define private public
 #define protected public
 #define UNIT_TEST 1
-
-#include "core/compatible_check.h"
-#include "utils/constants.h"
+#include "foundation/utils/constants.h"
+#include "plugin/common/any.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "pipline/core/compatible_check.h"
 #include "plugin/core/plugin_meta.h"
 
 using namespace std;

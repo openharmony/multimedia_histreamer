@@ -18,11 +18,11 @@
 
 #include <functional>
 #include <map>
-
+#include "foundation/osal/thread/mutex.h"
+#include "foundation/osal/thread/scoped_lock.h"
 #include "minimp3_wrapper.h"
-#include "plugin/interface/codec_plugin.h"
 #include "plugin/common/plugin_types.h"
-#include "utils/blocking_queue.h"
+#include "plugin/interface/codec_plugin.h"
 
 using Mp3DecoderHandle = Minimp3WrapperMp3dec;
 using Mp3DecoderSample = Minimp3WrapperMp3dSample;

@@ -15,6 +15,7 @@
 #define HST_LOG_TAG "MediaSyncSink"
 #include "media_synchronous_sink.h"
 #include "foundation/log.h"
+
 namespace OHOS {
 namespace Media {
 namespace Pipeline {

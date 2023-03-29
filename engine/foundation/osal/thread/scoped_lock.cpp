@@ -15,8 +15,7 @@
 
 #define HST_LOG_TAG "ScopedLock"
 
-#include "scoped_lock.h"
-
+#include "foundation/osal/thread/scoped_lock.h"
 #include <utility>
 
 namespace OHOS {

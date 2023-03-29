@@ -25,7 +25,7 @@ source_set("std_video_surface_sink") {
   sources = [ "surface_sink_plugin.cpp" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
 
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
@@ -40,6 +40,7 @@ source_set("std_video_surface_sink") {
       "//commonlibrary/c_utils/base/include",
       "//base/startup/init/interfaces/innerkits/include/syspara",
       "//third_party/bounds_checking_function/include",
+      "//foundation/multimedia/histreamer/engine/include",
     ]
     public_deps += [
       "//commonlibrary/c_utils/base:utils",

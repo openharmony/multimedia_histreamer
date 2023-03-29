@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "source.h"
-#include "interface/source_plugin.h"
+#include "plugin/core/source.h"
+#include "plugin/interface/source_plugin.h"
 
 using namespace OHOS::Media::Plugin;
 

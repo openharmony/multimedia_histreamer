@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "util.h"
+#include "foundation/osal/utils/util.h"
 #include <climits>
 
 #ifdef WIN32

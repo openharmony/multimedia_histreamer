@@ -17,16 +17,16 @@
 
 #define HST_LOG_TAG "VideoEncoderFilter"
 
-#include "video_encoder_filter.h"
+#include "pipeline/filters/codec/video_encoder/video_encoder_filter.h"
 #include "foundation/cpp_ext/memory_ext.h"
-#include "factory/filter_factory.h"
 #include "foundation/log.h"
-#include "osal/utils/util.h"
+#include "foundation/osal/utils/util.h"
+#include "foundation/utils/constants.h"
+#include "foundation/utils/steady_clock.h"
+#include "pipeline/factory/filter_factory.h"
+#include "plugin/common/plugin_attr_desc.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_video_tags.h"
-#include "utils/constants.h"
-#include "utils/steady_clock.h"
-#include "pipeline/core/plugin_attr_desc.h"
 
 namespace OHOS {
 namespace Media {

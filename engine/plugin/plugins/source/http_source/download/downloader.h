@@ -19,10 +19,10 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include "foundation/osal/thread/task.h"
+#include "foundation/utils/blocking_queue.h"
+#include "foundation/osal/utils/util.h"
 #include "network_client.h"
-#include "osal/thread/task.h"
-#include "blocking_queue.h"
-#include "osal/utils/util.h"
 
 namespace OHOS {
 namespace Media {

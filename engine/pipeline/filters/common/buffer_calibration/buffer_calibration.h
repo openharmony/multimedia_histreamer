@@ -20,6 +20,7 @@
 #include "pipeline/core/type_define.h"
 #include "plugin/common/plugin_tags.h"
 #include "pts_calibration_strategy.h"
+
 namespace OHOS {
 namespace Media {
 namespace Pipeline {

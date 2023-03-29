@@ -23,10 +23,9 @@
 
 #include <securec.h>
 #include "foundation/log.h"
-#include "plugin/common/plugin_buffer.h"
+#include "foundation/osal/utils/util.h"
+#include "foundation/utils/constants.h"
 #include "plugin/common/plugin_time.h"
-#include "utils/constants.h"
-#include "osal/utils/util.h"
 
 namespace OHOS {
 namespace Media {

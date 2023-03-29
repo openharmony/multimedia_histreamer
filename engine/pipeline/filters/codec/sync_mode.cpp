@@ -15,11 +15,11 @@
 
 #define HST_LOG_TAG "SyncMode"
 
-#include "sync_mode.h"
-#include "common/plugin_utils.h"
-#include "utils/dump_buffer.h"
+#include "pipeline/filters/codec/sync_mode.h"
 #include "foundation/log.h"
-#include "utils/steady_clock.h"
+#include "foundation/utils/dump_buffer.h"
+#include "foundation/utils/steady_clock.h"
+#include "pipeline/filters/common/plugin_utils.h"
 
 namespace OHOS {
 namespace Media {

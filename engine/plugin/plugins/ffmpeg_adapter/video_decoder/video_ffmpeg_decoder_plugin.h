@@ -20,16 +20,16 @@
 
 #include <functional>
 #include <map>
-#include "osal/thread/task.h"
-#include "utils/blocking_queue.h"
+#include "foundation/osal/thread/task.h"
+#include "foundation/utils/blocking_queue.h"
 #include "plugin/interface/codec_plugin.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 #include "libavcodec/avcodec.h"
-#include "libswscale/swscale.h"
 #include "libavutil/imgutils.h"
+#include "libswscale/swscale.h"
 #ifdef __cplusplus
 };
 #endif

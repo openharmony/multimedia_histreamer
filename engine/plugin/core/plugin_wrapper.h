@@ -15,11 +15,12 @@
 
 #ifndef HISTREAMER_PLUGIN_CORE_WRAPPER_H
 #define HISTREAMER_PLUGIN_CORE_WRAPPER_H
-#include "demuxer.h"
+
 #include "foundation/pre_defines.h"
-#include "interface/demuxer_plugin.h"
-#include "interface/muxer_plugin.h"
-#include "muxer.h"
+#include "plugin/core/demuxer.h"
+#include "plugin/core/muxer.h"
+#include "plugin/interface/demuxer_plugin.h"
+#include "plugin/interface/muxer_plugin.h"
 
 namespace OHOS {
 namespace Media {

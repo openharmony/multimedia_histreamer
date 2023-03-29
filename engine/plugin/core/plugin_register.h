@@ -20,10 +20,9 @@
 #include <map>
 #include <set>
 #include <utility>
-#include "common/any.h"
-
-#include "plugin_loader.h"
-#include "plugin_info.h"
+#include "plugin/common/any.h"
+#include "plugin/core/plugin_loader.h"
+#include "plugin/core/plugin_info.h"
 
 namespace OHOS {
 namespace Media {

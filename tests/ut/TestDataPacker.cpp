@@ -19,7 +19,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "filters/demux/data_packer.h"
+#include "pipeline/filters/demux/data_packer.h"
 
 namespace OHOS {
 namespace Media {

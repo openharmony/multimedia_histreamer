@@ -21,12 +21,12 @@
 #include "foundation/log.h"
 #include "foundation/osal/utils/util.h"
 #include "foundation/pre_defines.h"
+#include "foundation/utils/constants.h"
+#include "plugin/common/plugin_attr_desc.h"
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_time.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
-#include "utils/constants.h"
-#include "pipeline/core/plugin_attr_desc.h"
 
 namespace {
 using namespace OHOS::Media::Plugin;
@@ -219,7 +219,7 @@ Status SdlAudioSinkPlugin::GetParameter(Tag tag, ValueType& value)
             break;
         }
         default: {
-            MEDIA_LOG_W("receive one parameter with unconcern key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
+            MEDIA_LOG_W("receive one parameter with unconcern key: " PUBLIC_LOG_S, Tag2String(tag));
             break;
         }
     }
@@ -232,7 +232,7 @@ Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
     if (!value.SameTypeWith(typeid(typenames))) {                                                                      \
         return Status::ERROR_MISMATCHED_TYPE;                                                                          \
     }
-    MEDIA_LOG_I("SetParameter entered, key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
+    MEDIA_LOG_I("SetParameter entered, key: " PUBLIC_LOG_S, Tag2String(tag));
     switch (tag) {
         case Tag::AUDIO_OUTPUT_CHANNELS: {
             RETURN_ERROR_IF_CHECK_ERROR(uint32_t);
@@ -271,7 +271,7 @@ Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
             bitsPerSample_ = Plugin::AnyCast<uint32_t>(value);
             break;
         default: {
-            MEDIA_LOG_W("receive one parameter with unconcern key: " PUBLIC_LOG_S, Pipeline::Tag2String(tag));
+            MEDIA_LOG_W("receive one parameter with unconcern key: " PUBLIC_LOG_S, Tag2String(tag));
             break;
         }
     }

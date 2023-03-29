@@ -21,11 +21,11 @@
 #include <cstring>
 #include <map>
 #include <set>
+#include "ffmpeg_vid_enc_config.h"
+#include "plugin/common/plugin_attr_desc.h"
 #include "plugin/common/plugin_caps_builder.h"
 #include "plugin/common/plugin_time.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
-#include "ffmpeg_vid_enc_config.h"
-#include "pipeline/core/plugin_attr_desc.h"
 
 namespace {
 // register plugins
@@ -223,7 +223,7 @@ void VideoFfmpegEncoderPlugin::InitCodecContext()
     FindInParameterMapThenAssignLocked<uint32_t>(Tag::VIDEO_FRAME_RATE, frameRate_);
     FindInParameterMapThenAssignLocked<Plugin::VideoPixelFormat>(Tag::VIDEO_PIXEL_FORMAT, pixelFormat_);
     MEDIA_LOG_D("width: " PUBLIC_LOG_U32 ", height: " PUBLIC_LOG_U32 ", pixelFormat: " PUBLIC_LOG_S ", frameRate_: "
-                PUBLIC_LOG_U32, width_, height_, Pipeline::GetVideoPixelFormatNameStr(pixelFormat_), frameRate_);
+                PUBLIC_LOG_U32, width_, height_, GetVideoPixelFormatNameStr(pixelFormat_), frameRate_);
     ConfigVideoEncoder(*avCodecContext_, vencParams_);
 }
 

@@ -20,9 +20,9 @@
 #include <cstdint>
 #include <memory>
 
-#include "base.h"
-#include "common/media_source.h"
-#include "common/plugin_types.h"
+#include "plugin/common/media_source.h"
+#include "plugin/common/plugin_types.h"
+#include "plugin/core/base.h"
 
 namespace OHOS {
 namespace Media {

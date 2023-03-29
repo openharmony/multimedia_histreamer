@@ -16,8 +16,8 @@
 #define HST_LOG_TAG "StateMachine"
 
 #include "state_machine.h"
-#include "osal/utils/util.h"
-#include "utils/steady_clock.h"
+#include "foundation/osal/utils/util.h"
+#include "foundation/utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {

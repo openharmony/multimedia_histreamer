@@ -15,12 +15,12 @@
 
 #define HST_LOG_TAG "AudioDecoderFilter"
 
-#include "audio_decoder_filter.h"
-#include "factory/filter_factory.h"
-#include "osal/utils/util.h"
+#include "pipeline/filters/codec/audio_decoder/audio_decoder_filter.h"
+#include "foundation/osal/utils/util.h"
+#include "foundation/utils/dump_buffer.h"
+#include "foundation/utils/steady_clock.h"
+#include "pipeline/factory/filter_factory.h"
 #include "pipeline/filters/codec/codec_filter_factory.h"
-#include "utils/dump_buffer.h"
-#include "utils/steady_clock.h"
 
 namespace {
 constexpr uint32_t DEFAULT_IN_BUFFER_POOL_SIZE = 5;

@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
-#include "codec.h"
-
+#include "plugin/core/codec.h"
 #include <memory>
-#include <type_traits>
 #include "foundation/pre_defines.h"
-#include "interface/codec_plugin.h"
+#include "plugin/interface/codec_plugin.h"
 
 namespace OHOS {
 namespace Media {

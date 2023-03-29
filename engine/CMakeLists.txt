@@ -53,15 +53,9 @@ ENDIF (CMAKE_CL_64)
 # include directories
 include_directories(
         ${TOP_DIR}/engine
+        ${TOP_DIR}/engine/include
         ${TOP_DIR}/engine/scene/player
         ${TOP_DIR}/engine/scene/recorder
-        ${TOP_DIR}/engine/pipeline
-        ${TOP_DIR}/engine/pipeline/core
-        ${TOP_DIR}/engine/foundation
-        ${TOP_DIR}/engine/foundation/osal
-        ${TOP_DIR}/engine/foundation/utils
-        ${TOP_DIR}/engine/pipeline/filters
-        ${TOP_DIR}/engine/pipeline/filters/player
         ${TOP_DIR}/engine/plugin
 )
 

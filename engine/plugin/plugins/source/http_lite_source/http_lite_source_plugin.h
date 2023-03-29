@@ -15,10 +15,10 @@
 #ifndef HISTREAMER_HTTP_SOURCE_PLUGIN_H
 #define HISTREAMER_HTTP_SOURCE_PLUGIN_H
 
+#include "foundation/osal/thread/scoped_lock.h"
 #include "http_lite_manager.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/interface/source_plugin.h"
-#include "foundation/osal/thread/scoped_lock.h"
 
 namespace OHOS {
 namespace Media {

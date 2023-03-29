@@ -15,8 +15,8 @@
 
 #define HST_LOG_TAG "SteadyClock"
 
-#include "steady_clock.h"
 #include "foundation/log.h"
+#include "foundation/utils/steady_clock.h"
 
 namespace OHOS {
 namespace Media {

@@ -15,12 +15,12 @@
 
 #define HST_LOG_TAG "FilterBase"
 
-#include "filter_base.h"
+#include "pipeline/core/filter_base.h"
 #include <algorithm>
-#include "common/plugin_settings.h"
-#include "common/plugin_utils.h"
 #include "foundation/log.h"
-#include "plugin_attr_desc.h"
+#include "pipeline/filters/common/plugin_settings.h"
+#include "pipeline/filters/common/plugin_utils.h"
+#include "plugin/common/plugin_attr_desc.h"
 
 namespace OHOS {
 namespace Media {

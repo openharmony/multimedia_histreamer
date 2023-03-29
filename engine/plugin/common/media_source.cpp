@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "media_source.h"
+#include "plugin/common/media_source.h"
 #include <type_traits>
+
 namespace OHOS {
 namespace Media {
 namespace Plugin {

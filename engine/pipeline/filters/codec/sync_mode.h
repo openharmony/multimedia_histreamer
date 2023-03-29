@@ -16,7 +16,7 @@
 #ifndef HISTREAMER_PIPELINE_FILTER_SYNC_MODE_H
 #define HISTREAMER_PIPELINE_FILTER_SYNC_MODE_H
 
-#include "codec_mode.h"
+#include "pipeline/filters/codec/codec_mode.h"
 
 namespace OHOS {
 namespace Media {

@@ -17,11 +17,11 @@
 
 #define HST_LOG_TAG "VideoCaptureFilter"
 
-#include "video_capture_filter.h"
-#include "common/plugin_utils.h"
+#include "pipeline/filters/source/video_capture/video_capture_filter.h"
 #include "foundation/log.h"
-#include "factory/filter_factory.h"
-#include <plugin_attr_desc.h>
+#include "pipeline/factory/filter_factory.h"
+#include "pipeline/filters/common/plugin_utils.h"
+#include "plugin/common/plugin_attr_desc.h"
 
 namespace OHOS {
 namespace Media {
