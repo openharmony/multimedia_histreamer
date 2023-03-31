@@ -46,9 +46,9 @@ Status CodecPort::Config(TagMap& tagMap)
         tagMap[Tag::VIDEO_PIXEL_FORMAT]));
     portDef_.format.video.nFrameHeight = Plugin::AnyCast<uint32_t>(tagMap[Tag::VIDEO_HEIGHT]);
     portDef_.format.video.nFrameWidth = Plugin::AnyCast<uint32_t>(tagMap[Tag::VIDEO_WIDTH]);
-    portDef_.format.video.xFramerate = Plugin::AnyCast<uint32_t>(tagMap[Tag::VIDEO_FRAME_RATE])
-        << HDI_FRAME_RATE_MOVE;
+    portDef_.format.video.xFramerate = Plugin::AnyCast<uint32_t>(tagMap[Tag::VIDEO_FRAME_RATE]) << HDI_FRAME_RATE_MOVE;
     MEDIA_LOG_D("frame_rate: " PUBLIC_LOG_U32, portDef_.format.video.xFramerate);
+    portDef_.format.video.nBitrate = Plugin::AnyCast<int64_t>(tagMap[Tag::MEDIA_BITRATE]);
     ret = HdiSetParameter(codecComp_, OMX_IndexParamPortDefinition, portDef_);
     FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, Status::ERROR_INVALID_PARAMETER, "HdiSetParameter failed");
     return Status::OK;

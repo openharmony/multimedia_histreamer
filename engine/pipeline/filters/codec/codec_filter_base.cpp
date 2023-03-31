@@ -205,8 +205,6 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
             }
             atLeastOutCapMatched = true;
             thisOut->mime = outCap.mime;
-
-            // need to get the max buffer num from plugin capability when use hdi as codec plugin interfaces
             Plugin::TagMap proposeParams;
             if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_, proposeParams, downstreamParams)) {
                 negotiatedCap = candidate.second;
@@ -245,7 +243,8 @@ bool CodecFilterBase::Configure(const std::string &inPort, const std::shared_ptr
                          "can't configure codec plugin since meta is not compatible with negotiated caps");
     UpdateParams(upstreamMeta, thisMeta);
 
-    // HDI: must set width & height into hdi, hid use these params calc out buffer size & count then return to filter
+    // When use hdi as codec plugin interfaces, must set width & height into hdi,
+    // Hdi use these params to calc out buffer size & count then return to filter
     if (ConfigPluginWithMeta(*plugin_, *thisMeta) != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("set params into plugin failed");
         return false;

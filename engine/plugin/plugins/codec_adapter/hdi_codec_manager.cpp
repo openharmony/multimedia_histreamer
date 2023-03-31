@@ -75,6 +75,12 @@ Status HdiCodecManager::RegisterCodecPlugins(const std::shared_ptr<OHOS::Media::
     }
     InitCaps();
     for (auto codecCapability : codecCapabilitys_) {
+        if (codecCapability.pluginType != PluginType::VIDEO_DECODER &&
+            codecCapability.pluginType != PluginType::VIDEO_ENCODER) {
+            MEDIA_LOG_W("Plugin does not belong to video codec, pluginType: " PUBLIC_LOG_D32,
+                        codecCapability.pluginType);
+            continue;
+        }
         CodecPluginDef def;
         def.rank = 100; // 100 default rank
         def.codecMode = CodecMode::HARDWARE;
@@ -82,12 +88,14 @@ Status HdiCodecManager::RegisterCodecPlugins(const std::shared_ptr<OHOS::Media::
         def.name = packageName + "." + codecCapability.name;
         def.inCaps = codecCapability.inCaps;
         def.outCaps = codecCapability.outCaps;
-        def.creator = [] (const std::string& name) -> std::shared_ptr<CodecPlugin> {
-            return std::make_shared<HdiCodecAdapter>(name);
+        auto type = codecCapability.pluginType;
+        def.creator = [type] (const std::string& name) -> std::shared_ptr<CodecPlugin> {
+            return std::make_shared<HdiCodecAdapter>(name, type);
         };
         if (reg->AddPlugin(def) != Status::OK) {
             MEDIA_LOG_E("Add plugin " PUBLIC_LOG_S " failed", def.name.c_str());
         }
+        MEDIA_LOG_DD("pluginType: " PUBLIC_LOG_D32 ", pluginName: " PUBLIC_LOG_S, def.pluginType, def.name.c_str());
     }
     return Status::OK;
 }

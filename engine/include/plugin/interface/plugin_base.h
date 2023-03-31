@@ -205,6 +205,8 @@ struct PluginBase {
     /**
      * @brief Get the allocator specified by the plugin.
      * The allocator can allocate memory types that meet the plugin requirements.
+     * The filter first looks up the allocator from the negotiation result;
+     * If it does not exist, the return value here will be used.
      *
      * @return Obtains the allocator object or NULL if the plugin does not have requirements for memory.
      */
