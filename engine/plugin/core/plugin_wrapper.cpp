@@ -106,7 +106,7 @@ void ConvertToMediaInfoHelper(uint32_t pkgVersion, const MediaInfo& src, MediaIn
     for (size_t i = 0; i < streamSize; ++i) {
         for (auto const& meta : src.tracks[i]) {
             if (g_metaIdSet.count(meta.first)) {
-                dest.trackMeta[i].SetData(Tag(meta.first), meta.second);
+                dest.trackMeta[i].SetData(meta.first, meta.second);
             }
         }
     }

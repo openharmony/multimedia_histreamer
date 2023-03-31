@@ -58,7 +58,7 @@ ErrorCode AudioEncoderFilter::Start()
 ErrorCode AudioEncoderFilter::SetAudioEncoder(int32_t sourceId, Plugin::TagMap &encoderMeta)
 {
     std::string mime;
-    FALSE_RETURN_V_MSG_E(encoderMeta.GetData(Plugin::Tag::MIME, mime), ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
+    FALSE_RETURN_V_MSG_E(encoderMeta.Get<Plugin::Tag::MIME>(mime), ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
                          "encoder meta must contains mime");
     mime_ = mime;
     encoderMeta_ = std::move(encoderMeta);
@@ -127,11 +127,13 @@ uint32_t AudioEncoderFilter::CalculateBufferSize(Plugin::TagMap &meta)
     }
     auto samplesPerFrame = Plugin::AnyCast<uint32_t>(value);
     uint32_t channels;
-    if (meta.GetData(Plugin::Tag::AUDIO_CHANNELS, channels)) {
+    if (meta.Get<Plugin::Tag::AUDIO_CHANNELS>(channels)) {
+        MEDIA_LOG_E("Get AUDIO_CHANNELS fail");
         return 0;
     }
     Plugin::AudioSampleFormat format;
-    if (!meta.GetData<Plugin::AudioSampleFormat>(Plugin::Tag::AUDIO_SAMPLE_FORMAT, format)) {
+    if (!meta.Get<Plugin::Tag::AUDIO_SAMPLE_FORMAT>(format)) {
+        MEDIA_LOG_E("Get AUDIO_SAMPLE_FORMAT fail");
         return 0;
     }
     return GetBytesPerSample(format) * samplesPerFrame * channels;

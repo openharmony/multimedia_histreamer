@@ -33,6 +33,10 @@ namespace Plugin {
         inline typename std::enable_if<(condition), bool>::type  \
         Insert(ValueType value)                                  \
         {                                                        \
+            auto iter = map_.find(tag);                          \
+            if (iter != map_.end()) {                            \
+              return true;                                       \
+            }                                                    \
             map_.insert(std::make_pair(tag, value));             \
             return true;                                         \
         }                                                        \
@@ -53,6 +57,7 @@ namespace Plugin {
 
 
 using MapIt = std::map<Tag, Any>::const_iterator;
+
 class TagMap {
 public:
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
@@ -115,6 +120,11 @@ public:
         tag == Tag::MEDIA_LANGUAGE or
         tag == Tag::MEDIA_DESCRIPTION or
         tag == Tag::MEDIA_LYRICS, std::string);
+    TagMap& operator=(const TagMap& other)
+    {
+        map_ =other.map_;
+        return *this;
+    }
 
     ValueType& operator[](const Tag &tag)
     {
@@ -164,6 +174,16 @@ public:
         return true;
     }
 
+    bool GetData(Plugin::Tag id, Plugin::ValueType& value) const
+    {
+        auto ite = map_.find(id);
+        if (ite == map_.end()) {
+            return false;
+        }
+        value = ite->second;
+        return true;
+    }
+/*
     const ValueType* GetData(Tag id) const
     {
         auto ite = map_.find(id);
@@ -172,7 +192,7 @@ public:
         }
         return &(ite->second);
     }
-
+*/
     bool Remove(Plugin::Tag id)
     {
         auto ite = map_.find(id);
@@ -192,12 +212,6 @@ public:
         }
         return ret;
     }
-
-    void Update(TagMap& meta)
-    {
-        map_ = meta.map_;
-    }
-
 private:
     std::map<Tag, Any> map_;
 };

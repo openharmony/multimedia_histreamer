@@ -500,11 +500,12 @@ std::string Meta2String(Plugin::TagMap& meta)
             continue;
         }
 
-        auto tmp = meta.GetData(item);
+        Plugin::ValueType value;
+        auto tmp = meta.GetData(item,value);
         const auto& tuple = Plugin::g_tagInfoMap.at(static_cast<Tag>(item));
         if (tmp) {
             RETURN_IF_SNPRI_FAILED(g_metaStrnessMap.at(item)(buffer + pos, MAX_BUF_LEN - pos,
-                std::get<0>(tuple), std::get<2>(tuple), *tmp), ret, buffer); // secondary parameter
+                std::get<0>(tuple), std::get<2>(tuple), value), ret, buffer); // secondary parameter
             pos += ret;
             RETURN_IF_SNPRI_FAILED(snprintf_truncated_s(buffer + pos, MAX_BUF_LEN - pos, ", "), ret, buffer);
             pos += ret;

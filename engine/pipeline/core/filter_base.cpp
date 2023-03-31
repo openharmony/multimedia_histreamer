@@ -197,10 +197,10 @@ ErrorCode FilterBase::ConfigPluginWithMeta(Plugin::Base& plugin, Plugin::TagMap 
         if ((keyPair.second.second & PARAM_SET) == 0) {
             continue;
         }
-        auto outValPtr = meta.GetData(static_cast<Plugin::Tag>(keyPair.first));
-        if (outValPtr && keyPair.second.first(keyPair.first, *outValPtr)) {
-            if (plugin.SetParameter(keyPair.first, *outValPtr) != Plugin::Status::OK) {
-           // if (plugin.SetParameter(keyPair.first, tmp) != Plugin::Status::OK) {
+        Plugin::ValueType outValPtr;
+        auto ret = meta.GetData(static_cast<Plugin::Tag>(keyPair.first),outValPtr);
+        if (ret && keyPair.second.first(keyPair.first, outValPtr)) {
+            if (plugin.SetParameter(keyPair.first, outValPtr) != Plugin::Status::OK) {
                 MEDIA_LOG_W("set parameter " PUBLIC_LOG_S "(" PUBLIC_LOG_D32 ") on plugin " PUBLIC_LOG_S " failed",
                             Plugin::GetTagStrName(keyPair.first), keyPair.first, plugin.GetName().c_str());
             }

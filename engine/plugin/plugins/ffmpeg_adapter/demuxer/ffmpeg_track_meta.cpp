@@ -88,8 +88,8 @@ void ConvertCommonTrackToMetaInfo(const AVStream& avStream,
     if (!bitRate) {
         bitRate = avFormatContext->bit_rate;
     }
-    meta.Insert<Tag::MEDIA_BITRATE>(bitRate);
-    meta.Insert<Tag::BITS_PER_CODED_SAMPLE>(avCodecContext->bits_per_coded_sample);
+    FALSE_LOG(meta.Insert<Tag::MEDIA_BITRATE>(bitRate));
+    FALSE_LOG(meta.Insert<Tag::BITS_PER_CODED_SAMPLE>(avCodecContext->bits_per_coded_sample));
 }
 
 #ifdef VIDEO_SUPPORT

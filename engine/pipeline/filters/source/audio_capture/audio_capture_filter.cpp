@@ -79,35 +79,43 @@ ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin
     plugin_->SetCallback(this);
     pluginAllocator_ = plugin_->GetAllocator();
     uint32_t tmp = 0;
-    if (audioMeta->GetData(Tag::AUDIO_SAMPLE_RATE, tmp)) {
+    if (audioMeta->Get<Tag::AUDIO_SAMPLE_RATE>(tmp)) {
         MEDIA_LOG_I("configure plugin with sample rate " PUBLIC_LOG_U32, tmp);
         bufferCalibration_->SetParam(Tag::AUDIO_SAMPLE_RATE, tmp);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_RATE, tmp));
         if (err != ErrorCode::SUCCESS) {
             return err;
         }
+    } else {
+        MEDIA_LOG_I("get AUDIO_SAMPLE_RATE fail ");
     }
-    if (audioMeta->GetData(Tag::AUDIO_CHANNELS, tmp)) {
+    if (audioMeta->Get<Tag::AUDIO_CHANNELS>(tmp)) {
         MEDIA_LOG_I("configure plugin with channel " PUBLIC_LOG_U32, tmp);
         bufferCalibration_->SetParam(Tag::AUDIO_CHANNELS, tmp);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_CHANNELS, channelNum_));
         if (err != ErrorCode::SUCCESS) {
             return err;
         }
+    } else {
+        MEDIA_LOG_I("get AUDIO_CHANNELS fail ");
     }
     int64_t bitRate = 0;
-    if (audioMeta->GetData(Tag ::MEDIA_BITRATE, bitRate)) {
+    if (audioMeta->Get<Tag::MEDIA_BITRATE>(bitRate)) {
         MEDIA_LOG_I("configure plugin with bitrate " PUBLIC_LOG_D64, bitRate);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::MEDIA_BITRATE, bitRate));
         if (err != ErrorCode::SUCCESS) {
             return err;
         }
+    } else {
+        MEDIA_LOG_I("get MEDIA_BITRATE fail ");
     }
     Plugin::AudioSampleFormat sampleFormat = Plugin::AudioSampleFormat::S16;
-    if (audioMeta->GetData<Plugin::AudioSampleFormat>(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat)) {
+    if (audioMeta->Get<Tag::AUDIO_SAMPLE_FORMAT>(sampleFormat)) {
         bufferCalibration_->SetParam(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat);
         MEDIA_LOG_I("configure plugin with sampleFormat " PUBLIC_LOG_S, Plugin::GetAudSampleFmtNameStr(sampleFormat));
         return TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat));
+    } else {
+        MEDIA_LOG_I("get AUDIO_SAMPLE_FORMAT fail ");
     }
     return ErrorCode::SUCCESS;
 }
@@ -195,7 +203,7 @@ void AudioCaptureFilter::PickPreferSampleFmt(const std::shared_ptr<Plugin::TagMa
         });
     }
     if (pickPreferFmt) {
-        meta->SetData(Tag::AUDIO_SAMPLE_FORMAT, preferFmt);
+        FALSE_LOG(meta->Insert<Tag::AUDIO_SAMPLE_FORMAT>(preferFmt));
     }
 }
 

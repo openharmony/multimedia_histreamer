@@ -30,22 +30,22 @@ TEST(TestMeta, set_then_get_uint32)
 {
     TagMap meta;
     int32_t channels = 64;
-    meta.SetData(Tag::AUDIO_CHANNELS, channels);
+    meta.Insert<Tag::AUDIO_CHANNELS>(channels);
     int32_t outChannels = 0;
     ASSERT_TRUE(meta.GetData(Tag::AUDIO_CHANNELS, outChannels));
     ASSERT_EQ(channels, outChannels);
 
     uint32_t canNotGet = 0;
-    ASSERT_FALSE(meta.GetData(Tag::AUDIO_CHANNELS, canNotGet));
+    ASSERT_FALSE(meta.Get<Tag::AUDIO_CHANNELS>(canNotGet));
 }
 
 TEST(TestMeta, set_then_get_cstring)
 {
     TagMap meta;
     std::string artist("abcd");
-    meta.SetData(Tag::MEDIA_TITLE, artist);
+    meta.Insert<Tag::MEDIA_TITLE>(artist);
     std::string outArtist;
-    ASSERT_TRUE(meta.GetData(Tag::MEDIA_TITLE, outArtist));
+    ASSERT_TRUE(meta.Get<Tag::MEDIA_TITLE>(outArtist));
     ASSERT_STREQ(artist.c_str(), outArtist.c_str());
 }
 
@@ -63,16 +63,16 @@ TEST(TestMeta, fail_to_get_unexisted_data)
 {
     TagMap meta;
     int32_t channels = 64;
-    meta.SetData(Tag::AUDIO_CHANNELS, channels);
+    meta.Insert<Tag::AUDIO_CHANNELS>(channels);
     int64_t bitRate = 1876411;
-    ASSERT_FALSE(meta.GetData(Tag::MEDIA_BITRATE, bitRate));
+    ASSERT_FALSE(meta.Get<Tag::MEDIA_BITRATE>(bitRate));
 }
 
 TEST(TestMeta, remove_data)
 {
     TagMap meta;
     int32_t channels = 64;
-    meta.SetData(Tag::AUDIO_CHANNELS, channels);
+    meta.Insert<Tag::AUDIO_CHANNELS>(channels);
     ASSERT_TRUE(meta.Remove(Tag::AUDIO_CHANNELS));
     ASSERT_FALSE(meta.Remove(Tag::MEDIA_BITRATE));
 }
@@ -83,14 +83,14 @@ TEST(TestMeta, clear_data)
     std::string title("title");
     std::string album("album");
     int32_t channels = 64;
-    meta.SetData(Tag::MEDIA_TITLE, title);
-    meta.SetData(Tag::MEDIA_ALBUM, album);
-    meta.SetData(Tag::AUDIO_CHANNELS, channels);
+    meta.Insert<Tag::MEDIA_TITLE>(title);
+    meta.Insert<Tag::MEDIA_ALBUM>(album);
+    meta.Insert<Tag::AUDIO_CHANNELS>(channels);
     meta.Clear();
     std::string out;
-    ASSERT_FALSE(meta.GetData(Tag::MEDIA_TITLE, out));
+    ASSERT_FALSE(meta.Get<Tag::MEDIA_TITLE>(out));
     ASSERT_TRUE(out.empty());
-    ASSERT_FALSE(meta.GetData(Tag::MEDIA_ALBUM, out));
+    ASSERT_FALSE(meta.Get<Tag::MEDIA_ALBUM>( out));
     ASSERT_TRUE(out.empty());
     int32_t oChannels = 0;
     ASSERT_FALSE(meta.GetData(Tag::AUDIO_CHANNELS, oChannels));
@@ -103,19 +103,19 @@ TEST(TestMeta, update_meta)
     std::string title("title");
     std::string album("album");
     int32_t channels = 64;
-    meta.SetData(Tag::MEDIA_TITLE, title);
-    meta.SetData(Tag::MEDIA_ALBUM, album);
-    meta.SetData(Tag::AUDIO_CHANNELS, channels);
+    meta.Insert<Tag::MEDIA_TITLE>(title);
+    meta.Insert<Tag::MEDIA_ALBUM>(album);
+    meta.Insert<Tag::AUDIO_CHANNELS>(channels);
 
     TagMap meta2;
     int32_t channels2 = 32;
-    meta.SetData(Tag::AUDIO_CHANNELS, channels2);
+    meta.Insert<Tag::AUDIO_CHANNELS>(channels2);
 
-    meta.Update(meta2);
+    meta = meta2;
     std::string out;
-    ASSERT_TRUE(meta.GetData(Tag::MEDIA_TITLE, out));
+    ASSERT_TRUE(meta.Get<Tag::MEDIA_TITLE>(out));
     ASSERT_STREQ("title", out.c_str());
-    ASSERT_TRUE(meta.GetData(Tag::MEDIA_ALBUM, out));
+    ASSERT_TRUE(meta.Get<Tag::MEDIA_ALBUM>(out));
     ASSERT_STREQ("album", out.c_str());
     int32_t oChannel = 0;
     ASSERT_TRUE(meta.GetData(Tag::AUDIO_CHANNELS, oChannel));

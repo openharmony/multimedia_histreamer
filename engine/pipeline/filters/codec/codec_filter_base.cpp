@@ -242,7 +242,8 @@ bool CodecFilterBase::Configure(const std::string &inPort, Plugin::TagMap &upstr
     FALSE_RETURN_V_MSG_E(MergeMetaWithCapability(upstreamMeta, capNegWithDownstream_, thisMeta), false,
                          "can't configure codec plugin since meta is not compatible with negotiated caps");
     UpdateParams(upstreamMeta, thisMeta);
-    // HDI: must set width & height into hdi, hid use these params calc out buffer size & count then return to filter
+    // When use hdi as codec plugin interfaces, must set width & height into hdi,
+    // Hdi use these params to calc out buffer size & count then return to filter
     if (ConfigPluginWithMeta(*plugin_, thisMeta) != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("set params into plugin failed");
         return false;

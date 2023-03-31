@@ -217,7 +217,7 @@ bool VideoSinkFilter::Configure(const std::string &inPort, Plugin::TagMap &upstr
         OnEvent(Event{name_, EventType::EVENT_ERROR, {err}});
         return false;
     }
-    if (!upstreamMeta.GetData(Plugin::Tag::VIDEO_FRAME_RATE, frameRate_)) {
+    if (!upstreamMeta.Get<Plugin::Tag::VIDEO_FRAME_RATE>(frameRate_)) {
         MEDIA_LOG_I("frame rate is not found");
     }
     if (frameRate_ == 0) {
@@ -237,19 +237,25 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(Plugin::TagMap& meta)
 {
     auto err = ErrorCode::SUCCESS;
     uint32_t width;
-    if (meta.GetData(Plugin::Tag::VIDEO_WIDTH, width)) {
+    if (meta.Get<Plugin::Tag::VIDEO_WIDTH>(width)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_WIDTH, width));
         FAIL_RETURN_MSG(err, "Set plugin width fail");
+    } else {
+        MEDIA_LOG_I("get VIDEO_WIDTH fail");
     }
     uint32_t height;
-    if (meta.GetData(Plugin::Tag::VIDEO_HEIGHT, height)) {
+    if (meta.Get<Plugin::Tag::VIDEO_HEIGHT>(height)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_HEIGHT, height));
         FAIL_RETURN_MSG(err, "Set plugin height fail");
+    } else {
+        MEDIA_LOG_I("get VIDEO_HEIGHT fail");
     }
     Plugin::VideoPixelFormat pixelFormat;
-    if (meta.GetData<Plugin::VideoPixelFormat>(Plugin::Tag::VIDEO_PIXEL_FORMAT, pixelFormat)) {
+    if (meta.Get<Plugin::Tag::VIDEO_PIXEL_FORMAT>(pixelFormat)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_PIXEL_FORMAT, pixelFormat));
         FAIL_RETURN_MSG(err, "Set plugin pixel format fail");
+    } else {
+        MEDIA_LOG_I("get VIDEO_PIXEL_FORMAT fail");
     }
     MEDIA_LOG_D("width: " PUBLIC_LOG_U32 ", height: " PUBLIC_LOG_U32 ", pixelFormat: " PUBLIC_LOG_U32,
                 width, height, pixelFormat);

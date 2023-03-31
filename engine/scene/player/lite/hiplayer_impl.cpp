@@ -427,16 +427,20 @@ ErrorCode HiPlayerImpl::DoOnReady()
     sourceMeta_ = tmpMeta;
     int64_t duration = 0;
     bool found = false;
-    int64_t tmp;
-    if (tmpMeta->GetData(Media::Plugin::Tag::MEDIA_DURATION, tmp)) {
+    if (tmpMeta->Get<Media::Plugin::Tag::MEDIA_DURATION>(duration)) {
         found = true;
+    } else {
+        MEDIA_LOG_I("Get MEDIA_DURATION fail");
     }
     streamMeta_.clear();
+    int64_t tmp = 0;
     for (auto& streamMeta : demuxer_->GetStreamMetaInfo()) {
         streamMeta_.push_back(streamMeta);
-        if (streamMeta->GetData(Media::Plugin::Tag::MEDIA_DURATION, tmp)) {
+        if (streamMeta->Get<Media::Plugin::Tag::MEDIA_DURATION>(tmp)) {
             duration = std::max(duration, tmp);
             found = true;
+        } else {
+            MEDIA_LOG_I("Get MEDIA_DURATION fail");
         }
     }
     if (found) {

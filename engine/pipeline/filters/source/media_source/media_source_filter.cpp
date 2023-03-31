@@ -24,7 +24,6 @@
 #include "pipeline/factory/filter_factory.h"
 #include "pipeline/filters/common/plugin_utils.h"
 
-
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
@@ -274,14 +273,17 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
     Plugin::TagMap meta;
     Plugin::TagMap upstreamParams;
     Plugin::TagMap downstreamParams;
-    meta.SetData(Media::Plugin::Tag::MEDIA_FILE_URI,source->GetSourceUri());
+    meta.Insert<Media::Plugin::Tag::MEDIA_FILE_URI>(source->GetSourceUri());
     Seekable seekable = plugin_->GetSeekable();
     FALSE_RETURN_V_MSG_E(seekable != Plugin::Seekable::INVALID, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
                          "media source Seekable must be SEEKABLE or UNSEEKABLE !");
-    meta.SetData(Media::Plugin::Tag::MEDIA_SEEKABLE, static_cast<int32_t>(seekable));
+    FALSE_LOG_MSG(meta.Insert<Media::Plugin::Tag::MEDIA_SEEKABLE>(seekable),
+                  "set seekable fail");
     size_t fileSize = 0;
     if ((plugin_->GetSize(fileSize) == Status::OK) && (fileSize != 0)) {
-        meta.SetData(Media::Plugin::Tag::MEDIA_FILE_SIZE, fileSize);
+        MEDIA_LOG_I("Negotiate file size" PUBLIC_LOG_U64,static_cast<uint64_t>(fileSize));
+        FALSE_LOG_MSG(meta.Insert<Media::Plugin::Tag::MEDIA_FILE_SIZE>(static_cast<uint64_t>(fileSize)),
+                      "insert media file size fail");
     }
     Capability peerCap;
     auto tmpCap = MetaToCapability(meta);

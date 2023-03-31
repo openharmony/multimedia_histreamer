@@ -148,6 +148,7 @@ ErrorCode VideoEncoderFilter::SetVideoEncoder(int32_t sourceId,Plugin::TagMap &e
                          "encoder meta must contains mime");
     vencFormat_.mime = mime;
     codecMeta_ = std::move(encoderMeta);
+    //codecMeta_ = std::shared_ptr<Plugin::TagMap>(&encoderMeta);
     return ErrorCode::SUCCESS;
 }
 
@@ -305,29 +306,29 @@ uint32_t VideoEncoderFilter::CalculateBufferSize(Plugin::TagMap& meta)
 
 ErrorCode VideoEncoderFilter::SetVideoEncoderFormat(Plugin::TagMap &meta)
 {
-    if (!meta.GetData<Plugin::VideoPixelFormat>(Plugin::Tag::VIDEO_PIXEL_FORMAT, vencFormat_.format)) {
+    if (!meta.Get<Plugin::Tag::VIDEO_PIXEL_FORMAT>(vencFormat_.format)) {
         MEDIA_LOG_E("Get video pixel format fail");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    if (!meta.GetData(Plugin::Tag::VIDEO_WIDTH, vencFormat_.width)) {
+    if (!meta.Get<Plugin::Tag::VIDEO_WIDTH>(vencFormat_.width)) {
         MEDIA_LOG_E("Get video width fail");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    if (!meta.GetData(Plugin::Tag::VIDEO_HEIGHT, vencFormat_.height)) {
+    if (!meta.Get<Plugin::Tag::VIDEO_HEIGHT>(vencFormat_.height)) {
         MEDIA_LOG_E("Get video width height");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    if (!meta.GetData(Plugin::Tag::MEDIA_BITRATE, vencFormat_.bitRate)) {
+    if (!meta.Get<Plugin::Tag::MEDIA_BITRATE>(vencFormat_.bitRate)) {
         MEDIA_LOG_D("Do not have codec bit rate");
     }
-    if (!meta.GetData(Plugin::Tag::VIDEO_FRAME_RATE, vencFormat_.frameRate)) {
+    if (!meta.Get<Plugin::Tag::VIDEO_FRAME_RATE>(vencFormat_.frameRate)) {
         MEDIA_LOG_D("Do not have codec frame rate");
     }
-    if (!meta.GetData(Plugin::Tag::MIME, vencFormat_.mime)) {
+    if (!meta.Get<Plugin::Tag::MIME>(vencFormat_.mime)) {
         MEDIA_LOG_D("Do not have codec mime");
     }
     // Optional: codec extra data
-    if (!meta.GetData<std::vector<uint8_t>>(Plugin::Tag::MEDIA_CODEC_CONFIG, vencFormat_.codecConfig)) {
+    if (!meta.Get<Plugin::Tag::MEDIA_CODEC_CONFIG>(vencFormat_.codecConfig)) {
         MEDIA_LOG_D("Do not have codec extra data");
     }
     return ErrorCode::SUCCESS;
@@ -351,15 +352,19 @@ ErrorCode VideoEncoderFilter::ConfigurePluginParams()
         FALSE_RETURN_V_MSG_W(ret == ErrorCode::SUCCESS, ErrorCode::ERROR_UNKNOWN,
                              "Set framerate to plugin fail");
     }
-    if (codecMeta_.GetData<Plugin::VideoH264Profile>(Plugin::Tag::VIDEO_H264_PROFILE, vencFormat_.profile)) {
+    if (codecMeta_.Get<Plugin::Tag::VIDEO_H264_PROFILE>(vencFormat_.profile)) {
         auto ret = SetPluginParameterLocked(Tag::VIDEO_H264_PROFILE, vencFormat_.profile);
         FALSE_RETURN_V_MSG_W(ret == ErrorCode::SUCCESS, ErrorCode::ERROR_UNKNOWN,
                              "Set profile to plugin fail");
+    } else {
+        MEDIA_LOG_I("get VIDEO_H264_PROFILE, fail: ");
     }
-    if (codecMeta_.GetData(Plugin::Tag::VIDEO_H264_LEVEL, vencFormat_.level)) {
+    if (codecMeta_.Get<Plugin::Tag::VIDEO_H264_LEVEL>(vencFormat_.level)) {
         auto ret = SetPluginParameterLocked(Tag::VIDEO_H264_LEVEL, vencFormat_.level);
         FALSE_RETURN_V_MSG_W(ret == ErrorCode::SUCCESS, ErrorCode::ERROR_UNKNOWN,
                              "Set level to plugin fail");
+    } else {
+        MEDIA_LOG_I("get VIDEO_H264_LEVEL, fail: ");
     }
     // Optional: codec extra data
     if (vencFormat_.codecConfig.size() > 0) {
