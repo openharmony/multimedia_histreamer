@@ -16,10 +16,19 @@
 #define HST_LOG_TAG "ConditionVariable"
 
 #include "foundation/osal/thread/condition_variable.h"
+#include <ratio>
 #include "foundation/log.h"
 
 namespace {
-constexpr int32_t TIME_SCALE = 1000;
+inline long long TmToNs(struct timespec tm)
+{
+    return tm.tv_sec * std::giga::num + tm.tv_nsec;
+}
+
+inline struct timespec NsToTm(long long ns)
+{
+    return {ns / std::giga::num, static_cast<long>(ns % std::giga::num)};
+}
 }
 
 namespace OHOS {
@@ -84,11 +93,7 @@ bool ConditionVariable::WaitFor(ScopedLock& lock, int timeoutMs)
 #else
     clock_gettime(CLOCK_MONOTONIC, &timeout);
 #endif
-    timeout.tv_sec += timeoutMs / TIME_SCALE;
-    uint64_t us = timeout.tv_nsec / TIME_SCALE + TIME_SCALE * (timeoutMs % TIME_SCALE);
-    timeout.tv_sec += us / (TIME_SCALE * TIME_SCALE);
-    us = us % (TIME_SCALE * TIME_SCALE);
-    timeout.tv_nsec = us * TIME_SCALE;
+    timeout = NsToTm(TmToNs(timeout) + timeoutMs * std::mega::num);
     return pthread_cond_timedwait(&cond_, &(lock.mutex_->nativeHandle_),
         &timeout) == 0;
 }
