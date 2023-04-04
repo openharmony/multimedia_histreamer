@@ -89,8 +89,9 @@ Status HdiCodecManager::RegisterCodecPlugins(const std::shared_ptr<OHOS::Media::
         def.inCaps = codecCapability.inCaps;
         def.outCaps = codecCapability.outCaps;
         auto type = codecCapability.pluginType;
-        def.creator = [type] (const std::string& name) -> std::shared_ptr<CodecPlugin> {
-            return std::make_shared<HdiCodecAdapter>(name, type);
+        auto pluginMime = codecCapability.pluginMime;
+        def.creator = [type, pluginMime] (const std::string& name) -> std::shared_ptr<CodecPlugin> {
+            return std::make_shared<HdiCodecAdapter>(name, type, pluginMime);
         };
         if (reg->AddPlugin(def) != Status::OK) {
             MEDIA_LOG_E("Add plugin " PUBLIC_LOG_S " failed", def.name.c_str());
@@ -122,24 +123,31 @@ void HdiCodecManager::Reset()
 void HdiCodecManager::AddHdiCap(const CodecCompCapability& hdiCap)
 {
     MEDIA_LOG_I("AddHdiCap Start");
-    CodecCapability codecCapability;
-    CapabilityBuilder incapBuilder;
-    CapabilityBuilder outcapBuilder;
-    auto mime = GetCodecMime(hdiCap.role);
-    incapBuilder.SetMime(mime);
     auto pluginType = GetCodecType(hdiCap.type);
-    if (pluginType == PluginType::VIDEO_DECODER) {
-        if (mime == MEDIA_MIME_VIDEO_H264 || mime == MEDIA_MIME_VIDEO_H265) {
-            incapBuilder.SetVideoBitStreamFormatList({VideoBitStreamFormat::ANNEXB});
+    if (pluginType == PluginType::VIDEO_DECODER || pluginType == PluginType::VIDEO_ENCODER) {
+        CodecCapability codecCapability;
+        CapabilityBuilder incapBuilder;
+        CapabilityBuilder outcapBuilder;
+        auto mime = GetCodecMime(hdiCap.role);
+        if (pluginType == PluginType::VIDEO_DECODER) {
+            incapBuilder.SetMime(mime);
+            if (mime == MEDIA_MIME_VIDEO_H264 || mime == MEDIA_MIME_VIDEO_H265) {
+                incapBuilder.SetVideoBitStreamFormatList({VideoBitStreamFormat::ANNEXB});
+            }
+            outcapBuilder.SetMime(MEDIA_MIME_VIDEO_RAW);
+            outcapBuilder.SetVideoPixelFormatList(GetCodecFormats(hdiCap.port.video));
+        } else {
+            incapBuilder.SetMime(MEDIA_MIME_VIDEO_RAW);
+            incapBuilder.SetVideoPixelFormatList(GetCodecFormats(hdiCap.port.video));
+            outcapBuilder.SetMime(mime);
         }
-        outcapBuilder.SetMime(MEDIA_MIME_VIDEO_RAW);
+        codecCapability.inCaps.push_back(incapBuilder.Build());
+        codecCapability.outCaps.push_back(outcapBuilder.Build());
+        codecCapability.pluginType = pluginType;
+        codecCapability.pluginMime = mime;
+        codecCapability.name = hdiCap.compName;
+        codecCapabilitys_.push_back(codecCapability);
     }
-    outcapBuilder.SetVideoPixelFormatList(GetCodecFormats(hdiCap.port.video));
-    codecCapability.inCaps.push_back(incapBuilder.Build());
-    codecCapability.outCaps.push_back(outcapBuilder.Build());
-    codecCapability.pluginType = pluginType;
-    codecCapability.name = hdiCap.compName;
-    codecCapabilitys_.push_back(codecCapability);
 }
 
 void HdiCodecManager::InitCaps()

@@ -32,7 +32,7 @@ namespace Plugin {
 namespace CodecAdapter {
 class HdiCodecAdapter : public CodecPlugin {
 public:
-    HdiCodecAdapter(std::string componentName, PluginType pluginType);
+    HdiCodecAdapter(std::string componentName, PluginType pluginType, std::string pluginMime);
     ~HdiCodecAdapter() override;
     Status Init() override;
     Status Deinit() override;
@@ -76,7 +76,7 @@ private:
     std::string componentName_ {};
     uint32_t componentId_;
     PluginType pluginType_{};
-
+    std::string pluginMime_{};
     std::list<std::shared_ptr<Buffer>> inBufQue_ {};
     OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufQue_;
 

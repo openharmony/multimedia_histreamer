@@ -37,7 +37,6 @@ uint32_t Translate2omxFlagSet(uint64_t pluginFlags);
 
 uint64_t Translate2PluginFlagSet(uint32_t omxBufFlag);
 std::string OmxStateToString(OMX_STATETYPE state);
-std::string ComponentNameToMime(const std::string& componentName);
 
 OMX_VIDEO_CODINGTYPE CodingTypeHstToHdi(const std::string& format);
 OMX_COLOR_FORMATTYPE FormatHstToOmx(const VideoPixelFormat format);
