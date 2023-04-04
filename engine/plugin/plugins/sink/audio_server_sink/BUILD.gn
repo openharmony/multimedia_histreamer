@@ -46,7 +46,7 @@ if (!hst_is_lite_sys) {
       debug = false
     }
     deps = [ ":audio_server_sink" ]
-    external_deps = [ "multimedia_audio_framework:audio_renderer" ]
+    external_deps = [ "audio_framework:audio_renderer" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "multimedia_histreamer"
