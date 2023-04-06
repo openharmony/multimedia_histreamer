@@ -275,7 +275,7 @@ bool DDCapabilityCheck(const Plugin::DiscreteCapability<T>& v1, const Plugin::Di
 
 void LogOutIncorrectType(CapabilityID key, uint8_t flags)
 {
-    if (HasTagInfo(static_cast<Tag>(key))) {
+    if (Plugin::HasTagInfo(static_cast<Tag>(key))) {
         const auto& tuple = Plugin::g_tagInfoMap.at(static_cast<Tag>(key));
         const auto& typeName = std::get<2>(tuple); // secondary
         MEDIA_LOG_E("type of " PUBLIC_LOG_S " should be"
@@ -375,7 +375,7 @@ bool MergeCapabilityKeys(const Capability& originCap, const Capability& otherCap
         // if key is in otherCap, calculate the intersections
         if (g_capabilityValueCheckMap.count(pairKey.first) == 0) {
             MEDIA_LOG_W("capability " PUBLIC_LOG_S " cannot be applied, may be update the check map?",
-                        Tag2String(static_cast<Plugin::Tag>(pairKey.first)));
+                        Plugin::Tag2String(static_cast<Plugin::Tag>(pairKey.first)));
             continue;
         }
         Plugin::ValueType tmp;
@@ -385,7 +385,7 @@ bool MergeCapabilityKeys(const Capability& originCap, const Capability& otherCap
             //  if no intersections return false
             resCap.keys.clear();
             MEDIA_LOG_W("No intersections, originCap.mime: " PUBLIC_LOG_S ", tag: " PUBLIC_LOG_S,
-                        originCap.mime.c_str(), Tag2String(static_cast<Plugin::Tag>(pairKey.first)));
+                        originCap.mime.c_str(), Plugin::Tag2String(static_cast<Plugin::Tag>(pairKey.first)));
             return false;
         }
     }

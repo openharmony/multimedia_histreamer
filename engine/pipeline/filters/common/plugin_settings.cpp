@@ -28,7 +28,7 @@ namespace Pipeline {
 bool CommonParameterChecker (Plugin::Tag tag, const Plugin::ValueType& val)
 {
     // return true if not in tag in case of specially key used by plugin
-    FALSE_RETURN_V_MSG_E(HasTagInfo(tag), true,
+    FALSE_RETURN_V_MSG_E(Plugin::HasTagInfo(tag), true,
                        PUBLIC_LOG_D32 "is not found in map, may be update it?", tag);
     const auto& tuple = Plugin::g_tagInfoMap.at(tag);
     return std::get<1>(tuple).SameTypeWith(val);

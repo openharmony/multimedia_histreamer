@@ -290,13 +290,13 @@ namespace Pipeline {
 template<typename T>
 bool AssignParameterIfMatch(Tag tag, T& ret, const Plugin::ValueType& val)
 {
-    if (HasTagInfo(tag)) {
-        if (val.SameTypeWith(*GetTagDefValue(tag)) && val.SameTypeWith(typeid(T))) {
+    if (Plugin::HasTagInfo(tag)) {
+        if (val.SameTypeWith(*Plugin::GetTagDefValue(tag)) && val.SameTypeWith(typeid(T))) {
             ret = Plugin::AnyCast<T>(val);
             return true;
         } else {
             MEDIA_LOG_I("type of " PUBLIC_LOG_S " mismatch, should be " PUBLIC_LOG_S,
-                        GetTagStrName(tag), GetTagTypeStrName(tag));
+                        Plugin::GetTagStrName(tag), Plugin::GetTagTypeStrName(tag));
         }
     } else {
         MEDIA_LOG_I("tag " PUBLIC_LOG_D32 " is not in map, may be update it?", tag);
@@ -460,7 +460,7 @@ std::string Capability2String(const Capability& capability)
             needEtc = true;
             break;
         }
-        if (capStrnessMap.count(cap.first) == 0 || !HasTagInfo(static_cast<Tag>(cap.first))) {
+        if (capStrnessMap.count(cap.first) == 0 || !Plugin::HasTagInfo(static_cast<Tag>(cap.first))) {
             MEDIA_LOG_W(PUBLIC_LOG_D32 " is not in map, may be new key which is not contained?", cap.first);
             continue;
         }
@@ -495,7 +495,7 @@ std::string Meta2String(const Plugin::Meta& meta)
             needEtc = true;
             break;
         }
-        if (!HasTagInfo(static_cast<Tag>(item)) || g_metaStrnessMap.count(item) == 0) {
+        if (!Plugin::HasTagInfo(static_cast<Tag>(item)) || g_metaStrnessMap.count(item) == 0) {
             MEDIA_LOG_W("meta id " PUBLIC_LOG_D32 "is not is map, may be update the info map?", item);
             continue;
         }

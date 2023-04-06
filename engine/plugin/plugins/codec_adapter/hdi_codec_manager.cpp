@@ -129,6 +129,9 @@ void HdiCodecManager::AddHdiCap(const CodecCompCapability& hdiCap)
         CapabilityBuilder incapBuilder;
         CapabilityBuilder outcapBuilder;
         auto mime = GetCodecMime(hdiCap.role);
+        if (mime == "video/unknown") {
+            return;
+        }
         if (pluginType == PluginType::VIDEO_DECODER) {
             incapBuilder.SetMime(mime);
             if (mime == MEDIA_MIME_VIDEO_H264 || mime == MEDIA_MIME_VIDEO_H265) {
@@ -179,6 +182,9 @@ std::vector<VideoPixelFormat> HdiCodecManager::GetCodecFormats(const CodecVideoP
                 break;
             case PIXEL_FMT_RGBA_8888:
                 formats.push_back(VideoPixelFormat::RGBA);
+                break;
+            case PIXEL_FMT_BGRA_8888:
+                formats.push_back(VideoPixelFormat::BGRA);
                 break;
             default:
                 MEDIA_LOG_W("Unknown Format" PUBLIC_LOG_D32, port.supportPixFmts[index]);

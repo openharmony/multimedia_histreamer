@@ -201,14 +201,14 @@ ErrorCode FilterBase::ConfigPluginWithMeta(Plugin::Base& plugin, const Plugin::M
         if (outValPtr && keyPair.second.first(keyPair.first, *outValPtr)) {
             if (plugin.SetParameter(keyPair.first, *outValPtr) != Plugin::Status::OK) {
                 MEDIA_LOG_W("set parameter " PUBLIC_LOG_S "(" PUBLIC_LOG_D32 ") on plugin " PUBLIC_LOG_S " failed",
-                            GetTagStrName(keyPair.first), keyPair.first, plugin.GetName().c_str());
+                            Plugin::GetTagStrName(keyPair.first), keyPair.first, plugin.GetName().c_str());
             }
         } else {
-            if (!HasTagInfo(keyPair.first)) {
+            if (!Plugin::HasTagInfo(keyPair.first)) {
                 MEDIA_LOG_W("tag " PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
             } else {
                 MEDIA_LOG_W("parameter " PUBLIC_LOG_S " in meta is not found or type mismatch",
-                            GetTagStrName(keyPair.first));
+                            Plugin::GetTagStrName(keyPair.first));
             }
         }
     }

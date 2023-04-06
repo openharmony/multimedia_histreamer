@@ -80,20 +80,20 @@ ErrorCode CodecFilterBase::UpdateMetaFromPlugin(Plugin::Meta& meta)
         Plugin::ValueType tmpVal;
         auto ret = TranslatePluginStatus(plugin_->GetParameter(keyPair.first, tmpVal));
         if (ret != ErrorCode::SUCCESS) {
-            if (HasTagInfo(keyPair.first)) {
+            if (Plugin::HasTagInfo(keyPair.first)) {
                 MEDIA_LOG_I("GetParameter " PUBLIC_LOG_S " from plugin " PUBLIC_LOG_S "failed with code "
-                PUBLIC_LOG_D32, GetTagStrName(keyPair.first), pluginInfo_->name.c_str(), ret);
+                    PUBLIC_LOG_D32, Plugin::GetTagStrName(keyPair.first), pluginInfo_->name.c_str(), ret);
             } else {
                 MEDIA_LOG_I("Tag " PUBLIC_LOG_D32 " is not is map, may be update it?", keyPair.first);
                 MEDIA_LOG_I("GetParameter " PUBLIC_LOG_D32 " from plugin " PUBLIC_LOG_S " failed with code "
-                PUBLIC_LOG_D32, keyPair.first, pluginInfo_->name.c_str(), ret);
+                    PUBLIC_LOG_D32, keyPair.first, pluginInfo_->name.c_str(), ret);
             }
             continue;
         }
         if (!keyPair.second.first(keyPair.first, tmpVal)) {
-            if (HasTagInfo(keyPair.first)) {
+            if (Plugin::HasTagInfo(keyPair.first)) {
                 MEDIA_LOG_I("Type of Tag " PUBLIC_LOG_S " should be " PUBLIC_LOG_S,
-                            GetTagStrName(keyPair.first), std::get<2>(Plugin::g_tagInfoMap.at(keyPair.first)));
+                    Plugin::GetTagStrName(keyPair.first), std::get<2>(Plugin::g_tagInfoMap.at(keyPair.first)));
             } else {
                 MEDIA_LOG_I("Tag " PUBLIC_LOG_D32 " is not is map, may be update it?", keyPair.first);
                 MEDIA_LOG_I("Type of Tag " PUBLIC_LOG_D32 "mismatch", keyPair.first);
@@ -165,7 +165,7 @@ bool CodecFilterBase::CheckRequiredOutCapKeys(const Capability& capability)
     for (auto outCapKey : outCapKeys) {
         if (capability.keys.count(outCapKey) == 0) {
             MEDIA_LOG_W("decoder plugin must specify key " PUBLIC_LOG_S " in out caps",
-                        Tag2String(static_cast<Plugin::Tag>(outCapKey)));
+                        Plugin::Tag2String(static_cast<Plugin::Tag>(outCapKey)));
             return false;
         }
     }
