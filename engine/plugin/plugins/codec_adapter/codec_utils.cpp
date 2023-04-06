@@ -214,21 +214,6 @@ std::string OmxStateToString(OMX_STATETYPE state)
     return "null";
 }
 
-static const std::map<std::string, std::string> componentNameToMime = {
-    {"OMX.rk.video_decoder.avc", MEDIA_MIME_VIDEO_H264},
-    {"OMX.rk.video_decoder.hevc", MEDIA_MIME_VIDEO_H265}
-};
-
-std::string ComponentNameToMime(const std::string& componentName)
-{
-    auto iter = componentNameToMime.find(componentName);
-    if (iter != componentNameToMime.end()) {
-        return iter->second;
-    }
-    MEDIA_LOG_W("Not find value, maybe update the map");
-    return "null";
-}
-
 uint32_t GetOmxBufferType(const MemoryType& bufMemType, bool isInput)
 {
     uint32_t bufferType;

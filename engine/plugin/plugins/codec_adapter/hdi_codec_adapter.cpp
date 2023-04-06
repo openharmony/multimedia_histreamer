@@ -98,8 +98,8 @@ int32_t HdiCodecAdapter::FillBufferDone(CodecCallbackType* self, int64_t appData
     return HDF_SUCCESS;
 }
 
-HdiCodecAdapter::HdiCodecAdapter(std::string componentName, PluginType pluginType)
-    : CodecPlugin(std::move(componentName)), pluginType_(pluginType),
+HdiCodecAdapter::HdiCodecAdapter(std::string componentName, PluginType pluginType, std::string pluginMime)
+    : CodecPlugin(std::move(componentName)), pluginType_(pluginType), pluginMime_(std::move(pluginMime)),
       outBufQue_("hdiAdapterOutQueue", DEFAULT_OUT_BUFFER_QUEUE_SIZE)
 {
     MEDIA_LOG_I("ctor called");
@@ -350,7 +350,7 @@ Status HdiCodecAdapter::ConfigOmx()
 {
     MEDIA_LOG_D("ConfigOmx Start");
     TagMap tagMap;
-    tagMap.Insert<Tag::MIME>(ComponentNameToMime(componentName_));
+    tagMap.Insert<Tag::MIME>(pluginMime_);
     tagMap.Insert<Tag::VIDEO_WIDTH>(width_);
     tagMap.Insert<Tag::VIDEO_HEIGHT>(height_);
     tagMap.Insert<Tag::VIDEO_FRAME_RATE>(frameRate_);

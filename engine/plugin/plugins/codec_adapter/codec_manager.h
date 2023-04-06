@@ -25,6 +25,7 @@ namespace Plugin {
 namespace CodecAdapter {
 struct CodecCapability {
     PluginType pluginType;    ///< plugin type, For details, @see PluginType.
+    std::string pluginMime;   ///< plugin mime
     std::string name;         ///< plugin name
     CapabilitySet inCaps{};   ///< Plug-in input capability, For details, @see Capability.
     CapabilitySet outCaps{};  ///< Plug-in output capability, For details, @see Capability.
