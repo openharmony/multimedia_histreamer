@@ -148,11 +148,11 @@ ErrorCode MuxerFilter::AddTrackThenConfigure(const std::pair<std::string, Plugin
             keyPair.second.first(keyPair.first, *outValue)) {
             plugin_->SetTrackParameter(trackId, keyPair.first, *outValue);
         } else {
-            if (!HasTagInfo(keyPair.first)) {
+            if (!Plugin::HasTagInfo(keyPair.first)) {
                 MEDIA_LOG_W("tag " PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
             } else {
                 MEDIA_LOG_W("parameter " PUBLIC_LOG_S " in meta is not found or type mismatch",
-                    GetTagStrName(keyPair.first));
+                    Plugin::GetTagStrName(keyPair.first));
             }
         }
     }

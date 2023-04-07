@@ -115,7 +115,7 @@ ErrorCode VideoCaptureFilter::SetParameter(int32_t key, const Plugin::Any& value
             (void)AssignParameterIfMatch(tag, frameRate_, value);
             break;
         default:
-            MEDIA_LOG_W("Unknown key " PUBLIC_LOG_S, GetTagStrName(tag));
+            MEDIA_LOG_W("Unknown key " PUBLIC_LOG_S, Plugin::GetTagStrName(tag));
             break;
     }
     return ErrorCode::SUCCESS;
@@ -148,7 +148,7 @@ ErrorCode VideoCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
             break;
         }
         default:
-            MEDIA_LOG_W("Unknown key " PUBLIC_LOG_S, GetTagStrName(tag));
+            MEDIA_LOG_W("Unknown key " PUBLIC_LOG_S, Plugin::GetTagStrName(tag));
             break;
     }
     return ErrorCode::SUCCESS;

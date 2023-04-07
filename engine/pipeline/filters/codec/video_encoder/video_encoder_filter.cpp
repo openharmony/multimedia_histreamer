@@ -294,7 +294,8 @@ uint32_t VideoEncoderFilter::CalculateBufferSize(const std::shared_ptr<const OHO
         MEDIA_LOG_D("Output buffer size: " PUBLIC_LOG_U32, bufferSize);
     } else {
         // need to check video sink support and calc buffer size
-        MEDIA_LOG_E("Unsupported video pixel format: " PUBLIC_LOG_S, GetVideoPixelFormatNameStr(vencFormat_.format));
+        MEDIA_LOG_E("Unsupported video pixel format: " PUBLIC_LOG_S,
+            Plugin::GetVideoPixelFormatNameStr(vencFormat_.format));
     }
     return bufferSize;
 }
@@ -367,7 +368,7 @@ ErrorCode VideoEncoderFilter::ConfigurePluginParams()
     MEDIA_LOG_D("ConfigurePluginParams success, mime: " PUBLIC_LOG_S ", width: " PUBLIC_LOG_U32 ", height: "
                 PUBLIC_LOG_U32 ", format: " PUBLIC_LOG_S ", bitRate: " PUBLIC_LOG_D64 ", frameRate: " PUBLIC_LOG_U32,
                 vencFormat_.mime.c_str(), vencFormat_.width, vencFormat_.height,
-                GetVideoPixelFormatNameStr(vencFormat_.format), vencFormat_.bitRate, vencFormat_.frameRate);
+                Plugin::GetVideoPixelFormatNameStr(vencFormat_.format), vencFormat_.bitRate, vencFormat_.frameRate);
     return ErrorCode::SUCCESS;
 }
 

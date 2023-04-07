@@ -106,7 +106,7 @@ ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin
     Plugin::AudioSampleFormat sampleFormat = Plugin::AudioSampleFormat::S16;
     if (audioMeta->GetData<Plugin::AudioSampleFormat>(MetaID::AUDIO_SAMPLE_FORMAT, sampleFormat)) {
         bufferCalibration_->SetParam(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat);
-        MEDIA_LOG_I("configure plugin with sampleFormat " PUBLIC_LOG_S, GetAudSampleFmtNameStr(sampleFormat));
+        MEDIA_LOG_I("configure plugin with sampleFormat " PUBLIC_LOG_S, Plugin::GetAudSampleFmtNameStr(sampleFormat));
         return TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat));
     }
     return ErrorCode::SUCCESS;
