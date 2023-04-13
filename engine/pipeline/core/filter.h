@@ -77,7 +77,7 @@ public:
         return false;
     }
 
-    virtual bool Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta, Plugin::TagMap &upstreamParams,
+    virtual bool Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta, Plugin::TagMap &upstreamParams,
                            Plugin::TagMap &downstreamParams)
     {
         return false;

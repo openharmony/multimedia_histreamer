@@ -53,7 +53,7 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta,
+    bool Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
                    Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
 
     /**
@@ -84,8 +84,8 @@ protected:
     void ResetSyncInfo() override;
 
 private:
-    ErrorCode ConfigurePluginParams(Plugin::TagMap& meta);
-    ErrorCode ConfigurePluginToStartNoLocked(Plugin::TagMap& meta);
+    ErrorCode ConfigurePluginParams(const std::shared_ptr<Plugin::TagMap>& meta);
+    ErrorCode ConfigurePluginToStartNoLocked(const std::shared_ptr<Plugin::TagMap> &meta);
     bool CreateVideoSinkPlugin(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo);
     void HandleNegotiateParams(const Plugin::TagMap& upstreamParams, Plugin::TagMap& downstreamParams);
     void RenderFrame();

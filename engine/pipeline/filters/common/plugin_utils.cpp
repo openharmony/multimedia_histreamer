@@ -481,7 +481,7 @@ std::string Capability2String(const Capability& capability)
     return buffer;
 }
 
-std::string Meta2String(Plugin::TagMap& meta)
+std::string Meta2String(const Plugin::TagMap& meta)
 {
     char buffer[MAX_BUF_LEN + 1] = {0}; // one more is for \0
     int pos = 0;
@@ -499,7 +499,6 @@ std::string Meta2String(Plugin::TagMap& meta)
             MEDIA_LOG_W("meta id " PUBLIC_LOG_D32 "is not is map, may be update the info map?", item);
             continue;
         }
-
         Plugin::ValueType value;
         auto tmp = meta.GetData(item,value);
         const auto& tuple = Plugin::g_tagInfoMap.at(static_cast<Tag>(item));

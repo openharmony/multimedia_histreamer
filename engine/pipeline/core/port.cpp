@@ -79,7 +79,7 @@ bool InPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstream
     return filter && filter->Negotiate(name, upstreamCap, negotiatedCap, upstreamParams, downstreamParams);
 }
 
-bool InPort::Configure(Plugin::TagMap &upstreamMeta, Plugin::TagMap &upstreamParams,
+bool InPort::Configure(const std::shared_ptr<Plugin::TagMap> &upstreamMeta, Plugin::TagMap &upstreamParams,
                        Plugin::TagMap &downstreamParams)
 {
     return filter && filter->Configure(name, upstreamMeta, upstreamParams, downstreamParams);
@@ -165,7 +165,7 @@ bool OutPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstrea
     return nextPort->Negotiate(upstreamCap, negotiatedCap, upstreamParams, downstreamParams);
 }
 
-bool OutPort::Configure(Plugin::TagMap &upstreamMeta, Plugin::TagMap &upstreamParams,
+bool OutPort::Configure(const std::shared_ptr<Plugin::TagMap> &upstreamMeta, Plugin::TagMap &upstreamParams,
                         Plugin::TagMap &downstreamParams)
 {
     return nextPort->Configure(upstreamMeta, upstreamParams, downstreamParams);
@@ -213,7 +213,7 @@ bool EmptyInPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& ups
     return false;
 }
 
-bool EmptyInPort::Configure(Plugin::TagMap &upstreamMeta, Plugin::TagMap &upstreamParams,
+bool EmptyInPort::Configure(const std::shared_ptr<Plugin::TagMap> &upstreamMeta, Plugin::TagMap &upstreamParams,
                             Plugin::TagMap &downstreamParams)
 {
     UNUSED_VARIABLE(upstreamMeta);
@@ -264,7 +264,7 @@ bool EmptyOutPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& up
     return false;
 }
 
-bool EmptyOutPort::Configure(Plugin::TagMap &upstreamMeta, Plugin::TagMap &upstreamParams,
+bool EmptyOutPort::Configure(const std::shared_ptr<Plugin::TagMap> &upstreamMeta, Plugin::TagMap &upstreamParams,
                              Plugin::TagMap &downstreamParams)
 {
     UNUSED_VARIABLE(upstreamMeta);

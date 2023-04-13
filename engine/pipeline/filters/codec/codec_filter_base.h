@@ -52,7 +52,7 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta,
+    bool Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
                    Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
 
     void FlushStart() override;
@@ -62,7 +62,7 @@ public:
 protected:
     virtual uint32_t GetOutBufferPoolSize();
 
-    virtual uint32_t CalculateBufferSize(Plugin::TagMap &meta);
+    virtual uint32_t CalculateBufferSize(const std::shared_ptr<Plugin::TagMap> &meta);
 
     virtual Plugin::TagMap GetNegotiateParams(const Plugin::TagMap& upstreamParams);
 
@@ -70,14 +70,14 @@ protected:
 
     virtual std::vector<Capability::Key> GetRequiredOutCapKeys();
 
-    virtual ErrorCode ConfigureToStartPluginLocked(Plugin::TagMap &meta);
+    virtual ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<Plugin::TagMap> &meta);
 
     ErrorCode UpdateMetaFromPlugin(Plugin::TagMap& meta);
 
     ErrorCode SetPluginParameterLocked(Tag tag, const Plugin::ValueType& value);
 
-    virtual void UpdateParams(Plugin::TagMap &upMeta,
-                              Plugin::TagMap &meta);
+    virtual void UpdateParams(const std::shared_ptr<Plugin::TagMap> &upMeta,
+                              std::shared_ptr<Plugin::TagMap> &meta);
 
     template<typename T>
     ErrorCode GetPluginParameterLocked(Tag tag, T& value)

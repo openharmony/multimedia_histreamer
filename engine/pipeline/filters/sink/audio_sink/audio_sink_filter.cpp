@@ -166,11 +166,11 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
     return res;
 }
 
-bool AudioSinkFilter::Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta,
+bool AudioSinkFilter::Configure(const std::string &inPort,const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
                                 Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
 {
     PROFILE_BEGIN("Audio sink configure begin");
-    MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(upstreamMeta).c_str());
+    MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
     if (plugin_ == nullptr || pluginInfo_ == nullptr) {
         MEDIA_LOG_E("cannot configure decoder when no plugin available");
         return false;
@@ -182,7 +182,7 @@ bool AudioSinkFilter::Configure(const std::string &inPort, Plugin::TagMap &upstr
         FilterBase::OnEvent({name_, EventType::EVENT_ERROR, err});
         return false;
     }
-    UpdateMediaTimeRange(upstreamMeta);
+    UpdateMediaTimeRange(*upstreamMeta);
     state_ = FilterState::READY;
     FilterBase::OnEvent({name_, EventType::EVENT_READY});
     MEDIA_LOG_I("audio sink send EVENT_READY");
@@ -190,9 +190,9 @@ bool AudioSinkFilter::Configure(const std::string &inPort, Plugin::TagMap &upstr
     return true;
 }
 
-ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(Plugin::TagMap &meta)
+ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<Plugin::TagMap> &meta)
 {
-    FAIL_RETURN_MSG(ConfigPluginWithMeta(*plugin_, meta), "sink configuration failed.");
+    FAIL_RETURN_MSG(ConfigPluginWithMeta(*plugin_, *meta), "sink configuration failed.");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Prepare()), "sink prepare failed");
     return ErrorCode::SUCCESS;
 }

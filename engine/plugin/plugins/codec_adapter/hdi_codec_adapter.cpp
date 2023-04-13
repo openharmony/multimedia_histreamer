@@ -194,7 +194,6 @@ Status HdiCodecAdapter::Prepare()
     FALSE_RETURN_V_MSG_E(ChangeState(OMX_StateIdle) == Status::OK, Status::ERROR_WRONG_STATE,
                          "Change omx state to idle failed");
     outBufQue_.SetActive(true);
-    MEDIA_LOG_I("Prepare Flush inPortIndex_ " PUBLIC_LOG_U32 ,inPortIndex_);
     inBufPool_ = std::make_shared<CodecBufferPool>(codecComp_, verInfo_, inPortIndex_);
     outBufPool_ = std::make_shared<CodecBufferPool>(codecComp_, verInfo_, outPortIndex_);
     OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> inBufQue("TempInBufferQue", inBufferCnt_);

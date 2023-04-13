@@ -459,7 +459,7 @@ std::shared_ptr<Capability> MetaToCapability(Plugin::TagMap& meta)
     return ret;
 }
 
-bool MergeMetaWithCapability(Plugin::TagMap& meta, const Capability& cap, Plugin::TagMap& resTagMap)
+bool MergeMetaWithCapability(const Plugin::TagMap& meta, const Capability& cap, Plugin::TagMap& resTagMap)
 {
     resTagMap.Clear();
     // change meta into capability firstly

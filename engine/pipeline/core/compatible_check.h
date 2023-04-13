@@ -72,7 +72,7 @@ std::shared_ptr<Capability> MetaToCapability(Plugin::TagMap& meta);
  * @param resMeta result meta
  * @return success to merge
  */
-bool MergeMetaWithCapability(Plugin::TagMap& meta, const Capability& cap, Plugin::TagMap& resTagMap);
+bool MergeMetaWithCapability(const Plugin::TagMap& meta, const Capability& cap, Plugin::TagMap& resTagMap);
 
 bool ApplyCapabilitySet(const Capability& originCap, const CapabilitySet& capabilitySet, Capability& resCap);
 }

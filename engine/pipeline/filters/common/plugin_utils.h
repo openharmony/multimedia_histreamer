@@ -60,7 +60,7 @@ uint8_t GetBytesPerSample(Plugin::AudioSampleFormat fmt);
 
 std::string Capability2String(const Capability& capability);
 
-std::string Meta2String(Plugin::TagMap& meta);
+std::string Meta2String(const Plugin::TagMap& meta);
 } // Pipeline
 } // Media
 } // OHOS

@@ -30,7 +30,7 @@ public:
     explicit VideoEncoderFilter(const std::string& name);
     ~VideoEncoderFilter() override;
 
-    virtual ErrorCode SetVideoEncoder(int32_t sourceId, Plugin::TagMap &encoderMeta);
+    virtual ErrorCode SetVideoEncoder(int32_t sourceId, const std::shared_ptr<Plugin::TagMap> encoderMeta);
 
     ErrorCode Prepare() override;
 
@@ -48,7 +48,7 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta,
+    bool Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
                    Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
 
     /**
@@ -79,7 +79,7 @@ private:
         Plugin::CodecConfig codecConfig;
     };
 
-    ErrorCode SetVideoEncoderFormat(Plugin::TagMap &meta);
+    ErrorCode SetVideoEncoderFormat(const std::shared_ptr<Plugin::TagMap> &meta);
 
     ErrorCode AllocateOutputBuffers();
 
@@ -89,7 +89,7 @@ private:
 
     ErrorCode ConfigurePlugin();
 
-    ErrorCode ConfigureNoLocked(Plugin::TagMap &meta);
+    ErrorCode ConfigureNoLocked(const std::shared_ptr<Plugin::TagMap> &meta);
 
     void HandleFrame();
 
@@ -97,14 +97,14 @@ private:
 
     void FinishFrame();
 
-    uint32_t CalculateBufferSize(Plugin::TagMap& meta) override;
+    uint32_t CalculateBufferSize(const std::shared_ptr<Plugin::TagMap> &meta) override;
 
     bool isFlushing_ {false};
     bool isStop_ {false};
     Capability capNegWithDownstream_;
     Capability capNegWithUpstream_;
     VideoEncoderFormat vencFormat_;
-    Plugin::TagMap codecMeta_;
+    std::shared_ptr<Plugin::TagMap> codecMeta_ {nullptr};
     DataCallbackImpl* dataCallback_ {nullptr};
 
     std::shared_ptr<OHOS::Media::OSAL::Task> handleFrameTask_ {nullptr};

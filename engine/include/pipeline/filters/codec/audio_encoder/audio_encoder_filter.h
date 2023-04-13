@@ -30,7 +30,7 @@ public:
     explicit AudioEncoderFilter(const std::string& name);
     ~AudioEncoderFilter() override;
 
-    virtual ErrorCode SetAudioEncoder(int32_t sourceId, Plugin::TagMap &encoderMeta);
+    virtual ErrorCode SetAudioEncoder(int32_t sourceId, std::shared_ptr<Plugin::TagMap> encoderMeta);
 
     ErrorCode Start() override;
 
@@ -42,9 +42,9 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
 
-    uint32_t CalculateBufferSize(Plugin::TagMap &meta) override;
+    uint32_t CalculateBufferSize(const std::shared_ptr<Plugin::TagMap> &meta) override;
 
-    bool Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta,
+    bool Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
                    Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
 
     /**
@@ -57,7 +57,7 @@ public:
     ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
 private:
-    ErrorCode ConfigureToStartPluginLocked(Plugin::TagMap &meta) override;
+    ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<Plugin::TagMap> &meta) override;
 
     ErrorCode HandleFrame(const std::shared_ptr<AVBuffer>& buffer);
 
@@ -75,7 +75,7 @@ private:
     Capability capNegWithUpstream_;
     size_t frameSize_ {0};
     std::string mime_;
-    Plugin::TagMap encoderMeta_;
+    std::shared_ptr<Plugin::TagMap> encoderMeta_ {nullptr};
     std::unique_ptr<RingBuffer> rb_ {};
     AVBufferPtr cahceBuffer_ {nullptr};
 };

@@ -131,7 +131,7 @@ bool MuxerFilter::Negotiate(const std::string& inPort,
     // always use the first candidate plugin info
     return UpdateAndInitPluginByInfo(candidate[0]);
 }
-ErrorCode MuxerFilter::AddTrackThenConfigure(std::pair<std::string, Plugin::TagMap>& metaPair)
+ErrorCode MuxerFilter::AddTrackThenConfigure(const std::pair<std::string, Plugin::TagMap>& metaPair)
 {
     uint32_t trackId = 0;
     ErrorCode ret = TranslatePluginStatus(plugin_->AddTrack(trackId));
@@ -163,7 +163,7 @@ ErrorCode MuxerFilter::AddTrackThenConfigure(std::pair<std::string, Plugin::TagM
 ErrorCode MuxerFilter::ConfigureToStart()
 {
     ErrorCode ret;
-    for (auto& cache: metaCache_) {
+    for (const auto& cache: metaCache_) {
         ret = AddTrackThenConfigure(cache);
         if (ret != ErrorCode::SUCCESS) {
             MEDIA_LOG_E("add and configure for track from inPort " PUBLIC_LOG_S " failed", cache.first.c_str());
@@ -183,16 +183,16 @@ ErrorCode MuxerFilter::ConfigureToStart()
     }
     return ret;
 }
-bool MuxerFilter::Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta,
+bool MuxerFilter::Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
                             Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
 {
     std::string tmp;
-    if (!upstreamMeta.Get<Plugin::Tag::MIME>(tmp))  {
+    if (!upstreamMeta->Get<Plugin::Tag::MIME>(tmp))  {
         MEDIA_LOG_E("stream meta must contain mime, which is not found in current stream from port " PUBLIC_LOG_S,
                     inPort.c_str());
         return false;
     }
-    metaCache_.emplace_back(std::make_pair(inPort, upstreamMeta));
+    metaCache_.emplace_back(std::make_pair(inPort, *upstreamMeta));
     if (metaCache_.size() < inPorts_.size()) {
         return true;
     }
@@ -203,7 +203,7 @@ bool MuxerFilter::Configure(const std::string &inPort, Plugin::TagMap &upstreamM
 
     auto meta = std::make_shared<Plugin::TagMap>();
     FALSE_LOG(meta->Insert<Plugin::Tag::MIME>(containerMime_));
-    if (!outPorts_[0]->Configure(*meta, upstreamParams, downstreamParams)) {
+    if (!outPorts_[0]->Configure(meta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("downstream of muxer filter configure failed");
         return false;
     }

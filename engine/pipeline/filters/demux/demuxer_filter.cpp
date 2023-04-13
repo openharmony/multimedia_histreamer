@@ -249,13 +249,13 @@ bool DemuxerFilter::Negotiate(const std::string& inPort,
     return true;
 }
 
-bool DemuxerFilter::Configure(const std::string &inPort,Plugin::TagMap &upstreamMeta,
+bool DemuxerFilter::Configure(const std::string &inPort,const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
                               Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
 {
     (void)downstreamParams;
-    FALSE_LOG_MSG(upstreamMeta.Get<Plugin::Tag::MEDIA_FILE_SIZE>(mediaDataSize_),"Get MEDIA_FILE_SIZE failed");
-    FALSE_LOG_MSG(upstreamMeta.Get<Plugin::Tag::MEDIA_SEEKABLE>(seekable_),"Get MEDIA_SEEKABLE failed");
-    FALSE_LOG_MSG(upstreamMeta.Get<Plugin::Tag::MEDIA_FILE_URI>(uri_),"Get MEDIA_FILE_URI failed");
+    FALSE_LOG_MSG(upstreamMeta->Get<Plugin::Tag::MEDIA_FILE_SIZE>(mediaDataSize_),"Get MEDIA_FILE_SIZE failed");
+    FALSE_LOG_MSG(upstreamMeta->Get<Plugin::Tag::MEDIA_SEEKABLE>(seekable_),"Get MEDIA_SEEKABLE failed");
+    FALSE_LOG_MSG(upstreamMeta->Get<Plugin::Tag::MEDIA_FILE_URI>(uri_),"Get MEDIA_FILE_URI failed");
     return true;
 }
 
@@ -582,7 +582,7 @@ void DemuxerFilter::NegotiateDownstream()
             FALSE_LOG(upstreamParams.Insert<Tag::MEDIA_SEEKABLE>(seekable_));
             if (stream.port->Negotiate(tmpCap, caps, upstreamParams, downstreamParams)) {
                 UpdateStreamMeta(streamTag, caps, downstreamParams);
-                if (stream.port->Configure(*streamTag, upstreamParams, downstreamParams)) {
+                if (stream.port->Configure(streamTag, upstreamParams, downstreamParams)) {
                     stream.needNegoCaps = false;
                 }
             } else {

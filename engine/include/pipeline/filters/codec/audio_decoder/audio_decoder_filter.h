@@ -34,7 +34,7 @@ public:
 
     void FlushEnd() override;
 
-    bool Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta,
+    bool Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
                    Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
 
     ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
@@ -50,12 +50,12 @@ public:
     void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override;
 
 private:
-    uint32_t CalculateBufferSize(Plugin::TagMap &meta) override;
+    uint32_t CalculateBufferSize(const std::shared_ptr<Plugin::TagMap> &meta) override;
 
     std::vector<Capability::Key> GetRequiredOutCapKeys() override;
 
-    void UpdateParams(Plugin::TagMap &upMeta,
-                      Plugin::TagMap &meta) override;
+    void UpdateParams(const std::shared_ptr<Plugin::TagMap> &upMeta,
+                      std::shared_ptr<Plugin::TagMap> &meta) override;
 };
 } // Pipeline
 } // Media

@@ -44,7 +44,7 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta,
+    bool Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
                    Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
 
     ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
@@ -60,9 +60,9 @@ private:
 
     Plugin::TagMap GetNegotiateParams(const Plugin::TagMap& upstreamParams) override;
 
-    uint32_t CalculateBufferSize(Plugin::TagMap &meta) override;
+    uint32_t CalculateBufferSize(const std::shared_ptr<Plugin::TagMap> &meta) override;
 
-    void UpdateParams(Plugin::TagMap &upMeta, Plugin::TagMap &meta) override;
+    void UpdateParams(const std::shared_ptr<Plugin::TagMap> &upMeta, std::shared_ptr<Plugin::TagMap> &meta) override;
 };
 }
 }

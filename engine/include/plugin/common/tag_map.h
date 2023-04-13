@@ -183,16 +183,7 @@ public:
         value = ite->second;
         return true;
     }
-/*
-    const ValueType* GetData(Tag id) const
-    {
-        auto ite = map_.find(id);
-        if (ite == map_.end()) {
-            return nullptr;
-        }
-        return &(ite->second);
-    }
-*/
+
     bool Remove(Plugin::Tag id)
     {
         auto ite = map_.find(id);

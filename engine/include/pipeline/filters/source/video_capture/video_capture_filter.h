@@ -48,7 +48,7 @@ public:
     ErrorCode SendEos();
 private:
     void InitPorts() override;
-    ErrorCode InitAndConfigPlugin(const Plugin::TagMap& videoMeta);
+    ErrorCode InitAndConfigPlugin(const std::shared_ptr<Plugin::TagMap>& videoMeta);
     void ReadLoop();
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);

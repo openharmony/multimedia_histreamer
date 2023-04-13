@@ -37,7 +37,7 @@ public:
                    const Plugin::TagMap& upstreamParams,
                    Plugin::TagMap& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta,
+    bool Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
                    Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
 
     ErrorCode SetOutputFormat(std::string containerMime);
@@ -67,7 +67,7 @@ private:
     bool UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo);
 
     ErrorCode ConfigureToStart();
-    ErrorCode AddTrackThenConfigure(std::pair<std::string, Plugin::TagMap>& metaPair);
+    ErrorCode AddTrackThenConfigure(const std::pair<std::string, Plugin::TagMap>& metaPair);
 
     bool AllTracksEos();
     void UpdateEosState(const std::string& inPort);

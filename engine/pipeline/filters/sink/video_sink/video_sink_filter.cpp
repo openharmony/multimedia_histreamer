@@ -203,7 +203,7 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort,
     return true;
 }
 
-bool VideoSinkFilter::Configure(const std::string &inPort, Plugin::TagMap &upstreamMeta,
+bool VideoSinkFilter::Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
                                 Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
 {
     PROFILE_BEGIN("video sink configure start");
@@ -217,14 +217,14 @@ bool VideoSinkFilter::Configure(const std::string &inPort, Plugin::TagMap &upstr
         OnEvent(Event{name_, EventType::EVENT_ERROR, {err}});
         return false;
     }
-    if (!upstreamMeta.Get<Plugin::Tag::VIDEO_FRAME_RATE>(frameRate_)) {
+    if (!upstreamMeta->Get<Plugin::Tag::VIDEO_FRAME_RATE>(frameRate_)) {
         MEDIA_LOG_I("frame rate is not found");
     }
     if (frameRate_ == 0) {
         frameRate_ = DEFAULT_FRAME_RATE;
     }
     waitPrerolledTimeout_ = 1000 / frameRate_; // 1s = 1000ms
-    UpdateMediaTimeRange(upstreamMeta);
+    UpdateMediaTimeRange(*upstreamMeta);
     HandleNegotiateParams(upstreamParams, downstreamParams);
     state_ = FilterState::READY;
     OnEvent(Event{name_, EventType::EVENT_READY, {}});
@@ -233,25 +233,25 @@ bool VideoSinkFilter::Configure(const std::string &inPort, Plugin::TagMap &upstr
     return true;
 }
 
-ErrorCode VideoSinkFilter::ConfigurePluginParams(Plugin::TagMap& meta)
+ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<Plugin::TagMap>& meta)
 {
     auto err = ErrorCode::SUCCESS;
     uint32_t width;
-    if (meta.Get<Plugin::Tag::VIDEO_WIDTH>(width)) {
+    if (meta->Get<Plugin::Tag::VIDEO_WIDTH>(width)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_WIDTH, width));
         FAIL_RETURN_MSG(err, "Set plugin width fail");
     } else {
         MEDIA_LOG_I("get VIDEO_WIDTH fail");
     }
     uint32_t height;
-    if (meta.Get<Plugin::Tag::VIDEO_HEIGHT>(height)) {
+    if (meta->Get<Plugin::Tag::VIDEO_HEIGHT>(height)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_HEIGHT, height));
         FAIL_RETURN_MSG(err, "Set plugin height fail");
     } else {
         MEDIA_LOG_I("get VIDEO_HEIGHT fail");
     }
     Plugin::VideoPixelFormat pixelFormat;
-    if (meta.Get<Plugin::Tag::VIDEO_PIXEL_FORMAT>(pixelFormat)) {
+    if (meta->Get<Plugin::Tag::VIDEO_PIXEL_FORMAT>(pixelFormat)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_PIXEL_FORMAT, pixelFormat));
         FAIL_RETURN_MSG(err, "Set plugin pixel format fail");
     } else {
@@ -262,7 +262,7 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(Plugin::TagMap& meta)
     return err;
 }
 
-ErrorCode VideoSinkFilter::ConfigurePluginToStartNoLocked(Plugin::TagMap& meta)
+ErrorCode VideoSinkFilter::ConfigurePluginToStartNoLocked(const std::shared_ptr<Plugin::TagMap> &meta)
 {
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Init()), "Init plugin error");
     plugin_->SetCallback(this);

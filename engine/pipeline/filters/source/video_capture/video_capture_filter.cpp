@@ -57,7 +57,7 @@ std::vector<WorkMode> VideoCaptureFilter::GetWorkModes()
     return {WorkMode::PUSH};
 }
 
-ErrorCode VideoCaptureFilter::InitAndConfigPlugin(const Plugin::TagMap& videoMeta)
+ErrorCode VideoCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::TagMap>& videoMeta)
 {
     MEDIA_LOG_D("IN");
     ErrorCode err = TranslatePluginStatus(plugin_->Init());
@@ -170,11 +170,11 @@ ErrorCode VideoCaptureFilter::DoConfigure()
     FALSE_LOG(videoMeta->Insert<Plugin::Tag::VIDEO_PIXEL_FORMAT>(pixelFormat_));
     Plugin::TagMap upstreamParams;
     Plugin::TagMap downstreamParams;
-    if (!outPorts_[0]->Configure(*videoMeta, upstreamParams, downstreamParams)) {
+    if (!outPorts_[0]->Configure(videoMeta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("Configure downstream fail");
         return ErrorCode::ERROR_UNKNOWN;
     }
-    return InitAndConfigPlugin(*videoMeta);
+    return InitAndConfigPlugin(videoMeta);
 }
 
 ErrorCode VideoCaptureFilter::Prepare()
