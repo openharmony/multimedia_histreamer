@@ -41,7 +41,7 @@ ErrorCode SyncMode::Configure()
 
 ErrorCode SyncMode::PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset)
 {
-    const static int8_t maxRetryCnt = 3; // max retry times of handling one frame
+    const static int8_t MAX_RETRY_TIMES = 3; // max retry times of handling one frame
     ErrorCode handleFrameRes;
     int8_t retryCnt = 0;
     do {
@@ -50,7 +50,7 @@ ErrorCode SyncMode::PushData(const std::string &inPort, const AVBufferPtr& buffe
             MEDIA_LOG_DD("finish frame");
         }
         retryCnt++;
-        if (retryCnt >= maxRetryCnt) { // if retry cnt exceeds we will drop this frame
+        if (retryCnt >= MAX_RETRY_TIMES) { // if retry cnt exceeds we will drop this frame
             break;
         }
         // if timed out or returns again we should try again

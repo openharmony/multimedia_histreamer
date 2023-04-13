@@ -119,12 +119,12 @@ const std::string& StringnessPlayerState(PlayerStates state)
         std::make_pair(PlayerStates::PLAYER_STOPPED, "stopped"),
         std::make_pair(PlayerStates::PLAYER_PLAYBACK_COMPLETE, "completed"),
     };
-    const static std::string unknown = "unknown";
+    const static std::string UNKNOWN = "unknown";
     auto ite = std::find_if(maps.begin(), maps.end(), [&] (const StateString& item) -> bool {
         return item.first == state;
     });
     if (ite == maps.end()) {
-        return unknown;
+        return UNKNOWN;
     }
     return ite->second;
 }
