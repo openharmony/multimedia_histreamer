@@ -515,6 +515,11 @@ void HiPlayerImpl::OnEvent(const Event& event)
             callbackLooper_.OnInfo(INFO_TYPE_MESSAGE, PlayerMessageType::PLAYER_INFO_VIDEO_RENDERING_START, format);
             break;
         }
+        case EventType::EVENT_IS_LIVE_STREAM: {
+            Format format;
+            callbackLooper_.OnInfo(INFO_TYPE_IS_LIVE_STREAM, 0, format);
+            break;
+        }
         default:
             MEDIA_LOG_E("Unknown event(" PUBLIC_LOG_U32 ")", event.type);
     }
@@ -646,6 +651,10 @@ ErrorCode HiPlayerImpl::DoOnReady()
     }
     if (found) {
         duration_ = duration;
+        Format format;
+        callbackLooper_.OnInfo(INFO_TYPE_DURATION_UPDATE, Plugin::HstTime2Ms(duration_), format);
+    } else {
+        MEDIA_LOG_E("INFO_TYPE_DURATION_UPDATE failed");
     }
     return ErrorCode::SUCCESS;
 }

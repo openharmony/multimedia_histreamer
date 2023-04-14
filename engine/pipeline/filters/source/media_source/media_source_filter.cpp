@@ -252,6 +252,7 @@ void MediaSourceFilter::ActivateMode()
     } while (seekable_ == Seekable::INVALID);
     FALSE_LOG(seekable_ != Seekable::INVALID);
     if (seekable_ == Seekable::UNSEEKABLE) {
+        FilterBase::OnEvent(Event{name_, EventType::EVENT_IS_LIVE_STREAM, {}});
         if (taskPtr_ == nullptr) {
             taskPtr_ = std::make_shared<OSAL::Task>("DataReader");
             taskPtr_->RegisterHandler([this] { ReadLoop(); });
