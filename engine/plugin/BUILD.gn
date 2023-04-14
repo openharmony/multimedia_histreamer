@@ -150,7 +150,6 @@ source_set("histreamer_plugin_core") {
     "core/output_sink.cpp",
     "core/plugin_core_utils.cpp",
     "core/plugin_manager.cpp",
-    "core/plugin_meta.cpp",
     "core/plugin_register.cpp",
     "core/plugin_wrapper.cpp",
     "core/source.cpp",

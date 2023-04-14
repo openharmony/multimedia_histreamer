@@ -103,8 +103,8 @@ void VideoDecoderFilter::FlushEnd()
     codecMode_->FlushEnd();
 }
 
-bool VideoDecoderFilter::Configure(const std::string &inPort,const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
-                                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool VideoDecoderFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                                   Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
 {
     PROFILE_BEGIN("video decoder configure begin");
     FALSE_RETURN_V(CodecFilterBase::Configure(inPort, upstreamMeta, upstreamParams, downstreamParams), false);
@@ -129,8 +129,8 @@ ErrorCode VideoDecoderFilter::PushData(const std::string &inPort, const AVBuffer
 bool VideoDecoderFilter::Negotiate(const std::string& inPort,
                                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                    Plugin::Capability& negotiatedCap,
-                                   const Plugin::TagMap& upstreamParams,
-                                   Plugin::TagMap& downstreamParams)
+                                   const Plugin::Meta& upstreamParams,
+                                   Plugin::Meta& downstreamParams)
 {
     FALSE_RETURN_V(CodecFilterBase::Negotiate(inPort, upstreamCap, negotiatedCap, upstreamParams, downstreamParams),
                    false);
@@ -143,25 +143,17 @@ uint32_t VideoDecoderFilter::GetOutBufferPoolSize()
     return DEFAULT_OUT_BUFFER_POOL_SIZE;
 }
 
-uint32_t VideoDecoderFilter::CalculateBufferSize(const std::shared_ptr<Plugin::TagMap> &meta)
+uint32_t VideoDecoderFilter::CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     uint32_t bufferSize = 0;
     uint32_t vdecWidth;
     uint32_t vdecHeight;
     Plugin::VideoPixelFormat vdecFormat;
 
-    if (!meta->Get<Plugin::Tag::VIDEO_WIDTH>(vdecWidth)) {
-        MEDIA_LOG_E("Get video width fail");
-        return 0;
-    }
-    if (!meta->Get<Plugin::Tag::VIDEO_HEIGHT>(vdecHeight)) {
-        MEDIA_LOG_E("Get video width height");
-        return 0;
-    }
-    if (!meta->Get<Plugin::Tag::VIDEO_PIXEL_FORMAT>( vdecFormat)) {
-        MEDIA_LOG_E("Get video pixel format fail");
-        return 0;
-    }
+    FALSE_RETURN_V(meta->Get<Plugin::Tag::VIDEO_WIDTH>(vdecWidth), 0);
+    FALSE_RETURN_V(meta->Get<Plugin::Tag::VIDEO_HEIGHT>(vdecHeight), 0);
+    FALSE_RETURN_V(meta->Get<Plugin::Tag::VIDEO_PIXEL_FORMAT>(vdecFormat), 0);
+
     // YUV420: size = stride * height * 1.5
     uint32_t stride = Plugin::AlignUp(vdecWidth, VIDEO_ALIGN_SIZE);
     if (vdecFormat == Plugin::VideoPixelFormat::YUV420P ||
@@ -184,10 +176,10 @@ uint32_t VideoDecoderFilter::CalculateBufferSize(const std::shared_ptr<Plugin::T
     return bufferSize;
 }
 
-Plugin::TagMap VideoDecoderFilter::GetNegotiateParams(const Plugin::TagMap& upstreamParams)
+Plugin::Meta VideoDecoderFilter::GetNegotiateParams(const Plugin::Meta& upstreamParams)
 {
     // video, need to get the max buffer num from plugin capability when use hdi as codec plugin interfaces
-    Plugin::TagMap proposeParams = upstreamParams;
+    Plugin::Meta proposeParams = upstreamParams;
     proposeParams.Insert<Plugin::Tag::VIDEO_MAX_SURFACE_NUM>(DEFAULT_OUT_BUFFER_POOL_SIZE);
     return proposeParams;
 }
@@ -208,8 +200,8 @@ std::shared_ptr<Allocator> VideoDecoderFilter::GetAllocator()
     return plugin_->GetAllocator();
 }
 
-void VideoDecoderFilter::UpdateParams(const std::shared_ptr<Plugin::TagMap> &upMeta,
-                                      std::shared_ptr<Plugin::TagMap> &meta)
+void VideoDecoderFilter::UpdateParams(const std::shared_ptr<const Plugin::Meta>& upMeta,
+                                      std::shared_ptr<Plugin::Meta>& meta)
 {
     MEDIA_LOG_D("UpdateParams begin");
 }

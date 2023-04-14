@@ -55,11 +55,11 @@ ErrorCode AudioEncoderFilter::Start()
     return FilterBase::Start();
 }
 
-ErrorCode AudioEncoderFilter::SetAudioEncoder(int32_t sourceId, std::shared_ptr<Plugin::TagMap> encoderMeta)
+ErrorCode AudioEncoderFilter::SetAudioEncoder(int32_t sourceId, std::shared_ptr<Plugin::Meta> encoderMeta)
 {
     std::string mime;
     FALSE_RETURN_V_MSG_E(encoderMeta->Get<Plugin::Tag::MIME>(mime), ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
-                         "encoder meta must contains mime");
+                         "Encoder meta must contains mime");
     mime_ = mime;
     encoderMeta_ = std::move(encoderMeta);
     return ErrorCode::SUCCESS;
@@ -68,8 +68,8 @@ ErrorCode AudioEncoderFilter::SetAudioEncoder(int32_t sourceId, std::shared_ptr<
 bool AudioEncoderFilter::Negotiate(const std::string& inPort,
                                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                    Plugin::Capability& negotiatedCap,
-                                   const Plugin::TagMap& upstreamParams,
-                                   Plugin::TagMap& downstreamParams)
+                                   const Plugin::Meta& upstreamParams,
+                                   Plugin::Meta& downstreamParams)
 {
     PROFILE_BEGIN("Audio Encoder Negotiate begin");
     FALSE_RETURN_V_MSG_E(state_ == FilterState::PREPARING, false, "not preparing when negotiate");
@@ -81,7 +81,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
     for (const auto& candidate : candidatePlugins) {
         FALSE_LOG_MSG(!candidate.first->outCaps.empty(), "encoder plugin must have out caps");
         for (const auto& outCap : candidate.first->outCaps) { // each codec plugin should have at least one out cap
-            Plugin::TagMap tmpMeta;
+            Plugin::Meta tmpMeta;
             if (outCap.mime != mime_ || !MergeMetaWithCapability(*encoderMeta_, outCap, tmpMeta)) {
                 continue;
             }
@@ -117,7 +117,7 @@ bool AudioEncoderFilter::Negotiate(const std::string& inPort,
     return res;
 }
 
-uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<Plugin::TagMap> &meta)
+uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     Plugin::ValueType value;
     if (plugin_->GetParameter(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, value) != Plugin::Status::OK ||
@@ -127,26 +127,20 @@ uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<Plugin::T
     }
     auto samplesPerFrame = Plugin::AnyCast<uint32_t>(value);
     uint32_t channels;
-    if (meta->Get<Plugin::Tag::AUDIO_CHANNELS>(channels)) {
-        MEDIA_LOG_E("Get AUDIO_CHANNELS fail");
-        return 0;
-    }
+    FALSE_RETURN_V(meta->Get<Plugin::Tag::AUDIO_CHANNELS>(channels), 0);
     Plugin::AudioSampleFormat format;
-    if (!meta->Get<Plugin::Tag::AUDIO_SAMPLE_FORMAT>(format)) {
-        MEDIA_LOG_E("Get AUDIO_SAMPLE_FORMAT fail");
-        return 0;
-    }
+    FALSE_RETURN_V(meta->Get<Plugin::Tag::AUDIO_SAMPLE_FORMAT>(format), 0);
     return GetBytesPerSample(format) * samplesPerFrame * channels;
 }
 
-bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
-                                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool AudioEncoderFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                                   Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
 {
     PROFILE_BEGIN("Audio encoder configure begin");
     MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
     FALSE_RETURN_V_MSG_E(plugin_ != nullptr && pluginInfo_ != nullptr, false,
         "can't configure encoder when no plugin available");
-    auto thisMeta = std::make_shared<Plugin::TagMap>();
+    auto thisMeta = std::make_shared<Plugin::Meta>();
     // todo how to decide the caps ?
     FALSE_RETURN_V_MSG_E(MergeMetaWithCapability(*upstreamMeta, pluginInfo_->outCaps[0], *thisMeta), false,
         "can't configure encoder plugin since meta is not compatible with negotiated caps");
@@ -168,7 +162,7 @@ bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_
     return true;
 }
 
-ErrorCode AudioEncoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr<Plugin::TagMap> &meta)
+ErrorCode AudioEncoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     FAIL_RETURN_MSG(ConfigPluginWithMeta(*plugin_, *meta), "configure encoder plugin error");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Prepare()), "encoder prepare failed");

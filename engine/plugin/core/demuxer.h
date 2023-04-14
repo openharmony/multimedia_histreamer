@@ -24,8 +24,8 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 struct MediaInfoHelper {
-    TagMap globalMeta;
-    std::vector<TagMap> trackMeta;
+    Meta globalMeta;
+    std::vector<Meta> trackMeta;
 };
 
 struct DataSourceHelper {

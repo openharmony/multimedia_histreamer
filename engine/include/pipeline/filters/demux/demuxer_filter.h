@@ -66,17 +66,17 @@ public:
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
-                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                   Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams) override;
 
     ErrorCode SeekTo(int64_t seekTime, Plugin::SeekMode mode, int64_t& realSeekTime);
 
-    std::vector<std::shared_ptr<Plugin::TagMap>> GetStreamMetaInfo() const;
+    std::vector<std::shared_ptr<Plugin::Meta>> GetStreamMetaInfo() const;
 
-    std::shared_ptr<Plugin::TagMap> GetGlobalMetaInfo() const;
+    std::shared_ptr<Plugin::Meta> GetGlobalMetaInfo() const;
 
     void StopTask(bool force);
 
@@ -98,8 +98,8 @@ private:
 
     struct MediaMetaData {
         std::vector<StreamTrackInfo> trackInfos;
-        std::vector<std::shared_ptr<Plugin::TagMap>> trackMetas;
-        std::shared_ptr<Plugin::TagMap> globalMeta;
+        std::vector<std::shared_ptr<Plugin::Meta>> trackMetas;
+        std::shared_ptr<Plugin::Meta> globalMeta;
     };
 
     void Reset();
@@ -120,11 +120,11 @@ private:
 
     bool IsOffsetValid(int64_t offset) const;
 
-    bool PrepareStreams(Plugin::MediaInfoHelper& mediaInfo);
+    bool PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo);
 
     ErrorCode ReadFrame(AVBuffer& buffer, uint32_t& trackId);
 
-    std::shared_ptr<Plugin::TagMap> GetTrackMeta(uint32_t trackId);
+    std::shared_ptr<Plugin::Meta> GetTrackMeta(uint32_t trackId);
 
     void SendEventEos();
 
@@ -132,12 +132,12 @@ private:
 
     void NegotiateDownstream();
 
-    void UpdateStreamMeta(std::shared_ptr<Plugin::TagMap>& streamMeta,
-        Plugin::Capability& negotiatedCap, Plugin::TagMap& downstreamParams);
+    void UpdateStreamMeta(std::shared_ptr<Plugin::Meta>& streamMeta,
+        Plugin::Capability& negotiatedCap, Plugin::Meta& downstreamParams);
 
     void DemuxerLoop();
 
-    void ReportVideoSize(Plugin::MediaInfoHelper& mediaInfo);
+    void ReportVideoSize(const Plugin::MediaInfoHelper& mediaInfo);
 
     Plugin::Seekable seekable_;
     std::string uri_;

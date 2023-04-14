@@ -190,7 +190,7 @@ T FilterBase::FindPort(const std::vector<T>& list, const std::string& name)
     return nullptr;
 }
 
-ErrorCode FilterBase::ConfigPluginWithMeta(Plugin::Base& plugin, Plugin::TagMap &meta)
+ErrorCode FilterBase::ConfigPluginWithMeta(Plugin::Base& plugin, const Plugin::Meta& meta)
 {
     auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
@@ -198,7 +198,7 @@ ErrorCode FilterBase::ConfigPluginWithMeta(Plugin::Base& plugin, Plugin::TagMap 
             continue;
         }
         Plugin::ValueType outValPtr;
-        auto ret = meta.GetData(static_cast<Plugin::Tag>(keyPair.first),outValPtr);
+        auto ret = meta.GetData(static_cast<Plugin::Tag>(keyPair.first), outValPtr);
         if (ret && keyPair.second.first(keyPair.first, outValPtr)) {
             if (plugin.SetParameter(keyPair.first, outValPtr) != Plugin::Status::OK) {
                 MEDIA_LOG_W("set parameter " PUBLIC_LOG_S "(" PUBLIC_LOG_D32 ") on plugin " PUBLIC_LOG_S " failed",

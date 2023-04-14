@@ -77,7 +77,7 @@ void MediaSynchronousSink::NotifyAllPrerolled()
     prerollCond_.NotifyAll();
 }
 
-void MediaSynchronousSink::UpdateMediaTimeRange(Plugin::TagMap &meta)
+void MediaSynchronousSink::UpdateMediaTimeRange(const Plugin::Meta& meta)
 {
     int64_t trackStartTime = 0;
     meta.Get<Plugin::Tag::MEDIA_START_TIME>(trackStartTime);
@@ -93,7 +93,7 @@ void MediaSynchronousSink::UpdateMediaTimeRange(Plugin::TagMap &meta)
             syncCenter->SetMediaTimeRangeEnd(trackDuration + trackStartTime, trackId);
         }
     } else {
-        MEDIA_LOG_I(" get duration faled");
+        MEDIA_LOG_W("Get duration failed");
         if (syncCenter) {
             syncCenter->SetMediaTimeRangeEnd(INT64_MAX, trackId);
         }

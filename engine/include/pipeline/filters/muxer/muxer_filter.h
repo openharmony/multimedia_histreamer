@@ -34,11 +34,11 @@ public:
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
-                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                   Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams) override;
 
     ErrorCode SetOutputFormat(std::string containerMime);
     ErrorCode AddTrack(std::shared_ptr<InPort>& trackPort);
@@ -67,7 +67,7 @@ private:
     bool UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo);
 
     ErrorCode ConfigureToStart();
-    ErrorCode AddTrackThenConfigure(const std::pair<std::string, Plugin::TagMap>& metaPair);
+    ErrorCode AddTrackThenConfigure(const std::pair<std::string, Plugin::Meta>& metaPair);
 
     bool AllTracksEos();
     void UpdateEosState(const std::string& inPort);
@@ -78,7 +78,7 @@ private:
     std::shared_ptr<Plugin::PluginInfo> targetPluginInfo_ {nullptr};
     std::shared_ptr<DataSpliter> dataSpliter_{};
     std::vector<std::pair<std::string, Capability>> capabilityCache_ {};
-    std::vector<std::pair<std::string, Plugin::TagMap>> metaCache_ {};
+    std::vector<std::pair<std::string, Plugin::Meta>> metaCache_ {};
     bool hasWriteHeader_ {false};
     std::shared_ptr<MuxerDataSink> muxerDataSink_;
 

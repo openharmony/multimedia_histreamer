@@ -16,10 +16,9 @@
 #ifndef HISTREAMER_PIPELINE_CORE_COMPATIBLE_CHECK_H
 #define HISTREAMER_PIPELINE_CORE_COMPATIBLE_CHECK_H
 
-
 #include "pipeline/core/type_define.h"
 #include "plugin/common/plugin_caps.h"
-#include "plugin/common/tag_map.h"
+#include "plugin/common/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {
@@ -52,12 +51,12 @@ bool MergeCapability(const Capability& originCap, const Capability& otherCap, Ca
 
 
 /**
- * change tag info capability
+ * change meta info capability
  *
- * @param tagMap target tag
+ * @param meta target meta
  * @return result capability
  */
-std::shared_ptr<Capability> MetaToCapability(Plugin::TagMap& meta);
+std::shared_ptr<Capability> MetaToCapability(const Plugin::Meta& meta);
 
 /**
  * merge meta with capability. This function firstly change meta into capability metaCap. The mime of metaCap is the
@@ -72,7 +71,7 @@ std::shared_ptr<Capability> MetaToCapability(Plugin::TagMap& meta);
  * @param resMeta result meta
  * @return success to merge
  */
-bool MergeMetaWithCapability(const Plugin::TagMap& meta, const Capability& cap, Plugin::TagMap& resTagMap);
+bool MergeMetaWithCapability(const Plugin::Meta& meta, const Capability& cap, Plugin::Meta& resMeta);
 
 bool ApplyCapabilitySet(const Capability& originCap, const CapabilitySet& capabilitySet, Capability& resCap);
 }

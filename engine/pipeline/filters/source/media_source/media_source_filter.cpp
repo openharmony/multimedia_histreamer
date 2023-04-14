@@ -270,23 +270,20 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
 {
     MEDIA_LOG_D("IN");
     SYNC_TRACER();
-    std::shared_ptr<Plugin::TagMap> meta = std::make_shared<Plugin::TagMap>();
-    Plugin::TagMap upstreamParams;
-    Plugin::TagMap downstreamParams;
+    std::shared_ptr<Plugin::Meta> meta = std::make_shared<Plugin::Meta>();
     meta->Insert<Media::Plugin::Tag::MEDIA_FILE_URI>(source->GetSourceUri());
     Seekable seekable = plugin_->GetSeekable();
     FALSE_RETURN_V_MSG_E(seekable != Plugin::Seekable::INVALID, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
                          "media source Seekable must be SEEKABLE or UNSEEKABLE !");
-    FALSE_LOG_MSG(meta->Insert<Media::Plugin::Tag::MEDIA_SEEKABLE>(seekable),
-                  "set seekable fail");
+    FALSE_LOG(meta->Insert<Media::Plugin::Tag::MEDIA_SEEKABLE>(seekable));
     size_t fileSize = 0;
     if ((plugin_->GetSize(fileSize) == Status::OK) && (fileSize != 0)) {
-        MEDIA_LOG_I("Negotiate file size" PUBLIC_LOG_U64,static_cast<uint64_t>(fileSize));
-        FALSE_LOG_MSG(meta->Insert<Media::Plugin::Tag::MEDIA_FILE_SIZE>(static_cast<uint64_t>(fileSize)),
-                      "insert media file size fail");
+        FALSE_LOG(meta->Insert<Media::Plugin::Tag::MEDIA_FILE_SIZE>(static_cast<uint64_t>(fileSize)));
     }
     Capability peerCap;
     auto tmpCap = MetaToCapability(*meta);
+    Plugin::Meta upstreamParams;
+    Plugin::Meta downstreamParams;
     if (!GetOutPort(PORT_NAME_DEFAULT)->Negotiate(tmpCap, peerCap, upstreamParams, downstreamParams) ||
         !GetOutPort(PORT_NAME_DEFAULT)->Configure(meta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("Negotiate fail!");

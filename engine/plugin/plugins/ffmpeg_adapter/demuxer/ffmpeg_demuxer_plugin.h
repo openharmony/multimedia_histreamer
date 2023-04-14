@@ -81,7 +81,7 @@ private:
 
     bool IsSelectedTrack(int32_t trackId);
 
-    void SaveFileInfoToMetaInfo(TagMap &meta);
+    void SaveFileInfoToMetaInfo(Meta &meta);
 
     bool ParseMediaData();
 

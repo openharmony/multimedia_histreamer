@@ -48,11 +48,11 @@ void OutputSinkFilter::Init(EventReceiver *receiver, FilterCallback *callback)
     FilterBase::Init(receiver, callback);
     outPorts_.clear();
 }
-bool OutputSinkFilter::Negotiate(const std::string &inPort,
+bool OutputSinkFilter::Negotiate(const std::string& inPort,
                                  const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                  Plugin::Capability& negotiatedCap,
-                                 const Plugin::TagMap& upstreamParams,
-                                 Plugin::TagMap& downstreamParams)
+                                 const Plugin::Meta& upstreamParams,
+                                 Plugin::Meta& downstreamParams)
 {
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::OUTPUT_SINK);
     if (candidatePlugins.empty()) {
@@ -87,8 +87,8 @@ bool OutputSinkFilter::Negotiate(const std::string &inPort,
     return res;
 }
 
-bool OutputSinkFilter::Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
-                                 Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool OutputSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                                 Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
 {
     PROFILE_BEGIN("Output sink configure begin");
     if (plugin_ == nullptr || pluginInfo_ == nullptr) {

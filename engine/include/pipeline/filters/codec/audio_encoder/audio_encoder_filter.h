@@ -30,7 +30,7 @@ public:
     explicit AudioEncoderFilter(const std::string& name);
     ~AudioEncoderFilter() override;
 
-    virtual ErrorCode SetAudioEncoder(int32_t sourceId, std::shared_ptr<Plugin::TagMap> encoderMeta);
+    virtual ErrorCode SetAudioEncoder(int32_t sourceId, std::shared_ptr<Plugin::Meta> encoderMeta);
 
     ErrorCode Start() override;
 
@@ -39,13 +39,13 @@ public:
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
 
-    uint32_t CalculateBufferSize(const std::shared_ptr<Plugin::TagMap> &meta) override;
+    uint32_t CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta) override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
-                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                   Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams) override;
 
     /**
      *
@@ -57,7 +57,7 @@ public:
     ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
 private:
-    ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<Plugin::TagMap> &meta) override;
+    ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta) override;
 
     ErrorCode HandleFrame(const std::shared_ptr<AVBuffer>& buffer);
 
@@ -75,7 +75,7 @@ private:
     Capability capNegWithUpstream_;
     size_t frameSize_ {0};
     std::string mime_;
-    std::shared_ptr<Plugin::TagMap> encoderMeta_ {nullptr};
+    std::shared_ptr<Plugin::Meta> encoderMeta_ {nullptr};
     std::unique_ptr<RingBuffer> rb_ {};
     AVBufferPtr cahceBuffer_ {nullptr};
 };

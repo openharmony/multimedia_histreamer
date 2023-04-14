@@ -481,7 +481,7 @@ std::string Capability2String(const Capability& capability)
     return buffer;
 }
 
-std::string Meta2String(const Plugin::TagMap& meta)
+std::string Meta2String(const Plugin::Meta& meta)
 {
     char buffer[MAX_BUF_LEN + 1] = {0}; // one more is for \0
     int pos = 0;
@@ -490,7 +490,9 @@ std::string Meta2String(const Plugin::TagMap& meta)
     RETURN_IF_SNPRI_FAILED(snprintf_truncated_s(buffer + pos, MAX_BUF_LEN - pos, "Meta{"), ret, {});
     pos += ret;
     bool needEtc = false;
-    for (const auto & item : meta.GetMetaIDs()) {
+    std::vector<Tag> keys;
+    meta.GetKeys(keys);
+    for (const auto & item : keys) {
         if (pos >= MAX_BUF_LEN - 2) { // reserve for "}\0"
             needEtc = true;
             break;
@@ -500,9 +502,9 @@ std::string Meta2String(const Plugin::TagMap& meta)
             continue;
         }
         Plugin::ValueType value;
-        auto tmp = meta.GetData(item,value);
+        auto isValueExist = meta.GetData(item, value);
         const auto& tuple = Plugin::g_tagInfoMap.at(static_cast<Tag>(item));
-        if (tmp) {
+        if (isValueExist) {
             RETURN_IF_SNPRI_FAILED(g_metaStrnessMap.at(item)(buffer + pos, MAX_BUF_LEN - pos,
                 std::get<0>(tuple), std::get<2>(tuple), value), ret, buffer); // secondary parameter
             pos += ret;

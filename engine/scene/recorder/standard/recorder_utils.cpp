@@ -73,7 +73,7 @@ Plugin::SrcInputType TransVideoInputType(OHOS::Media::VideoSourceType sourceType
     }
     return Plugin::SrcInputType::UNKNOWN;
 }
-bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::TagMap& encoderMeta)
+bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& encoderMeta)
 {
     switch (aFormat) {
         case OHOS::Media::AudioCodecFormat::AUDIO_DEFAULT:
@@ -87,7 +87,7 @@ bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::TagMap&
     return false;
 }
 
-bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::TagMap& encoderMeta)
+bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::Meta& encoderMeta)
 {
     bool ret = true;
     switch (vFormat) {

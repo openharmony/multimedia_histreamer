@@ -35,30 +35,24 @@ namespace Plugin {
         {                                                        \
             auto iter = map_.find(tag);                          \
             if (iter != map_.end()) {                            \
-              return true;                                       \
+                map_.erase(iter++);                              \
             }                                                    \
             map_.insert(std::make_pair(tag, value));             \
             return true;                                         \
         }                                                        \
         template<Tag tag>                                        \
         inline typename std::enable_if<(condition), bool>::type  \
-        Get(ValueType& value)                                    \
+        Get(ValueType& value) const                              \
         {                                                        \
             if (map_.count(tag) == 0) {                          \
                 return false;                                    \
             }                                                    \
-            Any& temp = map_.at(tag);                            \
-            if (!temp.SameTypeWith(typeid(ValueType))) {         \
-                return false;                                    \
-            }                                                    \
-            value = AnyCast<ValueType>(map_.at(tag));            \
-            return true;                                         \
+            return AnyCast<ValueType>(&map_.at(tag), value);     \
         }
 
 
 using MapIt = std::map<Tag, Any>::const_iterator;
-
-class TagMap {
+class Meta {
 public:
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
     DEFINE_INSERT_GET_FUNC(tag == Tag::BUFFER_ALLOCATOR or tag == Tag::VIDEO_SURFACE,
@@ -77,7 +71,6 @@ public:
     DEFINE_INSERT_GET_FUNC(tag == Tag::MEDIA_TYPE, MediaType);
     DEFINE_INSERT_GET_FUNC(tag == Tag::VIDEO_BIT_STREAM_FORMAT, std::vector<VideoBitStreamFormat>);
     DEFINE_INSERT_GET_FUNC(tag == Tag::VIDEO_H264_PROFILE, VideoH264Profile);
-    DEFINE_INSERT_GET_FUNC(tag == Tag::VIDEO_H264_LEVEL, uint32_t);
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::TRACK_ID or
         tag == Tag::REQUIRED_OUT_BUFFER_CNT or
@@ -95,6 +88,7 @@ public:
         tag == Tag::VIDEO_HEIGHT or
         tag == Tag::VIDEO_FRAME_RATE or
         tag == Tag::VIDEO_MAX_SURFACE_NUM or
+        tag == Tag::VIDEO_H264_LEVEL or
         tag == Tag::BITS_PER_CODED_SAMPLE, uint32_t);
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::MEDIA_DURATION or
@@ -120,9 +114,9 @@ public:
         tag == Tag::MEDIA_LANGUAGE or
         tag == Tag::MEDIA_DESCRIPTION or
         tag == Tag::MEDIA_LYRICS, std::string);
-    TagMap& operator=(const TagMap& other)
+    Meta& operator=(const Meta& other)
     {
-        map_ =other.map_;
+        map_ = other.map_;
         return *this;
     }
 
@@ -131,7 +125,7 @@ public:
         return map_[tag];
     }
 
-    MapIt begin() const // to support for (auto e : TagMap), must use begin/end name
+    MapIt begin() const // to support for (auto e : Meta), must use begin/end name
     {
         return map_.cbegin();
     }
@@ -157,10 +151,9 @@ public:
     }
 
     template <typename T>
-    bool SetData(Plugin::Tag id, const T& value)
+    void SetData(Plugin::Tag id, const T& value)
     {
         map_[id] = value;
-        return true;
     }
 
     template <typename T>
@@ -184,24 +177,21 @@ public:
         return true;
     }
 
-    bool Remove(Plugin::Tag id)
+    void Remove(Plugin::Tag id)
     {
         auto ite = map_.find(id);
-        if (ite == map_.end()) {
-            return false;
+        if (ite != map_.end()) {
+            map_.erase(ite);
         }
-        map_.erase(ite);
-        return true;
     }
 
-    std::vector<Tag> GetMetaIDs() const
+    void GetKeys(std::vector<Tag>& keys) const
     {
-        std::vector<Tag> ret (map_.size());
         int cnt = 0;
+        keys.resize(map_.size());
         for (const auto& tmp : map_) {
-            ret[cnt++] = tmp.first;
+            keys[cnt++] = tmp.first;
         }
-        return ret;
     }
 private:
     std::map<Tag, Any> map_;

@@ -21,7 +21,7 @@
 #include "hst_recorder_param.h"
 #include "pipeline/core/error_code.h"
 #include "plugin/common/plugin_source_tags.h"
-#include "plugin/common/tag_map.h"
+#include "plugin/common/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {
@@ -79,8 +79,8 @@ const std::map<OutputFormatType, std::string> g_outputFormatToMimeMap = {
 int TransErrorCode(ErrorCode errorCode);
 Plugin::SrcInputType TransAudioInputType(OHOS::Media::AudioSourceType sourceType);
 Plugin::SrcInputType TransVideoInputType(OHOS::Media::VideoSourceType sourceType);
-bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::TagMap& encoderMeta);
-bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::TagMap& encoderMeta);
+bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& encoderMeta);
+bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::Meta& encoderMeta);
 bool GenerateFilePath(const std::string& dirPath, OutputFormatType outputFormatType, std::string& filePath);
 bool CastRecorderParam(int32_t sourceId, const RecorderParam& param, HstRecParam& out);
 }  // namespace Record

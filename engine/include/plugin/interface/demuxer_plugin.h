@@ -38,8 +38,8 @@ namespace Plugin {
  * @version 1.0
  */
 struct MediaInfo {
-    TagMap general;             ///< General information
-    std::vector<TagMap> tracks; ///< Media tracks, include audio, video and text
+    Meta general;             ///< General information
+    std::vector<Meta> tracks; ///< Media tracks, include audio, video and text
 };
 
 /**

@@ -50,11 +50,11 @@ public:
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
-                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                   Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams) override;
 
     /**
      *
@@ -84,10 +84,10 @@ protected:
     void ResetSyncInfo() override;
 
 private:
-    ErrorCode ConfigurePluginParams(const std::shared_ptr<Plugin::TagMap>& meta);
-    ErrorCode ConfigurePluginToStartNoLocked(const std::shared_ptr<Plugin::TagMap> &meta);
+    ErrorCode ConfigurePluginParams(const std::shared_ptr<const Plugin::Meta>& meta);
+    ErrorCode ConfigurePluginToStartNoLocked(const std::shared_ptr<const Plugin::Meta>& meta);
     bool CreateVideoSinkPlugin(const std::shared_ptr<Plugin::PluginInfo>& selectedPluginInfo);
-    void HandleNegotiateParams(const Plugin::TagMap& upstreamParams, Plugin::TagMap& downstreamParams);
+    void HandleNegotiateParams(const Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams);
     void RenderFrame();
     bool CheckBufferLatenessMayWait(AVBufferPtr buffer);
     std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQueue_ {nullptr};

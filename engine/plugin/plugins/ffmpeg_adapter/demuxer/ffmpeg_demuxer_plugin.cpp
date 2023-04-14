@@ -476,7 +476,7 @@ bool FFmpegDemuxerPlugin::IsSelectedTrack(int32_t trackId)
                        [trackId](int32_t id) { return id == trackId; });
 }
 
-void FFmpegDemuxerPlugin::SaveFileInfoToMetaInfo(TagMap& meta)
+void FFmpegDemuxerPlugin::SaveFileInfoToMetaInfo(Meta& meta)
 {
     meta.Clear();
     AVDictionaryEntry* tag = nullptr;
@@ -505,7 +505,7 @@ bool FFmpegDemuxerPlugin::ParseMediaData()
         if (!codecContext) {
             continue;
         }
-        TagMap track;
+        Meta track;
         if (avStream.codecpar->codec_type == AVMEDIA_TYPE_VIDEO
             && avStream.codecpar->codec_id != AV_CODEC_ID_RAWVIDEO) {
             if (!codecContext->width ||!codecContext->height) {

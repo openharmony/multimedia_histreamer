@@ -96,7 +96,7 @@ void ConvertToMediaInfoHelper(uint32_t pkgVersion, const MediaInfo& src, MediaIn
 {
     (void)(pkgVersion);
     for (auto const& global : src.general) {
-        dest.globalMeta.SetData(Tag(global.first), global.second);
+        dest.globalMeta.SetData(global.first, global.second);
     }
     size_t streamSize = src.tracks.size();
     if (streamSize <= 0) {

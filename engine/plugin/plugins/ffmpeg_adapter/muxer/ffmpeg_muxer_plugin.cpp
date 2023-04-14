@@ -134,66 +134,80 @@ Status SetCodecByMime(const AVOutputFormat* fmt, const std::string& mime, AVStre
     return Status::OK;
 }
 
-Status SetCodecOfTrack(const AVOutputFormat* fmt, AVStream* stream, const TagMap& tagMap)
+Status SetCodecOfTrack(const AVOutputFormat* fmt, AVStream* stream, const Meta& meta)
 {
-    auto ite = tagMap.Find(Tag::MIME);
-    FALSE_RETURN_V_MSG_E(ite != std::end(tagMap), Status::ERROR_UNSUPPORTED_FORMAT, "mime is missing!");
-    FALSE_RETURN_V(ite->second.SameTypeWith(typeid(std::string)), Status::ERROR_MISMATCHED_TYPE);
+    std::string mime;
+    FALSE_RETURN_V(meta.Get<Tag::MIME>(mime), Status::ERROR_INVALID_PARAMETER);
     // todo specially for audio/mpeg audio/mpeg we should check mpegversion and mpeglayer
 
-    return SetCodecByMime(fmt, AnyCast<std::string>(ite->second), stream);
+    return SetCodecByMime(fmt, AnyCast<std::string>(mime), stream);
 }
 
-template<typename T, typename U>
-Status SetSingleParameter(Tag tag, const TagMap& tagMap, U& target, std::function<U(T)> func)
+Status SetParameterOfAuTrack(AVStream* stream, const Meta& meta)
 {
-    auto ite = tagMap.Find(tag);
-    if (ite != std::end(tagMap)) {
-        FALSE_RETURN_V_MSG_E(ite->second.SameTypeWith(typeid(T)), Status::ERROR_MISMATCHED_TYPE,
-                             "tag " PUBLIC_LOG_U32 " type mismatched", tag);
-        target = func(AnyCast<T>(ite->second));
-    }
+    uint32_t channels;
+    uint32_t sampleRate;
+    uint32_t perFrame;
+    AudioSampleFormat sampleFormat;
+    AudioChannelLayout layout;
+
+    FALSE_RETURN_V(meta.Get<Tag::AUDIO_SAMPLE_FORMAT>(sampleFormat),
+                   Status::ERROR_INVALID_PARAMETER);
+    stream->codecpar->format = static_cast<int>(ConvP2FfSampleFmt(sampleFormat));
+
+    FALSE_RETURN_V(meta.Get<Tag::AUDIO_CHANNELS>(channels),
+                   Status::ERROR_INVALID_PARAMETER);
+    stream->codecpar->channels = ui2iFunc(channels);
+
+    FALSE_RETURN_V(meta.Get<Tag::AUDIO_SAMPLE_RATE>(sampleRate),
+                   Status::ERROR_INVALID_PARAMETER);
+    stream->codecpar->sample_rate = ui2iFunc(sampleRate);
+
+    FALSE_RETURN_V(meta.Get<Tag::AUDIO_SAMPLE_PER_FRAME>(perFrame),
+                   Status::ERROR_INVALID_PARAMETER);
+    stream->codecpar->frame_size = ui2iFunc(perFrame);
+
+    FALSE_RETURN_V(meta.Get<Tag::AUDIO_CHANNEL_LAYOUT>(layout),
+                   Status::ERROR_INVALID_PARAMETER);
+    stream->codecpar->channel_layout = (uint64_t)layout;
     return Status::OK;
 }
 
-Status SetParameterOfAuTrack(AVStream* stream, const TagMap& tagMap)
+Status SetParameterOfVdTrack(AVStream* stream, const Meta& meta)
 {
-    auto ret = SetSingleParameter<AudioSampleFormat, int32_t>(Tag::AUDIO_SAMPLE_FORMAT, tagMap,
-                                                              stream->codecpar->format, ConvP2FfSampleFmt);
-    NOK_RETURN(ret);
-    ret = SetSingleParameter<uint32_t, int32_t>(Tag::AUDIO_CHANNELS, tagMap, stream->codecpar->channels, ui2iFunc);
-    NOK_RETURN(ret);
-    ret = SetSingleParameter<uint32_t, int32_t>(Tag::AUDIO_SAMPLE_RATE, tagMap, stream->codecpar->sample_rate,
-                                                ui2iFunc);
-    NOK_RETURN(ret);
-    ret = SetSingleParameter<uint32_t, int32_t>(Tag::AUDIO_SAMPLE_PER_FRAME, tagMap, stream->codecpar->frame_size,
-                                                ui2iFunc);
-    NOK_RETURN(ret);
-    ret = SetSingleParameter<AudioChannelLayout, uint64_t>(Tag::AUDIO_CHANNEL_LAYOUT, tagMap,
-        stream->codecpar->channel_layout, [](AudioChannelLayout layout) {return (uint64_t)layout;});
-    return ret;
+    uint32_t width;
+    uint32_t height;
+    uint32_t level;
+    int64_t bitRate;
+    VideoPixelFormat format;
+    VideoH264Profile profile;
+    FALSE_RETURN_V(meta.Get<Tag::VIDEO_PIXEL_FORMAT>(format),
+                   Status::ERROR_INVALID_PARAMETER);
+    stream->codecpar->format = static_cast<int>(ConvertPixelFormatToFFmpeg(format));
+
+    FALSE_RETURN_V(meta.Get<Tag::VIDEO_WIDTH>(width),
+                   Status::ERROR_INVALID_PARAMETER);
+    stream->codecpar->width = ui2iFunc(width);
+
+    FALSE_RETURN_V(meta.Get<Tag::VIDEO_HEIGHT>(height),
+                   Status::ERROR_INVALID_PARAMETER);
+    stream->codecpar->height = ui2iFunc(height);
+
+    FALSE_RETURN_V(meta.Get<Tag::MEDIA_BITRATE>(bitRate),
+                   Status::ERROR_INVALID_PARAMETER);
+    stream->codecpar->bit_rate = bitRate;
+
+    FALSE_RETURN_V(meta.Get<Tag::VIDEO_H264_PROFILE>(profile),
+                   Status::ERROR_INVALID_PARAMETER);
+    stream->codecpar->profile = static_cast<int>(ConvH264ProfileToFfmpeg(profile));
+
+    FALSE_RETURN_V(meta.Get<Tag::VIDEO_H264_LEVEL>(level),
+                   Status::ERROR_INVALID_PARAMETER);
+    stream->codecpar->level = ui2iFunc(level);
+    return Status::OK;
 }
 
-Status SetParameterOfVdTrack(AVStream* stream, const TagMap& tagMap)
-{
-    auto ret = SetSingleParameter<VideoPixelFormat, int32_t>(Tag::VIDEO_PIXEL_FORMAT, tagMap,
-        stream->codecpar->format, ConvertPixelFormatToFFmpeg);
-    NOK_RETURN(ret);
-    ret = SetSingleParameter<uint32_t, int32_t>(Tag::VIDEO_WIDTH, tagMap, stream->codecpar->width, ui2iFunc);
-    NOK_RETURN(ret);
-    ret = SetSingleParameter<uint32_t, int32_t>(Tag::VIDEO_HEIGHT, tagMap, stream->codecpar->height, ui2iFunc);
-    NOK_RETURN(ret);
-    ret = SetSingleParameter<int64_t, int64_t>(Tag::MEDIA_BITRATE, tagMap, stream->codecpar->bit_rate,
-                                               [](int64_t bitRate) {return bitRate;});
-    NOK_RETURN(ret);
-    ret = SetSingleParameter<VideoH264Profile, int32_t>(Tag::VIDEO_H264_PROFILE, tagMap, stream->codecpar->profile,
-                                                        ConvH264ProfileToFfmpeg);
-    NOK_RETURN(ret);
-    return SetSingleParameter<uint32_t, int32_t>(Tag::VIDEO_H264_LEVEL, tagMap, stream->codecpar->level,
-                                                 ui2iFunc);
-}
-
-Status SetParameterOfSubTitleTrack(AVStream* stream, const TagMap& tagMap)
+Status SetParameterOfSubTitleTrack(AVStream* stream, const Meta& meta)
 {
     // todo add subtitle
     MEDIA_LOG_E("should add subtitle tack parameter setter");
@@ -218,45 +232,42 @@ void ResetCodecParameter(AVCodecParameters* par)
     par->sample_aspect_ratio = AVRational {0, 1};
 }
 
-Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const TagMap& tagMap)
+Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const Meta& meta)
 {
     FALSE_RETURN_V(stream != nullptr, Status::ERROR_INVALID_PARAMETER);
     ResetCodecParameter(stream->codecpar);
     // firstly mime
-    auto ret = SetCodecOfTrack(fmt, stream, tagMap);
+    auto ret = SetCodecOfTrack(fmt, stream, meta);
     NOK_RETURN(ret);
     if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) { // audio
-        ret = SetParameterOfAuTrack(stream, tagMap);
+        ret = SetParameterOfAuTrack(stream, meta);
     } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) { // video
-        ret = SetParameterOfVdTrack(stream, tagMap);
+        ret = SetParameterOfVdTrack(stream, meta);
     } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_SUBTITLE) { // subtitle
-        ret = SetParameterOfSubTitleTrack(stream, tagMap);
+        ret = SetParameterOfSubTitleTrack(stream, meta);
     } else {
         MEDIA_LOG_W("unknown codec type of stream " PUBLIC_LOG_D32, stream->index);
     }
     NOK_RETURN(ret);
     // others
-    ret = SetSingleParameter<int64_t, int64_t>(Tag::MEDIA_BITRATE, tagMap, stream->codecpar->bit_rate,
-         [](int64_t rate) {return rate;});
-    NOK_RETURN(ret);
+
+    FALSE_RETURN_V(meta.Get<Tag::MEDIA_BITRATE>(stream->codecpar->bit_rate),
+                   Status::ERROR_INVALID_PARAMETER);
     // extra data
-    auto ite = tagMap.Find(Tag::MEDIA_CODEC_CONFIG);
-    if (ite != std::end(tagMap)) {
-        FALSE_RETURN_V_MSG_E(ite->second.SameTypeWith(typeid(CodecConfig)), Status::ERROR_MISMATCHED_TYPE,
-                          "tag " PUBLIC_LOG_D32 " type mismatched", Tag::MEDIA_CODEC_CONFIG);
-        auto codecConfig = AnyCast<CodecConfig>(ite->second);
-        if (!codecConfig.empty()) {
-            auto extraSize = codecConfig.size();
-            stream->codecpar->extradata = static_cast<uint8_t *>(av_mallocz(extraSize + AV_INPUT_BUFFER_PADDING_SIZE));
-            FALSE_RETURN_V(stream->codecpar->extradata != nullptr, Status::ERROR_NO_MEMORY);
-            (void)memcpy_s(stream->codecpar->extradata, extraSize, codecConfig.data(), extraSize);
-            stream->codecpar->extradata_size = extraSize;
-        }
+    CodecConfig codecConfig;
+    FALSE_RETURN_V(meta.Get<Tag::MEDIA_CODEC_CONFIG>(codecConfig),
+                   Status::ERROR_INVALID_PARAMETER);
+    if (!codecConfig.empty()) {
+        auto extraSize = codecConfig.size();
+        stream->codecpar->extradata = static_cast<uint8_t *>(av_mallocz(extraSize + AV_INPUT_BUFFER_PADDING_SIZE));
+        FALSE_RETURN_V(stream->codecpar->extradata != nullptr, Status::ERROR_NO_MEMORY);
+        (void)memcpy_s(stream->codecpar->extradata, extraSize, codecConfig.data(), extraSize);
+        stream->codecpar->extradata_size = extraSize;
     }
     return Status::OK;
 }
 
-Status SetTagsOfGeneral(AVFormatContext* fmtCtx, const TagMap& tags)
+Status SetTagsOfGeneral(AVFormatContext* fmtCtx, const Meta& tags)
 {
     for (const auto& pair: tags) {
         std::string metaName;
@@ -401,7 +412,7 @@ Status FFmpegMuxerPlugin::SetTrackParameter(uint32_t trackId, Tag tag, const Plu
 {
     FALSE_RETURN_V(trackId < formatContext_->nb_streams, Status::ERROR_INVALID_PARAMETER);
     if (trackParameters_.count(trackId) == 0) {
-        trackParameters_.insert({trackId, Plugin::TagMap()});
+        trackParameters_.insert({trackId, Plugin::Meta()});
     }
     trackParameters_[trackId][tag] = value;
     return Status::OK;

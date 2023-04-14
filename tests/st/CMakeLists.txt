@@ -124,7 +124,6 @@ SET(TEST_PLUGIN_SRCS
         ${TOP_DIR}/histreamer/engine/plugin/core/plugin_core_utils.cpp
         ${TOP_DIR}/histreamer/engine/plugin/core/plugin_wrapper.cpp
         ${TOP_DIR}/histreamer/engine/plugin/core/output_sink.cpp
-        ${TOP_DIR}/histreamer/engine/plugin/core/plugin_meta.cpp
         ${TOP_DIR}/histreamer/engine/foundation/osal/filesystem/file_system.cpp
         ${TOP_DIR}/histreamer/engine/foundation/osal/thread/mutex.cpp
         ${TOP_DIR}/histreamer/engine/foundation/osal/thread/scoped_lock.cpp)

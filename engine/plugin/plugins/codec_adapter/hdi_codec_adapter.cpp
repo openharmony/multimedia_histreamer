@@ -132,6 +132,7 @@ Status HdiCodecAdapter::Init()
     codecCallback_->EventHandler = &HdiCodecAdapter::EventHandler;
     codecCallback_->EmptyBufferDone = &HdiCodecAdapter::EmptyBufferDone;
     codecCallback_->FillBufferDone = &HdiCodecAdapter::FillBufferDone;
+
     int32_t ret = HdiCodecManager::GetInstance().CreateComponent(&codecComp_, componentId_,
                                                                  const_cast<char*>(componentName_.c_str()),
                                                                  (int64_t)this, codecCallback_);
@@ -344,16 +345,16 @@ Status HdiCodecAdapter::SetParameter(Plugin::Tag tag, const ValueType &value)
 Status HdiCodecAdapter::ConfigOmx()
 {
     MEDIA_LOG_D("ConfigOmx Start");
-    TagMap tagMap;
-    tagMap.Insert<Tag::MIME>(pluginMime_);
-    tagMap.Insert<Tag::VIDEO_WIDTH>(width_);
-    tagMap.Insert<Tag::VIDEO_HEIGHT>(height_);
-    tagMap.Insert<Tag::VIDEO_FRAME_RATE>(frameRate_);
-    tagMap.Insert<Tag::VIDEO_PIXEL_FORMAT>(pixelFormat_);
-    tagMap.Insert<Tag::MEDIA_BITRATE>(bitRate_);
-    auto ret = inCodecPort_->Config(tagMap);
+    Meta meta;
+    meta.Insert<Tag::MIME>(pluginMime_);
+    meta.Insert<Tag::VIDEO_WIDTH>(width_);
+    meta.Insert<Tag::VIDEO_HEIGHT>(height_);
+    meta.Insert<Tag::VIDEO_FRAME_RATE>(frameRate_);
+    meta.Insert<Tag::VIDEO_PIXEL_FORMAT>(pixelFormat_);
+    meta.Insert<Tag::MEDIA_BITRATE>(bitRate_);
+    auto ret = inCodecPort_->Config(meta);
     FALSE_RETURN_V_MSG_E(ret == Status::OK, Status::ERROR_INVALID_OPERATION, "Configure inCodecPort failed");
-    ret = outCodecPort_->Config(tagMap);
+    ret = outCodecPort_->Config(meta);
     FALSE_RETURN_V_MSG_E(ret == Status::OK, Status::ERROR_INVALID_OPERATION, "Configure outCodecPort failed");
     PortInfo portInfo;
     inCodecPort_->QueryParam(portInfo);

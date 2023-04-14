@@ -36,19 +36,30 @@ CodecPort::CodecPort(CodecComponentType* component, uint32_t portIndex, const Co
     verInfo_ = verInfo;
 }
 
-Status CodecPort::Config(TagMap& tagMap)
+Status CodecPort::Config(Meta& meta)
 {
     MEDIA_LOG_D("Config Start");
     auto ret = HdiGetParameter(codecComp_, OMX_IndexParamPortDefinition, portDef_);
     FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, Status::ERROR_INVALID_PARAMETER, "HdiGetParameter failed");
-    portDef_.format.video.eCompressionFormat = CodingTypeHstToHdi(Plugin::AnyCast<std::string>(tagMap[Tag::MIME]));
-    portDef_.format.video.eColorFormat = FormatHstToOmx(Plugin::AnyCast<VideoPixelFormat>(
-        tagMap[Tag::VIDEO_PIXEL_FORMAT]));
-    portDef_.format.video.nFrameHeight = Plugin::AnyCast<uint32_t>(tagMap[Tag::VIDEO_HEIGHT]);
-    portDef_.format.video.nFrameWidth = Plugin::AnyCast<uint32_t>(tagMap[Tag::VIDEO_WIDTH]);
-    portDef_.format.video.xFramerate = Plugin::AnyCast<uint32_t>(tagMap[Tag::VIDEO_FRAME_RATE]) << HDI_FRAME_RATE_MOVE;
+    std::string mime;
+    uint32_t hight;
+    uint32_t wigth;
+    uint32_t frameRate;
+    int64_t bitRate;
+    Plugin::VideoPixelFormat vdecFormat;
+    FALSE_LOG(meta.Get<Tag::MIME>(mime));
+    FALSE_LOG(meta.Get<Tag::VIDEO_PIXEL_FORMAT>(vdecFormat));
+    FALSE_LOG(meta.Get<Tag::VIDEO_HEIGHT>(hight));
+    FALSE_LOG(meta.Get<Tag::VIDEO_WIDTH>(wigth));
+    FALSE_LOG(meta.Get<Tag::VIDEO_FRAME_RATE>(frameRate));
+    FALSE_LOG(meta.Get<Tag::MEDIA_BITRATE>(bitRate));
+    portDef_.format.video.eCompressionFormat = CodingTypeHstToHdi(mime);
+    portDef_.format.video.eColorFormat = FormatHstToOmx(vdecFormat);
+    portDef_.format.video.nFrameHeight = hight;
+    portDef_.format.video.nFrameWidth = wigth;
+    portDef_.format.video.xFramerate = frameRate << HDI_FRAME_RATE_MOVE;
     MEDIA_LOG_D("frame_rate: " PUBLIC_LOG_U32, portDef_.format.video.xFramerate);
-    portDef_.format.video.nBitrate = Plugin::AnyCast<int64_t>(tagMap[Tag::MEDIA_BITRATE]);
+    portDef_.format.video.nBitrate = bitRate;
     ret = HdiSetParameter(codecComp_, OMX_IndexParamPortDefinition, portDef_);
     FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, Status::ERROR_INVALID_PARAMETER, "HdiSetParameter failed");
     return Status::OK;

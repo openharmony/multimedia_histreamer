@@ -57,7 +57,7 @@ std::vector<WorkMode> VideoCaptureFilter::GetWorkModes()
     return {WorkMode::PUSH};
 }
 
-ErrorCode VideoCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::TagMap>& videoMeta)
+ErrorCode VideoCaptureFilter::InitAndConfigPlugin(const std::shared_ptr<Plugin::Meta>& videoMeta)
 {
     MEDIA_LOG_D("IN");
     ErrorCode err = TranslatePluginStatus(plugin_->Init());
@@ -156,8 +156,8 @@ ErrorCode VideoCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
 
 ErrorCode VideoCaptureFilter::DoConfigure()
 {
-    auto emptyMeta = std::make_shared<Plugin::TagMap>();
-    auto videoMeta = std::make_shared<Plugin::TagMap>();
+    auto emptyMeta = std::make_shared<Plugin::Meta>();
+    auto videoMeta = std::make_shared<Plugin::Meta>();
     if (!MergeMetaWithCapability(*emptyMeta, capNegWithDownstream_, *videoMeta)) {
         MEDIA_LOG_E("cannot find available capability of plugin " PUBLIC_LOG_S, pluginInfo_->name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
@@ -168,8 +168,8 @@ ErrorCode VideoCaptureFilter::DoConfigure()
     FALSE_LOG(videoMeta->Insert<Plugin::Tag::VIDEO_FRAME_RATE>(frameRate_));
     FALSE_LOG(videoMeta->Insert<Plugin::Tag::MIME>(mime_));
     FALSE_LOG(videoMeta->Insert<Plugin::Tag::VIDEO_PIXEL_FORMAT>(pixelFormat_));
-    Plugin::TagMap upstreamParams;
-    Plugin::TagMap downstreamParams;
+    Plugin::Meta upstreamParams;
+    Plugin::Meta downstreamParams;
     if (!outPorts_[0]->Configure(videoMeta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("Configure downstream fail");
         return ErrorCode::ERROR_UNKNOWN;
@@ -317,8 +317,8 @@ bool VideoCaptureFilter::DoNegotiate(const CapabilitySet &outCaps)
         auto thisOut = std::make_shared<Plugin::Capability>();
         mime_ = outCap.mime;
         *thisOut = outCap; // pixel format
-        Plugin::TagMap upstreamParams;
-        Plugin::TagMap downstreamParams;
+        Plugin::Meta upstreamParams;
+        Plugin::Meta downstreamParams;
         if (outPorts_[0]->Negotiate(thisOut, capNegWithDownstream_, upstreamParams, downstreamParams)) {
             MEDIA_LOG_I("Negotiate success");
             return true;

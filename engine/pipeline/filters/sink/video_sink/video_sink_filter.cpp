@@ -110,7 +110,7 @@ ErrorCode VideoSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
     return TranslatePluginStatus(plugin_->GetParameter(tag, value));
 }
 
-void VideoSinkFilter::HandleNegotiateParams(const Plugin::TagMap& upstreamParams, Plugin::TagMap& downstreamParams)
+void VideoSinkFilter::HandleNegotiateParams(const Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
 {
 #ifndef OHOS_LITE
     MEDIA_LOG_I("Enter set surface buffer");
@@ -172,8 +172,8 @@ bool VideoSinkFilter::CreateVideoSinkPlugin(const std::shared_ptr<Plugin::Plugin
 bool VideoSinkFilter::Negotiate(const std::string& inPort,
                                 const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                 Plugin::Capability& negotiatedCap,
-                                const Plugin::TagMap& upstreamParams,
-                                Plugin::TagMap& downstreamParams)
+                                const Plugin::Meta& upstreamParams,
+                                Plugin::Meta& downstreamParams)
 {
     PROFILE_BEGIN("video sink negotiate start");
     if (state_ != FilterState::PREPARING) {
@@ -203,8 +203,8 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort,
     return true;
 }
 
-bool VideoSinkFilter::Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
-                                Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool VideoSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                                Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
 {
     PROFILE_BEGIN("video sink configure start");
     if (plugin_ == nullptr || pluginInfo_ == nullptr) {
@@ -233,7 +233,7 @@ bool VideoSinkFilter::Configure(const std::string &inPort, const std::shared_ptr
     return true;
 }
 
-ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<Plugin::TagMap>& meta)
+ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     auto err = ErrorCode::SUCCESS;
     uint32_t width;
@@ -241,28 +241,28 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<Plugin::T
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_WIDTH, width));
         FAIL_RETURN_MSG(err, "Set plugin width fail");
     } else {
-        MEDIA_LOG_I("get VIDEO_WIDTH fail");
+        MEDIA_LOG_W("Get VIDEO_WIDTH failed.");
     }
     uint32_t height;
     if (meta->Get<Plugin::Tag::VIDEO_HEIGHT>(height)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_HEIGHT, height));
         FAIL_RETURN_MSG(err, "Set plugin height fail");
     } else {
-        MEDIA_LOG_I("get VIDEO_HEIGHT fail");
+        MEDIA_LOG_W("Get VIDEO_HEIGHT fail");
     }
     Plugin::VideoPixelFormat pixelFormat;
     if (meta->Get<Plugin::Tag::VIDEO_PIXEL_FORMAT>(pixelFormat)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_PIXEL_FORMAT, pixelFormat));
         FAIL_RETURN_MSG(err, "Set plugin pixel format fail");
     } else {
-        MEDIA_LOG_I("get VIDEO_PIXEL_FORMAT fail");
+        MEDIA_LOG_W("Get VIDEO_PIXEL_FORMAT fail");
     }
     MEDIA_LOG_D("width: " PUBLIC_LOG_U32 ", height: " PUBLIC_LOG_U32 ", pixelFormat: " PUBLIC_LOG_U32,
                 width, height, pixelFormat);
     return err;
 }
 
-ErrorCode VideoSinkFilter::ConfigurePluginToStartNoLocked(const std::shared_ptr<Plugin::TagMap> &meta)
+ErrorCode VideoSinkFilter::ConfigurePluginToStartNoLocked(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Init()), "Init plugin error");
     plugin_->SetCallback(this);

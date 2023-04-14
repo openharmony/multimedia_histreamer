@@ -43,7 +43,7 @@ protected:
     virtual void ResetSyncInfo() = 0;
 
     void ResetPrerollReported();
-    void UpdateMediaTimeRange(Plugin::TagMap &meta);
+    void UpdateMediaTimeRange(const Plugin::Meta& meta);
 
     int8_t syncerPriority_ {IMediaSynchronizer::NONE};
     bool hasReportedPreroll_ {false};

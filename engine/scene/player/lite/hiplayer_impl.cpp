@@ -430,7 +430,7 @@ ErrorCode HiPlayerImpl::DoOnReady()
     if (tmpMeta->Get<Media::Plugin::Tag::MEDIA_DURATION>(duration)) {
         found = true;
     } else {
-        MEDIA_LOG_I("Get MEDIA_DURATION fail");
+        MEDIA_LOG_W("Get media duration failed.");
     }
     streamMeta_.clear();
     int64_t tmp = 0;
@@ -440,7 +440,7 @@ ErrorCode HiPlayerImpl::DoOnReady()
             duration = std::max(duration, tmp);
             found = true;
         } else {
-            MEDIA_LOG_I("Get MEDIA_DURATION fail");
+            MEDIA_LOG_W("Get media duration failed.");
         }
     }
     if (found) {
@@ -653,13 +653,13 @@ ErrorCode HiPlayerImpl::GetTrackCnt(size_t& cnt) const
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode HiPlayerImpl::GetSourceMeta(shared_ptr<const Plugin::TagMap>& meta) const
+ErrorCode HiPlayerImpl::GetSourceMeta(shared_ptr<const Plugin::Meta>& meta) const
 {
     meta = sourceMeta_.lock();
     return meta ? ErrorCode::SUCCESS : ErrorCode::ERROR_AGAIN;
 }
 
-ErrorCode HiPlayerImpl::GetTrackMeta(size_t id, shared_ptr<const Plugin::TagMap>& meta) const
+ErrorCode HiPlayerImpl::GetTrackMeta(size_t id, shared_ptr<const Plugin::Meta>& meta) const
 {
     if (id > streamMeta_.size() || id < 0) {
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;

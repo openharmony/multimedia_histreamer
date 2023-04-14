@@ -34,28 +34,28 @@ public:
 
     void FlushEnd() override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
-                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                   Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams) override;
 
-    ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
+    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
 
     void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input) override;
 
     void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override;
 
 private:
-    uint32_t CalculateBufferSize(const std::shared_ptr<Plugin::TagMap> &meta) override;
+    uint32_t CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta) override;
 
     std::vector<Capability::Key> GetRequiredOutCapKeys() override;
 
-    void UpdateParams(const std::shared_ptr<Plugin::TagMap> &upMeta,
-                      std::shared_ptr<Plugin::TagMap> &meta) override;
+    void UpdateParams(const std::shared_ptr<const Plugin::Meta>& upMeta,
+                      std::shared_ptr<Plugin::Meta>& meta) override;
 };
 } // Pipeline
 } // Media

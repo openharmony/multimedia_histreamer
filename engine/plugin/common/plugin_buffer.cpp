@@ -141,7 +141,7 @@ ValueType BufferMeta::GetMeta(Tag tag)
 void BufferMeta::SetMeta(Tag tag, ValueType value)
 {
     if (!tags) {
-        tags = std::make_shared<TagMap>();
+        tags = std::make_shared<Meta>();
     }
     (*tags)[tag] = value;
 }

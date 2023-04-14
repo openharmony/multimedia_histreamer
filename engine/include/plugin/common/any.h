@@ -261,6 +261,8 @@ private:
     friend const T* AnyCast(const Any* operand) noexcept;
     template <typename T>
     friend T* AnyCast(Any* operand) noexcept;
+    template <typename T>
+    friend bool AnyCast(const Any* operand, T& value) noexcept;
 
     union Storage {
         using Stack = std::aligned_storage<STACK_STORAGE_SIZE, std::alignment_of<void*>::value>::type;
@@ -479,6 +481,28 @@ const ValueType* AnyCast(const Any* operand) noexcept
         return nullptr;
     }
     return operand->Cast<ValueType>();
+}
+
+ /**
+  * cast one Any pointer into ValueType object
+  *
+  * @tparam ValueType target value type
+  * @param operand any object
+  * @param value ValueType
+  * @return false if type mismatch, operand is nullptr, or valueType is function/array. Otherwise, true to the
+  *  value contained by operand.
+  */
+template <typename ValueType>
+bool AnyCast(const Any* operand, ValueType& value) noexcept
+{
+    static_assert(!std::is_void<ValueType>::value, "ValueType of any_cast must not be void");
+    if (std::is_function<ValueType>::value || std::is_array<ValueType>::value || operand == nullptr
+        || !operand->SameTypeWith(typeid(ValueType))) {
+        return false;
+    } else {
+        value = *(operand->Cast<ValueType>());
+        return true;
+    }
 }
 
 /**

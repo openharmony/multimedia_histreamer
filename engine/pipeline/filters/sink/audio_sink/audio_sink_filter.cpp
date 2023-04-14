@@ -118,11 +118,11 @@ ErrorCode AudioSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
 bool AudioSinkFilter::Negotiate(const std::string& inPort,
                                 const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                 Plugin::Capability& negotiatedCap,
-                                const Plugin::TagMap& upstreamParams,
-                                Plugin::TagMap& downstreamParams)
+                                const Plugin::Meta& upstreamParams,
+                                Plugin::Meta& downstreamParams)
 {
     MEDIA_LOG_I("audio sink negotiate started");
-    FALSE_LOG_MSG(upstreamParams.GetData(Tag::MEDIA_SEEKABLE,seekable_),"get seekable fail");
+    FALSE_LOG(const_cast<Plugin::Meta&>(upstreamParams).Get<Tag::MEDIA_SEEKABLE>(seekable_));
     PROFILE_BEGIN("Audio Sink Negotiate begin");
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::AUDIO_SINK);
     if (candidatePlugins.empty()) {
@@ -166,8 +166,8 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
     return res;
 }
 
-bool AudioSinkFilter::Configure(const std::string &inPort,const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
-                                Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                                Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
 {
     PROFILE_BEGIN("Audio sink configure begin");
     MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
@@ -190,7 +190,7 @@ bool AudioSinkFilter::Configure(const std::string &inPort,const std::shared_ptr<
     return true;
 }
 
-ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<Plugin::TagMap> &meta)
+ErrorCode AudioSinkFilter::ConfigureToPreparePlugin(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     FAIL_RETURN_MSG(ConfigPluginWithMeta(*plugin_, *meta), "sink configuration failed.");
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Prepare()), "sink prepare failed");

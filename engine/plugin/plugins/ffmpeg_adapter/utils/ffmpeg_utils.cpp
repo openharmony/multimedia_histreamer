@@ -109,13 +109,13 @@ const std::map<std::string, Tag> g_tagMap = {
     {"lyrics", Tag::MEDIA_LYRICS},
 };
 
-std::map<std::string, std::function<void(TagMap&, AVDictionaryEntry*)>> g_MediaMap = {
-    {"title", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_TITLE>(tag->value); }},
-    {"artist", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_ARTIST>(tag->value); }},
-    {"lyricist", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_LYRICIST>(tag->value); }},
-    {"album", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_ALBUM>(tag->value); }},
-    {"album-artist", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_ALBUM_ARTIST>(tag->value); }},
-    {"date", [](TagMap& meta, AVDictionaryEntry* tag) {
+std::map<std::string, std::function<void(Meta&, AVDictionaryEntry*)>> g_MediaMap = {
+    {"title", [](Meta& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_TITLE>(tag->value); }},
+    {"artist", [](Meta& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_ARTIST>(tag->value); }},
+    {"lyricist", [](Meta& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_LYRICIST>(tag->value); }},
+    {"album", [](Meta& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_ALBUM>(tag->value); }},
+    {"album-artist", [](Meta& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_ALBUM_ARTIST>(tag->value); }},
+    {"date", [](Meta& meta, AVDictionaryEntry* tag) {
         uint32_t year;
         uint32_t month;
         uint32_t day = 0;
@@ -123,12 +123,12 @@ std::map<std::string, std::function<void(TagMap&, AVDictionaryEntry*)>> g_MediaM
             meta.Insert<Tag::MEDIA_DATE>(RemoveDelimiter(tag->value, '-'));
         }
     }},
-    {"comment", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_COMMENT>(tag->value); }},
-    {"genre", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_GENRE>(tag->value); }},
-    {"copyright", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_COPYRIGHT>(tag->value); }},
-    {"language", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_LANGUAGE>(tag->value); }},
-    {"description", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_DESCRIPTION>(tag->value); }},
-    {"lyrics", [](TagMap& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_LYRICS>(tag->value); }}
+    {"comment", [](Meta& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_COMMENT>(tag->value); }},
+    {"genre", [](Meta& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_GENRE>(tag->value); }},
+    {"copyright", [](Meta& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_COPYRIGHT>(tag->value); }},
+    {"language", [](Meta& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_LANGUAGE>(tag->value); }},
+    {"description", [](Meta& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_DESCRIPTION>(tag->value); }},
+    {"lyrics", [](Meta& meta, AVDictionaryEntry* tag) {meta.Insert<Tag::MEDIA_LYRICS>(tag->value); }}
 };
 
 const std::vector<std::pair<AudioAacProfile, int32_t>> g_AacProfileMap = {
@@ -414,7 +414,7 @@ bool FindAvMetaNameByTag(Tag tag, std::string& metaName)
     return false;
 }
 
-void InsertMediaTag(TagMap& meta, AVDictionaryEntry* tag)
+void InsertMediaTag(Meta& meta, AVDictionaryEntry* tag)
 {
     for (auto e : g_MediaMap) {
         if (e.first == tag->key) {

@@ -443,7 +443,7 @@ bool ExtractFixedCap(const Plugin::ValueType& value, Plugin::ValueType& fixedVal
     return false;
 }
 
-std::shared_ptr<Capability> MetaToCapability(Plugin::TagMap& meta)
+std::shared_ptr<Capability> MetaToCapability(const Plugin::Meta& meta)
 {
     auto ret = std::make_shared<Capability>();
     std::string mime;
@@ -459,9 +459,9 @@ std::shared_ptr<Capability> MetaToCapability(Plugin::TagMap& meta)
     return ret;
 }
 
-bool MergeMetaWithCapability(const Plugin::TagMap& meta, const Capability& cap, Plugin::TagMap& resTagMap)
+bool MergeMetaWithCapability(const Plugin::Meta& meta, const Capability& cap, Plugin::Meta& resMeta)
 {
-    resTagMap.Clear();
+    resMeta.Clear();
     // change meta into capability firstly
     Capability metaCap;
     metaCap.mime = cap.mime;
@@ -476,8 +476,8 @@ bool MergeMetaWithCapability(const Plugin::TagMap& meta, const Capability& cap, 
         return false;
     }
     // merge capability
-    resTagMap = meta;
-    resTagMap.Insert<Plugin::Tag::MIME>(cap.mime);
+    resMeta = meta;
+    resMeta.Insert<Plugin::Tag::MIME>(cap.mime);
     for (const auto& oneCap : resCap.keys) {
         if (g_capExtrMap.count(oneCap.first) == 0) {
             continue;
@@ -485,7 +485,7 @@ bool MergeMetaWithCapability(const Plugin::TagMap& meta, const Capability& cap, 
         auto func = g_capExtrMap[oneCap.first];
         Plugin::ValueType tmp;
         if (func(oneCap.second, tmp)) {
-            resTagMap.SetData(static_cast<Plugin::Tag>(oneCap.first), tmp);
+            resMeta.SetData(static_cast<Plugin::Tag>(oneCap.first), tmp);
         }
     }
     return true;

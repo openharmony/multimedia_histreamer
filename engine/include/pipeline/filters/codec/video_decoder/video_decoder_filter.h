@@ -25,7 +25,7 @@ namespace Media {
 namespace Pipeline {
 class VideoDecoderFilter : public CodecFilterBase {
 public:
-    explicit VideoDecoderFilter(const std::string &name, std::shared_ptr<CodecMode> codecMode);
+    explicit VideoDecoderFilter(const std::string& name, std::shared_ptr<CodecMode> codecMode);
     ~VideoDecoderFilter() override;
 
     ErrorCode Prepare() override;
@@ -41,13 +41,13 @@ public:
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<Plugin::TagMap> &upstreamMeta,
-                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                   Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams) override;
 
-    ErrorCode PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset) override;
+    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
 
     void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input) override;
 
@@ -58,11 +58,11 @@ private:
 
     std::shared_ptr<Allocator> GetAllocator() override;
 
-    Plugin::TagMap GetNegotiateParams(const Plugin::TagMap& upstreamParams) override;
+    Plugin::Meta GetNegotiateParams(const Plugin::Meta& upstreamParams) override;
 
-    uint32_t CalculateBufferSize(const std::shared_ptr<Plugin::TagMap> &meta) override;
+    uint32_t CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta) override;
 
-    void UpdateParams(const std::shared_ptr<Plugin::TagMap> &upMeta, std::shared_ptr<Plugin::TagMap> &meta) override;
+    void UpdateParams(const std::shared_ptr<const Plugin::Meta>& upMeta, std::shared_ptr<Plugin::Meta>& meta) override;
 };
 }
 }

@@ -17,6 +17,7 @@
 
 #include "hirecorder_impl.h"
 #include <regex>
+#include "foundation/cpp_ext/type_traits_ext.h"
 #include "foundation/utils/hitrace_utils.h"
 #include "foundation/utils/steady_clock.h"
 #include "pipeline/factory/filter_factory.h"
@@ -537,7 +538,7 @@ ErrorCode HiRecorderImpl::DoConfigureAudio(const HstRecParam& param) const
         case RecorderPublicParamType::AUD_ENC_FMT: {
             auto ptr = param.GetValPtr<AudEnc>();
             FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
-            auto encoderMeta = std::make_shared<Plugin::TagMap>();
+            auto encoderMeta = std::make_shared<Plugin::Meta>();
             if (!TransAudioEncoderFmt(ptr->encFmt, *encoderMeta)) {
                 return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
             }
@@ -587,7 +588,7 @@ ErrorCode HiRecorderImpl::DoConfigureVideo(const HstRecParam& param) const
         case RecorderPublicParamType::VID_ENC_FMT: {
             auto ptr = param.GetValPtr<VidEnc>();
             FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
-            auto encoderMeta = std::make_shared<Plugin::TagMap>();
+            auto encoderMeta = std::make_shared<Plugin::Meta>();
             if (!TransVideoEncoderFmt(ptr->encFmt, *encoderMeta)) {
                 return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
             }

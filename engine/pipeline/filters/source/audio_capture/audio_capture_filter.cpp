@@ -60,7 +60,7 @@ std::vector<WorkMode> AudioCaptureFilter::GetWorkModes()
     return {WorkMode::PUSH};
 }
 
-ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin::TagMap>& audioMeta)
+ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin::Meta>& audioMeta)
 {
     MEDIA_LOG_D("IN");
     if (appTokenIdSpecified_) {
@@ -86,8 +86,6 @@ ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin
         if (err != ErrorCode::SUCCESS) {
             return err;
         }
-    } else {
-        MEDIA_LOG_I("get AUDIO_SAMPLE_RATE fail ");
     }
     if (audioMeta->Get<Tag::AUDIO_CHANNELS>(tmp)) {
         MEDIA_LOG_I("configure plugin with channel " PUBLIC_LOG_U32, tmp);
@@ -96,8 +94,6 @@ ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin
         if (err != ErrorCode::SUCCESS) {
             return err;
         }
-    } else {
-        MEDIA_LOG_I("get AUDIO_CHANNELS fail ");
     }
     int64_t bitRate = 0;
     if (audioMeta->Get<Tag::MEDIA_BITRATE>(bitRate)) {
@@ -106,16 +102,12 @@ ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin
         if (err != ErrorCode::SUCCESS) {
             return err;
         }
-    } else {
-        MEDIA_LOG_I("get MEDIA_BITRATE fail ");
     }
     Plugin::AudioSampleFormat sampleFormat = Plugin::AudioSampleFormat::S16;
     if (audioMeta->Get<Tag::AUDIO_SAMPLE_FORMAT>(sampleFormat)) {
         bufferCalibration_->SetParam(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat);
         MEDIA_LOG_I("configure plugin with sampleFormat " PUBLIC_LOG_S, Plugin::GetAudSampleFmtNameStr(sampleFormat));
         return TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat));
-    } else {
-        MEDIA_LOG_I("get AUDIO_SAMPLE_FORMAT fail ");
     }
     return ErrorCode::SUCCESS;
 }
@@ -189,7 +181,7 @@ ErrorCode AudioCaptureFilter::GetParameter(int32_t key, Plugin::Any& value)
     return ErrorCode::SUCCESS;
 }
 
-void AudioCaptureFilter::PickPreferSampleFmt(const std::shared_ptr<Plugin::TagMap>& meta, const Plugin::ValueType& val)
+void AudioCaptureFilter::PickPreferSampleFmt(const std::shared_ptr<Plugin::Meta>& meta, const Plugin::ValueType& val)
 {
     static constexpr AudioSampleFormat preferFmt = AudioSampleFormat::S16;
     bool pickPreferFmt = false;
@@ -207,9 +199,9 @@ void AudioCaptureFilter::PickPreferSampleFmt(const std::shared_ptr<Plugin::TagMa
     }
 }
 
-std::shared_ptr<Plugin::TagMap> AudioCaptureFilter::PickPreferParameters()
+std::shared_ptr<Plugin::Meta> AudioCaptureFilter::PickPreferParameters()
 {
-    auto preferMeta = std::make_shared<Plugin::TagMap>();
+    auto preferMeta = std::make_shared<Plugin::Meta>();
     if (capNegWithDownstream_.keys.count(Capability::Key::AUDIO_SAMPLE_FORMAT)) {
         PickPreferSampleFmt(preferMeta, capNegWithDownstream_.keys.at(Capability::Key::AUDIO_SAMPLE_FORMAT));
     }
@@ -219,13 +211,13 @@ std::shared_ptr<Plugin::TagMap> AudioCaptureFilter::PickPreferParameters()
 ErrorCode AudioCaptureFilter::DoConfigure()
 {
     auto preferMeta = PickPreferParameters();
-    auto audioMeta = std::make_shared<Plugin::TagMap>();
+    auto audioMeta = std::make_shared<Plugin::Meta>();
     if (!MergeMetaWithCapability(*preferMeta, capNegWithDownstream_, *audioMeta)) {
         MEDIA_LOG_E("cannot find available capability of plugin " PUBLIC_LOG_S, pluginInfo_->name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
-    Plugin::TagMap upstreamParams;
-    Plugin::TagMap downstreamParams;
+    Plugin::Meta upstreamParams;
+    Plugin::Meta downstreamParams;
     if (!outPorts_[0]->Configure(audioMeta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("Configure downstream fail with " PUBLIC_LOG_S, Meta2String(*audioMeta).c_str());
         return ErrorCode::ERROR_UNKNOWN;
@@ -492,8 +484,8 @@ bool AudioCaptureFilter::DoNegotiate(const CapabilitySet &outCaps)
         if (bitRateSpecified_) {
             thisOut->keys[Capability::Key::MEDIA_BITRATE] = bitRate_;
         }
-        Plugin::TagMap upstreamParams;
-        Plugin::TagMap downstreamParams;
+        Plugin::Meta upstreamParams;
+        Plugin::Meta downstreamParams;
         if (outPorts_[0]->Negotiate(thisOut, capNegWithDownstream_, upstreamParams, downstreamParams)) {
             MEDIA_LOG_I("Negotiate success");
             return true;
