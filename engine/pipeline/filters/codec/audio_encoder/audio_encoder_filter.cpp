@@ -205,7 +205,7 @@ ErrorCode AudioEncoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
 
 ErrorCode AudioEncoderFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
-    const static int8_t maxRetryCnt = 3; // max retry times of handling one frame
+    const static int8_t MAX_RETRY_TIMES = 3; // max retry times of handling one frame
     if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
         MEDIA_LOG_W("pushing data to encoder when state is " PUBLIC_LOG_D32, static_cast<int>(state_.load()));
         return ErrorCode::ERROR_INVALID_OPERATION;
@@ -237,7 +237,7 @@ ErrorCode AudioEncoderFilter::PushData(const std::string& inPort, const AVBuffer
                 MEDIA_LOG_DD("finish frame");
             }
             retryCnt++;
-            if (retryCnt >= maxRetryCnt) { // if retry cnt exceeds we will drop this frame
+            if (retryCnt >= MAX_RETRY_TIMES) { // if retry cnt exceeds we will drop this frame
                 break;
             }
             // if timed out or returns again we should try again
