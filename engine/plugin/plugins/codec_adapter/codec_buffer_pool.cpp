@@ -36,7 +36,7 @@ CodecBufferPool::CodecBufferPool(CodecComponentType* compType, CompVerInfo& verI
 
 // 当前实现仅仅支持异步模式，hdi的工作模式决定了仅支持异步，要求提前将所有 out buffer 配置好
 Status CodecBufferPool::UseBuffers(OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>>& bufQue, MemoryType bufMemType,
-                                   bool isInput)
+                                   bool isInput, uint32_t bufferSize)
 {
     MEDIA_LOG_D("UseBuffers begin");
     FALSE_RETURN_V_MSG_E(ConfigBufType(bufMemType, isInput) == Status::OK, Status::ERROR_INVALID_DATA,
@@ -44,7 +44,7 @@ Status CodecBufferPool::UseBuffers(OHOS::Media::BlockingQueue<std::shared_ptr<Bu
     auto count = bufQue.Size();
     for (uint32_t i = 0; i < count; i++) {
         auto pluginBuffer = bufQue.Pop();
-        auto codecBuffer = std::make_shared<CodecBuffer>(pluginBuffer, verInfo_, isInput);
+        auto codecBuffer = std::make_shared<CodecBuffer>(pluginBuffer, verInfo_, isInput, bufferSize);
         FALSE_RETURN_V_MSG(codecBuffer != nullptr, Status::ERROR_INVALID_DATA, "Create codec buffer failed");
         auto err = codecComp_->UseBuffer(codecComp_, portIndex_, codecBuffer->GetOmxBuffer().get());
         if (err != HDF_SUCCESS) {

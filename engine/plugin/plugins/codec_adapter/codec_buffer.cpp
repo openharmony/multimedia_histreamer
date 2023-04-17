@@ -24,37 +24,39 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace CodecAdapter {
-CodecBuffer::CodecBuffer(std::shared_ptr<Buffer>& buffer, CompVerInfo& verInfo, bool isInput)
+CodecBuffer::CodecBuffer(std::shared_ptr<Buffer>& buffer, CompVerInfo& verInfo, bool isInput, uint32_t bufferSize)
     : buffer_(buffer), verInfo_(verInfo)
 {
-    Init(isInput);
+    Init(isInput, bufferSize);
 }
 
-void CodecBuffer::Init(bool isInput)
+void CodecBuffer::Init(bool isInput, uint32_t bufferSize)
 {
     MEDIA_LOG_DD("CodecBuffer Init Start");
     omxBuffer_ = std::make_shared<OmxCodecBuffer>();
     omxBuffer_->size = sizeof(OmxCodecBuffer);
     omxBuffer_->version.s.nVersionMajor = verInfo_.compVersion.s.nVersionMajor;
-    memory_ = buffer_->GetMemory();
-    omxBuffer_->allocLen = memory_->GetCapacity();
     omxBuffer_->fenceFd = -1; // check use -1 first with no window
     omxBuffer_->pts = 0;
     omxBuffer_->flag = 0;
+    if (buffer_->IsEmpty() && isInput) {
+        omxBuffer_->allocLen = bufferSize;
+        omxBuffer_->bufferType = CODEC_BUFFER_TYPE_DYNAMIC_HANDLE;
+        omxBuffer_->bufferLen = 0;
+        omxBuffer_->buffer = nullptr;
+        return;
+    }
+    memory_ = buffer_->GetMemory();
+    omxBuffer_->allocLen = memory_->GetCapacity();
     omxBuffer_->bufferType = GetOmxBufferType(memory_->GetMemoryType(), isInput);
     switch (memory_->GetMemoryType()) {
         case MemoryType::SURFACE_BUFFER: {
-            if (isInput) {
-                omxBuffer_->bufferLen = 0;
-                omxBuffer_->buffer = nullptr;
-            } else {
-                BufferHandle* bufferHandle =
-                    std::static_pointer_cast<Plugin::SurfaceMemory>(memory_)->GetSurfaceBuffer()->GetBufferHandle();
-                FALSE_LOG_MSG(bufferHandle != nullptr, "bufferHandle is null");
-                omxBuffer_->bufferLen =
-                    sizeof(BufferHandle) + (sizeof(int32_t) * (bufferHandle->reserveFds + bufferHandle->reserveInts));
-                omxBuffer_->buffer = (uint8_t*)bufferHandle;
-            }
+            BufferHandle* bufferHandle =
+                std::static_pointer_cast<Plugin::SurfaceMemory>(memory_)->GetSurfaceBuffer()->GetBufferHandle();
+            FALSE_LOG_MSG(bufferHandle != nullptr, "bufferHandle is null");
+            omxBuffer_->bufferLen =
+                sizeof(BufferHandle) + (sizeof(int32_t) * (bufferHandle->reserveFds + bufferHandle->reserveInts));
+            omxBuffer_->buffer = (uint8_t*)bufferHandle;
             break;
         }
         case MemoryType::SHARE_MEMORY: {

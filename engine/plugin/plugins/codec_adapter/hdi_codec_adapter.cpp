@@ -207,13 +207,9 @@ Status HdiCodecAdapter::Prepare()
         }
         inBufQue.Push(buf);
     }
-    if (pluginType_ == PluginType::VIDEO_DECODER) {
-        inBufPool_->UseBuffers(inBufQue, MemoryType::SHARE_MEMORY, true);
-        outBufPool_->UseBuffers(outBufQue_, MemoryType::SURFACE_BUFFER, false);
-    } else {
-        inBufPool_->UseBuffers(inBufQue, MemoryType::SURFACE_BUFFER, true);
-        outBufPool_->UseBuffers(outBufQue_, MemoryType::SHARE_MEMORY, false);
-    }
+    bool isInput = true;
+    inBufPool_->UseBuffers(inBufQue, GetBufMemType(pluginType_, isInput), isInput, inBufferSize_);
+    outBufPool_->UseBuffers(outBufQue_, GetBufMemType(pluginType_, !isInput), !isInput, outBufferSize_);
     FALSE_RETURN_V_MSG_E(WaitForState(OMX_StateIdle) == Status::OK, Status::ERROR_WRONG_STATE,
                          "Wait omx state to idle failed");
     MEDIA_LOG_D("prepare end");

@@ -44,7 +44,7 @@ public:
      * inBuf is sharedBuf (READ_ONLY_TYPE),  outBuf is surfaceBuf and pre-allocation
      */
     Status UseBuffers(OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>>& bufQue, MemoryType bufMemType,
-                      bool isInput);
+                      bool isInput, uint32_t bufferSize);
 
     Status FreeBuffers(); // 释放所有buffer
 

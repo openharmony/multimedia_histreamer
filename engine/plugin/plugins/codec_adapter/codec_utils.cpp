@@ -233,6 +233,23 @@ uint32_t GetOmxBufferType(const MemoryType& bufMemType, bool isInput)
     }
     return bufferType;
 }
+
+MemoryType GetBufMemType(PluginType pluginType, bool isInput)
+{
+    auto memType = MemoryType::VIRTUAL_ADDR;
+    switch (pluginType) {
+        case PluginType::VIDEO_DECODER:
+            memType = isInput ? MemoryType::SHARE_MEMORY : MemoryType::SURFACE_BUFFER;
+            break;
+        case PluginType::VIDEO_ENCODER:
+            memType = isInput ? MemoryType::SURFACE_BUFFER : MemoryType::SHARE_MEMORY;
+            break;
+        default:
+            MEDIA_LOG_E("PluginType does not belong to VIDEO");
+            break;
+    }
+    return memType;
+}
 } // namespace CodecAdapter
 } // namespace Plugin
 } // namespace Media
