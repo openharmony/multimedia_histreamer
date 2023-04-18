@@ -88,10 +88,9 @@ Status HdiCodecManager::RegisterCodecPlugins(const std::shared_ptr<OHOS::Media::
         def.name = packageName + "." + codecCapability.name;
         def.inCaps = codecCapability.inCaps;
         def.outCaps = codecCapability.outCaps;
-        auto type = codecCapability.pluginType;
         auto pluginMime = codecCapability.pluginMime;
-        def.creator = [type, pluginMime] (const std::string& name) -> std::shared_ptr<CodecPlugin> {
-            return std::make_shared<HdiCodecAdapter>(name, type, pluginMime);
+        def.creator = [pluginMime] (const std::string& name) -> std::shared_ptr<CodecPlugin> {
+            return std::make_shared<HdiCodecAdapter>(name, pluginMime);
         };
         if (reg->AddPlugin(def) != Status::OK) {
             MEDIA_LOG_E("Add plugin " PUBLIC_LOG_S " failed", def.name.c_str());

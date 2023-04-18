@@ -20,6 +20,7 @@
 #include "codec_utils.h"
 #include "foundation/log.h"
 #include "hdf_base.h"
+#include "plugin/common/plugin_buffer.h"
 
 namespace {
     constexpr uint32_t HDI_FRAME_RATE_MOVE = 16; // hdi frame rate need move 16
@@ -40,23 +41,25 @@ Status CodecPort::Config(Meta& meta)
 {
     MEDIA_LOG_D("Config Start");
     auto ret = HdiGetParameter(codecComp_, OMX_IndexParamPortDefinition, portDef_);
-    FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, Status::ERROR_INVALID_PARAMETER, "HdiGetParameter failed");
+    FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, Status::ERROR_INVALID_PARAMETER, "HdiGetParameter portDef failed");
     std::string mime;
-    uint32_t hight;
-    uint32_t wigth;
+    uint32_t height;
+    uint32_t width;
     uint32_t frameRate;
     int64_t bitRate;
     Plugin::VideoPixelFormat vdecFormat;
     FALSE_LOG(meta.Get<Tag::MIME>(mime));
     FALSE_LOG(meta.Get<Tag::VIDEO_PIXEL_FORMAT>(vdecFormat));
-    FALSE_LOG(meta.Get<Tag::VIDEO_HEIGHT>(hight));
-    FALSE_LOG(meta.Get<Tag::VIDEO_WIDTH>(wigth));
+    FALSE_LOG(meta.Get<Tag::VIDEO_HEIGHT>(height));
+    FALSE_LOG(meta.Get<Tag::VIDEO_WIDTH>(width));
     FALSE_LOG(meta.Get<Tag::VIDEO_FRAME_RATE>(frameRate));
     FALSE_LOG(meta.Get<Tag::MEDIA_BITRATE>(bitRate));
     portDef_.format.video.eCompressionFormat = CodingTypeHstToHdi(mime);
     portDef_.format.video.eColorFormat = FormatHstToOmx(vdecFormat);
-    portDef_.format.video.nFrameHeight = hight;
-    portDef_.format.video.nFrameWidth = wigth;
+    portDef_.format.video.nFrameHeight = height;
+    portDef_.format.video.nSliceHeight = height;
+    portDef_.format.video.nFrameWidth = width;
+    portDef_.format.video.nStride = AlignUp(width, 16); // 16
     portDef_.format.video.xFramerate = frameRate << HDI_FRAME_RATE_MOVE;
     MEDIA_LOG_D("frame_rate: " PUBLIC_LOG_U32, portDef_.format.video.xFramerate);
     portDef_.format.video.nBitrate = bitRate;

@@ -106,6 +106,8 @@ enum struct Tag : uint32_t {
     AUDIO_RENDER_INFO,                ///< AudioRenderInfo, audio render info
     AUDIO_INTERRUPT_MODE,             ///< AudioInterruptMode, audio interrupt mode
     VIDEO_SCALE_TYPE,                 ///< VideoScaleType, video scale type
+    INPUT_MEMORY_TYPE,                ///< @see MemoryType
+    OUTPUT_MEMORY_TYPE,               ///< @see MemoryType
 
     /* -------------------- media tag -------------------- */
     MEDIA_TITLE = SECTION_MEDIA_START + 1, ///< string

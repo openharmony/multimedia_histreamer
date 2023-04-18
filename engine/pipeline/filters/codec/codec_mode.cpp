@@ -79,10 +79,13 @@ void CodecMode::CreateOutBufferPool(std::shared_ptr<Allocator>& outAllocator,
     // 每次重新创建bufferPool
     outBufPool_ = std::make_shared<BufferPool<AVBuffer>>(bufferCnt);
     if (outAllocator == nullptr) {
-        MEDIA_LOG_I("Plugin doest not support out allocator, using framework allocator.");
+        MEDIA_LOG_I("Plugin doest not support out allocator, and no allocator negotiated from sink, "
+                    "using framework allocator.");
+        plugin_->SetParameter(Tag::OUTPUT_MEMORY_TYPE, MemoryType::VIRTUAL_ADDR);
         outBufPool_->Init(bufferSize, bufferMetaType);
     } else {
         MEDIA_LOG_I("Using plugin output allocator.");
+        plugin_->SetParameter(Tag::OUTPUT_MEMORY_TYPE, outAllocator->GetMemoryType());
         for (size_t cnt = 0; cnt < bufferCnt; cnt++) {
             auto buf = CppExt::make_unique<AVBuffer>(bufferMetaType);
             if (buf == nullptr || buf->AllocMemory(outAllocator, bufferSize) == nullptr) {

@@ -42,9 +42,6 @@ OMX_VIDEO_CODINGTYPE CodingTypeHstToHdi(const std::string& format);
 OMX_COLOR_FORMATTYPE FormatHstToOmx(const VideoPixelFormat format);
 
 uint32_t GetOmxBufferType(const MemoryType& bufMemType, bool isInput);
-
-MemoryType GetBufMemType(PluginType pluginType, bool isInput);
-
 template <typename T>
 inline void InitHdiParam(T& param, CompVerInfo& verInfo)
 {

@@ -32,7 +32,7 @@ namespace Plugin {
 namespace CodecAdapter {
 class CodecBufferPool {
 public:
-    CodecBufferPool(CodecComponentType* compType, CompVerInfo& verInfo, uint32_t portIndex);
+    CodecBufferPool(CodecComponentType* compType, CompVerInfo& verInfo, uint32_t portIndex, uint32_t bufferCnt);
 
     ~CodecBufferPool() = default;
 
