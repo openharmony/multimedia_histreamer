@@ -282,7 +282,7 @@ void VideoSinkFilter::RenderFrame()
     }
     auto err = WriteToPluginRefTimeSync(frameBuffer);
     if (err != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("write to plugin fail: " PUBLIC_LOG_U32, err);
+        MEDIA_LOG_E("Write to plugin fail: " PUBLIC_LOG_U32 ", buf.pts: " PUBLIC_LOG_D64, err, frameBuffer->pts);
         return;
     }
     MEDIA_LOG_DD("RenderFrame success");

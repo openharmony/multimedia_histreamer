@@ -106,7 +106,7 @@ Status CodecBuffer::Copy(const std::shared_ptr<Plugin::Buffer>& pluginBuffer)
     memory_->Write(memAddr, mem->GetSize(), 0);
     omxBuffer_->offset = 0;
     omxBuffer_->filledLen = mem->GetSize();
-    MEDIA_LOG_DD("CopyBuffer end, bufferId: " PUBLIC_LOG_U32, bufferInfo->omxBuffer->bufferId);
+    MEDIA_LOG_DD("CopyBuffer end, bufferId: " PUBLIC_LOG_U32, omxBuffer_->bufferId);
     return Status::OK;
 }
 

@@ -83,8 +83,8 @@ Status CodecBufferPool::ConfigBufType(const MemoryType& bufMemType, bool isInput
     bufType.portIndex = portIndex_;
     bufType.bufferType = GetOmxBufferType(bufMemType, isInput);
     auto ret = codecComp_->SetParameter(codecComp_, OMX_IndexParamUseBufferType, (int8_t *)&bufType, sizeof(bufType));
-    FALSE_LOG_MSG(ret == HDF_SUCCESS, "PORT_INDEX_OUTPUT, bufferTypes: " PUBLIC_LOG_D32 ", ret: " PUBLIC_LOG_S,
-                  bufType.bufferType, HdfStatus2String(ret).c_str());
+    FALSE_LOG_MSG(ret == HDF_SUCCESS, "ConfigBufType failed, portIndex: " PUBLIC_LOG_U32 ", bufferTypes: "
+        PUBLIC_LOG_D32 ", ret: " PUBLIC_LOG_S, portIndex_, bufType.bufferType, OmxErrorType2String(ret).c_str());
     MEDIA_LOG_D("ConfigOutPortBufType end");
     return TransHdiRetVal2Status(ret);
 }
