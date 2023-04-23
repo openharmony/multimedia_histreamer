@@ -162,12 +162,12 @@ ErrorCode VideoCaptureFilter::DoConfigure()
         MEDIA_LOG_E("cannot find available capability of plugin " PUBLIC_LOG_S, pluginInfo_->name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
-    FALSE_LOG(videoMeta->Insert<Plugin::Tag::VIDEO_WIDTH>(videoWidth_));
-    FALSE_LOG(videoMeta->Insert<Plugin::Tag::VIDEO_HEIGHT>(videoHeight_));
-    FALSE_LOG(videoMeta->Insert<Plugin::Tag::MEDIA_BITRATE>(bitRate_));
-    FALSE_LOG(videoMeta->Insert<Plugin::Tag::VIDEO_FRAME_RATE>(frameRate_));
-    FALSE_LOG(videoMeta->Insert<Plugin::Tag::MIME>(mime_));
-    FALSE_LOG(videoMeta->Insert<Plugin::Tag::VIDEO_PIXEL_FORMAT>(pixelFormat_));
+    FALSE_LOG(videoMeta->Set<Plugin::Tag::VIDEO_WIDTH>(videoWidth_));
+    FALSE_LOG(videoMeta->Set<Plugin::Tag::VIDEO_HEIGHT>(videoHeight_));
+    FALSE_LOG(videoMeta->Set<Plugin::Tag::MEDIA_BITRATE>(bitRate_));
+    FALSE_LOG(videoMeta->Set<Plugin::Tag::VIDEO_FRAME_RATE>(frameRate_));
+    FALSE_LOG(videoMeta->Set<Plugin::Tag::MIME>(mime_));
+    FALSE_LOG(videoMeta->Set<Plugin::Tag::VIDEO_PIXEL_FORMAT>(pixelFormat_));
     Plugin::Meta upstreamParams;
     Plugin::Meta downstreamParams;
     if (!outPorts_[0]->Configure(videoMeta, upstreamParams, downstreamParams)) {

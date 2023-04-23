@@ -484,7 +484,7 @@ void FFmpegDemuxerPlugin::SaveFileInfoToMetaInfo(Meta& meta)
         InsertMediaTag(meta, tag);
     }
     int64_t nanoSec = formatContext_->duration * (HST_SECOND / AV_TIME_BASE);
-    meta.Insert<Tag::MEDIA_DURATION>(nanoSec);
+    meta.Set<Tag::MEDIA_DURATION>(nanoSec);
 }
 
 bool FFmpegDemuxerPlugin::ParseMediaData()
@@ -512,16 +512,16 @@ bool FFmpegDemuxerPlugin::ParseMediaData()
                 continue;
             }
             if (avStream.codecpar->codec_id == AV_CODEC_ID_H264) {
-                track.Insert<Tag::VIDEO_BIT_STREAM_FORMAT>(
+                track.Set<Tag::VIDEO_BIT_STREAM_FORMAT>(
                     std::vector<VideoBitStreamFormat>{VideoBitStreamFormat::AVC1, VideoBitStreamFormat::ANNEXB});
             } else if (avStream.codecpar->codec_id == AV_CODEC_ID_H265) {
-                track.Insert<Tag::VIDEO_BIT_STREAM_FORMAT>(
+                track.Set<Tag::VIDEO_BIT_STREAM_FORMAT>(
                     std::vector<VideoBitStreamFormat>{VideoBitStreamFormat::HEVC, VideoBitStreamFormat::ANNEXB});
             }
         }
         ConvertAVStreamToMetaInfo(avStream, formatContext_, codecContext, track);
         if (g_MediaTypeMap.find(avStream.codecpar->codec_type) != g_MediaTypeMap.end()) {
-            track.Insert<Tag::MEDIA_TYPE>(g_MediaTypeMap[avStream.codecpar->codec_type]);
+            track.Set<Tag::MEDIA_TYPE>(g_MediaTypeMap[avStream.codecpar->codec_type]);
         } else {
             MEDIA_LOG_E("media type not found!");
         }

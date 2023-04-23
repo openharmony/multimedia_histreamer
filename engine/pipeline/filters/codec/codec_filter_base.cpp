@@ -255,7 +255,7 @@ bool CodecFilterBase::Configure(const std::string& inPort, const std::shared_ptr
     }
     MEDIA_LOG_D("bufferCnt: " PUBLIC_LOG_U32, bufferCnt);
 
-    upstreamParams.Insert<Plugin::Tag::VIDEO_MAX_SURFACE_NUM>(bufferCnt);
+    upstreamParams.Set<Plugin::Tag::VIDEO_MAX_SURFACE_NUM>(bufferCnt);
     auto targetOutPort = GetRouteOutPort(inPort);
     if (targetOutPort == nullptr || !targetOutPort->Configure(thisMeta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("decoder filter downstream Configure failed");

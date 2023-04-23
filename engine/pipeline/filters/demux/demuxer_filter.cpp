@@ -554,8 +554,8 @@ void DemuxerFilter::UpdateStreamMeta(std::shared_ptr<Plugin::Meta>& streamMeta, 
             outputChannels = channels;
             outputChannelLayout = channelLayout;
         }
-        FALSE_LOG(streamMeta->Insert<Plugin::Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels));
-        FALSE_LOG(streamMeta->Insert<Plugin::Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT>(outputChannelLayout));
+        FALSE_LOG(streamMeta->Set<Plugin::Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels));
+        FALSE_LOG(streamMeta->Set<Plugin::Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT>(outputChannelLayout));
     } else if (type == Plugin::MediaType::VIDEO) {
         if (negotiatedCap.keys.count(Capability::Key::VIDEO_BIT_STREAM_FORMAT)) {
             auto vecVdBitStreamFormat = Plugin::AnyCast<std::vector<Plugin::VideoBitStreamFormat>>(
@@ -578,7 +578,7 @@ void DemuxerFilter::NegotiateDownstream()
             auto tmpCap = MetaToCapability(*streamMeta);
             Plugin::Meta upstreamParams;
             Plugin::Meta downstreamParams;
-            FALSE_LOG(upstreamParams.Insert<Tag::MEDIA_SEEKABLE>(seekable_));
+            FALSE_LOG(upstreamParams.Set<Tag::MEDIA_SEEKABLE>(seekable_));
             if (stream.port->Negotiate(tmpCap, caps, upstreamParams, downstreamParams)) {
                 UpdateStreamMeta(streamMeta, caps, downstreamParams);
                 if (stream.port->Configure(streamMeta, upstreamParams, downstreamParams)) {

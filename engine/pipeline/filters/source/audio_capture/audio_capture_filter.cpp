@@ -195,7 +195,7 @@ void AudioCaptureFilter::PickPreferSampleFmt(const std::shared_ptr<Plugin::Meta>
         });
     }
     if (pickPreferFmt) {
-        FALSE_LOG(meta->Insert<Tag::AUDIO_SAMPLE_FORMAT>(preferFmt));
+        FALSE_LOG(meta->Set<Tag::AUDIO_SAMPLE_FORMAT>(preferFmt));
     }
 }
 

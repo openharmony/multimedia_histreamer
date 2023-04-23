@@ -346,12 +346,12 @@ Status HdiCodecAdapter::ConfigOmx()
 {
     MEDIA_LOG_D("ConfigOmx Start");
     Meta meta;
-    meta.Insert<Tag::MIME>(pluginMime_);
-    meta.Insert<Tag::VIDEO_WIDTH>(width_);
-    meta.Insert<Tag::VIDEO_HEIGHT>(height_);
-    meta.Insert<Tag::VIDEO_FRAME_RATE>(frameRate_);
-    meta.Insert<Tag::VIDEO_PIXEL_FORMAT>(pixelFormat_);
-    meta.Insert<Tag::MEDIA_BITRATE>(bitRate_);
+    meta.Set<Tag::MIME>(pluginMime_);
+    meta.Set<Tag::VIDEO_WIDTH>(width_);
+    meta.Set<Tag::VIDEO_HEIGHT>(height_);
+    meta.Set<Tag::VIDEO_FRAME_RATE>(frameRate_);
+    meta.Set<Tag::VIDEO_PIXEL_FORMAT>(pixelFormat_);
+    meta.Set<Tag::MEDIA_BITRATE>(bitRate_);
     auto ret = inCodecPort_->Config(meta);
     FALSE_RETURN_V_MSG_E(ret == Status::OK, Status::ERROR_INVALID_OPERATION, "Configure inCodecPort failed");
     ret = outCodecPort_->Config(meta);

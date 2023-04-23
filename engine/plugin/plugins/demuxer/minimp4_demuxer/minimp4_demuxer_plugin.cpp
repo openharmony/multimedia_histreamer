@@ -255,21 +255,21 @@ Status MiniMP4DemuxerPlugin::GetMediaInfo(MediaInfo &mediaInfo)
         return Status::ERROR_UNKNOWN;
     }
     mediaInfo.tracks.resize(1);
-    mediaInfo.tracks[0].Insert<Tag::MEDIA_TYPE>(MediaType::AUDIO);
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_RATE>(miniMP4_.track->SampleDescription.audio.samplerate_hz);
-    mediaInfo.tracks[0].Insert<Tag::MEDIA_BITRATE>(miniMP4_.track->avg_bitrate_bps);
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNELS>(miniMP4_.track->SampleDescription.audio.channelcount);
-    mediaInfo.tracks[0].Insert<Tag::TRACK_ID>(0);
-    mediaInfo.tracks[0].Insert<Tag::MIME>(MEDIA_MIME_AUDIO_AAC);
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_MPEG_VERSION>(4); // 4
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_AAC_PROFILE>(AudioAacProfile::LC);
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_AAC_STREAM_FORMAT>(AudioAacStreamFormat::MP4ADTS);
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::S16);
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_PER_FRAME>(DEFAULT_AUDIO_SAMPLE_PER_FRAME);
+    mediaInfo.tracks[0].Set<Tag::MEDIA_TYPE>(MediaType::AUDIO);
+    mediaInfo.tracks[0].Set<Tag::AUDIO_SAMPLE_RATE>(miniMP4_.track->SampleDescription.audio.samplerate_hz);
+    mediaInfo.tracks[0].Set<Tag::MEDIA_BITRATE>(miniMP4_.track->avg_bitrate_bps);
+    mediaInfo.tracks[0].Set<Tag::AUDIO_CHANNELS>(miniMP4_.track->SampleDescription.audio.channelcount);
+    mediaInfo.tracks[0].Set<Tag::TRACK_ID>(0);
+    mediaInfo.tracks[0].Set<Tag::MIME>(MEDIA_MIME_AUDIO_AAC);
+    mediaInfo.tracks[0].Set<Tag::AUDIO_MPEG_VERSION>(4); // 4
+    mediaInfo.tracks[0].Set<Tag::AUDIO_AAC_PROFILE>(AudioAacProfile::LC);
+    mediaInfo.tracks[0].Set<Tag::AUDIO_AAC_STREAM_FORMAT>(AudioAacStreamFormat::MP4ADTS);
+    mediaInfo.tracks[0].Set<Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::S16);
+    mediaInfo.tracks[0].Set<Tag::AUDIO_SAMPLE_PER_FRAME>(DEFAULT_AUDIO_SAMPLE_PER_FRAME);
     if (miniMP4_.track->SampleDescription.audio.channelcount == 1) {
-        mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::MONO);
+        mediaInfo.tracks[0].Set<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::MONO);
     } else {
-        mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
+        mediaInfo.tracks[0].Set<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
     }
 
     unsigned int frameSize = 0;

@@ -202,7 +202,7 @@ bool MuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<con
     }
 
     auto meta = std::make_shared<Plugin::Meta>();
-    FALSE_LOG(meta->Insert<Plugin::Tag::MIME>(containerMime_));
+    FALSE_LOG(meta->Set<Plugin::Tag::MIME>(containerMime_));
     if (!outPorts_[0]->Configure(meta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("downstream of muxer filter configure failed");
         return false;

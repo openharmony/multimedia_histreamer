@@ -31,7 +31,7 @@ namespace Plugin {
 #define DEFINE_INSERT_GET_FUNC(condition, ValueType)             \
         template<Tag tag>                                        \
         inline typename std::enable_if<(condition), bool>::type  \
-        Insert(ValueType value)                                  \
+        Set(ValueType value)                                     \
         {                                                        \
             auto iter = map_.find(tag);                          \
             if (iter != map_.end()) {                            \

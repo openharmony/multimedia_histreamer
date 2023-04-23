@@ -493,11 +493,11 @@ TEST(TestApplyCapabilitySet, ComplexType_Test)
 TEST(TestMetaToCap, MetaToCap_Test)
 {
     Meta meta;
-    meta.Insert<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_RAW);
-    meta.Insert<Plugin::Tag::AUDIO_MPEG_VERSION>(1);
-    meta.Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
-    meta.Insert<Plugin::Tag::AUDIO_CHANNELS>(2);
-    meta.Insert<Plugin::Tag::AUDIO_SAMPLE_RATE>(48000);
+    meta.Set<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_RAW);
+    meta.Set<Plugin::Tag::AUDIO_MPEG_VERSION>(1);
+    meta.Set<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
+    meta.Set<Plugin::Tag::AUDIO_CHANNELS>(2);
+    meta.Set<Plugin::Tag::AUDIO_SAMPLE_RATE>(48000);
     auto cap = Pipeline::MetaToCapability(meta);
     ASSERT_STREQ(MEDIA_MIME_AUDIO_RAW, cap->mime.c_str());
     auto mpegVersion = Plugin::AnyCast<uint32_t>(cap->keys[CapabilityID::AUDIO_MPEG_VERSION]);
@@ -516,12 +516,12 @@ TEST(TestMetaToCap, MetaToCap_Test)
 TEST(TestMergeMetaWithCapability, MergeMetaWithEmptyKeyCapability_Test)
 {
     Meta meta;
-    meta.Insert<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
-    meta.Insert<Plugin::Tag::AUDIO_MPEG_VERSION>(1);
-    meta.Insert<Plugin::Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
-    meta.Insert<Plugin::Tag::AUDIO_CHANNELS>(2);
-    meta.Insert<Plugin::Tag::AUDIO_SAMPLE_RATE>(48000);
-    meta.Insert<Plugin::Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::U16P);
+    meta.Set<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
+    meta.Set<Plugin::Tag::AUDIO_MPEG_VERSION>(1);
+    meta.Set<Plugin::Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
+    meta.Set<Plugin::Tag::AUDIO_CHANNELS>(2);
+    meta.Set<Plugin::Tag::AUDIO_SAMPLE_RATE>(48000);
+    meta.Set<Plugin::Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::U16P);
 
     Capability cap0(MEDIA_MIME_AUDIO_RAW);
     Meta out1;
@@ -549,12 +549,12 @@ TEST(TestMergeMetaWithCapability, MergeMetaWithEmptyKeyCapability_Test)
 TEST(TestMergeMetaWithCapability, Merge_meta_contains_meta_ony_key_capability_Test)
 {
     Meta meta;
-    meta.Insert<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
-    meta.Insert<Plugin::Tag::AUDIO_MPEG_VERSION>(1);
-    meta.Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
-    meta.Insert<Plugin::Tag::AUDIO_CHANNELS>(2);
-    meta.Insert<Plugin::Tag::AUDIO_SAMPLE_RATE>(48000);
-    meta.Insert<Plugin::Tag::MEDIA_BITRATE>(128000);
+    meta.Set<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
+    meta.Set<Plugin::Tag::AUDIO_MPEG_VERSION>(1);
+    meta.Set<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
+    meta.Set<Plugin::Tag::AUDIO_CHANNELS>(2);
+    meta.Set<Plugin::Tag::AUDIO_SAMPLE_RATE>(48000);
+    meta.Set<Plugin::Tag::MEDIA_BITRATE>(128000);
 
     Capability cap0(MEDIA_MIME_AUDIO_RAW);
     cap0.AppendFixedKey<uint32_t>(CapabilityID::AUDIO_MPEG_VERSION, 1);
@@ -598,12 +598,12 @@ TEST(TestMergeMetaWithCapability, Merge_meta_contains_meta_ony_key_capability_Te
 TEST(TestMergeMetaWithCapability, Merge_meta_with_capability_failed_Test)
 {
     Meta meta;
-    meta.Insert<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
-    meta.Insert<Plugin::Tag::AUDIO_MPEG_VERSION>(1);
-    meta.Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
-    meta.Insert<Plugin::Tag::AUDIO_CHANNELS>(2);
-    meta.Insert<Plugin::Tag::AUDIO_SAMPLE_RATE>(48000);
-    meta.Insert<Plugin::Tag::MEDIA_BITRATE>(128000);
+    meta.Set<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
+    meta.Set<Plugin::Tag::AUDIO_MPEG_VERSION>(1);
+    meta.Set<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
+    meta.Set<Plugin::Tag::AUDIO_CHANNELS>(2);
+    meta.Set<Plugin::Tag::AUDIO_SAMPLE_RATE>(48000);
+    meta.Set<Plugin::Tag::MEDIA_BITRATE>(128000);
 
     Capability cap0(MEDIA_MIME_AUDIO_RAW);
     cap0.AppendFixedKey<uint32_t>(CapabilityID::AUDIO_MPEG_VERSION, 2);

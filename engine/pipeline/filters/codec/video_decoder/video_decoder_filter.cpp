@@ -180,7 +180,7 @@ Plugin::Meta VideoDecoderFilter::GetNegotiateParams(const Plugin::Meta& upstream
 {
     // video, need to get the max buffer num from plugin capability when use hdi as codec plugin interfaces
     Plugin::Meta proposeParams = upstreamParams;
-    proposeParams.Insert<Plugin::Tag::VIDEO_MAX_SURFACE_NUM>(DEFAULT_OUT_BUFFER_POOL_SIZE);
+    proposeParams.Set<Plugin::Tag::VIDEO_MAX_SURFACE_NUM>(DEFAULT_OUT_BUFFER_POOL_SIZE);
     return proposeParams;
 }
 

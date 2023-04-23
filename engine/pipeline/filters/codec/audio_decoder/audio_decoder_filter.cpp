@@ -169,8 +169,8 @@ void AudioDecoderFilter::UpdateParams(const std::shared_ptr<const Plugin::Meta>&
         MEDIA_LOG_W("Can't acquire samples per frame from decoder plugin: " PUBLIC_LOG_S, pluginInfo_->name.c_str());
         samplesPerFrame = MAX_SAMPLE_PER_FRAME;
     }
-    FALSE_LOG_MSG(meta->Insert<Plugin::Tag::AUDIO_SAMPLE_PER_FRAME>(samplesPerFrame),
-                  "insert sample_per_frame failed.");
+    FALSE_LOG_MSG(meta->Set<Plugin::Tag::AUDIO_SAMPLE_PER_FRAME>(samplesPerFrame),
+                  "Set per sample frame failed.");
     bool useStreamChannelParams {false};
     auto iter = sinkParams_.Find(Plugin::Tag::AUDIO_OUTPUT_CHANNELS);
     if (iter != std::end(sinkParams_) && iter->second.SameTypeWith(typeid(uint32_t))) {
@@ -185,7 +185,7 @@ void AudioDecoderFilter::UpdateParams(const std::shared_ptr<const Plugin::Meta>&
             plugin_->SetParameter(Plugin::Tag::AUDIO_OUTPUT_CHANNELS, outputChannels) != Plugin::Status::OK) {
             MEDIA_LOG_W("Set outputChannels to plugin " PUBLIC_LOG_S " failed", plugin_->GetName().c_str());
         }
-        FALSE_LOG_MSG(meta->Insert<Plugin::Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels), "Insert channel failed.");
+        FALSE_LOG_MSG(meta->Set<Plugin::Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels), "Set channel failed.");
     }
     iter = sinkParams_.Find(Plugin::Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT);
     if (iter != std::end(sinkParams_) && iter->second.SameTypeWith(typeid(Plugin::AudioChannelLayout))) {
@@ -198,7 +198,7 @@ void AudioDecoderFilter::UpdateParams(const std::shared_ptr<const Plugin::Meta>&
             plugin_->SetParameter(Plugin::Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, outputChanLayout) != Plugin::Status::OK) {
             MEDIA_LOG_W("Set outputChannelLayout to plugin " PUBLIC_LOG_S " failed", plugin_->GetName().c_str());
         }
-        FALSE_LOG(meta->Insert<Plugin::Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT>(outputChanLayout));
+        FALSE_LOG(meta->Set<Plugin::Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT>(outputChanLayout));
     }
 }
 } // Pipeline

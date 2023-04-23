@@ -477,7 +477,7 @@ bool MergeMetaWithCapability(const Plugin::Meta& meta, const Capability& cap, Pl
     }
     // merge capability
     resMeta = meta;
-    resMeta.Insert<Plugin::Tag::MIME>(cap.mime);
+    resMeta.Set<Plugin::Tag::MIME>(cap.mime);
     for (const auto& oneCap : resCap.keys) {
         if (g_capExtrMap.count(oneCap.first) == 0) {
             continue;

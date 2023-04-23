@@ -78,8 +78,8 @@ bool TransAudioEncoderFmt(OHOS::Media::AudioCodecFormat aFormat, Plugin::Meta& e
     switch (aFormat) {
         case OHOS::Media::AudioCodecFormat::AUDIO_DEFAULT:
         case OHOS::Media::AudioCodecFormat::AAC_LC:
-            FALSE_LOG(encoderMeta.Insert<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_AAC));
-            FALSE_LOG(encoderMeta.Insert<Plugin::Tag::AUDIO_AAC_PROFILE>(Plugin::AudioAacProfile::LC));
+            FALSE_LOG(encoderMeta.Set<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_AAC));
+            FALSE_LOG(encoderMeta.Set<Plugin::Tag::AUDIO_AAC_PROFILE>(Plugin::AudioAacProfile::LC));
             return true;
         default:
             break;
@@ -92,12 +92,12 @@ bool TransVideoEncoderFmt(OHOS::Media::VideoCodecFormat vFormat, Plugin::Meta& e
     bool ret = true;
     switch (vFormat) {
         case OHOS::Media::VideoCodecFormat::H264:
-            FALSE_LOG(encoderMeta.Insert<Plugin::Tag::MIME>(MEDIA_MIME_VIDEO_H264));
-            FALSE_LOG(encoderMeta.Insert<Plugin::Tag::VIDEO_H264_PROFILE>(Plugin::VideoH264Profile::BASELINE));
-            FALSE_LOG(encoderMeta.Insert<Plugin::Tag::VIDEO_H264_LEVEL>(32)); // 32: LEVEL 3.2
+            FALSE_LOG(encoderMeta.Set<Plugin::Tag::MIME>(MEDIA_MIME_VIDEO_H264));
+            FALSE_LOG(encoderMeta.Set<Plugin::Tag::VIDEO_H264_PROFILE>(Plugin::VideoH264Profile::BASELINE));
+            FALSE_LOG(encoderMeta.Set<Plugin::Tag::VIDEO_H264_LEVEL>(32)); // 32: LEVEL 3.2
             break;
         case OHOS::Media::VideoCodecFormat::MPEG4:
-            FALSE_LOG(encoderMeta.Insert<Plugin::Tag::MIME>(MEDIA_MIME_VIDEO_MPEG4));
+            FALSE_LOG(encoderMeta.Set<Plugin::Tag::MIME>(MEDIA_MIME_VIDEO_MPEG4));
             break;
         default:
             ret = false;

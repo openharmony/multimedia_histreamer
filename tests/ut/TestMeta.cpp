@@ -30,7 +30,7 @@ TEST(TestMeta, set_then_get_uint32)
 {
     Meta meta;
     uint32_t channels = 64;
-    meta.Insert<Tag::AUDIO_CHANNELS>(channels);
+    meta.Set<Tag::AUDIO_CHANNELS>(channels);
     uint32_t outChannels = 0;
     ASSERT_TRUE(meta.Get<Tag::AUDIO_CHANNELS>(outChannels));
     ASSERT_EQ(channels, outChannels);
@@ -43,7 +43,7 @@ TEST(TestMeta, set_then_get_cstring)
 {
     Meta meta;
     std::string artist("abcd");
-    meta.Insert<Tag::MEDIA_TITLE>(artist);
+    meta.Set<Tag::MEDIA_TITLE>(artist);
     std::string outArtist;
     ASSERT_TRUE(meta.Get<Tag::MEDIA_TITLE>(outArtist));
     ASSERT_STREQ(artist.c_str(), outArtist.c_str());
@@ -53,7 +53,7 @@ TEST(TestMeta, set_then_get_float)
 {
     Meta meta;
     std::string in = "9.9999f";
-    meta.Insert<Tag::MEDIA_ARTIST>(in); // this is only for test, normally MEDIA_ARTIST should be string
+    meta.Set<Tag::MEDIA_ARTIST>(in); // this is only for test, normally MEDIA_ARTIST should be string
     std::string out = "";
     ASSERT_TRUE(meta.Get<Tag::MEDIA_ARTIST>(out));
     ASSERT_TRUE(in == out);
@@ -63,7 +63,7 @@ TEST(TestMeta, fail_to_get_unexisted_data)
 {
     Meta meta;
     int32_t channels = 64;
-    meta.Insert<Tag::AUDIO_CHANNELS>(channels);
+    meta.Set<Tag::AUDIO_CHANNELS>(channels);
     int64_t bitRate = 1876411;
     ASSERT_FALSE(meta.Get<Tag::MEDIA_BITRATE>(bitRate));
 }
@@ -72,7 +72,7 @@ TEST(TestMeta, remove_data)
 {
     Meta meta;
     int32_t channels = 64;
-    meta.Insert<Tag::AUDIO_CHANNELS>(channels);
+    meta.Set<Tag::AUDIO_CHANNELS>(channels);
     meta.Remove(Tag::AUDIO_CHANNELS);
     meta.Remove(Tag::MEDIA_BITRATE);
 }
@@ -83,9 +83,9 @@ TEST(TestMeta, clear_data)
     std::string title("title");
     std::string album("album");
     uint32_t channels = 64;
-    meta.Insert<Tag::MEDIA_TITLE>(title);
-    meta.Insert<Tag::MEDIA_ALBUM>(album);
-    meta.Insert<Tag::AUDIO_CHANNELS>(channels);
+    meta.Set<Tag::MEDIA_TITLE>(title);
+    meta.Set<Tag::MEDIA_ALBUM>(album);
+    meta.Set<Tag::AUDIO_CHANNELS>(channels);
     meta.Clear();
     std::string out;
     ASSERT_FALSE(meta.Get<Tag::MEDIA_TITLE>(out));
@@ -103,13 +103,13 @@ TEST(TestMeta, update_meta)
     std::string title("title");
     std::string album("album");
     int32_t channels = 64;
-    meta.Insert<Tag::MEDIA_TITLE>(title);
-    meta.Insert<Tag::MEDIA_ALBUM>(album);
-    meta.Insert<Tag::AUDIO_CHANNELS>(channels);
+    meta.Set<Tag::MEDIA_TITLE>(title);
+    meta.Set<Tag::MEDIA_ALBUM>(album);
+    meta.Set<Tag::AUDIO_CHANNELS>(channels);
 
     Meta meta2;
     uint32_t channels2 = 32;
-    meta.Insert<Tag::AUDIO_CHANNELS>(channels2);
+    meta.Set<Tag::AUDIO_CHANNELS>(channels2);
 
     meta = meta2;
     std::string out;

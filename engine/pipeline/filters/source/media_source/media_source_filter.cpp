@@ -271,14 +271,14 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
     MEDIA_LOG_D("IN");
     SYNC_TRACER();
     std::shared_ptr<Plugin::Meta> meta = std::make_shared<Plugin::Meta>();
-    meta->Insert<Media::Plugin::Tag::MEDIA_FILE_URI>(source->GetSourceUri());
+    meta->Set<Media::Plugin::Tag::MEDIA_FILE_URI>(source->GetSourceUri());
     Seekable seekable = plugin_->GetSeekable();
     FALSE_RETURN_V_MSG_E(seekable != Plugin::Seekable::INVALID, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
                          "media source Seekable must be SEEKABLE or UNSEEKABLE !");
-    FALSE_LOG(meta->Insert<Media::Plugin::Tag::MEDIA_SEEKABLE>(seekable));
+    FALSE_LOG(meta->Set<Media::Plugin::Tag::MEDIA_SEEKABLE>(seekable));
     size_t fileSize = 0;
     if ((plugin_->GetSize(fileSize) == Status::OK) && (fileSize != 0)) {
-        FALSE_LOG(meta->Insert<Media::Plugin::Tag::MEDIA_FILE_SIZE>(static_cast<uint64_t>(fileSize)));
+        FALSE_LOG(meta->Set<Media::Plugin::Tag::MEDIA_FILE_SIZE>(static_cast<uint64_t>(fileSize)));
     }
     Capability peerCap;
     auto tmpCap = MetaToCapability(*meta);

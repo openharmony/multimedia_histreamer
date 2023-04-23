@@ -128,7 +128,7 @@ void VideoSinkFilter::HandleNegotiateParams(const Plugin::Meta& upstreamParams, 
     if (pluginAllocator != nullptr && pluginAllocator->GetMemoryType() == Plugin::MemoryType::SURFACE_BUFFER) {
         MEDIA_LOG_D("plugin provide surface allocator");
         auto allocator = Plugin::ReinterpretPointerCast<Plugin::SurfaceAllocator>(pluginAllocator);
-        downstreamParams.Insert<Tag::BUFFER_ALLOCATOR>(allocator);
+        downstreamParams.Set<Tag::BUFFER_ALLOCATOR>(allocator);
     }
 #endif
 }
