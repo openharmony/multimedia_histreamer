@@ -298,7 +298,7 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLe
     return Status::OK;
 }
 
-Status HttpSourcePlugin::GetSize(size_t &size)
+Status HttpSourcePlugin::GetSize(uint64_t& size)
 {
     OSAL::ScopedLock lock(httpMutex_);
     MEDIA_LOG_D("IN");

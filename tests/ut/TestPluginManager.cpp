@@ -174,7 +174,7 @@ public:
         return Status::OK;
     }
 
-    Status GetSize(size_t &size) override
+    Status GetSize(uint64_t &size) override
     {
         return Status::OK;
     }
@@ -195,7 +195,7 @@ public:
         return Status::OK;
     }
 
-    Status GetSize(size_t &size) override
+    Status GetSize(uint64_t &size) override
     {
         return Status::OK;
     }

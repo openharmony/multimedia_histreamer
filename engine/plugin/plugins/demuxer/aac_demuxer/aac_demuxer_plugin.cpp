@@ -66,7 +66,7 @@ Status AACDemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource>& source
     if (ioContext_.dataSource != nullptr) {
         ioContext_.dataSource->GetSize(fileSize_);
     }
-    MEDIA_LOG_I("fileSize_ " PUBLIC_LOG_ZU, fileSize_);
+    MEDIA_LOG_I("FileSize_ " PUBLIC_LOG_U64, fileSize_);
     isSeekable_ = fileSize_ > 0 ? true : false;
     return Status::OK;
 }

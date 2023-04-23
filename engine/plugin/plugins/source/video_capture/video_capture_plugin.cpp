@@ -325,13 +325,13 @@ Status VideoCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
     return Status::OK;
 }
 
-Status VideoCapturePlugin::GetSize(size_t& size)
+Status VideoCapturePlugin::GetSize(uint64_t& size)
 {
     if (bufferSize_ == 0) {
         return Status::ERROR_INVALID_PARAMETER;
     }
     size = bufferSize_;
-    MEDIA_LOG_D("bufferSize_: " PUBLIC_LOG_ZU, size);
+    MEDIA_LOG_D("BufferSize_: " PUBLIC_LOG_U64, size);
     return Status::OK;
 }
 

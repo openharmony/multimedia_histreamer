@@ -33,7 +33,7 @@ public:
 
     ~TypeFinder() override;
 
-    void Init(std::string uri, size_t mediaDataSize, std::function<bool(uint64_t, size_t)> checkRange,
+    void Init(std::string uri, uint64_t mediaDataSize, std::function<bool(uint64_t, size_t)> checkRange,
               std::function<bool(uint64_t, size_t, AVBufferPtr&)> peekRange);
 
     std::string FindMediaType();
@@ -42,7 +42,7 @@ public:
 
     Plugin::Status ReadAt(int64_t offset, std::shared_ptr<Plugin::Buffer>& buffer, size_t expectedLen) override;
 
-    Plugin::Status GetSize(size_t& size) override;
+    Plugin::Status GetSize(uint64_t& size) override;
 
     Plugin::Seekable GetSeekable() override;
 
@@ -63,7 +63,7 @@ private:
 
     bool sniffNeeded_;
     std::string uri_;
-    size_t mediaDataSize_;
+    uint64_t mediaDataSize_;
     std::string pluginName_;
     std::vector<std::shared_ptr<Plugin::PluginInfo>> plugins_;
     std::atomic<bool> pluginRegistryChanged_;

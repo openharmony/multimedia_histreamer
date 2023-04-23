@@ -584,7 +584,7 @@ int64_t FFmpegDemuxerPlugin::AVSeek(void* opaque, int64_t offset, int whence) //
             break;
         case SEEK_END:
         case AVSEEK_SIZE: {
-            size_t mediaDataSize = 0;
+            uint64_t mediaDataSize = 0;
             if (ioContext->dataSource->GetSize(mediaDataSize) == Status::OK) {
                 newPos = mediaDataSize + offset;
                 MEDIA_LOG_I("AVSeek seek end whence: " PUBLIC_LOG_D32 ", pos = " PUBLIC_LOG_D64,
@@ -617,7 +617,7 @@ int Sniff(const std::string& pluginName, std::shared_ptr<DataSource> dataSource)
         return 0;
     }
     size_t bufferSize = 4096;
-    size_t fileSize = 0;
+    uint64_t fileSize = 0;
     if (dataSource->GetSize(fileSize) == Status::OK) {
         bufferSize = (bufferSize < fileSize) ? bufferSize : fileSize;
     }

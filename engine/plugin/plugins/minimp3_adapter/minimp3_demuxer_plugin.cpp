@@ -678,7 +678,7 @@ int Sniff(const std::string& name, std::shared_ptr<DataSource> dataSource)
     uint8_t *inputDataPtr = nullptr;
     int offset = 0;
     int readSize = PROBE_READ_LENGTH;
-    size_t sourceSize = 0;
+    uint64_t sourceSize = 0;
     dataSource->GetSize(sourceSize);
     while (processLoop) {
         if (sourceSize < PROBE_READ_LENGTH && sourceSize != 0) {

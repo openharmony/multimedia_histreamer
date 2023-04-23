@@ -30,7 +30,7 @@ struct DataSourceWrapper : DataSource {
     ~DataSourceWrapper() override = default;
 
     Status ReadAt(int64_t offset, std::shared_ptr<Buffer>& buffer, size_t expectedLen) override;
-    Status GetSize(size_t& size) override;
+    Status GetSize(uint64_t& size) override;
     Seekable GetSeekable() override;
 private:
     MEDIA_UNUSED uint32_t version;
