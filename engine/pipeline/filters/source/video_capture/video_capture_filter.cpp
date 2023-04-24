@@ -162,14 +162,14 @@ ErrorCode VideoCaptureFilter::DoConfigure()
         MEDIA_LOG_E("cannot find available capability of plugin " PUBLIC_LOG_S, pluginInfo_->name.c_str());
         return ErrorCode::ERROR_UNKNOWN;
     }
-    videoMeta->SetUint32(Plugin::MetaID::VIDEO_WIDTH, videoWidth_);
-    videoMeta->SetUint32(Plugin::MetaID::VIDEO_HEIGHT, videoHeight_);
-    videoMeta->SetInt64(Plugin::MetaID::MEDIA_BITRATE, bitRate_);
-    videoMeta->SetUint32(Plugin::MetaID::VIDEO_FRAME_RATE, frameRate_);
-    videoMeta->SetData(Plugin::MetaID::MIME, mime_);
-    videoMeta->SetData(Plugin::MetaID::VIDEO_PIXEL_FORMAT, pixelFormat_);
-    Plugin::TagMap upstreamParams;
-    Plugin::TagMap downstreamParams;
+    FALSE_LOG(videoMeta->Set<Plugin::Tag::VIDEO_WIDTH>(videoWidth_));
+    FALSE_LOG(videoMeta->Set<Plugin::Tag::VIDEO_HEIGHT>(videoHeight_));
+    FALSE_LOG(videoMeta->Set<Plugin::Tag::MEDIA_BITRATE>(bitRate_));
+    FALSE_LOG(videoMeta->Set<Plugin::Tag::VIDEO_FRAME_RATE>(frameRate_));
+    FALSE_LOG(videoMeta->Set<Plugin::Tag::MIME>(mime_));
+    FALSE_LOG(videoMeta->Set<Plugin::Tag::VIDEO_PIXEL_FORMAT>(pixelFormat_));
+    Plugin::Meta upstreamParams;
+    Plugin::Meta downstreamParams;
     if (!outPorts_[0]->Configure(videoMeta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("Configure downstream fail");
         return ErrorCode::ERROR_UNKNOWN;
@@ -317,8 +317,8 @@ bool VideoCaptureFilter::DoNegotiate(const CapabilitySet &outCaps)
         auto thisOut = std::make_shared<Plugin::Capability>();
         mime_ = outCap.mime;
         *thisOut = outCap; // pixel format
-        Plugin::TagMap upstreamParams;
-        Plugin::TagMap downstreamParams;
+        Plugin::Meta upstreamParams;
+        Plugin::Meta downstreamParams;
         if (outPorts_[0]->Negotiate(thisOut, capNegWithDownstream_, upstreamParams, downstreamParams)) {
             MEDIA_LOG_I("Negotiate success");
             return true;

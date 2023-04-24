@@ -80,19 +80,20 @@ void MediaSynchronousSink::NotifyAllPrerolled()
 void MediaSynchronousSink::UpdateMediaTimeRange(const Plugin::Meta& meta)
 {
     int64_t trackStartTime = 0;
-    meta.GetInt64(Plugin::MetaID::MEDIA_START_TIME, trackStartTime);
+    meta.Get<Plugin::Tag::MEDIA_START_TIME>(trackStartTime);
     uint32_t trackId = 0;
-    meta.GetUint32(Plugin::MetaID::TRACK_ID, trackId);
+    FALSE_LOG(meta.Get<Plugin::Tag::TRACK_ID>(trackId));
     auto syncCenter = syncCenter_.lock();
     if (syncCenter) {
         syncCenter->SetMediaTimeRangeStart(trackStartTime, trackId);
     }
     int64_t trackDuration = 0;
-    if (meta.GetInt64(Plugin::MetaID::MEDIA_DURATION, trackDuration)) {
+    if (meta.Get<Plugin::Tag::MEDIA_DURATION>(trackDuration)) {
         if (syncCenter) {
             syncCenter->SetMediaTimeRangeEnd(trackDuration + trackStartTime, trackId);
         }
     } else {
+        MEDIA_LOG_W("Get duration failed");
         if (syncCenter) {
             syncCenter->SetMediaTimeRangeEnd(INT64_MAX, trackId);
         }

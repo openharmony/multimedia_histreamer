@@ -19,14 +19,14 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "plugin/common/tag_map.h"
+#include "plugin/common/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {
 namespace Test {
 using namespace OHOS::Media::Plugin;
 
-class TestTagMap : public ::testing::Test {
+class TestMeta : public ::testing::Test {
 public:
     void SetUp() override
     {
@@ -37,22 +37,23 @@ public:
     }
 };
 
-TEST_F(TestTagMap, Can_insert_tag_value_int64_to_TagMap)
+TEST_F(TestMeta, Can_insert_tag_value_int64_to_Meta)
 {
-    TagMap map;
-    ASSERT_TRUE(map.Insert<Tag::MEDIA_DURATION>(10000));
-    ASSERT_TRUE(map.Insert<Tag::MEDIA_FILE_SIZE>(500));
+    Meta map;
+    ASSERT_TRUE(map.Set<Tag::MEDIA_DURATION>(10000));
+    ASSERT_TRUE(map.Set<Tag::MEDIA_FILE_SIZE>(500));
     int64_t value;
     ASSERT_TRUE(map.Get<Tag::MEDIA_DURATION>(value));
     ASSERT_EQ(10000, value);
-    ASSERT_TRUE(map.Get<Tag::MEDIA_FILE_SIZE>(value));
+    uint64_t size;
+    ASSERT_TRUE(map.Get<Tag::MEDIA_FILE_SIZE>(size));
     ASSERT_EQ(500, value);
 }
 
-TEST_F(TestTagMap, Can_insert_tag_value_uint32_to_TagMap)
+TEST_F(TestMeta, Can_insert_tag_value_uint32_to_TagMap)
 {
-    TagMap map;
-    ASSERT_TRUE(map.Insert<Tag::TRACK_ID>(10000));
+    Meta map;
+    ASSERT_TRUE(map.Set<Tag::TRACK_ID>(10000));
     uint32_t value;
     ASSERT_TRUE(map.Get<Tag::TRACK_ID>(value));
     ASSERT_EQ(10000, value);

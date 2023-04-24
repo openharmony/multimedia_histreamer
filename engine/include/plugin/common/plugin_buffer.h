@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "plugin/common/plugin_memory.h"
-#include "plugin/common/tag_map.h"
+#include "plugin/common/plugin_meta.h"
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 #include "refbase.h"
 #include "surface/surface.h"
@@ -84,7 +84,7 @@ private:
     BufferMetaType type;
 
     /// Buffer metadata information of the buffer, which is represented by the key-value pair of the tag.
-    std::shared_ptr<TagMap> tags {};
+    std::shared_ptr<Meta> tags {};
 };
 
 /**

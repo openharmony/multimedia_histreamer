@@ -447,19 +447,19 @@ std::shared_ptr<Capability> MetaToCapability(const Plugin::Meta& meta)
 {
     auto ret = std::make_shared<Capability>();
     std::string mime;
-    if (meta.GetString(Plugin::MetaID::MIME, mime)) {
+    if (meta.Get<Plugin::Tag::MIME>(mime)) {
         ret->mime = mime;
     }
     for (const auto& key : g_allCapabilityId) {
         Plugin::ValueType tmp;
-        if (meta.GetData(static_cast<Plugin::MetaID>(key), tmp)) {
+        if (meta.GetData(static_cast<Plugin::Tag>(key), tmp)) {
             ret->keys[key] = tmp;
         }
     }
     return ret;
 }
 
-bool MergeMetaWithCapability(const Plugin::Meta& meta, const Capability& cap,  Plugin::Meta& resMeta)
+bool MergeMetaWithCapability(const Plugin::Meta& meta, const Capability& cap, Plugin::Meta& resMeta)
 {
     resMeta.Clear();
     // change meta into capability firstly
@@ -467,7 +467,7 @@ bool MergeMetaWithCapability(const Plugin::Meta& meta, const Capability& cap,  P
     metaCap.mime = cap.mime;
     for (const auto& key : g_allCapabilityId) {
         Plugin::ValueType tmp;
-        if (meta.GetData(static_cast<Plugin::MetaID>(key), tmp)) {
+        if (meta.GetData(static_cast<Plugin::Tag>(key), tmp)) {
             metaCap.keys[key] = tmp;
         }
     }
@@ -476,8 +476,8 @@ bool MergeMetaWithCapability(const Plugin::Meta& meta, const Capability& cap,  P
         return false;
     }
     // merge capability
-    resMeta.Update(meta);
-    resMeta.SetString(Plugin::MetaID::MIME, cap.mime);
+    resMeta = meta;
+    resMeta.Set<Plugin::Tag::MIME>(cap.mime);
     for (const auto& oneCap : resCap.keys) {
         if (g_capExtrMap.count(oneCap.first) == 0) {
             continue;
@@ -485,7 +485,7 @@ bool MergeMetaWithCapability(const Plugin::Meta& meta, const Capability& cap,  P
         auto func = g_capExtrMap[oneCap.first];
         Plugin::ValueType tmp;
         if (func(oneCap.second, tmp)) {
-            resMeta.SetData(static_cast<Plugin::MetaID>(oneCap.first), tmp);
+            resMeta.SetData(static_cast<Plugin::Tag>(oneCap.first), tmp);
         }
     }
     return true;

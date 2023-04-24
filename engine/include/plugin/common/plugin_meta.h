@@ -31,29 +31,28 @@ namespace Plugin {
 #define DEFINE_INSERT_GET_FUNC(condition, ValueType)             \
         template<Tag tag>                                        \
         inline typename std::enable_if<(condition), bool>::type  \
-        Insert(ValueType value)                                  \
+        Set(ValueType value)                                     \
         {                                                        \
+            auto iter = map_.find(tag);                          \
+            if (iter != map_.end()) {                            \
+                map_.erase(iter++);                              \
+            }                                                    \
             map_.insert(std::make_pair(tag, value));             \
             return true;                                         \
         }                                                        \
         template<Tag tag>                                        \
         inline typename std::enable_if<(condition), bool>::type  \
-        Get(ValueType& value)                                    \
+        Get(ValueType& value) const                              \
         {                                                        \
             if (map_.count(tag) == 0) {                          \
                 return false;                                    \
             }                                                    \
-            Any& temp = map_.at(tag);                            \
-            if (!temp.SameTypeWith(typeid(ValueType))) {         \
-                return false;                                    \
-            }                                                    \
-            value = AnyCast<ValueType>(map_.at(tag));            \
-            return true;                                         \
+            return AnyCast<ValueType>(&map_.at(tag), value);     \
         }
 
 
 using MapIt = std::map<Tag, Any>::const_iterator;
-class TagMap {
+class Meta {
 public:
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
     DEFINE_INSERT_GET_FUNC(tag == Tag::BUFFER_ALLOCATOR or tag == Tag::VIDEO_SURFACE,
@@ -71,6 +70,7 @@ public:
     DEFINE_INSERT_GET_FUNC(tag == Tag::MEDIA_SEEKABLE, Seekable);
     DEFINE_INSERT_GET_FUNC(tag == Tag::MEDIA_TYPE, MediaType);
     DEFINE_INSERT_GET_FUNC(tag == Tag::VIDEO_BIT_STREAM_FORMAT, std::vector<VideoBitStreamFormat>);
+    DEFINE_INSERT_GET_FUNC(tag == Tag::VIDEO_H264_PROFILE, VideoH264Profile);
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::TRACK_ID or
         tag == Tag::REQUIRED_OUT_BUFFER_CNT or
@@ -88,13 +88,15 @@ public:
         tag == Tag::VIDEO_HEIGHT or
         tag == Tag::VIDEO_FRAME_RATE or
         tag == Tag::VIDEO_MAX_SURFACE_NUM or
+        tag == Tag::VIDEO_H264_LEVEL or
         tag == Tag::BITS_PER_CODED_SAMPLE, uint32_t);
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::MEDIA_DURATION or
-        tag == Tag::MEDIA_FILE_SIZE or
         tag == Tag::MEDIA_BITRATE or
-        tag == Tag::MEDIA_POSITION or
         tag == Tag::MEDIA_START_TIME, int64_t);
+    DEFINE_INSERT_GET_FUNC(
+        tag == Tag::MEDIA_FILE_SIZE or
+        tag == Tag::MEDIA_POSITION, uint64_t);
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::VIDEO_CAPTURE_RATE, double);
     DEFINE_INSERT_GET_FUNC(
@@ -112,13 +114,18 @@ public:
         tag == Tag::MEDIA_LANGUAGE or
         tag == Tag::MEDIA_DESCRIPTION or
         tag == Tag::MEDIA_LYRICS, std::string);
+    Meta& operator=(const Meta& other)
+    {
+        map_ = other.map_;
+        return *this;
+    }
 
     ValueType& operator[](const Tag &tag)
     {
         return map_[tag];
     }
 
-    MapIt begin() const // to support for (auto e : TagMap), must use begin/end name
+    MapIt begin() const // to support for (auto e : Meta), must use begin/end name
     {
         return map_.cbegin();
     }
@@ -136,6 +143,55 @@ public:
     MapIt Find(Tag tag) const
     {
         return map_.find(tag);
+    }
+
+    bool Empty() const
+    {
+        return map_.empty();
+    }
+
+    template <typename T>
+    void SetData(Plugin::Tag id, const T& value)
+    {
+        map_[id] = value;
+    }
+
+    template <typename T>
+    bool GetData(Plugin::Tag id, T& value) const
+    {
+        auto ite = map_.find(id);
+        if (ite == map_.end() || !ite->second.SameTypeWith(typeid(T))) {
+            return false;
+        }
+        value = Plugin::AnyCast<T>(ite->second);
+        return true;
+    }
+
+    bool GetData(Plugin::Tag id, Plugin::ValueType& value) const
+    {
+        auto ite = map_.find(id);
+        if (ite == map_.end()) {
+            return false;
+        }
+        value = ite->second;
+        return true;
+    }
+
+    void Remove(Plugin::Tag id)
+    {
+        auto ite = map_.find(id);
+        if (ite != map_.end()) {
+            map_.erase(ite);
+        }
+    }
+
+    void GetKeys(std::vector<Tag>& keys) const
+    {
+        int cnt = 0;
+        keys.resize(map_.size());
+        for (const auto& tmp : map_) {
+            keys[cnt++] = tmp.first;
+        }
     }
 private:
     std::map<Tag, Any> map_;

@@ -27,7 +27,6 @@
 #include "plugin/common/plugin_tags.h"
 #include "plugin/core/codec.h"
 #include "plugin/core/plugin_info.h"
-#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {
@@ -50,11 +49,11 @@ public:
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                   Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams) override;
 
     void FlushStart() override;
 
@@ -63,15 +62,15 @@ public:
 protected:
     virtual uint32_t GetOutBufferPoolSize();
 
-    virtual uint32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta);
+    virtual uint32_t CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta);
 
-    virtual Plugin::TagMap GetNegotiateParams(const Plugin::TagMap& upstreamParams);
+    virtual Plugin::Meta GetNegotiateParams(const Plugin::Meta& upstreamParams);
 
     bool CheckRequiredOutCapKeys(const Capability& capability);
 
     virtual std::vector<Capability::Key> GetRequiredOutCapKeys();
 
-    virtual ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta> &meta);
+    virtual ErrorCode ConfigureToStartPluginLocked(const std::shared_ptr<const Plugin::Meta>& meta);
 
     ErrorCode UpdateMetaFromPlugin(Plugin::Meta& meta);
 
@@ -92,7 +91,7 @@ protected:
     }
 
     bool isFlushing_ {false};
-    Plugin::TagMap sinkParams_ {};
+    Plugin::Meta sinkParams_ {};
     std::shared_ptr<Plugin::Codec> plugin_ {};
     Plugin::BufferMetaType bufferMetaType_ = {};
     std::shared_ptr<CodecMode> codecMode_ {nullptr};

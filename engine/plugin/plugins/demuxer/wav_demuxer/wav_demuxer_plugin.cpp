@@ -94,34 +94,34 @@ Status WavDemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)
     dataOffset_ = wavHeadLength_;
     mediaInfo.tracks.resize(1);
     if (wavHeader_.numChannels == 1) {
-        mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::MONO);
+        mediaInfo.tracks[0].Set<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::MONO);
     } else {
-        mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
+        mediaInfo.tracks[0].Set<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
     }
     int64_t duration = 0;
     if (!Sec2HstTime((fileSize_ - wavHeadLength_) * 8 /     // 8
         (wavHeader_.sampleRate * wavHeader_.bitsPerSample * wavHeader_.numChannels), duration)) {
         MEDIA_LOG_E("value overflow!");
     }
-    mediaInfo.tracks[0].Insert<Tag::MEDIA_DURATION>(duration);
-    mediaInfo.tracks[0].Insert<Tag::MEDIA_TYPE>(MediaType::AUDIO);
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_RATE>(wavHeader_.sampleRate);
-    mediaInfo.tracks[0].Insert<Tag::MEDIA_BITRATE>((wavHeader_.byteRate) * 8); // 8  byte to bit
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNELS>(wavHeader_.numChannels);
-    mediaInfo.tracks[0].Insert<Tag::TRACK_ID>(0);
-    mediaInfo.tracks[0].Insert<Tag::MIME>(MEDIA_MIME_AUDIO_RAW);
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_MPEG_VERSION>(1);
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_PER_FRAME>(WAV_PER_FRAME_SIZE);
+    mediaInfo.tracks[0].Set<Tag::MEDIA_DURATION>(duration);
+    mediaInfo.tracks[0].Set<Tag::MEDIA_TYPE>(MediaType::AUDIO);
+    mediaInfo.tracks[0].Set<Tag::AUDIO_SAMPLE_RATE>(wavHeader_.sampleRate);
+    mediaInfo.tracks[0].Set<Tag::MEDIA_BITRATE>((wavHeader_.byteRate) * 8); // 8  byte to bit
+    mediaInfo.tracks[0].Set<Tag::AUDIO_CHANNELS>(wavHeader_.numChannels);
+    mediaInfo.tracks[0].Set<Tag::TRACK_ID>(0);
+    mediaInfo.tracks[0].Set<Tag::MIME>(MEDIA_MIME_AUDIO_RAW);
+    mediaInfo.tracks[0].Set<Tag::AUDIO_MPEG_VERSION>(1);
+    mediaInfo.tracks[0].Set<Tag::AUDIO_SAMPLE_PER_FRAME>(WAV_PER_FRAME_SIZE);
     if (wavHeader_.audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_PCM)
         || wavHeader_.audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_EXTENSIBLE)) {
-        mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_FORMAT>
+        mediaInfo.tracks[0].Set<Tag::AUDIO_SAMPLE_FORMAT>
             (g_WavAudioSampleFormatPacked[static_cast<uint32_t>(wavHeader_.bitsPerSample)]);
     } else if (wavHeader_.audioFormat == static_cast<uint16_t>(WavAudioFormat::WAVE_FORMAT_IEEE_FLOAT)) {
-        mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::F32);
+        mediaInfo.tracks[0].Set<Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::F32);
     } else {
-        mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::NONE);
+        mediaInfo.tracks[0].Set<Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::NONE);
     }
-    mediaInfo.tracks[0].Insert<Tag::BITS_PER_CODED_SAMPLE>(wavHeader_.bitsPerSample);
+    mediaInfo.tracks[0].Set<Tag::BITS_PER_CODED_SAMPLE>(wavHeader_.bitsPerSample);
     return Status::OK;
 }
 

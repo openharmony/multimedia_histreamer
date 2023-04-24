@@ -58,8 +58,8 @@ ErrorCode AudioEncoderFilter::Start()
 ErrorCode AudioEncoderFilter::SetAudioEncoder(int32_t sourceId, std::shared_ptr<Plugin::Meta> encoderMeta)
 {
     std::string mime;
-    FALSE_RETURN_V_MSG_E(encoderMeta->GetString(Plugin::MetaID::MIME, mime), ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
-                         "encoder meta must contains mime");
+    FALSE_RETURN_V_MSG_E(encoderMeta->Get<Plugin::Tag::MIME>(mime), ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
+                         "Encoder meta must contains mime");
     mime_ = mime;
     encoderMeta_ = std::move(encoderMeta);
     return ErrorCode::SUCCESS;
@@ -68,8 +68,8 @@ ErrorCode AudioEncoderFilter::SetAudioEncoder(int32_t sourceId, std::shared_ptr<
 bool AudioEncoderFilter::Negotiate(const std::string& inPort,
                                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                    Plugin::Capability& negotiatedCap,
-                                   const Plugin::TagMap& upstreamParams,
-                                   Plugin::TagMap& downstreamParams)
+                                   const Plugin::Meta& upstreamParams,
+                                   Plugin::Meta& downstreamParams)
 {
     PROFILE_BEGIN("Audio Encoder Negotiate begin");
     FALSE_RETURN_V_MSG_E(state_ == FilterState::PREPARING, false, "not preparing when negotiate");
@@ -127,18 +127,14 @@ uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<const Plu
     }
     auto samplesPerFrame = Plugin::AnyCast<uint32_t>(value);
     uint32_t channels;
-    if (!meta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels)) {
-        return 0;
-    }
+    FALSE_RETURN_V(meta->Get<Plugin::Tag::AUDIO_CHANNELS>(channels), 0);
     Plugin::AudioSampleFormat format;
-    if (!meta->GetData<Plugin::AudioSampleFormat>(Plugin::MetaID::AUDIO_SAMPLE_FORMAT, format)) {
-        return 0;
-    }
+    FALSE_RETURN_V(meta->Get<Plugin::Tag::AUDIO_SAMPLE_FORMAT>(format), 0);
     return GetBytesPerSample(format) * samplesPerFrame * channels;
 }
 
-bool AudioEncoderFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool AudioEncoderFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                                   Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
 {
     PROFILE_BEGIN("Audio encoder configure begin");
     MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());

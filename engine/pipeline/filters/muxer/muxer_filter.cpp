@@ -97,8 +97,8 @@ bool MuxerFilter::UpdateAndInitPluginByInfo(const std::shared_ptr<Plugin::Plugin
 bool MuxerFilter::Negotiate(const std::string& inPort,
                             const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                             Plugin::Capability& negotiatedCap,
-                            const Plugin::TagMap& upstreamParams,
-                            Plugin::TagMap& downstreamParams)
+                            const Plugin::Meta& upstreamParams,
+                            Plugin::Meta& downstreamParams)
 {
     if (state_ != FilterState::PREPARING) {
         MEDIA_LOG_W("muxer filter is not in preparing when negotiate");
@@ -142,11 +142,12 @@ ErrorCode MuxerFilter::AddTrackThenConfigure(const std::pair<std::string, Plugin
     trackInfos_.emplace_back(TrackInfo{static_cast<int32_t>(trackId), metaPair.first, false});
     auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
-        auto outValue = metaPair.second.GetData(static_cast<Plugin::MetaID>(keyPair.first));
-        if (outValue &&
+        Plugin::ValueType outValue;
+        auto ret = metaPair.second.GetData(static_cast<Plugin::Tag>(keyPair.first), outValue);
+        if (ret &&
             (keyPair.second.second & PARAM_SET) &&
-            keyPair.second.first(keyPair.first, *outValue)) {
-            plugin_->SetTrackParameter(trackId, keyPair.first, *outValue);
+            keyPair.second.first(keyPair.first, outValue)) {
+            plugin_->SetTrackParameter(trackId, keyPair.first, outValue);
         } else {
             if (!Plugin::HasTagInfo(keyPair.first)) {
                 MEDIA_LOG_W("tag " PUBLIC_LOG_D32 " is not in map, may be update it?", keyPair.first);
@@ -182,11 +183,11 @@ ErrorCode MuxerFilter::ConfigureToStart()
     }
     return ret;
 }
-bool MuxerFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                            Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool MuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                            Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
 {
     std::string tmp;
-    if (!upstreamMeta->GetString(Plugin::MetaID::MIME, tmp)) {
+    if (!upstreamMeta->Get<Plugin::Tag::MIME>(tmp))  {
         MEDIA_LOG_E("stream meta must contain mime, which is not found in current stream from port " PUBLIC_LOG_S,
                     inPort.c_str());
         return false;
@@ -201,7 +202,7 @@ bool MuxerFilter::Configure(const std::string &inPort, const std::shared_ptr<con
     }
 
     auto meta = std::make_shared<Plugin::Meta>();
-    meta->SetString(Plugin::MetaID::MIME, containerMime_);
+    FALSE_LOG(meta->Set<Plugin::Tag::MIME>(containerMime_));
     if (!outPorts_[0]->Configure(meta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("downstream of muxer filter configure failed");
         return false;

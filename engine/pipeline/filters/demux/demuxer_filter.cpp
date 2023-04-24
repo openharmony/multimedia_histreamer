@@ -17,6 +17,7 @@
 
 #include "pipeline/filters/demux/demuxer_filter.h"
 #include <algorithm>
+#include "foundation/cpp_ext/type_traits_ext.h"
 #include "foundation/log.h"
 #include "foundation/utils/constants.h"
 #include "foundation/utils/dump_buffer.h"
@@ -237,8 +238,8 @@ ErrorCode DemuxerFilter::PushData(const std::string& inPort, const AVBufferPtr& 
 bool DemuxerFilter::Negotiate(const std::string& inPort,
                               const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                               Plugin::Capability& negotiatedCap,
-                              const Plugin::TagMap& upstreamParams,
-                              Plugin::TagMap& downstreamParams)
+                              const Plugin::Meta& upstreamParams,
+                              Plugin::Meta& downstreamParams)
 {
     (void)inPort;
     (void)upstreamCap;
@@ -248,16 +249,13 @@ bool DemuxerFilter::Negotiate(const std::string& inPort,
     return true;
 }
 
-bool DemuxerFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                              Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool DemuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                              Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
 {
     (void)downstreamParams;
-    (void)upstreamMeta->GetUint64(Plugin::MetaID::MEDIA_FILE_SIZE, mediaDataSize_);
-    int32_t seekable = static_cast<int32_t>(seekable_);
-    if (upstreamMeta->GetInt32(Plugin::MetaID::MEDIA_SEEKABLE, seekable)) {
-        seekable_ = static_cast<Plugin::Seekable>(seekable);
-    }
-    upstreamMeta->GetString(Plugin::MetaID::MEDIA_FILE_URI, uri_);
+    FALSE_LOG_MSG(upstreamMeta->Get<Plugin::Tag::MEDIA_FILE_SIZE>(mediaDataSize_), "Get media file size  failed.");
+    FALSE_LOG_MSG(upstreamMeta->Get<Plugin::Tag::MEDIA_SEEKABLE>(seekable_), "Get MEDIA_SEEKABLE failed");
+    FALSE_LOG_MSG(upstreamMeta->Get<Plugin::Tag::MEDIA_FILE_URI>(uri_), "Get MEDIA_FILE_URI failed");
     return true;
 }
 
@@ -459,8 +457,8 @@ bool DemuxerFilter::PrepareStreams(const Plugin::MediaInfoHelper& mediaInfo)
         }
         std::string mime;
         uint32_t trackId = 0;
-        if (!mediaInfo.trackMeta[i].GetString(Plugin::MetaID::MIME, mime) ||
-            !mediaInfo.trackMeta[i].GetUint32(Plugin::MetaID::TRACK_ID, trackId)) {
+        if (!mediaInfo.trackMeta[i].Get<Plugin::Tag::MIME>(mime) ||
+            !mediaInfo.trackMeta[i].Get<Plugin::Tag::TRACK_ID>(trackId)) {
             MEDIA_LOG_E("PrepareStreams failed to extract mime or trackId.");
             continue;
         }
@@ -506,9 +504,10 @@ ErrorCode DemuxerFilter::ReadFrame(AVBuffer& buffer, uint32_t& trackId)
 std::shared_ptr<Plugin::Meta> DemuxerFilter::GetTrackMeta(uint32_t trackId)
 {
     uint32_t streamTrackId = 0;
+    auto ret = false;
     for (auto meta : mediaMetaData_.trackMetas) {
-        if (meta->GetUint32(Plugin::MetaID::TRACK_ID, streamTrackId)
-            && streamTrackId == trackId) {
+        FALSE_LOG_MSG(ret = meta->Get<Plugin::Tag::TRACK_ID>(streamTrackId), "Get TRACK_ID failed.");
+        if (ret && streamTrackId == trackId) {
             return meta;
         }
     }
@@ -537,17 +536,17 @@ void DemuxerFilter::HandleFrame(const AVBufferPtr& bufferPtr, uint32_t trackId)
 }
 
 void DemuxerFilter::UpdateStreamMeta(std::shared_ptr<Plugin::Meta>& streamMeta, Plugin::Capability& negotiatedCap,
-    Plugin::TagMap& downstreamParams)
+    Plugin::Meta& downstreamParams)
 {
     auto type = Plugin::MediaType::UNKNOWN;
-    streamMeta->GetData(Plugin::MetaID::MEDIA_TYPE, type);
+    FALSE_LOG(streamMeta->Get<Plugin::Tag::MEDIA_TYPE>(type));
     if (type == Plugin::MediaType::AUDIO) {
         uint32_t channels = 2;
         uint32_t outputChannels = 2;
         Plugin::AudioChannelLayout channelLayout = Plugin::AudioChannelLayout::STEREO;
         Plugin::AudioChannelLayout outputChannelLayout = Plugin::AudioChannelLayout::STEREO;
-        FALSE_LOG(streamMeta->GetUint32(Plugin::MetaID::AUDIO_CHANNELS, channels));
-        FALSE_LOG(streamMeta->GetData(Plugin::MetaID::AUDIO_CHANNEL_LAYOUT, channelLayout));
+        FALSE_LOG(streamMeta->Get<Plugin::Tag::AUDIO_CHANNELS>(channels));
+        FALSE_LOG(streamMeta->Get<Plugin::Tag::AUDIO_CHANNEL_LAYOUT>(channelLayout));
 
         FALSE_LOG(downstreamParams.Get<Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels));
         FALSE_LOG(downstreamParams.Get<Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT>(outputChannelLayout));
@@ -555,8 +554,8 @@ void DemuxerFilter::UpdateStreamMeta(std::shared_ptr<Plugin::Meta>& streamMeta, 
             outputChannels = channels;
             outputChannelLayout = channelLayout;
         }
-        streamMeta->SetUint32(Plugin::MetaID::AUDIO_OUTPUT_CHANNELS, outputChannels);
-        streamMeta->SetData(Plugin::MetaID::AUDIO_OUTPUT_CHANNEL_LAYOUT, outputChannelLayout);
+        FALSE_LOG(streamMeta->Set<Plugin::Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels));
+        FALSE_LOG(streamMeta->Set<Plugin::Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT>(outputChannelLayout));
     } else if (type == Plugin::MediaType::VIDEO) {
         if (negotiatedCap.keys.count(Capability::Key::VIDEO_BIT_STREAM_FORMAT)) {
             auto vecVdBitStreamFormat = Plugin::AnyCast<std::vector<Plugin::VideoBitStreamFormat>>(
@@ -577,9 +576,9 @@ void DemuxerFilter::NegotiateDownstream()
             MEDIA_LOG_I("demuxer negotiate with trackId: " PUBLIC_LOG_U32, stream.trackId);
             auto streamMeta = GetTrackMeta(stream.trackId);
             auto tmpCap = MetaToCapability(*streamMeta);
-            Plugin::TagMap upstreamParams;
-            Plugin::TagMap downstreamParams;
-            upstreamParams.Insert<Tag::MEDIA_SEEKABLE>(seekable_);
+            Plugin::Meta upstreamParams;
+            Plugin::Meta downstreamParams;
+            FALSE_LOG(upstreamParams.Set<Tag::MEDIA_SEEKABLE>(seekable_));
             if (stream.port->Negotiate(tmpCap, caps, upstreamParams, downstreamParams)) {
                 UpdateStreamMeta(streamMeta, caps, downstreamParams);
                 if (stream.port->Configure(streamMeta, upstreamParams, downstreamParams)) {
@@ -637,13 +636,13 @@ void DemuxerFilter::ReportVideoSize(const Plugin::MediaInfoHelper& mediaInfo)
     uint32_t height = 0;
     int streamCnt = mediaInfo.trackMeta.size();
     for (int i = 0; i < streamCnt; ++i) {
-        if (!mediaInfo.trackMeta[i].GetString(Plugin::MetaID::MIME, mime)) {
+        if (!mediaInfo.trackMeta[i].Get<Plugin::Tag::MIME>(mime)) {
             MEDIA_LOG_E("PrepareStreams failed to extract mime.");
             continue;
         }
         if (IsVideoMime(mime)) {
-            (void)mediaInfo.trackMeta[i].GetUint32(Plugin::MetaID::VIDEO_WIDTH, width);
-            (void)mediaInfo.trackMeta[i].GetUint32(Plugin::MetaID::VIDEO_HEIGHT, height);
+            FALSE_LOG(mediaInfo.trackMeta[i].Get<Plugin::Tag::VIDEO_WIDTH>(width));
+            FALSE_LOG(mediaInfo.trackMeta[i].Get<Plugin::Tag::VIDEO_HEIGHT>(height));
             MEDIA_LOG_I("mime-width-height: " PUBLIC_LOG_S "-" PUBLIC_LOG_U32 "-" PUBLIC_LOG_U32,
                         mime.c_str(), width, height);
             auto resolution = std::make_pair(static_cast<int32_t>(width), static_cast<int32_t>(height));

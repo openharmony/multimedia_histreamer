@@ -28,7 +28,6 @@
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/pipeline.h"
 #include "plugin/common/plugin_types.h"
-#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {

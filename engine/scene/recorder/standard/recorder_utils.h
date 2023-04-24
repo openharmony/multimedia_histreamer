@@ -21,7 +21,7 @@
 #include "hst_recorder_param.h"
 #include "pipeline/core/error_code.h"
 #include "plugin/common/plugin_source_tags.h"
-#include "plugin/core/plugin_meta.h"
+#include "plugin/common/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {

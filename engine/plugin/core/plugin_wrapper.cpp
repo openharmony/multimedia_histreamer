@@ -18,46 +18,46 @@
 #include <set>
 
 namespace {
-std::set<OHOS::Media::Plugin::MetaID> g_metaIdSet = {
-    OHOS::Media::Plugin::MetaID::MIME,
-    OHOS::Media::Plugin::MetaID::TRACK_ID,
-    OHOS::Media::Plugin::MetaID::MEDIA_CODEC_CONFIG,
-    OHOS::Media::Plugin::MetaID::MEDIA_BITRATE,
-    OHOS::Media::Plugin::MetaID::AUDIO_CHANNELS,
-    OHOS::Media::Plugin::MetaID::AUDIO_SAMPLE_RATE,
-    OHOS::Media::Plugin::MetaID::AUDIO_SAMPLE_FORMAT,
-    OHOS::Media::Plugin::MetaID::AUDIO_SAMPLE_PER_FRAME,
-    OHOS::Media::Plugin::MetaID::AUDIO_CHANNEL_LAYOUT,
-    OHOS::Media::Plugin::MetaID::MEDIA_TITLE,
-    OHOS::Media::Plugin::MetaID::MEDIA_ARTIST,
-    OHOS::Media::Plugin::MetaID::MEDIA_LYRICIST,
-    OHOS::Media::Plugin::MetaID::MEDIA_ALBUM,
-    OHOS::Media::Plugin::MetaID::MEDIA_ALBUM_ARTIST,
-    OHOS::Media::Plugin::MetaID::MEDIA_DATE,
-    OHOS::Media::Plugin::MetaID::MEDIA_COMMENT,
-    OHOS::Media::Plugin::MetaID::MEDIA_GENRE,
-    OHOS::Media::Plugin::MetaID::MEDIA_DESCRIPTION,
-    OHOS::Media::Plugin::MetaID::MEDIA_COPYRIGHT,
-    OHOS::Media::Plugin::MetaID::MEDIA_LANGUAGE,
-    OHOS::Media::Plugin::MetaID::MEDIA_LYRICS,
-    OHOS::Media::Plugin::MetaID::MEDIA_DURATION,
-    OHOS::Media::Plugin::MetaID::MEDIA_FILE_URI,
-    OHOS::Media::Plugin::MetaID::MEDIA_FILE_SIZE,
-    OHOS::Media::Plugin::MetaID::MEDIA_SEEKABLE,
-    OHOS::Media::Plugin::MetaID::MEDIA_TYPE,
-    OHOS::Media::Plugin::MetaID::AUDIO_MPEG_VERSION,
-    OHOS::Media::Plugin::MetaID::AUDIO_MPEG_LAYER,
-    OHOS::Media::Plugin::MetaID::AUDIO_AAC_PROFILE,
-    OHOS::Media::Plugin::MetaID::AUDIO_AAC_LEVEL,
-    OHOS::Media::Plugin::MetaID::AUDIO_AAC_STREAM_FORMAT,
-    OHOS::Media::Plugin::MetaID::VIDEO_WIDTH,
-    OHOS::Media::Plugin::MetaID::VIDEO_HEIGHT,
-    OHOS::Media::Plugin::MetaID::VIDEO_PIXEL_FORMAT,
-    OHOS::Media::Plugin::MetaID::VIDEO_BIT_STREAM_FORMAT,
-    OHOS::Media::Plugin::MetaID::VIDEO_FRAME_RATE,
-    OHOS::Media::Plugin::MetaID::VIDEO_H264_LEVEL,
-    OHOS::Media::Plugin::MetaID::VIDEO_H264_PROFILE,
-    OHOS::Media::Plugin::MetaID::BITS_PER_CODED_SAMPLE,
+std::set<OHOS::Media::Plugin::Tag> g_metaIdSet = {
+    OHOS::Media::Plugin::Tag::MIME,
+    OHOS::Media::Plugin::Tag::TRACK_ID,
+    OHOS::Media::Plugin::Tag::MEDIA_CODEC_CONFIG,
+    OHOS::Media::Plugin::Tag::MEDIA_BITRATE,
+    OHOS::Media::Plugin::Tag::AUDIO_CHANNELS,
+    OHOS::Media::Plugin::Tag::AUDIO_SAMPLE_RATE,
+    OHOS::Media::Plugin::Tag::AUDIO_SAMPLE_FORMAT,
+    OHOS::Media::Plugin::Tag::AUDIO_SAMPLE_PER_FRAME,
+    OHOS::Media::Plugin::Tag::AUDIO_CHANNEL_LAYOUT,
+    OHOS::Media::Plugin::Tag::MEDIA_TITLE,
+    OHOS::Media::Plugin::Tag::MEDIA_ARTIST,
+    OHOS::Media::Plugin::Tag::MEDIA_LYRICIST,
+    OHOS::Media::Plugin::Tag::MEDIA_ALBUM,
+    OHOS::Media::Plugin::Tag::MEDIA_ALBUM_ARTIST,
+    OHOS::Media::Plugin::Tag::MEDIA_DATE,
+    OHOS::Media::Plugin::Tag::MEDIA_COMMENT,
+    OHOS::Media::Plugin::Tag::MEDIA_GENRE,
+    OHOS::Media::Plugin::Tag::MEDIA_DESCRIPTION,
+    OHOS::Media::Plugin::Tag::MEDIA_COPYRIGHT,
+    OHOS::Media::Plugin::Tag::MEDIA_LANGUAGE,
+    OHOS::Media::Plugin::Tag::MEDIA_LYRICS,
+    OHOS::Media::Plugin::Tag::MEDIA_DURATION,
+    OHOS::Media::Plugin::Tag::MEDIA_FILE_URI,
+    OHOS::Media::Plugin::Tag::MEDIA_FILE_SIZE,
+    OHOS::Media::Plugin::Tag::MEDIA_SEEKABLE,
+    OHOS::Media::Plugin::Tag::MEDIA_TYPE,
+    OHOS::Media::Plugin::Tag::AUDIO_MPEG_VERSION,
+    OHOS::Media::Plugin::Tag::AUDIO_MPEG_LAYER,
+    OHOS::Media::Plugin::Tag::AUDIO_AAC_PROFILE,
+    OHOS::Media::Plugin::Tag::AUDIO_AAC_LEVEL,
+    OHOS::Media::Plugin::Tag::AUDIO_AAC_STREAM_FORMAT,
+    OHOS::Media::Plugin::Tag::VIDEO_WIDTH,
+    OHOS::Media::Plugin::Tag::VIDEO_HEIGHT,
+    OHOS::Media::Plugin::Tag::VIDEO_PIXEL_FORMAT,
+    OHOS::Media::Plugin::Tag::VIDEO_BIT_STREAM_FORMAT,
+    OHOS::Media::Plugin::Tag::VIDEO_FRAME_RATE,
+    OHOS::Media::Plugin::Tag::VIDEO_H264_LEVEL,
+    OHOS::Media::Plugin::Tag::VIDEO_H264_PROFILE,
+    OHOS::Media::Plugin::Tag::BITS_PER_CODED_SAMPLE,
 };
 }
 
@@ -96,7 +96,7 @@ void ConvertToMediaInfoHelper(uint32_t pkgVersion, const MediaInfo& src, MediaIn
 {
     (void)(pkgVersion);
     for (auto const& global : src.general) {
-        dest.globalMeta.SetData(MetaID(global.first), global.second);
+        dest.globalMeta.SetData(global.first, global.second);
     }
     size_t streamSize = src.tracks.size();
     if (streamSize <= 0) {
@@ -105,8 +105,8 @@ void ConvertToMediaInfoHelper(uint32_t pkgVersion, const MediaInfo& src, MediaIn
     dest.trackMeta.resize(streamSize);
     for (size_t i = 0; i < streamSize; ++i) {
         for (auto const& meta : src.tracks[i]) {
-            if (g_metaIdSet.count(MetaID(meta.first))) {
-                dest.trackMeta[i].SetData(MetaID(meta.first), meta.second);
+            if (g_metaIdSet.count(meta.first)) {
+                dest.trackMeta[i].SetData(meta.first, meta.second);
             }
         }
     }

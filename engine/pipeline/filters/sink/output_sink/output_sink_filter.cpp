@@ -18,6 +18,7 @@
 
 #include "pipeline/filters/sink/output_sink/output_sink_filter.h"
 #include <cstdio>
+#include "foundation/cpp_ext/type_traits_ext.h"
 #include "foundation/log.h"
 #include "foundation/utils/steady_clock.h"
 #include "pipeline/factory/filter_factory.h"
@@ -47,11 +48,11 @@ void OutputSinkFilter::Init(EventReceiver *receiver, FilterCallback *callback)
     FilterBase::Init(receiver, callback);
     outPorts_.clear();
 }
-bool OutputSinkFilter::Negotiate(const std::string &inPort,
+bool OutputSinkFilter::Negotiate(const std::string& inPort,
                                  const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                  Plugin::Capability& negotiatedCap,
-                                 const Plugin::TagMap& upstreamParams,
-                                 Plugin::TagMap& downstreamParams)
+                                 const Plugin::Meta& upstreamParams,
+                                 Plugin::Meta& downstreamParams)
 {
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::OUTPUT_SINK);
     if (candidatePlugins.empty()) {
@@ -86,8 +87,8 @@ bool OutputSinkFilter::Negotiate(const std::string &inPort,
     return res;
 }
 
-bool OutputSinkFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                                 Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool OutputSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                                 Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
 {
     PROFILE_BEGIN("Output sink configure begin");
     if (plugin_ == nullptr || pluginInfo_ == nullptr) {

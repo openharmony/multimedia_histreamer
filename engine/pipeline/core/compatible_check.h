@@ -18,7 +18,7 @@
 
 #include "pipeline/core/type_define.h"
 #include "plugin/common/plugin_caps.h"
-#include "plugin/core/plugin_meta.h"
+#include "plugin/common/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {

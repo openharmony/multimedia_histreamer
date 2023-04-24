@@ -162,22 +162,22 @@ void Minimp3DemuxerPlugin::FillInMediaInfo(MediaInfo& mediaInfo) const
 {
     mediaInfo.tracks.resize(1);
     if (mp3DemuxerRst_.frameChannels == 1) {
-        mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::MONO);
+        mediaInfo.tracks[0].Set<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::MONO);
     } else {
-        mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
+        mediaInfo.tracks[0].Set<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
     }
     int64_t durationHst;
     Ms2HstTime(durationMs, durationHst);
-    mediaInfo.tracks[0].Insert<Tag::MEDIA_TYPE>(MediaType::AUDIO);
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_RATE>(mp3DemuxerRst_.frameSampleRate);
-    mediaInfo.tracks[0].Insert<Tag::MEDIA_BITRATE>(mp3DemuxerRst_.frameBitrateKbps);
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_CHANNELS>(mp3DemuxerRst_.frameChannels);
-    mediaInfo.tracks[0].Insert<Tag::TRACK_ID>(0);
-    mediaInfo.tracks[0].Insert<Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_MPEG_VERSION>(1);
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_MPEG_LAYER>(mp3DemuxerRst_.audioLayer);
-    mediaInfo.tracks[0].Insert<Tag::AUDIO_SAMPLE_PER_FRAME>(mp3DemuxerRst_.samplesPerFrame);
-    mediaInfo.tracks[0].Insert<Tag::MEDIA_DURATION>(durationHst);
+    mediaInfo.tracks[0].Set<Tag::MEDIA_TYPE>(MediaType::AUDIO);
+    mediaInfo.tracks[0].Set<Tag::AUDIO_SAMPLE_RATE>(mp3DemuxerRst_.frameSampleRate);
+    mediaInfo.tracks[0].Set<Tag::MEDIA_BITRATE>(mp3DemuxerRst_.frameBitrateKbps);
+    mediaInfo.tracks[0].Set<Tag::AUDIO_CHANNELS>(mp3DemuxerRst_.frameChannels);
+    mediaInfo.tracks[0].Set<Tag::TRACK_ID>(0);
+    mediaInfo.tracks[0].Set<Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
+    mediaInfo.tracks[0].Set<Tag::AUDIO_MPEG_VERSION>(1);
+    mediaInfo.tracks[0].Set<Tag::AUDIO_MPEG_LAYER>(mp3DemuxerRst_.audioLayer);
+    mediaInfo.tracks[0].Set<Tag::AUDIO_SAMPLE_PER_FRAME>(mp3DemuxerRst_.samplesPerFrame);
+    mediaInfo.tracks[0].Set<Tag::MEDIA_DURATION>(durationHst);
 }
 
 Status Minimp3DemuxerPlugin::GetMediaInfo(MediaInfo& mediaInfo)

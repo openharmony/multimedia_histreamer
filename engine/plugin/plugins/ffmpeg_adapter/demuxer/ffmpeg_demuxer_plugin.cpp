@@ -476,7 +476,7 @@ bool FFmpegDemuxerPlugin::IsSelectedTrack(int32_t trackId)
                        [trackId](int32_t id) { return id == trackId; });
 }
 
-void FFmpegDemuxerPlugin::SaveFileInfoToMetaInfo(TagMap& meta)
+void FFmpegDemuxerPlugin::SaveFileInfoToMetaInfo(Meta& meta)
 {
     meta.Clear();
     AVDictionaryEntry* tag = nullptr;
@@ -484,7 +484,7 @@ void FFmpegDemuxerPlugin::SaveFileInfoToMetaInfo(TagMap& meta)
         InsertMediaTag(meta, tag);
     }
     int64_t nanoSec = formatContext_->duration * (HST_SECOND / AV_TIME_BASE);
-    meta.Insert<Tag::MEDIA_DURATION>(nanoSec);
+    meta.Set<Tag::MEDIA_DURATION>(nanoSec);
 }
 
 bool FFmpegDemuxerPlugin::ParseMediaData()
@@ -505,23 +505,23 @@ bool FFmpegDemuxerPlugin::ParseMediaData()
         if (!codecContext) {
             continue;
         }
-        TagMap track;
+        Meta track;
         if (avStream.codecpar->codec_type == AVMEDIA_TYPE_VIDEO
             && avStream.codecpar->codec_id != AV_CODEC_ID_RAWVIDEO) {
             if (!codecContext->width ||!codecContext->height) {
                 continue;
             }
             if (avStream.codecpar->codec_id == AV_CODEC_ID_H264) {
-                track.Insert<Tag::VIDEO_BIT_STREAM_FORMAT>(
+                track.Set<Tag::VIDEO_BIT_STREAM_FORMAT>(
                     std::vector<VideoBitStreamFormat>{VideoBitStreamFormat::AVC1, VideoBitStreamFormat::ANNEXB});
             } else if (avStream.codecpar->codec_id == AV_CODEC_ID_H265) {
-                track.Insert<Tag::VIDEO_BIT_STREAM_FORMAT>(
+                track.Set<Tag::VIDEO_BIT_STREAM_FORMAT>(
                     std::vector<VideoBitStreamFormat>{VideoBitStreamFormat::HEVC, VideoBitStreamFormat::ANNEXB});
             }
         }
         ConvertAVStreamToMetaInfo(avStream, formatContext_, codecContext, track);
         if (g_MediaTypeMap.find(avStream.codecpar->codec_type) != g_MediaTypeMap.end()) {
-            track.Insert<Tag::MEDIA_TYPE>(g_MediaTypeMap[avStream.codecpar->codec_type]);
+            track.Set<Tag::MEDIA_TYPE>(g_MediaTypeMap[avStream.codecpar->codec_type]);
         } else {
             MEDIA_LOG_E("media type not found!");
         }

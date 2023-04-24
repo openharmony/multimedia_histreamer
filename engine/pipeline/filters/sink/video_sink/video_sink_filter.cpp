@@ -110,7 +110,7 @@ ErrorCode VideoSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
     return TranslatePluginStatus(plugin_->GetParameter(tag, value));
 }
 
-void VideoSinkFilter::HandleNegotiateParams(const Plugin::TagMap& upstreamParams, Plugin::TagMap& downstreamParams)
+void VideoSinkFilter::HandleNegotiateParams(const Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
 {
 #ifndef OHOS_LITE
     MEDIA_LOG_I("Enter set surface buffer");
@@ -128,7 +128,7 @@ void VideoSinkFilter::HandleNegotiateParams(const Plugin::TagMap& upstreamParams
     if (pluginAllocator != nullptr && pluginAllocator->GetMemoryType() == Plugin::MemoryType::SURFACE_BUFFER) {
         MEDIA_LOG_D("plugin provide surface allocator");
         auto allocator = Plugin::ReinterpretPointerCast<Plugin::SurfaceAllocator>(pluginAllocator);
-        downstreamParams.Insert<Tag::BUFFER_ALLOCATOR>(allocator);
+        downstreamParams.Set<Tag::BUFFER_ALLOCATOR>(allocator);
     }
 #endif
 }
@@ -172,8 +172,8 @@ bool VideoSinkFilter::CreateVideoSinkPlugin(const std::shared_ptr<Plugin::Plugin
 bool VideoSinkFilter::Negotiate(const std::string& inPort,
                                 const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                 Plugin::Capability& negotiatedCap,
-                                const Plugin::TagMap& upstreamParams,
-                                Plugin::TagMap& downstreamParams)
+                                const Plugin::Meta& upstreamParams,
+                                Plugin::Meta& downstreamParams)
 {
     PROFILE_BEGIN("video sink negotiate start");
     if (state_ != FilterState::PREPARING) {
@@ -203,8 +203,8 @@ bool VideoSinkFilter::Negotiate(const std::string& inPort,
     return true;
 }
 
-bool VideoSinkFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                                Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool VideoSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                                Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
 {
     PROFILE_BEGIN("video sink configure start");
     if (plugin_ == nullptr || pluginInfo_ == nullptr) {
@@ -217,7 +217,7 @@ bool VideoSinkFilter::Configure(const std::string &inPort, const std::shared_ptr
         OnEvent(Event{name_, EventType::EVENT_ERROR, {err}});
         return false;
     }
-    if (!upstreamMeta->GetUint32(Plugin::MetaID::VIDEO_FRAME_RATE, frameRate_)) {
+    if (!upstreamMeta->Get<Plugin::Tag::VIDEO_FRAME_RATE>(frameRate_)) {
         MEDIA_LOG_I("frame rate is not found");
     }
     if (frameRate_ == 0) {
@@ -237,19 +237,25 @@ ErrorCode VideoSinkFilter::ConfigurePluginParams(const std::shared_ptr<const Plu
 {
     auto err = ErrorCode::SUCCESS;
     uint32_t width;
-    if (meta->GetUint32(Plugin::MetaID::VIDEO_WIDTH, width)) {
+    if (meta->Get<Plugin::Tag::VIDEO_WIDTH>(width)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_WIDTH, width));
         FAIL_RETURN_MSG(err, "Set plugin width fail");
+    } else {
+        MEDIA_LOG_W("Get VIDEO_WIDTH failed.");
     }
     uint32_t height;
-    if (meta->GetUint32(Plugin::MetaID::VIDEO_HEIGHT, height)) {
+    if (meta->Get<Plugin::Tag::VIDEO_HEIGHT>(height)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_HEIGHT, height));
         FAIL_RETURN_MSG(err, "Set plugin height fail");
+    } else {
+        MEDIA_LOG_W("Get VIDEO_HEIGHT fail");
     }
     Plugin::VideoPixelFormat pixelFormat;
-    if (meta->GetData<Plugin::VideoPixelFormat>(Plugin::MetaID::VIDEO_PIXEL_FORMAT, pixelFormat)) {
+    if (meta->Get<Plugin::Tag::VIDEO_PIXEL_FORMAT>(pixelFormat)) {
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::VIDEO_PIXEL_FORMAT, pixelFormat));
         FAIL_RETURN_MSG(err, "Set plugin pixel format fail");
+    } else {
+        MEDIA_LOG_W("Get VIDEO_PIXEL_FORMAT fail");
     }
     MEDIA_LOG_D("width: " PUBLIC_LOG_U32 ", height: " PUBLIC_LOG_U32 ", pixelFormat: " PUBLIC_LOG_U32,
                 width, height, pixelFormat);

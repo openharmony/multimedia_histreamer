@@ -100,7 +100,7 @@ ErrorCode CodecFilterBase::UpdateMetaFromPlugin(Plugin::Meta& meta)
             }
             continue;
         }
-        meta.SetData(static_cast<Plugin::MetaID>(keyPair.first), tmpVal);
+        meta.SetData(static_cast<Plugin::Tag>(keyPair.first), tmpVal);
     }
     return ErrorCode::SUCCESS;
 }
@@ -149,12 +149,12 @@ uint32_t CodecFilterBase::GetOutBufferPoolSize()
     return DEFAULT_OUT_BUFFER_POOL_SIZE;
 }
 
-uint32_t CodecFilterBase::CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta> &meta)
+uint32_t CodecFilterBase::CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta)
 {
     return 0;
 }
 
-Plugin::TagMap CodecFilterBase::GetNegotiateParams(const Plugin::TagMap& upstreamParams)
+Plugin::Meta CodecFilterBase::GetNegotiateParams(const Plugin::Meta& upstreamParams)
 {
     return upstreamParams;
 }
@@ -181,8 +181,8 @@ std::vector<Capability::Key> CodecFilterBase::GetRequiredOutCapKeys()
 bool CodecFilterBase::Negotiate(const std::string& inPort,
                                 const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                 Plugin::Capability& negotiatedCap,
-                                const Plugin::TagMap& upstreamParams,
-                                Plugin::TagMap& downstreamParams)
+                                const Plugin::Meta& upstreamParams,
+                                Plugin::Meta& downstreamParams)
 {
     PROFILE_BEGIN("CodecFilterBase negotiate start");
     FALSE_RETURN_V_MSG_W(state_ == FilterState::PREPARING, false, "filter is not preparing when negotiate");
@@ -205,7 +205,7 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
             }
             atLeastOutCapMatched = true;
             thisOut->mime = outCap.mime;
-            Plugin::TagMap proposeParams;
+            Plugin::Meta proposeParams;
             if (targetOutPort->Negotiate(thisOut, capNegWithDownstream_, proposeParams, downstreamParams)) {
                 negotiatedCap = candidate.second;
                 selectedPluginInfo = candidate.first;
@@ -232,8 +232,8 @@ bool CodecFilterBase::Negotiate(const std::string& inPort,
     return res;
 }
 
-bool CodecFilterBase::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                                Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool CodecFilterBase::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                                Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
 {
     MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());
     FALSE_RETURN_V_MSG_E(plugin_ != nullptr && pluginInfo_ != nullptr, false,
@@ -255,7 +255,7 @@ bool CodecFilterBase::Configure(const std::string &inPort, const std::shared_ptr
     }
     MEDIA_LOG_D("bufferCnt: " PUBLIC_LOG_U32, bufferCnt);
 
-    upstreamParams.Insert<Plugin::Tag::VIDEO_MAX_SURFACE_NUM>(bufferCnt);
+    upstreamParams.Set<Plugin::Tag::VIDEO_MAX_SURFACE_NUM>(bufferCnt);
     auto targetOutPort = GetRouteOutPort(inPort);
     if (targetOutPort == nullptr || !targetOutPort->Configure(thisMeta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("decoder filter downstream Configure failed");

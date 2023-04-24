@@ -26,7 +26,6 @@
 #include "pipeline/filters/demux/type_finder.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/core/demuxer.h"
-#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {
@@ -67,11 +66,11 @@ public:
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                   Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams) override;
 
     ErrorCode SeekTo(int64_t seekTime, Plugin::SeekMode mode, int64_t& realSeekTime);
 
@@ -134,7 +133,7 @@ private:
     void NegotiateDownstream();
 
     void UpdateStreamMeta(std::shared_ptr<Plugin::Meta>& streamMeta,
-        Plugin::Capability& negotiatedCap, Plugin::TagMap& downstreamParams);
+        Plugin::Capability& negotiatedCap, Plugin::Meta& downstreamParams);
 
     void DemuxerLoop();
 

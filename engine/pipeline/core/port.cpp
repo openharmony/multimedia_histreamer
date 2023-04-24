@@ -73,14 +73,14 @@ std::shared_ptr<Port> InPort::GetPeerPort()
 
 bool InPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                        Plugin::Capability& negotiatedCap,
-                       const Plugin::TagMap& upstreamParams,
-                       Plugin::TagMap& downstreamParams)
+                       const Plugin::Meta& upstreamParams,
+                       Plugin::Meta& downstreamParams)
 {
     return filter && filter->Negotiate(name, upstreamCap, negotiatedCap, upstreamParams, downstreamParams);
 }
 
-bool InPort::Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
-                       Plugin::TagMap &downstreamParams)
+bool InPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta, Plugin::Meta& upstreamParams,
+                       Plugin::Meta& downstreamParams)
 {
     return filter && filter->Configure(name, upstreamMeta, upstreamParams, downstreamParams);
 }
@@ -159,14 +159,14 @@ std::shared_ptr<Port> OutPort::GetPeerPort()
 
 bool OutPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                         Plugin::Capability& negotiatedCap,
-                        const Plugin::TagMap& upstreamParams,
-                        Plugin::TagMap& downstreamParams)
+                        const Plugin::Meta& upstreamParams,
+                        Plugin::Meta& downstreamParams)
 {
     return nextPort->Negotiate(upstreamCap, negotiatedCap, upstreamParams, downstreamParams);
 }
 
-bool OutPort::Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
-                        Plugin::TagMap &downstreamParams)
+bool OutPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta, Plugin::Meta& upstreamParams,
+                        Plugin::Meta& downstreamParams)
 {
     return nextPort->Configure(upstreamMeta, upstreamParams, downstreamParams);
 }
@@ -202,8 +202,8 @@ ErrorCode EmptyInPort::Activate(const std::vector<WorkMode>& modes, WorkMode& ou
 
 bool EmptyInPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                             Plugin::Capability& negotiatedCap,
-                            const Plugin::TagMap& upstreamParams,
-                            Plugin::TagMap& downstreamParams)
+                            const Plugin::Meta& upstreamParams,
+                            Plugin::Meta& downstreamParams)
 {
     UNUSED_VARIABLE(upstreamCap);
     UNUSED_VARIABLE(negotiatedCap);
@@ -213,8 +213,8 @@ bool EmptyInPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& ups
     return false;
 }
 
-bool EmptyInPort::Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
-                            Plugin::TagMap &downstreamParams)
+bool EmptyInPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta, Plugin::Meta& upstreamParams,
+                            Plugin::Meta& downstreamParams)
 {
     UNUSED_VARIABLE(upstreamMeta);
     UNUSED_VARIABLE(upstreamParams);
@@ -253,8 +253,8 @@ ErrorCode EmptyOutPort::Activate(const std::vector<WorkMode>& modes, WorkMode& o
 }
 bool EmptyOutPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                              Plugin::Capability& negotiatedCap,
-                             const Plugin::TagMap& upstreamParams,
-                             Plugin::TagMap& downstreamParams)
+                             const Plugin::Meta& upstreamParams,
+                             Plugin::Meta& downstreamParams)
 {
     UNUSED_VARIABLE(upstreamCap);
     UNUSED_VARIABLE(negotiatedCap);
@@ -264,8 +264,8 @@ bool EmptyOutPort::Negotiate(const std::shared_ptr<const Plugin::Capability>& up
     return false;
 }
 
-bool EmptyOutPort::Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
-                             Plugin::TagMap &downstreamParams)
+bool EmptyOutPort::Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta, Plugin::Meta& upstreamParams,
+                             Plugin::Meta& downstreamParams)
 {
     UNUSED_VARIABLE(upstreamMeta);
     UNUSED_VARIABLE(upstreamParams);

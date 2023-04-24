@@ -18,11 +18,12 @@
 #include <functional>
 #include <list>
 #include <memory>
+#include "foundation/cpp_ext/type_traits_ext.h"
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/event.h"
 #include "pipeline/core/i_media_sync_center.h"
 #include "pipeline/core/port.h"
-#include "plugin/core/plugin_meta.h"
+
 namespace OHOS {
 namespace Media {
 namespace Pipeline {
@@ -71,14 +72,14 @@ public:
     virtual bool Negotiate(const std::string& inPort,
                            const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                            Plugin::Capability& negotiatedCap,
-                           const Plugin::TagMap& upstreamParams,
-                           Plugin::TagMap& downstreamParams)
+                           const Plugin::Meta& upstreamParams,
+                           Plugin::Meta& downstreamParams)
     {
         return false;
     }
 
-    virtual bool Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                           Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+    virtual bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                           Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
     {
         return false;
     }

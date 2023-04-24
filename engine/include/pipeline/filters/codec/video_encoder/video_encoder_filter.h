@@ -45,11 +45,11 @@ public:
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                   Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams) override;
 
     /**
      *
@@ -97,7 +97,7 @@ private:
 
     void FinishFrame();
 
-    uint32_t CalculateBufferSize(const std::shared_ptr<const OHOS::Media::Plugin::Meta>& meta) override;
+    uint32_t CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta) override;
 
     bool isFlushing_ {false};
     bool isStop_ {false};

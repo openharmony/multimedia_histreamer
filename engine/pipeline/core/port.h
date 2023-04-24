@@ -19,10 +19,10 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include "foundation/cpp_ext/type_traits_ext.h"
 #include "foundation/utils/constants.h"
 #include "pipeline/core/error_code.h"
 #include "pipeline/core/type_define.h"
-#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {
@@ -58,10 +58,10 @@ public:
     virtual ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) = 0;
     virtual bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                            Plugin::Capability& negotiatedCap,
-                           const Plugin::TagMap& upstreamParams,
-                           Plugin::TagMap& downstreamParams) = 0;
-    virtual bool Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
-                           Plugin::TagMap &downstreamParams) = 0;
+                           const Plugin::Meta& upstreamParams,
+                           Plugin::Meta& downstreamParams) = 0;
+    virtual bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta, Plugin::Meta& upstreamParams,
+                           Plugin::Meta& downstreamParams) = 0;
     /**
      * push data
      * @param buffer pushed buffer
@@ -90,10 +90,10 @@ public:
     std::shared_ptr<Port> GetPeerPort() override;
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
-    bool Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
-                   Plugin::TagMap &downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
+    bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta, Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
     void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
@@ -112,10 +112,10 @@ public:
     std::shared_ptr<Port> GetPeerPort() override;
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
-    bool Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
-                   Plugin::TagMap &downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
+    bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta, Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
     void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
@@ -138,10 +138,10 @@ public:
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
-    bool Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
-                   Plugin::TagMap &downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
+    bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta, Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
     void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 
@@ -161,10 +161,10 @@ public:
     ErrorCode Activate(const std::vector<WorkMode>& modes, WorkMode& outMode) override;
     bool Negotiate(const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
-    bool Configure(const std::shared_ptr<const Plugin::Meta> &upstreamMeta, Plugin::TagMap &upstreamParams,
-                   Plugin::TagMap &downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
+    bool Configure(const std::shared_ptr<const Plugin::Meta>& upstreamMeta, Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
     void PushData(const AVBufferPtr& buffer, int64_t offset) override;
     ErrorCode PullData(uint64_t offset, size_t size, AVBufferPtr& data) override;
 

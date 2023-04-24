@@ -19,10 +19,11 @@
 #define protected public
 #define UNIT_TEST 1
 #include "foundation/utils/constants.h"
+#include "pipeline/core/compatible_check.h"
 #include "plugin/common/any.h"
 #include "plugin/common/plugin_audio_tags.h"
-#include "pipline/core/compatible_check.h"
-#include "plugin/core/plugin_meta.h"
+#include "plugin/common/plugin_meta.h"
+
 
 using namespace std;
 using namespace OHOS::Media::Plugin;
@@ -492,11 +493,11 @@ TEST(TestApplyCapabilitySet, ComplexType_Test)
 TEST(TestMetaToCap, MetaToCap_Test)
 {
     Meta meta;
-    meta.SetString(MetaID::MIME, MEDIA_MIME_AUDIO_RAW);
-    meta.SetUint32(MetaID::AUDIO_MPEG_VERSION, 1);
-    meta.SetData<AudioChannelLayout>(MetaID::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::STEREO);
-    meta.SetUint32(MetaID::AUDIO_CHANNELS, 2);
-    meta.SetUint32(MetaID::AUDIO_SAMPLE_RATE, 48000);
+    meta.Set<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_RAW);
+    meta.Set<Plugin::Tag::AUDIO_MPEG_VERSION>(1);
+    meta.Set<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
+    meta.Set<Plugin::Tag::AUDIO_CHANNELS>(2);
+    meta.Set<Plugin::Tag::AUDIO_SAMPLE_RATE>(48000);
     auto cap = Pipeline::MetaToCapability(meta);
     ASSERT_STREQ(MEDIA_MIME_AUDIO_RAW, cap->mime.c_str());
     auto mpegVersion = Plugin::AnyCast<uint32_t>(cap->keys[CapabilityID::AUDIO_MPEG_VERSION]);
@@ -515,12 +516,12 @@ TEST(TestMetaToCap, MetaToCap_Test)
 TEST(TestMergeMetaWithCapability, MergeMetaWithEmptyKeyCapability_Test)
 {
     Meta meta;
-    meta.SetString(MetaID::MIME, MEDIA_MIME_AUDIO_MPEG);
-    meta.SetUint32(MetaID::AUDIO_MPEG_VERSION, 1);
-    meta.SetData<AudioChannelLayout>(MetaID::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::STEREO);
-    meta.SetUint32(MetaID::AUDIO_CHANNELS, 2);
-    meta.SetUint32(MetaID::AUDIO_SAMPLE_RATE, 48000);
-    meta.SetData<AudioSampleFormat>(MetaID::AUDIO_SAMPLE_FORMAT, AudioSampleFormat::U16P);
+    meta.Set<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
+    meta.Set<Plugin::Tag::AUDIO_MPEG_VERSION>(1);
+    meta.Set<Plugin::Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
+    meta.Set<Plugin::Tag::AUDIO_CHANNELS>(2);
+    meta.Set<Plugin::Tag::AUDIO_SAMPLE_RATE>(48000);
+    meta.Set<Plugin::Tag::AUDIO_SAMPLE_FORMAT>(AudioSampleFormat::U16P);
 
     Capability cap0(MEDIA_MIME_AUDIO_RAW);
     Meta out1;
@@ -531,29 +532,29 @@ TEST(TestMergeMetaWithCapability, MergeMetaWithEmptyKeyCapability_Test)
     uint32_t outSampleRate1 = 0;
     AudioSampleFormat outSampleFormat1 = AudioSampleFormat::U8;
     ASSERT_TRUE(Pipeline::MergeMetaWithCapability(meta, cap0, out1));
-    ASSERT_TRUE(out1.GetString(MetaID::MIME, outMime1));
+    ASSERT_TRUE(out1.Get<Tag::MIME>(outMime1));
     ASSERT_STREQ(outMime1.c_str(), MEDIA_MIME_AUDIO_RAW);
-    ASSERT_TRUE(out1.GetUint32(MetaID::AUDIO_MPEG_VERSION, outMpegVersion1));
+    ASSERT_TRUE(out1.Get<Tag::AUDIO_MPEG_VERSION>(outMpegVersion1));
     ASSERT_TRUE(outMpegVersion1 == 1);
-    ASSERT_TRUE(out1.GetData<AudioChannelLayout>(MetaID::AUDIO_CHANNEL_LAYOUT, outAudioChannelLayout1));
+    ASSERT_TRUE(out1.Get<Tag::AUDIO_CHANNEL_LAYOUT>(outAudioChannelLayout1));
     ASSERT_TRUE(outAudioChannelLayout1 == AudioChannelLayout::STEREO);
-    ASSERT_TRUE(out1.GetUint32(MetaID::AUDIO_CHANNELS, outChannels1));
+    ASSERT_TRUE(out1.Get<Tag::AUDIO_CHANNELS>(outChannels1));
     ASSERT_TRUE(outChannels1 == 2);
-    ASSERT_TRUE(out1.GetUint32(MetaID::AUDIO_SAMPLE_RATE, outSampleRate1));
+    ASSERT_TRUE(out1.Get<Tag::AUDIO_SAMPLE_RATE>(outSampleRate1));
     ASSERT_TRUE(outSampleRate1 == 48000);
-    ASSERT_TRUE(out1.GetData(MetaID::AUDIO_SAMPLE_FORMAT, outSampleFormat1));
+    ASSERT_TRUE(out1.Get<Tag::AUDIO_SAMPLE_FORMAT>(outSampleFormat1));
     ASSERT_TRUE(outSampleFormat1 == AudioSampleFormat::U16P);
 }
 
 TEST(TestMergeMetaWithCapability, Merge_meta_contains_meta_ony_key_capability_Test)
 {
     Meta meta;
-    meta.SetString(MetaID::MIME, MEDIA_MIME_AUDIO_MPEG);
-    meta.SetUint32(MetaID::AUDIO_MPEG_VERSION, 1);
-    meta.SetData<AudioChannelLayout>(MetaID::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::STEREO);
-    meta.SetUint32(MetaID::AUDIO_CHANNELS, 2);
-    meta.SetUint32(MetaID::AUDIO_SAMPLE_RATE, 48000);
-    meta.SetInt64(MetaID::MEDIA_BITRATE, 128000);
+    meta.Set<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
+    meta.Set<Plugin::Tag::AUDIO_MPEG_VERSION>(1);
+    meta.Set<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
+    meta.Set<Plugin::Tag::AUDIO_CHANNELS>(2);
+    meta.Set<Plugin::Tag::AUDIO_SAMPLE_RATE>(48000);
+    meta.Set<Plugin::Tag::MEDIA_BITRATE>(128000);
 
     Capability cap0(MEDIA_MIME_AUDIO_RAW);
     cap0.AppendFixedKey<uint32_t>(CapabilityID::AUDIO_MPEG_VERSION, 1);
@@ -576,33 +577,33 @@ TEST(TestMergeMetaWithCapability, Merge_meta_contains_meta_ony_key_capability_Te
     int64_t  outBitRate = 0;
 
     ASSERT_TRUE(Pipeline::MergeMetaWithCapability(meta, cap0, out1));
-    ASSERT_TRUE(out1.GetString(MetaID::MIME, outMime1));
+    ASSERT_TRUE(out1.Get<Tag::MIME>(outMime1));
     ASSERT_STREQ(outMime1.c_str(), MEDIA_MIME_AUDIO_RAW);
-    ASSERT_TRUE(out1.GetUint32(MetaID::AUDIO_MPEG_VERSION, outMpegVersion1));
+    ASSERT_TRUE(out1.Get<Tag::AUDIO_MPEG_VERSION>(outMpegVersion1));
     ASSERT_TRUE(outMpegVersion1 == 1);
-    ASSERT_TRUE(out1.GetData<AudioChannelLayout>(MetaID::AUDIO_CHANNEL_LAYOUT, outAudioChannelLayout1));
+    ASSERT_TRUE(out1.Get<Tag::AUDIO_CHANNEL_LAYOUT>(outAudioChannelLayout1));
     ASSERT_TRUE(outAudioChannelLayout1 == AudioChannelLayout::STEREO);
-    ASSERT_TRUE(out1.GetUint32(MetaID::AUDIO_CHANNELS, outChannels1));
+    ASSERT_TRUE(out1.Get<Tag::AUDIO_CHANNELS>(outChannels1));
     ASSERT_TRUE(outChannels1 == 2);
-    ASSERT_TRUE(out1.GetUint32(MetaID::AUDIO_SAMPLE_RATE, outSampleRate1));
+    ASSERT_TRUE(out1.Get<Tag::AUDIO_SAMPLE_RATE>(outSampleRate1));
     ASSERT_TRUE(outSampleRate1 == 48000);
-    ASSERT_TRUE(out1.GetData(MetaID::AUDIO_SAMPLE_FORMAT, outSampleFormat1));
+    ASSERT_TRUE(out1.Get<Tag::AUDIO_SAMPLE_FORMAT>(outSampleFormat1));
     ASSERT_TRUE(outSampleFormat1 == AudioSampleFormat::U16P);
-    ASSERT_TRUE(out1.GetUint32(MetaID::AUDIO_MPEG_LAYER, outMpegLayer));
+    ASSERT_TRUE(out1.Get<Tag::AUDIO_MPEG_LAYER>(outMpegLayer));
     ASSERT_TRUE(outMpegLayer == 3);
-    ASSERT_TRUE(out1.GetInt64(MetaID::MEDIA_BITRATE, outBitRate));
+    ASSERT_TRUE(out1.Get<Tag::MEDIA_BITRATE>(outBitRate));
     ASSERT_TRUE(outBitRate == 128000);
 }
 
 TEST(TestMergeMetaWithCapability, Merge_meta_with_capability_failed_Test)
 {
     Meta meta;
-    meta.SetString(MetaID::MIME, MEDIA_MIME_AUDIO_MPEG);
-    meta.SetUint32(MetaID::AUDIO_MPEG_VERSION, 1);
-    meta.SetData<AudioChannelLayout>(MetaID::AUDIO_CHANNEL_LAYOUT, AudioChannelLayout::STEREO);
-    meta.SetUint32(MetaID::AUDIO_CHANNELS, 2);
-    meta.SetUint32(MetaID::AUDIO_SAMPLE_RATE, 48000);
-    meta.SetInt64(MetaID::MEDIA_BITRATE, 128000);
+    meta.Set<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
+    meta.Set<Plugin::Tag::AUDIO_MPEG_VERSION>(1);
+    meta.Set<Tag::AUDIO_CHANNEL_LAYOUT>(AudioChannelLayout::STEREO);
+    meta.Set<Plugin::Tag::AUDIO_CHANNELS>(2);
+    meta.Set<Plugin::Tag::AUDIO_SAMPLE_RATE>(48000);
+    meta.Set<Plugin::Tag::MEDIA_BITRATE>(128000);
 
     Capability cap0(MEDIA_MIME_AUDIO_RAW);
     cap0.AppendFixedKey<uint32_t>(CapabilityID::AUDIO_MPEG_VERSION, 2);

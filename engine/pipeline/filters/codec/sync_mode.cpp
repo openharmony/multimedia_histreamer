@@ -16,6 +16,7 @@
 #define HST_LOG_TAG "SyncMode"
 
 #include "pipeline/filters/codec/sync_mode.h"
+#include "foundation/cpp_ext/type_traits_ext.h"
 #include "foundation/log.h"
 #include "foundation/utils/dump_buffer.h"
 #include "foundation/utils/steady_clock.h"

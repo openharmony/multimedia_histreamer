@@ -39,13 +39,13 @@ public:
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
 
     uint32_t CalculateBufferSize(const std::shared_ptr<const Plugin::Meta>& meta) override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                   Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams) override;
 
     /**
      *
@@ -75,7 +75,7 @@ private:
     Capability capNegWithUpstream_;
     size_t frameSize_ {0};
     std::string mime_;
-    std::shared_ptr<Plugin::Meta> encoderMeta_ {};
+    std::shared_ptr<Plugin::Meta> encoderMeta_ {nullptr};
     std::unique_ptr<RingBuffer> rb_ {};
     AVBufferPtr cahceBuffer_ {nullptr};
 };

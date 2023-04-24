@@ -19,14 +19,12 @@
 #include "foundation/osal/utils/util.h"
 #include "foundation/utils/dump_buffer.h"
 #include "foundation/utils/steady_clock.h"
-
 #include "pipeline/factory/filter_factory.h"
 #include "pipeline/filters/common/plugin_settings.h"
 #include "pipeline/filters/common/plugin_utils.h"
 #include "plugin/common/plugin_attr_desc.h"
 #include "plugin/common/plugin_time.h"
 #include "plugin/common/plugin_types.h"
-#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {
@@ -120,11 +118,11 @@ ErrorCode AudioSinkFilter::GetParameter(int32_t key, Plugin::Any& value)
 bool AudioSinkFilter::Negotiate(const std::string& inPort,
                                 const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                                 Plugin::Capability& negotiatedCap,
-                                const Plugin::TagMap& upstreamParams,
-                                Plugin::TagMap& downstreamParams)
+                                const Plugin::Meta& upstreamParams,
+                                Plugin::Meta& downstreamParams)
 {
     MEDIA_LOG_I("audio sink negotiate started");
-    FALSE_LOG(const_cast<Plugin::TagMap&>(upstreamParams).Get<Tag::MEDIA_SEEKABLE>(seekable_));
+    FALSE_LOG(const_cast<Plugin::Meta&>(upstreamParams).Get<Tag::MEDIA_SEEKABLE>(seekable_));
     PROFILE_BEGIN("Audio Sink Negotiate begin");
     auto candidatePlugins = FindAvailablePlugins(*upstreamCap, Plugin::PluginType::AUDIO_SINK);
     if (candidatePlugins.empty()) {
@@ -156,20 +154,20 @@ bool AudioSinkFilter::Negotiate(const std::string& inPort,
     Plugin::ValueType pluginValue;
     if (plugin_->GetParameter(Tag::AUDIO_OUTPUT_CHANNELS, pluginValue) == Plugin::Status::OK) {
         auto outputChannels = Plugin::AnyCast<uint32_t>(pluginValue);
-        downstreamParams.Insert<Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels);
+        downstreamParams.Set<Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels);
         MEDIA_LOG_D("Get support outputChannels: " PUBLIC_LOG_U32, outputChannels);
     }
     if (plugin_->GetParameter(Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, pluginValue) == Plugin::Status::OK) {
         auto outputChanLayout = Plugin::AnyCast<Plugin::AudioChannelLayout>(pluginValue);
-        downstreamParams.Insert<Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT>(outputChanLayout);
+        downstreamParams.Set<Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT>(outputChanLayout);
         MEDIA_LOG_D("Get support outputChannelLayout: " PUBLIC_LOG_U64, outputChanLayout);
     }
     PROFILE_END("Audio Sink Negotiate end");
     return res;
 }
 
-bool AudioSinkFilter::Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                                Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams)
+bool AudioSinkFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                                Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams)
 {
     PROFILE_BEGIN("Audio sink configure begin");
     MEDIA_LOG_I("receive upstream meta " PUBLIC_LOG_S, Meta2String(*upstreamMeta).c_str());

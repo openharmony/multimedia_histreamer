@@ -20,7 +20,7 @@
 #include "foundation/osal/thread/condition_variable.h"
 #include "foundation/osal/thread/mutex.h"
 #include "plugin/common/plugin_types.h"
-#include "plugin/common/tag_map.h"
+#include "plugin/common/plugin_meta.h"
 #include "OMX_Component.h"
 
 namespace OHOS {
@@ -37,7 +37,7 @@ class CodecPort {
 public:
     CodecPort(CodecComponentType* component, uint32_t portIndex, const CompVerInfo& verInfo);
     ~CodecPort() = default;
-    Status Config(TagMap& tagMap);
+    Status Config(Meta& meta);
     Status QueryParam(PortInfo& portInfo);
 private:
     CodecComponentType* codecComp_ {nullptr};

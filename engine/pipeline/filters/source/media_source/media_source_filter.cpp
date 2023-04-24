@@ -16,13 +16,13 @@
 #define HST_LOG_TAG "MediaSourceFilter"
 
 #include "pipeline/filters/source/media_source/media_source_filter.h"
+#include "foundation/cpp_ext/type_traits_ext.h"
 #include "foundation/utils/dump_buffer.h"
 #include "foundation/utils/hitrace_utils.h"
 #include "pipeline/core/compatible_check.h"
 #include "pipeline/core/type_define.h"
 #include "pipeline/factory/filter_factory.h"
 #include "pipeline/filters/common/plugin_utils.h"
-#include "plugin/core/plugin_meta.h"
 
 namespace OHOS {
 namespace Media {
@@ -271,19 +271,19 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
     MEDIA_LOG_D("IN");
     SYNC_TRACER();
     std::shared_ptr<Plugin::Meta> meta = std::make_shared<Plugin::Meta>();
-    meta->SetString(Media::Plugin::MetaID::MEDIA_FILE_URI, source->GetSourceUri());
+    meta->Set<Media::Plugin::Tag::MEDIA_FILE_URI>(source->GetSourceUri());
     Seekable seekable = plugin_->GetSeekable();
     FALSE_RETURN_V_MSG_E(seekable != Plugin::Seekable::INVALID, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
                          "media source Seekable must be SEEKABLE or UNSEEKABLE !");
-    meta->SetInt32(Media::Plugin::MetaID::MEDIA_SEEKABLE, static_cast<int32_t>(seekable));
+    FALSE_LOG(meta->Set<Media::Plugin::Tag::MEDIA_SEEKABLE>(seekable));
     size_t fileSize = 0;
     if ((plugin_->GetSize(fileSize) == Status::OK) && (fileSize != 0)) {
-        meta->SetUint64(Media::Plugin::MetaID::MEDIA_FILE_SIZE, fileSize);
+        FALSE_LOG(meta->Set<Media::Plugin::Tag::MEDIA_FILE_SIZE>(static_cast<uint64_t>(fileSize)));
     }
     Capability peerCap;
     auto tmpCap = MetaToCapability(*meta);
-    Plugin::TagMap upstreamParams;
-    Plugin::TagMap downstreamParams;
+    Plugin::Meta upstreamParams;
+    Plugin::Meta downstreamParams;
     if (!GetOutPort(PORT_NAME_DEFAULT)->Negotiate(tmpCap, peerCap, upstreamParams, downstreamParams) ||
         !GetOutPort(PORT_NAME_DEFAULT)->Configure(meta, upstreamParams, downstreamParams)) {
         MEDIA_LOG_E("Negotiate fail!");

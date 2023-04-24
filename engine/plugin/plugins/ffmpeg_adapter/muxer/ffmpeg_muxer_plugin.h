@@ -93,9 +93,9 @@ private:
 
     std::shared_ptr<AVOutputFormat> outputFormat_{};
 
-    std::map<uint32_t, TagMap> trackParameters_{};
+    std::map<uint32_t, Meta> trackParameters_{};
 
-    TagMap generalParameters_{};
+    Meta generalParameters_{};
 
     OSAL::Mutex fmtMutex_{};
     std::shared_ptr<AVFormatContext> formatContext_{};

@@ -17,6 +17,7 @@
 
 #include "hirecorder_impl.h"
 #include <regex>
+#include "foundation/cpp_ext/type_traits_ext.h"
 #include "foundation/utils/hitrace_utils.h"
 #include "foundation/utils/steady_clock.h"
 #include "pipeline/factory/filter_factory.h"

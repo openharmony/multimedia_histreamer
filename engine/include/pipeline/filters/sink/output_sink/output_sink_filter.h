@@ -35,11 +35,11 @@ public:
     bool Negotiate(const std::string &inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
-                   const Plugin::TagMap& upstreamParams,
-                   Plugin::TagMap& downstreamParams) override;
+                   const Plugin::Meta& upstreamParams,
+                   Plugin::Meta& downstreamParams) override;
 
-    bool Configure(const std::string &inPort, const std::shared_ptr<const Plugin::Meta> &upstreamMeta,
-                   Plugin::TagMap &upstreamParams, Plugin::TagMap &downstreamParams) override;
+    bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
+                   Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams) override;
 
     ErrorCode Prepare() override;
     ErrorCode Start() override;
