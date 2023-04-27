@@ -17,6 +17,7 @@
 
 #include "plugin/common/share_memory.h"
 #include "foundation/log.h"
+#include "foundation/pre_defines.h"
 
 namespace OHOS {
 namespace Media {
@@ -42,6 +43,12 @@ ShareMemory::~ShareMemory()
         sharedMem_->CloseAshmem();
         sharedMem_ = nullptr;
     }
+}
+
+uint8_t* ShareMemory::GetRealAddr() const
+{
+    auto addr = const_cast<void* >(sharedMem_->ReadFromAshmem(0, 0));
+    return static_cast<uint8_t*>(addr);
 }
 
 size_t ShareMemory::Write(const uint8_t* in, size_t writeSize, size_t position)
