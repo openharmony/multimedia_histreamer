@@ -187,7 +187,7 @@ OMX_COLOR_FORMATTYPE FormatHstToOmx(const VideoPixelFormat format)
     if (formatHstOmx.find(format) != formatHstOmx.end()) {
         return formatHstOmx.at(format);
     }
-    MEDIA_LOG_W("Unknow VideoPixelFormat" PUBLIC_LOG_U32, static_cast<uint32_t>(format));
+    MEDIA_LOG_W("Unknow VideoPixelFormat: " PUBLIC_LOG_U32, static_cast<uint32_t>(format));
     return OMX_COLOR_FormatUnused;
 }
 

@@ -66,14 +66,14 @@ int32_t HdiCodecAdapter::EventHandler(CodecCallbackType* self, OMX_EVENTTYPE eve
 
 int32_t HdiCodecAdapter::EmptyBufferDone(CodecCallbackType* self, int64_t appData, const OmxCodecBuffer* omxBuffer)
 {
-    MEDIA_LOG_DD("EmptyBufferDone begin, bufferId: " PUBLIC_LOG_U32, buffer->bufferId);
+    MEDIA_LOG_DD("EmptyBufferDone begin, bufferId: " PUBLIC_LOG_U32, omxBuffer->bufferId);
     auto hdiAdapter = reinterpret_cast<HdiCodecAdapter*>(appData);
     hdiAdapter->inBufPool_->UseBufferDone(omxBuffer->bufferId);
     if (!hdiAdapter->isFlushing_) {
         hdiAdapter->HandleFrame();
     }
-    MEDIA_LOG_D("EmptyBufferDone-callback end, free in buffer count: " PUBLIC_LOG_U32,
-                hdiAdapter->inBufPool_->EmptyBufferCount());
+    MEDIA_LOG_DD("EmptyBufferDone-callback end, free in buffer count: " PUBLIC_LOG_U32,
+                 hdiAdapter->inBufPool_->EmptyBufferCount());
     return HDF_SUCCESS;
 }
 
@@ -93,8 +93,8 @@ int32_t HdiCodecAdapter::FillBufferDone(CodecCallbackType* self, int64_t appData
     }
     hdiAdapter->NotifyOutputBufferDone(outputBuffer);
     (void)hdiAdapter->FillAllTheOutBuffer(); // call FillThisBuffer() again
-    MEDIA_LOG_D("FillBufferDone-callback end, free out buffer count: " PUBLIC_LOG_U32,
-                hdiAdapter->outBufPool_->EmptyBufferCount());
+    MEDIA_LOG_DD("FillBufferDone-callback end, free out buffer count: " PUBLIC_LOG_U32,
+                 hdiAdapter->outBufPool_->EmptyBufferCount());
     return HDF_SUCCESS;
 }
 
@@ -332,10 +332,11 @@ Status HdiCodecAdapter::SetParameter(Plugin::Tag tag, const ValueType &value)
             bitRate_ = Plugin::AnyCast<int64_t>(value);
             break;
         default:
-            MEDIA_LOG_W("ignore this tag: " PUBLIC_LOG_S, Tag2String(tag));
+            MEDIA_LOG_W("Ignore this tag: " PUBLIC_LOG_S, Tag2String(tag));
             break;
     }
-    if (width_ != 0 && height_ != 0 && pixelFormat_ != VideoPixelFormat::UNKNOWN && !portConfigured_) {
+    if (width_ != 0 && height_ != 0 && pixelFormat_ != VideoPixelFormat::UNKNOWN && !portConfigured_ &&
+        frameRate_ != 0) {
         FALSE_RETURN_V_MSG_E(ConfigOmx() == Status::OK, Status::ERROR_INVALID_OPERATION, "Configure omx failed");
     }
     MEDIA_LOG_D("SetParameter end");
@@ -393,7 +394,7 @@ Status HdiCodecAdapter::QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuf
     {
         OSAL::ScopedLock l(lockInputBuffers_);
         inBufQue_.push_back(inputBuffer);
-        MEDIA_LOG_D("QueueInputBuffer end, inBufQue_.size: " PUBLIC_LOG_ZU, inBufQue_.size());
+        MEDIA_LOG_DD("QueueInputBuffer end, inBufQue_.size: " PUBLIC_LOG_ZU, inBufQue_.size());
     }
     if (!isFlushing_) {
         HandleFrame();
@@ -433,6 +434,7 @@ void HdiCodecAdapter::HandleFrame()
 
 Status HdiCodecAdapter::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
 {
+    MEDIA_LOG_DD("QueueOutputBuffer start, outBufQue size: " PUBLIC_LOG_ZU, outBufQue_.Size());
     outBufQue_.Push(outputBuffers);
     if (curState_ == OMX_StateExecuting && !isFlushing_) {
         FillAllTheOutBuffer();
@@ -482,7 +484,7 @@ bool HdiCodecAdapter::FillAllTheOutBuffer()
             auto codecBuffer = outBufPool_->GetBuffer();
             FALSE_RETURN_V_MSG_E(codecBuffer != nullptr, false, "Get codecBuffer failed");
             auto ret = HdiFillThisBuffer(codecComp_, codecBuffer->GetOmxBuffer().get());
-            FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, false, "call FillThisBuffer() error, ret: " PUBLIC_LOG_S
+            FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, false, "Call FillThisBuffer() error, ret: " PUBLIC_LOG_S
                 ", isFirstCall: " PUBLIC_LOG_D32, HdfStatus2String(ret).c_str(), isFirstCall_);
         }
     } else {
@@ -501,12 +503,12 @@ bool HdiCodecAdapter::FillAllTheOutBuffer()
             }
             codecBuffer->Rebind(outputBuffer); // 这里outBuf需要保存到codecBuffer里面，方便往下一节点传数据
             auto ret = HdiFillThisBuffer(codecComp_, codecBuffer->GetOmxBuffer().get());
-            FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, false, "call FillThisBuffer() error, ret: " PUBLIC_LOG_S
+            FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, false, "Call FillThisBuffer() error, ret: " PUBLIC_LOG_S
                 ", isFirstCall: " PUBLIC_LOG_D32, HdfStatus2String(ret).c_str(), isFirstCall_);
         }
     }
-    MEDIA_LOG_D("FillAllTheBuffer end, free out bufferId count: " PUBLIC_LOG_U32 ", outBufQue_.Size: " PUBLIC_LOG_ZU,
-                outBufPool_->EmptyBufferCount(), outBufQue_.Size());
+    MEDIA_LOG_DD("FillAllTheBuffer end, free out bufferId count: " PUBLIC_LOG_U32 ", outBufQue_.Size: " PUBLIC_LOG_ZU,
+                 outBufPool_->EmptyBufferCount(), outBufQue_.Size());
     return true;
 }
 

@@ -27,6 +27,7 @@ SurfaceMemory::SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocat
       fence_(-1),
       stride_(0)
 {
+    MEDIA_LOG_DD("SurfaceMemory ctor.");
     bufferSize_ = align ? (capacity + align - 1) : capacity;
     if (this->allocator != nullptr && this->allocator->GetMemoryType() == MemoryType::SURFACE_BUFFER) {
         surfaceAllocator_ = ReinterpretPointerCast<SurfaceAllocator>(this->allocator);
@@ -36,12 +37,14 @@ SurfaceMemory::SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocat
 
 SurfaceMemory::~SurfaceMemory()
 {
+    MEDIA_LOG_DD("SurfaceMemory dtor.");
     ReleaseSurfaceBuffer();
 }
 
 void SurfaceMemory::AllocSurfaceBuffer()
 {
     if (surfaceAllocator_ == nullptr || bufferSize_ == 0 || surfaceBuffer_ != nullptr) {
+        MEDIA_LOG_E("No need to allocate surface buffer.");
         return;
     }
     surfaceBuffer_ = surfaceAllocator_->AllocSurfaceBuffer();
@@ -51,15 +54,19 @@ void SurfaceMemory::AllocSurfaceBuffer()
             stride_ = bufferHandle->stride;
         }
         fence_ = -1;
+    } else {
+        MEDIA_LOG_E("AllocSurfaceBuffer failed.");
     }
 }
 
 sptr<SurfaceBuffer> SurfaceMemory::GetSurfaceBuffer()
 {
     OSAL::ScopedLock l(memMutex_);
-    if (!surfaceBuffer_) {
+    if (!surfaceBuffer_ || needRender_) {
         // request surface buffer again when old buffer flush to nullptr
+        surfaceBuffer_ = nullptr;
         AllocSurfaceBuffer();
+        needRender_ = false;
     }
     return surfaceBuffer_;
 }

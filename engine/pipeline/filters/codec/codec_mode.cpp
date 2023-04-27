@@ -79,14 +79,14 @@ void CodecMode::CreateOutBufferPool(std::shared_ptr<Allocator>& outAllocator,
     // 每次重新创建bufferPool
     outBufPool_ = std::make_shared<BufferPool<AVBuffer>>(bufferCnt);
     if (outAllocator == nullptr) {
-        MEDIA_LOG_I("plugin doest not support out allocator, using framework allocator");
+        MEDIA_LOG_I("Plugin doest not support out allocator, using framework allocator.");
         outBufPool_->Init(bufferSize, bufferMetaType);
     } else {
-        MEDIA_LOG_I("using plugin output allocator");
+        MEDIA_LOG_I("Using plugin output allocator.");
         for (size_t cnt = 0; cnt < bufferCnt; cnt++) {
             auto buf = CppExt::make_unique<AVBuffer>(bufferMetaType);
             if (buf == nullptr || buf->AllocMemory(outAllocator, bufferSize) == nullptr) {
-                MEDIA_LOG_I("alloc buffer " PUBLIC_LOG_U32 " fail", static_cast<uint32_t>(cnt));
+                MEDIA_LOG_I("Alloc buffer " PUBLIC_LOG_U32 " failed.", static_cast<uint32_t>(cnt));
                 continue;
             }
             outBufPool_->Append(std::move(buf));

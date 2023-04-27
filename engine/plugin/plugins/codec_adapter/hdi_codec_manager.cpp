@@ -122,7 +122,7 @@ void HdiCodecManager::Reset()
 
 void HdiCodecManager::AddHdiCap(const CodecCompCapability& hdiCap)
 {
-    MEDIA_LOG_I("AddHdiCap Start");
+    MEDIA_LOG_DD("AddHdiCap Start");
     auto pluginType = GetCodecType(hdiCap.type);
     if (pluginType == PluginType::VIDEO_DECODER || pluginType == PluginType::VIDEO_ENCODER) {
         CodecCapability codecCapability;
