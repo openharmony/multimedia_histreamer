@@ -185,6 +185,20 @@ std::shared_ptr<Memory> Buffer::WrapMemoryPtr(std::shared_ptr<uint8_t> data, siz
     return memory;
 }
 
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+std::shared_ptr<Memory> Buffer::WrapSurfaceMemory(sptr<SurfaceBuffer> surfaceBuffer)
+{
+    int32_t bufferSize;
+    auto ret = surfaceBuffer->GetExtraData()->ExtraGet("dataSize", bufferSize);
+    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK || bufferSize <= 0) {
+        return nullptr;
+    }
+    auto memory = std::shared_ptr<SurfaceMemory>(new SurfaceMemory(surfaceBuffer, bufferSize));
+    this->data.push_back(memory);
+    return memory;
+}
+#endif
+
 std::shared_ptr<Memory> Buffer::AllocMemory(std::shared_ptr<Allocator> allocator, size_t capacity, size_t align)
 {
     auto type = (allocator != nullptr) ? allocator->GetMemoryType() : MemoryType::VIRTUAL_ADDR;

@@ -100,7 +100,7 @@ public:
 
     const uint8_t* GetReadOnlyData(size_t position = 0);
 
-    uint8_t *GetWritableAddr(size_t estimatedWriteSize, size_t position = 0);
+    uint8_t* GetWritableAddr(size_t estimatedWriteSize, size_t position = 0);
 
     // If estimatedWriteSize doesn't equal to realWriteSize, should call UpdateDataSize
     void UpdateDataSize(size_t realWriteSize, size_t position = 0);
@@ -128,7 +128,7 @@ protected:
     /**
      * Get real memory address, it is addr + offset, the offset is calculated according to alignment.
      */
-    virtual uint8_t *GetRealAddr() const;
+    virtual uint8_t* GetRealAddr() const;
 
     /// Memory type
     MemoryType memoryType;

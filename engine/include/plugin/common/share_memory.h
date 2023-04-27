@@ -36,6 +36,9 @@ public:
 
     int GetShareMemoryFd();
 
+protected:
+    uint8_t* GetRealAddr() const override;
+
 private:
     void InitShareMemory(ShareMemType type);
 

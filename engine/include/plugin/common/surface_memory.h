@@ -40,12 +40,14 @@ public:
     uint32_t GetSurfaceBufferStride();
 
     void SetNeedRender(bool needRender);
+
+protected:
+    uint8_t* GetRealAddr() const override;
+
 private:
     explicit SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocator = nullptr, size_t align = 1);
+    explicit SurfaceMemory(sptr<SurfaceBuffer> surfaceBuffer, int32_t surfaceCapacity);
 
-    uint8_t *GetRealAddr() const override;
-
-private:
     void AllocSurfaceBuffer();
     void ReleaseSurfaceBuffer();
 
@@ -58,8 +60,6 @@ private:
 
     /// the fence fd for Surface
     int32_t fence_ {-1};
-
-    size_t bufferSize_ {0};
 
     uint32_t stride_ {0};
 
