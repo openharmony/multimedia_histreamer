@@ -35,7 +35,8 @@ public:
     size_t Read(uint8_t* out, size_t readSize, size_t position) override;
 
     int GetShareMemoryFd();
-
+protected:
+    uint8_t* GetRealAddr() const override;
 private:
     void InitShareMemory(ShareMemType type);
 
