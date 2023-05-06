@@ -103,11 +103,11 @@ Status FileFdSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
     return Status::OK;
 }
 
-Status FileFdSourcePlugin::GetSize(size_t& size)
+Status FileFdSourcePlugin::GetSize(uint64_t& size)
 {
     MEDIA_LOG_DD("IN");
     size = size_;
-    MEDIA_LOG_DD("size_: " PUBLIC_LOG_ZU, size);
+    MEDIA_LOG_DD("Size_: " PUBLIC_LOG_U64, size);
     return Status::OK;
 }
 
@@ -165,7 +165,7 @@ Status FileFdSourcePlugin::ParseUriInfo(const std::string& uri)
     if (seekable_ == Seekable::SEEKABLE) {
         NOK_LOG(SeekTo(0));
     }
-    MEDIA_LOG_D("fd: " PUBLIC_LOG_D32 ", offset: " PUBLIC_LOG_D64 ", size: " PUBLIC_LOG_D64, fd_, offset_, size_);
+    MEDIA_LOG_D("Fd: " PUBLIC_LOG_D32 ", offset: " PUBLIC_LOG_D64 ", size: " PUBLIC_LOG_U64, fd_, offset_, size_);
     return Status::OK;
 }
 } // namespace FileFdSource

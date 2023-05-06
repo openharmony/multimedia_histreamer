@@ -476,13 +476,13 @@ Status AudioCapturePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
     return ret;
 }
 
-Status AudioCapturePlugin::GetSize(size_t& size)
+Status AudioCapturePlugin::GetSize(uint64_t& size)
 {
     if (bufferSize_ == 0) {
         return Status::ERROR_INVALID_PARAMETER;
     }
     size = bufferSize_;
-    MEDIA_LOG_DD("bufferSize_: " PUBLIC_LOG_ZU, size);
+    MEDIA_LOG_DD("BufferSize_: " PUBLIC_LOG_U64, size);
     return Status::OK;
 }
 

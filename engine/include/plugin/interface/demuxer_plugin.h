@@ -72,7 +72,7 @@ struct DataSource {
      * @return  Execution status return.
      *  @retval OK: Plugin GetSize succeeded.
      */
-    virtual Status GetSize(size_t& size) = 0;
+    virtual Status GetSize(uint64_t& size) = 0;
 
     /**
      * @brief Indicates that the current data source seekable or not.

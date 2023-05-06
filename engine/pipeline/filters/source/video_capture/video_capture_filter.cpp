@@ -269,16 +269,16 @@ void VideoCaptureFilter::ReadLoop()
     if (isEos_.load()) {
         return;
     }
-    size_t bufferSize = 0;
+    uint64_t bufferSize = 0;
     auto ret = plugin_->GetSize(bufferSize);
     if (ret != Status::OK || bufferSize <= 0) {
         MEDIA_LOG_E("Get plugin buffer size fail");
         return;
     }
     AVBufferPtr bufferPtr = std::make_shared<AVBuffer>(BufferMetaType::VIDEO);
-    ret = plugin_->Read(bufferPtr, bufferSize);
+    ret = plugin_->Read(bufferPtr, static_cast<size_t>(bufferSize));
     if (ret != Status::OK) {
-        MEDIA_LOG_D("read buffer from plugin fail: " PUBLIC_LOG_U32, ret);
+        MEDIA_LOG_D("Read buffer from plugin fail: " PUBLIC_LOG_U32, ret);
         return;
     }
     SendBuffer(bufferPtr);

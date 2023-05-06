@@ -341,7 +341,7 @@ void AudioCaptureFilter::ReadLoop()
     if (eos_.load()) {
         return;
     }
-    size_t bufferSize = 0;
+    uint64_t bufferSize = 0;
     auto ret = plugin_->GetSize(bufferSize);
     if (ret != Status::OK || bufferSize <= 0) {
         MEDIA_LOG_E("Get plugin buffer size fail");

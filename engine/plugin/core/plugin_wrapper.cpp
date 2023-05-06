@@ -74,7 +74,7 @@ Status DataSourceWrapper::ReadAt(int64_t offset, std::shared_ptr<Buffer>& buffer
     return helper->ReadAt(offset, buffer, expectedLen);
 }
 
-Status DataSourceWrapper::GetSize(size_t& size)
+Status DataSourceWrapper::GetSize(uint64_t& size)
 {
     return helper->GetSize(size);
 }

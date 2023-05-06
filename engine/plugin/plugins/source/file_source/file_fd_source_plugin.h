@@ -32,7 +32,7 @@ public:
     Status SetCallback(Callback* cb) override;
     Status SetSource(std::shared_ptr<MediaSource> source) override;
     Status Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen) override;
-    Status GetSize(size_t& size) override;
+    Status GetSize(uint64_t& size) override;
     Seekable GetSeekable() override;
     Status SeekTo(uint64_t offset) override;
 private:
@@ -40,9 +40,9 @@ private:
 
     int32_t fd_ {-1};
     int64_t offset_ {0};
-    int64_t size_ {0};
+    uint64_t size_ {0};
 
-    size_t fileSize_ {0};
+    uint64_t fileSize_ {0};
     Seekable seekable_ {Seekable::SEEKABLE};
     uint64_t position_ {0};
 };

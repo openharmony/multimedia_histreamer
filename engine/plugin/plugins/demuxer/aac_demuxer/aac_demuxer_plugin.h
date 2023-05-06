@@ -86,7 +86,7 @@ private:
 
     AACDemuxerRst aacDemuxerRst_;
     IOContext ioContext_;
-    size_t fileSize_;
+    uint64_t fileSize_;
     bool isSeekable_;
     unsigned char *inIoBuffer_;
     int inIoBufferSize_;

@@ -48,7 +48,7 @@ public:
     Status SetCallback(Callback* cb) override;
     Status SetSource(std::shared_ptr<MediaSource> source) override;
     Status Read(std::shared_ptr<Buffer> &buffer, size_t expectedLen) override;
-    Status GetSize(size_t &size) override;
+    Status GetSize(uint64_t& size) override;
     Seekable GetSeekable() override;
     Status SeekTo(uint64_t offset) override;
     static void OnError(int httpError, int localError, void *param, int support_retry);

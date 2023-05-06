@@ -138,7 +138,7 @@ Status StreamSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expected
     return Status::OK;
 }
 
-Status StreamSourcePlugin::GetSize(size_t& size)
+Status StreamSourcePlugin::GetSize(uint64_t& size)
 {
     MEDIA_LOG_D("IN");
     size = 0;

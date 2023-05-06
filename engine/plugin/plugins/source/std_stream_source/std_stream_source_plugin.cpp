@@ -185,7 +185,7 @@ Status StdStreamSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expec
     return Status::OK;
 }
 
-Status StdStreamSourcePlugin::GetSize(size_t& size)
+Status StdStreamSourcePlugin::GetSize(uint64_t& size)
 {
     size = size_;
     return Status::OK;

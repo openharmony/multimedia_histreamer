@@ -93,7 +93,7 @@ bool TypeFinder::IsSniffNeeded(std::string uri)
     return uriChanged;
 }
 
-void TypeFinder::Init(std::string uri, size_t mediaDataSize, std::function<bool(uint64_t, size_t)> checkRange,
+void TypeFinder::Init(std::string uri, uint64_t mediaDataSize, std::function<bool(uint64_t, size_t)> checkRange,
                       std::function<bool(uint64_t, size_t, AVBufferPtr&)> peekRange)
 {
     mediaDataSize_ = mediaDataSize;
@@ -159,7 +159,7 @@ Plugin::Status TypeFinder::ReadAt(int64_t offset, std::shared_ptr<Plugin::Buffer
     return Plugin::Status::OK;
 }
 
-Plugin::Status TypeFinder::GetSize(size_t& size)
+Plugin::Status TypeFinder::GetSize(uint64_t& size)
 {
     size = mediaDataSize_;
     return (mediaDataSize_ > 0) ? Plugin::Status::OK : Plugin::Status::ERROR_UNKNOWN;

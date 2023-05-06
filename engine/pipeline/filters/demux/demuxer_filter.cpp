@@ -37,7 +37,7 @@ public:
     explicit DataSourceImpl(const DemuxerFilter& filter);
     ~DataSourceImpl() override = default;
     Plugin::Status ReadAt(int64_t offset, std::shared_ptr<Plugin::Buffer>& buffer, size_t expectedLen) override;
-    Plugin::Status GetSize(size_t& size) override;
+    Plugin::Status GetSize(uint64_t& size) override;
     Plugin::Seekable GetSeekable() override;
 
 private:
@@ -92,7 +92,7 @@ Plugin::Status DemuxerFilter::DataSourceImpl::ReadAt(int64_t offset, std::shared
     return rtv;
 }
 
-Plugin::Status DemuxerFilter::DataSourceImpl::GetSize(size_t& size)
+Plugin::Status DemuxerFilter::DataSourceImpl::GetSize(uint64_t& size)
 {
     size = filter.mediaDataSize_;
     return (filter.mediaDataSize_ > 0) ? Plugin::Status::OK : Plugin::Status::ERROR_WRONG_STATE;
@@ -386,7 +386,7 @@ void DemuxerFilter::ActivatePullMode()
     typeFinder_->Init(uri_, mediaDataSize_, checkRange_, peekRange_);
     std::string type = typeFinder_->FindMediaType();
     MEDIA_LOG_I("FindMediaType result : type : " PUBLIC_LOG_S ", uri_ : " PUBLIC_LOG_S ", mediaDataSize_ : "
-        PUBLIC_LOG_D64, type.c_str(), uri_.c_str(), mediaDataSize_);
+        PUBLIC_LOG_U64, type.c_str(), uri_.c_str(), mediaDataSize_);
     MediaTypeFound(std::move(type));
 }
 

@@ -39,7 +39,7 @@ public:
 
     Status Read(std::shared_ptr<Buffer> &buffer, size_t expectedLen);
 
-    Status GetSize(size_t& size);
+    Status GetSize(uint64_t& size);
 
     Seekable GetSeekable();
 

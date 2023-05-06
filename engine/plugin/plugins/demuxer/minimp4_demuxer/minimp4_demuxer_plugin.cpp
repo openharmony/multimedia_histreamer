@@ -72,7 +72,7 @@ Status MiniMP4DemuxerPlugin::SetDataSource(const std::shared_ptr<DataSource> &so
         ioContext_.dataSource->GetSize(fileSize_);
     }
     fileSize = fileSize_;
-    MEDIA_LOG_I("fileSize_ " PUBLIC_LOG_ZU, fileSize_);
+    MEDIA_LOG_I("FileSize_ " PUBLIC_LOG_U64, fileSize_);
     return Status::OK;
 }
 
@@ -417,7 +417,7 @@ Status MiniMP4DemuxerPlugin::SeekTo(int32_t trackId, int64_t seekTime, SeekMode 
     return Status::OK;
 }
 
-size_t MiniMP4DemuxerPlugin::GetFileSize()
+uint64_t MiniMP4DemuxerPlugin::GetFileSize()
 {
     return fileSize_;
 }

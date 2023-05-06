@@ -73,7 +73,7 @@ private:
         int64_t offset {0};
         bool eos {false};
     };
-    size_t              fileSize_;
+    uint64_t            fileSize_;
     IOContext           ioContext_;
     uint32_t            dataOffset_;
     Seekable            seekable_;

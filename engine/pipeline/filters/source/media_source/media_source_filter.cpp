@@ -167,10 +167,10 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
     ErrorCode err;
     auto readSize = size;
     if (seekable_ == Seekable::SEEKABLE) {
-        size_t totalSize = 0;
+        uint64_t totalSize = 0;
         if ((plugin_->GetSize(totalSize) == Status::OK) && (totalSize != 0)) {
             if (offset >= totalSize) {
-                MEDIA_LOG_W("offset: " PUBLIC_LOG_U64 " is larger than totalSize: " PUBLIC_LOG_ZU,
+                MEDIA_LOG_W("Offset: " PUBLIC_LOG_U64 " is larger than totalSize: " PUBLIC_LOG_U64,
                             offset, totalSize);
                 return ErrorCode::END_OF_STREAM;
             }
@@ -181,7 +181,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
                 auto realSize = data->GetMemory()->GetCapacity();
                 readSize = (readSize > realSize) ? realSize : readSize;
             }
-            MEDIA_LOG_DD("totalSize_: " PUBLIC_LOG_ZU, totalSize);
+            MEDIA_LOG_DD("TotalSize_: " PUBLIC_LOG_U64, totalSize);
         }
         if (position_ != offset) {
             err = TranslatePluginStatus(plugin_->SeekTo(offset));
@@ -274,11 +274,11 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
     meta->Set<Media::Plugin::Tag::MEDIA_FILE_URI>(source->GetSourceUri());
     Seekable seekable = plugin_->GetSeekable();
     FALSE_RETURN_V_MSG_E(seekable != Plugin::Seekable::INVALID, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
-                         "media source Seekable must be SEEKABLE or UNSEEKABLE !");
+                         "Media source Seekable must be SEEKABLE or UNSEEKABLE !");
     FALSE_LOG(meta->Set<Media::Plugin::Tag::MEDIA_SEEKABLE>(seekable));
-    size_t fileSize = 0;
+    uint64_t fileSize = 0;
     if ((plugin_->GetSize(fileSize) == Status::OK) && (fileSize != 0)) {
-        FALSE_LOG(meta->Set<Media::Plugin::Tag::MEDIA_FILE_SIZE>(static_cast<uint64_t>(fileSize)));
+        FALSE_LOG(meta->Set<Media::Plugin::Tag::MEDIA_FILE_SIZE>(fileSize));
     }
     Capability peerCap;
     auto tmpCap = MetaToCapability(*meta);

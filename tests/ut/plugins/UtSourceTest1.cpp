@@ -52,7 +52,7 @@ Status UtSourceTest1::Read(std::shared_ptr<Buffer> &buffer, size_t expectedLen)
     return Status::OK;
 }
 
-Status UtSourceTest1::GetSize(size_t &size)
+Status UtSourceTest1::GetSize(uint64_t &size)
 {
     return Status::OK;
 }

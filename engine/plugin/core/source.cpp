@@ -33,7 +33,7 @@ Status Source::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
     return source_->Read(buffer, expectedLen);
 }
 
-Status Source::GetSize(size_t& size)
+Status Source::GetSize(uint64_t& size)
 {
     return source_->GetSize(size);
 }

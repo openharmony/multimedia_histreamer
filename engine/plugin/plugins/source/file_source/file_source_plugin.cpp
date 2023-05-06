@@ -175,7 +175,7 @@ Status FileSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLe
     return Status::OK;
 }
 
-Status FileSourcePlugin::GetSize(size_t& size)
+Status FileSourcePlugin::GetSize(uint64_t& size)
 {
     MEDIA_LOG_DD("IN");
     if (!fp_) {
@@ -183,7 +183,7 @@ Status FileSourcePlugin::GetSize(size_t& size)
         return Status::ERROR_WRONG_STATE;
     }
     size = fileSize_;
-    MEDIA_LOG_DD("fileSize_: " PUBLIC_LOG_ZU, size);
+    MEDIA_LOG_DD("FileSize_: " PUBLIC_LOG_U64, size);
     return Status::OK;
 }
 
@@ -285,7 +285,7 @@ Status FileSourcePlugin::OpenFile()
     }
     fileSize_ = GetFileSize(fileName_);
     position_ = 0;
-    MEDIA_LOG_D("fileName_: " PUBLIC_LOG_S ", fileSize_: " PUBLIC_LOG_ZU, fileName_.c_str(), fileSize_);
+    MEDIA_LOG_D("FileName_: " PUBLIC_LOG_S ", fileSize_: " PUBLIC_LOG_U64, fileName_.c_str(), fileSize_);
     return Status::OK;
 }
 

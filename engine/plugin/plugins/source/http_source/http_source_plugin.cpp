@@ -201,12 +201,12 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLe
     return result ? Status::OK : Status::END_OF_STREAM;
 }
 
-Status HttpSourcePlugin::GetSize(size_t& size)
+Status HttpSourcePlugin::GetSize(uint64_t& size)
 {
     MEDIA_LOG_D("IN");
     OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(downloader_ != nullptr, Status::ERROR_NULL_POINTER);
-    size = downloader_->GetContentLength();
+    size = static_cast<uint64_t>(downloader_->GetContentLength());
     return Status::OK;
 }
 

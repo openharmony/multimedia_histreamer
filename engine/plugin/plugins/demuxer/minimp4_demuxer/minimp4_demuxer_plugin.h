@@ -48,7 +48,7 @@ public:
     Status SelectTrack(int32_t trackId) override;
     Status UnselectTrack(int32_t trackId) override;
     Status GetSelectedTracks(std::vector<int32_t>& trackIds) override;
-    size_t GetFileSize();
+    uint64_t GetFileSize();
     std::shared_ptr<DataSource> GetInputBuffer();
     Status AudioAdapterForDecoder();
     Status DoReadFromSource(uint32_t readSize);
@@ -64,7 +64,7 @@ private:
     IOContext ioContext_;
     std::shared_ptr<Callback> callback_ {nullptr};
     MP4D_demux_t miniMP4_;
-    size_t fileSize_;
+    uint64_t fileSize_;
     std::unique_ptr<MediaInfo> mediaInfo_;
     unsigned char *inIoBuffer_;
     unsigned int  ioDataRemainSize_;
