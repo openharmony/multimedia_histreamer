@@ -29,7 +29,8 @@ namespace Plugin {
 namespace CodecAdapter {
 class CodecBuffer {
 public:
-    CodecBuffer(std::shared_ptr<Buffer>& buffer, CompVerInfo& verInfo, bool isInput, uint32_t bufferSize);
+    CodecBuffer(std::shared_ptr<Buffer>& buffer, CompVerInfo& verInfo,
+        bool isInput, uint32_t bufferSize, MemoryType bufMemType);
 
     ~CodecBuffer() = default;
 
@@ -44,7 +45,7 @@ public:
     Status Unbind(std::shared_ptr<Plugin::Buffer>& buffer, const OmxCodecBuffer* omxBuffer);
 
 private:
-    void Init(bool isInput, uint32_t bufferSize);
+    void Init(bool isInput, uint32_t bufferSize, MemoryType bufMemType);
 
     std::shared_ptr<Buffer> buffer_;
     CompVerInfo verInfo_ {};

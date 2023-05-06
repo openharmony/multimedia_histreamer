@@ -267,9 +267,11 @@ ErrorCode VideoEncoderFilter::AllocateOutputBuffers()
     auto outAllocator = plugin_->GetAllocator(); // zero copy need change to use sink allocator
     if (outAllocator == nullptr) {
         MEDIA_LOG_I("plugin doest not support out allocator, using framework allocator");
+        plugin_->SetParameter(Tag::OUTPUT_MEMORY_TYPE, MemoryType::VIRTUAL_ADDR);
         outBufPool_->Init(bufferSize, Plugin::BufferMetaType::VIDEO);
     } else {
         MEDIA_LOG_I("using plugin output allocator");
+        plugin_->SetParameter(Tag::OUTPUT_MEMORY_TYPE, outAllocator->GetMemoryType());
         for (size_t cnt = 0; cnt < bufferCnt; cnt++) {
             auto buf = CppExt::make_unique<AVBuffer>(Plugin::BufferMetaType::VIDEO);
             buf->AllocMemory(outAllocator, bufferSize);
@@ -302,27 +304,13 @@ uint32_t VideoEncoderFilter::CalculateBufferSize(const std::shared_ptr<const Plu
 
 ErrorCode VideoEncoderFilter::SetVideoEncoderFormat(const std::shared_ptr<const Plugin::Meta> &meta)
 {
-    FALSE_RETURN_V(meta->Get<Plugin::Tag::VIDEO_PIXEL_FORMAT>(vencFormat_.format),
-                   ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
-
-    FALSE_RETURN_V(meta->Get<Plugin::Tag::VIDEO_WIDTH>(vencFormat_.width),
-                   ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
-
-    FALSE_RETURN_V(meta->Get<Plugin::Tag::VIDEO_HEIGHT>(vencFormat_.height),
-                   ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
-
-    FALSE_RETURN_V(meta->Get<Plugin::Tag::MEDIA_BITRATE>(vencFormat_.bitRate),
-                   ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
-
-    FALSE_RETURN_V(meta->Get<Plugin::Tag::VIDEO_FRAME_RATE>(vencFormat_.frameRate),
-                   ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
-
-    FALSE_RETURN_V(meta->Get<Plugin::Tag::MIME>(vencFormat_.mime),
-                   ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
-
-    FALSE_RETURN_V(meta->Get<Plugin::Tag::MEDIA_CODEC_CONFIG>(vencFormat_.codecConfig),
-                   ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
-
+    FALSE_LOG(meta->Get<Plugin::Tag::VIDEO_PIXEL_FORMAT>(vencFormat_.format));
+    FALSE_LOG(meta->Get<Plugin::Tag::VIDEO_WIDTH>(vencFormat_.width));
+    FALSE_LOG(meta->Get<Plugin::Tag::VIDEO_HEIGHT>(vencFormat_.height));
+    FALSE_LOG(meta->Get<Plugin::Tag::MEDIA_BITRATE>(vencFormat_.bitRate));
+    FALSE_LOG(meta->Get<Plugin::Tag::VIDEO_FRAME_RATE>(vencFormat_.frameRate));
+    FALSE_LOG(meta->Get<Plugin::Tag::MIME>(vencFormat_.mime));
+    FALSE_LOG(meta->Get<Plugin::Tag::MEDIA_CODEC_CONFIG>(vencFormat_.codecConfig));
     return ErrorCode::SUCCESS;
 }
 

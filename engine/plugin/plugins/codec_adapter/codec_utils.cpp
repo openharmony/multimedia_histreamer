@@ -179,7 +179,11 @@ OMX_VIDEO_CODINGTYPE CodingTypeHstToHdi(const std::string& format)
 }
 
 static const std::map<VideoPixelFormat, OMX_COLOR_FORMATTYPE> formatHstOmx = {
-    {VideoPixelFormat::NV12, OMX_COLOR_FormatYUV420SemiPlanar}
+    {VideoPixelFormat::NV12, OMX_COLOR_FormatYUV420SemiPlanar},
+    {VideoPixelFormat::NV21, OMX_COLOR_FormatYUV420SemiPlanar},
+    {VideoPixelFormat::BGRA, OMX_COLOR_Format32bitBGRA8888},
+    {VideoPixelFormat::RGBA, OMX_COLOR_Format32bitARGB8888},
+    {VideoPixelFormat::YUV420P, OMX_COLOR_FormatYUV420Planar},
 };
 
 OMX_COLOR_FORMATTYPE FormatHstToOmx(const VideoPixelFormat format)
@@ -232,23 +236,6 @@ uint32_t GetOmxBufferType(const MemoryType& bufMemType, bool isInput)
             MEDIA_LOG_E("MemoryType Error");
     }
     return bufferType;
-}
-
-MemoryType GetBufMemType(PluginType pluginType, bool isInput)
-{
-    auto memType = MemoryType::VIRTUAL_ADDR;
-    switch (pluginType) {
-        case PluginType::VIDEO_DECODER:
-            memType = isInput ? MemoryType::SHARE_MEMORY : MemoryType::SURFACE_BUFFER;
-            break;
-        case PluginType::VIDEO_ENCODER:
-            memType = isInput ? MemoryType::SURFACE_BUFFER : MemoryType::SHARE_MEMORY;
-            break;
-        default:
-            MEDIA_LOG_E("PluginType does not belong to VIDEO");
-            break;
-    }
-    return memType;
 }
 } // namespace CodecAdapter
 } // namespace Plugin

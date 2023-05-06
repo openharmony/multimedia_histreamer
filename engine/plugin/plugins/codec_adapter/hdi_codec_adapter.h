@@ -32,7 +32,7 @@ namespace Plugin {
 namespace CodecAdapter {
 class HdiCodecAdapter : public CodecPlugin {
 public:
-    HdiCodecAdapter(std::string componentName, PluginType pluginType, std::string pluginMime);
+    HdiCodecAdapter(std::string componentName, std::string pluginMime);
     ~HdiCodecAdapter() override;
     Status Init() override;
     Status Deinit() override;
@@ -74,26 +74,26 @@ private:
     CodecComponentType* codecComp_ {nullptr};
     CodecCallbackType* codecCallback_ {nullptr};
     std::string componentName_ {};
-    uint32_t componentId_;
-    PluginType pluginType_{};
+    uint32_t componentId_{};
     std::string pluginMime_{};
     std::list<std::shared_ptr<Buffer>> inBufQue_ {};
-    OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>> outBufQue_;
+    std::shared_ptr<OHOS::Media::BlockingQueue<std::shared_ptr<Buffer>>> outBufQue_{};
 
-    uint32_t inBufferSize_;
-    uint32_t inBufferCnt_;
-    uint32_t outBufferSize_ {std::numeric_limits<uint32_t>::max()};
-    uint32_t outBufferCnt_ {std::numeric_limits<uint32_t>::max()};
+    uint32_t inBufferSize_{};
+    uint32_t inBufferCnt_{};
+    uint32_t outBufferSize_{};
+    uint32_t outBufferCnt_{};
     std::shared_ptr<CodecBufferPool> inBufPool_ {};
     std::shared_ptr<CodecBufferPool> outBufPool_ {};
+    MemoryType inputMemoryType_ {MemoryType::VIRTUAL_ADDR};
+    MemoryType outputMemoryType_ {MemoryType::VIRTUAL_ADDR};
 
     bool portConfigured_ {false};
     uint32_t width_{};
     uint32_t height_{};
-    uint32_t frameRate_;
-    int32_t stride_{};
+    uint32_t frameRate_{};
     VideoPixelFormat pixelFormat_ {};
-    int64_t bitRate_;
+    int64_t bitRate_{};
 
     Callback* callback_ {nullptr};
     DataCallback* dataCallback_ {nullptr};
@@ -102,8 +102,8 @@ private:
 
     std::shared_ptr<ShareAllocator> shaAlloc_ {nullptr};
     bool isFlushing_ {false};
-    uint32_t inPortIndex_;
-    uint32_t outPortIndex_;
+    uint32_t inPortIndex_{};
+    uint32_t outPortIndex_{};
     CompVerInfo verInfo_ {};
     OMX_PORT_PARAM_TYPE portParam_ = {};
     std::shared_ptr<CodecPort> inCodecPort_{};

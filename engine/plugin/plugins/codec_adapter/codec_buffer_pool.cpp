@@ -17,7 +17,6 @@
 #define HST_LOG_TAG "CodecBufferPool"
 
 #include "codec_buffer_pool.h"
-#include <utility>
 #include "codec_utils.h"
 #include "foundation/log.h"
 #include "hdf_base.h"
@@ -26,11 +25,9 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace CodecAdapter {
-constexpr size_t DEFAULT_BUFFER_ID_QUEUE_SIZE = 21;
-
-CodecBufferPool::CodecBufferPool(CodecComponentType* compType, CompVerInfo& verInfo, uint32_t portIndex)
-    : codecComp_(compType), verInfo_(verInfo), portIndex_(portIndex),
-      freeBufferId_("hdiFreeBufferId", DEFAULT_BUFFER_ID_QUEUE_SIZE)
+CodecBufferPool::CodecBufferPool(CodecComponentType* compType, CompVerInfo& verInfo,
+    uint32_t portIndex, uint32_t bufferCnt)
+    : codecComp_(compType), verInfo_(verInfo), portIndex_(portIndex), freeBufferId_("hdiFreeBufferId", bufferCnt)
 {
 }
 
@@ -44,16 +41,16 @@ Status CodecBufferPool::UseBuffers(OHOS::Media::BlockingQueue<std::shared_ptr<Bu
     auto count = bufQue.Size();
     for (uint32_t i = 0; i < count; i++) {
         auto pluginBuffer = bufQue.Pop();
-        auto codecBuffer = std::make_shared<CodecBuffer>(pluginBuffer, verInfo_, isInput, bufferSize);
-        FALSE_RETURN_V_MSG(codecBuffer != nullptr, Status::ERROR_INVALID_DATA, "Create codec buffer failed");
+        auto codecBuffer = std::make_shared<CodecBuffer>(pluginBuffer, verInfo_, isInput, bufferSize, bufMemType);
+        FALSE_RETURN_V_MSG(codecBuffer != nullptr, Status::ERROR_NULL_POINTER, "Create codec buffer failed");
         auto err = codecComp_->UseBuffer(codecComp_, portIndex_, codecBuffer->GetOmxBuffer().get());
         if (err != HDF_SUCCESS) {
             MEDIA_LOG_E("failed to UseBuffer");
             return Status::ERROR_INVALID_DATA;
         }
-        MEDIA_LOG_D("UseBuffer returned bufferID: " PUBLIC_LOG_D32 ", PortIndex: " PUBLIC_LOG_D32,
-                    (int)codecBuffer->GetBufferId(), portIndex_);
-        codecBufMap_.emplace(std::make_pair(codecBuffer->GetBufferId(), codecBuffer));
+        MEDIA_LOG_D("UseBuffer returned bufferID: " PUBLIC_LOG_U32 ", PortIndex: " PUBLIC_LOG_U32,
+                    codecBuffer->GetBufferId(), portIndex_);
+        codecBufMap_.emplace(codecBuffer->GetBufferId(), codecBuffer);
         freeBufferId_.Push(codecBuffer->GetBufferId());
     }
     MEDIA_LOG_D("UseBuffers end, freeBufId.size: " PUBLIC_LOG_ZU ", portIndex: " PUBLIC_LOG_U32,
@@ -78,13 +75,16 @@ Status CodecBufferPool::FreeBuffers()
 
 Status CodecBufferPool::ConfigBufType(const MemoryType& bufMemType, bool isInput)
 {
-    UseBufferType bufType;
+    if (bufMemType == MemoryType::SHARE_MEMORY) {
+        return Status::OK;
+    }
+    UseBufferType bufType{};
     InitHdiParam(bufType, verInfo_);
     bufType.portIndex = portIndex_;
     bufType.bufferType = GetOmxBufferType(bufMemType, isInput);
     auto ret = codecComp_->SetParameter(codecComp_, OMX_IndexParamUseBufferType, (int8_t *)&bufType, sizeof(bufType));
-    FALSE_LOG_MSG(ret == HDF_SUCCESS, "ConfigBufType failed, portIndex: " PUBLIC_LOG_U32 ", bufferTypes: "
-        PUBLIC_LOG_D32 ", ret: " PUBLIC_LOG_S, portIndex_, bufType.bufferType, OmxErrorType2String(ret).c_str());
+    FALSE_LOG_MSG(ret == HDF_SUCCESS, "isInput: " PUBLIC_LOG_D32 ", bufferTypes: " PUBLIC_LOG_D32 ", ret: "
+            PUBLIC_LOG_S, static_cast<int32_t>(isInput), bufType.bufferType, OmxErrorType2String(ret).c_str());
     MEDIA_LOG_D("ConfigOutPortBufType end");
     return TransHdiRetVal2Status(ret);
 }
@@ -103,9 +103,7 @@ Status CodecBufferPool::UseBufferDone(uint32_t bufId)
 std::shared_ptr<CodecBuffer> CodecBufferPool::GetBuffer(int32_t bufferId)
 {
     auto bufId = bufferId >= 0 ? bufferId : freeBufferId_.Pop(1);
-    auto iter = codecBufMap_.find(bufId);
-    FALSE_RETURN_V_MSG_E(iter != codecBufMap_.end(), nullptr, "No value found in BufMap");
-    return iter->second;
+    return codecBufMap_.count(bufId) ? codecBufMap_[bufId] : nullptr;
 }
 } // namespace CodecAdapter
 } // namespace Plugin
