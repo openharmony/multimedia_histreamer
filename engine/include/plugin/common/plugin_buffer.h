@@ -76,15 +76,19 @@ public:
 
     BufferMetaType GetType() const;
 
+    void Update(const BufferMeta& bufferMeta);
+
+    virtual std::shared_ptr<BufferMeta> Clone();
+
 protected:
     /// Constructor
     explicit BufferMeta(BufferMetaType type);
 
 private:
-    BufferMetaType type;
+    BufferMetaType type_;
 
     /// Buffer metadata information of the buffer, which is represented by the key-value pair of the tag.
-    std::shared_ptr<Meta> tags {};
+    std::shared_ptr<Meta> tags_ {};
 };
 
 /**
@@ -120,6 +124,8 @@ public:
 
     /// the offsets (in bytes) where each channel plane starts in the buffer.
     std::vector<size_t> offsets {};
+
+    std::shared_ptr<BufferMeta> Clone() override;
 
 private:
     /// Constructor
@@ -162,6 +168,8 @@ public:
     /// array of offsets for the planes.
     std::vector<uint32_t> offset {};
 
+    std::shared_ptr<BufferMeta> Clone() override;
+
 private:
     /// Constructor
     VideoBufferMeta() : BufferMeta(BufferMetaType::VIDEO) {}
@@ -199,6 +207,8 @@ public:
     std::shared_ptr<Memory> GetMemory(uint32_t index = 0);
 
     std::shared_ptr<BufferMeta> GetBufferMeta();
+
+    void UpdateBufferMeta(const BufferMeta& bufferMeta);
 
     void Reset();
 

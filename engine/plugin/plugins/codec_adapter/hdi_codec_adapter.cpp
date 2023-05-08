@@ -83,6 +83,14 @@ int32_t HdiCodecAdapter::FillBufferDone(CodecCallbackType* self, int64_t appData
     std::shared_ptr<Plugin::Buffer> outputBuffer = nullptr;
     (void)codecBuffer->Unbind(outputBuffer, omxBuffer);
     hdiAdapter->outBufPool_->UseBufferDone(omxBuffer->bufferId);
+    auto iter = hdiAdapter->bufferMetaMap_.find(omxBuffer->pts);
+    if (iter != hdiAdapter->bufferMetaMap_.end()) {
+        outputBuffer->UpdateBufferMeta(*(iter->second));
+        hdiAdapter->bufferMetaMap_.erase(omxBuffer->pts);
+    } else {
+        uint32_t frameNum = 0;
+        outputBuffer->GetBufferMeta()->SetMeta(Tag::MEDIA_FRAME_NUMBER, frameNum);
+    }
     if (hdiAdapter->isFlushing_) {
         MEDIA_LOG_DD("hdi adapter is flushing, ignore this data");
         outputBuffer = nullptr;
@@ -226,6 +234,7 @@ Status HdiCodecAdapter::Reset()
     outBufQue_->SetActive(false);
     outBufQue_->Clear();
     inBufQue_.clear();
+    bufferMetaMap_.clear();
     width_ = 0;
     height_ = 0;
     inBufferSize_ = 0;
@@ -429,6 +438,7 @@ void HdiCodecAdapter::HandleFrame()
         } else {
             FALSE_RETURN_MSG(codecBuffer->Rebind(inputBuffer) == Status::OK, "Rebind inBuffer into codecBuffer fail");
         }
+        bufferMetaMap_.insert(std::make_pair(inputBuffer->pts, inputBuffer->GetBufferMeta()->Clone()));
         auto ret = HdiEmptyThisBuffer(codecComp_, codecBuffer->GetOmxBuffer().get());
         FALSE_LOG_MSG(ret == HDF_SUCCESS, "call EmptyThisBuffer() error, ret: " PUBLIC_LOG_S,
                       HdfStatus2String(ret).c_str());

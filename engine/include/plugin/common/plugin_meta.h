@@ -89,7 +89,8 @@ public:
         tag == Tag::VIDEO_FRAME_RATE or
         tag == Tag::VIDEO_MAX_SURFACE_NUM or
         tag == Tag::VIDEO_H264_LEVEL or
-        tag == Tag::BITS_PER_CODED_SAMPLE, uint32_t);
+        tag == Tag::BITS_PER_CODED_SAMPLE or
+        tag == Tag::MEDIA_FRAME_NUMBER, uint32_t);
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::MEDIA_DURATION or
         tag == Tag::MEDIA_BITRATE or
