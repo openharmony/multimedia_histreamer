@@ -84,7 +84,7 @@ void CodecMode::CreateOutBufferPool(std::shared_ptr<Allocator>& outAllocator,
         plugin_->SetParameter(Tag::OUTPUT_MEMORY_TYPE, MemoryType::VIRTUAL_ADDR);
         outBufPool_->Init(bufferSize, bufferMetaType);
     } else {
-        MEDIA_LOG_I("Using plugin output allocator.");
+        MEDIA_LOG_I("Using plugin output allocator, outputMemoryType: " PUBLIC_LOG_U8, outAllocator->GetMemoryType());
         plugin_->SetParameter(Tag::OUTPUT_MEMORY_TYPE, outAllocator->GetMemoryType());
         for (size_t cnt = 0; cnt < bufferCnt; cnt++) {
             auto buf = CppExt::make_unique<AVBuffer>(bufferMetaType);

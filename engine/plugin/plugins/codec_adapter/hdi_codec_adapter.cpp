@@ -437,10 +437,10 @@ void HdiCodecAdapter::HandleFrame()
     MEDIA_LOG_DD("handle frame end");
 }
 
-Status HdiCodecAdapter::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs)
+Status HdiCodecAdapter::QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs)
 {
-    MEDIA_LOG_DD("QueueOutputBuffer start, outBufQue size: " PUBLIC_LOG_ZU, outBufQue_.Size());
-    outBufQue_->Push(outputBuffers);
+    MEDIA_LOG_DD("QueueOutputBuffer start, outBufQue size: " PUBLIC_LOG_ZU, outBufQue_->Size());
+    outBufQue_->Push(outputBuffer);
     if (curState_ == OMX_StateExecuting && !isFlushing_) {
         FillAllTheOutBuffer();
     }
@@ -512,7 +512,7 @@ bool HdiCodecAdapter::FillAllTheOutBuffer()
                 ", isFirstCall: " PUBLIC_LOG_D32, HdfStatus2String(ret).c_str(), isFirstCall_);
         }
     }
-    MEDIA_LOG_DD("FillAllTheBuffer end, free out bufferId count: " PUBLIC_LOG_U32 ", outBufQue_.Size: " PUBLIC_LOG_ZU,
+    MEDIA_LOG_DD("FillAllTheBuffer end, free out bufferId count: " PUBLIC_LOG_U32 ", outBufQue_->Size: " PUBLIC_LOG_ZU,
                  outBufPool_->EmptyBufferCount(), outBufQue_->Size());
     return true;
 }

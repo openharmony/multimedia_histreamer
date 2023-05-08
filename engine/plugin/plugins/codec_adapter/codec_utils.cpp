@@ -195,7 +195,7 @@ OMX_COLOR_FORMATTYPE FormatHstToOmx(const VideoPixelFormat format)
     return OMX_COLOR_FormatUnused;
 }
 
-static const  std::map<OMX_STATETYPE, std::string> omxStateMap = {
+static const std::map<OMX_STATETYPE, std::string> omxStateMap = {
     {OMX_StateInvalid, "OMX_StateInvalid"},
     {OMX_StateLoaded, "OMX_StateLoaded"},
     {OMX_StateLoaded, "OMX_StateLoaded"},

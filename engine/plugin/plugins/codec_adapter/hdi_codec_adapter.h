@@ -45,7 +45,7 @@ public:
     Status SetParameter(Plugin::Tag tag, const Plugin::ValueType& value) override;
     std::shared_ptr<Plugin::Allocator> GetAllocator() override;
     Status QueueInputBuffer(const std::shared_ptr<Buffer>& inputBuffer, int32_t timeoutMs) override;
-    Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffers, int32_t timeoutMs) override;
+    Status QueueOutputBuffer(const std::shared_ptr<Buffer>& outputBuffer, int32_t timeoutMs) override;
     Status SetCallback(Callback* cb) override;
     Status SetDataCallback(DataCallback* dataCallback) override;
 
