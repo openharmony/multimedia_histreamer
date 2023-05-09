@@ -56,9 +56,9 @@ Status CodecPort::Config(Meta& meta)
     FALSE_LOG(meta.Get<Tag::MEDIA_BITRATE>(bitRate));
     portDef_.format.video.eCompressionFormat = CodingTypeHstToHdi(mime);
     portDef_.format.video.eColorFormat = FormatHstToOmx(vdecFormat);
-    portDef_.format.video.nFrameHeight = height;
-    portDef_.format.video.nSliceHeight = height;
-    portDef_.format.video.nFrameWidth = width;
+    portDef_.format.video.nFrameHeight = AlignUp(height, 16);
+    portDef_.format.video.nSliceHeight = AlignUp(height, 16);
+    portDef_.format.video.nFrameWidth = AlignUp(width, 16);
     portDef_.format.video.nStride = AlignUp(width, 16); // 16
     portDef_.format.video.xFramerate = frameRate << HDI_FRAME_RATE_MOVE;
     MEDIA_LOG_D("frame_rate: " PUBLIC_LOG_U32, portDef_.format.video.xFramerate);
