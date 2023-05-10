@@ -39,8 +39,9 @@ int32_t HstEngineFactory::Score(Scene scene, const std::string& uri)
 }
 
 #ifdef SUPPORT_PLAYER
-std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine(int32_t appUid, int32_t appPid)
+std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine(int32_t appUid, int32_t appPid, uint32_t appTokenId)
 {
+    (void)appTokenId;
     MEDIA_LOG_I("CreatePlayerEngine enter.");
     auto player = std::unique_ptr<HiPlayerImpl>(new (std::nothrow) HiPlayerImpl(appUid, appPid));
     if (player && player->Init() == ErrorCode::SUCCESS) {

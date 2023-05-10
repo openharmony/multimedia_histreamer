@@ -27,7 +27,8 @@ public:
 
     int32_t Score(Scene scene, const std::string& uri) override;
 #ifdef SUPPORT_PLAYER
-    std::unique_ptr<IPlayerEngine> CreatePlayerEngine(int32_t appUid = 0, int32_t appPid = 0) override;
+    std::unique_ptr<IPlayerEngine> CreatePlayerEngine(
+        int32_t appUid = 0, int32_t appPid = 0, uint32_t appTokenId = 0) override;
 #endif
 #ifdef SUPPORT_RECORDER
     std::unique_ptr<IRecorderEngine> CreateRecorderEngine(int32_t appUid, int32_t appPid, uint32_t appTokenId) override;
