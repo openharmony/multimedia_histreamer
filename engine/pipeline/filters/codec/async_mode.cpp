@@ -210,7 +210,7 @@ void AsyncMode::FlushEnd()
 
 ErrorCode AsyncMode::HandleFrame()
 {
-    MEDIA_LOG_DD("AsyncMode handle frame called");
+    MEDIA_LOG_DD("AsyncMode handle frame called, inBufQue_->Size(): " PUBLIC_LOG_ZU, inBufQue_->Size());
     auto oneBuffer = inBufQue_->Pop();
     if (oneBuffer == nullptr) {
         MEDIA_LOG_DD("decoder find nullptr in esBufferQ");
@@ -235,17 +235,17 @@ ErrorCode AsyncMode::HandleFrame()
 
 ErrorCode AsyncMode::DecodeFrame()
 {
-    MEDIA_LOG_DD("AsyncMode decode frame called");
+    MEDIA_LOG_DD("AsyncMode decode frame called, outBufPool_->Size(): " PUBLIC_LOG_ZU, outBufPool_->Size());
     Plugin::Status status = Plugin::Status::OK;
     auto newOutBuffer = outBufPool_->AllocateBuffer();
     if (CheckBufferValidity(newOutBuffer) == ErrorCode::SUCCESS) {
         newOutBuffer->Reset();
         status = plugin_->QueueOutputBuffer(newOutBuffer, 0);
         if (status == Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
-            OSAL::SleepFor(DEFAULT_TRY_DECODE_TIME);
+            MEDIA_LOG_DD("QueueOutputBuffer failed, cause no enough data.");
         }
     } else {
-        OSAL::SleepFor(DEFAULT_TRY_DECODE_TIME);
+        MEDIA_LOG_DD("Invalid buffer.");
     }
     MEDIA_LOG_DD("Async decode frame finished");
     return ErrorCode::SUCCESS;
@@ -253,7 +253,7 @@ ErrorCode AsyncMode::DecodeFrame()
 
 ErrorCode AsyncMode::FinishFrame()
 {
-    MEDIA_LOG_DD("FinishFrame begin");
+    MEDIA_LOG_DD("FinishFrame begin, outBufQue_.size(): " PUBLIC_LOG_ZU, outBufQue_.size());
     bool isRendered = false;
     std::shared_ptr<AVBuffer> frameBuffer = nullptr;
     {

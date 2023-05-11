@@ -274,7 +274,7 @@ ErrorCode VideoSinkFilter::ConfigurePluginToStartNoLocked(const std::shared_ptr<
 
 void VideoSinkFilter::RenderFrame()
 {
-    MEDIA_LOG_DD("RenderFrame called");
+    MEDIA_LOG_DD("RenderFrame called, inBufQue size: " PUBLIC_LOG_ZU, inBufQueue_->Size());
     auto frameBuffer = inBufQueue_->Pop();
     if (frameBuffer == nullptr) {
         MEDIA_LOG_D("Video sink find nullptr in esBufferQ");
@@ -321,7 +321,7 @@ ErrorCode VideoSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
         return ErrorCode::SUCCESS;
     }
     inBufQueue_->Push(buffer);
-    MEDIA_LOG_DD("video sink push data end");
+    MEDIA_LOG_DD("video sink push data end, buffer->pts: " PUBLIC_LOG_D64, buffer->pts);
     return ErrorCode::SUCCESS;
 }
 
