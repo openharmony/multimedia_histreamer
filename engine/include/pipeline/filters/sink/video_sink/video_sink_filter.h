@@ -100,12 +100,16 @@ private:
     sptr<Surface> surface_;
 #endif
     std::shared_ptr<Plugin::VideoSink> plugin_ {nullptr};
-    int64_t frameCnt_ {0};
     int64_t refreshTime_ {0};
     bool isFirstFrame_ {true};
     uint32_t frameRate_ {0};
     bool forceRenderNextFrame_ {false};
     Plugin::VideoScaleType videoScaleType_ {Plugin::VideoScaleType::VIDEO_SCALE_TYPE_FIT};
+
+    void CalcFrameRate();
+    std::shared_ptr<OHOS::Media::OSAL::Task> frameRateTask_ {nullptr};
+    std::atomic<uint64_t> renderFrameCnt_ {0};
+    std::atomic<uint64_t> discardFrameCnt_ {0};
 };
 } // namespace Pipeline
 } // namespace Media
