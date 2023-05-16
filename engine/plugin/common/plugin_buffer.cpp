@@ -126,29 +126,67 @@ MemoryType Memory::GetMemoryType()
     return memoryType;
 }
 
-BufferMeta::BufferMeta(BufferMetaType type) : type(type)
+BufferMeta::BufferMeta(BufferMetaType type) : type_(type), tags_(std::make_shared<Meta>())
 {
 }
 
 ValueType BufferMeta::GetMeta(Tag tag)
 {
-    if (tags) {
-        return (*tags)[tag];
+    if (tags_) {
+        return (*tags_)[tag];
     }
     return ValueType();
 }
 
 void BufferMeta::SetMeta(Tag tag, ValueType value)
 {
-    if (!tags) {
-        tags = std::make_shared<Meta>();
-    }
-    (*tags)[tag] = value;
+    (*tags_)[tag] = value;
 }
 
 BufferMetaType BufferMeta::GetType() const
 {
-    return type;
+    return type_;
+}
+
+void BufferMeta::Update(const BufferMeta& bufferMeta)
+{
+    type_ = bufferMeta.GetType();
+    *tags_ = *bufferMeta.tags_;
+}
+
+std::shared_ptr<BufferMeta> BufferMeta::Clone()
+{
+    auto bufferMeta = std::shared_ptr<BufferMeta>(new BufferMeta(BufferMetaType::AUDIO));
+    bufferMeta->Update(*this);
+    return bufferMeta;
+}
+
+std::shared_ptr<BufferMeta> AudioBufferMeta::Clone()
+{
+    auto bufferMeta = std::shared_ptr<AudioBufferMeta>(new AudioBufferMeta());
+    bufferMeta->samples = samples;
+    bufferMeta->sampleFormat = sampleFormat;
+    bufferMeta->sampleRate = sampleRate;
+    bufferMeta->channels = channels;
+    bufferMeta->bytesPreFrame = bytesPreFrame;
+    bufferMeta->channelLayout = channelLayout;
+    bufferMeta->offsets = offsets;
+    bufferMeta->Update(*this);
+    return bufferMeta;
+}
+
+std::shared_ptr<BufferMeta> VideoBufferMeta::Clone()
+{
+    auto bufferMeta = std::shared_ptr<VideoBufferMeta>(new VideoBufferMeta());
+    bufferMeta->videoPixelFormat = videoPixelFormat;
+    bufferMeta->id = id;
+    bufferMeta->width = width;
+    bufferMeta->height = height;
+    bufferMeta->planes = planes;
+    bufferMeta->stride = stride;
+    bufferMeta->offset = offset;
+    bufferMeta->Update(*this);
+    return bufferMeta;
 }
 
 Buffer::Buffer(BufferMetaType type) : trackID(0), pts(0), dts(0), duration(0), flag (0), meta()
@@ -229,6 +267,11 @@ std::shared_ptr<Memory> Buffer::GetMemory(uint32_t index)
 std::shared_ptr<BufferMeta> Buffer::GetBufferMeta()
 {
     return meta;
+}
+
+void Buffer::UpdateBufferMeta(const BufferMeta& bufferMeta)
+{
+    meta->Update(bufferMeta);
 }
 
 bool Buffer::IsEmpty()

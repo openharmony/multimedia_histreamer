@@ -109,6 +109,8 @@ private:
     std::shared_ptr<CodecPort> inCodecPort_{};
     std::shared_ptr<CodecPort> outCodecPort_{};
 
+    std::map<int64_t, std::shared_ptr<BufferMeta>> bufferMetaMap_;
+
     std::shared_ptr<CodecCmdExecutor> codecCmdExecutor_{};
     OMX_STATETYPE curState_ {OMX_StateInvalid};
     OMX_STATETYPE targetState_ {OMX_StateInvalid};
