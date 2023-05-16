@@ -202,6 +202,10 @@ public:
 
     std::shared_ptr<Memory> AllocMemory(std::shared_ptr<Allocator> allocator, size_t capacity, size_t align = 1);
 
+#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
+    std::shared_ptr<Memory> WrapSurfaceMemory(sptr<SurfaceBuffer> surfaceBuffer);
+#endif
+
     uint32_t GetMemoryCount();
 
     std::shared_ptr<Memory> GetMemory(uint32_t index = 0);
