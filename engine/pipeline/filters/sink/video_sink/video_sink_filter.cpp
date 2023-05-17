@@ -14,7 +14,7 @@
  */
 
 #ifdef VIDEO_SUPPORT
-
+#define SHOW_FRAME_RATE 0
 #define HST_LOG_TAG "VideoSinkFilter"
 
 #include "pipeline/filters/sink/video_sink/video_sink_filter.h"
@@ -51,6 +51,9 @@ VideoSinkFilter::~VideoSinkFilter()
     if (renderTask_) {
         renderTask_->Stop();
     }
+    if (frameRateTask_) {
+        frameRateTask_->Stop();
+    }
     if (plugin_) {
         plugin_->Stop();
         plugin_->Deinit();
@@ -72,6 +75,12 @@ void VideoSinkFilter::Init(EventReceiver* receiver, FilterCallback* callback)
         renderTask_ = std::make_shared<OHOS::Media::OSAL::Task>("VideoSinkRenderThread");
         renderTask_->RegisterHandler([this] { RenderFrame(); });
     }
+#if(SHOW_FRAME_RATE)
+    if (frameRateTask_ == nullptr) {
+        frameRateTask_ = std::make_shared<OHOS::Media::OSAL::Task>("CalcFrameRateThread");
+        frameRateTask_->RegisterHandler([this] { CalcFrameRate(); });
+    }
+#endif
 }
 
 ErrorCode VideoSinkFilter::SetParameter(int32_t key, const Plugin::Any& value)
@@ -291,7 +300,6 @@ void VideoSinkFilter::RenderFrame()
 ErrorCode VideoSinkFilter::PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     MEDIA_LOG_DD("video sink push data started, state_: " PUBLIC_LOG_D32, state_.load());
-    frameCnt_++;
     if (isFlushing_ || state_.load() == FilterState::INITIALIZED) {
         MEDIA_LOG_I("video sink is flushing ignore this buffer");
         return ErrorCode::SUCCESS;
@@ -356,6 +364,9 @@ ErrorCode VideoSinkFilter::Stop()
     }
     inBufQueue_->SetActive(false);
     renderTask_->Stop();
+    if (frameRateTask_) {
+        frameRateTask_->Stop();
+    }
     return ErrorCode::SUCCESS;
 }
 
@@ -370,6 +381,9 @@ ErrorCode VideoSinkFilter::Pause()
     FAIL_RETURN_MSG(TranslatePluginStatus(plugin_->Pause()), "Pause plugin fail");
     inBufQueue_->SetActive(false);
     renderTask_->Pause();
+    if (frameRateTask_) {
+        frameRateTask_->Pause();
+    }
     MEDIA_LOG_D("Video sink filter pause end");
     return ErrorCode::SUCCESS;
 }
@@ -390,7 +404,11 @@ ErrorCode VideoSinkFilter::Resume()
         }
         inBufQueue_->SetActive(true);
         renderTask_->Start();
-        frameCnt_ = 0;
+        if (frameRateTask_) {
+            frameRateTask_->Start();
+        }
+        renderFrameCnt_ = 0;
+        discardFrameCnt_ = 0;
     }
     return ErrorCode::SUCCESS;
 }
@@ -494,6 +512,9 @@ ErrorCode VideoSinkFilter::DoSyncWrite(const AVBufferPtr& buffer)
             }
             isFirstFrame_ = false;
             OnEvent(Event{name_, EventType::EVENT_VIDEO_RENDERING_START, {}});
+            if (frameRateTask_) {
+                frameRateTask_->Start();
+            }
         } else {
             shouldDrop = CheckBufferLatenessMayWait(buffer);
         }
@@ -503,12 +524,15 @@ ErrorCode VideoSinkFilter::DoSyncWrite(const AVBufferPtr& buffer)
         }
     }
     if (shouldDrop) {
+        discardFrameCnt_++;
         MEDIA_LOG_DD("drop buffer with pts " PUBLIC_LOG_D64 " due to too late", buffer->pts);
         return ErrorCode::SUCCESS;
     } else if (!render) {
+        discardFrameCnt_++;
         MEDIA_LOG_DD("drop buffer with pts " PUBLIC_LOG_D64 " due to seek not need to render", buffer->pts);
         return ErrorCode::SUCCESS;
     } else {
+        renderFrameCnt_++;
         return TranslatePluginStatus(plugin_->Write(buffer));
     }
 }
@@ -517,6 +541,15 @@ void VideoSinkFilter::ResetSyncInfo()
 {
     ResetPrerollReported();
     isFirstFrame_ = true;
+}
+
+void VideoSinkFilter::CalcFrameRate()
+{
+    OSAL::SleepFor(1000); // 1000ms
+    MEDIA_LOG_I("Render fps: " PUBLIC_LOG_U64 ", discard frame count: " PUBLIC_LOG_U64,
+                renderFrameCnt_.load(), discardFrameCnt_.load());
+    renderFrameCnt_ = 0;
+    discardFrameCnt_ = 0;
 }
 } // namespace Pipeline
 } // namespace Media
