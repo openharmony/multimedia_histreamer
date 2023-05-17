@@ -78,7 +78,7 @@ public:
 
     void Update(const BufferMeta& bufferMeta);
 
-    virtual std::shared_ptr<BufferMeta> Clone();
+    virtual std::shared_ptr<BufferMeta> Clone() = 0;
 
 protected:
     /// Constructor
@@ -104,6 +104,8 @@ public:
     /// Destructor
     ~AudioBufferMeta() override = default;
 
+    std::shared_ptr<BufferMeta> Clone() override;
+
     /// the number of valid samples in the buffer
     size_t samples {0};
 
@@ -125,8 +127,6 @@ public:
     /// the offsets (in bytes) where each channel plane starts in the buffer.
     std::vector<size_t> offsets {};
 
-    std::shared_ptr<BufferMeta> Clone() override;
-
 private:
     /// Constructor
     AudioBufferMeta() : BufferMeta(BufferMetaType::AUDIO) {}
@@ -146,6 +146,8 @@ class VideoBufferMeta : public BufferMeta {
 public:
     /// Destructor
     ~VideoBufferMeta() override = default;
+
+    std::shared_ptr<BufferMeta> Clone() override;
 
     /// describing video formats.
     VideoPixelFormat videoPixelFormat {VideoPixelFormat::UNKNOWN};
@@ -167,8 +169,6 @@ public:
 
     /// array of offsets for the planes.
     std::vector<uint32_t> offset {};
-
-    std::shared_ptr<BufferMeta> Clone() override;
 
 private:
     /// Constructor
@@ -218,6 +218,8 @@ public:
 
     /// no memory in the buffer.
     bool IsEmpty();
+
+    void ChangeBufferMetaType(BufferMetaType type);
 
     /// track index.
     uint32_t trackID;
