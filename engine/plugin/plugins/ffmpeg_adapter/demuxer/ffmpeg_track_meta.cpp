@@ -119,7 +119,7 @@ void ConvertCommonAudioStreamToMetaInfo(const AVStream& avStream,
         meta.Set<Tag::AUDIO_SAMPLE_RATE>(avCodecContext->sample_rate);
         meta.Set<Tag::AUDIO_CHANNELS>(avCodecContext->channels);
         meta.Set<Tag::AUDIO_CHANNEL_LAYOUT>(ConvertChannelLayoutFromFFmpeg(avCodecContext->channels,
-                                                                              avCodecContext->channel_layout));
+                                                                           avCodecContext->channel_layout));
         // ffmpeg defaults to 1024 samples per frame for planar PCM in each buffer (one for each channel).
         uint32_t samplesPerFrame = 1024;
         if (!IsPcmStream(avStream) && avCodecContext->frame_size != 0) {

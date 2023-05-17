@@ -28,6 +28,7 @@ namespace {
 using namespace OHOS::Media::Plugin;
 using namespace Ffmpeg;
 void UpdatePluginDefinition(const AVCodec* codec, CodecPluginDef& definition);
+void SetCapMime(const AVCodec* codec, CapabilityBuilder& capBuilder);
 
 std::map<std::string, std::shared_ptr<const AVCodec>> codecMap;
 
@@ -94,6 +95,34 @@ void UnRegisterAudioDecoderPlugin()
 void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
 {
     CapabilityBuilder capBuilder;
+    SetCapMime(codec, capBuilder);
+
+    if (codec->supported_samplerates != nullptr) {
+        DiscreteCapability<uint32_t> values;
+        size_t index {0};
+        for (; codec->supported_samplerates[index] != 0; ++index) {
+            values.push_back(codec->supported_samplerates[index]);
+        }
+        if (index) {
+            capBuilder.SetAudioSampleRateList(values);
+        }
+    }
+
+    if (codec->channel_layouts != nullptr) {
+        DiscreteCapability<AudioChannelLayout> values;
+        size_t index {0};
+        for (; codec->channel_layouts[index] != 0; ++index) {
+            values.push_back(AudioChannelLayout(codec->channel_layouts[index]));
+        }
+        if (index) {
+            capBuilder.SetAudioChannelLayoutList(values);
+        }
+    }
+    definition.inCaps.push_back(capBuilder.Build());
+}
+
+void SetCapMime(const AVCodec* codec, CapabilityBuilder& capBuilder)
+{
     switch (codec->id) {
         case AV_CODEC_ID_MP3:
             capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_MPEG)
@@ -124,29 +153,6 @@ void UpdateInCaps(const AVCodec* codec, CodecPluginDef& definition)
         default:
             MEDIA_LOG_I("codec is not supported right now");
     }
-
-    if (codec->supported_samplerates != nullptr) {
-        DiscreteCapability<uint32_t> values;
-        size_t index {0};
-        for (; codec->supported_samplerates[index] != 0; ++index) {
-            values.push_back(codec->supported_samplerates[index]);
-        }
-        if (index) {
-            capBuilder.SetAudioSampleRateList(values);
-        }
-    }
-
-    if (codec->channel_layouts != nullptr) {
-        DiscreteCapability<AudioChannelLayout> values;
-        size_t index {0};
-        for (; codec->channel_layouts[index] != 0; ++index) {
-            values.push_back(AudioChannelLayout(codec->channel_layouts[index]));
-        }
-        if (index) {
-            capBuilder.SetAudioChannelLayoutList(values);
-        }
-    }
-    definition.inCaps.push_back(capBuilder.Build());
 }
 
 void UpdateOutCaps(const AVCodec* codec, CodecPluginDef& definition)

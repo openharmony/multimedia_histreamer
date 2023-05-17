@@ -111,6 +111,9 @@ private:
 #endif
     ErrorCode RemoveFilterChains(Pipeline::Filter* filter, const Plugin::Any& parameter);
     void ActiveFilters(const std::vector<Pipeline::Filter*>& filters);
+    void HandleErrorEvent(const Event& event);
+    void HandleReadyEvent();
+    void HandleCompleteEvent(const Event& event);
     void HandlePluginErrorEvent(const Event& event);
     void UpdateStateNoLock(PlayerStates newState, bool notifyUpward = true);
     double ChangeModeToSpeed(const PlaybackRateMode& mode) const;

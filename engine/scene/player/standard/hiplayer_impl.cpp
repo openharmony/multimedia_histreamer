@@ -471,6 +471,35 @@ int32_t HiPlayerImpl::GetVideoHeight()
     return videoHeight_;
 }
 
+void HiPlayerImpl::HandleErrorEvent(const Event& event)
+{
+    ErrorCode errorCode = ErrorCode::ERROR_UNKNOWN;
+    if (event.param.SameTypeWith(typeid(ErrorCode))) {
+        errorCode = Plugin::AnyCast<ErrorCode>(event.param);
+    }
+    DoOnError(errorCode);
+}
+
+void HiPlayerImpl::HandleReadyEvent()
+{
+    ErrorCode errorCode = DoOnReady();
+    if (errorCode == ErrorCode::SUCCESS) {
+        OnStateChanged(StateId::READY);
+        Format format;
+        callbackLooper_.OnInfo(INFO_TYPE_POSITION_UPDATE, 0, format);
+    } else {
+        OnStateChanged(StateId::INIT);
+    }
+}
+
+void HiPlayerImpl::HandleCompleteEvent(const Event& event)
+{
+    mediaStats_.ReceiveEvent(event);
+    if (mediaStats_.IsEventCompleteAllReceived()) {
+        DoOnComplete();
+    }
+}
+
 void HiPlayerImpl::HandlePluginErrorEvent(const Event& event)
 {
     Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
@@ -495,29 +524,15 @@ void HiPlayerImpl::OnEvent(const Event& event)
     }
     switch (event.type) {
         case EventType::EVENT_ERROR: {
-            ErrorCode errorCode = ErrorCode::ERROR_UNKNOWN;
-            if (event.param.SameTypeWith(typeid(ErrorCode))) {
-                errorCode = Plugin::AnyCast<ErrorCode>(event.param);
-            }
-            DoOnError(errorCode);
+            HandleErrorEvent(event);
             break;
         }
         case EventType::EVENT_READY: {
-            ErrorCode errorCode = DoOnReady();
-            if (errorCode == ErrorCode::SUCCESS) {
-                OnStateChanged(StateId::READY);
-                Format format;
-                callbackLooper_.OnInfo(INFO_TYPE_POSITION_UPDATE, 0, format);
-            } else {
-                OnStateChanged(StateId::INIT);
-            }
+            HandleReadyEvent();
             break;
         }
         case EventType::EVENT_COMPLETE: {
-            mediaStats_.ReceiveEvent(event);
-            if (mediaStats_.IsEventCompleteAllReceived()) {
-                DoOnComplete();
-            }
+            HandleCompleteEvent(event);
             break;
         }
         case EventType::EVENT_PLUGIN_ERROR: {
