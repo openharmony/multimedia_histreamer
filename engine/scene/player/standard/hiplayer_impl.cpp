@@ -102,8 +102,8 @@ void HiPlayerImpl::UpdateStateNoLock(PlayerStates newState, bool notifyUpward)
         return;
     }
     pipelineStates_ = newState;
-    if (pipelineStates_ == PlayerStates::PLAYER_IDLE) {
-        MEDIA_LOG_W("do not report idle since audio player will report idle");
+    if (pipelineStates_ == PlayerStates::PLAYER_IDLE || pipelineStates_ == PlayerStates::PLAYER_PREPARING) {
+        MEDIA_LOG_W("do not report idle and preparing since av player doesn't need report idle and preparing");
         return;
     }
     if (notifyUpward) {
