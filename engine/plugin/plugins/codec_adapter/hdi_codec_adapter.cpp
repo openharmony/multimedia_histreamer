@@ -94,7 +94,6 @@ int32_t HdiCodecAdapter::FillBufferDone(CodecCallbackType* self, int64_t appData
             outputBuffer->GetBufferMeta()->SetMeta(Tag::MEDIA_FRAME_NUMBER, frameNum);
         }
     }
-
     if (hdiAdapter->isFlushing_) {
         MEDIA_LOG_DD("hdi adapter is flushing, ignore this data");
         outputBuffer = nullptr;
