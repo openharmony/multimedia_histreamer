@@ -109,6 +109,7 @@ private:
     std::shared_ptr<CodecPort> inCodecPort_{};
     std::shared_ptr<CodecPort> outCodecPort_{};
 
+    OSAL::Mutex bufferMetaMutex_;
     std::map<int64_t, std::shared_ptr<BufferMeta>> bufferMetaMap_;
 
     std::shared_ptr<CodecCmdExecutor> codecCmdExecutor_{};

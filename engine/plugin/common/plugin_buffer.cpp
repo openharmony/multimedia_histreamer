@@ -135,7 +135,7 @@ ValueType BufferMeta::GetMeta(Tag tag)
     if (tags_) {
         return (*tags_)[tag];
     }
-    return ValueType();
+    return {};
 }
 
 void BufferMeta::SetMeta(Tag tag, ValueType value)
@@ -152,13 +152,6 @@ void BufferMeta::Update(const BufferMeta& bufferMeta)
 {
     type_ = bufferMeta.GetType();
     *tags_ = *bufferMeta.tags_;
-}
-
-std::shared_ptr<BufferMeta> BufferMeta::Clone()
-{
-    auto bufferMeta = std::shared_ptr<BufferMeta>(new BufferMeta(BufferMetaType::AUDIO));
-    bufferMeta->Update(*this);
-    return bufferMeta;
 }
 
 std::shared_ptr<BufferMeta> AudioBufferMeta::Clone()
@@ -309,6 +302,17 @@ void Buffer::Reset()
         meta = std::shared_ptr<VideoBufferMeta>(new VideoBufferMeta());
     }
 }
+
+void Buffer::ChangeBufferMetaType(BufferMetaType type)
+{
+    meta.reset();
+    if (type == BufferMetaType::AUDIO) {
+        meta = std::shared_ptr<AudioBufferMeta>(new AudioBufferMeta());
+    } else if (type == BufferMetaType::VIDEO) {
+        meta = std::shared_ptr<VideoBufferMeta>(new VideoBufferMeta());
+    }
+}
+
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

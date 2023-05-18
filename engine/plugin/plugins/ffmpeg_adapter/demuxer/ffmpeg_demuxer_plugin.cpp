@@ -275,6 +275,7 @@ bool FFmpegDemuxerPlugin::ConvertAVPacketToFrameInfo(const AVStream& avStream, A
             }
         }
         frameSize = pkt.size;
+        frameInfo.ChangeBufferMetaType(BufferMetaType::VIDEO);
     } else {
         MEDIA_LOG_W("unsupported codec type: " PUBLIC_LOG_D32, static_cast<int32_t>(avStream.codecpar->codec_type));
         return false;
