@@ -108,6 +108,8 @@ private:
     uint32_t srcBytesPerSample_ {0};
     DataCallback* dataCallback_ {nullptr};
     std::shared_ptr<Ffmpeg::Resample> resample_ {nullptr};
+    mutable OSAL::Mutex bufferMetaMutex_ {};
+    std::shared_ptr<BufferMeta> bufferMeta_ {nullptr};
 };
 } // Ffmpeg
 } // namespace Plugin

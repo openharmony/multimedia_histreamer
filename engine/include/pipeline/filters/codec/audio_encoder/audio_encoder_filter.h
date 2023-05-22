@@ -77,7 +77,7 @@ private:
     std::string mime_;
     std::shared_ptr<Plugin::Meta> encoderMeta_ {nullptr};
     std::unique_ptr<RingBuffer> rb_ {};
-    AVBufferPtr cahceBuffer_ {nullptr};
+    AVBufferPtr cacheBuffer_ {nullptr};
 };
 } // OHOS
 } // Media

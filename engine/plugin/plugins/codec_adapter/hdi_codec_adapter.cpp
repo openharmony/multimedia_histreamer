@@ -91,7 +91,7 @@ int32_t HdiCodecAdapter::FillBufferDone(CodecCallbackType* self, int64_t appData
             hdiAdapter->bufferMetaMap_.erase(omxBuffer->pts);
         } else {
             uint32_t frameNum = 0;
-            outputBuffer->GetBufferMeta()->SetMeta(Tag::MEDIA_FRAME_NUMBER, frameNum);
+            outputBuffer->GetBufferMeta()->SetMeta(Tag::USER_FRAME_NUMBER, frameNum);
         }
     }
     if (hdiAdapter->isFlushing_) {
