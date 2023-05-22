@@ -31,13 +31,13 @@ config("histreamer_presets") {
     "-Wno-format",
   ]
   cflags_cc = cflags
-  if (multimedia_histreamer_enable_recorder) {
+  if (histreamer_enable_recorder) {
     defines += [ "RECORDER_SUPPORT" ]
   }
-  if (multimedia_histreamer_enable_video) {
+  if (histreamer_enable_video) {
     defines += [ "VIDEO_SUPPORT" ]
   }
-  if (multimedia_histreamer_enable_avs3da) {
+  if (histreamer_enable_avs3da) {
     defines += [ "AVS3DA_SUPPORT" ]
   }
   if (hst_is_lite_sys) {
@@ -65,7 +65,7 @@ if (ohos_kernel_type != "liteos_m") {
       target_type = "shared_library"
       sources = []
       deps = [ "engine/scene/player:histreamer_player" ]
-      if (multimedia_histreamer_enable_recorder) {
+      if (histreamer_enable_recorder) {
         deps += [ "engine/scene/recorder:histreamer_recorder" ]
       }
       public_deps = [ "//foundation/multimedia/media_utils_lite:media_common" ]
@@ -84,7 +84,7 @@ if (ohos_kernel_type != "liteos_m") {
       external_deps = [ "hitrace_native:hitrace_meter" ]
       relative_install_dir = "media"
       subsystem_name = "multimedia"
-      part_name = "multimedia_histreamer"
+      part_name = "histreamer"
     }
   }
 } else {
@@ -98,7 +98,7 @@ if (ohos_kernel_type != "liteos_m") {
       "engine/plugin/plugins:histreamer_plugin_store",
       "engine/scene/player:histreamer_player",
     ]
-    if (multimedia_histreamer_enable_recorder) {
+    if (histreamer_enable_recorder) {
       deps += [ "engine/scene/recorder:histreamer_recorder" ]
     }
     public_deps = [ "//foundation/multimedia/media_utils_lite:media_common" ]

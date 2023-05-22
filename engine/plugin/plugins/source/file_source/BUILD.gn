@@ -72,7 +72,7 @@ if (hst_is_lite_sys) {
     deps = [ ":filesource" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
+    part_name = "histreamer"
   }
   ohos_shared_library("histreamer_plugin_FileFdSource") {
     sanitize = {
@@ -82,6 +82,6 @@ if (hst_is_lite_sys) {
     deps = [ ":filefdsource" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
+    part_name = "histreamer"
   }
 }

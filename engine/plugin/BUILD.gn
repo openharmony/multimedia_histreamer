@@ -43,7 +43,7 @@ config("hst_plugin_intf_config") {
       "//foundation/multimedia/histreamer/engine/scene/standard",
       "//foundation/multimedia/player_framework/interfaces/inner_api/native",
     ]
-    if (multimedia_histreamer_enable_video) {
+    if (histreamer_enable_video) {
       include_dirs += [
         "//commonlibrary/c_utils/base/include",
         "//drivers/peripheral/display/interfaces/include",
@@ -61,7 +61,7 @@ source_set("histreamer_plugin_intf") {
     "common/media_source.cpp",
     "common/plugin_buffer.cpp",
   ]
-  if (!hst_is_lite_sys && multimedia_histreamer_enable_video) {
+  if (!hst_is_lite_sys && histreamer_enable_video) {
     sources += [
       "common/share_allocator.cpp",
       "common/share_memory.cpp",
@@ -81,7 +81,7 @@ source_set("histreamer_plugin_intf") {
     }
   } else {
     public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
-    if (multimedia_histreamer_enable_video) {
+    if (histreamer_enable_video) {
       public_deps += [
         "//foundation/graphic/graphic_2d/frameworks/surface:surface",
         "//foundation/graphic/graphic_2d/utils:sync_fence",
@@ -120,7 +120,7 @@ if (hst_is_lite_sys) {
     }
     deps = [ ":plugin_base" ]
     subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
+    part_name = "histreamer"
   }
 }
 

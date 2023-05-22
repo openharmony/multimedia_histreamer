@@ -31,7 +31,7 @@ source_set("std_engine_factory") {
       "player:histreamer_player",
       "//foundation/graphic/graphic_2d/frameworks/surface:surface",
     ]
-    if (multimedia_histreamer_enable_recorder) {
+    if (histreamer_enable_recorder) {
       deps += [ "recorder:histreamer_recorder" ]
     }
     defines = []

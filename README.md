@@ -75,4 +75,4 @@ The structure of the repository directory is as follows:
 
 - [media_lite](https://gitee.com/openharmony/multimedia_media_lite)
 
-- **multimedia_histreamer**
+- **histreamer**
