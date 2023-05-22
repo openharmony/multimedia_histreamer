@@ -142,7 +142,7 @@ ErrorCode PipelineCore::AddFilters(std::initializer_list<Filter*> filtersIn)
     std::vector<Filter*> filtersToAdd;
     for (auto& filterIn : filtersIn) {
         bool matched = false;
-        for (auto& filter : filters_) {
+        for (const auto& filter : filters_) {
             if (filterIn == filter) {
                 matched = true;
                 break;

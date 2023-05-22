@@ -43,7 +43,7 @@ HdiCodecManager::~HdiCodecManager()
     Reset();
 }
 
-int32_t HdiCodecManager::CreateComponent(const Plugin::Any& component, uint32_t& id, std::string name,
+int32_t HdiCodecManager::CreateComponent(const Plugin::Any& component, uint32_t& id, const std::string& name,
                                          const Plugin::Any& appData, const Plugin::Any& callbacks)
 {
     MEDIA_LOG_I("CreateComponent Start");
