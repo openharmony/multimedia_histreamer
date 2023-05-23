@@ -91,17 +91,20 @@ Status CodecBufferPool::ConfigBufType(const MemoryType& bufMemType, bool isInput
 
 uint32_t CodecBufferPool::EmptyBufferCount()
 {
+    OSAL::ScopedLock lock(mutex_);
     return freeBufferId_.Size();
 }
 
 Status CodecBufferPool::UseBufferDone(uint32_t bufId)
 {
+    OSAL::ScopedLock lock(mutex_);
     freeBufferId_.Push(bufId);
     return Status::OK;
 }
 
 std::shared_ptr<CodecBuffer> CodecBufferPool::GetBuffer(int32_t bufferId)
 {
+    OSAL::ScopedLock lock(mutex_);
     auto bufId = bufferId >= 0 ? bufferId : freeBufferId_.Pop(1);
     return codecBufMap_.count(bufId) ? codecBufMap_[bufId] : nullptr;
 }
