@@ -134,17 +134,17 @@ bool MuxerFilter::Negotiate(const std::string& inPort,
 ErrorCode MuxerFilter::AddTrackThenConfigure(const std::pair<std::string, Plugin::Meta>& metaPair)
 {
     uint32_t trackId = 0;
-    ErrorCode ret = TranslatePluginStatus(plugin_->AddTrack(trackId));
-    if (ret != ErrorCode::SUCCESS) {
+    ErrorCode isTranSuccess = TranslatePluginStatus(plugin_->AddTrack(trackId));
+    if (isTranSuccess != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("muxer plugin add track failed");
-        return ret;
+        return isTranSuccess;
     }
     trackInfos_.emplace_back(TrackInfo{static_cast<int32_t>(trackId), metaPair.first, false});
     auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
         Plugin::ValueType outValue;
-        auto ret = metaPair.second.GetData(static_cast<Plugin::Tag>(keyPair.first), outValue);
-        if (ret &&
+        auto isGetSuccess = metaPair.second.GetData(static_cast<Plugin::Tag>(keyPair.first), outValue);
+        if (isGetSuccess &&
             (keyPair.second.second & PARAM_SET) &&
             keyPair.second.first(keyPair.first, outValue)) {
             plugin_->SetTrackParameter(trackId, keyPair.first, outValue);

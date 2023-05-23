@@ -54,14 +54,14 @@ void CodecBuffer::Init(bool isInput, uint32_t bufferSize, MemoryType bufMemType)
             FALSE_LOG_MSG(bufferHandle != nullptr, "bufferHandle is null");
             omxBuffer_->bufferLen =
                 sizeof(BufferHandle) + (sizeof(int32_t) * (bufferHandle->reserveFds + bufferHandle->reserveInts));
-            omxBuffer_->buffer = (uint8_t*)bufferHandle;
+            omxBuffer_->buffer = reinterpret_cast<uint8_t *>(bufferHandle);
             break;
         }
         case MemoryType::SHARE_MEMORY: {
             omxBuffer_->bufferLen = sizeof(int);
             omxBuffer_->type = isInput ? READ_ONLY_TYPE : READ_WRITE_TYPE;
-            omxBuffer_->buffer =
-                (uint8_t *)(long long)std::static_pointer_cast<Plugin::ShareMemory>(memory_)->GetShareMemoryFd();
+            omxBuffer_->buffer = reinterpret_cast<uint8_t *>(static_cast<long long>(
+                std::static_pointer_cast<Plugin::ShareMemory>(memory_)->GetShareMemoryFd()));
             MEDIA_LOG_D("share memory fd: " PUBLIC_LOG_D32,
                         std::static_pointer_cast<Plugin::ShareMemory>(memory_)->GetShareMemoryFd());
             break;
@@ -77,7 +77,7 @@ std::shared_ptr<OmxCodecBuffer> CodecBuffer::GetOmxBuffer()
     return omxBuffer_;
 }
 
-uint32_t CodecBuffer::GetBufferId()
+uint32_t CodecBuffer::GetBufferId() const
 {
     return omxBuffer_->bufferId;
 }
@@ -125,13 +125,13 @@ Status CodecBuffer::Rebind(const std::shared_ptr<Plugin::Buffer>& pluginBuffer)
             FALSE_RETURN_V_MSG_E(bufferHandle != nullptr, Status::ERROR_NULL_POINTER, "GetBufferHandle failed");
             omxBuffer_->bufferLen =
                 sizeof(BufferHandle) + sizeof(int32_t) * (bufferHandle->reserveFds + bufferHandle->reserveInts);
-            omxBuffer_->buffer = (uint8_t*)bufferHandle;
+            omxBuffer_->buffer = reinterpret_cast<uint8_t *>(bufferHandle);
             break;
         }
         case MemoryType::SHARE_MEMORY:
             omxBuffer_->bufferLen = sizeof(int);
-            omxBuffer_->buffer = (uint8_t *)(long long)
-                std::static_pointer_cast<Plugin::ShareMemory>(memory_)->GetShareMemoryFd();
+            omxBuffer_->buffer = reinterpret_cast<uint8_t *>(static_cast<long long>(
+                std::static_pointer_cast<Plugin::ShareMemory>(memory_)->GetShareMemoryFd()));
             omxBuffer_->offset = 0;
             omxBuffer_->filledLen = 0;
             break;

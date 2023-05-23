@@ -36,11 +36,11 @@ public:
 
     std::shared_ptr<OmxCodecBuffer> GetOmxBuffer();
 
-    uint32_t GetBufferId();
+    uint32_t GetBufferId() const;
 
-    Status Copy(const std::shared_ptr<Plugin::Buffer>& Buffer);
+    Status Copy(const std::shared_ptr<Plugin::Buffer>& pluginBuffer);
 
-    Status Rebind(const std::shared_ptr<Plugin::Buffer>& buffer); // 重新申请内存时， CodecBuffer都要重新创建
+    Status Rebind(const std::shared_ptr<Plugin::Buffer>& pluginBuffer); // 重新申请内存时， CodecBuffer都要重新创建
 
     Status Unbind(std::shared_ptr<Plugin::Buffer>& buffer, const OmxCodecBuffer* omxBuffer);
 

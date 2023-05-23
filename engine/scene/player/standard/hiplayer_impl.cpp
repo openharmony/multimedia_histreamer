@@ -322,8 +322,7 @@ int32_t HiPlayerImpl::Seek(int32_t mSeconds, PlayerSeekMode mode)
         return TransErrorCode(ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
     }
     auto smode = Transform2SeekMode(mode);
-    auto ret = ErrorCode::SUCCESS;
-    ret = DoSeek(hstTime, smode);
+    auto ret = DoSeek(hstTime, smode);
     return TransErrorCode(ret);
 }
 

@@ -63,8 +63,8 @@ private:
 
     // HDI callback
     static int32_t EventHandler(CodecCallbackType* self, OMX_EVENTTYPE event, EventInfo* info);
-    static int32_t EmptyBufferDone(CodecCallbackType* self, int64_t appData, const OmxCodecBuffer* buffer);
-    static int32_t FillBufferDone(CodecCallbackType* self, int64_t appData, const OmxCodecBuffer* buffer);
+    static int32_t EmptyBufferDone(CodecCallbackType* self, int64_t appData, const OmxCodecBuffer* omxBuffer);
+    static int32_t FillBufferDone(CodecCallbackType* self, int64_t appData, const OmxCodecBuffer* omxBuffer);
 
     Status ConfigOmx();
 

@@ -31,7 +31,7 @@ public:
     static HdiCodecManager& GetInstance();
     ~HdiCodecManager() override;
 
-    int32_t CreateComponent(const Plugin::Any& component, uint32_t& id, std::string name,
+    int32_t CreateComponent(const Plugin::Any& component, uint32_t& id, const std::string& name,
                                  const Plugin::Any& appData, const Plugin::Any& callbacks) override;
     int32_t DestroyComponent(const Plugin::Any& component, uint32_t id) override;
 
