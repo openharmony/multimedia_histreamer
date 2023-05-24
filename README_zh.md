@@ -63,7 +63,7 @@ HiStreamer插件列表如下:
 │  │  ├─common                         # 插件接口依赖的基础类型定义
 │  │  ├─core                           # 插件框架，各个插件的代理类
 │  │  └─plugins                        # 若干插件实现
-│  │      ├─codec_adapter              # codec适配
+│  │      ├─codec_adapter              # 硬件编解码适配
 │  │      ├─minimp3_adapter            # minimp3适配
 │  │      ├─ffmpeg_adapter             # FFMPEG适配(适配成封装解封装、编解码插件)
 │  │      ├─hdi_adapter                # HDI适配(适配成输出插件)
@@ -71,12 +71,12 @@ HiStreamer插件列表如下:
 │  │      ├─demuxer                    # 解封装插件
 │  │      ├─sink                       # 输出插件
 │  │      └─source                     # 数据源插件
-│  └─scene                             # 播放录制场景
-│  │  ├─common                         # 播放场景的基础类型定义
-│  │  ├─lite                           # lite设备的播放场景
-│  │  ├─player                         # 播放场景
-│  │  ├─recorder                       # 录制场景
-│  │  └─standard                       # standard设备的播放场景
+│  └─scene                             # 播放录制等场景的封装实现
+│  │  ├─common                         # 共用的基础类型定义
+│  │  ├─lite                           # 对接到轻量设备的接口实现
+│  │  ├─player                         # 播放场景实现
+│  │  ├─recorder                       # 录制场景实现
+│  │  └─standard                       # 对接到标准设备的接口实现
 └─interface                            # 引擎对外接口
 ```
 
