@@ -49,6 +49,11 @@ if (hst_is_lite_sys) {
 } else {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_StdAudioCapture") {
+    sanitize = {
+      cfi = true
+      debug = false
+      integer_overflow = true
+    }
     deps = [ ":std_audio_capture" ]
     external_deps = [ "audio_framework:audio_capturer" ]
     relative_install_dir = "media/histreamer_plugins"

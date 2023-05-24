@@ -117,6 +117,7 @@ if (hst_is_lite_sys) {
     sanitize = {
       cfi = true
       debug = false
+      integer_overflow = true
     }
     deps = [ ":plugin_base" ]
     subsystem_name = "multimedia"

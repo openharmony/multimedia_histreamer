@@ -68,6 +68,7 @@ if (hst_is_lite_sys) {
     sanitize = {
       cfi = true
       debug = false
+      integer_overflow = true
     }
     deps = [ ":filesource" ]
     relative_install_dir = "media/histreamer_plugins"
@@ -78,6 +79,7 @@ if (hst_is_lite_sys) {
     sanitize = {
       cfi = true
       debug = false
+      integer_overflow = true
     }
     deps = [ ":filefdsource" ]
     relative_install_dir = "media/histreamer_plugins"
