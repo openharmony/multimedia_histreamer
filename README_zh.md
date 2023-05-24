@@ -43,26 +43,40 @@ HiStreamer插件列表如下:
 ├─LICENSE                              # 证书文件
 ├─engine                               # 引擎代码
 │  ├─foundation                        # 基础工具类, 包括OS适配
+│  ├─include                           # 引擎类的头文件，和子文件夹和同级文件夹一一对应
+│  │  ├─foundation                     # 引擎子文件夹foundation对应的头文件
+│  │  ├─pipeline                       # 引擎子文件夹pipeline对应的头文件
+│  │  └─plugin                         # 引擎子文件夹plugin对应的头文件
+│  │  	├─common                       # 插件接口依赖的基础类型头文件
+│  │  	└─interface                    # 插件接口
 │  ├─pipeline                          # pipeline框架
 │  │  ├─core                           # pipeline核心实现
 │  │  ├─factory                        # filter工厂
 │  │  └─filters                        # 若干filter节点实现
 │  │      ├─codec                      # 编解码节点实现
+│  │      ├─common                     # filters依赖的基础类型定义
 │  │      ├─demux                      # 解封装节点实现
+│  │      ├─muxer                      # 封装节点实现
 │  │      ├─sink                       # 输出节点实现
 │  │      └─source                     # 数据源节点实现
-│  ├─player                            # 播放器封装
-│  └─plugin                            # 插件
-│     ├─common                         # 插件接口依赖的基础类型定义
-│     ├─core                           # 插件框架
-│     ├─interface                      # 插件接口
-│     └─plugins                        # 若干插件实现
-│         ├─minimp3_adapter            # minimp3适配
-│         ├─ffmpeg_adapter             # FFMPEG适配(适配成封装解封装、编解码插件)
-│         ├─hdi_adapter                # HDI适配(适配成输出插件)
-│         ├─demuxer                    # 解封装插件
-│         ├─sink                       # 输出插件
-│         └─source                     # 数据源插件
+│  ├─plugin                            # 插件
+│  │  ├─common                         # 插件接口依赖的基础类型定义
+│  │  ├─core                           # 插件框架，各个插件的代理类
+│  │  └─plugins                        # 若干插件实现
+│  │      ├─codec_adapter              # 硬件编解码适配
+│  │      ├─minimp3_adapter            # minimp3适配
+│  │      ├─ffmpeg_adapter             # FFMPEG适配(适配成封装解封装、编解码插件)
+│  │      ├─hdi_adapter                # HDI适配(适配成输出插件)
+│  │      ├─lite_aac_decoder           # 轻量级AAC解码器插件
+│  │      ├─demuxer                    # 解封装插件
+│  │      ├─sink                       # 输出插件
+│  │      └─source                     # 数据源插件
+│  └─scene                             # 播放录制等场景的封装实现
+│  │  ├─common                         # 共用的基础类型定义
+│  │  ├─lite                           # 对接到轻量设备的接口实现
+│  │  ├─player                         # 播放场景实现
+│  │  ├─recorder                       # 录制场景实现
+│  │  └─standard                       # 对接到标准设备的接口实现
 └─interface                            # 引擎对外接口
 ```
 
