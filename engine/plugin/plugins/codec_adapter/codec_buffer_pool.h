@@ -21,6 +21,7 @@
 #include "codec_buffer.h"
 #include "codec_component_if.h"
 #include "codec_component_type.h"
+#include "foundation/osal/thread/mutex.h"
 #include "foundation/utils/blocking_queue.h"
 #include "plugin/common/plugin_types.h"
 #include "plugin/common/share_allocator.h"
@@ -58,6 +59,7 @@ private:
     Status ConfigBufType(const MemoryType& bufMemType, bool isInput);
 
 private:
+    OSAL::Mutex mutex_;
     CodecComponentType* codecComp_ {nullptr};
     CompVerInfo verInfo_;
 

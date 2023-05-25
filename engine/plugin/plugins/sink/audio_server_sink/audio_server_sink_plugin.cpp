@@ -335,6 +335,10 @@ bool AudioServerSinkPlugin::StopRender()
 {
     OSAL::ScopedLock lock(renderMutex_);
     if (audioRenderer_) {
+        if (audioRenderer_->GetStatus() == AudioStandard::RendererState::RENDERER_STOPPED) {
+            MEDIA_LOG_I("AudioRenderer is already in stopped state.");
+            return true;
+        }
         return audioRenderer_->Stop();
     }
     return true;
