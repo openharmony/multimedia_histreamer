@@ -78,6 +78,7 @@ if (ohos_kernel_type != "liteos_m") {
       sanitize = {
         cfi = true
         debug = false
+        integer_overflow = true
       }
       sources = []
       deps = [ "engine/scene:std_engine_factory" ]

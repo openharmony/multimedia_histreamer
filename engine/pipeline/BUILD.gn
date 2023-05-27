@@ -53,6 +53,7 @@ if (hst_is_lite_sys) {
     sanitize = {
       cfi = true
       debug = false
+      integer_overflow = true
     }
     deps = [ ":histreamer_pipeline_base" ]
     subsystem_name = "multimedia"
@@ -98,6 +99,7 @@ if (hst_is_lite_sys) {
     sanitize = {
       cfi = true
       debug = false
+      integer_overflow = true
     }
     deps = [ ":histreamer_pipeline" ]
     subsystem_name = "multimedia"
