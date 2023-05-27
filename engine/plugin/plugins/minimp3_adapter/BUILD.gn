@@ -72,7 +72,7 @@ if (ohos_kernel_type == "liteos_m") {
     ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
+    part_name = "histreamer"
   }
   ohos_shared_library("histreamer_plugin_Minimp3Decoder") {
     sanitize = {
@@ -94,6 +94,6 @@ if (ohos_kernel_type == "liteos_m") {
     ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
+    part_name = "histreamer"
   }
 }

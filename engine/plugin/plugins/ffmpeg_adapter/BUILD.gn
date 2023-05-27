@@ -24,16 +24,16 @@ group("plugin_ffmpeg_adapter") {
       ":histreamer_plugin_FFmpegAudioDecoders",
       ":histreamer_plugin_FFmpegDemuxer",
     ]
-    if (multimedia_histreamer_enable_video) {
+    if (histreamer_enable_video) {
       deps += [ ":histreamer_plugin_FFmpegVideoDecoders" ]
     }
   }
-  if (!hst_is_lite_sys && multimedia_histreamer_enable_recorder) {
+  if (!hst_is_lite_sys && histreamer_enable_recorder) {
     deps += [
       ":histreamer_plugin_FFmpegAudioEncoders",
       ":histreamer_plugin_FFmpegMuxers",
     ]
-    if (multimedia_histreamer_enable_video) {
+    if (histreamer_enable_video) {
       deps += [ ":histreamer_plugin_FFmpegVideoEncoders" ]
     }
   }
@@ -73,7 +73,7 @@ source_set("ffmpeg_demuxers") {
     "utils/bit_reader.cpp",
     "utils/ffmpeg_utils.cpp",
   ]
-  if (multimedia_histreamer_enable_video) {
+  if (histreamer_enable_video) {
     sources += [ "utils/avc_config_data_parser.cpp" ]
   }
   public_configs = [
@@ -212,7 +212,7 @@ if (hst_is_lite_sys) {
     deps = [ ":ffmpeg_audio_decoders" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
+    part_name = "histreamer"
   }
   ohos_shared_library("histreamer_plugin_FFmpegVideoDecoders") {
     sanitize = {
@@ -223,7 +223,7 @@ if (hst_is_lite_sys) {
     deps = [ ":ffmpeg_video_decoders" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
+    part_name = "histreamer"
   }
   ohos_shared_library("histreamer_plugin_FFmpegDemuxer") {
     sanitize = {
@@ -234,7 +234,7 @@ if (hst_is_lite_sys) {
     deps = [ ":ffmpeg_demuxers" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
+    part_name = "histreamer"
   }
   ohos_shared_library("histreamer_plugin_FFmpegAudioEncoders") {
     sanitize = {
@@ -245,7 +245,7 @@ if (hst_is_lite_sys) {
     deps = [ ":ffmpeg_audio_encoders" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
+    part_name = "histreamer"
   }
   ohos_shared_library("histreamer_plugin_FFmpegVideoEncoders") {
     sanitize = {
@@ -256,7 +256,7 @@ if (hst_is_lite_sys) {
     deps = [ ":ffmpeg_video_encoders" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
+    part_name = "histreamer"
   }
   ohos_shared_library("histreamer_plugin_FFmpegMuxers") {
     sanitize = {
@@ -267,6 +267,6 @@ if (hst_is_lite_sys) {
     deps = [ ":ffmpeg_muxers" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
+    part_name = "histreamer"
   }
 }

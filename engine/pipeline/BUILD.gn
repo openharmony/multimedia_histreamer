@@ -57,7 +57,7 @@ if (hst_is_lite_sys) {
     }
     deps = [ ":histreamer_pipeline_base" ]
     subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
+    part_name = "histreamer"
   }
 }
 
@@ -73,9 +73,9 @@ source_set("histreamer_pipeline") {
     "filters/source:audio_capture_filter",
     "filters/source:media_source_filter",
   ]
-  if (multimedia_histreamer_enable_video) {
+  if (histreamer_enable_video) {
     public_deps += [ "filters/sink:video_sink_filter" ]
-    if (multimedia_histreamer_enable_recorder) {
+    if (histreamer_enable_recorder) {
       public_deps += [ "filters/source:video_capture_filter" ]
     }
   }
@@ -103,6 +103,6 @@ if (hst_is_lite_sys) {
     }
     deps = [ ":histreamer_pipeline" ]
     subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
+    part_name = "histreamer"
   }
 }

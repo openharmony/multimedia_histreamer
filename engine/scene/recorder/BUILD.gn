@@ -14,7 +14,7 @@
 import("//foundation/multimedia/histreamer/config.gni")
 
 config("histreamer_recorder_config") {
-  if (multimedia_histreamer_enable_recorder) {
+  if (histreamer_enable_recorder) {
     include_dirs = [
       "//foundation/multimedia/histreamer/engine/include",
       "//foundation/multimedia/histreamer/engine/scene/recorder",
@@ -33,7 +33,7 @@ config("histreamer_recorder_config") {
 }
 
 source_set("histreamer_recorder") {
-  if (multimedia_histreamer_enable_recorder) {
+  if (histreamer_enable_recorder) {
     include_dirs = [ "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
     sources = [
       "internal/state.cpp",

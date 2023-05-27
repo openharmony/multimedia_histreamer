@@ -50,6 +50,6 @@ if (!hst_is_lite_sys) {
     external_deps = [ "audio_framework:audio_renderer" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
-    part_name = "multimedia_histreamer"
+    part_name = "histreamer"
   }
 }
