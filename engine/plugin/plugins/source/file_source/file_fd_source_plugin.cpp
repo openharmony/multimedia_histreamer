@@ -121,12 +121,12 @@ Status FileFdSourcePlugin::SeekTo(uint64_t offset)
 {
     FALSE_RETURN_V_MSG_E(fd_ != -1 && seekable_ == Seekable::SEEKABLE,
                          Status::ERROR_WRONG_STATE, "no valid fd or no seekable.");
-    int32_t ret = lseek(fd_, offset + offset_, SEEK_SET);
+    int32_t ret = lseek(fd_, offset + static_cast<uint64_t>(offset_), SEEK_SET);
     if (ret == -1) {
         MEDIA_LOG_E("seek to " PUBLIC_LOG_U64 " failed due to " PUBLIC_LOG_S, offset, strerror(errno));
         return Status::ERROR_UNKNOWN;
     }
-    position_ = offset + offset_;
+    position_ = offset + static_cast<uint64_t>(offset_);
     MEDIA_LOG_D("now seek to " PUBLIC_LOG_D32, ret);
     return Status::OK;
 }
@@ -149,12 +149,13 @@ Status FileFdSourcePlugin::ParseUriInfo(const std::string& uri)
     fileSize_ = GetFileSize(fd_);
     if (fdUriMatch.size() == 4) { // 4：4 sub match
         offset_ = std::stoll(fdUriMatch[2].str()); // 2: sub match offset subscript
-        if (offset_ > fileSize_) {
+        if (static_cast<uint64_t>(offset_) > fileSize_) {
             offset_ = fileSize_;
         }
-        size_ = std::stoll(fdUriMatch[3].str()); // 3: sub match size subscript
-        if ((offset_ + size_) > fileSize_) {
-            size_ = fileSize_ - offset_;
+        size_ = static_cast<uint64_t>(std::stoll(fdUriMatch[3].str())); // 3: sub match size subscript
+        uint64_t remainingSize = fileSize_ - offset_;
+        if (size_ > remainingSize) {
+            size_ = remainingSize; 
         }
     } else {
         size_ = fileSize_;

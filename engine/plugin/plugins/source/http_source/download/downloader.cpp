@@ -151,7 +151,7 @@ void Downloader::Stop()
 bool Downloader::Seek(int64_t offset)
 {
     MEDIA_LOG_I("Begin");
-    if (offset >= 0 && offset < currentRequest_->GetFileContentLength()) {
+    if (offset >= 0 && offset < static_cast<int64_t>(currentRequest_->GetFileContentLength())) {
         currentRequest_->startPos_ = offset;
     }
     int64_t temp = currentRequest_->GetFileContentLength() - currentRequest_->startPos_;

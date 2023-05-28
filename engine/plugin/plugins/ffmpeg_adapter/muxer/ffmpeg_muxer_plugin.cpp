@@ -261,7 +261,8 @@ Status SetTagsOfTrack(const AVOutputFormat* fmt, AVStream* stream, const Meta& m
         auto extraSize = codecConfig.size();
         stream->codecpar->extradata = static_cast<uint8_t *>(av_mallocz(extraSize + AV_INPUT_BUFFER_PADDING_SIZE));
         FALSE_RETURN_V(stream->codecpar->extradata != nullptr, Status::ERROR_NO_MEMORY);
-        (void)memcpy_s(stream->codecpar->extradata, extraSize, codecConfig.data(), extraSize);
+        auto ret = memcpy_s(stream->codecpar->extradata, extraSize, codecConfig.data(), extraSize);
+        FALSE_RETURN_V(ret == 0, Status::ERROR_UNKNOWN);
         stream->codecpar->extradata_size = extraSize;
     }
     return Status::OK;

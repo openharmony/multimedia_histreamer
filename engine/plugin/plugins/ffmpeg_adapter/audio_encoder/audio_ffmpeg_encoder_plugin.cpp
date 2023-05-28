@@ -438,7 +438,7 @@ Status AudioFfmpegEncoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>&
     ioInfoMem->Write(packet->data, packet->size);
     // how get perfect pts with upstream pts ?
     ioInfo->duration = ConvertTimeFromFFmpeg(packet->duration, avCodecContext_->time_base);
-    ioInfo->pts = (UINT64_MAX - prev_pts_ < packet->duration) ?
+    ioInfo->pts = (UINT64_MAX - prev_pts_ < static_cast<uint64_t>(packet->duration)) ?
                   (ioInfo->duration - (UINT64_MAX - prev_pts_)) :
                   (prev_pts_ + ioInfo->duration);
     prev_pts_ = ioInfo->pts;

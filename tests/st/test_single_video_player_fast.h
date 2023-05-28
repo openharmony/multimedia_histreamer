@@ -38,8 +38,8 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
                   DATA_GROUP(std::string(RESOURCE_DIR "/MP4/H264_AAC.mp4"), 1894335),
                   DATA_GROUP(std::string(RESOURCE_DIR "/../demo_resource/video/1h264_320x240_60.3gp"), 494522));
 
-    const int64_t NEXT_FRAME_TIME {8300};
-    const int64_t PREV_FRAME_TIME {4166};
+    static const int64_t NEXT_FRAME_TIME {8300};
+    static const int64_t PREV_FRAME_TIME {4166};
 
     std::string FilePathToFd(std::string url, int32_t fileSize)
     {
