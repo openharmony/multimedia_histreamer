@@ -263,7 +263,7 @@ bool DataPacker::GetRange(uint32_t size, AVBufferPtr& bufferPtr)
     uint8_t* dstPtr = GetBufferWritableData(bufferPtr, size);
     FALSE_RETURN_V(dstPtr != nullptr, false);
 
-    while (index < que_.size()) {
+    while (static_cast<uint32_t>(index) < que_.size()) {
         AVBufferPtr& buffer = que_[index];
         size_t bufferSize = GetBufferSize(buffer);
         currCopySize = std::min(static_cast<int32_t>(bufferSize), needCopySize);

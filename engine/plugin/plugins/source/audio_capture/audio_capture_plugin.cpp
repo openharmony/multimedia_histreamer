@@ -431,7 +431,7 @@ Status AudioCapturePlugin::GetAudioTimeLocked(int64_t& audioTimeNs)
     if (timeStamp.time.tv_sec < 0 || timeStamp.time.tv_nsec < 0) {
         return Status::ERROR_INVALID_PARAMETER;
     }
-    if ((UINT64_MAX - timeStamp.time.tv_nsec) / TIME_SEC_TO_NS < timeStamp.time.tv_sec) {
+    if ((UINT64_MAX - timeStamp.time.tv_nsec) / TIME_SEC_TO_NS < static_cast<uint64_t>(timeStamp.time.tv_sec)) {
         return Status::ERROR_INVALID_PARAMETER;
     }
     audioTimeNs = timeStamp.time.tv_sec * TIME_SEC_TO_NS + timeStamp.time.tv_nsec;

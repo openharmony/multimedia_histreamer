@@ -105,7 +105,7 @@ Status CodecBufferPool::UseBufferDone(uint32_t bufId)
 std::shared_ptr<CodecBuffer> CodecBufferPool::GetBuffer(int32_t bufferId)
 {
     OSAL::ScopedLock lock(mutex_);
-    auto bufId = bufferId >= 0 ? bufferId : freeBufferId_.Pop(1);
+    auto bufId = bufferId >= 0 ? static_cast<uint32_t>(bufferId) : freeBufferId_.Pop(1);
     return codecBufMap_.count(bufId) ? codecBufMap_[bufId] : nullptr;
 }
 } // namespace CodecAdapter

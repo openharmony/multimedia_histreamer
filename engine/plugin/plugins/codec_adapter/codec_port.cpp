@@ -60,10 +60,10 @@ Status CodecPort::Config(Meta& meta)
     portDef_.format.video.nFrameHeight = AlignUp(height, HDI_VIDEO_ALIGNMENT);
     portDef_.format.video.nSliceHeight = AlignUp(height, HDI_VIDEO_ALIGNMENT);
     portDef_.format.video.nFrameWidth = AlignUp(width, HDI_VIDEO_ALIGNMENT);
-    portDef_.format.video.nStride = AlignUp(width, HDI_VIDEO_ALIGNMENT);
+    portDef_.format.video.nStride = static_cast<int32_t>(AlignUp(width, HDI_VIDEO_ALIGNMENT));
     portDef_.format.video.xFramerate = frameRate << HDI_FRAME_RATE_MOVE;
     MEDIA_LOG_D("frame_rate: " PUBLIC_LOG_U32, portDef_.format.video.xFramerate);
-    portDef_.format.video.nBitrate = bitRate;
+    portDef_.format.video.nBitrate = static_cast<uint32_t>(bitRate);
     ret = HdiSetParameter(codecComp_, OMX_IndexParamPortDefinition, portDef_);
     FALSE_RETURN_V_MSG(ret == HDF_SUCCESS, Status::ERROR_INVALID_PARAMETER, "HdiSetParameter failed");
     return Status::OK;

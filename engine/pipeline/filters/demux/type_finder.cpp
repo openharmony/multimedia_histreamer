@@ -225,7 +225,7 @@ std::string TypeFinder::GuessMediaType() const
 
 bool TypeFinder::IsOffsetValid(int64_t offset) const
 {
-    return (mediaDataSize_ == 0) || offset < mediaDataSize_;
+    return (mediaDataSize_ == 0) || offset < static_cast<int64_t>(mediaDataSize_);
 }
 
 bool TypeFinder::GetPlugins()
