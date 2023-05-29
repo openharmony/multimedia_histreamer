@@ -208,28 +208,16 @@ Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
 {
     OSAL::ScopedLock lock(mutex_);
     switch (tag) {
-        case Tag::VIDEO_WIDTH: {
-            if (value.SameTypeWith(typeid(uint32_t))) {
-                width_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("width_: " PUBLIC_LOG_U32, width_);
-            }
+        case Tag::VIDEO_WIDTH:
+            SetVideoWidth(value);
             break;
-        }
-        case Tag::VIDEO_HEIGHT: {
-            if (value.SameTypeWith(typeid(uint32_t))) {
-                height_ = Plugin::AnyCast<uint32_t>(value);
-                MEDIA_LOG_D("height_: " PUBLIC_LOG_U32, height_);
-            }
+        case Tag::VIDEO_HEIGHT:
+            SetVideoHeight(value);
             break;
-        }
-        case Tag::VIDEO_PIXEL_FORMAT: {
-            if (value.SameTypeWith(typeid(VideoPixelFormat))) {
-                decodeOutputPixelFmt_ = Plugin::AnyCast<VideoPixelFormat>(value);
-                MEDIA_LOG_D("decode output pixel fmt: " PUBLIC_LOG_U32, static_cast<uint32_t>(decodeOutputPixelFmt_));
-            }
+        case Tag::VIDEO_PIXEL_FORMAT:
+            SetVideoPixelFormat(value);
             break;
-        }
-        case Tag::VIDEO_SURFACE: {
+        case Tag::VIDEO_SURFACE:
             if (value.SameTypeWith(typeid(sptr<Surface>))) {
                 surface_ = Plugin::AnyCast<sptr<Surface>>(value);
                 if (!surface_) {
@@ -241,32 +229,63 @@ Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
                 surfaceCond_.NotifyAll();
             }
             break;
-        }
-        case Tag::VIDEO_MAX_SURFACE_NUM: {
-            if (value.SameTypeWith(typeid(uint32_t))) {
-                auto bufferNum = Plugin::AnyCast<uint32_t>(value);
-                if (bufferNum < DEFAULT_BUFFER_NUM) {
-                    maxSurfaceNum_ = bufferNum;
-                }
-                MEDIA_LOG_D("maxSurfaceNum_: " PUBLIC_LOG_U32, maxSurfaceNum_);
-            }
+        case Tag::VIDEO_MAX_SURFACE_NUM:
+            SetMaxSurfaceNum(value);
             break;
-        }
-        case Tag::VIDEO_SCALE_TYPE: {
-            if (value.SameTypeWith(typeid(Plugin::VideoScaleType))) {
-                scalingType_ = Plugin::AnyCast<Plugin::VideoScaleType>(value);
-                MEDIA_LOG_D("scalingType_: " PUBLIC_LOG_U32, static_cast<uint32_t>(scalingType_));
-                if (mAllocator_) {
-                    mAllocator_->SetScaleType(scalingType_);
-                }
-            }
+        case Tag::VIDEO_SCALE_TYPE:
+            SetVideoScaleType(value);
             break;
-        }
         default:
             MEDIA_LOG_I("Unknown key");
             break;
     }
     return Status::OK;
+}
+
+void SurfaceSinkPlugin::SetVideoWidth(const ValueType& value)
+{
+    if (value.SameTypeWith(typeid(uint32_t))) {
+        width_ = Plugin::AnyCast<uint32_t>(value);
+        MEDIA_LOG_D("width_: " PUBLIC_LOG_U32, width_);
+    }
+}
+
+void SurfaceSinkPlugin::SetVideoHeight(const ValueType& value)
+{
+    if (value.SameTypeWith(typeid(uint32_t))) {
+        height_ = Plugin::AnyCast<uint32_t>(value);
+        MEDIA_LOG_D("height_: " PUBLIC_LOG_U32, height_);
+    }
+}
+
+void SurfaceSinkPlugin::SetVideoPixelFormat(const ValueType& value)
+{
+    if (value.SameTypeWith(typeid(VideoPixelFormat))) {
+        decodeOutputPixelFmt_ = Plugin::AnyCast<VideoPixelFormat>(value);
+        MEDIA_LOG_D("decode output pixel fmt: " PUBLIC_LOG_U32, static_cast<uint32_t>(decodeOutputPixelFmt_));
+    }
+}
+
+void SurfaceSinkPlugin::SetMaxSurfaceNum(const ValueType& value)
+{
+    if (value.SameTypeWith(typeid(uint32_t))) {
+        auto bufferNum = Plugin::AnyCast<uint32_t>(value);
+        if (bufferNum < DEFAULT_BUFFER_NUM) {
+            maxSurfaceNum_ = bufferNum;
+        }
+        MEDIA_LOG_D("maxSurfaceNum_: " PUBLIC_LOG_U32, maxSurfaceNum_);
+    }
+}
+
+void SurfaceSinkPlugin::SetVideoScaleType(const ValueType& value)
+{
+    if (value.SameTypeWith(typeid(Plugin::VideoScaleType))) {
+        scalingType_ = Plugin::AnyCast<Plugin::VideoScaleType>(value);
+        MEDIA_LOG_D("scalingType_: " PUBLIC_LOG_U32, static_cast<uint32_t>(scalingType_));
+        if (mAllocator_) {
+            mAllocator_->SetScaleType(scalingType_);
+        }
+    }
 }
 
 std::shared_ptr<Allocator> SurfaceSinkPlugin::GetAllocator()

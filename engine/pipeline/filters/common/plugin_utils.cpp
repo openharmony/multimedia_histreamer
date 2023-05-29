@@ -245,7 +245,7 @@ using CapStrnessFunc = std::function<int32_t(char*, size_t, const char*, const c
 std::map<Plugin::Tag, CapStrnessFunc> g_metaStrnessMap = {
     {Plugin::Tag::MIME, CapKeyStringiness<std::string>},
     {Plugin::Tag::TRACK_ID, MetaIDStringiness<uint32_t>},
-    {Plugin::Tag::MEDIA_CODEC_CONFIG,MetaIDStringiness<std::vector<uint8_t>>},
+    {Plugin::Tag::MEDIA_CODEC_CONFIG, MetaIDStringiness<std::vector<uint8_t>>},
     {Plugin::Tag::AUDIO_CHANNELS, MetaIDStringiness<uint32_t>},
     {Plugin::Tag::AUDIO_SAMPLE_RATE, MetaIDStringiness<uint32_t>},
     {Plugin::Tag::AUDIO_SAMPLE_FORMAT, MetaIDStringiness<Plugin::AudioSampleFormat>},
@@ -271,7 +271,7 @@ std::map<Plugin::Tag, CapStrnessFunc> g_metaStrnessMap = {
     {Plugin::Tag::MEDIA_FILE_SIZE, MetaIDStringiness<uint64_t>},
     {Plugin::Tag::MEDIA_SEEKABLE, MetaIDStringiness<Plugin::Seekable>},
     {Plugin::Tag::AUDIO_MPEG_VERSION, MetaIDStringiness<uint32_t>},
-    {Plugin::Tag::AUDIO_MPEG_LAYER ,MetaIDStringiness<uint32_t>},
+    {Plugin::Tag::AUDIO_MPEG_LAYER, MetaIDStringiness<uint32_t>},
     {Plugin::Tag::AUDIO_AAC_PROFILE, MetaIDStringiness<Plugin::AudioAacProfile>},
     {Plugin::Tag::AUDIO_AAC_LEVEL, MetaIDStringiness<uint32_t>},
     {Plugin::Tag::AUDIO_AAC_STREAM_FORMAT, MetaIDStringiness<Plugin::AudioAacStreamFormat>},
@@ -492,7 +492,7 @@ std::string Meta2String(const Plugin::Meta& meta)
     bool needEtc = false;
     std::vector<Tag> keys;
     meta.GetKeys(keys);
-    for (const auto & item : keys) {
+    for (const auto& item: keys) {
         if (pos >= MAX_BUF_LEN - 2) { // reserve for "}\0"
             needEtc = true;
             break;

@@ -614,7 +614,7 @@ Status Scale::Convert(uint8_t** srcData, const int32_t* srcLineSize, uint8_t** d
     return Status::OK;
 }
 #endif
-}// namespace Ffmpeg
+} // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

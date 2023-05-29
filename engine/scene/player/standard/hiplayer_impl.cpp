@@ -191,7 +191,8 @@ int32_t HiPlayerImpl::Prepare()
     }
     SYNC_TRACER();
     NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_START, 0);
-    MEDIA_LOG_I("Prepare entered, current pipeline state: " PUBLIC_LOG_S ".", StringnessPlayerState(pipelineStates_).c_str());
+    MEDIA_LOG_I("Prepare entered, current pipeline state: " PUBLIC_LOG_S ".",
+        StringnessPlayerState(pipelineStates_).c_str());
     PROFILE_BEGIN();
     auto ret = PrepareFilters();
     if (ret != ErrorCode::SUCCESS) {
@@ -204,8 +205,10 @@ int32_t HiPlayerImpl::Prepare()
     if (pipelineStates_ == PlayerStates::PLAYER_PREPARING) { // Wait state change to ready
         cond_.Wait(lock, [this] { return pipelineStates_ != PlayerStates::PLAYER_PREPARING; });
     }
-    MEDIA_LOG_D("Prepare finished, current pipeline state: " PUBLIC_LOG "s.", StringnessPlayerState(pipelineStates_).c_str());
-    PROFILE_END("Prepare finished, current pipeline state: " PUBLIC_LOG "s.", StringnessPlayerState(pipelineStates_).c_str());
+    MEDIA_LOG_D("Prepare finished, current pipeline state: " PUBLIC_LOG "s.",
+        StringnessPlayerState(pipelineStates_).c_str());
+    PROFILE_END("Prepare finished, current pipeline state: " PUBLIC_LOG "s.",
+        StringnessPlayerState(pipelineStates_).c_str());
     if (pipelineStates_ == PlayerStates::PLAYER_PREPARED) {
         NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_END, 0);
         Format format;
@@ -226,7 +229,8 @@ int HiPlayerImpl::PrepareAsync()
     }
     ASYNC_TRACER();
     NotifyBufferingUpdate(PlayerKeys::PLAYER_BUFFERING_START, 0);
-    MEDIA_LOG_I("Prepare async entered, current pipeline state: " PUBLIC_LOG_S, StringnessPlayerState(pipelineStates_).c_str());
+    MEDIA_LOG_I("Prepare async entered, current pipeline state: " PUBLIC_LOG_S,
+        StringnessPlayerState(pipelineStates_).c_str());
     PROFILE_BEGIN();
     auto ret = PrepareFilters();
     if (ret != ErrorCode::SUCCESS) {
@@ -835,13 +839,13 @@ int32_t HiPlayerImpl::SetPlaybackSpeed(PlaybackRateMode mode)
     Format format;
     callbackLooper_.OnInfo(INFO_TYPE_SPEEDDONE, 0, format);
 
-    int32_t currentPosMs  = 0;
+    int32_t currentPosMs = 0;
     int32_t durationMs = 0;
     NZERO_RETURN(GetDuration(durationMs));
-    NZERO_RETURN(GetCurrentTime(currentPosMs ));
-    currentPosMs  = std::min(currentPosMs , durationMs);
-    currentPosMs  = currentPosMs  < 0 ? 0 : currentPosMs ;
-    callbackLooper_.OnInfo(INFO_TYPE_POSITION_UPDATE, currentPosMs , format);
+    NZERO_RETURN(GetCurrentTime(currentPosMs));
+    currentPosMs = std::min(currentPosMs, durationMs);
+    currentPosMs = currentPosMs < 0 ? 0 : currentPosMs;
+    callbackLooper_.OnInfo(INFO_TYPE_POSITION_UPDATE, currentPosMs, format);
     MEDIA_LOG_D("SetPlaybackSpeed entered end.");
     return MSERR_OK;
 }

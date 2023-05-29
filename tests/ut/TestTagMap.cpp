@@ -26,6 +26,12 @@ namespace Media {
 namespace Test {
 using namespace OHOS::Media::Plugin;
 
+const int64_t TEST_TRACK_ID = 10000;
+
+const int64_t TEST_MEDIA_DURATION = 10000;
+
+const int64_t TEST_FILE_SIZE = 500;
+
 class TestMeta : public ::testing::Test {
 public:
     void SetUp() override
@@ -40,23 +46,23 @@ public:
 TEST_F(TestMeta, Can_insert_tag_value_int64_to_Meta)
 {
     Meta map;
-    ASSERT_TRUE(map.Set<Tag::MEDIA_DURATION>(10000));
-    ASSERT_TRUE(map.Set<Tag::MEDIA_FILE_SIZE>(500));
+    ASSERT_TRUE(map.Set<Tag::MEDIA_DURATION>(TEST_MEDIA_DURATION));
+    ASSERT_TRUE(map.Set<Tag::MEDIA_FILE_SIZE>(TEST_FILE_SIZE));
     int64_t value;
     ASSERT_TRUE(map.Get<Tag::MEDIA_DURATION>(value));
-    ASSERT_EQ(10000, value);
+    ASSERT_EQ(TEST_MEDIA_DURATION, value);
     uint64_t size;
     ASSERT_TRUE(map.Get<Tag::MEDIA_FILE_SIZE>(size));
-    ASSERT_EQ(500, value);
+    ASSERT_EQ(TEST_FILE_SIZE, value);
 }
 
 TEST_F(TestMeta, Can_insert_tag_value_uint32_to_TagMap)
 {
     Meta map;
-    ASSERT_TRUE(map.Set<Tag::TRACK_ID>(10000));
+    ASSERT_TRUE(map.Set<Tag::TRACK_ID>(TEST_TRACK_ID));
     uint32_t value;
     ASSERT_TRUE(map.Get<Tag::TRACK_ID>(value));
-    ASSERT_EQ(10000, value);
+    ASSERT_EQ(TEST_TRACK_ID, value);
 }
 } // namespace Test
 } // namespace Media

@@ -401,47 +401,12 @@ void PluginRegister::EraseRegisteredPluginsByLoader(const std::shared_ptr<Plugin
         auto plugins = it.second;
         for (auto info = plugins.begin(); info != plugins.end();) {
             if (info->second->loader == loader) {
-                SaveDisabledPackage(*info);
                 DeletePlugin(plugins, info);
             } else {
                 info++;
             }
         }
     }
-}
-
-int PluginRegister::GetRegisteredPluginCountByPackageName(std::string& name)
-{
-    int counts = 0;
-    for (auto it :registerData_->registerTable) {
-        auto plugins = it.second;
-        for (auto plugin : plugins) {
-            if (plugin.second->packageDef->name == name) {
-                counts++;
-            }
-        }
-    }
-    return counts;
-}
-
-void PluginRegister::EraseRegisteredPluginsByPackageName(const std::string& name)
-{
-    for (auto& it : registerData_->registerTable) {
-        auto plugins = it.second;
-        for (auto info = plugins.begin(); info != plugins.end();) {
-            if (info->second->packageDef->name == name) {
-                SaveDisabledPackage(*info);
-                DeletePlugin(plugins, info);
-            } else {
-                info++;
-            }
-        }
-    }
-}
-
-void PluginRegister::SaveDisabledPackage(std::pair<std::string, std::shared_ptr<PluginRegInfo>> info)
-{
-    registerData_->disabledPackage.push_back(info);
 }
 
 bool PluginRegister::RegisterData::IsPluginExist(PluginType type, const std::string& name)
@@ -449,60 +414,3 @@ bool PluginRegister::RegisterData::IsPluginExist(PluginType type, const std::str
     return (registerTable.find(type) != registerTable.end() &&
             registerTable[type].find(name) != registerTable[type].end());
 }
-
-bool PluginRegister::IsPackageExist(PluginType type, const std::string& name)
-{
-    if (registerData_->registerTable.find(type) != registerData_->registerTable.end()) {
-        for (auto plugin : registerData_->registerTable[type]) {
-            if (plugin.second->packageDef->name == name) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-void PluginRegister::PrintRegisteredPluginInfo()
-{
-    for (auto it : registerData_->registerTable) {
-        auto plugins = it.second;
-        for (auto plugin : plugins) {
-            MEDIA_LOG_I("Plugin " PUBLIC_LOG_S " belongs to package " PUBLIC_LOG_S, plugin.first.c_str(),
-                        plugin.second->packageDef->name.c_str());
-        }
-    }
-}
-
-void PluginRegister::RecoverDisabledPackage(PluginType type, const std::string& name)
-{
-    for (auto it = registerData_->disabledPackage.begin(); it != registerData_->disabledPackage.end();) {
-        if (it->second->packageDef->name == name) {
-            if ((type == PluginType::AUDIO_DECODER || type == PluginType::VIDEO_DECODER
-                || type == PluginType::AUDIO_ENCODER || type == PluginType::VIDEO_ENCODER)
-                && AnyCast<CodecMode>(it->second->info->extra[PLUGIN_INFO_EXTRA_CODEC_MODE]) == CodecMode::HARDWARE) {
-                registerData_->registerNames[type].insert(registerData_->registerNames[type].begin(), it->first);
-            } else {
-                registerData_->registerNames[type].push_back(it->first);
-            }
-            registerData_->registerTable[type].insert(*it);
-            it = registerData_->disabledPackage.erase(it);
-        } else {
-            it++;
-        }
-    }
-}
-
-void PluginRegister::EnablePackage(PluginType type, const std::string& name)
-{
-    if (!IsPackageExist(type, name)) {
-        RecoverDisabledPackage(type, name);
-    }
-}
-
-void PluginRegister::DisablePackage(PluginType type, const std::string& name)
-{
-    if (IsPackageExist(type, name)) {
-        EraseRegisteredPluginsByPackageName(name);
-    }
-}
-
