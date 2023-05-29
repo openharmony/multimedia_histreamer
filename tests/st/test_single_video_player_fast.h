@@ -30,17 +30,13 @@ using namespace OHOS::Media::Test;
 // @fixture(tags=video_play_fast)
 FIXTURE(DataDrivenSingleVideoPlayerTestFast)
 {
-
     DATA_PROVIDER(myurls, 1,
                   DATA_GROUP(std::string(RESOURCE_DIR "/MP4/H264_AAC.mp4")));
-
     DATA_PROVIDER(myfdurl, 2,
                   DATA_GROUP(std::string(RESOURCE_DIR "/MP4/H264_AAC.mp4"), 1894335),
                   DATA_GROUP(std::string(RESOURCE_DIR "/../demo_resource/video/1h264_320x240_60.3gp"), 494522));
-
     static const int64_t NEXT_FRAME_TIME {8300};
     static const int64_t PREV_FRAME_TIME {4166};
-
     std::string FilePathToFd(std::string url, int32_t fileSize)
     {
         std::string uri = "fd://?offset=0&size=";
@@ -50,7 +46,6 @@ FIXTURE(DataDrivenSingleVideoPlayerTestFast)
         uri.insert(5, fdStr); // 5 ---fd:://
         return uri;
     }
-
     bool CheckTimeEquality(int32_t expectValue, int32_t currentValue)
     {
         MEDIA_LOG_I("expectValue : %d, currentValue : %d", expectValue, currentValue);

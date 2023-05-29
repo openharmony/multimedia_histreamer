@@ -210,7 +210,7 @@ int32_t TestPlayerImpl::Release()
     return ERR_OK;
 }
 
-int32_t TestPlayerImpl::Seek(int64_t timeMs,PlayerSeekMode mode)
+int32_t TestPlayerImpl::Seek(int64_t timeMs, PlayerSeekMode mode)
 {
     int32_t ret = player_->Seek(timeMs, mode);
     NZERO_RETURN(ret);

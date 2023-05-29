@@ -80,6 +80,11 @@ private:
     void SetDumpFrameFromSysPara();
     void SetDumpFrameInternalFromSysPara();
     void SetKpiLogFromSysPara();
+    void SetVideoWidth(const ValueType& value);
+    void SetVideoHeight(const ValueType& value);
+    void SetVideoPixelFormat(const ValueType& value);
+    void SetMaxSurfaceNum(const ValueType& value);
+    void SetVideoScaleType(const ValueType& value);
     Status UpdateSurfaceMemory(std::shared_ptr<SurfaceMemory>& surfaceMemory, int64_t pts);
 
     OSAL::Mutex mutex_ {};

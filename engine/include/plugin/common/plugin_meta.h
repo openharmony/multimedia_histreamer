@@ -121,6 +121,14 @@ public:
         return *this;
     }
 
+    Meta() {
+    };
+
+    Meta(const Meta& other)
+    {
+        map_ = other.map_;
+    }
+
     ValueType& operator[](const Tag &tag)
     {
         return map_[tag];
