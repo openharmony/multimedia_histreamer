@@ -281,7 +281,7 @@ void ValuesListTag::ParseAttributes(const std::string& field)
 std::shared_ptr<Tag> TagFactory::CreateTagByName(const std::string& name, const std::string& value)
 {
     auto size = sizeof(g_exttagmapping) / sizeof(g_exttagmapping[0]);
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         if (name != g_exttagmapping[i].name) {
             continue;
         }
