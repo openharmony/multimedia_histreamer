@@ -82,6 +82,11 @@ NetworkServerErrorCode DownloadRequest::GetServerError()
     return serverError_;
 }
 
+void DownloadRequest::Close()
+{
+    headerInfo_.isClosed = true;
+}
+
 void DownloadRequest::WaitHeaderUpdated() const
 {
     size_t times = 0;
@@ -144,6 +149,7 @@ void Downloader::Stop()
 {
     MEDIA_LOG_I("Begin");
     requestQue_->SetActive(false);
+    currentRequest_->Close();
     task_->Stop();
     MEDIA_LOG_I("End");
 }

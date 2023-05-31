@@ -22,7 +22,7 @@ namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
 namespace {
-    constexpr int RETRY_TIMES_TO_REPORT_ERROR = 10;
+    constexpr int RETRY_TIMES_TO_REPORT_ERROR = 5;
 }
 DownloadMonitor::DownloadMonitor(std::shared_ptr<MediaDownloader> downloader) noexcept
     : downloader_(std::move(downloader))
