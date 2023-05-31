@@ -112,7 +112,6 @@ ENDFOREACH()
 ###############################
 # src files
 SET(TEST_PLUGIN_SRCS
-        ${TOP_DIR}/histreamer/engine/plugin/core/plugin_manager.cpp
         ${TOP_DIR}/histreamer/engine/plugin/core/plugin_register.cpp
         ${TOP_DIR}/histreamer/engine/plugin/core/muxer.cpp
         ${TOP_DIR}/histreamer/engine/plugin/core/source.cpp
