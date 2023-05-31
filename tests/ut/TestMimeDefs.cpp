@@ -31,7 +31,7 @@ TEST(TestDefs, check_mime_defs)
     ASSERT_STREQ(MEDIA_MIME_AUDIO_RAW, "audio/raw");
     ASSERT_STREQ(MEDIA_MIME_AUDIO_APE, "audio/ape");
     ASSERT_STREQ(MEDIA_MIME_AUDIO_WAV, "audio/wav");
-    ASSERT_STREQ(MEDIA_MIME_AUDIO_AAC, "audio/aac");
+    ASSERT_STREQ(MEDIA_MIME_AUDIO_AAC, "audio/mp4a-latm");
     ASSERT_STREQ(MEDIA_MIME_AUDIO_AAC_ADTS, "audio/aac-adts");
     ASSERT_STREQ(MEDIA_MIME_AUDIO_VORBIS, "audio/vorbis");
     ASSERT_STREQ(MEDIA_MIME_AUDIO_OPUS, "audio/opus");
