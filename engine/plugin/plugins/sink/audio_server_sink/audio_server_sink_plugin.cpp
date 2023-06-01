@@ -225,7 +225,6 @@ void AudioServerSinkPlugin::AudioRendererCallbackImpl::OnStateChange(const OHOS:
 AudioServerSinkPlugin::AudioServerSinkPlugin(std::string name)
     : Plugin::AudioSinkPlugin(std::move(name)), audioRenderer_(nullptr)
 {
-    rendererParams_.encodingType = AudioStandard::ENCODING_PCM;
 }
 
 AudioServerSinkPlugin::~AudioServerSinkPlugin()
@@ -303,6 +302,7 @@ Status AudioServerSinkPlugin::Prepare()
         MEDIA_LOG_E("audio renderer do not support pcm encoding");
         return Status::ERROR_INVALID_PARAMETER;
     }
+    rendererParams_.encodingType = AudioStandard::ENCODING_PCM;
     MEDIA_LOG_I("set param with fmt " PUBLIC_LOG_D32 " sampleRate " PUBLIC_LOG_D32 " channel " PUBLIC_LOG_D32
         " encode type " PUBLIC_LOG_D32,
         rendererParams_.sampleFormat, rendererParams_.sampleRate, rendererParams_.channelCount,
