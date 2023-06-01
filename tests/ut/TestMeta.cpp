@@ -26,7 +26,7 @@ namespace Media {
 namespace Test {
 using namespace OHOS::Media::Plugin;
 
-TEST(TestMeta, set_then_get_uint32)
+TEST(TestMeta, can_get_uint32_after_set)
 {
     Meta meta;
     uint32_t channels = 64;
@@ -34,7 +34,11 @@ TEST(TestMeta, set_then_get_uint32)
     uint32_t outChannels = 0;
     ASSERT_TRUE(meta.Get<Tag::AUDIO_CHANNELS>(outChannels));
     ASSERT_EQ(channels, outChannels);
+}
 
+TEST(TestMeta, can_not_get_uint32_if_not_set)
+{
+    Meta meta;
     uint32_t canNotGet = 0;
     ASSERT_FALSE(meta.Get<Tag::AUDIO_CHANNELS>(canNotGet));
 }
@@ -109,17 +113,39 @@ TEST(TestMeta, update_meta)
 
     Meta meta2;
     uint32_t channels2 = 32;
-    meta.Set<Tag::AUDIO_CHANNELS>(channels2);
+    meta2.Set<Tag::AUDIO_CHANNELS>(channels2);
 
     meta = meta2;
     std::string out;
-    ASSERT_TRUE(meta.Get<Tag::MEDIA_TITLE>(out));
-    ASSERT_STREQ("title", out.c_str());
-    ASSERT_TRUE(meta.Get<Tag::MEDIA_ALBUM>(out));
-    ASSERT_STREQ("album", out.c_str());
+    ASSERT_FALSE(meta.Get<Tag::MEDIA_TITLE>(out));
+    ASSERT_STRNE("title", out.c_str());
+    ASSERT_FALSE(meta.Get<Tag::MEDIA_ALBUM>(out));
+    ASSERT_STRNE("album", out.c_str());
     uint32_t oChannel = 0;
     ASSERT_TRUE(meta.Get<Tag::AUDIO_CHANNELS>(oChannel));
     ASSERT_EQ(channels2, oChannel);
+}
+
+TEST(TestMeta, Can_insert_tag_value_int64_to_Meta)
+{
+    Meta meta;
+    ASSERT_TRUE(meta.Set<Tag::MEDIA_DURATION>(10000));
+    ASSERT_TRUE(meta.Set<Tag::MEDIA_FILE_SIZE>(500));
+    int64_t value;
+    ASSERT_TRUE(meta.Get<Tag::MEDIA_DURATION>(value));
+    ASSERT_EQ(10000, value);
+    uint64_t size;
+    ASSERT_TRUE(meta.Get<Tag::MEDIA_FILE_SIZE>(size));
+    ASSERT_EQ(500, size);
+}
+
+TEST(TestMeta, Can_insert_tag_value_uint32_to_Meta)
+{
+    Meta meta;
+    ASSERT_TRUE(meta.Set<Tag::TRACK_ID>(10000));
+    uint32_t value;
+    ASSERT_TRUE(meta.Get<Tag::TRACK_ID>(value));
+    ASSERT_EQ(10000, value);
 }
 } // namespace Test
 } // namespace Media
