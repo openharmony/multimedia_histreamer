@@ -37,6 +37,7 @@ struct HeaderInfo {
     size_t fileContentLen {0};
     long contentLen {0};
     bool isChunked {false};
+    bool isClosed {false};
 
     void Update(const HeaderInfo* info)
     {
@@ -48,7 +49,7 @@ struct HeaderInfo {
 
     size_t GetFileContentLength() const
     {
-        while (fileContentLen == 0 && !isChunked) {
+        while (fileContentLen == 0 && !isChunked && !isClosed) {
             OSAL::SleepFor(10); // 10, wait for fileContentLen updated
         }
         return fileContentLen;
@@ -82,6 +83,7 @@ public:
     {
         return url_;
     }
+    void Close();
 
 private:
     void WaitHeaderUpdated() const;
