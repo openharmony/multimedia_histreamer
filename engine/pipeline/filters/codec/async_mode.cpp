@@ -243,6 +243,11 @@ ErrorCode AsyncMode::DecodeFrame()
         status = plugin_->QueueOutputBuffer(newOutBuffer, 0);
         if (status == Plugin::Status::ERROR_NOT_ENOUGH_DATA) {
             MEDIA_LOG_DD("QueueOutputBuffer failed, cause no enough data.");
+            if (!isNeedQueueInputBuffer_) {
+                OSAL::ScopedLock lock(mutex_);
+                isNeedQueueInputBuffer_ = true;
+                cv_.NotifyOne();
+            }
         }
     } else {
         MEDIA_LOG_DD("Invalid buffer.");
