@@ -75,10 +75,13 @@ TEST(TestMeta, fail_to_get_unexisted_data)
 TEST(TestMeta, remove_data)
 {
     Meta meta;
-    int32_t channels = 64;
+    uint32_t channels = 64;
     meta.Set<Tag::AUDIO_CHANNELS>(channels);
+    uint32_t out;
+    ASSERT_TRUE(meta.Get<Tag::AUDIO_CHANNELS>(out));
+    ASSERT_EQ(channels, out);
     meta.Remove(Tag::AUDIO_CHANNELS);
-    meta.Remove(Tag::MEDIA_BITRATE);
+    ASSERT_FALSE(meta.Get<Tag::AUDIO_CHANNELS>(out));
 }
 
 TEST(TestMeta, clear_data)
