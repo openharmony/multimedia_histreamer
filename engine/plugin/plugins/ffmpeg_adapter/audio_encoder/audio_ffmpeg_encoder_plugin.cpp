@@ -219,6 +219,10 @@ Status AudioFfmpegEncoderPlugin::ResetLocked()
 {
     audioParameter_.clear();
     avCodecContext_.reset();
+    {
+        OSAL::ScopedLock l(bufferMetaMutex_);
+        bufferMeta_.reset();
+    }
     return Status::OK;
 }
 
@@ -325,6 +329,10 @@ Status AudioFfmpegEncoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
         if (avCodecContext_ == nullptr) {
             return Status::ERROR_WRONG_STATE;
         }
+        {
+            OSAL::ScopedLock l(bufferMetaMutex_);
+            bufferMeta_ = inputBuffer->GetBufferMeta()->Clone();
+        }
         ret = SendBufferLocked(inputBuffer);
     }
     return ret;
@@ -346,6 +354,10 @@ Status AudioFfmpegEncoderPlugin::SendOutputBuffer()
     MEDIA_LOG_DD("send output buffer");
     Status status = ReceiveBuffer();
     if (status == Status::OK || status == Status::END_OF_STREAM) {
+        {
+            OSAL::ScopedLock l(bufferMetaMutex_);
+            outBuffer_->UpdateBufferMeta(*bufferMeta_);
+        }
         dataCallback_->OnOutputBufferDone(outBuffer_);
     }
     outBuffer_.reset();

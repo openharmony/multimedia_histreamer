@@ -193,8 +193,8 @@ ErrorCode AudioEncoderFilter::ConfigureToStartPluginLocked(const std::shared_ptr
     rb_ = CppExt::make_unique<RingBuffer>(frameSize_ * 10); // 最大缓存10帧
     FALSE_RETURN_V_MSG_E(rb_ != nullptr, ErrorCode::ERROR_NO_MEMORY, "create ring buffer failed");
     rb_->Init();
-    cahceBuffer_ = std::make_shared<AVBuffer>(Plugin::BufferMetaType::AUDIO);
-    FALSE_RETURN_V_MSG_E(cahceBuffer_->AllocMemory(nullptr, frameSize_) != nullptr, ErrorCode::ERROR_NO_MEMORY,
+    cacheBuffer_ = std::make_shared<AVBuffer>(Plugin::BufferMetaType::AUDIO);
+    FALSE_RETURN_V_MSG_E(cacheBuffer_->AllocMemory(nullptr, frameSize_) != nullptr, ErrorCode::ERROR_NO_MEMORY,
                          "alloc cache mem failed");
     return ErrorCode::SUCCESS;
 }
@@ -214,21 +214,21 @@ ErrorCode AudioEncoderFilter::PushData(const std::string& inPort, const AVBuffer
     bool isRbDrained = false;
     for (auto available = rb_->GetSize(); (available >= frameSize_) || (shouldDrainRb && !isRbDrained);
          available = rb_->GetSize()) {
-        cahceBuffer_->Reset();
+        cacheBuffer_->Reset();
         auto encodeSize = std::min(available, frameSize_);
         if (encodeSize > 0) { // ring buffer has buffer available
-            if (rb_->ReadBuffer(cahceBuffer_->GetMemory()->GetWritableAddr(encodeSize), encodeSize) != encodeSize) {
+            if (rb_->ReadBuffer(cacheBuffer_->GetMemory()->GetWritableAddr(encodeSize), encodeSize) != encodeSize) {
                 MEDIA_LOG_E("Read data from ring buffer fail");
                 return ErrorCode::ERROR_UNKNOWN;
             }
         } else { // EOS
-            cahceBuffer_->flag |= BUFFER_FLAG_EOS;
+            cacheBuffer_->flag |= BUFFER_FLAG_EOS;
             isRbDrained = true;
         }
         ErrorCode handleFrameRes;
         int8_t retryCnt = 0;
         do {
-            handleFrameRes = HandleFrame(cahceBuffer_);
+            handleFrameRes = HandleFrame(cacheBuffer_);
             while (FinishFrame() == ErrorCode::SUCCESS) {
                 MEDIA_LOG_DD("finish frame");
             }

@@ -351,6 +351,10 @@ Status AudioFfmpegDecoderPlugin::ResetLocked()
     audioParameter_.clear();
     StopLocked();
     avCodecContext_.reset();
+    {
+        OSAL::ScopedLock l(bufferMetaMutex_);
+        bufferMeta_.reset();
+    }
     return Status::OK;
 }
 
@@ -433,6 +437,10 @@ Status AudioFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
         if (avCodecContext_ == nullptr) {
             return Status::ERROR_WRONG_STATE;
         }
+        {
+            OSAL::ScopedLock l(bufferMetaMutex_);
+            bufferMeta_ = inputBuffer->GetBufferMeta()->Clone();
+        }
         ret = SendBufferLocked(inputBuffer);
     }
     return ret;
@@ -454,6 +462,10 @@ Status AudioFfmpegDecoderPlugin::SendOutputBuffer()
     MEDIA_LOG_DD("send output buffer");
     Status status = ReceiveBuffer();
     if (status == Status::OK || status == Status::END_OF_STREAM) {
+        {
+            OSAL::ScopedLock l(bufferMetaMutex_);
+            outBuffer_->UpdateBufferMeta(*bufferMeta_);
+        }
         dataCallback_->OnOutputBufferDone(outBuffer_);
     }
     outBuffer_.reset();
@@ -597,16 +609,6 @@ Status AudioFfmpegDecoderPlugin::ReceiveBuffer()
         status = ReceiveBufferLocked(ioInfo);
     }
     return status;
-}
-
-void AudioFfmpegDecoderPlugin::NotifyInputBufferDone(const std::shared_ptr<Buffer>& input)
-{
-    dataCallback_->OnInputBufferDone(input);
-}
-
-void AudioFfmpegDecoderPlugin::NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output)
-{
-    dataCallback_->OnOutputBufferDone(output);
 }
 
 std::shared_ptr<Allocator> AudioFfmpegDecoderPlugin::GetAllocator()

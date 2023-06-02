@@ -31,6 +31,7 @@ enum struct TagSection : uint8_t {
     AUDIO_SPECIFIC = 4,
     VIDEO_UNIVERSAL = 5,
     VIDEO_SPECIFIC = 6,
+    USER_SPECIFIC = 7,
     MAX_SECTION = 64
 };
 
@@ -88,6 +89,7 @@ enum struct Tag : uint32_t {
     SECTION_AUDIO_SPECIFIC_START = static_cast<uint8_t>(TagSection::AUDIO_SPECIFIC) << 16U,   // audio specific tag
     SECTION_VIDEO_UNIVERSAL_START = static_cast<uint8_t>(TagSection::VIDEO_UNIVERSAL) << 16U, // video universal tag
     SECTION_VIDEO_SPECIFIC_START = static_cast<uint8_t>(TagSection::VIDEO_SPECIFIC) << 16U,   // video specific tag
+    SECTION_USER_SPECIFIC_START = static_cast<uint8_t>(TagSection::USER_SPECIFIC) << 16U,     // user specific tag
 
     /* -------------------- regular tag -------------------- */
     MIME = SECTION_REGULAR_START + 1, ///< std::string
@@ -132,7 +134,6 @@ enum struct Tag : uint32_t {
     MEDIA_SEEKABLE,                        ///< enum Seekable: Seekable status of the media
     MEDIA_PLAYBACK_SPEED,                  ///< double, playback speed
     MEDIA_TYPE,                            ///< enum MediaType: Auido Video Subtitle...
-    MEDIA_FRAME_NUMBER,                    ///< uint32_t : The frame number
 
     /* -------------------- audio universal tag -------------------- */
     AUDIO_CHANNELS = SECTION_AUDIO_UNIVERSAL_START + 1, ///< uint32_t, stream channel num
@@ -167,6 +168,10 @@ enum struct Tag : uint32_t {
     VIDEO_SPECIFIC_H264_START = MAKE_VIDEO_SPECIFIC_START(VideoFormat::H264),
     VIDEO_H264_PROFILE,      ///< @see VideoH264Profile
     VIDEO_H264_LEVEL,        ///< uint32_t, h264 level
+
+    /* -------------------- user specific tag -------------------- */
+    USER_FRAME_NUMBER = SECTION_USER_SPECIFIC_START + 1,       ///< uint32_t : The user frame number
+    USER_FRAME_PTS,                                            ///< int64_t : The user frame pts
 };
 /**
  * @enum Media protocol type.

@@ -90,11 +90,13 @@ public:
         tag == Tag::VIDEO_MAX_SURFACE_NUM or
         tag == Tag::VIDEO_H264_LEVEL or
         tag == Tag::BITS_PER_CODED_SAMPLE or
-        tag == Tag::MEDIA_FRAME_NUMBER, uint32_t);
+        tag == Tag::USER_FRAME_NUMBER, uint32_t);
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::MEDIA_DURATION or
         tag == Tag::MEDIA_BITRATE or
-        tag == Tag::MEDIA_START_TIME, int64_t);
+        tag == Tag::MEDIA_START_TIME or
+        tag == Tag::USER_FRAME_PTS, int64_t);
+
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::MEDIA_FILE_SIZE or
         tag == Tag::MEDIA_POSITION, uint64_t);

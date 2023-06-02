@@ -101,10 +101,6 @@ private:
 
     Status SendOutputBuffer();
 
-    void NotifyInputBufferDone(const std::shared_ptr<Buffer>& input);
-
-    void NotifyOutputBufferDone(const std::shared_ptr<Buffer>& output);
-
     mutable OSAL::Mutex parameterMutex_ {};
     std::map<Tag, ValueType> audioParameter_ {};
 
@@ -123,6 +119,8 @@ private:
     int32_t bufferNum_ {1};
     int32_t bufferIndex_ {1};
     int64_t bufferGroupPtsDistance {0};
+    mutable OSAL::Mutex bufferMetaMutex_ {};
+    std::shared_ptr<BufferMeta> bufferMeta_ {nullptr};
 };
 } // namespace Ffmpeg
 } // namespace Plugin
