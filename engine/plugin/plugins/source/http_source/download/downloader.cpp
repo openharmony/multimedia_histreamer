@@ -82,6 +82,11 @@ NetworkServerErrorCode DownloadRequest::GetServerError()
     return serverError_;
 }
 
+bool DownloadRequest::IsClosed()
+{
+    return headerInfo_.isClosed;
+}
+
 void DownloadRequest::Close()
 {
     headerInfo_.isClosed = true;
