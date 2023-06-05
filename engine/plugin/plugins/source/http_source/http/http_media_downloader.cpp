@@ -56,10 +56,10 @@ bool HttpMediaDownloader::Open(const std::string& url)
     return true;
 }
 
-void HttpMediaDownloader::Close()
+void HttpMediaDownloader::Close(bool isAsync)
 {
     buffer_->SetActive(false);
-    downloader_->Stop();
+    downloader_->Stop(isAsync);
 }
 
 void HttpMediaDownloader::Pause()

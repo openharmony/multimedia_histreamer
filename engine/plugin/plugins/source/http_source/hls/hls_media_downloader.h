@@ -29,7 +29,7 @@ public:
     HlsMediaDownloader() noexcept;
     ~HlsMediaDownloader() override = default;
     bool Open(const std::string& url) override;
-    void Close() override;
+    void Close(bool isAsync) override;
     void Pause() override;
     void Resume() override;
     bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) override;

@@ -28,7 +28,7 @@ class MediaDownloader {
 public:
     virtual ~MediaDownloader() = default;
     virtual bool Open(const std::string& url) = 0;
-    virtual void Close() = 0;
+    virtual void Close(bool isAsync) = 0;
     virtual void Pause() = 0;
     virtual void Resume() = 0;
     virtual bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) = 0;

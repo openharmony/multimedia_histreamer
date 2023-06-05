@@ -76,7 +76,7 @@ bool HlsMediaDownloader::Open(const std::string& url)
     return true;
 }
 
-void HlsMediaDownloader::Close()
+void HlsMediaDownloader::Close(bool isAsync)
 {
     buffer_->SetActive(false);
     playList_->SetActive(false);

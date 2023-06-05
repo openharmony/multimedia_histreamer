@@ -81,11 +81,11 @@ void DownloadMonitor::Resume()
     isPlaying_ = true;
 }
 
-void DownloadMonitor::Close()
+void DownloadMonitor::Close(bool isAsync)
 {
     retryTasks_.clear();
     task_->Stop();
-    downloader_->Close();
+    downloader_->Close(isAsync);
     isPlaying_ = false;
 }
 
@@ -157,7 +157,8 @@ bool DownloadMonitor::NeedRetry(const std::shared_ptr<DownloadRequest>& request)
             }
             if (!downloader_->GetStartedStatus()) {
                 task_->Stop();
-                downloader_->Close();
+                // The current thread is the downloader thread, Therefore, the thread must be stopped asynchronously.
+                downloader_->Close(true);
                 return false;
             }
         }
