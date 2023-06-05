@@ -37,33 +37,44 @@ The HiStreamer plug-in list is as follows:
 The structure of the repository directory is as follows:
 
 ```
-/foundation/multimedia/histreamer
-├── LICENSE                             # License file
-└── ohos.build                          # Build file
 /foundation/multimedia/histreamer      # HiStreamer media engine component business code
 ├─LICENSE                              # The license file
 ├─engine                               # The engine code
 │  ├─foundation                        # Basic tool classes, including OS adaptation
-│  ├─pipeline framework                # pipeline frame
+│  ├─include                           # Expose the necessary header files for calling histreamer in other modules, including calling pipeline/filter or calling plugins.
+│  │  ├─foundation                     # Basic tool library of histreamer, including logging, buffer tools, operating system adaptation, language extensions, etc.
+│  │  ├─pipeline                       # Header files for the pipeline framework, mainly the pipeline/filter interface.
+│  │  └─plugin                         # Header files for the "plugin" subfolder of the engine
+│  │  	├─common                       # Basic type header files required for plugin interfaces
+│  │  	└─interface                    # Plugin interfaces
+│  ├─pipeline                          # pipeline framework
 │  │  ├─core                           # pipeline core implementation
 │  │  ├─factory                        # filter factory
 │  │  └─filters                        # Several filter node implementations
 │  │      ├─codec                      # Codec node implementation
+│  │      ├─common                     # Basic type definitions required by filters
 │  │      ├─demux                      # Decapsulation node implementation
+│  │      ├─muxer                      # Capsulation node implementation
 │  │      ├─sink                       # Output node implementation
 │  │      └─source                     # Data source node implementation
-│  ├─player                            # Player package
-│  └─plugin                            # plug-in
-│     ├─common                         # The underlying type definitions on which the plug-in interface depends
-│     ├─core                           # Plug-in framework
-│     ├─interface                      # Plug-in interface
-│     └─plugins                        # Several plug-in implementations
-│         ├─minimp3_adapter            # minimp3 adapter
-│         ├─ffmpeg_adapter             # FFMPEG adaption (adaption into encapsulation and decapsulation, codec plug-in)
-│         ├─hdi_adapter                # HDI adapter (adapter to output plug-in)
-│         ├─demuxer                    # Unpack plugin
-│         ├─sink                       # Output plug-in
-│         └─source                     # Data source plug-in
+│  ├─plugin                            # plug-in
+│  │  ├─common                         # The underlying type definitions on which the plug-in interface depends
+│  │  ├─core                           # Plug-in framework
+│  │  └─plugins                        # Several plug-in implementations
+│  │      ├─codec_adapter              # Codec adapter
+│  │      ├─minimp3_adapter            # minimp3 adapter
+│  │      ├─ffmpeg_adapter             # FFMPEG adaption (adaption into encapsulation and decapsulation, codec plug-in)
+│  │      ├─hdi_adapter                # HDI adapter (adapter to output plug-in)
+│  │      ├─lite_aac_decoder           # Lite AAC decoder plugin
+│  │      ├─demuxer                    # Unpack plugin
+│  │      ├─sink                       # Output plug-in
+│  │      └─source                     # Data source plug-in
+│  ├─scene                             # Playback and recording scenes
+│  │  ├─common                         # Common basic type definitions
+│  │  ├─lite                           # interface implementation for integration with lite devices
+│  │  ├─player                         # Playback scene
+│  │  ├─recorder                       # Recording scene
+│  │  └─standard                       # interface implementation for integration with standard devices
 └─interface                            # Engine external interface
 ```
 

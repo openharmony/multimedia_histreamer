@@ -43,12 +43,12 @@ HiStreamer插件列表如下:
 ├─LICENSE                              # 证书文件
 ├─engine                               # 引擎代码
 │  ├─foundation                        # 基础工具类, 包括OS适配
-│  ├─include                           # 引擎类的头文件，和子文件夹和同级文件夹一一对应
-│  │  ├─foundation                     # 引擎子文件夹foundation对应的头文件
-│  │  ├─pipeline                       # 引擎子文件夹pipeline对应的头文件
-│  │  └─plugin                         # 引擎子文件夹plugin对应的头文件
-│  │  	├─common                       # 插件接口依赖的基础类型头文件
-│  │  	└─interface                    # 插件接口
+│  ├─include                           # 为其它模块调用histreamer暴露必要的头文件，包括调用pipeline/filter，或者调用插件
+│  │  ├─foundation                     # histreamer基础工具库，包括日志打印、Buffer工具、操作系统适配、语言扩展等
+│  │  ├─pipeline                       # pipeline框架的头文件，主要是pipeline/filter接口
+│  │  └─plugin                         # 插件相关的头文件
+│  │      ├─common                     # 插件接口依赖的基础类型头文件
+│  │      └─interface                  # 插件接口
 │  ├─pipeline                          # pipeline框架
 │  │  ├─core                           # pipeline核心实现
 │  │  ├─factory                        # filter工厂
