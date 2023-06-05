@@ -116,7 +116,7 @@ public:
     void Start();
     void Pause();
     void Resume();
-    void Stop();
+    void Stop(bool isAsync = false);
     bool Seek(int64_t offset);
     bool Retry(const std::shared_ptr<DownloadRequest>& request);
 private:

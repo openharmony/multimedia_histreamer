@@ -233,7 +233,7 @@ void HttpSourcePlugin::CloseUri()
     OSAL::ScopedLock lock(mutex_);
     if (downloader_ != nullptr) {
         MEDIA_LOG_D("Close uri");
-        downloader_->Close();
+        downloader_->Close(false);
         downloader_ = nullptr;
     }
 }

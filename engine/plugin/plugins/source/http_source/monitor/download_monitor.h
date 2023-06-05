@@ -42,7 +42,7 @@ public:
     explicit DownloadMonitor(std::shared_ptr<MediaDownloader> downloader) noexcept;
     ~DownloadMonitor() override = default;
     bool Open(const std::string& url) override;
-    void Close() override;
+    void Close(bool isAsync) override;
     bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) override;
     bool Seek(int offset) override;
     void Pause() override;

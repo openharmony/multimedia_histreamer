@@ -145,12 +145,16 @@ void Downloader::Resume()
     MEDIA_LOG_I("End");
 }
 
-void Downloader::Stop()
+void Downloader::Stop(bool isAsync)
 {
     MEDIA_LOG_I("Begin");
     requestQue_->SetActive(false);
     currentRequest_->Close();
-    task_->Stop();
+    if (isAsync) {
+        task_->StopAsync();
+    } else {
+        task_->Stop();
+    }
     MEDIA_LOG_I("End");
 }
 
