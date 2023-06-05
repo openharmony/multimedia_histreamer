@@ -527,8 +527,12 @@ bool HdiCodecAdapter::FillAllTheOutBuffer()
             }
             codecBuffer->Rebind(outputBuffer); // 这里outBuf需要保存到codecBuffer里面，方便往下一节点传数据
             auto ret = HdiFillThisBuffer(codecComp_, codecBuffer->GetOmxBuffer().get());
-            FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, false, "Call FillThisBuffer() error, ret: " PUBLIC_LOG_S
-                ", isFirstCall: " PUBLIC_LOG_D32, HdfStatus2String(ret).c_str(), isFirstCall_);
+            if (ret != HDF_SUCCESS) {
+                codecBuffer->Unbind(outputBuffer, codecBuffer->GetOmxBuffer().get());
+                outBufPool_->UseBufferDone(codecBuffer->GetBufferId());
+                MEDIA_LOG_E("Call FillThisBuffer() error, ret: " PUBLIC_LOG_S ", isFirstCall: " PUBLIC_LOG_D32,
+                    HdfStatus2String(ret).c_str(), isFirstCall_);
+            }
         }
     }
     MEDIA_LOG_DD("FillAllTheBuffer end, free out bufferId count: " PUBLIC_LOG_U32 ", outBufQue_->Size: " PUBLIC_LOG_ZU,
