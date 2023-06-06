@@ -83,7 +83,7 @@ public:
     {
         return url_;
     }
-    bool IsClosed();
+    bool IsClosed() const;
     void Close();
 
 private:

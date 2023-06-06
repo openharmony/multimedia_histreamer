@@ -82,7 +82,7 @@ NetworkServerErrorCode DownloadRequest::GetServerError()
     return serverError_;
 }
 
-bool DownloadRequest::IsClosed()
+bool DownloadRequest::IsClosed() const
 {
     return headerInfo_.isClosed;
 }
@@ -179,11 +179,13 @@ bool Downloader::Retry(const std::shared_ptr<DownloadRequest>& request)
     FALSE_RETURN_V(client_ != nullptr, false);
     Pause();
     client_->Close();
-    if (currentRequest_ != nullptr && currentRequest_->IsSame(request) && !shouldStartNextRequest) {
-        currentRequest_->retryTimes_++;
-        MEDIA_LOG_D("Do retry.");
+    if (currentRequest_ != nullptr) {
+        if (currentRequest_->IsSame(request) && !shouldStartNextRequest) {
+            currentRequest_->retryTimes_++;
+            MEDIA_LOG_D("Do retry.");
+        }
+        client_->Open(currentRequest_->url_);
     }
-    client_->Open(currentRequest_->url_);
     Resume();
     MEDIA_LOG_I("Downloader Retry End");
     return true;
