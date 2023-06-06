@@ -227,50 +227,52 @@ uint64_t Minimp3DemuxerPlugin::GetCurrentPositionTimeS(void)
     return currentTime;
 }
 
-Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
+void Minimp3DemuxerPlugin::WriteMp3Data(Buffer& outBuffer)
 {
-    int  status  = -1;
-    Status retResult = Status::OK;
     std::shared_ptr<Memory> mp3FrameData;
-    retResult = GetDataFromSource();
-    if (retResult != Status::OK) {
-        return retResult;
-    }
-    MEDIA_LOG_DD("ioDataRemainSize_ = " PUBLIC_LOG_D32, ioDataRemainSize_);
-    status = AudioDemuxerMp3Process(inIoBuffer_, ioDataRemainSize_);
     if (outBuffer.IsEmpty()) {
         mp3FrameData = outBuffer.AllocMemory(nullptr, mp3DemuxerRst_.frameLength);
     } else {
         mp3FrameData = outBuffer.GetMemory();
     }
+    MEDIA_LOG_DD("ReadFrame: success usedInputLength " PUBLIC_LOG_D32 " ioDataRemainSize_ " PUBLIC_LOG_D32,
+                 (uint32_t)mp3DemuxerRst_.usedInputLength, ioDataRemainSize_);
+    if (mp3DemuxerRst_.frameLength) {
+        mp3FrameData->Write(mp3DemuxerRst_.frameBuffer, mp3DemuxerRst_.frameLength);
+        ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
+        currentDemuxerPos_ += mp3DemuxerRst_.usedInputLength;
+    } else if (mp3DemuxerRst_.usedInputLength == 0) {
+        if (ioDataRemainSize_ > AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX) {
+            ioDataRemainSize_ = ioDataRemainSize_ - AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX;
+            currentDemuxerPos_ += AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX;
+        } else {
+            currentDemuxerPos_ += ioDataRemainSize_;
+            ioDataRemainSize_ = 0;
+        }
+    } else {
+        ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
+        currentDemuxerPos_ += mp3DemuxerRst_.usedInputLength;
+    }
+    outBuffer.pts = GetCurrentPositionTimeS();
+    MEDIA_LOG_DD("ReadFrame: mp3DemuxerRst_.frameLength " PUBLIC_LOG_U32 ", pts " PUBLIC_LOG_U64,
+                 mp3DemuxerRst_.frameLength, outBuffer.pts);
+    if (mp3DemuxerRst_.frameBuffer) {
+        free(mp3DemuxerRst_.frameBuffer);
+        mp3DemuxerRst_.frameBuffer = nullptr;
+    }
+}
+
+Status Minimp3DemuxerPlugin::ReadFrame(Buffer& outBuffer, int32_t timeOutMs)
+{
+    int  status  = -1;
+    Status retResult = Status::OK;
+    NOK_RETURN(GetDataFromSource());
+    MEDIA_LOG_DD("ioDataRemainSize_ = " PUBLIC_LOG_D32, ioDataRemainSize_);
+    status = AudioDemuxerMp3Process(inIoBuffer_, ioDataRemainSize_);
     MEDIA_LOG_DD("status = " PUBLIC_LOG_D32, status);
     switch (status) {
         case AUDIO_DEMUXER_SUCCESS:
-            MEDIA_LOG_DD("ReadFrame: success usedInputLength " PUBLIC_LOG_D32 " ioDataRemainSize_ " PUBLIC_LOG_D32,
-                        (uint32_t)mp3DemuxerRst_.usedInputLength, ioDataRemainSize_);
-            if (mp3DemuxerRst_.frameLength) {
-                mp3FrameData->Write(mp3DemuxerRst_.frameBuffer, mp3DemuxerRst_.frameLength);
-                ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
-                currentDemuxerPos_ += mp3DemuxerRst_.usedInputLength;
-            } else if (mp3DemuxerRst_.usedInputLength == 0) {
-                if (ioDataRemainSize_ > AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX) {
-                    ioDataRemainSize_ = ioDataRemainSize_ - AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX;
-                    currentDemuxerPos_ += AUDIO_DEMUXER_SOURCE_ONCE_LENGTH_MAX;
-                } else {
-                    currentDemuxerPos_ += ioDataRemainSize_;
-                    ioDataRemainSize_ = 0;
-                }
-            } else {
-                ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;
-                currentDemuxerPos_ += mp3DemuxerRst_.usedInputLength;
-            }
-            outBuffer.pts = GetCurrentPositionTimeS();
-            MEDIA_LOG_DD("ReadFrame: mp3DemuxerRst_.frameLength " PUBLIC_LOG_U32 ", pts " PUBLIC_LOG_U64,
-                        mp3DemuxerRst_.frameLength, outBuffer.pts);
-            if (mp3DemuxerRst_.frameBuffer) {
-                free(mp3DemuxerRst_.frameBuffer);
-                mp3DemuxerRst_.frameBuffer = nullptr;
-            }
+            WriteMp3Data(outBuffer);
             break;
         case AUDIO_DEMUXER_PROCESS_NEED_MORE_DATA:
             ioDataRemainSize_ -= mp3DemuxerRst_.usedInputLength;

@@ -659,6 +659,7 @@ ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode)
     }
     if (rtv != ErrorCode::SUCCESS) {
         callbackLooper_.OnError(PLAYER_ERROR, MSERR_SEEK_FAILED);
+        MEDIA_LOG_E("Seek done, seek error.");
     } else {
         Format format;
         int64_t currentPos = Plugin::HstTime2Ms(seekPos);

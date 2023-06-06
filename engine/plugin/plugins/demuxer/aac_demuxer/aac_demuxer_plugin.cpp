@@ -82,21 +82,14 @@ Status AACDemuxerPlugin::DoReadFromSource(uint32_t readSize)
     MEDIA_LOG_D("readSize " PUBLIC_LOG_U32 " inIoBufferSize_ " PUBLIC_LOG_D32 "ioDataRemainSize_ "
                 PUBLIC_LOG_U32, readSize, inIoBufferSize_, ioDataRemainSize_);
     do {
+        int64_t offset {0};
         if (isSeekable_) {
-            auto result = ioContext_.dataSource->ReadAt(ioContext_.offset, buffer, static_cast<size_t>(readSize));
+            offset = ioContext_.offset;
             MEDIA_LOG_D("ioContext_.offset " PUBLIC_LOG_U32, static_cast<uint32_t>(ioContext_.offset));
-            if (result != Status::OK) {
-                MEDIA_LOG_W("read data from source warning " PUBLIC_LOG_D32, static_cast<int>(result));
-                return result;
-            }
-        } else {
-            auto result = ioContext_.dataSource->ReadAt(0, buffer, static_cast<size_t>(readSize));
-            if (result != Status::OK) {
-                MEDIA_LOG_W("read data from source warning " PUBLIC_LOG_D32, static_cast<int>(result));
-                return result;
-            }
         }
-
+        auto result = ioContext_.dataSource->ReadAt(offset, buffer, static_cast<size_t>(readSize));
+        FALSE_RETURN_V_MSG_W(result == Status::OK, result, "Read data from source warning." PUBLIC_LOG_D32,
+                static_cast<int>(result));
         MEDIA_LOG_D("bufData->GetSize() " PUBLIC_LOG_ZU, bufData->GetSize());
         if (bufData->GetSize() > 0) {
             if (readSize >= bufData->GetSize()) {
@@ -116,10 +109,8 @@ Status AACDemuxerPlugin::DoReadFromSource(uint32_t readSize)
             retryTimes++;
             continue;
         }
-        if (retryTimes >= 200) { // 200
-            MEDIA_LOG_E("Warning: not end of file, but do not have enough data");
-            return Status::ERROR_NOT_ENOUGH_DATA;
-        }
+        FALSE_RETURN_V_MSG_E(retryTimes < 200, Status::ERROR_NOT_ENOUGH_DATA, // 200
+                             "Warning: not end of file, but do not have enough data.");
         break;
     } while (true);
     return Status::OK;

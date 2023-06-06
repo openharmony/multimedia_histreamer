@@ -356,10 +356,8 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t seekTime, SeekMode m
                     trackId, formatContext_->nb_streams);
         return Status::ERROR_INVALID_PARAMETER;
     }
-    if (!seekModeToFfmpegSeekFlags.count(mode)) {
-        MEDIA_LOG_E("unsupported seek mode: " PUBLIC_LOG_U32, static_cast<uint32_t>(mode));
-        return Status::ERROR_INVALID_PARAMETER;
-    }
+    FALSE_RETURN_V_MSG_E(seekModeToFfmpegSeekFlags.count(mode), Status::ERROR_INVALID_PARAMETER,
+                         "Unsupported seek mode: " PUBLIC_LOG_U32, static_cast<uint32_t>(mode));
     int flags = seekModeToFfmpegSeekFlags.at(mode);
     auto avStream = formatContext_->streams[trackId];
     int64_t ffTime = ConvertTimeToFFmpeg(seekTime, avStream->time_base);
@@ -393,9 +391,7 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t seekTime, SeekMode m
     realSeekTime = ConvertTimeFromFFmpeg(ffTime, avStream->time_base);
     MEDIA_LOG_I("SeekTo " PUBLIC_LOG_U64 " / " PUBLIC_LOG_D64, ffTime, realSeekTime);
     auto rtv = av_seek_frame(formatContext_.get(), trackId, ffTime, flags);
-    if (rtv < 0) {
-        MEDIA_LOG_E("seek failed, return value: " PUBLIC_LOG_D32, rtv);
-    }
+    MEDIA_LOG_I("Av seek finished, return value : " PUBLIC_LOG_D32, rtv);
     return (rtv >= 0) ? Status::OK : Status::ERROR_UNKNOWN;
 }
 

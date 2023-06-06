@@ -15,7 +15,7 @@
 
 #ifdef OHOS_LITE
 #include <memory>
-#include "common/any.h"
+#include "plugin/common/any.h"
 
 #include <gtest/gtest.h>
 #include <mockcpp/mockcpp.hpp>
