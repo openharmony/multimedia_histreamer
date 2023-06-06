@@ -84,7 +84,8 @@ bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
         isEos = downloadRequest_->IsEos();
         bool isClosed = downloadRequest_->IsClosed();
         if (isEos || isClosed) {
-            MEDIA_LOG_D("HttpMediaDownloader read return, isEos: " PUBLIC_LOG_D32 ", isClosed: " PUBLIC_LOG_D32, isEos, isClosed);
+            MEDIA_LOG_D("HttpMediaDownloader read return, isEos: " PUBLIC_LOG_D32 ", isClosed: " PUBLIC_LOG_D32, isEos,
+                        isClosed);
             realReadLength = 0;
             return false;
         }
