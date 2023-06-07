@@ -76,6 +76,8 @@ public:
 
     BufferMetaType GetType() const;
 
+    bool IsExist(Tag tag);
+
     void Update(const BufferMeta& bufferMeta);
 
     virtual std::shared_ptr<BufferMeta> Clone() = 0;
