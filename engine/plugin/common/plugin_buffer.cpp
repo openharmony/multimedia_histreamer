@@ -148,6 +148,11 @@ BufferMetaType BufferMeta::GetType() const
     return type_;
 }
 
+bool BufferMeta::IsExist(Tag tag)
+{
+    return tags_->Find(tag) != tags_->end();
+}
+
 void BufferMeta::Update(const BufferMeta& bufferMeta)
 {
     type_ = bufferMeta.GetType();
