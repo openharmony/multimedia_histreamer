@@ -246,6 +246,13 @@ void Downloader::HttpDownloadLoop()
                 task_->PauseAsync();
             }
             shouldStartNextRequest = true;
+        } else if (currentRequest_->headerInfo_.fileContentLen == 0 && remaining <= 0) {
+            currentRequest_->isEos_ = true;
+            currentRequest_->Close();
+            if (requestQue_->Empty()) {
+                task_->StopAsync();
+            }
+            shouldStartNextRequest = false;
         } else if (remaining < PER_REQUEST_SIZE) {
             currentRequest_->requestSize_ = remaining;
         } else {
