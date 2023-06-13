@@ -437,11 +437,11 @@ Status AudioFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
         if (avCodecContext_ == nullptr) {
             return Status::ERROR_WRONG_STATE;
         }
-        {
+        ret = SendBufferLocked(inputBuffer);
+        if (ret == Status::OK || ret == Status::END_OF_STREAM) {
             OSAL::ScopedLock l(bufferMetaMutex_);
             bufferMeta_ = inputBuffer->GetBufferMeta()->Clone();
         }
-        ret = SendBufferLocked(inputBuffer);
     }
     return ret;
 }

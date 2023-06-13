@@ -224,7 +224,8 @@ ErrorCode AsyncMode::HandleFrame()
             || status != Plugin::Status::ERROR_AGAIN || stopped_) {
             break;
         }
-        MEDIA_LOG_DD("Send data to plugin error: " PUBLIC_LOG_D32, status);
+        MEDIA_LOG_DD("Send data to plugin error: " PUBLIC_LOG_D32 ", currently, input buffer cannot be inputted, "
+            "send data can only continue after reading the output from ffmpeg.", static_cast<int32_t>(status));
         OSAL::ScopedLock lock(mutex_);
         isNeedQueueInputBuffer_ = false;
         cv_.Wait(lock);
@@ -245,7 +246,6 @@ ErrorCode AsyncMode::DecodeFrame()
             MEDIA_LOG_DD("QueueOutputBuffer failed, cause no enough data.");
             if (!isNeedQueueInputBuffer_) {
                 OSAL::ScopedLock lock(mutex_);
-                isNeedQueueInputBuffer_ = true;
                 cv_.NotifyOne();
             }
         }
