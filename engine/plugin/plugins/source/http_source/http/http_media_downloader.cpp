@@ -151,12 +151,16 @@ bool HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
         bufferSize >= downloadRequest_->GetFileContentLength() / 2) && !aboveWaterline_) { // 2
         aboveWaterline_ = true;
         MEDIA_LOG_I("Send http aboveWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
-        callback_->OnEvent({PluginEventType::ABOVE_LOW_WATERLINE, {ratio}, "http"});
+        if (callback_ != nullptr) {
+            callback_->OnEvent({PluginEventType::ABOVE_LOW_WATERLINE, {ratio}, "http"});
+        }
         startedPlayStatus_ = true;
     } else if (bufferSize < WATER_LINE && aboveWaterline_) {
         aboveWaterline_ = false;
         MEDIA_LOG_I("Send http belowWaterline event, ringbuffer ratio " PUBLIC_LOG_F, ratio);
-        callback_->OnEvent({PluginEventType::BELOW_LOW_WATERLINE, {ratio}, "http"});
+        if (callback_ != nullptr) {
+            callback_->OnEvent({PluginEventType::BELOW_LOW_WATERLINE, {ratio}, "http"});
+        }
     }
     return true;
 }
