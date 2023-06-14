@@ -278,13 +278,13 @@ ErrorCode AVInputFilter::DoConfigure()
     if (err != ErrorCode::SUCCESS) {
         MEDIA_LOG_E("Init plugin fail");
         state_ = FilterState::INITIALIZED;
-        return err;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     err = ConfigPlugin();
     if (err != ErrorCode::SUCCESS) {
-        MEDIA_LOG_E("Configure downStream fail");
+        MEDIA_LOG_E("Configure plugin fail");
         state_ = FilterState::INITIALIZED;
-        return err;
+        return ErrorCode::ERROR_INVALID_OPERATION;
     }
     return ErrorCode::SUCCESS;
 }
@@ -359,7 +359,7 @@ ErrorCode AVInputFilter::ConfigVideoMeta(Plugin::Meta& meta)
     return ErrorCode::SUCCESS;
 }
 
-OHOS::Media::Plugin::AudioChannelLayout TransAudioChannelLayout(int layoutPtr)
+OHOS::Media::Plugin::AudioChannelLayout AVInputFilter::TransAudioChannelLayout(int layoutPtr)
 {
     const static std::pair<int, OHOS::Media::Plugin::AudioChannelLayout> mapArray[] = {
         {1, OHOS::Media::Plugin::AudioChannelLayout::MONO},
@@ -373,7 +373,7 @@ OHOS::Media::Plugin::AudioChannelLayout TransAudioChannelLayout(int layoutPtr)
     return OHOS::Media::Plugin::AudioChannelLayout::UNKNOWN;
 }
 
-OHOS::Media::Plugin::AudioSampleFormat TransAudioSampleFormat(int sampleFormat)
+OHOS::Media::Plugin::AudioSampleFormat AVInputFilter::TransAudioSampleFormat(int sampleFormat)
 {
     const static std::pair<int, OHOS::Media::Plugin::AudioSampleFormat> mapArray[] = {
         {0, OHOS::Media::Plugin::AudioSampleFormat::U8},
@@ -384,7 +384,7 @@ OHOS::Media::Plugin::AudioSampleFormat TransAudioSampleFormat(int sampleFormat)
         {-1, OHOS::Media::Plugin::AudioSampleFormat::NONE},
     };
     for (const auto& item : mapArray) {
-        if (item.first == layoutPtr) {
+        if (item.first == sampleFormat) {
             return item.second;
         }
     }
@@ -397,43 +397,43 @@ ErrorCode AVInputFilter::ConfigAudioMeta(Plugin::Meta& meta)
     if (paramsMap_.find(Tag::AUDIO_CHANNELS) != paramsMap_.end() &&
         paramsMap_[Tag::AUDIO_CHANNELS].SameTypeWith(typeid(int))) {
         uint32_t audioChannel = Plugin::AnyCast<int>(paramsMap_[Tag::AUDIO_CHANNELS]);
-        MEDIA_LOG_I("ConfigVideoMeta: AUDIO_CHANNELS is " PUBLIC_LOG_U32, audioChannel);
+        MEDIA_LOG_I("ConfigAudioMeta: AUDIO_CHANNELS is " PUBLIC_LOG_U32, audioChannel);
         meta.Set<Plugin::Tag::AUDIO_CHANNELS>(audioChannel);
     }
     if (paramsMap_.find(Tag::AUDIO_SAMPLE_RATE) != paramsMap_.end() &&
         paramsMap_[Tag::AUDIO_SAMPLE_RATE].SameTypeWith(typeid(int))) {
         uint32_t sampleRate = Plugin::AnyCast<int>(paramsMap_[Tag::AUDIO_SAMPLE_RATE]);
-        MEDIA_LOG_I("ConfigVideoMeta: AUDIO_SAMPLE_RATE is " PUBLIC_LOG_U32, sampleRate);
+        MEDIA_LOG_I("ConfigAudioMeta: AUDIO_SAMPLE_RATE is " PUBLIC_LOG_U32, sampleRate);
         meta.Set<Plugin::Tag::AUDIO_SAMPLE_RATE>(sampleRate);
     }
     if (paramsMap_.find(Tag::MEDIA_BITRATE) != paramsMap_.end() &&
         paramsMap_[Tag::MEDIA_BITRATE].SameTypeWith(typeid(int))) {
         int64_t mediaBitRate = Plugin::AnyCast<int>(paramsMap_[Tag::MEDIA_BITRATE]);
-        MEDIA_LOG_I("ConfigVideoMeta: MEDIA_BITRATE is " PUBLIC_LOG_D64, mediaBitRate);
+        MEDIA_LOG_I("ConfigAudioMeta: MEDIA_BITRATE is " PUBLIC_LOG_D64, mediaBitRate);
         meta.Set<Plugin::Tag::MEDIA_BITRATE>(mediaBitRate);
     }
     if (paramsMap_.find(Tag::AUDIO_SAMPLE_FORMAT) != paramsMap_.end() &&
         paramsMap_[Tag::AUDIO_SAMPLE_FORMAT].SameTypeWith(typeid(int))) {
-        uint32_t audioSampleFmtPtr = Plugin::AnyCast<int>(paramsMap_[Tag::AUDIO_SAMPLE_FORMAT]);
-        MEDIA_LOG_I("ConfigVideoMeta: AUDIO_SAMPLE_FORMAT is " PUBLIC_LOG_U32, audioSampleFmtPtr);
+        auto audioSampleFmtPtr = Plugin::AnyCast<int>(paramsMap_[Tag::AUDIO_SAMPLE_FORMAT]);
+        MEDIA_LOG_I("ConfigAudioMeta: AUDIO_SAMPLE_FORMAT is " PUBLIC_LOG_U32, audioSampleFmtPtr);
         meta.Set<Plugin::Tag::AUDIO_SAMPLE_FORMAT>(TransAudioSampleFormat(audioSampleFmtPtr));
     }
     if (paramsMap_.find(Tag::AUDIO_CHANNEL_LAYOUT) != paramsMap_.end() &&
         paramsMap_[Tag::AUDIO_CHANNEL_LAYOUT].SameTypeWith(typeid(int))) {
         auto layoutPtr = Plugin::AnyCast<int>(paramsMap_[Tag::AUDIO_CHANNEL_LAYOUT]);
-        MEDIA_LOG_I("ConfigVideoMeta: AUDIO_CHANNEL_LAYOUT is " PUBLIC_LOG_U32, layoutPtr);
+        MEDIA_LOG_I("ConfigAudioMeta: AUDIO_CHANNEL_LAYOUT is " PUBLIC_LOG_U32, layoutPtr);
         meta.Set<Plugin::Tag::AUDIO_CHANNEL_LAYOUT>(TransAudioChannelLayout(layoutPtr));
     }
     if (paramsMap_.find(Tag::AUDIO_SAMPLE_PER_FRAME) != paramsMap_.end() &&
         paramsMap_[Tag::AUDIO_SAMPLE_PER_FRAME].SameTypeWith(typeid(int))) {
-        auto samplePerFrame = Plugin::AnyCast<int>(paramsMap_[Tag::AUDIO_SAMPLE_PER_FRAME]);
-        MEDIA_LOG_I("ConfigVideoMeta: AUDIO_SAMPLE_PER_FRAME is " PUBLIC_LOG_U32, samplePerFrame);
+        uint32_t samplePerFrame = Plugin::AnyCast<int>(paramsMap_[Tag::AUDIO_SAMPLE_PER_FRAME]);
+        MEDIA_LOG_I("ConfigAudioMeta: AUDIO_SAMPLE_PER_FRAME is " PUBLIC_LOG_U32, samplePerFrame);
         meta.Set<Plugin::Tag::AUDIO_SAMPLE_PER_FRAME>(samplePerFrame);
     }
     if (paramsMap_.find(Tag::AUDIO_AAC_LEVEL) != paramsMap_.end() &&
         paramsMap_[Tag::AUDIO_AAC_LEVEL].SameTypeWith(typeid(int))) {
-        auto aacLevel = Plugin::AnyCast<int>(paramsMap_[Tag::AUDIO_AAC_LEVEL]);
-        MEDIA_LOG_I("ConfigVideoMeta: AUDIO_AAC_LEVEL is " PUBLIC_LOG_U32, aacLevel);
+        uint32_t aacLevel = Plugin::AnyCast<int>(paramsMap_[Tag::AUDIO_AAC_LEVEL]);
+        MEDIA_LOG_I("ConfigAudioMeta: AUDIO_AAC_LEVEL is " PUBLIC_LOG_U32, aacLevel);
         meta.Set<Plugin::Tag::AUDIO_AAC_LEVEL>(aacLevel);
     }
     return ErrorCode::SUCCESS;

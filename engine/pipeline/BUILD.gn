@@ -69,11 +69,11 @@ source_set("histreamer_pipeline") {
     "filters/demux:demuxer_filter",
     "filters/muxer:muxer_filter",
     "filters/sink:audio_sink_filter",
-    "filters/sink:output_sink_filter",
     "filters/sink:av_transport_output_filter",
+    "filters/sink:output_sink_filter",
     "filters/source:audio_capture_filter",
-    "filters/source:media_source_filter",
     "filters/source:av_transport_input_filter",
+    "filters/source:media_source_filter",
   ]
   if (histreamer_enable_video) {
     public_deps += [ "filters/sink:video_sink_filter" ]

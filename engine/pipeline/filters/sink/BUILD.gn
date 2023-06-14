@@ -59,9 +59,7 @@ source_set("output_sink_filter") {
 
 source_set("av_transport_output_filter") {
   sources = [ "av_transport_output/av_transport_output_filter.cpp" ]
-  public_configs = [
-    "../../../../:histreamer_presets",
-  ]
+  public_configs = [ "../../../../:histreamer_presets" ]
   public_deps = [
     "../../../foundation:histreamer_foundation",
     "../../../pipeline:histreamer_base",

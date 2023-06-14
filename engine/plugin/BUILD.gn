@@ -144,6 +144,8 @@ config("hst_plugin_core_config") {
 source_set("histreamer_plugin_core") {
   sources = [
     "core/audio_sink.cpp",
+    "core/avtrans_input.cpp",
+    "core/avtrans_output.cpp",
     "core/base.cpp",
     "core/codec.cpp",
     "core/demuxer.cpp",
@@ -155,8 +157,6 @@ source_set("histreamer_plugin_core") {
     "core/plugin_wrapper.cpp",
     "core/source.cpp",
     "core/video_sink.cpp",
-    "core/avtrans_input.cpp",
-    "core/avtrans_output.cpp",
   ]
   defines = []
   if (plugin_dynamic_register) {

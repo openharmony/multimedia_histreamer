@@ -271,7 +271,8 @@ Status PluginRegister::RegisterImpl::InitAvTransInputInfo(std::shared_ptr<Plugin
     return Status::OK;
 }
 
-Status PluginRegister::RegisterImpl::InitAvTransOutputInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def)
+Status PluginRegister::RegisterImpl::InitAvTransOutputInfo(std::shared_ptr<PluginRegInfo>& reg,
+    const PluginDefBase& def)
 {
     auto& base = (AvTransOutputPluginDef&)def;
     reg->creator = base.creator;

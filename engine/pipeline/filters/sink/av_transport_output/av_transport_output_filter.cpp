@@ -14,9 +14,7 @@
  */
 
 #define HST_LOG_TAG "AVOutputFilter"
-
 #include "pipeline/filters/sink/av_transport_output/av_transport_output_filter.h"
-
 #include "pipeline/filters/common/plugin_utils.h"
 #include "foundation/log.h"
 #include "pipeline/factory/filter_factory.h"
@@ -235,7 +233,6 @@ ErrorCode AVOutputFilter::CreatePlugin(const std::shared_ptr<PluginInfo>& select
         MEDIA_LOG_E("selectedInfo is nullptr or pluginName is invalid!");
         return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
     }
-    OSAL::ScopedLock lock(outputFilterMutex_);
     if ((plugin_ != nullptr) && (pluginInfo_ != nullptr)) {
         if (selectedInfo->name == pluginInfo_->name && TranslatePluginStatus(plugin_->Reset()) == ErrorCode::SUCCESS) {
             MEDIA_LOG_I("Reuse last plugin: " PUBLIC_LOG_S, selectedInfo->name.c_str());
@@ -326,6 +323,15 @@ ErrorCode AVOutputFilter::SetPluginParams()
     if (paramsMap_.find(Tag::MEDIA_DESCRIPTION) != paramsMap_.end()) {
         plugin_->SetParameter(Tag::MEDIA_DESCRIPTION, paramsMap_[Tag::MEDIA_DESCRIPTION]);
     }
+    if (paramsMap_.find(Tag::AUDIO_CHANNELS) != paramsMap_.end()) {
+        plugin_->SetParameter(Tag::AUDIO_CHANNELS, paramsMap_[Tag::AUDIO_CHANNELS]);
+    }
+    if (paramsMap_.find(Tag::AUDIO_SAMPLE_RATE) != paramsMap_.end()) {
+        plugin_->SetParameter(Tag::AUDIO_SAMPLE_RATE, paramsMap_[Tag::AUDIO_SAMPLE_RATE]);
+    }
+    if (paramsMap_.find(Tag::AUDIO_CHANNEL_LAYOUT) != paramsMap_.end()) {
+        plugin_->SetParameter(Tag::AUDIO_CHANNEL_LAYOUT, paramsMap_[Tag::AUDIO_CHANNEL_LAYOUT]);
+    }
     return ErrorCode::SUCCESS;
 }
 
@@ -356,10 +362,6 @@ void AVOutputFilter::OnDataCallback(std::shared_ptr<Plugin::Buffer> buffer)
     OSAL::ScopedLock lock(outputFilterMutex_);
     if (buffer == nullptr) {
         MEDIA_LOG_E("buffer is nullptr!");
-        return;
-    }
-    if (outPorts_.size() == 0 || outPorts_[0] == nullptr) {
-        MEDIA_LOG_E("outPorts is invalid!");
         return;
     }
     OnEvent(Event{name_, EventType::EVENT_BUFFER_PROGRESS, buffer});
