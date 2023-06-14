@@ -64,7 +64,7 @@ private:
     ErrorCode SetDataCallBack();
     ErrorCode SetPluginParams();
     void OnDataCallback(std::shared_ptr<Plugin::Buffer> buffer);
-    OHOS::Media::Plugin::AudioChannelLayout TransAudioChannelLayout(int layout);
+    OHOS::Media::Plugin::AudioChannelLayout TransAudioChannelLayout(int layoutPtr);
     OHOS::Media::Plugin::AudioSampleFormat TransAudioSampleFormat(int sampleFormat);
 
     std::shared_ptr<Plugin::AvTransInput> plugin_ {nullptr};
