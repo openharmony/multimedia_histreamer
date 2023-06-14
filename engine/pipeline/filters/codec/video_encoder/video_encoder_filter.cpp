@@ -332,19 +332,21 @@ ErrorCode VideoEncoderFilter::ConfigurePluginParams()
         FALSE_RETURN_V_MSG_W(ret == ErrorCode::SUCCESS, ErrorCode::ERROR_UNKNOWN,
                              "Set framerate to plugin fail");
     }
-    if (codecMeta_->Get<Plugin::Tag::VIDEO_H264_PROFILE>(vencFormat_.profile)) {
-        auto ret = SetPluginParameterLocked(Tag::VIDEO_H264_PROFILE, vencFormat_.profile);
-        FALSE_RETURN_V_MSG_W(ret == ErrorCode::SUCCESS, ErrorCode::ERROR_UNKNOWN,
-                             "Set profile to plugin fail");
-    } else {
-        MEDIA_LOG_W("Get VIDEO_H264_PROFILE, fail");
-    }
-    if (codecMeta_->Get<Plugin::Tag::VIDEO_H264_LEVEL>(vencFormat_.level)) {
-        auto ret = SetPluginParameterLocked(Tag::VIDEO_H264_LEVEL, vencFormat_.level);
-        FALSE_RETURN_V_MSG_W(ret == ErrorCode::SUCCESS, ErrorCode::ERROR_UNKNOWN,
-                             "Set level to plugin fail");
-    } else {
-        MEDIA_LOG_W("Get VIDEO_H264_LEVEL, failed.");
+    if (vencFormat_.mime == MEDIA_MIME_VIDEO_H264) {
+        if (codecMeta_->Get<Plugin::Tag::VIDEO_H264_PROFILE>(vencFormat_.profile)) {
+            auto ret = SetPluginParameterLocked(Tag::VIDEO_H264_PROFILE, vencFormat_.profile);
+            FALSE_RETURN_V_MSG_W(ret == ErrorCode::SUCCESS, ErrorCode::ERROR_UNKNOWN,
+                                 "Set profile to plugin fail");
+        } else {
+            MEDIA_LOG_W("Get VIDEO_H264_PROFILE, fail");
+        }
+        if (codecMeta_->Get<Plugin::Tag::VIDEO_H264_LEVEL>(vencFormat_.level)) {
+            auto ret = SetPluginParameterLocked(Tag::VIDEO_H264_LEVEL, vencFormat_.level);
+            FALSE_RETURN_V_MSG_W(ret == ErrorCode::SUCCESS, ErrorCode::ERROR_UNKNOWN,
+                                 "Set level to plugin fail");
+        } else {
+            MEDIA_LOG_W("Get VIDEO_H264_LEVEL, failed.");
+        }
     }
     // Optional: codec extra data
     if (vencFormat_.codecConfig.size() > 0) {
