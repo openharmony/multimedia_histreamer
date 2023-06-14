@@ -47,8 +47,6 @@ public:
     bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
                    Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams) override;
 
-    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
-
     void OnInputBufferDone(const std::shared_ptr<Plugin::Buffer>& input) override;
 
     void OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& output) override;

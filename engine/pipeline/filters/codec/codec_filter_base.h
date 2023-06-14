@@ -59,6 +59,8 @@ public:
 
     void FlushEnd() override;
 
+    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
+
 protected:
     virtual uint32_t GetOutBufferPoolSize();
 
@@ -90,7 +92,6 @@ protected:
         return err;
     }
 
-    bool isFlushing_ {false};
     Plugin::Meta sinkParams_ {};
     std::shared_ptr<Plugin::Codec> plugin_ {};
     Plugin::BufferMetaType bufferMetaType_ = {};
@@ -98,6 +99,7 @@ protected:
     Plugin::PluginType pluginType_ {};
     Plugin::CodecMode preferredCodecMode_ {Plugin::CodecMode::HARDWARE};
 private:
+    std::atomic<bool> isFlushing_ {false};
     virtual std::shared_ptr<Allocator> GetAllocator();
     Capability capNegWithDownstream_ {};
 };

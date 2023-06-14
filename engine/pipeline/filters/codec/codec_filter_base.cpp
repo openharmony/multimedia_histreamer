@@ -311,6 +311,19 @@ void CodecFilterBase::FlushEnd()
     MEDIA_LOG_I("FlushEnd entered");
     isFlushing_ = false;
 }
+
+ErrorCode CodecFilterBase::PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset)
+{
+    if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
+        MEDIA_LOG_W("pushing data to decoder when state is " PUBLIC_LOG_D32, static_cast<int>(state_.load()));
+        return ErrorCode::ERROR_INVALID_OPERATION;
+    }
+    if (isFlushing_) {
+        MEDIA_LOG_I("Flushing, discarding this data from port " PUBLIC_LOG_S, inPort.c_str());
+        return ErrorCode::SUCCESS;
+    }
+    return codecMode_->PushData(inPort, buffer, offset);
+}
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS

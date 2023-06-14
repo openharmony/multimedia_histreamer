@@ -294,6 +294,15 @@ void VideoSinkFilter::RenderFrame()
         MEDIA_LOG_E("Write to plugin fail: " PUBLIC_LOG_U32 ", buf.pts: " PUBLIC_LOG_D64, err, frameBuffer->pts);
         return;
     }
+    if (frameBuffer->flag & BUFFER_FLAG_EOS) {
+        Event event{
+            .srcFilter = name_,
+            .type = EventType::EVENT_COMPLETE,
+        };
+        OnEvent(event);
+        MEDIA_LOG_D("Video sink render frame send event_complete end.");
+        renderTask_->PauseAsync();
+    }
     MEDIA_LOG_DD("RenderFrame success");
 }
 
@@ -314,18 +323,7 @@ ErrorCode VideoSinkFilter::PushData(const std::string& inPort, const AVBufferPtr
     }
     if (isFlushing_ || state_.load() == FilterState::INITIALIZED) {
         MEDIA_LOG_I("PushData return due to: isFlushing_ = " PUBLIC_LOG_D32 ", state_ = " PUBLIC_LOG_D32,
-                    isFlushing_, static_cast<int>(state_.load()));
-        return ErrorCode::SUCCESS;
-    }
-
-    if (buffer->flag & BUFFER_FLAG_EOS) {
-        Event event{
-            .srcFilter = name_,
-            .type = EventType::EVENT_COMPLETE,
-        };
-        MEDIA_LOG_D("video sink push data send event_complete");
-        OnEvent(event);
-        MEDIA_LOG_D("video sink push data end");
+                    isFlushing_.load(), static_cast<int>(state_.load()));
         return ErrorCode::SUCCESS;
     }
     inBufQueue_->Push(buffer);
@@ -423,9 +421,10 @@ void VideoSinkFilter::FlushStart()
     if (inBufQueue_) {
         inBufQueue_->SetActive(false);
     }
+    renderTask_->Pause();
     auto err = TranslatePluginStatus(plugin_->Flush());
     if (err != ErrorCode::SUCCESS) {
-        MEDIA_LOG_W("Video sink filter flush end");
+        MEDIA_LOG_E("Video sink filter flush failed.");
     }
 }
 
@@ -436,6 +435,7 @@ void VideoSinkFilter::FlushEnd()
     if (inBufQueue_) {
         inBufQueue_->SetActive(true);
     }
+    renderTask_->Start();
     ResetSyncInfo();
 }
 
