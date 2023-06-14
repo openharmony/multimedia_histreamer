@@ -49,7 +49,7 @@ public:
 private:
     void InitPorts() override;
     ErrorCode FindPlugin();
-    ErrorCode DoNegotiate(const CapabilitySet& outCaps);
+    bool DoNegotiate(const CapabilitySet& outCaps);
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& selectedInfo);
     ErrorCode DoConfigure();
     ErrorCode MergeMeta(const Plugin::Meta& meta, Plugin::Meta& targetMeta);

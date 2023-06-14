@@ -155,6 +155,8 @@ source_set("histreamer_plugin_core") {
     "core/plugin_wrapper.cpp",
     "core/source.cpp",
     "core/video_sink.cpp",
+    "core/avtrans_input.cpp",
+    "core/avtrans_output.cpp",
   ]
   defines = []
   if (plugin_dynamic_register) {
