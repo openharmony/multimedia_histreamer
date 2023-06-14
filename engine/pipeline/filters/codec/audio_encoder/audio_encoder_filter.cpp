@@ -225,6 +225,8 @@ ErrorCode AudioEncoderFilter::PushData(const std::string& inPort, const AVBuffer
             cacheBuffer_->flag |= BUFFER_FLAG_EOS;
             isRbDrained = true;
         }
+        cacheBuffer_->pts  = buffer->pts;
+        cacheBuffer_->UpdateBufferMeta(*buffer->GetBufferMeta());
         ErrorCode handleFrameRes;
         int8_t retryCnt = 0;
         do {
