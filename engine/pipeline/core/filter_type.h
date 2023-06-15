@@ -34,8 +34,6 @@ enum struct FilterType : uint8_t {
     AUDIO_SINK,
     VIDEO_SINK,
     OUTPUT_SINK,
-    AV_INPUT,
-    AV_OUTPUT,
 };
 } // namespace Pipeline
 } // namespace Media

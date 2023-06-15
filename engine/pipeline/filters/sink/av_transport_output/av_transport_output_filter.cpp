@@ -30,7 +30,6 @@ static AutoRegisterFilter<AVOutputFilter> g_registerFilterHelper("builtin.avtran
 AVOutputFilter::AVOutputFilter(const std::string& name) : FilterBase(name), plugin_(nullptr), pluginInfo_(nullptr)
 {
     MEDIA_LOG_I("ctor called");
-    filterType_ = FilterType::AV_OUTPUT;
 }
 
 AVOutputFilter::~AVOutputFilter()

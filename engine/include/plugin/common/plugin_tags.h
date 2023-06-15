@@ -172,6 +172,9 @@ enum struct Tag : uint32_t {
     /* -------------------- user specific tag -------------------- */
     USER_FRAME_NUMBER = SECTION_USER_SPECIFIC_START + 1,       ///< uint32_t : The user frame number
     USER_FRAME_PTS,                                            ///< int64_t : The user frame pts
+    TIME_SYNC_RESULT,                                          ///< std::string : The time sync result
+    AV_SYNC_GROUP_INFO,                                        ///< std::string : The av sync group info
+    SHARED_MEMORY_FD,                                          ///< std::string : The shared memory fd
 };
 /**
  * @enum Media protocol type.

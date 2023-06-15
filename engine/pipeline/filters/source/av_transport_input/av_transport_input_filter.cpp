@@ -30,7 +30,6 @@ static AutoRegisterFilter<AVInputFilter> g_registerFilterHelper("builtin.avtrans
 AVInputFilter::AVInputFilter(const std::string& name) : FilterBase(name), plugin_(nullptr), pluginInfo_(nullptr)
 {
     MEDIA_LOG_I("ctor called");
-    filterType_ = FilterType::AV_INPUT;
 }
 
 AVInputFilter::~AVInputFilter()
