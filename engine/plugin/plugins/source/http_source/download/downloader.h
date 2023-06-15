@@ -98,6 +98,7 @@ private:
     bool isHeaderUpdated {false};
     bool isEos_ {false}; // file download finished
     int64_t startPos_;
+    int64_t firstPos_;
     bool isDownloading_;
     bool requestWholeFile_ {false};
     int requestSize_;

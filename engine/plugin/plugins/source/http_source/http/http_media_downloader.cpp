@@ -104,10 +104,12 @@ bool HttpMediaDownloader::Seek(int offset)
     if (buffer_->Seek(offset)) {
         return true;
     }
-    buffer_->Clear(); // First clear buffer, avoid no available buffer then task pause never exit.
+    buffer_->SetActive(false); // First clear buffer, avoid no available buffer then task pause never exit.
     downloader_->Pause();
     buffer_->Clear();
+    buffer_->SetActive(true);
     downloader_->Seek(offset);
+    MEDIA_LOG_D("Seek: after buffer size " PUBLIC_LOG_ZU , buffer_->GetSize());
     downloader_->Resume();
     return true;
 }

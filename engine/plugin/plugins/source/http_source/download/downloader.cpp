@@ -109,8 +109,7 @@ Downloader::Downloader(std::string name) noexcept : name_(std::move(name))
     client_ = std::make_shared<HttpCurlClient>(&RxHeaderData, &RxBodyData, this);
     client_->Init();
     requestQue_ = std::make_shared<BlockingQueue<std::shared_ptr<DownloadRequest>>>(name_ + "RequestQue",
-                                                                                    REQUEST_QUEUE_SIZE);
-
+        REQUEST_QUEUE_SIZE);
     task_ = std::make_shared<OSAL::Task>(std::string(name_ + "Downloader"));
     task_->RegisterHandler([this] { HttpDownloadLoop(); });
 }
@@ -168,6 +167,7 @@ bool Downloader::Seek(int64_t offset)
     MEDIA_LOG_I("Begin");
     if (offset >= 0 && offset < static_cast<int64_t>(currentRequest_->GetFileContentLength())) {
         currentRequest_->startPos_ = offset;
+        currentRequest_->firstPos_ = offset;
     }
     int64_t temp = currentRequest_->GetFileContentLength() - currentRequest_->startPos_;
     currentRequest_->requestSize_ = static_cast<int>(std::min(temp, static_cast<int64_t>(PER_REQUEST_SIZE)));
@@ -205,6 +205,7 @@ bool Downloader::BeginDownload()
 
     currentRequest_->requestSize_ = 1;
     currentRequest_->startPos_ = 0;
+    currentRequest_->firstPos_ = 0;
     currentRequest_->isEos_ = false;
     currentRequest_->retryTimes_ = 0;
 
@@ -280,7 +281,6 @@ size_t Downloader::RxBodyData(void* buffer, size_t size, size_t nitems, void* us
     auto mediaDownloader = static_cast<Downloader *>(userParam);
     HeaderInfo* header = &(mediaDownloader->currentRequest_->headerInfo_);
     size_t dataLen = size * nitems;
-
     if (header->fileContentLen == 0) {
         if (header->contentLen > 0) {
             MEDIA_LOG_W("Unsupported range, use content length as content file length");
@@ -294,7 +294,7 @@ size_t Downloader::RxBodyData(void* buffer, size_t size, size_t nitems, void* us
         mediaDownloader->currentRequest_->isDownloading_ = true;
     }
     if (!mediaDownloader->currentRequest_->saveData_(static_cast<uint8_t*>(buffer), dataLen,
-        mediaDownloader->currentRequest_->startPos_)) {
+        mediaDownloader->currentRequest_->firstPos_)) {
         MEDIA_LOG_W("Save data failed.");
         return 0; // save data failed, make perform finished.
     }
