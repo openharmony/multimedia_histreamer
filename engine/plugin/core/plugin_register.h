@@ -107,6 +107,10 @@ private:
 
         Status InitOutputSinkInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def);
 
+        Status InitAvTransInputInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def);
+
+        Status InitAvTransOutputInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def);
+
         bool Verification(const PluginDefBase& definition);
 
         bool VersionMatched(const PluginDefBase& definition);

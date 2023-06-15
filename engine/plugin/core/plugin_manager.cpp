@@ -93,6 +93,16 @@ std::shared_ptr<OutputSink> PluginManager::CreateOutputSinkPlugin(const std::str
 {
     return CreatePlugin<OutputSink, OutputSinkPlugin>(name, PluginType::OUTPUT_SINK);
 }
+
+std::shared_ptr<AvTransInput> PluginManager::CreateAvTransInputPlugin(const std::string& name)
+{
+    return CreatePlugin<AvTransInput, AvTransInputPlugin>(name, PluginType::AVTRANS_INPUT);
+}
+
+std::shared_ptr<AvTransOutput> PluginManager::CreateAvTransOutputPlugin(const std::string& name)
+{
+    return CreatePlugin<AvTransOutput, AvTransOutputPlugin>(name, PluginType::AVTRANS_OUTPUT);
+}
 } // namespace Plugin
 } // namespace Media
 } // namespace OHOS

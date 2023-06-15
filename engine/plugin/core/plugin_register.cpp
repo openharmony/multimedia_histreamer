@@ -26,6 +26,8 @@
 #include "plugin/interface/source_plugin.h"
 #include "plugin/interface/video_sink_plugin.h"
 #include "plugin/interface/output_sink_plugin.h"
+#include "plugin/interface/avtrans_input_plugin.h"
+#include "plugin/interface/avtrans_output_plugin.h"
 
 using namespace OHOS::Media::Plugin;
 
@@ -40,6 +42,8 @@ static std::map<PluginType, int> g_apiVersionMap = {
     {PluginType::VIDEO_SINK,  VIDEO_SINK_API_VERSION},
     {PluginType::MUXER,       MUXER_API_VERSION},
     {PluginType::OUTPUT_SINK, OUTPUT_SINK_API_VERSION},
+    {PluginType::AVTRANS_INPUT, AVTRANS_INPUT_API_VERSION},
+    {PluginType::AVTRANS_OUTPUT, AVTRANS_OUTPUT_API_VERSION},
 };
 
 static std::string g_libFileHead = "libhistreamer_plugin_";
@@ -119,6 +123,12 @@ void PluginRegister::RegisterImpl::UpdateRegisterTableAndRegisterNames(const Plu
             break;
         case PluginType::OUTPUT_SINK:
             InitOutputSinkInfo(regInfo, def);
+            break;
+        case PluginType::AVTRANS_INPUT:
+            InitAvTransInputInfo(regInfo, def);
+            break;
+        case PluginType::AVTRANS_OUTPUT:
+            InitAvTransOutputInfo(regInfo, def);
             break;
         default:
             return;
@@ -245,6 +255,29 @@ Status PluginRegister::RegisterImpl::InitOutputSinkInfo(std::shared_ptr<PluginRe
     std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
     SetPluginInfo(info, def);
     info->extra[PLUGIN_INFO_EXTRA_OUTPUT_TYPE] = base.protocolType;
+    info->inCaps = base.inCaps;
+    reg->info = info;
+    return Status::OK;
+}
+
+Status PluginRegister::RegisterImpl::InitAvTransInputInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def)
+{
+    auto& base = (AvTransInputPluginDef&)def;
+    reg->creator = base.creator;
+    std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
+    SetPluginInfo(info, def);
+    info->outCaps = base.outCaps;
+    reg->info = info;
+    return Status::OK;
+}
+
+Status PluginRegister::RegisterImpl::InitAvTransOutputInfo(std::shared_ptr<PluginRegInfo>& reg,
+    const PluginDefBase& def)
+{
+    auto& base = (AvTransOutputPluginDef&)def;
+    reg->creator = base.creator;
+    std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
+    SetPluginInfo(info, def);
     info->inCaps = base.inCaps;
     reg->info = info;
     return Status::OK;

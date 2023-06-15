@@ -116,6 +116,9 @@ public:
         tag == Tag::MEDIA_COPYRIGHT or
         tag == Tag::MEDIA_LANGUAGE or
         tag == Tag::MEDIA_DESCRIPTION or
+        tag == Tag::USER_TIME_SYNC_RESULT or
+        tag == Tag::USER_AV_SYNC_GROUP_INFO or
+        tag == Tag::USER_SHARED_MEMORY_FD or
         tag == Tag::MEDIA_LYRICS, std::string);
     Meta& operator=(const Meta& other)
     {

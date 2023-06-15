@@ -26,6 +26,8 @@
 #include "plugin/core/plugin_register.h"
 #include "plugin/core/source.h"
 #include "plugin/core/video_sink.h"
+#include "plugin/core/avtrans_input.h"
+#include "plugin/core/avtrans_output.h"
 
 namespace OHOS {
 namespace Media {
@@ -58,6 +60,10 @@ public:
     std::shared_ptr<VideoSink> CreateVideoSinkPlugin(const std::string& name);
 
     std::shared_ptr<OutputSink> CreateOutputSinkPlugin(const std::string& name);
+
+    std::shared_ptr<AvTransInput> CreateAvTransInputPlugin(const std::string& name);
+
+    std::shared_ptr<AvTransOutput> CreateAvTransOutputPlugin(const std::string& name);
 
     int32_t Sniffer(const std::string& name, std::shared_ptr<DataSourceHelper> source);
 
