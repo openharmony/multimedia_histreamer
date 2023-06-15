@@ -106,9 +106,9 @@ const std::map<Tag, std::tuple<const char*, const ValueType&, const char*>> g_ta
     {Tag::AUDIO_RENDER_INFO, {"audio_render_info",     g_audioRenderInfoDef, "AudioRenderInfo"}},
     {Tag::AUDIO_INTERRUPT_MODE, {"audio_interrupt_mode", g_audioInterruptModeDef, "AudioInterruptMode"}},
     {Tag::USER_FRAME_NUMBER, {"frame_number",          g_u32Def,            "uint32_t"}},
-    {Tag::TIME_SYNC_RESULT, {"time_sync_result",       g_emptyString,       "string"}},
-    {Tag::AV_SYNC_GROUP_INFO, {"av_sync_group_info",   g_emptyString,       "string"}},
-    {Tag::SHARED_MEMORY_FD, {"shared_memory_fd",       g_emptyString,       "string"}},
+    {Tag::USER_TIME_SYNC_RESULT, {"time_sync_result",  g_emptyString,       "string"}},
+    {Tag::USER_AV_SYNC_GROUP_INFO, {"av_sync_group_info",   g_emptyString,  "string"}},
+    {Tag::USER_SHARED_MEMORY_FD, {"shared_memory_fd",  g_emptyString,       "string"}},
 };
 
 const std::map<AudioSampleFormat, const char*> g_auSampleFmtStrMap = {
