@@ -41,9 +41,8 @@ HttpMediaDownloader::HttpMediaDownloader() noexcept
 bool HttpMediaDownloader::Open(const std::string& url)
 {
     MEDIA_LOG_I("Open download " PUBLIC_LOG_S, url.c_str());
-    auto saveData =  [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
-        return SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
-                        std::forward<decltype(offset)>(offset));
+    auto saveData =  [this] (uint8_t*&& data, uint32_t&& len) {
+        return SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len));
     };
     FALSE_RETURN_V(statusCallback_ != nullptr, false);
     auto realStatusCallback = [this] (DownloadStatus&& status, std::shared_ptr<Downloader>& downloader,
@@ -52,6 +51,7 @@ bool HttpMediaDownloader::Open(const std::string& url)
     };
     downloadRequest_ = std::make_shared<DownloadRequest>(url, saveData, realStatusCallback);
     downloader_->Download(downloadRequest_, -1); // -1
+    buffer_->SetMediaOffset(0);
     downloader_->Start();
     return true;
 }
@@ -109,7 +109,7 @@ bool HttpMediaDownloader::Seek(int offset)
     buffer_->Clear();
     buffer_->SetActive(true);
     downloader_->Seek(offset);
-    MEDIA_LOG_D("Seek: after buffer size " PUBLIC_LOG_ZU , buffer_->GetSize());
+    buffer_->SetMediaOffset(offset);
     downloader_->Resume();
     return true;
 }
@@ -144,9 +144,9 @@ bool HttpMediaDownloader::GetStartedStatus()
     return startedPlayStatus_;
 }
 
-bool HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
+bool HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len)
 {
-    FALSE_RETURN_V(buffer_->WriteBuffer(data, len, offset), false);
+    FALSE_RETURN_V(buffer_->WriteBuffer(data, len), false);
     size_t bufferSize = buffer_->GetSize();
     double ratio = (static_cast<double>(bufferSize)) / RING_BUFFER_SIZE;
     if ((bufferSize >= WATER_LINE ||
