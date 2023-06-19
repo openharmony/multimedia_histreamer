@@ -437,6 +437,8 @@ void VideoSinkFilter::FlushEnd()
     }
     renderTask_->Start();
     ResetSyncInfo();
+    renderFrameCnt_ = 0;
+    discardFrameCnt_ = 0;
 }
 
 #ifndef OHOS_LITE

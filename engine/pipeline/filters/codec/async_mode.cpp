@@ -25,7 +25,6 @@
 
 namespace {
 constexpr uint32_t DEFAULT_TRY_DECODE_TIME = 20;
-constexpr uint32_t DEFAULT_TRY_RENDER_TIME = 5;
 }
 
 namespace OHOS {
@@ -264,7 +263,6 @@ ErrorCode AsyncMode::DecodeFrame()
 ErrorCode AsyncMode::FinishFrame()
 {
     MEDIA_LOG_DD("FinishFrame begin, outBufQue size: " PUBLIC_LOG_ZU, outBufQue_.size());
-    bool isRendered = false;
     std::shared_ptr<AVBuffer> frameBuffer = nullptr;
     {
         OSAL::ScopedLock l(renderMutex_);
@@ -278,7 +276,6 @@ ErrorCode AsyncMode::FinishFrame()
         if (oPort->GetWorkMode() == WorkMode::PUSH) {
             DUMP_BUFFER2LOG("AsyncMode PushData to Sink", frameBuffer, -1);
             oPort->PushData(frameBuffer, -1);
-            isRendered = true;
         } else {
             MEDIA_LOG_W("decoder out port works in pull mode");
             return ErrorCode::ERROR_INVALID_OPERATION;
@@ -288,9 +285,6 @@ ErrorCode AsyncMode::FinishFrame()
             pushTask_->PauseAsync();
         }
         frameBuffer.reset();
-    }
-    if (!isRendered) {
-        OSAL::SleepFor(DEFAULT_TRY_RENDER_TIME);
     }
     MEDIA_LOG_DD("AsyncMode finish frame success");
     return ErrorCode::SUCCESS;
