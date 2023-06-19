@@ -57,15 +57,3 @@ source_set("video_capture_filter") {
     "../../../pipeline:histreamer_base",
   ]
 }
-
-source_set("av_transport_input_filter") {
-  sources = [ "av_transport_input/av_transport_input_filter.cpp" ]
-  public_configs = [
-    ":source_config",
-    "../../../../:histreamer_presets",
-  ]
-  public_deps = [
-    "../../../foundation:histreamer_foundation",
-    "../../../pipeline:histreamer_base",
-  ]
-}

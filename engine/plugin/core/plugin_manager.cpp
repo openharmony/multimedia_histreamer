@@ -94,14 +94,14 @@ std::shared_ptr<OutputSink> PluginManager::CreateOutputSinkPlugin(const std::str
     return CreatePlugin<OutputSink, OutputSinkPlugin>(name, PluginType::OUTPUT_SINK);
 }
 
-std::shared_ptr<AvTransInput> PluginManager::CreateAvTransInputPlugin(const std::string& name)
+void PluginManager::RegisterGenericPlugin(const GenericPluginDef& pluginDef)
 {
-    return CreatePlugin<AvTransInput, AvTransInputPlugin>(name, PluginType::AVTRANS_INPUT);
+    pluginRegister_->RegisterGenericPlugin(pluginDef);
 }
 
-std::shared_ptr<AvTransOutput> PluginManager::CreateAvTransOutputPlugin(const std::string& name)
+void PluginManager::RegisterGenericPlugins(const std::vector<GenericPluginDef>& vecPluginDef)
 {
-    return CreatePlugin<AvTransOutput, AvTransOutputPlugin>(name, PluginType::AVTRANS_OUTPUT);
+    pluginRegister_->RegisterGenericPlugins(vecPluginDef);
 }
 } // namespace Plugin
 } // namespace Media

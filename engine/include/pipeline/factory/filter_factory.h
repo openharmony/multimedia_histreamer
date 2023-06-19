@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 #include "pipeline/core/filter.h"
+#include "plugin/common/type_cast_ext.h"
 
 namespace OHOS {
 namespace Media {
@@ -47,7 +48,7 @@ public:
     std::shared_ptr<T> CreateFilterWithType(const std::string& filterName, const std::string& aliasName)
     {
         auto filter = CreateFilter(filterName, aliasName);
-        auto typedFilter = std::dynamic_pointer_cast<T>(filter);
+        auto typedFilter = Plugin::ReinterpretPointerCast<T>(filter);
         return typedFilter;
     }
 

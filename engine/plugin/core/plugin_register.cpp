@@ -22,38 +22,13 @@
 #include "plugin/interface/audio_sink_plugin.h"
 #include "plugin/interface/codec_plugin.h"
 #include "plugin/interface/demuxer_plugin.h"
+#include "plugin/interface/generic_plugin.h"
 #include "plugin/interface/muxer_plugin.h"
 #include "plugin/interface/source_plugin.h"
 #include "plugin/interface/video_sink_plugin.h"
 #include "plugin/interface/output_sink_plugin.h"
-#include "plugin/interface/avtrans_input_plugin.h"
-#include "plugin/interface/avtrans_output_plugin.h"
 
 using namespace OHOS::Media::Plugin;
-
-static std::map<PluginType, int> g_apiVersionMap = {
-    {PluginType::SOURCE,      SOURCE_API_VERSION},
-    {PluginType::DEMUXER,     DEMUXER_API_VERSION},
-    {PluginType::AUDIO_DECODER, CODEC_API_VERSION},
-    {PluginType::VIDEO_DECODER, CODEC_API_VERSION},
-    {PluginType::AUDIO_ENCODER, CODEC_API_VERSION},
-    {PluginType::VIDEO_ENCODER, CODEC_API_VERSION},
-    {PluginType::AUDIO_SINK,  AUDIO_SINK_API_VERSION},
-    {PluginType::VIDEO_SINK,  VIDEO_SINK_API_VERSION},
-    {PluginType::MUXER,       MUXER_API_VERSION},
-    {PluginType::OUTPUT_SINK, OUTPUT_SINK_API_VERSION},
-    {PluginType::AVTRANS_INPUT, AVTRANS_INPUT_API_VERSION},
-    {PluginType::AVTRANS_OUTPUT, AVTRANS_OUTPUT_API_VERSION},
-};
-
-static std::string g_libFileHead = "libhistreamer_plugin_";
-
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
-static std::string g_fileSeparator = "\\";
-#else
-static std::string g_fileSeparator = "/";
-#endif
-static std::string g_libFileTail = HST_PLUGIN_FILE_TAIL;
 
 PluginRegister::~PluginRegister()
 {
@@ -97,7 +72,7 @@ Status PluginRegister::RegisterImpl::AddPlugin(const PluginDefBase& def)
 
 void PluginRegister::RegisterImpl::UpdateRegisterTableAndRegisterNames(const PluginDefBase& def)
 {
-    std::shared_ptr<PluginRegInfo> regInfo = std::make_shared<PluginRegInfo>();
+    auto regInfo = std::make_shared<PluginRegInfo>();
     regInfo->packageDef = packageDef;
     switch (def.pluginType) {
         case PluginType::SOURCE:
@@ -124,11 +99,8 @@ void PluginRegister::RegisterImpl::UpdateRegisterTableAndRegisterNames(const Plu
         case PluginType::OUTPUT_SINK:
             InitOutputSinkInfo(regInfo, def);
             break;
-        case PluginType::AVTRANS_INPUT:
-            InitAvTransInputInfo(regInfo, def);
-            break;
-        case PluginType::AVTRANS_OUTPUT:
-            InitAvTransOutputInfo(regInfo, def);
+        case PluginType::GENERIC_PLUGIN:
+            InitGenericPlugin(regInfo, def);
             break;
         default:
             return;
@@ -155,6 +127,21 @@ bool PluginRegister::RegisterImpl::Verification(const PluginDefBase& definition)
 
 bool PluginRegister::RegisterImpl::VersionMatched(const PluginDefBase& definition)
 {
+    static std::map<PluginType, int> g_apiVersionMap = {
+        {PluginType::SOURCE,      SOURCE_API_VERSION},
+        {PluginType::DEMUXER,     DEMUXER_API_VERSION},
+        {PluginType::AUDIO_DECODER, CODEC_API_VERSION},
+        {PluginType::VIDEO_DECODER, CODEC_API_VERSION},
+        {PluginType::AUDIO_ENCODER, CODEC_API_VERSION},
+        {PluginType::VIDEO_ENCODER, CODEC_API_VERSION},
+        {PluginType::AUDIO_SINK,  AUDIO_SINK_API_VERSION},
+        {PluginType::VIDEO_SINK,  VIDEO_SINK_API_VERSION},
+        {PluginType::MUXER,       MUXER_API_VERSION},
+        {PluginType::OUTPUT_SINK, OUTPUT_SINK_API_VERSION},
+    };
+    if (definition.pluginType  == PluginType::GENERIC_PLUGIN) {
+        return true;
+    }
     int major = (definition.apiVersion >> 16) & 0xFFFF; // 16
     int minor = definition.apiVersion & 0xFFFF;
     uint32_t version = g_apiVersionMap[definition.pluginType];
@@ -252,7 +239,7 @@ Status PluginRegister::RegisterImpl::InitOutputSinkInfo(std::shared_ptr<PluginRe
 {
     auto& base = (OutputSinkPluginDef&)def;
     reg->creator = base.creator;
-    std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
+    auto info = std::make_shared<PluginInfo>();
     SetPluginInfo(info, def);
     info->extra[PLUGIN_INFO_EXTRA_OUTPUT_TYPE] = base.protocolType;
     info->inCaps = base.inCaps;
@@ -260,25 +247,14 @@ Status PluginRegister::RegisterImpl::InitOutputSinkInfo(std::shared_ptr<PluginRe
     return Status::OK;
 }
 
-Status PluginRegister::RegisterImpl::InitAvTransInputInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def)
+Status PluginRegister::RegisterImpl::InitGenericPlugin(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def)
 {
-    auto& base = (AvTransInputPluginDef&)def;
+    auto& base = (GenericPluginDef&)def;
     reg->creator = base.creator;
-    std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
-    SetPluginInfo(info, def);
-    info->outCaps = base.outCaps;
-    reg->info = info;
-    return Status::OK;
-}
-
-Status PluginRegister::RegisterImpl::InitAvTransOutputInfo(std::shared_ptr<PluginRegInfo>& reg,
-    const PluginDefBase& def)
-{
-    auto& base = (AvTransOutputPluginDef&)def;
-    reg->creator = base.creator;
-    std::shared_ptr<PluginInfo> info = std::make_shared<PluginInfo>();
+    auto info = std::make_shared<PluginInfo>();
     SetPluginInfo(info, def);
     info->inCaps = base.inCaps;
+    info->outCaps = base.outCaps;
     reg->info = info;
     return Status::OK;
 }
@@ -360,9 +336,25 @@ void PluginRegister::RegisterPlugins()
     RegisterDynamicPlugins();
 }
 
+void PluginRegister::RegisterGenericPlugin(const GenericPluginDef& pluginDef)
+{
+    (void)staticPluginRegister_->AddPackage({pluginDef.pkgVersion, pluginDef.pkgName, pluginDef.license});
+    FALSE_LOG_MSG(staticPluginRegister_->AddPlugin(pluginDef) == Status::OK,
+        "Plugin " PUBLIC_LOG_S  " register fail.", pluginDef.name.c_str());
+}
+
+void PluginRegister::RegisterGenericPlugins(const std::vector<GenericPluginDef>& vecPluginDef)
+{
+    for (auto& pluginDef : vecPluginDef) {
+        (void)staticPluginRegister_->AddPackage({pluginDef.pkgVersion, pluginDef.pkgName, pluginDef.license});
+        FALSE_LOG_MSG(staticPluginRegister_->AddPlugin(pluginDef) == Status::OK,
+            "Plugin " PUBLIC_LOG_S  " register fail.", pluginDef.name.c_str());
+    }
+}
+
 void PluginRegister::RegisterStaticPlugins()
 {
-    RegisterPluginStatic(std::make_shared<RegisterImpl>(registerData_));
+    RegisterPluginStatic(staticPluginRegister_);
 }
 
 void PluginRegister::RegisterDynamicPlugins()
@@ -373,6 +365,13 @@ void PluginRegister::RegisterDynamicPlugins()
 void PluginRegister::RegisterPluginsFromPath(const char* libDirPath)
 {
 #ifdef DYNAMIC_PLUGINS
+    static std::string libFileHead = "libhistreamer_plugin_";
+    #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+    static std::string fileSeparator = "\\";
+    #else
+    static std::string fileSeparator = "/";
+    #endif
+    static std::string libFileTail = HST_PLUGIN_FILE_TAIL;
     DIR* libDir = opendir(libDirPath);
     if (libDir) {
         struct dirent* lib = nullptr;
@@ -382,13 +381,13 @@ void PluginRegister::RegisterPluginsFromPath(const char* libDirPath)
                 continue;
             }
             std::string libName = lib->d_name;
-            if (libName.find(g_libFileHead) ||
-                libName.compare(libName.size() - g_libFileTail.size(), g_libFileTail.size(), g_libFileTail)) {
+            if (libName.find(libFileHead) ||
+                libName.compare(libName.size() - libFileTail.size(), libFileTail.size(), libFileTail)) {
                 continue;
             }
             std::string pluginName =
-                libName.substr(g_libFileHead.size(), libName.size() - g_libFileHead.size() - g_libFileTail.size());
-            std::string libPath = libDirPath + g_fileSeparator + lib->d_name;
+                libName.substr(libFileHead.size(), libName.size() - libFileHead.size() - libFileTail.size());
+            std::string libPath = libDirPath + fileSeparator + lib->d_name;
             loader = PluginLoader::Create(pluginName, libPath);
             if (loader) {
                 loader->FetchRegisterFunction()(std::make_shared<RegisterImpl>(registerData_, loader));

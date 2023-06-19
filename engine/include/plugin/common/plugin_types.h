@@ -120,8 +120,7 @@ enum struct PluginType : int32_t {
     VIDEO_SINK,        ///< reference VideoSinkPlugin
     MUXER,             ///< reference MuxerPlugin
     OUTPUT_SINK,       ///< reference OutputSinkPlugin
-    AVTRANS_INPUT,     ///< reference AvtransInputPlugin
-    AVTRANS_OUTPUT,    ///< reference AvtransOutputPlugin
+    GENERIC_PLUGIN,    ///< generic plugin can be used to represent any user extended plugin
 };
 
 /*
