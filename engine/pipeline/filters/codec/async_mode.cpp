@@ -378,8 +378,11 @@ ErrorCode AsyncMode::CheckBufferValidity(std::shared_ptr<AVBuffer>& buffer)
             Plugin::ReinterpretPointerCast<Plugin::SurfaceMemory>(memory);
 
         // trigger surface memory to request surface buffer again when it is surface buffer
-        FALSE_RETURN_V_MSG_E(surfaceMemory->GetSurfaceBuffer() != nullptr, ErrorCode::ERROR_NO_MEMORY,
-                             "get surface buffer fail");
+        if (surfaceMemory->GetSurfaceBuffer() == nullptr) {
+            // Surface often obtain buffer failed, but doesn't cause any problem.
+            MEDIA_LOG_DD("Get surface buffer fail.");
+            return ErrorCode::ERROR_NO_MEMORY;
+        }
     }
 #endif
     return ErrorCode::SUCCESS;
