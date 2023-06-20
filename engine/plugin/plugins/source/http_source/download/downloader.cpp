@@ -167,7 +167,6 @@ bool Downloader::Seek(int64_t offset)
     MEDIA_LOG_I("Begin");
     if (offset >= 0 && offset < static_cast<int64_t>(currentRequest_->GetFileContentLength())) {
         currentRequest_->startPos_ = offset;
-        currentRequest_->firstPos_ = offset;
     }
     int64_t temp = currentRequest_->GetFileContentLength() - currentRequest_->startPos_;
     currentRequest_->requestSize_ = static_cast<int>(std::min(temp, static_cast<int64_t>(PER_REQUEST_SIZE)));
@@ -205,7 +204,6 @@ bool Downloader::BeginDownload()
 
     currentRequest_->requestSize_ = 1;
     currentRequest_->startPos_ = 0;
-    currentRequest_->firstPos_ = 0;
     currentRequest_->isEos_ = false;
     currentRequest_->retryTimes_ = 0;
 
@@ -249,7 +247,8 @@ void Downloader::HandleRetOK() {
     if (currentRequest_->retryTimes_ > 0) {
         currentRequest_->retryTimes_ = 0;
     }
-    int64_t remaining = currentRequest_->headerInfo_.fileContentLen - currentRequest_->startPos_;
+    int64_t remaining = currentRequest_->headerInfo_.fileContentLen -
+        static_cast<size_t>(currentRequest_->startPos_);
     if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
         MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,
                     currentRequest_->startPos_, currentRequest_->url_.c_str());
@@ -293,8 +292,7 @@ size_t Downloader::RxBodyData(void* buffer, size_t size, size_t nitems, void* us
     if (!mediaDownloader->currentRequest_->isDownloading_) {
         mediaDownloader->currentRequest_->isDownloading_ = true;
     }
-    if (!mediaDownloader->currentRequest_->saveData_(static_cast<uint8_t*>(buffer), dataLen,
-        mediaDownloader->currentRequest_->firstPos_)) {
+    if (!mediaDownloader->currentRequest_->saveData_(static_cast<uint8_t *>(buffer), dataLen)) {
         MEDIA_LOG_W("Save data failed.");
         return 0; // save data failed, make perform finished.
     }

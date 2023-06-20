@@ -44,7 +44,7 @@ public:
     bool GetStartedStatus() override;
 
 private:
-    bool SaveData(uint8_t* data, uint32_t len, int64_t offset);
+    bool SaveData(uint8_t* data, uint32_t len);
 
 private:
     std::shared_ptr<RingBuffer> buffer_;

@@ -23,9 +23,8 @@ namespace HttpPlugin {
 PlayListDownloader::PlayListDownloader()
 {
     downloader_ = std::make_shared<Downloader>("hlsPlayList");
-    dataSave_ = [this] (uint8_t*&& data, uint32_t&& len, int64_t&& offset) {
-        return SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len),
-                        std::forward<decltype(offset)>(offset));
+    dataSave_ = [this] (uint8_t*&& data, uint32_t&& len) {
+        return SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len));
     };
     // this is default callback
     statusCallback_ = [this] (DownloadStatus&& status, std::shared_ptr<Downloader> d,
@@ -60,9 +59,8 @@ bool PlayListDownloader::GetPlayListDownloadStatus()
     return startedDownloadStatus_;
 }
 
-bool PlayListDownloader::SaveData(uint8_t* data, uint32_t len, int64_t offset)
+bool PlayListDownloader::SaveData(uint8_t* data, uint32_t len)
 {
-    (void)offset;
     playList_.append(reinterpret_cast<const char*>(data), len);
     startedDownloadStatus_ = true;
     ParseManifest();
