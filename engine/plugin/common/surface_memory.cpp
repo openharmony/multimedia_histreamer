@@ -60,7 +60,8 @@ void SurfaceMemory::AllocSurfaceBuffer()
         }
         fence_ = -1;
     } else {
-        MEDIA_LOG_E("AllocSurfaceBuffer failed.");
+        // Surface often obtain buffer failed, but doesn't cause any problem.
+        MEDIA_LOG_DD("AllocSurfaceBuffer failed.");
     }
 }
 

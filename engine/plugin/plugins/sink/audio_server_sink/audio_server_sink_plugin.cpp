@@ -708,13 +708,15 @@ Status AudioServerSinkPlugin::Drain()
     if (audioRenderer_ == nullptr) {
         return Status::ERROR_WRONG_STATE;
     }
-    auto res = audioRenderer_->Drain();
-    uint64_t latency = 0;
-    audioRenderer_->GetLatency(latency);
-    latency /= 1000; // 1000 cast into ms
-    if (!res || latency > 50) { // 50 latency too large
-        MEDIA_LOG_W("drain failed or latency is too large, will sleep " PUBLIC_LOG_U64 " ms, aka. latency", latency);
-        OSAL::SleepFor(latency);
+    if (!audioRenderer_->Drain()) {
+        uint64_t latency = 0;
+        audioRenderer_->GetLatency(latency);
+        latency /= 1000; // 1000 cast into ms
+        if (latency > 50) { // 50 latency too large
+            MEDIA_LOG_W("Drain failed and latency is too large, will sleep " PUBLIC_LOG_U64 " ms, aka. latency.",
+                        latency);
+            OSAL::SleepFor(latency);
+        }
     }
     MEDIA_LOG_I("audioRenderer_ Drain() success");
     return Status::OK;

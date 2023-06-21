@@ -101,7 +101,7 @@ private:
     OSAL::Mutex lockInputBuffers_;
 
     std::shared_ptr<ShareAllocator> shaAlloc_ {nullptr};
-    bool isFlushing_ {false};
+    std::atomic<bool> isFlushing_ {false};
     uint32_t inPortIndex_{};
     uint32_t outPortIndex_{};
     CompVerInfo verInfo_ {};

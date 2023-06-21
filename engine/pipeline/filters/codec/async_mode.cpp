@@ -108,7 +108,8 @@ ErrorCode AsyncMode::Configure()
 ErrorCode AsyncMode::PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset)
 {
     DUMP_BUFFER2LOG("AsyncMode in", buffer, offset);
-    MEDIA_LOG_DD("PushData.");
+    MEDIA_LOG_DD("PushData called, inBufQue_->Size(): " PUBLIC_LOG_ZU ", capacity: " PUBLIC_LOG_ZU,
+                 inBufQue_->Size(), inBufQue_->Capacity());
     if (buffer != nullptr && !stopped_) {
         inBufQue_->Push(buffer);
     } else {
@@ -175,6 +176,9 @@ void AsyncMode::FlushStart()
     if (pushTask_) {
         pushTask_->Pause();
     }
+    while (!outBufQue_.empty()) {
+        outBufQue_.pop();
+    }
     MEDIA_LOG_I("AsyncMode FlushStart exit.");
 }
 
@@ -202,9 +206,6 @@ void AsyncMode::FlushEnd()
     if (pushTask_) {
         pushTask_->Start();
     }
-    if (plugin_) {
-        QueueAllBufferInPoolToPluginLocked();
-    }
     MEDIA_LOG_I("AsyncMode FlushEnd exit");
 }
 
@@ -222,6 +223,10 @@ ErrorCode AsyncMode::HandleFrame()
         status = plugin_->QueueInputBuffer(oneBuffer, 0);
         if (status == Plugin::Status::OK || status == Plugin::Status::END_OF_STREAM
             || status != Plugin::Status::ERROR_AGAIN || stopped_) {
+            if (oneBuffer->flag & BUFFER_FLAG_EOS) {
+                MEDIA_LOG_D("Handle frame receive EOS, pause async.");
+                handleFrameTask_->PauseAsync();
+            }
             break;
         }
         MEDIA_LOG_DD("Send data to plugin error: " PUBLIC_LOG_D32 ", currently, input buffer cannot be inputted, "
@@ -258,7 +263,7 @@ ErrorCode AsyncMode::DecodeFrame()
 
 ErrorCode AsyncMode::FinishFrame()
 {
-    MEDIA_LOG_DD("FinishFrame begin, outBufQue_.size(): " PUBLIC_LOG_ZU, outBufQue_.size());
+    MEDIA_LOG_DD("FinishFrame begin, outBufQue size: " PUBLIC_LOG_ZU, outBufQue_.size());
     bool isRendered = false;
     std::shared_ptr<AVBuffer> frameBuffer = nullptr;
     {
@@ -277,6 +282,10 @@ ErrorCode AsyncMode::FinishFrame()
         } else {
             MEDIA_LOG_W("decoder out port works in pull mode");
             return ErrorCode::ERROR_INVALID_OPERATION;
+        }
+        if (frameBuffer->flag & BUFFER_FLAG_EOS) {
+            MEDIA_LOG_D("Finish frame receive EOS, pause async.");
+            pushTask_->PauseAsync();
         }
         frameBuffer.reset();
     }
@@ -297,6 +306,13 @@ void AsyncMode::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& buffer
         OSAL::ScopedLock lock(mutex_);
         isNeedQueueInputBuffer_ = true;
         cv_.NotifyOne();
+    }
+    if (buffer->flag & BUFFER_FLAG_EOS) {
+        if (outBufPool_) {
+            outBufPool_->SetActive(false);
+        }
+        MEDIA_LOG_D("Decode frame receive EOS, pause async.");
+        decodeFrameTask_->PauseAsync();
     }
 }
 
@@ -323,6 +339,11 @@ ErrorCode AsyncMode::Prepare()
     return ErrorCode::SUCCESS;
 }
 
+/**
+ * CheckBufferValidity 返回失败的原因是 SurfaceBuffer 申请失败。
+ * 这种情况，SurfaceBuffer 对应的 AVBuffer 仍然要回到 outBufPool_。继续循环，就会使得这个循环无法退出。
+ * 实际上是 SurfaceBuffer 申请成功才能退出。可能遇到了特殊情况，永远申请不到 SurfaceBuffer。
+ */
 ErrorCode AsyncMode::QueueAllBufferInPoolToPluginLocked()
 {
     ErrorCode err = ErrorCode::SUCCESS;
@@ -330,8 +351,9 @@ ErrorCode AsyncMode::QueueAllBufferInPoolToPluginLocked()
         auto buf = outBufPool_->AllocateBuffer();
         if (CheckBufferValidity(buf) != ErrorCode::SUCCESS) {
             MEDIA_LOG_W("cannot allocate buffer in buffer pool");
-            continue;
+            break;
         }
+        buf->Reset();
         err = TranslatePluginStatus(plugin_->QueueOutputBuffer(buf, -1));
         if (err != ErrorCode::SUCCESS) {
             MEDIA_LOG_W("Queue output buffer error, plugin doesn't support queue all out buffers.");
@@ -356,8 +378,11 @@ ErrorCode AsyncMode::CheckBufferValidity(std::shared_ptr<AVBuffer>& buffer)
             Plugin::ReinterpretPointerCast<Plugin::SurfaceMemory>(memory);
 
         // trigger surface memory to request surface buffer again when it is surface buffer
-        FALSE_RETURN_V_MSG_E(surfaceMemory->GetSurfaceBuffer() != nullptr, ErrorCode::ERROR_NO_MEMORY,
-                             "get surface buffer fail");
+        if (surfaceMemory->GetSurfaceBuffer() == nullptr) {
+            // Surface often obtain buffer failed, but doesn't cause any problem.
+            MEDIA_LOG_DD("Get surface buffer fail.");
+            return ErrorCode::ERROR_NO_MEMORY;
+        }
     }
 #endif
     return ErrorCode::SUCCESS;

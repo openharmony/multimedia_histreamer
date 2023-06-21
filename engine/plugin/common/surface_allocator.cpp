@@ -57,16 +57,16 @@ sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer()
         MEDIA_LOG_E("surface is nullptr");
         return nullptr;
     }
-    MEDIA_LOG_D("width: " PUBLIC_LOG_D32 ", height :" PUBLIC_LOG_D32 ", align: " PUBLIC_LOG_D32
-                ", format: " PUBLIC_LOG_D32 ", usage: " PUBLIC_LOG_U64 ", timeout: " PUBLIC_LOG_D32,
-                requestConfig_.width, requestConfig_.height, requestConfig_.strideAlignment, requestConfig_.format,
-                requestConfig_.usage, requestConfig_.timeout);
+    MEDIA_LOG_DD("width: " PUBLIC_LOG_D32 ", height :" PUBLIC_LOG_D32 ", align: " PUBLIC_LOG_D32
+                 ", format: " PUBLIC_LOG_D32 ", usage: " PUBLIC_LOG_U64 ", timeout: " PUBLIC_LOG_D32,
+                 requestConfig_.width, requestConfig_.height, requestConfig_.strideAlignment, requestConfig_.format,
+                 requestConfig_.usage, requestConfig_.timeout);
     OHOS::sptr<OHOS::SurfaceBuffer> surfaceBuffer = nullptr;
     int32_t releaseFence = -1;
     auto ret = surface_->RequestBuffer(surfaceBuffer, releaseFence, requestConfig_);
     if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK || surfaceBuffer == nullptr) {
         if (ret == OHOS::SurfaceError::SURFACE_ERROR_NO_BUFFER) {
-            MEDIA_LOG_E("buffer queue is no more buffers");
+            MEDIA_LOG_DD("buffer queue is no more buffers");
         } else {
             MEDIA_LOG_E("surface RequestBuffer fail, ret: " PUBLIC_LOG_U64, static_cast<uint64_t>(ret));
         }
@@ -87,7 +87,7 @@ sptr<SurfaceBuffer> SurfaceAllocator::AllocSurfaceBuffer()
         surface_->CancelBuffer(surfaceBuffer);
         return nullptr;
     }
-    MEDIA_LOG_D("request surface buffer success, releaseFence: " PUBLIC_LOG_D32, releaseFence);
+    MEDIA_LOG_DD("request surface buffer success, releaseFence: " PUBLIC_LOG_D32, releaseFence);
     return surfaceBuffer;
 }
 

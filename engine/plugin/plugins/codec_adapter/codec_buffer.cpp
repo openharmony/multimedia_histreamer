@@ -144,7 +144,7 @@ Status CodecBuffer::Rebind(const std::shared_ptr<Plugin::Buffer>& pluginBuffer)
     }
     // 这里buffer需要保存一下，为了方便往下一节点传数据，通过GetBuffer()获取
     buffer_ = pluginBuffer;
-    MEDIA_LOG_D("Rebind end, omxBufferId: " PUBLIC_LOG_U32, omxBuffer_->bufferId);
+    MEDIA_LOG_DD("Rebind end, omxBufferId: " PUBLIC_LOG_U32, omxBuffer_->bufferId);
     return Status::OK;
 }
 

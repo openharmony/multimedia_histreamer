@@ -22,7 +22,6 @@
 #include "foundation/log.h"
 #include "foundation/osal/utils/util.h"
 #include "foundation/utils/constants.h"
-#include "foundation/utils/dump_buffer.h"
 #include "foundation/utils/steady_clock.h"
 #include "pipeline/factory/filter_factory.h"
 #include "pipeline/filters/codec/codec_filter_factory.h"
@@ -91,16 +90,16 @@ ErrorCode VideoDecoderFilter::Stop()
 
 void VideoDecoderFilter::FlushStart()
 {
-    MEDIA_LOG_I("video decoder FlushStart entered.");
+    MEDIA_LOG_I("Video decoder FlushStart entered.");
     codecMode_->FlushStart();
     CodecFilterBase::FlushStart();
 }
 
 void VideoDecoderFilter::FlushEnd()
 {
-    MEDIA_LOG_I("video decoder FlushEnd entered");
-    isFlushing_ = false;
+    MEDIA_LOG_I("Video decoder FlushEnd entered.");
     codecMode_->FlushEnd();
+    CodecFilterBase::FlushEnd();
 }
 
 bool VideoDecoderFilter::Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
@@ -110,20 +109,6 @@ bool VideoDecoderFilter::Configure(const std::string& inPort, const std::shared_
     FALSE_RETURN_V(CodecFilterBase::Configure(inPort, upstreamMeta, upstreamParams, downstreamParams), false);
     PROFILE_END("video decoder configure end");
     return true;
-}
-
-ErrorCode VideoDecoderFilter::PushData(const std::string &inPort, const AVBufferPtr& buffer, int64_t offset)
-{
-    if (state_ != FilterState::READY && state_ != FilterState::PAUSED && state_ != FilterState::RUNNING) {
-        MEDIA_LOG_W("pushing data to decoder when state is " PUBLIC_LOG_D32, static_cast<int>(state_.load()));
-        return ErrorCode::ERROR_INVALID_OPERATION;
-    }
-    if (isFlushing_) {
-        MEDIA_LOG_I("video decoder is flushing, discarding this data from port " PUBLIC_LOG_S, inPort.c_str());
-        return ErrorCode::SUCCESS;
-    }
-    DUMP_BUFFER2FILE("decoder_input.data", buffer);
-    return codecMode_->PushData(inPort, buffer, offset);
 }
 
 bool VideoDecoderFilter::Negotiate(const std::string& inPort,

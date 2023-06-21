@@ -93,7 +93,7 @@ private:
     std::shared_ptr<OHOS::Media::BlockingQueue<AVBufferPtr>> inBufQueue_ {nullptr};
     std::shared_ptr<OHOS::Media::OSAL::Task> renderTask_ {nullptr};
     std::atomic<bool> pushThreadIsBlocking_ {false};
-    bool isFlushing_ {false};
+    std::atomic<bool> isFlushing_ {false};
     OSAL::ConditionVariable startWorkingCondition_ {};
     OSAL::Mutex mutex_;
 #ifndef OHOS_LITE

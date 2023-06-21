@@ -37,8 +37,6 @@ public:
     bool Configure(const std::string& inPort, const std::shared_ptr<const Plugin::Meta>& upstreamMeta,
                    Plugin::Meta& upstreamParams, Plugin::Meta& downstreamParams) override;
 
-    ErrorCode PushData(const std::string& inPort, const AVBufferPtr& buffer, int64_t offset) override;
-
     bool Negotiate(const std::string& inPort,
                    const std::shared_ptr<const Plugin::Capability>& upstreamCap,
                    Plugin::Capability& negotiatedCap,
