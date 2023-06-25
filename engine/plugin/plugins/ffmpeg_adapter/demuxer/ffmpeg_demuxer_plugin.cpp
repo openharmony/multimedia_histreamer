@@ -370,8 +370,8 @@ Status FFmpegDemuxerPlugin::SeekTo(int32_t trackId, int64_t seekTime, SeekMode m
         MEDIA_LOG_I("SeekTo " PUBLIC_LOG_D64 "ns, ffTime: " PUBLIC_LOG_D64 ", key frame index: "
                     PUBLIC_LOG_D32, realSeekTime, ffTime, keyFrameIdx);
         if (keyFrameIdx < 0) {
-            flags = seekModeToFfmpegSeekFlags.at(SeekMode::SEEK_CLOSEST_SYNC);
-            keyFrameIdx = av_index_search_timestamp(avStream, ffTime, flags);
+            keyFrameIdx = av_index_search_timestamp(avStream, ffTime,
+                                                    seekModeToFfmpegSeekFlags.at(SeekMode::SEEK_PREVIOUS_SYNC));
         }
         if (keyFrameIdx >= 0) {
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(58, 78, 0)

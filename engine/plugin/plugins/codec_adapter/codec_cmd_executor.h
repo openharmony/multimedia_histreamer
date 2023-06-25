@@ -49,7 +49,7 @@ private:
     void HandleEventCmdComplete(uint32_t data1, uint32_t data2);
     void HandleEventPortSettingsChanged(OMX_U32 data1, OMX_U32 data2);
     void HandleEventBufferFlag(OMX_U32 data1, OMX_U32 data2);
-    void HandleEventError(OMX_U32 data1);
+    void HandleEventError(OMX_U32 data1, OMX_U32 data2);
 
     Callback* callback_ {nullptr};
 

@@ -49,7 +49,7 @@ Status CodecCmdExecutor::OnEvent(OMX_EVENTTYPE event, EventInfo* info)
             HandleEventBufferFlag(info->data1, info->data2);
             break;
         case OMX_EventError:
-            HandleEventError(info->data1);
+            HandleEventError(info->data1, info->data2);
             break;
         default:
             break;
@@ -192,13 +192,23 @@ void CodecCmdExecutor::HandleEventBufferFlag(OMX_U32 data1, OMX_U32 data2)
     }
 }
 
-void CodecCmdExecutor::HandleEventError(OMX_U32 data1)
+void CodecCmdExecutor::HandleEventError(OMX_U32 data1, OMX_U32 data2)
 {
-    MEDIA_LOG_E("HandleEventError begin, error msg: " PUBLIC_LOG_S, OmxErrorType2String(data1).c_str());
-    OSAL::ScopedLock lock(mutex_);
-    (void)data1;
-    lastCmd_ = -1;
-    cond_.NotifyAll();
+    {
+        OSAL::ScopedLock lock(mutex_);
+        lastCmd_ = -1;
+        cond_.NotifyAll();
+    }
+    // Sometimes, hdi return data1 does not indicate an OMX_ERRORTYPE, call OmxErrorType2String() return OMX_ErrorNone
+    auto errorType = OmxErrorType2String(data1);
+    MEDIA_LOG_E("HandleEventError begin, error msg: " PUBLIC_LOG_S, errorType.c_str());
+    if (errorType == "OMX_ErrorNone" && static_cast<OMX_INDEXTYPE>(data2) == OMX_IndexParamPortDefinition) {
+        if (data1 == inPortIndex_) {
+            MEDIA_LOG_E("Unknown error on input port");
+        } else {
+            MEDIA_LOG_E("Input data does not contain keyframes, unable to obtain output data.");
+        }
+    }
 }
 } // namespace CodecAdapter
 } // namespace Plugin
