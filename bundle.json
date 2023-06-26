@@ -53,7 +53,10 @@
             ],
             "components": [
                 "hilog_lite",
-                "hiviewdfx_hilog_native"
+                "hiviewdfx_hilog_native",
+                "hitrace_native",
+                "audio_framework",
+                "drivers_peripheral_codec"
             ]
         },
         "build": {
