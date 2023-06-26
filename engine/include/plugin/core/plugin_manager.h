@@ -26,8 +26,7 @@
 #include "plugin/core/plugin_register.h"
 #include "plugin/core/source.h"
 #include "plugin/core/video_sink.h"
-#include "plugin/core/avtrans_input.h"
-#include "plugin/core/avtrans_output.h"
+#include "plugin/interface/generic_plugin.h"
 
 namespace OHOS {
 namespace Media {
@@ -61,12 +60,17 @@ public:
 
     std::shared_ptr<OutputSink> CreateOutputSinkPlugin(const std::string& name);
 
-    std::shared_ptr<AvTransInput> CreateAvTransInputPlugin(const std::string& name);
-
-    std::shared_ptr<AvTransOutput> CreateAvTransOutputPlugin(const std::string& name);
+    template<typename T, typename U>
+    std::shared_ptr<T> CreateGenericPlugin(const std::string& name)
+    {
+        return CreatePlugin<T, U>(name, PluginType::GENERIC_PLUGIN);
+    }
 
     int32_t Sniffer(const std::string& name, std::shared_ptr<DataSourceHelper> source);
 
+    void RegisterGenericPlugin(const GenericPluginDef& pluginDef);
+
+    void RegisterGenericPlugins(const std::vector<GenericPluginDef>& vecPluginDef);
 private:
     PluginManager();
 

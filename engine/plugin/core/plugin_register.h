@@ -23,6 +23,7 @@
 #include "plugin/common/any.h"
 #include "plugin/core/plugin_loader.h"
 #include "plugin/core/plugin_info.h"
+#include "plugin/interface/generic_plugin.h"
 
 namespace OHOS {
 namespace Media {
@@ -51,6 +52,9 @@ public:
 
     void RegisterPlugins();
 
+    void RegisterGenericPlugin(const GenericPluginDef& pluginDef);
+
+    void RegisterGenericPlugins(const std::vector<GenericPluginDef>& vecPluginDef);
 private:
     void RegisterStaticPlugins();
     void RegisterDynamicPlugins();
@@ -107,9 +111,7 @@ private:
 
         Status InitOutputSinkInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def);
 
-        Status InitAvTransInputInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def);
-
-        Status InitAvTransOutputInfo(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def);
+        Status InitGenericPlugin(std::shared_ptr<PluginRegInfo>& reg, const PluginDefBase& def);
 
         bool Verification(const PluginDefBase& definition);
 
@@ -125,6 +127,7 @@ private:
         std::map<std::string, std::shared_ptr<PluginRegInfo>>::iterator& info);
     std::shared_ptr<RegisterData> registerData_ = std::make_shared<RegisterData>();
     std::vector<std::shared_ptr<PluginLoader>> registeredLoaders_;
+    std::shared_ptr<RegisterImpl> staticPluginRegister_ = std::make_shared<RegisterImpl>(registerData_);
 };
 } // namespace Plugin
 } // namespace Media
