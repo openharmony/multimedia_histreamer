@@ -23,6 +23,7 @@
 #include "audio_renderer.h"
 #include "foundation/osal/thread/mutex.h"
 #include "plugin/common/plugin_audio_tags.h"
+#include "plugin/convert/ffmpeg_convert.h"
 #include "plugin/interface/audio_sink_plugin.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 #include "timestamp.h"

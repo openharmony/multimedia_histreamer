@@ -63,7 +63,40 @@
             "sub_component": [
                 "//foundation/multimedia/histreamer:histreamer"
             ],
-            "inner_kits": [],
+            "inner_kits": [
+              {
+                "type": "so",
+                "name": "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base",
+                "header": {
+                  "header_files": [],
+                  "header_base": "//foundation/multimedia/histreamer/engine/include"
+                }
+              },
+              {
+                "type": "so",
+                "name": "//foundation/multimedia/histreamer/engine/pipeline:histreamer_codec_filters",
+                "header": {
+                  "header_files": [],
+                  "header_base": "//foundation/multimedia/histreamer/engine/include"
+                }
+              },
+              {
+                "type": "so",
+                "name": "//foundation/multimedia/histreamer/engine/plugin:histreamer_ffmpeg_convert",
+                "header": {
+                  "header_files": [],
+                  "header_base": "//foundation/multimedia/histreamer/engine/include"
+                }
+              },
+              {
+                "type": "so",
+                "name": "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
+                "header": {
+                  "header_files": [],
+                  "header_base": "//foundation/multimedia/histreamer/engine/include"
+                }
+              }
+            ],
             "test": []
         }
     }

@@ -22,6 +22,7 @@
 #include <map>
 #include "foundation/osal/thread/task.h"
 #include "foundation/utils/blocking_queue.h"
+#include "plugin/convert/ffmpeg_convert.h"
 #include "plugin/interface/codec_plugin.h"
 
 #ifdef __cplusplus

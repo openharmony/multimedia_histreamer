@@ -35,6 +35,18 @@ source_set("histreamer_pipeline_base") {
   ]
 }
 
+config("histreamer_base_external_config") {
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine/include/pipeline/core",
+    "//foundation/multimedia/histreamer/engine/include/pipeline/factory",
+    "//foundation/multimedia/histreamer/engine/include/plugin/common",
+    "//foundation/multimedia/histreamer/engine/include/plugin/core",
+    "//foundation/multimedia/histreamer/engine/include/plugin/factory",
+    "//foundation/multimedia/histreamer/engine/include/plugin/interface",
+    "//foundation/multimedia/player_framework/interfaces/inner_api/native",
+  ]
+}
+
 if (hst_is_lite_sys) {
   import("//build/lite/config/component/lite_component.gni")
   lite_library("histreamer_base") {
@@ -49,6 +61,7 @@ if (hst_is_lite_sys) {
 } else {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_base") {
+    public_configs = [ ":histreamer_base_external_config" ]
     install_enable = true
     sanitize = {
       cfi = true
@@ -61,11 +74,48 @@ if (hst_is_lite_sys) {
   }
 }
 
+config("histreamer_codec_filters_external_config") {
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine/scene/standard",
+    "//foundation/multimedia/histreamer/engine/include/pipeline/filters/codec/audio_decoder",
+    "//foundation/multimedia/histreamer/engine/include/pipeline/filters/codec/audio_encoder",
+    "//foundation/multimedia/histreamer/engine/include/pipeline/filters/codec/video_decoder",
+    "//foundation/multimedia/histreamer/engine/include/pipeline/filters/codec/video_encoder",
+  ]
+}
+
+if (hst_is_lite_sys) {
+  import("//build/lite/config/component/lite_component.gni")
+  lite_library("histreamer_codec_filters") {
+    if (ohos_kernel_type == "liteos_m") {
+      target_type = "static_library"
+    } else {
+      target_type = "shared_library"
+    }
+    sources = []
+    deps = [ "filters/codec:codec_filters" ]
+  }
+} else {
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer_codec_filters") {
+    public_configs = [ ":histreamer_codec_filters_external_config" ]
+    install_enable = true
+    sanitize = {
+      cfi = true
+      debug = false
+      integer_overflow = true
+    }
+    deps = [ "filters/codec:codec_filters" ]
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
+  }
+}
+
 source_set("histreamer_pipeline") {
   sources = []
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
   public_deps = [
-    "filters/codec:codec_filters",
+    ":histreamer_codec_filters",
     "filters/demux:demuxer_filter",
     "filters/muxer:muxer_filter",
     "filters/sink:audio_sink_filter",

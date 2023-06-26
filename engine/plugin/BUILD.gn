@@ -99,6 +99,16 @@ source_set("plugin_base") {
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
 }
 
+config("histreamer_plugin_base_external_config") {
+  include_dirs = [
+    "//foundation/graphic/graphic_2d/interfaces/inner_api/",
+    "//foundation/multimedia/histreamer/engine",
+    "//foundation/multimedia/histreamer/engine/include",
+    "//foundation/multimedia/histreamer/engine/include/plugin/common",
+    "//foundation/multimedia/histreamer/engine/include/plugin/core",
+  ]
+}
+
 if (hst_is_lite_sys) {
   import("//build/lite/config/component/lite_component.gni")
   lite_library("histreamer_plugin_base") {
@@ -113,6 +123,7 @@ if (hst_is_lite_sys) {
 } else {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_base") {
+    public_configs = [ ":histreamer_plugin_base_external_config" ]
     install_enable = true
     sanitize = {
       cfi = true
@@ -120,6 +131,55 @@ if (hst_is_lite_sys) {
       integer_overflow = true
     }
     deps = [ ":plugin_base" ]
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
+  }
+}
+
+config("hst_ffmpeg_convert_external_config") {
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine/include",
+    "//third_party/ffmpeg",
+  ]
+}
+
+source_set("ffmpeg_convert") {
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine/include",
+    "//third_party/ffmpeg",
+  ]
+  sources = [ "convert/ffmpeg_convert.cpp" ]
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
+  public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
+  if (hst_is_lite_sys) {
+    # deps on lite
+  } else {
+    public_deps += [ "//third_party/ffmpeg:libohosffmpeg" ]
+  }
+}
+
+if (hst_is_lite_sys) {
+  import("//build/lite/config/component/lite_component.gni")
+  lite_library("histreamer_ffmpeg_convert") {
+    if (ohos_kernel_type == "liteos_m") {
+      target_type = "static_library"
+    } else {
+      target_type = "shared_library"
+    }
+    sources = []
+    deps = [ ":ffmpeg_convert" ]
+  }
+} else {
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer_ffmpeg_convert") {
+    public_configs = [ ":hst_ffmpeg_convert_external_config" ]
+    install_enable = true
+    sanitize = {
+      cfi = true
+      debug = false
+      integer_overflow = true
+    }
+    deps = [ ":ffmpeg_convert" ]
     subsystem_name = "multimedia"
     part_name = "histreamer"
   }
