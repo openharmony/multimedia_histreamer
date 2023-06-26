@@ -52,7 +52,8 @@
                 "minimp4"
             ],
             "components": [
-                "hilog_lite"
+                "hilog_lite",
+                "hiviewdfx_hilog_native"
             ]
         },
         "build": {
