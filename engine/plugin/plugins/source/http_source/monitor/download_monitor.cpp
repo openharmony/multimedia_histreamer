@@ -147,11 +147,11 @@ bool DownloadMonitor::NeedRetry(const std::shared_ptr<DownloadRequest>& request)
         MEDIA_LOG_I("NeedRetry: clientError = " PUBLIC_LOG_D32 ", serverError = " PUBLIC_LOG_D32
             ", retryTimes = " PUBLIC_LOG_D32, clientError, serverError, retryTimes);
         if (retryTimes > RETRY_TIMES_TO_REPORT_ERROR) { // Report error to upper layer
-            if (clientError != NetworkClientErrorCode::ERROR_OK) {
+            if (clientError != NetworkClientErrorCode::ERROR_OK && callback_ != nullptr) {
                 MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, static_cast<int32_t>(clientError));
                 callback_->OnEvent({PluginEventType::CLIENT_ERROR, {clientError}, "http"});
             }
-            if (serverError != 0) {
+            if (serverError != 0 && callback_ != nullptr) {
                 MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32, serverError);
                 callback_->OnEvent({PluginEventType::SERVER_ERROR, {serverError}, "http"});
             }
