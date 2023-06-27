@@ -47,9 +47,9 @@ public:
 
 private:
     Status DoDeinit();
-    bool AssignSampleRateIfSupported(uint32_t sampleRate);
-    bool AssignChannelNumIfSupported(uint32_t channelNum);
-    bool AssignSampleFmtIfSupported(AudioSampleFormat sampleFormat);
+    bool AssignSampleRateIfSupported(const ValueType& value);
+    bool AssignChannelNumIfSupported(const ValueType& value);
+    bool AssignSampleFmtIfSupported(const ValueType& value);
     Status GetAudioTimeLocked(int64_t& audioTimeNs);
 
     OSAL::Mutex captureMutex_ {};

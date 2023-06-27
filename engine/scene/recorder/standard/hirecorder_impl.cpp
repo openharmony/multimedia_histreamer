@@ -589,9 +589,8 @@ ErrorCode HiRecorderImpl::DoConfigureVideo(const HstRecParam& param) const
             auto ptr = param.GetValPtr<VidEnc>();
             FALSE_RETURN_V_MSG_E(ptr != nullptr, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,);
             auto encoderMeta = std::make_shared<Plugin::Meta>();
-            if (!TransVideoEncoderFmt(ptr->encFmt, *encoderMeta)) {
-                return ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
-            }
+            FALSE_RETURN_V(TransVideoEncoderFmt(ptr->encFmt, *encoderMeta),
+                           ErrorCode::ERROR_INVALID_PARAMETER_VALUE);
             return videoEncoder_->SetVideoEncoder(param.srcId, encoderMeta);
         }
         default:

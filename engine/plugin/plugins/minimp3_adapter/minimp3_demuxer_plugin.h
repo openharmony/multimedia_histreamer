@@ -131,6 +131,7 @@ private:
 
     void FillInMediaInfo(MediaInfo& mediaInfo) const;
 
+    void WriteMp3Data(Buffer& outBuffer);
     Seekable            seekable_;
     int                 inIoBufferSize_;
     size_t              fileSize_;

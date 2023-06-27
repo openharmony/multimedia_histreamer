@@ -117,6 +117,8 @@ void HiPlayerCallbackLooper::DoReportError(const Plugin::Any &error)
     auto obs = obs_.lock();
     if (obs != nullptr) {
         auto ptr = Plugin::AnyCast<std::pair<PlayerErrorType, int32_t>>(&error);
+        MEDIA_LOG_E("Report error, error type: " PUBLIC_LOG_D32 " error value: " PUBLIC_LOG_D32,
+                    static_cast<int32_t>(ptr->first), static_cast<int32_t>(ptr->second));
         obs->OnError(ptr->first, ptr->second);
     }
 }
@@ -132,6 +134,8 @@ void HiPlayerCallbackLooper::DoReportInfo(const Plugin::Any& info)
     auto obs = obs_.lock();
     if (obs != nullptr) {
         auto ptr = Plugin::AnyCast<std::tuple<PlayerOnInfoType, int32_t, Format>>(&info);
+        MEDIA_LOG_I("Report info, info type: " PUBLIC_LOG_D32 " info value: " PUBLIC_LOG_D32,
+                    static_cast<int32_t>(std::get<0>(*ptr)), static_cast<int32_t>(std::get<1>(*ptr)));
         obs->OnInfo(std::get<0>(*ptr), std::get<1>(*ptr), std::get<2>(*ptr)); // indexes
     }
 }
