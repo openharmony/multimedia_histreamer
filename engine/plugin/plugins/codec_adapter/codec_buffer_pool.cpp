@@ -63,7 +63,11 @@ Status CodecBufferPool::FreeBuffers()
     MEDIA_LOG_D("FreeBuffers begin");
     for (auto& codecBuf : codecBufMap_) {
         auto& codecBuffer = codecBuf.second;
-        auto ret = codecComp_->FreeBuffer(codecComp_, portIndex_, codecBuffer->GetOmxBuffer().get());
+        FALSE_RETURN_V_MSG_E(codecComp_ != nullptr, Status::ERROR_NULL_POINTER, "Codec component is null.");
+        FALSE_RETURN_V_MSG_E(codecBuffer != nullptr, Status::ERROR_NULL_POINTER, "Codec buffer is null.");
+        auto omxBuffer = codecBuffer->GetOmxBuffer().get();
+        FALSE_RETURN_V_MSG_E(omxBuffer != nullptr, Status::ERROR_NULL_POINTER, "Omx buffer is null.");
+        auto ret = codecComp_->FreeBuffer(codecComp_, portIndex_, omxBuffer);
         FALSE_RETURN_V_MSG_E(ret == HDF_SUCCESS, TransHdiRetVal2Status(ret),
             "codec component free buffer failed, omxBufId: " PUBLIC_LOG_U32, codecBuffer->GetBufferId());
     }

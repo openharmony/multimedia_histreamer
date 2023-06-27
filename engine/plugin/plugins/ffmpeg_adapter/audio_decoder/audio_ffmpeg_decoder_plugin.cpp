@@ -218,6 +218,7 @@ Status AudioFfmpegDecoderPlugin::Init()
 
 Status AudioFfmpegDecoderPlugin::Deinit()
 {
+    MEDIA_LOG_I("Deinit enter.");
     OSAL::ScopedLock lock(avMutex_);
     OSAL::ScopedLock lock1(parameterMutex_);
     return DeInitLocked();
@@ -225,6 +226,7 @@ Status AudioFfmpegDecoderPlugin::Deinit()
 
 Status AudioFfmpegDecoderPlugin::DeInitLocked()
 {
+    MEDIA_LOG_I("DeInitLocked enter.");
     ResetLocked();
     avCodec_.reset();
     cachedFrame_.reset();
@@ -348,6 +350,7 @@ Status AudioFfmpegDecoderPlugin::AssignExtraDataIfExistsLocked(const std::shared
 
 Status AudioFfmpegDecoderPlugin::ResetLocked()
 {
+    MEDIA_LOG_I("ResetLocked enter.");
     audioParameter_.clear();
     StopLocked();
     avCodecContext_.reset();
@@ -398,6 +401,7 @@ Status AudioFfmpegDecoderPlugin::CloseCtxLocked()
 
 Status AudioFfmpegDecoderPlugin::StopLocked()
 {
+    MEDIA_LOG_I("StopLocked enter.");
     auto ret = CloseCtxLocked();
     avCodecContext_.reset();
     if (outBuffer_) {
@@ -408,6 +412,7 @@ Status AudioFfmpegDecoderPlugin::StopLocked()
 
 Status AudioFfmpegDecoderPlugin::Stop()
 {
+    MEDIA_LOG_I("Stop enter.");
     OSAL::ScopedLock lock(avMutex_);
     return StopLocked();
 }
@@ -428,7 +433,7 @@ Status AudioFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
     MEDIA_LOG_DD("queue input buffer");
     (void)timeoutMs;
     if (inputBuffer->IsEmpty() && !(inputBuffer->flag & BUFFER_FLAG_EOS)) {
-        MEDIA_LOG_E("decoder does not support fd buffer");
+        MEDIA_LOG_E("Decoder does not support fd buffer.");
         return Status::ERROR_INVALID_DATA;
     }
     Status ret = Status::OK;
@@ -440,6 +445,10 @@ Status AudioFfmpegDecoderPlugin::QueueInputBuffer(const std::shared_ptr<Buffer>&
         ret = SendBufferLocked(inputBuffer);
         if (ret == Status::OK || ret == Status::END_OF_STREAM) {
             OSAL::ScopedLock l(bufferMetaMutex_);
+            if (inputBuffer == nullptr || inputBuffer->GetBufferMeta() == nullptr) {
+                MEDIA_LOG_E("Decoder input buffer is null or get buffer meta fail.");
+                return Status::ERROR_INVALID_DATA;
+            }
             bufferMeta_ = inputBuffer->GetBufferMeta()->Clone();
         }
     }
@@ -451,6 +460,7 @@ Status AudioFfmpegDecoderPlugin::QueueOutputBuffer(const std::shared_ptr<Buffer>
     MEDIA_LOG_DD("queue output buffer");
     (void)timeoutMs;
     if (!outputBuffer) {
+        MEDIA_LOG_E("Queue out buffer is null.");
         return Status::ERROR_INVALID_PARAMETER;
     }
     outBuffer_ = outputBuffer;
@@ -464,6 +474,7 @@ Status AudioFfmpegDecoderPlugin::SendOutputBuffer()
     if (status == Status::OK || status == Status::END_OF_STREAM) {
         {
             OSAL::ScopedLock l(bufferMetaMutex_);
+            FALSE_RETURN_V_MSG_E(outBuffer_ != nullptr, Status::ERROR_NULL_POINTER, "Send out buffer is null.");
             outBuffer_->UpdateBufferMeta(*bufferMeta_);
         }
         dataCallback_->OnOutputBufferDone(outBuffer_);
@@ -509,6 +520,7 @@ Status AudioFfmpegDecoderPlugin::SendBufferLocked(const std::shared_ptr<Buffer>&
 
 Status AudioFfmpegDecoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>& ioInfo)
 {
+    FALSE_RETURN_V_MSG_E(ioInfo != nullptr, Status::ERROR_INVALID_PARAMETER, "ioInfo buffer is null.");
     int32_t channels = cachedFrame_->channels;
     int32_t samples = cachedFrame_->nb_samples;
     auto sampleFormat = static_cast<AVSampleFormat>(cachedFrame_->format);
@@ -552,6 +564,7 @@ Status AudioFfmpegDecoderPlugin::ReceiveFrameSucc(const std::shared_ptr<Buffer>&
  */
 Status AudioFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffer>& ioInfo)
 {
+    FALSE_RETURN_V_MSG_E(ioInfo != nullptr, Status::ERROR_INVALID_PARAMETER, "ioInfo buffer is null.");
     Status status;
     auto ret = avcodec_receive_frame(avCodecContext_.get(), cachedFrame_.get());
     if (ret >= 0) {
@@ -596,7 +609,7 @@ Status AudioFfmpegDecoderPlugin::ReceiveBufferLocked(const std::shared_ptr<Buffe
 Status AudioFfmpegDecoderPlugin::ReceiveBuffer()
 {
     std::shared_ptr<Buffer> ioInfo {outBuffer_};
-    if ((ioInfo == nullptr) || ioInfo->IsEmpty() ||
+    if ((ioInfo == nullptr) || ioInfo->IsEmpty() || ioInfo->GetBufferMeta() == nullptr ||
         (ioInfo->GetBufferMeta()->GetType() != BufferMetaType::AUDIO)) {
         MEDIA_LOG_W("cannot fetch valid buffer to output");
         return Status::ERROR_NO_MEMORY;

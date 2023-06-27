@@ -292,6 +292,21 @@ ErrorCode AsyncMode::FinishFrame()
 
 void AsyncMode::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& buffer)
 {
+    if (buffer == nullptr) {
+        MEDIA_LOG_E("Out put buffer is null.");
+        return;
+    }
+    if (buffer->flag & BUFFER_FLAG_EOS) {
+        if (outBufPool_) {
+            outBufPool_->SetActive(false);
+        }
+        MEDIA_LOG_D("Decode frame receive EOS, pause async.");
+        if (decodeFrameTask_ == nullptr) {
+            MEDIA_LOG_E("Decode frame task is closed.");
+            return;
+        }
+        decodeFrameTask_->PauseAsync();
+    }
     {
         OSAL::ScopedLock l(renderMutex_);
         outBufQue_.push(buffer);
@@ -300,13 +315,6 @@ void AsyncMode::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& buffer
         OSAL::ScopedLock lock(mutex_);
         isNeedQueueInputBuffer_ = true;
         cv_.NotifyOne();
-    }
-    if (buffer->flag & BUFFER_FLAG_EOS) {
-        if (outBufPool_) {
-            outBufPool_->SetActive(false);
-        }
-        MEDIA_LOG_D("Decode frame receive EOS, pause async.");
-        decodeFrameTask_->PauseAsync();
     }
 }
 
