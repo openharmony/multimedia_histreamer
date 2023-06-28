@@ -34,8 +34,6 @@ extern "C" {
 #include "libavutil/imgutils.h"
 #include "libavutil/pixdesc.h"
 #include "libavutil/pixfmt.h"
-#include "libswresample/swresample.h"
-#include "libswscale/swscale.h"
 #ifdef __cplusplus
 };
 #endif
@@ -109,50 +107,6 @@ bool IsRgbFormat(AVPixelFormat format);
 VideoH264Profile ConvH264ProfileFromFfmpeg (int32_t ffmpegProfile);
 
 int32_t ConvH264ProfileToFfmpeg(VideoH264Profile profile);
-
-struct ResamplePara {
-    uint32_t channels {2}; // 2: STEREO
-    uint32_t sampleRate {0};
-    uint32_t bitsPerSample {0};
-    int64_t channelLayout {0};
-    AVSampleFormat srcFfFmt {AV_SAMPLE_FMT_NONE};
-    uint32_t destSamplesPerFrame {0};
-    AVSampleFormat destFmt {AV_SAMPLE_FMT_S16};
-};
-
-class Resample {
-public:
-    Status Init(const ResamplePara& resamplePara);
-    Status Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8_t*& destBuffer, size_t& destLength);
-private:
-    ResamplePara resamplePara_ {};
-#if defined(_WIN32) || !defined(OHOS_LITE)
-    std::vector<uint8_t> resampleCache_ {};
-    std::vector<uint8_t*> resampleChannelAddr_ {};
-    std::shared_ptr<SwrContext> swrCtx_ {nullptr};
-#endif
-};
-
-#if defined(VIDEO_SUPPORT)
-struct ScalePara {
-    int32_t srcWidth {0};
-    int32_t srcHeight {0};
-    AVPixelFormat srcFfFmt {AVPixelFormat::AV_PIX_FMT_NONE};
-    int32_t dstWidth {0};
-    int32_t dstHeight {0};
-    AVPixelFormat dstFfFmt {AVPixelFormat::AV_PIX_FMT_RGBA};
-    int32_t align {16};
-};
-
-struct Scale {
-public:
-    Status Init(const ScalePara& scalePara, uint8_t** dstData, int32_t* dstLineSize);
-    Status Convert(uint8_t** srcData, const int32_t* srcLineSize, uint8_t** dstData, int32_t* dstLineSize);
-private:
-    ScalePara scalePara_ {};
-    std::shared_ptr<SwsContext> swsCtx_ {nullptr};
-};
-#endif
 } // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media

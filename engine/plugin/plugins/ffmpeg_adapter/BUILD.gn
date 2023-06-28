@@ -104,6 +104,7 @@ source_set("ffmpeg_audio_encoders") {
   ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_ffmpeg_convert",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
   if (hst_is_lite_sys) {
@@ -124,6 +125,7 @@ source_set("ffmpeg_video_decoders") {
   ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/plugin:histreamer_ffmpeg_convert",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
   if (hst_is_lite_sys) {

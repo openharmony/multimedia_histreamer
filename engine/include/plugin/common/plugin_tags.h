@@ -175,6 +175,7 @@ enum struct Tag : uint32_t {
     USER_TIME_SYNC_RESULT,                                     ///< std::string : The time sync result
     USER_AV_SYNC_GROUP_INFO,                                   ///< std::string : The av sync group info
     USER_SHARED_MEMORY_FD,                                     ///< std::string : The shared memory fd
+    USER_PUSH_DATA_TIME                                        ///< int64_t : The user push data time
 };
 /**
  * @enum Media protocol type.

@@ -95,7 +95,8 @@ public:
         tag == Tag::MEDIA_DURATION or
         tag == Tag::MEDIA_BITRATE or
         tag == Tag::MEDIA_START_TIME or
-        tag == Tag::USER_FRAME_PTS, int64_t);
+        tag == Tag::USER_FRAME_PTS or
+        tag == Tag::USER_PUSH_DATA_TIME, int64_t);
 
     DEFINE_INSERT_GET_FUNC(
         tag == Tag::MEDIA_FILE_SIZE or

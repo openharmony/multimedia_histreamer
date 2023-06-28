@@ -18,6 +18,7 @@
 #include <functional>
 #include <map>
 #include "foundation/utils/blocking_queue.h"
+#include "plugin/convert/ffmpeg_convert.h"
 #include "plugin/interface/codec_plugin.h"
 #include "plugins/ffmpeg_adapter/utils/ffmpeg_utils.h"
 
