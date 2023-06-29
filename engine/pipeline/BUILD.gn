@@ -93,7 +93,10 @@ if (hst_is_lite_sys) {
       target_type = "shared_library"
     }
     sources = []
-    deps = [ "filters/codec:codec_filters" ]
+    deps = [
+      ":histreamer_pipeline_base",
+      "filters/codec:codec_filters",
+    ]
   }
 } else {
   import("//build/ohos.gni")
@@ -105,7 +108,10 @@ if (hst_is_lite_sys) {
       debug = false
       integer_overflow = true
     }
-    deps = [ "filters/codec:codec_filters" ]
+    deps = [
+      ":histreamer_pipeline_base",
+      "filters/codec:codec_filters",
+    ]
     subsystem_name = "multimedia"
     part_name = "histreamer"
   }
