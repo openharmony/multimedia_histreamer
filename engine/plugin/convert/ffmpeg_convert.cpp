@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,7 @@ Status Resample::Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8
         resampleCache_.reserve(destLength);
         resampleCache_.assign(destLength, 0);
         for (size_t i {0}; i < destLength / 2; i++) { // 2
-            memcpy_s(&resampleCache_[0] + i * 2 + 1, 1, srcBuffer + i, 1); // 0 2 1
+            memcpy_s(&resampleCache_[0] + i * 2 + 1, sizeof(uint8_t), srcBuffer + i, 1); // 0 2 1
             *(&resampleCache_[0] + i * 2 + 1) += 0x80; // 0x80
         }
         destBuffer = resampleCache_.data();
@@ -75,7 +75,7 @@ Status Resample::Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8
         resampleCache_.reserve(destLength);
         resampleCache_.assign(destLength, 0);
         for (size_t i = 0; i < destLength / 2; i++) { // 2
-            memcpy_s(&resampleCache_[0] + i * 2, 2, srcBuffer + i * 3 + 1, 2); // 2 3 1
+            memcpy_s(&resampleCache_[0] + i * 2, sizeof(uint8_t) * 2, srcBuffer + i * 3 + 1, 2); // 2 3 1
         }
         destBuffer = resampleCache_.data();
     } else {
