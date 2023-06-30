@@ -29,16 +29,6 @@
 
 using namespace OHOS::Media::Plugin;
 
-// NOLINTNEXTLINE: void*
-PluginLoader::PluginLoader(void* handler, std::string name) : handler_(handler), name_(std::move(name))
-{
-}
-
-PluginLoader::~PluginLoader()
-{
-    UnLoadPluginFile();
-}
-
 std::shared_ptr<PluginLoader> PluginLoader::Create(const std::string& name, const std::string& path)
 {
     if (name.empty() || path.empty()) {
@@ -89,7 +79,15 @@ std::shared_ptr<PluginLoader> PluginLoader::CheckSymbol(void* handler, const std
         unregisterFunc = (UnregisterFunc)(::dlsym(handler, unregisterFuncName.c_str()));
 #endif
         if (registerFunc && unregisterFunc) {
-            std::shared_ptr<PluginLoader> loader(new PluginLoader(handler, name));
+            std::shared_ptr<PluginLoader> loader(new PluginLoader(), [&] (void*) {
+                if (handler) {
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+                    ::FreeLibrary((HMODULE)handler);
+#else
+                    ::dlclose(handler);
+#endif
+                }
+            });
             loader->registerFunc_ = registerFunc;
             loader->unregisterFunc_ = unregisterFunc;
             return loader;
@@ -98,15 +96,4 @@ std::shared_ptr<PluginLoader> PluginLoader::CheckSymbol(void* handler, const std
         }
     }
     return {};
-}
-
-void PluginLoader::UnLoadPluginFile()
-{
-    if (handler_) {
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
-        ::FreeLibrary((HMODULE)handler_);
-#else
-        ::dlclose(const_cast<void*>(handler_)); // NOLINT: const_cast
-#endif
-    }
 }
