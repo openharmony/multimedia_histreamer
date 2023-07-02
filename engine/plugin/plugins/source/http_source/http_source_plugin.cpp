@@ -54,31 +54,31 @@ HttpSourcePlugin::HttpSourcePlugin(std::string name) noexcept
       waterline_(0),
       downloader_(nullptr)
 {
-    MEDIA_LOG_D("HttpSourcePlugin IN");
+    MEDIA_LOG_D("HttpSourcePlugin enter.");
 }
 
 HttpSourcePlugin::~HttpSourcePlugin()
 {
-    MEDIA_LOG_D("~HttpSourcePlugin IN");
+    MEDIA_LOG_D("~HttpSourcePlugin enter.");
     CloseUri();
 }
 
 Status HttpSourcePlugin::Init()
 {
-    MEDIA_LOG_D("Init IN");
+    MEDIA_LOG_D("Init enter.");
     return Status::OK;
 }
 
 Status HttpSourcePlugin::Deinit()
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_D("Deinit enter.");
     CloseUri();
     return Status::OK;
 }
 
 Status HttpSourcePlugin::Prepare()
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_D("Prepare enter.");
     if (delayReady) {
         return Status::ERROR_DELAY_READY;
     }
@@ -87,20 +87,20 @@ Status HttpSourcePlugin::Prepare()
 
 Status HttpSourcePlugin::Reset()
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_D("Reset enter.");
     CloseUri();
     return Status::OK;
 }
 
 Status HttpSourcePlugin::Start()
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_D("Start enter.");
     return Status::OK;
 }
 
 Status HttpSourcePlugin::Stop()
 {
-    MEDIA_LOG_I("IN");
+    MEDIA_LOG_I("Stop enter.");
     CloseUri();
     return Status::OK;
 }
@@ -109,7 +109,7 @@ Status HttpSourcePlugin::Stop()
 
 Status HttpSourcePlugin::GetParameter(Tag tag, ValueType& value)
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_D("GetParameter enter.");
     switch (tag) {
         case Tag::BUFFERING_SIZE:
             value = bufferSize_;
@@ -124,7 +124,7 @@ Status HttpSourcePlugin::GetParameter(Tag tag, ValueType& value)
 
 Status HttpSourcePlugin::SetParameter(Tag tag, const ValueType& value)
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_D("SetParameter enter.");
     switch (tag) {
         case Tag::BUFFERING_SIZE:
             bufferSize_ = AnyCast<uint32_t>(value);
@@ -139,7 +139,7 @@ Status HttpSourcePlugin::SetParameter(Tag tag, const ValueType& value)
 
 Status HttpSourcePlugin::SetCallback(Callback* cb)
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_D("SetCallback enter.");
     callback_ = cb;
     OSAL::ScopedLock lock(mutex_);
     if (downloader_ != nullptr) {
@@ -150,7 +150,7 @@ Status HttpSourcePlugin::SetCallback(Callback* cb)
 
 Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 {
-    MEDIA_LOG_D("SetSource IN");
+    MEDIA_LOG_D("SetSource enter.");
     OSAL::ScopedLock lock(mutex_);
     auto uri = source->GetSourceUri();
     if (uri.find(".m3u8") != std::string::npos) {
@@ -172,13 +172,13 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 
 std::shared_ptr<Allocator> HttpSourcePlugin::GetAllocator()
 {
-    MEDIA_LOG_D("GetAllocator IN");
+    MEDIA_LOG_D("GetAllocator enter.");
     return nullptr;
 }
 
 Status HttpSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen)
 {
-    MEDIA_LOG_D("Read in");
+    MEDIA_LOG_D("Read enter.");
     OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(downloader_ != nullptr, Status::ERROR_NULL_POINTER);
 
@@ -203,7 +203,7 @@ Status HttpSourcePlugin::Read(std::shared_ptr<Buffer>& buffer, size_t expectedLe
 
 Status HttpSourcePlugin::GetSize(uint64_t& size)
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_D("GetSize enter.");
     OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(downloader_ != nullptr, Status::ERROR_NULL_POINTER);
     size = static_cast<uint64_t>(downloader_->GetContentLength());
@@ -212,7 +212,7 @@ Status HttpSourcePlugin::GetSize(uint64_t& size)
 
 Seekable HttpSourcePlugin::GetSeekable()
 {
-    MEDIA_LOG_D("IN");
+    MEDIA_LOG_D("GetSeekable enter.");
     OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(downloader_ != nullptr, Seekable::INVALID);
     return downloader_->GetSeekable();
@@ -220,6 +220,7 @@ Seekable HttpSourcePlugin::GetSeekable()
 
 Status HttpSourcePlugin::SeekTo(uint64_t offset)
 {
+    MEDIA_LOG_I("SeekTo enter, offset = " PUBLIC_LOG_U64, offset);
     OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(downloader_ != nullptr, Status::ERROR_NULL_POINTER);
     FALSE_RETURN_V(downloader_->GetSeekable() == Seekable::SEEKABLE, Status::ERROR_INVALID_OPERATION);

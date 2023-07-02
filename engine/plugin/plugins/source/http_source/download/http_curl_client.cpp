@@ -128,6 +128,7 @@ Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCod
         } else {
             snprintf_s(requestRange, sizeof(requestRange), sizeof(requestRange) - 1, "%ld-", startPos);
         }
+        MEDIA_LOG_DD("RequestData: requestRange " PUBLIC_LOG_S, requestRange);
         curl_easy_setopt(easyHandle_, CURLOPT_RANGE, requestRange);
     }
     curl_slist *headers {nullptr};

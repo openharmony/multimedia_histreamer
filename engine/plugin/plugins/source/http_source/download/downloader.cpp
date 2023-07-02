@@ -15,11 +15,8 @@
 #define HST_LOG_TAG "Downloader"
 
 #include "downloader.h"
-#include <algorithm>
 
-#include "foundation/log.h"
 #include "http_curl_client.h"
-#include "foundation/osal/utils/util.h"
 #include "foundation/utils/steady_clock.h"
 #include "securec.h"
 
@@ -164,8 +161,9 @@ void Downloader::Stop(bool isAsync)
 
 bool Downloader::Seek(int64_t offset)
 {
-    MEDIA_LOG_I("Begin");
-    if (offset >= 0 && offset < static_cast<int64_t>(currentRequest_->GetFileContentLength())) {
+    size_t contentLength = currentRequest_->GetFileContentLength();
+    MEDIA_LOG_I("Seek Begin, offset = " PUBLIC_LOG_D64 ", contentLength = " PUBLIC_LOG_ZU, offset, contentLength);
+    if (offset >= 0 && offset < static_cast<int64_t>(contentLength)) {
         currentRequest_->startPos_ = offset;
         currentRequest_->firstPos_ = offset;
     }
@@ -218,6 +216,7 @@ void Downloader::HttpDownloadLoop()
     if (shouldStartNextRequest) {
         currentRequest_ = requestQue_->Pop(); // 1000);
         if (!currentRequest_) {
+            MEDIA_LOG_W("HttpDownloadLoop currentRequest_ is null.");
             return;
         }
         BeginDownload();
