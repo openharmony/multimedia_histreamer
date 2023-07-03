@@ -170,19 +170,19 @@ std::vector<VideoPixelFormat> HdiCodecManager::GetCodecFormats(const CodecVideoP
     std::vector<VideoPixelFormat> formats;
     while (index < PIX_FORMAT_NUM && port.supportPixFmts[index] > 0) {
         switch (port.supportPixFmts[index]) {
-            case PIXEL_FMT_YCBCR_420_SP:
+            case GRAPHIC_PIXEL_FMT_YCBCR_420_SP:
                 formats.push_back(VideoPixelFormat::NV12);
                 break;
-            case PIXEL_FMT_YCRCB_420_SP:
+            case GRAPHIC_PIXEL_FMT_YCRCB_420_SP:
                 formats.push_back(VideoPixelFormat::NV21);
                 break;
-            case PIXEL_FMT_YCBCR_420_P:
+            case GRAPHIC_PIXEL_FMT_YCBCR_420_P:
                 formats.push_back(VideoPixelFormat::YUV420P);
                 break;
-            case PIXEL_FMT_RGBA_8888:
+            case GRAPHIC_PIXEL_FMT_RGBA_8888:
                 formats.push_back(VideoPixelFormat::RGBA);
                 break;
-            case PIXEL_FMT_BGRA_8888:
+            case GRAPHIC_PIXEL_FMT_BGRA_8888:
                 formats.push_back(VideoPixelFormat::BGRA);
                 break;
             default:
