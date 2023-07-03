@@ -142,10 +142,10 @@ bool DownloadMonitor::NeedRetry(const std::shared_ptr<DownloadRequest>& request)
     auto clientError = request->GetClientError();
     auto serverError = request->GetServerError();
     auto retryTimes = request->GetRetryTimes();
+    MEDIA_LOG_I("NeedRetry: clientError = " PUBLIC_LOG_D32 ", serverError = " PUBLIC_LOG_D32
+        ", retryTimes = " PUBLIC_LOG_D32 ",", clientError, serverError, retryTimes);
     if ((clientError != NetworkClientErrorCode::ERROR_OK && clientError != NetworkClientErrorCode::ERROR_NOT_RETRY)
         || serverError != 0) {
-        MEDIA_LOG_I("NeedRetry: clientError = " PUBLIC_LOG_D32 ", serverError = " PUBLIC_LOG_D32
-            ", retryTimes = " PUBLIC_LOG_D32, clientError, serverError, retryTimes);
         if (retryTimes > RETRY_TIMES_TO_REPORT_ERROR) { // Report error to upper layer
             if (clientError != NetworkClientErrorCode::ERROR_OK && callback_ != nullptr) {
                 MEDIA_LOG_I("Send http client error, code " PUBLIC_LOG_D32, static_cast<int32_t>(clientError));
@@ -155,12 +155,10 @@ bool DownloadMonitor::NeedRetry(const std::shared_ptr<DownloadRequest>& request)
                 MEDIA_LOG_I("Send http server error, code " PUBLIC_LOG_D32, serverError);
                 callback_->OnEvent({PluginEventType::SERVER_ERROR, {serverError}, "http"});
             }
-            if (!downloader_->GetStartedStatus()) {
-                task_->Stop();
-                // The current thread is the downloader thread, Therefore, the thread must be stopped asynchronously.
-                downloader_->Close(true);
-                return false;
-            }
+            task_->StopAsync();
+            // The current thread is the downloader thread, Therefore, the thread must be stopped asynchronously.
+            downloader_->Close(true);
+            return false;
         }
         return true;
     }

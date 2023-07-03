@@ -38,7 +38,7 @@ Task::Task(std::string name, std::function<void()> handler, ThreadPriority prior
 
 Task::~Task()
 {
-    MEDIA_LOG_D("task " PUBLIC_LOG_S " dtor called", name_.c_str());
+    MEDIA_LOG_I("task " PUBLIC_LOG_S " dtor called", name_.c_str());
     runningState_ = RunningState::STOPPED;
     syncCond_.NotifyAll();
 }
@@ -46,6 +46,7 @@ Task::~Task()
 void Task::Start()
 {
 #ifndef START_FAKE_TASK
+    MEDIA_LOG_I("task " PUBLIC_LOG_S " start called", name_.c_str());
     OSAL::ScopedLock lock(stateMutex_);
     runningState_ = RunningState::STARTED;
     if (!loop_) { // thread not exist
@@ -56,7 +57,6 @@ void Task::Start()
     } else {
         syncCond_.NotifyAll();
     }
-    MEDIA_LOG_D("task " PUBLIC_LOG_S " start called", name_.c_str());
 #endif
 }
 
@@ -87,9 +87,10 @@ void Task::StopAsync()
 
 void Task::Pause()
 {
-    MEDIA_LOG_D("task " PUBLIC_LOG_S " Pause called", name_.c_str());
     OSAL::ScopedLock lock(stateMutex_);
-    switch (runningState_.load()) {
+    RunningState state = runningState_.load();
+    MEDIA_LOG_I("task " PUBLIC_LOG_S " Pause called, running state = " PUBLIC_LOG_D32, name_.c_str(), state);
+    switch (state) {
         case RunningState::STARTED: {
             runningState_ = RunningState::PAUSING;
             syncCond_.Wait(lock, [this] {
@@ -108,12 +109,12 @@ void Task::Pause()
         default:
             break;
     }
-    MEDIA_LOG_D("task " PUBLIC_LOG_S " Pause done.", name_.c_str());
+    MEDIA_LOG_I("task " PUBLIC_LOG_S " Pause done.", name_.c_str());
 }
 
 void Task::PauseAsync()
 {
-    MEDIA_LOG_D("task " PUBLIC_LOG_S " PauseAsync called", name_.c_str());
+    MEDIA_LOG_I("task " PUBLIC_LOG_S " PauseAsync called", name_.c_str());
     OSAL::ScopedLock lock(stateMutex_);
     if (runningState_.load() == RunningState::STARTED) {
         runningState_ = RunningState::PAUSING;
@@ -147,6 +148,7 @@ void Task::Run()
             syncCond_.WaitFor(lock, timeoutMs, [this] { return runningState_.load() != RunningState::PAUSED; });
         }
         if (runningState_.load() == RunningState::STOPPING || runningState_.load() == RunningState::STOPPED) {
+            MEDIA_LOG_I("task " PUBLIC_LOG_S " is stopped", name_.c_str());
             runningState_ = RunningState::STOPPED;
             syncCond_.NotifyAll();
             break;

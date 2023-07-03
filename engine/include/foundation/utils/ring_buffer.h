@@ -49,6 +49,7 @@ public:
         }
         auto available = tail_ - head_;
         while (waitTimes > 0 && available == 0) {
+            MEDIA_LOG_DD("ReadBuffer wait , waitTimes is " PUBLIC_LOG_U64, waitTimes);
             writeCondition_.Wait(lck);
             if (!isActive_) {
                 return 0;
@@ -67,6 +68,8 @@ public:
         }
         head_ += available;
         mediaOffset_ += available;
+        MEDIA_LOG_DD("ReadBuffer finish available is " PUBLIC_LOG_ZU ", mediaOffset_ " PUBLIC_LOG_U64, available,
+            mediaOffset_);
         writeCondition_.NotifyOne();
         return available;
     }
@@ -78,6 +81,7 @@ public:
             return false;
         }
         while (writeSize + tail_ > head_ + bufferSize_) {
+            MEDIA_LOG_DD("WriteBuffer wait writeSize is " PUBLIC_LOG_U64, writeSize);
             writeCondition_.Wait(lck);
             if (!isActive_) {
                 return false;
