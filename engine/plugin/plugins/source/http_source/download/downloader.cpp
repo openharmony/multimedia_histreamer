@@ -111,6 +111,14 @@ Downloader::Downloader(std::string name) noexcept : name_(std::move(name))
     task_->RegisterHandler([this] { HttpDownloadLoop(); });
 }
 
+Downloader::~Downloader()
+{
+    if (client_ != nullptr) {
+        client_->Deinit();
+        client_ = nullptr;
+    }
+}
+
 bool Downloader::Download(const std::shared_ptr<DownloadRequest>& request, int32_t waitMs)
 {
     MEDIA_LOG_I("In");
