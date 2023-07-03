@@ -111,7 +111,7 @@ private:
 class Downloader {
 public:
     explicit Downloader(std::string name) noexcept;
-    ~Downloader() = default;
+    virtual ~Downloader();
 
     bool Download(const std::shared_ptr<DownloadRequest>& request, int32_t waitMs);
     void Start();
