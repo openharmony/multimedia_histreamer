@@ -82,7 +82,7 @@ if (ohos_kernel_type != "liteos_m") {
       }
       sources = []
       deps = [ "engine/scene:std_engine_factory" ]
-      external_deps = [ "hitrace_native:hitrace_meter" ]
+      external_deps = [ "hitrace:hitrace_meter" ]
       relative_install_dir = "media"
       subsystem_name = "multimedia"
       part_name = "histreamer"

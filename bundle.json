@@ -52,9 +52,9 @@
                 "minimp4"
             ],
             "components": [
+                "hilog",
                 "hilog_lite",
-                "hiviewdfx_hilog_native",
-                "hitrace_native",
+                "hitrace",
                 "audio_framework",
                 "drivers_peripheral_codec"
             ]
