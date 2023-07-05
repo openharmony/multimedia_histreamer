@@ -338,7 +338,7 @@ Status SurfaceSinkPlugin::UpdateSurfaceMemory(std::shared_ptr<SurfaceMemory>& su
 
 Status SurfaceSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
 {
-    MEDIA_LOG_D("SurfaceSink write begin");
+    MEDIA_LOG_DD("SurfaceSink write begin");
     if (inputInfo == nullptr || inputInfo->IsEmpty()) {
         return Status::ERROR_INVALID_PARAMETER;
     }
@@ -351,7 +351,7 @@ Status SurfaceSinkPlugin::Write(const std::shared_ptr<Buffer>& inputInfo)
     if (ret != Status::OK) {
         MEDIA_LOG_W("UpdateSurfaceMemory fail: " PUBLIC_LOG_D32, static_cast<int32_t>(ret));
     } else {
-        MEDIA_LOG_D("SurfaceSink write success");
+        MEDIA_LOG_DD("SurfaceSink write success");
     }
     return ret;
 }

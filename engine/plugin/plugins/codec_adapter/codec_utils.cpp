@@ -125,7 +125,7 @@ std::string OmxErrorType2String(uint32_t errorType)
         return it->second;
     }
     MEDIA_LOG_E("Not find value: " PUBLIC_LOG_U32 " in omxErrorTypeMap", errorType);
-    return "null";
+    return omxErrorTypeMap.at(OMX_ErrorNone);
 }
 
 template<typename T, typename U>
