@@ -28,7 +28,7 @@ public:
 
     PluginLoader operator=(const PluginLoader &) = delete;
 
-    ~PluginLoader();
+    ~PluginLoader() = default;
 
     static std::shared_ptr<PluginLoader> Create(const std::string &name, const std::string &path);
 
@@ -37,17 +37,12 @@ public:
     UnregisterFunc FetchUnregisterFunction();
 
 private:
-    PluginLoader(void* handler, std::string name); // NOLINT: void*
+    PluginLoader() = default;
 
     static void* LoadPluginFile(const std::string &path);
 
     static std::shared_ptr<PluginLoader> CheckSymbol(void* handler, const std::string &name); // NOLINT: void*
-
-    void UnLoadPluginFile();
-
 private:
-    const void *handler_;
-    const std::string name_;
     RegisterFunc registerFunc_ {nullptr};
     UnregisterFunc unregisterFunc_ {nullptr};
 };

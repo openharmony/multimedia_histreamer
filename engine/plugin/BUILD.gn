@@ -34,7 +34,10 @@ group("histreamer_plugin") {
 
 # build plugin interface
 config("hst_plugin_intf_config") {
-  include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine/include",
+    "//foundation/multimedia/histreamer/engine/scene/standard",
+  ]
   if (hst_is_lite_sys) {
     include_dirs +=
         [ "//foundation/multimedia/media_utils_lite/interfaces/kits" ]
@@ -106,6 +109,7 @@ config("histreamer_plugin_base_external_config") {
     "//foundation/multimedia/histreamer/engine/include",
     "//foundation/multimedia/histreamer/engine/include/plugin/common",
     "//foundation/multimedia/histreamer/engine/include/plugin/core",
+    "//foundation/multimedia/histreamer/engine/scene/standard",
   ]
 }
 
