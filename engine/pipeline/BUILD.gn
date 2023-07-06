@@ -116,6 +116,7 @@ source_set("histreamer_pipeline") {
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
   public_deps = [
     ":histreamer_codec_filters",
+    "filters/codec:codec_filters",
     "filters/demux:demuxer_filter",
     "filters/muxer:muxer_filter",
     "filters/sink:audio_sink_filter",
