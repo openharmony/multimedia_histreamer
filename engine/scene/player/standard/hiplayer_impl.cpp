@@ -250,7 +250,7 @@ int32_t HiPlayerImpl::Play()
     MEDIA_LOG_I("Play entered.");
     PROFILE_BEGIN();
     auto ret {ErrorCode::SUCCESS};
-    callbackLooper_.StartReportMediaProgress();
+    callbackLooper_.StartReportMediaProgress(100); // 100 MS
     if (pipelineStates_ == PlayerStates::PLAYER_PLAYBACK_COMPLETE) {
         ret = DoSeek(0, Plugin::SeekMode::SEEK_PREVIOUS_SYNC);
     } else if (pipelineStates_ == PlayerStates::PLAYER_PAUSED) {
