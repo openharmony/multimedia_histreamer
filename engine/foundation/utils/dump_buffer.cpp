@@ -30,16 +30,21 @@ namespace Media {
 namespace Pipeline {
 #ifdef _WIN32
 #define DUMP_FILE_DIR ""
+//#define DUMP_FILE_DIR "/data/local/tmp/"
 #endif
 // Specify the dump file dir in BUILD.gn
 #ifndef DUMP_FILE_DIR
-#define DUMP_FILE_DIR "/data/local/tmp"
+#define DUMP_FILE_DIR "/data/local/tmp/"
 #endif
 
 std::string GetDumpFileDir()
 {
+    //return std::string(DUMP_FILE_DIR);
     auto rootDir = std::string(DUMP_FILE_DIR);
-    return rootDir.empty() ? "histreamer_dump_files/" : rootDir + "/histreamer_dump_files/";
+#ifndef _WIN32
+    chmod("/data/local/tmp/",777);
+#endif
+    return rootDir.empty() ? "histreamer_dump_files/" : rootDir + "histreamer_dump_files/";
 }
 
 void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin::Buffer>& buffer)
@@ -58,11 +63,14 @@ void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin:
 
 void PrepareDumpDir()
 {
+    MEDIA_LOG_I("PrepareDumpDir enter.");
     std::string dumpDir = GetDumpFileDir();
     const char* fileDir = dumpDir.c_str();
     if (access(fileDir, 0) == 0) { // 目录存在
+        MEDIA_LOG_I("PrepareDumpDir enter1.");
         OSAL::FileSystem::RemoveFilesInDir(fileDir);
     } else {
+        MEDIA_LOG_I("PrepareDumpDir enter2.");
         (void)OSAL::FileSystem::MakeMultipleDir(fileDir);
     }
 }

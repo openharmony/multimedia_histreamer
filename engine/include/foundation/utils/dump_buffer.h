@@ -27,12 +27,12 @@ namespace Media {
 namespace Pipeline {
 // Modify DUMP_BUFFER2FILE_ENABLE to 1 to dump buffer to file.
 #ifndef DUMP_BUFFER2FILE_ENABLE
-#define DUMP_BUFFER2FILE_ENABLE 0
+#define DUMP_BUFFER2FILE_ENABLE 1
 #endif
 
 // Modify DUMP_BUFFER2LOG_ENABLE to 1 to dump buffer first 10 bytes to log.
 #ifndef DUMP_BUFFER2LOG_ENABLE
-#define DUMP_BUFFER2LOG_ENABLE 0
+#define DUMP_BUFFER2LOG_ENABLE 1
 #endif
 
 #if DUMP_BUFFER2FILE_ENABLE

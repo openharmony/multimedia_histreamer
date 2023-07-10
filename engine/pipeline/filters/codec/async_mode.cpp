@@ -15,6 +15,9 @@
 
 #define HST_LOG_TAG "AsyncMode"
 
+//#define DUMP_BUFFER2FILE_ENABLE 1
+//#define DUMP_BUFFER2LOG_ENABLE 1
+
 #include "pipeline/filters/codec/async_mode.h"
 #include "foundation/osal/utils/util.h"
 #include "foundation/utils/dump_buffer.h"
@@ -309,6 +312,8 @@ void AsyncMode::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& buffer
     }
     {
         OSAL::ScopedLock l(renderMutex_);
+        DUMP_BUFFER2FILE("dqp_test.dmp",buffer);
+        DUMP_BUFFER2LOG("AsyncMode OnOutputBufferDone to Sink", buffer, -1);
         outBufQue_.push(buffer);
     }
     if (!isNeedQueueInputBuffer_) {
