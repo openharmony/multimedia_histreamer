@@ -50,6 +50,8 @@ private:
     std::shared_ptr<RingBuffer> buffer_;
     std::shared_ptr<Downloader> downloader_;
     std::shared_ptr<DownloadRequest> downloadRequest_;
+    OSAL::Mutex mutex_;
+    OSAL::ConditionVariable cvReadWrite_;
     Callback* callback_ {nullptr};
     StatusCallbackFunc statusCallback_ {nullptr};
     bool aboveWaterline_ {false};

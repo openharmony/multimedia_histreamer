@@ -91,6 +91,12 @@ bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
         }
         OSAL::SleepFor(5); // 5
     }
+    if (buffer_->GetMediaOffset() + wantReadLength <= downloadRequest_->GetFileContentLength() &&
+        (buffer_->GetSize() < wantReadLength)) {
+        MEDIA_LOG_D("wantReadLength larger than available, wait for write");
+        OSAL::ScopedLock lock(mutex_);
+        cvReadWrite_.Wait(lock, [this, wantReadLength] { return buffer_->GetSize() >= wantReadLength; });
+    }
     realReadLength = buffer_->ReadBuffer(buff, wantReadLength, 2); // wait 2 times
     MEDIA_LOG_D("Read: wantReadLength " PUBLIC_LOG_D32 ", realReadLength " PUBLIC_LOG_D32 ", isEos "
                 PUBLIC_LOG_D32, wantReadLength, realReadLength, isEos);
@@ -147,6 +153,7 @@ bool HttpMediaDownloader::GetStartedStatus()
 bool HttpMediaDownloader::SaveData(uint8_t* data, uint32_t len)
 {
     FALSE_RETURN_V(buffer_->WriteBuffer(data, len), false);
+    cvReadWrite_.NotifyOne();
     size_t bufferSize = buffer_->GetSize();
     double ratio = (static_cast<double>(bufferSize)) / RING_BUFFER_SIZE;
     if ((bufferSize >= WATER_LINE ||
