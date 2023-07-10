@@ -118,6 +118,11 @@ public:
         return (tail_ - head_);
     }
 
+    uint64_t GetMediaOffset()
+    {
+        return mediaOffset_;
+    }
+
     void SetMediaOffset(uint64_t offset)
     {
         mediaOffset_ = offset;
