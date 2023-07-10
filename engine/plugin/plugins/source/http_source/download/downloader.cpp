@@ -149,7 +149,9 @@ void Downloader::Resume()
 {
     MEDIA_LOG_I("Begin");
     requestQue_->SetActive(true);
-    currentRequest_->isEos_ = false;
+    if (currentRequest_ != nullptr) {
+        currentRequest_->isEos_ = false;
+    }
     Start();
     MEDIA_LOG_I("End");
 }
@@ -158,7 +160,9 @@ void Downloader::Stop(bool isAsync)
 {
     MEDIA_LOG_I("Begin");
     requestQue_->SetActive(false);
-    currentRequest_->Close();
+    if (currentRequest_ != nullptr) {
+        currentRequest_->Close();
+    }
     if (isAsync) {
         task_->StopAsync();
     } else {
@@ -169,6 +173,7 @@ void Downloader::Stop(bool isAsync)
 
 bool Downloader::Seek(int64_t offset)
 {
+    FALSE_RETURN_V(currentRequest_ != nullptr, false);
     size_t contentLength = currentRequest_->GetFileContentLength();
     MEDIA_LOG_I("Seek Begin, offset = " PUBLIC_LOG_D64 ", contentLength = " PUBLIC_LOG_ZU, offset, contentLength);
     if (offset >= 0 && offset < static_cast<int64_t>(contentLength)) {
