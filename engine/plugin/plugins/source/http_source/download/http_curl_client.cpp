@@ -19,6 +19,7 @@
 #include <regex>
 #include <vector>
 #include "foundation/log.h"
+#include <foundation/osal/thread/scoped_lock.h>
 #include "foundation/utils/hitrace_utils.h"
 #include "securec.h"
 
@@ -57,6 +58,7 @@ Status HttpCurlClient::Open(const std::string& url)
 
 Status HttpCurlClient::Close()
 {
+    OSAL::ScopedLock lock(mutex_);
     MEDIA_LOG_I("Close client");
     curl_easy_setopt(easyHandle_, CURLOPT_TIMEOUT, 1);
     if (easyHandle_) {
@@ -137,6 +139,8 @@ Status HttpCurlClient::RequestData(long startPos, int len, NetworkServerErrorCod
     curl_easy_setopt(easyHandle_, CURLOPT_HTTPHEADER, headers);
     
     MEDIA_LOG_D("RequestData: startPos " PUBLIC_LOG_D32 ", len " PUBLIC_LOG_D32, static_cast<int>(startPos), len);
+    OSAL::ScopedLock lock(mutex_);
+    FALSE_RETURN_V(easyHandle_ != nullptr, Status::ERROR_NULL_POINTER);
     CURLcode returnCode = curl_easy_perform(easyHandle_);
     if (headers != nullptr) {
         curl_slist_free_all(headers);
