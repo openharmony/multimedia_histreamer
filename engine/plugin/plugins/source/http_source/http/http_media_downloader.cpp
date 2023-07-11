@@ -38,6 +38,12 @@ HttpMediaDownloader::HttpMediaDownloader() noexcept
     downloader_ = std::make_shared<Downloader>("http");
 }
 
+HttpMediaDownloader::~HttpMediaDownloader()
+{
+    MEDIA_LOG_I("~HttpMediaDownloader dtor");
+    Close(false);
+}
+
 bool HttpMediaDownloader::Open(const std::string& url)
 {
     MEDIA_LOG_I("Open download " PUBLIC_LOG_S, url.c_str());

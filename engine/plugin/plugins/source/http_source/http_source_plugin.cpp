@@ -152,6 +152,7 @@ Status HttpSourcePlugin::SetSource(std::shared_ptr<MediaSource> source)
 {
     MEDIA_LOG_D("SetSource enter.");
     OSAL::ScopedLock lock(mutex_);
+    FALSE_RETURN_V(downloader_ == nullptr, Status::ERROR_INVALID_OPERATION); // not allowed set again
     auto uri = source->GetSourceUri();
     if (uri.find(".m3u8") != std::string::npos) {
         downloader_ = std::make_shared<DownloadMonitor>(std::make_shared<HlsMediaDownloader>());
