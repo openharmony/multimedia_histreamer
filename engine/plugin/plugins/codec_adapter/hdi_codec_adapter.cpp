@@ -500,6 +500,7 @@ void HdiCodecAdapter::NotifyOutputBufferDone(const std::shared_ptr<Buffer>& outp
 
 bool HdiCodecAdapter::FillAllTheOutBuffer()
 {
+    OSAL::ScopedLock l(fillAllTheOutBufferMutex_);
     MEDIA_LOG_DD("FillAllTheBuffer begin");
     if (isFirstCall_) {
         MEDIA_LOG_I("isFirstCall: " PUBLIC_LOG_D32, isFirstCall_);
