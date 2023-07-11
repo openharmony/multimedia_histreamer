@@ -159,9 +159,9 @@ Status CodecBuffer::Unbind(std::shared_ptr<Plugin::Buffer>& buffer, const OmxCod
     // 因为Rebind()里面用buffer_保存了PluginBuf，所以这里的buffer_需要主动释放，减少智能指针的引用计数
     // decoder 时，PluginBuf 的真正释放时机应该是在sink节点，该数据送显后才能释放
     FALSE_RETURN_V_MSG_E(memory_ != nullptr, Status::ERROR_NULL_POINTER, "Param memory_ is nullptr");
-    //if (memory_->GetMemoryType() == MemoryType::SHARE_MEMORY) {
+    if (memory_->GetMemoryType() == MemoryType::SHARE_MEMORY) {
         memory_->UpdateDataSize(static_cast<size_t>(omxBuffer->filledLen - omxBuffer->offset), 0);
-    //}
+    }
     buffer = buffer_;
     buffer->flag = Translate2PluginFlagSet(omxBuffer->flag);
     buffer->pts = omxBuffer->pts;

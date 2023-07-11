@@ -80,7 +80,6 @@ bool FileSystem::IsExists(const std::string& path)
 
 bool FileSystem::MakeDir(const std::string& path)
 {
-    MEDIA_LOG_I("Make Dir enter ." PUBLIC_LOG_S , path.c_str());
 #ifdef _WIN32
     if (mkdir(path.c_str()) == -1) {
         MEDIA_LOG_E("Fail to create dir " PUBLIC_LOG_S " due to " PUBLIC_LOG_S, path.c_str(), std::strerror(errno));
@@ -89,11 +88,8 @@ bool FileSystem::MakeDir(const std::string& path)
 #else
 #ifndef OHOS_LITE
     auto oldMask = umask(0);
-    MEDIA_LOG_I("create dir " PUBLIC_LOG_S , path.c_str());
 #endif
-    int32_t retMod = chmod("/data/local/tmp/",777);
-    MEDIA_LOG_I("chmod dir " PUBLIC_LOG_S " due to " PUBLIC_LOG_D32, path.c_str(), retMod);
-    if (mkdir(path.c_str(), 777) == -1) { // 755 directory access permissions
+    if (mkdir(path.c_str(), 755) == -1) { // 755 directory access permissions
         MEDIA_LOG_E("Fail to create dir " PUBLIC_LOG_S " due to " PUBLIC_LOG_S, path.c_str(), std::strerror(errno));
 #ifndef OHOS_LITE
         umask(oldMask);
@@ -109,20 +105,28 @@ bool FileSystem::MakeDir(const std::string& path)
 
 bool FileSystem::MakeMultipleDir(const std::string& path)
 {
-    MEDIA_LOG_I("make Multiple dir " PUBLIC_LOG_S , path.c_str());
     FALSE_RETURN_V(!IsExists(path), true);
 
     // pos is 1, not 0  example: D:/a/b, /local/tmp/
     // Avoid Linux root path before is empty string, which makes it impossible to judge whether the path exists
-    MEDIA_LOG_I("make Multiple dir2 " PUBLIC_LOG_S , path.c_str());
     auto index = path.find('/', 1);
     while (index != std::string::npos) {
         std::string tPath = path.substr(0, index);
         FALSE_RETURN_V(IsExists(tPath) || MakeDir(tPath), false);
         index = path.find('/', index + 1);
     }
-    MEDIA_LOG_I("make Multiple dir3 " PUBLIC_LOG_S , path.c_str());
     return path[path.size() - 1] == '/' || MakeDir(path);
+}
+
+void FileSystem::ClearFileContent(const std::string& fullPath)
+{
+    MEDIA_LOG_I("Clear file content path : " PUBLIC_LOG_S, fullPath.c_str());
+    auto filePtr = fopen(fullPath.c_str(), "w+");
+    if (!filePtr) {
+        MEDIA_LOG_E("Clear file content fail.");
+        return;
+    }
+    fclose(filePtr);
 }
 
 void FileSystem::RemoveFilesInDir(const std::string& path)
