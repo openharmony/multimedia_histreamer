@@ -19,6 +19,7 @@
 #include <string>
 #include "network_client.h"
 #include "curl/curl.h"
+#include "foundation/osal/thread/mutex.h"
 
 namespace OHOS {
 namespace Media {
@@ -48,6 +49,7 @@ private:
     RxBody rxBody_;
     void *userParam_;
     CURL* easyHandle_ {nullptr};
+    mutable OSAL::Mutex mutex_;
 };
 }
 }
