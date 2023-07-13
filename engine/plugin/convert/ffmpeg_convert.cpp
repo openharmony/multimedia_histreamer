@@ -90,7 +90,7 @@ Status Resample::Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8
                 tmpInput[i] = tmpInput[i-1] + lineSize;
             }
         }
-        auto samples = lineSize / av_get_bytes_per_sample(resamplePara_.srcFfFmt);
+        auto samples = lineSize / static_cast<size_t>(av_get_bytes_per_sample(resamplePara_.srcFfFmt));
         auto res = swr_convert(swrCtx_.get(), resampleChannelAddr_.data(), resamplePara_.destSamplesPerFrame,
                                tmpInput.data(), samples);
         if (res < 0) {
@@ -98,7 +98,8 @@ Status Resample::Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8
             destLength = 0;
         } else {
             destBuffer = resampleCache_.data();
-            destLength = res * av_get_bytes_per_sample(resamplePara_.destFmt) * resamplePara_.channels;
+            size_t bytesPerSample = static_cast<size_t>(av_get_bytes_per_sample(resamplePara_.destFmt));
+            destLength = static_cast<size_t>(res) * bytesPerSample * resamplePara_.channels;
         }
     }
 #endif
