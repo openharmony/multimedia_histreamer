@@ -64,8 +64,9 @@ Status Resample::Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8
         resampleCache_.reserve(destLength);
         resampleCache_.assign(destLength, 0);
         for (size_t i {0}; i < destLength / 2; i++) { // 2
-            memcpy_s(&resampleCache_[0] + i * 2 + 1, sizeof(uint8_t), srcBuffer + i, 1); // 0 2 1
-            *(&resampleCache_[0] + i * 2 + 1) += 0x80; // 0x80
+            auto resCode = memcpy_s(&resampleCache_[0] + i * 2 + 1, sizeof(uint8_t), srcBuffer + i, 1); // 0 2 1
+            FALSE_RETURN_V_MSG_E(resCode == EOK, Status::ERROR_INVALID_OPERATION, "Memcpy failed at 8 bits/sample.");
+            *(&resampleCache_[0] + i * 2 + 1) += 0x80; // 2 0x80
         }
         destBuffer = resampleCache_.data();
     } else if (resamplePara_.bitsPerSample == 24) {  // 24
@@ -75,7 +76,9 @@ Status Resample::Convert(const uint8_t* srcBuffer, const size_t srcLength, uint8
         resampleCache_.reserve(destLength);
         resampleCache_.assign(destLength, 0);
         for (size_t i = 0; i < destLength / 2; i++) { // 2
-            memcpy_s(&resampleCache_[0] + i * 2, sizeof(uint8_t) * 2, srcBuffer + i * 3 + 1, 2); // 2 3 1
+            auto resCode
+                = memcpy_s(&resampleCache_[0] + i * 2, sizeof(uint8_t) * 2, srcBuffer + i * 3 + 1, 2); // 2 3 1
+            FALSE_RETURN_V_MSG_E(resCode == EOK, Status::ERROR_INVALID_OPERATION, "Memcpy failed at 24 bits/sample.");
         }
         destBuffer = resampleCache_.data();
     } else {
