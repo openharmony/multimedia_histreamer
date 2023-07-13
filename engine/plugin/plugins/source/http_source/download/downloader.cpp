@@ -133,6 +133,15 @@ bool Downloader::Download(const std::shared_ptr<DownloadRequest>& request, int32
 void Downloader::Start()
 {
     MEDIA_LOG_I("Begin");
+    if (!currentRequest_) {
+        currentRequest_ = requestQue_->Pop();
+        if (!currentRequest_) {
+            MEDIA_LOG_W("CurrentRequest_ is null.");
+            return;
+        }
+        BeginDownload();
+        shouldStartNextRequest = false;
+    }
     task_->Start();
     MEDIA_LOG_I("End");
 }
@@ -176,8 +185,12 @@ bool Downloader::Seek(int64_t offset)
     }
     int64_t temp = currentRequest_->GetFileContentLength() - currentRequest_->startPos_;
     currentRequest_->requestSize_ = static_cast<int>(std::min(temp, static_cast<int64_t>(PER_REQUEST_SIZE)));
+    OSAL::ScopedLock l(shouldStartNextRequestMutex_);
+    if (currentRequest_->isEos_) {
+        shouldStartNextRequest = false; // Reuse last request when seek
+        Resume();
+    }
     currentRequest_->isEos_ = false;
-    shouldStartNextRequest = false; // Reuse last request when seek
     return true;
 }
 
@@ -257,6 +270,7 @@ void Downloader::HandleRetOK() {
     int64_t remaining = currentRequest_->headerInfo_.fileContentLen -
         static_cast<size_t>(currentRequest_->startPos_);
     if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
+        OSAL::ScopedLock l(shouldStartNextRequestMutex_);
         MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,
                     currentRequest_->startPos_, currentRequest_->url_.c_str());
         currentRequest_->isEos_ = true;
