@@ -133,6 +133,15 @@ bool Downloader::Download(const std::shared_ptr<DownloadRequest>& request, int32
 void Downloader::Start()
 {
     MEDIA_LOG_I("Begin");
+    if (!currentRequest_) {
+        currentRequest_ = requestQue_->Pop();
+        if (!currentRequest_) {
+            MEDIA_LOG_W("CurrentRequest_ is null.");
+            return;
+        }
+        BeginDownload();
+        shouldStartNextRequest = false;
+    }
     task_->Start();
     MEDIA_LOG_I("End");
 }
@@ -169,6 +178,10 @@ void Downloader::Stop(bool isAsync)
 
 bool Downloader::Seek(int64_t offset)
 {
+    if (currentRequest_->isEos_) {
+        BeginDownload();
+        shouldStartNextRequest = false;
+    }
     size_t contentLength = currentRequest_->GetFileContentLength();
     MEDIA_LOG_I("Seek Begin, offset = " PUBLIC_LOG_D64 ", contentLength = " PUBLIC_LOG_ZU, offset, contentLength);
     if (offset >= 0 && offset < static_cast<int64_t>(contentLength)) {
