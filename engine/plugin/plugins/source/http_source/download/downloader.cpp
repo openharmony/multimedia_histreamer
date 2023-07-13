@@ -133,6 +133,15 @@ bool Downloader::Download(const std::shared_ptr<DownloadRequest>& request, int32
 void Downloader::Start()
 {
     MEDIA_LOG_I("Begin");
+    if (!currentRequest_) {
+        currentRequest_ = requestQue_->Pop();
+        if (!currentRequest_) {
+            MEDIA_LOG_W("HttpDownloadLoop currentRequest_ is null.");
+            return;
+        }
+        BeginDownload();
+        shouldStartNextRequest = false;
+    }
     task_->Start();
     MEDIA_LOG_I("End");
 }
