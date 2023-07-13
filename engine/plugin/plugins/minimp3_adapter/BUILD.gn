@@ -55,6 +55,7 @@ if (ohos_kernel_type == "liteos_m") {
   ohos_shared_library("histreamer_plugin_Minimp3Demuxer") {
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
@@ -77,6 +78,7 @@ if (ohos_kernel_type == "liteos_m") {
   ohos_shared_library("histreamer_plugin_Minimp3Decoder") {
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }

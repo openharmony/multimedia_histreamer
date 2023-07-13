@@ -65,6 +65,7 @@ if (hst_is_lite_sys) {
     install_enable = true
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
@@ -102,6 +103,7 @@ if (hst_is_lite_sys) {
     install_enable = true
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
@@ -149,6 +151,7 @@ if (hst_is_lite_sys) {
     install_enable = true
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
