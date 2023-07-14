@@ -208,6 +208,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FFmpegAudioDecoders") {
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
@@ -219,6 +220,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FFmpegVideoDecoders") {
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
@@ -230,6 +232,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FFmpegDemuxer") {
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
@@ -241,6 +244,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FFmpegAudioEncoders") {
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
@@ -252,6 +256,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FFmpegVideoEncoders") {
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
@@ -263,6 +268,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FFmpegMuxers") {
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }

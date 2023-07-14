@@ -67,6 +67,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FileSource") {
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
@@ -78,6 +79,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FileFdSource") {
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
