@@ -103,7 +103,10 @@ bool DownloadMonitor::Read(unsigned char *buff, unsigned int wantReadLength,
 bool DownloadMonitor::Seek(int offset)
 {
     isPlaying_ = true;
-    retryTasks_.clear();
+    {
+        OSAL::ScopedLock lock(taskMutex_);
+        retryTasks_.clear();
+    }
     return downloader_->Seek(offset);
 }
 
