@@ -34,6 +34,7 @@ public:
     static bool MakeDir(const std::string& path);
     static bool MakeMultipleDir(const std::string& path);
     static void RemoveFilesInDir(const std::string& path);
+    static void ClearFileContent(const std::string& fullPath);
     static std::string GetTmpFileName();
 };
 } // namespace OSAL

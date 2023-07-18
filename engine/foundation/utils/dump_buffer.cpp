@@ -16,6 +16,7 @@
 
 #include "foundation/utils/dump_buffer.h"
 #include <cstdio>
+#include <cstring>
 #ifdef _WIN32
 #include <direct.h>
 #else
@@ -36,34 +37,52 @@ namespace Pipeline {
 #define DUMP_FILE_DIR "/data/local/tmp"
 #endif
 
+std::vector<std::string> allDumpFiles = {
+    DEMUXER_INPUT_PEEK,
+    DEMUXER_INPUT_GET,
+    DEMUXER_OUTPUT,
+    DECODER_OUTPUT
+};
+std::map<std::string, FILE*> allDumpFileFds;
+
 std::string GetDumpFileDir()
 {
-    auto rootDir = std::string(DUMP_FILE_DIR);
-    return rootDir.empty() ? "histreamer_dump_files/" : rootDir + "/histreamer_dump_files/";
+    return std::string(DUMP_FILE_DIR);
 }
 
 void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin::Buffer>& buffer)
 {
+    FALSE_RETURN_MSG(allDumpFileFds[fileName] != nullptr, "fd is null");
     size_t bufferSize = buffer->GetMemory()->GetSize();
     FALSE_RETURN(bufferSize != 0);
-
-    std::string filePath = GetDumpFileDir() + fileName;
-    auto filePtr = fopen(filePath.c_str(), "ab+");
-    FALSE_RETURN_MSG(filePtr != nullptr, "Open file(" PUBLIC_LOG_S ") failed(" PUBLIC_LOG_S ").", filePath.c_str(),
-                     strerror(errno));
     (void)fwrite(reinterpret_cast<const char*>(buffer->GetMemory()->GetReadOnlyData()),
-                 1, bufferSize, filePtr);
-    (void)fclose(filePtr);
+                 1, bufferSize, allDumpFileFds[fileName]);
 }
 
 void PrepareDumpDir()
 {
-    std::string dumpDir = GetDumpFileDir();
-    const char* fileDir = dumpDir.c_str();
-    if (access(fileDir, 0) == 0) { // 目录存在
-        OSAL::FileSystem::RemoveFilesInDir(fileDir);
-    } else {
-        (void)OSAL::FileSystem::MakeMultipleDir(fileDir);
+    MEDIA_LOG_I("Prepare dumpDir enter.");
+    for (auto iter : allDumpFiles) {
+        std::string filePath = GetDumpFileDir() + "/" + iter;
+        MEDIA_LOG_I("Prepare dumpDir: " PUBLIC_LOG_S, filePath.c_str());
+        if (access(filePath.c_str(), 0) == 0) { // 文件存在
+            OSAL::FileSystem::ClearFileContent(filePath);
+        }
+        allDumpFileFds[iter] = fopen(filePath.c_str(), "ab+");
+        if (allDumpFileFds[iter] == nullptr) {
+            MEDIA_LOG_W("Open file(" PUBLIC_LOG_S ") failed(" PUBLIC_LOG_S ").", filePath.c_str(), strerror(errno));
+        }
+    }
+}
+
+void EndDumpFile()
+{
+    MEDIA_LOG_I("End dump enter.");
+    for (auto iter : allDumpFiles) {
+        if (allDumpFileFds[iter]) {
+            fclose(allDumpFileFds[iter]);
+            allDumpFileFds[iter] = nullptr;
+        }
     }
 }
 

@@ -21,6 +21,7 @@
 #include <media_errors.h>
 #include "foundation/cpp_ext/type_traits_ext.h"
 #include "foundation/log.h"
+#include "foundation/utils/dump_buffer.h"
 #include "foundation/utils/hitrace_utils.h"
 #include "foundation/utils/steady_clock.h"
 #include "media_utils.h"
@@ -183,6 +184,7 @@ int32_t HiPlayerImpl::SetSource(const std::shared_ptr<IMediaDataSource>& dataSrc
 
 int32_t HiPlayerImpl::Prepare()
 {
+    DUMP_BUFFER2FILE_PREPARE();
     if (!(pipelineStates_ == PlayerStates::PLAYER_INITIALIZED || pipelineStates_ == PlayerStates::PLAYER_STOPPED)) {
         return MSERR_INVALID_OPERATION;
     }
@@ -221,6 +223,7 @@ int32_t HiPlayerImpl::Prepare()
 
 int HiPlayerImpl::PrepareAsync()
 {
+    DUMP_BUFFER2FILE_PREPARE();
     if (!(pipelineStates_ == PlayerStates::PLAYER_INITIALIZED || pipelineStates_ == PlayerStates::PLAYER_STOPPED)) {
         return MSERR_INVALID_OPERATION;
     }
@@ -615,6 +618,7 @@ ErrorCode HiPlayerImpl::DoResume()
 
 ErrorCode HiPlayerImpl::DoStop()
 {
+    DUMP_BUFFER2FILE_END();
     mediaStats_.Reset();
     // 先关闭demuxer线程，防止元数据解析prepare过程中出现并发问题
     if (demuxer_) {

@@ -112,7 +112,7 @@ void SyncMode::OnOutputBufferDone(const std::shared_ptr<Plugin::Buffer>& buffer)
     // push to port
     auto oPort = outPorts_[0];
     if (oPort->GetWorkMode() == WorkMode::PUSH) {
-        DUMP_BUFFER2FILE("decoder_output.data", buffer);
+        DUMP_BUFFER2FILE(DECODER_OUTPUT, buffer);
         oPort->PushData(buffer, -1);
     } else {
         MEDIA_LOG_W("decoder out port works in pull mode");
