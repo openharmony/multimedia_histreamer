@@ -327,7 +327,7 @@ bool AudioCapturePlugin::AssignChannelNumIfSupported(const ValueType& value)
 
 bool AudioCapturePlugin::AssignSampleFmtIfSupported(const ValueType& value)
 {
-    FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(uint32_t)), false, "Check sample format value fail.");
+    FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(AudioSampleFormat)), false, "Check sample format value fail.");
     AudioSampleFormat sampleFormat = AnyCast<AudioSampleFormat>(value);
     AudioStandard::AudioSampleFormat aFmt = AudioStandard::AudioSampleFormat::INVALID_WIDTH;
     FALSE_RETURN_V_MSG_E(AuCapturePlugin::PluginFmt2SampleFmt(sampleFormat, aFmt), false,
