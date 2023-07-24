@@ -20,6 +20,7 @@
 #include <atomic>
 #include <vector>
 
+#include "foundation/osal/thread/mutex.h"
 #include "pipeline/core/event.h"
 
 namespace OHOS {
@@ -52,6 +53,7 @@ public:
     void ResetEventCompleteAllReceived();
 
 private:
+    OSAL::Mutex mediaStatMutex_ {};
     std::vector<MediaStat> mediaStats_;
 };
 } // Media
