@@ -97,7 +97,9 @@
                 }
               }
             ],
-            "test": []
+            "test": [
+              "//foundation/multimedia/histreamer/tests:histreamer_test"
+            ]
         }
     }
 }

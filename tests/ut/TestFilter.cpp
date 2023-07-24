@@ -15,11 +15,10 @@
 
 #include <memory>
 #include <gtest/gtest.h>
-#include <test_helper.h>
 #include "pipeline/core/filter_base.h"
-#include "plugin/common/any.h"
 
 using namespace OHOS::Media::Pipeline;
+using namespace testing::ext;
 
 namespace OHOS::Media::Test {
 class UtTestFilter : public ::testing::Test {
@@ -35,12 +34,12 @@ public:
     }
 };
 
-TEST_F(UtTestFilter, Can_find_port_if_it_exists)
+HWTEST_F(UtTestFilter, Can_find_port_if_it_exists, TestSize.Level1)
 {
     ASSERT_EQ(port2, FilterBase::FindPort(list, "port2"));
 }
 
-TEST_F(UtTestFilter, Can_not_find_port_if_it_does_not_exists)
+HWTEST_F(UtTestFilter, Can_not_find_port_if_it_does_not_exists, TestSize.Level1)
 {
     ASSERT_TRUE(nullptr == FilterBase::FindPort(list, "port3"));
 }

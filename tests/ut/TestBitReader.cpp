@@ -21,6 +21,8 @@
 
 #include "plugin/plugins/ffmpeg_adapter/utils/bit_reader.h"
 
+using namespace testing::ext;
+
 namespace OHOS {
 namespace Media {
 namespace Test {
@@ -38,7 +40,7 @@ public:
     Ffmpeg::BitReader bitReader;
 };
 
-TEST_F(TestBitReader, test_read_bits)
+HWTEST_F(TestBitReader, test_read_bits, TestSize.Level1)
 {
     const uint8_t data[] = {0xff, 0x11, 0x22, 0x33};
     bitReader.Reset(data, sizeof(data));
@@ -56,7 +58,7 @@ TEST_F(TestBitReader, test_read_bits)
     EXPECT_EQ(bitReader.ReadBits(4, val), false);
 }
 
-TEST_F(TestBitReader, test_skip_bits)
+HWTEST_F(TestBitReader, test_skip_bits, TestSize.Level1)
 {
     const uint8_t data[] = {0xff, 0x11, 0x22, 0x33};
     bitReader.Reset(data, sizeof(data));
@@ -71,7 +73,7 @@ TEST_F(TestBitReader, test_skip_bits)
     EXPECT_EQ(val, 0x33);
 }
 
-TEST_F(TestBitReader, test_show_bits)
+HWTEST_F(TestBitReader, test_show_bits, TestSize.Level1)
 {
     const uint8_t data[] = {0xff, 0x11, 0x22, 0x33};
     bitReader.Reset(data, sizeof(data));
@@ -87,7 +89,7 @@ TEST_F(TestBitReader, test_show_bits)
     EXPECT_EQ(val, 0x11);
 }
 
-TEST_F(TestBitReader, test_seek_bits)
+HWTEST_F(TestBitReader, test_seek_bits, TestSize.Level1)
 {
     const uint8_t data[] = {0xff, 0x11, 0x22, 0x33};
     bitReader.Reset(data, sizeof(data));

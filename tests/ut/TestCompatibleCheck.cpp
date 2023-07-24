@@ -24,12 +24,13 @@
 #include "plugin/common/plugin_audio_tags.h"
 #include "plugin/common/plugin_meta.h"
 
+using namespace testing::ext;
 
 using namespace std;
 using namespace OHOS::Media::Plugin;
 
 namespace OHOS::Media::Test {
-TEST(TestApplyCapability, mime_Test)
+HWTEST(TestApplyCapability, mime_Test, TestSize.Level1)
 {
     Capability wildcard {"*"};
     Capability audioWildcard {"audio/*"};
@@ -78,7 +79,7 @@ TEST(TestApplyCapability, mime_Test)
     ASSERT_TRUE(out.keys.empty());
 }
 
-TEST(TestMergeCapabilityKeys, SingleType_Test)
+HWTEST(TestMergeCapabilityKeys, SingleType_Test, TestSize.Level1)
 {
     Capability wildMimeCapability("*");
     Capability out;
@@ -222,7 +223,7 @@ TEST(TestMergeCapabilityKeys, SingleType_Test)
     ASSERT_TRUE(intCaps5[1] == 44100);
 }
 
-TEST(TestMergeCapability, SingleType_Test)
+HWTEST(TestMergeCapability, SingleType_Test, TestSize.Level1)
 {
     Capability wildMimeCapability("*");
     Capability out;
@@ -366,7 +367,7 @@ TEST(TestMergeCapability, SingleType_Test)
     ASSERT_TRUE(intCaps5[1] == 44100);
 }
 
-TEST(TestMergeCapability, ComplexType_Test)
+HWTEST(TestMergeCapability, ComplexType_Test, TestSize.Level1)
 {
     Capability wildMimeCapability("*");
     Capability out;
@@ -438,7 +439,7 @@ TEST(TestMergeCapability, ComplexType_Test)
     ASSERT_TRUE(out.keys.empty());
 }
 
-TEST(TestApplyCapabilitySet, ComplexType_Test)
+HWTEST(TestApplyCapabilitySet, ComplexType_Test, TestSize.Level1)
 {
     Capability out;
 
@@ -490,7 +491,7 @@ TEST(TestApplyCapabilitySet, ComplexType_Test)
     ASSERT_TRUE(out.keys.empty());
 }
 
-TEST(TestMetaToCap, MetaToCap_Test)
+HWTEST(TestMetaToCap, MetaToCap_Test, TestSize.Level1)
 {
     Meta meta;
     meta.Set<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_RAW);
@@ -513,7 +514,7 @@ TEST(TestMetaToCap, MetaToCap_Test)
     ASSERT_TRUE(sampleRate == 48000);
 }
 
-TEST(TestMergeMetaWithCapability, MergeMetaWithEmptyKeyCapability_Test)
+HWTEST(TestMergeMetaWithCapability, MergeMetaWithEmptyKeyCapability_Test, TestSize.Level1)
 {
     Meta meta;
     meta.Set<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
@@ -546,7 +547,7 @@ TEST(TestMergeMetaWithCapability, MergeMetaWithEmptyKeyCapability_Test)
     ASSERT_TRUE(outSampleFormat1 == AudioSampleFormat::U16P);
 }
 
-TEST(TestMergeMetaWithCapability, Merge_meta_contains_meta_ony_key_capability_Test)
+HWTEST(TestMergeMetaWithCapability, Merge_meta_contains_meta_ony_key_capability_Test, TestSize.Level1)
 {
     Meta meta;
     meta.Set<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
@@ -595,7 +596,7 @@ TEST(TestMergeMetaWithCapability, Merge_meta_contains_meta_ony_key_capability_Te
     ASSERT_TRUE(outBitRate == 128000);
 }
 
-TEST(TestMergeMetaWithCapability, Merge_meta_with_capability_failed_Test)
+HWTEST(TestMergeMetaWithCapability, Merge_meta_with_capability_failed_Test, TestSize.Level1)
 {
     Meta meta;
     meta.Set<Plugin::Tag::MIME>(MEDIA_MIME_AUDIO_MPEG);
