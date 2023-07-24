@@ -26,6 +26,8 @@
 #include "foundation/osal/base/synchronizer.h"
 #include "foundation/osal/thread/task.h"
 
+using namespace testing::ext;
+
 namespace OHOS {
 namespace Media {
 namespace Test {
@@ -56,7 +58,7 @@ public:
 
 Synchronizer<int, int> TestSynchronizer::synchronizer("sync");
 
-TEST_F(TestSynchronizer, test_waitfor_fail)
+HWTEST_F(TestSynchronizer, test_waitfor_fail, TestSize.Level1)
 {
     int syncId = 0;
     task1->RegisterHandler([this, syncId] { synchronizer.Notify(syncId, 1234); });
@@ -71,7 +73,7 @@ TEST_F(TestSynchronizer, test_waitfor_fail)
     std::cout << "TestSynchronizer time diff: " << diff << std::endl;
 }
 
-TEST_F(TestSynchronizer, test_waitfor_succ)
+HWTEST_F(TestSynchronizer, test_waitfor_succ, TestSize.Level1)
 {
     int syncId = 0;
     task1->RegisterHandler([this, syncId] { synchronizer.Notify(syncId, 1234); });
@@ -82,7 +84,7 @@ TEST_F(TestSynchronizer, test_waitfor_succ)
     EXPECT_EQ(true, rtv);
 }
 
-TEST_F(TestSynchronizer, test_waitfor_with_result_succ)
+HWTEST_F(TestSynchronizer, test_waitfor_with_result_succ, TestSize.Level1)
 {
     int syncId = 0;
     int expect = 1234;
@@ -96,7 +98,7 @@ TEST_F(TestSynchronizer, test_waitfor_with_result_succ)
     EXPECT_EQ(expect, result);
 }
 
-TEST_F(TestSynchronizer, test_wait_succ)
+HWTEST_F(TestSynchronizer, test_wait_succ, TestSize.Level1)
 {
     int syncId = 0;
     int result = 0;

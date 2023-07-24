@@ -21,22 +21,24 @@
 #define protected public
 #include "foundation/cpp_ext/algorithm_ext.h"
 
+using namespace testing::ext;
+
 namespace OHOS {
 namespace Media {
 namespace Test {
-TEST(TestAnyOf, any_of_should_return_true_if_int_item_exists)
+HWTEST(TestAnyOf, any_of_should_return_true_if_int_item_exists, TestSize.Level1)
 {
     std::vector<int> vec {1, 2, 3, 4};
     ASSERT_EQ(true, CppExt::AnyOf(std::begin(vec), std::end(vec), [](int item) { return item == 3; }));
 }
-TEST(TestAnyOf, any_of_should_return_true_if_string_item_exists)
+HWTEST(TestAnyOf, any_of_should_return_true_if_string_item_exists, TestSize.Level1)
 {
     std::vector<std::string> vec {"one", "two", "three"};
     ASSERT_EQ(true, CppExt::AnyOf(std::begin(vec), std::end(vec),
                           [](const std::string& item) { return item == "two"; }));
 }
 
-TEST(TestAnyOf, any_of_should_return_false_if_item_not_exists)
+HWTEST(TestAnyOf, any_of_should_return_false_if_item_not_exists, TestSize.Level1)
 {
     std::vector<int> vec {1, 2, 3, 4};
     ASSERT_EQ(false, CppExt::AnyOf(std::begin(vec), std::end(vec), [](int item) { return item == 8; }));

@@ -21,12 +21,14 @@
 
 #include "plugin/common/plugin_meta.h"
 
+using namespace testing::ext;
+
 namespace OHOS {
 namespace Media {
 namespace Test {
 using namespace OHOS::Media::Plugin;
 
-TEST(TestMeta, can_get_uint32_after_set)
+HWTEST(TestMeta, can_get_uint32_after_set, TestSize.Level1)
 {
     Meta meta;
     uint32_t channels = 64;
@@ -36,14 +38,14 @@ TEST(TestMeta, can_get_uint32_after_set)
     ASSERT_EQ(channels, outChannels);
 }
 
-TEST(TestMeta, can_not_get_uint32_if_not_set)
+HWTEST(TestMeta, can_not_get_uint32_if_not_set, TestSize.Level1)
 {
     Meta meta;
     uint32_t canNotGet = 0;
     ASSERT_FALSE(meta.Get<Tag::AUDIO_CHANNELS>(canNotGet));
 }
 
-TEST(TestMeta, set_then_get_cstring)
+HWTEST(TestMeta, set_then_get_cstring, TestSize.Level1)
 {
     Meta meta;
     std::string artist("abcd");
@@ -53,7 +55,7 @@ TEST(TestMeta, set_then_get_cstring)
     ASSERT_STREQ(artist.c_str(), outArtist.c_str());
 }
 
-TEST(TestMeta, set_then_get_float)
+HWTEST(TestMeta, set_then_get_float, TestSize.Level1)
 {
     Meta meta;
     std::string in = "9.9999f";
@@ -63,7 +65,7 @@ TEST(TestMeta, set_then_get_float)
     ASSERT_TRUE(in == out);
 }
 
-TEST(TestMeta, fail_to_get_unexisted_data)
+HWTEST(TestMeta, fail_to_get_unexisted_data, TestSize.Level1)
 {
     Meta meta;
     int32_t channels = 64;
@@ -72,7 +74,7 @@ TEST(TestMeta, fail_to_get_unexisted_data)
     ASSERT_FALSE(meta.Get<Tag::MEDIA_BITRATE>(bitRate));
 }
 
-TEST(TestMeta, remove_data)
+HWTEST(TestMeta, remove_data, TestSize.Level1)
 {
     Meta meta;
     uint32_t channels = 64;
@@ -84,7 +86,7 @@ TEST(TestMeta, remove_data)
     ASSERT_FALSE(meta.Get<Tag::AUDIO_CHANNELS>(out));
 }
 
-TEST(TestMeta, clear_data)
+HWTEST(TestMeta, clear_data, TestSize.Level1)
 {
     Meta meta;
     std::string title("title");
@@ -104,7 +106,7 @@ TEST(TestMeta, clear_data)
     ASSERT_EQ(0u, oChannels);
 }
 
-TEST(TestMeta, update_meta)
+HWTEST(TestMeta, update_meta, TestSize.Level1)
 {
     Meta meta;
     std::string title("title");
@@ -129,7 +131,7 @@ TEST(TestMeta, update_meta)
     ASSERT_EQ(channels2, oChannel);
 }
 
-TEST(TestMeta, Can_insert_tag_value_int64_to_Meta)
+HWTEST(TestMeta, Can_insert_tag_value_int64_to_Meta, TestSize.Level1)
 {
     Meta meta;
     ASSERT_TRUE(meta.Set<Tag::MEDIA_DURATION>(10000));
@@ -142,7 +144,7 @@ TEST(TestMeta, Can_insert_tag_value_int64_to_Meta)
     ASSERT_EQ(500, size);
 }
 
-TEST(TestMeta, Can_insert_tag_value_uint32_to_Meta)
+HWTEST(TestMeta, Can_insert_tag_value_uint32_to_Meta, TestSize.Level1)
 {
     Meta meta;
     ASSERT_TRUE(meta.Set<Tag::TRACK_ID>(10000));

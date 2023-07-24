@@ -19,12 +19,14 @@
 #define private public
 #define protected public
 
+using namespace testing::ext;
+
 namespace OHOS {
 namespace Media {
 namespace Test {
 using namespace Plugin;
 
-TEST(ChannelLayoutTest, test_convert_from_ffmpeg_mono)
+HWTEST(ChannelLayoutTest, test_convert_from_ffmpeg_mono, TestSize.Level1)
 {
     int channels = 1;
     uint64_t ffChannelLayout = 0x4;
@@ -33,7 +35,7 @@ TEST(ChannelLayoutTest, test_convert_from_ffmpeg_mono)
     EXPECT_EQ(AudioChannelLayout::MONO, channelLayout);
 }
 
-TEST(ChannelLayoutTest, test_convert_from_ffmpeg_stereo)
+HWTEST(ChannelLayoutTest, test_convert_from_ffmpeg_stereo, TestSize.Level1)
 {
     int channels = 2;
     uint64_t ffChannelLayout = 0x3;

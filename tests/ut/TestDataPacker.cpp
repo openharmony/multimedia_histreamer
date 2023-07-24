@@ -21,6 +21,8 @@
 #define protected public
 #include "pipeline/filters/demux/data_packer.h"
 
+using namespace testing::ext;
+
 namespace OHOS {
 namespace Media {
 namespace Test {
@@ -56,14 +58,14 @@ AVBufferPtr CreateEmptyBuffer(size_t size)
     return buffer;
 }
 
-TEST_F(TestDataPacker, can_push_one_buffer_to_datapacker)
+HWTEST_F(TestDataPacker, can_push_one_buffer_to_datapacker, TestSize.Level1)
 {
     auto bufferPtr = CreateBuffer(10);
     dataPacker->PushData(bufferPtr, 0);
     ASSERT_STREQ("DataPacker (offset 0, size 10, buffer count 1)", dataPacker->ToString().c_str());
 }
 
-TEST_F(TestDataPacker, can_push_two_buffers_to_datapacker)
+HWTEST_F(TestDataPacker, can_push_two_buffers_to_datapacker, TestSize.Level1)
 {
     auto bufferPtr = CreateBuffer(10);
     dataPacker->PushData(bufferPtr, 0);
@@ -72,7 +74,7 @@ TEST_F(TestDataPacker, can_push_two_buffers_to_datapacker)
     ASSERT_STREQ("DataPacker (offset 0, size 14, buffer count 2)", dataPacker->ToString().c_str());
 }
 
-TEST_F(TestDataPacker, should_return_true_if_check_range_in_datapacker)
+HWTEST_F(TestDataPacker, should_return_true_if_check_range_in_datapacker, TestSize.Level1)
 {
     auto bufferPtr = CreateBuffer(10);
     dataPacker->PushData(bufferPtr, 0);
@@ -81,7 +83,7 @@ TEST_F(TestDataPacker, should_return_true_if_check_range_in_datapacker)
     ASSERT_EQ(curOffset, 10);
 }
 
-TEST_F(TestDataPacker, should_return_false_if_check_range_not_in_datapacker)
+HWTEST_F(TestDataPacker, should_return_false_if_check_range_not_in_datapacker, TestSize.Level1)
 {
     auto bufferPtr = CreateBuffer(10);
     dataPacker->PushData(bufferPtr, 0);
@@ -89,7 +91,7 @@ TEST_F(TestDataPacker, should_return_false_if_check_range_not_in_datapacker)
     ASSERT_FALSE(dataPacker->IsDataAvailable(11, 2, curOffset));
 }
 
-TEST_F(TestDataPacker, should_update_cur_offset_to_get_range_offset_if_get_range_start_not_in_datapacker)
+HWTEST_F(TestDataPacker, should_update_offset_to_get_range_offset_if_start_not_in_datapacker, TestSize.Level1)
 {
     auto bufferPtr = CreateBuffer(10);
     dataPacker->PushData(bufferPtr, 0);
@@ -98,7 +100,7 @@ TEST_F(TestDataPacker, should_update_cur_offset_to_get_range_offset_if_get_range
     ASSERT_EQ(curOffset, 11);
 }
 
-TEST_F(TestDataPacker, should_update_cur_offset_to_datapacker_offset_end_if_get_range_start_in_datapacker)
+HWTEST_F(TestDataPacker, should_update_offset_to_datapacker_offset_end_if_start_in_datapacker, TestSize.Level1)
 {
     auto bufferPtr = CreateBuffer(10);
     dataPacker->PushData(bufferPtr, 0);
@@ -107,7 +109,7 @@ TEST_F(TestDataPacker, should_update_cur_offset_to_datapacker_offset_end_if_get_
     ASSERT_EQ(curOffset, 10);
 }
 
-TEST_F(TestDataPacker, can_get_data_in_the_middle_of_one_buffer)
+HWTEST_F(TestDataPacker, can_get_data_in_the_middle_of_one_buffer, TestSize.Level1)
 {
     auto bufferPtr = CreateBuffer(10);
     dataPacker->PushData(bufferPtr, 0);
@@ -120,7 +122,7 @@ TEST_F(TestDataPacker, can_get_data_in_the_middle_of_one_buffer)
     ASSERT_STREQ("45", (const char *)(bufferOut->GetMemory()->GetReadOnlyData()));
 }
 
-TEST_F(TestDataPacker, remove_old_data_after_second_get_range)
+HWTEST_F(TestDataPacker, remove_old_data_after_second_get_range, TestSize.Level1)
 {
     auto bufferPtr = CreateBuffer(10);
     dataPacker->PushData(bufferPtr, 0);
@@ -135,7 +137,7 @@ TEST_F(TestDataPacker, remove_old_data_after_second_get_range)
     ASSERT_STREQ("DataPacker (offset 5, size 5, buffer count 1)", dataPacker->ToString().c_str());
 }
 
-TEST_F(TestDataPacker, remove_old_data_after_second_get_range_when_two_buffers_in_datapacker)
+HWTEST_F(TestDataPacker, remove_old_data_after_second_get_range_when_two_buffers_in_datapacker, TestSize.Level1)
 {
     auto bufferPtr = CreateBuffer(10);
     dataPacker->PushData(bufferPtr, 0);
@@ -151,7 +153,7 @@ TEST_F(TestDataPacker, remove_old_data_after_second_get_range_when_two_buffers_i
     dataPacker->GetRange(11, 2, bufferOut);
     ASSERT_STREQ("DataPacker (offset 11, size 3, buffer count 1)", dataPacker->ToString().c_str());
 }
-TEST_F(TestDataPacker, can_get_data_from_two_buffers)
+HWTEST_F(TestDataPacker, can_get_data_from_two_buffers, TestSize.Level1)
 {
     auto bufferPtr = CreateBuffer(10);
     dataPacker->PushData(bufferPtr, 0);
