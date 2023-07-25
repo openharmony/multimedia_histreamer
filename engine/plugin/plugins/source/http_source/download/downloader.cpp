@@ -122,6 +122,7 @@ Downloader::~Downloader()
 bool Downloader::Download(const std::shared_ptr<DownloadRequest>& request, int32_t waitMs)
 {
     MEDIA_LOG_I("In");
+    OSAL::ScopedLock lock(operatorMutex_);
     requestQue_->SetActive(true);
     if (waitMs == -1) { // wait until push success
         requestQue_->Push(request);
@@ -132,43 +133,58 @@ bool Downloader::Download(const std::shared_ptr<DownloadRequest>& request, int32
 
 void Downloader::Start()
 {
-    MEDIA_LOG_I("Begin");
+    MEDIA_LOG_I("start Begin");
     task_->Start();
-    MEDIA_LOG_I("End");
+    MEDIA_LOG_I("start End");
 }
 
 void Downloader::Pause()
 {
-    MEDIA_LOG_I("Begin");
-    requestQue_->SetActive(false, false);
+    {
+        OSAL::ScopedLock lock(operatorMutex_);
+        MEDIA_LOG_I("pause Begin");
+        requestQue_->SetActive(false, false);
+    }
     task_->Pause();
-    MEDIA_LOG_I("End");
+    MEDIA_LOG_I("pause End");
 }
 
 void Downloader::Resume()
 {
-    MEDIA_LOG_I("Begin");
-    requestQue_->SetActive(true);
-    currentRequest_->isEos_ = false;
+    {
+        OSAL::ScopedLock lock(operatorMutex_);
+        MEDIA_LOG_I("resume Begin");
+        requestQue_->SetActive(true);
+        if (currentRequest_ != nullptr) {
+            currentRequest_->isEos_ = false;
+        }
+    }
     Start();
-    MEDIA_LOG_I("End");
+    MEDIA_LOG_I("resume End");
 }
 
 void Downloader::Stop(bool isAsync)
 {
-    MEDIA_LOG_I("Begin");
-    requestQue_->SetActive(false);
-    currentRequest_->Close();
+    {
+        OSAL::ScopedLock lock(operatorMutex_);
+        MEDIA_LOG_I("Stop Begin");
+        requestQue_->SetActive(false);
+        if (currentRequest_ != nullptr) {
+            currentRequest_->Close();
+        }
+    }
     if (isAsync) {
         task_->StopAsync();
     } else {
         task_->Stop();
     }
-    MEDIA_LOG_I("End");
+    MEDIA_LOG_I("Stop End");
 }
 
 bool Downloader::Seek(int64_t offset)
 {
+    OSAL::ScopedLock lock(operatorMutex_);
+    FALSE_RETURN_V(currentRequest_ != nullptr, false);
     size_t contentLength = currentRequest_->GetFileContentLength();
     MEDIA_LOG_I("Seek Begin, offset = " PUBLIC_LOG_D64 ", contentLength = " PUBLIC_LOG_ZU, offset, contentLength);
     if (offset >= 0 && offset < static_cast<int64_t>(contentLength)) {
@@ -184,25 +200,34 @@ bool Downloader::Seek(int64_t offset)
 // Pause download thread before use currentRequest_
 bool Downloader::Retry(const std::shared_ptr<DownloadRequest>& request)
 {
-    MEDIA_LOG_I(PUBLIC_LOG_S " Retry Begin, url : " PUBLIC_LOG_S, name_.c_str(), request->url_.c_str());
-    FALSE_RETURN_V(client_ != nullptr, false);
-    Pause();
-    client_->Close();
-    if (currentRequest_ != nullptr) {
-        if (currentRequest_->IsSame(request) && !shouldStartNextRequest) {
-            currentRequest_->retryTimes_++;
-            MEDIA_LOG_D("Do retry.");
-        }
-        client_->Open(currentRequest_->url_);
+    {
+        OSAL::ScopedLock lock(operatorMutex_);
+        MEDIA_LOG_I(PUBLIC_LOG_S " Retry Begin, url : " PUBLIC_LOG_S, name_.c_str(), request->url_.c_str());
+        FALSE_RETURN_V(client_ != nullptr && !shouldStartNextRequest, false);
+        requestQue_->SetActive(false, false);
     }
-    Resume();
-    MEDIA_LOG_I("Downloader Retry End");
+    task_->Pause();
+    {
+        OSAL::ScopedLock lock(operatorMutex_);
+        FALSE_RETURN_V(client_ != nullptr && !shouldStartNextRequest, false);
+        client_->Close();
+        if (currentRequest_ != nullptr) {
+            if (currentRequest_->IsSame(request) && !shouldStartNextRequest) {
+                currentRequest_->retryTimes_++;
+                MEDIA_LOG_D("Do retry.");
+            }
+            client_->Open(currentRequest_->url_);
+        }
+        requestQue_->SetActive(true);
+        currentRequest_->isEos_ = false;
+    }
+    task_->Start();
     return true;
 }
 
 bool Downloader::BeginDownload()
 {
-    MEDIA_LOG_I("Begin");
+    MEDIA_LOG_I("BeginDownload");
     std::string url = currentRequest_->url_;
     FALSE_RETURN_V(!url.empty(), false);
 
@@ -219,12 +244,14 @@ bool Downloader::BeginDownload()
 
 void Downloader::HttpDownloadLoop()
 {
+    OSAL::ScopedLock lock(operatorMutex_);
     if (shouldStartNextRequest) {
-        currentRequest_ = requestQue_->Pop(); // 1000);
-        if (!currentRequest_) {
-            MEDIA_LOG_W("HttpDownloadLoop currentRequest_ is null.");
+        std::shared_ptr<DownloadRequest> tempRequest = requestQue_->Pop(1000); //1000ms超时限制
+        if (!tempRequest) {
+            MEDIA_LOG_W("HttpDownloadLoop tempRequest is null.");
             return;
         }
+        currentRequest_ = tempRequest;
         BeginDownload();
         shouldStartNextRequest = false;
     }
@@ -254,11 +281,11 @@ void Downloader::HandleRetOK() {
     if (currentRequest_->retryTimes_ > 0) {
         currentRequest_->retryTimes_ = 0;
     }
-    int64_t remaining = currentRequest_->headerInfo_.fileContentLen -
-        static_cast<size_t>(currentRequest_->startPos_);
+    int64_t remaining = static_cast<int64_t>(currentRequest_->headerInfo_.fileContentLen) -
+        currentRequest_->startPos_;
     if (currentRequest_->headerInfo_.fileContentLen > 0 && remaining <= 0) { // 检查是否播放结束
         MEDIA_LOG_I("http transfer reach end, startPos_ " PUBLIC_LOG_D64 " url: " PUBLIC_LOG_S,
-                    currentRequest_->startPos_, currentRequest_->url_.c_str());
+            currentRequest_->startPos_, currentRequest_->url_.c_str());
         currentRequest_->isEos_ = true;
         if (requestQue_->Empty()) {
             task_->PauseAsync();

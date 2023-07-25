@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 #include "foundation/osal/thread/task.h"
+#include "foundation/osal/thread/mutex.h"
 #include "foundation/utils/blocking_queue.h"
 #include "foundation/osal/utils/util.h"
 #include "network_client.h"
@@ -132,6 +133,7 @@ private:
     std::shared_ptr<NetworkClient> client_;
     std::shared_ptr<OSAL::Task> task_;
     std::shared_ptr<BlockingQueue<std::shared_ptr<DownloadRequest>>> requestQue_;
+    OSAL::Mutex operatorMutex_{};
 
     std::shared_ptr<DownloadRequest> currentRequest_;
     bool shouldStartNextRequest {false};

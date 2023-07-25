@@ -120,10 +120,12 @@ bool HttpMediaDownloader::Seek(int offset)
     downloader_->Pause();
     buffer_->Clear();
     buffer_->SetActive(true);
-    downloader_->Seek(offset);
-    buffer_->SetMediaOffset(offset);
+    bool result = downloader_->Seek(offset);
+    if (result) {
+        buffer_->SetMediaOffset(offset);
+    }
     downloader_->Resume();
-    return true;
+    return result;
 }
 
 size_t HttpMediaDownloader::GetContentLength() const
