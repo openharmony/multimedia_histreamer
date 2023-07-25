@@ -25,6 +25,7 @@
 #include <memory>   // NOLINT
 #include "foundation/osal/base/synchronizer.h"
 #include "foundation/osal/thread/task.h"
+#include "foundation/pre_defines.h"
 
 using namespace testing::ext;
 
@@ -61,7 +62,10 @@ Synchronizer<int, int> TestSynchronizer::synchronizer("sync");
 HWTEST_F(TestSynchronizer, test_waitfor_fail, TestSize.Level1)
 {
     int syncId = 0;
-    task1->RegisterHandler([this, syncId] { synchronizer.Notify(syncId, 1234); });
+    task1->RegisterHandler([this, syncId] {
+        UNUSED_VARIABLE(this);
+        synchronizer.Notify(syncId, 1234);
+    });
     int timeoutMs = 100;
     auto start = std::chrono::high_resolution_clock::now();
     auto rtv = synchronizer.WaitFor(
@@ -76,7 +80,10 @@ HWTEST_F(TestSynchronizer, test_waitfor_fail, TestSize.Level1)
 HWTEST_F(TestSynchronizer, test_waitfor_succ, TestSize.Level1)
 {
     int syncId = 0;
-    task1->RegisterHandler([this, syncId] { synchronizer.Notify(syncId, 1234); });
+    task1->RegisterHandler([this, syncId] {
+        UNUSED_VARIABLE(this);
+        synchronizer.Notify(syncId, 1234);
+    });
     task1->Start();
     int timeoutMs = 1000;
     auto rtv = synchronizer.WaitFor(
@@ -88,7 +95,10 @@ HWTEST_F(TestSynchronizer, test_waitfor_with_result_succ, TestSize.Level1)
 {
     int syncId = 0;
     int expect = 1234;
-    task1->RegisterHandler([this, syncId, expect] { synchronizer.Notify(syncId, expect); });
+    task1->RegisterHandler([this, syncId, expect] {
+        UNUSED_VARIABLE(this);
+        synchronizer.Notify(syncId, expect);
+    });
     task1->Start();
     int timeoutMs = 1000;
     int result = 0;
@@ -104,6 +114,7 @@ HWTEST_F(TestSynchronizer, test_wait_succ, TestSize.Level1)
     int result = 0;
     int expect = 1234;
     task1->RegisterHandler([this, syncId, &result] {
+        UNUSED_VARIABLE(this);
         if (!isDataRcved.load()) {
             synchronizer.Wait(
                 syncId, [] {}, result);
@@ -111,7 +122,10 @@ HWTEST_F(TestSynchronizer, test_wait_succ, TestSize.Level1)
         }
     });
     task1->Start();
-    task2->RegisterHandler([this, syncId, expect] { synchronizer.Notify(syncId, expect); });
+    task2->RegisterHandler([this, syncId, expect] {
+        UNUSED_VARIABLE(this);
+        synchronizer.Notify(syncId, expect);
+    });
     task2->Start();
     while (!isDataRcved.load()) {}
     EXPECT_EQ(expect, result);

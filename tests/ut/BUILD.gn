@@ -37,7 +37,7 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/engine/pipeline/filters/demux:demuxer_filter",
     "$histreamer_root_dir/engine/plugin:histreamer_plugin_base",
     "$histreamer_root_dir/engine/plugin:histreamer_plugin_core",
-    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_audio_decoders",
+    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_demuxers",
     "$histreamer_root_dir/engine/scene/player:histreamer_player",
     "//third_party/googletest:gtest_rtti",
   ]
@@ -45,6 +45,9 @@ ohos_unittest("histreamer_unit_test") {
   sources = [
     "$histreamer_root_dir/engine/include/plugin/common/plugin_types.h",
     "$histreamer_root_dir/engine/include/plugin/core/plugin_manager.h",
+    "./TestAlgoExt.cpp",
+    "./TestAny.cpp",
+    "./TestBitReader.cpp",
     "./TestBufferPool.cpp",
     "./TestCompatibleCheck.cpp",
     "./TestDataPacker.cpp",
@@ -54,6 +57,7 @@ ohos_unittest("histreamer_unit_test") {
     "./TestMeta.cpp",
     "./TestMimeDefs.cpp",
     "./TestPluginManager.cpp",
+    "./TestSynchronizer.cpp",
     "./plugins/UtSourceTest1.cpp",
     "./plugins/UtSourceTest2.cpp",
   ]
