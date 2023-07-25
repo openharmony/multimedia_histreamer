@@ -25,6 +25,7 @@
 #include <dirent.h>
 #include "foundation/log.h"
 #include "foundation/osal/filesystem/file_system.h"
+#include "foundation/osal/utils/util.h"
 
 namespace OHOS {
 namespace Media {
@@ -65,12 +66,14 @@ void PrepareDumpDir()
     for (auto iter : allDumpFiles) {
         std::string filePath = GetDumpFileDir() + "/" + iter;
         MEDIA_LOG_I("Prepare dumpDir: " PUBLIC_LOG_S, filePath.c_str());
-        if (access(filePath.c_str(), 0) == 0) { // 文件存在
-            OSAL::FileSystem::ClearFileContent(filePath);
+        std::string fullPath;
+        bool isFileExist = OSAL::ConvertFullPath(filePath, fullPath);
+        if (isFileExist) { // 文件存在
+            OSAL::FileSystem::ClearFileContent(fullPath);
         }
-        allDumpFileFds[iter] = fopen(filePath.c_str(), "ab+");
+        allDumpFileFds[iter] = fopen(fullPath.c_str(), "ab+");
         if (allDumpFileFds[iter] == nullptr) {
-            MEDIA_LOG_W("Open file(" PUBLIC_LOG_S ") failed(" PUBLIC_LOG_S ").", filePath.c_str(), strerror(errno));
+            MEDIA_LOG_W("Open file(" PUBLIC_LOG_S ") failed(" PUBLIC_LOG_S ").", fullPath.c_str(), strerror(errno));
         }
     }
 }
