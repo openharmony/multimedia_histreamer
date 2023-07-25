@@ -33,9 +33,12 @@ ohos_unittest("histreamer_unit_test") {
   cflags = histreamer_unittest_cflags
 
   deps = [
+    "$histreamer_root_dir/engine/pipeline:histreamer_pipeline_base",
     "$histreamer_root_dir/engine/pipeline/filters/demux:demuxer_filter",
     "$histreamer_root_dir/engine/plugin:histreamer_plugin_base",
     "$histreamer_root_dir/engine/plugin:histreamer_plugin_core",
+    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_audio_decoders",
+    "$histreamer_root_dir/engine/scene/player:histreamer_player",
     "//third_party/googletest:gtest_rtti",
   ]
 
@@ -45,7 +48,9 @@ ohos_unittest("histreamer_unit_test") {
     "./TestBufferPool.cpp",
     "./TestCompatibleCheck.cpp",
     "./TestDataPacker.cpp",
+    "./TestFFmpegUtils.cpp",
     "./TestFilter.cpp",
+    "./TestHiPlayer.cpp",
     "./TestMeta.cpp",
     "./TestMimeDefs.cpp",
     "./TestPluginManager.cpp",
