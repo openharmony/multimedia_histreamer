@@ -14,12 +14,13 @@
  */
 
 #include <gtest/gtest.h>
+#include "scene/player/standard/hiplayer_impl.h"
+#include "plugin/common/plugin_meta.h"
 
 #define private public
 #define protected public
 #define UNIT_TEST 1
 
-#include "plugin/common/plugin_meta.h"
 
 using namespace testing::ext;
 
@@ -27,6 +28,7 @@ namespace OHOS {
 namespace Media {
 namespace Test {
 using namespace OHOS::Media::Plugin;
+using namespace OHOS::Media::Pipeline;
 
 HWTEST(TestMeta, can_get_uint32_after_set, TestSize.Level1)
 {
@@ -151,6 +153,27 @@ HWTEST(TestMeta, Can_insert_tag_value_uint32_to_Meta, TestSize.Level1)
     uint32_t value;
     ASSERT_TRUE(meta.Get<Tag::TRACK_ID>(value));
     ASSERT_EQ(10000, value);
+}
+
+HWTEST(TestMeta, return_value_after_meta_to_capability, TestSize.Level1)
+{
+    Meta meta;
+    meta.Set<Plugin::Tag::AUDIO_MPEG_VERSION>(1);
+    meta.Set<Plugin::Tag::AUDIO_CHANNELS>(2);
+    std::shared_ptr<Capability> cap = MetaToCapability(meta);
+    auto mpegVersion = Plugin::AnyCast<uint32_t>(cap->keys[CapabilityID::AUDIO_MPEG_VERSION]);
+    ASSERT_TRUE(mpegVersion == 1);
+    auto channels = Plugin::AnyCast<uint32_t>(cap->keys[CapabilityID::AUDIO_CHANNELS]);
+    ASSERT_TRUE(channels == 2);
+}
+
+HWTEST(TestMeta, meta_to_string, TestSize.Level1)
+{
+    Meta meta;
+    meta.Set<Plugin::Tag::AUDIO_MPEG_VERSION>(1);
+    meta.Set<Plugin::Tag::AUDIO_CHANNELS>(2);
+    std::string string = Meta2String(meta);
+    ASSERT_EQ(string, "Meta{channels:(uint32_t)2, ad_mpeg_ver:(uint32_t)1}");
 }
 } // namespace Test
 } // namespace Media
