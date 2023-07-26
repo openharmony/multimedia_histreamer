@@ -183,6 +183,132 @@ HWTEST(AACAudioConfigParserTest, test_aac_audio_config_parser_17, TestSize.Level
     EXPECT_EQ(false, status);
 }
 
+HWTEST(UtilsTest, testAVStrError, TestSize.Level1)
+{
+    const int number = 1;
+    auto res = AVStrError(number);
+    ASSERT_STREQ(res.c_str(), "Error number 1 occurred");
+}
+
+HWTEST(UtilsTest, testConvertTimeFromFFmpeg, TestSize.Level1)
+{
+    int64_t number = 1000;
+    AVRational rational = av_make_q(1000, 500);
+    auto res = ConvertTimeFromFFmpeg(number, rational);
+    ASSERT_EQ(res, 2000000000000);
+    number = ((int64_t)UINT64_C(0x8000000000000000));
+    auto res2 = ConvertTimeFromFFmpeg(number, rational);
+    ASSERT_EQ(res2, -1);
+}
+
+HWTEST(UtilsTest, testConvertTimeToFFmpeg, TestSize.Level1)
+{
+    int64_t number = 1045566545;
+    AVRational rational = av_make_q(0, 50);
+    auto res = ConvertTimeToFFmpeg(number, rational);
+    ASSERT_EQ(res, ((int64_t)UINT64_C(0x8000000000000000)));
+    rational = av_make_q(10, 500);
+    auto res2 = ConvertTimeToFFmpeg(number, rational);
+    ASSERT_EQ(res2, 52);
+}
+
+HWTEST(UtilsTest, testFillAVPicture, TestSize.Level1)
+{
+    AVFrame* frame = av_frame_alloc();
+    uint8_t ptr = 10;
+    auto res = FillAVPicture(frame, &ptr, AVPixelFormat::AV_PIX_FMT_ABGR, 1920, 1080);
+    ASSERT_EQ(res, 0);
+}
+
+HWTEST(UtilsTest, testGetAVPictureSize, TestSize.Level1)
+{
+    AVPixelFormat format = AVPixelFormat::AV_PIX_FMT_ABGR;
+    int height = 1920;
+    int width = 1080;
+    auto res = GetAVPictureSize(format, height, width);
+    ASSERT_EQ(res, 0);
+}
+
+HWTEST(UtilsTest, testRemoveDelimiter, TestSize.Level1)
+{
+    const char* str = "hello";
+    char ch = 'o';
+    auto res = RemoveDelimiter(str, ch);
+    ASSERT_STREQ(res.c_str(), "hell");
+}
+
+HWTEST(UtilsTest, testRemoveDelimiter2, TestSize.Level1)
+{
+    std::string str = "hello";
+    char ch = 'l';
+    RemoveDelimiter(ch, str);
+    ASSERT_STREQ(str.c_str(), "heo");
+}
+
+HWTEST(UtilsTest, testReplaceDelimiter, TestSize.Level1)
+{
+    std::string limit = "he";
+    char ch = 'e';
+    std::string str = "hello";
+    ReplaceDelimiter(limit, ch, str);
+    ASSERT_STREQ(str.c_str(), "eeeee");
+    char ch2 = 'o';
+    std::string str2 = "hello";
+    ReplaceDelimiter(limit, ch2, str2);
+    ASSERT_STREQ(str2.c_str(), "hello");
+}
+
+HWTEST(UtilsTest, testSplitString, TestSize.Level1)
+{
+    const char* limit = "hello";
+    char ch = 'l';
+    std::vector<std::string> res = SplitString(limit, ch);
+    ASSERT_EQ(res.size(), 1);
+    ASSERT_STREQ(res[0].c_str(), "he");
+}
+
+HWTEST(UtilsTest, testConvertChannelLayoutFromFFmpeg, TestSize.Level1)
+{
+    for (int index = 0; index <= 24; index++) {
+        auto res = ConvertChannelLayoutFromFFmpeg(index, 0);
+        switch (index) {
+            case 1:
+                ASSERT_EQ(AudioChannelLayout::MONO, res);
+                break;
+            case 2:
+                ASSERT_EQ(AudioChannelLayout::STEREO, res);
+                break;
+            case 4:
+                ASSERT_EQ(AudioChannelLayout::CH_4POINT0, res);
+                break;
+            case 6:
+                ASSERT_EQ(AudioChannelLayout::CH_5POINT1, res);
+                break;
+            case 8:
+                ASSERT_EQ(AudioChannelLayout::CH_5POINT1POINT2, res);
+                break;
+            case 10:
+                ASSERT_EQ(AudioChannelLayout::CH_7POINT1POINT2, res);
+                break;
+            case 12:
+                ASSERT_EQ(AudioChannelLayout::CH_7POINT1POINT4, res);
+                break;
+            case 14:
+                ASSERT_EQ(AudioChannelLayout::CH_9POINT1POINT4, res);
+                break;
+            case 16:
+                ASSERT_EQ(AudioChannelLayout::CH_9POINT1POINT6, res);
+                break;
+            case 24:
+                ASSERT_EQ(AudioChannelLayout::CH_22POINT2, res);
+                break;
+            default:
+                ASSERT_EQ(AudioChannelLayout::UNKNOWN, res);
+                break;
+        }
+    }
+}
+
 } // namespace Test
 } // namespace Media
 } // namespace OHOS
