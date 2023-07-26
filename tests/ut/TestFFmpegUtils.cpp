@@ -53,6 +53,8 @@ HWTEST(AACAudioConfigParserTest, test_aac_audio_config_parser_1, TestSize.Level1
     AACAudioConfigParser aacAudioConfigParser(config, 2);
     bool status = aacAudioConfigParser.ParseConfigs();
     EXPECT_EQ(true, status);
+    uint32_t level = aacAudioConfigParser.GetLevel();
+    EXPECT_EQ(2, level);
 }
 
 HWTEST(AACAudioConfigParserTest, test_aac_audio_config_parser_2, TestSize.Level1)
