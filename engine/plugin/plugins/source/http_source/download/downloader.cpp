@@ -165,13 +165,10 @@ void Downloader::Resume()
 
 void Downloader::Stop(bool isAsync)
 {
-    {
-        OSAL::ScopedLock lock(operatorMutex_);
-        MEDIA_LOG_I("Stop Begin");
-        requestQue_->SetActive(false);
-        if (currentRequest_ != nullptr) {
-            currentRequest_->Close();
-        }
+    MEDIA_LOG_I("Stop Begin");
+    requestQue_->SetActive(false);
+    if (currentRequest_ != nullptr) {
+        currentRequest_->Close();
     }
     if (isAsync) {
         task_->StopAsync();
