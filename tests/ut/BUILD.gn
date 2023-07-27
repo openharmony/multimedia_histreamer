@@ -28,19 +28,28 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/tests/ut/plugins/",
     "$histreamer_root_dir/tests/ut/",
     "$histreamer_root_dir/engine/include/plugin/",
+    "$histreamer_root_dir/engine/pipeline/core/",
+    "$histreamer_root_dir/engine/pipeline/filters/common/",
     "./plugins/",
   ]
   cflags = histreamer_unittest_cflags
 
   deps = [
     "$histreamer_root_dir/engine/pipeline:histreamer_pipeline_base",
+    "$histreamer_root_dir/engine/pipeline/filters/codec:codec_filters",
     "$histreamer_root_dir/engine/pipeline/filters/demux:demuxer_filter",
+    "$histreamer_root_dir/engine/plugin:ffmpeg_convert",
     "$histreamer_root_dir/engine/plugin:histreamer_plugin_base",
     "$histreamer_root_dir/engine/plugin:histreamer_plugin_core",
+    "$histreamer_root_dir/engine/plugin/plugins/codec_adapter:histreamer_plugin_CodecAdapter",
     "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_demuxers",
     "$histreamer_root_dir/engine/scene/player:histreamer_player",
     "//third_party/googletest:gtest_rtti",
   ]
+
+  external_deps = [ "hdf_core:libpub_utils" ]
+
+  public_configs = [ "$histreamer_root_dir/engine/plugin/plugins/codec_adapter:plugin_codec_adapter_config" ]
 
   sources = [
     "$histreamer_root_dir/engine/include/plugin/common/plugin_types.h",
@@ -58,6 +67,8 @@ ohos_unittest("histreamer_unit_test") {
     "./TestHiPlayer.cpp",
     "./TestMeta.cpp",
     "./TestMimeDefs.cpp",
+    "./TestPipline.cpp",
+    "./TestPlugin.cpp",
     "./TestPluginManager.cpp",
     "./TestSynchronizer.cpp",
     "./plugins/UtSourceTest1.cpp",
