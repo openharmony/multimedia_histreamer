@@ -33,7 +33,6 @@ ohos_unittest("histreamer_unit_test") {
     "./plugins/",
   ]
   cflags = histreamer_unittest_cflags
-  public_configs = [ "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config" ]
 
   deps = [
     "$histreamer_root_dir/engine/pipeline:histreamer_pipeline_base",
@@ -44,7 +43,6 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/engine/plugin:histreamer_plugin_core",
     "$histreamer_root_dir/engine/plugin/plugins/codec_adapter:histreamer_plugin_CodecAdapter",
     "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_demuxers",
-    "$histreamer_root_dir/engine/plugin/plugins/source/audio_capture:histreamer_plugin_StdAudioCapture",
     "$histreamer_root_dir/engine/scene/player:histreamer_player",
     "//third_party/googletest:gtest_rtti",
   ]
@@ -58,7 +56,6 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/engine/include/plugin/core/plugin_manager.h",
     "./TestAlgoExt.cpp",
     "./TestAny.cpp",
-    "./TestAudioCapturePlugin.cpp",
     "./TestBitReader.cpp",
     "./TestBufferPool.cpp",
     "./TestCommon.cpp",
