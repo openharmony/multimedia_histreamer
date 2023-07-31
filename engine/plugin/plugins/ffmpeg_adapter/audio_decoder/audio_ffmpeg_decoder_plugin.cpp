@@ -43,6 +43,7 @@ const std::set<AVCodecID> g_supportedCodec = {
     AV_CODEC_ID_APE,
     AV_CODEC_ID_AMR_NB,
     AV_CODEC_ID_AMR_WB,
+    AV_CODEC_ID_OPUS,
 };
 
 std::map<AVCodecID, uint32_t> samplesPerFrameMap = {
@@ -54,6 +55,7 @@ std::map<AVCodecID, uint32_t> samplesPerFrameMap = {
     {AV_CODEC_ID_APE, 4608}, // 4608
     {AV_CODEC_ID_AMR_NB, 160}, // 160
     {AV_CODEC_ID_AMR_WB, 160}, // 160
+    {AV_CODEC_ID_OPUS, 960}, // 960
 };
 
 Status RegisterAudioDecoderPlugins(const std::shared_ptr<Register>& reg)
@@ -150,6 +152,9 @@ void SetCapMime(const AVCodec* codec, CapabilityBuilder& capBuilder)
         case AV_CODEC_ID_AMR_WB:
             capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_AMR_WB);
             break;
+        case AV_CODEC_ID_OPUS:
+            capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_OPUS);
+            break;
         default:
             MEDIA_LOG_I("codec is not supported right now");
     }
@@ -159,6 +164,17 @@ void UpdateOutCaps(const AVCodec* codec, CodecPluginDef& definition)
 {
     CapabilityBuilder capBuilder;
     capBuilder.SetMime(OHOS::Media::MEDIA_MIME_AUDIO_RAW);
+    switch(codec->id){
+        case AV_CODEC_ID_OPUS:
+        {
+            DiscreteCapability<AudioSampleFormat> values;
+            values.push_back(ConvFf2PSampleFmt(AV_SAMPLE_FMT_FLTP));
+            capBuilder.SetAudioSampleFormatList(values);
+            break;
+        }
+        default:
+            break;
+    }
     if (codec->sample_fmts != nullptr) {
         DiscreteCapability<AudioSampleFormat> values;
         size_t index {0};
