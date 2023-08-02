@@ -19,7 +19,13 @@
 #include <format.h>
 #include <string>
 #include <vector>
+//#include "media_data_source.h"
+//#ifndef WIN32
+//#include "media_data_source.h"
+//#else
 #include "media_data_source_impl.h"
+//#endif
+
 #include "plugin/common/plugin_types.h"
 #include "securec.h"
 #include "player.h"

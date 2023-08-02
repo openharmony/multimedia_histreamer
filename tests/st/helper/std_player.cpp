@@ -24,6 +24,9 @@
 #include "i_player_engine.h"
 #include "media_errors.h"
 
+#ifndef WIN32
+#include "scene/player/standard/hiplayer_impl.h"
+#endif
 extern "C" {
 __attribute__((visibility("default"))) OHOS::Media::IEngineFactory* CreateEngineFactory();
 }
@@ -101,10 +104,28 @@ TestSource TestSource::CreateTestSource(std::string& url, TestSourceType type, P
     }
 }
 
+#ifndef WIN32
+std::unique_ptr<IPlayerEngine> CreatePlayerEngine(int32_t appUid, int32_t appPid, uint32_t appTokenId)
+{
+    (void)appTokenId;
+    MEDIA_LOG_I("CreatePlayerEngine enter.");
+    auto player = std::unique_ptr<HiPlayerImpl>(new (std::nothrow) HiPlayerImpl(appUid, appPid));
+    if (player && player->Init() == ErrorCode::SUCCESS) {
+        return player;
+    }
+    MEDIA_LOG_E("create player failed or player init failed");
+    return nullptr;
+}
+#endif
+
 std::unique_ptr<TestPlayer> TestPlayer::Create()
 {
     auto engineFactory = std::unique_ptr<OHOS::Media::IEngineFactory>(CreateEngineFactory());
-    auto player = engineFactory->CreatePlayerEngine(0, 0);
+#ifndef WIN32
+    auto player = CreatePlayerEngine(0, 0, 0);
+#else
+    auto player = engineFactory->CreatePlayerEngine(0, 0, 0);
+#endif
     std::static_pointer_cast<PlayerCallbackImpl>(gCallback)->SetPlayer(player.get());
     player->SetObs(gCallback);
     g_playFinished = false;

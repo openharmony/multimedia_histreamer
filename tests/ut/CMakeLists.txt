@@ -37,7 +37,13 @@ link_directories(
         ${curl_lib_path}
 )
 
-file(GLOB UT_TEST_SRCS ./*.cpp)
+file(GLOB UT_TEST_SRCS
+        ../st/helper/media_data_source_imp.cpp
+        ../st/helper/std_player.cpp
+        ./TestFastPlayer.cpp
+        #./testaudio/TestFastPlayer.cpp
+        #./*.cpp
+        )
 
 file(GLOB UT_TEST_PLUGINS ./plugins/*.cpp)
 

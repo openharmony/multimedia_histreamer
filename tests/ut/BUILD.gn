@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/test.gni")
+import("//build/ohos.gni")
+import("//foundation/multimedia/player_framework/config.gni")
 import("//foundation/multimedia/histreamer/config.gni")
 
 module_output_path = "histreamer/ut"
@@ -30,7 +32,9 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/engine/include/plugin/",
     "$histreamer_root_dir/engine/pipeline/core/",
     "$histreamer_root_dir/engine/pipeline/filters/common/",
+    "$histreamer_root_dir/engine/scene/player/standard/",
     "./plugins/",
+    "foundation/multimedia/media_standard/interfaces/innerkits/native/media/include",
   ]
   cflags = histreamer_unittest_cflags
 
@@ -50,6 +54,7 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/engine/plugin/plugins/source/audio_capture:histreamer_plugin_StdAudioCapture",
     "$histreamer_root_dir/engine/plugin/plugins/source/file_source:filesource",
     "$histreamer_root_dir/engine/scene/player:histreamer_player",
+    "$histreamer_root_dir/engine/scene:std_engine_factory",
     "//third_party/googletest:gtest_rtti",
   ]
 
@@ -89,5 +94,9 @@ ohos_unittest("histreamer_unit_test") {
     "./TestVideoFFmpegEncoder.cpp",
     "./plugins/UtSourceTest1.cpp",
     "./plugins/UtSourceTest2.cpp",
+    "./TestFastPlayer.cpp",
+    "../st/helper/std_player.cpp",
+    "../st/helper/media_data_source_imp.cpp",
+    #"./testaudio/TestFastPlayer.cpp",
   ]
 }
