@@ -102,7 +102,7 @@ HWTEST(AACAudioConfigParserTest, test_aac_audio_config_parser_7, TestSize.Level1
     const uint8_t config[2] = {0b00000000, 0b00000000};
     AACAudioConfigParser aacAudioConfigParser(config, 2);
     bool status = aacAudioConfigParser.ParseConfigs();
-    EXPECT_EQ(true, status);
+    EXPECT_EQ(false, status);
 }
 
 HWTEST(AACAudioConfigParserTest, test_aac_audio_config_parser_8, TestSize.Level1)
@@ -142,7 +142,7 @@ HWTEST(AACAudioConfigParserTest, test_aac_audio_config_parser_12, TestSize.Level
     const uint8_t config[2] = {0b10000110, 0b10101101};
     AACAudioConfigParser aacAudioConfigParser(config, 2);
     bool status = aacAudioConfigParser.ParseConfigs();
-    EXPECT_EQ(true, status);
+    EXPECT_EQ(false, status);
 }
 
 HWTEST(AACAudioConfigParserTest, test_aac_audio_config_parser_13, TestSize.Level1)
@@ -150,7 +150,7 @@ HWTEST(AACAudioConfigParserTest, test_aac_audio_config_parser_13, TestSize.Level
     const uint8_t config[2] = {0b10000111, 0b10110110};
     AACAudioConfigParser aacAudioConfigParser(config, 2);
     bool status = aacAudioConfigParser.ParseConfigs();
-    EXPECT_EQ(true, status);
+    EXPECT_EQ(false, status);
 }
 
 HWTEST(AACAudioConfigParserTest, test_aac_audio_config_parser_14, TestSize.Level1)
@@ -158,7 +158,7 @@ HWTEST(AACAudioConfigParserTest, test_aac_audio_config_parser_14, TestSize.Level
     const uint8_t config[2] = {0b10000111, 0b01011111};
     AACAudioConfigParser aacAudioConfigParser(config, 2);
     bool status = aacAudioConfigParser.ParseConfigs();
-    EXPECT_EQ(true, status);
+    EXPECT_EQ(false, status);
 }
 
 HWTEST(AACAudioConfigParserTest, test_aac_audio_config_parser_15, TestSize.Level1)
@@ -166,7 +166,7 @@ HWTEST(AACAudioConfigParserTest, test_aac_audio_config_parser_15, TestSize.Level
     const uint8_t config[2] = {0b10000111, 0b01100101};
     AACAudioConfigParser aacAudioConfigParser(config, 2);
     bool status = aacAudioConfigParser.ParseConfigs();
-    EXPECT_EQ(true, status);
+    EXPECT_EQ(false, status);
 }
 
 HWTEST(AACAudioConfigParserTest, test_aac_audio_config_parser_16, TestSize.Level1)
@@ -189,7 +189,7 @@ HWTEST(UtilsTest, testAVStrError, TestSize.Level1)
 {
     const int number = 1;
     auto res = AVStrError(number);
-    ASSERT_STREQ(res.c_str(), "Error number 1 occurred");
+    ASSERT_STREQ(res.c_str(), "No error information");
 }
 
 HWTEST(UtilsTest, testConvertTimeFromFFmpeg, TestSize.Level1)

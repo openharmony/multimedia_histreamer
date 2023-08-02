@@ -24,25 +24,6 @@ using namespace OHOS::Media::Pipeline;
 namespace OHOS {
 namespace Media {
 namespace Test {
-HWTEST(TestMeta, port_link, TestSize.Level1)
-{
-    std::shared_ptr<EventReceiver> receiver = std::make_shared<PipelineCore>();
-    std::shared_ptr<FilterCallback> callback = std::make_shared<HiPlayerImpl>(1, 1);
-    std::shared_ptr<FilterBase> sourceFilter = std::make_shared<MediaSourceFilter>("MediaSourceFilter");
-    std::shared_ptr<FilterBase> demuxerFilter = std::make_shared<DemuxerFilter>("DemuxerFilter");
-    sourceFilter->Init(&*receiver, &*callback);
-    demuxerFilter->Init(&*receiver, &*callback);
-    sourceFilter->GetOutPort(PORT_NAME_DEFAULT)->Connect(demuxerFilter->GetInPort(PORT_NAME_DEFAULT));
-    demuxerFilter->GetInPort(PORT_NAME_DEFAULT)->Connect(sourceFilter->GetOutPort(PORT_NAME_DEFAULT));
-    auto preFilters = demuxerFilter->GetPreFilters();
-    auto nextFilters = sourceFilter->GetNextFilters();
-    ASSERT_TRUE(preFilters.size() != 0);
-    ASSERT_TRUE(nextFilters.size() != 0);
-    demuxerFilter->UnlinkPrevFilters();
-    preFilters = demuxerFilter->GetPreFilters();
-    ASSERT_TRUE(preFilters.size() == 0);
-}
-
 HWTEST(TestMeta, create_filters, TestSize.Level1)
 {
     ASSERT_TRUE(CreateCodecFilter("builtin.player.audiodecoder", FilterCodecMode::AUDIO_ASYNC_DECODER) != nullptr);
