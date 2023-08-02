@@ -58,7 +58,9 @@ config("hst_plugin_intf_config") {
   }
 }
 
-source_set("histreamer_plugin_intf") {
+ohos_source_set("histreamer_plugin_intf") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [
     "common/media_sink.cpp",
     "common/media_source.cpp",
@@ -83,17 +85,21 @@ source_set("histreamer_plugin_intf") {
       public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     }
   } else {
-    public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    external_deps = [
+      "bounds_checking_function:libsec_shared"
+    ]
     if (histreamer_enable_video) {
-      public_deps += [
-        "//foundation/graphic/graphic_2d/frameworks/surface:surface",
-        "//foundation/graphic/graphic_2d/utils:sync_fence",
+      external_deps += [
+       "graphic_2d:surface",
+       "graphic_2d:sync_fence"
       ]
     }
   }
 }
 
-source_set("plugin_base") {
+ohos_source_set("plugin_base") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = []
   public_deps = [
     ":histreamer_plugin_intf",
@@ -148,18 +154,26 @@ config("hst_ffmpeg_convert_external_config") {
   ]
 }
 
-source_set("ffmpeg_convert") {
+ohos_source_set("ffmpeg_convert") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   include_dirs = [
     "//foundation/multimedia/histreamer/engine/include",
     "//third_party/ffmpeg",
   ]
   sources = [ "convert/ffmpeg_convert.cpp" ]
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
-  public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
+  public_deps = [
+    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base"
+  ]
   if (hst_is_lite_sys) {
     # deps on lite
   } else {
     public_deps += [ "//third_party/ffmpeg:libohosffmpeg" ]
+    external_deps = [
+      "hilog:libhilog"
+    ]
   }
 }
 
@@ -207,7 +221,9 @@ config("hst_plugin_core_config") {
   }
 }
 
-source_set("histreamer_plugin_core") {
+ohos_source_set("histreamer_plugin_core") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [
     "core/audio_sink.cpp",
     "core/base.cpp",
@@ -251,6 +267,11 @@ source_set("histreamer_plugin_core") {
     ":histreamer_plugin_base",
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [
+      "graphic_2d:surface"
+    ]
+  }
 
   if (hst_is_lite_sys) {
     if (ohos_kernel_type == "liteos_m") {

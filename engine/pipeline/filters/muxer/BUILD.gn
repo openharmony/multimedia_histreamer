@@ -14,7 +14,9 @@
 
 # build plugin interface
 import("//foundation/multimedia/histreamer/config.gni")
-source_set("muxer_filter") {
+ohos_source_set("muxer_filter") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   include_dirs = [
     "../../../",
     "../../../include",
@@ -25,4 +27,9 @@ source_set("muxer_filter") {
     "../../../foundation:histreamer_foundation",
     "../../../pipeline:histreamer_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [
+      "graphic_2d:surface"
+    ]
+  }
 }

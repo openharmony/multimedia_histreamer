@@ -14,7 +14,9 @@
 
 # build plugin interface
 import("//foundation/multimedia/histreamer/config.gni")
-source_set("histreamer_pipeline_base") {
+ohos_source_set("histreamer_pipeline_base") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
   sources = [
     "core/compatible_check.cpp",
@@ -33,6 +35,11 @@ source_set("histreamer_pipeline_base") {
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_core",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [
+      "graphic_2d:surface"
+    ]
+  }
 }
 
 config("histreamer_base_external_config") {
@@ -113,7 +120,9 @@ if (hst_is_lite_sys) {
   }
 }
 
-source_set("histreamer_pipeline") {
+ohos_source_set("histreamer_pipeline") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = []
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
   public_deps = [

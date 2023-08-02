@@ -23,7 +23,9 @@ config("plugin_http_source_config") {
   ]
 }
 
-source_set("httpsource") {
+ohos_source_set("httpsource") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [
     "download/downloader.cpp",
     "download/http_curl_client.cpp",
@@ -40,6 +42,11 @@ source_set("httpsource") {
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [
+      "graphic_2d:surface"
+    ]
+  }
   if (hst_is_lite_sys) {
     if (ohos_kernel_type == "liteos_m") {
       public_deps += [ "//third_party/curl:libcurl_static" ]

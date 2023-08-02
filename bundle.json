@@ -49,14 +49,22 @@
             "third_party": [
                 "ffmpeg",
                 "minimp3",
-                "minimp4"
+                "minimp4",
+                "bounds_checking_function",
+                "curl"
             ],
             "components": [
                 "hilog",
                 "hilog_lite",
                 "hitrace",
                 "audio_framework",
-                "drivers_peripheral_codec"
+                "drivers_peripheral_codec",
+                "graphic_2d",
+                "hdf_core",
+                "c_utils",
+                "bounds_checking_function",
+                "init",
+                "player_framework"
             ]
         },
         "build": {

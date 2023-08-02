@@ -17,7 +17,9 @@ group("plugin_stream_source") {
   deps = [ ":histreamer_plugin_StreamSource" ]
 }
 
-source_set("streamsource") {
+ohos_source_set("streamsource") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
   sources = [ "stream_source_plugin.cpp" ]
   public_deps = [

@@ -35,7 +35,9 @@ config("histreamer_player_config") {
   }
 }
 
-source_set("histreamer_player") {
+ohos_source_set("histreamer_player") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   include_dirs = [ "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
   sources = [
     "//foundation/multimedia/histreamer/engine/scene/player/internal/state.cpp",
@@ -63,9 +65,9 @@ source_set("histreamer_player") {
       "//foundation/multimedia/histreamer/engine/scene/player/standard/hiplayer_impl.cpp",
       "//foundation/multimedia/histreamer/engine/scene/player/standard/media_utils.cpp",
     ]
-    public_deps += [
-      "//foundation/multimedia/player_framework/services/utils:media_format",
+    external_deps = [
+      "player_framework:media_format",
+      "graphic_2d:surface"
     ]
-    deps = [ "//foundation/graphic/graphic_2d/frameworks/surface:surface" ]
   }
 }

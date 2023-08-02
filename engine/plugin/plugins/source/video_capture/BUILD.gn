@@ -21,7 +21,9 @@ group("plugin_standard_video_capture") {
   }
 }
 
-source_set("std_video_capture") {
+ohos_source_set("std_video_capture") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [ "video_capture_plugin.cpp" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
@@ -41,8 +43,10 @@ source_set("std_video_capture") {
     ]
     public_deps += [
       "//commonlibrary/c_utils/base:utilsbase_rtti",
-      "//foundation/graphic/graphic_2d:libsurface",
-      "//foundation/graphic/graphic_2d/utils:sync_fence",
+    ]
+    external_deps = [
+      "graphic_2d:surface",
+      "graphic_2d:sync_fence"
     ]
   }
 }

@@ -214,9 +214,9 @@ bool Downloader::Retry(const std::shared_ptr<DownloadRequest>& request)
                 MEDIA_LOG_D("Do retry.");
             }
             client_->Open(currentRequest_->url_);
-            requestQue_->SetActive(true);
-            currentRequest_->isEos_ = false;
         }
+        requestQue_->SetActive(true);
+        currentRequest_->isEos_ = false;
     }
     task_->Start();
     return true;

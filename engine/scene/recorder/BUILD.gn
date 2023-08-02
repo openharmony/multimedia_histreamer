@@ -32,7 +32,9 @@ config("histreamer_recorder_config") {
   }
 }
 
-source_set("histreamer_recorder") {
+ohos_source_set("histreamer_recorder") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   if (histreamer_enable_recorder) {
     include_dirs = [ "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
     sources = [
@@ -51,9 +53,11 @@ source_set("histreamer_recorder") {
         "standard/recorder_utils.cpp",
       ]
       deps += [
-        "//foundation/graphic/graphic_2d/frameworks/surface:surface",
         "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base",
         "//foundation/multimedia/histreamer/engine/pipeline:histreamer_engine_filters",
+      ]
+      external_deps = [
+        "graphic_2d:surface"
       ]
     }
   }

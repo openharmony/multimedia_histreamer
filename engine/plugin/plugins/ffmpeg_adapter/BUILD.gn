@@ -46,7 +46,9 @@ config("plugin_ffmpeg_adapter_config") {
   ]
 }
 
-source_set("ffmpeg_adapter_common") {
+ohos_source_set("ffmpeg_adapter_common") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [ "utils/ffmpeg_utils.cpp" ]
   public_configs = [
     ":plugin_ffmpeg_adapter_config",
@@ -56,6 +58,11 @@ source_set("ffmpeg_adapter_common") {
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [
+      "graphic_2d:surface"
+    ]
+  }
   if (hst_is_lite_sys) {
     print("histreamer audio encoder plugin only supports standard system")
   } else {
@@ -63,7 +70,9 @@ source_set("ffmpeg_adapter_common") {
   }
 }
 
-source_set("ffmpeg_audio_decoders") {
+ohos_source_set("ffmpeg_audio_decoders") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [ "audio_decoder/audio_ffmpeg_decoder_plugin.cpp" ]
   public_configs = [
     ":plugin_ffmpeg_adapter_config",
@@ -73,13 +82,20 @@ source_set("ffmpeg_audio_decoders") {
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [
+      "graphic_2d:surface"
+    ]
+  }
   if (hst_is_lite_sys) {
     # deps on lite
   } else {
     public_deps += [ "//third_party/ffmpeg:libohosffmpeg" ]
   }
 }
-source_set("ffmpeg_demuxers") {
+ohos_source_set("ffmpeg_demuxers") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [
     "demuxer/ffmpeg_demuxer_plugin.cpp",
     "demuxer/ffmpeg_track_meta.cpp",
@@ -97,6 +113,11 @@ source_set("ffmpeg_demuxers") {
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [
+      "graphic_2d:surface"
+    ]
+  }
 
   if (hst_is_lite_sys) {
     # deps on lite
@@ -105,7 +126,9 @@ source_set("ffmpeg_demuxers") {
   }
 }
 
-source_set("ffmpeg_audio_encoders") {
+ohos_source_set("ffmpeg_audio_encoders") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [
     "audio_encoder/audio_ffmpeg_encoder_plugin.cpp",
     "audio_encoder/ffmpeg_au_enc_config.cpp",
@@ -119,6 +142,11 @@ source_set("ffmpeg_audio_encoders") {
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_ffmpeg_convert",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [
+      "graphic_2d:surface"
+    ]
+  }
   if (hst_is_lite_sys) {
     print("histreamer audio encoder plugin only supports standard system")
   } else {
@@ -126,7 +154,9 @@ source_set("ffmpeg_audio_encoders") {
   }
 }
 
-source_set("ffmpeg_video_decoders") {
+ohos_source_set("ffmpeg_video_decoders") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [ "video_decoder/video_ffmpeg_decoder_plugin.cpp" ]
   public_configs = [
     ":plugin_ffmpeg_adapter_config",
@@ -137,6 +167,11 @@ source_set("ffmpeg_video_decoders") {
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_ffmpeg_convert",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [
+      "graphic_2d:surface"
+    ]
+  }
   if (hst_is_lite_sys) {
     print("histreamer video decoder plugin only supports standard system")
   } else {
@@ -144,7 +179,9 @@ source_set("ffmpeg_video_decoders") {
   }
 }
 
-source_set("ffmpeg_video_encoders") {
+ohos_source_set("ffmpeg_video_encoders") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [
     "video_encoder/ffmpeg_vid_enc_config.cpp",
     "video_encoder/video_ffmpeg_encoder_plugin.cpp",
@@ -157,6 +194,11 @@ source_set("ffmpeg_video_encoders") {
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [
+      "graphic_2d:surface"
+    ]
+  }
   if (hst_is_lite_sys) {
     print("histreamer video encoder plugin only supports standard system")
   } else {
@@ -164,7 +206,9 @@ source_set("ffmpeg_video_encoders") {
   }
 }
 
-source_set("ffmpeg_muxers") {
+ohos_source_set("ffmpeg_muxers") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [
     "muxer/ffmpeg_muxer_plugin.cpp",
     "utils/ffmpeg_codec_map.cpp",
@@ -177,6 +221,11 @@ source_set("ffmpeg_muxers") {
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [
+      "graphic_2d:surface"
+    ]
+  }
   if (hst_is_lite_sys) {
     print("histreamer ffmpeg muxer plugin only supports standard system")
   } else {
