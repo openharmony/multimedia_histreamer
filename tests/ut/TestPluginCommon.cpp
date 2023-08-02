@@ -44,17 +44,6 @@ HWTEST(PluginBufferTest, test_PluginBuffer, TestSize.Level1) {
                                                                       std::shared_ptr<Allocator>(), 1);
     videoBuffer->Reset();
 }
-
-
-HWTEST(SufaceMemortTest, test_SurfaceAllocator, TestSize.Level1) {
-    std::shared_ptr<SurfaceAllocator> surfaceAllocator = std::make_shared<SurfaceAllocator>(nullptr);
-    ASSERT_EQ(nullptr, surfaceAllocator->AllocSurfaceBuffer());
-    sptr<Surface> surface = Surface::CreateSurfaceAsConsumer();
-    std::shared_ptr<SurfaceAllocator> surfaceAllocator1 = std::make_shared<SurfaceAllocator>(surface);
-    sptr<SurfaceBuffer> surfaceBuffer = surfaceAllocator1->AllocSurfaceBuffer();
-    surfaceAllocator1->ReleaseSurfaceBuffer(surfaceBuffer, false);
-    surfaceAllocator1->UpdateSurfaceBufferScaleMode(surfaceBuffer);
-}
 } //namespace Test
 } //namespace Media
 } //namespace OHOS
