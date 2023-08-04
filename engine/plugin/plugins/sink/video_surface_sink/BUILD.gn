@@ -45,10 +45,10 @@ ohos_source_set("std_video_surface_sink") {
       "//foundation/multimedia/histreamer/engine/include",
     ]
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "graphic_2d:surface",
       "graphic_2d:sync_fence",
-      "bounds_checking_function:libsec_shared"
     ]
   }
 }

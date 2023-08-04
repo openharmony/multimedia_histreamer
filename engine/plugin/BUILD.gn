@@ -104,13 +104,11 @@ if (hst_is_lite_sys) {
       ":hst_plugin_intf_config",
       "//foundation/multimedia/histreamer:histreamer_presets",
     ]
-    external_deps = [
-      "bounds_checking_function:libsec_shared"
-    ]
+    external_deps = [ "bounds_checking_function:libsec_shared" ]
     if (histreamer_enable_video) {
       external_deps += [
-      "graphic_2d:surface",
-      "graphic_2d:sync_fence"
+        "graphic_2d:surface",
+        "graphic_2d:sync_fence",
       ]
     }
   }
@@ -184,15 +182,13 @@ ohos_source_set("ffmpeg_convert") {
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base"
+    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base",
   ]
   if (hst_is_lite_sys) {
     # deps on lite
   } else {
     public_deps += [ "//third_party/ffmpeg:libohosffmpeg" ]
-    external_deps = [
-      "hilog:libhilog"
-    ]
+    external_deps = [ "hilog:libhilog" ]
   }
 }
 
@@ -287,9 +283,7 @@ ohos_source_set("histreamer_plugin_core") {
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
   ]
   if (!hst_is_lite_sys) {
-    external_deps = [
-      "graphic_2d:surface"
-    ]
+    external_deps = [ "graphic_2d:surface" ]
   }
 
   if (hst_is_lite_sys) {

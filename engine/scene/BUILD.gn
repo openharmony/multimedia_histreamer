@@ -23,17 +23,13 @@ ohos_source_set("std_engine_factory") {
       "//foundation/multimedia/player_framework/services/services/engine_intf",
       "//base/startup/init/interfaces/innerkits/include/syspara",
     ]
-    public_deps = [
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    ]
+    public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
     public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
     sources = [ "standard/hst_engine_factory.cpp" ]
-    deps = [
-      "player:histreamer_player",
-    ]
+    deps = [ "player:histreamer_player" ]
     external_deps = [
+      "graphic_2d:surface",
       "init:libbegetutil",
-      "graphic_2d:surface"
     ]
     if (histreamer_enable_recorder) {
       deps += [ "recorder:histreamer_recorder" ]

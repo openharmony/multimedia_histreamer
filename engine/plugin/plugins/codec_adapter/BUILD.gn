@@ -48,13 +48,9 @@ ohos_source_set("std_plugin_codec_adapter") {
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
-  external_deps = [
-    "hdf_core:libpub_utils",
-  ]
+  external_deps = [ "hdf_core:libpub_utils" ]
   if (!hst_is_lite_sys) {
-    external_deps += [
-      "graphic_2d:surface"
-    ]
+    external_deps += [ "graphic_2d:surface" ]
   }
   public_configs = [
     ":plugin_codec_adapter_config",

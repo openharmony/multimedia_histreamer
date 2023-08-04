@@ -28,8 +28,6 @@ ohos_source_set("muxer_filter") {
     "../../../pipeline:histreamer_base",
   ]
   if (!hst_is_lite_sys) {
-    external_deps = [
-      "graphic_2d:surface"
-    ]
+    external_deps = [ "graphic_2d:surface" ]
   }
 }

@@ -36,9 +36,7 @@ ohos_source_set("histreamer_pipeline_base") {
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_core",
   ]
   if (!hst_is_lite_sys) {
-    external_deps = [
-      "graphic_2d:surface"
-    ]
+    external_deps = [ "graphic_2d:surface" ]
   }
 }
 

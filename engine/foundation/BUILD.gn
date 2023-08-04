@@ -43,7 +43,10 @@ if (hst_is_lite_sys) {
       "utils/hitrace_utils.cpp",
       "utils/steady_clock.cpp",
     ]
-    public_deps = []
+    public_configs = [
+      ":histreamer_foundation_config",
+      "//foundation/multimedia/histreamer:histreamer_presets",
+    ]
     deps = [ "//foundation/multimedia/media_utils_lite:media_common" ]
     if (ohos_kernel_type == "liteos_m") {
       deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_static" ]
@@ -96,4 +99,3 @@ if (hst_is_lite_sys) {
     }
   }
 }
-

@@ -26,9 +26,7 @@ ohos_source_set("file_fd_sink") {
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
   if (!hst_is_lite_sys) {
-    external_deps = [
-      "graphic_2d:surface"
-    ]
+    external_deps = [ "graphic_2d:surface" ]
   }
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
 }

@@ -43,9 +43,7 @@ ohos_source_set("httpsource") {
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
   if (!hst_is_lite_sys) {
-    external_deps = [
-      "graphic_2d:surface"
-    ]
+    external_deps = [ "graphic_2d:surface" ]
   }
   if (hst_is_lite_sys) {
     if (ohos_kernel_type == "liteos_m") {
