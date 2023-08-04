@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/test.gni")
-import("//build/ohos.gni")
 import("//foundation/multimedia/player_framework/config.gni")
 import("//foundation/multimedia/histreamer/config.gni")
 
@@ -37,6 +36,8 @@ ohos_unittest("histreamer_unit_test") {
     "foundation/multimedia/media_standard/interfaces/innerkits/native/media/include",
   ]
   cflags = histreamer_unittest_cflags
+  defines = []
+  defines += player_framework_defines
 
   deps = [
     "$histreamer_root_dir/engine/pipeline:histreamer_pipeline_base",
@@ -94,9 +95,9 @@ ohos_unittest("histreamer_unit_test") {
     "./TestVideoFFmpegEncoder.cpp",
     "./plugins/UtSourceTest1.cpp",
     "./plugins/UtSourceTest2.cpp",
-    "./TestFastPlayer.cpp",
     "../st/helper/std_player.cpp",
     "../st/helper/media_data_source_imp.cpp",
-    #"./testaudio/TestFastPlayer.cpp",
+    "./testaudio/TestFastPlayer.cpp",
+    #"./testvedio/TestFastVedioPlayer.cpp",
   ]
 }

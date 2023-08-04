@@ -25,10 +25,8 @@
 
 namespace OHOS {
 namespace Media {
-IMediaDataSourceImpl::IMediaDataSourceImpl(std::string url, Plugin::Seekable seekable) :
-    url_(std::move(url)),
-    readPos_(0),
-    seekable_(seekable)
+IMediaDataSourceImpl::IMediaDataSourceImpl(std::string url, Plugin::Seekable seekable)
+    : url_(std::move(url)), readPos_(0), seekable_(seekable)
 {
     size_ = ReadDataFromFile();
 }
@@ -64,14 +62,14 @@ int IMediaDataSourceImpl::ReadDataFromFile()
         ss << s;
     }
     std::string data = ss.str();
+    uint32_t formatData;
     const char* split = ",";
-    char* s_input = const_cast<char *>(data.c_str());
-    char* p = strtok(s_input, split);
+    char* p = strtok(const_cast<char *>(data.c_str()), split);
     while (p != nullptr) {
-        uint32_t data;
-        (void)sscanf_s(p, "%x", &data);
-        data_.push_back(data);
-        p = strtok(nullptr, split);
+        if (sscanf_s(p, "%x", &formatData) != -1) {
+            data_.push_back(formatData);
+            p = strtok(nullptr, split);
+        }
     }
     return data_.size() * 4; // 4
 }
