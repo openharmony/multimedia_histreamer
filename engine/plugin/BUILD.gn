@@ -58,40 +58,59 @@ config("hst_plugin_intf_config") {
   }
 }
 
-ohos_source_set("histreamer_plugin_intf") {
-  subsystem_name = "multimedia"
-  part_name = "histreamer"
-  sources = [
-    "common/media_sink.cpp",
-    "common/media_source.cpp",
-    "common/plugin_buffer.cpp",
-  ]
-  if (!hst_is_lite_sys && histreamer_enable_video) {
-    sources += [
-      "common/share_allocator.cpp",
-      "common/share_memory.cpp",
-      "common/surface_allocator.cpp",
-      "common/surface_memory.cpp",
+if (hst_is_lite_sys) {
+  source_set("histreamer_plugin_intf") {
+    sources = [
+      "common/media_sink.cpp",
+      "common/media_source.cpp",
+      "common/plugin_buffer.cpp",
     ]
-  }
-  public_configs = [
-    ":hst_plugin_intf_config",
-    "//foundation/multimedia/histreamer:histreamer_presets",
-  ]
-  if (hst_is_lite_sys) {
+    if (!hst_is_lite_sys && histreamer_enable_video) {
+      sources += [
+        "common/share_allocator.cpp",
+        "common/share_memory.cpp",
+        "common/surface_allocator.cpp",
+        "common/surface_memory.cpp",
+      ]
+    }
+    public_configs = [
+      ":hst_plugin_intf_config",
+      "//foundation/multimedia/histreamer:histreamer_presets",
+    ]
     if (ohos_kernel_type == "liteos_m") {
       public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
     } else {
       public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     }
-  } else {
+  }
+} else {
+  ohos_source_set("histreamer_plugin_intf") {
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
+    sources = [
+      "common/media_sink.cpp",
+      "common/media_source.cpp",
+      "common/plugin_buffer.cpp",
+    ]
+    if (!hst_is_lite_sys && histreamer_enable_video) {
+      sources += [
+        "common/share_allocator.cpp",
+        "common/share_memory.cpp",
+        "common/surface_allocator.cpp",
+        "common/surface_memory.cpp",
+      ]
+    }
+    public_configs = [
+      ":hst_plugin_intf_config",
+      "//foundation/multimedia/histreamer:histreamer_presets",
+    ]
     external_deps = [
       "bounds_checking_function:libsec_shared"
     ]
     if (histreamer_enable_video) {
       external_deps += [
-       "graphic_2d:surface",
-       "graphic_2d:sync_fence"
+      "graphic_2d:surface",
+      "graphic_2d:sync_fence"
       ]
     }
   }
