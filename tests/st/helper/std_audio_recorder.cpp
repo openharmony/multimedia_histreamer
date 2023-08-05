@@ -62,7 +62,7 @@ private:
 std::unique_ptr<TestRecorder> TestRecorder::CreateAudioRecorder()
 {
     auto engineFactory = std::unique_ptr<OHOS::Media::IEngineFactory>(CreateEngineFactory());
-    auto recorder = engineFactory->CreateRecorderEngine(0, 0, 0); // 0
+    auto recorder = engineFactory->CreateRecorderEngine(0, 0, 0, 0); // 0
     auto obs = std::make_shared<RecorderEngineObs>();
     recorder->SetObs(obs);
     return std::make_unique<TestRecorderImpl>(std::move(recorder));
