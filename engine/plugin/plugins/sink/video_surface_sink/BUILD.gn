@@ -21,7 +21,9 @@ group("plugin_standard_video_surface_sink") {
   }
 }
 
-source_set("std_video_surface_sink") {
+ohos_source_set("std_video_surface_sink") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [ "surface_sink_plugin.cpp" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
@@ -42,11 +44,11 @@ source_set("std_video_surface_sink") {
       "//third_party/bounds_checking_function/include",
       "//foundation/multimedia/histreamer/engine/include",
     ]
-    public_deps += [
-      "//commonlibrary/c_utils/base:utils",
-      "//foundation/graphic/graphic_2d:libsurface",
-      "//foundation/graphic/graphic_2d/utils:sync_fence",
-      "//third_party/bounds_checking_function:libsec_static",
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "c_utils:utils",
+      "graphic_2d:surface",
+      "graphic_2d:sync_fence",
     ]
   }
 }

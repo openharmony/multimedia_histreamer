@@ -17,7 +17,9 @@ if (!hst_is_lite_sys) {
     deps = [ ":histreamer_plugin_AudioServerSink" ]
   }
 
-  source_set("audio_server_sink") {
+  ohos_source_set("audio_server_sink") {
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
     include_dirs = [
       "//foundation/multimedia/histreamer/engine/include/",
       "//foundation/multimedia/histreamer/engine/plugin/",
@@ -28,6 +30,7 @@ if (!hst_is_lite_sys) {
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_ffmpeg_convert",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
     ]
+    external_deps = [ "graphic_2d:surface" ]
     public_configs = [
       "//foundation/multimedia/histreamer:histreamer_presets",
       "//foundation/multimedia/audio_framework/frameworks/native/audiorenderer:audio_renderer_config",

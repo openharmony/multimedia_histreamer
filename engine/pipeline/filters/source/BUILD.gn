@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import("//build/ohos.gni")
+import("//foundation/multimedia/histreamer/config.gni")
 config("source_config") {
   include_dirs = [
     "../../../",
@@ -18,7 +20,9 @@ config("source_config") {
   ]
 }
 
-source_set("audio_capture_filter") {
+ohos_source_set("audio_capture_filter") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [
     "../common/buffer_calibration/audio_buffer_calibration.cpp",
     "../common/buffer_calibration/buffer_calibration.cpp",
@@ -32,9 +36,14 @@ source_set("audio_capture_filter") {
     "../../../foundation:histreamer_foundation",
     "../../../pipeline:histreamer_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [ "graphic_2d:surface" ]
+  }
 }
 
-source_set("media_source_filter") {
+ohos_source_set("media_source_filter") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [ "media_source/media_source_filter.cpp" ]
   public_configs = [
     ":source_config",
@@ -44,9 +53,14 @@ source_set("media_source_filter") {
     "../../../foundation:histreamer_foundation",
     "../../../pipeline:histreamer_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [ "graphic_2d:surface" ]
+  }
 }
 
-source_set("video_capture_filter") {
+ohos_source_set("video_capture_filter") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [ "video_capture/video_capture_filter.cpp" ]
   public_configs = [
     ":source_config",
@@ -56,4 +70,7 @@ source_set("video_capture_filter") {
     "../../../foundation:histreamer_foundation",
     "../../../pipeline:histreamer_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [ "graphic_2d:surface" ]
+  }
 }

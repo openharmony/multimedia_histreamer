@@ -54,7 +54,10 @@ ohos_unittest("histreamer_unit_test") {
     "//third_party/googletest:gtest_rtti",
   ]
 
-  external_deps = [ "hdf_core:libpub_utils" ]
+  external_deps = [
+    "graphic_2d:surface",
+    "hdf_core:libpub_utils",
+  ]
 
   public_configs = [
     "$histreamer_root_dir/engine/plugin/plugins/codec_adapter:plugin_codec_adapter_config",

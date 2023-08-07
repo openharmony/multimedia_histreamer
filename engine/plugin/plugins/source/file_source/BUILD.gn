@@ -20,23 +20,33 @@ group("plugin_file_fd_source") {
   deps = [ ":histreamer_plugin_FileFdSource" ]
 }
 
-source_set("filesource") {
+ohos_source_set("filesource") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
   sources = [ "file_source_plugin.cpp" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [ "graphic_2d:surface" ]
+  }
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
 }
 
-source_set("filefdsource") {
+ohos_source_set("filefdsource") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
   sources = [ "file_fd_source_plugin.cpp" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [ "graphic_2d:surface" ]
+  }
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
 }
 

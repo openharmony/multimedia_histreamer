@@ -32,7 +32,9 @@ config("plugin_codec_adapter_config") {
   ]
 }
 
-source_set("std_plugin_codec_adapter") {
+ohos_source_set("std_plugin_codec_adapter") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [
     "codec_buffer.cpp",
     "codec_buffer_pool.cpp",
@@ -43,10 +45,13 @@ source_set("std_plugin_codec_adapter") {
     "hdi_codec_manager.cpp",
   ]
   public_deps = [
-    "//drivers/hdf_core/adapter/uhdf2/pub_utils:libpub_utils",
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
+  external_deps = [ "hdf_core:libpub_utils" ]
+  if (!hst_is_lite_sys) {
+    external_deps += [ "graphic_2d:surface" ]
+  }
   public_configs = [
     ":plugin_codec_adapter_config",
     "//foundation/multimedia/histreamer:histreamer_presets",

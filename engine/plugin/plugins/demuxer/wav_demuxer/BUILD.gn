@@ -25,7 +25,9 @@ group("plugin_wav_demuxer") {
   }
 }
 
-source_set("wavdemuxer") {
+ohos_source_set("wavdemuxer") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
   sources = [ "wav_demuxer_plugin.cpp" ]
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
