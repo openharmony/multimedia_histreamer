@@ -54,11 +54,11 @@ std::unique_ptr<IPlayerEngine> HstEngineFactory::CreatePlayerEngine(int32_t appU
 
 #ifdef SUPPORT_RECORDER
 std::unique_ptr<IRecorderEngine> HstEngineFactory::CreateRecorderEngine(
-    int32_t appUid, int32_t appPid, uint32_t appTokenId)
+    int32_t appUid, int32_t appPid, uint32_t appTokenId, uint64_t appFullTokenId)
 {
     MEDIA_LOG_I("CreateRecorderEngine enter.");
     auto recorder = std::unique_ptr<Record::HiRecorderImpl>(new (std::nothrow) Record::HiRecorderImpl(
-        appUid, appPid, appTokenId));
+        appUid, appPid, appTokenId, appFullTokenId));
     if (recorder && recorder->Init() == ErrorCode::SUCCESS) {
         return recorder;
     }

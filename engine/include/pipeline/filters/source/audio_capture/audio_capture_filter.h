@@ -78,6 +78,8 @@ private:
     bool bitRateSpecified_ {false};
     uint32_t appTokenId_ {0};
     bool appTokenIdSpecified_ {false};
+    uint64_t appFullTokenId_ {0};
+    bool appFullTokenIdSpecified_ {false};
     int32_t appUid_ {0};
     bool appUidSpecified_ {false};
     int32_t appPid_ {0};
