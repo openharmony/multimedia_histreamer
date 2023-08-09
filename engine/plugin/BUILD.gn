@@ -107,8 +107,10 @@ if (hst_is_lite_sys) {
     external_deps = [ "bounds_checking_function:libsec_shared" ]
     if (histreamer_enable_video) {
       external_deps += [
+        "c_utils:utils",
         "graphic_2d:surface",
         "graphic_2d:sync_fence",
+        "hilog:libhilog",
       ]
     }
   }
@@ -282,8 +284,13 @@ ohos_source_set("histreamer_plugin_core") {
     ":histreamer_plugin_base",
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
   ]
+
   if (!hst_is_lite_sys) {
-    external_deps = [ "graphic_2d:surface" ]
+    external_deps = [
+      "c_utils:utils",
+      "graphic_2d:surface",
+      "hilog:libhilog",
+    ]
   }
 
   if (hst_is_lite_sys) {
