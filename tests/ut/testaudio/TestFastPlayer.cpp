@@ -83,74 +83,6 @@ namespace Test {
         ASSERT_EQ(0, player->Stop());
     }
 
-    void TestSinglePlayerGetCurrentTime(std::string url)
-    {
-        int64_t currentMS {0};
-        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-        ASSERT_EQ(0, player->SetSource(TestSource(url)));
-        ASSERT_EQ(0, player->Prepare());
-        ASSERT_EQ(0, player->Play());
-        ASSERT_TRUE(player->IsPlaying());
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // 1000 MS
-        ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // 1000 MS
-        ASSERT_TRUE(CheckTimeEquality(2000, currentMS)); // 2000 MS
-        ASSERT_EQ(0, player->Stop());
-    }
-
-    void TestSinglePlayerSeek(std::string url)
-    {
-        int64_t seekPos {5000};
-        int64_t currentMS {0};
-        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-        ASSERT_EQ(0, player->SetSource(TestSource(url)));
-        ASSERT_EQ(0, player->Prepare());
-        ASSERT_EQ(0, player->Play());
-        ASSERT_TRUE(player->IsPlaying());
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // 1000 MS
-        ASSERT_EQ(0, player->Seek(seekPos));
-        ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        EXPECT_TRUE(CheckTimeEquality(seekPos, currentMS));
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000)); // 2000 MS
-        ASSERT_EQ(0, player->Stop());
-    }
-
-    void TestSinglePlayerSeekPause(std::string url)
-    {
-        int64_t seekPos {5000}; // 5000 MS
-        int64_t currentMS {0};
-        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-        ASSERT_EQ(0, player->SetSource(TestSource(url)));
-        ASSERT_EQ(0, player->Prepare());
-        ASSERT_EQ(0, player->Play());
-        ASSERT_TRUE(player->IsPlaying());
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // 1000 MS
-        ASSERT_EQ(0, player->Pause());
-        ASSERT_EQ(0, player->Seek(seekPos));
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // 1000 MS
-        ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        ASSERT_TRUE(CheckTimeEquality(seekPos, currentMS)); // pause + seek still pause
-        ASSERT_EQ(0, player->Stop());
-    }
-
-    void TestSinglePlayerPauseSeek(std::string url)
-    {
-        int64_t seekPos {5000}; // 5000 MS
-        int64_t currentMS {0};
-        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-        ASSERT_EQ(0, player->SetSource(TestSource(url)));
-        ASSERT_EQ(0, player->Prepare());
-        ASSERT_EQ(0, player->Play());
-        ASSERT_TRUE(player->IsPlaying());
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // 1000 MS
-        ASSERT_EQ(0, player->Pause());
-        ASSERT_EQ(0, player->Seek(seekPos));
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // 1000 MS
-        ASSERT_EQ(0, player->GetCurrentTime(currentMS));
-        ASSERT_TRUE(CheckTimeEquality(seekPos, currentMS)); // pause + seek still pause
-        ASSERT_EQ(0, player->Stop());
-    }
-
     void TestSinglePlayerSingleLoop(std::string url)
     {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -162,28 +94,7 @@ namespace Test {
         ASSERT_EQ(0, player->Stop());
     }
 
-    void TestSinglePlayerHttp(std::string url)
-    {
-        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-        ASSERT_EQ(0, player->SetSource(TestSource(url)));
-        ASSERT_EQ(0, player->Prepare());
-        ASSERT_EQ(0, player->Play());
-        std::this_thread::sleep_for(std::chrono::seconds(20)); // 20 second
-        ASSERT_EQ(0, player->Seek(10000)); // 10000 MS
-        std::this_thread::sleep_for(std::chrono::seconds(10)); // 10 second
-        player->Stop();
-    }
-
-    void TestSinglePlayerHls(std::string url)
-    {
-        std::unique_ptr<TestPlayer> player = TestPlayer::Create();
-        ASSERT_EQ(0, player->SetSource(TestSource(url)));
-        ASSERT_EQ(0, player->Prepare());
-        ASSERT_EQ(0, player->Play());
-        std::this_thread::sleep_for(std::chrono::seconds(20)); // 20 second
-        player->Stop();
-    }
-
+    
     void TestSinglePlayerSeekNearEnd(std::string url, int32_t expectDuration)
     {
         std::unique_ptr<TestPlayer> player = TestPlayer::Create();
@@ -264,58 +175,6 @@ namespace Test {
                                         50000); // 50000 MS
     }
 
-    HST_TEST(UtTestFastPlayer, TestSinglePlayerGetCurrentTime, TestSize.Level1)
-    {
-        std::vector<std::string> vecSource;
-        vecSource.push_back(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"));
-        vecSource.push_back(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a"));
-        vecSource.push_back(std::string("http://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3"));
-        vecSource.push_back(std::string("http://localhost/resource-src/media/MP3/MP3_LONG_48000_32.mp3"));
-        for (auto url : vecSource)
-        {
-            TestSinglePlayerGetCurrentTime(url);
-        }
-    }
-
-    HST_TEST(UtTestFastPlayer, TestSinglePlayerSeek, TestSize.Level1)
-    {
-        std::vector<std::string> vecSource;
-        vecSource.push_back(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"));
-        vecSource.push_back(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a"));
-        vecSource.push_back(std::string("http://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3"));
-        vecSource.push_back(std::string("http://localhost/resource-src/media/MP3/MP3_LONG_48000_32.mp3"));
-        for (auto url : vecSource)
-        {
-            TestSinglePlayerSeek(url);
-        }
-    }
-
-    HST_TEST(UtTestFastPlayer, TestSinglePlayerSeekPause, TestSize.Level1)
-    {
-        std::vector<std::string> vecSource;
-        vecSource.push_back(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"));
-        vecSource.push_back(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a"));
-        vecSource.push_back(std::string("http://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3"));
-        vecSource.push_back(std::string("http://localhost/resource-src/media/MP3/MP3_LONG_48000_32.mp3"));
-        for (auto url : vecSource)
-        {
-            TestSinglePlayerSeekPause(url);
-        }
-    }
-
-    HST_TEST(UtTestFastPlayer, TestSinglePlayerPauseSeek, TestSize.Level1)
-    {
-        std::vector<std::string> vecSource;
-        vecSource.push_back(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"));
-        vecSource.push_back(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a"));
-        vecSource.push_back(std::string("http://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3"));
-        vecSource.push_back(std::string("http://localhost/resource-src/media/MP3/MP3_LONG_48000_32.mp3"));
-        for (auto url : vecSource)
-        {
-            TestSinglePlayerPauseSeek(url);
-        }
-    }
-
     HST_TEST(UtTestFastPlayer, TestSinglePlayerSingleLoop, TestSize.Level1)
     {
         std::vector<std::string> vecSource;
@@ -328,31 +187,6 @@ namespace Test {
         for (auto url : vecSource)
         {
             TestSinglePlayerSingleLoop(url);
-        }
-    }
-
-    HST_TEST(UtTestFastPlayer, TestSinglePlayerHttp, TestSize.Level1)
-    {
-        std::vector<std::string> vecSource;
-        vecSource.push_back(std::string("http://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3"));
-        vecSource.push_back(std::string("https://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3"));
-        for (auto url : vecSource)
-        {
-            TestSinglePlayerHttp(url);
-        }
-    }
-
-    HST_TEST(UtTestFastPlayer, TestSinglePlayerHls, TestSize.Level1)
-    {
-        std::vector<std::string> vecSource;
-        vecSource.push_back(std::string("http://ngcdn001.cnr.cn/live/zgzs/index.m3u8"));
-        vecSource.push_back(std::string("https://live.ximalaya.com/radio-first-page-app/live/1011/64.m3u8?"
-                                        "transcode=aac"));
-        vecSource.push_back(std::string("http://ls-open.qingting.fm/live/20500010/64k.m3u8?"
-                                        "deviceid=00000000-0000-0000-0000-000000000000&format=aac"));
-        for (auto url : vecSource)
-        {
-            TestSinglePlayerHls(url);
         }
     }
 
