@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/test.gni")
-import("//foundation/multimedia/player_framework/config.gni")
 import("//foundation/multimedia/histreamer/config.gni")
+import("//foundation/multimedia/player_framework/config.gni")
 
 module_output_path = "histreamer/ut"
 
@@ -31,9 +31,7 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/engine/include/plugin/",
     "$histreamer_root_dir/engine/pipeline/core/",
     "$histreamer_root_dir/engine/pipeline/filters/common/",
-    "$histreamer_root_dir/engine/scene/player/standard/",
     "./plugins/",
-    "foundation/multimedia/media_standard/interfaces/innerkits/native/media/include",
   ]
   cflags = histreamer_unittest_cflags
   defines = []
@@ -54,8 +52,8 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_video_encoders",
     "$histreamer_root_dir/engine/plugin/plugins/source/audio_capture:histreamer_plugin_StdAudioCapture",
     "$histreamer_root_dir/engine/plugin/plugins/source/file_source:filesource",
-    "$histreamer_root_dir/engine/scene/player:histreamer_player",
     "$histreamer_root_dir/engine/scene:std_engine_factory",
+    "$histreamer_root_dir/engine/scene/player:histreamer_player",
     "//third_party/googletest:gtest_rtti",
   ]
 
@@ -69,6 +67,8 @@ ohos_unittest("histreamer_unit_test") {
   sources = [
     "$histreamer_root_dir/engine/include/plugin/common/plugin_types.h",
     "$histreamer_root_dir/engine/include/plugin/core/plugin_manager.h",
+    "../st/helper/media_data_source_imp.cpp",
+    "../st/helper/std_player.cpp",
     "./TestAlgoExt.cpp",
     "./TestAny.cpp",
     "./TestAudioCapturePlugin.cpp",
@@ -95,8 +95,6 @@ ohos_unittest("histreamer_unit_test") {
     "./TestVideoFFmpegEncoder.cpp",
     "./plugins/UtSourceTest1.cpp",
     "./plugins/UtSourceTest2.cpp",
-    "../st/helper/std_player.cpp",
-    "../st/helper/media_data_source_imp.cpp",
     "./testaudio/TestFastPlayer.cpp",
   ]
 }

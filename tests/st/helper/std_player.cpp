@@ -24,9 +24,6 @@
 #include "i_player_engine.h"
 #include "media_errors.h"
 
-#ifndef WIN32
-#include "scene/player/standard/hiplayer_impl.h"
-#endif
 extern "C" {
 __attribute__((visibility("default"))) OHOS::Media::IEngineFactory* CreateEngineFactory();
 }
