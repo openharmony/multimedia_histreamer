@@ -104,7 +104,7 @@ TestSource TestSource::CreateTestSource(std::string& url, TestSourceType type, P
 std::unique_ptr<TestPlayer> TestPlayer::Create()
 {
     auto engineFactory = std::unique_ptr<OHOS::Media::IEngineFactory>(CreateEngineFactory());
-    auto player = engineFactory->CreatePlayerEngine(0, 0);
+    auto player = engineFactory->CreatePlayerEngine(0, 0, 0);
     std::static_pointer_cast<PlayerCallbackImpl>(gCallback)->SetPlayer(player.get());
     player->SetObs(gCallback);
     g_playFinished = false;

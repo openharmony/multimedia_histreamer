@@ -165,6 +165,7 @@ if (${OHOS_LITE})
             )
 else()
     set(TEST_HELPER_SRCS
+            ${TOP_DIR}/histreamer/tests/st/helper/media_data_source_imp.cpp
             ${TOP_DIR}/histreamer/tests/st/helper/std_player.cpp
             ${OSAL_THREAD_SRCS}
             ${TOP_DIR}/histreamer/engine/foundation/osal/utils/util.cpp
