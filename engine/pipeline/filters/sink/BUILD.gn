@@ -21,7 +21,9 @@ config("sink_config") {
   ]
 }
 
-source_set("media_synchronous_sink") {
+ohos_source_set("media_synchronous_sink") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [ "media_synchronous_sink.cpp" ]
   public_configs = [
     ":sink_config",
@@ -31,21 +33,36 @@ source_set("media_synchronous_sink") {
     "../../../foundation:histreamer_foundation",
     "../../../pipeline:histreamer_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [ "graphic_2d:surface" ]
+  }
 }
 
-source_set("audio_sink_filter") {
+ohos_source_set("audio_sink_filter") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [ "audio_sink/audio_sink_filter.cpp" ]
   public_configs = [ "../../../../:histreamer_presets" ]
   public_deps = [ ":media_synchronous_sink" ]
+  if (!hst_is_lite_sys) {
+    external_deps = [ "graphic_2d:surface" ]
+  }
 }
 
-source_set("video_sink_filter") {
+ohos_source_set("video_sink_filter") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [ "video_sink/video_sink_filter.cpp" ]
   public_configs = [ "../../../../:histreamer_presets" ]
   public_deps = [ ":media_synchronous_sink" ]
+  if (!hst_is_lite_sys) {
+    external_deps = [ "graphic_2d:surface" ]
+  }
 }
 
-source_set("output_sink_filter") {
+ohos_source_set("output_sink_filter") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [ "output_sink/output_sink_filter.cpp" ]
   public_configs = [
     ":sink_config",
@@ -55,4 +72,7 @@ source_set("output_sink_filter") {
     "../../../foundation:histreamer_foundation",
     "../../../pipeline:histreamer_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [ "graphic_2d:surface" ]
+  }
 }

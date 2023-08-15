@@ -25,6 +25,7 @@
 #include "pipeline/filters/sink/audio_sink/audio_sink_filter.h"
 #include "scene/player/lite/hiplayer_impl.h"
 
+using namespace testing::ext;
 using namespace OHOS::Media::Pipeline;
 
 namespace OHOS::Media::Test {
@@ -98,7 +99,7 @@ public:
 
 OHOS::Media::Source UtTestHiPlayer::source("./test.mp3");
 
-TEST_F(UtTestHiPlayer, Can_SetSource)
+HWTEST_F(UtTestHiPlayer, Can_SetSource, TestSize.Level1)
 {
     // 因为player内部根据source参数创建shared_ptr，最终调用 audioSource.SetSource. 这里没法检查该指针参数了。
     MOCK_METHOD(audioSource, SetSource)
@@ -110,7 +111,7 @@ TEST_F(UtTestHiPlayer, Can_SetSource)
     ASSERT_EQ("PreparingState", player->fsm_.curState_->GetName());
 }
 
-TEST_F(UtTestHiPlayer, Can_SetBufferSize)
+HWTEST_F(UtTestHiPlayer, Can_SetBufferSize, TestSize.Level1)
 {
     size_t size = 100;
     MOCK_METHOD(audioSource, SetBufferSize)

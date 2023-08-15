@@ -79,6 +79,8 @@ void ConvertAMRnbStreamToMetaInfo(const AVStream& avStream, const std::shared_pt
 
 void ConvertAMRwbStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
                                   const std::shared_ptr<AVCodecContext>& avCodecContext, Meta& meta);
+void ConvertOPUSStreamToMetaInfo(const AVStream& avStream, const std::shared_ptr<AVFormatContext>& avFormatContext,
+                                  const std::shared_ptr<AVCodecContext>& avCodecContext, Meta& meta);
 } // namespace Ffmpeg
 } // namespace Plugin
 } // namespace Media

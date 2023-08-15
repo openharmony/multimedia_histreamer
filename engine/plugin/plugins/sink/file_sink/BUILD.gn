@@ -16,13 +16,18 @@ group("plugin_file_fd_sink") {
   deps = [ ":histreamer_plugin_FileFdSink" ]
 }
 
-source_set("file_fd_sink") {
+ohos_source_set("file_fd_sink") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   include_dirs = [ "//foundation/multimedia/histreamer/engine/include" ]
   sources = [ "file_fd_sink_plugin.cpp" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
+  if (!hst_is_lite_sys) {
+    external_deps = [ "graphic_2d:surface" ]
+  }
   public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
 }
 
@@ -42,6 +47,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_FileFdSink") {
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }

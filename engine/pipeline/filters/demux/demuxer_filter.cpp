@@ -71,7 +71,7 @@ Plugin::Status DemuxerFilter::DataSourceImpl::ReadAt(int64_t offset, std::shared
             break;
         case DemuxerState::DEMUXER_STATE_PARSE_HEADER: {
             if (filter.getRange_(static_cast<uint64_t>(offset), expectedLen, buffer)) {
-                DUMP_BUFFER2FILE("demuxer_input_peek.data", buffer);
+                DUMP_BUFFER2FILE(DEMUXER_INPUT_PEEK, buffer);
             } else {
                 rtv = Plugin::Status::ERROR_NOT_ENOUGH_DATA;
             }
@@ -80,7 +80,7 @@ Plugin::Status DemuxerFilter::DataSourceImpl::ReadAt(int64_t offset, std::shared
         case DemuxerState::DEMUXER_STATE_PARSE_FRAME: {
             if (filter.getRange_(static_cast<uint64_t>(offset), expectedLen, buffer)) {
                 DUMP_BUFFER2LOG("Demuxer GetRange", buffer, offset);
-                DUMP_BUFFER2FILE("demuxer_input_get.data", buffer);
+                DUMP_BUFFER2FILE(DEMUXER_INPUT_GET, buffer);
             } else {
                 rtv = Plugin::Status::END_OF_STREAM;
             }
@@ -208,7 +208,6 @@ ErrorCode DemuxerFilter::GetParameter(int32_t key, Plugin::Any& value)
 ErrorCode DemuxerFilter::Prepare()
 {
     MEDIA_LOG_I("Prepare called");
-    DUMP_BUFFER2FILE_PREPARE();
     dataPacker_->Start();
     pluginState_ = DemuxerState::DEMUXER_STATE_NULL;
     task_->RegisterHandler([this] { DemuxerLoop(); });
@@ -602,7 +601,7 @@ void DemuxerFilter::DemuxerLoop()
         auto rtv = ReadFrame(*bufferPtr, streamIndex);
         if (rtv == ErrorCode::SUCCESS) {
             DUMP_BUFFER2LOG("Demuxer Output", bufferPtr, 0);
-            DUMP_BUFFER2FILE("demuxer_output.data", bufferPtr);
+            DUMP_BUFFER2FILE(DEMUXER_OUTPUT, bufferPtr);
             HandleFrame(bufferPtr, streamIndex);
         } else {
             SendEventEos();

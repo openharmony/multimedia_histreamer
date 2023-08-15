@@ -19,16 +19,19 @@
 
 #include <algorithm>
 #include "foundation/log.h"
+#include "foundation/osal/thread/scoped_lock.h"
 
 namespace OHOS {
 namespace Media {
 void MediaStatStub::Reset()
 {
+    OSAL::ScopedLock lock(mediaStatMutex_);
     mediaStats_.clear();
 }
 
 void MediaStatStub::Append(const std::string& reporter)
 {
+    OSAL::ScopedLock lock(mediaStatMutex_);
     for (auto& stat : mediaStats_) {
         if (stat.reporter == reporter) {
             return;
@@ -40,7 +43,8 @@ void MediaStatStub::Append(const std::string& reporter)
 void MediaStatStub::ReceiveEvent(const Event& event)
 {
     switch (event.type) {
-        case EventType::EVENT_COMPLETE:
+        case EventType::EVENT_COMPLETE: {
+            OSAL::ScopedLock lock(mediaStatMutex_);
             for (auto& stat : mediaStats_) {
                 if (stat.reporter == event.srcFilter) {
                     stat.completeEventReceived = true;
@@ -48,6 +52,7 @@ void MediaStatStub::ReceiveEvent(const Event& event)
                 }
             }
             break;
+        }
         default:
             MEDIA_LOG_W("MediaStats::ReceiveEvent receive unexpected event " PUBLIC_LOG_D32,
                         static_cast<int>(event.type));
@@ -57,6 +62,7 @@ void MediaStatStub::ReceiveEvent(const Event& event)
 
 bool MediaStatStub::IsEventCompleteAllReceived()
 {
+    OSAL::ScopedLock lock(mediaStatMutex_);
     return std::all_of(mediaStats_.begin(), mediaStats_.end(), [](const MediaStat& stat) {
         return stat.completeEventReceived.load();
     });
@@ -64,6 +70,7 @@ bool MediaStatStub::IsEventCompleteAllReceived()
 
 void MediaStatStub::ResetEventCompleteAllReceived()
 {
+    OSAL::ScopedLock lock(mediaStatMutex_);
     for (auto& mediaStat : mediaStats_) {
         mediaStat.completeEventReceived = false;
     }

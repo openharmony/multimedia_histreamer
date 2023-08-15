@@ -27,48 +27,75 @@ config("histreamer_foundation_config") {
   }
 }
 
-source_set("histreamer_foundation") {
-  include_dirs = [ "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
-  sources = [
-    "osal/filesystem/file_system.cpp",
-    "osal/thread/condition_variable.cpp",
-    "osal/thread/mutex.cpp",
-    "osal/thread/scoped_lock.cpp",
-    "osal/thread/task.cpp",
-    "osal/thread/thread.cpp",
-    "osal/utils/util.cpp",
-    "utils/constants.cpp",
-    "utils/dump_buffer.cpp",
-    "utils/hitrace_utils.cpp",
-    "utils/steady_clock.cpp",
-  ]
-  public_configs = [
-    ":histreamer_foundation_config",
-    "//foundation/multimedia/histreamer:histreamer_presets",
-  ]
-  public_deps = []
-  if (hst_is_lite_sys) {
+if (hst_is_lite_sys) {
+  source_set("histreamer_foundation") {
+    include_dirs = [ "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
+    sources = [
+      "osal/filesystem/file_system.cpp",
+      "osal/thread/condition_variable.cpp",
+      "osal/thread/mutex.cpp",
+      "osal/thread/scoped_lock.cpp",
+      "osal/thread/task.cpp",
+      "osal/thread/thread.cpp",
+      "osal/utils/util.cpp",
+      "utils/constants.cpp",
+      "utils/dump_buffer.cpp",
+      "utils/hitrace_utils.cpp",
+      "utils/steady_clock.cpp",
+    ]
+    public_configs = [
+      ":histreamer_foundation_config",
+      "//foundation/multimedia/histreamer:histreamer_presets",
+    ]
     deps = [ "//foundation/multimedia/media_utils_lite:media_common" ]
     if (ohos_kernel_type == "liteos_m") {
       deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_static" ]
-      public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+      public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
     } else {
       deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
-      public_deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
+      public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     }
-  } else {
-    deps = [
-      "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
-      "//base/hiviewdfx/hitrace/interfaces/native/innerkits:hitrace_meter",
-    ]
-    public_deps += [
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
-      "//third_party/bounds_checking_function:libsec_static",
-    ]
-  }
 
-  if (defined(config_ohos_histreamer_stack_size) &&
-      config_ohos_histreamer_stack_size > 0) {
-    defines = [ "THREAD_STACK_SIZE=$config_ohos_histreamer_stack_size" ]
+    if (defined(config_ohos_histreamer_stack_size) &&
+        config_ohos_histreamer_stack_size > 0) {
+      defines = [ "THREAD_STACK_SIZE=$config_ohos_histreamer_stack_size" ]
+    }
+  }
+} else {
+  ohos_source_set("histreamer_foundation") {
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
+    include_dirs = [ "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
+    sources = [
+      "osal/filesystem/file_system.cpp",
+      "osal/thread/condition_variable.cpp",
+      "osal/thread/mutex.cpp",
+      "osal/thread/scoped_lock.cpp",
+      "osal/thread/task.cpp",
+      "osal/thread/thread.cpp",
+      "osal/utils/util.cpp",
+      "utils/constants.cpp",
+      "utils/dump_buffer.cpp",
+      "utils/hitrace_utils.cpp",
+      "utils/steady_clock.cpp",
+    ]
+    public_configs = [
+      ":histreamer_foundation_config",
+      "//foundation/multimedia/histreamer:histreamer_presets",
+    ]
+    public_deps = [
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
+    ]
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "graphic_2d:surface",
+      "hilog:libhilog",
+      "hitrace:hitrace_meter",
+    ]
+
+    if (defined(config_ohos_histreamer_stack_size) &&
+        config_ohos_histreamer_stack_size > 0) {
+      defines = [ "THREAD_STACK_SIZE=$config_ohos_histreamer_stack_size" ]
+    }
   }
 }

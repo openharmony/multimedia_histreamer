@@ -24,6 +24,12 @@
 #include "securec.h"
 #include "player.h"
 
+#ifndef WIN32
+#define HST_TEST(UtObject, function, level) HWTEST_F(UtObject, function, level)
+#else
+#define HST_TEST(UtObject, function, level) TEST_F(UtObject, function)
+#endif
+
 namespace OHOS::Media::Test {
 enum class TestSourceType : int32_t {
     URI = 0,

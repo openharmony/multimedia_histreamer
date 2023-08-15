@@ -66,6 +66,7 @@ void HttpMediaDownloader::Close(bool isAsync)
 {
     buffer_->SetActive(false);
     downloader_->Stop(isAsync);
+    cvReadWrite_.NotifyOne();
 }
 
 void HttpMediaDownloader::Pause()
@@ -73,12 +74,14 @@ void HttpMediaDownloader::Pause()
     bool cleanData = GetSeekable() != Seekable::SEEKABLE;
     buffer_->SetActive(false, cleanData);
     downloader_->Pause();
+    cvReadWrite_.NotifyOne();
 }
 
 void HttpMediaDownloader::Resume()
 {
     buffer_->SetActive(true);
     downloader_->Resume();
+    cvReadWrite_.NotifyOne();
 }
 
 bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
@@ -101,7 +104,9 @@ bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
         (buffer_->GetSize() < wantReadLength)) {
         MEDIA_LOG_D("wantReadLength larger than available, wait for write");
         OSAL::ScopedLock lock(mutex_);
-        cvReadWrite_.Wait(lock, [this, wantReadLength] { return buffer_->GetSize() >= wantReadLength; });
+        cvReadWrite_.Wait(lock, [this, wantReadLength] {
+            return buffer_->GetSize() >= wantReadLength || downloadRequest_->IsEos() || downloadRequest_->IsClosed();
+        });
     }
     realReadLength = buffer_->ReadBuffer(buff, wantReadLength, 2); // wait 2 times
     MEDIA_LOG_D("Read: wantReadLength " PUBLIC_LOG_D32 ", realReadLength " PUBLIC_LOG_D32 ", isEos "
@@ -120,10 +125,12 @@ bool HttpMediaDownloader::Seek(int offset)
     downloader_->Pause();
     buffer_->Clear();
     buffer_->SetActive(true);
-    downloader_->Seek(offset);
-    buffer_->SetMediaOffset(offset);
+    bool result = downloader_->Seek(offset);
+    if (result) {
+        buffer_->SetMediaOffset(offset);
+    }
     downloader_->Resume();
-    return true;
+    return result;
 }
 
 size_t HttpMediaDownloader::GetContentLength() const

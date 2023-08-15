@@ -35,37 +35,56 @@ config("histreamer_player_config") {
   }
 }
 
-source_set("histreamer_player") {
-  include_dirs = [ "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
-  sources = [
-    "//foundation/multimedia/histreamer/engine/scene/player/internal/state.cpp",
-    "//foundation/multimedia/histreamer/engine/scene/player/internal/state_machine.cpp",
-  ]
-  public_configs = [
-    ":histreamer_player_config",
-    "//foundation/multimedia/histreamer:histreamer_presets",
-  ]
-  public_deps = [
-    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base",
-    "//foundation/multimedia/histreamer/engine/pipeline:histreamer_engine_filters",
-    "//foundation/multimedia/histreamer/engine/scene:scene_common",
-  ]
-  if (hst_is_lite_sys) {
+if (hst_is_lite_sys) {
+  source_set("histreamer_player") {
+    include_dirs = [ "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
+    sources = [
+      "//foundation/multimedia/histreamer/engine/scene/player/internal/state.cpp",
+      "//foundation/multimedia/histreamer/engine/scene/player/internal/state_machine.cpp",
+    ]
+    public_configs = [
+      ":histreamer_player_config",
+      "//foundation/multimedia/histreamer:histreamer_presets",
+    ]
+    public_deps = [
+      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base",
+      "//foundation/multimedia/histreamer/engine/pipeline:histreamer_engine_filters",
+      "//foundation/multimedia/histreamer/engine/scene:scene_common",
+    ]
     sources += [
       "//foundation/multimedia/histreamer/engine/scene/player/lite/hiplayer.cpp",
       "//foundation/multimedia/histreamer/engine/scene/player/lite/hiplayer_impl.cpp",
     ]
     public_deps += [ "//foundation/multimedia/media_utils_lite:media_common" ]
-  } else {
+  }
+} else {
+  ohos_source_set("histreamer_player") {
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
+    include_dirs = [ "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
+    sources = [
+      "//foundation/multimedia/histreamer/engine/scene/player/internal/state.cpp",
+      "//foundation/multimedia/histreamer/engine/scene/player/internal/state_machine.cpp",
+    ]
+    public_configs = [
+      ":histreamer_player_config",
+      "//foundation/multimedia/histreamer:histreamer_presets",
+    ]
+    public_deps = [
+      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/pipeline:histreamer_base",
+      "//foundation/multimedia/histreamer/engine/pipeline:histreamer_engine_filters",
+      "//foundation/multimedia/histreamer/engine/scene:scene_common",
+    ]
     sources += [
       "//foundation/multimedia/histreamer/engine/scene/player/standard/hiplayer_callback_looper.cpp",
       "//foundation/multimedia/histreamer/engine/scene/player/standard/hiplayer_impl.cpp",
       "//foundation/multimedia/histreamer/engine/scene/player/standard/media_utils.cpp",
     ]
-    public_deps += [
-      "//foundation/multimedia/player_framework/services/utils:media_format",
+    external_deps = [
+      "graphic_2d:surface",
+      "player_framework:media_format",
     ]
-    deps = [ "//foundation/graphic/graphic_2d/frameworks/surface:surface" ]
   }
 }

@@ -11,8 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import("//build/ohos.gni")
 declare_args() {
+  histreamer_root_dir = "//foundation/multimedia/histreamer"
+
   # build histreamer plugin feature ability
   # only for small and std (mini device does not support dynamic libraries)
   histreamer_enable_plugin_ffmpeg_adapter = true

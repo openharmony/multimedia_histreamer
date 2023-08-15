@@ -22,8 +22,9 @@
 #include <vector>
 
 #include "foundation/utils/buffer_pool.h"
-#include "foundation/utils/constants.h"
 #include "pipeline/core/type_define.h"
+
+using namespace testing::ext;
 
 namespace OHOS::Media::Test {
 class BufferPoolTest : public ::testing::Test {
@@ -41,12 +42,12 @@ public:
     std::shared_ptr<BufferPool<AVBuffer>> pool;
 };
 
-TEST_F(BufferPoolTest, buffer_pool_init_buffer)
+HWTEST_F(BufferPoolTest, buffer_pool_init_buffer, TestSize.Level1)
 {
     EXPECT_EQ(DEFAULT_POOL_SIZE, pool->Size());
 }
 
-TEST_F(BufferPoolTest, buffer_pool_recycle_succ)
+HWTEST_F(BufferPoolTest, buffer_pool_recycle_succ, TestSize.Level1)
 {
     EXPECT_EQ(DEFAULT_POOL_SIZE, pool->Size());
     auto buffPtr = pool->AllocateBuffer();
@@ -55,7 +56,7 @@ TEST_F(BufferPoolTest, buffer_pool_recycle_succ)
     EXPECT_EQ(DEFAULT_POOL_SIZE, pool->Size());
 }
 
-TEST_F(BufferPoolTest, buffer_pool_return_nullptr_after_buffer_exhausted)
+HWTEST_F(BufferPoolTest, buffer_pool_return_nullptr_after_buffer_exhausted, TestSize.Level1)
 {
     EXPECT_EQ(DEFAULT_POOL_SIZE, pool->Size());
     std::vector<std::shared_ptr<AVBuffer>> buffers;

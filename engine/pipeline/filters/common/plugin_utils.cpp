@@ -306,6 +306,7 @@ bool AssignParameterIfMatch(Tag tag, T& ret, const Plugin::ValueType& val)
 
 template bool AssignParameterIfMatch(Tag tag, Plugin::SrcInputType& ret, const Plugin::ValueType& val);
 template bool AssignParameterIfMatch(Tag tag, uint32_t& ret, const Plugin::ValueType& val);
+template bool AssignParameterIfMatch(Tag tag, uint64_t& ret, const Plugin::ValueType& val);
 template bool AssignParameterIfMatch(Tag tag, int32_t& ret, const Plugin::ValueType& val);
 template bool AssignParameterIfMatch(Tag tag, int64_t& ret, const Plugin::ValueType& val);
 template bool AssignParameterIfMatch(Tag tag, double& ret, const Plugin::ValueType& val);

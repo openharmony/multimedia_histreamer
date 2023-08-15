@@ -83,8 +83,6 @@ std::shared_ptr<PluginLoader> PluginLoader::CheckSymbol(void* handler, const std
                 if (handler) {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
                     ::FreeLibrary((HMODULE)handler);
-#else
-                    ::dlclose(handler);
 #endif
                 }
             });

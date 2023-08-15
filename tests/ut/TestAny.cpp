@@ -21,6 +21,8 @@
 #define protected public
 #include "plugin/common/any.h"
 
+using namespace testing::ext;
+
 namespace OHOS {
 namespace Media {
 namespace Test {
@@ -91,7 +93,7 @@ public:
     uint8_t a_;
 };
 
-TEST(AnyTest, testAnyUseTrivial)
+HWTEST(AnyTest, testAnyUseTrivial, TestSize.Level1)
 {
     auto tmp = UseStorage<uint8_t, Any::TrivialStackFunctionTable>();
     ASSERT_TRUE(tmp);
@@ -113,7 +115,7 @@ TEST(AnyTest, testAnyUseTrivial)
     ASSERT_FALSE(tmp);
 }
 
-TEST(AnyTest, testAnyUseStack)
+HWTEST(AnyTest, testAnyUseStack, TestSize.Level1)
 {
     auto tmp = UseStorage<NonTrivialCopyable, Any::StackFunctionTable>();
     ASSERT_FALSE(tmp);
@@ -123,13 +125,13 @@ TEST(AnyTest, testAnyUseStack)
     ASSERT_TRUE(tmp);
 }
 
-TEST(AnyTest, testAnyUseHeap)
+HWTEST(AnyTest, testAnyUseHeap, TestSize.Level1)
 {
     auto tmp = UseStorage<NonTrivialCopyable, Any::HeapFunctionTable>();
     ASSERT_TRUE(tmp);
 }
 
-TEST(AnyTest, testAnyCast)
+HWTEST(AnyTest, testAnyCast, TestSize.Level1)
 {
     const int number = 12;
     auto a = Any(number);
@@ -164,7 +166,7 @@ public:
     }
 };
 
-TEST(AnyTest, testAnyEmplace)
+HWTEST(AnyTest, testAnyEmplace, TestSize.Level1)
 {
     Any celestial;
     celestial.Emplace<Star>("Procyon", 2943);
@@ -179,7 +181,7 @@ TEST(AnyTest, testAnyEmplace)
     ASSERT_TRUE(vector1 == (*va));
 }
 
-TEST(AnyTest, testMakeAny)
+HWTEST(AnyTest, testMakeAny, TestSize.Level1)
 {
     Star star1("Procyon", 2943);
     Any celestial = MakeAny<Star, std::string, int32_t>("Procyon", 2943);
@@ -190,7 +192,7 @@ TEST(AnyTest, testMakeAny)
     ASSERT_TRUE(AnyCast<std::vector<char>>(av) == vector1);
 }
 
-TEST(AnyTest, testType)
+HWTEST(AnyTest, testType, TestSize.Level1)
 {
     Any test = "test";
     ASSERT_TRUE(test.Type() == typeid(const char*));
@@ -198,7 +200,7 @@ TEST(AnyTest, testType)
     ASSERT_NE(test.Type(), typeid(char*));
 }
 
-TEST(AnyTest, testSwap)
+HWTEST(AnyTest, testSwap, TestSize.Level1)
 {
     NonTrivialNonThrowMove n1(100);
     Any a1 = n1;
@@ -219,7 +221,7 @@ TEST(AnyTest, testSwap)
     ASSERT_TRUE(AnyCast<Star>(a1) == star);
 }
 
-TEST(AnyTest, testHasValue_Reset)
+HWTEST(AnyTest, testHasValue_Reset, TestSize.Level1)
 {
     Any a;
     ASSERT_FALSE(a.HasValue());

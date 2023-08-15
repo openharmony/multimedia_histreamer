@@ -16,6 +16,11 @@
 #ifndef HISTREAMER_PIPELINE_DUMP_BUFFER_H
 #define HISTREAMER_PIPELINE_DUMP_BUFFER_H
 
+#define DEMUXER_INPUT_PEEK "hst_dump_demuxer_input_peek.data"
+#define DEMUXER_INPUT_GET "hst_dump_demuxer_input_get.data"
+#define DEMUXER_OUTPUT "hst_dump_demuxer_output.data"
+#define DECODER_OUTPUT "hst_dump_decoder_output.data"
+
 #include <cstddef>
 #include <cstdint>
 #include <iosfwd>
@@ -38,9 +43,11 @@ namespace Pipeline {
 #if DUMP_BUFFER2FILE_ENABLE
 #define DUMP_BUFFER2FILE(fileName, buffer) OHOS::Media::Pipeline::DumpBufferToFile(fileName, buffer)
 #define DUMP_BUFFER2FILE_PREPARE() OHOS::Media::Pipeline::PrepareDumpDir()
+#define DUMP_BUFFER2FILE_END() OHOS::Media::Pipeline::EndDumpFile()
 #else
 #define DUMP_BUFFER2FILE(fileName, buffer)
 #define DUMP_BUFFER2FILE_PREPARE()
+#define DUMP_BUFFER2FILE_END()
 #endif
 
 #define DUMP_BUFFER2LOG_SIZE 10 // Dump first 10 bytes of buffer.
@@ -53,6 +60,7 @@ namespace Pipeline {
 
 void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin::Buffer>& buffer);
 void PrepareDumpDir();
+void EndDumpFile();
 void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugin::Buffer>& buffer, uint64_t offset, size_t dumpSize);
 } // Pipeline
 } // Media

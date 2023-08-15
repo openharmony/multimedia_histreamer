@@ -93,6 +93,9 @@ public:
     void OnEvent(const Event& event) override;
 
     void SetSyncCenter(std::weak_ptr<IMediaSyncCenter> syncCenter) final;
+
+    template <typename T>
+    static T FindPort(const std::vector<T>& list, const std::string& name);
 protected:
     virtual void InitPorts();
 
@@ -139,9 +142,6 @@ protected:
     std::shared_ptr<Plugin::PluginInfo> pluginInfo_{};
 
     std::weak_ptr<IMediaSyncCenter> syncCenter_ {};
-private:
-    template <typename T>
-    static T FindPort(const std::vector<T>& list, const std::string& name);
 };
 } // namespace Pipeline
 } // namespace Media

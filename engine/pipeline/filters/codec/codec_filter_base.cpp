@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,7 +72,7 @@ ErrorCode CodecFilterBase::Prepare()
 
 ErrorCode CodecFilterBase::UpdateMetaFromPlugin(Plugin::Meta& meta)
 {
-    auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
+    auto parameterMap = PluginParameterTable::GetInstance().FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
         if ((keyPair.second.second & PARAM_GET) == 0) {
             continue;

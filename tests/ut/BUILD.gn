@@ -1,0 +1,103 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import("//build/test.gni")
+import("//foundation/multimedia/histreamer/config.gni")
+import("//foundation/multimedia/player_framework/config.gni")
+
+module_output_path = "histreamer/ut"
+
+histreamer_unittest_cflags = [
+  "-std=c++17",
+  "-Wall",
+  "-Werror",
+]
+
+#################################################################################################################
+ohos_unittest("histreamer_unit_test") {
+  module_out_path = module_output_path
+  include_dirs = [
+    "$histreamer_root_dir/tests/ut/plugins/",
+    "$histreamer_root_dir/tests/ut/",
+    "$histreamer_root_dir/engine/include/plugin/",
+    "$histreamer_root_dir/engine/pipeline/core/",
+    "$histreamer_root_dir/engine/pipeline/filters/common/",
+    "./plugins/",
+  ]
+  cflags = histreamer_unittest_cflags
+  defines = []
+  defines += player_framework_defines
+
+  deps = [
+    "$histreamer_root_dir/engine/pipeline:histreamer_pipeline_base",
+    "$histreamer_root_dir/engine/pipeline/filters/codec:codec_filters",
+    "$histreamer_root_dir/engine/pipeline/filters/demux:demuxer_filter",
+    "$histreamer_root_dir/engine/plugin:ffmpeg_convert",
+    "$histreamer_root_dir/engine/plugin:histreamer_plugin_base",
+    "$histreamer_root_dir/engine/plugin:histreamer_plugin_core",
+    "$histreamer_root_dir/engine/plugin/plugins/codec_adapter:histreamer_plugin_CodecAdapter",
+    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_adapter_common",
+    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_audio_decoders",
+    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_audio_encoders",
+    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_demuxers",
+    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_video_decoders",
+    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_video_encoders",
+    "$histreamer_root_dir/engine/plugin/plugins/source/audio_capture:histreamer_plugin_StdAudioCapture",
+    "$histreamer_root_dir/engine/plugin/plugins/source/file_source:filesource",
+    "$histreamer_root_dir/engine/scene:std_engine_factory",
+    "$histreamer_root_dir/engine/scene/player:histreamer_player",
+    "//third_party/googletest:gtest_rtti",
+  ]
+
+  external_deps = [
+    "graphic_2d:surface",
+    "hdf_core:libpub_utils",
+  ]
+
+  public_configs = [
+    "$histreamer_root_dir/engine/plugin/plugins/codec_adapter:plugin_codec_adapter_config",
+    "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config",
+  ]
+
+  sources = [
+    "$histreamer_root_dir/engine/include/plugin/common/plugin_types.h",
+    "$histreamer_root_dir/engine/include/plugin/core/plugin_manager.h",
+    "../st/helper/media_data_source_imp.cpp",
+    "../st/helper/std_player.cpp",
+    "./TestAlgoExt.cpp",
+    "./TestAny.cpp",
+    "./TestBitReader.cpp",
+    "./TestBufferPool.cpp",
+    "./TestCommon.cpp",
+    "./TestCompatibleCheck.cpp",
+    "./TestDataPacker.cpp",
+    "./TestFFmpegAudioDecoder.cpp",
+    "./TestFFmpegAudioEncoder.cpp",
+    "./TestFFmpegAvcConfigDataParser.cpp",
+    "./TestFFmpegUtils.cpp",
+    "./TestFFmpegVidEncConfig.cpp",
+    "./TestFFmpegVideoDecoder.cpp",
+    "./TestFileSourcePlugin.cpp",
+    "./TestFilter.cpp",
+    "./TestHiPlayer.cpp",
+    "./TestMeta.cpp",
+    "./TestMimeDefs.cpp",
+    "./TestPipline.cpp",
+    "./TestPluginCommon.cpp",
+    "./TestPluginManager.cpp",
+    "./TestSynchronizer.cpp",
+    "./TestVideoFFmpegEncoder.cpp",
+    "./plugins/UtSourceTest1.cpp",
+    "./plugins/UtSourceTest2.cpp",
+    "./testaudio/TestFastPlayer.cpp",
+  ]
+}

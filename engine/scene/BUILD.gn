@@ -14,22 +14,22 @@
 import("//foundation/multimedia/histreamer/config.gni")
 import("//foundation/multimedia/player_framework/config.gni")
 
-source_set("std_engine_factory") {
+ohos_source_set("std_engine_factory") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   if (!hst_is_lite_sys) {
     include_dirs = [
       "//foundation/multimedia/histreamer/engine",
       "//foundation/multimedia/player_framework/services/services/engine_intf",
       "//base/startup/init/interfaces/innerkits/include/syspara",
     ]
-    public_deps = [
-      "//base/startup/init/interfaces/innerkits:libbegetutil",
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    ]
+    public_deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
     public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
     sources = [ "standard/hst_engine_factory.cpp" ]
-    deps = [
-      "player:histreamer_player",
-      "//foundation/graphic/graphic_2d/frameworks/surface:surface",
+    deps = [ "player:histreamer_player" ]
+    external_deps = [
+      "graphic_2d:surface",
+      "init:libbegetutil",
     ]
     if (histreamer_enable_recorder) {
       deps += [ "recorder:histreamer_recorder" ]
@@ -39,7 +39,9 @@ source_set("std_engine_factory") {
   }
 }
 
-source_set("scene_common") {
+ohos_source_set("scene_common") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   include_dirs = [
     "//foundation/multimedia/histreamer/engine",
     "//foundation/multimedia/histreamer/engine/include",

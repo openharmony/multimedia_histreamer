@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +15,13 @@
 
 #include <gtest/gtest.h>
 
-#define private public
-#define protected public
-#define UNIT_TEST 1
-
 #include "foundation/utils/constants.h"
+using namespace testing::ext;
 
 namespace OHOS {
 namespace Media {
 namespace Test {
-TEST(TestDefs, check_mime_defs)
+HWTEST(TestDefs, check_mime_defs, TestSize.Level1)
 {
     ASSERT_STREQ(MEDIA_MIME_AUDIO_MPEG, "audio/mpeg");
     ASSERT_STREQ(MEDIA_MIME_AUDIO_FLAC, "audio/flac");

@@ -21,7 +21,9 @@ group("plugin_std_stream_source") {
   }
 }
 
-source_set("std_stream_source") {
+ohos_source_set("std_stream_source") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   sources = [ "std_stream_source_plugin.cpp" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
@@ -37,7 +39,10 @@ source_set("std_stream_source") {
       "//foundation/multimedia/histreamer/engine/include",
       "//commonlibrary/c_utils/base/include",
     ]
-    public_deps += [ "//foundation/multimedia/player_framework/services/utils:media_service_utils" ]
+    external_deps = [
+      "graphic_2d:surface",
+      "player_framework:media_service_utils",
+    ]
     public_configs += [ "//foundation/multimedia/player_framework/services/utils:media_service_utils_public_config" ]
   }
 }
@@ -49,6 +54,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_plugin_StdStreamSource") {
     sanitize = {
       cfi = true
+      cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
