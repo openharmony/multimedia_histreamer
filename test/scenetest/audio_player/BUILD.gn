@@ -1,0 +1,47 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import("//build/test.gni")
+import("//foundation/multimedia/histreamer/config.gni")
+import("//foundation/multimedia/player_framework/config.gni")
+
+module_output_path = "histreamer/scenetest/audio_player"
+
+histreamer_unittest_cflags = [
+  "-std=c++17",
+  "-Wall",
+  "-Werror",
+]
+
+#################################################################################################################
+ohos_unittest("histreamer_audio_player_test") {
+  module_out_path = module_output_path
+  include_dirs = [
+    "$histreamer_root_dir/engine",
+    "$histreamer_root_dir/test/scenetest/helper/engine_intf/",
+  ]
+  cflags = histreamer_unittest_cflags
+  defines = []
+  defines += player_framework_defines
+  defines -= [ "SUPPORT_METADATA" ]
+  deps = [
+    "$histreamer_root_dir/engine/scene:std_engine_factory",
+    "//third_party/googletest:gtest_rtti",
+  ]
+  external_deps = [ "graphic_2d:surface" ]
+  public_configs = []
+  sources = [
+    "../helper/media_data_source_imp.cpp",
+    "../helper/std_player.cpp",
+    "TestFastPlayer.cpp",
+  ]
+}
