@@ -19,7 +19,7 @@
 #include <cmath>
 #include <thread>
 #include "foundation/log.h"
-#include "../../st/helper/test_player.hpp"
+#include "../../scenetest/helper/test_player.hpp"
 
 #ifndef WIN32
 #define RESOURCE_DIR "/data/test/media/"
