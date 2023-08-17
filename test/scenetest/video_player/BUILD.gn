@@ -10,12 +10,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import("//build/test.gni")
 import("//foundation/multimedia/histreamer/config.gni")
 
-group("histreamer_test") {
-  testonly = true
+module_output_path = "histreamer/scenetest/video_player"
+
+histreamer_unittest_cflags = [
+  "-std=c++17",
+  "-Wall",
+  "-Werror",
+]
+
+#################################################################################################################
+ohos_unittest("histreamer_video_player_test") {
+  module_out_path = module_output_path
+  include_dirs = []
+  cflags = histreamer_unittest_cflags
+  defines = []
   deps = []
-  if (!hst_is_lite_sys) {
-    deps += [ "ut:histreamer_unit_test" ]
-  }
+  external_deps = []
+  public_configs = []
+  sources = []
 }

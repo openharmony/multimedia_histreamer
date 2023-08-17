@@ -12,9 +12,8 @@
 # limitations under the License.
 import("//build/test.gni")
 import("//foundation/multimedia/histreamer/config.gni")
-import("//foundation/multimedia/player_framework/config.gni")
 
-module_output_path = "histreamer/ut"
+module_output_path = "histreamer/unittest"
 
 histreamer_unittest_cflags = [
   "-std=c++17",
@@ -26,8 +25,8 @@ histreamer_unittest_cflags = [
 ohos_unittest("histreamer_unit_test") {
   module_out_path = module_output_path
   include_dirs = [
-    "$histreamer_root_dir/tests/ut/plugins/",
-    "$histreamer_root_dir/tests/ut/",
+    "$histreamer_root_dir/test/unittest/plugins/",
+    "$histreamer_root_dir/test/unittest/",
     "$histreamer_root_dir/engine/include/plugin/",
     "$histreamer_root_dir/engine/pipeline/core/",
     "$histreamer_root_dir/engine/pipeline/filters/common/",
@@ -35,7 +34,6 @@ ohos_unittest("histreamer_unit_test") {
   ]
   cflags = histreamer_unittest_cflags
   defines = []
-  defines += player_framework_defines
 
   deps = [
     "$histreamer_root_dir/engine/pipeline:histreamer_pipeline_base",
@@ -71,8 +69,6 @@ ohos_unittest("histreamer_unit_test") {
   sources = [
     "$histreamer_root_dir/engine/include/plugin/common/plugin_types.h",
     "$histreamer_root_dir/engine/include/plugin/core/plugin_manager.h",
-    "../st/helper/media_data_source_imp.cpp",
-    "../st/helper/std_player.cpp",
     "./TestAlgoExt.cpp",
     "./TestAny.cpp",
     "./TestBitReader.cpp",
@@ -98,6 +94,5 @@ ohos_unittest("histreamer_unit_test") {
     "./TestVideoFFmpegEncoder.cpp",
     "./plugins/UtSourceTest1.cpp",
     "./plugins/UtSourceTest2.cpp",
-    "./testaudio/TestFastPlayer.cpp",
   ]
 }

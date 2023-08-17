@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "media_data_source.h"
-#include "plugin/common/plugin_types.h"
-
 #ifndef HISTREAMER_MEDIA_DATA_SOURCE_IMPL_H
 #define HISTREAMER_MEDIA_DATA_SOURCE_IMPL_H
+
+#include "media_data_source.h"
+#include "plugin/common/plugin_types.h"
 
 namespace OHOS {
 namespace Media {

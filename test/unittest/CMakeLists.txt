@@ -37,12 +37,7 @@ link_directories(
         ${curl_lib_path}
 )
 
-file(GLOB UT_TEST_SRCS
-        ../st/helper/media_data_source_imp.cpp
-        ../st/helper/std_player.cpp
-        ./testaudio/TestFastPlayer.cpp
-        ./*.cpp
-        )
+file(GLOB UT_TEST_SRCS ./*.cpp)
 
 file(GLOB UT_TEST_PLUGINS ./plugins/*.cpp)
 
@@ -54,17 +49,17 @@ set(SRC
         ../main.cpp
         )
 
-add_executable(HiStreamerUtTests ${SRC})
+add_executable(histreamer_unittest ${SRC})
 
 link_directories(
         ${MOCKCPP_DIR}/lib/
         /usr/local/lib
 )
 
-target_compile_definitions(HiStreamerUtTests PRIVATE UNIT_TEST)
+target_compile_definitions(histreamer_unittest PRIVATE UNIT_TEST)
 
 if (MSVC)
-    target_link_libraries(HiStreamerUtTests
+    target_link_libraries(histreamer_unittest
             ${GTEST_ROOT_DIR}/lib/gtestd.lib
             ${MOCKCPP_DIR}/lib/mockcpp.lib
             pthreadVC2.lib
@@ -72,7 +67,7 @@ if (MSVC)
 elseif (MINGW)
     set(ffmpeg_path ${THIRD_PARTY_DIR}/ffmpeg/windows)
     set(sdl_path ${THIRD_PARTY_DIR}/SDL2.0/windows)
-    target_link_libraries(HiStreamerUtTests
+    target_link_libraries(histreamer_unittest
             # dl
             ${sdl_path}/lib/x64/SDL2.lib
             ${ffmpeg_path}/lib/libavcodec.dll.a
@@ -88,10 +83,10 @@ elseif (MINGW)
     message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
     file(GLOB ffmpeg_shared_libraries ${ffmpeg_path}/bin/*.dll)
     file(GLOB sdl_shared_libraries ${sdl_path}/lib/x64/*.dll)
-    file(COPY ${ffmpeg_shared_libraries} DESTINATION ${CMAKE_BINARY_DIR}/_deps/histreamer-build/tests/ut)
-    file(COPY ${sdl_shared_libraries} DESTINATION ${CMAKE_BINARY_DIR}/_deps/histreamer-build/tests/ut)
+    file(COPY ${ffmpeg_shared_libraries} DESTINATION ${CMAKE_BINARY_DIR}/_deps/histreamer-build/test/unittest)
+    file(COPY ${sdl_shared_libraries} DESTINATION ${CMAKE_BINARY_DIR}/_deps/histreamer-build/test/unittest)
 else ()
-    target_link_libraries(HiStreamerUtTests
+    target_link_libraries(histreamer_unittest
             dl
             ${ffmpeg_lib_path}/libavformat.a
             ${ffmpeg_lib_path}/libavcodec.a

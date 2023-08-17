@@ -106,7 +106,7 @@
               }
             ],
             "test": [
-              "//foundation/multimedia/histreamer/tests:histreamer_test"
+              "//foundation/multimedia/histreamer/test:histreamer_test"
             ]
         }
     }
