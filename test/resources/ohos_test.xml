@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2023 Huawei Device Co., Ltd.
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<configuration ver="2.0">
+    <target name="histreamer_audio_player_test">
+        <depend pushpath="/data/test" findpath="res" presetcmd=""/>
+        <preparer>
+            <option name="shell" value="mkdir -p /data/test/media"/>
+            <option name="shell" value="mkdir -p /data/test/media/MP3"/>
+            <option name="shell" value="mkdir -p /data/test/media/AAC"/>
+            <option name="shell" value="mkdir -p /data/test/media/FLAC"/>
+            <option name="shell" value="mkdir -p /data/test/media/M4A"/>
+            <option name="shell" value="mkdir -p /data/test/media/WAV"/>
+            <option name="shell" value="mkdir -p /data/test/media/MP4"/>
+            <option name="push" value="MP3_LONG_48000_32.mp3 -> /data/test/media/MP3" src="res"/>
+            <option name="push" value="MP3_48000_32_SHORT.mp3 -> /data/test/media/MP3" src="res"/>
+            <option name="push" value="MPEG-4_48000_32_SHORT.m4a -> /data/test/media/M4A" src="res"/>
+            <option name="push" value="vorbis_48000_32_SHORT.wav -> /data/test/media/WAV" src="res"/>
+            <option name="push" value="MPEG-4_48000_32_LONG.m4a -> /data/test/media/M4A" src="res"/>
+            <option name="push" value="vorbis_48000_32_SHORT.flac -> /data/test/media/FLAC" src="res"/>
+            <option name="push" value="AAC_48000_32_SHORT.aac -> /data/test/media/AAC" src="res"/>
+            <option name="shell" value="restorecon /data/test/media"/>
+        </preparer>
+    </target>
+</configuration>
