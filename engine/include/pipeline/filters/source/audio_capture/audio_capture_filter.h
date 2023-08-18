@@ -63,6 +63,7 @@ private:
     void SendBuffer(const std::shared_ptr<AVBuffer>& buffer);
     void PickPreferSampleFmt(const std::shared_ptr<Plugin::Meta>& meta, const Plugin::ValueType& val);
     std::shared_ptr<Plugin::Meta> PickPreferParameters();
+    void SetAppInfoParams();
 
     std::shared_ptr<OSAL::Task> taskPtr_ {nullptr};
     std::shared_ptr<Plugin::Source> plugin_ {nullptr};
