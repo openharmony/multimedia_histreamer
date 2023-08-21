@@ -91,7 +91,7 @@ private:
     std::atomic<PlayerStates> pipelineStates_ {PlayerStates::PLAYER_IDLE};
 };
 
-TestSource TestSource::CreateTestSource(std::string& url, TestSourceType type, Plugin::Seekable seekable)
+TestSource TestSource::CreateTestSource(const std::string& url, TestSourceType type, Plugin::Seekable seekable)
 {
     switch (type) {
         case TestSourceType::URI:
@@ -99,6 +99,7 @@ TestSource TestSource::CreateTestSource(std::string& url, TestSourceType type, P
         case TestSourceType::STREAM:
             return TestSource(url, seekable);
     }
+    return TestSource("");
 }
 
 std::unique_ptr<TestPlayer> TestPlayer::Create()

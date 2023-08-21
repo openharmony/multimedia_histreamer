@@ -46,17 +46,17 @@ public:
         outFD_ = fdUri;
     }
 
-    void GetBitRate(int64_t& bitrate)
+    void GetBitRate(int64_t& bitrate) const
     {
         bitrate = bitRate_;
     }
 
-    void GetSampleRate(int32_t& sampleRate)
+    void GetSampleRate(int32_t& sampleRate) const
     {
         sampleRate = sampleRate_;
     }
 
-    void GetChannel(int32_t& channel)
+    void GetChannel(int32_t& channel) const
     {
         channel = channel_;
     }

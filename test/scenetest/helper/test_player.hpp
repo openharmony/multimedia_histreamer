@@ -38,7 +38,7 @@ enum class TestSourceType : int32_t {
 
 class TestSource {
 public:
-    static TestSource CreateTestSource(std::string& url, TestSourceType type, Plugin::Seekable seekable);
+    static TestSource CreateTestSource(const std::string& url, TestSourceType type, Plugin::Seekable seekable);
     explicit TestSource(std::string url) : url_(std::move(url)), type_(TestSourceType::URI) {}
     TestSource(std::string url, Plugin::Seekable seekable) : url_(std::move(url)),
         type_(TestSourceType::STREAM), seekable_(seekable) {}
