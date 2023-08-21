@@ -83,6 +83,7 @@ ohos_unittest("histreamer_unit_test") {
     "./TestDataPacker.cpp",
     "./TestFFmpegAudioDecoder.cpp",
     "./TestFFmpegAudioEncoder.cpp",
+    "./TestFFmpegAvcConfigDataParser.cpp",
     "./TestFFmpegDemuxer.cpp",
     "./TestFFmpegUtils.cpp",
     "./TestFFmpegVidEncConfig.cpp",
