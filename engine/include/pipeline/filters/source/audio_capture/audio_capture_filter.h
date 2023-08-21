@@ -104,3 +104,4 @@ private:
 } // namespace OHOS
 #endif
 #endif // MEDIA_PIPELINE_AUDIO_CAPTURE_FILTER_H
+
