@@ -25,8 +25,8 @@ histreamer_unittest_cflags = [
 ohos_unittest("histreamer_unit_test") {
   module_out_path = module_output_path
   include_dirs = [
-    "$histreamer_root_dir/tests/ut/plugins/",
-    "$histreamer_root_dir/tests/ut/",
+    "$histreamer_root_dir/test/unittest/plugins/",
+    "$histreamer_root_dir/test/unittest/",
     "$histreamer_root_dir/engine/include/plugin/",
     "$histreamer_root_dir/engine/pipeline/core/",
     "$histreamer_root_dir/engine/pipeline/filters/common/",
