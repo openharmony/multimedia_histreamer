@@ -13,7 +13,7 @@
 import("//build/test.gni")
 import("//foundation/multimedia/histreamer/config.gni")
 
-module_output_path = "histreamer/ut"
+module_output_path = "histreamer/unittest"
 
 histreamer_unittest_cflags = [
   "-std=c++17",
@@ -56,6 +56,8 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:histreamer_plugin_FFmpegVideoEncoders",
     "$histreamer_root_dir/engine/plugin/plugins/source/audio_capture:histreamer_plugin_StdAudioCapture",
     "$histreamer_root_dir/engine/plugin/plugins/source/file_source:filesource",
+    "$histreamer_root_dir/engine/plugin/plugins/source/http_source:httpsource",
+    "$histreamer_root_dir/engine/scene:std_engine_factory",
     "$histreamer_root_dir/engine/scene/player:histreamer_player",
     "//third_party/googletest:gtest_rtti",
   ]
@@ -81,13 +83,14 @@ ohos_unittest("histreamer_unit_test") {
     "./TestDataPacker.cpp",
     "./TestFFmpegAudioDecoder.cpp",
     "./TestFFmpegAudioEncoder.cpp",
-    "./TestFFmpegAvcConfigDataParser.cpp",
+    "./TestFFmpegDemuxer.cpp",
     "./TestFFmpegUtils.cpp",
     "./TestFFmpegVidEncConfig.cpp",
     "./TestFFmpegVideoDecoder.cpp",
     "./TestFileSourcePlugin.cpp",
     "./TestFilter.cpp",
     "./TestHiPlayer.cpp",
+    "./TestHttpSourcePlugin.cpp",
     "./TestMeta.cpp",
     "./TestMimeDefs.cpp",
     "./TestPipline.cpp",
