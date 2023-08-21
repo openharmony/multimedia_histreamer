@@ -24,7 +24,7 @@ config("plugin_aac_demuxer_adapter_config") {
   ]
 }
 
-if (ohos_kernel_type == "liteos_m") {
+if (hst_is_mini_sys) {
   static_library("histreamer_plugin_AACDemuxer") {
     sources = [ "aac_demuxer_plugin.cpp" ]
     public_configs = [

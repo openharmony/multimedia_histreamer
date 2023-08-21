@@ -31,8 +31,7 @@ public:
         int32_t appUid = 0, int32_t appPid = 0, uint32_t appTokenId = 0) override;
 #endif
 #ifdef SUPPORT_RECORDER
-    std::unique_ptr<IRecorderEngine> CreateRecorderEngine(int32_t appUid, int32_t appPid,
-        uint32_t appTokenId, uint64_t appFullTokenId) override;
+    std::unique_ptr<IRecorderEngine> CreateRecorderEngine(int32_t appUid, int32_t appPid, uint32_t appTokenId) override;
 #endif
 #ifdef SUPPORT_METADATA
     std::unique_ptr<IAVMetadataHelperEngine> CreateAVMetadataHelperEngine() override;

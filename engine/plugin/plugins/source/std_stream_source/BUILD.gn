@@ -13,54 +13,41 @@
 #
 import("//foundation/multimedia/histreamer/config.gni")
 group("plugin_std_stream_source") {
-  deps = []
-  if (hst_is_lite_sys) {
-    print("std stream source plugin is not available on lite systems")
-  } else {
-    deps += [ ":histreamer_plugin_StdStreamSource" ]
+  if (hst_is_standard_sys) {
+    deps = [ ":histreamer_plugin_StdStreamSource" ]
   }
 }
 
-ohos_source_set("std_stream_source") {
-  subsystem_name = "multimedia"
-  part_name = "histreamer"
-  sources = [ "std_stream_source_plugin.cpp" ]
-  public_deps = [
-    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
-  ]
-  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
-  if (hst_is_lite_sys) {
-    print("std stream source plugin is not available on lite systems")
-  } else {
+if (hst_is_standard_sys) {
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer_plugin_StdStreamSource") {
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
     include_dirs = [
       "//foundation/multimedia/player_framework/interfaces/inner_api/native",
       "//foundation/multimedia/player_framework/services/utils/include",
       "//foundation/multimedia/histreamer/engine/include",
       "//commonlibrary/c_utils/base/include",
     ]
+    sources = [ "std_stream_source_plugin.cpp" ]
+    public_configs = [
+      "//foundation/multimedia/histreamer:histreamer_presets",
+      "//foundation/multimedia/player_framework/services/utils:media_service_utils_public_config"
+    ]
+    public_deps = [
+      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
+    ]
     external_deps = [
       "graphic_2d:surface",
       "player_framework:media_service_utils",
     ]
-    public_configs += [ "//foundation/multimedia/player_framework/services/utils:media_service_utils_public_config" ]
-  }
-}
-
-if (hst_is_lite_sys) {
-  print("std stream source plugin is not available on lite systems")
-} else {
-  import("//build/ohos.gni")
-  ohos_shared_library("histreamer_plugin_StdStreamSource") {
     sanitize = {
       cfi = true
       cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
-    deps = [ ":std_stream_source" ]
     relative_install_dir = "media/histreamer_plugins"
-    subsystem_name = "multimedia"
-    part_name = "histreamer"
   }
 }

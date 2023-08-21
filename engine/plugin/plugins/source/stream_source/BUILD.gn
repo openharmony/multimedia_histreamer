@@ -36,7 +36,7 @@ if (hst_is_lite_sys) {
   #lite
   import("//build/lite/config/component/lite_component.gni")
   lite_library("histreamer_plugin_StreamSource") {
-    if (ohos_kernel_type == "liteos_m") {
+    if (hst_is_mini_sys) {
       target_type = "static_library"
     } else {
       target_type = "shared_library"
@@ -47,15 +47,15 @@ if (hst_is_lite_sys) {
   #standard
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_StreamSource") {
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
+    deps = [ ":streamsource" ]
     sanitize = {
       cfi = true
       cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
-    deps = [ ":streamsource" ]
     relative_install_dir = "media/histreamer_plugins"
-    subsystem_name = "multimedia"
-    part_name = "histreamer"
   }
 }

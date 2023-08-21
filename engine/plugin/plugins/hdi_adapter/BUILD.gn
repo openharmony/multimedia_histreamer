@@ -14,11 +14,8 @@
 import("//foundation/multimedia/histreamer/config.gni")
 
 group("plugin_hdi_adapter") {
-  deps = []
   if (hst_is_lite_sys) {
-    deps += [ ":histreamer_plugin_HdiAuSink" ]
-  } else {
-    print("plugin_hdi_adapter is not available on standard systems")
+    deps = [ ":histreamer_plugin_HdiAuSink" ]
   }
 }
 
@@ -38,7 +35,7 @@ if (hst_is_lite_sys) {
   }
 
   lite_library("histreamer_plugin_HdiAuSink") {
-    if (ohos_kernel_type == "liteos_m") {
+    if (hst_is_mini_sys) {
       target_type = "static_library"
     } else {
       target_type = "shared_library"

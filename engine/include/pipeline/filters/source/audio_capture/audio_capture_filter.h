@@ -63,7 +63,6 @@ private:
     void SendBuffer(const std::shared_ptr<AVBuffer>& buffer);
     void PickPreferSampleFmt(const std::shared_ptr<Plugin::Meta>& meta, const Plugin::ValueType& val);
     std::shared_ptr<Plugin::Meta> PickPreferParameters();
-    void SetAppInfoParams();
 
     std::shared_ptr<OSAL::Task> taskPtr_ {nullptr};
     std::shared_ptr<Plugin::Source> plugin_ {nullptr};
@@ -79,8 +78,6 @@ private:
     bool bitRateSpecified_ {false};
     uint32_t appTokenId_ {0};
     bool appTokenIdSpecified_ {false};
-    uint64_t appFullTokenId_ {0};
-    bool appFullTokenIdSpecified_ {false};
     int32_t appUid_ {0};
     bool appUidSpecified_ {false};
     int32_t appPid_ {0};

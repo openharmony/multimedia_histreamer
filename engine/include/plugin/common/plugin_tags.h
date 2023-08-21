@@ -103,7 +103,6 @@ enum struct Tag : uint32_t {
     SRC_INPUT_TYPE,                   ///< @see SrcInputType
     BITS_PER_CODED_SAMPLE,            ///< uint32_t, bits per coded sample
     APP_TOKEN_ID,                     ///< uint32_t, app token id
-    APP_FULL_TOKEN_ID,                ///< uint64_t, app full token id
     APP_UID,                          ///< int32_t, app uid
     APP_PID,                          ///< int32_t, app pid
     AUDIO_RENDER_INFO,                ///< AudioRenderInfo, audio render info

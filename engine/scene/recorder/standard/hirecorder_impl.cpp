@@ -33,9 +33,8 @@ namespace Media {
 namespace Record {
 using namespace Pipeline;
 
-HiRecorderImpl::HiRecorderImpl(int32_t appUid, int32_t appPid, uint32_t appTokenId, uint64_t appFullTokenId)
-    : appUid_(appUid), appPid_(appPid), appTokenId_(appTokenId), appFullTokenId_(appFullTokenId),
-      fsm_(*this), curFsmState_(StateId::INIT)
+HiRecorderImpl::HiRecorderImpl(int32_t appUid, int32_t appPid, uint32_t appTokenId)
+    : appUid_(appUid), appPid_(appPid), appTokenId_(appTokenId), fsm_(*this), curFsmState_(StateId::INIT)
 {
     SYNC_TRACER();
     MEDIA_LOG_I("hiRecorderImpl ctor");
@@ -477,7 +476,6 @@ ErrorCode HiRecorderImpl::SetAudioSourceInternal(AudioSourceType source, int32_t
     FALSE_RETURN_V_MSG_E(audioCapture_ != nullptr && audioEncoder_ != nullptr, ErrorCode::ERROR_UNKNOWN,
                          "create audioCapture/audioEncoder filter fail");
     audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::APP_TOKEN_ID), appTokenId_);
-    audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::APP_FULL_TOKEN_ID), appFullTokenId_);
     audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::APP_UID), appUid_);
     audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::APP_PID), appPid_);
     return fsm_.SendEvent(Intent::SET_AUDIO_SOURCE,

@@ -19,7 +19,7 @@ config("histreamer_recorder_config") {
       "//foundation/multimedia/histreamer/engine/include",
       "//foundation/multimedia/histreamer/engine/scene/recorder",
     ]
-    if (!hst_is_lite_sys) {
+    if (hst_is_standard_sys) {
       include_dirs += [
         "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
         "//foundation/multimedia/player_framework/interfaces/inner_api/native",
@@ -47,7 +47,7 @@ ohos_source_set("histreamer_recorder") {
       "//foundation/multimedia/histreamer:histreamer_presets",
     ]
     deps = [ "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation" ]
-    if (!hst_is_lite_sys) {
+    if (hst_is_standard_sys) {
       sources += [
         "standard/hirecorder_impl.cpp",
         "standard/recorder_utils.cpp",

@@ -48,7 +48,7 @@ if (hst_is_lite_sys) {
       "//foundation/multimedia/histreamer:histreamer_presets",
     ]
     deps = [ "//foundation/multimedia/media_utils_lite:media_common" ]
-    if (ohos_kernel_type == "liteos_m") {
+    if (hst_is_mini_sys) {
       deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_static" ]
       public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
     } else {

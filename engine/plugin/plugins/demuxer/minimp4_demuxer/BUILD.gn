@@ -23,7 +23,7 @@ config("plugin_minimp4_demuxer_adapter_config") {
   ]
 }
 
-if (ohos_kernel_type == "liteos_m") {
+if (hst_is_mini_sys) {
   static_library("histreamer_plugin_Minimp4Demuxer") {
     sources = [ "minimp4_demuxer_plugin.cpp" ]
     public_configs = [

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,15 +31,10 @@ constexpr uint8_t PARAM_SET = 0x02;
 using PluginParaAllowedMap = std::map<Plugin::Tag,
     std::pair<std::function<bool(Plugin::Tag, const Plugin::ValueType&)>, uint8_t>>;
 
-class PluginParameterTable {
-public:
-    static PluginParameterTable& GetInstance();
-    PluginParameterTable();
-    const PluginParaAllowedMap& FindAllowedParameterMap(FilterType category);
-
+struct PluginParameterTable {
+    static const PluginParaAllowedMap& FindAllowedParameterMap(FilterType category);
 private:
-    void Init();
-    std::map<FilterType, PluginParaAllowedMap> table_;
+    static const std::map<FilterType, PluginParaAllowedMap> table_;
 };
 } // Pipeline
 } // Media

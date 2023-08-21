@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,7 +140,7 @@ ErrorCode MuxerFilter::AddTrackThenConfigure(const std::pair<std::string, Plugin
         return isTranSuccess;
     }
     trackInfos_.emplace_back(TrackInfo{static_cast<int32_t>(trackId), metaPair.first, false});
-    auto parameterMap = PluginParameterTable::GetInstance().FindAllowedParameterMap(filterType_);
+    auto parameterMap = PluginParameterTable::FindAllowedParameterMap(filterType_);
     for (const auto& keyPair : parameterMap) {
         Plugin::ValueType outValue;
         auto isGetSuccess = metaPair.second.GetData(static_cast<Plugin::Tag>(keyPair.first), outValue);

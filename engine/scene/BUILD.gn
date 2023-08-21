@@ -17,7 +17,7 @@ import("//foundation/multimedia/player_framework/config.gni")
 ohos_source_set("std_engine_factory") {
   subsystem_name = "multimedia"
   part_name = "histreamer"
-  if (!hst_is_lite_sys) {
+  if (hst_is_standard_sys) {
     include_dirs = [
       "//foundation/multimedia/histreamer/engine",
       "//foundation/multimedia/player_framework/services/services/engine_intf",

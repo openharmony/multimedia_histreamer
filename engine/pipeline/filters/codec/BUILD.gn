@@ -41,7 +41,7 @@ ohos_source_set("codec_filters") {
     "../../../foundation:histreamer_foundation",
     "../../../pipeline:histreamer_base",
   ]
-  if (!hst_is_lite_sys) {
+  if (hst_is_standard_sys) {
     external_deps = [ "graphic_2d:surface" ]
   }
 }

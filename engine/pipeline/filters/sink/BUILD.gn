@@ -33,7 +33,7 @@ ohos_source_set("media_synchronous_sink") {
     "../../../foundation:histreamer_foundation",
     "../../../pipeline:histreamer_base",
   ]
-  if (!hst_is_lite_sys) {
+  if (hst_is_standard_sys) {
     external_deps = [ "graphic_2d:surface" ]
   }
 }
@@ -44,7 +44,7 @@ ohos_source_set("audio_sink_filter") {
   sources = [ "audio_sink/audio_sink_filter.cpp" ]
   public_configs = [ "../../../../:histreamer_presets" ]
   public_deps = [ ":media_synchronous_sink" ]
-  if (!hst_is_lite_sys) {
+  if (hst_is_standard_sys) {
     external_deps = [ "graphic_2d:surface" ]
   }
 }
@@ -55,7 +55,7 @@ ohos_source_set("video_sink_filter") {
   sources = [ "video_sink/video_sink_filter.cpp" ]
   public_configs = [ "../../../../:histreamer_presets" ]
   public_deps = [ ":media_synchronous_sink" ]
-  if (!hst_is_lite_sys) {
+  if (hst_is_standard_sys) {
     external_deps = [ "graphic_2d:surface" ]
   }
 }
@@ -72,7 +72,7 @@ ohos_source_set("output_sink_filter") {
     "../../../foundation:histreamer_foundation",
     "../../../pipeline:histreamer_base",
   ]
-  if (!hst_is_lite_sys) {
+  if (hst_is_standard_sys) {
     external_deps = [ "graphic_2d:surface" ]
   }
 }
