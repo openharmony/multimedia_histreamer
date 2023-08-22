@@ -225,6 +225,7 @@ void AudioServerSinkPlugin::AudioRendererCallbackImpl::OnStateChange(const OHOS:
 AudioServerSinkPlugin::AudioServerSinkPlugin(std::string name)
     : Plugin::AudioSinkPlugin(std::move(name)), audioRenderer_(nullptr)
 {
+    SetUpParamsSetterMap();
 }
 
 AudioServerSinkPlugin::~AudioServerSinkPlugin()
@@ -523,82 +524,151 @@ void AudioServerSinkPlugin::SetInterruptMode(AudioStandard::InterruptMode interr
     }
 }
 
+void AudioServerSinkPlugin::SetUpParamsSetterMap()
+{
+    SetUpSampleRateSetter();
+    SetUpAudioOutputChannelsSetter();
+    SetUpMediaBitRateSetter();
+    SetUpAudioSampleFormatSetter();
+    SetUpAudioOutputChannelLayoutSetter();
+    SetUpAudioSamplePerFrameSetter();
+    SetUpBitsPerCodedSampleSetter();
+    SetUpMediaSeekableSetter();
+    SetUpAppPidSetter();
+    SetUpAppUidSetter();
+    SetUpAudioRenderInfoSetter();
+    SetUpAudioInterruptModeSetter();
+}
+
+void AudioServerSinkPlugin::SetUpSampleRateSetter()
+{
+    paramsSetterMap_[Tag::AUDIO_SAMPLE_RATE] = [this](const ValueType& para) {
+        FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
+                             "sample rate type should be uint32_t");
+        FALSE_RETURN_V_MSG_E(AssignSampleRateIfSupported(Plugin::AnyCast<uint32_t>(para)),
+                             Status::ERROR_INVALID_PARAMETER, "sampleRate isn't supported");
+        return Status::OK;
+    };
+}
+
+void AudioServerSinkPlugin::SetUpAudioOutputChannelsSetter()
+{
+    paramsSetterMap_[Tag::AUDIO_OUTPUT_CHANNELS] = [this](const ValueType &para) {
+        FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
+                             "channels type should be uint32_t");
+        channels_ = Plugin::AnyCast<uint32_t>(para);
+        MEDIA_LOG_I("Set outputChannels: " PUBLIC_LOG_U32, channels_);
+        FALSE_RETURN_V_MSG_E(AssignChannelNumIfSupported(channels_), Status::ERROR_INVALID_PARAMETER,
+                             "channel isn't supported");
+        return Status::OK;
+    };
+}
+
+void AudioServerSinkPlugin::SetUpMediaBitRateSetter()
+{
+    paramsSetterMap_[Tag::MEDIA_BITRATE] = [this](const ValueType &para) {
+        FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(int64_t)), Status::ERROR_MISMATCHED_TYPE,
+            "bit rate type should be int64_t");
+        bitRate_ = Plugin::AnyCast<int64_t>(para);
+        return Status::OK;
+    };
+}
+void AudioServerSinkPlugin::SetUpAudioSampleFormatSetter()
+{
+    paramsSetterMap_[Tag::AUDIO_SAMPLE_FORMAT] = [this](const ValueType &para) {
+        FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(AudioSampleFormat)), Status::ERROR_MISMATCHED_TYPE,
+            "AudioSampleFormat type should be AudioSampleFormat");
+        FALSE_RETURN_V_MSG_E(AssignSampleFmtIfSupported(Plugin::AnyCast<AudioSampleFormat>(para)),
+            Status::ERROR_INVALID_PARAMETER, "sampleFmt isn't supported by audio renderer or resample lib");
+        return Status::OK;
+    };
+}
+void AudioServerSinkPlugin::SetUpAudioOutputChannelLayoutSetter()
+{
+    paramsSetterMap_[Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT] = [this](const ValueType &para) {
+        FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(AudioChannelLayout)), Status::ERROR_MISMATCHED_TYPE,
+            "channel layout type should be AudioChannelLayout");
+        channelLayout_ = Plugin::AnyCast<AudioChannelLayout>(para);
+        MEDIA_LOG_I("Set outputChannelLayout: " PUBLIC_LOG_U64, channelLayout_);
+        return Status::OK;
+    };
+}
+void AudioServerSinkPlugin::SetUpAudioSamplePerFrameSetter()
+{
+    paramsSetterMap_[Tag::AUDIO_SAMPLE_PER_FRAME] = [this](const ValueType &para) {
+        FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
+            "SAMPLE_PER_FRAME type should be uint32_t");
+        samplesPerFrame_ = Plugin::AnyCast<uint32_t>(para);
+        return Status::OK;
+    };
+}
+void AudioServerSinkPlugin::SetUpBitsPerCodedSampleSetter()
+{
+    paramsSetterMap_[Tag::BITS_PER_CODED_SAMPLE] = [this](const ValueType &para) {
+        FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
+                             "BITS_PER_CODED_SAMPLE type should be uint32_t");
+        bitsPerSample_ = Plugin::AnyCast<uint32_t>(para);
+        return Status::OK;
+    };
+}
+void AudioServerSinkPlugin::SetUpMediaSeekableSetter()
+{
+    paramsSetterMap_[Tag::MEDIA_SEEKABLE] = [this](const ValueType &para) {
+        FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(Seekable)), Status::ERROR_MISMATCHED_TYPE,
+                             "MEDIA_SEEKABLE type should be Seekable");
+        seekable_ = Plugin::AnyCast<Plugin::Seekable>(para);
+        return Status::OK;
+    };
+}
+void AudioServerSinkPlugin::SetUpAppPidSetter()
+{
+    paramsSetterMap_[Tag::APP_PID] = [this](const ValueType &para) {
+        FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(int32_t)), Status::ERROR_MISMATCHED_TYPE,
+            "APP_PID type should be int32_t");
+        appPid_ = Plugin::AnyCast<int32_t>(para);
+        return Status::OK;
+    };
+}
+void AudioServerSinkPlugin::SetUpAppUidSetter()
+{
+    paramsSetterMap_[Tag::APP_UID] = [this](const ValueType &para) {
+        FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(int32_t)), Status::ERROR_MISMATCHED_TYPE,
+            "APP_UID type should be int32_t");
+        appUid_ = Plugin::AnyCast<int32_t>(para);
+        return Status::OK;
+    };
+}
+void AudioServerSinkPlugin::SetUpAudioRenderInfoSetter()
+{
+    paramsSetterMap_[Tag::AUDIO_RENDER_INFO] = [this](const ValueType &para) {
+        FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(AudioRenderInfo)), Status::ERROR_MISMATCHED_TYPE,
+                             "AUDIO_RENDER_INFO type should be AudioRenderInfo");
+        audioRenderInfo_ = Plugin::AnyCast<AudioRenderInfo>(para);
+        return Status::OK;
+    };
+}
+void AudioServerSinkPlugin::SetUpAudioInterruptModeSetter()
+{
+    paramsSetterMap_[Tag::AUDIO_INTERRUPT_MODE] = [this](const ValueType &para) {
+        FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(AudioInterruptMode)), Status::ERROR_MISMATCHED_TYPE,
+                             "AUDIO_INTERRUPT_MODE type should be AudioInterruptMode");
+        AudioInterruptMode2InterruptMode(Plugin::AnyCast<AudioInterruptMode>(para), audioInterruptMode_);
+        SetInterruptMode(audioInterruptMode_);
+        return Status::OK;
+    };
+}
+
 Status AudioServerSinkPlugin::SetParameter(Tag tag, const ValueType& para)
 {
     MEDIA_LOG_I("SetParameter entered, key: " PUBLIC_LOG_S, Tag2String(tag));
-    switch (tag) {
-        case Tag::AUDIO_SAMPLE_RATE:
-            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
-                "sample rate type should be uint32_t");
-            FALSE_RETURN_V_MSG_E(AssignSampleRateIfSupported(Plugin::AnyCast<uint32_t>(para)),
-                Status::ERROR_INVALID_PARAMETER, "sampleRate isn't supported");
-            break;
-        case Tag::AUDIO_OUTPUT_CHANNELS:
-            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
-                "channels type should be uint32_t");
-            channels_ = Plugin::AnyCast<uint32_t>(para);
-            MEDIA_LOG_I("Set outputChannels: " PUBLIC_LOG_U32, channels_);
-            FALSE_RETURN_V_MSG_E(AssignChannelNumIfSupported(channels_), Status::ERROR_INVALID_PARAMETER,
-                "channel isn't supported");
-            break;
-        case Tag::MEDIA_BITRATE:
-            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(int64_t)), Status::ERROR_MISMATCHED_TYPE,
-                "bit rate type should be int64_t");
-            bitRate_ = Plugin::AnyCast<int64_t>(para);
-            break;
-        case Tag::AUDIO_SAMPLE_FORMAT:
-            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(AudioSampleFormat)), Status::ERROR_MISMATCHED_TYPE,
-                "AudioSampleFormat type should be AudioSampleFormat");
-            FALSE_RETURN_V_MSG_E(AssignSampleFmtIfSupported(Plugin::AnyCast<AudioSampleFormat>(para)),
-                Status::ERROR_INVALID_PARAMETER, "sampleFmt isn't supported by audio renderer or resample lib");
-            break;
-        case Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT:
-            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(AudioChannelLayout)), Status::ERROR_MISMATCHED_TYPE,
-                "channel layout type should be AudioChannelLayout");
-            channelLayout_ = Plugin::AnyCast<AudioChannelLayout>(para);
-            MEDIA_LOG_I("Set outputChannelLayout: " PUBLIC_LOG_U64, channelLayout_);
-            break;
-        case Tag::AUDIO_SAMPLE_PER_FRAME:
-            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
-                "SAMPLE_PER_FRAME type should be uint32_t");
-            samplesPerFrame_ = Plugin::AnyCast<uint32_t>(para);
-            break;
-        case Tag::BITS_PER_CODED_SAMPLE:
-            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(uint32_t)), Status::ERROR_MISMATCHED_TYPE,
-                                 "BITS_PER_CODED_SAMPLE type should be uint32_t");
-            bitsPerSample_ = Plugin::AnyCast<uint32_t>(para);
-            break;
-        case Tag::MEDIA_SEEKABLE:
-            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(Seekable)), Status::ERROR_MISMATCHED_TYPE,
-                                 "MEDIA_SEEKABLE type should be Seekable");
-            seekable_ = Plugin::AnyCast<Plugin::Seekable>(para);
-            break;
-        case Tag::APP_PID:
-            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(int32_t)), Status::ERROR_MISMATCHED_TYPE,
-                "APP_PID type should be int32_t");
-            appPid_ = Plugin::AnyCast<int32_t>(para);
-            break;
-        case Tag::APP_UID:
-            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(int32_t)), Status::ERROR_MISMATCHED_TYPE,
-                "APP_UID type should be int32_t");
-            appUid_ = Plugin::AnyCast<int32_t>(para);
-            break;
-        case Tag::AUDIO_RENDER_INFO:
-            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(AudioRenderInfo)), Status::ERROR_MISMATCHED_TYPE,
-                                 "AUDIO_RENDER_INFO type should be AudioRenderInfo");
-            audioRenderInfo_ = Plugin::AnyCast<AudioRenderInfo>(para);
-            break;
-        case Tag::AUDIO_INTERRUPT_MODE:
-            FALSE_RETURN_V_MSG_E(para.SameTypeWith(typeid(AudioInterruptMode)), Status::ERROR_MISMATCHED_TYPE,
-                                 "AUDIO_INTERRUPT_MODE type should be AudioInterruptMode");
-            AudioInterruptMode2InterruptMode(Plugin::AnyCast<AudioInterruptMode>(para), audioInterruptMode_);
-            SetInterruptMode(audioInterruptMode_);
-            break;
-        default:
-            MEDIA_LOG_I("Unknown key");
-            break;
+    auto iter = paramsSetterMap_.find(tag);
+    if (iter == paramsSetterMap_.end()) {
+        MEDIA_LOG_I("Unknown key");
+        return Status::OK;
     }
-    return Status::OK;
+
+    std::function<Status(const ValueType& para)> paramSetter = iter->second;
+    return paramSetter(para);
 }
 
 Status AudioServerSinkPlugin::GetVolume(float& volume)
