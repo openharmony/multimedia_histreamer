@@ -85,6 +85,28 @@ if (hst_is_lite_sys) {
   }
 }
 
+ohos_source_set("plugin_base") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
+  sources = []
+  public_deps = [
+    ":histreamer_plugin_intf",
+    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+  ]
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
+}
+
+config("histreamer_plugin_base_external_config") {
+  include_dirs = [
+    "//foundation/graphic/graphic_2d/interfaces/inner_api/",
+    "//foundation/multimedia/histreamer/engine",
+    "//foundation/multimedia/histreamer/engine/include",
+    "//foundation/multimedia/histreamer/engine/include/plugin/common",
+    "//foundation/multimedia/histreamer/engine/include/plugin/core",
+    "//foundation/multimedia/histreamer/engine/scene/standard",
+  ]
+}
+
 if (hst_is_lite_sys) {
   import("//build/lite/config/component/lite_component.gni")
   lite_library("histreamer_plugin_base") {
@@ -94,30 +116,15 @@ if (hst_is_lite_sys) {
       target_type = "shared_library"
     }
     sources = []
-    public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
-    public_deps = [
-      ":histreamer_plugin_intf",
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    ]
+    deps = [ ":plugin_base" ]
   }
 } else {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_base") {
     subsystem_name = "multimedia"
     part_name = "histreamer"
-    include_dirs = [
-      "//foundation/graphic/graphic_2d/interfaces/inner_api/",
-      "//foundation/multimedia/histreamer/engine",
-      "//foundation/multimedia/histreamer/engine/include",
-      "//foundation/multimedia/histreamer/engine/include/plugin/common",
-      "//foundation/multimedia/histreamer/engine/include/plugin/core",
-      "//foundation/multimedia/histreamer/engine/scene/standard",
-    ]
-    public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
-    public_deps = [
-      ":histreamer_plugin_intf",
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    ]
+    public_configs = [ ":histreamer_plugin_base_external_config" ]
+    deps = [ ":plugin_base" ]
     sanitize = {
       cfi = true
       cfi_cross_dso = true
