@@ -19,6 +19,4 @@ CMakeCache.txt
 CMakeFiles/
 Makefile
 cmake_install.cmake
-*.mp3
-*.mp4
 test/scenetest/gen_testsuites

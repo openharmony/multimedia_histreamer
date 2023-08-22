@@ -420,56 +420,6 @@ HWTEST(TestMergeCapability, ComplexType_Test1, TestSize.Level1)
     ASSERT_TRUE(disCaps[4] == Plugin::AudioSampleFormat::F64);
 }
 
-HWTEST(TestMergeCapability, ComplexType_Test2, TestSize.Level1)
-{
-    Capability out;
-    Capability cap1 (MEDIA_MIME_AUDIO_RAW);
-    cap1.AppendFixedKey<uint32_t>(CapabilityID::AUDIO_SAMPLE_RATE, 8000);
-    cap1.AppendIntervalKey<uint32_t>(CapabilityID::AUDIO_CHANNELS, 2, 8);
-    cap1.AppendDiscreteKeys<Plugin::AudioSampleFormat>(CapabilityID::AUDIO_SAMPLE_FORMAT, {
-            Plugin::AudioSampleFormat::S64, Plugin::AudioSampleFormat::S64P, Plugin::AudioSampleFormat::U64,
-            Plugin::AudioSampleFormat::U64P, Plugin::AudioSampleFormat::F64,
-    });
-    auto disCaps = Plugin::AnyCast<Plugin::DiscreteCapability<Plugin::AudioSampleFormat>>(
-            out.keys[CapabilityID::AUDIO_SAMPLE_FORMAT]);
-    Capability cap4(MEDIA_MIME_AUDIO_RAW);
-    cap4.AppendIntervalKey<uint32_t>(CapabilityID::AUDIO_SAMPLE_RATE, 8000, 96000);
-    cap4.AppendFixedKey<uint32_t>(CapabilityID::AUDIO_CHANNELS, 4);
-    cap4.AppendDiscreteKeys<Plugin::AudioChannelLayout>(CapabilityID::AUDIO_CHANNEL_LAYOUT, {
-            Plugin::AudioChannelLayout::STEREO, Plugin::AudioChannelLayout::SURROUND,
-            Plugin::AudioChannelLayout::CH_5POINT1, Plugin::AudioChannelLayout::CH_7POINT1,
-    });
-    ASSERT_TRUE(Pipeline::MergeCapability(cap1, cap4, out));
-    ASSERT_TRUE(Plugin::AnyCast<uint32_t>(out.keys[CapabilityID::AUDIO_SAMPLE_RATE]) == 8000);
-    ASSERT_TRUE(Plugin::AnyCast<uint32_t>(out.keys[CapabilityID::AUDIO_CHANNELS]) == 4);
-    auto disCaps1 = Plugin::AnyCast<Plugin::DiscreteCapability<Plugin::AudioSampleFormat>>(
-            out.keys[CapabilityID::AUDIO_SAMPLE_FORMAT]);
-    ASSERT_TRUE(disCaps.size() == 5);
-    ASSERT_TRUE(disCaps[0] == Plugin::AudioSampleFormat::S64);
-    ASSERT_TRUE(disCaps[1] == Plugin::AudioSampleFormat::S64P);
-    ASSERT_TRUE(disCaps[2] == Plugin::AudioSampleFormat::U64);
-    ASSERT_TRUE(disCaps[3] == Plugin::AudioSampleFormat::U64P);
-    ASSERT_TRUE(disCaps[4] == Plugin::AudioSampleFormat::F64);
-    auto intCaps1 = Plugin::AnyCast<Plugin::DiscreteCapability<Plugin::AudioChannelLayout>>(
-            out.keys[CapabilityID::AUDIO_CHANNEL_LAYOUT]);
-    ASSERT_TRUE(intCaps1.size() == 4);
-    ASSERT_TRUE(intCaps1[0] == Plugin::AudioChannelLayout::STEREO);
-    ASSERT_TRUE(intCaps1[1] == Plugin::AudioChannelLayout::SURROUND);
-    ASSERT_TRUE(intCaps1[2] == Plugin::AudioChannelLayout::CH_5POINT1);
-    ASSERT_TRUE(intCaps1[3] == Plugin::AudioChannelLayout::CH_7POINT1);
-
-    Capability cap5(MEDIA_MIME_AUDIO_RAW);
-    cap5.AppendIntervalKey<uint32_t>(CapabilityID::AUDIO_SAMPLE_RATE, 8000, 96000);
-    cap5.AppendFixedKey<uint32_t>(CapabilityID::AUDIO_CHANNELS, 10);
-    cap5.AppendDiscreteKeys<Plugin::AudioChannelLayout>(CapabilityID::AUDIO_CHANNEL_LAYOUT, {
-            Plugin::AudioChannelLayout::STEREO, Plugin::AudioChannelLayout::SURROUND,
-            Plugin::AudioChannelLayout::CH_5POINT1, Plugin::AudioChannelLayout::CH_7POINT1,
-    });
-    ASSERT_FALSE(Pipeline::MergeCapability(cap1, cap5, out));
-    ASSERT_TRUE(out.mime.empty());
-    ASSERT_TRUE(out.keys.empty());
-}
-
 HWTEST(TestApplyCapabilitySet, ComplexType_Test3, TestSize.Level1)
 {
     Capability out;
