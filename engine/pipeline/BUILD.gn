@@ -79,6 +79,16 @@ if (hst_is_lite_sys) {
   }
 }
 
+config("histreamer_codec_filters_external_config") {
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine/scene/standard",
+    "//foundation/multimedia/histreamer/engine/include/pipeline/filters/codec/audio_decoder",
+    "//foundation/multimedia/histreamer/engine/include/pipeline/filters/codec/audio_encoder",
+    "//foundation/multimedia/histreamer/engine/include/pipeline/filters/codec/video_decoder",
+    "//foundation/multimedia/histreamer/engine/include/pipeline/filters/codec/video_encoder",
+  ]
+}
+
 if (hst_is_lite_sys) {
   import("//build/lite/config/component/lite_component.gni")
   lite_library("histreamer_codec_filters") {
@@ -93,16 +103,10 @@ if (hst_is_lite_sys) {
 } else {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_codec_filters") {
-    include_dirs = [
-      "//foundation/multimedia/histreamer/engine/scene/standard",
-      "//foundation/multimedia/histreamer/engine/include/pipeline/filters/codec/audio_decoder",
-      "//foundation/multimedia/histreamer/engine/include/pipeline/filters/codec/audio_encoder",
-      "//foundation/multimedia/histreamer/engine/include/pipeline/filters/codec/video_decoder",
-      "//foundation/multimedia/histreamer/engine/include/pipeline/filters/codec/video_encoder",
-    ]
-    deps = [ "filters/codec:codec_filters" ]
     subsystem_name = "multimedia"
     part_name = "histreamer"
+    public_configs = [ ":histreamer_codec_filters_external_config" ]
+    deps = [ "filters/codec:codec_filters" ]
     sanitize = {
       cfi = true
       cfi_cross_dso = true
