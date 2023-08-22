@@ -40,6 +40,18 @@ ohos_source_set("histreamer_pipeline_base") {
   }
 }
 
+config("histreamer_base_external_config") {
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine/include/pipeline/core",
+    "//foundation/multimedia/histreamer/engine/include/pipeline/factory",
+    "//foundation/multimedia/histreamer/engine/include/plugin/common",
+    "//foundation/multimedia/histreamer/engine/include/plugin/core",
+    "//foundation/multimedia/histreamer/engine/include/plugin/factory",
+    "//foundation/multimedia/histreamer/engine/include/plugin/interface",
+    "//foundation/multimedia/player_framework/interfaces/inner_api/native",
+  ]
+}
+
 if (hst_is_lite_sys) {
   import("//build/lite/config/component/lite_component.gni")
   lite_library("histreamer_base") {
@@ -56,15 +68,7 @@ if (hst_is_lite_sys) {
   ohos_shared_library("histreamer_base") {
     subsystem_name = "multimedia"
     part_name = "histreamer"
-    include_dirs = [
-      "//foundation/multimedia/histreamer/engine/include/pipeline/core",
-      "//foundation/multimedia/histreamer/engine/include/pipeline/factory",
-      "//foundation/multimedia/histreamer/engine/include/plugin/common",
-      "//foundation/multimedia/histreamer/engine/include/plugin/core",
-      "//foundation/multimedia/histreamer/engine/include/plugin/factory",
-      "//foundation/multimedia/histreamer/engine/include/plugin/interface",
-      "//foundation/multimedia/player_framework/interfaces/inner_api/native",
-    ]
+    public_configs = [ ":histreamer_base_external_config" ]
     deps = [ ":histreamer_pipeline_base" ]
     sanitize = {
       cfi = true
