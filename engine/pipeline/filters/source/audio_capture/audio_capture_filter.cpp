@@ -81,9 +81,7 @@ ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin
     MEDIA_LOG_D("IN");
     SetAppInfoParams();
     ErrorCode err = TranslatePluginStatus(plugin_->Init());
-    if (err != ErrorCode::SUCCESS) {
-        return err;
-    }
+    FALSE_RETURN_V(err == ErrorCode::SUCCESS, err);
     plugin_->SetCallback(this);
     pluginAllocator_ = plugin_->GetAllocator();
     uint32_t tmp = 0;
@@ -91,25 +89,19 @@ ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin
         MEDIA_LOG_I("configure plugin with sample rate " PUBLIC_LOG_U32, tmp);
         bufferCalibration_->SetParam(Tag::AUDIO_SAMPLE_RATE, tmp);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_RATE, tmp));
-        if (err != ErrorCode::SUCCESS) {
-            return err;
-        }
+        FALSE_RETURN_V(err == ErrorCode::SUCCESS, err);
     }
     if (audioMeta->Get<Tag::AUDIO_CHANNELS>(tmp)) {
         MEDIA_LOG_I("configure plugin with channel " PUBLIC_LOG_U32, tmp);
         bufferCalibration_->SetParam(Tag::AUDIO_CHANNELS, tmp);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_CHANNELS, channelNum_));
-        if (err != ErrorCode::SUCCESS) {
-            return err;
-        }
+        FALSE_RETURN_V(err == ErrorCode::SUCCESS, err);
     }
     int64_t bitRate = 0;
     if (audioMeta->Get<Tag::MEDIA_BITRATE>(bitRate)) {
         MEDIA_LOG_I("configure plugin with bitrate " PUBLIC_LOG_D64, bitRate);
         err = TranslatePluginStatus(plugin_->SetParameter(Tag::MEDIA_BITRATE, bitRate));
-        if (err != ErrorCode::SUCCESS) {
-            return err;
-        }
+        FALSE_RETURN_V(err == ErrorCode::SUCCESS, err);
     }
     Plugin::AudioSampleFormat sampleFormat = Plugin::AudioSampleFormat::S16;
     if (audioMeta->Get<Tag::AUDIO_SAMPLE_FORMAT>(sampleFormat)) {

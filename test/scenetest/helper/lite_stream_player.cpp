@@ -60,7 +60,7 @@ uint8_t *GetDataFromSource(int8_t *flag, uint32_t *getDataSize)
         *getDataSize = 0;
         return outDataPtr;
     }
-    outDataPtr = (uint8_t *)malloc(inputSize);
+    outDataPtr = reinterpret_cast<uint8_t*>(malloc(inputSize));
     auto ret = memset_s(outDataPtr, INPUT_BUFFER_SIZE, 0, inputSize);
     FALSE_RETURN(ret == 0);
     if (readPos + INPUT_BUFFER_SIZE > testDataSize) {
@@ -149,13 +149,13 @@ int ReadDataFromFile(std::string dataPath)
     }
     std::string data = ss.str();
     const char* split = ",";
-    char* s_input = (char *)data.c_str();
+    char* s_input = data.c_str();
     char* p = strtok(s_input, split);
     while (p != nullptr) {
-        uint32_t data;
-        auto ret = sscanf_s(p, "%x", &data);
+        uint32_t dataValue;
+        auto ret = sscanf_s(p, "%x", &dataValue);
         FALSE_LOG_MSG_W(ret == 0, "sscanf_s failed.");
-        testData.push_back(data);
+        testData.push_back(dataValue);
         p=strtok(nullptr, split);
     }
     return testData.size() * 4; // 4

@@ -40,6 +40,9 @@ public:
 private:
     void Init();
     std::map<FilterType, PluginParaAllowedMap> table_;
+    void InitAudioTable();
+    void InitMuxerTable();
+    void InitVideoTable();
 };
 } // Pipeline
 } // Media
