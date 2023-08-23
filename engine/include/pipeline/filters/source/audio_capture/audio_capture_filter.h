@@ -50,7 +50,13 @@ public:
     ErrorCode SendEos();
 private:
     void InitPorts() override;
+
+    ErrorCode ConfigureAudioSampleRate(const std::shared_ptr<Plugin::Meta>& audioMeta);
+    ErrorCode ConfigureAudioChannels(const std::shared_ptr<Plugin::Meta>& audioMeta);
+    ErrorCode ConfigureAudioBitRate(const std::shared_ptr<Plugin::Meta>& audioMeta);
+    ErrorCode ConfigureSampleFormat(const std::shared_ptr<Plugin::Meta>& audioMeta);
     ErrorCode InitAndConfigWithMeta(const std::shared_ptr<Plugin::Meta>& audioMeta);
+
     void ReadLoop();
     ErrorCode CreatePlugin(const std::shared_ptr<Plugin::PluginInfo>& info, const std::string& name,
                            Plugin::PluginManager& manager);
