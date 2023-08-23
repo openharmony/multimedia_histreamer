@@ -12,6 +12,7 @@
 # limitations under the License.
 import("//build/test.gni")
 import("//foundation/multimedia/histreamer/config.gni")
+import("//foundation/multimedia/player_framework/config.gni")
 
 module_output_path = "histreamer/scenetest/audio_recorder"
 
@@ -24,11 +25,22 @@ histreamer_unittest_cflags = [
 #################################################################################################################
 ohos_unittest("histreamer_audio_recorder_test") {
   module_out_path = module_output_path
-  include_dirs = []
+  include_dirs = [ "$histreamer_root_dir/engine" ]
   cflags = histreamer_unittest_cflags
   defines = []
-  deps = []
-  external_deps = []
+  defines += player_framework_defines
+  defines -= [ "SUPPORT_METADATA" ]
+  deps = [
+    "$histreamer_root_dir/engine/scene:std_engine_factory",
+    "$histreamer_root_dir/engine/scene/player:histreamer_player",
+    "//third_party/googletest:gtest_rtti",
+  ]
+  external_deps = [ "graphic_2d:surface" ]
   public_configs = []
-  sources = []
+  resource_config_file = "../../resources/ohos_test.xml"
+  sources = [
+    "../helper/media_data_source_imp.cpp",
+    "../helper/std_player.cpp",
+    "TestFastRecorder.cpp",
+  ]
 }
