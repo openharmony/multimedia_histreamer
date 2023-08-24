@@ -21,19 +21,40 @@ declare_args() {
   }
 }
 
+onfig("hst_plugin_intf_config") {
+  include_dirs = [
+    "//foundation/multimedia/histreamer/engine/include",
+    "//foundation/multimedia/histreamer/engine/scene/standard",
+  ]
+  if (hst_is_lite_sys) {
+    include_dirs +=
+        [ "//foundation/multimedia/media_utils_lite/interfaces/kits" ]
+  } else {
+    include_dirs += [
+      "//foundation/multimedia/histreamer/engine/scene/standard",
+      "//foundation/multimedia/player_framework/interfaces/inner_api/native",
+    ]
+    if (histreamer_enable_video) {
+      include_dirs += [
+        "//commonlibrary/c_utils/base/include",
+        "//drivers/peripheral/display/interfaces/include",
+        "//foundation/graphic/graphic_2d/frameworks/surface/include",
+        "//foundation/graphic/graphic_2d/interfaces/inner_api/",
+        "//foundation/graphic/graphic_2d/utils/sync_fence/export",
+      ]
+    }
+  }
+}
+
 if (hst_is_lite_sys) {
   source_set("histreamer_plugin_intf") {
-    include_dirs = [
-      "//foundation/multimedia/histreamer/engine/include",
-      "//foundation/multimedia/histreamer/engine/scene/standard",
-      "//foundation/multimedia/media_utils_lite/interfaces/kits"
-    ]
     sources = [
       "common/media_sink.cpp",
       "common/media_source.cpp",
       "common/plugin_buffer.cpp",
     ]
     public_configs = [
+      ":hst_plugin_intf_config",
       "//foundation/multimedia/histreamer:histreamer_presets",
     ]
     if (hst_is_mini_sys) {
@@ -46,29 +67,17 @@ if (hst_is_lite_sys) {
   ohos_source_set("histreamer_plugin_intf") {
     subsystem_name = "multimedia"
     part_name = "histreamer"
-    include_dirs = [
-      "//foundation/multimedia/histreamer/engine/include",
-      "//foundation/multimedia/histreamer/engine/scene/standard",
-      "//foundation/multimedia/histreamer/engine/scene/standard",
-      "//foundation/multimedia/player_framework/interfaces/inner_api/native",
-    ]
     sources = [
       "common/media_sink.cpp",
       "common/media_source.cpp",
       "common/plugin_buffer.cpp",
     ]
     public_configs = [
+      ":hst_plugin_intf_config",
       "//foundation/multimedia/histreamer:histreamer_presets",
     ]
     external_deps = [ "bounds_checking_function:libsec_shared" ]
     if (histreamer_enable_video) {
-      include_dirs += [
-        "//commonlibrary/c_utils/base/include",
-        "//drivers/peripheral/display/interfaces/include",
-        "//foundation/graphic/graphic_2d/frameworks/surface/include",
-        "//foundation/graphic/graphic_2d/interfaces/inner_api/",
-        "//foundation/graphic/graphic_2d/utils/sync_fence/export",
-      ]
       sources += [
         "common/share_allocator.cpp",
         "common/share_memory.cpp",
