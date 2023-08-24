@@ -21,7 +21,7 @@ declare_args() {
   }
 }
 
-onfig("hst_plugin_intf_config") {
+config("hst_plugin_intf_config") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine/include",
     "//foundation/multimedia/histreamer/engine/scene/standard",
@@ -215,20 +215,19 @@ ohos_source_set("histreamer_plugin_core") {
     sources += [ "core/plugin_loader.cpp" ]
     defines += [ "DYNAMIC_PLUGINS" ]
   }
-  public_configs = [
-    "//foundation/multimedia/histreamer:histreamer_presets",
-  ]
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
   public_deps = [
     ":histreamer_plugin_base",
+    "plugins:gen_plugin_static_header",
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "plugins:gen_plugin_static_header"
   ]
   if (hst_is_lite_sys) {
     defines += [
       "HST_PLUGIN_PATH=\"/usr/lib\"",
       "HST_PLUGIN_FILE_TAIL=\".so\"",
     ]
-    include_dirs += [ "//foundation/multimedia/media_utils_lite/interfaces/kits" ]
+    include_dirs +=
+        [ "//foundation/multimedia/media_utils_lite/interfaces/kits" ]
     if (hst_is_mini_sys) {
       public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
     } else {
@@ -255,4 +254,3 @@ ohos_source_set("histreamer_plugin_core") {
     external_deps = [ "graphic_2d:surface" ]
   }
 }
-

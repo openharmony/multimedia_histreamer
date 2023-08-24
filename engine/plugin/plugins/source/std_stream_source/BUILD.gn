@@ -32,7 +32,7 @@ if (hst_is_standard_sys) {
     sources = [ "std_stream_source_plugin.cpp" ]
     public_configs = [
       "//foundation/multimedia/histreamer:histreamer_presets",
-      "//foundation/multimedia/player_framework/services/utils:media_service_utils_public_config"
+      "//foundation/multimedia/player_framework/services/utils:media_service_utils_public_config",
     ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",

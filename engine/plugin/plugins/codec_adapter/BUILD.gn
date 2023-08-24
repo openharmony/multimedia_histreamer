@@ -40,17 +40,15 @@ if (hst_is_standard_sys) {
       "hdi_codec_adapter.cpp",
       "hdi_codec_manager.cpp",
     ]
-    public_configs = [
-      "//foundation/multimedia/histreamer:histreamer_presets",
-    ]
+    public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
     ]
     external_deps = [
-      "hdf_core:libpub_utils",
+      "drivers_peripheral_codec:libcodec_hdi_omx_client",
       "graphic_2d:surface",
-      "drivers_peripheral_codec:libcodec_hdi_omx_client"
+      "hdf_core:libpub_utils",
     ]
     sanitize = {
       cfi = true
@@ -60,4 +58,4 @@ if (hst_is_standard_sys) {
     }
     relative_install_dir = "media/histreamer_plugins"
   }
-} 
+}

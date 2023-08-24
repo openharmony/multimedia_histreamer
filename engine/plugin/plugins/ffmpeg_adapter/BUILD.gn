@@ -178,9 +178,7 @@ if (hst_is_lite_sys) {
       ":plugin_ffmpeg_adapter_config",
       "//foundation/multimedia/histreamer:histreamer_presets",
     ]
-    deps = [
-      ":ffmpeg_adapter_common",
-    ]
+    deps = [ ":ffmpeg_adapter_common" ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_ffmpeg_convert",
@@ -208,9 +206,7 @@ if (hst_is_lite_sys) {
       ":plugin_ffmpeg_adapter_config",
       "//foundation/multimedia/histreamer:histreamer_presets",
     ]
-    deps = [
-      ":ffmpeg_adapter_common",
-    ]
+    deps = [ ":ffmpeg_adapter_common" ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_ffmpeg_convert",
@@ -238,9 +234,7 @@ if (hst_is_lite_sys) {
       ":plugin_ffmpeg_adapter_config",
       "//foundation/multimedia/histreamer:histreamer_presets",
     ]
-    deps = [
-      ":ffmpeg_adapter_common",
-    ]
+    deps = [ ":ffmpeg_adapter_common" ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
@@ -267,9 +261,7 @@ if (hst_is_lite_sys) {
       ":plugin_ffmpeg_adapter_config",
       "//foundation/multimedia/histreamer:histreamer_presets",
     ]
-    deps = [
-      ":ffmpeg_adapter_common",
-    ]
+    deps = [ ":ffmpeg_adapter_common" ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",

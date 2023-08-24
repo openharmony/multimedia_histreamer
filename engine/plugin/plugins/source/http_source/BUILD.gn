@@ -35,9 +35,7 @@ ohos_source_set("httpsource") {
     "http_source_plugin.cpp",
     "monitor/download_monitor.cpp",
   ]
-  public_configs = [
-    "//foundation/multimedia/histreamer:histreamer_presets",
-  ]
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",

@@ -79,7 +79,7 @@ if (!defined(ohos_lite) || !ohos_lite) {
   hst_is_lite_sys = true
   if (ohos_kernel_type == "liteos_m") {
     hst_is_mini_sys = true
-  } else { 
+  } else {
     hst_is_small_sys = true
   }
 }

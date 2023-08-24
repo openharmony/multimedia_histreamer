@@ -34,15 +34,15 @@ if (hst_is_standard_sys) {
     ]
     public_configs = [
       "//foundation/multimedia/histreamer:histreamer_presets",
-      "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config"
+      "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config",
     ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
     ]
     external_deps = [
+      "audio_framework:audio_capturer",
       "graphic_2d:surface",
-      "audio_framework:audio_capturer"
     ]
     sanitize = {
       cfi = true

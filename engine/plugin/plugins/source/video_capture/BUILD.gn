@@ -33,9 +33,9 @@ if (hst_is_standard_sys) {
     sources = [ "video_capture_plugin.cpp" ]
     public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
     public_deps = [
+      "//commonlibrary/c_utils/base:utilsbase_rtti",
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
-      "//commonlibrary/c_utils/base:utilsbase_rtti"
     ]
     external_deps = [
       "graphic_2d:surface",

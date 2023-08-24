@@ -67,9 +67,7 @@ ohos_unittest("histreamer_unit_test") {
     "hdf_core:libpub_utils",
   ]
 
-  public_configs = [
-    "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config",
-  ]
+  public_configs = [ "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config" ]
 
   sources = [
     "$histreamer_root_dir/engine/include/plugin/common/plugin_types.h",

@@ -16,7 +16,6 @@ group("plugin_file_fd_sink") {
   deps = [ ":histreamer_plugin_FileFdSink" ]
 }
 
-
 if (hst_is_lite_sys) {
   import("//build/lite/config/component/lite_component.gni")
   lite_library("histreamer_plugin_FileFdSink") {

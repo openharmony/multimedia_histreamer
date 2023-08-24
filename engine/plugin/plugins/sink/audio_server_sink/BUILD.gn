@@ -38,8 +38,8 @@ if (hst_is_standard_sys) {
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
     ]
     external_deps = [
+      "audio_framework:audio_renderer",
       "graphic_2d:surface",
-      "audio_framework:audio_renderer"
     ]
     sanitize = {
       cfi = true
