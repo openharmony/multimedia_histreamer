@@ -15,10 +15,7 @@ import("//foundation/multimedia/histreamer/config.gni")
 config("histreamer_presets") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine",
-    "//foundation/multimedia/histreamer/engine/scene/standard",
     "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
-    "//foundation/graphic/graphic_2d/interfaces/inner_api/",
-    "//foundation/multimedia/player_framework/interfaces/inner_api/native",
   ]
   defines = [ "MEDIA_OHOS" ]
   cflags = [
