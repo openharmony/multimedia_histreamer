@@ -76,6 +76,53 @@ void AudioCaptureFilter::SetAppInfoParams()
     }
 }
 
+ErrorCode AudioCaptureFilter::ConfigureAudioSampleRate(const std::shared_ptr<Plugin::Meta>& audioMeta)
+{
+    uint32_t sampleRate = 0;
+    ErrorCode errorCode = ErrorCode::SUCCESS;
+    if (audioMeta->Get<Tag::AUDIO_SAMPLE_RATE>(sampleRate)) {
+        MEDIA_LOG_I("configure plugin with sample rate " PUBLIC_LOG_U32, sampleRate);
+        bufferCalibration_->SetParam(Tag::AUDIO_SAMPLE_RATE, sampleRate);
+        errorCode = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_RATE, sampleRate));
+    }
+    return errorCode;
+}
+
+ErrorCode AudioCaptureFilter::ConfigureAudioChannels(const std::shared_ptr<Plugin::Meta> &audioMeta)
+{
+    uint32_t channels = 0;
+    ErrorCode errorCode = ErrorCode::SUCCESS;
+    if (audioMeta->Get<Tag::AUDIO_CHANNELS>(channels)) {
+        MEDIA_LOG_I("configure plugin with channel " PUBLIC_LOG_U32, channels);
+        bufferCalibration_->SetParam(Tag::AUDIO_CHANNELS, channels);
+        errorCode = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_CHANNELS, channelNum_));
+    }
+    return errorCode;
+}
+
+ErrorCode AudioCaptureFilter::ConfigureAudioBitRate(const std::shared_ptr<Plugin::Meta> &audioMeta)
+{
+    int64_t bitRate = 0;
+    ErrorCode errorCode = ErrorCode::SUCCESS;
+    if (audioMeta->Get<Tag::MEDIA_BITRATE>(bitRate)) {
+        MEDIA_LOG_I("configure plugin with bitrate " PUBLIC_LOG_D64, bitRate);
+        errorCode = TranslatePluginStatus(plugin_->SetParameter(Tag::MEDIA_BITRATE, bitRate));
+    }
+    return errorCode;
+}
+
+ErrorCode AudioCaptureFilter::ConfigureSampleFormat(const std::shared_ptr<Plugin::Meta> &audioMeta)
+{
+    Plugin::AudioSampleFormat sampleFormat = Plugin::AudioSampleFormat::S16;
+    ErrorCode errorCode = ErrorCode::SUCCESS;
+    if (audioMeta->Get<Tag::AUDIO_SAMPLE_FORMAT>(sampleFormat)) {
+        bufferCalibration_->SetParam(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat);
+        MEDIA_LOG_I("configure plugin with sampleFormat " PUBLIC_LOG_S, Plugin::GetAudSampleFmtNameStr(sampleFormat));
+        errorCode = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat));
+    }
+    return errorCode;
+}
+
 ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin::Meta>& audioMeta)
 {
     MEDIA_LOG_D("IN");
@@ -84,31 +131,19 @@ ErrorCode AudioCaptureFilter::InitAndConfigWithMeta(const std::shared_ptr<Plugin
     FALSE_RETURN_V(err == ErrorCode::SUCCESS, err);
     plugin_->SetCallback(this);
     pluginAllocator_ = plugin_->GetAllocator();
-    uint32_t tmp = 0;
-    if (audioMeta->Get<Tag::AUDIO_SAMPLE_RATE>(tmp)) {
-        MEDIA_LOG_I("configure plugin with sample rate " PUBLIC_LOG_U32, tmp);
-        bufferCalibration_->SetParam(Tag::AUDIO_SAMPLE_RATE, tmp);
-        err = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_RATE, tmp));
-        FALSE_RETURN_V(err == ErrorCode::SUCCESS, err);
-    }
-    if (audioMeta->Get<Tag::AUDIO_CHANNELS>(tmp)) {
-        MEDIA_LOG_I("configure plugin with channel " PUBLIC_LOG_U32, tmp);
-        bufferCalibration_->SetParam(Tag::AUDIO_CHANNELS, tmp);
-        err = TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_CHANNELS, channelNum_));
-        FALSE_RETURN_V(err == ErrorCode::SUCCESS, err);
-    }
-    int64_t bitRate = 0;
-    if (audioMeta->Get<Tag::MEDIA_BITRATE>(bitRate)) {
-        MEDIA_LOG_I("configure plugin with bitrate " PUBLIC_LOG_D64, bitRate);
-        err = TranslatePluginStatus(plugin_->SetParameter(Tag::MEDIA_BITRATE, bitRate));
-        FALSE_RETURN_V(err == ErrorCode::SUCCESS, err);
-    }
-    Plugin::AudioSampleFormat sampleFormat = Plugin::AudioSampleFormat::S16;
-    if (audioMeta->Get<Tag::AUDIO_SAMPLE_FORMAT>(sampleFormat)) {
-        bufferCalibration_->SetParam(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat);
-        MEDIA_LOG_I("configure plugin with sampleFormat " PUBLIC_LOG_S, Plugin::GetAudSampleFmtNameStr(sampleFormat));
-        return TranslatePluginStatus(plugin_->SetParameter(Tag::AUDIO_SAMPLE_FORMAT, sampleFormat));
-    }
+
+    err = ConfigureAudioSampleRate(audioMeta);
+    FALSE_RETURN_V(err == ErrorCode::SUCCESS, err);
+
+    err = ConfigureAudioChannels(audioMeta);
+    FALSE_RETURN_V(err == ErrorCode::SUCCESS, err);
+
+    err = ConfigureAudioBitRate(audioMeta);
+    FALSE_RETURN_V(err == ErrorCode::SUCCESS, err);
+
+    err = ConfigureSampleFormat(audioMeta);
+    FALSE_RETURN_V(err == ErrorCode::SUCCESS, err);
+
     return ErrorCode::SUCCESS;
 }
 
@@ -530,6 +565,7 @@ void AudioCaptureFilter::SendBuffer(const std::shared_ptr<AVBuffer>& buffer)
         outPorts_[0]->PushData(buffer, -1);
     }
 }
+
 } // namespace Pipeline
 } // namespace Media
 } // namespace OHOS
