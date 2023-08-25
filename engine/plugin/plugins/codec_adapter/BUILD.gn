@@ -13,66 +13,49 @@
 #
 import("//foundation/multimedia/histreamer/config.gni")
 group("plugin_codec_adapter") {
-  deps = []
-  if (hst_is_lite_sys) {
-    print("std hdi codec adapter is not available on lite systems")
-  } else {
-    deps += [ ":histreamer_plugin_CodecAdapter" ]
+  if (hst_is_standard_sys) {
+    deps = [ ":histreamer_plugin_CodecAdapter" ]
   }
 }
 
-config("plugin_codec_adapter_config") {
-  include_dirs = [
-    "//drivers/peripheral/base/",
-    "//drivers/peripheral/codec/hal/include/",
-    "//drivers/peripheral/codec/interfaces/include/",
-    "//drivers/peripheral/display/interfaces/include/",
-    "//foundation/multimedia/histreamer/engine/include/",
-    "//third_party/openmax/api/1.1.2/",
-  ]
-}
-
-ohos_source_set("std_plugin_codec_adapter") {
-  subsystem_name = "multimedia"
-  part_name = "histreamer"
-  sources = [
-    "codec_buffer.cpp",
-    "codec_buffer_pool.cpp",
-    "codec_cmd_executor.cpp",
-    "codec_port.cpp",
-    "codec_utils.cpp",
-    "hdi_codec_adapter.cpp",
-    "hdi_codec_manager.cpp",
-  ]
-  public_deps = [
-    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
-  ]
-  external_deps = [ "hdf_core:libpub_utils" ]
-  if (!hst_is_lite_sys) {
-    external_deps += [ "graphic_2d:surface" ]
-  }
-  public_configs = [
-    ":plugin_codec_adapter_config",
-    "//foundation/multimedia/histreamer:histreamer_presets",
-  ]
-}
-
-if (hst_is_lite_sys) {
-  print("std hdi codec adapter is not available on lite systems")
-} else {
+if (hst_is_standard_sys) {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_CodecAdapter") {
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
+    include_dirs = [
+      "//drivers/peripheral/base/",
+      "//drivers/peripheral/codec/hal/include/",
+      "//drivers/peripheral/codec/interfaces/include/",
+      "//drivers/peripheral/display/interfaces/include/",
+      "//foundation/multimedia/histreamer/engine/include/",
+      "//third_party/openmax/api/1.1.2/",
+    ]
+    sources = [
+      "codec_buffer.cpp",
+      "codec_buffer_pool.cpp",
+      "codec_cmd_executor.cpp",
+      "codec_port.cpp",
+      "codec_utils.cpp",
+      "hdi_codec_adapter.cpp",
+      "hdi_codec_manager.cpp",
+    ]
+    public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
+    public_deps = [
+      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
+    ]
+    external_deps = [
+      "drivers_peripheral_codec:libcodec_hdi_omx_client",
+      "graphic_2d:surface",
+      "hdf_core:libpub_utils",
+    ]
     sanitize = {
       cfi = true
       cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
-    deps = [ ":std_plugin_codec_adapter" ]
-    external_deps = [ "drivers_peripheral_codec:libcodec_hdi_omx_client" ]
     relative_install_dir = "media/histreamer_plugins"
-    subsystem_name = "multimedia"
-    part_name = "histreamer"
   }
 }

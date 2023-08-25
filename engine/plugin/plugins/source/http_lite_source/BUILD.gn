@@ -16,10 +16,8 @@ if (hst_is_lite_sys) {
   import("//build/lite/config/component/lite_component.gni")
 
   group("plugin_http_lite_source") {
-    if (ohos_kernel_type == "liteos_m") {
+    if (hst_is_mini_sys) {
       deps = [ ":histreamer_plugin_lite_HttpSource" ]
-    } else {
-      deps = []
     }
   }
 
@@ -31,7 +29,7 @@ if (hst_is_lite_sys) {
   }
 
   lite_library("histreamer_plugin_lite_HttpSource") {
-    if (ohos_kernel_type == "liteos_m") {
+    if (hst_is_mini_sys) {
       target_type = "static_library"
     } else {
       target_type = "shared_library"

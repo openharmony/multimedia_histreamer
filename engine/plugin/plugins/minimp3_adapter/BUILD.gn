@@ -13,16 +13,12 @@
 #
 import("//build/ohos.gni")
 import("//foundation/multimedia/histreamer/config.gni")
-if (!hst_is_lite_sys) {
-  ohos_kernel_type = ""
-}
 
 group("plugin_minimp3_adapter") {
-  if (ohos_kernel_type == "liteos_m") {
+  if (hst_is_mini_sys) {
     deps = [ ":histreamer_plugin_Minimp3_static" ]
   } else {
-    deps = []
-    deps += [ ":histreamer_plugin_Minimp3Demuxer" ]
+    deps = [ ":histreamer_plugin_Minimp3Demuxer" ]
     deps += [ ":histreamer_plugin_Minimp3Decoder" ]
   }
 }
@@ -35,7 +31,7 @@ config("plugin_minimp3_adapter_config") {
   ]
 }
 
-if (ohos_kernel_type == "liteos_m") {
+if (hst_is_mini_sys) {
   static_library("histreamer_plugin_Minimp3_static") {
     sources = [
       "minimp3_decoder_plugin.cpp",
@@ -53,12 +49,8 @@ if (ohos_kernel_type == "liteos_m") {
   }
 } else {
   ohos_shared_library("histreamer_plugin_Minimp3Demuxer") {
-    sanitize = {
-      cfi = true
-      cfi_cross_dso = true
-      debug = false
-      integer_overflow = true
-    }
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
     sources = [
       "minimp3_demuxer_plugin.cpp",
       "minimp3_wrapper.c",
@@ -71,17 +63,17 @@ if (ohos_kernel_type == "liteos_m") {
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
     ]
-    relative_install_dir = "media/histreamer_plugins"
-    subsystem_name = "multimedia"
-    part_name = "histreamer"
-  }
-  ohos_shared_library("histreamer_plugin_Minimp3Decoder") {
     sanitize = {
       cfi = true
       cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
+    relative_install_dir = "media/histreamer_plugins"
+  }
+  ohos_shared_library("histreamer_plugin_Minimp3Decoder") {
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
     sources = [
       "minimp3_decoder_plugin.cpp",
       "minimp3_wrapper.c",
@@ -94,8 +86,12 @@ if (ohos_kernel_type == "liteos_m") {
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",
     ]
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+      integer_overflow = true
+    }
     relative_install_dir = "media/histreamer_plugins"
-    subsystem_name = "multimedia"
-    part_name = "histreamer"
   }
 }

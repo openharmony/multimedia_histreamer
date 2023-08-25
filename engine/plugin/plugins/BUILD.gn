@@ -14,10 +14,6 @@
 
 import("//foundation/multimedia/histreamer/config.gni")
 
-if (!hst_is_lite_sys) {
-  ohos_kernel_type = ""
-}
-
 print("histreamer plugin: ffmpeg_adapter =",
       histreamer_enable_plugin_ffmpeg_adapter)
 print("histreamer plugin: wav_demuxer =", histreamer_enable_plugin_wav_demuxer)
@@ -139,7 +135,7 @@ action("gen_plugin_static_header") {
     rebase_path("${target_gen_dir}/include/", root_build_dir),
   ]
 
-  if (ohos_kernel_type == "liteos_m") {
+  if (hst_is_mini_sys) {
     if (histreamer_enable_plugin_ffmpeg_adapter) {
       args += [
         "FFmpegDemuxer",

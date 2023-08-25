@@ -12,9 +12,6 @@
 # limitations under the License.
 #
 import("//foundation/multimedia/histreamer/config.gni")
-if (!hst_is_lite_sys) {
-  ohos_kernel_type = ""
-}
 config("histreamer_presets") {
   include_dirs = [
     "//foundation/multimedia/histreamer/engine",
@@ -44,12 +41,8 @@ config("histreamer_presets") {
     defines += [ "OHOS_LITE" ]
   }
 }
-if (hst_is_lite_sys) {
-  config("hiplayer_external_library_config") {
-    include_dirs = [ "//foundation/multimedia/histreamer/interface" ]
-  }
-}
-if (ohos_kernel_type != "liteos_m") {
+
+if (!hst_is_mini_sys) {
   # L1 & std shared and seprated
   group("histreamer") {
     deps = [
@@ -63,30 +56,30 @@ if (ohos_kernel_type != "liteos_m") {
     import("//build/lite/config/component/lite_component.gni")
     lite_library("media_engine_histreamer") {
       target_type = "shared_library"
+      include_dirs = [ "//foundation/multimedia/histreamer/interface" ]
       sources = []
       deps = [ "engine/scene/player:histreamer_player" ]
       if (histreamer_enable_recorder) {
         deps += [ "engine/scene/recorder:histreamer_recorder" ]
       }
       public_deps = [ "//foundation/multimedia/media_utils_lite:media_common" ]
-      public_configs = [ ":hiplayer_external_library_config" ]
       output_name = "histreamer"
     }
   } else {
     import("//build/ohos.gni")
     ohos_shared_library("media_engine_histreamer") {
+      subsystem_name = "multimedia"
+      part_name = "histreamer"
+      sources = []
+      deps = [ "engine/scene:std_engine_factory" ]
+      external_deps = [ "hitrace:hitrace_meter" ]
       sanitize = {
         cfi = true
         cfi_cross_dso = true
         debug = false
         integer_overflow = true
       }
-      sources = []
-      deps = [ "engine/scene:std_engine_factory" ]
-      external_deps = [ "hitrace:hitrace_meter" ]
       relative_install_dir = "media"
-      subsystem_name = "multimedia"
-      part_name = "histreamer"
     }
   }
 } else {
@@ -96,6 +89,7 @@ if (ohos_kernel_type != "liteos_m") {
     target_type = "static_library"
     complete_static_lib = true
     sources = []
+    include_dirs = [ "//foundation/multimedia/histreamer/interface" ]
     deps = [
       "engine/plugin/plugins:histreamer_plugin_store",
       "engine/scene/player:histreamer_player",
@@ -104,6 +98,5 @@ if (ohos_kernel_type != "liteos_m") {
       deps += [ "engine/scene/recorder:histreamer_recorder" ]
     }
     public_deps = [ "//foundation/multimedia/media_utils_lite:media_common" ]
-    public_configs = [ ":hiplayer_external_library_config" ]
   }
 }

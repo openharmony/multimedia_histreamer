@@ -16,16 +16,13 @@ group("plugin_http_source") {
   deps = [ ":histreamer_plugin_HttpSource" ]
 }
 
-config("plugin_http_source_config") {
+ohos_source_set("httpsource") {
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
   include_dirs = [
     "//third_party/curl/include",
     "//foundation/multimedia/histreamer/engine/include",
   ]
-}
-
-ohos_source_set("httpsource") {
-  subsystem_name = "multimedia"
-  part_name = "histreamer"
   sources = [
     "download/downloader.cpp",
     "download/http_curl_client.cpp",
@@ -38,34 +35,28 @@ ohos_source_set("httpsource") {
     "http_source_plugin.cpp",
     "monitor/download_monitor.cpp",
   ]
+  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
   public_deps = [
     "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
     "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
   ]
-  if (!hst_is_lite_sys) {
-    external_deps = [ "graphic_2d:surface" ]
-  }
   if (hst_is_lite_sys) {
-    if (ohos_kernel_type == "liteos_m") {
+    if (hst_is_mini_sys) {
       public_deps += [ "//third_party/curl:libcurl_static" ]
     } else {
       public_deps += [ "//third_party/curl:libcurl_shared" ]
     }
   } else {
     public_deps += [ "//third_party/curl:curl_shared" ]
+    external_deps = [ "graphic_2d:surface" ]
   }
-
-  public_configs = [
-    ":plugin_http_source_config",
-    "//foundation/multimedia/histreamer:histreamer_presets",
-  ]
 }
 
 if (hst_is_lite_sys) {
   # lite
   import("//build/lite/config/component/lite_component.gni")
   lite_library("histreamer_plugin_HttpSource") {
-    if (ohos_kernel_type == "liteos_m") {
+    if (hst_is_mini_sys) {
       target_type = "static_library"
     } else {
       target_type = "shared_library"
@@ -77,15 +68,15 @@ if (hst_is_lite_sys) {
   # standard
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_HttpSource") {
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
+    deps = [ ":httpsource" ]
     sanitize = {
       cfi = true
       cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
-    deps = [ ":httpsource" ]
     relative_install_dir = "media/histreamer_plugins"
-    subsystem_name = "multimedia"
-    part_name = "histreamer"
   }
 }

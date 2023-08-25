@@ -13,56 +13,43 @@
 #
 import("//foundation/multimedia/histreamer/config.gni")
 group("plugin_standard_audio_capture") {
-  deps = []
-  if (hst_is_lite_sys) {
-    print("std audio capture plugin is not available on lite systems")
-  } else {
-    deps += [ ":histreamer_plugin_StdAudioCapture" ]
+  if (hst_is_standard_sys) {
+    deps = [ ":histreamer_plugin_StdAudioCapture" ]
   }
 }
 
-ohos_source_set("std_audio_capture") {
-  subsystem_name = "multimedia"
-  part_name = "histreamer"
-  sources = [
-    "audio_capture_plugin.cpp",
-    "audio_type_translate.cpp",
-  ]
-  public_deps = [
-    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
-  ]
-  if (!hst_is_lite_sys) {
-    external_deps = [ "graphic_2d:surface" ]
-  }
-  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
-  if (hst_is_lite_sys) {
-    print("std audio capture plugin is not available on lite systems")
-  } else {
+if (hst_is_standard_sys) {
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer_plugin_StdAudioCapture") {
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
     include_dirs = [
       "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiocommon/include",
       "//foundation/multimedia/histreamer/engine/include",
       "//commonlibrary/c_utils/base/include/",
     ]
-    public_configs += [ "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config" ]
-  }
-}
-
-if (hst_is_lite_sys) {
-  print("std audio capture plugin is not available on lite systems")
-} else {
-  import("//build/ohos.gni")
-  ohos_shared_library("histreamer_plugin_StdAudioCapture") {
+    sources = [
+      "audio_capture_plugin.cpp",
+      "audio_type_translate.cpp",
+    ]
+    public_configs = [
+      "//foundation/multimedia/histreamer:histreamer_presets",
+      "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config",
+    ]
+    public_deps = [
+      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
+    ]
+    external_deps = [
+      "audio_framework:audio_capturer",
+      "graphic_2d:surface",
+    ]
     sanitize = {
       cfi = true
       cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
-    deps = [ ":std_audio_capture" ]
-    external_deps = [ "audio_framework:audio_capturer" ]
     relative_install_dir = "media/histreamer_plugins"
-    subsystem_name = "multimedia"
-    part_name = "histreamer"
   }
 }

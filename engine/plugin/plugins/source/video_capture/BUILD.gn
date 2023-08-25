@@ -13,27 +13,16 @@
 #
 import("//foundation/multimedia/histreamer/config.gni")
 group("plugin_standard_video_capture") {
-  deps = []
-  if (hst_is_lite_sys) {
-    print("std video capture plugin is not available on lite systems")
-  } else {
-    deps += [ ":histreamer_plugin_StdVideoCapture" ]
+  if (hst_is_standard_sys) {
+    deps = [ ":histreamer_plugin_StdVideoCapture" ]
   }
 }
 
-ohos_source_set("std_video_capture") {
-  subsystem_name = "multimedia"
-  part_name = "histreamer"
-  sources = [ "video_capture_plugin.cpp" ]
-  public_deps = [
-    "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-    "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
-  ]
-
-  public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
-  if (hst_is_lite_sys) {
-    print("std video capture plugin is not available on lite systems")
-  } else {
+if (hst_is_standard_sys) {
+  import("//build/ohos.gni")
+  ohos_shared_library("histreamer_plugin_StdVideoCapture") {
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
     include_dirs = [
       "//foundation/graphic/graphic_2d/interfaces/inner_api/surface",
       "//drivers/peripheral/display/interfaces/include",
@@ -41,28 +30,23 @@ ohos_source_set("std_video_capture") {
       "//commonlibrary/c_utils/base/include",
       "//foundation/multimedia/histreamer/engine/include",
     ]
-    public_deps += [ "//commonlibrary/c_utils/base:utilsbase_rtti" ]
+    sources = [ "video_capture_plugin.cpp" ]
+    public_configs = [ "//foundation/multimedia/histreamer:histreamer_presets" ]
+    public_deps = [
+      "//commonlibrary/c_utils/base:utilsbase_rtti",
+      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
+    ]
     external_deps = [
       "graphic_2d:surface",
       "graphic_2d:sync_fence",
     ]
-  }
-}
-
-if (hst_is_lite_sys) {
-  print("std video capture plugin is not available on lite systems")
-} else {
-  import("//build/ohos.gni")
-  ohos_shared_library("histreamer_plugin_StdVideoCapture") {
     sanitize = {
       cfi = true
       cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
-    deps = [ ":std_video_capture" ]
     relative_install_dir = "media/histreamer_plugins"
-    subsystem_name = "multimedia"
-    part_name = "histreamer"
   }
 }

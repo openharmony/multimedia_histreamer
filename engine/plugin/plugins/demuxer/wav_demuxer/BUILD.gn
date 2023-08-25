@@ -12,16 +12,12 @@
 # limitations under the License.
 #
 import("//foundation/multimedia/histreamer/config.gni")
-if (!hst_is_lite_sys) {
-  ohos_kernel_type = ""
-}
 
 group("plugin_wav_demuxer") {
-  if (ohos_kernel_type == "liteos_m") {
+  if (hst_is_mini_sys) {
     deps = [ ":histreamer_plugin_wav_static" ]
   } else {
-    deps = []
-    deps += [ ":histreamer_plugin_WavDemuxer" ]
+    deps = [ ":histreamer_plugin_WavDemuxer" ]
   }
 }
 
@@ -44,10 +40,10 @@ if (hst_is_lite_sys) {
 } else {
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_WavDemuxer") {
-    deps = [ ":wavdemuxer" ]
-    relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "histreamer"
+    deps = [ ":wavdemuxer" ]
+    relative_install_dir = "media/histreamer_plugins"
     sanitize = {
       cfi = true
       cfi_cross_dso = true

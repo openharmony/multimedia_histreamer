@@ -12,44 +12,41 @@
 # limitations under the License.
 #
 import("//foundation/multimedia/histreamer/config.gni")
-if (!hst_is_lite_sys) {
+if (hst_is_standard_sys) {
   group("plugin_audio_server_sink") {
     deps = [ ":histreamer_plugin_AudioServerSink" ]
-  }
-
-  ohos_source_set("audio_server_sink") {
-    subsystem_name = "multimedia"
-    part_name = "histreamer"
-    include_dirs = [
-      "//foundation/multimedia/histreamer/engine/include/",
-      "//foundation/multimedia/histreamer/engine/plugin/",
-    ]
-    sources = [ "audio_server_sink_plugin.cpp" ]
-    public_deps = [
-      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_ffmpeg_convert",
-      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
-    ]
-    external_deps = [ "graphic_2d:surface" ]
-    public_configs = [
-      "//foundation/multimedia/histreamer:histreamer_presets",
-      "//foundation/multimedia/audio_framework/frameworks/native/audiorenderer:audio_renderer_config",
-    ]
   }
 
   # only for standard
   import("//build/ohos.gni")
   ohos_shared_library("histreamer_plugin_AudioServerSink") {
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
+    include_dirs = [
+      "//foundation/multimedia/histreamer/engine/include/",
+      "//foundation/multimedia/histreamer/engine/plugin/",
+      "//third_party/ffmpeg",
+    ]
+    sources = [ "audio_server_sink_plugin.cpp" ]
+    public_configs = [
+      "//foundation/multimedia/histreamer:histreamer_presets",
+      "//foundation/multimedia/audio_framework/frameworks/native/audiorenderer:audio_renderer_config",
+    ]
+    public_deps = [
+      "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_ffmpeg_convert",
+      "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
+    ]
+    external_deps = [
+      "audio_framework:audio_renderer",
+      "graphic_2d:surface",
+    ]
     sanitize = {
       cfi = true
       cfi_cross_dso = true
       debug = false
       integer_overflow = true
     }
-    deps = [ ":audio_server_sink" ]
-    external_deps = [ "audio_framework:audio_renderer" ]
     relative_install_dir = "media/histreamer_plugins"
-    subsystem_name = "multimedia"
-    part_name = "histreamer"
   }
 }

@@ -13,12 +13,9 @@
 #
 
 import("//foundation/multimedia/histreamer/config.gni")
-if (!hst_is_lite_sys) {
-  ohos_kernel_type = ""
-}
 
 group("plugin_lite_aac_decoder_adapter") {
-  if (ohos_kernel_type == "liteos_m") {
+  if (hst_is_mini_sys) {
     deps = [ ":histreamer_plugin_AACDecoder" ]
   }
 }
