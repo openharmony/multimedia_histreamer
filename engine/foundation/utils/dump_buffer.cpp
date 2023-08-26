@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #define HST_LOG_TAG "DumpBuffer"
+#define ALL_DUMP_FILES { DEMUXER_INPUT_PEEK, DEMUXER_INPUT_GET, DEMUXER_OUTPUT, DECODER_OUTPUT }
 
 #include "foundation/utils/dump_buffer.h"
 #include <cstdio>
@@ -38,12 +39,6 @@ namespace Pipeline {
 #define DUMP_FILE_DIR "/data/local/tmp"
 #endif
 
-std::vector<std::string> allDumpFiles = {
-    DEMUXER_INPUT_PEEK,
-    DEMUXER_INPUT_GET,
-    DEMUXER_OUTPUT,
-    DECODER_OUTPUT
-};
 std::map<std::string, FILE*> allDumpFileFds;
 
 std::string GetDumpFileDir()
@@ -63,7 +58,7 @@ void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin:
 void PrepareDumpDir()
 {
     MEDIA_LOG_I("Prepare dumpDir enter.");
-    for (auto iter : allDumpFiles) {
+    for (auto iter : ALL_DUMP_FILES) {
         std::string filePath = GetDumpFileDir() + "/" + iter;
         MEDIA_LOG_I("Prepare dumpDir: " PUBLIC_LOG_S, filePath.c_str());
         std::string fullPath;
@@ -81,7 +76,7 @@ void PrepareDumpDir()
 void EndDumpFile()
 {
     MEDIA_LOG_I("End dump enter.");
-    for (auto iter : allDumpFiles) {
+    for (auto iter : ALL_DUMP_FILES) {
         if (allDumpFileFds[iter]) {
             fclose(allDumpFileFds[iter]);
             allDumpFileFds[iter] = nullptr;
