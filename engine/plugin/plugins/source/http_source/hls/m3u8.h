@@ -19,6 +19,8 @@
 #include <memory>
 #include <string>
 #include <list>
+#include <unordered_map>
+#include <functional>
 #include "hls_tags.h"
 
 namespace OHOS {
@@ -53,8 +55,17 @@ struct M3U8Fragment {
     int size_ {0};
 };
 
+struct M3U8Info {
+    std::string uri;
+    std::string title;
+    double duration = 0;
+    bool discontinuity = false;
+    bool bVod;
+};
+
 struct M3U8 {
     M3U8(std::string uri, std::string name);
+    void InitTagUpdatersMap();
     bool Update(std::string& playList);
     void UpdateFromTags(std::list<std::shared_ptr<Tag>>& tags);
     void GetExtInf(const std::shared_ptr<Tag>& tag, double& duration, std::string& title) const;
@@ -63,6 +74,7 @@ struct M3U8 {
 
     std::string uri_;
     std::string name_;
+    std::unordered_map<HlsTag, std::function<void(std::shared_ptr<Tag>&, M3U8Info&)>> tagUpdatersMap_;
 
     double targetDuration_ {0.0};
     bool bLive_ {};

@@ -49,6 +49,7 @@ M3U8Fragment::M3U8Fragment(std::string uri, std::string title, double duration, 
 
 M3U8::M3U8(std::string uri, std::string name) : uri_(std::move(uri)), name_(std::move(name))
 {
+    InitTagUpdatersMap();
 }
 
 bool M3U8::Update(std::string& playList)
@@ -74,56 +75,77 @@ bool M3U8::Update(std::string& playList)
     return true;
 }
 
+void M3U8::InitTagUpdatersMap()
+{
+    tagUpdatersMap_[HlsTag::EXTXPLAYLISTTYPE] = [this] (std::shared_ptr<Tag>& tag, M3U8Info& info) {
+        bLive_ = !info.bVod && (std::static_pointer_cast<SingleValueTag>(tag)->GetValue().QuotedString() != "VOD");
+    };
+    
+    tagUpdatersMap_[HlsTag::EXTXTARGETDURATION] = [this] (std::shared_ptr<Tag>& tag, M3U8Info& info) {
+        std::ignore = info;
+        targetDuration_ = std::static_pointer_cast<SingleValueTag>(tag)->GetValue().FloatingPoint();
+    };
+    
+    tagUpdatersMap_[HlsTag::EXTXMEDIASEQUENCE] = [this] (std::shared_ptr<Tag>& tag, M3U8Info& info) {
+        std::ignore = info;
+        sequence_ = std::static_pointer_cast<SingleValueTag>(tag)->GetValue().Decimal();
+    };
+    
+    tagUpdatersMap_[HlsTag::EXTXDISCONTINUITYSEQUENCE] = [this] (std::shared_ptr<Tag>& tag, M3U8Info& info) {
+        discontSequence_ =  std::static_pointer_cast<SingleValueTag>(tag)->GetValue().Decimal();
+        info.discontinuity = true;
+    };
+    
+    tagUpdatersMap_[HlsTag::EXTINF] = [this](std::shared_ptr<Tag> &tag, M3U8Info &info) {
+        GetExtInf(tag, info.duration, info.title);
+    };
+    
+    tagUpdatersMap_[HlsTag::URI] = [this](std::shared_ptr<Tag> &tag, M3U8Info &info) {
+        info.uri = UriJoin(uri_, std::static_pointer_cast<SingleValueTag>(tag)->GetValue().QuotedString());
+    };
+    
+    tagUpdatersMap_[HlsTag::EXTXBYTERANGE] = [](std::shared_ptr<Tag> &tag, M3U8Info &info) {
+        std::ignore = tag;
+        std::ignore = info;
+        MEDIA_LOG_I("need to parse EXTXBYTERANGE");
+    };
+    
+    tagUpdatersMap_[HlsTag::EXTXDISCONTINUITY] = [this](std::shared_ptr<Tag> &tag, M3U8Info &info) {
+        std::ignore = tag;
+        discontSequence_++;
+        info.discontinuity = true;
+    };
+    
+    tagUpdatersMap_[HlsTag::EXTXKEY] = [](std::shared_ptr<Tag> &tag, M3U8Info &info) {
+        std::ignore = tag;
+        std::ignore = info;
+        MEDIA_LOG_I("need to parse EXTXKEY");
+    };
+    
+    tagUpdatersMap_[HlsTag::EXTXMAP] = [](std::shared_ptr<Tag> &tag, M3U8Info &info) {
+        std::ignore = tag;
+        std::ignore = info;
+        MEDIA_LOG_I("need to parse EXTXMAP");
+    };
+}
+
 void M3U8::UpdateFromTags(std::list<std::shared_ptr<Tag>>& tags)
 {
-    std::string uri;
-    std::string title;
-    double duration = 0;
-    bool discontinuity = false;
-    auto bVod = !tags.empty() && tags.back()->GetType() == HlsTag::EXTXENDLIST;
-    bLive_ = !bVod;
+    M3U8Info info;
+    info.bVod = !tags.empty() && tags.back()->GetType() == HlsTag::EXTXENDLIST;
+    bLive_ = !info.bVod;
     for (auto& tag : tags) {
-        switch (tag->GetType()) {
-            case HlsTag::EXTXPLAYLISTTYPE:
-                bLive_ = !bVod && (std::static_pointer_cast<SingleValueTag>(tag)->GetValue().QuotedString() != "VOD");
-                break;
-            case HlsTag::EXTXTARGETDURATION:
-                targetDuration_ = std::static_pointer_cast<SingleValueTag>(tag)->GetValue().FloatingPoint();
-                break;
-            case HlsTag::EXTXMEDIASEQUENCE:
-                sequence_ = std::static_pointer_cast<SingleValueTag>(tag)->GetValue().Decimal();
-                break;
-            case HlsTag::EXTXDISCONTINUITYSEQUENCE: {
-                discontSequence_ =  std::static_pointer_cast<SingleValueTag>(tag)->GetValue().Decimal();
-                discontinuity = true;
-                break;
-            }
-            case HlsTag::EXTINF:
-                GetExtInf(tag, duration, title);
-                break;
-            case HlsTag::URI:
-                uri = UriJoin(uri_, std::static_pointer_cast<SingleValueTag>(tag)->GetValue().QuotedString());
-                break;
-            case HlsTag::EXTXBYTERANGE:
-                MEDIA_LOG_I("need to parse EXTXBYTERANGE");
-                break;
-            case HlsTag::EXTXDISCONTINUITY: {
-                discontSequence_++;
-                discontinuity = true;
-                break;
-            }
-            case HlsTag::EXTXKEY:
-                MEDIA_LOG_I("need to parse EXTXKEY");
-                break;
-            case HlsTag::EXTXMAP:
-                MEDIA_LOG_I("need to parse EXTXMAP");
-                break;
-            default:
-                break;
+        HlsTag hlsTag = tag->GetType();
+        auto iter = tagUpdatersMap_.find(hlsTag);
+        if (iter != tagUpdatersMap_.end()) {
+            auto updater = iter->second;
+            updater(tag, info);
         }
-        if (!uri.empty()) {
-            files_.emplace_back(std::make_shared<M3U8Fragment>(uri, title, duration, sequence_++, discontinuity));
-            uri = "", title = "", duration = 0, discontinuity = false;
+        
+        if (!info.uri.empty()) {
+            files_.emplace_back(std::make_shared<M3U8Fragment>(info.uri, info.title, info.duration, sequence_++,
+                                                               info.discontinuity));
+            info.uri = "", info.title = "", info.duration = 0, info.discontinuity = false;
         }
     }
 }
