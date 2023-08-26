@@ -48,8 +48,6 @@
         "deps": {
             "third_party": [
                 "ffmpeg",
-                "minimp3",
-                "minimp4",
                 "bounds_checking_function",
                 "curl"
             ],
