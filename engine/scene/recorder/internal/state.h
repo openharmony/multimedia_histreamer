@@ -20,6 +20,8 @@
 #include <memory>
 #include <string>
 #include <tuple>
+#include <unordered_map>
+#include <functional>
 #include "foundation/log.h"
 #include "pipeline/core/error_code.h"
 #include "plugin/common/any.h"
@@ -124,6 +126,51 @@ protected:
         {Action::TRANS_TO_ERROR, "TRANS_TO_ERROR"},
         {Action::ACTION_PENDING, "ACTION_PENDING"},
         {Action::ACTION_BUTT, "ACTION_BUTT"}};
+    const std::unordered_map<Intent, std::function<std::tuple<ErrorCode, Action>(
+        const Plugin::Any &param)>> intentDispatchersMap_ = {
+        {Intent::SET_OBS, [this](const Plugin::Any &param) {
+            std::ignore = param;
+            return SetObs();
+        }},
+        {Intent::SET_VIDEO_SOURCE, [this](const Plugin::Any &param) { return SetVideoSource(param); }},
+        {Intent::SET_AUDIO_SOURCE, [this](const Plugin::Any &param) { return SetAudioSource(param); }},
+        {Intent::CONFIGURE, [this](const Plugin::Any &param) { return Configure(param); }},
+        {Intent::SET_OUTPUT_FORMAT, [this](const Plugin::Any &param) { return SetOutputFormat(param); }},
+        {Intent::PREPARE, [this](const Plugin::Any &param) {
+            std::ignore = param;
+            return Prepare();
+        }},
+        {Intent::START, [this](const Plugin::Any &param) {
+            std::ignore = param;
+            return Start();
+        }},
+        {Intent::PAUSE, [this](const Plugin::Any &param) {
+            std::ignore = param;
+            return Pause();
+        }},
+        {Intent::RESUME, [this](const Plugin::Any &param) {
+            std::ignore = param;
+            return Resume();
+        }},
+        {Intent::RESET, [this](const Plugin::Any &param) {
+            std::ignore = param;
+            return Reset();
+        }},
+        {Intent::STOP, [this](const Plugin::Any &param) {
+            return Stop(param);
+        }},
+        {Intent::NOTIFY_READY, [this](const Plugin::Any &param) {
+            std::ignore = param;
+            return OnReady();
+        }},
+        {Intent::NOTIFY_COMPLETE, [this](const Plugin::Any &param) {
+            std::ignore = param;
+            return OnComplete();
+        }},
+        {Intent::NOTIFY_ERROR, [this](const Plugin::Any &param) {
+            return OnError(param);
+        }},
+    };
 };
 } // namespace Record
 } // namespace Media

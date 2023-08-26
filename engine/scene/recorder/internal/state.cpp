@@ -137,54 +137,13 @@ std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin:
 {
     ErrorCode rtv = ErrorCode::SUCCESS;
     Action nextAction = Action::ACTION_BUTT;
-    switch (intent) {
-        case Intent::SET_OBS:
-            std::tie(rtv, nextAction) = SetObs();
-            break;
-        case Intent::SET_VIDEO_SOURCE:
-            std::tie(rtv, nextAction) = SetVideoSource(param);
-            break;
-        case Intent::SET_AUDIO_SOURCE:
-            std::tie(rtv, nextAction) = SetAudioSource(param);
-            break;
-        case Intent::CONFIGURE:
-            std::tie(rtv, nextAction) = Configure(param);
-            break;
-        case Intent::SET_OUTPUT_FORMAT:
-            std::tie(rtv, nextAction) = SetOutputFormat(param);
-            break;
-        case Intent::PREPARE:
-            std::tie(rtv, nextAction) = Prepare();
-            break;
-        case Intent::START:
-            std::tie(rtv, nextAction) = Start();
-            break;
-        case Intent::PAUSE:
-            std::tie(rtv, nextAction) = Pause();
-            break;
-        case Intent::RESUME:
-            std::tie(rtv, nextAction) = Resume();
-            break;
-        case Intent::RESET:
-            std::tie(rtv, nextAction) = Reset();
-            break;
-        case Intent::STOP:
-            std::tie(rtv, nextAction) = Stop(param);
-            break;
-        case Intent::NOTIFY_READY:
-            std::tie(rtv, nextAction) = OnReady();
-            break;
-        case Intent::NOTIFY_COMPLETE:
-            std::tie(rtv, nextAction) = OnComplete();
-            break;
-        case Intent::NOTIFY_ERROR:
-            std::tie(rtv, nextAction) = OnError(param);
-            break;
-        case Intent::INTENT_BUTT:
-            break;
-        default:
-            break;
+
+    auto iter = intentDispatchersMap_.find(intent);
+    if (iter != intentDispatchersMap_.end()) {
+        std::function<std::tuple<ErrorCode, Action>(const Plugin::Any &param)> updator = iter->second;
+        updator(param);
     }
+
     MEDIA_LOG_D("DispatchIntent " PUBLIC_LOG_S ", curState: " PUBLIC_LOG_S ", nextState: " PUBLIC_LOG_S,
                 intentDesc_.at(intent).c_str(), name_.c_str(), actionDesc_.at(nextAction).c_str());
     return {rtv, nextAction};
