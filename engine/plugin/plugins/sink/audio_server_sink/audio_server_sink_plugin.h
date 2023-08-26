@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <memory>
+#include <unordered_map>
 
 #include "audio_info.h"
 #include "audio_renderer.h"
@@ -128,6 +129,20 @@ private:
     bool AssignSampleFmtIfSupported(AudioSampleFormat sampleFormat);
     void SetInterruptMode(AudioStandard::InterruptMode interruptMode);
 
+    void SetUpParamsSetterMap();
+    void SetUpSampleRateSetter();
+    void SetUpAudioOutputChannelsSetter();
+    void SetUpMediaBitRateSetter();
+    void SetUpAudioSampleFormatSetter();
+    void SetUpAudioOutputChannelLayoutSetter();
+    void SetUpAudioSamplePerFrameSetter();
+    void SetUpBitsPerCodedSampleSetter();
+    void SetUpMediaSeekableSetter();
+    void SetUpAppPidSetter();
+    void SetUpAppUidSetter();
+    void SetUpAudioRenderInfoSetter();
+    void SetUpAudioInterruptModeSetter();
+
     OSAL::Mutex renderMutex_ {};
     Callback* callback_ {};
     AudioRenderInfo audioRenderInfo_ {};
@@ -153,6 +168,8 @@ private:
     bool needReformat_ {false};
     Plugin::Seekable seekable_ {Plugin::Seekable::INVALID};
     std::shared_ptr<Ffmpeg::Resample> resample_ {nullptr};
+
+    std::unordered_map<Tag, std::function<Status(const ValueType& para)>> paramsSetterMap_;
 };
 } // AuSrSinkPlugin
 } // Plugin
