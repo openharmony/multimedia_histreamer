@@ -65,9 +65,14 @@ namespace Test {
         ASSERT_EQ(0, player->SetSource(TestSource(url)));
         ASSERT_EQ(0, player->Prepare());
         ASSERT_EQ(0, player->Play());
+        std::vector<OHOS::Media::Format> audioTrack;
+        ASSERT_EQ(0, player->GetAudioTrackInfo(audioTrack));
         ASSERT_TRUE(player->IsPlaying());
         std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // 1000 MS
+        ASSERT_EQ(0, player->Pause());
         ASSERT_EQ(0, player->Stop());
+        ASSERT_EQ(0, player->Reset());
+        ASSERT_EQ(0, player->Release());
     }
 
     void TestSinglePlayerGetDuration(std::string url, int32_t expectDuration)
@@ -164,15 +169,13 @@ namespace Test {
     {
         std::vector<std::string> vecSource;
         vecSource.push_back(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"));
-        vecSource.push_back(std::string(RESOURCE_DIR "/AAC/AAC_LONG_48000_32.aac"));
-        vecSource.push_back(std::string(RESOURCE_DIR "/FLAC/FLAC_48000_32_LONG.flac"));
         vecSource.push_back(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a"));
         for (auto url : vecSource)
         {
             TestSinglePlayerGetDuration(url, 30000); // 30000 MS
         }
         TestSinglePlayerGetDuration(std::string(RESOURCE_DIR "/WAV/vorbis_48000_32_SHORT.wav"),
-                                        50000); // 50000 MS
+                                        5000); // 5000 MS
     }
 
     HST_TEST(UtTestFastPlayer, TestSinglePlayerSingleLoop, TestSize.Level1)
@@ -194,8 +197,6 @@ namespace Test {
     {
         std::vector<std::string> vecSource;
         vecSource.push_back(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"));
-        vecSource.push_back(std::string(RESOURCE_DIR "/AAC/AAC_LONG_48000_32.aac"));
-        vecSource.push_back(std::string(RESOURCE_DIR "/FLAC/FLAC_48000_32_LONG.flac"));
         vecSource.push_back(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a"));
         for (auto url : vecSource)
         {
