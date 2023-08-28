@@ -250,7 +250,9 @@ ohos_source_set("histreamer_plugin_core") {
       "//foundation/multimedia/player_framework/interfaces/inner_api/native",
       "//drivers/peripheral/display/interfaces/include",
     ]
-    public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
-    external_deps = [ "graphic_2d:surface" ]
+    external_deps = [
+      "graphic_2d:surface",
+      "bounds_checking_function:libsec_shared",
+    ]
   }
 }
