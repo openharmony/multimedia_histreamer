@@ -48,7 +48,6 @@
         "deps": {
             "third_party": [
                 "ffmpeg",
-                "bounds_checking_function",
                 "curl"
             ],
             "components": [
