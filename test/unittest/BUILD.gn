@@ -31,14 +31,9 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/engine/pipeline/core/",
     "$histreamer_root_dir/engine/pipeline/filters/common/",
     "./plugins/",
-    "//drivers/peripheral/base/",
-    "//drivers/peripheral/codec/hal/include",
-    "//drivers/peripheral/codec/interfaces/include",
-    "//drivers/peripheral/display/interfaces/include",
-    "//third_party/openmax/api/1.1.2",
-    "$histreamer_root_dir/engine/include/",
   ]
   cflags = histreamer_unittest_cflags
+  defines = []
 
   deps = [
     "$histreamer_root_dir/engine/pipeline:histreamer_pipeline_base",
@@ -49,11 +44,11 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/engine/plugin:histreamer_plugin_core",
     "$histreamer_root_dir/engine/plugin/plugins/codec_adapter:histreamer_plugin_CodecAdapter",
     "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_adapter_common",
-    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:histreamer_plugin_FFmpegAudioDecoders",
-    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:histreamer_plugin_FFmpegAudioEncoders",
-    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:histreamer_plugin_FFmpegDemuxer",
-    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:histreamer_plugin_FFmpegVideoDecoders",
-    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:histreamer_plugin_FFmpegVideoEncoders",
+    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_audio_decoders",
+    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_audio_encoders",
+    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_demuxers",
+    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_video_decoders",
+    "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_video_encoders",
     "$histreamer_root_dir/engine/plugin/plugins/source/audio_capture:histreamer_plugin_StdAudioCapture",
     "$histreamer_root_dir/engine/plugin/plugins/source/file_source:filesource",
     "$histreamer_root_dir/engine/plugin/plugins/source/http_source:httpsource",
@@ -67,7 +62,10 @@ ohos_unittest("histreamer_unit_test") {
     "hdf_core:libpub_utils",
   ]
 
-  public_configs = [ "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config" ]
+  public_configs = [
+    "$histreamer_root_dir/engine/plugin/plugins/codec_adapter:plugin_codec_adapter_config",
+    "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config",
+  ]
 
   sources = [
     "$histreamer_root_dir/engine/include/plugin/common/plugin_types.h",
