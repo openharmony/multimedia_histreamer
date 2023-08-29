@@ -141,7 +141,7 @@ std::tuple<ErrorCode, Action> State::DispatchIntent(Intent intent, const Plugin:
     auto iter = intentDispatchersMap_.find(intent);
     if (iter != intentDispatchersMap_.end()) {
         std::function<std::tuple<ErrorCode, Action>(const Plugin::Any &param)> updator = iter->second;
-        updator(param);
+        std::tie(rtv, nextAction) = updator(param);
     }
 
     MEDIA_LOG_D("DispatchIntent " PUBLIC_LOG_S ", curState: " PUBLIC_LOG_S ", nextState: " PUBLIC_LOG_S,
