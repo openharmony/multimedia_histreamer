@@ -66,6 +66,7 @@ public:
     virtual int32_t GetDuration(int64_t& durationMs) = 0;
     virtual int32_t SetVolume(float leftVolume, float rightVolume) = 0;
     virtual int32_t GetAudioTrackInfo(std::vector<Format> &audioTrack) = 0;
+    virtual int32_t GetVideoTrackInfo(std::vector<Format> &videoTrack) = 0;
     virtual int32_t SetPlaybackSpeed(PlaybackRateMode mode)  = 0;
     virtual int32_t GetPlaybackSpeed(PlaybackRateMode &mode) = 0;
 };

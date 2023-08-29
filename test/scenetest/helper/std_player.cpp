@@ -79,6 +79,7 @@ public:
     int32_t GetDuration(int64_t& durationMs) override;
     int32_t SetVolume(float leftVolume, float rightVolume) override;
     int32_t GetAudioTrackInfo(std::vector<Format> &audioTrack) override;
+    int32_t GetVideoTrackInfo(std::vector<Format> &videoTrack) override;
     int32_t SetPlaybackSpeed(PlaybackRateMode mode) override;
     int32_t GetPlaybackSpeed(PlaybackRateMode &mode) override;
 private:
@@ -252,6 +253,12 @@ int32_t TestPlayerImpl::SetVolume(float leftVolume, float rightVolume)
 int32_t TestPlayerImpl::GetAudioTrackInfo(std::vector<Format> &audioTrack)
 {
     int32_t ret = player_->GetAudioTrackInfo(audioTrack);
+    return ret;
+}
+
+int32_t TestPlayerImpl::GetVideoTrackInfo(std::vector<Format> &videoTrack)
+{
+    int32_t ret = player_->GetVideoTrackInfo(videoTrack);
     return ret;
 }
 }
