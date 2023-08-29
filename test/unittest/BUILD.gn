@@ -31,9 +31,14 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/engine/pipeline/core/",
     "$histreamer_root_dir/engine/pipeline/filters/common/",
     "./plugins/",
+    "//drivers/peripheral/base/",
+    "//drivers/peripheral/codec/hal/include",
+    "//drivers/peripheral/codec/interfaces/include",
+    "//drivers/peripheral/display/interfaces/include",
+    "//third_party/openmax/api/1.1.2",
+    "$histreamer_root_dir/engine/include/",
   ]
   cflags = histreamer_unittest_cflags
-  defines = []
 
   deps = [
     "$histreamer_root_dir/engine/pipeline:histreamer_pipeline_base",
@@ -62,10 +67,7 @@ ohos_unittest("histreamer_unit_test") {
     "hdf_core:libpub_utils",
   ]
 
-  public_configs = [
-    "$histreamer_root_dir/engine/plugin/plugins/codec_adapter:plugin_codec_adapter_config",
-    "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config",
-  ]
+  public_configs = [ "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config" ]
 
   sources = [
     "$histreamer_root_dir/engine/include/plugin/common/plugin_types.h",
