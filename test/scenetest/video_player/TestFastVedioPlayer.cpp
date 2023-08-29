@@ -64,6 +64,8 @@ namespace Test {
         ASSERT_EQ(0, player->SetSource(TestSource(url)));
         ASSERT_EQ(0, player->Prepare());
         ASSERT_EQ(0, player->Play());
+        std::vector<OHOS::Media::Format> videoTrack;
+        ASSERT_EQ(0, player->GetVideoTrackInfo(videoTrack));
         while (player->IsPlaying()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // 1000 MS
         }
