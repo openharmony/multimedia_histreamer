@@ -48,6 +48,7 @@
         "deps": {
             "third_party": [
                 "ffmpeg",
+                "bounds_checking_function",
                 "curl"
             ],
             "components": [
@@ -59,7 +60,6 @@
                 "graphic_2d",
                 "hdf_core",
                 "c_utils",
-                "bounds_checking_function",
                 "init",
                 "player_framework"
             ]
