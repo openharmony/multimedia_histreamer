@@ -76,7 +76,7 @@ if (hst_is_lite_sys) {
       ":hst_plugin_intf_config",
       "//foundation/multimedia/histreamer:histreamer_presets",
     ]
-    deps = [ "bounds_checking_function:libsec_shared" ]
+    deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     if (histreamer_enable_video) {
       sources += [
         "common/share_allocator.cpp",
