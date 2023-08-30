@@ -39,8 +39,10 @@ if (hst_is_standard_sys) {
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
     ]
+    deps = [
+        "//third_party/bounds_checking_function:libsec_shared"
+    ]
     external_deps = [
-      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "graphic_2d:surface",
       "graphic_2d:sync_fence",
