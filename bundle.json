@@ -60,7 +60,6 @@
                 "graphic_2d",
                 "hdf_core",
                 "c_utils",
-                "bounds_checking_function",
                 "init",
                 "player_framework"
             ]

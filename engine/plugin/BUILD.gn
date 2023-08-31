@@ -76,7 +76,7 @@ if (hst_is_lite_sys) {
       ":hst_plugin_intf_config",
       "//foundation/multimedia/histreamer:histreamer_presets",
     ]
-    external_deps = [ "bounds_checking_function:libsec_shared" ]
+    deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     if (histreamer_enable_video) {
       sources += [
         "common/share_allocator.cpp",
@@ -84,7 +84,7 @@ if (hst_is_lite_sys) {
         "common/surface_allocator.cpp",
         "common/surface_memory.cpp",
       ]
-      external_deps += [
+      external_deps = [
         "c_utils:utils",
         "graphic_2d:surface",
         "graphic_2d:sync_fence",
@@ -250,7 +250,7 @@ ohos_source_set("histreamer_plugin_core") {
       "//foundation/multimedia/player_framework/interfaces/inner_api/native",
       "//drivers/peripheral/display/interfaces/include",
     ]
-    public_deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+    deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     external_deps = [ "graphic_2d:surface" ]
   }
 }
