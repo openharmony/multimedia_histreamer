@@ -25,6 +25,7 @@
 namespace {
     constexpr uint32_t HDI_FRAME_RATE_MOVE = 16; // hdi frame rate need move 16
     constexpr uint32_t HDI_VIDEO_ALIGNMENT = 16;
+    constexpr uint32_t HDI_VIDEO_WIDTH_ALIGNMENT = 32;
 }
 namespace OHOS {
 namespace Media {
@@ -59,7 +60,7 @@ Status CodecPort::Config(Meta& meta)
     portDef_.format.video.eColorFormat = FormatHstToOmx(vdecFormat);
     portDef_.format.video.nFrameHeight = AlignUp(height, HDI_VIDEO_ALIGNMENT);
     portDef_.format.video.nSliceHeight = AlignUp(height, HDI_VIDEO_ALIGNMENT);
-    portDef_.format.video.nFrameWidth = AlignUp(width, HDI_VIDEO_ALIGNMENT);
+    portDef_.format.video.nFrameWidth = AlignUp(width, HDI_VIDEO_WIDTH_ALIGNMENT);
     portDef_.format.video.nStride = static_cast<int32_t>(AlignUp(width, HDI_VIDEO_ALIGNMENT));
     portDef_.format.video.xFramerate = frameRate << HDI_FRAME_RATE_MOVE;
     MEDIA_LOG_D("frame_rate: " PUBLIC_LOG_U32, portDef_.format.video.xFramerate);
