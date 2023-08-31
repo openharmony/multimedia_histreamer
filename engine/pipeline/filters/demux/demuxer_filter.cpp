@@ -333,7 +333,7 @@ bool DemuxerFilter::InitPlugin(std::string pluginName)
         }
     }
     MEDIA_LOG_I("InitPlugin, " PUBLIC_LOG_S " used.", pluginName_.c_str());
-    (void)plugin_->SetDataSource(std::dynamic_pointer_cast<Plugin::DataSourceHelper>(dataSource_));
+    (void)plugin_->SetDataSource(std::reinterpret_pointer_cast<Plugin::DataSourceHelper>(dataSource_));
     pluginState_ = DemuxerState::DEMUXER_STATE_PARSE_HEADER;
     return plugin_->Prepare() == Plugin::Status::OK;
 }

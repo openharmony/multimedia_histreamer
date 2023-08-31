@@ -70,7 +70,7 @@ Status CodecCmdExecutor::SendCmd(OMX_COMMANDTYPE cmd, const Plugin::Any& param)
         }
         case OMX_CommandFlush: {
             uint32_t portIndex;
-            if (param.SameTypeWith(typeid(int32_t)) && Plugin::AnyCast<int32_t>(param) == -1) {
+            if (Plugin::Any::IsSameTypeWith<int32_t >(param) && Plugin::AnyCast<int32_t>(param) == -1) {
                 portIndex = static_cast<uint32_t>(-1);
             } else {
                 portIndex = Plugin::AnyCast<uint32_t>(param);

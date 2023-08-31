@@ -17,13 +17,16 @@ config("histreamer_presets") {
     "//foundation/multimedia/histreamer/engine",
     "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
   ]
-  defines = [ "MEDIA_OHOS" ]
+  defines = [
+    "HST_ANY_WITH_NO_RTTI",
+    "MEDIA_OHOS",
+  ]
   cflags = [
     "-O2",
     "-fPIC",
     "-Wall",
-    "-frtti",
     "-fexceptions",
+    "-fno-rtti",
     "-Wno-unused-but-set-variable",
     "-Wno-format",
   ]
