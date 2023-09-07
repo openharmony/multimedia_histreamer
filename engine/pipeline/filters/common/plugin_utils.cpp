@@ -119,11 +119,11 @@ template<typename T>
 int32_t CapKeyStringiness(char* buf, size_t maxLen, const char* name, const char* typeName,
                           const Plugin::ValueType& val)
 {
-    if (val.SameTypeWith(typeid(Plugin::FixedCapability<T>))) {
+    if (Plugin::Any::IsSameTypeWith<Plugin::FixedCapability<T>>(val)) {
         return FixedCapKeyStringiness<T>(buf, maxLen, name, typeName, val);
-    } else if (val.SameTypeWith(typeid(Plugin::IntervalCapability<T>))) {
+    } else if (Plugin::Any::IsSameTypeWith<Plugin::IntervalCapability<T>>(val)) {
         return IntervalCapKeyStringiness<T>(buf, maxLen, name, typeName, val);
-    } else if (val.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
+    } else if (Plugin::Any::IsSameTypeWith<Plugin::DiscreteCapability<T>>(val)) {
         return DiscreteCapKeyStringiness<T>(buf, maxLen, name, typeName, val);
     } else {
         MEDIA_LOG_W("cap " PUBLIC_LOG_S "type mismatches when cast to string, which should be " PUBLIC_LOG_S,
@@ -231,9 +231,9 @@ template<typename T>
 int32_t MetaIDStringiness(char* buf, size_t maxLen, const char* name, const char* typeName,
                           const Plugin::ValueType& val)
 {
-    if (val.SameTypeWith(typeid(T))) {
+    if (Plugin::Any::IsSameTypeWith<T>(val)) {
         return FixedCapKeyStringiness<T>(buf, maxLen, name, typeName, val);
-    } else if (val.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
+    } else if (Plugin::Any::IsSameTypeWith<Plugin::DiscreteCapability<T>>(val)) {
         return DiscreteCapKeyStringiness<T>(buf, maxLen, name, typeName, val);
     } else {
         MEDIA_LOG_W("meta " PUBLIC_LOG_S " type mismatches when cast to string", name);
@@ -291,7 +291,7 @@ template<typename T>
 bool AssignParameterIfMatch(Tag tag, T& ret, const Plugin::ValueType& val)
 {
     if (Plugin::HasTagInfo(tag)) {
-        if (val.SameTypeWith(*Plugin::GetTagDefValue(tag)) && val.SameTypeWith(typeid(T))) {
+        if (val.SameTypeWith(*Plugin::GetTagDefValue(tag)) && Plugin::Any::IsSameTypeWith<T>(val)) {
             ret = Plugin::AnyCast<T>(val);
             return true;
         } else {

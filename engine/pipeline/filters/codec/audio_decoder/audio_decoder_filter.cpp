@@ -158,7 +158,7 @@ void AudioDecoderFilter::UpdateParams(const std::shared_ptr<const Plugin::Meta>&
                   "Set per sample frame failed.");
     bool useStreamChannelParams {false};
     auto iter = sinkParams_.Find(Plugin::Tag::AUDIO_OUTPUT_CHANNELS);
-    if (iter != std::end(sinkParams_) && iter->second.SameTypeWith(typeid(uint32_t))) {
+    if (iter != std::end(sinkParams_) && Plugin::Any::IsSameTypeWith<uint32_t>(iter->second)) {
         auto outputChannels = Plugin::AnyCast<uint32_t>(iter->second);
         uint32_t upChannels {0};
         FALSE_LOG(upMeta->Get<Plugin::Tag::AUDIO_CHANNELS>(upChannels));
@@ -173,7 +173,7 @@ void AudioDecoderFilter::UpdateParams(const std::shared_ptr<const Plugin::Meta>&
         FALSE_LOG_MSG(meta->Set<Plugin::Tag::AUDIO_OUTPUT_CHANNELS>(outputChannels), "Set channel failed.");
     }
     iter = sinkParams_.Find(Plugin::Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT);
-    if (iter != std::end(sinkParams_) && iter->second.SameTypeWith(typeid(Plugin::AudioChannelLayout))) {
+    if (iter != std::end(sinkParams_) && Plugin::Any::IsSameTypeWith<Plugin::AudioChannelLayout>(iter->second)) {
         auto outputChanLayout = Plugin::AnyCast<Plugin::AudioChannelLayout>(iter->second);
         Plugin::AudioChannelLayout upAudioChannelLayout;
         if (useStreamChannelParams && upMeta->Get<Plugin::Tag::AUDIO_CHANNEL_LAYOUT>(upAudioChannelLayout)) {

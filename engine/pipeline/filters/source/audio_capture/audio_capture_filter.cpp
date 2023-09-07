@@ -223,10 +223,10 @@ void AudioCaptureFilter::PickPreferSampleFmt(const std::shared_ptr<Plugin::Meta>
 {
     static constexpr AudioSampleFormat preferFmt = AudioSampleFormat::S16;
     bool pickPreferFmt = false;
-    if (val.SameTypeWith(typeid(FixedCapability<AudioSampleFormat>)) &&
+    if (Any::IsSameTypeWith<FixedCapability<AudioSampleFormat>>(val) &&
         preferFmt == Plugin::AnyCast<FixedCapability<AudioSampleFormat>>(val)) {
         pickPreferFmt = true;
-    } else if (val.SameTypeWith(typeid(DiscreteCapability<AudioSampleFormat>))) {
+    } else if (Any::IsSameTypeWith<FixedCapability<DiscreteCapability<AudioSampleFormat>>>(val)) {
         const auto* fmts = Plugin::AnyCast<DiscreteCapability<AudioSampleFormat>>(&val);
         pickPreferFmt = CppExt::AnyOf(fmts->begin(), fmts->end(), [&](AudioSampleFormat tmp) -> bool {
             return preferFmt == tmp;
@@ -435,7 +435,7 @@ bool AudioCaptureFilter::CheckSampleRate(const Plugin::Capability& cap)
     }
     for (const auto& pairKey : cap.keys) {
         if (pairKey.first != Capability::Key::AUDIO_SAMPLE_RATE ||
-            !pairKey.second.SameTypeWith(typeid(DiscreteCapability<uint32_t>))) {
+            !Plugin::Any::IsSameTypeWith<DiscreteCapability<uint32_t>>(pairKey.second)) {
             continue;
         }
         auto supportedSampleRateList = Plugin::AnyCast<DiscreteCapability<uint32_t>>(pairKey.second);
@@ -455,7 +455,7 @@ bool AudioCaptureFilter::CheckChannels(const Plugin::Capability& cap)
     }
     for (const auto& pairKey : cap.keys) {
         if (pairKey.first != Capability::Key::AUDIO_CHANNELS ||
-            !pairKey.second.SameTypeWith(typeid(DiscreteCapability<uint32_t>))) {
+            !Plugin::Any::IsSameTypeWith<DiscreteCapability<uint32_t>>(pairKey.second)) {
             continue;
         }
         auto supportedChannelsList = Plugin::AnyCast<DiscreteCapability<uint32_t>>(pairKey.second);
@@ -475,7 +475,7 @@ bool AudioCaptureFilter::CheckSampleFormat(const Plugin::Capability& cap)
     }
     for (const auto& pairKey : cap.keys) {
         if (pairKey.first != Capability::Key::AUDIO_SAMPLE_FORMAT ||
-            !pairKey.second.SameTypeWith(typeid(DiscreteCapability<Plugin::AudioSampleFormat>))) {
+            !Plugin::Any::IsSameTypeWith<DiscreteCapability<Plugin::AudioSampleFormat>>(pairKey.second)) {
             continue;
         }
         auto supportedSampleFormatList =
@@ -544,7 +544,7 @@ ErrorCode AudioCaptureFilter::FindPlugin()
         std::shared_ptr<PluginInfo> info = pluginManager.GetPluginInfo(PluginType::SOURCE, name);
         MEDIA_LOG_I("name: " PUBLIC_LOG_S ", info->name: " PUBLIC_LOG_S, name.c_str(), info->name.c_str());
         auto val = info->extra[PLUGIN_INFO_EXTRA_INPUT_TYPE];
-        if (val.SameTypeWith(typeid(Plugin::SrcInputType))) {
+        if (Plugin::Any::IsSameTypeWith<Plugin::SrcInputType>(val)) {
             auto supportInputType = OHOS::Media::Plugin::AnyCast<Plugin::SrcInputType>(val);
             if (inputType_ == supportInputType && DoNegotiate(info->outCaps) &&
                 CreatePlugin(info, name, pluginManager) == ErrorCode::SUCCESS) {

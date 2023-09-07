@@ -62,7 +62,7 @@ bool OutputSinkFilter::Negotiate(const std::string& inPort,
     std::shared_ptr<Plugin::PluginInfo> selectedPluginInfo = nullptr;
     for (const auto& candidate : candidatePlugins) {
         const auto& tmp = candidate.first->extra[PLUGIN_INFO_EXTRA_OUTPUT_TYPE];
-        if (!tmp.SameTypeWith(typeid(Plugin::ProtocolType))) {
+        if (!Plugin::Any::IsSameTypeWith<Plugin::ProtocolType>(tmp)) {
             continue;
         }
         if (Plugin::AnyCast<Plugin::ProtocolType>(tmp) == protocolType_) {

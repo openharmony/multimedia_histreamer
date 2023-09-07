@@ -27,7 +27,7 @@ namespace Pipeline {
 template<class T>
 bool ExtractTag(T& out, const Plugin::Any& val)
 {
-    if (!val.SameTypeWith(typeid(T))) {
+    if (!Plugin::Any::IsSameTypeWith<T>(val)) {
         return false;
     }
     out = *(Plugin::AnyCast<T>(&val));
