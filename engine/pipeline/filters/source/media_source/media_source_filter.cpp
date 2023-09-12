@@ -407,7 +407,7 @@ ErrorCode MediaSourceFilter::FindPlugin(const std::shared_ptr<MediaSource>& sour
         std::shared_ptr<PluginInfo> info = pluginManager.GetPluginInfo(PluginType::SOURCE, name);
         MEDIA_LOG_I("name: " PUBLIC_LOG_S ", info->name: " PUBLIC_LOG_S, name.c_str(), info->name.c_str());
         auto val = info->extra[PLUGIN_INFO_EXTRA_PROTOCOL];
-        if (Plugin::Any::IsSameTypeWith<std::vector<ProtocolType>>(val)) {
+        if (val.SameTypeWith(typeid(std::vector<ProtocolType>))) {
             auto supportProtocols = OHOS::Media::Plugin::AnyCast<std::vector<ProtocolType>>(val);
             for(auto supportProtocol : supportProtocols){
                 if (g_protocolStringToType[protocol_] == supportProtocol &&

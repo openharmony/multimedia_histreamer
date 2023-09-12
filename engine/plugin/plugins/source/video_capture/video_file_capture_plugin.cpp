@@ -168,19 +168,19 @@ Status VideoFileCapturePlugin::SetParameter(Tag tag, const ValueType& value)
 {
     switch (tag) {
         case Tag::VIDEO_HEIGHT: {
-            if (Any::IsSameTypeWith<uint32_t>(value)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 height_ = Plugin::AnyCast<uint32_t>(value);
             }
             break;
         }
         case Tag::VIDEO_WIDTH: {
-            if (Any::IsSameTypeWith<uint32_t>(value)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 width_ = Plugin::AnyCast<uint32_t>(value);
             }
             break;
         }
         case Tag::VIDEO_CAPTURE_RATE: {
-            if (Any::IsSameTypeWith<double>(value)) {
+            if (value.SameTypeWith(typeid(double))) {
                 auto rate = Plugin::AnyCast<double>(value);
                 if (rate != 0.0) {
                     captureRate_ = rate;
@@ -189,7 +189,7 @@ Status VideoFileCapturePlugin::SetParameter(Tag tag, const ValueType& value)
             break;
         }
         case Tag::VIDEO_PIXEL_FORMAT: {
-            if (Any::IsSameTypeWith<VideoPixelFormat>(value)) {
+            if (value.SameTypeWith(typeid(VideoPixelFormat))) {
                 pixelFormat_ = Plugin::AnyCast<VideoPixelFormat>(value);
             }
             break;
@@ -222,7 +222,7 @@ Status VideoFileCapturePlugin::SetSource(std::shared_ptr<MediaSource> source)
 
 void VideoFileCapturePlugin::SetVideoBufferMeta(std::shared_ptr<BufferMeta>& bufferMeta)
 {
-    std::shared_ptr<VideoBufferMeta> videoMeta = std::reinterpret_pointer_cast<VideoBufferMeta>(bufferMeta);
+    std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
     videoMeta->width = width_;
     videoMeta->height = height_;
     videoMeta->videoPixelFormat = VideoPixelFormat::YUV420P;

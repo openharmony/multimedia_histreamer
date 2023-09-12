@@ -580,7 +580,7 @@ void HiPlayerImpl::HandlePluginErrorEvent(const Event& event)
     Plugin::PluginEvent pluginEvent = Plugin::AnyCast<Plugin::PluginEvent>(event.param);
     MEDIA_LOG_I("Receive PLUGIN_ERROR, type:  " PUBLIC_LOG_D32, CppExt::to_underlying(pluginEvent.type));
     if (pluginEvent.type == Plugin::PluginEventType::CLIENT_ERROR &&
-            Plugin::Any::IsSameTypeWith<Plugin::NetworkClientErrorCode>(pluginEvent.param)) {
+        pluginEvent.param.SameTypeWith(typeid(Plugin::NetworkClientErrorCode))) {
         auto netClientErrorCode = Plugin::AnyCast<Plugin::NetworkClientErrorCode>(pluginEvent.param);
         auto errorCode {-1};
         if (netClientErrorCode == Plugin::NetworkClientErrorCode::ERROR_TIME_OUT) {
@@ -673,7 +673,7 @@ ErrorCode HiPlayerImpl::GetTrackMeta(size_t id, shared_ptr<const Plugin::Meta>& 
 
 ErrorCode HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& parameter)
 {
-    if (!Plugin::Any::IsSameTypeWith<PortInfo>(parameter)) {
+    if (!parameter.SameTypeWith(typeid(PortInfo))) {
         return ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
     }
     ErrorCode rtv = ErrorCode::ERROR_INVALID_PARAMETER_VALUE;
@@ -709,7 +709,7 @@ ErrorCode HiPlayerImpl::NewAudioPortFound(Filter* filter, const Plugin::Any& par
 #ifdef VIDEO_SUPPORT
 ErrorCode HiPlayerImpl::NewVideoPortFound(Filter* filter, const Plugin::Any& parameter)
 {
-    if (!Plugin::Any::IsSameTypeWith<PortInfo>(parameter)) {
+    if (!parameter.SameTypeWith(typeid(PortInfo))) {
         return ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
     }
     auto param = Plugin::AnyCast<PortInfo>(parameter);
@@ -759,7 +759,7 @@ ErrorCode HiPlayerImpl::RemoveFilterChains(Filter* filter, const Plugin::Any& pa
         MEDIA_LOG_I("remove filter chain for port: " PUBLIC_LOG_S, portDesc.name.c_str());
         auto peerPort = filter->GetOutPort(portDesc.name)->GetPeerPort();
         if (peerPort) {
-            auto nextFilter = const_cast<Filter*>(reinterpret_cast<const Filter*>(peerPort->GetOwnerFilter()));
+            auto nextFilter = const_cast<Filter*>(dynamic_cast<const Filter*>(peerPort->GetOwnerFilter()));
             if (nextFilter) {
                 pipeline_->RemoveFilterChain(nextFilter);
             }

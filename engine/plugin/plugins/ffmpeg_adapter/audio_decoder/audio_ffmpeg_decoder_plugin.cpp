@@ -275,7 +275,7 @@ Status AudioFfmpegDecoderPlugin::FindInParameterMapThenAssignLocked(Tag tag, T& 
         return Status::OK;
     }
     const auto& item = audioParameter_.at(tag);
-    if (Any::IsSameTypeWith<T>(item)) {
+    if (item.SameTypeWith(typeid(T))) {
         assign = Plugin::AnyCast<T>(item);
         return Status::OK;
     }
@@ -342,7 +342,7 @@ Status AudioFfmpegDecoderPlugin::AssignExtraDataIfExistsLocked(const std::shared
         return Status::OK;
     }
     const auto& item = audioParameter_.at(Tag::MEDIA_CODEC_CONFIG);
-    if (!Plugin::Any::IsSameTypeWith<CodecConfig>(item)) {
+    if (!item.SameTypeWith(typeid(CodecConfig))) {
         return Status::ERROR_MISMATCHED_TYPE;
     }
     const auto* codecConfig = Plugin::AnyCast<CodecConfig>(&item);

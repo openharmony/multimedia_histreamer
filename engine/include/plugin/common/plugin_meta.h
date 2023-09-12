@@ -175,7 +175,7 @@ public:
     bool GetData(Plugin::Tag id, T& value) const
     {
         auto ite = map_.find(id);
-        if (ite == map_.end() || !Plugin::Any::IsSameTypeWith<T>(ite->second)) {
+        if (ite == map_.end() || !ite->second.SameTypeWith(typeid(T))) {
             return false;
         }
         value = Plugin::AnyCast<T>(ite->second);

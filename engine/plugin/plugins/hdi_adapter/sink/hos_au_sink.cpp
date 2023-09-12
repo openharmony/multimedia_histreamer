@@ -194,7 +194,7 @@ void UnRegisterAudioDecoderPlugin()
 template <typename T>
 inline Status AssignIfCastSuccess(T& lvalue, const Any& anyValue, const char* tagName)
 {
-    if (Any::IsSameTypeWith<T>(anyValue)) {
+    if (anyValue.SameTypeWith(typeid(T))) {
         lvalue = AnyCast<const T&>(anyValue);
         MEDIA_LOG_I("AssignIfCastSuccess found " PUBLIC_LOG_S, tagName);
         return Status::OK;

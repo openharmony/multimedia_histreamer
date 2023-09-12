@@ -92,9 +92,8 @@ ErrorCode VideoSinkFilter::SetParameter(int32_t key, const Plugin::Any& value)
     }
     switch (tag) {
         case Tag::VIDEO_SCALE_TYPE:
-            FALSE_RETURN_V_MSG_E(Plugin::Any::IsSameTypeWith<Plugin::VideoScaleType>(value),
-                                 ErrorCode::ERROR_INVALID_PARAMETER_TYPE,
-                                 "VIDEO_SCALE_TYPE type should be Plugin::VideoScaleType");
+            FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(Plugin::VideoScaleType)),
+                ErrorCode::ERROR_INVALID_PARAMETER_TYPE, "VIDEO_SCALE_TYPE type should be Plugin::VideoScaleType");
             videoScaleType_ = Plugin::AnyCast<Plugin::VideoScaleType>(value);
             if (plugin_) {
                 (void)plugin_->SetParameter(Tag::VIDEO_SCALE_TYPE, videoScaleType_);
@@ -127,7 +126,7 @@ void VideoSinkFilter::HandleNegotiateParams(const Plugin::Meta& upstreamParams, 
     Plugin::Tag tag = Plugin::Tag::VIDEO_MAX_SURFACE_NUM;
     auto ite = upstreamParams.Find(tag);
     if (ite != std::end(upstreamParams)) {
-        if (Plugin::Any::IsSameTypeWith<uint32_t>(ite->second)) {
+        if (ite->second.SameTypeWith(typeid(uint32_t))) {
             auto ret = plugin_->SetParameter(tag, Plugin::AnyCast<uint32_t>(ite->second));
             if (ret != Plugin::Status::OK) {
                 MEDIA_LOG_W("Set max surface num to plugin fail");

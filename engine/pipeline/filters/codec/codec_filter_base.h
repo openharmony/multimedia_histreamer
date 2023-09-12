@@ -86,7 +86,7 @@ protected:
     {
         Plugin::Any tmp;
         auto err = TranslatePluginStatus(plugin_->GetParameter(tag, tmp));
-        if (err == ErrorCode::SUCCESS && Plugin::Any::IsSameTypeWith<T>(tmp)) {
+        if (err == ErrorCode::SUCCESS && tmp.SameTypeWith(typeid(T))) {
             value = Plugin::AnyCast<T>(tmp);
         }
         return err;

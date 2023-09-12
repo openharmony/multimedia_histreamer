@@ -26,7 +26,6 @@
 
 #include <array>
 #include <cstring>
-#include <string_view>
 #include <type_traits>
 #include "plugin/common/type_cast_ext.h"
 #include "securec.h"
@@ -153,31 +152,6 @@ public:
         return *this;
     }
 
-    template<typename T>
-    static constexpr std::string_view GetTypeName() noexcept
-    {
-        const char* charInfo = __PRETTY_FUNCTION__ ;
-        std::string_view stringInfo = charInfo;
-        int beginIndex = stringInfo.find_first_of('=') + 2; // 2 表示右移两位
-        int endIndex = stringInfo.find_first_of(';');
-        std::string_view typeName(charInfo + beginIndex, endIndex - beginIndex);
-        return typeName;
-    }
-
-    template<typename T>
-    static bool IsSameTypeWith(const Any& other) noexcept
-    {
-#ifndef HST_ANY_WITH_NO_RTTI
-        if (!other.SameTypeWith(typeid(T))) {
-#else
-        if (!other.SameTypeWith(Any::GetTypeName<T>())) {
-#endif
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     ~Any()
     {
         Reset();
@@ -256,7 +230,6 @@ public:
         return IsFunctionTableValid();
     }
 
-#ifndef HST_ANY_WITH_NO_RTTI
     /**
      * Get tye type_info of object
      *
@@ -269,17 +242,7 @@ public:
         }
         return functionTable_->type();
     }
-#else
-    std::string_view TypeName() const noexcept
-    {
-        if (!HasValue()) {
-            return "empty"; // no value
-        }
-        return functionTable_->type_name();
-    }
-#endif
 
-#ifndef HST_ANY_WITH_NO_RTTI
     bool SameTypeWith(const std::type_info& otherInfo) const noexcept
     {
         if (functionTable_ == nullptr) {
@@ -287,23 +250,10 @@ public:
         }
         return IsSameType(functionTable_->type(), otherInfo);
     }
-#else
-    bool SameTypeWith(std::string_view otherTypeName) const noexcept
-    {
-        if (functionTable_ == nullptr) {
-            return false;
-        }
-        return IsSameType(functionTable_->type_name(), otherTypeName);
-    }
-#endif
 
     bool SameTypeWith(const Any& other) const noexcept
     {
-#ifndef HST_ANY_WITH_NO_RTTI
         return IsSameType(functionTable_->type(), other.Type());
-#else
-        return IsSameType(functionTable_->type_name(), other.TypeName());
-#endif
     }
 
 private:
@@ -324,11 +274,7 @@ private:
     };
 
     struct FunctionTable {
-#ifndef HST_ANY_WITH_NO_RTTI
         const std::type_info& (*type)() noexcept;
-#else
-        std::string_view (*type_name)() noexcept;
-#endif
         void (*destroy)(Storage&) noexcept;
         void (*copy)(Storage&, const Storage&) noexcept;
         void (*move)(Storage&, Storage&) noexcept;
@@ -338,17 +284,10 @@ private:
 
     template <typename T>
     struct TrivialStackFunctionTable {
-#ifndef HST_ANY_WITH_NO_RTTI
         static const std::type_info& Type() noexcept
         {
             return typeid(T);
         }
-#else
-        static std::string_view TypeName() noexcept
-        {
-            return GetTypeName<T>();
-        }
-#endif
 
         static void Destroy(Storage& storage) noexcept
         {
@@ -380,17 +319,10 @@ private:
 
     template <typename T>
     struct StackFunctionTable {
-#ifndef HST_ANY_WITH_NO_RTTI
         static const std::type_info& Type() noexcept
         {
             return typeid(T);
         }
-#else
-        static std::string_view TypeName() noexcept
-        {
-            return GetTypeName<T>();
-        }
-#endif
 
         static void Destroy(Storage& storage) noexcept
         {
@@ -423,17 +355,10 @@ private:
 
     template <typename T>
     struct HeapFunctionTable {
-#ifndef HST_ANY_WITH_NO_RTTI
         static const std::type_info& Type() noexcept
         {
             return typeid(T);
         }
-#else
-        static std::string_view TypeName() noexcept
-        {
-            return GetTypeName<T>();
-        }
-#endif
 
         static void Destroy(Storage& storage) noexcept
         {
@@ -469,11 +394,7 @@ private:
                           conditional_t<IsStackStorable<DecayedValueType>::value,
                                         StackFunctionTable<DecayedValueType>, HeapFunctionTable<DecayedValueType>>>;
         static FunctionTable table = {
-#ifndef HST_ANY_WITH_NO_RTTI
             .type = DetailFunctionTable::Type,
-#else
-            .type_name = DetailFunctionTable::TypeName,
-#endif
             .destroy = DetailFunctionTable::Destroy,
             .copy = DetailFunctionTable::Copy,
             .move = DetailFunctionTable::Move,
@@ -516,14 +437,7 @@ private:
     ValueType* Cast() noexcept
     {
         using DecayedValueType = decay_t<ValueType>;
-        if (!IsFunctionTableValid()) {
-            return nullptr;
-        }
-#ifndef HST_ANY_WITH_NO_RTTI
-        if (!SameTypeWith(typeid(DecayedValueType))) {
-#else
-        if (!SameTypeWith(Any::GetTypeName<DecayedValueType>())) {
-#endif
+        if (!IsFunctionTableValid() || !SameTypeWith(typeid(DecayedValueType))) {
             return nullptr;
         }
         return IsTrivialStackStorable<DecayedValueType>::value
@@ -536,14 +450,7 @@ private:
     const ValueType* Cast() const noexcept
     {
         using DecayedValueType = decay_t<ValueType>;
-        if (!IsFunctionTableValid()) {
-            return nullptr;
-        }
-#ifndef HST_ANY_WITH_NO_RTTI
-        if (!SameTypeWith(typeid(DecayedValueType))) {
-#else
-        if (!SameTypeWith(Any::GetTypeName<DecayedValueType>())) {
-#endif
+        if (!IsFunctionTableValid() || !SameTypeWith(typeid(DecayedValueType))) {
             return nullptr;
         }
         return IsTrivialStackStorable<DecayedValueType>::value
@@ -589,19 +496,13 @@ template <typename ValueType>
 bool AnyCast(const Any* operand, ValueType& value) noexcept
 {
     static_assert(!std::is_void<ValueType>::value, "ValueType of any_cast must not be void");
-    if (std::is_function<ValueType>::value || std::is_array<ValueType>::value || operand == nullptr) {
+    if (std::is_function<ValueType>::value || std::is_array<ValueType>::value || operand == nullptr
+        || !operand->SameTypeWith(typeid(ValueType))) {
         return false;
+    } else {
+        value = *(operand->Cast<ValueType>());
+        return true;
     }
-#ifndef HST_ANY_WITH_NO_RTTI
-     if (!operand->SameTypeWith(typeid(ValueType))) {
-#else
-     if (!operand->SameTypeWith(Any::GetTypeName<ValueType>())) {
-#endif
-         return false;
-     } else {
-         value = *(operand->Cast<ValueType>());
-         return true;
-     }
 }
 
 /**

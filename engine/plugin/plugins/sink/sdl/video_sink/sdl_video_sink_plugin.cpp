@@ -290,21 +290,21 @@ Status SdlVideoSinkPlugin::SetParameter(Tag tag, const ValueType& value)
 {
     switch (tag) {
         case Tag::VIDEO_WIDTH: {
-            if (Any::IsSameTypeWith<uint32_t>(value)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 pixelWidth_ = Plugin::AnyCast<uint32_t>(value);
                 MEDIA_LOG_D("pixelWidth_: " PUBLIC_LOG_U32, pixelWidth_);
             }
             break;
         }
         case Tag::VIDEO_HEIGHT: {
-            if (Any::IsSameTypeWith<uint32_t>(value)) {
+            if (value.SameTypeWith(typeid(uint32_t))) {
                 pixelHeight_ = Plugin::AnyCast<uint32_t>(value);
                 MEDIA_LOG_D("pixelHeight_: " PUBLIC_LOG_U32, pixelHeight_);
             }
             break;
         }
         case Tag::VIDEO_PIXEL_FORMAT: {
-            if (Any::IsSameTypeWith<VideoPixelFormat>(value)) {
+            if (value.SameTypeWith(typeid(VideoPixelFormat))) {
                 VideoPixelFormat format = Plugin::AnyCast<VideoPixelFormat>(value);
                 pixelFormat_ = TranslatePixelFormat(format);
                 MEDIA_LOG_D("SDL pixelFormat: " PUBLIC_LOG_U32, pixelFormat_);
@@ -370,7 +370,7 @@ Status SdlVideoSinkPlugin::VideoImageDisaplay(const std::shared_ptr<Buffer>& inp
         MEDIA_LOG_E("Invalid video buffer");
         return Status::ERROR_INVALID_DATA;
     }
-    std::shared_ptr<VideoBufferMeta> videoMeta = std::reinterpret_pointer_cast<VideoBufferMeta>(bufferMeta);
+    std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
     uint32_t frameFormat = TranslatePixelFormat(videoMeta->videoPixelFormat);
     if (frameFormat != pixelFormat_) {
         MEDIA_LOG_I("pixel format change from " PUBLIC_LOG_U32 " to " PUBLIC_LOG_U32, pixelFormat_, frameFormat);
