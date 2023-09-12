@@ -40,7 +40,7 @@ bool CommonParameterChecker(Plugin::Tag tag, const Plugin::ValueType& val)
 template <typename T>
 MEDIA_UNUSED static bool TypedParameterType(const Plugin::ValueType& value)
 {
-    return Any::IsSameTypeWith<T>(value);
+    return value.SameTypeWith(typeid(T));
 }
 
 PluginParameterTable& PluginParameterTable::GetInstance()

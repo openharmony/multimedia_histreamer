@@ -28,7 +28,7 @@ public:
     std::tuple<ErrorCode, Action> SetSource(const Plugin::Any& param) override
     {
         std::shared_ptr<MediaSource> source;
-        if (!Plugin::Any::IsSameTypeWith<std::shared_ptr<MediaSource>>(param) ||
+        if (!param.SameTypeWith(typeid(std::shared_ptr<MediaSource>)) ||
             !(source = Plugin::AnyCast<std::shared_ptr<MediaSource>>(param))) {
             return {ErrorCode::ERROR_INVALID_PARAMETER_TYPE, Action::ACTION_BUTT};
         }

@@ -218,7 +218,7 @@ Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
             SetVideoPixelFormat(value);
             break;
         case Tag::VIDEO_SURFACE:
-            if (Any::IsSameTypeWith<sptr<Surface>>(value)) {
+            if (value.SameTypeWith(typeid(sptr<Surface>))) {
                 surface_ = Plugin::AnyCast<sptr<Surface>>(value);
                 if (!surface_) {
                     MEDIA_LOG_E("surface is null");
@@ -244,7 +244,7 @@ Status SurfaceSinkPlugin::SetParameter(Tag tag, const ValueType& value)
 
 void SurfaceSinkPlugin::SetVideoWidth(const ValueType& value)
 {
-    if (Any::IsSameTypeWith<uint32_t>(value)) {
+    if (value.SameTypeWith(typeid(uint32_t))) {
         width_ = Plugin::AnyCast<uint32_t>(value);
         MEDIA_LOG_D("width_: " PUBLIC_LOG_U32, width_);
     }
@@ -252,7 +252,7 @@ void SurfaceSinkPlugin::SetVideoWidth(const ValueType& value)
 
 void SurfaceSinkPlugin::SetVideoHeight(const ValueType& value)
 {
-    if (Any::IsSameTypeWith<uint32_t>(value)) {
+    if (value.SameTypeWith(typeid(uint32_t))) {
         height_ = Plugin::AnyCast<uint32_t>(value);
         MEDIA_LOG_D("height_: " PUBLIC_LOG_U32, height_);
     }
@@ -260,7 +260,7 @@ void SurfaceSinkPlugin::SetVideoHeight(const ValueType& value)
 
 void SurfaceSinkPlugin::SetVideoPixelFormat(const ValueType& value)
 {
-    if (Any::IsSameTypeWith<VideoPixelFormat>(value)) {
+    if (value.SameTypeWith(typeid(VideoPixelFormat))) {
         decodeOutputPixelFmt_ = Plugin::AnyCast<VideoPixelFormat>(value);
         MEDIA_LOG_D("decode output pixel fmt: " PUBLIC_LOG_U32, static_cast<uint32_t>(decodeOutputPixelFmt_));
     }
@@ -268,7 +268,7 @@ void SurfaceSinkPlugin::SetVideoPixelFormat(const ValueType& value)
 
 void SurfaceSinkPlugin::SetMaxSurfaceNum(const ValueType& value)
 {
-    if (Any::IsSameTypeWith<uint32_t>(value)) {
+    if (value.SameTypeWith(typeid(uint32_t))) {
         auto bufferNum = Plugin::AnyCast<uint32_t>(value);
         if (bufferNum < DEFAULT_BUFFER_NUM) {
             maxSurfaceNum_ = bufferNum;
@@ -279,7 +279,7 @@ void SurfaceSinkPlugin::SetMaxSurfaceNum(const ValueType& value)
 
 void SurfaceSinkPlugin::SetVideoScaleType(const ValueType& value)
 {
-    if (Any::IsSameTypeWith<VideoScaleType>(value)) {
+    if (value.SameTypeWith(typeid(Plugin::VideoScaleType))) {
         scalingType_ = Plugin::AnyCast<Plugin::VideoScaleType>(value);
         MEDIA_LOG_D("scalingType_: " PUBLIC_LOG_U32, static_cast<uint32_t>(scalingType_));
         if (mAllocator_) {

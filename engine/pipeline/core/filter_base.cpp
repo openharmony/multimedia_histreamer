@@ -109,7 +109,7 @@ std::vector<Filter*> FilterBase::GetNextFilters()
                         ").", name_.c_str(), outPort->GetName().c_str(), outPorts_.size());
             continue;
         }
-        auto filter = const_cast<Filter*>(reinterpret_cast<const Filter*>(peerPort->GetOwnerFilter()));
+        auto filter = const_cast<Filter*>(dynamic_cast<const Filter*>(peerPort->GetOwnerFilter()));
         if (filter) {
             nextFilters.emplace_back(filter);
         }
@@ -128,7 +128,7 @@ std::vector<Filter*> FilterBase::GetPreFilters()
                         ").", name_.c_str(), inPort->GetName().c_str(), inPorts_.size());
             continue;
         }
-        auto filter = const_cast<Filter*>(reinterpret_cast<const Filter*>(peerPort->GetOwnerFilter()));
+        auto filter = const_cast<Filter*>(dynamic_cast<const Filter*>(peerPort->GetOwnerFilter()));
         if (filter) {
             preFilters.emplace_back(filter);
         }

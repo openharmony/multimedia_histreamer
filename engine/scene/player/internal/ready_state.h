@@ -47,7 +47,7 @@ public:
     {
         MEDIA_LOG_D("Seek in ready state.");
         std::tuple<ErrorCode, Action> err {ErrorCode::ERROR_INVALID_PARAMETER_TYPE, Action::ACTION_BUTT};
-        FALSE_RETURN_V(Plugin::Any::IsSameTypeWith<SeekInfo>(param), err);
+        FALSE_RETURN_V(param.SameTypeWith(typeid(SeekInfo)), err);
         auto info = Plugin::AnyCast<SeekInfo>(param);
         auto ret = executor_.DoSeek(info.hstTime, info.mode, true);
         return {ret, Action::ACTION_BUTT};

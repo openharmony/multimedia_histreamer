@@ -44,7 +44,7 @@ template <typename T>
 const T* FindTagInMap(Tag tag, const std::map<Tag, ValueType>& tagStore)
 {
     auto ite = tagStore.find(tag);
-    if (ite != tagStore.end() && Any::IsSameTypeWith<T>(ite->second)) {
+    if (ite != tagStore.end() && ite->second.SameTypeWith(typeid(T))) {
         return AnyCast<T>(&ite->second);
     } else {
         MEDIA_LOG_D("parameter " PUBLIC_LOG_D32 " is not found or type mismatch", static_cast<int32_t>(tag));
