@@ -121,7 +121,7 @@ uint32_t AudioEncoderFilter::CalculateBufferSize(const std::shared_ptr<const Plu
 {
     Plugin::ValueType value;
     if (plugin_->GetParameter(Plugin::Tag::AUDIO_SAMPLE_PER_FRAME, value) != Plugin::Status::OK ||
-        !Plugin::Any::IsSameTypeWith<uint32_t>(value)) {
+        !value.SameTypeWith(typeid(uint32_t))) {
         MEDIA_LOG_E("Get samplePerFrame from plugin fail");
         return 0;
     }

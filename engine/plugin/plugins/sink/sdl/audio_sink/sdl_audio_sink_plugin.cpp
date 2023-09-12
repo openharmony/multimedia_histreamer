@@ -229,7 +229,7 @@ Status SdlAudioSinkPlugin::GetParameter(Tag tag, ValueType& value)
 Status SdlAudioSinkPlugin::SetParameter(Tag tag, const ValueType& value)
 {
 #define RETURN_ERROR_IF_CHECK_ERROR(typenames)                                                                         \
-    if (!Plugin::Any::IsSameTypeWith<typenames>(value)) {                                                              \
+    if (!value.SameTypeWith(typeid(typenames))) {                                                                      \
         return Status::ERROR_MISMATCHED_TYPE;                                                                          \
     }
     MEDIA_LOG_I("SetParameter entered, key: " PUBLIC_LOG_S, Tag2String(tag));
