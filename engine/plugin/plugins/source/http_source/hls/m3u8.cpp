@@ -92,7 +92,7 @@ void M3U8::InitTagUpdatersMap()
     };
 
     tagUpdatersMap_[HlsTag::EXTXDISCONTINUITYSEQUENCE] = [this](std::shared_ptr<Tag> &tag, M3U8Info &info) {
-        discontSequence_ = std::static_pointer_cast<SingleValueTag>(tag)->GetValue().Decimal();
+        discontSequence_ = static_cast<int>(std::static_pointer_cast<SingleValueTag>(tag)->GetValue().Decimal());
         info.discontinuity = true;
     };
 

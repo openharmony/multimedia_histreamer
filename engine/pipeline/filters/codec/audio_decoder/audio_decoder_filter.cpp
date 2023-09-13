@@ -158,7 +158,7 @@ void AudioDecoderFilter::UpdateParams(const std::shared_ptr<const Plugin::Meta>&
                   "Set per sample frame failed.");
     bool useStreamChannelParams {false};
     auto iter = sinkParams_.Find(Plugin::Tag::AUDIO_OUTPUT_CHANNELS);
-     if (iter != std::end(sinkParams_) && iter->second.SameTypeWith(typeid(uint32_t))) {
+    if (iter != std::end(sinkParams_) && iter->second.SameTypeWith(typeid(uint32_t))) {
         auto outputChannels = Plugin::AnyCast<uint32_t>(iter->second);
         uint32_t upChannels {0};
         FALSE_LOG(upMeta->Get<Plugin::Tag::AUDIO_CHANNELS>(upChannels));
