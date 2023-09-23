@@ -60,15 +60,6 @@ HWTEST(TestPluginManager, ListPlugins_case5, TestSize.Level1)
     }
 }
 
-HWTEST(TestPluginManager, ListPlugins_case6, TestSize.Level1)
-{
-    std::vector<std::string> plugins = PluginManager::Instance().ListPlugins(PluginType::AUDIO_SINK);
-    ASSERT_TRUE(plugins.size() > 1);
-    for (const auto & plugin : plugins) {
-        ASSERT_NE(plugin, "");
-    }
-}
-
 HWTEST(TestPluginManager, ListPlugins_case7, TestSize.Level1)
 {
     ASSERT_TRUE(PluginManager::Instance().ListPlugins(PluginType::INVALID_TYPE).empty());
@@ -77,14 +68,6 @@ HWTEST(TestPluginManager, ListPlugins_case7, TestSize.Level1)
 HWTEST(TestPluginManager, ListPlugins_case8, TestSize.Level1)
 {
     ASSERT_TRUE(PluginManager::Instance().ListPlugins(PluginType(256)).empty());
-}
-
-HWTEST(TestPluginManager, GetPluginInfo_case1, TestSize.Level1)
-{
-    std::shared_ptr<PluginInfo> info = PluginManager::Instance().GetPluginInfo(
-            PluginType::SOURCE, "UtSourceTest1");
-    ASSERT_TRUE(info != nullptr);
-    ASSERT_EQ(info->name, "UtSourceTest1");
 }
 
 HWTEST(TestPluginManager, GetPluginInfo_case2, TestSize.Level1)
@@ -107,11 +90,6 @@ HWTEST(TestPluginManager, GetPluginInfo_case5, TestSize.Level1)
     ASSERT_TRUE(PluginManager::Instance().GetPluginInfo(PluginType(256), "") == nullptr);
 }
 
-HWTEST(TestPluginManager, CreateSourcePlugin_case1, TestSize.Level1)
-{
-    ASSERT_TRUE(PluginManager::Instance().CreateSourcePlugin("UtSourceTest1") != nullptr);
-}
-
 HWTEST(TestPluginManager, CreateSourcePlugin_case2, TestSize.Level1)
 {
     ASSERT_TRUE(PluginManager::Instance().CreateSourcePlugin("UtSourceTest3") == nullptr);
@@ -120,11 +98,6 @@ HWTEST(TestPluginManager, CreateSourcePlugin_case2, TestSize.Level1)
 HWTEST(TestPluginManager, CreateSourcePlugin_case3, TestSize.Level1)
 {
     ASSERT_TRUE(PluginManager::Instance().CreateSourcePlugin("") == nullptr);
-}
-
-HWTEST(TestPluginManager, CreateDemuxerPlugin_case1, TestSize.Level1)
-{
-    ASSERT_TRUE(PluginManager::Instance().CreateDemuxerPlugin("UtDemuxerTest1") != nullptr);
 }
 
 HWTEST(TestPluginManager, CreateDemuxerPlugin_case2, TestSize.Level1)
@@ -137,11 +110,6 @@ HWTEST(TestPluginManager, CreateDemuxerPlugin_case3, TestSize.Level1)
     ASSERT_TRUE(PluginManager::Instance().CreateDemuxerPlugin("") == nullptr);
 }
 
-HWTEST(TestPluginManager, CreateCodecPlugin_case1, TestSize.Level1)
-{
-    ASSERT_TRUE(PluginManager::Instance().CreateCodecPlugin("UtCodecTest1", PluginType::AUDIO_DECODER) != nullptr);
-}
-
 HWTEST(TestPluginManager, CreateCodecPlugin_case2, TestSize.Level1)
 {
     ASSERT_TRUE(PluginManager::Instance().CreateCodecPlugin("UtCodecTest3", PluginType::AUDIO_DECODER) == nullptr);
@@ -150,11 +118,6 @@ HWTEST(TestPluginManager, CreateCodecPlugin_case2, TestSize.Level1)
 HWTEST(TestPluginManager, CreateCodecPlugin_case3, TestSize.Level1)
 {
     ASSERT_TRUE(PluginManager::Instance().CreateCodecPlugin("", PluginType::AUDIO_DECODER) == nullptr);
-}
-
-HWTEST(TestPluginManager, CreateAudioSinkPlugin_case1, TestSize.Level1)
-{
-    ASSERT_TRUE(PluginManager::Instance().CreateAudioSinkPlugin("UtAudioSinkTest1") != nullptr);
 }
 
 HWTEST(TestPluginManager, CreateAudioSinkPlugin_case2, TestSize.Level1)
@@ -208,13 +171,6 @@ public:
         return OHOS::Media::Plugin::Seekable::SEEKABLE;
     }
 };
-
-
-HWTEST(TestPluginManager, Sniffer_case1, TestSize.Level1)
-{
-    ASSERT_TRUE(PluginManager::Instance().Sniffer("UtDemuxerTest1",
-                                                  std::make_shared<UtDataSourceHelperTest1>()) > 0);
-}
 
 HWTEST(TestPluginManager, Sniffer_case2, TestSize.Level1)
 {

@@ -98,6 +98,5 @@ ohos_unittest("histreamer_unit_test") {
     "./TestVideoFFmpegEncoder.cpp",
     "./plugins/UtSourceTest1.cpp",
     "./plugins/UtSourceTest2.cpp",
-    "./testaudio/TestFastPlayer.cpp",
   ]
 }

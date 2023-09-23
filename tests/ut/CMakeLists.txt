@@ -40,7 +40,6 @@ link_directories(
 file(GLOB UT_TEST_SRCS
         ../st/helper/media_data_source_imp.cpp
         ../st/helper/std_player.cpp
-        ./testaudio/TestFastPlayer.cpp
         ./*.cpp
         )
 
