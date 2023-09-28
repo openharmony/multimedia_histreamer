@@ -38,6 +38,7 @@ inline std::string HstGetFileName(const std::string& file)
 #ifndef LOG_TAG
 #define LOG_TAG "HiStreamer"
 #endif
+#undef HILOG_RAWFORMAT
 #include "hilog/log.h"
 #else
 #include "log_adapter.h"
