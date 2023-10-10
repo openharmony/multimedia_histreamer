@@ -65,6 +65,7 @@ if (hst_is_lite_sys) {
       integer_overflow = true
     }
     deps = [ ":std_video_surface_sink" ]
+    external_deps = [ "hilog:libhilog" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "histreamer"

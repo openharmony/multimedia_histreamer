@@ -70,7 +70,11 @@ if (hst_is_lite_sys) {
       integer_overflow = true
     }
     deps = [ ":std_plugin_codec_adapter" ]
-    external_deps = [ "drivers_peripheral_codec:libcodec_hdi_omx_client" ]
+
+    external_deps = [
+      "drivers_peripheral_codec:libcodec_hdi_omx_client",
+      "hilog:libhilog",
+    ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "histreamer"

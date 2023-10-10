@@ -72,7 +72,10 @@ if (!hst_is_mini_sys) {
       part_name = "histreamer"
       sources = []
       deps = [ "engine/scene:std_engine_factory" ]
-      external_deps = [ "hitrace:hitrace_meter" ]
+      external_deps = [
+        "hilog:libhilog",
+        "hitrace:hitrace_meter",
+      ]
       sanitize = {
         cfi = true
         cfi_cross_dso = true

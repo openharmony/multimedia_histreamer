@@ -63,6 +63,7 @@ if (hst_is_mini_sys) {
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
     ]
+    external_deps = [ "hilog:libhilog" ]
     sanitize = {
       cfi = true
       cfi_cross_dso = true
@@ -82,6 +83,7 @@ if (hst_is_mini_sys) {
       ":plugin_minimp3_adapter_config",
       "//foundation/multimedia/histreamer:histreamer_presets",
     ]
+    external_deps = [ "hilog:libhilog" ]
     public_deps = [
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_intf",

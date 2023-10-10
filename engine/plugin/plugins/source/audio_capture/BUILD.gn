@@ -40,9 +40,11 @@ if (hst_is_standard_sys) {
       "//foundation/multimedia/histreamer/engine/foundation:histreamer_foundation",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
     ]
+
     external_deps = [
       "audio_framework:audio_capturer",
       "graphic_2d:surface",
+      "hilog:libhilog",
     ]
     sanitize = {
       cfi = true
