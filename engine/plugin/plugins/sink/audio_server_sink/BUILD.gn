@@ -37,9 +37,11 @@ if (hst_is_standard_sys) {
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_ffmpeg_convert",
       "//foundation/multimedia/histreamer/engine/plugin:histreamer_plugin_base",
     ]
+
     external_deps = [
       "audio_framework:audio_renderer",
       "graphic_2d:surface",
+      "hilog:libhilog",
     ]
     sanitize = {
       cfi = true

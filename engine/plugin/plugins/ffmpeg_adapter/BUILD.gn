@@ -264,6 +264,7 @@ if (hst_is_lite_sys) {
       ":ffmpeg_adapter_common",
       ":ffmpeg_audio_decoders",
     ]
+    external_deps = [ "hilog:libhilog" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "histreamer"
@@ -279,6 +280,7 @@ if (hst_is_lite_sys) {
       ":ffmpeg_adapter_common",
       ":ffmpeg_video_decoders",
     ]
+    external_deps = [ "hilog:libhilog" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "histreamer"
@@ -294,6 +296,7 @@ if (hst_is_lite_sys) {
       ":ffmpeg_adapter_common",
       ":ffmpeg_demuxers",
     ]
+    external_deps = [ "hilog:libhilog" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "histreamer"
@@ -309,6 +312,7 @@ if (hst_is_lite_sys) {
       ":ffmpeg_adapter_common",
       ":ffmpeg_audio_encoders",
     ]
+    external_deps = [ "hilog:libhilog" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "histreamer"
@@ -324,6 +328,7 @@ if (hst_is_lite_sys) {
       ":ffmpeg_adapter_common",
       ":ffmpeg_video_encoders",
     ]
+    external_deps = [ "hilog:libhilog" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "histreamer"
@@ -339,6 +344,7 @@ if (hst_is_lite_sys) {
       ":ffmpeg_adapter_common",
       ":ffmpeg_muxers",
     ]
+    external_deps = [ "hilog:libhilog" ]
     relative_install_dir = "media/histreamer_plugins"
     subsystem_name = "multimedia"
     part_name = "histreamer"

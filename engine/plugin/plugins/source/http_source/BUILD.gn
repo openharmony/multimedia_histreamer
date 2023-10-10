@@ -71,6 +71,7 @@ if (hst_is_lite_sys) {
     subsystem_name = "multimedia"
     part_name = "histreamer"
     deps = [ ":httpsource" ]
+    external_deps = [ "hilog:libhilog" ]
     sanitize = {
       cfi = true
       cfi_cross_dso = true

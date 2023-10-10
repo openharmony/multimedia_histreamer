@@ -134,6 +134,7 @@ if (hst_is_lite_sys) {
     part_name = "histreamer"
     public_configs = [ ":histreamer_plugin_base_external_config" ]
     deps = [ ":plugin_base" ]
+    external_deps = [ "hilog:libhilog" ]
     sanitize = {
       cfi = true
       cfi_cross_dso = true
@@ -183,6 +184,7 @@ if (hst_is_lite_sys) {
       "//third_party/ffmpeg",
     ]
     deps = [ ":ffmpeg_convert" ]
+    external_deps = [ "hilog:libhilog" ]
     sanitize = {
       cfi = true
       cfi_cross_dso = true

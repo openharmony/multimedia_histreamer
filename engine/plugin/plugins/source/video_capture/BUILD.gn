@@ -40,6 +40,7 @@ if (hst_is_standard_sys) {
     external_deps = [
       "graphic_2d:surface",
       "graphic_2d:sync_fence",
+      "hilog:libhilog",
     ]
     sanitize = {
       cfi = true

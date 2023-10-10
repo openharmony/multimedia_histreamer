@@ -40,8 +40,10 @@ if (hst_is_standard_sys) {
     ]
     external_deps = [
       "graphic_2d:surface",
+      "hilog:libhilog",
       "player_framework:media_service_utils",
     ]
+
     sanitize = {
       cfi = true
       cfi_cross_dso = true

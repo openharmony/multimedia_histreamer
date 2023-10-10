@@ -43,6 +43,7 @@ if (hst_is_lite_sys) {
     subsystem_name = "multimedia"
     part_name = "histreamer"
     deps = [ ":wavdemuxer" ]
+    external_deps = [ "hilog:libhilog" ]
     relative_install_dir = "media/histreamer_plugins"
     sanitize = {
       cfi = true
