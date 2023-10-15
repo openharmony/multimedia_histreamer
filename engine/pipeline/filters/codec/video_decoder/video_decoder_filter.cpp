@@ -176,7 +176,7 @@ std::shared_ptr<Allocator> VideoDecoderFilter::GetAllocator()
     Plugin::Tag tag = Plugin::Tag::BUFFER_ALLOCATOR;
     auto ite = sinkParams_.Find(tag);
     if (ite != std::end(sinkParams_)) {
-        if (ite->second.SameTypeWith(typeid(std::shared_ptr<Plugin::SurfaceAllocator>))) {
+        if (Plugin::Any::IsSameTypeWith<std::shared_ptr<Plugin::SurfaceAllocator>>(ite->second)) {
             MEDIA_LOG_D("Get SurfaceAllocator from sink");
             return Plugin::AnyCast<std::shared_ptr<Plugin::SurfaceAllocator>>(ite->second);
         }

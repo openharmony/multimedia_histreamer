@@ -73,22 +73,22 @@ ErrorCode AudioSinkFilter::SetParameter(int32_t key, const Plugin::Any& value)
     }
     switch (tag) {
         case Tag::APP_PID:
-            FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(int32_t)), ErrorCode::ERROR_INVALID_PARAMETER_TYPE,
+            FALSE_RETURN_V_MSG_E(Any::IsSameTypeWith<int32_t>(value), ErrorCode::ERROR_INVALID_PARAMETER_TYPE,
                                  "APP_PID type should be int32_t");
             appPid_ = Plugin::AnyCast<int32_t>(value);
             break;
         case Tag::APP_UID:
-            FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(int32_t)), ErrorCode::ERROR_INVALID_PARAMETER_TYPE,
+            FALSE_RETURN_V_MSG_E(Any::IsSameTypeWith<int32_t>(value), ErrorCode::ERROR_INVALID_PARAMETER_TYPE,
                                  "APP_UID type should be int32_t");
             appUid_ = Plugin::AnyCast<int32_t>(value);
             break;
         case Tag::AUDIO_RENDER_INFO:
-            FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(AudioRenderInfo)), ErrorCode::ERROR_INVALID_PARAMETER_TYPE,
+            FALSE_RETURN_V_MSG_E(Any::IsSameTypeWith<AudioRenderInfo>(value), ErrorCode::ERROR_INVALID_PARAMETER_TYPE,
                                  "AUDIO_RENDER_INFO type should be AudioRenderInfo");
             audioRenderInfo_ = Plugin::AnyCast<AudioRenderInfo>(value);
             break;
         case Tag::AUDIO_INTERRUPT_MODE:
-            FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(int32_t)), ErrorCode::ERROR_INVALID_PARAMETER_TYPE,
+            FALSE_RETURN_V_MSG_E(Any::IsSameTypeWith<int32_t>(value), ErrorCode::ERROR_INVALID_PARAMETER_TYPE,
                                  "AUDIO_INTERRUPT_MODE type should be int32_t");
             audioInterruptMode_ = static_cast<AudioInterruptMode>(Plugin::AnyCast<int32_t>(value));
             if (plugin_) {

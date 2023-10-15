@@ -190,7 +190,7 @@ template <typename T>
 void VideoFfmpegEncoderPlugin::FindInParameterMapThenAssignLocked(Tag tag, T& assign)
 {
     auto iter = vencParams_.find(tag);
-    if (iter != vencParams_.end() && typeid(T) == iter->second.Type()) {
+    if (iter != vencParams_.end() && Plugin::Any::IsSameTypeWith<T>(iter->second)) {
         assign = Plugin::AnyCast<T>(iter->second);
     } else {
         MEDIA_LOG_W("parameter %d is not found or type mismatch", static_cast<int32_t>(tag));
@@ -398,7 +398,7 @@ Status VideoFfmpegEncoderPlugin::FillAvFrame(const std::shared_ptr<Buffer>& inpu
     auto bufferMeta = inputBuffer->GetBufferMeta();
     FALSE_RETURN_V_MSG_W(bufferMeta != nullptr && bufferMeta->GetType() == BufferMetaType::VIDEO,
         Status::ERROR_INVALID_PARAMETER, "invalid buffer meta");
-    std::shared_ptr<VideoBufferMeta> videoMeta = std::dynamic_pointer_cast<VideoBufferMeta>(bufferMeta);
+    std::shared_ptr<VideoBufferMeta> videoMeta = std::reinterpret_pointer_cast<VideoBufferMeta>(bufferMeta);
     FALSE_RETURN_V_MSG_W(pixelFormat_ == videoMeta->videoPixelFormat, Status::ERROR_INVALID_PARAMETER,
         "pixel format change");
     cachedFrame_->format = ConvertPixelFormatToFFmpeg(videoMeta->videoPixelFormat);

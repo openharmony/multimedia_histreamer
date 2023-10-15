@@ -291,7 +291,7 @@ Status AudioCapturePlugin::GetParameter(Tag tag, ValueType& value)
 
 bool AudioCapturePlugin::AssignSampleRateIfSupported(const ValueType& value)
 {
-    FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(uint32_t)), false, "Check sample rate value fail.");
+    FALSE_RETURN_V_MSG_E(Plugin::Any::IsSameTypeWith<uint32_t>(value), false, "Check sample rate value fail.");
     uint32_t sampleRate = AnyCast<uint32_t>(value);
     AudioStandard::AudioSamplingRate aRate = AudioStandard::SAMPLE_RATE_8000;
     FALSE_RETURN_V_MSG_E(AuCapturePlugin::SampleRateNum2Enum(sampleRate, aRate), false, "sample rate " PUBLIC_LOG_U32
@@ -307,7 +307,7 @@ bool AudioCapturePlugin::AssignSampleRateIfSupported(const ValueType& value)
 
 bool AudioCapturePlugin::AssignChannelNumIfSupported(const ValueType& value)
 {
-    FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(uint32_t)), false, "Check channel num value fail.");
+    FALSE_RETURN_V_MSG_E(Plugin::Any::IsSameTypeWith<uint32_t>(value), false, "Check channel num value fail.");
     uint32_t channelNum = AnyCast<uint32_t>(value);
     if (channelNum > 2) { // 2
         MEDIA_LOG_E("Unsupported channelNum: " PUBLIC_LOG_U32, channelNum);
@@ -327,7 +327,8 @@ bool AudioCapturePlugin::AssignChannelNumIfSupported(const ValueType& value)
 
 bool AudioCapturePlugin::AssignSampleFmtIfSupported(const ValueType& value)
 {
-    FALSE_RETURN_V_MSG_E(value.SameTypeWith(typeid(AudioSampleFormat)), false, "Check sample format value fail.");
+    FALSE_RETURN_V_MSG_E(Plugin::Any::IsSameTypeWith<AudioSampleFormat>(value), false,
+                         "Check sample format value fail.");
     AudioSampleFormat sampleFormat = AnyCast<AudioSampleFormat>(value);
     AudioStandard::AudioSampleFormat aFmt = AudioStandard::AudioSampleFormat::INVALID_WIDTH;
     FALSE_RETURN_V_MSG_E(AuCapturePlugin::PluginFmt2SampleFmt(sampleFormat, aFmt), false,
@@ -355,7 +356,7 @@ Status AudioCapturePlugin::SetParameter(Tag tag, const ValueType& value)
             break;
         }
         case Tag::MEDIA_BITRATE: {
-            if (value.SameTypeWith(typeid(int64_t))) {
+            if (Any::IsSameTypeWith<int64_t>(value)) {
                 bitRate_ = Plugin::AnyCast<int64_t>(value);
                 MEDIA_LOG_D("BitRate_: " PUBLIC_LOG_D64, bitRate_);
             }
@@ -367,19 +368,19 @@ Status AudioCapturePlugin::SetParameter(Tag tag, const ValueType& value)
             break;
         }
         case Tag::APP_TOKEN_ID: {
-            if (value.SameTypeWith(typeid(uint32_t))) {
+            if (Any::IsSameTypeWith<uint32_t>(value)) {
                 appTokenId_ = Plugin::AnyCast<uint32_t>(value);
             }
             break;
         }
         case Tag::APP_UID: {
-            if (value.SameTypeWith(typeid(int32_t))) {
+            if (Any::IsSameTypeWith<uint32_t>(value)) {
                 appUid_ = Plugin::AnyCast<int32_t>(value);
             }
             break;
         }
         case Tag::APP_PID: {
-            if (value.SameTypeWith(typeid(int32_t))) {
+            if (Any::IsSameTypeWith<uint32_t>(value)) {
                 appPid_ = Plugin::AnyCast<int32_t>(value);
             }
             break;

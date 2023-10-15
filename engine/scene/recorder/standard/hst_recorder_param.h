@@ -27,7 +27,7 @@ struct HstRecParam {
     template<typename T>
     inline const T* GetValPtr() const
     {
-        if (!val.SameTypeWith(typeid(T))) {
+        if (!Plugin::Any::IsSameTypeWith<T>(val)) {
             return nullptr;
         }
         return Plugin::AnyCast<T>(&val);

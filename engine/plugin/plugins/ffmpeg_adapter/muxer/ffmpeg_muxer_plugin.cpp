@@ -276,7 +276,7 @@ Status SetTagsOfGeneral(AVFormatContext* fmtCtx, const Meta& tags)
             MEDIA_LOG_I("tag " PUBLIC_LOG_U32 " will not written as general meta", pair.first);
             continue;
         }
-        if (!pair.second.SameTypeWith(typeid(std::string))) {
+        if (!Any::IsSameTypeWith<std::string>(pair.second)) {
             continue;
         }
         auto value = AnyCast<std::string>(pair.second);

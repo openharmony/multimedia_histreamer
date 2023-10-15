@@ -145,7 +145,7 @@ std::tuple<ErrorCode, Action> State::OnReady()
 std::tuple<ErrorCode, Action> State::OnError(const Plugin::Any& param)
 {
     ErrorCode errorCode = ErrorCode::ERROR_UNKNOWN;
-    if (param.SameTypeWith(typeid(ErrorCode))) {
+    if (Plugin::Any::IsSameTypeWith<ErrorCode>(param)) {
         errorCode = Plugin::AnyCast<ErrorCode>(param);
     }
     executor_.DoOnError(errorCode);

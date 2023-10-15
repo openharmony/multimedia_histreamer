@@ -131,7 +131,7 @@ sptr<Surface> HiRecorderImpl::GetSurface(int32_t sourceId)
     Plugin::Any any;
     FALSE_RETURN_V(videoCapture_ ->GetParameter(static_cast<int32_t>(Plugin::Tag::VIDEO_SURFACE), any)
                    != ErrorCode::SUCCESS, nullptr);
-    return any.SameTypeWith(typeid(sptr<Surface>)) ? Plugin::AnyCast<sptr<Surface>>(any) : nullptr;
+    return Plugin::Any::IsSameTypeWith<sptr<Surface>>(any) ? Plugin::AnyCast<sptr<Surface>>(any) : nullptr;
 #else
     return nullptr;
 #endif
@@ -322,7 +322,7 @@ ErrorCode HiRecorderImpl::DoSetVideoSource(const Plugin::Any& param) const
     FALSE_RETURN_V_MSG_E(videoCapture_ != nullptr, ErrorCode::ERROR_INVALID_OPERATION,
                          "videoCapture is NULL");
     using SrcInputPair = std::pair<int32_t, Plugin::SrcInputType>;
-    if (param.SameTypeWith(typeid(SrcInputPair))) {
+    if (Plugin::Any::IsSameTypeWith<SrcInputPair>(param)) {
         auto srcType = Plugin::AnyCast<SrcInputPair>(param).second;
         return videoCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::SRC_INPUT_TYPE), srcType);
     } else {
@@ -338,7 +338,7 @@ ErrorCode HiRecorderImpl::DoSetAudioSource(const Plugin::Any& param) const
     FALSE_RETURN_V_MSG_E(audioCapture_ != nullptr, ErrorCode::ERROR_INVALID_OPERATION,
                          "audioCapture is NULL");
     using SrcInputPair = std::pair<int32_t, Plugin::SrcInputType>;
-    if (param.SameTypeWith(typeid(SrcInputPair))) {
+    if (Plugin::Any::IsSameTypeWith<SrcInputPair>(param)) {
         auto srcType = Plugin::AnyCast<SrcInputPair>(param).second;
         return audioCapture_->SetParameter(static_cast<int32_t>(Plugin::Tag::SRC_INPUT_TYPE), srcType);
     } else {
@@ -348,7 +348,7 @@ ErrorCode HiRecorderImpl::DoSetAudioSource(const Plugin::Any& param) const
 
 ErrorCode HiRecorderImpl::DoConfigure(const Plugin::Any &param) const
 {
-    if (!param.SameTypeWith(typeid(HstRecParam))) {
+    if (!Plugin::Any::IsSameTypeWith<HstRecParam>(param)) {
         return ErrorCode::ERROR_INVALID_PARAMETER_TYPE;
     }
     ErrorCode ret  = ErrorCode::SUCCESS;
@@ -382,7 +382,7 @@ ErrorCode HiRecorderImpl::DoConfigure(const Plugin::Any &param) const
 ErrorCode HiRecorderImpl::DoSetOutputFormat(const Plugin::Any& param) const
 {
     ErrorCode ret {ErrorCode::SUCCESS};
-    if (param.SameTypeWith(typeid(OutputFormatType))) {
+    if (Plugin::Any::IsSameTypeWith<OutputFormatType>(param)) {
         auto outputFormatType = Plugin::AnyCast<OutputFormatType>(param);
         if (g_outputFormatToMimeMap.find(outputFormatType) != g_outputFormatToMimeMap.end()) {
             ret = muxer_->SetOutputFormat(g_outputFormatToMimeMap.at(outputFormatType));

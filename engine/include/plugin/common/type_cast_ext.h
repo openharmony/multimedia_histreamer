@@ -16,12 +16,15 @@
 #define HISTREAMER_PLUGIN_TYPE_INFO_EXT_H
 
 #include <cstring>
+#include <string_view>
 #include <memory>
 #include <typeinfo>
+#include<string>
 
 namespace OHOS {
 namespace Media {
 namespace Plugin {
+#ifndef HST_ANY_WITH_NO_RTTI
 /**
  * This function is used to compare two type_info. Besides the basic compare using operator == of type_info,
  * we also consider types with the same names are the same types.
@@ -40,6 +43,12 @@ inline bool IsSameType(const std::type_info& t1, const std::type_info& t2) noexc
     }
     return false;
 }
+#else
+inline bool IsSameType(std::string_view t1, std::string_view t2) noexcept
+{
+    return std::string(t1) == std::string(t2);
+}
+#endif
 
 /**
  * This function is used to reinterpret cast one shared_ptr into another shared_ptr.
