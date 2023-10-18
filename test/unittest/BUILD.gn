@@ -65,6 +65,7 @@ ohos_unittest("histreamer_unit_test") {
   external_deps = [
     "graphic_2d:surface",
     "hdf_core:libpub_utils",
+    "hilog:libhilog",
   ]
 
   public_configs = [ "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer_config" ]
