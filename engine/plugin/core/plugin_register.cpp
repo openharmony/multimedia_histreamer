@@ -107,9 +107,11 @@ void PluginRegister::RegisterImpl::UpdateRegisterTableAndRegisterNames(const Plu
     }
     regInfo->loader = std::move(pluginLoader);
     registerData->registerTable[def.pluginType][def.name] = regInfo;
+    auto extra = regInfo->info->extra[PLUGIN_INFO_EXTRA_CODEC_MODE];
     if ((def.pluginType == PluginType::AUDIO_DECODER || def.pluginType == PluginType::VIDEO_DECODER
         || def.pluginType == PluginType::AUDIO_ENCODER || def.pluginType == PluginType::VIDEO_ENCODER)
-        && AnyCast<CodecMode>(regInfo->info->extra[PLUGIN_INFO_EXTRA_CODEC_MODE]) == CodecMode::HARDWARE) {
+        && regInfo->info->extra.count(PLUGIN_INFO_EXTRA_CODEC_MODE) != 0
+        && (Plugin::Any::IsSameTypeWith<CodecMode>(extra) && AnyCast<CodecMode>(extra) == CodecMode::HARDWARE)) {
         registerData->registerNames[def.pluginType].insert(registerData->registerNames[def.pluginType].begin(),
             def.name);
     } else {

@@ -29,8 +29,13 @@ namespace Test {
 using namespace OHOS::Media::Plugin;
 bool CompareFunctionTable(const Any::FunctionTable* ft1, const Any::FunctionTable* ft2)
 {
+#ifndef HST_ANY_WITH_NO_RTTI
     return ft1->type == ft2->type && ft1->destroy == ft2->destroy && ft1->getPtr == ft2->getPtr &&
            ft1->move == ft2->move && ft1->copy == ft2->copy && ft1->getConstPtr == ft2->getConstPtr;
+#else
+    return ft1->type_name == ft2->type_name && ft1->destroy == ft2->destroy && ft1->getPtr == ft2->getPtr &&
+           ft1->move == ft2->move && ft1->copy == ft2->copy && ft1->getConstPtr == ft2->getConstPtr;
+#endif
 }
 
 template <typename T, template <class> class U>
@@ -38,7 +43,11 @@ bool UseStorage()
 {
     auto ft1 = Any::GetFunctionTable<T>();
     Any::FunctionTable ft2 {
+#ifndef HST_ANY_WITH_NO_RTTI
         .type = U<T>::Type,
+#else
+        .type_name = U<T>::TypeName,
+#endif
         .destroy = U<T>::Destroy,
         .copy = U<T>::Copy,
         .move = U<T>::Move,
@@ -190,14 +199,6 @@ HWTEST(AnyTest, testMakeAny, TestSize.Level1)
     std::vector<char> vector1({'C', '+', '+', '1', '7'});
     Any av = MakeAny<std::vector<char>>({'C', '+', '+', '1', '7'});
     ASSERT_TRUE(AnyCast<std::vector<char>>(av) == vector1);
-}
-
-HWTEST(AnyTest, testType, TestSize.Level1)
-{
-    Any test = "test";
-    ASSERT_TRUE(test.Type() == typeid(const char*));
-    ASSERT_NE(test.Type(), typeid(char*));
-    ASSERT_NE(test.Type(), typeid(char*));
 }
 
 HWTEST(AnyTest, testSwap, TestSize.Level1)

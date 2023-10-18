@@ -20,7 +20,7 @@ namespace OHOS {
 namespace Media {
 std::shared_ptr<DataStream> CreateDataStream(size_t size, size_t count, MemoryType type)
 {
-    return std::dynamic_pointer_cast<DataStream>(std::make_shared<DataStreamImpl>(size, count, type));
+    return std::reinterpret_pointer_cast<DataStream>(std::make_shared<DataStreamImpl>(size, count, type));
 }
 } // Media
 } // OHOS

@@ -295,13 +295,13 @@ template <typename T>
 bool FixedNumericalCapabilityCheck(CapabilityID key, const T& value2, const Plugin::ValueType& value1,
                                    uint8_t flags, std::function<int(T, T)> cmpFunc, Plugin::ValueType& outValue)
 {
-    if (value1.SameTypeWith(typeid(T))) {
+    if (Plugin::Any::IsSameTypeWith<T>(value1)) {
         return FFCapabilityCheck(value2, Plugin::AnyCast<T>(value1), cmpFunc, outValue);
     }
-    if (IsIntervalAllowed(flags) && value1.SameTypeWith(typeid(Plugin::IntervalCapability<T>))) {
+    if (IsIntervalAllowed(flags) && Plugin::Any::IsSameTypeWith<Plugin::IntervalCapability<T>>(value1)) {
         return FICapabilityCheck(value2, Plugin::AnyCast<Plugin::IntervalCapability<T>>(value1), cmpFunc, outValue);
     }
-    if (IsDiscreteAllowed(flags) && value1.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
+    if (IsDiscreteAllowed(flags) && Plugin::Any::IsSameTypeWith<Plugin::DiscreteCapability<T>>(value1)) {
         return FDCapabilityCheck(value2, Plugin::AnyCast<Plugin::DiscreteCapability<T>>(value1), cmpFunc, outValue);
     }
     LogOutIncorrectType(key, flags);
@@ -312,13 +312,13 @@ template <typename T>
 bool IntervalNumericalCapabilityCheck(CapabilityID key, const Plugin::IntervalCapability<T>& value2,
     const Plugin::ValueType& value1, uint8_t flags, std::function<int(T, T)> cmpFunc, Plugin::ValueType& outValue)
 {
-    if (IsFixedAllowed(flags) && value1.SameTypeWith(typeid(T))) {
+    if (IsFixedAllowed(flags) && Plugin::Any::IsSameTypeWith<T>(value1)) {
         return FICapabilityCheck(Plugin::AnyCast<T>(value1), value2, cmpFunc, outValue);
     }
-    if (value1.SameTypeWith(typeid(Plugin::IntervalCapability<T>))) {
+    if (Plugin::Any::IsSameTypeWith<Plugin::IntervalCapability<T>>(value1)) {
         return IICapabilityCheck(Plugin::AnyCast<Plugin::IntervalCapability<T>>(value1), value2, cmpFunc, outValue);
     }
-    if (IsDiscreteAllowed(flags) && value1.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
+    if (IsDiscreteAllowed(flags) && Plugin::Any::IsSameTypeWith<Plugin::DiscreteCapability<T>>(value1)) {
         return IDCapabilityCheck(value2, Plugin::AnyCast<Plugin::DiscreteCapability<T>>(value1), cmpFunc, outValue);
     }
     LogOutIncorrectType(key, flags);
@@ -329,13 +329,13 @@ template <typename T>
 bool DiscreteNumericalCapabilityCheck(CapabilityID key, const Plugin::DiscreteCapability<T>& value2,
     const Plugin::ValueType& value1, uint8_t flags, std::function<int(T, T)> cmpFunc, Plugin::ValueType& outValue)
 {
-    if (IsFixedAllowed(flags) && value1.SameTypeWith(typeid(T))) {
+    if (IsFixedAllowed(flags) && Plugin::Any::IsSameTypeWith<T>(value1)) {
         return FDCapabilityCheck(Plugin::AnyCast<T>(value1), value2, cmpFunc, outValue);
     }
-    if (IsIntervalAllowed(flags) && value1.SameTypeWith(typeid(Plugin::IntervalCapability<T>))) {
+    if (IsIntervalAllowed(flags) && Plugin::Any::IsSameTypeWith<Plugin::IntervalCapability<T>>(value1)) {
         return IDCapabilityCheck(Plugin::AnyCast<Plugin::IntervalCapability<T>>(value1), value2, cmpFunc, outValue);
     }
-    if (value1.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
+    if (Plugin::Any::IsSameTypeWith<Plugin::DiscreteCapability<T>>(value1)) {
         return DDCapabilityCheck(Plugin::AnyCast<Plugin::DiscreteCapability<T>>(value1), value2, cmpFunc, outValue);
     }
     LogOutIncorrectType(key, flags);
@@ -346,15 +346,15 @@ template<typename T>
 bool CapabilityValueCheck(CapabilityID key, std::pair<const Plugin::ValueType&, const Plugin::ValueType&> inVals,
                           uint8_t flags, std::function<int(T,T)> cmpFunc, Plugin::ValueType& outValue)
 {
-    if (IsFixedAllowed(flags) && inVals.first.SameTypeWith(typeid(Plugin::FixedCapability<T>))) {
+    if (IsFixedAllowed(flags) && Plugin::Any::IsSameTypeWith<Plugin::FixedCapability<T>>(inVals.first)) {
         return FixedNumericalCapabilityCheck<T>(key,
             Plugin::AnyCast<Plugin::FixedCapability<T>>(inVals.first), inVals.second, flags, cmpFunc,outValue);
     }
-    if (IsIntervalAllowed(flags) && inVals.first.SameTypeWith(typeid(Plugin::IntervalCapability<T>))) {
+    if (IsIntervalAllowed(flags) && Plugin::Any::IsSameTypeWith<Plugin::IntervalCapability<T>>(inVals.first)) {
         return IntervalNumericalCapabilityCheck(key,
             Plugin::AnyCast<Plugin::IntervalCapability<T>>(inVals.first), inVals.second, flags, cmpFunc, outValue);
     }
-    if (IsDiscreteAllowed(flags) && inVals.first.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
+    if (IsDiscreteAllowed(flags) && Plugin::Any::IsSameTypeWith<Plugin::DiscreteCapability<T>>(inVals.first)) {
         return DiscreteNumericalCapabilityCheck(key,
             Plugin::AnyCast<Plugin::DiscreteCapability<T>>(inVals.first), inVals.second, flags, cmpFunc, outValue);
     }
@@ -426,14 +426,14 @@ bool ApplyCapabilitySet(const Capability& originCap, const CapabilitySet& capabi
 template <typename T>
 bool ExtractFixedCap(const Plugin::ValueType& value, Plugin::ValueType& fixedValue)
 {
-    if (value.SameTypeWith(typeid(Plugin::FixedCapability<T>))) {
+    if (Plugin::Any::IsSameTypeWith<Plugin::FixedCapability<T>>(value)) {
         fixedValue = Plugin::AnyCast<Plugin::FixedCapability<T>>(value);
         return true;
-    } else if (value.SameTypeWith(typeid(Plugin::IntervalCapability<T>))) {
+    } else if (Plugin::Any::IsSameTypeWith<Plugin::IntervalCapability<T>>(value)) {
         auto tmp = Plugin::AnyCast<Plugin::IntervalCapability<T>>(value);
         fixedValue = tmp.first;
         return true;
-    } else if (value.SameTypeWith(typeid(Plugin::DiscreteCapability<T>))) {
+    } else if (Plugin::Any::IsSameTypeWith<Plugin::DiscreteCapability<T>>(value)) {
         auto tmp = Plugin::AnyCast<Plugin::DiscreteCapability<T>>(value);
         if (!tmp.empty()) {
             fixedValue = tmp[0];
