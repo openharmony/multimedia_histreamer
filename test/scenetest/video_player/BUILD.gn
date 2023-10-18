@@ -38,7 +38,10 @@ ohos_unittest("histreamer_video_player_test") {
     "$histreamer_root_dir/engine/scene/player:histreamer_player",
     "//third_party/googletest:gtest_rtti",
   ]
-  external_deps = [ "graphic_2d:surface" ]
+  external_deps = [
+    "graphic_2d:surface",
+    "hilog:libhilog",
+  ]
   public_configs = []
   resource_config_file = "../../resources/ohos_test.xml"
   sources = [
