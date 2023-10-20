@@ -1,0 +1,68 @@
+# Copyright (C) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/multimedia/av_codec/config.gni")
+
+media_foundation_root_dir = av_codec_root_dir
+
+config("media_foundation_avbuffer_public_config") {
+  include_dirs = [
+    "./include",
+    "$media_foundation_root_dir/interfaces/inner_api/native",
+    "$media_foundation_root_dir/interfaces/kits/c",
+    "$media_foundation_root_dir/services/dfx/include",
+    "$media_foundation_root_dir/../../graphic/graphic_2d/frameworks/surface/include",
+    "$media_foundation_root_dir/../../graphic/graphic_2d/interfaces/inner_api/surface",
+    "$media_foundation_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
+    "$media_foundation_root_dir/../../graphic/graphic_2d/interfaces/inner_api/common",
+    "$media_foundation_root_dir/../../../commonlibrary/memory_utils/libdmabufheap/include",
+  ]
+}
+
+ohos_static_library("media_foundation_avbuffer") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":media_foundation_avbuffer_public_config" ]
+
+  sources = [
+    "./av_hardware_memory.cpp",
+    "./av_shared_memory_ext.cpp",
+    "./av_surface_memory.cpp",
+    "./av_virtual_memory.cpp",
+    "./avbuffer_utils.cpp",
+    "./avbuffer.cpp",
+    "./avmemory.cpp",
+    "./format.cpp",
+  ]
+
+  public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:surface",
+    "graphic_2d:sync_fence",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "memory_utils:libdmabufheap",
+  ]
+
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
+}

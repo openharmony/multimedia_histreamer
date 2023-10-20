@@ -1,0 +1,137 @@
+# Copyright (C) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/multimedia/av_codec/config.gni")
+import("//foundation/multimedia/histreamer/config.gni")
+
+media_foundation_root_dir = av_codec_root_dir
+
+#################################################################################################################capi
+config("media_foundation_capi_unit_test_config") {
+  include_dirs = [
+    "./",
+    "./include",
+    "../avbuffer",
+    "../avbuffer/avbuffer/capi",
+    "../avbuffer/format",
+    "../avbuffer/format/capi",
+    "$media_foundation_root_dir/../../graphic/graphic_2d/interfaces/inner_api/surface",
+    "$media_foundation_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
+    "$media_foundation_root_dir/../../graphic/graphic_2d/frameworks/surface/include",
+    "$media_foundation_root_dir/../../graphic/graphic_2d/interfaces/inner_api",
+    "$media_foundation_root_dir/../../window/window_manager/interfaces/innerkits",
+  ]
+}
+
+ohos_static_library("media_foundation_capi_unit_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  testonly = true
+  public_configs = [ ":media_foundation_capi_unit_test_config" ]
+
+  sources = [
+    "$media_foundation_root_dir/test/unittest/avbuffer/capi/avbuffer_capi_mock.cpp",
+    "$media_foundation_root_dir/test/unittest/avbuffer/capi/avbuffer_capi_mock_factory.cpp",
+    "$media_foundation_root_dir/test/unittest/format/capi/avformat_capi_mock.cpp",
+    "$media_foundation_root_dir/test/unittest/format/capi/avformat_capi_mock_factory.cpp",
+  ]
+
+  public_deps = [
+    "$mhistreamer_root_dir/src/buffer/avbuffer/BUILD.gn",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/googletest:gtest",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:libgraphic_utils",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:surface",
+    "graphic_2d:sync_fence",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "window_manager:libwm",
+  ]
+
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
+}
+
+#################################################################################################################inner
+config("media_foundation_inner_unit_test_config") {
+  include_dirs = [
+    "./",
+    "./include",
+    "../avbuffer",
+    "../avbuffer/inner",
+    "../format",
+    "../format/inner",
+    "$media_foundation_root_dir/frameworks/native/capi/common",
+    "$media_foundation_root_dir/interfaces/inner_api/native",
+    "$media_foundation_root_dir/interfaces/kits/c",
+    "$media_foundation_root_dir/services/dfx/include",
+    "$media_foundation_root_dir/services/utils/include",
+    "$media_foundation_root_dir/../../graphic/graphic_2d/interfaces/inner_api/surface",
+    "$media_foundation_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
+    "$media_foundation_root_dir/../../graphic/graphic_2d/frameworks/surface/include",
+    "$media_foundation_root_dir/../../graphic/graphic_2d/interfaces/inner_api",
+    "$media_foundation_root_dir/../../window/window_manager/interfaces/innerkits",
+  ]
+}
+
+ohos_static_library("media_foundation_inner_unit_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  testonly = true
+  public_configs = [ ":media_foundation_inner_unit_test_config" ]
+
+  sources = [
+    "../avbuffer/inner/avbuffer_inner_mock.cpp",
+    "../avbuffer/inner/avbuffer_inner_mock_factory.cpp",
+    "../format/inner/avformat_inner_mock.cpp",
+    "../format/inner/avformat_inner_mock_factory.cpp",
+  ]
+
+  public_deps = [
+    "$histreamer_root_dir/src/foundation/avbuffer:media_foundation_avbuffer",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/googletest:gtest",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:libgraphic_utils",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:surface",
+    "graphic_2d:sync_fence",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "window_manager:libwm",
+  ]
+
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
+}
