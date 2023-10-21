@@ -43,7 +43,7 @@ AVSharedAllocator::AVSharedAllocator(){};
 
 void *AVSharedAllocator::Alloc(int32_t capacity)
 {
-    int fd = AshmemCreate(0, static_cast<size_t>(capacity)); // release by close(fd_)
+    int32_t fd = AshmemCreate(0, static_cast<size_t>(capacity)); // release by close(fd)
     CHECK_AND_RETURN_RET_LOG(fd > 0, nullptr, "fd is invalid, fd = %{public}d", fd);
 
     return reinterpret_cast<void *>(fd);
@@ -51,7 +51,7 @@ void *AVSharedAllocator::Alloc(int32_t capacity)
 
 bool AVSharedAllocator::Free(void *ptr)
 {
-    int fd = reinterpret_cast<int>(ptr);
+    int32_t fd = reinterpret_cast<intptr_t>(ptr);
     if (fd > 0) {
         (void)::close(fd);
         return true;
@@ -69,7 +69,7 @@ MemoryFlag AVSharedAllocator::GetMemFlag()
     return memFlag_;
 }
 
-AVSharedMemoryExt::AVSharedMemoryExt() : fd_(-1), isFirstFlag_(true), memFlag_(MemoryFlag::MEMORY_READ_WRITE) {}
+AVSharedMemoryExt::AVSharedMemoryExt() : fd_(-1), isFirstFlag_(true), memFlag_(MemoryFlag::MEMORY_READ_ONLY) {}
 
 AVSharedMemoryExt::~AVSharedMemoryExt()
 {
@@ -88,7 +88,7 @@ int32_t AVSharedMemoryExt::Init()
     memFlag_ = std::static_pointer_cast<AVSharedAllocator>(allocator_)->GetMemFlag();
 
     int32_t allocSize = align_ ? (capacity_ + align_ - 1) : capacity_;
-    fd_ = reinterpret_cast<int>(allocator_->Alloc(allocSize));
+    fd_ = reinterpret_cast<intptr_t>(allocator_->Alloc(allocSize));
     CHECK_AND_RETURN_RET_LOG(fd_ > 0, AVCS_ERR_NO_MEMORY, "Alloc AVSharedMemoryExt failed");
 
     uintptr_t addrBase = reinterpret_cast<uintptr_t>(base_);
@@ -139,6 +139,11 @@ int32_t AVSharedMemoryExt::GetFileDescriptor()
     return fd_;
 }
 
+MemoryFlag AVSharedMemoryExt::GetMemFlag()
+{
+    return memFlag_;
+}
+
 void AVSharedMemoryExt::Close() noexcept
 {
     if (base_ != nullptr) {
@@ -172,7 +177,7 @@ int32_t AVSharedMemoryExt::MapMemoryAddr()
     void *addr = ::mmap(nullptr, static_cast<size_t>(capacity_), static_cast<int>(prot), MAP_SHARED, fd_, 0);
     CHECK_AND_RETURN_RET_LOG(addr != MAP_FAILED, AVCS_ERR_INVALID_OPERATION, "mmap failed, please check params");
 
-    base_ = reinterpret_cast<uint8_t *>(addr);
+    base_ = static_cast<uint8_t *>(addr);
     CANCEL_SCOPE_EXIT_GUARD(0);
     return AVCS_ERR_OK;
 }

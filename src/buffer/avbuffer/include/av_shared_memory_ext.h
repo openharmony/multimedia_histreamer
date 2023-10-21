@@ -28,6 +28,7 @@ public:
     uint8_t *GetAddr() override;
     MemoryType GetMemoryType() override;
     int32_t GetFileDescriptor() override;
+    MemoryFlag GetMemFlag();
 
 private:
     int32_t Init() override;
@@ -35,7 +36,7 @@ private:
     bool WriteToMessageParcel(MessageParcel &parcel) override;
     void Close() noexcept;
     int32_t MapMemoryAddr();
-    int fd_;
+    int32_t fd_;
     bool isFirstFlag_;
     MemoryFlag memFlag_;
 };

@@ -14,7 +14,6 @@
  */
 
 #include "av_hardware_memory.h"
-#include <dirent.h>
 #include <unistd.h>
 #include "ashmem.h"
 #include "av_hardware_allocator.h"
@@ -23,85 +22,31 @@
 #include "message_parcel.h"
 #include "scope_guard.h"
 #include "sys/mman.h"
-// #include <unordered_map>
+#include <unordered_map>
 
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, LOG_DOMAIN, "AVHardWareMemory"};
 constexpr uint8_t LOGD_FREQUENCY = 5;
-// const std::unordered_map<OHOS::MediaAVCodec::MemoryFlag, DmabufHeapBufferSyncType> MEMORY_FLAG_MAP = {
-//     {OHOS::MediaAVCodec::MemoryFlag::FLAGS_WRITE_ONLY, DmabufHeapBufferSyncType::DMA_BUF_HEAP_BUF_SYNC_WRITE},
-//     {OHOS::MediaAVCodec::MemoryFlag::FLAGS_READ_ONLY, DmabufHeapBufferSyncType::DMA_BUF_HEAP_BUF_SYNC_READ},
-//     {OHOS::MediaAVCodec::MemoryFlag::FLAGS_READ_WRITE, DmabufHeapBufferSyncType::DMA_BUF_HEAP_BUF_SYNC_RW}};
+const std::unordered_map<OHOS::MediaAVCodec::MemoryFlag, DmabufHeapBufferSyncType> FLAG_ADAPTER_MAP = {
+    {OHOS::MediaAVCodec::MemoryFlag::MEMORY_WRITE_ONLY, DmabufHeapBufferSyncType::DMA_BUF_HEAP_BUF_SYNC_WRITE},
+    {OHOS::MediaAVCodec::MemoryFlag::MEMORY_READ_ONLY, DmabufHeapBufferSyncType::DMA_BUF_HEAP_BUF_SYNC_READ},
+    {OHOS::MediaAVCodec::MemoryFlag::MEMORY_READ_WRITE, DmabufHeapBufferSyncType::DMA_BUF_HEAP_BUF_SYNC_RW}};
 } // namespace
 
 namespace OHOS {
 namespace MediaAVCodec {
-HardwareHeapFactory::HardwareHeapFactory()
+std::shared_ptr<AVAllocator> AVAllocatorFactory::CreateHardwareAllocator(int32_t fd, int32_t capacity,
+                                                                         MemoryFlag memFlag)
 {
-    std::string rootDir = "/dev/dma_heap/";
-    DIR *dir = opendir(rootDir.c_str());
-    if (dir == nullptr) {
-        return;
-    }
-    struct dirent *ptr;
-    std::string heapName = "";
-    while ((ptr = readdir(dir)) != nullptr) {
-        std::string fileName = ptr->d_name;
-        std::string::size_type idx = fileName.find("system");
-        if (idx != std::string::npos) {
-            heapName = fileName;
-            break;
-        }
-    }
-    closedir(dir);
-    dmaHeapFd_ = DmabufHeapOpen(heapName.c_str());
-}
-
-HardwareHeapFactory::~HardwareHeapFactory()
-{
-    DmabufHeapClose(dmaHeapFd_);
-}
-
-HardwareHeapFactory &HardwareHeapFactory::GetInstance()
-{
-    static HardwareHeapFactory hwHeapInstance_;
-    return hwHeapInstance_;
-}
-
-int32_t HardwareHeapFactory::GetHardwareHeapFd()
-{
-    return dmaHeapFd_;
-}
-
-std::shared_ptr<AVAllocator> AVAllocatorFactory::CreateHardwareAllocator(int32_t fd, int32_t capacity, uint32_t memFlag)
-{
-    DmabufHeapBufferSyncType tempFlag = static_cast<DmabufHeapBufferSyncType>(memFlag);
-    bool isFlagValid = (tempFlag == DMA_BUF_HEAP_BUF_SYNC_RW) || (tempFlag == DMA_BUF_HEAP_BUF_SYNC_READ) ||
-                       (tempFlag == DMA_BUF_HEAP_BUF_SYNC_WRITE);
-    CHECK_AND_RETURN_RET_LOG(isFlagValid, nullptr, "memFlag is invalid, memFlag = %{public}d", memFlag);
     auto allocator = std::shared_ptr<AVHardwareAllocator>(new AVHardwareAllocator());
     allocator->fd_ = fd;
     allocator->capacity_ = capacity;
-    allocator->memFlag_ = static_cast<DmabufHeapBufferSyncType>(memFlag);
+    allocator->memFlag_ = memFlag;
     return allocator;
 }
 
-AVHardwareAllocator::AVHardwareAllocator() : fd_(-1), capacity_(-1), allocBase_(nullptr){};
-// void *AVHardwareAllocator::Alloc(int32_t capacity)
-// {
-//     (void)capacity;
-//     DmabufHeapBuffer dmaBuffer = {.fd = fd_, .size = capacity_, .heapFlags = 0};
-//     isRemote_ = true;
-//     if (fd_ <= 0) {
-//         isRemote_ = false;
-//         dmaBuffer = {.size = capacity_, .heapFlags = 0};
-//         int32_t dmaHeapFd = HardwareHeapFactory::GetInstance().GetHardwareHeapFd();
-//         DmabufHeapBufferAlloc(dmaHeapFd, &dmaBuffer);
-//         CHECK_AND_RETURN_RET_LOG(dmaHeapFd >= 0, nullptr, "dma heap fd error, dmaHeapFd_ = %{public}d", dmaHeapFd);
-//     }
-//     fd_ = dmaBuffer.fd;
-//     return reinterpret_cast<void *>(fd_);
-// }
+AVHardwareAllocator::AVHardwareAllocator()
+    : fd_(-1), capacity_(-1), allocBase_(nullptr), memFlag_(MemoryFlag::MEMORY_READ_ONLY){};
 
 void *AVHardwareAllocator::Alloc(int32_t capacity)
 {
@@ -129,7 +74,7 @@ MemoryType AVHardwareAllocator::GetMemoryType()
     return MemoryType::HARDWARE_MEMORY;
 }
 
-DmabufHeapBufferSyncType AVHardwareAllocator::GetMemFlag()
+MemoryFlag AVHardwareAllocator::GetMemFlag()
 {
     return memFlag_;
 }
@@ -156,9 +101,9 @@ int32_t AVHardwareAllocator::MapMemoryAddr()
                              capacity_);
     unsigned int prot = PROT_READ | PROT_WRITE;
     CHECK_AND_RETURN_RET_LOG(fd_ > 0, AVCS_ERR_INVALID_OPERATION, "fd is invalid, fd = %{public}d", fd_);
-    if (memFlag_ == DMA_BUF_HEAP_BUF_SYNC_READ) {
+    if (memFlag_ == MemoryFlag::MEMORY_READ_ONLY) {
         prot &= ~PROT_WRITE;
-    } else if (memFlag_ == DMA_BUF_HEAP_BUF_SYNC_WRITE) {
+    } else if (memFlag_ == MemoryFlag::MEMORY_WRITE_ONLY) {
         prot &= ~PROT_READ;
     }
     void *addr = ::mmap(nullptr, static_cast<size_t>(capacity_), static_cast<int>(prot), MAP_SHARED, fd_, 0);
@@ -168,7 +113,7 @@ int32_t AVHardwareAllocator::MapMemoryAddr()
     return AVCS_ERR_OK;
 }
 
-AVHardwareMemory::AVHardwareMemory() : isStartSync_(false) {}
+AVHardwareMemory::AVHardwareMemory() : isStartSync_(false), memFlag_(MemoryFlag::MEMORY_READ_ONLY) {}
 
 AVHardwareMemory::~AVHardwareMemory()
 {
@@ -198,7 +143,7 @@ int32_t AVHardwareMemory::Init()
 int32_t AVHardwareMemory::Init(MessageParcel &parcel)
 {
     fd_ = dup(parcel.ReadFileDescriptor());
-    memFlag_ = static_cast<DmabufHeapBufferSyncType>(parcel.ReadUint32());
+    memFlag_ = static_cast<MemoryFlag>(parcel.ReadUint32());
 
     allocator_ = AVAllocatorFactory::CreateHardwareAllocator(fd_, capacity_, memFlag_);
     CHECK_AND_RETURN_RET_LOG(allocator_ != nullptr, AVCS_ERR_NO_MEMORY, "allocator_ is nullptr");
@@ -237,7 +182,7 @@ int32_t AVHardwareMemory::SyncStart()
     std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_RET_LOG(!isStartSync_, -1, "Not ready to start syncing yet!");
     isStartSync_ = true;
-    return DmabufHeapBufferSyncStart(fd_, memFlag_);
+    return DmabufHeapBufferSyncStart(fd_, FLAG_ADAPTER_MAP.at(memFlag_));
 }
 
 int32_t AVHardwareMemory::SyncEnd()
@@ -245,7 +190,12 @@ int32_t AVHardwareMemory::SyncEnd()
     std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_RET_LOG(isStartSync_, -1, "Haven't started syncing yet!");
     isStartSync_ = false;
-    return DmabufHeapBufferSyncEnd(fd_, memFlag_);
+    return DmabufHeapBufferSyncEnd(fd_, FLAG_ADAPTER_MAP.at(memFlag_));
+}
+
+MemoryFlag AVHardwareMemory::GetMemFlag()
+{
+    return memFlag_;
 }
 } // namespace MediaAVCodec
 } // namespace OHOS

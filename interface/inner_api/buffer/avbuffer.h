@@ -18,17 +18,58 @@
 
 #include <memory>
 #include <string>
-#include "av_common.h"
 #include "avallocator.h"
+#include "format.h"
 
 namespace OHOS {
 namespace MediaAVCodec {
+using AVBufferConfig = struct AVBufferConfig {
+    int32_t capacity = 0;
+    int32_t align = 0;
+    MemoryType memoryType = MemoryType::UNKNOWN_MEMORY;
+    MemoryFlag memoryFlag = MemoryFlag::MEMORY_READ_ONLY;
+    BufferRequestConfig surfaceBufferConfig;
+    int32_t dmaFd = -1; // to create dma buffer
+
+    bool operator<=(const struct AVBufferConfig &config) const
+    {
+        if (memoryType != config.memoryType) {
+            return false;
+        }
+        int32_t allocSize = align ? (capacity + align - 1) : capacity;
+        int32_t allocSizeConfig = config.align ? (config.capacity + config.align - 1) : config.capacity;
+        switch (memoryType) {
+            case MemoryType::VIRTUAL_MEMORY:
+                return allocSize <= allocSizeConfig;
+            case MemoryType::SHARED_MEMORY:
+                return allocSize <= allocSizeConfig &&
+                       (memoryFlag == config.memoryFlag || config.memoryFlag == MemoryFlag::MEMORY_READ_WRITE);
+            case MemoryType::HARDWARE_MEMORY:
+                return allocSize <= allocSizeConfig &&
+                       (memoryFlag == config.memoryFlag || config.memoryFlag == MemoryFlag::MEMORY_READ_WRITE);
+            case MemoryType::SURFACE_MEMORY:
+                return surfaceBufferConfig == config.surfaceBufferConfig;
+            default:
+                return false;
+        }
+    }
+};
+
 /**
  * @brief Class that encapsulates some types of media buffer.
  */
 class __attribute__((visibility("default"))) AVBuffer {
 public:
     virtual ~AVBuffer() = default;
+    /**
+     * @brief Create the AVBuffer by configuration.
+     * @param config The configuration of AVBuffer, refer to {@link AVBufferConfig}
+     * @return The shared pointer of AVBuffer.
+     * @since 4.1
+     * @version 1.0
+     */
+    static std::shared_ptr<AVBuffer> CreateAVBuffer(const AVBufferConfig &config);
+
     /**
      * @brief Create the AVBuffer by allocator.
      * @param allocator The instance of AVAllocator, refer to {@link AVAllocator}
@@ -71,6 +112,14 @@ public:
     static std::shared_ptr<AVBuffer> CreateAVBuffer();
 
     /**
+     * @brief Get the AVBufferConfig.
+     * @return The config struct of AVBuffer.
+     * @since 4.1
+     * @version 1.0
+     */
+    AVBufferConfig GetConfig();
+
+    /**
      * @brief Get the unique identifier of buffer.
      * @return The unique identifier of buffer.
      * @since 4.1
@@ -90,7 +139,7 @@ public:
     int64_t pts_;
     int64_t dts_;
     int64_t duration_;
-    AVCodecBufferFlag flag_;
+    uint32_t flag_;
     std::shared_ptr<Format> meta_;
     std::shared_ptr<AVMemory> memory_;
 
@@ -101,6 +150,7 @@ private:
     int32_t Init(MessageParcel &parcel, bool isSurfaceBuffer = false);
 
     uint64_t uid_;
+    AVBufferConfig config_;
 };
 
 constexpr int32_t INVALID_POSITION = -1;

@@ -30,11 +30,9 @@ public:
     // uint8_t *GetAddr() override;
     MemoryType GetMemoryType() override;
     int32_t GetFileDescriptor() override;
-    // int32_t Write(const uint8_t *in, int32_t writeSize, int32_t position) override;
-    // int32_t Read(uint8_t *out, int32_t redSize, int32_t position) override;
     int32_t SyncStart() override;
     int32_t SyncEnd() override;
-    std::string GetName();
+    MemoryFlag GetMemFlag();
 
 private:
     int32_t Init() override;
@@ -45,7 +43,7 @@ private:
     std::mutex mutex_;
     int32_t fd_;
     bool isStartSync_;
-    DmabufHeapBufferSyncType memFlag_;
+    MemoryFlag memFlag_;
 };
 } // namespace MediaAVCodec
 } // namespace OHOS

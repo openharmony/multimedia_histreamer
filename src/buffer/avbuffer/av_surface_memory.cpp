@@ -41,18 +41,6 @@ std::shared_ptr<AVAllocator> AVAllocatorFactory::CreateSurfaceAllocator(const Bu
 
 AVSurfaceAllocator::AVSurfaceAllocator() {}
 
-// int32_t AVSurfaceAllocator::Init(const std::string &name, MessageParcel &parcel)
-// {
-//     name_ = name;
-//     surfaceBuffer_ = SurfaceBuffer::Create();
-//     CHECK_AND_RETURN_RET_LOG(surfaceBuffer_ != nullptr, AVCS_ERR_NO_MEMORY, "no surface memory!");
-
-//     GSError ret = surfaceBuffer_->ReadFromMessageParcel(parcel);
-//     CHECK_AND_RETURN_RET_LOG(ret == GSERROR_OK, AVCS_ERR_INVALID_OPERATION,
-//                              "Read surface message parcel failed!, %{public}s", GSErrorStr(ret).c_str());
-//     return AVCS_ERR_OK;
-// }
-
 void *AVSurfaceAllocator::Alloc(int32_t capacity)
 {
     (void)capacity;

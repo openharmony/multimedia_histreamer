@@ -21,17 +21,6 @@
 
 namespace OHOS {
 namespace MediaAVCodec {
-class HardwareHeapFactory {
-public:
-    static HardwareHeapFactory &GetInstance();
-    int32_t GetHardwareHeapFd();
-
-private:
-    HardwareHeapFactory();
-    ~HardwareHeapFactory();
-    int32_t dmaHeapFd_ = -1;
-};
-
 class AVHardwareAllocator : public AVAllocator {
 public:
     friend class AVAllocatorFactory;
@@ -41,7 +30,7 @@ public:
     bool Free(void *ptr) override;
     MemoryType GetMemoryType() override;
 
-    DmabufHeapBufferSyncType GetMemFlag();
+    MemoryFlag GetMemFlag();
     int32_t GetFileDescriptor();
 
 private:
@@ -51,7 +40,7 @@ private:
     int32_t fd_;
     int32_t capacity_;
     uint8_t *allocBase_;
-    DmabufHeapBufferSyncType memFlag_;
+    MemoryFlag memFlag_;
 };
 } // namespace MediaAVCodec
 } // namespace OHOS

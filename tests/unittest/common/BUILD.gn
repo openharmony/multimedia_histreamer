@@ -12,10 +12,9 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/multimedia/av_codec/config.gni")
 import("//foundation/multimedia/histreamer/config.gni")
 
-media_foundation_root_dir = av_codec_root_dir
+av_codec_root_dir = "//foundation/multimedia/av_codec"
 
 #################################################################################################################capi
 config("media_foundation_capi_unit_test_config") {
@@ -23,14 +22,20 @@ config("media_foundation_capi_unit_test_config") {
     "./",
     "./include",
     "../avbuffer",
-    "../avbuffer/avbuffer/capi",
-    "../avbuffer/format",
-    "../avbuffer/format/capi",
-    "$media_foundation_root_dir/../../graphic/graphic_2d/interfaces/inner_api/surface",
-    "$media_foundation_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
-    "$media_foundation_root_dir/../../graphic/graphic_2d/frameworks/surface/include",
-    "$media_foundation_root_dir/../../graphic/graphic_2d/interfaces/inner_api",
-    "$media_foundation_root_dir/../../window/window_manager/interfaces/innerkits",
+    "../avbuffer/capi",
+    "../format",
+    "../format/capi",
+    "$av_codec_root_dir/interfaces/inner_api/native",
+    "$av_codec_root_dir/interfaces/kits/c",
+    "$histreamer_root_dir/interface/kits/c",
+    "$histreamer_root_dir/interface/inner_api/buffer",
+    "$histreamer_root_dir/src/buffer/avbuffer/capi",
+    "$histreamer_root_dir/src/buffer/avbuffer/include",
+    "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/surface",
+    "$histreamer_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
+    "$histreamer_root_dir/../../graphic/graphic_2d/frameworks/surface/include",
+    "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api",
+    "$histreamer_root_dir/../../window/window_manager/interface/innerkits",
   ]
 }
 
@@ -44,14 +49,14 @@ ohos_static_library("media_foundation_capi_unit_test") {
   public_configs = [ ":media_foundation_capi_unit_test_config" ]
 
   sources = [
-    "$media_foundation_root_dir/test/unittest/avbuffer/capi/avbuffer_capi_mock.cpp",
-    "$media_foundation_root_dir/test/unittest/avbuffer/capi/avbuffer_capi_mock_factory.cpp",
-    "$media_foundation_root_dir/test/unittest/format/capi/avformat_capi_mock.cpp",
-    "$media_foundation_root_dir/test/unittest/format/capi/avformat_capi_mock_factory.cpp",
+    "../avbuffer/capi/avbuffer_capi_mock.cpp",
+    "../avbuffer/capi/avbuffer_capi_mock_factory.cpp",
+    "../format/capi/avformat_capi_mock.cpp",
+    "../format/capi/avformat_capi_mock_factory.cpp",
   ]
 
   public_deps = [
-    "$mhistreamer_root_dir/src/buffer/avbuffer/BUILD.gn",
+    "$histreamer_root_dir/src/buffer/avbuffer:media_foundation_avbuffer",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest",
   ]
@@ -83,16 +88,16 @@ config("media_foundation_inner_unit_test_config") {
     "../avbuffer/inner",
     "../format",
     "../format/inner",
-    "$media_foundation_root_dir/frameworks/native/capi/common",
-    "$media_foundation_root_dir/interfaces/inner_api/native",
-    "$media_foundation_root_dir/interfaces/kits/c",
-    "$media_foundation_root_dir/services/dfx/include",
-    "$media_foundation_root_dir/services/utils/include",
-    "$media_foundation_root_dir/../../graphic/graphic_2d/interfaces/inner_api/surface",
-    "$media_foundation_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
-    "$media_foundation_root_dir/../../graphic/graphic_2d/frameworks/surface/include",
-    "$media_foundation_root_dir/../../graphic/graphic_2d/interfaces/inner_api",
-    "$media_foundation_root_dir/../../window/window_manager/interfaces/innerkits",
+    "$av_codec_root_dir/interfaces/inner_api/native",
+    "$av_codec_root_dir/interfaces/kits/c",
+    "$histreamer_root_dir/interface/inner_api/buffer",
+    "$histreamer_root_dir/src/buffer/avbuffer/capi",
+    "$histreamer_root_dir/src/buffer/avbuffer/include",
+    "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/surface",
+    "$histreamer_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
+    "$histreamer_root_dir/../../graphic/graphic_2d/frameworks/surface/include",
+    "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api",
+    "$histreamer_root_dir/../../window/window_manager/interface/innerkits",
   ]
 }
 
@@ -113,7 +118,7 @@ ohos_static_library("media_foundation_inner_unit_test") {
   ]
 
   public_deps = [
-    "$histreamer_root_dir/src/foundation/avbuffer:media_foundation_avbuffer",
+    "$histreamer_root_dir/src/buffer/avbuffer:media_foundation_avbuffer",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest",
   ]

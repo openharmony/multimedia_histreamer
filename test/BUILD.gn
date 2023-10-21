@@ -17,8 +17,8 @@ group("histreamer_test") {
   deps = []
   if (!hst_is_lite_sys) {
     deps += [
-      "unittest:histreamer_unit_test",
       "scenetest:histreamer_scene_test",
+      "unittest:histreamer_unit_test",
     ]
   }
 }

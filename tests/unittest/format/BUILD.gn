@@ -12,11 +12,9 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/multimedia/av_codec/config.gni")
 import("//foundation/multimedia/histreamer/config.gni")
 
 module_output_path = "histreamer/unittest"
-media_foundation_root_dir = av_codec_root_dir
 
 group("format_unit_test") {
   testonly = true
@@ -54,7 +52,7 @@ ohos_unittest("format_capi_unit_test") {
   include_dirs = [
     "./",
     "./capi",
-    "$media_foundation_root_dir/interfaces/kits/c",
+    "$histreamer_root_dir/interface/kits/c",
   ]
 
   cflags = avcodec_unittest_cflags
@@ -65,14 +63,7 @@ ohos_unittest("format_capi_unit_test") {
     "./capi/avformat_capi_mock_factory.cpp",
   ]
 
-  deps = [ "$media_foundation_root_dir/interfaces/kits/c:capi_packages" ]
-
-  public_deps = [
-    "$media_foundation_root_dir/services/utils:media_foundation_service_utils",
-  ]
-
-  resource_config_file =
-      "$media_foundation_root_dir/test/unittest/resources/ohos_test.xml"
+  public_deps = [ "../common:media_foundation_capi_unit_test" ]
 }
 
 ##################################################################################################################
@@ -81,7 +72,7 @@ ohos_unittest("format_inner_unit_test") {
   include_dirs = [
     "./",
     "./inner",
-    "$media_foundation_root_dir/interfaces/inner_api/native",
+    "$histreamer_root_dir/interface/inner_api/buffer",
   ]
 
   cflags = avcodec_unittest_cflags
@@ -92,10 +83,5 @@ ohos_unittest("format_inner_unit_test") {
     "./inner/avformat_inner_mock_factory.cpp",
   ]
 
-  public_deps = [
-    "$media_foundation_root_dir/services/utils:media_foundation_service_utils",
-  ]
-
-  resource_config_file =
-      "$media_foundation_root_dir/test/unittest/resources/ohos_test.xml"
+  public_deps = [ "../common:media_foundation_inner_unit_test" ]
 }

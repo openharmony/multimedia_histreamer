@@ -17,9 +17,14 @@
 #include <atomic>
 #include <iomanip>
 #include <sstream>
+#include "av_common.h"
+#include "av_hardware_memory.h"
+#include "av_shared_memory_ext.h"
 #include "avbuffer_utils.h"
 #include "avcodec_errors.h"
 #include "avcodec_log.h"
+#include "surface_buffer.h"
+#include "surface_type.h"
 #include "unistd.h"
 
 namespace {
@@ -31,6 +36,69 @@ std::atomic<uint64_t> g_bufferId = 0;
 namespace OHOS {
 namespace MediaAVCodec {
 AVBuffer::AVBuffer() : uid_(0) {}
+std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(const AVBufferConfig &config)
+{
+    std::shared_ptr<AVAllocator> allocator = nullptr;
+    switch (config.memoryType) {
+        case MemoryType::VIRTUAL_MEMORY: {
+            allocator = AVAllocatorFactory::CreateVirtualAllocator();
+            break;
+        }
+        case MemoryType::SHARED_MEMORY: {
+            allocator = AVAllocatorFactory::CreateSharedAllocator(config.memoryFlag);
+            break;
+        }
+        case MemoryType::SURFACE_MEMORY: {
+            allocator = AVAllocatorFactory::CreateSurfaceAllocator(config.surfaceBufferConfig);
+            break;
+        }
+        case MemoryType::HARDWARE_MEMORY: {
+            allocator = AVAllocatorFactory::CreateHardwareAllocator(config.dmaFd, config.capacity, config.memoryFlag);
+            break;
+        }
+        default:
+            return nullptr;
+    }
+    auto buffer = CreateAVBuffer(allocator, config.capacity, config.align);
+    if (buffer != nullptr) {
+        buffer->config_ = config;
+    }
+    return buffer;
+}
+
+AVBufferConfig AVBuffer::GetConfig()
+{
+    if ((config_.memoryType == MemoryType::UNKNOWN_MEMORY) && (memory_ != nullptr)) {
+        config_.memoryType = memory_->GetMemoryType();
+        config_.capacity = memory_->capacity_;
+        config_.align = memory_->align_;
+        switch (config_.memoryType) {
+            case MemoryType::SHARED_MEMORY: {
+                config_.memoryFlag = std::static_pointer_cast<AVSharedMemoryExt>(memory_)->GetMemFlag();
+                break;
+            }
+            case MemoryType::HARDWARE_MEMORY: {
+                config_.memoryFlag = std::static_pointer_cast<AVHardwareMemory>(memory_)->GetMemFlag();
+                config_.dmaFd = memory_->GetFileDescriptor();
+                break;
+            }
+            case MemoryType::SURFACE_MEMORY: {
+                auto surfaceBuffer = memory_->GetSurfaceBuffer();
+                config_.surfaceBufferConfig.width = surfaceBuffer->GetWidth();
+                config_.surfaceBufferConfig.height = surfaceBuffer->GetHeight();
+                config_.surfaceBufferConfig.strideAlignment = surfaceBuffer->GetStride();
+                config_.surfaceBufferConfig.format = surfaceBuffer->GetFormat();
+                config_.surfaceBufferConfig.usage = surfaceBuffer->GetUsage();
+                config_.surfaceBufferConfig.colorGamut = surfaceBuffer->GetSurfaceBufferColorGamut();
+                config_.surfaceBufferConfig.transform = surfaceBuffer->GetSurfaceBufferTransform();
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    return config_;
+}
 
 std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(std::shared_ptr<AVAllocator> allocator, int32_t capacity,
                                                    int32_t align)
@@ -121,7 +189,7 @@ int32_t AVBuffer::Init(MessageParcel &parcel, bool isSurfaceBuffer)
     pts_ = parcel.ReadInt64();
     dts_ = parcel.ReadInt64();
     duration_ = parcel.ReadInt64();
-    flag_ = static_cast<AVCodecBufferFlag>(parcel.ReadUint32());
+    flag_ = parcel.ReadUint32();
 
     bool ret = Unmarshalling(parcel, *(meta_));
     CHECK_AND_RETURN_RET_LOG(ret, AVCS_ERR_UNKNOWN, "Unmarshalling meta_ failed");
@@ -152,13 +220,9 @@ bool AVBuffer::WriteToMessageParcel(MessageParcel &parcel)
 {
     MessageParcel bufferParcel;
     bool isBufferAttrToParcel = (memory_ == nullptr);
-    bool ret = bufferParcel.WriteUint64(GetUniqueId()) &&
-               bufferParcel.WriteInt64(pts_) &&
-               bufferParcel.WriteInt64(dts_) &&
-               bufferParcel.WriteInt64(duration_) &&
-               bufferParcel.WriteUint32(flag_) &&
-               Marshalling(bufferParcel, *(meta_)) &&
-               bufferParcel.WriteBool(isBufferAttrToParcel);
+    bool ret = bufferParcel.WriteUint64(GetUniqueId()) && bufferParcel.WriteInt64(pts_) &&
+               bufferParcel.WriteInt64(dts_) && bufferParcel.WriteInt64(duration_) && bufferParcel.WriteUint32(flag_) &&
+               Marshalling(bufferParcel, *(meta_)) && bufferParcel.WriteBool(isBufferAttrToParcel);
 
     if (!isBufferAttrToParcel) {
         MemoryType type = memory_->GetMemoryType();

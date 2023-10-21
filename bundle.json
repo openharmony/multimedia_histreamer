@@ -103,7 +103,8 @@
               }
             ],
             "test": [
-              "//foundation/multimedia/histreamer/test:histreamer_test"
+              "//foundation/multimedia/histreamer/test:histreamer_test",
+              "//foundation/multimedia/histreamer/tests:media_foundation_unit_test"
             ]
         }
     }

@@ -12,18 +12,16 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/multimedia/av_codec/config.gni")
 import("//foundation/multimedia/histreamer/config.gni")
 
 module_output_path = "histreamer/unittest"
-media_foundation_root_dir = av_codec_root_dir
 
 group("avbuffer_unit_test") {
   testonly = true
   deps = [
-      ":avbuffer_inner_unit_test",
-      ":avbuffer_capi_unit_test",
-    ]
+    ":avbuffer_capi_unit_test",
+    ":avbuffer_inner_unit_test",
+  ]
 }
 
 avbuffer_unittest_cflags = [
@@ -68,8 +66,8 @@ ohos_unittest("avbuffer_inner_unit_test") {
   cflags = avbuffer_unittest_cflags
 
   public_deps = [
-    "../common:media_foundation_inner_unit_test",
     "$histreamer_root_dir/src/buffer/avbuffer:media_foundation_avbuffer",
+    "../common:media_foundation_inner_unit_test",
   ]
 
   external_deps = [
@@ -77,6 +75,7 @@ ohos_unittest("avbuffer_inner_unit_test") {
     "graphic_2d:surface",
     "graphic_2d:sync_fence",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "memory_utils:libdmabufheap",
   ]
 }
@@ -87,7 +86,7 @@ ohos_unittest("avbuffer_capi_unit_test") {
   include_dirs = [
     "./",
     "./capi",
-    "$media_foundation_root_dir/services/services/common",
+    "$histreamer_root_dir/interface/kits/c",
   ]
 
   defines = [ "AVBUFFER_CAPI_UNIT_TEST" ]
@@ -100,11 +99,9 @@ ohos_unittest("avbuffer_capi_unit_test") {
 
   cflags = avbuffer_unittest_cflags
 
-  deps = [ "$media_foundation_root_dir/interfaces/kits/c:capi_packages" ]
-
   public_deps = [
-    "../common:media_foundation_capi_unit_test",
     "$histreamer_root_dir/src/buffer/avbuffer:media_foundation_avbuffer",
+    "../common:media_foundation_capi_unit_test",
   ]
 
   external_deps = [
@@ -112,6 +109,7 @@ ohos_unittest("avbuffer_capi_unit_test") {
     "graphic_2d:surface",
     "graphic_2d:sync_fence",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "memory_utils:libdmabufheap",
   ]
 }

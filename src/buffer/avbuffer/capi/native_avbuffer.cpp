@@ -28,7 +28,6 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, LOG_DOMAIN, "OH_AVBuffer"};
 }
 typedef struct OH_AVBuffer OH_AVBuffer;
-// typedef struct OH_AVBufferQueue OH_AVBufferQueue;
 using namespace OHOS::MediaAVCodec;
 
 OH_AVBuffer::OH_AVBuffer(const std::shared_ptr<AVBuffer> &buf)
@@ -40,40 +39,6 @@ bool OH_AVBuffer::IsEqualBuffer(const std::shared_ptr<AVBuffer> &buf)
 {
     return (buf == buffer_);
 }
-
-// OH_AVBufferQueue::OH_AVBufferQueue(const std::shared_ptr<AVBufferQueue> &bufferQueue)
-//     : AVObjectMagic(AVMagic::AVCODEC_MAGIC_AVBUFFER_QUEUE), bufferQueue_(bufferQueue)
-// {
-// }
-
-// class NativeAVBufferQueueCallback : public AVBufferQueueCallback {
-// public:
-//     NativeAVBufferQueueCallback(OH_AVBufferQueue *bufferQueue, OH_AVBufferQueueCallback callback, void *userData)
-//         : bufferQueue_(bufferQueue), callback_(callback), userData_(userData)
-//     {
-//     }
-//     virtual ~NativeAVBufferQueueCallback() = default;
-
-//     void OnBufferAvailable() override
-//     {
-//         std::unique_lock<std::shared_mutex> lock(mutex_);
-//         if (bufferQueue_ != nullptr && callback_.onBufferAvailable != nullptr) {
-//             callback_.onBufferAvailable(bufferQueue_, userData_);
-//         }
-//     }
-
-//     void StopCallback()
-//     {
-//         std::unique_lock<std::shared_mutex> lock(mutex_);
-//         bufferQueue_ = nullptr;
-//     }
-
-// private:
-//     struct OH_AVBufferQueue *bufferQueue_;
-//     struct OH_AVBufferQueueCallback callback_;
-//     void *userData_;
-//     std::shared_mutex mutex_;
-// };
 
 namespace OHOS {
 namespace MediaAVCodec {

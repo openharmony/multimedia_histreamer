@@ -17,19 +17,10 @@
 #include <string>
 #include <vector>
 #include <gtest/gtest.h>
-#include "av_hardware_allocator.h"
-#include "av_hardware_memory.h"
-#include "av_shared_allocator.h"
-#include "av_shared_memory_ext.h"
-#include "av_surface_allocator.h"
-#include "av_surface_memory.h"
-#include "avbuffer.h"
-#include "avbuffer_ipc.h"
 #include "avbuffer_mock.h"
+#include "avbuffer_utils.h"
 #include "avcodec_errors.h"
-#include "avcodec_parcel.h"
 #include "unittest_log.h"
-#include "utils.h"
 #ifdef AVBUFFER_CAPI_UNIT_TEST
 #include "native_avmagic.h"
 #endif
