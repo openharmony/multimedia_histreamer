@@ -158,8 +158,8 @@ public:
     {
         const char* charInfo = __PRETTY_FUNCTION__ ;
         std::string_view stringInfo = charInfo;
-        int beginIndex = stringInfo.find_first_of('=') + 2; // 2 表示右移两位
-        int endIndex = stringInfo.find_first_of(']');
+        uint32_t beginIndex = stringInfo.find_first_of('=') + 2; // 2 表示右移两位
+        uint32_t endIndex = stringInfo.find_first_of(']');
         std::string_view typeName(charInfo + beginIndex, endIndex - beginIndex + 1);
         return typeName;
     }
