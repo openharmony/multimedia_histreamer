@@ -59,8 +59,8 @@ const uint32_t g_flag = 1 << 0;
 
 const int32_t g_pixSize = 4;
 const BufferRequestConfig g_config = {
-    .width = 1920,
-    .height = 1080,
+    .width = 800,
+    .height = 600,
     .strideAlignment = 0x8,
     .format = GraphicPixelFormat::GRAPHIC_PIXEL_FMT_RGBA_8888,
     .usage = BUFFER_USAGE_CPU_READ | BUFFER_USAGE_CPU_WRITE | BUFFER_USAGE_MEM_DMA,
@@ -215,7 +215,7 @@ void AVBufferInnerUnitTest::CreateLocalHardwareMemByConfig()
     DmabufHeapBufferAlloc(dmaHeapFd, &dmaBuffer);
 
     config_.dmaFd = dmaBuffer.fd;
-    config_.capacity = capacity_;
+    config_.size = capacity_;
     config_.memoryFlag = memFlag_;
     config_.memoryType = MemoryType::HARDWARE_MEMORY;
     remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(config_);
@@ -247,7 +247,7 @@ void AVBufferInnerUnitTest::CreateLocalSharedMemByConfig()
 {
     // create loacal
     config_.align = align_;
-    config_.capacity = capacity_;
+    config_.size = capacity_;
     config_.memoryFlag = memFlag_;
     config_.memoryType = MemoryType::SHARED_MEMORY;
     remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(config_);
@@ -330,7 +330,7 @@ void AVBufferInnerUnitTest::CreateLocalVirtualMemByConfig()
 {
     // create loacal
     config_.align = align_;
-    config_.capacity = capacity_;
+    config_.size = capacity_;
     config_.memoryType = MemoryType::VIRTUAL_MEMORY;
     remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(config_);
     ASSERT_NE(nullptr, buffer_);
@@ -524,31 +524,31 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_002, TestSize.Level1)
     AVBufferConfig configFirst;
     AVBufferConfig configSecond;
     configFirst.memoryType = configSecond.memoryType = MemoryType::HARDWARE_MEMORY;
-    configFirst.capacity = 0;
+    configFirst.size = 0;
     configSecond.capacity = 1;
     EXPECT_TRUE(configFirst <= configSecond);
 
-    configFirst.capacity = 0;
+    configFirst.size = 0;
     configSecond.capacity = 0;
     EXPECT_TRUE(configFirst <= configSecond);
 
-    configFirst.capacity = 1;
+    configFirst.size = 1;
     configSecond.capacity = 0;
     EXPECT_FALSE(configFirst <= configSecond);
 
-    configFirst.capacity = 0;
+    configFirst.size = 0;
     configSecond.capacity = 1;
     configFirst.memoryFlag = MemoryFlag::MEMORY_READ_ONLY;
     configSecond.memoryFlag = MemoryFlag::MEMORY_READ_ONLY;
     EXPECT_TRUE(configFirst <= configSecond);
 
-    configFirst.capacity = 0;
+    configFirst.size = 0;
     configSecond.capacity = 1;
     configFirst.memoryFlag = MemoryFlag::MEMORY_READ_ONLY;
     configSecond.memoryFlag = MemoryFlag::MEMORY_READ_WRITE;
     EXPECT_TRUE(configFirst <= configSecond);
 
-    configFirst.capacity = 0;
+    configFirst.size = 0;
     configSecond.capacity = 1;
     configFirst.memoryFlag = MemoryFlag::MEMORY_READ_WRITE;
     configSecond.memoryFlag = MemoryFlag::MEMORY_READ_ONLY;
@@ -565,36 +565,37 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_003, TestSize.Level1)
     AVBufferConfig configFirst;
     AVBufferConfig configSecond;
     configFirst.memoryType = configSecond.memoryType = MemoryType::SHARED_MEMORY;
-    configFirst.capacity = 0;
+    configFirst.size = 0;
     configSecond.capacity = 1;
     EXPECT_TRUE(configFirst <= configSecond);
 
-    configFirst.capacity = 0;
+    configFirst.size = 0;
     configSecond.capacity = 0;
     EXPECT_TRUE(configFirst <= configSecond);
 
-    configFirst.capacity = 0;
-    configFirst.align = 2; // 2: align size
+    configFirst.size = 2; // 2: first size
+    configSecond.capacity = 1;
+    configSecond.align = 2; // 2: align size
+    EXPECT_TRUE(configFirst <= configSecond);
+    configSecond.align = 0;
+
+    configFirst.size = 1;
     configSecond.capacity = 0;
     EXPECT_FALSE(configFirst <= configSecond);
 
-    configFirst.capacity = 1;
-    configSecond.capacity = 0;
-    EXPECT_FALSE(configFirst <= configSecond);
-
-    configFirst.capacity = 0;
+    configFirst.size = 0;
     configSecond.capacity = 1;
     configFirst.memoryFlag = MemoryFlag::MEMORY_READ_ONLY;
     configSecond.memoryFlag = MemoryFlag::MEMORY_READ_ONLY;
     EXPECT_TRUE(configFirst <= configSecond);
 
-    configFirst.capacity = 0;
+    configFirst.size = 0;
     configSecond.capacity = 1;
     configFirst.memoryFlag = MemoryFlag::MEMORY_READ_ONLY;
     configSecond.memoryFlag = MemoryFlag::MEMORY_READ_WRITE;
     EXPECT_TRUE(configFirst <= configSecond);
 
-    configFirst.capacity = 0;
+    configFirst.size = 0;
     configSecond.capacity = 1;
     configFirst.memoryFlag = MemoryFlag::MEMORY_READ_WRITE;
     configSecond.memoryFlag = MemoryFlag::MEMORY_READ_ONLY;
@@ -611,7 +612,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_004, TestSize.Level1)
     AVBufferConfig configFirst;
     AVBufferConfig configSecond;
     configFirst.memoryType = configSecond.memoryType = MemoryType::SURFACE_MEMORY;
-    configFirst.capacity = 1;
+    configFirst.size = 1;
     configSecond.capacity = 0;
     EXPECT_TRUE(configFirst <= configSecond);
 
@@ -637,23 +638,41 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_005, TestSize.Level1)
     AVBufferConfig configFirst;
     AVBufferConfig configSecond;
     configFirst.memoryType = configSecond.memoryType = MemoryType::VIRTUAL_MEMORY;
-    configFirst.capacity = 0;
+    configFirst.size = 0;
     configSecond.capacity = 1;
     EXPECT_TRUE(configFirst <= configSecond);
 
-    configFirst.capacity = 0;
+    configFirst.size = 0;
     configSecond.capacity = 0;
     EXPECT_TRUE(configFirst <= configSecond);
 
-    configFirst.capacity = 1;
+    configFirst.size = 1;
     configSecond.capacity = 0;
     EXPECT_FALSE(configFirst <= configSecond);
 
-    configFirst.capacity = 0;
+    configFirst.size = 0;
     configSecond.capacity = 1;
     configFirst.memoryFlag = MemoryFlag::MEMORY_READ_WRITE;
     configSecond.memoryFlag = MemoryFlag::MEMORY_READ_ONLY;
     EXPECT_TRUE(configFirst <= configSecond);
+
+    configFirst.size = 0;
+    configFirst.capacity = 1;
+    configSecond.size = 1;
+    configSecond.capacity = 1;
+    EXPECT_TRUE(configFirst <= configSecond);
+
+    configFirst.size = 1;
+    configFirst.capacity = 0;
+    configSecond.size = 0;
+    configSecond.capacity = 1;
+    EXPECT_TRUE(configFirst <= configSecond);
+
+    configFirst.size = 1;
+    configFirst.capacity = 0;
+    configSecond.size = 1;
+    configSecond.capacity = 0;
+    EXPECT_FALSE(configFirst <= configSecond);
 }
 
 /**
@@ -1185,6 +1204,20 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetConfig_001, TestSize.L
     EXPECT_EQ(config.surfaceBufferConfig.height, g_config.height);
     EXPECT_EQ(config.surfaceBufferConfig.format, g_config.format);
     EXPECT_EQ(config.surfaceBufferConfig.usage, g_config.usage);
+}
+
+/**
+ * @tc.name: AVBuffer_SurfaceMemory_GetConfig_002
+ * @tc.desc: create local surface memory and GetConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetConfig_002, TestSize.Level1)
+{
+    memFlag_ = MemoryFlag::MEMORY_READ_WRITE;
+    CreateLocalSurfaceMemByConfig();
+    ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
+    AVBufferConfig config = buffer_->GetConfig();
+    EXPECT_TRUE(config <= config_);
 }
 
 /**

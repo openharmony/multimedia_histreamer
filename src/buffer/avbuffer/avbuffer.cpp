@@ -39,12 +39,15 @@ AVBuffer::AVBuffer() : uid_(0) {}
 std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(const AVBufferConfig &config)
 {
     std::shared_ptr<AVAllocator> allocator = nullptr;
+    int32_t capacity = std::max(config.size, config.capacity);
+    MemoryFlag memflag = MemoryFlag::MEMORY_READ_WRITE;
     switch (config.memoryType) {
         case MemoryType::VIRTUAL_MEMORY: {
             allocator = AVAllocatorFactory::CreateVirtualAllocator();
             break;
         }
         case MemoryType::SHARED_MEMORY: {
+            memflag = config.memoryFlag;
             allocator = AVAllocatorFactory::CreateSharedAllocator(config.memoryFlag);
             break;
         }
@@ -53,26 +56,37 @@ std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(const AVBufferConfig &config)
             break;
         }
         case MemoryType::HARDWARE_MEMORY: {
-            allocator = AVAllocatorFactory::CreateHardwareAllocator(config.dmaFd, config.capacity, config.memoryFlag);
+            memflag = config.memoryFlag;
+            allocator = AVAllocatorFactory::CreateHardwareAllocator(config.dmaFd, capacity, config.memoryFlag);
             break;
         }
         default:
             return nullptr;
     }
-    auto buffer = CreateAVBuffer(allocator, config.capacity, config.align);
+    auto buffer = CreateAVBuffer(allocator, capacity, config.align);
     if (buffer != nullptr) {
         buffer->config_ = config;
+        buffer->config_.capacity = capacity;
+        buffer->config_.memoryFlag = memflag;
     }
     return buffer;
 }
 
-AVBufferConfig AVBuffer::GetConfig()
+const AVBufferConfig &AVBuffer::GetConfig()
 {
-    if ((config_.memoryType == MemoryType::UNKNOWN_MEMORY) && (memory_ != nullptr)) {
+    if (memory_ == nullptr) {
+        return config_;
+    }
+    config_.size = memory_->GetSize();
+    if (config_.memoryType == MemoryType::UNKNOWN_MEMORY) {
         config_.memoryType = memory_->GetMemoryType();
-        config_.capacity = memory_->capacity_;
+        config_.capacity = memory_->GetCapacity();
         config_.align = memory_->align_;
         switch (config_.memoryType) {
+            case MemoryType::VIRTUAL_MEMORY: {
+                config_.memoryFlag = MemoryFlag::MEMORY_READ_WRITE;
+                break;
+            }
             case MemoryType::SHARED_MEMORY: {
                 config_.memoryFlag = std::static_pointer_cast<AVSharedMemoryExt>(memory_)->GetMemFlag();
                 break;

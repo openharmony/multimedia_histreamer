@@ -23,12 +23,16 @@
 
 namespace OHOS {
 namespace MediaAVCodec {
+/**
+ * @brief Struct that encapsulates some info of media buffer.
+ */
 using AVBufferConfig = struct AVBufferConfig {
-    int32_t capacity = 0;
+    int32_t size = 0;
     int32_t align = 0;
     MemoryType memoryType = MemoryType::UNKNOWN_MEMORY;
     MemoryFlag memoryFlag = MemoryFlag::MEMORY_READ_ONLY;
     BufferRequestConfig surfaceBufferConfig;
+    int32_t capacity = 0; // get from buffer
     int32_t dmaFd = -1; // to create dma buffer
 
     bool operator<=(const struct AVBufferConfig &config) const
@@ -36,19 +40,24 @@ using AVBufferConfig = struct AVBufferConfig {
         if (memoryType != config.memoryType) {
             return false;
         }
-        int32_t allocSize = align ? (capacity + align - 1) : capacity;
-        int32_t allocSizeConfig = config.align ? (config.capacity + config.align - 1) : config.capacity;
+        int32_t configAllocSize = config.align ? (config.capacity + config.align - 1) : config.capacity;
         switch (memoryType) {
             case MemoryType::VIRTUAL_MEMORY:
-                return allocSize <= allocSizeConfig;
+                return size <= configAllocSize;
             case MemoryType::SHARED_MEMORY:
-                return allocSize <= allocSizeConfig &&
+                return size <= configAllocSize &&
                        (memoryFlag == config.memoryFlag || config.memoryFlag == MemoryFlag::MEMORY_READ_WRITE);
             case MemoryType::HARDWARE_MEMORY:
-                return allocSize <= allocSizeConfig &&
+                return size <= configAllocSize &&
                        (memoryFlag == config.memoryFlag || config.memoryFlag == MemoryFlag::MEMORY_READ_WRITE);
             case MemoryType::SURFACE_MEMORY:
-                return surfaceBufferConfig == config.surfaceBufferConfig;
+                return (surfaceBufferConfig.width == config.surfaceBufferConfig.width) &&
+                       (surfaceBufferConfig.height == config.surfaceBufferConfig.height) &&
+                       (surfaceBufferConfig.strideAlignment == config.surfaceBufferConfig.strideAlignment) &&
+                       (surfaceBufferConfig.format == config.surfaceBufferConfig.format) &&
+                       (surfaceBufferConfig.usage == config.surfaceBufferConfig.usage) &&
+                       (surfaceBufferConfig.transform == config.surfaceBufferConfig.transform) &&
+                       (surfaceBufferConfig.colorGamut == config.surfaceBufferConfig.colorGamut); // ignore timeout
             default:
                 return false;
         }
@@ -117,7 +126,7 @@ public:
      * @since 4.1
      * @version 1.0
      */
-    AVBufferConfig GetConfig();
+    const AVBufferConfig &GetConfig();
 
     /**
      * @brief Get the unique identifier of buffer.
