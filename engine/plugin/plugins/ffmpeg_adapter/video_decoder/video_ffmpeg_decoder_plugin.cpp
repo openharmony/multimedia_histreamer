@@ -278,7 +278,10 @@ void VideoFfmpegDecoderPlugin::SetCodecExtraData()
     if (configSize > 0) {
         auto allocSize = AlignUp(configSize + AV_INPUT_BUFFER_PADDING_SIZE, STRIDE_ALIGN);
         avCodecContext_->extradata = static_cast<uint8_t*>(av_mallocz(allocSize));
-        (void)memcpy_s(avCodecContext_->extradata, configSize, codecConfig.data(), configSize);
+        auto ret = memcpy_s(avCodecContext_->extradata, configSize, codecConfig.data(), configSize);
+        if (ret != EOK) {
+            MEDIA_LOG_W("memcpy into buffer failed with code " PUBLIC_LOG_D32, ret);
+        }
         avCodecContext_->extradata_size = configSize;
         MEDIA_LOG_I("SetCodecExtraData success");
     }
