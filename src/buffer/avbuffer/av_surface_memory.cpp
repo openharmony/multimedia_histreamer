@@ -83,28 +83,29 @@ AVSurfaceMemory::~AVSurfaceMemory()
 int32_t AVSurfaceMemory::Init()
 {
     surfaceBuffer_ = sptr<SurfaceBuffer>(static_cast<SurfaceBuffer *>(allocator_->Alloc(0)));
-    FALSE_RETURN_V_MSG_E(surfaceBuffer_ != nullptr, (int32_t)Status::ERROR_NO_MEMORY, "surfaceBuffer_ alloc failed");
+    FALSE_RETURN_V_MSG_E(surfaceBuffer_ != nullptr, static_cast<int32_t>(Status::ERROR_NO_MEMORY),
+                         "surfaceBuffer_ alloc failed");
     capacity_ = surfaceBuffer_->GetSize();
 
     MEDIA_LOG_DD("enter init, instance: 0x%{public}06" PRIXPTR ", name = %{public}s", FAKE_POINTER(this),
                  name_.c_str());
-    return (int32_t)Status::OK;
+    return static_cast<int32_t>(Status::OK);
 }
 
 int32_t AVSurfaceMemory::Init(MessageParcel &parcel)
 {
     surfaceBuffer_ = SurfaceBuffer::Create();
-    FALSE_RETURN_V_MSG_E(surfaceBuffer_ != nullptr, (int32_t)Status::ERROR_NO_MEMORY,
+    FALSE_RETURN_V_MSG_E(surfaceBuffer_ != nullptr, static_cast<int32_t>(Status::ERROR_NO_MEMORY),
                          "No memory for new SurfaceBuffer!");
 
     GSError ret = surfaceBuffer_->ReadFromMessageParcel(parcel);
-    FALSE_RETURN_V_MSG_E(ret == GSERROR_OK, (int32_t)Status::ERROR_INVALID_OPERATION,
+    FALSE_RETURN_V_MSG_E(ret == GSERROR_OK, static_cast<int32_t>(Status::ERROR_INVALID_OPERATION),
                          "Read surface message parcel failed!, %{public}s", GSErrorStr(ret).c_str());
     capacity_ = surfaceBuffer_->GetSize();
 
     MEDIA_LOG_DD("enter init, instance: 0x%{public}06" PRIXPTR ", name = %{public}s", FAKE_POINTER(this),
                  name_.c_str());
-    return (int32_t)Status::OK;
+    return static_cast<int32_t>(Status::OK);
 }
 
 bool AVSurfaceMemory::WriteToMessageParcel(MessageParcel &parcel)
@@ -121,7 +122,7 @@ uint8_t *AVSurfaceMemory::GetAddr()
 {
     if (isFirstFlag_) {
         int32_t ret = MapMemoryAddr();
-        FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "MapMemory failed");
+        FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), nullptr, "MapMemory failed");
         isFirstFlag_ = false;
     }
     return base_;
@@ -157,14 +158,14 @@ int32_t AVSurfaceMemory::MapMemoryAddr()
         MEDIA_LOG_E("create avsurfacememory failed, name = %{public}s, size = " PUBLIC_LOG_D32, name_.c_str(),
                     capacity_);
         Close();
-        return (int32_t)Status::ERROR_NO_MEMORY;
+        return static_cast<int32_t>(Status::ERROR_NO_MEMORY);
     };
     GSError ret = surfaceBuffer_->Map();
-    FALSE_RETURN_V_MSG_E(ret == GSERROR_OK, (int32_t)Status::ERROR_INVALID_OPERATION,
+    FALSE_RETURN_V_MSG_E(ret == GSERROR_OK, static_cast<int32_t>(Status::ERROR_INVALID_OPERATION),
                          "mmap failed, please check params, %{public}s", GSErrorStr(ret).c_str());
     base_ = reinterpret_cast<uint8_t *>(surfaceBuffer_->GetVirAddr());
     CANCEL_SCOPE_EXIT_GUARD(0);
-    return (int32_t)Status::OK;
+    return static_cast<int32_t>(Status::OK);
 }
 } // namespace Media
 } // namespace OHOS

@@ -14,13 +14,13 @@
  */
 
 #include <mutex>
-#include <shared_mutex>
 #include "inner_api/buffer/avbuffer.h"
-#include "inner_api/common/status.h"
 #include "inner_api/common/log.h"
+#include "inner_api/common/status.h"
 #include "native_avmagic.h"
 #include "native_buffer.h"
 #include "surface_buffer.h"
+#include <shared_mutex>
 
 typedef struct OH_AVBuffer OH_AVBuffer;
 
@@ -101,15 +101,19 @@ OH_AVCodecBufferAttr OH_AVBuffer_GetBufferAttr(OH_AVBuffer *buf)
 
 OH_AVErrCode OH_AVBuffer_SetBufferAttr(OH_AVBuffer *buf, OH_AVCodecBufferAttr *attr)
 {
-    FALSE_RETURN_V_MSG_E(buf != nullptr, AV_ERR_INVALID_VAL, "input buf is nullptr!");
-    FALSE_RETURN_V_MSG_E(buf->magic_ == AVMagic::AVCODEC_MAGIC_AVBUFFER, AV_ERR_INVALID_VAL, "magic error!");
-    FALSE_RETURN_V_MSG_E(buf->buffer_ != nullptr, AV_ERR_INVALID_VAL, "buffer is nullptr!");
-    FALSE_RETURN_V_MSG_E(buf->buffer_->memory_ != nullptr, AV_ERR_INVALID_VAL, "buffer's memory is nullptr!");
+    FALSE_RETURN_V_MSG_E(buf != nullptr, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
+                         "input buf is nullptr!");
+    FALSE_RETURN_V_MSG_E(buf->magic_ == AVMagic::AVCODEC_MAGIC_AVBUFFER,
+                         static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER), "magic error!");
+    FALSE_RETURN_V_MSG_E(buf->buffer_ != nullptr, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
+                         "buffer is nullptr!");
+    FALSE_RETURN_V_MSG_E(buf->buffer_->memory_ != nullptr, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
+                         "buffer's memory is nullptr!");
     buf->buffer_->pts_ = attr->pts;
     buf->buffer_->memory_->SetOffset(attr->offset);
     buf->buffer_->flag_ = static_cast<AVCodecBufferFlag>(attr->flags);
     buf->buffer_->memory_->SetSize(attr->size);
-    return AV_ERR_OK;
+    return static_cast<int32_t>(Status::OK);
 }
 
 OH_AVFormat *OH_AVBuffer_GetParameter(OH_AVBuffer *buf)
@@ -127,11 +131,14 @@ OH_AVFormat *OH_AVBuffer_GetParameter(OH_AVBuffer *buf)
 
 OH_AVErrCode OH_AVBuffer_SetParameter(OH_AVBuffer *buf, OH_AVFormat *format)
 {
-    FALSE_RETURN_V_MSG_E(buf != nullptr, AV_ERR_INVALID_VAL, "input buf is nullptr!");
-    FALSE_RETURN_V_MSG_E(buf->magic_ == AVMagic::AVCODEC_MAGIC_AVBUFFER, AV_ERR_INVALID_VAL, "magic error!");
-    FALSE_RETURN_V_MSG_E(buf->buffer_ != nullptr, AV_ERR_INVALID_VAL, "buffer is nullptr!");
-    *(buf->buffer_->meta_ )= format->format_;
-    return AV_ERR_OK;
+    FALSE_RETURN_V_MSG_E(buf != nullptr, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
+                         "input buf is nullptr!");
+    FALSE_RETURN_V_MSG_E(buf->magic_ == AVMagic::AVCODEC_MAGIC_AVBUFFER,
+                         static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER), "magic error!");
+    FALSE_RETURN_V_MSG_E(buf->buffer_ != nullptr, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
+                         "buffer is nullptr!");
+    *(buf->buffer_->meta_) = format->format_;
+    return static_cast<int32_t>(Status::OK);
 }
 
 OH_NativeBuffer *OH_AVBuffer_GetNativeBuffer(OH_AVBuffer *buf)
@@ -147,49 +154,59 @@ OH_NativeBuffer *OH_AVBuffer_GetNativeBuffer(OH_AVBuffer *buf)
 
 OH_AVErrCode OH_AVBuffer_Destroy(struct OH_AVBuffer *buf)
 {
-    FALSE_RETURN_V_MSG_E(buf != nullptr, AV_ERR_INVALID_VAL, "input buf is nullptr!");
-    FALSE_RETURN_V_MSG_E(buf->magic_ == AVMagic::AVCODEC_MAGIC_AVBUFFER, AV_ERR_INVALID_VAL, "magic error!");
-    FALSE_RETURN_V_MSG_E(buf->isUserCreated, AV_ERR_INVALID_VAL, "input buf is not user created!");
+    FALSE_RETURN_V_MSG_E(buf != nullptr, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
+                         "input buf is nullptr!");
+    FALSE_RETURN_V_MSG_E(buf->magic_ == AVMagic::AVCODEC_MAGIC_AVBUFFER,
+                         static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER), "magic error!");
+    FALSE_RETURN_V_MSG_E(buf->isUserCreated, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
+                         "input buf is not user created!");
     delete buf;
-    return AV_ERR_OK;
+    return static_cast<int32_t>(Status::OK);
 }
 
 // OH_AVErrCode OH_AVBufferQueue_SetProducerCallback(OH_AVBufferQueue *bufferQueue, OH_AVBufferQueueCallback callback,
 //                                                   void *userData)
 // {
-//     FALSE_RETURN_V_MSG_E(bufferQueue != nullptr, AV_ERR_INVALID_VAL, "input bufferQueue is nullptr!");
-//     FALSE_RETURN_V_MSG_E(bufferQueue->bufferQueue_ != nullptr, AV_ERR_INVALID_VAL, "bufferQueue_ is nullptr!");
-//     FALSE_RETURN_V_MSG_E(bufferQueue->magic_ == AVMagic::AVCODEC_MAGIC_AVBUFFER_QUEUE, AV_ERR_INVALID_VAL,
+//     FALSE_RETURN_V_MSG_E(bufferQueue != nullptr, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER), "input
+//     bufferQueue is nullptr!"); FALSE_RETURN_V_MSG_E(bufferQueue->bufferQueue_ != nullptr,
+//     static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER), "bufferQueue_ is nullptr!");
+//     FALSE_RETURN_V_MSG_E(bufferQueue->magic_ == AVMagic::AVCODEC_MAGIC_AVBUFFER_QUEUE,
+//     static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
 //                              "magic error!");
-//     FALSE_RETURN_V_MSG_E(callback.onBufferAvailable != nullptr, AV_ERR_INVALID_VAL,
+//     FALSE_RETURN_V_MSG_E(callback.onBufferAvailable != nullptr,
+//     static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
 //                              "Callback onBufferAvailable is nullptr");
 
 //     bufferQueue->callback_ = std::make_shared<NativeAVBufferQueueCallback>(bufferQueue, callback, userData);
 //     int32_t ret = bufferQueue->bufferQueue_->SetProducerCallback(bufferQueue->callback_);
-//     FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, AVCSErrorToOHAVErrCode(static_cast<AVCodecServiceErrCode>(ret)),
+//     FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK),
+//     AVCSErrorToOHAVErrCode(static_cast<AVCodecServiceErrCode>(ret)),
 //                              "audioDecoder SetCallback failed!");
-//     return AV_ERR_OK;
+//     return static_cast<int32_t>(Status::OK);
 // }
 
 // OH_AVErrCode OH_AVBufferQueue_PushBuffer(OH_AVBufferQueue *bufferQueue, OH_AVBuffer *buf)
 // {
-//     FALSE_RETURN_V_MSG_E(bufferQueue != nullptr, AV_ERR_INVALID_VAL, "bufferQueue is nullptr!");
-//     FALSE_RETURN_V_MSG_E(bufferQueue->bufferQueue_ != nullptr, AV_ERR_INVALID_VAL, "bufferQueue_ is nullptr!");
-//     FALSE_RETURN_V_MSG_E(bufferQueue->magic_ == AVMagic::AVCODEC_MAGIC_AVBUFFER_QUEUE, AV_ERR_INVALID_VAL,
+//     FALSE_RETURN_V_MSG_E(bufferQueue != nullptr, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER), "bufferQueue
+//     is nullptr!"); FALSE_RETURN_V_MSG_E(bufferQueue->bufferQueue_ != nullptr,
+//     static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER), "bufferQueue_ is nullptr!");
+//     FALSE_RETURN_V_MSG_E(bufferQueue->magic_ == AVMagic::AVCODEC_MAGIC_AVBUFFER_QUEUE,
+//     static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
 //                              "magic error!");
 
-//     FALSE_RETURN_V_MSG_E(buf != nullptr, AV_ERR_INVALID_VAL, "input buf is nullptr!");
-//     FALSE_RETURN_V_MSG_E(buf->magic_ == AVMagic::AVCODEC_MAGIC_AVBUFFER, AV_ERR_INVALID_VAL, "magic error!");
-//     FALSE_RETURN_V_MSG_E(buf->buffer_ != nullptr, AV_ERR_INVALID_VAL, "buffer is nullptr!");
-//     FALSE_RETURN_V_MSG_E(buf->buffer_->memory_ != nullptr, AV_ERR_INVALID_VAL, "buffer's memory is nullptr!");
-//     auto buffer = buf->buffer_;
-//     FALSE_RETURN_V_MSG_E(buf->isUserCreated, AV_ERR_INVALID_VAL, "input buf is not user created!");
-//     delete buf;
+//     FALSE_RETURN_V_MSG_E(buf != nullptr, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER), "input buf is
+//     nullptr!"); FALSE_RETURN_V_MSG_E(buf->magic_ == AVMagic::AVCODEC_MAGIC_AVBUFFER,
+//     static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER), "magic error!"); FALSE_RETURN_V_MSG_E(buf->buffer_ !=
+//     nullptr, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER), "buffer is nullptr!");
+//     FALSE_RETURN_V_MSG_E(buf->buffer_->memory_ != nullptr, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
+//     "buffer's memory is nullptr!"); auto buffer = buf->buffer_; FALSE_RETURN_V_MSG_E(buf->isUserCreated,
+//     static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER), "input buf is not user created!"); delete buf;
 
 //     int32_t ret = bufferQueue->bufferQueue_->PushBuffer(buffer);
-//     FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, AVCSErrorToOHAVErrCode(static_cast<AVCodecServiceErrCode>(ret)),
+//     FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK),
+//     AVCSErrorToOHAVErrCode(static_cast<AVCodecServiceErrCode>(ret)),
 //                              "audioDecoder SetCallback failed!");
-//     return AV_ERR_OK;
+//     return static_cast<int32_t>(Status::OK);
 // }
 
 // OH_AVBuffer *OH_AVBufferQueue_RequestBuffer(OH_AVBufferQueue *bufferQueue, int32_t capacity)

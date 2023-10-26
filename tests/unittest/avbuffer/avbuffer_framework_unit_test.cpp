@@ -89,7 +89,7 @@ void AVBufferFrameworkUnitTest::TearDown(void)
  */
 HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_Create_001, TestSize.Level1)
 {
-    EXPECT_EQ(AV_ERR_OK, buffer_->Destroy());
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->Destroy());
     buffer_ = nullptr;
 
     buffer_ = AVBufferMockFactory::CreateAVBuffer(-1);
@@ -105,7 +105,7 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_GetAddr_001, TestSize.Level1)
 {
     EXPECT_NE(nullptr, buffer_->GetAddr());
 
-    EXPECT_EQ(AV_ERR_OK, buffer_->Destroy());
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->Destroy());
     buffer_ = nullptr;
 }
 
@@ -118,7 +118,7 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_GetCapacity_001, TestSize.Level1)
 {
     EXPECT_EQ(MEMSIZE, buffer_->GetCapacity());
 
-    EXPECT_EQ(AV_ERR_OK, buffer_->Destroy());
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->Destroy());
     buffer_ = nullptr;
 }
 
@@ -134,7 +134,7 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_SetBufferAttr_001, TestSize.Level1)
     attr.size = MEMSIZE;
     attr.offset = g_offset;
     attr.flags = static_cast<uint32_t>(g_flag);
-    EXPECT_EQ(AV_ERR_OK, buffer_->SetBufferAttr(attr));
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->SetBufferAttr(attr));
 
     OH_AVCodecBufferAttr attrTemp = buffer_->GetBufferAttr();
     EXPECT_EQ(attr.pts, attrTemp.pts);
@@ -142,7 +142,7 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_SetBufferAttr_001, TestSize.Level1)
     EXPECT_EQ(attr.offset, attrTemp.offset);
     EXPECT_EQ(attr.flags, attrTemp.flags);
 
-    EXPECT_EQ(AV_ERR_OK, buffer_->Destroy());
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->Destroy());
     buffer_ = nullptr;
 }
 
@@ -160,7 +160,7 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_SetParameter_001, TestSize.Level1)
     EXPECT_TRUE(format->PutFloatValue(g_floatKey, g_floatValue));
     EXPECT_TRUE(format->PutDoubleValue(g_doubleKey, g_doubleValue));
     EXPECT_TRUE(format->PutStringValue(g_stringKey, g_stringValue));
-    EXPECT_EQ(AV_ERR_OK, buffer_->SetParameter(format));
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->SetParameter(format));
 
     std::shared_ptr<FormatMock> formatTemp = buffer_->GetParameter();
     int32_t getIntValue = 0;
@@ -181,7 +181,7 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_SetParameter_001, TestSize.Level1)
     EXPECT_EQ(getDoubleValue, g_doubleValue);
     EXPECT_EQ(getStringValue, g_stringValue);
 
-    EXPECT_EQ(AV_ERR_OK, buffer_->Destroy());
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->Destroy());
     buffer_ = nullptr;
 }
 
@@ -192,7 +192,7 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_SetParameter_001, TestSize.Level1)
  */
 HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_Destroy_001, TestSize.Level1)
 {
-    EXPECT_EQ(AV_ERR_OK, buffer_->Destroy());
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->Destroy());
     buffer_ = nullptr;
 }
 

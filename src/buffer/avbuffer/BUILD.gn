@@ -23,6 +23,11 @@ config("media_foundation_avbuffer_public_config") {
 }
 
 config("media_foundation_avbuffer_config") {
+  defines = [
+    "HST_ANY_WITH_NO_RTTI",
+    "MEDIA_OHOS",
+  ]
+
   include_dirs = [
     "./",
     "./capi",
@@ -33,7 +38,17 @@ config("media_foundation_avbuffer_config") {
     "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/common",
     "$histreamer_root_dir/../../../commonlibrary/memory_utils/libdmabufheap/include",
   ]
-  defines = [ "MEDIA_OHOS" ]
+
+  cflags = [
+    "-O2",
+    "-fPIC",
+    "-Wall",
+    "-fexceptions",
+    "-fno-rtti",
+    "-Wno-unused-but-set-variable",
+    "-Wno-format",
+  ]
+  cflags_cc = cflags
 }
 
 ohos_static_library("media_foundation_avbuffer") {
@@ -53,7 +68,8 @@ ohos_static_library("media_foundation_avbuffer") {
     "./avbuffer.cpp",
     "./avbuffer_utils.cpp",
     "./avmemory.cpp",
-    "./capi/native_avbuffer.cpp",
+
+    # "./capi/native_avbuffer.cpp",
   ]
 
   public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]

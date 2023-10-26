@@ -37,11 +37,11 @@ using namespace testing::ext;
 using namespace OHOS;
 using namespace OHOS::Media;
 
-#define INT_TESTKEY Tag::VIDEO_HEIGHT
-#define LONG_TESTKEY Tag::AUDIO_SAMPLE_RATE
-#define FLOAT_TESTKEY Tag::BITS_PER_CODED_SAMPLE
-#define DOUBLE_TESTKEY Tag::MEDIA_PLAYBACK_SPEED
-#define STRING_TESTKEY Tag::USER_SHARED_MEMORY_FD
+// #define INT_TESTKEY Tag::VIDEO_HEIGHT
+#define LONG_TESTKEY Tag::MEDIA_DURATION
+// #define FLOAT_TESTKEY Tag::BITS_PER_CODED_SAMPLE
+#define DOUBLE_TESTKEY Tag::VIDEO_CAPTURE_RATE
+#define STRING_TESTKEY Tag::MEDIA_FILE_URI
 namespace {
 const int32_t MEMSIZE = 1024 * 1024;
 const int32_t POSITION_ONE = 1024 * 64;
@@ -361,9 +361,9 @@ void AVBufferInnerUnitTest::GetRemoteBuffer()
 
 void AVBufferInnerUnitTest::CheckMetaSetAndGet()
 {
-    int32_t getIntValue = 0;
+    // int32_t getIntValue = 0;
     int64_t getLongValue = 0;
-    float getFloatValue = 0.0;
+    // float getFloatValue = 0.0;
     double getDoubleValue = 0.0;
     std::string getStringValue = "";
 
@@ -373,32 +373,32 @@ void AVBufferInnerUnitTest::CheckMetaSetAndGet()
     remoteBuffer_->flag_ = g_flag;
 
     // meta_->Set<INT_TESTKEY>(g_intValue);
-    // meta_->Set<LONG_TESTKEY>(g_longValue);
+    meta_->Set<LONG_TESTKEY>(g_longValue);
     // meta_->Set<FLOAT_TESTKEY>(g_floatValue);
-    // meta_->Set<DOUBLE_TESTKEY>(g_doubleValue);
-    // meta_->Set<STRING_TESTKEY>(g_stringValue);
-    // remoteBuffer_->meta_ = meta_;
+    meta_->Set<DOUBLE_TESTKEY>(g_doubleValue);
+    meta_->Set<STRING_TESTKEY>(g_stringValue);
+    remoteBuffer_->meta_ = meta_;
 
-    // if (parcel_ != nullptr) {
-    //     GetRemoteBuffer();
-    //     ASSERT_EQ(remoteBuffer_->GetUniqueId(), buffer_->GetUniqueId());
-    //     ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
-    // }
-    // ASSERT_NE(nullptr, buffer_->meta_);
-    // EXPECT_EQ(buffer_->pts_, g_pts);
-    // EXPECT_EQ(buffer_->dts_, g_dts);
-    // EXPECT_EQ(buffer_->duration_, g_duration);
-    // EXPECT_EQ(buffer_->flag_, g_flag);
+    if (parcel_ != nullptr) {
+        GetRemoteBuffer();
+        ASSERT_EQ(remoteBuffer_->GetUniqueId(), buffer_->GetUniqueId());
+        ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
+    }
+    ASSERT_NE(nullptr, buffer_->meta_);
+    EXPECT_EQ(buffer_->pts_, g_pts);
+    EXPECT_EQ(buffer_->dts_, g_dts);
+    EXPECT_EQ(buffer_->duration_, g_duration);
+    EXPECT_EQ(buffer_->flag_, g_flag);
 
     // buffer_->meta_->Get<INT_TESTKEY>(getIntValue);
-    // buffer_->meta_->Get<LONG_TESTKEY>(getLongValue);
+    buffer_->meta_->Get<LONG_TESTKEY>(getLongValue);
     // buffer_->meta_->Get<FLOAT_TESTKEY>(getFloatValue);
-    // buffer_->meta_->Get<DOUBLE_TESTKEY>(getDoubleValue);
-    // buffer_->meta_->Get<STRING_TESTKEY>(getStringValue);
+    buffer_->meta_->Get<DOUBLE_TESTKEY>(getDoubleValue);
+    buffer_->meta_->Get<STRING_TESTKEY>(getStringValue);
 
-    EXPECT_EQ(getIntValue, g_intValue);
+    // EXPECT_EQ(getIntValue, g_intValue);
     EXPECT_EQ(getLongValue, g_longValue);
-    EXPECT_EQ(getFloatValue, g_floatValue);
+    // EXPECT_EQ(getFloatValue, g_floatValue);
     EXPECT_EQ(getDoubleValue, g_doubleValue);
     EXPECT_EQ(getStringValue, g_stringValue);
 }
@@ -484,15 +484,15 @@ void AVBufferInnerUnitTest::CheckMemTransOutOfRange(int32_t pos)
 
 void AVBufferInnerUnitTest::CheckDataSize()
 {
-    EXPECT_EQ((int32_t)Status::OK, remoteBuffer_->memory_->SetSize(capacity_ - 1));
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), remoteBuffer_->memory_->SetSize(capacity_ - 1));
     EXPECT_EQ(remoteBuffer_->memory_->GetSize(), capacity_ - 1);
-    EXPECT_EQ((int32_t)Status::OK, remoteBuffer_->memory_->SetSize(0));
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), remoteBuffer_->memory_->SetSize(0));
     EXPECT_EQ(remoteBuffer_->memory_->GetSize(), 0);
-    EXPECT_EQ((int32_t)Status::OK, remoteBuffer_->memory_->SetSize(1));
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), remoteBuffer_->memory_->SetSize(1));
     EXPECT_EQ(remoteBuffer_->memory_->GetSize(), 1);
-    EXPECT_EQ((int32_t)Status::OK, remoteBuffer_->memory_->SetSize(-1));
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), remoteBuffer_->memory_->SetSize(-1));
     EXPECT_EQ(remoteBuffer_->memory_->GetSize(), 0);
-    EXPECT_EQ((int32_t)Status::OK, remoteBuffer_->memory_->SetSize(capacity_));
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), remoteBuffer_->memory_->SetSize(capacity_));
     EXPECT_EQ(remoteBuffer_->memory_->GetSize(), capacity_);
     if (parcel_ != nullptr) {
         GetRemoteBuffer();

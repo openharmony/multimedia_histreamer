@@ -26,7 +26,6 @@
 #include "surface_type.h"
 #include "unistd.h"
 
-
 namespace {
 const uint64_t NANOSEC_MASK = 0xFFFFFFFF;
 std::atomic<uint64_t> g_bufferId = 0;
@@ -119,16 +118,12 @@ std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(std::shared_ptr<AVAllocator> 
     FALSE_RETURN_V_MSG_E(allocator != nullptr, nullptr, "allocator is nullptr");
     FALSE_RETURN_V_MSG_E(capacity >= 0, nullptr, "capacity is invalid");
     FALSE_RETURN_V_MSG_E(align >= 0, nullptr, "align is invalid");
-    FALSE_RETURN_V_MSG_E(allocator != nullptr, nullptr, "allocator is nullptr");
-    FALSE_RETURN_V_MSG_E(capacity >= 0, nullptr, "capacity is invalid");
-    FALSE_RETURN_V_MSG_E(align >= 0, nullptr, "align is invalid");
 
     auto buffer = std::shared_ptr<AVBuffer>(new AVBuffer());
     FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
-    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
 
     int32_t ret = buffer->Init(allocator, capacity, align);
-    FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Init AVBuffer failed");
+    FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), nullptr, "Init AVBuffer failed");
 
     buffer->meta_ = std::make_shared<Meta>();
     FALSE_RETURN_V_MSG_E(buffer->meta_ != nullptr, nullptr, "Create meta_ failed, no memory");
@@ -140,20 +135,15 @@ std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(uint8_t *ptr, int32_t capacit
     FALSE_RETURN_V_MSG_E(ptr != nullptr, nullptr, "ptr is nullptr");
     FALSE_RETURN_V_MSG_E(capacity >= 0, nullptr, "capacity is invalid");
     FALSE_RETURN_V_MSG_E((0 <= size) && (size <= capacity), nullptr, "size is invalid");
-    FALSE_RETURN_V_MSG_E(ptr != nullptr, nullptr, "ptr is nullptr");
-    FALSE_RETURN_V_MSG_E(capacity >= 0, nullptr, "capacity is invalid");
-    FALSE_RETURN_V_MSG_E((0 <= size) && (size <= capacity), nullptr, "size is invalid");
 
     auto buffer = std::shared_ptr<AVBuffer>(new AVBuffer());
-    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
     FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
 
     buffer->meta_ = std::make_shared<Meta>();
     FALSE_RETURN_V_MSG_E(buffer->meta_ != nullptr, nullptr, "Create meta_ failed, no memory");
 
     int32_t ret = buffer->Init(ptr, capacity, size);
-    FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Init AVBuffer failed");
-    FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Init AVBuffer failed");
+    FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), nullptr, "Init AVBuffer failed");
     return buffer;
 }
 
@@ -161,21 +151,18 @@ std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(MessageParcel &parcel, bool i
 {
     auto buffer = std::shared_ptr<AVBuffer>(new AVBuffer());
     FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
-    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
 
     buffer->meta_ = std::make_shared<Meta>();
     FALSE_RETURN_V_MSG_E(buffer->meta_ != nullptr, nullptr, "Create meta_ failed, no memory");
 
     int32_t ret = buffer->Init(parcel, isSurfaceBuffer);
-    FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Init AVBuffer failed");
-    FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Init AVBuffer failed");
+    FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), nullptr, "Init AVBuffer failed");
     return buffer;
 }
 
 std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer()
 {
     auto buffer = std::shared_ptr<AVBuffer>(new AVBuffer());
-    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
     FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
 
     buffer->meta_ = std::make_shared<Meta>();
@@ -189,28 +176,26 @@ int32_t AVBuffer::Init(std::shared_ptr<AVAllocator> allocator, int32_t capacity,
     ss << std::hex << std::setw(16) << std::setfill('0') << GetUniqueId();
     std::string uidName = ss.str();
     memory_ = AVMemory::CreateAVMemory(uidName, allocator, capacity, align);
-    FALSE_RETURN_V_MSG_E(memory_ != nullptr, (int32_t)Status::ERROR_UNKNOWN, "Create memory failed");
-    return (int32_t)Status::OK;
+    FALSE_RETURN_V_MSG_E(memory_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN), "Create memory failed");
+    return static_cast<int32_t>(Status::OK);
 }
 
 int32_t AVBuffer::Init(uint8_t *ptr, int32_t capacity, int32_t size)
 {
     memory_ = AVMemory::CreateAVMemory(ptr, capacity, size);
-    FALSE_RETURN_V_MSG_E(memory_ != nullptr, (int32_t)Status::ERROR_UNKNOWN, "Create memory failed");
-    return (int32_t)Status::OK;
-    FALSE_RETURN_V_MSG_E(memory_ != nullptr, (int32_t)Status::ERROR_UNKNOWN, "Create memory failed");
-    return (int32_t)Status::OK;
+    FALSE_RETURN_V_MSG_E(memory_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN), "Create memory failed");
+    return static_cast<int32_t>(Status::OK);
 }
 
 int32_t AVBuffer::Init(MessageParcel &parcel, bool isSurfaceBuffer)
 {
     if (isSurfaceBuffer) {
         memory_ = AVMemory::CreateAVMemory(parcel, true);
-        FALSE_RETURN_V_MSG_E(memory_ != nullptr, (int32_t)Status::ERROR_UNKNOWN, "Create memory failed");
+        FALSE_RETURN_V_MSG_E(memory_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN), "Create memory failed");
         std::stringstream ss;
         ss << std::hex << std::setw(16) << std::setfill('0') << GetUniqueId();
         memory_->name_ = ss.str();
-        return (int32_t)Status::OK;
+        return static_cast<int32_t>(Status::OK);
     }
     uid_ = parcel.ReadUint64();
     pts_ = parcel.ReadInt64();
@@ -219,15 +204,15 @@ int32_t AVBuffer::Init(MessageParcel &parcel, bool isSurfaceBuffer)
     flag_ = parcel.ReadUint32();
 
     bool ret = Unmarshalling(parcel, *(meta_));
-    FALSE_RETURN_V_MSG_E(ret, (int32_t)Status::ERROR_UNKNOWN, "Unmarshalling meta_ failed");
+    FALSE_RETURN_V_MSG_E(ret, static_cast<int32_t>(Status::ERROR_UNKNOWN), "Unmarshalling meta_ failed");
 
     bool isBufferAttrToParcel = parcel.ReadBool();
     if (isBufferAttrToParcel) {
-        return (int32_t)Status::OK;
+        return static_cast<int32_t>(Status::OK);
     }
     memory_ = AVMemory::CreateAVMemory(parcel, false);
-    FALSE_RETURN_V_MSG_E(memory_ != nullptr, (int32_t)Status::ERROR_UNKNOWN, "Create memory failed");
-    return (int32_t)Status::OK;
+    FALSE_RETURN_V_MSG_E(memory_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN), "Create memory failed");
+    return static_cast<int32_t>(Status::OK);
 }
 
 uint64_t AVBuffer::GetUniqueId()
@@ -253,7 +238,6 @@ bool AVBuffer::WriteToMessageParcel(MessageParcel &parcel)
 
     if (!isBufferAttrToParcel) {
         MemoryType type = memory_->GetMemoryType();
-        FALSE_RETURN_V_MSG_E(type != MemoryType::VIRTUAL_MEMORY, false, "Virtual memory not support");
         FALSE_RETURN_V_MSG_E(type != MemoryType::VIRTUAL_MEMORY, false, "Virtual memory not support");
 
         ret = ret && bufferParcel.WriteUint8(static_cast<uint8_t>(type)) &&

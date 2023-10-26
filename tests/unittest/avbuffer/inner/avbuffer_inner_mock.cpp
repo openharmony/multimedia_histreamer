@@ -48,7 +48,8 @@ OH_AVCodecBufferAttr AVBufferInnerMock::GetBufferAttr()
 }
 int32_t AVBufferInnerMock::SetBufferAttr(OH_AVCodecBufferAttr &attr)
 {
-    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, AV_ERR_UNKNOWN, "buffer_ is nullptr!");
+    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN),
+                                      "buffer_ is nullptr!");
     buffer_->pts_ = attr.pts;
     buffer_->memory_->SetOffset(attr.offset);
     buffer_->flag_ = static_cast<AVCodecBufferFlag>(attr.flags);
@@ -64,9 +65,10 @@ std::shared_ptr<FormatMock> AVBufferInnerMock::GetParameter()
 
 int32_t AVBufferInnerMock::SetParameter(const std::shared_ptr<FormatMock> &format)
 {
-    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, AV_ERR_UNKNOWN, "buffer_ is nullptr!");
+    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN),
+                                      "buffer_ is nullptr!");
     *(buffer_->meta_) = std::static_pointer_cast<AVFormatInnerMock>(format)->GetFormat();
-    return AV_ERR_OK;
+    return static_cast<int32_t>(Status::OK);
 }
 
 sptr<SurfaceBuffer> AVBufferInnerMock::GetNativeBuffer()
@@ -79,7 +81,7 @@ sptr<SurfaceBuffer> AVBufferInnerMock::GetNativeBuffer()
 int32_t AVBufferInnerMock::Destroy()
 {
     buffer_ = nullptr;
-    return AV_ERR_OK;
+    return static_cast<int32_t>(Status::OK);
 }
 
 std::shared_ptr<AVBuffer> &AVBufferInnerMock::GetAVBuffer()
@@ -108,13 +110,14 @@ std::shared_ptr<AVBuffer> &AVBufferInnerMock::GetAVBuffer()
 //             return bufferQueue_->SetProducerCallback(callback);
 //         }
 //     }
-//     return AV_ERR_UNKNOWN;
+//     return static_cast<int32_t>(Status::ERROR_UNKNOWN);
 // }
 
 // int32_t AVBufferQueueInnerMock::PushBuffer(std::shared_ptr<AVBufferMock> &buffer)
 // {
-//     UNITTEST_CHECK_AND_RETURN_RET_LOG(bufferQueue_ != nullptr, AV_ERR_INVALID_VAL, "bufferQueue_ is nullptr!");
-//     return bufferQueue_->PushBuffer(std::static_pointer_cast<AVBufferInnerMock>(buffer)->GetAVBuffer());
+//     UNITTEST_CHECK_AND_RETURN_RET_LOG(bufferQueue_ != nullptr, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
+//     "bufferQueue_ is nullptr!"); return
+//     bufferQueue_->PushBuffer(std::static_pointer_cast<AVBufferInnerMock>(buffer)->GetAVBuffer());
 // }
 
 // std::shared_ptr<AVBufferMock> AVBufferQueueInnerMock::RequestBuffer(int32_t capacity)

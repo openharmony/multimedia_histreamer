@@ -46,7 +46,8 @@ OH_AVCodecBufferAttr AVBufferCapiMock::GetBufferAttr()
 }
 int32_t AVBufferCapiMock::SetBufferAttr(OH_AVCodecBufferAttr &attr)
 {
-    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, AV_ERR_UNKNOWN, "buffer_ is nullptr!");
+    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN),
+                                      "buffer_ is nullptr!");
     return OH_AVBuffer_SetBufferAttr(buffer_, &attr);
 }
 
@@ -61,7 +62,8 @@ std::shared_ptr<FormatMock> AVBufferCapiMock::GetParameter()
 
 int32_t AVBufferCapiMock::SetParameter(const std::shared_ptr<FormatMock> &format)
 {
-    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, AV_ERR_UNKNOWN, "buffer_ is nullptr!");
+    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN),
+                                      "buffer_ is nullptr!");
     return OH_AVBuffer_SetParameter(buffer_, std::static_pointer_cast<AVFormatCapiMock>(format)->GetFormat());
 }
 
@@ -76,9 +78,9 @@ sptr<SurfaceBuffer> AVBufferCapiMock::GetNativeBuffer()
 int32_t AVBufferCapiMock::Destroy()
 {
     int32_t ret = OH_AVBuffer_Destroy(buffer_);
-    UNITTEST_CHECK_AND_RETURN_RET_LOG(ret == AV_ERR_OK, ret, "OH_AVBuffer_Destroy failed!");
+    UNITTEST_CHECK_AND_RETURN_RET_LOG(ret == static_cast<int32_t>(Status::OK), ret, "OH_AVBuffer_Destroy failed!");
     buffer_ = nullptr;
-    return AV_ERR_OK;
+    return static_cast<int32_t>(Status::OK);
 }
 
 OH_AVBuffer *AVBufferCapiMock::GetAVBuffer()
@@ -137,12 +139,13 @@ OH_AVBuffer *AVBufferCapiMock::GetAVBuffer()
 //         callback.onBufferAvailable = AVBufferQueueCapiMock::OnBufferAvailable;
 //         return OH_AVBufferQueue_SetProducerCallback(bufferQueue_, callback, NULL);
 //     }
-//     return AV_ERR_OPERATE_NOT_PERMIT;
+//     return static_cast<int32_t>(Status::ERROR_INVALID_OPERATION);
 // }
 
 // int32_t AVBufferQueueCapiMock::PushBuffer(std::shared_ptr<AVBufferMock> &buffer)
 // {
-//     return OH_AVBufferQueue_PushBuffer(bufferQueue_, std::static_pointer_cast<AVBufferCapiMock>(buffer)->GetAVBuffer());
+//     return OH_AVBufferQueue_PushBuffer(bufferQueue_,
+//     std::static_pointer_cast<AVBufferCapiMock>(buffer)->GetAVBuffer());
 // }
 
 // std::shared_ptr<AVBufferMock> AVBufferQueueCapiMock::RequestBuffer(int32_t capacity)

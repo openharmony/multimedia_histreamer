@@ -52,7 +52,7 @@ void *AVHardwareAllocator::Alloc(int32_t capacity)
 {
     (void)capacity;
     int32_t ret = MapMemoryAddr();
-    FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Map dma buffer failed");
+    FALSE_RETURN_V_MSG_E(ret == Status::OK, nullptr, "Map dma buffer failed");
 
     return reinterpret_cast<void *>(allocBase_);
 }
@@ -95,23 +95,24 @@ int32_t AVHardwareAllocator::MapMemoryAddr()
             (void)::munmap(allocBase_, static_cast<size_t>(capacity_));
             allocBase_ = nullptr;
         }
-        return (int32_t)Status::ERROR_NO_MEMORY;
+        return static_cast<int32_t>(Status::ERROR_NO_MEMORY);
     };
-    FALSE_RETURN_V_MSG_E(capacity_ > 0, (int32_t)Status::ERROR_INVALID_DATA,
+    FALSE_RETURN_V_MSG_E(capacity_ > 0, static_cast<int32_t>(Status::ERROR_INVALID_DATA),
                          "capacity is invalid, capacity = " PUBLIC_LOG_D32, capacity_);
     unsigned int prot = PROT_READ | PROT_WRITE;
-    FALSE_RETURN_V_MSG_E(fd_ > 0, (int32_t)Status::ERROR_INVALID_OPERATION, "fd is invalid, fd = " PUBLIC_LOG_D32, fd_);
+    FALSE_RETURN_V_MSG_E(fd_ > 0, static_cast<int32_t>(Status::ERROR_INVALID_OPERATION),
+                         "fd is invalid, fd = " PUBLIC_LOG_D32, fd_);
     if (memFlag_ == MemoryFlag::MEMORY_READ_ONLY) {
         prot &= ~PROT_WRITE;
     } else if (memFlag_ == MemoryFlag::MEMORY_WRITE_ONLY) {
         prot &= ~PROT_READ;
     }
     void *addr = ::mmap(nullptr, static_cast<size_t>(capacity_), static_cast<int>(prot), MAP_SHARED, fd_, 0);
-    FALSE_RETURN_V_MSG_E(addr != MAP_FAILED, (int32_t)Status::ERROR_INVALID_OPERATION,
+    FALSE_RETURN_V_MSG_E(addr != MAP_FAILED, static_cast<int32_t>(Status::ERROR_INVALID_OPERATION),
                          "mmap failed, please check params");
     allocBase_ = reinterpret_cast<uint8_t *>(addr);
     CANCEL_SCOPE_EXIT_GUARD(0);
-    return (int32_t)Status::OK;
+    return static_cast<int32_t>(Status::OK);
 }
 
 AVHardwareMemory::AVHardwareMemory() : isStartSync_(false), memFlag_(MemoryFlag::MEMORY_READ_ONLY) {}
@@ -135,10 +136,10 @@ int32_t AVHardwareMemory::Init()
     memFlag_ = std::static_pointer_cast<AVHardwareAllocator>(allocator_)->GetMemFlag();
     base_ = static_cast<uint8_t *>(allocator_->Alloc(0));
 
-    FALSE_RETURN_V_MSG_E(base_ != nullptr, (int32_t)Status::ERROR_NO_MEMORY, "dma memory alloc failed");
+    FALSE_RETURN_V_MSG_E(base_ != nullptr, static_cast<int32_t>(Status::ERROR_NO_MEMORY), "dma memory alloc failed");
     MEDIA_LOG_DD("enter init, instance: 0x%{public}06" PRIXPTR ", name = %{public}s", FAKE_POINTER(this),
                  name_.c_str());
-    return (int32_t)Status::OK;
+    return static_cast<int32_t>(Status::OK);
 }
 
 int32_t AVHardwareMemory::Init(MessageParcel &parcel)
@@ -147,15 +148,15 @@ int32_t AVHardwareMemory::Init(MessageParcel &parcel)
     memFlag_ = static_cast<MemoryFlag>(parcel.ReadUint32());
 
     allocator_ = AVAllocatorFactory::CreateHardwareAllocator(fd_, capacity_, memFlag_);
-    FALSE_RETURN_V_MSG_E(allocator_ != nullptr, (int32_t)Status::ERROR_NO_MEMORY, "allocator_ is nullptr");
+    FALSE_RETURN_V_MSG_E(allocator_ != nullptr, static_cast<int32_t>(Status::ERROR_NO_MEMORY), "allocator_ is nullptr");
 
     base_ = static_cast<uint8_t *>(allocator_->Alloc(0));
     allocator_ = nullptr;
 
-    FALSE_RETURN_V_MSG_E(base_ != nullptr, (int32_t)Status::ERROR_NO_MEMORY, "dma memory alloc failed");
+    FALSE_RETURN_V_MSG_E(base_ != nullptr, static_cast<int32_t>(Status::ERROR_NO_MEMORY), "dma memory alloc failed");
     MEDIA_LOG_DD("enter init, instance: 0x%{public}06" PRIXPTR ", name = %{public}s", FAKE_POINTER(this),
                  name_.c_str());
-    return (int32_t)Status::OK;
+    return static_cast<int32_t>(Status::OK);
 }
 
 bool AVHardwareMemory::WriteToMessageParcel(MessageParcel &parcel)

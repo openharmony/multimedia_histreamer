@@ -56,7 +56,11 @@ ohos_unittest("avbuffer_inner_unit_test") {
     "./inner",
   ]
 
-  defines = [ "MEDIA_OHOS" ]
+  defines = [
+    "HST_ANY_WITH_NO_RTTI",
+    "MEDIA_OHOS",
+  ]
+
   sources = [
     # "./avbuffer_framework_unit_test.cpp",
     "./avbuffer_func_unit_test.cpp",

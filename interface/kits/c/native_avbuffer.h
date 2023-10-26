@@ -82,7 +82,7 @@ OH_AVCodecBufferAttr OH_AVBuffer_GetBufferAttr(OH_AVBuffer *buf);
  * @syscap SystemCapability.Multimedia.Media.Core
  * @param buf Encapsulate OH_AVBuffer structure instance pointer
  * @param attr The description of the Buffer, please refer to {@link OH_AVCodecBufferAttr}
- * @return Returns AV_ERR_OK if the execution is successful, otherwise returns a specific error code, refer to {@link
+ * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to {@link
  * OH_AVErrCode}
  * @since 10
  * @version 1.0
@@ -104,7 +104,7 @@ OH_AVFormat *OH_AVBuffer_GetParameter(OH_AVBuffer *buf);
  * @syscap SystemCapability.Multimedia.Media.Core
  * @param buf Encapsulate OH_AVBuffer structure instance pointer
  * @param format Encapsulate OH_AVFormat structure instance pointer, refer to {@link OH_AVFormat}
- * @return Returns AV_ERR_OK if the execution is successful, otherwise returns a specific error code, refer to {@link
+ * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to {@link
  * OH_AVErrCode}
  * @since 10
  * @version 1.0
@@ -126,7 +126,7 @@ OH_NativeBuffer *OH_AVBuffer_GetNativeBuffer(OH_AVBuffer *buf);
  * @brief Clear the internal resources of the buffer and destroy the buffer instance
  * @syscap SystemCapability.Multimedia.Media.Core
  * @param mem Encapsulate OH_AVBuffer structure instance pointer
- * @return Returns AV_ERR_OK if the execution is successful, otherwise returns a specific error code, refer to {@link
+ * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to {@link
  * OH_AVErrCode}
  * @since 10
  * @version 1.0
@@ -139,7 +139,8 @@ OH_AVErrCode OH_AVBuffer_Destroy(struct OH_AVBuffer *buf);
 //  * @param bufferQueue Encapsulate OH_AVBufferQueue structure instance pointer
 //  * @param callback  A collection of all callback functions, see {@link OH_AVBufferQueueCallback}
 //  * @param userData specified data
-//  * @return Returns AV_ERR_OK if the execution is successful, otherwise returns a specific error code, refer to {@link
+//  * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to
+//  {@link
 //  * OH_AVErrCode}
 //  * @since 10
 //  * @version 1.0
@@ -163,7 +164,8 @@ OH_AVErrCode OH_AVBuffer_Destroy(struct OH_AVBuffer *buf);
 //  * @syscap SystemCapability.Multimedia.Media.Core
 //  * @param bufferQueue Encapsulate OH_AVBufferQueue structure instance pointer
 //  * @param buf Encapsulate OH_AVBuffer structure instance pointer
-//  * @return Returns AV_ERR_OK if the execution is successful, otherwise returns a specific error code, refer to {@link
+//  * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to
+//  {@link
 //  * OH_AVErrCode}
 //  * @since 10
 //  * @version 1.0
