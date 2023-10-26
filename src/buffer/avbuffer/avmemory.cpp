@@ -13,30 +13,27 @@
  * limitations under the License.
  */
 
-#include "av_hardware_memory.h"
-#include "av_shared_memory_ext.h"
-#include "av_surface_memory.h"
-#include "av_virtual_memory.h"
-#include "avallocator.h"
-#include "avbuffer.h"
-#include "avcodec_errors.h"
-#include "avcodec_log.h"
+#include "include/av_hardware_memory.h"
+#include "include/av_shared_memory_ext.h"
+#include "include/av_surface_memory.h"
+#include "include/av_virtual_memory.h"
+#include "inner_api/buffer/avallocator.h"
+#include "inner_api/buffer/avbuffer.h"
+#include "inner_api/common/log.h"
+#include "inner_api/common/status.h"
 #include "message_parcel.h"
 #include "securec.h"
 #include "surface_buffer.h"
 
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, LOG_DOMAIN, "AVMemory"};
 const std::string INVALID_MEMORY_NAME = "";
 } // namespace
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(const std::string &name, std::shared_ptr<AVAllocator> allocator,
                                                    int32_t capacity, int32_t align)
 {
-    CHECK_AND_RETURN_RET_LOG(allocator != nullptr, nullptr, "Invalid allocator");
-
     MemoryType type = allocator->GetMemoryType();
     std::shared_ptr<AVMemory> mem = nullptr;
     switch (type) {
@@ -59,23 +56,22 @@ std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(const std::string &name, std:
         default:
             break;
     }
-    CHECK_AND_RETURN_RET_LOG(mem != nullptr, nullptr, "Create AVMemory failed, no memory, name = %{public}s",
-                             name.c_str());
+    FALSE_RETURN_V_MSG_E(mem != nullptr, nullptr, "Create AVMemory failed, no memory, name = %{public}s", name.c_str());
 
     mem->name_ = name;
     mem->allocator_ = allocator;
     mem->capacity_ = capacity;
     mem->align_ = align;
     int32_t ret = mem->Init();
-    CHECK_AND_RETURN_RET_LOG(ret == AVCS_ERR_OK, nullptr, "Init AVMemory failed, index = %{public}s",
-                             mem->name_.c_str());
+    FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Init AVMemory failed, index = %{public}s",
+                         mem->name_.c_str());
     return mem;
 }
 
 std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(uint8_t *ptr, int32_t capacity, int32_t size)
 {
     std::shared_ptr<AVMemory> mem = std::shared_ptr<AVMemory>(new AVVirtualMemory());
-    CHECK_AND_RETURN_RET_LOG(mem != nullptr, nullptr, "Create AVVirtualMemory failed, no memory");
+    FALSE_RETURN_V_MSG_E(mem != nullptr, nullptr, "Create AVVirtualMemory failed, no memory");
     mem->name_ = "virtualMemory";
     mem->allocator_ = nullptr;
     mem->capacity_ = capacity;
@@ -89,7 +85,7 @@ std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(MessageParcel &parcel, bool i
     if (isSurfaceBuffer) {
         auto mem = std::shared_ptr<AVMemory>(new AVSurfaceMemory());
         int32_t ret = mem->Init(parcel);
-        CHECK_AND_RETURN_RET_LOG(ret == AVCS_ERR_OK, nullptr, "Init AVSurfaceMemory failed");
+        FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Init AVSurfaceMemory failed");
         return mem;
     }
     MemoryType type = static_cast<MemoryType>(parcel.ReadUint8());
@@ -114,12 +110,12 @@ std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(MessageParcel &parcel, bool i
             break;
     }
 
-    CHECK_AND_RETURN_RET_LOG(mem != nullptr, nullptr, "Create AVMemory failed, no memory");
+    FALSE_RETURN_V_MSG_E(mem != nullptr, nullptr, "Create AVMemory failed, no memory");
     int32_t ret = mem->ReadCommonFromMessageParcel(parcel);
-    CHECK_AND_RETURN_RET_LOG(ret == AVCS_ERR_OK, nullptr, "Read common memory info from parcel failed");
+    FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Read common memory info from parcel failed");
     ret = mem->Init(parcel);
-    CHECK_AND_RETURN_RET_LOG(ret == AVCS_ERR_OK, nullptr, "Init AVMemory failed, name = %{public}s",
-                             mem->name_.c_str());
+    FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Init AVMemory failed, name = %{public}s",
+                         mem->name_.c_str());
     return mem;
 }
 
@@ -129,13 +125,13 @@ AVMemory::~AVMemory() {}
 
 int32_t AVMemory::Init()
 {
-    return AVCS_ERR_UNSUPPORT;
+    return (int32_t)Status::ERROR_UNIMPLEMENTED;
 }
 
 int32_t AVMemory::Init(MessageParcel &parcel)
 {
     (void)parcel;
-    return AVCS_ERR_UNSUPPORT;
+    return (int32_t)Status::ERROR_UNIMPLEMENTED;
 }
 
 bool AVMemory::WriteToMessageParcel(MessageParcel &parcel)
@@ -148,17 +144,17 @@ int32_t AVMemory::ReadCommonFromMessageParcel(MessageParcel &parcel)
 {
     name_ = parcel.ReadString();
     capacity_ = parcel.ReadInt32();
-    CHECK_AND_RETURN_RET_LOG(capacity_ >= 0, AVCS_ERR_INVALID_VAL, "capacity is invalid");
+    FALSE_RETURN_V_MSG_E(capacity_ >= 0, (int32_t)Status::ERROR_INVALID_DATA, "capacity is invalid");
 
     align_ = parcel.ReadInt32();
-    CHECK_AND_RETURN_RET_LOG(align_ >= 0, AVCS_ERR_INVALID_VAL, "align is invalid");
+    FALSE_RETURN_V_MSG_E(align_ >= 0, (int32_t)Status::ERROR_INVALID_DATA, "align is invalid");
 
     offset_ = parcel.ReadInt32();
-    CHECK_AND_RETURN_RET_LOG(offset_ >= 0, AVCS_ERR_INVALID_VAL, "offset is invalid");
+    FALSE_RETURN_V_MSG_E(offset_ >= 0, (int32_t)Status::ERROR_INVALID_DATA, "offset is invalid");
 
     size_ = parcel.ReadInt32();
-    CHECK_AND_RETURN_RET_LOG((size_ >= 0) || (capacity_ < size_), AVCS_ERR_INVALID_VAL, "size is invalid");
-    return AVCS_ERR_OK;
+    FALSE_RETURN_V_MSG_E((size_ >= 0) || (capacity_ < size_), (int32_t)Status::ERROR_INVALID_DATA, "size is invalid");
+    return (int32_t)Status::OK;
 }
 
 bool AVMemory::WriteCommonToMessageParcel(MessageParcel &parcel)
@@ -191,7 +187,7 @@ int32_t AVMemory::SetSize(int32_t size)
 {
     size_ = std::max(0, size);
     size_ = std::min(capacity_, size_);
-    return AVCS_ERR_OK;
+    return (int32_t)Status::OK;
 }
 
 int32_t AVMemory::GetOffset()
@@ -203,7 +199,7 @@ int32_t AVMemory::SetOffset(int32_t offset)
 {
     offset_ = std::max(0, offset);
     offset_ = std::min(capacity_, offset_);
-    return AVCS_ERR_OK;
+    return (int32_t)Status::OK;
 }
 
 uint8_t *AVMemory::GetAddr()
@@ -218,10 +214,10 @@ int32_t AVMemory::GetFileDescriptor()
 
 int32_t AVMemory::Write(const uint8_t *in, int32_t writeSize, int32_t position)
 {
-    CHECK_AND_RETURN_RET_LOG(in != nullptr, 0, "Input buffer is nullptr");
-    CHECK_AND_RETURN_RET_LOG(writeSize > 0, 0, "Input writeSize:%{public}d is invalid", writeSize);
+    FALSE_RETURN_V_MSG_E(in != nullptr, 0, "Input buffer is nullptr");
+    FALSE_RETURN_V_MSG_E(writeSize > 0, 0, "Input writeSize:" PUBLIC_LOG_D32 " is invalid", writeSize);
     uint8_t *addr = GetAddr();
-    CHECK_AND_RETURN_RET_LOG(addr != nullptr, 0, "Base buffer is nullptr");
+    FALSE_RETURN_V_MSG_E(addr != nullptr, 0, "Base buffer is nullptr");
     int32_t start = 0;
     if (position <= INVALID_POSITION) {
         start = size_;
@@ -230,25 +226,25 @@ int32_t AVMemory::Write(const uint8_t *in, int32_t writeSize, int32_t position)
     }
     int32_t unusedSize = capacity_ - start;
     int32_t length = std::min(writeSize, unusedSize);
-    AVCODEC_LOGD("write data, length:%{public}d, start:%{public}d, name:%{public}s", length, start, name_.c_str());
-    CHECK_AND_RETURN_RET_LOG((length + start) <= capacity_, 0,
-                             "Write out of bounds, length:%{public}d, start:%{public}d, capacity:%{public}d", length,
-                             start, capacity_);
+    FALSE_RETURN_V_MSG_E((length + start) <= capacity_, 0,
+                         "Write out of bounds, length:" PUBLIC_LOG_D32 ", start:" PUBLIC_LOG_D32
+                         ", capacity:" PUBLIC_LOG_D32,
+                         length, start, capacity_);
     uint8_t *dstPtr = addr + start;
-    CHECK_AND_RETURN_RET_LOG(dstPtr != nullptr, 0, "Inner dstPtr is nullptr");
+    FALSE_RETURN_V_MSG_E(dstPtr != nullptr, 0, "Inner dstPtr is nullptr");
     auto error = memcpy_s(dstPtr, length, in, length);
-    CHECK_AND_RETURN_RET_LOG(error == EOK, 0, "Inner memcpy_s failed, name:%{public}s, %{public}s", name_.c_str(),
-                             strerror(error));
+    FALSE_RETURN_V_MSG_E(error == EOK, 0, "Inner memcpy_s failed, name:%{public}s, %{public}s", name_.c_str(),
+                         strerror(error));
     size_ = start + length;
     return length;
 }
 
 int32_t AVMemory::Read(uint8_t *out, int32_t readSize, int32_t position)
 {
-    CHECK_AND_RETURN_RET_LOG(out != nullptr, 0, "Output buffer is nullptr");
-    CHECK_AND_RETURN_RET_LOG(readSize > 0, 0, "Output readSize:%{public}d is invalid", readSize);
+    FALSE_RETURN_V_MSG_E(out != nullptr, 0, "Output buffer is nullptr");
+    FALSE_RETURN_V_MSG_E(readSize > 0, 0, "Output readSize:" PUBLIC_LOG_D32 " is invalid", readSize);
     uint8_t *addr = GetAddr();
-    CHECK_AND_RETURN_RET_LOG(addr != nullptr, 0, "Base buffer is nullptr");
+    FALSE_RETURN_V_MSG_E(addr != nullptr, 0, "Base buffer is nullptr");
     int32_t start = 0;
     size_t maxLength = size_;
     if (position > INVALID_POSITION) {
@@ -256,15 +252,15 @@ int32_t AVMemory::Read(uint8_t *out, int32_t readSize, int32_t position)
         maxLength = size_ - start;
     }
     int32_t length = std::min(static_cast<size_t>(readSize), maxLength);
-    AVCODEC_LOGD("read data, length:%{public}d, start:%{public}d, name:%{public}s", length, start, name_.c_str());
-    CHECK_AND_RETURN_RET_LOG((length + start) <= capacity_, 0,
-                             "Read out of bounds, length:%{public}d, start:%{public}d, capacity:%{public}d", length,
-                             start, capacity_);
+    FALSE_RETURN_V_MSG_E((length + start) <= capacity_, 0,
+                         "Read out of bounds, length:" PUBLIC_LOG_D32 ", start:" PUBLIC_LOG_D32
+                         ", capacity:" PUBLIC_LOG_D32,
+                         length, start, capacity_);
     uint8_t *srcPtr = addr + start;
-    CHECK_AND_RETURN_RET_LOG(srcPtr != nullptr, 0, "Inner srcPtr is nullptr");
+    FALSE_RETURN_V_MSG_E(srcPtr != nullptr, 0, "Inner srcPtr is nullptr");
     auto error = memcpy_s(out, length, srcPtr, length);
-    CHECK_AND_RETURN_RET_LOG(error == EOK, 0, "Inner memcpy_s failed, name:%{public}s, %{public}s", name_.c_str(),
-                             strerror(error));
+    FALSE_RETURN_V_MSG_E(error == EOK, 0, "Inner memcpy_s failed, name:%{public}s, %{public}s", name_.c_str(),
+                         strerror(error));
     return length;
 }
 
@@ -280,14 +276,14 @@ sptr<SurfaceBuffer> AVMemory::GetSurfaceBuffer()
 
 int32_t AVMemory::SyncStart()
 {
-    return AVCS_ERR_UNSUPPORT;
+    return (int32_t)Status::ERROR_UNIMPLEMENTED;
 }
 
 int32_t AVMemory::SyncEnd()
 {
 
-    return AVCS_ERR_UNSUPPORT;
+    return (int32_t)Status::ERROR_UNIMPLEMENTED;
 }
 
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS

@@ -40,6 +40,6 @@ private:
     bool isFirstFlag_;
     MemoryFlag memFlag_;
 };
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
 #endif // AV_SHARED_MEMORY_EXT_H

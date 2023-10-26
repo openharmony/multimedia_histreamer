@@ -14,8 +14,6 @@
 import("//build/ohos.gni")
 import("//foundation/multimedia/histreamer/config.gni")
 
-av_codec_root_dir = "//foundation/multimedia/av_codec"
-
 config("media_foundation_avbuffer_public_config") {
   include_dirs = [
     "$histreamer_root_dir/interface/kits/c",
@@ -26,16 +24,16 @@ config("media_foundation_avbuffer_public_config") {
 
 config("media_foundation_avbuffer_config") {
   include_dirs = [
+    "./",
     "./capi",
     "./include",
-    "$av_codec_root_dir/interfaces/inner_api/native",
-    "$av_codec_root_dir/interfaces/kits/c",
-    "$av_codec_root_dir/services/dfx/include",
+    "$histreamer_root_dir/interface/",
     "$histreamer_root_dir/../../graphic/graphic_2d/frameworks/surface/include",
     "$histreamer_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
     "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/common",
     "$histreamer_root_dir/../../../commonlibrary/memory_utils/libdmabufheap/include",
   ]
+  defines = [ "MEDIA_OHOS" ]
 }
 
 ohos_static_library("media_foundation_avbuffer") {
@@ -56,8 +54,6 @@ ohos_static_library("media_foundation_avbuffer") {
     "./avbuffer_utils.cpp",
     "./avmemory.cpp",
     "./capi/native_avbuffer.cpp",
-    "./capi/native_avformat.cpp",
-    "./format.cpp",
   ]
 
   public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
@@ -67,7 +63,6 @@ ohos_static_library("media_foundation_avbuffer") {
     "graphic_2d:surface",
     "graphic_2d:sync_fence",
     "hilog:libhilog",
-    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",

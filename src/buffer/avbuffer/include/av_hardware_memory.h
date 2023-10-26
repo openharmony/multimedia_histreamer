@@ -17,12 +17,11 @@
 #define AV_HARDWARE_MEMORY_H
 
 #include <mutex>
-#include "avallocator.h"
-#include "avbuffer.h"
-#include "dmabuf_alloc.h"
+#include "inner_api/buffer/avallocator.h"
+#include "inner_api/buffer/avbuffer.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 class AVHardwareMemory : public AVMemory {
 public:
     explicit AVHardwareMemory();
@@ -45,6 +44,6 @@ private:
     bool isStartSync_;
     MemoryFlag memFlag_;
 };
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
 #endif // AV_HARDWARE_MEMORY_H

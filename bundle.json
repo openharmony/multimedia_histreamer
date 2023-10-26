@@ -61,7 +61,9 @@
                 "hdf_core",
                 "c_utils",
                 "init",
-                "player_framework"
+                "player_framework",
+                "ipc",
+                "memory_utils"
             ]
         },
         "build": {
@@ -99,6 +101,26 @@
                 "header": {
                   "header_files": [],
                   "header_base": "//foundation/multimedia/histreamer/engine/include"
+                }
+              },
+              {
+                "type": "so",
+                "name": "//foundation/multimedia/histreamer/interface/inner_api/buffer:media_foundation_buffer",
+                "header": {
+                  "header_files": [
+                    "avbuffer_queue.h",
+                    "avbuffer.h",
+                    "avallocator.h",
+                    "avbuffer_queue_producer.h",
+                    "avbuffer_queue_consumer.h",
+                    "native_avbuffer.h",
+                    "native_avformat.h",
+                    "key.h"
+                  ],
+                  "header_base": [
+                    "//foundation/multimedia/histreamer/interface/inner_api/buffer",
+                    "//foundation/multimedia/histreamer/interface/kits/c"
+                  ]
                 }
               }
             ],

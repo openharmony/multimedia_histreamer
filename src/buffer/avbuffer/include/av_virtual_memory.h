@@ -30,6 +30,6 @@ public:
 private:
     int32_t Init() override;
 };
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
 #endif // AV_VIRTUAL_MEMORY_H

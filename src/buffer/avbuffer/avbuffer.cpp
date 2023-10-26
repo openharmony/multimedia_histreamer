@@ -13,28 +13,27 @@
  * limitations under the License.
  */
 
-#include "avbuffer.h"
+#include "inner_api/buffer/avbuffer.h"
 #include <atomic>
 #include <iomanip>
 #include <sstream>
-#include "av_common.h"
-#include "av_hardware_memory.h"
-#include "av_shared_memory_ext.h"
-#include "avbuffer_utils.h"
-#include "avcodec_errors.h"
-#include "avcodec_log.h"
+#include "include/av_hardware_memory.h"
+#include "include/av_shared_memory_ext.h"
+#include "include/avbuffer_utils.h"
+#include "inner_api/common/log.h"
+#include "inner_api/common/status.h"
 #include "surface_buffer.h"
 #include "surface_type.h"
 #include "unistd.h"
 
+
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, LOG_DOMAIN, "AVBuffer"};
 const uint64_t NANOSEC_MASK = 0xFFFFFFFF;
 std::atomic<uint64_t> g_bufferId = 0;
 } // namespace
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 AVBuffer::AVBuffer() : uid_(0) {}
 std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(const AVBufferConfig &config)
 {
@@ -117,58 +116,70 @@ const AVBufferConfig &AVBuffer::GetConfig()
 std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(std::shared_ptr<AVAllocator> allocator, int32_t capacity,
                                                    int32_t align)
 {
-    CHECK_AND_RETURN_RET_LOG(allocator != nullptr, nullptr, "allocator is nullptr");
-    CHECK_AND_RETURN_RET_LOG(capacity >= 0, nullptr, "capacity is invalid");
-    CHECK_AND_RETURN_RET_LOG(align >= 0, nullptr, "align is invalid");
+    FALSE_RETURN_V_MSG_E(allocator != nullptr, nullptr, "allocator is nullptr");
+    FALSE_RETURN_V_MSG_E(capacity >= 0, nullptr, "capacity is invalid");
+    FALSE_RETURN_V_MSG_E(align >= 0, nullptr, "align is invalid");
+    FALSE_RETURN_V_MSG_E(allocator != nullptr, nullptr, "allocator is nullptr");
+    FALSE_RETURN_V_MSG_E(capacity >= 0, nullptr, "capacity is invalid");
+    FALSE_RETURN_V_MSG_E(align >= 0, nullptr, "align is invalid");
 
     auto buffer = std::shared_ptr<AVBuffer>(new AVBuffer());
-    CHECK_AND_RETURN_RET_LOG(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
 
     int32_t ret = buffer->Init(allocator, capacity, align);
-    CHECK_AND_RETURN_RET_LOG(ret == AVCS_ERR_OK, nullptr, "Init AVBuffer failed");
+    FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Init AVBuffer failed");
 
-    buffer->meta_ = std::make_shared<Format>();
-    CHECK_AND_RETURN_RET_LOG(buffer->meta_ != nullptr, nullptr, "Create meta_ failed, no memory");
+    buffer->meta_ = std::make_shared<Meta>();
+    FALSE_RETURN_V_MSG_E(buffer->meta_ != nullptr, nullptr, "Create meta_ failed, no memory");
     return buffer;
 }
 
 std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(uint8_t *ptr, int32_t capacity, int32_t size)
 {
-    CHECK_AND_RETURN_RET_LOG(ptr != nullptr, nullptr, "ptr is nullptr");
-    CHECK_AND_RETURN_RET_LOG(capacity >= 0, nullptr, "capacity is invalid");
-    CHECK_AND_RETURN_RET_LOG((0 <= size) && (size <= capacity), nullptr, "size is invalid");
+    FALSE_RETURN_V_MSG_E(ptr != nullptr, nullptr, "ptr is nullptr");
+    FALSE_RETURN_V_MSG_E(capacity >= 0, nullptr, "capacity is invalid");
+    FALSE_RETURN_V_MSG_E((0 <= size) && (size <= capacity), nullptr, "size is invalid");
+    FALSE_RETURN_V_MSG_E(ptr != nullptr, nullptr, "ptr is nullptr");
+    FALSE_RETURN_V_MSG_E(capacity >= 0, nullptr, "capacity is invalid");
+    FALSE_RETURN_V_MSG_E((0 <= size) && (size <= capacity), nullptr, "size is invalid");
 
     auto buffer = std::shared_ptr<AVBuffer>(new AVBuffer());
-    CHECK_AND_RETURN_RET_LOG(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
 
-    buffer->meta_ = std::make_shared<Format>();
-    CHECK_AND_RETURN_RET_LOG(buffer->meta_ != nullptr, nullptr, "Create meta_ failed, no memory");
+    buffer->meta_ = std::make_shared<Meta>();
+    FALSE_RETURN_V_MSG_E(buffer->meta_ != nullptr, nullptr, "Create meta_ failed, no memory");
 
     int32_t ret = buffer->Init(ptr, capacity, size);
-    CHECK_AND_RETURN_RET_LOG(ret == AVCS_ERR_OK, nullptr, "Init AVBuffer failed");
+    FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Init AVBuffer failed");
+    FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Init AVBuffer failed");
     return buffer;
 }
 
 std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(MessageParcel &parcel, bool isSurfaceBuffer)
 {
     auto buffer = std::shared_ptr<AVBuffer>(new AVBuffer());
-    CHECK_AND_RETURN_RET_LOG(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
 
-    buffer->meta_ = std::make_shared<Format>();
-    CHECK_AND_RETURN_RET_LOG(buffer->meta_ != nullptr, nullptr, "Create meta_ failed, no memory");
+    buffer->meta_ = std::make_shared<Meta>();
+    FALSE_RETURN_V_MSG_E(buffer->meta_ != nullptr, nullptr, "Create meta_ failed, no memory");
 
     int32_t ret = buffer->Init(parcel, isSurfaceBuffer);
-    CHECK_AND_RETURN_RET_LOG(ret == AVCS_ERR_OK, nullptr, "Init AVBuffer failed");
+    FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Init AVBuffer failed");
+    FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "Init AVBuffer failed");
     return buffer;
 }
 
 std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer()
 {
     auto buffer = std::shared_ptr<AVBuffer>(new AVBuffer());
-    CHECK_AND_RETURN_RET_LOG(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
 
-    buffer->meta_ = std::make_shared<Format>();
-    CHECK_AND_RETURN_RET_LOG(buffer->meta_ != nullptr, nullptr, "Create meta_ failed, no memory");
+    buffer->meta_ = std::make_shared<Meta>();
+    FALSE_RETURN_V_MSG_E(buffer->meta_ != nullptr, nullptr, "Create meta_ failed, no memory");
     return buffer;
 }
 
@@ -178,26 +189,28 @@ int32_t AVBuffer::Init(std::shared_ptr<AVAllocator> allocator, int32_t capacity,
     ss << std::hex << std::setw(16) << std::setfill('0') << GetUniqueId();
     std::string uidName = ss.str();
     memory_ = AVMemory::CreateAVMemory(uidName, allocator, capacity, align);
-    CHECK_AND_RETURN_RET_LOG(memory_ != nullptr, AVCS_ERR_UNKNOWN, "Create memory failed");
-    return AVCS_ERR_OK;
+    FALSE_RETURN_V_MSG_E(memory_ != nullptr, (int32_t)Status::ERROR_UNKNOWN, "Create memory failed");
+    return (int32_t)Status::OK;
 }
 
 int32_t AVBuffer::Init(uint8_t *ptr, int32_t capacity, int32_t size)
 {
     memory_ = AVMemory::CreateAVMemory(ptr, capacity, size);
-    CHECK_AND_RETURN_RET_LOG(memory_ != nullptr, AVCS_ERR_UNKNOWN, "Create memory failed");
-    return AVCS_ERR_OK;
+    FALSE_RETURN_V_MSG_E(memory_ != nullptr, (int32_t)Status::ERROR_UNKNOWN, "Create memory failed");
+    return (int32_t)Status::OK;
+    FALSE_RETURN_V_MSG_E(memory_ != nullptr, (int32_t)Status::ERROR_UNKNOWN, "Create memory failed");
+    return (int32_t)Status::OK;
 }
 
 int32_t AVBuffer::Init(MessageParcel &parcel, bool isSurfaceBuffer)
 {
     if (isSurfaceBuffer) {
         memory_ = AVMemory::CreateAVMemory(parcel, true);
-        CHECK_AND_RETURN_RET_LOG(memory_ != nullptr, AVCS_ERR_UNKNOWN, "Create memory failed");
+        FALSE_RETURN_V_MSG_E(memory_ != nullptr, (int32_t)Status::ERROR_UNKNOWN, "Create memory failed");
         std::stringstream ss;
         ss << std::hex << std::setw(16) << std::setfill('0') << GetUniqueId();
         memory_->name_ = ss.str();
-        return AVCS_ERR_OK;
+        return (int32_t)Status::OK;
     }
     uid_ = parcel.ReadUint64();
     pts_ = parcel.ReadInt64();
@@ -206,15 +219,15 @@ int32_t AVBuffer::Init(MessageParcel &parcel, bool isSurfaceBuffer)
     flag_ = parcel.ReadUint32();
 
     bool ret = Unmarshalling(parcel, *(meta_));
-    CHECK_AND_RETURN_RET_LOG(ret, AVCS_ERR_UNKNOWN, "Unmarshalling meta_ failed");
+    FALSE_RETURN_V_MSG_E(ret, (int32_t)Status::ERROR_UNKNOWN, "Unmarshalling meta_ failed");
 
     bool isBufferAttrToParcel = parcel.ReadBool();
     if (isBufferAttrToParcel) {
-        return AVCS_ERR_OK;
+        return (int32_t)Status::OK;
     }
     memory_ = AVMemory::CreateAVMemory(parcel, false);
-    CHECK_AND_RETURN_RET_LOG(memory_ != nullptr, AVCS_ERR_UNKNOWN, "Create memory failed");
-    return AVCS_ERR_OK;
+    FALSE_RETURN_V_MSG_E(memory_ != nullptr, (int32_t)Status::ERROR_UNKNOWN, "Create memory failed");
+    return (int32_t)Status::OK;
 }
 
 uint64_t AVBuffer::GetUniqueId()
@@ -240,7 +253,8 @@ bool AVBuffer::WriteToMessageParcel(MessageParcel &parcel)
 
     if (!isBufferAttrToParcel) {
         MemoryType type = memory_->GetMemoryType();
-        CHECK_AND_RETURN_RET_LOG(type != MemoryType::VIRTUAL_MEMORY, false, "Virtual memory not support");
+        FALSE_RETURN_V_MSG_E(type != MemoryType::VIRTUAL_MEMORY, false, "Virtual memory not support");
+        FALSE_RETURN_V_MSG_E(type != MemoryType::VIRTUAL_MEMORY, false, "Virtual memory not support");
 
         ret = ret && bufferParcel.WriteUint8(static_cast<uint8_t>(type)) &&
               memory_->WriteCommonToMessageParcel(bufferParcel) && memory_->WriteToMessageParcel(bufferParcel);
@@ -250,5 +264,5 @@ bool AVBuffer::WriteToMessageParcel(MessageParcel &parcel)
     }
     return ret;
 }
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS

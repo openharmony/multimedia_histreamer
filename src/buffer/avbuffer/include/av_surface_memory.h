@@ -39,6 +39,6 @@ private:
     sptr<SurfaceBuffer> surfaceBuffer_;
     bool isFirstFlag_;
 };
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
 #endif // AV_SURFACE_MEMORY_H

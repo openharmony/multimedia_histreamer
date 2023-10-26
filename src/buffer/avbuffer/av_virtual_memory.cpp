@@ -13,24 +13,20 @@
  * limitations under the License.
  */
 
-#include "av_virtual_memory.h"
-#include "av_virtual_allocator.h"
-#include "avbuffer_utils.h"
-#include "avcodec_errors.h"
-#include "avcodec_log.h"
+#include "include/av_virtual_memory.h"
+#include "include/av_virtual_allocator.h"
+#include "include/avbuffer_utils.h"
+#include "inner_api/buffer/avallocator.h"
+#include "inner_api/common/log.h"
+#include "inner_api/common/status.h"
 #include "message_parcel.h"
 
-namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, LOG_DOMAIN, "AVVirtualMemory"};
-constexpr uint8_t LOGD_FREQUENCY = 5;
-} // namespace
-
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 std::shared_ptr<AVAllocator> AVAllocatorFactory::CreateVirtualAllocator()
 {
     auto allocator = std::shared_ptr<AVVirtualAllocator>(new AVVirtualAllocator());
-    CHECK_AND_RETURN_RET_LOG(allocator != nullptr, nullptr, "Create AVVirtualAllocator failed, no memory");
+    FALSE_RETURN_V_MSG_E(allocator != nullptr, nullptr, "Create AVVirtualAllocator failed, no memory");
     return allocator;
 }
 
@@ -39,7 +35,7 @@ AVVirtualAllocator::AVVirtualAllocator(){};
 void *AVVirtualAllocator::Alloc(int32_t capacity)
 {
     uint8_t *ptr = new uint8_t[capacity];
-    CHECK_AND_RETURN_RET_LOG(ptr != nullptr, nullptr, "Alloc memory failed, no memory");
+    FALSE_RETURN_V_MSG_E(ptr != nullptr, nullptr, "Alloc memory failed, no memory");
 
     return static_cast<void *>(ptr);
 }
@@ -47,9 +43,7 @@ void *AVVirtualAllocator::Alloc(int32_t capacity)
 bool AVVirtualAllocator::Free(void *ptr)
 {
     uint8_t *dataPtr = static_cast<uint8_t *>(ptr);
-    CHECK_AND_RETURN_RET_LOG(dataPtr != nullptr, false, "Invalid ptr, ptr = 0x%{public}06" PRIXPTR,
-                             FAKE_POINTER(dataPtr));
-
+    FALSE_RETURN_V_MSG_E(dataPtr != nullptr, false, "Invalid ptr, ptr = 0x%{public}06" PRIXPTR, FAKE_POINTER(dataPtr));
     delete dataPtr;
     return true;
 }
@@ -63,12 +57,12 @@ AVVirtualMemory::AVVirtualMemory() {}
 
 AVVirtualMemory::~AVVirtualMemory()
 {
-    AVCODEC_LOGD_LIMIT(LOGD_FREQUENCY, "enter dtor, instance: 0x%{public}06" PRIXPTR, FAKE_POINTER(this));
+    MEDIA_LOG_DD("enter dtor, instance: 0x%{public}06" PRIXPTR, FAKE_POINTER(this));
     if (allocator_ == nullptr) {
         return;
     }
     bool ret = allocator_->Free(static_cast<void *>(base_));
-    CHECK_AND_RETURN_LOG(ret, "Free memory failed, instance: 0x%{public}06" PRIXPTR, FAKE_POINTER(this));
+    FALSE_RETURN_MSG(ret, "Free memory failed, instance: 0x%{public}06" PRIXPTR, FAKE_POINTER(this));
     base_ = nullptr;
 }
 
@@ -76,18 +70,18 @@ int32_t AVVirtualMemory::Init()
 {
     int32_t allocSize = align_ ? (capacity_ + align_ - 1) : capacity_;
     base_ = static_cast<uint8_t *>(allocator_->Alloc(allocSize));
-    CHECK_AND_RETURN_RET_LOG(base_ != nullptr, AVCS_ERR_NO_MEMORY, "Alloc AVVirtualMemory failed");
+    FALSE_RETURN_V_MSG_E(base_ != nullptr, (int32_t)Status::ERROR_NO_MEMORY, "Alloc AVVirtualMemory failed");
 
     uintptr_t addrBase = reinterpret_cast<uintptr_t>(base_);
     offset_ = static_cast<size_t>(AlignUp(addrBase, static_cast<uintptr_t>(offset_)) - addrBase);
 
-    AVCODEC_LOGD_LIMIT(LOGD_FREQUENCY, "enter init, instance: 0x%{public}06" PRIXPTR, FAKE_POINTER(this));
-    return AVCS_ERR_OK;
+    MEDIA_LOG_DD("enter init, instance: 0x%{public}06" PRIXPTR, FAKE_POINTER(this));
+    return (int32_t)Status::OK;
 }
 
 MemoryType AVVirtualMemory::GetMemoryType()
 {
     return MemoryType::VIRTUAL_MEMORY;
 }
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS

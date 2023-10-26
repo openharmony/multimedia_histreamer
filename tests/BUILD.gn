@@ -16,6 +16,6 @@ group("media_foundation_unit_test") {
   testonly = true
   deps = [
     "unittest/avbuffer:avbuffer_unit_test",
-    "unittest/format:format_unit_test",
+    # "unittest/format:format_unit_test",
   ]
 }

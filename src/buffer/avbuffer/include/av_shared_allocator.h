@@ -39,6 +39,6 @@ private:
 
     MemoryFlag memFlag_;
 };
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
 #endif // AV_SHARED_ALLOCATOR_H

@@ -16,11 +16,13 @@
 #ifndef AV_HARDWARE_ALLOCATOR_H
 #define AV_HARDWARE_ALLOCATOR_H
 
-#include "avallocator.h"
+#include "inner_api/buffer/avallocator.h"
+#ifdef MEDIA_OHOS
 #include "dmabuf_alloc.h"
+#endif
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 class AVHardwareAllocator : public AVAllocator {
 public:
     friend class AVAllocatorFactory;
@@ -42,6 +44,6 @@ private:
     uint8_t *allocBase_;
     MemoryFlag memFlag_;
 };
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
 #endif // AV_HARDWARE_ALLOCATOR_H

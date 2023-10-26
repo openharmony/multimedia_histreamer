@@ -19,10 +19,10 @@
 #include <memory>
 #include <string>
 #include "avallocator.h"
-#include "format.h"
+#include "inner_api/meta/meta.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 /**
  * @brief Struct that encapsulates some info of media buffer.
  */
@@ -149,8 +149,9 @@ public:
     int64_t dts_;
     int64_t duration_;
     uint32_t flag_;
-    std::shared_ptr<Format> meta_;
+    std::shared_ptr<Meta> meta_;  // TODO: 应该使用 meta，而不是 format， format只是对外提供接口才会涉及到，而且它的内部实现应该是直接操作Meta
     std::shared_ptr<AVMemory> memory_;
+    // TODO: 包装SurfaceBuffer的时候，需要 保存 fence 等参数
 
 private:
     explicit AVBuffer();
@@ -198,7 +199,7 @@ public:
      * @brief Set the memory's used size.
      * @param size The memory's used size. If the size is greater than the capacity, it will be set to equal the
      * capacity.
-     * @return Returns AVCS_ERR_OK if the execution is successful, otherwise returns a specific error code, refer to
+     * @return Returns (int32_t)Status::OK if the execution is successful, otherwise returns a specific error code, refer to
      * {@link AVCodecServiceErrCode}
      * @since 4.1
      * @version 1.0
@@ -216,7 +217,7 @@ public:
     /**
      * @brief Set the memory's offset.
      * @param offset The memory's offset, bytes.
-     * @return Returns AVCS_ERR_OK if the execution is successful, otherwise returns a specific error code, refer to
+     * @return Returns (int32_t)Status::OK if the execution is successful, otherwise returns a specific error code, refer to
      * {@link AVCodecServiceErrCode}
      * @since 4.1
      * @version 1.0
@@ -281,7 +282,7 @@ public:
 
     /**
      * @brief Start data synchronization, only used when the memory type is {@link HARDWARE_MEMORY}.
-     * @return  Returns AVCS_ERR_OK if the execution is successful, otherwise returns a specific error code, refer to
+     * @return  Returns (int32_t)Status::OK if the execution is successful, otherwise returns a specific error code, refer to
      * {@link AVCodecServiceErrCode}
      * @since 4.1
      * @version 1.0
@@ -290,7 +291,7 @@ public:
 
     /**
      * @brief End data synchronization, only used when the memory type is {@link HARDWARE_MEMORY}.
-     * @return  Returns AVCS_ERR_OK if the execution is successful, otherwise returns a specific error code, refer to
+     * @return  Returns (int32_t)Status::OK if the execution is successful, otherwise returns a specific error code, refer to
      * {@link AVCodecServiceErrCode}
      * @since 4.1
      * @version 1.0
@@ -321,6 +322,6 @@ private:
     static std::shared_ptr<AVMemory> CreateAVMemory(uint8_t *ptr, int32_t capacity, int32_t size);
     static std::shared_ptr<AVMemory> CreateAVMemory(MessageParcel &parcel, bool isSurfaceBuffer = false);
 };
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
 #endif // AVBUFFER_H

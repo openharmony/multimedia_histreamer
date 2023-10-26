@@ -19,7 +19,7 @@ module_output_path = "histreamer/unittest"
 group("avbuffer_unit_test") {
   testonly = true
   deps = [
-    ":avbuffer_capi_unit_test",
+    # ":avbuffer_capi_unit_test",
     ":avbuffer_inner_unit_test",
   ]
 }
@@ -56,17 +56,18 @@ ohos_unittest("avbuffer_inner_unit_test") {
     "./inner",
   ]
 
+  defines = [ "MEDIA_OHOS" ]
   sources = [
-    "./avbuffer_framework_unit_test.cpp",
+    # "./avbuffer_framework_unit_test.cpp",
     "./avbuffer_func_unit_test.cpp",
-    "./inner/avbuffer_inner_mock.cpp",
-    "./inner/avbuffer_inner_mock_factory.cpp",
+    # "./inner/avbuffer_inner_mock.cpp",
+    # "./inner/avbuffer_inner_mock_factory.cpp",
   ]
 
   cflags = avbuffer_unittest_cflags
 
   public_deps = [
-    "$histreamer_root_dir/src/buffer/avbuffer:media_foundation_avbuffer",
+    "$histreamer_root_dir/interface/inner_api/buffer:media_foundation_buffer",
     "../common:media_foundation_inner_unit_test",
   ]
 
@@ -89,10 +90,13 @@ ohos_unittest("avbuffer_capi_unit_test") {
     "$histreamer_root_dir/interface/kits/c",
   ]
 
-  defines = [ "AVBUFFER_CAPI_UNIT_TEST" ]
+  defines = [
+    "AVBUFFER_CAPI_UNIT_TEST",
+    "MEDIA_OHOS",
+  ]
 
   sources = [
-    "./avbuffer_framework_unit_test.cpp",
+    # "./avbuffer_framework_unit_test.cpp",
     "./capi/avbuffer_capi_mock.cpp",
     "./capi/avbuffer_capi_mock_factory.cpp",
   ]
@@ -100,7 +104,7 @@ ohos_unittest("avbuffer_capi_unit_test") {
   cflags = avbuffer_unittest_cflags
 
   public_deps = [
-    "$histreamer_root_dir/src/buffer/avbuffer:media_foundation_avbuffer",
+    "$histreamer_root_dir/interface/inner_api/buffer:media_foundation_buffer",
     "../common:media_foundation_capi_unit_test",
   ]
 

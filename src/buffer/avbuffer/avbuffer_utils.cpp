@@ -13,91 +13,86 @@
  * limitations under the License.
  */
 
-#include "avbuffer_utils.h"
-#include "avcodec_log.h"
+#include "include/avbuffer_utils.h"
+#include "inner_api/common/log.h"
+#include "inner_api/meta/any.h"
+#include "inner_api/meta/meta_key.h"
 
-namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, LOG_DOMAIN, "AVBufferUtils"};
-} // namespace
 namespace OHOS {
-namespace MediaAVCodec {
-bool Marshalling(MessageParcel &parcel, const Format &format)
+namespace Media {
+bool Marshalling(MessageParcel &parcel, const Meta &meta)
 {
-    auto dataMap = format.GetFormatMap();
-    (void)parcel.WriteUint32(dataMap.size());
-    for (auto it = dataMap.begin(); it != dataMap.end(); ++it) {
-        (void)parcel.WriteString(it->first);
-        (void)parcel.WriteUint32(it->second.type);
-        switch (it->second.type) {
-            case FORMAT_TYPE_INT32:
-                (void)parcel.WriteInt32(it->second.val.int32Val);
-                break;
-            case FORMAT_TYPE_INT64:
-                (void)parcel.WriteInt64(it->second.val.int64Val);
-                break;
-            case FORMAT_TYPE_FLOAT:
-                (void)parcel.WriteFloat(it->second.val.floatVal);
-                break;
-            case FORMAT_TYPE_DOUBLE:
-                (void)parcel.WriteDouble(it->second.val.doubleVal);
-                break;
-            case FORMAT_TYPE_STRING:
-                (void)parcel.WriteString(it->second.stringVal);
-                break;
-            case FORMAT_TYPE_ADDR:
-                (void)parcel.WriteInt32(static_cast<int32_t>(it->second.size));
-                (void)parcel.WriteUnpadBuffer(reinterpret_cast<const void *>(it->second.addr), it->second.size);
-                break;
-            default:
-                AVCODEC_LOGE("fail to Marshalling Key: %{public}s", it->first.c_str());
-                return false;
-        }
-        AVCODEC_LOGD("success to Marshalling Key: %{public}s", it->first.c_str());
-    }
+    (void)parcel;
+    (void)meta;
+    return false;
+    // MessageParcel metaParcel;
+    // int32_t metaSize = 0;
+    // bool ret = metaParcel.WriteUint32(meta.size());
+    // for (auto it = meta.begin(); it != meta.end(); ++it) {
+    //     ++metaSize;
+    //     ret &= metaParcel.WriteString(it->first);
+    //     const auto &type = it->second.Type();
+    //     ret &= metaParcel.WriteString(type.name());
+    //     if (type == typeid(int32_t)) {
+    //         ret &= metaParcel.WriteInt32(it->second);
+    //     } else if (type == typeid(int64_t)) {
+    //         ret &= metaParcel.WriteInt64(it->second);
+    //     } else if (type == typeid(float)) {
+    //         ret &= metaParcel.WriteFloat(it->second);
+    //     } else if (type == typeid(double)) {
+    //         ret &= metaParcel.WriteDouble(it->second);
+    //     } else if (type == typeid(std::string)) {
+    //         ret &= metaParcel.WriteString(it->second);
+    //     // } else if (type == typeid(void *)) {
+    //     //     ret &= metaParcel.WriteInt32(static_cast<int32_t>(it->second.size));
+    //     //     ret &= metaParcel.WriteUnpadBuffer(reinterpret_cast<const void *>(it->second.addr), it->second.size);
+    //     } else {
+    //         MEDIA_LOG_E("fail to Marshalling Key: " PUBLIC_LOG_S, it->first.c_str());
+    //         return false;
+    //     }
+    //     MEDIA_LOG_D("success to Marshalling Key: " PUBLIC_LOG_S, it->first.c_str());
+    // }
+    // if (ret) {
+    //     parcel.Append(metaParcel);
+    // }
+    // return ret;
 
-    return true;
 }
 
-bool Unmarshalling(MessageParcel &parcel, Format &format)
+bool Unmarshalling(MessageParcel &parcel, Meta &meta)
 {
-    uint32_t size = parcel.ReadUint32();
-    for (uint32_t index = 0; index < size; index++) {
-        std::string key = parcel.ReadString();
-        uint32_t valType = parcel.ReadUint32();
-        switch (valType) {
-            case FORMAT_TYPE_INT32:
-                (void)format.PutIntValue(key, parcel.ReadInt32());
-                break;
-            case FORMAT_TYPE_INT64:
-                (void)format.PutLongValue(key, parcel.ReadInt64());
-                break;
-            case FORMAT_TYPE_FLOAT:
-                (void)format.PutFloatValue(key, parcel.ReadFloat());
-                break;
-            case FORMAT_TYPE_DOUBLE:
-                (void)format.PutDoubleValue(key, parcel.ReadDouble());
-                break;
-            case FORMAT_TYPE_STRING:
-                (void)format.PutStringValue(key, parcel.ReadString());
-                break;
-            case FORMAT_TYPE_ADDR: {
-                auto addrSize = parcel.ReadInt32();
-                auto addr = parcel.ReadUnpadBuffer(static_cast<size_t>(addrSize));
-                if (addr == nullptr) {
-                    AVCODEC_LOGE("fail to ReadBuffer Key: %{public}s", key.c_str());
-                    return false;
-                }
-                (void)format.PutBuffer(key, addr, static_cast<size_t>(addrSize));
-                break;
-            }
-            default:
-                AVCODEC_LOGE("fail to Unmarshalling Key: %{public}s", key.c_str());
-                return false;
-        }
-        AVCODEC_LOGD("success to Unmarshalling Key: %{public}s", key.c_str());
-    }
-
-    return true;
+    (void)parcel;
+    (void)meta;
+    return false;
+    // uint32_t size = parcel.ReadUint32();
+    // for (uint32_t index = 0; index < size; index++) {
+    //     std::string key = parcel.ReadString();
+    //     std::string valType = parcel.ReadWriteString();
+    //     if (valType == typeid(int32_t).name()) {
+    //         meta.Get<key>(parcel.ReadInt32());
+    //     } else if (valType == typeid(int64_t).name()) {
+    //         meta.Get<key>(parcel.ReadInt64());
+    //     } else if (valType == typeid(float).name()) {
+    //         meta.Get<key>(parcel.ReadFloat());
+    //     } else if (valType == typeid(double).name()) {
+    //         meta.Get<key>(parcel.ReadDouble());
+    //     } else if (valType == typeid(std::string).name()) {
+    //         meta.Get<key>(parcel.ReadString());
+    //     // } else if (valType == typeid(void *).name()) {
+    //     //     auto addrSize = parcel.ReadInt32();
+    //     //     auto addr = parcel.ReadUnpadBuffer(static_cast<size_t>(addrSize));
+    //     //     if (addr == nullptr) {
+    //     //         MEDIA_LOG_E("fail to ReadBuffer Key: %{public}s", key.c_str());
+    //     //         return false;
+    //     //     }
+    //     //     (void)meta.PutBuffer(key, addr, static_cast<size_t>(addrSize));
+    //     } else {
+    //         MEDIA_LOG_E("fail to Unmarshalling Key: %{public}s", key.c_str());
+    //         return false;
+    //     }
+    //     MEDIA_LOG_D("success to Unmarshalling Key: %{public}s", key.c_str());
+    // }
+    // return true;
 }
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS

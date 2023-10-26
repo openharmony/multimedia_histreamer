@@ -17,13 +17,13 @@
 #define AVBUFFER_UTILS_H
 
 #include <unistd.h>
-#include "format.h"
+#include "inner_api/meta/meta.h"
 #include "message_parcel.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
-[[maybe_unused]] bool Marshalling(MessageParcel &parcel, const Format &format);
-[[maybe_unused]] bool Unmarshalling(MessageParcel &parcel, Format &format);
+namespace Media {
+[[maybe_unused]] bool Marshalling(MessageParcel &parcel, const Meta &meta);
+[[maybe_unused]] bool Unmarshalling(MessageParcel &parcel, Meta &meta);
 
 template <typename T>
 using MakeUnsigned = typename std::make_unsigned<T>::type;
@@ -34,6 +34,6 @@ template <typename T, typename U>
                               static_cast<uint64_t>((~(static_cast<MakeUnsigned<T>>(alignment) - 1))))
                            : num;
 }
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
 #endif // AVBUFFER_UTILS_H

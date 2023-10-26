@@ -37,6 +37,6 @@ private:
 
     BufferRequestConfig config_;
 };
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
 #endif // AV_SURFACE_ALLOCATOR_H

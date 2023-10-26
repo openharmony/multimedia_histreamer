@@ -35,6 +35,6 @@ public:
 private:
     explicit AVVirtualAllocator();
 };
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
 #endif // AV_VIRTUAL_ALLOCATOR_H

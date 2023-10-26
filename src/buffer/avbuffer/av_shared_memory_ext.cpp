@@ -13,28 +13,26 @@
  * limitations under the License.
  */
 
-#include "av_shared_memory_ext.h"
+#include "include/av_shared_memory_ext.h"
 #include <unistd.h>
 #include "ashmem.h"
-#include "av_shared_allocator.h"
-#include "avcodec_errors.h"
-#include "avcodec_log.h"
+#include "include/av_shared_allocator.h"
+#include "inner_api/buffer/avallocator.h"
+#include "inner_api/common/log.h"
+#include "inner_api/common/status.h"
 #include "message_parcel.h"
 #include "scope_guard.h"
+#include "include/avbuffer_utils.h"
+#ifdef MEDIA_OHOS
 #include "sys/mman.h"
-#include "avbuffer_utils.h"
-
-namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, LOG_DOMAIN, "AVSharedMemoryExt"};
-constexpr uint8_t LOGD_FREQUENCY = 5;
-} // namespace
+#endif
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 std::shared_ptr<AVAllocator> AVAllocatorFactory::CreateSharedAllocator(MemoryFlag memFlag)
 {
     auto allocator = std::shared_ptr<AVSharedAllocator>(new AVSharedAllocator());
-    CHECK_AND_RETURN_RET_LOG(allocator != nullptr, nullptr, "Create AVSharedAllocator failed, no memory");
+    FALSE_RETURN_V_MSG_E(allocator != nullptr, nullptr, "Create AVSharedAllocator failed, no memory");
     allocator->memFlag_ = memFlag;
     return allocator;
 }
@@ -44,7 +42,7 @@ AVSharedAllocator::AVSharedAllocator(){};
 void *AVSharedAllocator::Alloc(int32_t capacity)
 {
     int32_t fd = AshmemCreate(0, static_cast<size_t>(capacity)); // release by close(fd)
-    CHECK_AND_RETURN_RET_LOG(fd > 0, nullptr, "fd is invalid, fd = %{public}d", fd);
+    FALSE_RETURN_V_MSG_E(fd > 0, nullptr, "fd is invalid, fd = " PUBLIC_LOG_D32, fd);
 
     return reinterpret_cast<void *>(fd);
 }
@@ -73,14 +71,14 @@ AVSharedMemoryExt::AVSharedMemoryExt() : fd_(-1), isFirstFlag_(true), memFlag_(M
 
 AVSharedMemoryExt::~AVSharedMemoryExt()
 {
-    AVCODEC_LOGD_LIMIT(LOGD_FREQUENCY, "enter dtor, instance: 0x%{public}06" PRIXPTR ", name = %{public}s",
-                       FAKE_POINTER(this), name_.c_str());
+    MEDIA_LOG_DD("enter dtor, instance: 0x%{public}06" PRIXPTR ", name = %{public}s", FAKE_POINTER(this),
+                 name_.c_str());
     Close();
     if (allocator_ == nullptr) {
         return;
     }
     bool ret = allocator_->Free(reinterpret_cast<void *>(fd_));
-    CHECK_AND_RETURN_LOG(ret, "Free memory failed, instance: 0x%{public}06" PRIXPTR, FAKE_POINTER(this));
+    FALSE_RETURN_MSG(ret, "Free memory failed, instance: 0x%{public}06" PRIXPTR, FAKE_POINTER(this));
 }
 
 int32_t AVSharedMemoryExt::Init()
@@ -89,30 +87,29 @@ int32_t AVSharedMemoryExt::Init()
 
     int32_t allocSize = align_ ? (capacity_ + align_ - 1) : capacity_;
     fd_ = reinterpret_cast<intptr_t>(allocator_->Alloc(allocSize));
-    CHECK_AND_RETURN_RET_LOG(fd_ > 0, AVCS_ERR_NO_MEMORY, "Alloc AVSharedMemoryExt failed");
+    FALSE_RETURN_V_MSG_E(fd_ > 0, (int32_t)Status::ERROR_NO_MEMORY, "Alloc AVSharedMemoryExt failed");
 
     uintptr_t addrBase = reinterpret_cast<uintptr_t>(base_);
     offset_ = static_cast<size_t>(AlignUp(addrBase, static_cast<uintptr_t>(offset_)) - addrBase);
 
-    AVCODEC_LOGD_LIMIT(LOGD_FREQUENCY, "enter init, instance: 0x%{public}06" PRIXPTR ", name = %{public}s",
-                       FAKE_POINTER(this), name_.c_str());
-    return AVCS_ERR_OK;
+    MEDIA_LOG_DD("enter init, instance: 0x%{public}06" PRIXPTR ", name = %{public}s", FAKE_POINTER(this),
+                 name_.c_str());
+    return (int32_t)Status::OK;
 }
 
 int32_t AVSharedMemoryExt::Init(MessageParcel &parcel)
 {
     fd_ = dup(parcel.ReadFileDescriptor());
     memFlag_ = static_cast<MemoryFlag>(parcel.ReadUint32());
-    AVCODEC_LOGD_LIMIT(LOGD_FREQUENCY, "enter init, instance: 0x%{public}06" PRIXPTR ", name = %{public}s",
-                       FAKE_POINTER(this), name_.c_str());
-    return AVCS_ERR_OK;
+    MEDIA_LOG_DD("enter init, instance: 0x%{public}06" PRIXPTR ", name = %{public}s", FAKE_POINTER(this),
+                 name_.c_str());
+    return (int32_t)Status::OK;
 }
 
 bool AVSharedMemoryExt::WriteToMessageParcel(MessageParcel &parcel)
 {
     MessageParcel bufferParcel;
-    bool ret = bufferParcel.WriteFileDescriptor(fd_) &&
-               bufferParcel.WriteUint32(static_cast<uint32_t>(memFlag_));
+    bool ret = bufferParcel.WriteFileDescriptor(fd_) && bufferParcel.WriteUint32(static_cast<uint32_t>(memFlag_));
     if (ret) {
         parcel.Append(bufferParcel);
     }
@@ -123,7 +120,7 @@ uint8_t *AVSharedMemoryExt::GetAddr()
 {
     if (isFirstFlag_) {
         int32_t ret = MapMemoryAddr();
-        CHECK_AND_RETURN_RET_LOG(ret == AVCS_ERR_OK, nullptr, "MapMemory failed");
+        FALSE_RETURN_V_MSG_E(ret == (int32_t)Status::OK, nullptr, "MapMemory failed");
         isFirstFlag_ = false;
     }
     return base_;
@@ -146,24 +143,28 @@ MemoryFlag AVSharedMemoryExt::GetMemFlag()
 
 void AVSharedMemoryExt::Close() noexcept
 {
+#ifdef MEDIA_OHOS
     if (base_ != nullptr) {
         (void)::munmap(base_, static_cast<size_t>(capacity_));
         base_ = nullptr;
         size_ = 0;
     }
+#endif
 }
 
 int32_t AVSharedMemoryExt::MapMemoryAddr()
 {
+#ifdef MEDIA_OHOS
     ON_SCOPE_EXIT(0)
     {
-        AVCODEC_LOGE("create avsharedmemory failed, name = %{public}s, size = %{public}d, "
-                     "flags = 0x%{public}x, fd = %{public}d",
-                     name_.c_str(), capacity_, static_cast<int32_t>(memFlag_), fd_);
+        MEDIA_LOG_E("create avsharedmemory failed, name = %{public}s, size = " PUBLIC_LOG_D32 ", "
+                    "flags = 0x%{public}x, fd = " PUBLIC_LOG_D32,
+                    name_.c_str(), capacity_, static_cast<int32_t>(memFlag_), fd_);
         Close();
-        return AVCS_ERR_NO_MEMORY;
+        return (int32_t)Status::ERROR_NO_MEMORY;
     };
-    CHECK_AND_RETURN_RET_LOG(capacity_ > 0, AVCS_ERR_INVALID_VAL, "size is invalid, size = %{public}d", capacity_);
+    FALSE_RETURN_V_MSG_E(capacity_ > 0, (int32_t)Status::ERROR_INVALID_DATA, "size is invalid, size = " PUBLIC_LOG_D32,
+                         capacity_);
     unsigned int prot = PROT_READ | PROT_WRITE;
     if (memFlag_ == MemoryFlag::MEMORY_READ_ONLY) {
         prot &= ~PROT_WRITE;
@@ -171,15 +172,17 @@ int32_t AVSharedMemoryExt::MapMemoryAddr()
         prot &= ~PROT_READ;
     }
     int result = AshmemSetProt(fd_, static_cast<int>(prot));
-    CHECK_AND_RETURN_RET_LOG(result >= 0, AVCS_ERR_INVALID_OPERATION, "AshmemSetProt failed, result = %{public}d",
-                             result);
+    FALSE_RETURN_V_MSG_E(result >= 0, (int32_t)Status::ERROR_INVALID_OPERATION,
+                         "AshmemSetProt failed, result = " PUBLIC_LOG_D32, result);
 
     void *addr = ::mmap(nullptr, static_cast<size_t>(capacity_), static_cast<int>(prot), MAP_SHARED, fd_, 0);
-    CHECK_AND_RETURN_RET_LOG(addr != MAP_FAILED, AVCS_ERR_INVALID_OPERATION, "mmap failed, please check params");
+    FALSE_RETURN_V_MSG_E(addr != MAP_FAILED, (int32_t)Status::ERROR_INVALID_OPERATION,
+                         "mmap failed, please check params");
 
     base_ = static_cast<uint8_t *>(addr);
     CANCEL_SCOPE_EXIT_GUARD(0);
-    return AVCS_ERR_OK;
+#endif
+    return (int32_t)Status::OK;
 }
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
