@@ -14,80 +14,89 @@
  */
 
 #include "include/avbuffer_utils.h"
+#include "inner_api/buffer/avbuffer.h"
 #include "inner_api/common/log.h"
 #include "inner_api/cpp_ext/type_cast_ext.h"
 #include "inner_api/meta/any.h"
+#include "inner_api/meta/meta.h"
 #include "inner_api/meta/meta_key.h"
+#include <unordered_map>
 
 namespace OHOS {
 namespace Media {
 bool Marshalling(MessageParcel &parcel, const Meta &meta)
 {
-    // (void)parcel;
-    // (void)meta;
-    // return false;
+#ifndef HST_ANY_WITH_NO_RTTI
+    (void)parcel;
+    (void)meta;
+    return false;
+#else
     MessageParcel metaParcel;
     int32_t metaSize = 0;
     bool ret = true;
     for (auto it = meta.begin(); it != meta.end(); ++it) {
         ++metaSize;
         ret &= metaParcel.WriteString(it->first);
-        const auto &type = it->second.Type();
-        ret &= metaParcel.WriteString(type.name());
-        if (IsSameType<int32_t>(it->second)) {
-            ret &= metaParcel.WriteInt32(it->second);
-        } else if (IsSameType<int64_t>(it->second)) {
-            ret &= metaParcel.WriteInt64(it->second);
-        } else if (IsSameType<float>(it->second)) {
-            ret &= metaParcel.WriteFloat(it->second);
-        } else if (Any::IsSameType<double>(it->second)) {
-            ret &= metaParcel.WriteDouble(it->second);
-        } else if (IsSameType<std::string>(it->second)) {
-            ret &= metaParcel.WriteString(it->second);
-        } else if (IsSameType<AVBuffer::MetaData>(it->second)) {
-            ret &= metaParcel.WriteInt32(static_cast<int32_t>(it->second.size));
-            ret &= metaParcel.WriteUnpadBuffer(reinterpret_cast<const void *>(it->second.data), it->second.size);
+        const auto &type = it->second.TypeName();
+        ret &= metaParcel.WriteString(std::string(type));
+        if (Any::IsSameTypeWith<int32_t>(it->second)) {
+            ret &= metaParcel.WriteInt32(AnyCast<int32_t>(it->second));
+        } else if (Any::IsSameTypeWith<int64_t>(it->second)) {
+            ret &= metaParcel.WriteInt64(AnyCast<int64_t>(it->second));
+        } else if (Any::IsSameTypeWith<float>(it->second)) {
+            ret &= metaParcel.WriteFloat(AnyCast<float>(it->second));
+        } else if (Any::IsSameTypeWith<double>(it->second)) {
+            ret &= metaParcel.WriteDouble(AnyCast<double>(it->second));
+        } else if (Any::IsSameTypeWith<std::string>(it->second)) {
+            ret &= metaParcel.WriteString(AnyCast<std::string>(it->second));
+        } else if (Any::IsSameTypeWith<AVBuffer::MetaData>(it->second)) {
+            ret &= metaParcel.WriteInt32(static_cast<int32_t>(AnyCast<AVBuffer::MetaData>(it->second).size()));
+            ret &= metaParcel.WriteUnpadBuffer(
+                reinterpret_cast<const void *>(AnyCast<AVBuffer::MetaData>(it->second).data()),
+                AnyCast<AVBuffer::MetaData>(it->second).size());
         } else {
-            MEDIA_LOG_E("fail to Marshalling Key: " PUBLIC_LOG_S, it->first.c_str());
+            MEDIA_LOG_E("fail to Marshalling Key: " PUBLIC_LOG_S, it->first);
             return false;
         }
-        MEDIA_LOG_D("success to Marshalling Key: " PUBLIC_LOG_S, it->first.c_str());
+        MEDIA_LOG_D("success to Marshalling Key: " PUBLIC_LOG_S, it->first);
     }
     if (ret) {
         ret &= parcel.WriteUint32(metaSize);
         ret &= parcel.Append(metaParcel);
     }
     return ret;
+#endif
 }
 
 bool Unmarshalling(MessageParcel &parcel, Meta &meta)
 {
-    // (void)parcel;
-    // (void)meta;
-    // return false;
+#ifndef HST_ANY_WITH_NO_RTTI
+    (void)parcel;
+    (void)meta;
+    return false;
+#else
     uint32_t size = parcel.ReadUint32();
     for (uint32_t index = 0; index < size; index++) {
         std::string key = parcel.ReadString();
-        std::string type = parcel.ReadWriteString();
-        if (Plugin::IsSameType(type, Any(int32_t).Type())) {
-            meta.Set<key>(parcel.ReadInt32());
-        } else if (Plugin::IsSameType(type, Any(int64_t).Type())) {
-            meta.Set<key>(parcel.ReadInt64());
-        } else if (Plugin::IsSameType(type, Any(float).Type())) {
-            meta.Set<key>(parcel.ReadFloat());
-        } else if (Plugin::IsSameType(type, Any(double).Type())) {
-            meta.Set<key>(parcel.ReadDouble());
-        } else if (Plugin::IsSameType(type, Any(std::string).Type())) {
-            meta.Set<key>(parcel.ReadString());
-        } else if (Plugin::IsSameType(type, Any().Type())) {
+        std::string type = parcel.ReadString();
+        if (MakeAny<int32_t>().SameTypeWith(std::string_view(type))) {
+            meta.SetData(key.c_str(), parcel.ReadInt32());
+        } else if (MakeAny<int64_t>().SameTypeWith(std::string_view(type))) {
+            meta.SetData(key.c_str(), parcel.ReadInt64());
+        } else if (MakeAny<float>().SameTypeWith(std::string_view(type))) {
+            meta.SetData(key.c_str(), parcel.ReadFloat());
+        } else if (MakeAny<double>().SameTypeWith(std::string_view(type))) {
+            meta.SetData(key.c_str(), parcel.ReadDouble());
+        } else if (MakeAny<std::string>().SameTypeWith(std::string_view(type))) {
+            meta.SetData(key.c_str(), parcel.ReadString());
+        } else if (MakeAny<AVBuffer::MetaData>().SameTypeWith(std::string_view(type))) {
             int32_t addrSize = parcel.ReadInt32();
-            uint8_t *addr = parcel.ReadUnpadBuffer(static_cast<size_t>(addrSize));
+            auto addr = parcel.ReadUnpadBuffer(static_cast<size_t>(addrSize));
             if (addr == nullptr) {
                 MEDIA_LOG_E("fail to ReadBuffer Key: %{public}s", key.c_str());
                 return false;
             }
-            AVBuffer::MetaData val = {.data = addr, .size = addrSize};
-            meta.Set<key>(val);
+            meta.SetData(key.c_str(), AVBuffer::MetaData(addr, addr + addrSize));
         } else {
             MEDIA_LOG_E("fail to Unmarshalling Key: %{public}s", key.c_str());
             return false;
@@ -95,6 +104,7 @@ bool Unmarshalling(MessageParcel &parcel, Meta &meta)
         MEDIA_LOG_D("success to Unmarshalling Key: %{public}s", key.c_str());
     }
     return true;
+#endif
 }
 } // namespace Media
 } // namespace OHOS

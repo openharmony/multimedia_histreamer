@@ -52,13 +52,14 @@ void *AVHardwareAllocator::Alloc(int32_t capacity)
 {
     (void)capacity;
     int32_t ret = MapMemoryAddr();
-    FALSE_RETURN_V_MSG_E(ret == Status::OK, nullptr, "Map dma buffer failed");
+    FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), nullptr, "Map dma buffer failed");
 
     return reinterpret_cast<void *>(allocBase_);
 }
 
 bool AVHardwareAllocator::Free(void *ptr)
 {
+#ifdef MEDIA_OHOS
     FALSE_RETURN_V_MSG_E(static_cast<uint8_t *>(ptr) == allocBase_, false, "Mapped buffer not match");
     if (allocBase_ != nullptr) {
         (void)::munmap(allocBase_, static_cast<size_t>(capacity_));
@@ -66,6 +67,7 @@ bool AVHardwareAllocator::Free(void *ptr)
     allocBase_ = nullptr;
     fd_ = -1;
     capacity_ = -1;
+#endif
     return true;
 }
 
@@ -86,6 +88,7 @@ int32_t AVHardwareAllocator::GetFileDescriptor()
 
 int32_t AVHardwareAllocator::MapMemoryAddr()
 {
+#ifdef MEDIA_OHOS
     ON_SCOPE_EXIT(0)
     {
         MEDIA_LOG_E("MapMemoryAddr failed, size = " PUBLIC_LOG_D32 ", "
@@ -112,6 +115,7 @@ int32_t AVHardwareAllocator::MapMemoryAddr()
                          "mmap failed, please check params");
     allocBase_ = reinterpret_cast<uint8_t *>(addr);
     CANCEL_SCOPE_EXIT_GUARD(0);
+#endif
     return static_cast<int32_t>(Status::OK);
 }
 
@@ -119,6 +123,7 @@ AVHardwareMemory::AVHardwareMemory() : isStartSync_(false), memFlag_(MemoryFlag:
 
 AVHardwareMemory::~AVHardwareMemory()
 {
+#ifdef MEDIA_OHOS
     MEDIA_LOG_DD("enter dtor, instance: 0x%{public}06" PRIXPTR ", name = %{public}s", FAKE_POINTER(this),
                  name_.c_str());
     if (allocator_ == nullptr) {
@@ -127,6 +132,7 @@ AVHardwareMemory::~AVHardwareMemory()
         }
         return;
     }
+#endif
     allocator_->Free(base_);
 }
 

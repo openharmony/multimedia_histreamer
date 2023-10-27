@@ -33,6 +33,32 @@ config("media_foundation_capi_unit_test_config") {
     "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api",
     "$histreamer_root_dir/../../window/window_manager/interface/innerkits",
   ]
+
+  cflags = [
+    "-std=c++17",
+    "-fno-rtti",
+    "-fexceptions",
+    "-Wall",
+    "-fno-common",
+    "-fstack-protector-strong",
+    "-Wshadow",
+    "-FPIC",
+    "-FS",
+    "-O2",
+    "-D_FORTIFY_SOURCE=2",
+    "-fvisibility=hidden",
+    "-Wformat=2",
+    "-Wdate-time",
+    "-Werror",
+    "-Wextra",
+    "-Wimplicit-fallthrough",
+    "-Wsign-compare",
+    "-Wunused-parameter",
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  cflags_cc = cflags
 }
 
 ohos_static_library("media_foundation_capi_unit_test") {
@@ -93,6 +119,32 @@ config("media_foundation_inner_unit_test_config") {
     "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api",
     "$histreamer_root_dir/../../window/window_manager/interface/innerkits",
   ]
+  
+  cflags = [
+    "-std=c++17",
+    "-fno-rtti",
+    "-fexceptions",
+    "-Wall",
+    "-fno-common",
+    "-fstack-protector-strong",
+    "-Wshadow",
+    "-FPIC",
+    "-FS",
+    "-O2",
+    "-D_FORTIFY_SOURCE=2",
+    "-fvisibility=hidden",
+    "-Wformat=2",
+    "-Wdate-time",
+    "-Werror",
+    "-Wextra",
+    "-Wimplicit-fallthrough",
+    "-Wsign-compare",
+    "-Wunused-parameter",
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  cflags_cc = cflags
 }
 
 ohos_static_library("media_foundation_inner_unit_test") {

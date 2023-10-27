@@ -19,10 +19,10 @@
 #include <memory>
 #include <string>
 #include "avallocator.h"
-#include "inner_api/meta/meta.h"
 
 namespace OHOS {
 namespace Media {
+class Meta;
 /**
  * @brief Struct that encapsulates some info of media buffer.
  */
@@ -63,7 +63,6 @@ using AVBufferConfig = struct AVBufferConfig {
         }
     }
 };
-
 /**
  * @brief Class that encapsulates some types of media buffer.
  */
@@ -145,10 +144,7 @@ public:
      */
     bool WriteToMessageParcel(MessageParcel &parcel);
 
-    using MetaData = struct {
-        uint8_t * data;
-        int32_t size;
-    };
+    using MetaData = std::vector<uint8_t>;
 
     int64_t pts_;
     int64_t dts_;

@@ -47,10 +47,10 @@ const int32_t MEMSIZE = 1024 * 1024;
 const int32_t POSITION_ONE = 1024 * 64;
 const int32_t TEST_BUFFER_SIZE = 1048 * 1048 * 8;
 
-const int32_t g_intValue = 12424;
+// const int32_t g_intValue = 12424;
 const int64_t g_longValue = 115441;
-const float g_floatValue = 3.115441;
-const double g_doubleValue = 3.11541415926;
+// const float g_floatValue = 1.115441;
+const double g_doubleValue = 1.11541415926;
 const std::string g_stringValue = "STRING_TESTKEY";
 
 const int64_t g_pts = 33000;
@@ -372,11 +372,11 @@ void AVBufferInnerUnitTest::CheckMetaSetAndGet()
     remoteBuffer_->duration_ = g_duration;
     remoteBuffer_->flag_ = g_flag;
 
-    // meta_->Set<INT_TESTKEY>(g_intValue);
-    meta_->Set<LONG_TESTKEY>(g_longValue);
-    // meta_->Set<FLOAT_TESTKEY>(g_floatValue);
-    meta_->Set<DOUBLE_TESTKEY>(g_doubleValue);
-    meta_->Set<STRING_TESTKEY>(g_stringValue);
+    // meta_->SetData(INT_TESTKEY, g_intValue);
+    meta_->SetData(LONG_TESTKEY, g_longValue);
+    // meta_->SetData(FLOAT_TESTKEY, g_floatValue);
+    meta_->SetData(DOUBLE_TESTKEY, g_doubleValue);
+    meta_->SetData(STRING_TESTKEY, g_stringValue);
     remoteBuffer_->meta_ = meta_;
 
     if (parcel_ != nullptr) {
@@ -390,11 +390,11 @@ void AVBufferInnerUnitTest::CheckMetaSetAndGet()
     EXPECT_EQ(buffer_->duration_, g_duration);
     EXPECT_EQ(buffer_->flag_, g_flag);
 
-    // buffer_->meta_->Get<INT_TESTKEY>(getIntValue);
-    buffer_->meta_->Get<LONG_TESTKEY>(getLongValue);
+    // buffer_->meta_->GetData(INT_TESTKEY, getIntValue);
+    buffer_->meta_->GetData(LONG_TESTKEY, getLongValue);
     // buffer_->meta_->Get<FLOAT_TESTKEY>(getFloatValue);
-    buffer_->meta_->Get<DOUBLE_TESTKEY>(getDoubleValue);
-    buffer_->meta_->Get<STRING_TESTKEY>(getStringValue);
+    buffer_->meta_->GetData(DOUBLE_TESTKEY, getDoubleValue);
+    buffer_->meta_->GetData(STRING_TESTKEY, getStringValue);
 
     // EXPECT_EQ(getIntValue, g_intValue);
     EXPECT_EQ(getLongValue, g_longValue);

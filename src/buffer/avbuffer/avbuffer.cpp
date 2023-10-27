@@ -22,9 +22,11 @@
 #include "include/avbuffer_utils.h"
 #include "inner_api/common/log.h"
 #include "inner_api/common/status.h"
+#include "inner_api/meta/meta.h"
 #include "surface_buffer.h"
 #include "surface_type.h"
 #include "unistd.h"
+
 
 namespace {
 const uint64_t NANOSEC_MASK = 0xFFFFFFFF;

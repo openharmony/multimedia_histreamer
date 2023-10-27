@@ -27,7 +27,7 @@ group("avbuffer_unit_test") {
 avbuffer_unittest_cflags = [
   "-std=c++17",
   "-fno-rtti",
-  "-fno-exceptions",
+  "-fexceptions",
   "-Wall",
   "-fno-common",
   "-fstack-protector-strong",

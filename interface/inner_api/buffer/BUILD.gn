@@ -22,7 +22,7 @@ config("media_foundation_buffer_public_config") {
   ]
 
   cflags = [
-    "-fno-exceptions",
+    "-fexceptions",
     "-Wall",
     "-fno-common",
     "-fstack-protector-strong",

@@ -23,6 +23,7 @@
 #include "surface_buffer.h"
 #include "surface_type.h"
 
+
 namespace OHOS {
 namespace Media {
 std::shared_ptr<AVAllocator> AVAllocatorFactory::CreateSurfaceAllocator(const BufferRequestConfig &config)
