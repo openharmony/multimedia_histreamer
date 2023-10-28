@@ -678,6 +678,45 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AVBuffer_Config_006
+ * @tc.desc: test AVBufferConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_006, TestSize.Level1)
+{
+    AVBufferConfig configRemote;
+    configRemote.size = MEMSIZE;
+    configRemote.align = POSITION_ONE;
+    configRemote.memoryType = MemoryType::HARDWARE_MEMORY;
+    configRemote.memoryFlag = MemoryFlag::MEMORY_READ_WRITE;
+    configRemote.capacity = TEST_BUFFER_SIZE;
+    configRemote.dmaFd = 1;
+
+    MessageParcel parcel;
+    configRemote.surfaceBufferConfig = g_config;
+    EXPECT_TRUE(MarshallingConfig(parcel, configRemote));
+
+    AVBufferConfig configLocal;
+    EXPECT_TRUE(UnmarshallingConfig(parcel, configLocal));
+
+    EXPECT_EQ(configRemote.size, configLocal.size);
+    EXPECT_EQ(configRemote.align, configLocal.align);
+    EXPECT_EQ(configRemote.memoryType, configLocal.memoryType);
+    EXPECT_EQ(configRemote.memoryFlag, configLocal.memoryFlag);
+    EXPECT_EQ(configRemote.capacity, configLocal.capacity);
+    EXPECT_EQ(configRemote.dmaFd, configLocal.dmaFd);
+
+    EXPECT_EQ(configRemote.surfaceBufferConfig.width, configLocal.surfaceBufferConfig.width);
+    EXPECT_EQ(configRemote.surfaceBufferConfig.height, configLocal.surfaceBufferConfig.height);
+    EXPECT_EQ(configRemote.surfaceBufferConfig.strideAlignment, configLocal.surfaceBufferConfig.strideAlignment);
+    EXPECT_EQ(configRemote.surfaceBufferConfig.format, configLocal.surfaceBufferConfig.format);
+    EXPECT_EQ(configRemote.surfaceBufferConfig.usage, configLocal.surfaceBufferConfig.usage);
+    EXPECT_EQ(configRemote.surfaceBufferConfig.timeout, configLocal.surfaceBufferConfig.timeout);
+    EXPECT_EQ(configRemote.surfaceBufferConfig.colorGamut, configLocal.surfaceBufferConfig.colorGamut);
+    EXPECT_EQ(configRemote.surfaceBufferConfig.transform, configLocal.surfaceBufferConfig.transform);
+}
+
+/**
  * @tc.name: AVBuffer_CreateWithInvalid_001
  * @tc.desc: create memory with invalid parcel
  * @tc.type: FUNC

@@ -20,8 +20,33 @@
 #include "inner_api/meta/any.h"
 #include "inner_api/meta/meta.h"
 #include "inner_api/meta/meta_key.h"
+#include "surface_type.h"
 #include <unordered_map>
 
+namespace {
+using namespace OHOS;
+using namespace OHOS::Media;
+bool WriteSurfaceBufferConfig(MessageParcel &parcel, const BufferRequestConfig &config)
+{
+    return parcel.WriteInt32(config.width) && parcel.WriteInt32(config.height) &&
+           parcel.WriteInt32(config.strideAlignment) && parcel.WriteInt32(config.format) &&
+           parcel.WriteUint64(config.usage) && parcel.WriteInt32(config.timeout) &&
+           parcel.WriteInt32(static_cast<GraphicColorGamut>(config.colorGamut)) &&
+           parcel.WriteInt32(static_cast<GraphicTransformType>(config.transform));
+}
+
+void ReadSurfaceBufferConfig(MessageParcel &parcel, BufferRequestConfig &config)
+{
+    config.width = parcel.ReadInt32();
+    config.height = parcel.ReadInt32();
+    config.strideAlignment = parcel.ReadInt32();
+    config.format = parcel.ReadInt32();
+    config.usage = parcel.ReadUint64();
+    config.timeout = parcel.ReadInt32();
+    config.colorGamut = static_cast<GraphicColorGamut>(parcel.ReadInt32());
+    config.transform = static_cast<GraphicTransformType>(parcel.ReadInt32());
+}
+} // namespace
 namespace OHOS {
 namespace Media {
 bool Marshalling(MessageParcel &parcel, const Meta &meta)
@@ -105,6 +130,33 @@ bool Unmarshalling(MessageParcel &parcel, Meta &meta)
     }
     return true;
 #endif
+}
+
+bool MarshallingConfig(MessageParcel &parcel, const AVBufferConfig &config)
+{
+    MessageParcel configParcel;
+    bool ret = configParcel.WriteInt32(config.size) && configParcel.WriteInt32(config.align) &&
+               configParcel.WriteUint8(static_cast<uint8_t>(config.memoryType)) &&
+               configParcel.WriteUint8(static_cast<uint8_t>(config.memoryFlag)) &&
+               WriteSurfaceBufferConfig(configParcel, config.surfaceBufferConfig) &&
+               configParcel.WriteInt32(config.capacity) && configParcel.WriteInt32(config.dmaFd);
+
+    if (ret) {
+        ret &= parcel.Append(configParcel);
+    }
+    return ret;
+}
+
+bool UnmarshallingConfig(MessageParcel &parcel, AVBufferConfig &config)
+{
+    config.size = parcel.ReadUint32();
+    config.align = parcel.ReadInt32();
+    config.memoryType = static_cast<MemoryType>(parcel.ReadUint8());
+    config.memoryFlag = static_cast<MemoryFlag>(parcel.ReadUint8());
+    ReadSurfaceBufferConfig(parcel, config.surfaceBufferConfig);
+    config.capacity = parcel.ReadInt32();
+    config.dmaFd = parcel.ReadInt32();
+    return true;
 }
 } // namespace Media
 } // namespace OHOS

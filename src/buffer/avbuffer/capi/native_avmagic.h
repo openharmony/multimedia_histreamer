@@ -17,7 +17,7 @@
 #define NATIVE_AVMAGIC_H
 
 #include <refbase.h>
-#include "avbuffer.h"
+#include "interface/inner_api/buffer/avbuffer.h"
 
 #define AV_MAGIC(a, b, c, d) (((a) << 24) + ((b) << 16) + ((c) << 8) + ((d) << 0))
 

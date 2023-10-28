@@ -22,8 +22,11 @@
 
 namespace OHOS {
 namespace Media {
+struct AVBufferConfig;
 [[maybe_unused]] bool Marshalling(MessageParcel &parcel, const Meta &meta);
 [[maybe_unused]] bool Unmarshalling(MessageParcel &parcel, Meta &meta);
+[[maybe_unused]] bool MarshallingConfig(MessageParcel &parcel, const AVBufferConfig &config);
+[[maybe_unused]] bool UnmarshallingConfig(MessageParcel &parcel, AVBufferConfig &config);
 
 template <typename T>
 using MakeUnsigned = typename std::make_unsigned<T>::type;

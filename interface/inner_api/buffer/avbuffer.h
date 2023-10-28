@@ -104,7 +104,8 @@ public:
     /**
      * @brief Create the AVBuffer by MessageParcel.
      * @param parcel The MessageParcel that wirtten by remote buffer, refer to {@link MessageParcel}.
-     * @param isSurfaceBuffer Whether the parcel was obtained from SurfaceBuffer, {@link SurfaceBuffer}.
+     * @param isSurfaceBuffer Whether the parcel was obtained directly through SurfaceBuffer's function, {@link
+     * SurfaceBuffer}.
      * @return The shared pointer of AVBuffer.
      * @since 4.1
      * @version 1.0

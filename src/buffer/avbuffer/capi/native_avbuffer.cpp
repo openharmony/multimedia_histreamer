@@ -85,6 +85,7 @@ int32_t OH_AVBuffer_GetCapacity(OH_AVBuffer *buf)
     return buf->buffer_->memory_->GetCapacity();
 }
 
+#ifdef MEDIA_OHOS
 OH_AVCodecBufferAttr OH_AVBuffer_GetBufferAttr(OH_AVBuffer *buf)
 {
     OH_AVCodecBufferAttr attr;
@@ -223,6 +224,7 @@ OH_AVErrCode OH_AVBuffer_Destroy(struct OH_AVBuffer *buf)
 //     buf->isUserCreated = true;
 //     return buf;
 // }
+#endif
 #ifdef __cplusplus
 };
 #endif

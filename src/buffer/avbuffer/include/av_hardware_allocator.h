@@ -17,9 +17,7 @@
 #define AV_HARDWARE_ALLOCATOR_H
 
 #include "inner_api/buffer/avallocator.h"
-#ifdef MEDIA_OHOS
 #include "dmabuf_alloc.h"
-#endif
 
 namespace OHOS {
 namespace Media {

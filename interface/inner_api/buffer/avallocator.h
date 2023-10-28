@@ -65,7 +65,7 @@ enum struct MemoryType : uint8_t {
 /**
  * @brief Enumerates the flag bits used to create a new shared memory.
  */
-enum MemoryFlag : uint32_t {
+enum MemoryFlag : uint8_t {
     /**
      * For platforms that support multiple processes, this flag bit indicates that the remote process can only read data
      * in the shared memory. If this flag is not set, the remote process has both read and write permissions by default.
