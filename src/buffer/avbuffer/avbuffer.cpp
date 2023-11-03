@@ -27,10 +27,8 @@
 #include "surface_type.h"
 #include "unistd.h"
 
-
 namespace {
-const uint64_t NANOSEC_MASK = 0xFFFFFFFF;
-std::atomic<uint64_t> g_bufferId = 0;
+constexpr uint16_t BUFFERID_BOUNDARY = 0xffff;
 } // namespace
 
 namespace OHOS {
@@ -220,12 +218,22 @@ int32_t AVBuffer::Init(MessageParcel &parcel, bool isSurfaceBuffer)
 uint64_t AVBuffer::GetUniqueId()
 {
     using namespace std::chrono;
+    static const uint32_t processId = static_cast<uint32_t>(getpid());
+    static std::atomic<uint16_t> bufferId = 0;
     if (uid_ == 0) {
-        uint64_t pid = static_cast<uint64_t>(getpid());
-        uint64_t nowTime = time_point_cast<nanoseconds>(system_clock::now()).time_since_epoch().count();
-        uint64_t bufferId = (NANOSEC_MASK & nowTime) - g_bufferId;
-        ++g_bufferId;
-        uid_ = (pid << 32) | bufferId;
+        union UniqueId {
+            uint64_t nowTime;
+            uint32_t processId[2];
+            uint16_t bufferId[4];
+        } uid{0};
+        if (bufferId == BUFFERID_BOUNDARY) {
+            bufferId = 0;
+        }
+        ++bufferId;
+        uid.nowTime = time_point_cast<nanoseconds>(system_clock::now()).time_since_epoch().count();
+        uid.processId[1] = processId;
+        uid.bufferId[3] = bufferId;
+        uid_ = uid.nowTime;
     }
     return uid_;
 }

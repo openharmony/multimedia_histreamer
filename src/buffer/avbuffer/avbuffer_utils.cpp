@@ -80,10 +80,10 @@ bool Marshalling(MessageParcel &parcel, const Meta &meta)
                 reinterpret_cast<const void *>(AnyCast<AVBuffer::MetaData>(it->second).data()),
                 AnyCast<AVBuffer::MetaData>(it->second).size());
         } else {
-            MEDIA_LOG_E("fail to Marshalling Key: " PUBLIC_LOG_S, it->first);
+            MEDIA_LOG_E("fail to Marshalling Key: " PUBLIC_LOG_S, it->first.c_str());
             return false;
         }
-        MEDIA_LOG_D("success to Marshalling Key: " PUBLIC_LOG_S, it->first);
+        MEDIA_LOG_D("success to Marshalling Key: " PUBLIC_LOG_S, it->first.c_str());
     }
     if (ret) {
         ret &= parcel.WriteUint32(metaSize);

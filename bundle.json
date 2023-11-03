@@ -108,11 +108,14 @@
                 "name": "//foundation/multimedia/histreamer/interface/inner_api/buffer:media_foundation_buffer",
                 "header": {
                   "header_files": [
-                    "avbuffer_queue.h",
-                    "avbuffer.h",
                     "avallocator.h",
-                    "avbuffer_queue_producer.h",
+                    "avbuffer.h",
+                    "avbuffer_queue.h",
+                    "avbuffer_queue_define.h",
                     "avbuffer_queue_consumer.h",
+                    "avbuffer_queue_producer.h",
+                    "avbuffer_queue_producer_interface.h",
+                    "avbuffer_queue_producer_proxy.h",
                     "native_avbuffer.h",
                     "native_avformat.h",
                     "key.h"
