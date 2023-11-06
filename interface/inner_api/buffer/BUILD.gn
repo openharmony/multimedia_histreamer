@@ -62,6 +62,7 @@ ohos_shared_library("media_foundation_buffer") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    integer_overflow = true
   }
   sources = [
     "$histreamer_root_dir/src/buffer/avbuffer/av_hardware_memory.cpp",
@@ -71,7 +72,7 @@ ohos_shared_library("media_foundation_buffer") {
     "$histreamer_root_dir/src/buffer/avbuffer/avbuffer.cpp",
     "$histreamer_root_dir/src/buffer/avbuffer/avbuffer_utils.cpp",
     "$histreamer_root_dir/src/buffer/avbuffer/avmemory.cpp",
-
+    "$histreamer_root_dir/src/meta/any.cpp",
     # "./capi/native_avbuffer.cpp",
   ]
   sources += [

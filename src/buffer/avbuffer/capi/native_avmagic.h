@@ -21,17 +21,17 @@
 
 #define AV_MAGIC(a, b, c, d) (((a) << 24) + ((b) << 16) + ((c) << 8) + ((d) << 0))
 
-enum class AVMagic {
+enum class MFMagic {
     AVCODEC_MAGIC_AVBUFFER = AV_MAGIC('B', 'B', 'U', 'F'),
 };
 
-struct AVObjectMagic : public OHOS::RefBase {
-    explicit AVObjectMagic(enum AVMagic m) : magic_(m) {}
+struct MFObjectMagic : public OHOS::RefBase {
+    explicit AVObjectMagic(enum MFMagic m) : magic_(m) {}
     virtual ~AVObjectMagic() = default;
-    enum AVMagic magic_;
+    enum MFMagic magic_;
 };
 
-struct OH_AVBuffer : public AVObjectMagic {
+struct OH_AVBuffer : public MFObjectMagic {
     explicit OH_AVBuffer(const std::shared_ptr<OHOS::Media::AVBuffer> &buf);
     virtual ~OH_AVBuffer() = default;
     bool IsEqualBuffer(const std::shared_ptr<OHOS::Media::AVBuffer> &buf);

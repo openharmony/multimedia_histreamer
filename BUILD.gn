@@ -45,6 +45,13 @@ config("histreamer_presets") {
   }
 }
 
+group("media_foundation") {
+  deps = [
+    "interface/inner_api/buffer:media_foundation_buffer",
+    "src:media_foundation_osal"
+  ]
+}
+
 if (!hst_is_mini_sys) {
   # L1 & std shared and seprated
   group("histreamer") {

@@ -25,7 +25,7 @@
 typedef struct OH_AVBuffer OH_AVBuffer;
 
 OH_AVBuffer::OH_AVBuffer(const std::shared_ptr<OHOS::Media::AVBuffer> &buf)
-    : AVObjectMagic(AVMagic::AVCODEC_MAGIC_AVBUFFER), buffer_(buf)
+    : MFObjectMagic(MFMagic::AVCODEC_MAGIC_AVBUFFER), buffer_(buf)
 {
 }
 
