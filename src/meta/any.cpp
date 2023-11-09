@@ -19,7 +19,7 @@ namespace Media {
 #ifdef MEDIA_OHOS
 bool Any::BaseTypesToParcel(const Any *operand, MessageParcel &parcel) noexcept
 {
-    bool ret = false;
+    bool ret = true;
     const auto &type = operand->TypeName();
     ret &= parcel.WriteString(std::string(type));
     if (Any::IsSameTypeWith<int32_t>(*operand)) {

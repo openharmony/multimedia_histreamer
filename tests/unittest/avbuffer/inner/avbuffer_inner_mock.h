@@ -18,7 +18,6 @@
 
 #include "buffer/avbuffer.h"
 #include "avbuffer_mock.h"
-#include "buffer/avbuffer_common.h"
 
 
 namespace OHOS {

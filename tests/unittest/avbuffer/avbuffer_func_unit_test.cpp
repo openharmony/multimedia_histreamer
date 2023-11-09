@@ -26,7 +26,6 @@
 #include "av_surface_memory.h"
 #include "avbuffer_utils.h"
 #include "buffer/avbuffer.h"
-#include "buffer/avbuffer_common.h"
 #include "meta.h"
 #include "meta_key.h"
 #include "surface_buffer.h"
@@ -39,9 +38,7 @@ using namespace testing::ext;
 using namespace OHOS;
 using namespace OHOS::Media;
 
-// #define INT_TESTKEY Tag::VIDEO_HEIGHT
 #define LONG_TESTKEY Tag::MEDIA_DURATION
-// #define FLOAT_TESTKEY Tag::BITS_PER_CODED_SAMPLE
 #define DOUBLE_TESTKEY Tag::VIDEO_CAPTURE_RATE
 #define STRING_TESTKEY Tag::MEDIA_FILE_URI
 namespace {
@@ -49,9 +46,7 @@ const int32_t MEMSIZE = 1024 * 1024;
 const int32_t POSITION_ONE = 1024 * 64;
 const int32_t TEST_BUFFER_SIZE = 1048 * 1048 * 8;
 
-// const int32_t g_intValue = 12424;
 const int64_t g_longValue = 115441;
-// const float g_floatValue = 1.115441;
 const double g_doubleValue = 1.11541415926;
 const std::string g_stringValue = "STRING_TESTKEY";
 
@@ -392,15 +387,11 @@ void AVBufferInnerUnitTest::CheckMetaSetAndGet()
     EXPECT_EQ(buffer_->duration_, g_duration);
     EXPECT_EQ(buffer_->flag_, g_flag);
 
-    // buffer_->meta_->GetData(INT_TESTKEY, getIntValue);
     buffer_->meta_->GetData(LONG_TESTKEY, getLongValue);
-    // buffer_->meta_->Get<FLOAT_TESTKEY>(getFloatValue);
     buffer_->meta_->GetData(DOUBLE_TESTKEY, getDoubleValue);
     buffer_->meta_->GetData(STRING_TESTKEY, getStringValue);
 
-    // EXPECT_EQ(getIntValue, g_intValue);
     EXPECT_EQ(getLongValue, g_longValue);
-    // EXPECT_EQ(getFloatValue, g_floatValue);
     EXPECT_EQ(getDoubleValue, g_doubleValue);
     EXPECT_EQ(getStringValue, g_stringValue);
 }

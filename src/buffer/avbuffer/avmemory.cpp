@@ -19,7 +19,6 @@
 #include "av_virtual_memory.h"
 #include "buffer/avallocator.h"
 #include "buffer/avbuffer.h"
-#include "buffer/avbuffer_common.h"
 #include "common/log.h"
 #include "common/status.h"
 #include "message_parcel.h"

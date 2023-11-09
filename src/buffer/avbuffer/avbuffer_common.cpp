@@ -28,6 +28,7 @@ AVBufferConfig::AVBufferConfig(const AVBufferConfig &rhs)
     if (&rhs == this) {
         return;
     }
+    this->surfaceBufferConfig = std::make_unique<BufferRequestConfig>();
     *(this->surfaceBufferConfig) = *(rhs.surfaceBufferConfig);
     this->size = rhs.size;
     this->align = rhs.align;

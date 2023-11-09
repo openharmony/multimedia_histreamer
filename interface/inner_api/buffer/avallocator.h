@@ -19,7 +19,7 @@
 #include <memory>
 #include <string>
 #include "refbase.h"
-#include "avbuffer_common.h"
+#include "buffer/avbuffer_common.h"
 
 namespace OHOS {
 struct BufferRequestConfig;

@@ -15,7 +15,6 @@
 
 #include "avbuffer_utils.h"
 #include "buffer/avbuffer.h"
-#include "buffer/avbuffer_common.h"
 #include "common/log.h"
 #include "cpp_ext/type_cast_ext.h"
 #include "meta/any.h"
@@ -63,7 +62,7 @@ bool MarshallingConfig(MessageParcel &parcel, const AVBufferConfig &config)
     bool ret = configParcel.WriteInt32(config.size) && configParcel.WriteInt32(config.align) &&
                configParcel.WriteUint8(static_cast<uint8_t>(config.memoryType)) &&
                configParcel.WriteUint8(static_cast<uint8_t>(config.memoryFlag)) &&
-               WriteSurfaceBufferConfig(configParcel, config.surfaceBufferConfig) &&
+               WriteSurfaceBufferConfig(configParcel, *(config.surfaceBufferConfig)) &&
                configParcel.WriteInt32(config.capacity) && configParcel.WriteInt32(config.dmaFd);
 
     if (ret) {
@@ -82,7 +81,7 @@ bool UnmarshallingConfig(MessageParcel &parcel, AVBufferConfig &config)
     config.align = parcel.ReadInt32();
     config.memoryType = static_cast<MemoryType>(parcel.ReadUint8());
     config.memoryFlag = static_cast<MemoryFlag>(parcel.ReadUint8());
-    ReadSurfaceBufferConfig(parcel, config.surfaceBufferConfig);
+    ReadSurfaceBufferConfig(parcel, *(config.surfaceBufferConfig));
     config.capacity = parcel.ReadInt32();
     config.dmaFd = parcel.ReadInt32();
 #endif

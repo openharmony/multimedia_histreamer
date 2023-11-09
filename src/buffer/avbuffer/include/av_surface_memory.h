@@ -18,7 +18,6 @@
 
 #include "buffer/avallocator.h"
 #include "buffer/avbuffer.h"
-#include "buffer/avbuffer_common.h"
 
 namespace OHOS {
 namespace Media {
