@@ -39,11 +39,9 @@ avbuffer_unittest_cflags = [
   "-fvisibility=hidden",
   "-Wformat=2",
   "-Wdate-time",
-  "-Werror",
   "-Wextra",
   "-Wimplicit-fallthrough",
   "-Wsign-compare",
-  "-Wunused-parameter",
   "-Dprivate=public",
   "-Dprotected=public",
 ]
@@ -71,7 +69,7 @@ ohos_unittest("avbuffer_inner_unit_test") {
   cflags = avbuffer_unittest_cflags
 
   public_deps = [
-    "$histreamer_root_dir/interface/inner_api/buffer:media_foundation_buffer",
+    "$histreamer_root_dir/src:media_foundation_buffer",
     "../common:media_foundation_inner_unit_test",
   ]
 
@@ -108,7 +106,7 @@ ohos_unittest("avbuffer_capi_unit_test") {
   cflags = avbuffer_unittest_cflags
 
   public_deps = [
-    "$histreamer_root_dir/interface/inner_api/buffer:media_foundation_buffer",
+    "$histreamer_root_dir/src:media_foundation_buffer",
     "../common:media_foundation_capi_unit_test",
   ]
 

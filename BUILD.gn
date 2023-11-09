@@ -47,8 +47,10 @@ config("histreamer_presets") {
 
 group("media_foundation") {
   deps = [
-    "interface/inner_api/buffer:media_foundation_buffer",
-    "src:media_foundation_osal"
+    "src:media_foundation_buffer",
+    "src:media_foundation_osal",
+    "src:media_foundation_pipeline",
+    "src:media_foundation_plugin"
   ]
 }
 

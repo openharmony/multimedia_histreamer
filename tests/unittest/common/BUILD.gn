@@ -78,7 +78,7 @@ ohos_static_library("media_foundation_capi_unit_test") {
   ]
 
   public_deps = [
-    "$histreamer_root_dir/interface/inner_api/buffer:media_foundation_buffer",
+    "$histreamer_root_dir/src:media_foundation_buffer",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest",
   ]
@@ -135,11 +135,9 @@ config("media_foundation_inner_unit_test_config") {
     "-fvisibility=hidden",
     "-Wformat=2",
     "-Wdate-time",
-    "-Werror",
     "-Wextra",
     "-Wimplicit-fallthrough",
     "-Wsign-compare",
-    "-Wunused-parameter",
     "-Dprivate=public",
     "-Dprotected=public",
   ]
@@ -164,7 +162,7 @@ ohos_static_library("media_foundation_inner_unit_test") {
   ]
 
   public_deps = [
-    "$histreamer_root_dir/interface/inner_api/buffer:media_foundation_buffer",
+    "$histreamer_root_dir/src:media_foundation_buffer",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest",
   ]

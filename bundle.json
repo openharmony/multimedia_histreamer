@@ -105,7 +105,7 @@
               },
               {
                 "type": "so",
-                "name": "//foundation/multimedia/histreamer/interface/inner_api/buffer:media_foundation_buffer",
+                "name": "//foundation/multimedia/histreamer/src:media_foundation_buffer",
                 "header": {
                   "header_files": [
                     "avallocator.h",
