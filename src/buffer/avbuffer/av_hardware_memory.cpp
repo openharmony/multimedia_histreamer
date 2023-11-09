@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#include "include/av_hardware_memory.h"
+#include "av_hardware_memory.h"
 #include <unistd.h>
 #include "ashmem.h"
-#include "include/av_hardware_allocator.h"
-#include "inner_api/common/log.h"
-#include "inner_api/common/status.h"
+#include "av_hardware_allocator.h"
+#include "common/log.h"
+#include "common/status.h"
 #include "message_parcel.h"
 #include "scope_guard.h"
 #include <unordered_map>
+
+
 #ifdef MEDIA_OHOS
 #include "sys/mman.h"
 #endif

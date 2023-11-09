@@ -17,14 +17,13 @@
 #define AVBUFFER_UTILS_H
 
 #include <unistd.h>
-#include "inner_api/meta/meta.h"
 #include "message_parcel.h"
+#include "meta/meta.h"
+
 
 namespace OHOS {
 namespace Media {
 struct AVBufferConfig;
-[[maybe_unused]] bool Marshalling(MessageParcel &parcel, const Meta &meta);
-[[maybe_unused]] bool Unmarshalling(MessageParcel &parcel, Meta &meta);
 [[maybe_unused]] bool MarshallingConfig(MessageParcel &parcel, const AVBufferConfig &config);
 [[maybe_unused]] bool UnmarshallingConfig(MessageParcel &parcel, AVBufferConfig &config);
 

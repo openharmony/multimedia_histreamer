@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#include "include/avbuffer_utils.h"
-#include "inner_api/buffer/avbuffer.h"
-#include "inner_api/common/log.h"
-#include "inner_api/cpp_ext/type_cast_ext.h"
-#include "inner_api/meta/any.h"
-#include "inner_api/meta/meta.h"
-#include "inner_api/meta/meta_key.h"
+#include "avbuffer_utils.h"
+#include "buffer/avbuffer.h"
+#include "buffer/avbuffer_common.h"
+#include "common/log.h"
+#include "cpp_ext/type_cast_ext.h"
+#include "meta/any.h"
+#include "meta/meta.h"
+#include "meta/meta_key.h"
 #include "surface_type.h"
 #include <unordered_map>
 
@@ -28,15 +29,20 @@ using namespace OHOS;
 using namespace OHOS::Media;
 bool WriteSurfaceBufferConfig(MessageParcel &parcel, const BufferRequestConfig &config)
 {
+#ifdef MEDIA_OHOS
     return parcel.WriteInt32(config.width) && parcel.WriteInt32(config.height) &&
            parcel.WriteInt32(config.strideAlignment) && parcel.WriteInt32(config.format) &&
            parcel.WriteUint64(config.usage) && parcel.WriteInt32(config.timeout) &&
            parcel.WriteInt32(static_cast<GraphicColorGamut>(config.colorGamut)) &&
            parcel.WriteInt32(static_cast<GraphicTransformType>(config.transform));
+#else
+    return false;
+#endif
 }
 
 void ReadSurfaceBufferConfig(MessageParcel &parcel, BufferRequestConfig &config)
 {
+#ifdef MEDIA_OHOS
     config.width = parcel.ReadInt32();
     config.height = parcel.ReadInt32();
     config.strideAlignment = parcel.ReadInt32();
@@ -45,95 +51,14 @@ void ReadSurfaceBufferConfig(MessageParcel &parcel, BufferRequestConfig &config)
     config.timeout = parcel.ReadInt32();
     config.colorGamut = static_cast<GraphicColorGamut>(parcel.ReadInt32());
     config.transform = static_cast<GraphicTransformType>(parcel.ReadInt32());
+#endif
 }
 } // namespace
 namespace OHOS {
 namespace Media {
-bool Marshalling(MessageParcel &parcel, const Meta &meta)
-{
-#ifndef HST_ANY_WITH_NO_RTTI
-    (void)parcel;
-    (void)meta;
-    return false;
-#else
-    MessageParcel metaParcel;
-    int32_t metaSize = 0;
-    bool ret = true;
-    for (auto it = meta.begin(); it != meta.end(); ++it) {
-        ++metaSize;
-        ret &= metaParcel.WriteString(it->first);
-        const auto &type = it->second.TypeName();
-        ret &= metaParcel.WriteString(std::string(type));
-        if (Any::IsSameTypeWith<int32_t>(it->second)) {
-            ret &= metaParcel.WriteInt32(AnyCast<int32_t>(it->second));
-        } else if (Any::IsSameTypeWith<int64_t>(it->second)) {
-            ret &= metaParcel.WriteInt64(AnyCast<int64_t>(it->second));
-        } else if (Any::IsSameTypeWith<float>(it->second)) {
-            ret &= metaParcel.WriteFloat(AnyCast<float>(it->second));
-        } else if (Any::IsSameTypeWith<double>(it->second)) {
-            ret &= metaParcel.WriteDouble(AnyCast<double>(it->second));
-        } else if (Any::IsSameTypeWith<std::string>(it->second)) {
-            ret &= metaParcel.WriteString(AnyCast<std::string>(it->second));
-        } else if (Any::IsSameTypeWith<AVBuffer::MetaData>(it->second)) {
-            ret &= metaParcel.WriteInt32(static_cast<int32_t>(AnyCast<AVBuffer::MetaData>(it->second).size()));
-            ret &= metaParcel.WriteUnpadBuffer(
-                reinterpret_cast<const void *>(AnyCast<AVBuffer::MetaData>(it->second).data()),
-                AnyCast<AVBuffer::MetaData>(it->second).size());
-        } else {
-            MEDIA_LOG_E("fail to Marshalling Key: " PUBLIC_LOG_S, it->first.c_str());
-            return false;
-        }
-        MEDIA_LOG_D("success to Marshalling Key: " PUBLIC_LOG_S, it->first.c_str());
-    }
-    if (ret) {
-        ret &= parcel.WriteUint32(metaSize);
-        ret &= parcel.Append(metaParcel);
-    }
-    return ret;
-#endif
-}
-
-bool Unmarshalling(MessageParcel &parcel, Meta &meta)
-{
-#ifndef HST_ANY_WITH_NO_RTTI
-    (void)parcel;
-    (void)meta;
-    return false;
-#else
-    uint32_t size = parcel.ReadUint32();
-    for (uint32_t index = 0; index < size; index++) {
-        std::string key = parcel.ReadString();
-        std::string type = parcel.ReadString();
-        if (MakeAny<int32_t>().SameTypeWith(std::string_view(type))) {
-            meta.SetData(key.c_str(), parcel.ReadInt32());
-        } else if (MakeAny<int64_t>().SameTypeWith(std::string_view(type))) {
-            meta.SetData(key.c_str(), parcel.ReadInt64());
-        } else if (MakeAny<float>().SameTypeWith(std::string_view(type))) {
-            meta.SetData(key.c_str(), parcel.ReadFloat());
-        } else if (MakeAny<double>().SameTypeWith(std::string_view(type))) {
-            meta.SetData(key.c_str(), parcel.ReadDouble());
-        } else if (MakeAny<std::string>().SameTypeWith(std::string_view(type))) {
-            meta.SetData(key.c_str(), parcel.ReadString());
-        } else if (MakeAny<AVBuffer::MetaData>().SameTypeWith(std::string_view(type))) {
-            int32_t addrSize = parcel.ReadInt32();
-            auto addr = parcel.ReadUnpadBuffer(static_cast<size_t>(addrSize));
-            if (addr == nullptr) {
-                MEDIA_LOG_E("fail to ReadBuffer Key: %{public}s", key.c_str());
-                return false;
-            }
-            meta.SetData(key.c_str(), AVBuffer::MetaData(addr, addr + addrSize));
-        } else {
-            MEDIA_LOG_E("fail to Unmarshalling Key: %{public}s", key.c_str());
-            return false;
-        }
-        MEDIA_LOG_D("success to Unmarshalling Key: %{public}s", key.c_str());
-    }
-    return true;
-#endif
-}
-
 bool MarshallingConfig(MessageParcel &parcel, const AVBufferConfig &config)
 {
+#ifdef MEDIA_OHOS
     MessageParcel configParcel;
     bool ret = configParcel.WriteInt32(config.size) && configParcel.WriteInt32(config.align) &&
                configParcel.WriteUint8(static_cast<uint8_t>(config.memoryType)) &&
@@ -145,10 +70,14 @@ bool MarshallingConfig(MessageParcel &parcel, const AVBufferConfig &config)
         ret &= parcel.Append(configParcel);
     }
     return ret;
+#else
+    return false;
+#endif
 }
 
 bool UnmarshallingConfig(MessageParcel &parcel, AVBufferConfig &config)
 {
+#ifdef MEDIA_OHOS
     config.size = parcel.ReadUint32();
     config.align = parcel.ReadInt32();
     config.memoryType = static_cast<MemoryType>(parcel.ReadUint8());
@@ -156,6 +85,7 @@ bool UnmarshallingConfig(MessageParcel &parcel, AVBufferConfig &config)
     ReadSurfaceBufferConfig(parcel, config.surfaceBufferConfig);
     config.capacity = parcel.ReadInt32();
     config.dmaFd = parcel.ReadInt32();
+#endif
     return true;
 }
 } // namespace Media

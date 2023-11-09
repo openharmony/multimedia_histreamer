@@ -14,9 +14,10 @@
  */
 
 #include <mutex>
-#include "inner_api/buffer/avbuffer.h"
-#include "inner_api/common/log.h"
-#include "inner_api/common/status.h"
+#include "buffer/avbuffer.h"
+#include "buffer/avbuffer_common.h"
+#include "common/log.h"
+#include "common/status.h"
 #include "native_avmagic.h"
 #include "native_buffer.h"
 #include "surface_buffer.h"

@@ -16,11 +16,12 @@
 #ifndef AV_SURFACE_MEMORY_H
 #define AV_SURFACE_MEMORY_H
 
-#include "avallocator.h"
-#include "avbuffer.h"
+#include "buffer/avallocator.h"
+#include "buffer/avbuffer.h"
+#include "buffer/avbuffer_common.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 class AVSurfaceMemory : public AVMemory {
 public:
     explicit AVSurfaceMemory();

@@ -13,22 +13,23 @@
  * limitations under the License.
  */
 
-#include "inner_api/buffer/avbuffer.h"
 #include <atomic>
 #include <iomanip>
 #include <sstream>
-#include "include/av_hardware_memory.h"
-#include "include/av_shared_memory_ext.h"
-#include "include/avbuffer_utils.h"
-#include "inner_api/common/log.h"
-#include "inner_api/common/status.h"
-#include "inner_api/meta/meta.h"
+#include "av_hardware_memory.h"
+#include "av_shared_memory_ext.h"
+#include "avbuffer_utils.h"
+#include "buffer/avbuffer.h"
+#include "buffer/avbuffer_common.h"
+#include "common/log.h"
+#include "common/status.h"
+#include "meta/meta.h"
 #include "surface_buffer.h"
 #include "surface_type.h"
 #include "unistd.h"
 
 namespace {
-constexpr uint16_t BUFFERID_BOUNDARY = 0xffff;
+    constexpr uint16_t BUFFERID_BOUNDARY = 0xffff;
 } // namespace
 
 namespace OHOS {
@@ -50,7 +51,7 @@ std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(const AVBufferConfig &config)
             break;
         }
         case MemoryType::SURFACE_MEMORY: {
-            allocator = AVAllocatorFactory::CreateSurfaceAllocator(config.surfaceBufferConfig);
+            allocator = AVAllocatorFactory::CreateSurfaceAllocator(*(config.surfaceBufferConfig));
             break;
         }
         case MemoryType::HARDWARE_MEMORY: {
@@ -96,13 +97,13 @@ const AVBufferConfig &AVBuffer::GetConfig()
             }
             case MemoryType::SURFACE_MEMORY: {
                 auto surfaceBuffer = memory_->GetSurfaceBuffer();
-                config_.surfaceBufferConfig.width = surfaceBuffer->GetWidth();
-                config_.surfaceBufferConfig.height = surfaceBuffer->GetHeight();
-                config_.surfaceBufferConfig.strideAlignment = surfaceBuffer->GetStride();
-                config_.surfaceBufferConfig.format = surfaceBuffer->GetFormat();
-                config_.surfaceBufferConfig.usage = surfaceBuffer->GetUsage();
-                config_.surfaceBufferConfig.colorGamut = surfaceBuffer->GetSurfaceBufferColorGamut();
-                config_.surfaceBufferConfig.transform = surfaceBuffer->GetSurfaceBufferTransform();
+                config_.surfaceBufferConfig->width = surfaceBuffer->GetWidth();
+                config_.surfaceBufferConfig->height = surfaceBuffer->GetHeight();
+                config_.surfaceBufferConfig->strideAlignment = surfaceBuffer->GetStride();
+                config_.surfaceBufferConfig->format = surfaceBuffer->GetFormat();
+                config_.surfaceBufferConfig->usage = surfaceBuffer->GetUsage();
+                config_.surfaceBufferConfig->colorGamut = surfaceBuffer->GetSurfaceBufferColorGamut();
+                config_.surfaceBufferConfig->transform = surfaceBuffer->GetSurfaceBufferTransform();
                 break;
             }
             default:
@@ -203,7 +204,7 @@ int32_t AVBuffer::Init(MessageParcel &parcel, bool isSurfaceBuffer)
     duration_ = parcel.ReadInt64();
     flag_ = parcel.ReadUint32();
 
-    bool ret = Unmarshalling(parcel, *(meta_));
+    bool ret = meta_->FromParcel(parcel);
     FALSE_RETURN_V_MSG_E(ret, static_cast<int32_t>(Status::ERROR_UNKNOWN), "Unmarshalling meta_ failed");
 
     bool isBufferAttrToParcel = parcel.ReadBool();
@@ -244,7 +245,8 @@ bool AVBuffer::WriteToMessageParcel(MessageParcel &parcel)
     bool isBufferAttrToParcel = (memory_ == nullptr);
     bool ret = bufferParcel.WriteUint64(GetUniqueId()) && bufferParcel.WriteInt64(pts_) &&
                bufferParcel.WriteInt64(dts_) && bufferParcel.WriteInt64(duration_) && bufferParcel.WriteUint32(flag_) &&
-               Marshalling(bufferParcel, *(meta_)) && bufferParcel.WriteBool(isBufferAttrToParcel);
+               meta_->ToParcel(bufferParcel) &&
+               bufferParcel.WriteBool(isBufferAttrToParcel);
 
     if (!isBufferAttrToParcel) {
         MemoryType type = memory_->GetMemoryType();

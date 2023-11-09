@@ -25,7 +25,7 @@ namespace OHOS {
  * the scope exits.
  */
 namespace Detail {
-template<typename ExitAction>
+template <typename ExitAction>
 class ScopeGuard {
 public:
     explicit ScopeGuard(ExitAction &&action) : action_(action), enable_(true) {}
@@ -47,17 +47,15 @@ private:
 };
 
 struct ScopeExitGuardHelper {};
-template<typename ExitAction>
+template <typename ExitAction>
 static inline ScopeGuard<ExitAction> operator+(ScopeExitGuardHelper, ExitAction &&action)
 {
     return ScopeGuard<ExitAction>(std::forward<ExitAction>(action));
 }
-}
+} // namespace Detail
 
-#define ON_SCOPE_EXIT(id) \
-    auto onScopeExitGuard##id = Detail::ScopeExitGuardHelper{} + [ & ]
+#define ON_SCOPE_EXIT(id) auto onScopeExitGuard##id = Detail::ScopeExitGuardHelper{} + [&]
 
-#define CANCEL_SCOPE_EXIT_GUARD(id) \
-    onScopeExitGuard##id.Disable()
-}
+#define CANCEL_SCOPE_EXIT_GUARD(id) onScopeExitGuard##id.Disable()
+} // namespace OHOS
 #endif

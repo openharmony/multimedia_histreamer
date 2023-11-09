@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-#include "include/av_shared_memory_ext.h"
+#include "av_shared_memory_ext.h"
 #include <unistd.h>
 #include "ashmem.h"
-#include "include/av_shared_allocator.h"
-#include "include/avbuffer_utils.h"
-#include "inner_api/buffer/avallocator.h"
-#include "inner_api/common/log.h"
-#include "inner_api/common/status.h"
+#include "av_shared_allocator.h"
+#include "avbuffer_utils.h"
+#include "buffer/avallocator.h"
+#include "common/log.h"
+#include "common/status.h"
 #include "message_parcel.h"
 #include "scope_guard.h"
-
 
 #ifdef MEDIA_OHOS
 #include "sys/mman.h"

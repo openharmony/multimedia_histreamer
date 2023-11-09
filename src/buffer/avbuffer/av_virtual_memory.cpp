@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "include/av_virtual_memory.h"
-#include "include/av_virtual_allocator.h"
-#include "include/avbuffer_utils.h"
-#include "inner_api/buffer/avallocator.h"
-#include "inner_api/common/log.h"
-#include "inner_api/common/status.h"
+#include "av_virtual_memory.h"
+#include "av_virtual_allocator.h"
+#include "avbuffer_utils.h"
+#include "buffer/avallocator.h"
+#include "common/log.h"
+#include "common/status.h"
 #include "message_parcel.h"
 
 namespace OHOS {

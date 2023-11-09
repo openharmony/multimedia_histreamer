@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-#include "include/av_hardware_memory.h"
-#include "include/av_shared_memory_ext.h"
-#include "include/av_surface_memory.h"
-#include "include/av_virtual_memory.h"
-#include "inner_api/buffer/avallocator.h"
-#include "inner_api/buffer/avbuffer.h"
-#include "inner_api/common/log.h"
-#include "inner_api/common/status.h"
+#include "av_hardware_memory.h"
+#include "av_shared_memory_ext.h"
+#include "av_surface_memory.h"
+#include "av_virtual_memory.h"
+#include "buffer/avallocator.h"
+#include "buffer/avbuffer.h"
+#include "buffer/avbuffer_common.h"
+#include "common/log.h"
+#include "common/status.h"
 #include "message_parcel.h"
 #include "securec.h"
 #include "surface_buffer.h"
@@ -82,6 +83,7 @@ std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(uint8_t *ptr, int32_t capacit
 
 std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(MessageParcel &parcel, bool isSurfaceBuffer)
 {
+#ifdef MEDIA_OHOS
     if (isSurfaceBuffer) {
         auto mem = std::shared_ptr<AVMemory>(new AVSurfaceMemory());
         int32_t ret = mem->Init(parcel);
@@ -118,6 +120,9 @@ std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(MessageParcel &parcel, bool i
     FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), nullptr, "Init AVMemory failed, name = %{public}s",
                          mem->name_.c_str());
     return mem;
+#else
+    return nullptr;
+#endif
 }
 
 AVMemory::AVMemory() : name_("mem_null"), align_(0), offset_(0), size_(0), base_(nullptr), allocator_(nullptr) {}
@@ -143,6 +148,7 @@ bool AVMemory::WriteToMessageParcel(MessageParcel &parcel)
 
 int32_t AVMemory::ReadCommonFromMessageParcel(MessageParcel &parcel)
 {
+#ifdef MEDIA_OHOS
     name_ = parcel.ReadString();
     capacity_ = parcel.ReadInt32();
     FALSE_RETURN_V_MSG_E(capacity_ >= 0, static_cast<int32_t>(Status::ERROR_INVALID_DATA), "capacity is invalid");
@@ -156,17 +162,21 @@ int32_t AVMemory::ReadCommonFromMessageParcel(MessageParcel &parcel)
     size_ = parcel.ReadInt32();
     FALSE_RETURN_V_MSG_E((size_ >= 0) || (capacity_ < size_), static_cast<int32_t>(Status::ERROR_INVALID_DATA),
                          "size is invalid");
+#endif
     return static_cast<int32_t>(Status::OK);
 }
 
 bool AVMemory::WriteCommonToMessageParcel(MessageParcel &parcel)
 {
+    bool ret = true;
+#ifdef MEDIA_OHOS
     MessageParcel bufferParcel;
-    bool ret = bufferParcel.WriteString(name_) && bufferParcel.WriteInt32(capacity_) &&
-               bufferParcel.WriteInt32(align_) && bufferParcel.WriteInt32(offset_) && bufferParcel.WriteInt32(size_);
+    ret = bufferParcel.WriteString(name_) && bufferParcel.WriteInt32(capacity_) && bufferParcel.WriteInt32(align_) &&
+          bufferParcel.WriteInt32(offset_) && bufferParcel.WriteInt32(size_);
     if (ret) {
         parcel.Append(bufferParcel);
     }
+#endif
     return ret;
 }
 

@@ -75,7 +75,7 @@ int32_t OH_AVBuffer_GetCapacity(OH_AVBuffer *buf);
  * @since 10
  * @version 1.0
  */
-OH_AVCodecBufferAttr OH_AVBuffer_GetBufferAttr(OH_AVBuffer *buf);
+// OH_AVCodecBufferAttr OH_AVBuffer_GetBufferAttr(OH_AVBuffer *buf);
 
 /**
  * @brief Set the buffer's flag
@@ -87,7 +87,7 @@ OH_AVCodecBufferAttr OH_AVBuffer_GetBufferAttr(OH_AVBuffer *buf);
  * @since 10
  * @version 1.0
  */
-OH_AVErrCode OH_AVBuffer_SetBufferAttr(OH_AVBuffer *buf, OH_AVCodecBufferAttr *attr);
+// OH_AVErrCode OH_AVBuffer_SetBufferAttr(OH_AVBuffer *buf, OH_AVCodecBufferAttr *attr);
 
 /**
  * @brief Get the buffer's meta data

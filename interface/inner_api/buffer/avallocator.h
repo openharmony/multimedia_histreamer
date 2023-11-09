@@ -17,76 +17,15 @@
 #define AV_ALLOCATOR_H
 
 #include <memory>
-#include <stdlib.h>
 #include <string>
 #include "refbase.h"
-#include "surface_type.h" // foundation/graphic/graphic_2d/interfaces/inner_api/surface/surface_type.h
+#include "avbuffer_common.h"
 
 namespace OHOS {
-class SurfaceBuffer;
-class MessageParcel;
+struct BufferRequestConfig;
 } // namespace OHOS
 namespace OHOS {
-namespace MediaAVCodec {
-class AVMemory;
-/**
- * @enum MemoryType
- * @brief For platforms that support multiple processes, this flag bit indicates the types of data storage, refer to
- * {@link AVAllocator}.
- * @since 4.1
- * @version 1.0
- */
-enum struct MemoryType : uint8_t {
-    /**
-     * If this type is not set, the allocator will be initialized by the current type by default. This type of memory is
-     * created through malloc() and can only be used by the current process.
-     */
-    VIRTUAL_MEMORY = 0,
-    /**
-     * A memory type that implements a convenient memory sharing mechanism. For platforms that do not support
-     * multiprocessing, it may only encapsulate ordinary memory blocks rather than truly multiprocess shared memory
-     */
-    SHARED_MEMORY,
-    /**
-     * A memory type that provides surface buffer for sharing multi process data.
-     */
-    SURFACE_MEMORY,
-    /**
-     * A memory type that provides DMA method for sharing multi process data. If the hardware does not support it, it
-     * will be invalid when initializing AVAlocator.
-     */
-    HARDWARE_MEMORY,
-    /**
-     * The identifier for buffer queue, representing any type of memory can be allocated.
-     */
-    UNKNOWN_MEMORY
-};
-
-/**
- * @brief Enumerates the flag bits used to create a new shared memory.
- */
-enum MemoryFlag : uint8_t {
-    /**
-     * For platforms that support multiple processes, this flag bit indicates that the remote process can only read data
-     * in the shared memory. If this flag is not set, the remote process has both read and write permissions by default.
-     * Adding this flag does not affect the process that creates the memory, which always has the read and write
-     * permission on the shared memory. For platforms that do not support multi-processes, the memory read and write
-     * permission control capability may not be available. In this case, this flag is invalid.
-     */
-    MEMORY_READ_ONLY = 0x1 << 0,
-    /**
-     * For platforms that support multiple processes, this flag bit indicates that the remote process can only write
-     * data in the shared memory.
-     */
-    MEMORY_WRITE_ONLY = 0x1 << 1,
-    /**
-     * This flag bit indicates that the remote process is allowed to read and write the shared memory. If no flags are
-     * specified, this is the default memory sharing policy. If the FLAGS_READ_ONLY bit is set, this flag bit is
-     * ignored.
-     */
-    MEMORY_READ_WRITE = MEMORY_READ_ONLY | MEMORY_WRITE_ONLY,
-};
-
+namespace Media {
 /**
  * @brief AVBuffer's allocator.
  */
@@ -151,7 +90,7 @@ public:
      * @since 4.1
      * @version 1.0
      */
-    static std::shared_ptr<AVAllocator> CreateSurfaceAllocator(const BufferRequestConfig &configs);
+    static std::shared_ptr<AVAllocator> CreateSurfaceAllocator(const struct BufferRequestConfig &configs);
 
     /**
      * @brief Create the allocator of DMA buffer.
@@ -168,6 +107,6 @@ private:
     AVAllocatorFactory() = default;
     ~AVAllocatorFactory() = default;
 };
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
 #endif // AV_ALLOCATOR_H

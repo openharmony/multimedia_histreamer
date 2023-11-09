@@ -16,10 +16,10 @@
 #ifndef AV_VIRTUAL_ALLOCATOR_H
 #define AV_VIRTUAL_ALLOCATOR_H
 
-#include "avallocator.h"
+#include "buffer/avallocator.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 /**
  * @brief The allocator that allocate virtual memory.
  */

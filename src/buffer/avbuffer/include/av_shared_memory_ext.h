@@ -16,11 +16,13 @@
 #ifndef AV_SHARED_MEMORY_EXT_H
 #define AV_SHARED_MEMORY_EXT_H
 
-#include "avallocator.h"
-#include "avbuffer.h"
+#include "buffer/avallocator.h"
+#include "buffer/avbuffer.h"
+#include "buffer/avbuffer_common.h"
+#include "common/status.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 class AVSharedMemoryExt : public AVMemory {
 public:
     explicit AVSharedMemoryExt();

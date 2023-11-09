@@ -16,10 +16,11 @@
 #ifndef AV_SURFACE_ALLOCATOR_H
 #define AV_SURFACE_ALLOCATOR_H
 
-#include "avallocator.h"
+#include "buffer/avallocator.h"
+#include "surface_type.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 /**
  * @brief The allocator that allocate surface buffer, refer to {@link SurfaceBuffer}.
  */

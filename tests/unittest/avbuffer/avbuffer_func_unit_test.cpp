@@ -24,13 +24,15 @@
 #include "av_shared_memory_ext.h"
 #include "av_surface_allocator.h"
 #include "av_surface_memory.h"
-#include "avbuffer.h"
 #include "avbuffer_utils.h"
+#include "buffer/avbuffer.h"
+#include "buffer/avbuffer_common.h"
 #include "meta.h"
 #include "meta_key.h"
 #include "surface_buffer.h"
 #include "surface_type.h"
 #include "unittest_log.h"
+
 
 using namespace std;
 using namespace testing::ext;
@@ -279,7 +281,7 @@ void AVBufferInnerUnitTest::CreateLocalSurfaceMem()
 void AVBufferInnerUnitTest::CreateLocalSurfaceMemByConfig()
 {
     // create loacal
-    config_.surfaceBufferConfig = g_config;
+    *(config_.surfaceBufferConfig) = g_config;
     config_.memoryType = MemoryType::SURFACE_MEMORY;
     remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(config_);
     ASSERT_NE(nullptr, buffer_);
@@ -622,11 +624,11 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_004, TestSize.Level1)
     configSecond.memoryFlag = MemoryFlag::MEMORY_READ_ONLY;
     EXPECT_TRUE(configFirst <= configSecond);
 
-    configFirst.surfaceBufferConfig = g_config;
+    *(configFirst.surfaceBufferConfig) = g_config;
     EXPECT_FALSE(configFirst <= configSecond);
 
-    configFirst.surfaceBufferConfig = g_config;
-    configSecond.surfaceBufferConfig = g_config;
+    *(configFirst.surfaceBufferConfig) = g_config;
+    *(configSecond.surfaceBufferConfig) = g_config;
     EXPECT_TRUE(configFirst <= configSecond);
 }
 
@@ -693,7 +695,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_006, TestSize.Level1)
     configRemote.dmaFd = 1;
 
     MessageParcel parcel;
-    configRemote.surfaceBufferConfig = g_config;
+   *( configRemote.surfaceBufferConfig) = g_config;
     EXPECT_TRUE(MarshallingConfig(parcel, configRemote));
 
     AVBufferConfig configLocal;
@@ -706,14 +708,14 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_006, TestSize.Level1)
     EXPECT_EQ(configRemote.capacity, configLocal.capacity);
     EXPECT_EQ(configRemote.dmaFd, configLocal.dmaFd);
 
-    EXPECT_EQ(configRemote.surfaceBufferConfig.width, configLocal.surfaceBufferConfig.width);
-    EXPECT_EQ(configRemote.surfaceBufferConfig.height, configLocal.surfaceBufferConfig.height);
-    EXPECT_EQ(configRemote.surfaceBufferConfig.strideAlignment, configLocal.surfaceBufferConfig.strideAlignment);
-    EXPECT_EQ(configRemote.surfaceBufferConfig.format, configLocal.surfaceBufferConfig.format);
-    EXPECT_EQ(configRemote.surfaceBufferConfig.usage, configLocal.surfaceBufferConfig.usage);
-    EXPECT_EQ(configRemote.surfaceBufferConfig.timeout, configLocal.surfaceBufferConfig.timeout);
-    EXPECT_EQ(configRemote.surfaceBufferConfig.colorGamut, configLocal.surfaceBufferConfig.colorGamut);
-    EXPECT_EQ(configRemote.surfaceBufferConfig.transform, configLocal.surfaceBufferConfig.transform);
+    EXPECT_EQ(configRemote.surfaceBufferConfig->width, configLocal.surfaceBufferConfig->width);
+    EXPECT_EQ(configRemote.surfaceBufferConfig->height, configLocal.surfaceBufferConfig->height);
+    EXPECT_EQ(configRemote.surfaceBufferConfig->strideAlignment, configLocal.surfaceBufferConfig->strideAlignment);
+    EXPECT_EQ(configRemote.surfaceBufferConfig->format, configLocal.surfaceBufferConfig->format);
+    EXPECT_EQ(configRemote.surfaceBufferConfig->usage, configLocal.surfaceBufferConfig->usage);
+    EXPECT_EQ(configRemote.surfaceBufferConfig->timeout, configLocal.surfaceBufferConfig->timeout);
+    EXPECT_EQ(configRemote.surfaceBufferConfig->colorGamut, configLocal.surfaceBufferConfig->colorGamut);
+    EXPECT_EQ(configRemote.surfaceBufferConfig->transform, configLocal.surfaceBufferConfig->transform);
 }
 
 /**
@@ -1241,10 +1243,10 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetConfig_001, TestSize.L
     ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
     AVBufferConfig config = buffer_->GetConfig();
     EXPECT_EQ(config.memoryType, MemoryType::SURFACE_MEMORY);
-    EXPECT_EQ(config.surfaceBufferConfig.width, g_config.width);
-    EXPECT_EQ(config.surfaceBufferConfig.height, g_config.height);
-    EXPECT_EQ(config.surfaceBufferConfig.format, g_config.format);
-    EXPECT_EQ(config.surfaceBufferConfig.usage, g_config.usage);
+    EXPECT_EQ(config.surfaceBufferConfig->width, g_config.width);
+    EXPECT_EQ(config.surfaceBufferConfig->height, g_config.height);
+    EXPECT_EQ(config.surfaceBufferConfig->format, g_config.format);
+    EXPECT_EQ(config.surfaceBufferConfig->usage, g_config.usage);
 }
 
 /**

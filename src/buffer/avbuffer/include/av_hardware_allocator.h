@@ -16,7 +16,7 @@
 #ifndef AV_HARDWARE_ALLOCATOR_H
 #define AV_HARDWARE_ALLOCATOR_H
 
-#include "inner_api/buffer/avallocator.h"
+#include "buffer/avallocator.h"
 #include "dmabuf_alloc.h"
 
 namespace OHOS {

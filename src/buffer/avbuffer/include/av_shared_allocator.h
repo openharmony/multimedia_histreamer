@@ -16,10 +16,10 @@
 #ifndef AV_SHARED_ALLOCATOR_H
 #define AV_SHARED_ALLOCATOR_H
 
-#include "avallocator.h"
+#include "buffer/avallocator.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 /**
  * @brief The allocator that allocate shared memory.
  */

@@ -16,11 +16,12 @@
 #ifndef AV_VIRTUAL_MEMORY_H
 #define AV_VIRTUAL_MEMORY_H
 
-#include "avallocator.h"
-#include "avbuffer.h"
+#include "buffer/avallocator.h"
+#include "buffer/avbuffer.h"
+#include "buffer/avbuffer_common.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 class AVVirtualMemory : public AVMemory {
 public:
     explicit AVVirtualMemory();

@@ -17,8 +17,9 @@
 #define AV_HARDWARE_MEMORY_H
 
 #include <mutex>
-#include "inner_api/buffer/avallocator.h"
-#include "inner_api/buffer/avbuffer.h"
+#include "buffer/avallocator.h"
+#include "buffer/avbuffer.h"
+#include "buffer/avbuffer_common.h"
 
 namespace OHOS {
 namespace Media {
