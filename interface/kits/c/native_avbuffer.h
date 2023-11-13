@@ -18,159 +18,136 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include "native_avcodec_base.h"
-#include "native_averrors.h"
+#include "native_mferrors.h"
 #include "native_avformat.h"
-#include "native_buffer.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 typedef struct OH_AVBuffer OH_AVBuffer;
-// typedef struct OH_AVBufferQueue OH_AVBufferQueue;
+typedef struct OH_NativeBuffer OH_NativeBuffer;
+
+/**
+ * @brief Enumerate the categories of OH_AVBuffer tags
+ * @syscap SystemCapability.Multimedia.Media.CodecBase
+ * @since 11
+ * @version 1.0
+ */
+typedef enum OH_AVBufferFlags {
+  MF_BUFFER_FLAGS_NONE = 0,
+  /* Indicates that the Buffer is an End-of-Stream frame */
+  MF_BUFFER_FLAGS_EOS = 1 << 0,
+  /* Indicates that the Buffer contains keyframes */
+  MF_BUFFER_FLAGS_SYNC_FRAME = 1 << 1,
+  /* Indicates that the data contained in the Buffer is only part of a frame */
+  MF_BUFFER_FLAGS_INCOMPLETE_FRAME = 1 << 2,
+  /* Indicates that the Buffer contains Codec-Specific-Data */
+  MF_BUFFER_FLAGS_CODEC_DATA = 1 << 3,
+} OH_AVBufferFlags;
+
+/**
+ * @brief Define the Buffer description information of OH_AVBuffer
+ * @syscap SystemCapability.Multimedia.Media.Core
+ * @since 11
+ */
+typedef struct OH_AVBufferAttr {
+    /* Presentation timestamp of this Buffer in microseconds */
+    int64_t pts;
+    /* The size of the data contained in the Buffer in bytes */
+    int32_t size;
+    /* The starting offset of valid data in this Buffer */
+    int32_t offset;
+    /* The flags this Buffer has, which is also a combination of multiple {@link OH_AVBufferFlags} */
+    uint32_t flags;
+} OH_AVBufferAttr;
 
 /**
  * @brief Create an OH_AVBuffer instance
  * @syscap SystemCapability.Multimedia.Media.Core
- * @param capacity the buffer's capacity, bytes.
- * @return Returns a pointer to an OH_AVBuffer instance, needs to be freed by OH_AVBuffer_Destroy.
- * @since 10
+ * @param capacity the buffer's capacity, bytes
+ * @return Returns a pointer to an OH_AVBuffer instance, needs to be freed by OH_AVBuffer_Destroy
+ * @since 11
  */
 OH_AVBuffer *OH_AVBuffer_Create(int32_t capacity);
-
-// /**
-//  * @brief Create an OH_AVBuffer instance
-//  * @syscap SystemCapability.Multimedia.Media.Core
-//  * @param bufferQueue Encapsulate OH_AVBufferQueue structure instance pointer
-//  * @return Returns a pointer to an OH_AVBuffer instance, needs to be freed by OH_AVBuffer_Destroy.
-//  * @since 10
-//  */
-// OH_AVBuffer *OH_AVBuffer_CreateFromBufferQueue(OH_AVBufferQueue *bufferQueue);
-
-/**
- * @brief Get the buffer's virtual address
- * @syscap SystemCapability.Multimedia.Media.Core
- * @param buf Encapsulate OH_AVBuffer structure instance pointer
- * @return the buffer's virtual address if the buffer is valid, otherwise nullptr.
- * @since 10
- * @version 1.0
- */
-uint8_t *OH_AVBuffer_GetAddr(OH_AVBuffer *buf);
-
-/**
- * @brief Get the buffer's size
- * @syscap SystemCapability.Multimedia.Media.Core
- * @param buf Encapsulate OH_AVBuffer structure instance pointer
- * @return the buffer's capacity if the buffer is valid, otherwise 0, bytes.
- * @since 10
- * @version 1.0
- */
-int32_t OH_AVBuffer_GetCapacity(OH_AVBuffer *buf);
-
-/**
- * @brief Get the buffer's flag
- * @syscap SystemCapability.Multimedia.Media.Core
- * @param buf Encapsulate OH_AVBuffer structure instance pointer
- * @return Returns The description of the Buffer, please refer to {@link OH_AVCodecBufferAttr}
- * @since 10
- * @version 1.0
- */
-// OH_AVCodecBufferAttr OH_AVBuffer_GetBufferAttr(OH_AVBuffer *buf);
-
-/**
- * @brief Set the buffer's flag
- * @syscap SystemCapability.Multimedia.Media.Core
- * @param buf Encapsulate OH_AVBuffer structure instance pointer
- * @param attr The description of the Buffer, please refer to {@link OH_AVCodecBufferAttr}
- * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to {@link
- * OH_AVErrCode}
- * @since 10
- * @version 1.0
- */
-// OH_AVErrCode OH_AVBuffer_SetBufferAttr(OH_AVBuffer *buf, OH_AVCodecBufferAttr *attr);
-
-/**
- * @brief Get the buffer's meta data
- * @syscap SystemCapability.Multimedia.Media.Core
- * @param buf Encapsulate OH_AVBuffer structure instance pointer
- * @return Returns Encapsulate OH_AVFormat structure instance pointer, refer to {@link OH_AVFormat}
- * @since 10
- * @version 1.0
- */
-OH_AVFormat *OH_AVBuffer_GetParameter(OH_AVBuffer *buf);
-
-/**
- * @brief Set the buffer's meta data
- * @syscap SystemCapability.Multimedia.Media.Core
- * @param buf Encapsulate OH_AVBuffer structure instance pointer
- * @param format Encapsulate OH_AVFormat structure instance pointer, refer to {@link OH_AVFormat}
- * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to {@link
- * OH_AVErrCode}
- * @since 10
- * @version 1.0
- */
-OH_AVErrCode OH_AVBuffer_SetParameter(OH_AVBuffer *buf, OH_AVFormat *format);
-
-/**
- * @brief Get the nativeBuffer
- * @syscap SystemCapability.Multimedia.Media.Core
- * @param buf Encapsulate OH_AVBuffer structure instance pointer
- * @return Returns Encapsulate OH_NativeBuffer structure instance pointer is successful, otherwise returns nullptr,
- * refer to {@link OH_NativeBuffer}
- * @since 10
- * @version 1.0
- */
-OH_NativeBuffer *OH_AVBuffer_GetNativeBuffer(OH_AVBuffer *buf);
 
 /**
  * @brief Clear the internal resources of the buffer and destroy the buffer instance
  * @syscap SystemCapability.Multimedia.Media.Core
- * @param mem Encapsulate OH_AVBuffer structure instance pointer
+ * @param buffer Encapsulate OH_AVBuffer structure instance pointer
  * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to {@link
- * OH_AVErrCode}
- * @since 10
+ * OH_MFErrorCode}
+ * @since 11
+ */
+OH_MFErrorCode OH_AVBuffer_Destroy(struct OH_AVBuffer *buffer);
+
+/**
+ * @brief Get the buffer's attribute
+ * @syscap SystemCapability.Multimedia.Media.Core
+ * @param buffer Encapsulate OH_AVBuffer structure instance pointer
+ * @return Returns the description of the buffer, please refer to {@link OH_AVBufferAttr}
+ * @since 11
+ */
+OH_AVBufferAttr OH_AVBuffer_GetBufferAttr(OH_AVBuffer *buffer);
+
+/**
+ * @brief Set the buffer's attribute
+ * @syscap SystemCapability.Multimedia.Media.Core
+ * @param buffer Encapsulate OH_AVBuffer structure instance pointer
+ * @param attr The description of the buffer, please refer to {@link OH_AVBufferAttr}
+ * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to {@link
+ * OH_MFErrorCode}
+ * @since 11
+ */
+OH_MFErrorCode OH_AVBuffer_SetBufferAttr(OH_AVBuffer *buffer, OH_AVBufferAttr *attr);
+
+/**
+ * @brief Get the buffer's parameter
+ * @syscap SystemCapability.Multimedia.Media.Core
+ * @param buffer Encapsulate OH_AVBuffer structure instance pointer
+ * @return Returns Encapsulate OH_AVFormat structure instance pointer, refer to {@link OH_AVFormat}
+ * @since 11
+ */
+OH_AVFormat *OH_AVBuffer_GetParameter(OH_AVBuffer *buffer);
+
+/**
+ * @brief Set the buffer's parameter
+ * @syscap SystemCapability.Multimedia.Media.Core
+ * @param buffer Encapsulate OH_AVBuffer structure instance pointer
+ * @param format Encapsulate OH_AVFormat structure instance pointer, refer to {@link OH_AVFormat}
+ * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to {@link
+ * OH_MFErrorCode}
+ * @since 11
  * @version 1.0
  */
-OH_AVErrCode OH_AVBuffer_Destroy(struct OH_AVBuffer *buf);
+OH_MFErrorCode OH_AVBuffer_SetParameter(OH_AVBuffer *buffer, OH_AVFormat *format);
 
-// /**
-//  * @brief Get the nativeBuffer
-//  * @syscap SystemCapability.Multimedia.Media.Core
-//  * @param bufferQueue Encapsulate OH_AVBufferQueue structure instance pointer
-//  * @param callback  A collection of all callback functions, see {@link OH_AVBufferQueueCallback}
-//  * @param userData specified data
-//  * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to
-//  {@link
-//  * OH_AVErrCode}
-//  * @since 10
-//  * @version 1.0
-//  */
-// OH_AVErrCode OH_AVBufferQueue_SetProducerCallback(OH_AVBufferQueue *bufferQueue, OH_AVBufferQueueCallback callback,
-//                                                   void *userData);
+/**
+ * @brief Get the buffer's virtual address
+ * @syscap SystemCapability.Multimedia.Media.Core
+ * @param buffer Encapsulate OH_AVBuffer structure instance pointer
+ * @return the buffer's virtual address if the buffer is valid, otherwise nullptr
+ * @since 11
+ */
+uint8_t *OH_AVBuffer_GetAddr(OH_AVBuffer *buffer);
 
-// /**
-//  * @brief Request the buffer from buffer queue.
-//  * @syscap SystemCapability.Multimedia.Media.Core
-//  * @param bufferQueue Encapsulate OH_AVBufferQueue structure instance pointer
-//  * @param capacity the buffer's capacity, bytes.
-//  * @return Returns a pointer to an OH_AVBuffer instance, needs to be freed by OH_AVBufferQueue_PushBuffer.
-//  * @since 10
-//  * @version 1.0
-//  */
-// OH_AVBuffer *OH_AVBufferQueue_RequestBuffer(OH_AVBufferQueue *bufferQueue, int32_t capacity);
+/**
+ * @brief Get the buffer's capacity
+ * @syscap SystemCapability.Multimedia.Media.Core
+ * @param buffer Encapsulate OH_AVBuffer structure instance pointer
+ * @return the buffer's capacity if the buffer is valid, otherwise -1
+ * @since 11
+ */
+int32_t OH_AVBuffer_GetCapacity(OH_AVBuffer *buffer);
 
-// /**
-//  * @brief Push and clear the internal resources of the buffer that request from buffer queue.
-//  * @syscap SystemCapability.Multimedia.Media.Core
-//  * @param bufferQueue Encapsulate OH_AVBufferQueue structure instance pointer
-//  * @param buf Encapsulate OH_AVBuffer structure instance pointer
-//  * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to
-//  {@link
-//  * OH_AVErrCode}
-//  * @since 10
-//  * @version 1.0
-//  */
-// OH_AVErrCode OH_AVBufferQueue_PushBuffer(OH_AVBufferQueue *bufferQueue, OH_AVBuffer *buf);
+/**
+ * @brief Get the nativeBuffer
+ * @syscap SystemCapability.Multimedia.Media.Core
+ * @param buffer Encapsulate OH_AVBuffer structure instance pointer
+ * @return Returns Encapsulate OH_NativeBuffer structure instance pointer is successful, otherwise returns nullptr,
+ * refer to {@link OH_NativeBuffer}
+ * @since 11
+ */
+OH_NativeBuffer *OH_AVBuffer_GetNativeBuffer(OH_AVBuffer *buffer);
 
 #ifdef __cplusplus
 }

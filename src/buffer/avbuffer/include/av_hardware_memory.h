@@ -31,7 +31,7 @@ public:
     int32_t GetFileDescriptor() override;
     int32_t SyncStart() override;
     int32_t SyncEnd() override;
-    MemoryFlag GetMemFlag();
+    MemoryFlag GetMemoryFlag() override;
 
 private:
     int32_t Init() override;

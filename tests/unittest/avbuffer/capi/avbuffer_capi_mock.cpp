@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include "avformat_capi_mock.h"
 #include "native_avbuffer.h"
-#include "native_averrors.h"
+#include "native_mferrors.h"
 #include "surface_buffer.h"
 #include "unittest_log.h"
 
@@ -38,13 +38,13 @@ int32_t AVBufferCapiMock::GetCapacity()
     return OH_AVBuffer_GetCapacity(buffer_);
 }
 
-OH_AVCodecBufferAttr AVBufferCapiMock::GetBufferAttr()
+OH_AVBufferAttr AVBufferCapiMock::GetBufferAttr()
 {
-    OH_AVCodecBufferAttr attr;
+    OH_AVBufferAttr attr;
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, attr, "buffer_ is nullptr!");
     return OH_AVBuffer_GetBufferAttr(buffer_);
 }
-int32_t AVBufferCapiMock::SetBufferAttr(OH_AVCodecBufferAttr &attr)
+int32_t AVBufferCapiMock::SetBufferAttr(OH_AVBufferAttr &attr)
 {
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN),
                                       "buffer_ is nullptr!");

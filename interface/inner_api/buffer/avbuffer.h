@@ -140,6 +140,14 @@ public:
     virtual MemoryType GetMemoryType();
 
     /**
+     * @brief Get the memory's Flag set by the allocator, refer to {@link MemoryType}
+     * @return the memory's flag.
+     * @since 4.1
+     * @version 1.0
+     */
+    virtual MemoryFlag GetMemoryFlag();
+
+    /**
      * @brief Get the memory's capacity, which was set during creation and alloced by the allocator.
      * @return The memory's capacity, bytes. If the memory is valid, otherwise -1.
      * @since 4.1

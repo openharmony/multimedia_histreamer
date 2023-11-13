@@ -33,7 +33,7 @@ namespace {
 const int32_t MEMSIZE = 1024 * 190;
 const int32_t g_offset = 1000;
 const int64_t g_pts = 33000;
-const AVCodecBufferFlag g_flag = AVCODEC_BUFFER_FLAG_EOS;
+const AVCodecBufferFlag g_flag = MF_BUFFER_FLAG_EOS;
 
 const std::string_view g_intKey = "IntKey";
 const std::string_view g_longKey = "LongKey";
@@ -129,14 +129,14 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_GetCapacity_001, TestSize.Level1)
  */
 HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_SetBufferAttr_001, TestSize.Level1)
 {
-    OH_AVCodecBufferAttr attr;
+    OH_AVBufferAttr attr;
     attr.pts = g_pts;
     attr.size = MEMSIZE;
     attr.offset = g_offset;
     attr.flags = static_cast<uint32_t>(g_flag);
     EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->SetBufferAttr(attr));
 
-    OH_AVCodecBufferAttr attrTemp = buffer_->GetBufferAttr();
+    OH_AVBufferAttr attrTemp = buffer_->GetBufferAttr();
     EXPECT_EQ(attr.pts, attrTemp.pts);
     EXPECT_EQ(attr.size, attrTemp.size);
     EXPECT_EQ(attr.offset, attrTemp.offset);

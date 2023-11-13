@@ -29,7 +29,7 @@ public:
     uint8_t *GetAddr() override;
     MemoryType GetMemoryType() override;
     int32_t GetFileDescriptor() override;
-    MemoryFlag GetMemFlag();
+    MemoryFlag GetMemoryFlag() override;
 
 private:
     int32_t Init() override;

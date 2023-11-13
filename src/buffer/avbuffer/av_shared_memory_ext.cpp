@@ -132,14 +132,14 @@ MemoryType AVSharedMemoryExt::GetMemoryType()
     return MemoryType::SHARED_MEMORY;
 }
 
+MemoryFlag AVSharedMemoryExt::GetMemoryFlag()
+{
+    return memFlag_;
+}
+
 int32_t AVSharedMemoryExt::GetFileDescriptor()
 {
     return fd_;
-}
-
-MemoryFlag AVSharedMemoryExt::GetMemFlag()
-{
-    return memFlag_;
 }
 
 void AVSharedMemoryExt::Close() noexcept

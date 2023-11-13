@@ -182,6 +182,11 @@ MemoryType AVHardwareMemory::GetMemoryType()
     return MemoryType::HARDWARE_MEMORY;
 }
 
+MemoryFlag AVHardwareMemory::GetMemoryFlag()
+{
+    return memFlag_;
+}
+
 int32_t AVHardwareMemory::GetFileDescriptor()
 {
     return fd_;
@@ -201,11 +206,6 @@ int32_t AVHardwareMemory::SyncEnd()
     FALSE_RETURN_V_MSG_E(isStartSync_, -1, "Haven't started syncing yet!");
     isStartSync_ = false;
     return DmabufHeapBufferSyncEnd(fd_, FLAG_ADAPTER_MAP.at(memFlag_));
-}
-
-MemoryFlag AVHardwareMemory::GetMemFlag()
-{
-    return memFlag_;
 }
 } // namespace Media
 } // namespace OHOS

@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef NATIVE_AVMAGIC_H
-#define NATIVE_AVMAGIC_H
+#ifndef NATIVE_MFMAGIC_H
+#define NATIVE_MFMAGIC_H
 
 #include <refbase.h>
 #include "interface/inner_api/buffer/avbuffer.h"
 
-#define AV_MAGIC(a, b, c, d) (((a) << 24) + ((b) << 16) + ((c) << 8) + ((d) << 0))
+#define MF_MAGIC(a, b, c, d) (((a) << 24) + ((b) << 16) + ((c) << 8) + ((d) << 0))
 
 enum class MFMagic {
-    AVCODEC_MAGIC_AVBUFFER = AV_MAGIC('B', 'B', 'U', 'F'),
+    MFMAGIC_AVBUFFER = MF_MAGIC('B', 'B', 'U', 'F'),
 };
 
 struct MFObjectMagic : public OHOS::RefBase {
@@ -38,4 +38,4 @@ struct OH_AVBuffer : public MFObjectMagic {
     std::shared_ptr<OHOS::Media::AVBuffer> buffer_;
     bool isUserCreated = false;
 };
-#endif // NATIVE_AVMAGIC_H
+#endif // NATIVE_MFMAGIC_H

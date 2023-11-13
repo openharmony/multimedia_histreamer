@@ -86,11 +86,11 @@ const AVBufferConfig &AVBuffer::GetConfig()
                 break;
             }
             case MemoryType::SHARED_MEMORY: {
-                config_.memoryFlag = std::static_pointer_cast<AVSharedMemoryExt>(memory_)->GetMemFlag();
+                config_.memoryFlag = std::static_pointer_cast<AVSharedMemoryExt>(memory_)->GetMemoryFlag();
                 break;
             }
             case MemoryType::HARDWARE_MEMORY: {
-                config_.memoryFlag = std::static_pointer_cast<AVHardwareMemory>(memory_)->GetMemFlag();
+                config_.memoryFlag = std::static_pointer_cast<AVHardwareMemory>(memory_)->GetMemoryFlag();
                 config_.dmaFd = memory_->GetFileDescriptor();
                 break;
             }

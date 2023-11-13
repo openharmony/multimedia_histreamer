@@ -184,6 +184,11 @@ MemoryType AVMemory::GetMemoryType()
     return MemoryType::VIRTUAL_MEMORY;
 }
 
+MemoryFlag AVMemory::GetMemoryFlag()
+{
+    return MemoryFlag::MEMORY_READ_WRITE;
+}
+
 int32_t AVMemory::GetCapacity()
 {
     return capacity_;

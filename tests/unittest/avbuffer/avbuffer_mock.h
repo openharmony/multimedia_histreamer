@@ -30,8 +30,8 @@ public:
     virtual ~AVBufferMock() = default;
     virtual uint8_t *GetAddr() = 0;
     virtual int32_t GetCapacity() = 0;
-    virtual OH_AVCodecBufferAttr GetBufferAttr() = 0;
-    virtual int32_t SetBufferAttr(OH_AVCodecBufferAttr &attr) = 0;
+    virtual OH_AVBufferAttr GetBufferAttr() = 0;
+    virtual int32_t SetBufferAttr(OH_AVBufferAttr &attr) = 0;
     virtual std::shared_ptr<FormatMock> GetParameter() = 0;
     virtual int32_t SetParameter(const std::shared_ptr<FormatMock> &format) = 0;
     virtual sptr<SurfaceBuffer> GetNativeBuffer() = 0;

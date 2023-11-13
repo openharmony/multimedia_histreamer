@@ -16,7 +16,7 @@
 #include "avbuffer_inner_mock.h"
 #include "avformat_inner_mock.h"
 #include "media_description.h"
-#include "native_averrors.h"
+#include "native_mferrors.h"
 #include "securec.h"
 #include "unittest_log.h"
 
@@ -36,9 +36,9 @@ int32_t AVBufferInnerMock::GetCapacity()
     return buffer_->memory_->GetCapacity();
 }
 
-OH_AVCodecBufferAttr AVBufferInnerMock::GetBufferAttr()
+OH_AVBufferAttr AVBufferInnerMock::GetBufferAttr()
 {
-    OH_AVCodecBufferAttr attr;
+    OH_AVBufferAttr attr;
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, attr, "buffer_ is nullptr!");
     attr.pts = buffer_->pts_;
     attr.offset = buffer_->memory_->GetOffset();
@@ -46,7 +46,7 @@ OH_AVCodecBufferAttr AVBufferInnerMock::GetBufferAttr()
     attr.flags = static_cast<uint32_t>(buffer_->flag_);
     return attr;
 }
-int32_t AVBufferInnerMock::SetBufferAttr(OH_AVCodecBufferAttr &attr)
+int32_t AVBufferInnerMock::SetBufferAttr(OH_AVBufferAttr &attr)
 {
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN),
                                       "buffer_ is nullptr!");

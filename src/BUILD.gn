@@ -32,6 +32,7 @@ config("media_foundation_buffer_config") {
     "$histreamer_root_dir/src/buffer/avbuffer/capi",
     "$histreamer_root_dir/src/buffer/avbuffer/include",
     "$histreamer_root_dir/src/buffer/avbuffer_queue/include",
+    "$histreamer_root_dir/src/buffer/capi/common",
     "$histreamer_root_dir/interface/inner_api",
     "$histreamer_root_dir/../../graphic/graphic_2d/frameworks/surface/include",
     "$histreamer_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
@@ -71,9 +72,8 @@ ohos_shared_library("media_foundation_buffer") {
     "$histreamer_root_dir/src/buffer/avbuffer/avbuffer_common.cpp",
     "$histreamer_root_dir/src/buffer/avbuffer/avbuffer_utils.cpp",
     "$histreamer_root_dir/src/buffer/avbuffer/avmemory.cpp",
+    "$histreamer_root_dir/src/buffer/capi/native_avbuffer.cpp",
     "$histreamer_root_dir/src/meta/any.cpp",
-
-    # "./capi/native_avbuffer.cpp",
   ]
   sources += [
     "$histreamer_root_dir/src/buffer/avbuffer_queue/avbuffer_queue.cpp",
@@ -96,7 +96,10 @@ ohos_shared_library("media_foundation_buffer") {
     "ipc:ipc_core",
     "memory_utils:libdmabufheap",
   ]
-
+  innerapi_tags = [
+    "platformsdk",
+    "sasdk",
+  ]
   subsystem_name = "multimedia"
   part_name = "histreamer"
 }
@@ -159,6 +162,10 @@ ohos_shared_library("media_foundation_osal") {
     "hitrace:hitrace_meter",
   ]
 
+  innerapi_tags = [
+    "platformsdk",
+    "sasdk",
+  ]
   subsystem_name = "multimedia"
   part_name = "histreamer"
 }
@@ -214,6 +221,10 @@ ohos_shared_library("media_foundation_pipeline") {
 
   deps = [ ":media_foundation_osal" ]
 
+  innerapi_tags = [
+    "platformsdk",
+    "sasdk",
+  ]
   subsystem_name = "multimedia"
   part_name = "histreamer"
 }
@@ -282,6 +293,10 @@ ohos_shared_library("media_foundation_plugin") {
     "hitrace:hitrace_meter",
   ]
 
+  innerapi_tags = [
+    "platformsdk",
+    "sasdk",
+  ]
   subsystem_name = "multimedia"
   part_name = "histreamer"
 }
