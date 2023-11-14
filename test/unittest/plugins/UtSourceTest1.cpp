@@ -68,7 +68,7 @@ Seekable UtSourceTest1::GetSeekable()
     return Seekable::UNSEEKABLE;
 }
 
-Status UtSourceTest1::SeekTo(uint64_t offset)
+Status UtSourceTest1::SeekToPos(int64_t offset)
 {
     return Status::OK;
 }
