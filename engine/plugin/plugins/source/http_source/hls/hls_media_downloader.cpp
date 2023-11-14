@@ -17,6 +17,7 @@
 #include "hls_media_downloader.h"
 #include "hls_playlist_downloader.h"
 #include "securec.h"
+#include "plugin/common/plugin_time.h"
 
 namespace OHOS {
 namespace Media {
@@ -38,7 +39,7 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
     downloadTask_ = std::make_shared<OSAL::Task>(std::string("FragmentDownload"));
     downloadTask_->RegisterHandler([this] { FragmentDownloadLoop(); });
 
-    playList_ = std::make_shared<BlockingQueue<std::string>>("PlayList", 50); // 50
+    playList_ = std::make_shared<BlockingQueue<PlayInfo>>("PlayList", 50); // 50
 
     dataSave_ =  [this] (uint8_t*&& data, uint32_t&& len) {
         return SaveData(std::forward<decltype(data)>(data), std::forward<decltype(len)>(len));
@@ -49,23 +50,31 @@ HlsMediaDownloader::HlsMediaDownloader() noexcept
 }
 
 void HlsMediaDownloader::FragmentDownloadLoop()
-{
-    std::string url = playList_->Pop();
+{   
+    auto playInfo = playList_->Pop();
+    std::string url = playInfo.url_;
     if (url.empty()) { // when monitor pause, playList_ set active false, it's empty
         OSAL::SleepFor(10); // 10
         return;
     }
     if (!fragmentDownloadStart[url]) {
         fragmentDownloadStart[url] = true;
-        auto realStatusCallback = [this] (DownloadStatus&& status, std::shared_ptr<Downloader>& downloader,
-                                          std::shared_ptr<DownloadRequest>& request) {
-            statusCallback_(status, downloader_, std::forward<decltype(request)>(request));
-        };
-        // TO DO: If the fragment file is too large, should not requestWholeFile.
-        downloadRequest_ = std::make_shared<DownloadRequest>(url, dataSave_, realStatusCallback, true);
-        downloader_->Download(downloadRequest_, -1); // -1
-        downloader_->Start();
+        PutRequestIntoDownloader(playInfo);
     }
+}
+
+void HlsMediaDownloader::PutRequestIntoDownloader(const PlayInfo& playInfo)
+{
+    auto realStatusCallback = [this] (DownloadStatus&& status, std::shared_ptr<Downloader>& downloader,
+                                        std::shared_ptr<DownloadRequest>& request) {
+        statusCallback_(status, downloader_, std::forward<decltype(request)>(request));
+    };
+    // TO DO: If the fragment file is too large, should not requestWholeFile.
+    downloadRequest_ = std::make_shared<DownloadRequest>(playInfo.url_, playInfo.duration_, dataSave_, realStatusCallback, true);
+    // push request to back queue for seek
+    backPlayList_.push_back(downloadRequest_);
+    downloader_->Download(downloadRequest_, -1); // -1
+    downloader_->Start();
 }
 
 bool HlsMediaDownloader::Open(const std::string& url)
@@ -113,18 +122,19 @@ bool HlsMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
     return true;
 }
 
-bool HlsMediaDownloader::Seek(int offset)
-{
+bool HlsMediaDownloader::SeekToTime(int64_t offset)
+{   
     FALSE_RETURN_V(buffer_ != nullptr, false);
     MEDIA_LOG_I("Seek: buffer size " PUBLIC_LOG_ZU ", offset " PUBLIC_LOG_D32, buffer_->GetSize(), offset);
     if (buffer_->Seek(offset)) {
         return true;
     }
     buffer_->Clear(); // First clear buffer, avoid no available buffer then task pause never exit.
-    downloader_->Pause();
+    downloader_->Cancle();
     buffer_->Clear();
-    downloader_->Seek(offset);
     downloader_->Start();
+    FindSeekRequest(offset);
+    MEDIA_LOG_I("SeekToTime end\n");
     return true;
 }
 
@@ -133,8 +143,9 @@ size_t HlsMediaDownloader::GetContentLength() const
     return 0;
 }
 
-double HlsMediaDownloader::GetDuration() const
-{
+int64_t HlsMediaDownloader::GetDuration() const
+{   
+    MEDIA_LOG_I("GetDuration " PUBLIC_LOG_D64 , playListDownloader_->GetDuration());
     return playListDownloader_->GetDuration();
 }
 
@@ -148,8 +159,8 @@ void HlsMediaDownloader::SetCallback(Callback* cb)
     callback_ = cb;
 }
 
-void HlsMediaDownloader::OnPlayListChanged(const std::vector<std::string>& playList)
-{
+void HlsMediaDownloader::OnPlayListChanged(const std::vector<PlayInfo>& playList)
+{   
     for (auto& fragment : playList) {
         playList_->Push(fragment);
     }
@@ -171,6 +182,52 @@ void HlsMediaDownloader::SetStatusCallback(StatusCallbackFunc cb)
     statusCallback_ = cb;
     playListDownloader_->SetStatusCallback(cb);
 }
+
+std::vector<uint32_t> HlsMediaDownloader::GetBitRates()
+{   
+    return playListDownloader_->GetBitRates();
+}
+
+bool HlsMediaDownloader::SelectBitRate(uint32_t bitRate)
+{   
+    if (playListDownloader_->IsBitrateSame(bitRate))
+    {
+        return 0;
+    }
+    buffer_->Clear(); // First clear buffer, avoid no available buffer then task pause never exit.
+    downloader_->Stop();
+    buffer_->Clear();
+    playListDownloader_->Stop();
+    // clear request queue
+    playList_->SetActive(false, true);
+    playList_->SetActive(true);
+    fragmentDownloadStart.clear();
+    backPlayList_.clear();
+    // switch to des bitrate
+    playListDownloader_->SelectBitRate(bitRate);
+    downloader_->Start();
+    playListDownloader_->Start();
+    playListDownloader_->UpdateManifest();
+    return 1;
+}
+
+void HlsMediaDownloader::FindSeekRequest(int64_t offset)
+{   
+    int64_t totalDuration = 0;
+    for (const auto &item : backPlayList_) {
+        int64_t hstTime;
+        Plugin::Sec2HstTime(item->GetDuration(), hstTime);
+        totalDuration += Plugin::HstTime2Ns(hstTime);
+        if (offset < totalDuration) {   
+            PlayInfo playInfo;
+            playInfo.url_ = item->GetUrl();
+            playInfo.duration_ = item->GetDuration();
+            MEDIA_LOG_I("FindSeekRequest  url_" PUBLIC_LOG_S " totalDuration " PUBLIC_LOG_D64, playInfo.url_.c_str(), totalDuration);
+            PutRequestIntoDownloader(playInfo);
+        } 
+    }
+}
+
 }
 }
 }

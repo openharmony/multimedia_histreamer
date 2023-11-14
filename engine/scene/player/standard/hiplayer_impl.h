@@ -82,6 +82,7 @@ public:
     int32_t SetAudioRendererInfo(const int32_t contentType, const int32_t streamUsage,
                                  const int32_t rendererFlag) override;
     int32_t SetAudioInterruptMode(const int32_t interruptMode) override;
+    int32_t SelectBitRate(uint32_t bitRate) override;
 
     // internal interfaces
     void OnEvent(const Event& event) override;

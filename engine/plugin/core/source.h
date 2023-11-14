@@ -43,7 +43,15 @@ public:
 
     Seekable GetSeekable();
 
-    Status SeekTo(uint64_t offset);
+    Status SeekToPos(int64_t offset);
+	
+	Status SeekToTime(int64_t offset);
+	
+    Status GetDuration(int64_t& duration);
+
+    Status GetBitRates(std::vector<uint32_t>& bitRates);
+
+    Status SelectBitRate(uint32_t bitRate);
 
 private:
     friend class PluginManager;

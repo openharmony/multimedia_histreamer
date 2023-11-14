@@ -23,9 +23,13 @@ namespace OHOS {
 namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
+struct PlayInfo {
+    std::string url_;
+    double duration_;
+};
 struct PlayListChangeCallback {
     virtual ~PlayListChangeCallback() = default;
-    virtual void OnPlayListChanged(const std::vector<std::string>& playList) = 0;
+    virtual void OnPlayListChanged(const std::vector<PlayInfo>& playList) = 0;
 };
 class PlayListDownloader {
 public:
@@ -37,12 +41,16 @@ public:
     virtual void ParseManifest() = 0;
     virtual void PlayListUpdateLoop() = 0;
     virtual void SetPlayListCallback(PlayListChangeCallback* callback) = 0;
-    virtual double GetDuration() const = 0;
+    virtual int64_t GetDuration() const = 0;
     virtual Seekable GetSeekable() const = 0;
-
+    virtual void SelectBitRate(uint32_t bitRate) = 0;
+    virtual std::vector<uint32_t> GetBitRates() = 0;
+    virtual bool IsBitrateSame(uint32_t bitRate) = 0;
     void Resume();
     void Pause();
     void Close();
+    void Stop();
+    void Start();
     void SetStatusCallback(StatusCallbackFunc cb);
     bool GetPlayListDownloadStatus();
 

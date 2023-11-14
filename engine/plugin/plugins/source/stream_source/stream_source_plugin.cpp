@@ -151,7 +151,7 @@ Seekable StreamSourcePlugin::GetSeekable()
     return seekable_;
 }
 
-Status StreamSourcePlugin::SeekTo(uint64_t offset)
+Status StreamSourcePlugin::SeekToPos(int64_t offset)
 {
     MEDIA_LOG_D("IN");
     return Status::ERROR_UNIMPLEMENTED;

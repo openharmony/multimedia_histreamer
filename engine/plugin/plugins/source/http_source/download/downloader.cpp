@@ -41,6 +41,16 @@ DownloadRequest::DownloadRequest(const std::string& url, DataSaveFunc saveData, 
     headerInfo_.contentLen = 0;
 }
 
+DownloadRequest::DownloadRequest(const std::string& url, double duration, DataSaveFunc saveData, StatusCallbackFunc statusCallback,
+                                 bool requestWholeFile)
+    : url_(url), duration_(duration), saveData_(std::move(saveData)), statusCallback_(std::move(statusCallback)),
+    requestWholeFile_(requestWholeFile)
+{
+    (void)memset_s(&headerInfo_, sizeof(HeaderInfo), 0x00, sizeof(HeaderInfo));
+    headerInfo_.fileContentLen = 0;
+    headerInfo_.contentLen = 0;
+}
+
 size_t DownloadRequest::GetFileContentLength() const
 {
     WaitHeaderUpdated();
@@ -99,6 +109,11 @@ void DownloadRequest::WaitHeaderUpdated() const
     MEDIA_LOG_D("isHeaderUpdated " PUBLIC_LOG_D32 ", times " PUBLIC_LOG_ZU, isHeaderUpdated, times);
 }
 
+double DownloadRequest::GetDuration()
+{
+    return duration_;
+}
+
 Downloader::Downloader(std::string name) noexcept : name_(std::move(name))
 {
     shouldStartNextRequest = true;
@@ -134,6 +149,7 @@ bool Downloader::Download(const std::shared_ptr<DownloadRequest>& request, int32
 void Downloader::Start()
 {
     MEDIA_LOG_I("start Begin");
+	requestQue_->SetActive(true);
     task_->Start();
     MEDIA_LOG_I("start End");
 }
@@ -148,6 +164,21 @@ void Downloader::Pause()
     task_->Pause();
     MEDIA_LOG_I("pause End");
 }
+
+void Downloader::Cancle()
+{   
+    {
+        requestQue_->SetActive(false, true);
+        //stop current request
+        if (currentRequest_ != nullptr) {
+            currentRequest_->Close();
+            client_->Close();
+            shouldStartNextRequest = true;
+        }
+    }
+    task_->Pause();
+}
+
 
 void Downloader::Resume()
 {
@@ -169,6 +200,8 @@ void Downloader::Stop(bool isAsync)
     requestQue_->SetActive(false);
     if (currentRequest_ != nullptr) {
         currentRequest_->Close();
+        client_->Close(); 
+        shouldStartNextRequest = true;
     }
     if (isAsync) {
         task_->StopAsync();
@@ -309,6 +342,10 @@ void Downloader::HandleRetOK() {
 size_t Downloader::RxBodyData(void* buffer, size_t size, size_t nitems, void* userParam)
 {
     auto mediaDownloader = static_cast<Downloader *>(userParam);
+    if (mediaDownloader->currentRequest_->IsClosed())
+    {
+        return 0;
+    }
     HeaderInfo* header = &(mediaDownloader->currentRequest_->headerInfo_);
     size_t dataLen = size * nitems;
     if (header->fileContentLen == 0) {

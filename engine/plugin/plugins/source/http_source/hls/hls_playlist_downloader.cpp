@@ -15,6 +15,7 @@
 #define HST_LOG_TAG "HlsPlayListDownloader"
 #include <mutex>
 #include "hls_playlist_downloader.h"
+#include "plugin/common/plugin_time.h"
 
 namespace OHOS {
 namespace Media {
@@ -52,41 +53,103 @@ void HlsPlayListDownloader::SetPlayListCallback(PlayListChangeCallback* callback
     callback_ = callback;
 }
 
-double HlsPlayListDownloader::GetDuration() const
+int64_t HlsPlayListDownloader::GetDuration() const
 {
     if (!master_) {
         return 0;
     }
-    return master_->bLive_ ? -1.0 : master_->duration_; // -1.0
+    int64_t hstTime;
+    Plugin::Sec2HstTime(master_->duration_, hstTime);
+    return master_->bLive_ ? -1.0 : (Plugin::HstTime2Ns(hstTime)); // -1.0
 }
 
 Seekable HlsPlayListDownloader::GetSeekable() const
-{
-    if (!master_) {
-        return Seekable::INVALID;
+{   
+    
+    // need wait master_ not null
+    while (true)
+    {   
+        if (master_ && master_->isSimple_)
+        {
+            break;
+        }       
+        OSAL::SleepFor(1);
     }
     return master_->bLive_ ? Seekable::UNSEEKABLE : Seekable::SEEKABLE;
 }
 
-void HlsPlayListDownloader::ParseManifest()
+void HlsPlayListDownloader::NotifyListChange()
 {
+    auto files = currentVariant_->m3u8_->files_;
+    auto playList = std::vector<PlayInfo>();
+    playList.reserve(files.size());
+    for (auto &file: files) {
+        PlayInfo palyInfo;
+        palyInfo.url_ = file->uri_;
+        palyInfo.duration_ = file->duration_;
+        playList.push_back(palyInfo);
+    }
+    callback_->OnPlayListChanged(playList);
+}
+
+void HlsPlayListDownloader::ParseManifest()
+{   
+    using namespace std;
     if (!master_) {
         master_ = std::make_shared<M3U8MasterPlaylist>(playList_, url_);
         currentVariant_ = master_->defaultVariant_;
         if (!master_->isSimple_) {
             UpdateManifest();
+        } else {
+            // need notify , avoid delay 5s
+            NotifyListChange();
         }
         updateTask_->Start();
     } else {
-        currentVariant_->m3u8_->Update(playList_);
-        auto files = currentVariant_->m3u8_->files_;
-        auto playList = std::vector<std::string>();
-        playList.reserve(files.size());
-        for (auto &file: files) {
-            playList.push_back(file->uri_);
+        if (master_->isSimple_) {   
+            bool ret = currentVariant_->m3u8_->Update(playList_);
+            if (ret) {
+               NotifyListChange();
+            }            
+        } else {
+            currentVariant_ = master_->defaultVariant_;
+            bool ret = currentVariant_->m3u8_->Update(playList_);
+            if (ret) {
+                master_->isSimple_ = true;
+                master_->duration_ = currentVariant_->m3u8_->GetDuration();
+                NotifyListChange();
+            }
         }
-        callback_->OnPlayListChanged(playList);
+    }   
+}
+
+void HlsPlayListDownloader::SelectBitRate(uint32_t bitRate)
+{   
+    for (const auto &item : master_->variants_) {
+        if (item->bandWidth_ == bitRate) {   
+            currentVariant_ = item;
+			break;
+        }
     }
+}
+
+bool HlsPlayListDownloader::IsBitrateSame(uint32_t bitRate) 
+{
+    if (bitRate == currentVariant_->bandWidth_) {
+        return true;
+    }
+    return false;
+}
+
+std::vector<uint32_t> HlsPlayListDownloader::GetBitRates()
+{
+    std::vector<uint32_t> bitRates;
+    for (const auto &item : master_->variants_) {
+        if (item->bandWidth_) {   
+            bitRates.push_back(item->bandWidth_);
+        }
+    }
+    return bitRates;
 }
 }
 }
