@@ -72,7 +72,7 @@ HWTEST_F(TestFileSourcePlugin, test_get_size, TestSize.Level1)
 
 HWTEST_F(TestFileSourcePlugin, test_seek_to, TestSize.Level1)
 {
-    auto status = fileSourcePlugin->SeekTo(10);
+    auto status = fileSourcePlugin->SeekToPos(10);
     EXPECT_EQ(Status::ERROR_WRONG_STATE, status);
 }
 
