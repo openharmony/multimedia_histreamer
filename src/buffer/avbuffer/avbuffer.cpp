@@ -13,23 +13,17 @@
  * limitations under the License.
  */
 
+#include "buffer/avbuffer.h"
 #include <atomic>
 #include <iomanip>
 #include <sstream>
-#include "av_hardware_memory.h"
-#include "av_shared_memory_ext.h"
 #include "avbuffer_utils.h"
-#include "buffer/avbuffer.h"
 #include "common/log.h"
 #include "common/status.h"
 #include "meta/meta.h"
 #include "surface_buffer.h"
 #include "surface_type.h"
 #include "unistd.h"
-
-namespace {
-    constexpr uint16_t BUFFERID_BOUNDARY = 0xffff;
-} // namespace
 
 namespace OHOS {
 namespace Media {
@@ -80,17 +74,15 @@ const AVBufferConfig &AVBuffer::GetConfig()
         config_.memoryType = memory_->GetMemoryType();
         config_.capacity = memory_->GetCapacity();
         config_.align = memory_->align_;
+        config_.memoryFlag = memory_->GetMemoryFlag();
         switch (config_.memoryType) {
             case MemoryType::VIRTUAL_MEMORY: {
-                config_.memoryFlag = MemoryFlag::MEMORY_READ_WRITE;
                 break;
             }
             case MemoryType::SHARED_MEMORY: {
-                config_.memoryFlag = std::static_pointer_cast<AVSharedMemoryExt>(memory_)->GetMemoryFlag();
                 break;
             }
             case MemoryType::HARDWARE_MEMORY: {
-                config_.memoryFlag = std::static_pointer_cast<AVHardwareMemory>(memory_)->GetMemoryFlag();
                 config_.dmaFd = memory_->GetFileDescriptor();
                 break;
             }
@@ -172,9 +164,7 @@ std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer()
 
 int32_t AVBuffer::Init(std::shared_ptr<AVAllocator> allocator, int32_t capacity, int32_t align)
 {
-    std::stringstream ss;
-    ss << std::hex << std::setw(16) << std::setfill('0') << GetUniqueId();
-    std::string uidName = ss.str();
+    std::string uidName = std::to_string(GetUniqueId());
     memory_ = AVMemory::CreateAVMemory(uidName, allocator, capacity, align);
     FALSE_RETURN_V_MSG_E(memory_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN), "Create memory failed");
     return static_cast<int32_t>(Status::OK);
@@ -192,9 +182,8 @@ int32_t AVBuffer::Init(MessageParcel &parcel, bool isSurfaceBuffer)
     if (isSurfaceBuffer) {
         memory_ = AVMemory::CreateAVMemory(parcel, true);
         FALSE_RETURN_V_MSG_E(memory_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN), "Create memory failed");
-        std::stringstream ss;
-        ss << std::hex << std::setw(16) << std::setfill('0') << GetUniqueId();
-        memory_->name_ = ss.str();
+
+        memory_->name_ = std::to_string(GetUniqueId());
         return static_cast<int32_t>(Status::OK);
     }
     uid_ = parcel.ReadUint64();
@@ -218,22 +207,22 @@ int32_t AVBuffer::Init(MessageParcel &parcel, bool isSurfaceBuffer)
 uint64_t AVBuffer::GetUniqueId()
 {
     using namespace std::chrono;
-    static const uint32_t processId = static_cast<uint32_t>(getpid());
-    static std::atomic<uint16_t> bufferId = 0;
+    static const uint64_t startTime = time_point_cast<seconds>(system_clock::now()).time_since_epoch().count();
+    static const uint16_t processId = static_cast<uint16_t>(getpid());
+    static std::atomic<uint32_t> bufferId = 0;
     if (uid_ == 0) {
-        union UniqueId {
-            uint64_t nowTime;
-            uint32_t processId[2];
-            uint16_t bufferId[4];
-        } uid{0};
-        if (bufferId == BUFFERID_BOUNDARY) {
+        if (bufferId == UINT32_MAX) {
             bufferId = 0;
         }
+        union UniqueId {
+            uint64_t startTime;    //  1--16, 16: time
+            uint16_t processId[4]; // 17--32, 16: process id
+            uint32_t bufferId[2];  // 33--64, 32: atomic val
+        } uid = {.startTime = startTime};
         ++bufferId;
-        uid.nowTime = time_point_cast<nanoseconds>(system_clock::now()).time_since_epoch().count();
         uid.processId[1] = processId;
-        uid.bufferId[3] = bufferId;
-        uid_ = uid.nowTime;
+        uid.bufferId[1] = bufferId;
+        uid_ = uid.startTime;
     }
     return uid_;
 }
@@ -244,8 +233,7 @@ bool AVBuffer::WriteToMessageParcel(MessageParcel &parcel)
     bool isBufferAttrToParcel = (memory_ == nullptr);
     bool ret = bufferParcel.WriteUint64(GetUniqueId()) && bufferParcel.WriteInt64(pts_) &&
                bufferParcel.WriteInt64(dts_) && bufferParcel.WriteInt64(duration_) && bufferParcel.WriteUint32(flag_) &&
-               meta_->ToParcel(bufferParcel) &&
-               bufferParcel.WriteBool(isBufferAttrToParcel);
+               meta_->ToParcel(bufferParcel) && bufferParcel.WriteBool(isBufferAttrToParcel);
 
     if (!isBufferAttrToParcel) {
         MemoryType type = memory_->GetMemoryType();

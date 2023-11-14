@@ -18,12 +18,11 @@
 
 #include <unistd.h>
 #include "message_parcel.h"
-#include "meta/meta.h"
+#include "buffer/avbuffer_common.h"
 
 
 namespace OHOS {
 namespace Media {
-struct AVBufferConfig;
 [[maybe_unused]] bool MarshallingConfig(MessageParcel &parcel, const AVBufferConfig &config);
 [[maybe_unused]] bool UnmarshallingConfig(MessageParcel &parcel, AVBufferConfig &config);
 

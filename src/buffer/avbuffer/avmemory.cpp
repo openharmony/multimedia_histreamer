@@ -96,15 +96,15 @@ std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(MessageParcel &parcel, bool i
             return nullptr;
         }
         case MemoryType::SURFACE_MEMORY: {
-            mem = std::shared_ptr<AVSurfaceMemory>(new AVSurfaceMemory());
+            mem = std::shared_ptr<AVMemory>(new AVSurfaceMemory());
             break;
         }
         case MemoryType::SHARED_MEMORY: {
-            mem = std::shared_ptr<AVSharedMemoryExt>(new AVSharedMemoryExt());
+            mem = std::shared_ptr<AVMemory>(new AVSharedMemoryExt());
             break;
         }
         case MemoryType::HARDWARE_MEMORY: {
-            mem = std::shared_ptr<AVHardwareMemory>(new AVHardwareMemory());
+            mem = std::shared_ptr<AVMemory>(new AVHardwareMemory());
             break;
         }
         default:
@@ -297,7 +297,6 @@ int32_t AVMemory::SyncStart()
 
 int32_t AVMemory::SyncEnd()
 {
-
     return static_cast<int32_t>(Status::ERROR_UNIMPLEMENTED);
 }
 

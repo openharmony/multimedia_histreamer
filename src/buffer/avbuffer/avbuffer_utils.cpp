@@ -14,6 +14,7 @@
  */
 
 #include "avbuffer_utils.h"
+#include <unordered_map>
 #include "buffer/avbuffer.h"
 #include "common/log.h"
 #include "cpp_ext/type_cast_ext.h"
@@ -21,7 +22,6 @@
 #include "meta/meta.h"
 #include "meta/meta_key.h"
 #include "surface_type.h"
-#include <unordered_map>
 
 namespace {
 using namespace OHOS;
@@ -64,7 +64,6 @@ bool MarshallingConfig(MessageParcel &parcel, const AVBufferConfig &config)
                configParcel.WriteUint8(static_cast<uint8_t>(config.memoryFlag)) &&
                WriteSurfaceBufferConfig(configParcel, *(config.surfaceBufferConfig)) &&
                configParcel.WriteInt32(config.capacity) && configParcel.WriteInt32(config.dmaFd);
-
     if (ret) {
         ret &= parcel.Append(configParcel);
     }
