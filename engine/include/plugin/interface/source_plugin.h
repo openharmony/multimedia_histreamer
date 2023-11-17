@@ -101,26 +101,26 @@ struct SourcePlugin : public PluginBase {
      *  @retval ERROR_INVALID_DATA: The offset is invalid.
      */
     virtual Status SeekToPos(int64_t offset)
-	{
-		return Status::ERROR_UNSUPPORTED_FORMAT;
-	}
+    {
+        return Status::ERROR_UNIMPLEMENTED;
+    }
 
-	/**
+    /**
      * @brief seek to pos by time
      * @return Execution status return
      */
-	virtual Status SeekToTime(int64_t offset)
-	{
-		return Status::ERROR_UNSUPPORTED_FORMAT;
-	}
+    virtual Status SeekToTime(int64_t offset)
+    {
+        return Status::ERROR_UNIMPLEMENTED;
+    }
 
     /**
      * @brief Get duration from current source
      * @return Execution status return
      */
     virtual Status GetDuration(int64_t& duration) 
-	{
-        return Status::ERROR_UNSUPPORTED_FORMAT;
+    {
+        return Status::ERROR_UNIMPLEMENTED;
     }
 
     /**
@@ -128,8 +128,8 @@ struct SourcePlugin : public PluginBase {
      * @return Execution status return
     */
     virtual Status GetBitRates(std::vector<uint32_t>& bitRates) 
-	{
-        return Status::ERROR_UNSUPPORTED_FORMAT;
+    {
+        return Status::ERROR_UNIMPLEMENTED;
     }
     
     /**
@@ -138,8 +138,8 @@ struct SourcePlugin : public PluginBase {
      * @return Execution status return
     */
     virtual Status SelectBitRate(uint32_t bitRate) 
-	{
-        return Status::ERROR_UNSUPPORTED_FORMAT;
+    {
+        return Status::ERROR_UNIMPLEMENTED;
     }
 };
 

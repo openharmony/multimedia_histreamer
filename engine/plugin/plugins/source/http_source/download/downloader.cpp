@@ -149,7 +149,7 @@ bool Downloader::Download(const std::shared_ptr<DownloadRequest>& request, int32
 void Downloader::Start()
 {
     MEDIA_LOG_I("start Begin");
-	requestQue_->SetActive(true);
+    requestQue_->SetActive(true);
     task_->Start();
     MEDIA_LOG_I("start End");
 }
@@ -167,14 +167,11 @@ void Downloader::Pause()
 
 void Downloader::Cancle()
 {   
-    {
-        requestQue_->SetActive(false, true);
-        //stop current request
-        if (currentRequest_ != nullptr) {
-            currentRequest_->Close();
-            client_->Close();
-            shouldStartNextRequest = true;
-        }
+    requestQue_->SetActive(false, true);
+    if (currentRequest_ != nullptr) {
+        currentRequest_->Close();
+        client_->Close();
+        shouldStartNextRequest = true;
     }
     task_->Pause();
 }
@@ -342,8 +339,7 @@ void Downloader::HandleRetOK() {
 size_t Downloader::RxBodyData(void* buffer, size_t size, size_t nitems, void* userParam)
 {
     auto mediaDownloader = static_cast<Downloader *>(userParam);
-    if (mediaDownloader->currentRequest_->IsClosed())
-    {
+    if (mediaDownloader->currentRequest_->IsClosed()) {
         return 0;
     }
     HeaderInfo* header = &(mediaDownloader->currentRequest_->headerInfo_);

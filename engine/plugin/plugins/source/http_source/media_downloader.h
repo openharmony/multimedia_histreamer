@@ -33,9 +33,9 @@ public:
     virtual void Resume() = 0;
     virtual bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) = 0;
     virtual bool SeekToPos(int64_t offset) 
-	{
-		return 0;
-	}
+    {
+        return 0;
+    }
     virtual size_t GetContentLength() const = 0;
     virtual int64_t GetDuration() const = 0;
     virtual Seekable GetSeekable() const = 0;
@@ -43,13 +43,15 @@ public:
     virtual void SetStatusCallback(StatusCallbackFunc cb) = 0;
     virtual bool GetStartedStatus() = 0;
     virtual bool SeekToTime(int64_t offset) 
-	{
-		return 0;
-	}	
-    virtual std::vector<uint32_t> GetBitRates() {
+    {
+        return 0;
+    }	
+    virtual std::vector<uint32_t> GetBitRates()
+    {
         return {};
     }
-    virtual bool SelectBitRate(uint32_t bitRate) {
+    virtual bool SelectBitRate(uint32_t bitRate)
+    {
         return 0;
     }
 };

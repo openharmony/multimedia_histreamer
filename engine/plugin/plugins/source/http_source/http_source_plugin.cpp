@@ -232,7 +232,7 @@ Status HttpSourcePlugin::SeekToPos(int64_t offset)
 
 Status HttpSourcePlugin::SeekToTime(int64_t offset)
 {
-	OSAL::ScopedLock lock(mutex_);
+    OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(downloader_ != nullptr, Status::ERROR_NULL_POINTER);
     FALSE_RETURN_V(downloader_->GetSeekable() == Seekable::SEEKABLE, Status::ERROR_INVALID_OPERATION);
     FALSE_RETURN_V(offset <= downloader_->GetDuration(), Status::ERROR_INVALID_PARAMETER);

@@ -44,7 +44,7 @@ public:
     Status GetSize(uint64_t& size) override;
     Seekable GetSeekable() override;
     Status SeekToPos(int64_t offset) override;
-	Status SeekToTime(int64_t offset) override;
+    Status SeekToTime(int64_t offset) override;
     Status GetDuration(int64_t& duration) override;
     Status GetBitRates(std::vector<uint32_t>& bitRates) override;
     Status SelectBitRate(uint32_t bitRate) override;

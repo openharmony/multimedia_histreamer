@@ -126,7 +126,6 @@ public:
     bool Seek(int64_t offset);
     void Cancle();
     bool Retry(const std::shared_ptr<DownloadRequest>& request);
-    double FindSeekRequest();
 private:
     bool BeginDownload();
 
@@ -143,10 +142,6 @@ private:
 
     std::shared_ptr<DownloadRequest> currentRequest_;
     bool shouldStartNextRequest {false};
-    std::deque<std::shared_ptr<DownloadRequest>> requestDoneQue_;
-    double doneDuration_ = 0.0;
-    std::deque<std::shared_ptr<DownloadRequest>> requestBufferingQue_;
-    double bufferingDuration_ = 0.0;
 };
 }
 }

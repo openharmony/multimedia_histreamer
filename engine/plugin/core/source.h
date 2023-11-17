@@ -45,7 +45,7 @@ public:
 
     Status SeekToPos(int64_t offset);
 	
-	Status SeekToTime(int64_t offset);
+    Status SeekToTime(int64_t offset);
 	
     Status GetDuration(int64_t& duration);
 

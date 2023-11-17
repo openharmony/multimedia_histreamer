@@ -190,19 +190,20 @@ std::vector<uint32_t> HlsMediaDownloader::GetBitRates()
 
 bool HlsMediaDownloader::SelectBitRate(uint32_t bitRate)
 {   
-    if (playListDownloader_->IsBitrateSame(bitRate))
-    {
+    if (playListDownloader_->IsBitrateSame(bitRate)) {
         return 0;
     }
     buffer_->Clear(); // First clear buffer, avoid no available buffer then task pause never exit.
     downloader_->Stop();
     buffer_->Clear();
     playListDownloader_->Stop();
+
     // clear request queue
     playList_->SetActive(false, true);
     playList_->SetActive(true);
     fragmentDownloadStart.clear();
     backPlayList_.clear();
+    
     // switch to des bitrate
     playListDownloader_->SelectBitRate(bitRate);
     downloader_->Start();

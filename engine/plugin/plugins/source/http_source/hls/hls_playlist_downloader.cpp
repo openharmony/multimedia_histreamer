@@ -67,10 +67,8 @@ Seekable HlsPlayListDownloader::GetSeekable() const
 {   
     
     // need wait master_ not null
-    while (true)
-    {   
-        if (master_ && master_->isSimple_)
-        {
+    while (true) {   
+        if (master_ && master_->isSimple_) {
             break;
         }       
         OSAL::SleepFor(1);
@@ -94,7 +92,6 @@ void HlsPlayListDownloader::NotifyListChange()
 
 void HlsPlayListDownloader::ParseManifest()
 {   
-    using namespace std;
     if (!master_) {
         master_ = std::make_shared<M3U8MasterPlaylist>(playList_, url_);
         currentVariant_ = master_->defaultVariant_;
@@ -128,7 +125,7 @@ void HlsPlayListDownloader::SelectBitRate(uint32_t bitRate)
     for (const auto &item : master_->variants_) {
         if (item->bandWidth_ == bitRate) {   
             currentVariant_ = item;
-			break;
+            break;
         }
     }
 }

@@ -270,18 +270,20 @@ ErrorCode MediaSourceFilter::SeekToTime(int64_t offset) const
 {   
     Status ret = plugin_->SeekToTime(offset);
     MEDIA_LOG_I("plugin_->SeekTo ret = " PUBLIC_LOG_D32, static_cast<int32_t>(ret));
-    return static_cast<ErrorCode>(ret);
+    return ret == Status::OK ? ErrorCode::SUCCESS : ErrorCode::ERROR_UNKNOWN;
 }
 
 ErrorCode MediaSourceFilter::GetBitRates(std::vector<uint32_t>& bitRates) const
 {   
     MEDIA_LOG_I("MediaSourceFilter::GetBitRates() enter.\n");
-    return static_cast<ErrorCode>(plugin_->GetBitRates(bitRates));
+    Status ret = plugin_->GetBitRates(bitRates);
+    return ret == Status::OK ? ErrorCode::SUCCESS : ErrorCode::ERROR_UNKNOWN;
 }
 
 ErrorCode MediaSourceFilter::SelectBitRate(uint32_t bitRate) const
-{
-    return static_cast<ErrorCode>(plugin_->SelectBitRate(bitRate));
+{   
+    Status ret = plugin_->SelectBitRate(bitRate);
+    return ret == Status::OK ? ErrorCode::SUCCESS : ErrorCode::ERROR_UNKNOWN;
 }
 
 

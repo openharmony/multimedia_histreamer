@@ -231,8 +231,7 @@ void M3U8MasterPlaylist::UpdateMasterPlaylist()
                         stream->height_ = resolutionAttribute->GetResolution().second;
                     }
                     variants_.emplace_back(stream);
-					//play last stream
-                    defaultVariant_ = stream;
+                    defaultVariant_ = stream; // play last stream
                 }
                 break;
             }

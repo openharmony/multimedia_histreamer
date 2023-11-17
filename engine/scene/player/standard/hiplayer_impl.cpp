@@ -651,7 +651,7 @@ ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode)
 
         MEDIA_LOG_I("Do seek ...");
         int64_t realSeekTime = seekTime;
-		rtv = audioSource_->SeekToTime(seekTime);
+        rtv = audioSource_->SeekToTime(seekTime);
         if (rtv != ErrorCode::SUCCESS) {
             MEDIA_LOG_I("SeekToTime failed\n");
             rtv = demuxer_->SeekTo(seekTime, seekMode, realSeekTime);
@@ -1084,9 +1084,9 @@ int32_t HiPlayerImpl::SetAudioInterruptMode(const int32_t interruptMode)
 int32_t HiPlayerImpl::SelectBitRate(uint32_t bitRate) {
     int64_t mBitRate = static_cast<int64_t>(bitRate);
     pipeline_->FlushStart();
-    int32_t ret = static_cast<int32_t>(audioSource_->SelectBitRate(mBitRate));
+    auto ret = audioSource_->SelectBitRate(mBitRate);
     pipeline_->FlushEnd();
-    return ret;
+    return TransErrorCode(ret);
 }
 
 void HiPlayerImpl::NotifyBufferingUpdate(const std::string_view& type, int32_t param)
