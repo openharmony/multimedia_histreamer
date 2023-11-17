@@ -118,6 +118,16 @@ bool AVSurfaceMemory::WriteToMessageParcel(MessageParcel &parcel)
     return true;
 }
 
+bool AVSurfaceMemory::ReadFromMessageParcel(MessageParcel &parcel)
+{
+#ifdef MEDIA_OHOS
+    GSError gsRet = surfaceBuffer_->ReadFromMessageParcel(parcel);
+    FALSE_RETURN_V_MSG_E(gsRet == GSERROR_OK, false, "Write message parcel failed!, %{public}s",
+                         GSErrorStr(gsRet).c_str());
+#endif
+    return true;
+}
+
 uint8_t *AVSurfaceMemory::GetAddr()
 {
     if (isFirstFlag_) {

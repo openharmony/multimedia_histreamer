@@ -35,6 +35,7 @@ private:
     int32_t Init() override;
     int32_t Init(MessageParcel &parcel) override;
     bool WriteToMessageParcel(MessageParcel &parcel) override;
+    bool ReadFromMessageParcel(MessageParcel &parcel) override;
     void Close() noexcept;
     int32_t MapMemoryAddr();
     int32_t fd_;

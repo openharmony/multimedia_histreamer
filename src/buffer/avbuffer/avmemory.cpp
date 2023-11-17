@@ -112,10 +112,10 @@ std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(MessageParcel &parcel, bool i
     }
 
     FALSE_RETURN_V_MSG_E(mem != nullptr, nullptr, "Create AVMemory failed, no memory");
-    int32_t ret = mem->ReadCommonFromMessageParcel(parcel);
-    FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), nullptr,
-                         "Read common memory info from parcel failed");
-    ret = mem->Init(parcel);
+    bool isReadParcel = mem->ReadCommonFromMessageParcel(parcel);
+    FALSE_RETURN_V_MSG_E(isReadParcel == true, nullptr, "Read common memory info from parcel failed");
+
+    int32_t ret = mem->Init(parcel);
     FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), nullptr, "Init AVMemory failed, name = %{public}s",
                          mem->name_.c_str());
     return mem;
@@ -139,30 +139,35 @@ int32_t AVMemory::Init(MessageParcel &parcel)
     return static_cast<int32_t>(Status::ERROR_UNIMPLEMENTED);
 }
 
+bool AVMemory::ReadFromMessageParcel(MessageParcel &parcel)
+{
+    (void)parcel;
+    return false;
+}
+
 bool AVMemory::WriteToMessageParcel(MessageParcel &parcel)
 {
     (void)parcel;
     return false;
 }
 
-int32_t AVMemory::ReadCommonFromMessageParcel(MessageParcel &parcel)
+bool AVMemory::ReadCommonFromMessageParcel(MessageParcel &parcel)
 {
 #ifdef MEDIA_OHOS
     name_ = parcel.ReadString();
     capacity_ = parcel.ReadInt32();
-    FALSE_RETURN_V_MSG_E(capacity_ >= 0, static_cast<int32_t>(Status::ERROR_INVALID_DATA), "capacity is invalid");
+    FALSE_RETURN_V_MSG_E(capacity_ >= 0, false, "capacity is invalid");
 
     align_ = parcel.ReadInt32();
-    FALSE_RETURN_V_MSG_E(align_ >= 0, static_cast<int32_t>(Status::ERROR_INVALID_DATA), "align is invalid");
+    FALSE_RETURN_V_MSG_E(align_ >= 0, false, "align is invalid");
 
     offset_ = parcel.ReadInt32();
-    FALSE_RETURN_V_MSG_E(offset_ >= 0, static_cast<int32_t>(Status::ERROR_INVALID_DATA), "offset is invalid");
+    FALSE_RETURN_V_MSG_E(offset_ >= 0, false, "offset is invalid");
 
     size_ = parcel.ReadInt32();
-    FALSE_RETURN_V_MSG_E((size_ >= 0) || (capacity_ < size_), static_cast<int32_t>(Status::ERROR_INVALID_DATA),
-                         "size is invalid");
+    FALSE_RETURN_V_MSG_E((size_ >= 0) || (capacity_ < size_), false, "size is invalid");
 #endif
-    return static_cast<int32_t>(Status::OK);
+    return true;
 }
 
 bool AVMemory::WriteCommonToMessageParcel(MessageParcel &parcel)

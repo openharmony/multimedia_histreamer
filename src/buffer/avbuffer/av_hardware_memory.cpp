@@ -176,6 +176,15 @@ bool AVHardwareMemory::WriteToMessageParcel(MessageParcel &parcel)
     return ret;
 }
 
+bool AVHardwareMemory::ReadFromMessageParcel(MessageParcel &parcel)
+{
+#ifdef MEDIA_OHOS
+    (void)parcel.ReadFileDescriptor();
+    (void)parcel.ReadUint32();
+#endif
+    return true;
+}
+
 MemoryType AVHardwareMemory::GetMemoryType()
 {
     return MemoryType::HARDWARE_MEMORY;

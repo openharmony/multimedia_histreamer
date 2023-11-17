@@ -117,6 +117,15 @@ bool AVSharedMemoryExt::WriteToMessageParcel(MessageParcel &parcel)
     return ret;
 }
 
+bool AVSharedMemoryExt::ReadFromMessageParcel(MessageParcel &parcel)
+{
+#ifdef MEDIA_OHOS
+    (void)parcel.ReadFileDescriptor();
+    (void)parcel.ReadUint32();
+#endif
+    return true;
+}
+
 uint8_t *AVSharedMemoryExt::GetAddr()
 {
     if (isFirstFlag_) {

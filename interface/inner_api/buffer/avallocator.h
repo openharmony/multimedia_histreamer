@@ -36,7 +36,6 @@ public:
      * @brief Get the memory's type set by the creator, refer to {@link MemoryType}
      * @return the memory's type.
      * @since 4.1
-     * @version 1.0
      */
     virtual MemoryType GetMemoryType() = 0;
 
@@ -46,7 +45,6 @@ public:
      * @return The pointer of the allocated buffer. When memory's type is {@link SHARED_MEMORY} returns the file
      * descriptor of allocated memory.
      * @since 4.1
-     * @version 1.0
      */
     virtual void *Alloc(int32_t capacity) = 0;
 
@@ -56,7 +54,6 @@ public:
      * file descriptor of allocated memory.
      * @return Whether the free was successful.
      * @since 4.1
-     * @version 1.0
      */
     virtual bool Free(void *ptr) = 0;
 
@@ -70,7 +67,6 @@ public:
      * @brief Create the allocator of CPU buffer.
      * @return The allocator that allocate CPU buffer.
      * @since 4.1
-     * @version 1.0
      */
     static std::shared_ptr<AVAllocator> CreateVirtualAllocator();
 
@@ -79,7 +75,6 @@ public:
      * @param memFlag Set the memory's flags, refer to {@link MemoryFlag}.
      * @return The allocator that allocate shared memory.
      * @since 4.1
-     * @version 1.0
      */
     static std::shared_ptr<AVAllocator> CreateSharedAllocator(MemoryFlag memFlag);
 
@@ -88,7 +83,6 @@ public:
      * @param config Set the config of the surface buffer, refer to {@link BufferRequestConfig}.
      * @return The allocator that allocate surface buffer.
      * @since 4.1
-     * @version 1.0
      */
     static std::shared_ptr<AVAllocator> CreateSurfaceAllocator(const struct BufferRequestConfig &configs);
 
@@ -99,7 +93,6 @@ public:
      * @param memFlag Set the memory's flags, refer to {@link MemoryFlag}.
      * @return The allocator that allocate DMA buffer.
      * @since 4.1
-     * @version 1.0
      */
     static std::shared_ptr<AVAllocator> CreateHardwareAllocator(int32_t fd, int32_t capacity, MemoryFlag memFlag);
 

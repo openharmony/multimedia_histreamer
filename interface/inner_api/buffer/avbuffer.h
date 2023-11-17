@@ -34,7 +34,6 @@ public:
      * @param config The configuration of AVBuffer, refer to {@link AVBufferConfig}
      * @return The shared pointer of AVBuffer.
      * @since 4.1
-     * @version 1.0
      */
     static std::shared_ptr<AVBuffer> CreateAVBuffer(const AVBufferConfig &config);
 
@@ -45,7 +44,6 @@ public:
      * @param align The align of AVBuffer, bytes.
      * @return The shared pointer of AVBuffer.
      * @since 4.1
-     * @version 1.0
      */
     static std::shared_ptr<AVBuffer> CreateAVBuffer(std::shared_ptr<AVAllocator> allocator, int32_t capacity = 0,
                                                     int32_t align = 0);
@@ -57,26 +55,14 @@ public:
      * @param size The size of the memory, bytes. If it can not greater than capacity.
      * @return The shared pointer of AVBuffer.
      * @since 4.1
-     * @version 1.0
      */
     static std::shared_ptr<AVBuffer> CreateAVBuffer(uint8_t *ptr, int32_t capacity, int32_t size = 0);
 
-    /**
-     * @brief Create the AVBuffer by MessageParcel.
-     * @param parcel The MessageParcel that wirtten by remote buffer, refer to {@link MessageParcel}.
-     * @param isSurfaceBuffer Whether the parcel was obtained directly through SurfaceBuffer's function, {@link
-     * SurfaceBuffer}.
-     * @return The shared pointer of AVBuffer.
-     * @since 4.1
-     * @version 1.0
-     */
-    static std::shared_ptr<AVBuffer> CreateAVBuffer(MessageParcel &parcel, bool isSurfaceBuffer = false);
 
     /**
      * @brief Create the AVBuffer.
      * @return The shared pointer of AVBuffer.
      * @since 4.1
-     * @version 1.0
      */
     static std::shared_ptr<AVBuffer> CreateAVBuffer();
 
@@ -84,7 +70,6 @@ public:
      * @brief Get the AVBufferConfig.
      * @return The config struct of AVBuffer.
      * @since 4.1
-     * @version 1.0
      */
     const AVBufferConfig &GetConfig();
 
@@ -92,18 +77,26 @@ public:
      * @brief Get the unique identifier of buffer.
      * @return The unique identifier of buffer.
      * @since 4.1
-     * @version 1.0
      */
     uint64_t GetUniqueId();
 
     /**
      * @brief Wirte buffer info to MessageParcel.
      * @param parcel The MessageParcel wirtten by buffer, refer to {@link MessageParcel}.
-     * @return Whether the write was successful.
+     * @return Whether the writing was successful.
      * @since 4.1
-     * @version 1.0
      */
     bool WriteToMessageParcel(MessageParcel &parcel);
+
+    /**
+     * @brief Read buffer info from MessageParcel.
+     * @param parcel The MessageParcel that wirtten by remote buffer, refer to {@link MessageParcel}.
+     * @param isSurfaceBuffer Whether the parcel was obtained directly through SurfaceBuffer's function, {@link
+     * SurfaceBuffer}.
+     * @return Whether the reading was successful.
+     * @since 4.1
+     */
+    bool ReadFromMessageParcel(MessageParcel &parcel, bool isSurfaceBuffer = false);
 
     using MetaData = std::vector<uint8_t>;
 
@@ -118,7 +111,6 @@ private:
     explicit AVBuffer();
     int32_t Init(std::shared_ptr<AVAllocator> allocator, int32_t capacity = 0, int32_t align = 0);
     int32_t Init(uint8_t *ptr, int32_t capacity, int32_t size = 0);
-    int32_t Init(MessageParcel &parcel, bool isSurfaceBuffer = false);
 
     uint64_t uid_;
     AVBufferConfig config_;
@@ -135,7 +127,6 @@ public:
      * @brief Get the memory's types set by the allocator, refer to {@link MemoryType}
      * @return the memory's types if the memory is valid, otherwise {@link VIRTUAL_MEMORY}.
      * @since 4.1
-     * @version 1.0
      */
     virtual MemoryType GetMemoryType();
 
@@ -143,7 +134,6 @@ public:
      * @brief Get the memory's Flag set by the allocator, refer to {@link MemoryType}
      * @return the memory's flag.
      * @since 4.1
-     * @version 1.0
      */
     virtual MemoryFlag GetMemoryFlag();
 
@@ -151,7 +141,6 @@ public:
      * @brief Get the memory's capacity, which was set during creation and alloced by the allocator.
      * @return The memory's capacity, bytes. If the memory is valid, otherwise -1.
      * @since 4.1
-     * @version 1.0
      */
     virtual int32_t GetCapacity();
 
@@ -159,7 +148,6 @@ public:
      * @brief Get the memory's used size.
      * @return The memory's size, bytes.
      * @since 4.1
-     * @version 1.0
      */
     virtual int32_t GetSize();
 
@@ -170,7 +158,6 @@ public:
      * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to
      * {@link AVCodecServiceErrCode}
      * @since 4.1
-     * @version 1.0
      */
     virtual int32_t SetSize(int32_t size);
 
@@ -178,7 +165,6 @@ public:
      * @brief Get the memory's used size.
      * @return The memory's used size, bytes.
      * @since 4.1
-     * @version 1.0
      */
     virtual int32_t GetOffset();
 
@@ -188,7 +174,6 @@ public:
      * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to
      * {@link AVCodecServiceErrCode}
      * @since 4.1
-     * @version 1.0
      */
     virtual int32_t SetOffset(int32_t offset);
 
@@ -197,7 +182,6 @@ public:
      * @return The memory's file descriptor. If the memory type is {@link SURFACE_MEMORY} or {@link VIRTUAL_MEMORY}, it
      * will return -1.
      * @since 4.1
-     * @version 1.0
      */
     virtual int32_t GetFileDescriptor();
 
@@ -205,7 +189,6 @@ public:
      * @brief Get the memory's address.
      * @return The pointer of memory's address.
      * @since 4.1
-     * @version 1.0
      */
     virtual uint8_t *GetAddr();
 
@@ -217,7 +200,6 @@ public:
      * existing data, bytes.
      * @return The length of the actual written data.
      * @since 4.1
-     * @version 1.0
      */
     virtual int32_t Write(const uint8_t *in, int32_t writeSize, int32_t position = INVALID_POSITION);
 
@@ -228,14 +210,12 @@ public:
      * @param position The position of reading data in memory, if equal to INVALID_POSITION, read from begin, bytes.
      * @return The length of the actual read data.
      * @since 4.1
-     * @version 1.0
      */
     virtual int32_t Read(uint8_t *out, int32_t readSize, int32_t position = INVALID_POSITION);
 
     /**
      * @brief Set the memory's used size to zero.
      * @since 4.1
-     * @version 1.0
      */
     void Reset();
 
@@ -244,7 +224,6 @@ public:
      * @return Returns the surface buffer if the memory type is {@link SURFACE_MEMORY},
      * otherwise returns nullptr.
      * @since 4.1
-     * @version 1.0
      */
     virtual sptr<SurfaceBuffer> GetSurfaceBuffer();
 
@@ -253,7 +232,6 @@ public:
      * @return  Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to
      * {@link AVCodecServiceErrCode}
      * @since 4.1
-     * @version 1.0
      */
     virtual int32_t SyncStart();
 
@@ -262,7 +240,6 @@ public:
      * @return  Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to
      * {@link AVCodecServiceErrCode}
      * @since 4.1
-     * @version 1.0
      */
     virtual int32_t SyncEnd();
 
@@ -271,8 +248,9 @@ protected:
     virtual int32_t Init();
     virtual int32_t Init(MessageParcel &parcel);
     virtual bool WriteToMessageParcel(MessageParcel &parcel);
+    virtual bool ReadFromMessageParcel(MessageParcel &parcel);
 
-    int32_t ReadCommonFromMessageParcel(MessageParcel &parcel);
+    bool ReadCommonFromMessageParcel(MessageParcel &parcel);
     bool WriteCommonToMessageParcel(MessageParcel &parcel);
 
     std::string name_;

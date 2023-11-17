@@ -144,10 +144,11 @@ private:
     void CreateRemoteSharedMem();
     void CreateRemoteSurfaceMem();
     void CreateRemoteSurfaceMemByParcel();
-    void CreateRemoteVirtualMem();
+    void CreateLocalNullMem();
     void GetRemoteBuffer();
 
     void CheckMetaSetAndGet();
+    void CheckAttrTrans();
     void CheckMemTrans();
     void CheckMemTransPos(int32_t pos);
     void CheckMemTransOutOfRange(int32_t pos);
@@ -300,8 +301,9 @@ void AVBufferInnerUnitTest::CreateLocalSurfaceMemByParcel()
     (void)surfaceBuffer->Alloc(g_config);
     (void)surfaceBuffer->WriteToMessageParcel(parcel);
     // create local
-    remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(parcel, true);
+    remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer();
     ASSERT_NE(nullptr, buffer_);
+    ASSERT_TRUE(buffer_->ReadFromMessageParcel(parcel, true));
     ASSERT_NE(nullptr, buffer_->memory_->GetAddr());
 }
 
@@ -335,7 +337,7 @@ void AVBufferInnerUnitTest::CreateLocalVirtualMemByConfig()
     ASSERT_NE(nullptr, buffer_->memory_->GetAddr());
 }
 
-void AVBufferInnerUnitTest::CreateRemoteVirtualMem()
+void AVBufferInnerUnitTest::CreateLocalNullMem()
 {
     parcel_ = std::make_shared<MessageParcel>();
     // create remote
@@ -348,8 +350,11 @@ void AVBufferInnerUnitTest::GetRemoteBuffer()
     bool ret = remoteBuffer_->WriteToMessageParcel(*parcel_);
     ASSERT_TRUE(ret);
     // create loacal
-    buffer_ = AVBuffer::CreateAVBuffer(*parcel_);
+    buffer_ = AVBuffer::CreateAVBuffer();
     ASSERT_NE(nullptr, buffer_);
+
+    ret = buffer_->ReadFromMessageParcel(*parcel_);
+    ASSERT_TRUE(ret);
     if (buffer_->memory_ != nullptr) {
         ASSERT_NE(nullptr, buffer_->memory_->GetAddr());
         std::cout << "local fd: " << buffer_->memory_->GetFileDescriptor() << "\n";
@@ -394,6 +399,36 @@ void AVBufferInnerUnitTest::CheckMetaSetAndGet()
     EXPECT_EQ(getLongValue, g_longValue);
     EXPECT_EQ(getDoubleValue, g_doubleValue);
     EXPECT_EQ(getStringValue, g_stringValue);
+}
+
+void AVBufferInnerUnitTest::CheckAttrTrans()
+{
+    remoteBuffer_->pts_ = g_pts;
+    remoteBuffer_->dts_ = g_dts;
+    remoteBuffer_->duration_ = g_duration;
+    remoteBuffer_->flag_ = g_flag;
+
+    GetRemoteBuffer();
+    ASSERT_EQ(remoteBuffer_->GetUniqueId(), buffer_->GetUniqueId());
+    ASSERT_FALSE(buffer_ == nullptr);
+
+    EXPECT_EQ(buffer_->pts_, g_pts);
+    EXPECT_EQ(buffer_->dts_, g_dts);
+    EXPECT_EQ(buffer_->duration_, g_duration);
+    EXPECT_EQ(buffer_->flag_, g_flag);
+
+    remoteBuffer_->pts_ = g_pts + 1;
+    remoteBuffer_->dts_ = g_dts + 1;
+    remoteBuffer_->duration_ = g_duration + 1;
+    remoteBuffer_->flag_ = g_flag + 1;
+
+    ASSERT_TRUE(remoteBuffer_->WriteToMessageParcel(*parcel_));
+    ASSERT_TRUE(buffer_->ReadFromMessageParcel(*parcel_));
+
+    EXPECT_EQ(buffer_->pts_, g_pts + 1);
+    EXPECT_EQ(buffer_->dts_, g_dts + 1);
+    EXPECT_EQ(buffer_->duration_, g_duration + 1);
+    EXPECT_EQ(buffer_->flag_, g_flag + 1);
 }
 
 void AVBufferInnerUnitTest::CheckMemTrans()
@@ -717,8 +752,9 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_006, TestSize.Level1)
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_CreateWithInvalid_001, TestSize.Level1)
 {
     parcel_ = std::make_shared<MessageParcel>();
-    buffer_ = AVBuffer::CreateAVBuffer(*parcel_);
-    EXPECT_EQ(nullptr, buffer_);
+    buffer_ = AVBuffer::CreateAVBuffer();
+    ASSERT_TRUE(buffer_->ReadFromMessageParcel(*parcel_));
+    ASSERT_EQ(buffer_->memory_, nullptr);
 }
 
 /**
@@ -1161,6 +1197,20 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_Reset_002, TestSize.Level1
     ASSERT_EQ(remoteBuffer_->GetUniqueId(), buffer_->GetUniqueId());
     buffer_->memory_->Reset();
     EXPECT_EQ(buffer_->memory_->size_, 0);
+}
+
+/**
+ * @tc.name: AVBuffer_SharedMemory_ReadFromMessageParcel_001
+ * @tc.desc: shared memory read from message parcel
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_ReadFromMessageParcel_001, TestSize.Level1)
+{
+    memFlag_ = MemoryFlag::MEMORY_READ_WRITE;
+    capacity_ = MEMSIZE;
+    align_ = 0;
+    CreateRemoteSharedMem();
+    CheckAttrTrans();
 }
 
 /**
@@ -1787,6 +1837,19 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_Reset_004, TestSize.Level
 }
 
 /**
+ * @tc.name: AVBuffer_SurfaceMemory_ReadFromMessageParcel_001
+ * @tc.desc: surface memory read from message parcel
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_ReadFromMessageParcel_001, TestSize.Level1)
+{
+    capacity_ = MEMSIZE;
+    align_ = 0;
+    CreateRemoteSurfaceMem();
+    CheckAttrTrans();
+}
+
+/**
  * @tc.name: AVBuffer_Create_Local_HardwareMemory_001
  * @tc.desc: create local hardware memory
  * @tc.type: FUNC
@@ -2131,6 +2194,20 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_Reset_002, TestSize.Leve
 }
 
 /**
+ * @tc.name: AVBuffer_HardwareMemory_ReadFromMessageParcel_001
+ * @tc.desc: hardware memory read from message parcel
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_ReadFromMessageParcel_001, TestSize.Level1)
+{
+    memFlag_ = MemoryFlag::MEMORY_READ_WRITE;
+    capacity_ = MEMSIZE;
+    align_ = 0;
+    CreateRemoteHardwareMem();
+    CheckAttrTrans();
+}
+
+/**
  * @tc.name: AVBuffer_Create_Local_VirtualMemory_001
  * @tc.desc: create local virtual memory
  * @tc.type: FUNC
@@ -2156,7 +2233,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_VirtualMemory_001, TestSiz
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_VirtualMemory_002, TestSize.Level1)
 {
-    CreateRemoteVirtualMem();
+    CreateLocalNullMem();
     ASSERT_NE(nullptr, remoteBuffer_);
     ASSERT_NE(nullptr, remoteBuffer_->meta_);
     ASSERT_EQ(nullptr, remoteBuffer_->memory_);
@@ -2340,6 +2417,19 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_VirtualMemory_Reset_001, TestSize.Level
     buffer_->memory_->Reset();
     EXPECT_EQ(buffer_->memory_->size_, 0);
 }
+
+/**
+ * @tc.name: AVBuffer_VirtualMemory_ReadFromMessageParcel_001
+ * @tc.desc: null memory read from message parcel
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVBufferInnerUnitTest, AVBuffer_VirtualMemory_ReadFromMessageParcel_001, TestSize.Level1)
+{
+    CreateLocalNullMem();
+    CreateRemoteHardwareMem();
+    CheckAttrTrans();
+}
+
 } // namespace AVBufferFuncUT
 } // namespace Media
 } // namespace OHOS
