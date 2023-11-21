@@ -1081,7 +1081,8 @@ int32_t HiPlayerImpl::SetAudioInterruptMode(const int32_t interruptMode)
     return TransErrorCode(ret);
 }
 
-int32_t HiPlayerImpl::SelectBitRate(uint32_t bitRate) {
+int32_t HiPlayerImpl::SelectBitRate(uint32_t bitRate)
+{
     int64_t mBitRate = static_cast<int64_t>(bitRate);
     pipeline_->FlushStart();
     auto ret = audioSource_->SelectBitRate(mBitRate);
