@@ -14,10 +14,10 @@
  */
 
 #include <dirent.h>
+#include <gtest/gtest.h>
 #include <memory>
 #include <string>
 #include <vector>
-#include <gtest/gtest.h>
 #include "av_hardware_allocator.h"
 #include "av_hardware_memory.h"
 #include "av_shared_allocator.h"
@@ -32,23 +32,25 @@
 #include "surface_type.h"
 #include "unittest_log.h"
 
-
 using namespace std;
 using namespace testing::ext;
 using namespace OHOS;
 using namespace OHOS::Media;
 
+#define INT_TESTKEY Tag::SRC_INPUT_TYPE
 #define LONG_TESTKEY Tag::MEDIA_DURATION
 #define DOUBLE_TESTKEY Tag::VIDEO_CAPTURE_RATE
 #define STRING_TESTKEY Tag::MEDIA_FILE_URI
 namespace {
-const int32_t MEMSIZE = 1024 * 1024;
-const int32_t POSITION_ONE = 1024 * 64;
-const int32_t TEST_BUFFER_SIZE = 1048 * 1048 * 8;
+constexpr int32_t MEMSIZE = 1024 * 1024;
+constexpr int32_t POSITION_ONE = 1024 * 64;
+constexpr int32_t TEST_BUFFER_SIZE = 1048 * 1048 * 8;
+constexpr int32_t TEST_LOOP_DEPTH = 10;
 
+const int32_t g_intValue = 141;
 const int64_t g_longValue = 115441;
-const double g_doubleValue = 1.11541415926;
-const std::string g_stringValue = "STRING_TESTKEY";
+const double g_doubleValue = 1.59261111;
+const std::string g_stringValue = "STRING_TESTVALUE";
 
 const int64_t g_pts = 33000;
 const int64_t g_dts = 100;
@@ -148,6 +150,7 @@ private:
     void GetRemoteBuffer();
 
     void CheckMetaSetAndGet();
+    void CheckMetaTransParcel();
     void CheckAttrTrans();
     void CheckMemTrans();
     void CheckMemTransPos(int32_t pos);
@@ -361,11 +364,34 @@ void AVBufferInnerUnitTest::GetRemoteBuffer()
     }
 }
 
+void AVBufferInnerUnitTest::CheckMetaTransParcel()
+{
+    int32_t getIntValue = 0;
+    int64_t getLongValue = 0;
+    double getDoubleValue = 0.0;
+    std::string getStringValue = "";
+    MessageParcel parcel;
+    for (int32_t toIndex = 0; toIndex < TEST_LOOP_DEPTH; ++toIndex) {
+        ASSERT_TRUE(meta_->ToParcel(parcel));
+    }
+    for (int32_t fromIndex = 0; fromIndex < TEST_LOOP_DEPTH; ++fromIndex) {
+        ASSERT_TRUE(meta_->FromParcel(parcel));
+        meta_->GetData(INT_TESTKEY, getIntValue);
+        meta_->GetData(LONG_TESTKEY, getLongValue);
+        meta_->GetData(DOUBLE_TESTKEY, getDoubleValue);
+        meta_->GetData(STRING_TESTKEY, getStringValue);
+
+        EXPECT_EQ(getIntValue, g_intValue);
+        EXPECT_EQ(getLongValue, g_longValue);
+        EXPECT_EQ(getDoubleValue, g_doubleValue);
+        EXPECT_EQ(getStringValue, g_stringValue);
+    }
+}
+
 void AVBufferInnerUnitTest::CheckMetaSetAndGet()
 {
-    // int32_t getIntValue = 0;
+    int32_t getIntValue = 0;
     int64_t getLongValue = 0;
-    // float getFloatValue = 0.0;
     double getDoubleValue = 0.0;
     std::string getStringValue = "";
 
@@ -374,11 +400,11 @@ void AVBufferInnerUnitTest::CheckMetaSetAndGet()
     remoteBuffer_->duration_ = g_duration;
     remoteBuffer_->flag_ = g_flag;
 
-    // meta_->SetData(INT_TESTKEY, g_intValue);
+    meta_->SetData(INT_TESTKEY, g_intValue);
     meta_->SetData(LONG_TESTKEY, g_longValue);
-    // meta_->SetData(FLOAT_TESTKEY, g_floatValue);
     meta_->SetData(DOUBLE_TESTKEY, g_doubleValue);
     meta_->SetData(STRING_TESTKEY, g_stringValue);
+    CheckMetaTransParcel();
     remoteBuffer_->meta_ = meta_;
 
     if (parcel_ != nullptr) {
@@ -392,10 +418,12 @@ void AVBufferInnerUnitTest::CheckMetaSetAndGet()
     EXPECT_EQ(buffer_->duration_, g_duration);
     EXPECT_EQ(buffer_->flag_, g_flag);
 
+    buffer_->meta_->GetData(INT_TESTKEY, getIntValue);
     buffer_->meta_->GetData(LONG_TESTKEY, getLongValue);
     buffer_->meta_->GetData(DOUBLE_TESTKEY, getDoubleValue);
     buffer_->meta_->GetData(STRING_TESTKEY, getStringValue);
 
+    EXPECT_EQ(getIntValue, g_intValue);
     EXPECT_EQ(getLongValue, g_longValue);
     EXPECT_EQ(getDoubleValue, g_doubleValue);
     EXPECT_EQ(getStringValue, g_stringValue);
@@ -417,18 +445,22 @@ void AVBufferInnerUnitTest::CheckAttrTrans()
     EXPECT_EQ(buffer_->duration_, g_duration);
     EXPECT_EQ(buffer_->flag_, g_flag);
 
-    remoteBuffer_->pts_ = g_pts + 1;
-    remoteBuffer_->dts_ = g_dts + 1;
-    remoteBuffer_->duration_ = g_duration + 1;
-    remoteBuffer_->flag_ = g_flag + 1;
+    for (int32_t i = 0; i < TEST_LOOP_DEPTH; i++) {
+        remoteBuffer_->pts_++;
+        remoteBuffer_->dts_++;
+        remoteBuffer_->duration_++;
+        remoteBuffer_->flag_++;
 
-    ASSERT_TRUE(remoteBuffer_->WriteToMessageParcel(*parcel_));
-    ASSERT_TRUE(buffer_->ReadFromMessageParcel(*parcel_));
+        ASSERT_TRUE(remoteBuffer_->WriteToMessageParcel(*parcel_));
+        ASSERT_TRUE(remoteBuffer_->WriteToMessageParcel(*parcel_));
+        ASSERT_TRUE(buffer_->ReadFromMessageParcel(*parcel_));
+        ASSERT_TRUE(buffer_->ReadFromMessageParcel(*parcel_));
 
-    EXPECT_EQ(buffer_->pts_, g_pts + 1);
-    EXPECT_EQ(buffer_->dts_, g_dts + 1);
-    EXPECT_EQ(buffer_->duration_, g_duration + 1);
-    EXPECT_EQ(buffer_->flag_, g_flag + 1);
+        EXPECT_EQ(buffer_->pts_, remoteBuffer_->pts_);
+        EXPECT_EQ(buffer_->dts_, remoteBuffer_->dts_);
+        EXPECT_EQ(buffer_->duration_, remoteBuffer_->duration_);
+        EXPECT_EQ(buffer_->flag_, remoteBuffer_->flag_);
+    }
 }
 
 void AVBufferInnerUnitTest::CheckMemTrans()
@@ -721,7 +753,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_006, TestSize.Level1)
     configRemote.dmaFd = 1;
 
     MessageParcel parcel;
-   *( configRemote.surfaceBufferConfig) = g_config;
+    *(configRemote.surfaceBufferConfig) = g_config;
     EXPECT_TRUE(MarshallingConfig(parcel, configRemote));
 
     AVBufferConfig configLocal;
@@ -753,7 +785,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_CreateWithInvalid_001, TestSize.Level1)
 {
     parcel_ = std::make_shared<MessageParcel>();
     buffer_ = AVBuffer::CreateAVBuffer();
-    ASSERT_TRUE(buffer_->ReadFromMessageParcel(*parcel_));
+    ASSERT_FALSE(buffer_->ReadFromMessageParcel(*parcel_));
     ASSERT_EQ(buffer_->memory_, nullptr);
 }
 
