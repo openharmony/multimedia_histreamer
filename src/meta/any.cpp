@@ -34,6 +34,8 @@ bool Any::BaseTypesToParcel(const Any *operand, MessageParcel &parcel) noexcept
         ret &= parcel.WriteString(*AnyCast<std::string>(operand));
     } else if (Any::IsSameTypeWith<std::vector<uint8_t>>(*operand)) {
         ret &= parcel.WriteUInt8Vector(*AnyCast<std::vector<uint8_t>>(operand));
+    } else {
+        return false;
     }
     return ret;
 }
@@ -41,32 +43,31 @@ bool Any::BaseTypesToParcel(const Any *operand, MessageParcel &parcel) noexcept
 // TODO: 这种方式，必须把类型字符串序列化，如果针对基本类型特化 ToParcel，则有可能不用传类型字符串
 int Any::BaseTypesFromParcel(Any *operand, MessageParcel &parcel) noexcept
 {
-    std::string_view type = parcel.ReadString();
-    Any tmp;
-    if (MakeAny<int32_t>().SameTypeWith(type)) {
-        tmp.Emplace<int32_t>(parcel.ReadInt32());
+    std::string type = parcel.ReadString();
+    if (MakeAny<int32_t>().SameTypeWith(std::string_view(type))) {
+        Any tmp(parcel.ReadInt32());
         operand->Swap(tmp);
         return 0;
-    } else if (MakeAny<int64_t>().SameTypeWith(type)) {
-        tmp.Emplace<int64_t>(parcel.ReadInt64());
+    } else if (MakeAny<int64_t>().SameTypeWith(std::string_view(type))) {
+        Any tmp(parcel.ReadInt64());
         operand->Swap(tmp);
         return 0;
-    } else if (MakeAny<float>().SameTypeWith(type)) {
-        tmp.Emplace<float>(parcel.ReadFloat());
+    } else if (MakeAny<float>().SameTypeWith(std::string_view(type))) {
+        Any tmp(parcel.ReadFloat());
         operand->Swap(tmp);
         return 0;
-    } else if (MakeAny<double>().SameTypeWith(type)) {
-        tmp.Emplace<double>(parcel.ReadDouble());
+    } else if (MakeAny<double>().SameTypeWith(std::string_view(type))) {
+        Any tmp(parcel.ReadDouble());
         operand->Swap(tmp);
         return 0;
-    } else if (MakeAny<std::string>().SameTypeWith(type)) {
-        tmp.Emplace<std::string>(parcel.ReadString());
+    } else if (MakeAny<std::string>().SameTypeWith(std::string_view(type))) {
+        Any tmp(parcel.ReadString());
         operand->Swap(tmp);
         return 0;
-    } else if (MakeAny<std::vector<uint8_t>>().SameTypeWith(type)) {
+    } else if (MakeAny<std::vector<uint8_t>>().SameTypeWith(std::string_view(type))) {
         std::vector<uint8_t> val;
         (void)parcel.ReadUInt8Vector(&val);
-        tmp.Emplace<std::vector<uint8_t>>(val);
+        Any tmp(val);
         operand->Swap(tmp);
         return 0;
     }

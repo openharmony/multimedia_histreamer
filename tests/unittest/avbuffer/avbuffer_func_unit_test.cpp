@@ -37,7 +37,7 @@ using namespace testing::ext;
 using namespace OHOS;
 using namespace OHOS::Media;
 
-#define INT_TESTKEY Tag::SRC_INPUT_TYPE
+#define INT_TESTKEY Tag::APP_PID
 #define LONG_TESTKEY Tag::MEDIA_DURATION
 #define DOUBLE_TESTKEY Tag::VIDEO_CAPTURE_RATE
 #define STRING_TESTKEY Tag::MEDIA_FILE_URI
@@ -2461,7 +2461,6 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_VirtualMemory_ReadFromMessageParcel_001
     CreateRemoteHardwareMem();
     CheckAttrTrans();
 }
-
 } // namespace AVBufferFuncUT
 } // namespace Media
 } // namespace OHOS
