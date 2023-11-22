@@ -73,7 +73,6 @@ ohos_shared_library("media_foundation_buffer") {
     "$histreamer_root_dir/src/buffer/avbuffer/avbuffer_utils.cpp",
     "$histreamer_root_dir/src/buffer/avbuffer/avmemory.cpp",
     "$histreamer_root_dir/src/buffer/capi/native_avbuffer.cpp",
-    "$histreamer_root_dir/src/meta/any.cpp",
   ]
   sources += [
     "$histreamer_root_dir/src/buffer/avbuffer_queue/avbuffer_queue.cpp",
@@ -82,6 +81,11 @@ ohos_shared_library("media_foundation_buffer") {
     "$histreamer_root_dir/src/buffer/avbuffer_queue/avbuffer_queue_producer_proxy.cpp",
     "$histreamer_root_dir/src/buffer/avbuffer_queue/avbuffer_queue_producer_stub.cpp",
     "$histreamer_root_dir/src/buffer/avbuffer_queue/avbuffer_queue_surface.cpp",
+  ]
+  sources += [
+    "$histreamer_root_dir/src/meta/any.cpp",
+    "$histreamer_root_dir/src/meta/media_source.cpp",
+    "$histreamer_root_dir/src/meta/meta.cpp",
   ]
   public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
 
