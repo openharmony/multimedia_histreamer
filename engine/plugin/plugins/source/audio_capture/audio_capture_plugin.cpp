@@ -480,7 +480,7 @@ Seekable AudioCapturePlugin::GetSeekable()
     return Seekable::UNSEEKABLE;
 }
 
-Status AudioCapturePlugin::SeekTo(uint64_t offset)
+Status AudioCapturePlugin::SeekToPos(int64_t offset)
 {
     (void)offset;
     return Status::ERROR_UNIMPLEMENTED;

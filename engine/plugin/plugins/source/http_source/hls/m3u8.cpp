@@ -193,7 +193,6 @@ M3U8MasterPlaylist::M3U8MasterPlaylist(std::string& playList, const std::string&
 void M3U8MasterPlaylist::UpdateMediaPlaylist()
 {
     MEDIA_LOG_I("This is a simple media playlist, not a master playlist " PUBLIC_LOG_S, uri_.c_str());
-    isSimple_ = true;
     auto m3u8 = std::make_shared<M3U8>(uri_, "");
     auto stream = std::make_shared<M3U8VariantStream>(uri_, uri_, m3u8);
     variants_.emplace_back(stream);
@@ -201,6 +200,7 @@ void M3U8MasterPlaylist::UpdateMediaPlaylist()
     m3u8->Update(playList_);
     duration_ = m3u8->GetDuration();
     bLive_ = m3u8->IsLive();
+    isSimple_ = true;
     MEDIA_LOG_D("UpdateMediaPlaylist called, duration_ = " PUBLIC_LOG_F, duration_);
 }
 
@@ -231,9 +231,7 @@ void M3U8MasterPlaylist::UpdateMasterPlaylist()
                         stream->height_ = resolutionAttribute->GetResolution().second;
                     }
                     variants_.emplace_back(stream);
-                    if (defaultVariant_ == nullptr) {
-                        defaultVariant_ = stream;
-                    }
+                    defaultVariant_ = stream; // play last stream
                 }
                 break;
             }

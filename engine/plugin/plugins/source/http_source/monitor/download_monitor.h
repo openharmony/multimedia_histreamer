@@ -44,15 +44,18 @@ public:
     bool Open(const std::string& url) override;
     void Close(bool isAsync) override;
     bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) override;
-    bool Seek(int offset) override;
+    bool SeekToPos(int64_t offset) override;
     void Pause() override;
     void Resume() override;
     size_t GetContentLength() const override;
-    double GetDuration() const override;
+    int64_t GetDuration() const override;
     Seekable GetSeekable() const override;
     void SetCallback(Callback *cb) override;
     void SetStatusCallback(StatusCallbackFunc cb) override;
     bool GetStartedStatus() override;
+    bool SeekToTime(int64_t offset) override;
+    std::vector<uint32_t> GetBitRates() override;
+    bool SelectBitRate(uint32_t bitRate) override;
 
 private:
     void HttpMonitorLoop();

@@ -219,16 +219,27 @@ Seekable HttpSourcePlugin::GetSeekable()
     return downloader_->GetSeekable();
 }
 
-Status HttpSourcePlugin::SeekTo(uint64_t offset)
+Status HttpSourcePlugin::SeekToPos(int64_t offset)
 {
     MEDIA_LOG_I("SeekTo enter, offset = " PUBLIC_LOG_U64, offset);
     OSAL::ScopedLock lock(mutex_);
     FALSE_RETURN_V(downloader_ != nullptr, Status::ERROR_NULL_POINTER);
     FALSE_RETURN_V(downloader_->GetSeekable() == Seekable::SEEKABLE, Status::ERROR_INVALID_OPERATION);
     FALSE_RETURN_V(offset <= downloader_->GetContentLength(), Status::ERROR_INVALID_PARAMETER);
-    FALSE_RETURN_V(downloader_->Seek(offset), Status::ERROR_UNKNOWN);
+    FALSE_RETURN_V(downloader_->SeekToPos(offset), Status::ERROR_UNKNOWN);
     return Status::OK;
 }
+
+Status HttpSourcePlugin::SeekToTime(int64_t offset)
+{
+    OSAL::ScopedLock lock(mutex_);
+    FALSE_RETURN_V(downloader_ != nullptr, Status::ERROR_NULL_POINTER);
+    FALSE_RETURN_V(downloader_->GetSeekable() == Seekable::SEEKABLE, Status::ERROR_INVALID_OPERATION);
+    FALSE_RETURN_V(offset <= downloader_->GetDuration(), Status::ERROR_INVALID_PARAMETER);
+    FALSE_RETURN_V(downloader_->SeekToTime(offset), Status::ERROR_UNKNOWN);
+    return Status::OK;
+}
+
 
 void HttpSourcePlugin::CloseUri()
 {
@@ -239,6 +250,27 @@ void HttpSourcePlugin::CloseUri()
         downloader_ = nullptr;
     }
 }
+
+Status HttpSourcePlugin::GetDuration(int64_t& duration)
+{   
+    FALSE_RETURN_V(downloader_ != nullptr, Status::ERROR_NULL_POINTER);
+    duration = downloader_->GetDuration();
+    return Status::OK;
+}
+
+Status HttpSourcePlugin::GetBitRates(std::vector<uint32_t>& bitRates)
+{   
+    MEDIA_LOG_I("HttpSourcePlugin::GetBitRates() enter.\n");
+    FALSE_RETURN_V(downloader_ != nullptr, Status::ERROR_NULL_POINTER);
+    bitRates = downloader_->GetBitRates();
+    return Status::OK;
+}
+
+Status HttpSourcePlugin::SelectBitRate(uint32_t bitRate)
+{
+    return  static_cast<Status>(downloader_->SelectBitRate(bitRate));
+}
+
 }
 }
 }

@@ -184,7 +184,7 @@ ErrorCode MediaSourceFilter::PullData(const std::string& outPort, uint64_t offse
             MEDIA_LOG_DD("TotalSize_: " PUBLIC_LOG_U64, totalSize);
         }
         if (position_ != offset) {
-            err = TranslatePluginStatus(plugin_->SeekTo(offset));
+            err = TranslatePluginStatus(plugin_->SeekToPos(offset));
             if (err != ErrorCode::SUCCESS) {
                 MEDIA_LOG_E("Seek to " PUBLIC_LOG_U64 " fail", offset);
                 return err;
@@ -266,6 +266,27 @@ Plugin::Seekable MediaSourceFilter::GetSeekable() const
     return seekable_;
 }
 
+ErrorCode MediaSourceFilter::SeekToTime(int64_t offset) const
+{   
+    Status ret = plugin_->SeekToTime(offset);
+    MEDIA_LOG_I("plugin_->SeekTo ret = " PUBLIC_LOG_D32, static_cast<int32_t>(ret));
+    return ret == Status::OK ? ErrorCode::SUCCESS : ErrorCode::ERROR_UNKNOWN;
+}
+
+ErrorCode MediaSourceFilter::GetBitRates(std::vector<uint32_t>& bitRates) const
+{   
+    MEDIA_LOG_I("MediaSourceFilter::GetBitRates() enter.\n");
+    Status ret = plugin_->GetBitRates(bitRates);
+    return ret == Status::OK ? ErrorCode::SUCCESS : ErrorCode::ERROR_UNKNOWN;
+}
+
+ErrorCode MediaSourceFilter::SelectBitRate(uint32_t bitRate) const
+{   
+    Status ret = plugin_->SelectBitRate(bitRate);
+    return ret == Status::OK ? ErrorCode::SUCCESS : ErrorCode::ERROR_UNKNOWN;
+}
+
+
 ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& source)
 {
     MEDIA_LOG_D("IN");
@@ -276,6 +297,11 @@ ErrorCode MediaSourceFilter::DoNegotiate(const std::shared_ptr<MediaSource>& sou
     FALSE_RETURN_V_MSG_E(seekable != Plugin::Seekable::INVALID, ErrorCode::ERROR_INVALID_PARAMETER_VALUE,
                          "Media source Seekable must be SEEKABLE or UNSEEKABLE !");
     FALSE_LOG(meta->Set<Media::Plugin::Tag::MEDIA_SEEKABLE>(seekable));
+    int64_t duration = 0;
+    auto ret = plugin_->GetDuration(duration);
+    if (ret == Status::OK && (duration != 0)) {
+        FALSE_LOG(meta->Set<Media::Plugin::Tag::MEDIA_DURATION>(duration));
+    }
     uint64_t fileSize = 0;
     if ((plugin_->GetSize(fileSize) == Status::OK) && (fileSize != 0)) {
         FALSE_LOG(meta->Set<Media::Plugin::Tag::MEDIA_FILE_SIZE>(fileSize));

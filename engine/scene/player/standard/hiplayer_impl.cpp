@@ -641,17 +641,21 @@ ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode)
 {
     SYNC_TRACER();
     PROFILE_BEGIN();
-    int64_t seekPos = hstTime;
+    int64_t seekTime = hstTime;
     Plugin::SeekMode seekMode = mode;
-    auto rtv = seekPos >= 0 ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_OPERATION;
+    auto rtv = seekTime >= 0 ? ErrorCode::SUCCESS : ErrorCode::ERROR_INVALID_OPERATION;
     if (rtv == ErrorCode::SUCCESS) {
         pipeline_->FlushStart();
         PROFILE_END("Flush start");
         PROFILE_RESET();
 
         MEDIA_LOG_I("Do seek ...");
-        int64_t realSeekTime = seekPos;
-        rtv = demuxer_->SeekTo(seekPos, seekMode, realSeekTime);
+        int64_t realSeekTime = seekTime;
+        rtv = audioSource_->SeekToTime(seekTime);
+        if (rtv != ErrorCode::SUCCESS) {
+            MEDIA_LOG_I("SeekToTime failed\n");
+            rtv = demuxer_->SeekTo(seekTime, seekMode, realSeekTime);
+        }
         if (rtv == ErrorCode::SUCCESS) {
             syncManager_->Seek(realSeekTime);
         }
@@ -666,7 +670,7 @@ ErrorCode HiPlayerImpl::DoSeek(int64_t hstTime, Plugin::SeekMode mode)
         MEDIA_LOG_E("Seek done, seek error.");
     } else {
         Format format;
-        int64_t currentPos = Plugin::HstTime2Ms(seekPos);
+        int64_t currentPos = Plugin::HstTime2Ms(seekTime);
         MEDIA_LOG_I("Seek done, currentPos : " PUBLIC_LOG_D64, currentPos);
         callbackLooper_.OnInfo(INFO_TYPE_SEEKDONE, static_cast<int32_t>(currentPos), format);
         callbackLooper_.OnInfo(INFO_TYPE_POSITION_UPDATE, static_cast<int32_t>(currentPos), format);
@@ -704,6 +708,17 @@ ErrorCode HiPlayerImpl::DoOnReady()
         callbackLooper_.OnInfo(INFO_TYPE_DURATION_UPDATE, Plugin::HstTime2Ms(duration_), format);
     } else {
         MEDIA_LOG_E("INFO_TYPE_DURATION_UPDATE failed");
+    }
+    std::vector<uint32_t> vBitRates;
+    auto ret = audioSource_->GetBitRates(vBitRates);
+    if ((ret == ErrorCode::SUCCESS) && (vBitRates.size() > 0)) {   
+        int msize = vBitRates.size();
+        const int size_ = msize;
+        uint32_t* bitrates = vBitRates.data();
+        Format bitRateFormat;
+        (void)bitRateFormat.PutBuffer(std::string(PlayerKeys::PLAYER_BITRATE),
+        static_cast<uint8_t *>(static_cast<void *>(bitrates)), size_ * sizeof(uint32_t));
+        callbackLooper_.OnInfo(INFO_TYPE_BITRATE_COLLECT, 0, bitRateFormat);
     }
     return ErrorCode::SUCCESS;
 }
@@ -1063,6 +1078,15 @@ int32_t HiPlayerImpl::SetAudioInterruptMode(const int32_t interruptMode)
 {
     MEDIA_LOG_I("SetAudioInterruptMode entered.");
     auto ret = audioSink_->SetParameter(static_cast<int32_t>(Tag::AUDIO_INTERRUPT_MODE), interruptMode);
+    return TransErrorCode(ret);
+}
+
+int32_t HiPlayerImpl::SelectBitRate(uint32_t bitRate)
+{
+    int64_t mBitRate = static_cast<int64_t>(bitRate);
+    pipeline_->FlushStart();
+    auto ret = audioSource_->SelectBitRate(mBitRate);
+    pipeline_->FlushEnd();
     return TransErrorCode(ret);
 }
 

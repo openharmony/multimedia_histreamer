@@ -142,6 +142,7 @@ private:
     Plugin::Seekable seekable_;
     std::string uri_;
     uint64_t mediaDataSize_;
+    int64_t duration_;
     std::shared_ptr<OSAL::Task> task_;
     std::shared_ptr<TypeFinder> typeFinder_;
     std::shared_ptr<DataPacker> dataPacker_;
