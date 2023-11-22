@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include "avformat_capi_mock.h"
 #include "native_avbuffer.h"
-#include "native_mferrors.h"
+#include "native_averrors.h"
 #include "surface_buffer.h"
 #include "unittest_log.h"
 

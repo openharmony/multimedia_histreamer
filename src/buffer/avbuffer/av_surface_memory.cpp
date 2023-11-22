@@ -94,6 +94,12 @@ int32_t AVSurfaceMemory::Init()
 
 int32_t AVSurfaceMemory::Init(MessageParcel &parcel)
 {
+    (void)parcel.ReadUint64();
+    return InitSurfaceBuffer(parcel);
+}
+
+int32_t AVSurfaceMemory::InitSurfaceBuffer(MessageParcel &parcel)
+{
     surfaceBuffer_ = SurfaceBuffer::Create();
     FALSE_RETURN_V_MSG_E(surfaceBuffer_ != nullptr, static_cast<int32_t>(Status::ERROR_NO_MEMORY),
                          "No memory for new SurfaceBuffer!");
@@ -110,22 +116,28 @@ int32_t AVSurfaceMemory::Init(MessageParcel &parcel)
 
 bool AVSurfaceMemory::WriteToMessageParcel(MessageParcel &parcel)
 {
+#ifdef MEDIA_OHOS
     MessageParcel bufferParcel;
     GSError gsRet = surfaceBuffer_->WriteToMessageParcel(bufferParcel);
     FALSE_RETURN_V_MSG_E(gsRet == GSERROR_OK, false, "Write message parcel failed!, %{public}s",
                          GSErrorStr(gsRet).c_str());
-    parcel.Append(bufferParcel);
+    size_t size = bufferParcel.GetDataSize();
+    return parcel.WriteUint64(static_cast<uint64_t>(size)) && parcel.Append(bufferParcel);
+#else
     return true;
+#endif
 }
 
 bool AVSurfaceMemory::ReadFromMessageParcel(MessageParcel &parcel)
 {
 #ifdef MEDIA_OHOS
-    GSError gsRet = surfaceBuffer_->ReadFromMessageParcel(parcel);
-    FALSE_RETURN_V_MSG_E(gsRet == GSERROR_OK, false, "Write message parcel failed!, %{public}s",
-                         GSErrorStr(gsRet).c_str());
-#endif
+    uint64_t size = 0;
+    bool ret = parcel.ReadUint64(size);
+    parcel.SkipBytes(static_cast<size_t>(size));
+    return ret;
+#else
     return true;
+#endif
 }
 
 uint8_t *AVSurfaceMemory::GetAddr()

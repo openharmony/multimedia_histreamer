@@ -46,12 +46,7 @@ config("histreamer_presets") {
 }
 
 group("media_foundation") {
-  deps = [
-    "src:media_foundation_buffer",
-    "src:media_foundation_osal",
-    "src:media_foundation_pipeline",
-    "src:media_foundation_plugin"
-  ]
+  deps = [ "src:media_foundation_buffer" ]
 }
 
 if (!hst_is_mini_sys) {

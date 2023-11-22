@@ -247,10 +247,12 @@ protected:
     explicit AVMemory();
     virtual int32_t Init();
     virtual int32_t Init(MessageParcel &parcel);
+    virtual int32_t InitSurfaceBuffer(MessageParcel &parcel);
     virtual bool WriteToMessageParcel(MessageParcel &parcel);
     virtual bool ReadFromMessageParcel(MessageParcel &parcel);
 
     bool ReadCommonFromMessageParcel(MessageParcel &parcel);
+    bool SkipCommonFromMessageParcel(MessageParcel &parcel);
     bool WriteCommonToMessageParcel(MessageParcel &parcel);
 
     std::string name_;

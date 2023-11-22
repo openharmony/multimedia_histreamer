@@ -17,7 +17,7 @@
 #define NATIVE_MFMAGIC_H
 
 #include <refbase.h>
-#include "interface/inner_api/buffer/avbuffer.h"
+#include "buffer/avbuffer.h"
 
 #define MF_MAGIC(a, b, c, d) (((a) << 24) + ((b) << 16) + ((c) << 8) + ((d) << 0))
 
@@ -26,8 +26,8 @@ enum class MFMagic {
 };
 
 struct MFObjectMagic : public OHOS::RefBase {
-    explicit AVObjectMagic(enum MFMagic m) : magic_(m) {}
-    virtual ~AVObjectMagic() = default;
+    explicit MFObjectMagic(enum MFMagic m) : magic_(m) {}
+    virtual ~MFObjectMagic() = default;
     enum MFMagic magic_;
 };
 

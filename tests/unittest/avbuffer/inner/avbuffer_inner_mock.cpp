@@ -16,7 +16,7 @@
 #include "avbuffer_inner_mock.h"
 #include "avformat_inner_mock.h"
 #include "media_description.h"
-#include "native_mferrors.h"
+#include "native_averrors.h"
 #include "securec.h"
 #include "unittest_log.h"
 

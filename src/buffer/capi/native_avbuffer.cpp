@@ -50,16 +50,16 @@ OH_AVBuffer *OH_AVBuffer_Create(int32_t capacity)
     return buf;
 }
 
-OH_MFErrorCode OH_AVBuffer_Destroy(struct OH_AVBuffer *buffer)
+OH_AVErrCode OH_AVBuffer_Destroy(struct OH_AVBuffer *buffer)
 {
-    FALSE_RETURN_V_MSG_E(buffer != nullptr, MF_ERROR_INVALID_STATE,
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, AV_ERR_INVALID_STATE,
                          "input buffer is nullptr!");
     FALSE_RETURN_V_MSG_E(buffer->magic_ == MFMagic::MFMAGIC_AVBUFFER,
-                         MF_ERROR_INVALID_VAL, "magic error!");
-    FALSE_RETURN_V_MSG_E(buffer->isUserCreated, MF_ERROR_INVALID_VAL,
+                         AV_ERR_INVALID_VAL, "magic error!");
+    FALSE_RETURN_V_MSG_E(buffer->isUserCreated, AV_ERR_INVALID_VAL,
                          "input buffer is not user created!");
     delete buffer;
-    return MF_ERROR_OK;
+    return AV_ERR_OK;
 }
 
 OH_AVBufferAttr OH_AVBuffer_GetBufferAttr(OH_AVBuffer *buffer)
@@ -68,29 +68,33 @@ OH_AVBufferAttr OH_AVBuffer_GetBufferAttr(OH_AVBuffer *buffer)
     FALSE_RETURN_V_MSG_E(buffer != nullptr, attr, "input buffer is nullptr!");
     FALSE_RETURN_V_MSG_E(buffer->magic_ == MFMagic::MFMAGIC_AVBUFFER, attr, "magic error!");
     FALSE_RETURN_V_MSG_E(buffer->buffer_ != nullptr, attr, "buffer is nullptr!");
-    FALSE_RETURN_V_MSG_E(buffer->buffer_->memory_ != nullptr, attr, "buffer's memory is nullptr!");
     attr.pts = buffer->buffer_->pts_;
-    attr.offset = buffer->buffer_->memory_->GetOffset();
-    attr.size = buffer->buffer_->memory_->GetSize();
     attr.flags = static_cast<uint32_t>(buffer->buffer_->flag_);
+    if (buffer->buffer_->memory_ != nullptr) {
+        attr.offset = buffer->buffer_->memory_->GetOffset();
+        attr.size = buffer->buffer_->memory_->GetSize();
+    } else {
+        attr.offset = 0;
+        attr.size = 0;
+    }
     return attr;
 }
 
-OH_MFErrorCode OH_AVBuffer_SetBufferAttr(OH_AVBuffer *buffer, OH_AVBufferAttr *attr)
+OH_AVErrCode OH_AVBuffer_SetBufferAttr(OH_AVBuffer *buffer, OH_AVBufferAttr *attr)
 {
-    FALSE_RETURN_V_MSG_E(buffer != nullptr, MF_ERROR_INVALID_VAL,
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, AV_ERR_INVALID_VAL,
                          "input buffer is nullptr!");
     FALSE_RETURN_V_MSG_E(buffer->magic_ == MFMagic::MFMAGIC_AVBUFFER,
-                         MF_ERROR_INVALID_VAL, "magic error!");
-    FALSE_RETURN_V_MSG_E(buffer->buffer_ != nullptr, MF_ERROR_INVALID_VAL,
+                         AV_ERR_INVALID_VAL, "magic error!");
+    FALSE_RETURN_V_MSG_E(buffer->buffer_ != nullptr, AV_ERR_INVALID_VAL,
                          "buffer is nullptr!");
-    FALSE_RETURN_V_MSG_E(buffer->buffer_->memory_ != nullptr, MF_ERROR_INVALID_VAL,
-                         "buffer's memory is nullptr!");
     buffer->buffer_->pts_ = attr->pts;
-    buffer->buffer_->memory_->SetOffset(attr->offset);
     buffer->buffer_->flag_ = attr->flags;
-    buffer->buffer_->memory_->SetSize(attr->size);
-    return MF_ERROR_OK;
+    if (buffer->buffer_->memory_ != nullptr) {
+        buffer->buffer_->memory_->SetSize(attr->size);
+        buffer->buffer_->memory_->SetOffset(attr->offset);
+    }
+    return AV_ERR_OK;
 }
 
 OH_AVFormat *OH_AVBuffer_GetParameter(OH_AVBuffer *buffer)
@@ -110,19 +114,19 @@ OH_AVFormat *OH_AVBuffer_GetParameter(OH_AVBuffer *buffer)
 #endif
 }
 
-OH_MFErrorCode OH_AVBuffer_SetParameter(OH_AVBuffer *buffer, OH_AVFormat *format)
+OH_AVErrCode OH_AVBuffer_SetParameter(OH_AVBuffer *buffer, OH_AVFormat *format)
 {
-    FALSE_RETURN_V_MSG_E(buffer != nullptr, MF_ERROR_INVALID_VAL,
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, AV_ERR_INVALID_VAL,
                          "input buffer is nullptr!");
     FALSE_RETURN_V_MSG_E(buffer->magic_ == MFMagic::MFMAGIC_AVBUFFER,
-                         MF_ERROR_INVALID_VAL, "magic error!");
-    FALSE_RETURN_V_MSG_E(buffer->buffer_ != nullptr, MF_ERROR_INVALID_VAL,
+                         AV_ERR_INVALID_VAL, "magic error!");
+    FALSE_RETURN_V_MSG_E(buffer->buffer_ != nullptr, AV_ERR_INVALID_VAL,
                          "buffer is nullptr!");
 #ifdef MEDIA_OHOS
     // *(buffer->buffer_->meta_) = format->format_;
-    return MF_ERROR_OK;
+    return AV_ERR_OK;
 #endif
-    return MF_ERROR_OK;
+    return AV_ERR_OK;
 }
 
 uint8_t *OH_AVBuffer_GetAddr(OH_AVBuffer *buffer)

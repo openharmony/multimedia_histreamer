@@ -18,7 +18,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include "native_mferrors.h"
+#include "native_averrors.h"
 #include "native_avformat.h"
 
 #ifdef __cplusplus
@@ -75,10 +75,10 @@ OH_AVBuffer *OH_AVBuffer_Create(int32_t capacity);
  * @syscap SystemCapability.Multimedia.Media.Core
  * @param buffer Encapsulate OH_AVBuffer structure instance pointer
  * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to {@link
- * OH_MFErrorCode}
+ * OH_AVErrCode}
  * @since 11
  */
-OH_MFErrorCode OH_AVBuffer_Destroy(struct OH_AVBuffer *buffer);
+OH_AVErrCode OH_AVBuffer_Destroy(struct OH_AVBuffer *buffer);
 
 /**
  * @brief Get the buffer's attribute
@@ -95,10 +95,10 @@ OH_AVBufferAttr OH_AVBuffer_GetBufferAttr(OH_AVBuffer *buffer);
  * @param buffer Encapsulate OH_AVBuffer structure instance pointer
  * @param attr The description of the buffer, please refer to {@link OH_AVBufferAttr}
  * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to {@link
- * OH_MFErrorCode}
+ * OH_AVErrCode}
  * @since 11
  */
-OH_MFErrorCode OH_AVBuffer_SetBufferAttr(OH_AVBuffer *buffer, OH_AVBufferAttr *attr);
+OH_AVErrCode OH_AVBuffer_SetBufferAttr(OH_AVBuffer *buffer, OH_AVBufferAttr *attr);
 
 /**
  * @brief Get the buffer's parameter
@@ -115,11 +115,11 @@ OH_AVFormat *OH_AVBuffer_GetParameter(OH_AVBuffer *buffer);
  * @param buffer Encapsulate OH_AVBuffer structure instance pointer
  * @param format Encapsulate OH_AVFormat structure instance pointer, refer to {@link OH_AVFormat}
  * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to {@link
- * OH_MFErrorCode}
+ * OH_AVErrCode}
  * @since 11
  * @version 1.0
  */
-OH_MFErrorCode OH_AVBuffer_SetParameter(OH_AVBuffer *buffer, OH_AVFormat *format);
+OH_AVErrCode OH_AVBuffer_SetParameter(OH_AVBuffer *buffer, OH_AVFormat *format);
 
 /**
  * @brief Get the buffer's virtual address

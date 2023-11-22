@@ -17,7 +17,7 @@
 #define NATIVE_AVMEMORY_H
 
 #include <stdint.h>
-#include "native_mferrors.h"
+#include "native_averrors.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,10 +60,10 @@ int32_t OH_AVMemory_GetSize(struct OH_AVMemory *mem);
  * @syscap SystemCapability.Multimedia.Media.Core
  * @param mem Encapsulate OH_AVMemory structure instance pointer
  * @return Returns AV_ERR_OK if the execution is successful,
- * otherwise returns a specific error code, refer to {@link OH_MFErrorCode}
+ * otherwise returns a specific error code, refer to {@link OH_AVErrCode}
  * @since 10
  */
-OH_MFErrorCode OH_AVMemory_Destroy(struct OH_AVMemory *mem);
+OH_AVErrCode OH_AVMemory_Destroy(struct OH_AVMemory *mem);
 
 #ifdef __cplusplus
 }

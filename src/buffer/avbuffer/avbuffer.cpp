@@ -237,19 +237,20 @@ bool AVBuffer::ReadFromMessageParcel(MessageParcel &parcel, bool isSurfaceBuffer
     // 2. 相同buffer更新attr：  memroy != nullptr，uid == fromParcel，不创建memory，更新attr + memory的attr
     // 3. 初始化buffer：        memroy == nullptr，fromParcel != 0，创建memory
     // 4. 只传buffer的attr：    memroy == nullptr，fromParcel == 0，更新attr
-    uint64_t uid = parcel.ReadUint64();
-    int64_t pts = parcel.ReadInt64();
-    int64_t dts = parcel.ReadInt64();
-    int64_t duration = parcel.ReadInt64();
-    uint32_t flag = parcel.ReadUint32();
+    uint64_t uid = 0;
+    int64_t pts = 0;
+    int64_t dts = 0;
+    int64_t duration = 0;
+    uint32_t flag = 0;
     auto meta = std::make_shared<Meta>();
-    bool ret = meta->FromParcel(parcel);
-    FALSE_RETURN_V_MSG_E(ret, false, "Unmarshalling meta_ failed");
+    bool ret = parcel.ReadUint64(uid) && parcel.ReadInt64(pts) && parcel.ReadInt64(dts) && parcel.ReadInt64(duration) &&
+               parcel.ReadUint32(flag) && meta->FromParcel(parcel);
+    FALSE_RETURN_V_MSG_E(ret, false, "Unmarshalling buffer info failed");
 
     if (memory_ != nullptr) {
         FALSE_RETURN_V_MSG_E(GetUniqueId() == uid, false, "Can't read message parcel from other AVBuffer object!");
         (void)parcel.ReadUint8();
-        ret = memory_->ReadCommonFromMessageParcel(parcel) && memory_->ReadFromMessageParcel(parcel);
+        ret = memory_->SkipCommonFromMessageParcel(parcel) && memory_->ReadFromMessageParcel(parcel);
         FALSE_RETURN_V_MSG_E(ret, false, "Update memory info failed");
     } else if (uid != 0) {
         uid_ = uid;

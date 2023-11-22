@@ -85,7 +85,7 @@ std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(MessageParcel &parcel, bool i
 #ifdef MEDIA_OHOS
     if (isSurfaceBuffer) {
         auto mem = std::shared_ptr<AVMemory>(new AVSurfaceMemory());
-        int32_t ret = mem->Init(parcel);
+        int32_t ret = mem->InitSurfaceBuffer(parcel);
         FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), nullptr, "Init AVSurfaceMemory failed");
         return mem;
     }
@@ -139,6 +139,12 @@ int32_t AVMemory::Init(MessageParcel &parcel)
     return static_cast<int32_t>(Status::ERROR_UNIMPLEMENTED);
 }
 
+int32_t AVMemory::InitSurfaceBuffer(MessageParcel &parcel)
+{
+    (void)parcel;
+    return static_cast<int32_t>(Status::ERROR_UNIMPLEMENTED);
+}
+
 bool AVMemory::ReadFromMessageParcel(MessageParcel &parcel)
 {
     (void)parcel;
@@ -154,20 +160,40 @@ bool AVMemory::WriteToMessageParcel(MessageParcel &parcel)
 bool AVMemory::ReadCommonFromMessageParcel(MessageParcel &parcel)
 {
 #ifdef MEDIA_OHOS
-    name_ = parcel.ReadString();
-    capacity_ = parcel.ReadInt32();
+    (void)parcel.ReadUint64();
+    bool ret = parcel.ReadString(name_) && parcel.ReadInt32(capacity_);
     FALSE_RETURN_V_MSG_E(capacity_ >= 0, false, "capacity is invalid");
 
-    align_ = parcel.ReadInt32();
+    ret &= parcel.ReadInt32(align_);
     FALSE_RETURN_V_MSG_E(align_ >= 0, false, "align is invalid");
 
-    offset_ = parcel.ReadInt32();
+    ret &= parcel.ReadInt32(offset_);
     FALSE_RETURN_V_MSG_E(offset_ >= 0, false, "offset is invalid");
 
-    size_ = parcel.ReadInt32();
+    ret &= parcel.ReadInt32(size_);
     FALSE_RETURN_V_MSG_E((size_ >= 0) || (capacity_ < size_), false, "size is invalid");
-#endif
+    return ret;
+#else
     return true;
+#endif
+}
+
+bool AVMemory::SkipCommonFromMessageParcel(MessageParcel &parcel)
+{
+#ifdef MEDIA_OHOS
+    uint64_t size = 0;
+    bool ret = parcel.ReadUint64(size);
+    parcel.SkipBytes(static_cast<size_t>(size) - 8); // 8: the size of size_ and offset_
+
+    ret &= parcel.ReadInt32(offset_);
+    FALSE_RETURN_V_MSG_E(offset_ >= 0, false, "offset is invalid");
+
+    ret &= parcel.ReadInt32(size_);
+    FALSE_RETURN_V_MSG_E((size_ >= 0) || (capacity_ < size_), false, "size is invalid");
+    return ret;
+#else
+    return true;
+#endif
 }
 
 bool AVMemory::WriteCommonToMessageParcel(MessageParcel &parcel)
@@ -177,9 +203,9 @@ bool AVMemory::WriteCommonToMessageParcel(MessageParcel &parcel)
     MessageParcel bufferParcel;
     ret = bufferParcel.WriteString(name_) && bufferParcel.WriteInt32(capacity_) && bufferParcel.WriteInt32(align_) &&
           bufferParcel.WriteInt32(offset_) && bufferParcel.WriteInt32(size_);
-    if (ret) {
-        parcel.Append(bufferParcel);
-    }
+
+    size_t size = bufferParcel.GetDataSize();
+    return ret && parcel.WriteUint64(static_cast<uint64_t>(size)) && parcel.Append(bufferParcel);
 #endif
     return ret;
 }
