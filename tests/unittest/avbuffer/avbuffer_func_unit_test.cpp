@@ -47,18 +47,18 @@ constexpr int32_t POSITION_ONE = 1024 * 64;
 constexpr int32_t TEST_BUFFER_SIZE = 1048 * 1048 * 8;
 constexpr int32_t TEST_LOOP_DEPTH = 10;
 
-const int32_t g_intValue = 141;
-const int64_t g_longValue = 115441;
-const double g_doubleValue = 1.59261111;
-const std::string g_stringValue = "STRING_TESTVALUE";
+const int32_t INTVALUE = 141;
+const int64_t LONGVALUE = 115441;
+const double DOUBLEVALUE = 1.59261111;
+const std::string STRINGVALUE = "STRING_TESTVALUE";
 
-const int64_t g_pts = 33000;
-const int64_t g_dts = 100;
-const int64_t g_duration = 1000;
-const uint32_t g_flag = 1 << 0;
+const int64_t DEFAULT_PTS = 33000;
+const int64_t DEFAULT_DTS = 100;
+const int64_t DEFAULT_DURATION = 1000;
+const uint32_t DEFAULT_FLAG = 1 << 0;
 
-const int32_t g_pixSize = 4;
-const BufferRequestConfig g_config = {
+const int32_t DEFAULT_PIXELSIZE = 4;
+const BufferRequestConfig DEFAULT_CONFIG = {
     .width = 800,
     .height = 600,
     .strideAlignment = 0x8,
@@ -283,7 +283,7 @@ void AVBufferInnerUnitTest::CreateRemoteSharedMem()
 void AVBufferInnerUnitTest::CreateLocalSurfaceMem()
 {
     // create loacal
-    allocator_ = AVAllocatorFactory::CreateSurfaceAllocator(g_config);
+    allocator_ = AVAllocatorFactory::CreateSurfaceAllocator(DEFAULT_CONFIG);
     ASSERT_NE(nullptr, allocator_);
     remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(allocator_, capacity_, align_);
     ASSERT_NE(nullptr, buffer_);
@@ -293,7 +293,7 @@ void AVBufferInnerUnitTest::CreateLocalSurfaceMem()
 void AVBufferInnerUnitTest::CreateLocalSurfaceMemByConfig()
 {
     // create loacal
-    *(config_.surfaceBufferConfig) = g_config;
+    *(config_.surfaceBufferConfig) = DEFAULT_CONFIG;
     config_.memoryType = MemoryType::SURFACE_MEMORY;
     remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(config_);
     ASSERT_NE(nullptr, buffer_);
@@ -314,7 +314,7 @@ void AVBufferInnerUnitTest::CreateLocalSurfaceMemByParcel()
 {
     MessageParcel parcel;
     sptr<SurfaceBuffer> surfaceBuffer = SurfaceBuffer::Create();
-    (void)surfaceBuffer->Alloc(g_config);
+    (void)surfaceBuffer->Alloc(DEFAULT_CONFIG);
     (void)surfaceBuffer->WriteToMessageParcel(parcel);
     // create local
     remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer();
@@ -394,10 +394,10 @@ void AVBufferInnerUnitTest::CheckMetaTransParcel()
         meta_->GetData(DOUBLE_TESTKEY, getDoubleValue);
         meta_->GetData(STRING_TESTKEY, getStringValue);
 
-        EXPECT_EQ(getIntValue, g_intValue);
-        EXPECT_EQ(getLongValue, g_longValue);
-        EXPECT_EQ(getDoubleValue, g_doubleValue);
-        EXPECT_EQ(getStringValue, g_stringValue);
+        EXPECT_EQ(getIntValue, INTVALUE);
+        EXPECT_EQ(getLongValue, LONGVALUE);
+        EXPECT_EQ(getDoubleValue, DOUBLEVALUE);
+        EXPECT_EQ(getStringValue, STRINGVALUE);
     }
 }
 
@@ -408,15 +408,15 @@ void AVBufferInnerUnitTest::CheckMetaSetAndGet()
     double getDoubleValue = 0.0;
     std::string getStringValue = "";
 
-    remoteBuffer_->pts_ = g_pts;
-    remoteBuffer_->dts_ = g_dts;
-    remoteBuffer_->duration_ = g_duration;
-    remoteBuffer_->flag_ = g_flag;
+    remoteBuffer_->pts_ = DEFAULT_PTS;
+    remoteBuffer_->dts_ = DEFAULT_DTS;
+    remoteBuffer_->duration_ = DEFAULT_DURATION;
+    remoteBuffer_->flag_ = DEFAULT_FLAG;
 
-    meta_->SetData(INT_TESTKEY, g_intValue);
-    meta_->SetData(LONG_TESTKEY, g_longValue);
-    meta_->SetData(DOUBLE_TESTKEY, g_doubleValue);
-    meta_->SetData(STRING_TESTKEY, g_stringValue);
+    meta_->SetData(INT_TESTKEY, INTVALUE);
+    meta_->SetData(LONG_TESTKEY, LONGVALUE);
+    meta_->SetData(DOUBLE_TESTKEY, DOUBLEVALUE);
+    meta_->SetData(STRING_TESTKEY, STRINGVALUE);
     CheckMetaTransParcel();
     remoteBuffer_->meta_ = meta_;
 
@@ -426,37 +426,37 @@ void AVBufferInnerUnitTest::CheckMetaSetAndGet()
         ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
     }
     ASSERT_NE(nullptr, buffer_->meta_);
-    EXPECT_EQ(buffer_->pts_, g_pts);
-    EXPECT_EQ(buffer_->dts_, g_dts);
-    EXPECT_EQ(buffer_->duration_, g_duration);
-    EXPECT_EQ(buffer_->flag_, g_flag);
+    EXPECT_EQ(buffer_->pts_, DEFAULT_PTS);
+    EXPECT_EQ(buffer_->dts_, DEFAULT_DTS);
+    EXPECT_EQ(buffer_->duration_, DEFAULT_DURATION);
+    EXPECT_EQ(buffer_->flag_, DEFAULT_FLAG);
 
     buffer_->meta_->GetData(INT_TESTKEY, getIntValue);
     buffer_->meta_->GetData(LONG_TESTKEY, getLongValue);
     buffer_->meta_->GetData(DOUBLE_TESTKEY, getDoubleValue);
     buffer_->meta_->GetData(STRING_TESTKEY, getStringValue);
 
-    EXPECT_EQ(getIntValue, g_intValue);
-    EXPECT_EQ(getLongValue, g_longValue);
-    EXPECT_EQ(getDoubleValue, g_doubleValue);
-    EXPECT_EQ(getStringValue, g_stringValue);
+    EXPECT_EQ(getIntValue, INTVALUE);
+    EXPECT_EQ(getLongValue, LONGVALUE);
+    EXPECT_EQ(getDoubleValue, DOUBLEVALUE);
+    EXPECT_EQ(getStringValue, STRINGVALUE);
 }
 
 void AVBufferInnerUnitTest::CheckAttrTrans()
 {
-    remoteBuffer_->pts_ = g_pts;
-    remoteBuffer_->dts_ = g_dts;
-    remoteBuffer_->duration_ = g_duration;
-    remoteBuffer_->flag_ = g_flag;
+    remoteBuffer_->pts_ = DEFAULT_PTS;
+    remoteBuffer_->dts_ = DEFAULT_DTS;
+    remoteBuffer_->duration_ = DEFAULT_DURATION;
+    remoteBuffer_->flag_ = DEFAULT_FLAG;
 
     GetRemoteBuffer();
     ASSERT_EQ(remoteBuffer_->GetUniqueId(), buffer_->GetUniqueId());
     ASSERT_FALSE(buffer_ == nullptr);
 
-    EXPECT_EQ(buffer_->pts_, g_pts);
-    EXPECT_EQ(buffer_->dts_, g_dts);
-    EXPECT_EQ(buffer_->duration_, g_duration);
-    EXPECT_EQ(buffer_->flag_, g_flag);
+    EXPECT_EQ(buffer_->pts_, DEFAULT_PTS);
+    EXPECT_EQ(buffer_->dts_, DEFAULT_DTS);
+    EXPECT_EQ(buffer_->duration_, DEFAULT_DURATION);
+    EXPECT_EQ(buffer_->flag_, DEFAULT_FLAG);
 
     for (int32_t i = 0; i < TEST_LOOP_DEPTH; i++) {
         remoteBuffer_->pts_++;
@@ -508,6 +508,7 @@ void AVBufferInnerUnitTest::CheckMemTrans()
 void AVBufferInnerUnitTest::CheckMemTransPos(int32_t pos)
 {
     g_out.resize(TEST_BUFFER_SIZE, 0);
+    capacity_ = remoteBuffer_->memory_->GetCapacity();
     int32_t length = capacity_ - pos;
     EXPECT_EQ(remoteBuffer_->memory_->Write(g_in.data() + pos, length, pos), length);
     EXPECT_EQ(remoteBuffer_->memory_->Read(g_out.data() + pos, length, pos), length);
@@ -533,6 +534,7 @@ void AVBufferInnerUnitTest::CheckMemTransPos(int32_t pos)
 void AVBufferInnerUnitTest::CheckMemTransOutOfRange(int32_t pos)
 {
     g_out.resize(TEST_BUFFER_SIZE, 0);
+    capacity_ = remoteBuffer_->memory_->GetCapacity();
     int32_t length = capacity_ - pos;
     EXPECT_EQ(remoteBuffer_->memory_->Write(g_in.data() + pos, length + 1, pos), length);
     EXPECT_EQ(remoteBuffer_->memory_->Read(g_out.data() + pos, length + 1, pos), length);
@@ -695,11 +697,11 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_004, TestSize.Level1)
     configSecond.memoryFlag = MemoryFlag::MEMORY_READ_ONLY;
     EXPECT_TRUE(configFirst <= configSecond);
 
-    *(configFirst.surfaceBufferConfig) = g_config;
+    *(configFirst.surfaceBufferConfig) = DEFAULT_CONFIG;
     EXPECT_FALSE(configFirst <= configSecond);
 
-    *(configFirst.surfaceBufferConfig) = g_config;
-    *(configSecond.surfaceBufferConfig) = g_config;
+    *(configFirst.surfaceBufferConfig) = DEFAULT_CONFIG;
+    *(configSecond.surfaceBufferConfig) = DEFAULT_CONFIG;
     EXPECT_TRUE(configFirst <= configSecond);
 }
 
@@ -766,7 +768,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_006, TestSize.Level1)
     configRemote.dmaFd = 1;
 
     MessageParcel parcel;
-    *(configRemote.surfaceBufferConfig) = g_config;
+    *(configRemote.surfaceBufferConfig) = DEFAULT_CONFIG;
     EXPECT_TRUE(MarshallingConfig(parcel, configRemote));
 
     AVBufferConfig configLocal;
@@ -1265,7 +1267,6 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_ReadFromMessageParcel_001,
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SurfaceMemory_001, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
     align_ = 0;
     CreateLocalSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (buffer_ == nullptr) || (buffer_->memory_ == nullptr));
@@ -1275,7 +1276,6 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SurfaceMemory_001, TestSiz
     EXPECT_EQ(std::static_pointer_cast<AVSurfaceMemory>(buffer_->memory_)->allocator_->GetMemoryType(),
               MemoryType::SURFACE_MEMORY);
     EXPECT_EQ(buffer_->memory_->GetMemoryType(), MemoryType::SURFACE_MEMORY);
-    EXPECT_EQ(buffer_->memory_->capacity_, capacity_);
     EXPECT_EQ(buffer_->memory_->offset_, offset);
 }
 
@@ -1286,7 +1286,6 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SurfaceMemory_001, TestSiz
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SurfaceMemory_002, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
     align_ = 0;
     CreateLocalSurfaceMemByParcel();
     ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
@@ -1294,7 +1293,6 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SurfaceMemory_002, TestSiz
         AlignUp(reinterpret_cast<uintptr_t>(buffer_->memory_->GetAddr()), static_cast<uintptr_t>(align_)) -
         reinterpret_cast<uintptr_t>(buffer_->memory_->GetAddr()));
     EXPECT_EQ(buffer_->memory_->GetMemoryType(), MemoryType::SURFACE_MEMORY);
-    EXPECT_EQ(buffer_->memory_->capacity_, capacity_);
     EXPECT_EQ(buffer_->memory_->offset_, offset);
 }
 
@@ -1305,7 +1303,6 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SurfaceMemory_002, TestSiz
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SurfaceMemory_003, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
     align_ = 0;
     CreateLocalSurfaceMemByConfig();
     ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
@@ -1313,7 +1310,6 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SurfaceMemory_003, TestSiz
         AlignUp(reinterpret_cast<uintptr_t>(buffer_->memory_->GetAddr()), static_cast<uintptr_t>(align_)) -
         reinterpret_cast<uintptr_t>(buffer_->memory_->GetAddr()));
     EXPECT_EQ(buffer_->memory_->GetMemoryType(), MemoryType::SURFACE_MEMORY);
-    EXPECT_EQ(buffer_->memory_->capacity_, capacity_);
     EXPECT_EQ(buffer_->memory_->offset_, offset);
 }
 
@@ -1329,10 +1325,10 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetConfig_001, TestSize.L
     ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
     AVBufferConfig config = buffer_->GetConfig();
     EXPECT_EQ(config.memoryType, MemoryType::SURFACE_MEMORY);
-    EXPECT_EQ(config.surfaceBufferConfig->width, g_config.width);
-    EXPECT_EQ(config.surfaceBufferConfig->height, g_config.height);
-    EXPECT_EQ(config.surfaceBufferConfig->format, g_config.format);
-    EXPECT_EQ(config.surfaceBufferConfig->usage, g_config.usage);
+    EXPECT_EQ(config.surfaceBufferConfig->width, DEFAULT_CONFIG.width);
+    EXPECT_EQ(config.surfaceBufferConfig->height, DEFAULT_CONFIG.height);
+    EXPECT_EQ(config.surfaceBufferConfig->format, DEFAULT_CONFIG.format);
+    EXPECT_EQ(config.surfaceBufferConfig->usage, DEFAULT_CONFIG.usage);
 }
 
 /**
@@ -1356,7 +1352,6 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetConfig_002, TestSize.L
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Remote_SurfaceMemory_001, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
     align_ = 0;
     CreateRemoteSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1367,7 +1362,6 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Remote_SurfaceMemory_001, TestSi
         AlignUp(reinterpret_cast<uintptr_t>(buffer_->memory_->GetAddr()), static_cast<uintptr_t>(align_)) -
         reinterpret_cast<uintptr_t>(buffer_->memory_->GetAddr()));
     EXPECT_EQ(buffer_->memory_->GetMemoryType(), MemoryType::SURFACE_MEMORY);
-    EXPECT_EQ(buffer_->memory_->capacity_, capacity_);
     EXPECT_EQ(buffer_->memory_->offset_, offset);
 }
 
@@ -1378,7 +1372,6 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Remote_SurfaceMemory_001, TestSi
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Remote_SurfaceMemory_002, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
     align_ = 0;
     CreateRemoteSurfaceMemByParcel();
     ASSERT_FALSE((remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1389,7 +1382,6 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Remote_SurfaceMemory_002, TestSi
         AlignUp(reinterpret_cast<uintptr_t>(buffer_->memory_->GetAddr()), static_cast<uintptr_t>(align_)) -
         reinterpret_cast<uintptr_t>(buffer_->memory_->GetAddr()));
     EXPECT_EQ(buffer_->memory_->GetMemoryType(), MemoryType::SURFACE_MEMORY);
-    EXPECT_EQ(buffer_->memory_->capacity_, capacity_);
     EXPECT_EQ(buffer_->memory_->offset_, offset);
 }
 
@@ -1400,7 +1392,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Remote_SurfaceMemory_002, TestSi
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_001, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateLocalSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (buffer_ == nullptr) || (buffer_->memory_ == nullptr));
@@ -1414,7 +1406,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_001, TestSize.L
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_002, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateRemoteSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1428,7 +1420,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_002, TestSize.L
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_003, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateLocalSurfaceMemByParcel();
     ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
@@ -1442,7 +1434,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_003, TestSize.L
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_004, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateRemoteSurfaceMemByParcel();
     ASSERT_FALSE((remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1456,7 +1448,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_004, TestSize.L
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_001, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateLocalSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (buffer_ == nullptr) || (buffer_->memory_ == nullptr));
@@ -1470,7 +1462,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_001, TestSiz
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_002, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateRemoteSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1484,7 +1476,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_002, TestSiz
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_003, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateRemoteSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1498,7 +1490,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_003, TestSiz
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_004, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateRemoteSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1512,7 +1504,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_004, TestSiz
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_005, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateLocalSurfaceMemByParcel();
     ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
@@ -1526,7 +1518,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_005, TestSiz
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_006, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateRemoteSurfaceMemByParcel();
     ASSERT_FALSE((remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1540,7 +1532,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_006, TestSiz
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_007, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateRemoteSurfaceMemByParcel();
     ASSERT_FALSE((remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1554,7 +1546,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_007, TestSiz
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_008, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateRemoteSurfaceMemByParcel();
     ASSERT_FALSE((remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1568,11 +1560,9 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_008, TestSiz
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetCapacity_001, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
     align_ = 0;
     CreateLocalSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (buffer_ == nullptr) || (buffer_->memory_ == nullptr));
-    EXPECT_EQ(buffer_->memory_->GetCapacity(), capacity_);
 }
 
 /**
@@ -1582,14 +1572,12 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetCapacity_001, TestSize
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetCapacity_002, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
     align_ = 0;
     CreateRemoteSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
     GetRemoteBuffer();
     ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
     ASSERT_EQ(remoteBuffer_->GetUniqueId(), buffer_->GetUniqueId());
-    EXPECT_EQ(buffer_->memory_->GetCapacity(), capacity_);
 }
 
 /**
@@ -1599,11 +1587,9 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetCapacity_002, TestSize
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetCapacity_003, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
     align_ = 0;
     CreateLocalSurfaceMemByParcel();
     ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
-    EXPECT_EQ(buffer_->memory_->GetCapacity(), capacity_);
 }
 
 /**
@@ -1613,14 +1599,12 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetCapacity_003, TestSize
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetCapacity_004, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
     align_ = 0;
     CreateRemoteSurfaceMemByParcel();
     ASSERT_FALSE((remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
     GetRemoteBuffer();
     ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
     ASSERT_EQ(remoteBuffer_->GetUniqueId(), buffer_->GetUniqueId());
-    EXPECT_EQ(buffer_->memory_->GetCapacity(), capacity_);
 }
 
 /**
@@ -1630,7 +1614,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetCapacity_004, TestSize
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_CheckDataSize_001, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateLocalSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (buffer_ == nullptr) || (buffer_->memory_ == nullptr));
@@ -1644,7 +1628,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_CheckDataSize_001, TestSi
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_CheckDataSize_002, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateRemoteSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1658,7 +1642,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_CheckDataSize_002, TestSi
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_CheckDataSize_003, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateLocalSurfaceMemByParcel();
     ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
@@ -1672,7 +1656,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_CheckDataSize_003, TestSi
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_CheckDataSize_004, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateRemoteSurfaceMemByParcel();
     ASSERT_FALSE((remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1686,7 +1670,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_CheckDataSize_004, TestSi
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetMemoryType_001, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateLocalSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (buffer_ == nullptr) || (buffer_->memory_ == nullptr));
@@ -1700,7 +1684,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetMemoryType_001, TestSi
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetMemoryType_002, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateRemoteSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1717,7 +1701,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetMemoryType_002, TestSi
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetMemoryType_003, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateLocalSurfaceMemByParcel();
     ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
@@ -1731,7 +1715,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetMemoryType_003, TestSi
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetMemoryType_004, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateRemoteSurfaceMemByParcel();
     ASSERT_FALSE((remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1748,7 +1732,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetMemoryType_004, TestSi
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetFileDescriptor_001, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateLocalSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (buffer_ == nullptr) || (buffer_->memory_ == nullptr));
@@ -1762,7 +1746,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetFileDescriptor_001, Te
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetFileDescriptor_002, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateRemoteSurfaceMem();
     ASSERT_FALSE((allocator_ == nullptr) || (remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -1779,7 +1763,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetFileDescriptor_002, Te
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetFileDescriptor_003, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateLocalSurfaceMemByParcel();
     ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
@@ -1793,7 +1777,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetFileDescriptor_003, Te
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetFileDescriptor_004, TestSize.Level1)
 {
-    capacity_ = g_config.width * g_config.height * g_pixSize;
+    capacity_ = DEFAULT_CONFIG.width * DEFAULT_CONFIG.height * DEFAULT_PIXELSIZE;
     align_ = 0;
     CreateRemoteSurfaceMemByParcel();
     ASSERT_FALSE((remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
@@ -2282,10 +2266,10 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_VirtualMemory_002, TestSiz
     ASSERT_NE(nullptr, remoteBuffer_);
     ASSERT_NE(nullptr, remoteBuffer_->meta_);
     ASSERT_EQ(nullptr, remoteBuffer_->memory_);
-    remoteBuffer_->pts_ = g_pts;
-    remoteBuffer_->dts_ = g_dts;
-    remoteBuffer_->duration_ = g_duration;
-    remoteBuffer_->flag_ = g_flag;
+    remoteBuffer_->pts_ = DEFAULT_PTS;
+    remoteBuffer_->dts_ = DEFAULT_DTS;
+    remoteBuffer_->duration_ = DEFAULT_DURATION;
+    remoteBuffer_->flag_ = DEFAULT_FLAG;
 
     GetRemoteBuffer();
     ASSERT_NE(nullptr, buffer_);

@@ -69,7 +69,7 @@ ohos_unittest("avbuffer_inner_unit_test") {
   cflags = avbuffer_unittest_cflags
 
   public_deps = [
-    "$histreamer_root_dir/src:media_foundation_buffer",
+    "$histreamer_root_dir/src:media_foundation",
     "../common:media_foundation_inner_unit_test",
   ]
 
@@ -106,7 +106,7 @@ ohos_unittest("avbuffer_capi_unit_test") {
   cflags = avbuffer_unittest_cflags
 
   public_deps = [
-    "$histreamer_root_dir/src:media_foundation_buffer",
+    "$histreamer_root_dir/src:media_foundation",
     "../common:media_foundation_capi_unit_test",
   ]
 

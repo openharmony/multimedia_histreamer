@@ -79,7 +79,7 @@ ohos_static_library("media_foundation_capi_unit_test") {
   ]
 
   public_deps = [
-    "$histreamer_root_dir/src:media_foundation_buffer",
+    "$histreamer_root_dir/src:media_foundation",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest",
   ]
@@ -164,7 +164,7 @@ ohos_static_library("media_foundation_inner_unit_test") {
   ]
 
   public_deps = [
-    "$histreamer_root_dir/src:media_foundation_buffer",
+    "$histreamer_root_dir/src:media_foundation",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest",
   ]

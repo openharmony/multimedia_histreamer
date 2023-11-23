@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 import("//foundation/multimedia/histreamer/config.gni")
 
 if (hst_is_standard_sys) {
-  config("media_foundation_buffer_public_config") {
+  config("media_foundation_public_config") {
     include_dirs = [
       "$histreamer_root_dir/interface/kits/c",
       "$histreamer_root_dir/interface/inner_api/buffer",
@@ -23,7 +23,7 @@ if (hst_is_standard_sys) {
     ]
   }
 
-  config("media_foundation_buffer_config") {
+  config("media_foundation_config") {
     defines = [
       "HST_ANY_WITH_NO_RTTI",
       "MEDIA_OHOS",
@@ -52,10 +52,10 @@ if (hst_is_standard_sys) {
     cflags_cc = cflags
   }
 
-  ohos_shared_library("media_foundation_buffer") {
+  ohos_shared_library("media_foundation") {
     install_enable = true
-    public_configs = [ ":media_foundation_buffer_public_config" ]
-    configs = [ ":media_foundation_buffer_config" ]
+    public_configs = [ ":media_foundation_public_config" ]
+    configs = [ ":media_foundation_config" ]
 
     sanitize = {
       cfi = true
@@ -99,6 +99,6 @@ if (hst_is_standard_sys) {
     part_name = "histreamer"
   }
 } else {
-  group("media_foundation_buffer") {
+  group("media_foundation") {
   }
 }
