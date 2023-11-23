@@ -26,7 +26,6 @@ class AVHardwareMemory : public AVMemory {
 public:
     explicit AVHardwareMemory();
     ~AVHardwareMemory() override;
-    // uint8_t *GetAddr() override;
     MemoryType GetMemoryType() override;
     int32_t GetFileDescriptor() override;
     int32_t SyncStart() override;

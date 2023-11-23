@@ -112,19 +112,9 @@
                     "buffer/avallocator.h",
                     "buffer/avbuffer.h",
                     "buffer/avbuffer_common.h",
-                    "buffer/avbuffer_queue.h",
-                    "buffer/avbuffer_queue_define.h",
-                    "buffer/avbuffer_queue_consumer.h",
-                    "buffer/avbuffer_queue_producer.h",
-                    "buffer/avbuffer_queue_producer_proxy.h",
-                    "meta/meta.h",
-                    "native_avbuffer.h",
-                    "native_avformat.h"
+                    "meta/meta.h"
                   ],
-                  "header_base": [
-                    "//foundation/multimedia/histreamer/interface/inner_api",
-                    "//foundation/multimedia/histreamer/interface/kits/c"
-                  ]
+                  "header_base": "//foundation/multimedia/histreamer/interface/inner_api"
                 }
               }
             ],

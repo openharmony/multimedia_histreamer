@@ -23,9 +23,6 @@
 
 namespace OHOS {
 namespace MediaAVCodec {
-// std::mutex AVBufferQueueCapiMock::mutex_;
-// std::map<OH_AVBufferQueue *, std::shared_ptr<AVBufferQueueCallbackMock>> AVBufferQueueCapiMock::mockCbMap_;
-
 uint8_t *AVBufferCapiMock::GetAddr()
 {
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, nullptr, "buffer_ is nullptr!");
@@ -87,72 +84,5 @@ OH_AVBuffer *AVBufferCapiMock::GetAVBuffer()
 {
     return buffer_;
 }
-
-// AVBufferQueueCapiMock::~AVBufferQueueCapiMock()
-// {
-//     DelCallback(bufferQueue_);
-// }
-
-// OH_AVBufferQueue *AVBufferQueueCapiMock::GetAVBufferQueue()
-// {
-//     return bufferQueue_;
-// }
-
-// void AVBufferQueueCapiMock::OnBufferAvailable(OH_AVBufferQueue *bufferQueue, void *userData)
-// {
-//     (void)userData;
-//     std::shared_ptr<AVBufferQueueCallbackMock> mockCb = GetCallback(bufferQueue);
-//     if (mockCb != nullptr) {
-//         mockCb->OnBufferAvailable();
-//     }
-// }
-
-// std::shared_ptr<AVBufferQueueCallbackMock> AVBufferQueueCapiMock::GetCallback(OH_AVBufferQueue *bufferQueue)
-// {
-//     std::lock_guard<std::mutex> lock(mutex_);
-//     if (mockCbMap_.find(bufferQueue) != mockCbMap_.end()) {
-//         return mockCbMap_.at(bufferQueue);
-//     }
-//     return nullptr;
-// }
-
-// void AVBufferQueueCapiMock::SetProducerCallback(OH_AVBufferQueue *bufferQueue,
-//                                                 std::shared_ptr<AVBufferQueueCallbackMock> cb)
-// {
-//     std::lock_guard<std::mutex> lock(mutex_);
-//     mockCbMap_[bufferQueue] = cb;
-// }
-
-// void AVBufferQueueCapiMock::DelCallback(OH_AVBufferQueue *bufferQueue)
-// {
-//     auto it = mockCbMap_.find(bufferQueue);
-//     if (it != mockCbMap_.end()) {
-//         mockCbMap_.erase(it);
-//     }
-// }
-
-// int32_t AVBufferQueueCapiMock::SetProducerCallback(std::shared_ptr<AVBufferQueueCallbackMock> cb)
-// {
-//     if (cb != nullptr && bufferQueue_ != nullptr) {
-//         SetProducerCallback(bufferQueue_, cb);
-//         struct OH_AVBufferQueueCallback callback;
-//         callback.onBufferAvailable = AVBufferQueueCapiMock::OnBufferAvailable;
-//         return OH_AVBufferQueue_SetProducerCallback(bufferQueue_, callback, NULL);
-//     }
-//     return static_cast<int32_t>(Status::ERROR_INVALID_OPERATION);
-// }
-
-// int32_t AVBufferQueueCapiMock::PushBuffer(std::shared_ptr<AVBufferMock> &buffer)
-// {
-//     return OH_AVBufferQueue_PushBuffer(bufferQueue_,
-//     std::static_pointer_cast<AVBufferCapiMock>(buffer)->GetAVBuffer());
-// }
-
-// std::shared_ptr<AVBufferMock> AVBufferQueueCapiMock::RequestBuffer(int32_t capacity)
-// {
-//     struct OH_AVBuffer *buf = OH_AVBufferQueue_RequestBuffer(bufferQueue_, capacity);
-//     std::shared_ptr<AVBufferMock> buffer = std::make_shared<AVBufferCapiMock>(buf);
-//     return buffer;
-// }
 } // namespace MediaAVCodec
 } // namespace OHOS

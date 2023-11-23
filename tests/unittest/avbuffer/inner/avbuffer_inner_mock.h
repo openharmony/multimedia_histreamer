@@ -38,30 +38,6 @@ public:
 private:
     std::shared_ptr<AVBuffer> buffer_;
 };
-
-// class AVBufferQueueInnerMock : public AVBufferQueueMock {
-// public:
-//     explicit AVBufferQueueInnerMock(std::shared_ptr<AVBufferQueue> bufferQueue) : bufferQueue_(bufferQueue) {}
-//     ~AVBufferQueueInnerMock() = default;
-//     int32_t SetProducerCallback(std::shared_ptr<AVBufferQueueCallbackMock> callback) override;
-//     int32_t PushBuffer(std::shared_ptr<AVBufferMock> &buffer) override;
-//     std::shared_ptr<AVBufferMock> RequestBuffer(int32_t capacity) override;
-//     std::shared_ptr<AVBufferQueue> GetAVBufferQueue();
-
-// private:
-//     std::shared_ptr<AVBufferQueue> bufferQueue_ = nullptr;
-// };
-
-// class AVBufferQueueCallbackInnerMock : public AVBufferQueueCallback {
-// public:
-//     AVBufferQueueCallbackInnerMock(std::shared_ptr<AVBufferQueueCallbackMock> cb, std::weak_ptr<AVBufferQueue> bufferQueue);
-//     ~AVBufferQueueCallbackInnerMock() = default;
-//     void OnBufferAvailable() override;
-
-// private:
-//     std::shared_ptr<AVBufferQueueCallbackMock> mockCb_ = nullptr;
-//     std::weak_ptr<AVBufferQueue> bufferQueue_;
-// };
 }  // namespace MediaAVCodec
 }  // namespace OHOS
 #endif // AVBUFFER_NATIVE_MOCK_H

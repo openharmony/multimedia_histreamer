@@ -104,14 +104,7 @@ OH_AVFormat *OH_AVBuffer_GetParameter(OH_AVBuffer *buffer)
     FALSE_RETURN_V_MSG_E(buffer->buffer_ != nullptr, nullptr, "buffer is nullptr!");
     FALSE_RETURN_V_MSG_E(buffer->buffer_->meta_ != nullptr, nullptr, "buffer's meta is nullptr!");
 
-#ifdef MEDIA_OHOS
-    // OH_AVFormat *avFormat = OH_AVFormat_Create();
-    // avFormat->format_ = *(buffer->buffer_->meta_);
-    // return avFormat;
     return nullptr;
-#else
-    return nullptr;
-#endif
 }
 
 OH_AVErrCode OH_AVBuffer_SetParameter(OH_AVBuffer *buffer, OH_AVFormat *format)
@@ -122,10 +115,7 @@ OH_AVErrCode OH_AVBuffer_SetParameter(OH_AVBuffer *buffer, OH_AVFormat *format)
                          AV_ERR_INVALID_VAL, "magic error!");
     FALSE_RETURN_V_MSG_E(buffer->buffer_ != nullptr, AV_ERR_INVALID_VAL,
                          "buffer is nullptr!");
-#ifdef MEDIA_OHOS
-    // *(buffer->buffer_->meta_) = format->format_;
-    return AV_ERR_OK;
-#endif
+
     return AV_ERR_OK;
 }
 
