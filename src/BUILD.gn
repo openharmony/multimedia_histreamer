@@ -22,13 +22,13 @@ if (hst_is_standard_sys) {
       "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/surface",
     ]
   }
-  
+
   config("media_foundation_buffer_config") {
     defines = [
       "HST_ANY_WITH_NO_RTTI",
       "MEDIA_OHOS",
     ]
-  
+
     include_dirs = [
       "$histreamer_root_dir/src/buffer/avbuffer/capi",
       "$histreamer_root_dir/src/buffer/avbuffer/include",
@@ -39,7 +39,7 @@ if (hst_is_standard_sys) {
       "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/common",
       "$histreamer_root_dir/../../../commonlibrary/memory_utils/libdmabufheap/include",
     ]
-  
+
     cflags = [
       "-O2",
       "-fPIC",
@@ -51,12 +51,12 @@ if (hst_is_standard_sys) {
     ]
     cflags_cc = cflags
   }
-  
+
   ohos_shared_library("media_foundation_buffer") {
     install_enable = true
     public_configs = [ ":media_foundation_buffer_public_config" ]
     configs = [ ":media_foundation_buffer_config" ]
-  
+
     sanitize = {
       cfi = true
       cfi_cross_dso = true
@@ -79,7 +79,7 @@ if (hst_is_standard_sys) {
       "$histreamer_root_dir/src/meta/meta.cpp",
     ]
     public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
-  
+
     deps = []
     external_deps = [
       "c_utils:utils",
