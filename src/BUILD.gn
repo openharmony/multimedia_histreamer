@@ -98,4 +98,7 @@ if (hst_is_standard_sys) {
     subsystem_name = "multimedia"
     part_name = "histreamer"
   }
+} else {
+  group("media_foundation_buffer") {
+  }
 }
