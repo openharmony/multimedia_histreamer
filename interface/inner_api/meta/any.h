@@ -29,10 +29,7 @@
 #include "cpp_ext/type_cast_ext.h"
 #include "securec.h"
 #include <type_traits>
-
-#ifdef MEDIA_OHOS
 #include "message_parcel.h"
-#endif
 
 namespace {
 template <typename T>
@@ -83,7 +80,6 @@ public:
         return "bad any cast";
     }
 };
-#ifdef MEDIA_OHOS
 class Any;
 template <typename T>
 inline typename std::enable_if<std::is_enum<T>::value, bool>::type MakeAnyFromParcel(Any& value, MessageParcel& parcel);
@@ -111,7 +107,22 @@ inline typename std::enable_if<!std::is_enum<T>::value, bool>::type WriteValueTo
     // current only support write enum to parcel
     return false;
 }
-#endif
+template <typename T>
+inline typename std::enable_if<std::is_enum<T>::value, bool>::type WriteValueToParcelInt64(const T &value,
+                                                                                           MessageParcel &parcel)
+{
+    parcel.WriteInt64(static_cast<int64_t>(value));
+    return true;
+}
+template <typename T>
+inline typename std::enable_if<!std::is_enum<T>::value, bool>::type WriteValueToParcelInt64(const T &value,
+                                                                                            MessageParcel &parcel)
+{
+    (void)value;
+    (void)parcel;
+    // current only support write enum to parcel
+    return false;
+}
 /**
  * @brief This class describes a type-safe container for arbitrary type values which are copy constructible.
  *
@@ -379,12 +390,10 @@ private:
         void* (*getPtr)(Storage&) noexcept;
         const void* (*getConstPtr)(const Storage&) noexcept;
     };
-#ifdef MEDIA_OHOS
     static bool BaseTypesToParcel(const Any *operand, MessageParcel& parcel) noexcept;
     // returnValue : 0 -- success; 1 -- retry enum; 2 -- failed no retry
     // TODO: 这种方式，必须把类型字符串序列化，如果针对基本类型特化 ToParcel，则有可能不用传类型字符串
     static int BaseTypesFromParcel(Any *operand, MessageParcel& parcel) noexcept;
-#endif
 
     template <typename T>
     struct TrivialStackFunctionTable {
@@ -398,14 +407,21 @@ private:
         {
             return GetTypeName<T>();
         }
-#ifdef MEDIA_OHOS
         // Only support parcel enum value to int32_t except base types
         static bool ToParcel(const Any *operand, MessageParcel& parcel) noexcept
         {
             if (BaseTypesToParcel(operand, parcel)) {
                 return true;
             }
-            if (sizeof(T) > 4) { // Only support enum
+            if (sizeof(T) > sizeof(int64_t)) { // Only support enum
+                return false;
+            }
+            if (sizeof(T) == sizeof(int64_t)) { //  support Int64 enum
+                T value;
+                if (AnyCast(operand, value)) {
+                    WriteValueToParcelInt64(value, parcel);
+                    return true;
+                }
                 return false;
             }
             T value;
@@ -421,15 +437,10 @@ private:
             int ret = BaseTypesFromParcel(operand, parcel);
             if (ret == 0) {
                 return true;
-            } else if (ret == 2) {
-                return false;
             }
-            Any tmp;
-            MakeAnyFromParcel<T>(tmp, parcel);
-            operand->Swap(tmp);
+            MakeAnyFromParcel<T>(*operand, parcel);
             return true;
         }
-#endif
 #endif
 
         static void Destroy(Storage& storage) noexcept
@@ -472,14 +483,21 @@ private:
         {
             return GetTypeName<T>();
         }
-#ifdef MEDIA_OHOS
         // Only support parcel enum value to int32_t except base types
         static bool ToParcel(const Any *operand, MessageParcel& parcel) noexcept
         {
             if (BaseTypesToParcel(operand, parcel)) {
                 return true;
             }
-            if (sizeof(T) > 4) { // Only support enum
+            if (sizeof(T) > sizeof(int64_t)) { // Only support enum
+                return false;
+            }
+            if (sizeof(T) == sizeof(int64_t)) { //  support Int64 enum
+                T value;
+                if (AnyCast(operand, value)) {
+                    WriteValueToParcelInt64(value, parcel);
+                    return true;
+                }
                 return false;
             }
             T value;
@@ -495,13 +513,10 @@ private:
             int ret = BaseTypesFromParcel(operand, parcel);
             if (ret == 0) {
                 return true;
-            } else if (ret == 2) {
-                return false;
             }
             MakeAnyFromParcel<T>(*operand, parcel);
             return true;
         }
-#endif
 #endif
 
         static void Destroy(Storage& storage) noexcept
@@ -545,14 +560,21 @@ private:
         {
             return GetTypeName<T>();
         }
-#ifdef MEDIA_OHOS
         // Only support parcel enum value to int32_t except base types
         static bool ToParcel(const Any *operand, MessageParcel& parcel) noexcept
         {
             if (BaseTypesToParcel(operand, parcel)) {
                 return true;
             }
-            if (sizeof(T) > 4) { // Only support enum
+            if (sizeof(T) > sizeof(int64_t)) { // Only support enum
+                return false;
+            }
+            if (sizeof(T) == sizeof(int64_t)) { //  support Int64 enum
+                T value;
+                if (AnyCast(operand, value)) {
+                    WriteValueToParcelInt64(value, parcel);
+                    return true;
+                }
                 return false;
             }
             T value;
@@ -568,16 +590,10 @@ private:
             int ret = BaseTypesFromParcel(operand, parcel);
             if (ret == 0) {
                 return true;
-            } else if (ret == 2) {
-                return false;
             }
-
-            Any tmp;
-            MakeAnyFromParcel<T>(tmp, parcel);
-            operand->Swap(tmp);
+            MakeAnyFromParcel<T>(*operand, parcel);
             return true;
         }
-#endif
 #endif
 
         static void Destroy(Storage& storage) noexcept
@@ -789,7 +805,7 @@ ValueType AnyCast(const Any& other)
                   "remove_cv_t<remove_reference_t<ValueType>>&");
     auto ptr = AnyCast<U>(&other);
     if (ptr == nullptr) {
-        throw BadAnyCast();
+        // throw BadAnyCast();
     }
     return static_cast<ValueType>(*ptr);
 }
@@ -814,7 +830,7 @@ ValueType AnyCast(Any& other)
                   "remove_cv_t<remove_reference_t<ValueType>>&");
     auto ptr = AnyCast<U>(&other);
     if (ptr == nullptr) {
-        throw BadAnyCast();
+        // throw BadAnyCast();
     }
     return static_cast<ValueType>(*ptr);
 }
@@ -839,7 +855,7 @@ ValueType AnyCast(Any&& other)
                   "remove_cv_t<remove_reference_t<ValueType>>");
     auto ptr = AnyCast<U>(&other);
     if (ptr == nullptr) {
-        throw BadAnyCast();
+        // throw BadAnyCast();
     }
     return static_cast<ValueType>(std::move(*ptr));
 }
@@ -878,15 +894,17 @@ Any MakeAny(std::initializer_list<U> il, Args&&... args)
     return tmp;
 }
 
-#ifdef MEDIA_OHOS
 template <typename T>
 inline typename std::enable_if<std::is_enum<T>::value, bool>::type MakeAnyFromParcel(Any& value, MessageParcel
 & parcel)
 {
+    if(sizeof(T) == sizeof(int64_t)){
+        value.Emplace<T>(static_cast<T>(parcel.ReadInt64()));
+        return true;
+    }
     value.Emplace<T>(static_cast<T>(parcel.ReadInt32()));
     return true;
 }
-#endif
 } // namespace Media
 } // namespace OHOS
 #endif

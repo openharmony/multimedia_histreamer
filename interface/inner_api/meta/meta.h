@@ -16,13 +16,13 @@
 #ifndef MEDIA_FOUNDATION_META_H
 #define MEDIA_FOUNDATION_META_H
 #include <map>
-#include "meta_key.h"
-#include "audio_types.h"
-#include "media_types.h"
-#include "video_types.h"
-#include "source_types.h"
-#include "mime_type.h"
-#include "any.h" // NOLINT
+#include "meta/meta_key.h"
+#include "meta/audio_types.h"
+#include "meta/media_types.h"
+#include "meta/video_types.h"
+#include "meta/source_types.h"
+#include "meta/mime_type.h"
+#include "meta/any.h" // NOLINT
 #if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
 //#include "plugin/common/surface_allocator.h"
 #endif
@@ -45,10 +45,10 @@ extern Any GetDefaultAnyValue(const TagType& tag);
             typedef int32_t type;                            \
     };
 
-#define DEFINE_INSERT_GET_FUNC(condition, Any, eValueType)   \
+#define DEFINE_INSERT_GET_FUNC(condition, InternalType, eValueType)   \
     template<TagTypeCharSeq tagCharSeq>                      \
     inline typename std::enable_if<(condition), bool>::type  \
-    Set(Any value)                                           \
+    Set(InternalType value)                                  \
     {                                                        \
         TagType tag = tagCharSeq;                            \
         auto iter = map_.find(tag);                          \
@@ -61,13 +61,13 @@ extern Any GetDefaultAnyValue(const TagType& tag);
                                                              \
     template<TagTypeCharSeq tagCharSeq>                      \
     inline typename std::enable_if<(condition), bool>::type  \
-    Get(Any& value) const                                    \
+    Get(InternalType& value) const                           \
     {                                                        \
         TagType tag = tagCharSeq;                            \
         if (map_.count(tag) == 0) {                          \
             return false;                                    \
         }                                                    \
-        return AnyCast<Any>(&map_.at(tag), value);           \
+        return AnyCast<InternalType>(&map_.at(tag), value);  \
     }                                                        \
                                                              \
     template<TagTypeCharSeq tagCharSeq>                      \
@@ -111,7 +111,7 @@ public:
                            std::vector<uint8_t>, ValueType::VECTOR_UINT8);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::AUDIO_CHANNEL_LAYOUT or
                            tagCharSeq == Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT,
-                           Plugin::AudioChannelLayout, ValueType::UINT64_T);
+                           Plugin::AudioChannelLayout, ValueType::INT64_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat,
                            ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::AUDIO_AAC_PROFILE, Plugin::AudioAacProfile, ValueType::UINT8_T);
@@ -158,7 +158,6 @@ public:
         tagCharSeq == Tag::AUDIO_MAX_OUTPUT_SIZE or
         tagCharSeq == Tag::VIDEO_WIDTH or
         tagCharSeq == Tag::VIDEO_HEIGHT or
-        tagCharSeq == Tag::VIDEO_FRAME_RATE or
         tagCharSeq == Tag::VIDEO_DELAY or
         tagCharSeq == Tag::VIDEO_MAX_SURFACE_NUM or
         tagCharSeq == Tag::VIDEO_H264_LEVEL or
@@ -178,11 +177,12 @@ public:
         tagCharSeq == Tag::MEDIA_BITRATE or
         tagCharSeq == Tag::MEDIA_START_TIME or
         tagCharSeq == Tag::USER_FRAME_PTS or
-        tagCharSeq == Tag::USER_PUSH_DATA_TIME, int64_t, ValueType::INT64_T);
+        tagCharSeq == Tag::USER_PUSH_DATA_TIME or
+        tagCharSeq == Tag::MEDIA_FILE_SIZE or
+        tagCharSeq == Tag::MEDIA_POSITION, int64_t, ValueType::INT64_T);
 
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::MEDIA_FILE_SIZE or
-        tagCharSeq == Tag::MEDIA_POSITION, uint64_t, ValueType::UINT64_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_CAPTURE_RATE, double, ValueType::DOUBLE);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_FRAME_RATE or
+        tagCharSeq == Tag::VIDEO_CAPTURE_RATE, double, ValueType::DOUBLE);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::MEDIA_FILE_TYPE, Plugin::FileType, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(
         tagCharSeq == Tag::MIME_TYPE or
@@ -317,7 +317,6 @@ public:
             keys[cnt++] = tmp.first;
         }
     }
-#ifdef MEDIA_OHOS
     // TODO: 最好把这两个函数移动到 meta.cpp 里面, 减少头文件对外暴露的内容，cpp中包含log.h，打印log也更方便
     bool ToParcel(MessageParcel &parcel) const
     {
@@ -358,7 +357,6 @@ public:
         }
         return true;
     }
-#endif
 
 private:
     std::map<TagType, Any> map_;
@@ -381,6 +379,23 @@ bool SetMetaData(Meta& meta, const TagType& tag, int32_t& value);
  * @example OHOS::Media::GetMetaData(meta, "audio.aac.profile", value);
  */
 bool GetMetaData(const Meta& meta, const TagType& tag, int32_t& value);
+/**
+ * @brief SetMetaData only used for Application interface OH_AVFormat to set Enum value into Meta Object.
+ * @implNote In order to set value(int64_t type) to Meta Object, should convert int32_t value to correct EnumType then save to Any object. We use metadataGetterSetterMap to get the right setter function.
+ * @return Returns operator status, <b>True</b> if Set Success.
+ * returns <b>False</b> otherwise.
+ * @example OHOS::Media::SetMetaData(meta, "audio.aac.profile", value);
+ */
+bool SetMetaData(Meta& meta, const TagType& tag, int64_t& value);
+
+/**
+ * @brief GetMetaData only used for Application interface OH_AVFormat to get Enum value from Meta Object.
+ * @implNote In order to get value(Enum type) from Meta Object, should use correct Enum type to get value from Any object. We use metadataGetterSetterMap to get the right getter function.
+ * @return Returns operator status, <b>True</b> if Get Success.
+ * returns <b>False</b> otherwise.
+ * @example OHOS::Media::GetMetaData(meta, "audio.aac.profile", value);
+ */
+bool GetMetaData(const Meta& meta, const TagType& tag, int64_t& value);
 } // namespace Media
 } // namespace OHOS
 #endif // MEDIA_FOUNDATION_META_H

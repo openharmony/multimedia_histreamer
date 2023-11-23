@@ -16,7 +16,6 @@
 
 namespace OHOS {
 namespace Media {
-#ifdef MEDIA_OHOS
 bool Any::BaseTypesToParcel(const Any *operand, MessageParcel &parcel) noexcept
 {
     bool ret = true;
@@ -73,7 +72,5 @@ int Any::BaseTypesFromParcel(Any *operand, MessageParcel &parcel) noexcept
     }
     return 1;
 }
-
-#endif
 }
 } // namespace OHOS
