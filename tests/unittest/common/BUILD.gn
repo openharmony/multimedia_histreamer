@@ -121,7 +121,7 @@ config("media_foundation_inner_unit_test_config") {
     "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api",
     "$histreamer_root_dir/../../window/window_manager/interface/innerkits",
   ]
-  
+
   cflags = [
     "-std=c++17",
     "-fno-rtti",

@@ -14,86 +14,88 @@
 import("//build/ohos.gni")
 import("//foundation/multimedia/histreamer/config.gni")
 
-config("media_foundation_buffer_public_config") {
-  include_dirs = [
-    "$histreamer_root_dir/interface/kits/c",
-    "$histreamer_root_dir/interface/inner_api/buffer",
-    "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/surface",
-  ]
-}
-
-config("media_foundation_buffer_config") {
-  defines = [
-    "HST_ANY_WITH_NO_RTTI",
-    "MEDIA_OHOS",
-  ]
-
-  include_dirs = [
-    "$histreamer_root_dir/src/buffer/avbuffer/capi",
-    "$histreamer_root_dir/src/buffer/avbuffer/include",
-    "$histreamer_root_dir/src/buffer/capi/common",
-    "$histreamer_root_dir/interface/inner_api",
-    "$histreamer_root_dir/../../graphic/graphic_2d/frameworks/surface/include",
-    "$histreamer_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
-    "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/common",
-    "$histreamer_root_dir/../../../commonlibrary/memory_utils/libdmabufheap/include",
-  ]
-
-  cflags = [
-    "-O2",
-    "-fPIC",
-    "-Wall",
-    "-fexceptions",
-    "-fno-rtti",
-    "-Wno-unused-but-set-variable",
-    "-Wno-format",
-  ]
-  cflags_cc = cflags
-}
-
-ohos_shared_library("media_foundation_buffer") {
-  install_enable = true
-  public_configs = [ ":media_foundation_buffer_public_config" ]
-  configs = [ ":media_foundation_buffer_config" ]
-
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-    integer_overflow = true
+if (hst_is_standard_sys) {
+  config("media_foundation_buffer_public_config") {
+    include_dirs = [
+      "$histreamer_root_dir/interface/kits/c",
+      "$histreamer_root_dir/interface/inner_api/buffer",
+      "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/surface",
+    ]
   }
-  sources = [
-    "$histreamer_root_dir/src/buffer/avbuffer/av_hardware_memory.cpp",
-    "$histreamer_root_dir/src/buffer/avbuffer/av_shared_memory_ext.cpp",
-    "$histreamer_root_dir/src/buffer/avbuffer/av_surface_memory.cpp",
-    "$histreamer_root_dir/src/buffer/avbuffer/av_virtual_memory.cpp",
-    "$histreamer_root_dir/src/buffer/avbuffer/avbuffer.cpp",
-    "$histreamer_root_dir/src/buffer/avbuffer/avbuffer_common.cpp",
-    "$histreamer_root_dir/src/buffer/avbuffer/avbuffer_utils.cpp",
-    "$histreamer_root_dir/src/buffer/avbuffer/avmemory.cpp",
-    "$histreamer_root_dir/src/buffer/capi/native_avbuffer.cpp",
-  ]
-  sources += [
-    "$histreamer_root_dir/src/meta/any.cpp",
-    "$histreamer_root_dir/src/meta/meta.cpp",
-  ]
-  public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
-
-  deps = []
-  external_deps = [
-    "c_utils:utils",
-    "graphic_2d:surface",
-    "graphic_2d:sync_fence",
-    "hilog:libhilog",
-    "hitrace:hitrace_meter",
-    "init:libbegetutil",
-    "ipc:ipc_core",
-    "memory_utils:libdmabufheap",
-  ]
-  innerapi_tags = [
-    "platformsdk",
-    "sasdk",
-  ]
-  subsystem_name = "multimedia"
-  part_name = "histreamer"
+  
+  config("media_foundation_buffer_config") {
+    defines = [
+      "HST_ANY_WITH_NO_RTTI",
+      "MEDIA_OHOS",
+    ]
+  
+    include_dirs = [
+      "$histreamer_root_dir/src/buffer/avbuffer/capi",
+      "$histreamer_root_dir/src/buffer/avbuffer/include",
+      "$histreamer_root_dir/src/buffer/capi/common",
+      "$histreamer_root_dir/interface/inner_api",
+      "$histreamer_root_dir/../../graphic/graphic_2d/frameworks/surface/include",
+      "$histreamer_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
+      "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/common",
+      "$histreamer_root_dir/../../../commonlibrary/memory_utils/libdmabufheap/include",
+    ]
+  
+    cflags = [
+      "-O2",
+      "-fPIC",
+      "-Wall",
+      "-fexceptions",
+      "-fno-rtti",
+      "-Wno-unused-but-set-variable",
+      "-Wno-format",
+    ]
+    cflags_cc = cflags
+  }
+  
+  ohos_shared_library("media_foundation_buffer") {
+    install_enable = true
+    public_configs = [ ":media_foundation_buffer_public_config" ]
+    configs = [ ":media_foundation_buffer_config" ]
+  
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+      integer_overflow = true
+    }
+    sources = [
+      "$histreamer_root_dir/src/buffer/avbuffer/av_hardware_memory.cpp",
+      "$histreamer_root_dir/src/buffer/avbuffer/av_shared_memory_ext.cpp",
+      "$histreamer_root_dir/src/buffer/avbuffer/av_surface_memory.cpp",
+      "$histreamer_root_dir/src/buffer/avbuffer/av_virtual_memory.cpp",
+      "$histreamer_root_dir/src/buffer/avbuffer/avbuffer.cpp",
+      "$histreamer_root_dir/src/buffer/avbuffer/avbuffer_common.cpp",
+      "$histreamer_root_dir/src/buffer/avbuffer/avbuffer_utils.cpp",
+      "$histreamer_root_dir/src/buffer/avbuffer/avmemory.cpp",
+      "$histreamer_root_dir/src/buffer/capi/native_avbuffer.cpp",
+    ]
+    sources += [
+      "$histreamer_root_dir/src/meta/any.cpp",
+      "$histreamer_root_dir/src/meta/meta.cpp",
+    ]
+    public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  
+    deps = []
+    external_deps = [
+      "c_utils:utils",
+      "graphic_2d:surface",
+      "graphic_2d:sync_fence",
+      "hilog:libhilog",
+      "hitrace:hitrace_meter",
+      "init:libbegetutil",
+      "ipc:ipc_core",
+      "memory_utils:libdmabufheap",
+    ]
+    innerapi_tags = [
+      "platformsdk",
+      "sasdk",
+    ]
+    subsystem_name = "multimedia"
+    part_name = "histreamer"
+  }
 }

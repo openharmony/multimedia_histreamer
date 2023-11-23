@@ -45,10 +45,6 @@ config("histreamer_presets") {
   }
 }
 
-group("media_foundation") {
-  deps = [ "src:media_foundation_buffer" ]
-}
-
 if (!hst_is_mini_sys) {
   # L1 & std shared and seprated
   group("histreamer") {
@@ -73,6 +69,9 @@ if (!hst_is_mini_sys) {
       output_name = "histreamer"
     }
   } else {
+    group("media_foundation") {
+      deps = [ "src:media_foundation_buffer" ]
+    }
     import("//build/ohos.gni")
     ohos_shared_library("media_engine_histreamer") {
       subsystem_name = "multimedia"
