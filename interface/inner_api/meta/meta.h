@@ -45,10 +45,10 @@ extern Any GetDefaultAnyValue(const TagType& tag);
             typedef int32_t type;                            \
     };
 
-#define DEFINE_INSERT_GET_FUNC(condition, InternalType, eValueType)   \
+#define DEFINE_INSERT_GET_FUNC(condition, Any, eValueType)   \
     template<TagTypeCharSeq tagCharSeq>                      \
     inline typename std::enable_if<(condition), bool>::type  \
-    Set(InternalType value)                                  \
+    Set(Any value)                                           \
     {                                                        \
         TagType tag = tagCharSeq;                            \
         auto iter = map_.find(tag);                          \
@@ -61,13 +61,13 @@ extern Any GetDefaultAnyValue(const TagType& tag);
                                                              \
     template<TagTypeCharSeq tagCharSeq>                      \
     inline typename std::enable_if<(condition), bool>::type  \
-    Get(InternalType& value) const                           \
+    Get(Any& value) const                                    \
     {                                                        \
         TagType tag = tagCharSeq;                            \
         if (map_.count(tag) == 0) {                          \
             return false;                                    \
         }                                                    \
-        return AnyCast<InternalType>(&map_.at(tag), value);  \
+        return AnyCast<Any>(&map_.at(tag), value);           \
     }                                                        \
                                                              \
     template<TagTypeCharSeq tagCharSeq>                      \
