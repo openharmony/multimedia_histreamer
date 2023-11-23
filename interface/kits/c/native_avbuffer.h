@@ -25,25 +25,6 @@
 extern "C" {
 #endif
 typedef struct OH_AVBuffer OH_AVBuffer;
-typedef struct OH_NativeBuffer OH_NativeBuffer;
-
-/**
- * @brief Enumerate the categories of OH_AVBuffer tags
- * @syscap SystemCapability.Multimedia.Media.CodecBase
- * @since 11
- * @version 1.0
- */
-typedef enum OH_AVBufferFlags {
-  MF_BUFFER_FLAGS_NONE = 0,
-  /* Indicates that the Buffer is an End-of-Stream frame */
-  MF_BUFFER_FLAGS_EOS = 1 << 0,
-  /* Indicates that the Buffer contains keyframes */
-  MF_BUFFER_FLAGS_SYNC_FRAME = 1 << 1,
-  /* Indicates that the data contained in the Buffer is only part of a frame */
-  MF_BUFFER_FLAGS_INCOMPLETE_FRAME = 1 << 2,
-  /* Indicates that the Buffer contains Codec-Specific-Data */
-  MF_BUFFER_FLAGS_CODEC_DATA = 1 << 3,
-} OH_AVBufferFlags;
 
 /**
  * @brief Define the Buffer description information of OH_AVBuffer
@@ -57,7 +38,7 @@ typedef struct OH_AVBufferAttr {
     int32_t size;
     /* The starting offset of valid data in this Buffer */
     int32_t offset;
-    /* The flags this Buffer has, which is also a combination of multiple {@link OH_AVBufferFlags} */
+    /* The flags this Buffer has, which is also a combination of multiple {@link OH_AVCodecBufferFlags} */
     uint32_t flags;
 } OH_AVBufferAttr;
 
@@ -117,7 +98,6 @@ OH_AVFormat *OH_AVBuffer_GetParameter(OH_AVBuffer *buffer);
  * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to {@link
  * OH_AVErrCode}
  * @since 11
- * @version 1.0
  */
 OH_AVErrCode OH_AVBuffer_SetParameter(OH_AVBuffer *buffer, OH_AVFormat *format);
 
@@ -138,16 +118,6 @@ uint8_t *OH_AVBuffer_GetAddr(OH_AVBuffer *buffer);
  * @since 11
  */
 int32_t OH_AVBuffer_GetCapacity(OH_AVBuffer *buffer);
-
-/**
- * @brief Get the nativeBuffer
- * @syscap SystemCapability.Multimedia.Media.Core
- * @param buffer Encapsulate OH_AVBuffer structure instance pointer
- * @return Returns Encapsulate OH_NativeBuffer structure instance pointer is successful, otherwise returns nullptr,
- * refer to {@link OH_NativeBuffer}
- * @since 11
- */
-OH_NativeBuffer *OH_AVBuffer_GetNativeBuffer(OH_AVBuffer *buffer);
 
 #ifdef __cplusplus
 }

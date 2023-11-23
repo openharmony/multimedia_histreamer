@@ -109,8 +109,8 @@ HardwareHeapFactory::~HardwareHeapFactory()
 
 HardwareHeapFactory &HardwareHeapFactory::GetInstance()
 {
-    static HardwareHeapFactory hwHeapInstance_;
-    return hwHeapInstance_;
+    static HardwareHeapFactory hwHeapInstance;
+    return hwHeapInstance;
 }
 
 int32_t HardwareHeapFactory::GetHardwareHeapFd()
@@ -173,7 +173,7 @@ void AVBufferInnerUnitTest::SetUpTestCase(void)
 {
     std::cout << "[SetUpTestCase]: SetUp!!!" << std::endl;
     for (int32_t i = 0; i < TEST_BUFFER_SIZE; ++i) {
-        g_in[i] = rand() % 256;
+        g_in[i] = rand() % 256; // 256: rand uint8_t range
     }
 }
 

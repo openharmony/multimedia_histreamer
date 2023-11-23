@@ -31,21 +31,21 @@ using namespace OHOS;
 using namespace OHOS::MediaAVCodec;
 namespace {
 const int32_t MEMSIZE = 1024 * 190;
-const int32_t g_offset = 1000;
-const int64_t g_pts = 33000;
-const AVCodecBufferFlag g_flag = MF_BUFFER_FLAG_EOS;
+const int32_t DEFAULT_OFFSET = 1000;
+const int64_t DEFAULT_PTS = 33000;
+const AVCodecBufferFlag DEFAULT_FLAG = MF_BUFFER_FLAG_EOS;
 
-const std::string_view g_intKey = "IntKey";
-const std::string_view g_longKey = "LongKey";
-const std::string_view g_floatKey = "FloatKey";
-const std::string_view g_doubleKey = "DoubleKey";
-const std::string_view g_stringKey = "StringKey";
+const std::string_view INT_CAPI_TESTKEY = "IntKey";
+const std::string_view LONG_CAPI_TESTKEY = "LongKey";
+const std::string_view FlOAT_CAPI_TESTKEY = "FloatKey";
+const std::string_view DOUBLE_CAPI_TESTKEY = "DoubleKey";
+const std::string_view STRING_CAPI_TESTKEY = "StringKey";
 
-const int32_t g_intValue = 1;
-const int64_t g_longValue = 1;
-const float g_floatValue = 1.0;
-const double g_doubleValue = 1.0;
-const std::string g_stringValue = "StringValue";
+const int32_t INTVALUE = 1;
+const int64_t LONGVALUE = 1;
+const float FLOATVALUE = 1.0;
+const double DOUBLEVALUE = 1.0;
+const std::string STRINGVALUE = "StringValue";
 } // namespace
 
 namespace OHOS {
@@ -130,10 +130,10 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_GetCapacity_001, TestSize.Level1)
 HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_SetBufferAttr_001, TestSize.Level1)
 {
     OH_AVBufferAttr attr;
-    attr.pts = g_pts;
+    attr.pts = DEFAULT_PTS;
     attr.size = MEMSIZE;
-    attr.offset = g_offset;
-    attr.flags = static_cast<uint32_t>(g_flag);
+    attr.offset = DEFAULT_OFFSET;
+    attr.flags = static_cast<uint32_t>(DEFAULT_FLAG);
     EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->SetBufferAttr(attr));
 
     OH_AVBufferAttr attrTemp = buffer_->GetBufferAttr();
@@ -155,11 +155,11 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_SetParameter_001, TestSize.Level1)
 {
     std::shared_ptr<FormatMock> format;
 
-    EXPECT_TRUE(format->PutIntValue(g_intKey, g_intValue));
-    EXPECT_TRUE(format->PutLongValue(g_longKey, g_longValue));
-    EXPECT_TRUE(format->PutFloatValue(g_floatKey, g_floatValue));
-    EXPECT_TRUE(format->PutDoubleValue(g_doubleKey, g_doubleValue));
-    EXPECT_TRUE(format->PutStringValue(g_stringKey, g_stringValue));
+    EXPECT_TRUE(format->PutIntValue(INT_CAPI_TESTKEY, INTVALUE));
+    EXPECT_TRUE(format->PutLongValue(LONG_CAPI_TESTKEY, LONGVALUE));
+    EXPECT_TRUE(format->PutFloatValue(FlOAT_CAPI_TESTKEY, FLOATVALUE));
+    EXPECT_TRUE(format->PutDoubleValue(DOUBLE_CAPI_TESTKEY, DOUBLEVALUE));
+    EXPECT_TRUE(format->PutStringValue(STRING_CAPI_TESTKEY, STRINGVALUE));
     EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->SetParameter(format));
 
     std::shared_ptr<FormatMock> formatTemp = buffer_->GetParameter();
@@ -169,17 +169,17 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_SetParameter_001, TestSize.Level1)
     double getDoubleValue = 0.0;
     std::string getStringValue = "";
 
-    EXPECT_TRUE(formatTemp->GetIntValue(g_intKey, getIntValue));
-    EXPECT_TRUE(formatTemp->GetLongValue(g_longKey, getLongValue));
-    EXPECT_TRUE(formatTemp->GetFloatValue(g_floatKey, getFloatValue));
-    EXPECT_TRUE(formatTemp->GetDoubleValue(g_doubleKey, getDoubleValue));
-    EXPECT_TRUE(formatTemp->GetStringValue(g_stringKey, getStringValue));
+    EXPECT_TRUE(formatTemp->GetIntValue(INT_CAPI_TESTKEY, getIntValue));
+    EXPECT_TRUE(formatTemp->GetLongValue(LONG_CAPI_TESTKEY, getLongValue));
+    EXPECT_TRUE(formatTemp->GetFloatValue(FlOAT_CAPI_TESTKEY, getFloatValue));
+    EXPECT_TRUE(formatTemp->GetDoubleValue(DOUBLE_CAPI_TESTKEY, getDoubleValue));
+    EXPECT_TRUE(formatTemp->GetStringValue(STRING_CAPI_TESTKEY, getStringValue));
 
-    EXPECT_EQ(getIntValue, g_intValue);
-    EXPECT_EQ(getLongValue, g_longValue);
-    EXPECT_EQ(getFloatValue, g_floatValue);
-    EXPECT_EQ(getDoubleValue, g_doubleValue);
-    EXPECT_EQ(getStringValue, g_stringValue);
+    EXPECT_EQ(getIntValue, INTVALUE);
+    EXPECT_EQ(getLongValue, LONGVALUE);
+    EXPECT_EQ(getFloatValue, FLOATVALUE);
+    EXPECT_EQ(getDoubleValue, DOUBLEVALUE);
+    EXPECT_EQ(getStringValue, STRINGVALUE);
 
     EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->Destroy());
     buffer_ = nullptr;

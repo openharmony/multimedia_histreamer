@@ -52,12 +52,9 @@ OH_AVBuffer *OH_AVBuffer_Create(int32_t capacity)
 
 OH_AVErrCode OH_AVBuffer_Destroy(struct OH_AVBuffer *buffer)
 {
-    FALSE_RETURN_V_MSG_E(buffer != nullptr, AV_ERR_INVALID_STATE,
-                         "input buffer is nullptr!");
-    FALSE_RETURN_V_MSG_E(buffer->magic_ == MFMagic::MFMAGIC_AVBUFFER,
-                         AV_ERR_INVALID_VAL, "magic error!");
-    FALSE_RETURN_V_MSG_E(buffer->isUserCreated, AV_ERR_INVALID_VAL,
-                         "input buffer is not user created!");
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, AV_ERR_INVALID_STATE, "input buffer is nullptr!");
+    FALSE_RETURN_V_MSG_E(buffer->magic_ == MFMagic::MFMAGIC_AVBUFFER, AV_ERR_INVALID_VAL, "magic error!");
+    FALSE_RETURN_V_MSG_E(buffer->isUserCreated, AV_ERR_INVALID_VAL, "input buffer is not user created!");
     delete buffer;
     return AV_ERR_OK;
 }
@@ -82,12 +79,9 @@ OH_AVBufferAttr OH_AVBuffer_GetBufferAttr(OH_AVBuffer *buffer)
 
 OH_AVErrCode OH_AVBuffer_SetBufferAttr(OH_AVBuffer *buffer, OH_AVBufferAttr *attr)
 {
-    FALSE_RETURN_V_MSG_E(buffer != nullptr, AV_ERR_INVALID_VAL,
-                         "input buffer is nullptr!");
-    FALSE_RETURN_V_MSG_E(buffer->magic_ == MFMagic::MFMAGIC_AVBUFFER,
-                         AV_ERR_INVALID_VAL, "magic error!");
-    FALSE_RETURN_V_MSG_E(buffer->buffer_ != nullptr, AV_ERR_INVALID_VAL,
-                         "buffer is nullptr!");
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, AV_ERR_INVALID_VAL, "input buffer is nullptr!");
+    FALSE_RETURN_V_MSG_E(buffer->magic_ == MFMagic::MFMAGIC_AVBUFFER, AV_ERR_INVALID_VAL, "magic error!");
+    FALSE_RETURN_V_MSG_E(buffer->buffer_ != nullptr, AV_ERR_INVALID_VAL, "buffer is nullptr!");
     buffer->buffer_->pts_ = attr->pts;
     buffer->buffer_->flag_ = attr->flags;
     if (buffer->buffer_->memory_ != nullptr) {
@@ -109,12 +103,9 @@ OH_AVFormat *OH_AVBuffer_GetParameter(OH_AVBuffer *buffer)
 
 OH_AVErrCode OH_AVBuffer_SetParameter(OH_AVBuffer *buffer, OH_AVFormat *format)
 {
-    FALSE_RETURN_V_MSG_E(buffer != nullptr, AV_ERR_INVALID_VAL,
-                         "input buffer is nullptr!");
-    FALSE_RETURN_V_MSG_E(buffer->magic_ == MFMagic::MFMAGIC_AVBUFFER,
-                         AV_ERR_INVALID_VAL, "magic error!");
-    FALSE_RETURN_V_MSG_E(buffer->buffer_ != nullptr, AV_ERR_INVALID_VAL,
-                         "buffer is nullptr!");
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, AV_ERR_INVALID_VAL, "input buffer is nullptr!");
+    FALSE_RETURN_V_MSG_E(buffer->magic_ == MFMagic::MFMAGIC_AVBUFFER, AV_ERR_INVALID_VAL, "magic error!");
+    FALSE_RETURN_V_MSG_E(buffer->buffer_ != nullptr, AV_ERR_INVALID_VAL, "buffer is nullptr!");
 
     return AV_ERR_OK;
 }
@@ -135,15 +126,4 @@ int32_t OH_AVBuffer_GetCapacity(OH_AVBuffer *buffer)
     FALSE_RETURN_V_MSG_E(buffer->buffer_ != nullptr, -1, "buffer is nullptr!");
     FALSE_RETURN_V_MSG_E(buffer->buffer_->memory_ != nullptr, -1, "buffer's memory is nullptr!");
     return buffer->buffer_->memory_->GetCapacity();
-}
-
-OH_NativeBuffer *OH_AVBuffer_GetNativeBuffer(OH_AVBuffer *buffer)
-{
-    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "input buffer is nullptr!");
-    FALSE_RETURN_V_MSG_E(buffer->magic_ == MFMagic::MFMAGIC_AVBUFFER, nullptr, "magic error!");
-    FALSE_RETURN_V_MSG_E(buffer->buffer_ != nullptr, nullptr, "buffer is nullptr!");
-    FALSE_RETURN_V_MSG_E(buffer->buffer_->memory_ != nullptr, nullptr, "buffer's memory is nullptr!");
-    sptr<SurfaceBuffer> surfaceBuffer = buffer->buffer_->memory_->GetSurfaceBuffer();
-    FALSE_RETURN_V_MSG_E(surfaceBuffer != nullptr, nullptr, "surface buffer is nullptr!");
-    return surfaceBuffer->SurfaceBufferToNativeBuffer();
 }

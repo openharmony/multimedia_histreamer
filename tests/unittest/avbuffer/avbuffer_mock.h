@@ -34,7 +34,6 @@ public:
     virtual int32_t SetBufferAttr(OH_AVBufferAttr &attr) = 0;
     virtual std::shared_ptr<FormatMock> GetParameter() = 0;
     virtual int32_t SetParameter(const std::shared_ptr<FormatMock> &format) = 0;
-    virtual sptr<SurfaceBuffer> GetNativeBuffer() = 0;
     virtual int32_t Destroy() = 0;
 };
 

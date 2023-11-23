@@ -25,5 +25,6 @@ std::shared_ptr<AVBufferMock> AVBufferMockFactory::CreateAVBuffer(const int32_t 
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer != nullptr, nullptr, "OH_AVBuffer_Create is nullptr!");
     return std::make_shared<AVBufferCapiMock>(buffer);
 }
+
 } // namespace MediaAVCodec
 } // namespace OHOS

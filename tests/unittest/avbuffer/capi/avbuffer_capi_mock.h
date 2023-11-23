@@ -33,7 +33,6 @@ public:
     int32_t SetBufferAttr(OH_AVBufferAttr &attr) override;
     std::shared_ptr<FormatMock> GetParameter() override;
     int32_t SetParameter(const std::shared_ptr<FormatMock> &format) override;
-    sptr<SurfaceBuffer> GetNativeBuffer() override;
     int32_t Destroy() override;
     OH_AVBuffer *GetAVBuffer();
 

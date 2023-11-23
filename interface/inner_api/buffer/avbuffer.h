@@ -58,7 +58,6 @@ public:
      */
     static std::shared_ptr<AVBuffer> CreateAVBuffer(uint8_t *ptr, int32_t capacity, int32_t size = 0);
 
-
     /**
      * @brief Create the AVBuffer.
      * @return The shared pointer of AVBuffer.

@@ -71,13 +71,6 @@ int32_t AVBufferInnerMock::SetParameter(const std::shared_ptr<FormatMock> &forma
     return static_cast<int32_t>(Status::OK);
 }
 
-sptr<SurfaceBuffer> AVBufferInnerMock::GetNativeBuffer()
-{
-    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, nullptr, "buffer_ is nullptr!");
-    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_->memory_ != nullptr, nullptr, "buffer_->memory_ is nullptr!");
-    return buffer_->memory_->GetSurfaceBuffer();
-}
-
 int32_t AVBufferInnerMock::Destroy()
 {
     buffer_ = nullptr;

@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include "buffer/avbuffer.h"
 #include "avbuffer_inner_mock.h"
+#include "buffer/avbuffer.h"
 #include "buffer/avbuffer_common.h"
 #include "unittest_log.h"
-
 
 namespace OHOS {
 namespace MediaAVCodec {
