@@ -68,6 +68,8 @@ if (!hst_is_mini_sys) {
       public_deps = [ "//foundation/multimedia/media_utils_lite:media_common" ]
       output_name = "histreamer"
     }
+    group("media_foundation") {
+    }
   } else {
     group("media_foundation") {
       deps = [ "src:media_foundation_buffer" ]
