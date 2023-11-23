@@ -164,21 +164,27 @@ private:
     MemoryFlag memFlag_;
     int32_t capacity_ = MEMSIZE;
     int32_t align_ = 0;
+    int32_t dmaFd_ = -1;
     AVBufferConfig config_;
+    std::vector<DmabufHeapBuffer> dmaBufferLst_;
 };
 
 void AVBufferInnerUnitTest::SetUpTestCase(void)
 {
+    std::cout << "[SetUpTestCase]: SetUp!!!" << std::endl;
     for (int32_t i = 0; i < TEST_BUFFER_SIZE; ++i) {
         g_in[i] = rand() % 256;
     }
 }
 
-void AVBufferInnerUnitTest::TearDownTestCase(void) {}
+void AVBufferInnerUnitTest::TearDownTestCase(void)
+{
+    std::cout << "[TearDownTestCase]: over!!!" << std::endl;
+}
 
 void AVBufferInnerUnitTest::SetUp(void)
 {
-    std::cout << "[SetUp]: SetUp!!!, test: ";
+    std::cout << "[SetUp]: SetUp!!!";
     meta_ = std::make_shared<Meta>();
     const ::testing::TestInfo *testInfo_ = ::testing::UnitTest::GetInstance()->current_test_info();
     std::string testName = testInfo_->name();
@@ -192,6 +198,11 @@ void AVBufferInnerUnitTest::TearDown(void)
     buffer_ = nullptr;
     meta_ = nullptr;
     parcel_ = nullptr;
+    for (auto &buffer:dmaBufferLst_) {
+        DmabufHeapBufferFree(&buffer);
+    }
+    std::vector<DmabufHeapBuffer> tmp;
+    swap(tmp, dmaBufferLst_);
     std::cout << "[TearDown]: over!!!" << std::endl;
 }
 
@@ -201,6 +212,7 @@ void AVBufferInnerUnitTest::CreateLocalHardwareMem()
     DmabufHeapBuffer dmaBuffer = {.size = capacity_, .heapFlags = 0};
     int32_t dmaHeapFd = HardwareHeapFactory::GetInstance().GetHardwareHeapFd();
     DmabufHeapBufferAlloc(dmaHeapFd, &dmaBuffer);
+    dmaBufferLst_.push_back(dmaBuffer);
 
     allocator_ = AVAllocatorFactory::CreateHardwareAllocator(dmaBuffer.fd, capacity_, memFlag_);
     ASSERT_NE(nullptr, allocator_);
@@ -215,6 +227,7 @@ void AVBufferInnerUnitTest::CreateLocalHardwareMemByConfig()
     DmabufHeapBuffer dmaBuffer = {.size = capacity_, .heapFlags = 0};
     int32_t dmaHeapFd = HardwareHeapFactory::GetInstance().GetHardwareHeapFd();
     DmabufHeapBufferAlloc(dmaHeapFd, &dmaBuffer);
+    dmaBufferLst_.push_back(dmaBuffer);
 
     config_.dmaFd = dmaBuffer.fd;
     config_.size = capacity_;

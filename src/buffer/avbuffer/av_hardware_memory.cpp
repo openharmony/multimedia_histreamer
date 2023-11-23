@@ -39,8 +39,9 @@ namespace Media {
 std::shared_ptr<AVAllocator> AVAllocatorFactory::CreateHardwareAllocator(int32_t fd, int32_t capacity,
                                                                          MemoryFlag memFlag)
 {
+    FALSE_RETURN_V_MSG_E(fd > 0, nullptr, "File descriptor is invalid");
     auto allocator = std::shared_ptr<AVHardwareAllocator>(new AVHardwareAllocator());
-    allocator->fd_ = fd;
+    allocator->fd_ = dup(fd);
     allocator->capacity_ = capacity;
     allocator->memFlag_ = memFlag;
     return allocator;
@@ -65,8 +66,11 @@ bool AVHardwareAllocator::Free(void *ptr)
     if (allocBase_ != nullptr) {
         (void)::munmap(allocBase_, static_cast<size_t>(capacity_));
     }
+    if (fd_ > 0) {
+        (void)::close(fd_);
+        fd_ = -1;
+    }
     allocBase_ = nullptr;
-    fd_ = -1;
     capacity_ = -1;
 #endif
     return true;
@@ -131,6 +135,10 @@ AVHardwareMemory::~AVHardwareMemory()
         if (base_ != nullptr) {
             (void)::munmap(base_, static_cast<size_t>(capacity_));
         }
+        if (fd_ > 0) {
+            (void)::close(fd_);
+            fd_ = -1;
+        }
         return;
     }
 #endif
@@ -151,11 +159,20 @@ int32_t AVHardwareMemory::Init()
 
 int32_t AVHardwareMemory::Init(MessageParcel &parcel)
 {
-    fd_ = dup(parcel.ReadFileDescriptor());
+#ifdef MEDIA_OHOS
+    int32_t fd = parcel.ReadFileDescriptor();
+    FALSE_RETURN_V_MSG_E(fd > 0, static_cast<int32_t>(Status::ERROR_INVALID_DATA), "File descriptor is invalid");
+
     memFlag_ = static_cast<MemoryFlag>(parcel.ReadUint32());
 
-    allocator_ = AVAllocatorFactory::CreateHardwareAllocator(fd_, capacity_, memFlag_);
+    allocator_ = AVAllocatorFactory::CreateHardwareAllocator(fd, capacity_, memFlag_);
     FALSE_RETURN_V_MSG_E(allocator_ != nullptr, static_cast<int32_t>(Status::ERROR_NO_MEMORY), "allocator_ is nullptr");
+    if (allocator_ == nullptr) {
+        MEDIA_LOG_E("allocator_ is nullptr");
+        (void)::close(fd);
+    }
+    fd_ = std::static_pointer_cast<AVHardwareAllocator>(allocator_)->GetFileDescriptor();
+    (void)::close(fd);
 
     base_ = static_cast<uint8_t *>(allocator_->Alloc(0));
     allocator_ = nullptr;
@@ -163,24 +180,31 @@ int32_t AVHardwareMemory::Init(MessageParcel &parcel)
     FALSE_RETURN_V_MSG_E(base_ != nullptr, static_cast<int32_t>(Status::ERROR_NO_MEMORY), "dma memory alloc failed");
     MEDIA_LOG_DD("enter init, instance: 0x%{public}06" PRIXPTR ", name = %{public}s", FAKE_POINTER(this),
                  name_.c_str());
+#endif
     return static_cast<int32_t>(Status::OK);
 }
 
 bool AVHardwareMemory::WriteToMessageParcel(MessageParcel &parcel)
 {
+    bool ret = true;
+#ifdef MEDIA_OHOS
     MessageParcel bufferParcel;
-    bool ret = bufferParcel.WriteFileDescriptor(fd_) && bufferParcel.WriteUint32(static_cast<uint32_t>(memFlag_));
+    ret = bufferParcel.WriteFileDescriptor(fd_) && bufferParcel.WriteUint32(static_cast<uint32_t>(memFlag_));
     if (ret) {
         parcel.Append(bufferParcel);
     }
+#endif
     return ret;
 }
 
 bool AVHardwareMemory::ReadFromMessageParcel(MessageParcel &parcel)
 {
 #ifdef MEDIA_OHOS
-    (void)parcel.ReadFileDescriptor();
+    int32_t fd = parcel.ReadFileDescriptor();
     (void)parcel.ReadUint32();
+    if (fd > 0) {
+        (void)::close(fd);
+    }
 #endif
     return true;
 }
@@ -202,18 +226,26 @@ int32_t AVHardwareMemory::GetFileDescriptor()
 
 int32_t AVHardwareMemory::SyncStart()
 {
+#ifdef MEDIA_OHOS
     std::lock_guard<std::mutex> lock(mutex_);
     FALSE_RETURN_V_MSG_E(!isStartSync_, -1, "Not ready to start syncing yet!");
     isStartSync_ = true;
     return DmabufHeapBufferSyncStart(fd_, FLAG_ADAPTER_MAP.at(memFlag_));
+#else
+    return 0;
+#endif
 }
 
 int32_t AVHardwareMemory::SyncEnd()
 {
+#ifdef MEDIA_OHOS
     std::lock_guard<std::mutex> lock(mutex_);
     FALSE_RETURN_V_MSG_E(isStartSync_, -1, "Haven't started syncing yet!");
     isStartSync_ = false;
     return DmabufHeapBufferSyncEnd(fd_, FLAG_ADAPTER_MAP.at(memFlag_));
+#else
+    return 0;
+#endif
 }
 } // namespace Media
 } // namespace OHOS

@@ -76,6 +76,10 @@ AVSharedMemoryExt::~AVSharedMemoryExt()
                  name_.c_str());
     Close();
     if (allocator_ == nullptr) {
+        if (fd_ > 0) {
+            (void)::close(fd_);
+            fd_ = -1;
+        }
         return;
     }
     bool ret = allocator_->Free(reinterpret_cast<void *>(fd_));
@@ -100,28 +104,43 @@ int32_t AVSharedMemoryExt::Init()
 
 int32_t AVSharedMemoryExt::Init(MessageParcel &parcel)
 {
-    fd_ = dup(parcel.ReadFileDescriptor());
+#ifdef MEDIA_OHOS
+    int32_t fd = parcel.ReadFileDescriptor();
+    FALSE_RETURN_V_MSG_E(fd > 0, static_cast<int32_t>(Status::ERROR_INVALID_DATA), "File descriptor is invalid");
+    fd_ = dup(fd);
+
     memFlag_ = static_cast<MemoryFlag>(parcel.ReadUint32());
     MEDIA_LOG_DD("enter init, instance: 0x%{public}06" PRIXPTR ", name = %{public}s", FAKE_POINTER(this),
                  name_.c_str());
+    (void)::close(fd);
     return static_cast<int32_t>(Status::OK);
+#else
+    return 0;
+#endif
 }
 
 bool AVSharedMemoryExt::WriteToMessageParcel(MessageParcel &parcel)
 {
+#ifdef MEDIA_OHOS
     MessageParcel bufferParcel;
     bool ret = bufferParcel.WriteFileDescriptor(fd_) && bufferParcel.WriteUint32(static_cast<uint32_t>(memFlag_));
     if (ret) {
         parcel.Append(bufferParcel);
     }
     return ret;
+#else
+    return false;
+#endif
 }
 
 bool AVSharedMemoryExt::ReadFromMessageParcel(MessageParcel &parcel)
 {
 #ifdef MEDIA_OHOS
-    (void)parcel.ReadFileDescriptor();
+    int32_t fd = parcel.ReadFileDescriptor();
     (void)parcel.ReadUint32();
+    if (fd > 0) {
+        (void)::close(fd);
+    }
 #endif
     return true;
 }
