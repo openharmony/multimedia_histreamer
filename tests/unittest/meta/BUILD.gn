@@ -18,9 +18,7 @@ module_output_path = "histreamer/unittest"
 
 group("meta_unit_test") {
   testonly = true
-  deps = [
-    ":meta_inner_unit_test",
-  ]
+  deps = [ ":meta_inner_unit_test" ]
 }
 
 #################################################################################################################meta
@@ -48,18 +46,14 @@ meta_unittest_cflags = [
 
 ohos_unittest("meta_inner_unit_test") {
   module_out_path = module_output_path
-  include_dirs = [
-    "./",
-  ]
+  include_dirs = [ "./" ]
 
   defines = [
     "HST_ANY_WITH_NO_RTTI",
     "MEDIA_OHOS",
   ]
 
-  sources = [
-    "./meta_func_unit_test.cpp",
-  ]
+  sources = [ "./meta_func_unit_test.cpp" ]
 
   cflags = meta_unittest_cflags
 
