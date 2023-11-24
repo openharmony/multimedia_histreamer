@@ -897,7 +897,7 @@ template <typename T>
 inline typename std::enable_if<std::is_enum<T>::value, bool>::type MakeAnyFromParcel(Any& value, MessageParcel
 & parcel)
 {
-    if(sizeof(T) == sizeof(int64_t)) {
+    if (sizeof(T) == sizeof(int64_t)) {
         value.Emplace<T>(static_cast<T>(parcel.ReadInt64()));
         return true;
     }
