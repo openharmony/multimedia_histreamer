@@ -151,7 +151,7 @@ enum AudioChannelSet : uint64_t {
     AMBISONICS_ACN15 = 1ULL << 56U, /** third-order ambisonics channel number 15. */
 };
 
-enum AudioChannelLayout : uint64_t {
+enum AudioChannelLayout : int64_t {
     UNKNOWN_CHANNEL_LAYOUT = 0,
     MONO = (AudioChannelSet::FRONT_CENTER),
     STEREO = (AudioChannelSet::FRONT_LEFT | AudioChannelSet::FRONT_RIGHT),

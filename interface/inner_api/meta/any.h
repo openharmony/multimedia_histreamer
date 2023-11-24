@@ -392,7 +392,6 @@ private:
     };
     static bool BaseTypesToParcel(const Any *operand, MessageParcel& parcel) noexcept;
     // returnValue : 0 -- success; 1 -- retry enum; 2 -- failed no retry
-    // TODO: 这种方式，必须把类型字符串序列化，如果针对基本类型特化 ToParcel，则有可能不用传类型字符串
     static int BaseTypesFromParcel(Any *operand, MessageParcel& parcel) noexcept;
 
     template <typename T>
@@ -898,7 +897,7 @@ template <typename T>
 inline typename std::enable_if<std::is_enum<T>::value, bool>::type MakeAnyFromParcel(Any& value, MessageParcel
 & parcel)
 {
-    if(sizeof(T) == sizeof(int64_t)){
+    if(sizeof(T) == sizeof(int64_t)) {
         value.Emplace<T>(static_cast<T>(parcel.ReadInt64()));
         return true;
     }

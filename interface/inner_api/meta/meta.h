@@ -23,9 +23,6 @@
 #include "meta/source_types.h"
 #include "meta/mime_type.h"
 #include "meta/any.h" // NOLINT
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
-//#include "plugin/common/surface_allocator.h"
-#endif
 
 namespace OHOS {
 namespace Media {
@@ -86,10 +83,6 @@ extern Any GetDefaultAnyValue(const TagType& tag);
 using MapIt = std::map<TagType, Any>::const_iterator;
 class Meta {
 public:
-#if !defined(OHOS_LITE) && defined(VIDEO_SUPPORT)
-//    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::BUFFER_ALLOCATOR or tagCharSeq == Tag::VIDEO_SURFACE,
-//                           std::shared_ptr<SurfaceAllocator>);
-#endif
     enum struct ValueType : int32_t {
         BOOL,
         UINT8_T,
@@ -317,46 +310,9 @@ public:
             keys[cnt++] = tmp.first;
         }
     }
-    // TODO: 最好把这两个函数移动到 meta.cpp 里面, 减少头文件对外暴露的内容，cpp中包含log.h，打印log也更方便
-    bool ToParcel(MessageParcel &parcel) const
-    {
-        MessageParcel metaParcel;
-        int32_t metaSize = 0;
-        bool ret = true;
-        for (auto it = begin(); it != end(); ++it) {
-            ++metaSize;
-            ret &= metaParcel.WriteString(it->first);
-            ret &= it->second.ToParcel(metaParcel);
-            if (!ret) {
-                // MEDIA_LOG_E("fail to Marshalling Key: " PUBLIC_LOG_S, it->first.c_str());
-                return false;
-            }
-            // MEDIA_LOG_D("success to Marshalling Key: " PUBLIC_LOG_S, it->first.c_str());
-        }
-        if (ret) {
-            ret &= parcel.WriteInt32(metaSize);
-            ret &= parcel.Append(metaParcel);
-        }
-        return ret;
-    }
 
-    bool FromParcel(MessageParcel &parcel)
-    {
-        map_.clear();
-        int32_t size = parcel.ReadInt32();
-        for (int32_t index = 0; index < size; index++) {
-            std::string key = parcel.ReadString();
-            Any value = GetDefaultAnyValue(key); //Init Default Value
-            if (value.FromParcel(parcel)) {
-                map_[key] = value;
-            } else {
-                // MEDIA_LOG_E("fail to Unmarshalling Key: %{public}s", key.c_str());
-                return false;
-            }
-            // MEDIA_LOG_D("success to Unmarshalling Key: %{public}s", key.c_str());
-        }
-        return true;
-    }
+    bool ToParcel(MessageParcel &parcel) const;
+    bool FromParcel(MessageParcel &parcel);
 
 private:
     std::map<TagType, Any> map_;
@@ -364,7 +320,8 @@ private:
 
 /**
  * @brief SetMetaData only used for Application interface OH_AVFormat to set Enum value into Meta Object.
- * @implNote In order to set value(int32_t type) to Meta Object, should convert int32_t value to correct EnumType then save to Any object. We use metadataGetterSetterMap to get the right setter function.
+ * @implNote In order to set value(int32_t type) to Meta Object, should convert int32_t value to correct EnumType then
+ * save to Any object. We use metadataGetterSetterMap to get the right setter function.
  * @return Returns operator status, <b>True</b> if Set Success.
  * returns <b>False</b> otherwise.
  * @example OHOS::Media::SetMetaData(meta, "audio.aac.profile", value);
@@ -373,7 +330,8 @@ bool SetMetaData(Meta& meta, const TagType& tag, int32_t& value);
 
 /**
  * @brief GetMetaData only used for Application interface OH_AVFormat to get Enum value from Meta Object.
- * @implNote In order to get value(Enum type) from Meta Object, should use correct Enum type to get value from Any object. We use metadataGetterSetterMap to get the right getter function.
+ * @implNote In order to get value(Enum type) from Meta Object, should use correct Enum type to get value from Any
+ * object. We use metadataGetterSetterMap to get the right getter function.
  * @return Returns operator status, <b>True</b> if Get Success.
  * returns <b>False</b> otherwise.
  * @example OHOS::Media::GetMetaData(meta, "audio.aac.profile", value);
@@ -381,7 +339,8 @@ bool SetMetaData(Meta& meta, const TagType& tag, int32_t& value);
 bool GetMetaData(const Meta& meta, const TagType& tag, int32_t& value);
 /**
  * @brief SetMetaData only used for Application interface OH_AVFormat to set Enum value into Meta Object.
- * @implNote In order to set value(int64_t type) to Meta Object, should convert int32_t value to correct EnumType then save to Any object. We use metadataGetterSetterMap to get the right setter function.
+ * @implNote In order to set value(int64_t type) to Meta Object, should convert int32_t value to correct EnumType then
+ * save to Any object. We use metadataGetterSetterMap to get the right setter function.
  * @return Returns operator status, <b>True</b> if Set Success.
  * returns <b>False</b> otherwise.
  * @example OHOS::Media::SetMetaData(meta, "audio.aac.profile", value);
@@ -390,7 +349,8 @@ bool SetMetaData(Meta& meta, const TagType& tag, int64_t& value);
 
 /**
  * @brief GetMetaData only used for Application interface OH_AVFormat to get Enum value from Meta Object.
- * @implNote In order to get value(Enum type) from Meta Object, should use correct Enum type to get value from Any object. We use metadataGetterSetterMap to get the right getter function.
+ * @implNote In order to get value(Enum type) from Meta Object, should use correct Enum type to get value from Any
+ * object. We use metadataGetterSetterMap to get the right getter function.
  * @return Returns operator status, <b>True</b> if Get Success.
  * returns <b>False</b> otherwise.
  * @example OHOS::Media::GetMetaData(meta, "audio.aac.profile", value);

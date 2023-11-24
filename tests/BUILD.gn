@@ -18,7 +18,6 @@ group("media_foundation_unit_test") {
     deps = [
       "unittest/avbuffer:avbuffer_unit_test",
       "unittest/meta:meta_unit_test",
-
       # "unittest/format:format_unit_test",
     ]
   }

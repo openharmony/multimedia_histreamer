@@ -39,7 +39,6 @@ bool Any::BaseTypesToParcel(const Any *operand, MessageParcel &parcel) noexcept
     return ret;
 }
 // returnValue : 0 -- success; 1 -- retry enum; 2 -- failed no retry
-// TODO: 这种方式，必须把类型字符串序列化，如果针对基本类型特化 ToParcel，则有可能不用传类型字符串
 int Any::BaseTypesFromParcel(Any *operand, MessageParcel &parcel) noexcept
 {
     std::string type = parcel.ReadString();
@@ -72,5 +71,5 @@ int Any::BaseTypesFromParcel(Any *operand, MessageParcel &parcel) noexcept
     }
     return 1;
 }
-}
+} // namespace Media
 } // namespace OHOS

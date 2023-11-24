@@ -43,42 +43,44 @@ namespace OHOS {
 namespace Media {
 namespace MetaFuncUT {
 class MetaInnerUnitTest : public testing::Test {
-    public:
-        static void SetUpTestCase(void);
+public:
+    static void SetUpTestCase(void);
 
-        static void TearDownTestCase(void);
+    static void TearDownTestCase(void);
 
-        void SetUp(void);
+    void SetUp(void);
 
-        void TearDown(void);
+    void TearDown(void);
 
-    private:
-        void CheckMetaSetAndGet();
+private:
+    void CheckMetaSetAndGet();
 
-        void CheckMetaTransParcel();
+    void CheckMetaTransParcel();
 
-        std::shared_ptr<Meta> meta_ = nullptr;
-        std::shared_ptr<MessageParcel> parcel_ = nullptr;
+    std::shared_ptr<Meta> meta_ = nullptr;
+    std::shared_ptr<MessageParcel> parcel_ = nullptr;
 };
 
-    void MetaInnerUnitTest::SetUpTestCase(void) {}
+void MetaInnerUnitTest::SetUpTestCase(void) {}
 
-    void MetaInnerUnitTest::TearDownTestCase(void) {}
+void MetaInnerUnitTest::TearDownTestCase(void) {}
 
-    void MetaInnerUnitTest::SetUp(void) {
-        std::cout << "[SetUp]: SetUp!!!, test: ";
-        meta_ = std::make_shared<Meta>();
-        const ::testing::TestInfo *testInfo_ = ::testing::UnitTest::GetInstance()->current_test_info();
-        std::string testName = testInfo_->name();
-        std::cout << testName << std::endl;
-        parcel_ = nullptr;
-    }
+void MetaInnerUnitTest::SetUp(void)
+{
+    std::cout << "[SetUp]: SetUp!!!, test: ";
+    meta_ = std::make_shared<Meta>();
+    const ::testing::TestInfo *testInfo_ = ::testing::UnitTest::GetInstance()->current_test_info();
+    std::string testName = testInfo_->name();
+    std::cout << testName << std::endl;
+    parcel_ = nullptr;
+}
 
-    void MetaInnerUnitTest::TearDown(void) {
-        meta_ = nullptr;
-        parcel_ = nullptr;
-        std::cout << "[TearDown]: over!!!" << std::endl;
-    }
+void MetaInnerUnitTest::TearDown(void)
+{
+    meta_ = nullptr;
+    parcel_ = nullptr;
+    std::cout << "[TearDown]: over!!!" << std::endl;
+}
 
 /**
  * @tc.name: SetGet_Int32
