@@ -1,0 +1,188 @@
+# Copyright (C) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/multimedia/histreamer/config.gni")
+
+#################################################################################################################capi
+config("media_foundation_capi_unit_test_config") {
+  include_dirs = [
+    "./",
+    "./include",
+    "../avbuffer",
+    "../avbuffer/capi",
+    "$histreamer_root_dir/interface",
+    "$histreamer_root_dir/interface/inner_api",
+    "$histreamer_root_dir/interface/kits/c",
+    "$histreamer_root_dir/interface/inner_api/buffer",
+    "$histreamer_root_dir/interface/inner_api/meta",
+    "$histreamer_root_dir/src/buffer/avbuffer/capi",
+    "$histreamer_root_dir/src/buffer/avbuffer/include",
+    "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/surface",
+    "$histreamer_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
+    "$histreamer_root_dir/../../graphic/graphic_2d/frameworks/surface/include",
+    "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api",
+    "$histreamer_root_dir/../../window/window_manager/interface/innerkits",
+  ]
+
+  cflags = [
+    "-std=c++17",
+    "-fno-rtti",
+    "-fexceptions",
+    "-Wall",
+    "-fno-common",
+    "-fstack-protector-strong",
+    "-Wshadow",
+    "-FPIC",
+    "-FS",
+    "-O2",
+    "-D_FORTIFY_SOURCE=2",
+    "-fvisibility=hidden",
+    "-Wformat=2",
+    "-Wdate-time",
+    "-Werror",
+    "-Wextra",
+    "-Wimplicit-fallthrough",
+    "-Wsign-compare",
+    "-Wunused-parameter",
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  cflags_cc = cflags
+}
+
+ohos_static_library("media_foundation_capi_unit_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  testonly = true
+  public_configs = [ ":media_foundation_capi_unit_test_config" ]
+
+  sources = [
+    # "../avbuffer/capi/avbuffer_capi_mock.cpp",
+    # "../avbuffer/capi/avbuffer_capi_mock_factory.cpp",
+    # "../format/capi/avformat_capi_mock.cpp",
+    # "../format/capi/avformat_capi_mock_factory.cpp",
+  ]
+
+  public_deps = [
+    "$histreamer_root_dir/src:media_foundation",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/googletest:gtest",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:libgraphic_utils",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:surface",
+    "graphic_2d:sync_fence",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "window_manager:libwm",
+  ]
+
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
+}
+
+#################################################################################################################inner
+config("media_foundation_inner_unit_test_config") {
+  include_dirs = [
+    "./",
+    "./include",
+    "../avbuffer",
+    "../avbuffer/inner",
+    "$histreamer_root_dir/interface",
+    "$histreamer_root_dir/interface/inner_api",
+    "$histreamer_root_dir/interface/inner_api/buffer",
+    "$histreamer_root_dir/interface/inner_api/meta",
+    "$histreamer_root_dir/src/buffer/avbuffer/capi",
+    "$histreamer_root_dir/src/buffer/avbuffer/include",
+    "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/surface",
+    "$histreamer_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
+    "$histreamer_root_dir/../../graphic/graphic_2d/frameworks/surface/include",
+    "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api",
+    "$histreamer_root_dir/../../window/window_manager/interface/innerkits",
+  ]
+
+  cflags = [
+    "-std=c++17",
+    "-fno-rtti",
+    "-fexceptions",
+    "-Wall",
+    "-fno-common",
+    "-fstack-protector-strong",
+    "-Wshadow",
+    "-FPIC",
+    "-FS",
+    "-O2",
+    "-D_FORTIFY_SOURCE=2",
+    "-fvisibility=hidden",
+    "-Wformat=2",
+    "-Wdate-time",
+    "-Wextra",
+    "-Wimplicit-fallthrough",
+    "-Wsign-compare",
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  cflags_cc = cflags
+}
+
+ohos_static_library("media_foundation_inner_unit_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  testonly = true
+  public_configs = [ ":media_foundation_inner_unit_test_config" ]
+
+  sources = [
+    # "../avbuffer/inner/avbuffer_inner_mock.cpp",
+    # "../avbuffer/inner/avbuffer_inner_mock_factory.cpp",
+    # "../format/inner/avformat_inner_mock.cpp",
+    # "../format/inner/avformat_inner_mock_factory.cpp",
+  ]
+
+  public_deps = [
+    "$histreamer_root_dir/src:media_foundation",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/googletest:gtest",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:libgraphic_utils",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:surface",
+    "graphic_2d:sync_fence",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "window_manager:libwm",
+  ]
+
+  subsystem_name = "multimedia"
+  part_name = "histreamer"
+}

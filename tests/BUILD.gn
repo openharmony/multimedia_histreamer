@@ -12,13 +12,12 @@
 # limitations under the License.
 import("//foundation/multimedia/histreamer/config.gni")
 
-group("histreamer_test") {
+group("media_foundation_unit_test") {
   testonly = true
-  deps = []
-  if (!hst_is_lite_sys) {
-    deps += [
-      "scenetest:histreamer_scene_test",
-      "unittest:histreamer_unit_test",
+  if (hst_is_standard_sys) {
+    deps = [
+      "unittest/avbuffer:avbuffer_unit_test",
+      "unittest/meta:meta_unit_test",
     ]
   }
 }
