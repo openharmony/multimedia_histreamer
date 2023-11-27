@@ -30,6 +30,7 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/engine/include/plugin/",
     "$histreamer_root_dir/engine/pipeline/core/",
     "$histreamer_root_dir/engine/pipeline/filters/common/",
+    "$histreamer_root_dir/engine/plugin/core/",
     "./plugins/",
     "//drivers/peripheral/base/",
     "//drivers/peripheral/codec/hal/include",
@@ -37,6 +38,8 @@ ohos_unittest("histreamer_unit_test") {
     "//drivers/peripheral/display/interfaces/include",
     "//third_party/openmax/api/1.1.2",
     "$histreamer_root_dir/engine/include/",
+    "//graphic/graphic_2d/interfaces/innerkits/surface",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
   ]
   cflags = histreamer_unittest_cflags
 
@@ -54,11 +57,14 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_demuxers",
     "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_video_decoders",
     "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_video_encoders",
+    "$histreamer_root_dir/engine/plugin/plugins/sink/video_surface_sink:std_video_surface_sink",
     "$histreamer_root_dir/engine/plugin/plugins/source/audio_capture:histreamer_plugin_StdAudioCapture",
     "$histreamer_root_dir/engine/plugin/plugins/source/file_source:filesource",
     "$histreamer_root_dir/engine/plugin/plugins/source/http_source:httpsource",
     "$histreamer_root_dir/engine/scene:std_engine_factory",
     "$histreamer_root_dir/engine/scene/player:histreamer_player",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/window/window_manager/wm:libwm",
     "//third_party/googletest:gtest_rtti",
   ]
 
@@ -96,6 +102,7 @@ ohos_unittest("histreamer_unit_test") {
     "./TestPipline.cpp",
     "./TestPluginCommon.cpp",
     "./TestPluginManager.cpp",
+    "./TestSurfaceSinkPlugin.cpp",
     "./TestSynchronizer.cpp",
     "./TestVideoFFmpegEncoder.cpp",
     "./plugins/UtSourceTest1.cpp",
