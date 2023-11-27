@@ -57,15 +57,15 @@ ohos_unittest("histreamer_unit_test") {
     "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_demuxers",
     "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_video_decoders",
     "$histreamer_root_dir/engine/plugin/plugins/ffmpeg_adapter:ffmpeg_video_encoders",
+    "$histreamer_root_dir/engine/plugin/plugins/sink/video_surface_sink:std_video_surface_sink",
     "$histreamer_root_dir/engine/plugin/plugins/source/audio_capture:histreamer_plugin_StdAudioCapture",
     "$histreamer_root_dir/engine/plugin/plugins/source/file_source:filesource",
     "$histreamer_root_dir/engine/plugin/plugins/source/http_source:httpsource",
-    "$histreamer_root_dir/engine/plugin/plugins/sink/video_surface_sink:std_video_surface_sink",
     "$histreamer_root_dir/engine/scene:std_engine_factory",
     "$histreamer_root_dir/engine/scene/player:histreamer_player",
-    "//third_party/googletest:gtest_rtti",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/wm:libwm",
+    "//third_party/googletest:gtest_rtti",
   ]
 
   external_deps = [
@@ -102,10 +102,10 @@ ohos_unittest("histreamer_unit_test") {
     "./TestPipline.cpp",
     "./TestPluginCommon.cpp",
     "./TestPluginManager.cpp",
+    "./TestSurfaceSinkPlugin.cpp",
     "./TestSynchronizer.cpp",
     "./TestVideoFFmpegEncoder.cpp",
     "./plugins/UtSourceTest1.cpp",
     "./plugins/UtSourceTest2.cpp",
-    "./TestSurfaceSinkPlugin.cpp",
   ]
 }
