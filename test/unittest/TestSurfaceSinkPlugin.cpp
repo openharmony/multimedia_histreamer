@@ -48,6 +48,7 @@ sptr<Surface> GetVideoSurface()
     if (window == nullptr || window->GetSurfaceNode() == nullptr) {
         return nullptr;
     }
+    window->Show();
     return window->GetSurfaceNode()->GetSurface();
 }
 
@@ -63,6 +64,7 @@ HWTEST(TestSurfaceSinkPlugin, find_surface_sink_plugins_process, TestSize.Level1
     ASSERT_TRUE(plugin != nullptr);
     sptr<Surface> surface = GetVideoSurface();
     ASSERT_TRUE(surface != nullptr);
+    surface->SetUserData("SURFACE_FORMAT", std::to_string(PIXEL_FMT_RGBA_8888));
 
     plugin->SetParameter(Tag::VIDEO_SURFACE, surface);
     auto initStatus = plugin->Init();
