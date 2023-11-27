@@ -152,7 +152,7 @@ static Any defaultAudioAacProfile = AudioAacProfile::ELD;
 static Any defaultAudioAacStreamFormat = AudioAacStreamFormat::ADIF;
 static Any defaultVectorUInt8 = std::vector<uint8_t>();
 static Any defaultVectorVideoBitStreamFormat = std::vector<VideoBitStreamFormat>();
-static std::map<TagType,  const Any&> g_metadataDefaultValueMap = {
+static std::map<TagType, const Any &> g_metadataDefaultValueMap = {
     {Tag::SRC_INPUT_TYPE, defaultSrcInputType},
     {Tag::AUDIO_SAMPLE_FORMAT, defaultAudioSampleFormat},
     {Tag::VIDEO_PIXEL_FORMAT, defaultVideoPixelFormat},
@@ -166,7 +166,7 @@ static std::map<TagType,  const Any&> g_metadataDefaultValueMap = {
     {Tag::VIDEO_H265_LEVEL, defaultHEVCLevel},
     {Tag::VIDEO_CHROMA_LOCATION, defaultChromaLocation},
     {Tag::MEDIA_FILE_TYPE, defaultFileType},
-    //Int32
+    // Int32
     {Tag::APP_PID, defaultInt32},
     {Tag::APP_TOKEN_ID, defaultInt32},
     {Tag::REQUIRED_IN_BUFFER_CNT, defaultInt32},
@@ -195,11 +195,11 @@ static std::map<TagType,  const Any&> g_metadataDefaultValueMap = {
     {Tag::MEDIA_HAS_AUDIO, defaultInt32},
     {Tag::AUDIO_AAC_IS_ADTS, defaultInt32},
     {Tag::AUDIO_COMPRESSION_LEVEL, defaultInt32},
-    {Tag::BITS_PER_CODED_SAMPLE, defaultInt32},
+    {Tag::AUDIO_BITS_PER_CODED_SAMPLE, defaultInt32},
     {Tag::MEDIA_TRACK_COUNT, defaultInt32},
     {Tag::MEDIA_HAS_VIDEO, defaultInt32},
     {Tag::MEDIA_HAS_AUDIO, defaultInt32},
-    //String
+    // String
     {Tag::MIME_TYPE, defaultString},
     {Tag::MEDIA_FILE_URI, defaultString},
     {Tag::MEDIA_TITLE, defaultString},
@@ -219,35 +219,34 @@ static std::map<TagType,  const Any&> g_metadataDefaultValueMap = {
     {Tag::MEDIA_AUTHOR, defaultString},
     {Tag::MEDIA_COMPOSER, defaultString},
     {Tag::MEDIA_LYRICS, defaultString},
-    //Double
+    // Double
     {Tag::VIDEO_CAPTURE_RATE, defaultDouble},
     {Tag::VIDEO_FRAME_RATE, defaultDouble},
-    //Bool
+    // Bool
     {Tag::VIDEO_COLOR_RANGE, defaultBool},
     {Tag::VIDEO_IS_HDR_VIVID, defaultBool},
-    //UInt64
+    // UInt64
     {Tag::MEDIA_FILE_SIZE, defaultUInt64},
     {Tag::MEDIA_POSITION, defaultUInt64},
-    //Int64
+    // Int64
     {Tag::APP_FULL_TOKEN_ID, defaultInt64},
     {Tag::MEDIA_DURATION, defaultInt64},
     {Tag::MEDIA_BITRATE, defaultInt64},
     {Tag::MEDIA_START_TIME, defaultInt64},
     {Tag::USER_FRAME_PTS, defaultInt64},
     {Tag::USER_PUSH_DATA_TIME, defaultInt64},
-    //AudioChannelLayout UINT64_T
+    // AudioChannelLayout UINT64_T
     {Tag::AUDIO_CHANNEL_LAYOUT, defaultAudioChannelLayout},
     {Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, defaultAudioChannelLayout},
-    //AudioAacProfile UInt8
+    // AudioAacProfile UInt8
     {Tag::AUDIO_AAC_PROFILE, defaultAudioAacProfile},
-    //AudioAacStreamFormat UInt8
+    // AudioAacStreamFormat UInt8
     {Tag::AUDIO_AAC_STREAM_FORMAT, defaultAudioAacStreamFormat},
-    //vector<uint8_t>
+    // vector<uint8_t>
     {Tag::MEDIA_CODEC_CONFIG, defaultVectorUInt8},
     {Tag::MEDIA_COVER, defaultVectorUInt8},
-    //vector<Plugin::VideoBitStreamFormat>
-    {Tag::VIDEO_BIT_STREAM_FORMAT, defaultVectorVideoBitStreamFormat}
-};
+    // vector<Plugin::VideoBitStreamFormat>
+    {Tag::VIDEO_BIT_STREAM_FORMAT, defaultVectorVideoBitStreamFormat}};
 
 Any GetDefaultAnyValue(const TagType& tag)
 {

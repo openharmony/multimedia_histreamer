@@ -29,10 +29,10 @@ namespace Plugin {
  * @version 1.0
  */
 enum class MediaType : int32_t {
-    UNKNOWN = 0,    ///< Usually treated as DATA
-    AUDIO,
-    VIDEO,
-    SUBTITLE,
+    UNKNOWN = -1,    ///< Usually treated as DATA
+    AUDIO = 0,
+    VIDEO = 1,
+    SUBTITLE = 2,
     ATTACHMENT,     ///< Opaque data information usually sparse
     DATA            ///< Opaque data information usually continuous
 };
@@ -188,6 +188,32 @@ enum struct State : int32_t {
     PAUSED = 4,      ///< Plugin temporarily stops processing data. This state is optional.
     DESTROYED = -1,  ///< Plugin destruction state. In this state, all resources are released.
     INVALID = -2,    ///< An error occurs in any state and the plugin enters the invalid state.
+};
+
+/**
+ * @enum codec name.
+ *
+ * @since 4.1
+ */
+class CodecName {
+public:
+    static constexpr std::string_view AUDIO_DECODER_MP3_NAME = "OH.Media.Codec.Decoder.Audio.Mpeg";
+    static constexpr std::string_view AUDIO_DECODER_AAC_NAME = "OH.Media.Codec.Decoder.Audio.AAC";
+    static constexpr std::string_view AUDIO_DECODER_API9_AAC_NAME = "avdec_aac";
+    static constexpr std::string_view AUDIO_DECODER_VORBIS_NAME = "OH.Media.Codec.Decoder.Audio.Vorbis";
+    static constexpr std::string_view AUDIO_DECODER_FLAC_NAME = "OH.Media.Codec.Decoder.Audio.Flac";
+    static constexpr std::string_view AUDIO_DECODER_AMRNB_NAME = "OH.Media.Codec.Decoder.Audio.Amrnb";
+    static constexpr std::string_view AUDIO_DECODER_AMRWB_NAME = "OH.Media.Codec.Decoder.Audio.Amrwb";
+
+    static constexpr std::string_view AUDIO_ENCODER_FLAC_NAME = "OH.Media.Codec.Encoder.Audio.Flac";
+    static constexpr std::string_view AUDIO_ENCODER_AAC_NAME = "OH.Media.Codec.Encoder.Audio.AAC";
+    static constexpr std::string_view AUDIO_ENCODER_API9_AAC_NAME = "avenc_aac";
+
+    static constexpr std::string_view VIDEO_DECODER_AVC_NAME = "OH.Media.Codec.Decoder.Video.AVC";
+
+private:
+    CodecName() = delete;
+    ~CodecName() = delete;
 };
 
 /**

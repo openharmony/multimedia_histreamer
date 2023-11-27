@@ -100,7 +100,9 @@ public:
 
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::SRC_INPUT_TYPE, Plugin::SrcInputType, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::MEDIA_CODEC_CONFIG or
-                           tagCharSeq == Tag::MEDIA_COVER,
+                           tagCharSeq == Tag::MEDIA_COVER or
+                           tagCharSeq == Tag::AUDIO_VORBIS_IDENTIFICATION_HEADER or
+                           tagCharSeq == Tag::AUDIO_VORBIS_SETUP_HEADER,
                            std::vector<uint8_t>, ValueType::VECTOR_UINT8);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::AUDIO_CHANNEL_LAYOUT or
                            tagCharSeq == Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT,
@@ -125,8 +127,13 @@ public:
                            ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_MATRIX_COEFF, Plugin::MatrixCoefficient,
                            ValueType::INT32_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_RANGE, bool, ValueType::BOOL);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_IS_HDR_VIVID, bool, ValueType::BOOL);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_ENCODE_BITRATE_MODE, Plugin::VideoEncodeBitrateMode, ValueType::INT32_T);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_RANGE or 
+                           tagCharSeq == Tag::VIDEO_REQUEST_I_FRAME or
+                           tagCharSeq == Tag::VIDEO_IS_HDR_VIVID or
+                           tagCharSeq == Tag::MEDIA_HAS_VIDEO or
+                           tagCharSeq == Tag::MEDIA_HAS_AUDIO or
+                           tagCharSeq == Tag::MEDIA_END_OF_STREAM, bool, ValueType::BOOL);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_H265_PROFILE, Plugin::HEVCProfile, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_H265_LEVEL, Plugin::HEVCLevel, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_CHROMA_LOCATION, Plugin::ChromaLocation, ValueType::INT32_T);
@@ -155,14 +162,18 @@ public:
         tagCharSeq == Tag::VIDEO_MAX_SURFACE_NUM or
         tagCharSeq == Tag::VIDEO_H264_LEVEL or
         tagCharSeq == Tag::MEDIA_TRACK_COUNT or
-        tagCharSeq == Tag::MEDIA_HAS_VIDEO or
-        tagCharSeq == Tag::MEDIA_HAS_AUDIO or
         tagCharSeq == Tag::AUDIO_AAC_IS_ADTS or
         tagCharSeq == Tag::AUDIO_COMPRESSION_LEVEL or
-        tagCharSeq == Tag::BITS_PER_CODED_SAMPLE or
+        tagCharSeq == Tag::AUDIO_BITS_PER_CODED_SAMPLE or
         tagCharSeq == Tag::MEDIA_TRACK_COUNT or
-        tagCharSeq == Tag::MEDIA_HAS_VIDEO or
-        tagCharSeq == Tag::MEDIA_HAS_AUDIO, int32_t, ValueType::INT32_T);
+        tagCharSeq == Tag::REGULAR_TRACK_ID or
+        tagCharSeq == Tag::VIDEO_SCALE_TYPE or 
+        tagCharSeq == Tag::VIDEO_I_FRAME_INTERVAL or
+        tagCharSeq == Tag::MEDIA_PROFILE or
+        tagCharSeq == Tag::VIDEO_ENCODE_QUALITY or
+        tagCharSeq == Tag::AUDIO_AAC_SBR or
+        tagCharSeq == Tag::AUDIO_FLAC_COMPLIANCE_LEVEL or
+        tagCharSeq == Tag::MEDIA_LEVEL, int32_t, ValueType::INT32_T);
 
     DEFINE_INSERT_GET_FUNC(
         tagCharSeq == Tag::APP_FULL_TOKEN_ID or
@@ -172,7 +183,8 @@ public:
         tagCharSeq == Tag::USER_FRAME_PTS or
         tagCharSeq == Tag::USER_PUSH_DATA_TIME or
         tagCharSeq == Tag::MEDIA_FILE_SIZE or
-        tagCharSeq == Tag::MEDIA_POSITION, int64_t, ValueType::INT64_T);
+        tagCharSeq == Tag::MEDIA_POSITION or
+        tagCharSeq == Tag::MEDIA_TIME_STAMP, int64_t, ValueType::INT64_T);
 
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_FRAME_RATE or
         tagCharSeq == Tag::VIDEO_CAPTURE_RATE, double, ValueType::DOUBLE);
@@ -196,7 +208,8 @@ public:
         tagCharSeq == Tag::USER_SHARED_MEMORY_FD or
         tagCharSeq == Tag::MEDIA_AUTHOR or
         tagCharSeq == Tag::MEDIA_COMPOSER or
-        tagCharSeq == Tag::MEDIA_LYRICS, std::string, ValueType::STRING);
+        tagCharSeq == Tag::MEDIA_LYRICS or
+        tagCharSeq == Tag::MEDIA_CODEC_NAME, std::string, ValueType::STRING);
 
     Meta& operator=(const Meta& other)
     {
