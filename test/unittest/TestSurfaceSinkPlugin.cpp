@@ -20,9 +20,6 @@
 #include "window.h"
 #include "window_option.h"
 
-#define private public
-#define protected public
-
 using namespace testing::ext;
 using namespace OHOS::Media::Plugin;
 using namespace OHOS::Media::Plugin::VidSurfaceSinkPlugin;
