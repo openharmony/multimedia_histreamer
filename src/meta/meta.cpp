@@ -86,12 +86,19 @@ static std::map<TagType, std::pair<MetaSetterInt64Function, MetaGetterInt64Funct
         DEFINE_METADATA_SETTER_GETTER(Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, AudioChannelLayout)
 };
 
-
+static std::vector<TagType> g_metadataBoolVector = {
+    Tag::VIDEO_COLOR_RANGE,
+    Tag::VIDEO_IS_HDR_VIVID
+};
 
 bool SetMetaData(Meta& meta, const TagType& tag, int32_t& value)
 {
     auto iter = g_metadataGetterSetterMap.find(tag);
     if (iter == g_metadataGetterSetterMap.end()) {
+        if (std::find(g_metadataBoolVector.begin(), g_metadataBoolVector.end(), tag) != g_metadataBoolVector.end()) {
+            meta.SetData(tag, value != 0 ? true : false);
+            return true;
+        }
         meta.SetData(tag, value);
         return true;
     }
@@ -102,6 +109,12 @@ bool GetMetaData(const Meta& meta, const TagType& tag, int32_t& value)
 {
     auto iter = g_metadataGetterSetterMap.find(tag);
     if (iter == g_metadataGetterSetterMap.end()) {
+        if (std::find(g_metadataBoolVector.begin(), g_metadataBoolVector.end(), tag) != g_metadataBoolVector.end()) {
+            bool valueBool = false;
+            FALSE_RETURN_V(meta.GetData(tag, valueBool), false);
+            value = valueBool ? 1 : 0;
+            return true;
+        }
         return meta.GetData(tag, value);
     }
     return iter->second.second(meta, tag, value);
