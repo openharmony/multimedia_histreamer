@@ -481,7 +481,7 @@ int32_t HiPlayerImpl::SetDecryptConfig(const sptr<DrmStandard::IMediaKeySessionS
 {
     (void)keySessionProxy;
     (void)svp;
-     return TransErrorCode(ErrorCode::SUCCESS);
+    return TransErrorCode(ErrorCode::SUCCESS);
 }
 
 void HiPlayerImpl::HandleErrorEvent(const Event& event)
