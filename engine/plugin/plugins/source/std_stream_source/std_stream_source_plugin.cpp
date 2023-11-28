@@ -196,7 +196,7 @@ Seekable StdStreamSourcePlugin::GetSeekable()
     return seekable_;
 }
 
-Status StdStreamSourcePlugin::SeekTo(uint64_t offset)
+Status StdStreamSourcePlugin::SeekToPos(int64_t offset)
 {
     if (seekable_ == Seekable::UNSEEKABLE) {
         MEDIA_LOG_E("source is unseekable!");

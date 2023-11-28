@@ -39,7 +39,7 @@ public:
 
     Seekable GetSeekable() override;
 
-    Status SeekTo(uint64_t offset) override;
+    Status SeekToPos(int64_t offset) override;
 
     std::shared_ptr<Allocator> GetAllocator() override;
 

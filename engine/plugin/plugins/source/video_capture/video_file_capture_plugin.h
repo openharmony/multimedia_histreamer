@@ -46,7 +46,7 @@ public:
     Status Read(std::shared_ptr<Buffer>& buffer, size_t expectedLen) override;
     Status GetSize(uint64_t& size) override;
     Seekable GetSeekable() override;
-    Status SeekTo(uint64_t offset) override;
+    Status SeekToPos(int64_t offset) override;
 
 protected:
     void SetVideoBufferMeta(std::shared_ptr<BufferMeta>& bufferMeta);

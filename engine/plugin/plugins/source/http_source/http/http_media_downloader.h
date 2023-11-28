@@ -35,9 +35,9 @@ public:
     void Pause() override;
     void Resume() override;
     bool Read(unsigned char* buff, unsigned int wantReadLength, unsigned int& realReadLength, bool& isEos) override;
-    bool Seek(int offset) override;
+    bool SeekToPos(int64_t offset) override;
     size_t GetContentLength() const override;
-    double GetDuration() const override;
+    int64_t GetDuration() const override;
     Seekable GetSeekable() const override;
     void SetCallback(Callback* cb) override;
     void SetStatusCallback(StatusCallbackFunc cb) override;

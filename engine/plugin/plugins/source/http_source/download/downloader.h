@@ -69,6 +69,8 @@ class DownloadRequest {
 public:
     DownloadRequest(const std::string& url, DataSaveFunc saveData, StatusCallbackFunc statusCallback,
                     bool requestWholeFile = false);
+    DownloadRequest(const std::string& url, double duration, DataSaveFunc saveData, StatusCallbackFunc statusCallback,
+                    bool requestWholeFile = false);
     size_t GetFileContentLength() const;
     void SaveHeader(const HeaderInfo* header);
     bool IsChunked() const;
@@ -86,11 +88,13 @@ public:
     }
     bool IsClosed() const;
     void Close();
+    double GetDuration();
 
 private:
     void WaitHeaderUpdated() const;
 
     std::string url_;
+    double duration_;
     DataSaveFunc saveData_;
     StatusCallbackFunc statusCallback_;
 
@@ -120,6 +124,7 @@ public:
     void Resume();
     void Stop(bool isAsync = false);
     bool Seek(int64_t offset);
+    void Cancle();
     bool Retry(const std::shared_ptr<DownloadRequest>& request);
 private:
     bool BeginDownload();

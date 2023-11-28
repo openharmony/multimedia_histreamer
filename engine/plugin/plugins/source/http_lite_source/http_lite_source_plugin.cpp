@@ -313,7 +313,7 @@ Seekable HttpSourcePlugin::GetSeekable()
     return !isStream_ ? Seekable::SEEKABLE : Seekable::UNSEEKABLE;
 }
 
-Status HttpSourcePlugin::SeekTo(uint64_t offset)
+Status HttpSourcePlugin::SeekToPos(int64_t offset)
 {
     OSAL::ScopedLock lock(httpMutex_);
     unsigned int readPos = 0;

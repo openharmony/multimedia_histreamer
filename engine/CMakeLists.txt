@@ -50,7 +50,7 @@ IF (CMAKE_CL_64)
 ENDIF (CMAKE_CL_64)
 
 ######################################################
-# include directories
+#include directories
 include_directories(
         ${TOP_DIR}/engine
         ${TOP_DIR}/engine/include
@@ -148,7 +148,10 @@ file(GLOB_RECURSE PLUGINS_STATIC_BUILD_SRCS
         ${TOP_DIR}/engine/plugin/plugins/source/file_source/*.cpp
         )
 
-INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+INCLUDE_DIRECTORIES(BEFORE 
+        ${CMAKE_CURRENT_SOURCE_DIR}/../include
+        ${HISTREAMER_BASE_SRCS} ${PLAYER_SRCS} ${RECORDER_SRCS} ${COMMON_PLUGIN_SRCS} ${AVS3DA_PLUGIN_SRCS} ${PLAT_PLUGIN_SRCS} ../../3rdparty/ohos/utils/native/base/include/
+)
 
 link_directories(
         ${ffmpeg_lib_path}

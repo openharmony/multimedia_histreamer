@@ -255,6 +255,7 @@ bool DemuxerFilter::Configure(const std::string& inPort, const std::shared_ptr<c
     FALSE_LOG_MSG(upstreamMeta->Get<Plugin::Tag::MEDIA_FILE_SIZE>(mediaDataSize_), "Get media file size  failed.");
     FALSE_LOG_MSG(upstreamMeta->Get<Plugin::Tag::MEDIA_SEEKABLE>(seekable_), "Get MEDIA_SEEKABLE failed");
     FALSE_LOG_MSG(upstreamMeta->Get<Plugin::Tag::MEDIA_FILE_URI>(uri_), "Get MEDIA_FILE_URI failed");
+    FALSE_LOG_MSG(upstreamMeta->Get<Plugin::Tag::MEDIA_DURATION>(duration_), "Get MEDIA_DURATION failed");
     return true;
 }
 
@@ -420,6 +421,7 @@ void DemuxerFilter::MediaTypeFound(std::string pluginName)
 void DemuxerFilter::InitMediaMetaData(const Plugin::MediaInfoHelper& mediaInfo)
 {
     mediaMetaData_.globalMeta = std::make_shared<Plugin::Meta>(mediaInfo.globalMeta);
+    mediaMetaData_.globalMeta->Set<Plugin::Tag::MEDIA_DURATION>(duration_);
     mediaMetaData_.trackMetas.clear();
     int trackCnt = 0;
     for (auto& trackMeta : mediaInfo.trackMeta) {

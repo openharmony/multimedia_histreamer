@@ -152,7 +152,7 @@ HWTEST(AudioCaptureTest, testAudioCapturePlugin, TestSize.Level1)
 
     Seekable seekable = audioCapture->GetSeekable();
     ASSERT_EQ(Seekable::UNSEEKABLE, seekable);
-    Status seekSt = audioCapture->SeekTo(300);
+    Status seekSt = audioCapture->SeekToPos(300);
     ASSERT_EQ(seekSt, Status::ERROR_UNIMPLEMENTED);
 
     auto deInitStatus = audioCapture->Deinit();

@@ -50,6 +50,9 @@ public:
     void FlushStart() override;
     void FlushEnd() override;
     Plugin::Seekable GetSeekable() const;
+    ErrorCode SeekToTime(int64_t offset) const;
+    ErrorCode GetBitRates(std::vector<uint32_t>& bitRates) const;
+    ErrorCode SelectBitRate(uint32_t bitRate) const;
 
 private:
     void InitPorts() override;

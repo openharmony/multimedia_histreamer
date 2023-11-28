@@ -117,7 +117,7 @@ Seekable FileFdSourcePlugin::GetSeekable()
     return seekable_;
 }
 
-Status FileFdSourcePlugin::SeekTo(uint64_t offset)
+Status FileFdSourcePlugin::SeekToPos(int64_t offset)
 {
     FALSE_RETURN_V_MSG_E(fd_ != -1 && seekable_ == Seekable::SEEKABLE,
                          Status::ERROR_WRONG_STATE, "no valid fd or no seekable.");
@@ -164,7 +164,7 @@ Status FileFdSourcePlugin::ParseUriInfo(const std::string& uri)
     position_ = offset_;
     seekable_ = OSAL::FileSystem::IsSeekable(fd_) ? Seekable::SEEKABLE : Seekable::UNSEEKABLE;
     if (seekable_ == Seekable::SEEKABLE) {
-        NOK_LOG(SeekTo(0));
+        NOK_LOG(SeekToPos(0));
     }
     MEDIA_LOG_D("Fd: " PUBLIC_LOG_D32 ", offset: " PUBLIC_LOG_D64 ", size: " PUBLIC_LOG_U64, fd_, offset_, size_);
     return Status::OK;

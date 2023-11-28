@@ -193,7 +193,7 @@ Seekable FileSourcePlugin::GetSeekable()
     return seekable_;
 }
 
-Status FileSourcePlugin::SeekTo(uint64_t offset)
+Status FileSourcePlugin::SeekToPos(int64_t offset)
 {
     if (!fp_ || (offset > fileSize_) || (position_ == offset)) {
         MEDIA_LOG_E("Invalid operation");
