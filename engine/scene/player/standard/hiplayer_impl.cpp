@@ -477,6 +477,13 @@ int32_t HiPlayerImpl::GetVideoHeight()
     return videoHeight_;
 }
 
+int32_t HiPlayerImpl::SetDecryptConfig(const sptr<DrmStandard::IMediaKeySessionService> &keySessionProxy, bool svp)
+{
+    (void)keySessionProxy;
+    (void)svp;
+    return TransErrorCode(ErrorCode::SUCCESS);
+}
+
 void HiPlayerImpl::HandleErrorEvent(const Event& event)
 {
     ErrorCode errorCode = ErrorCode::ERROR_UNKNOWN;
