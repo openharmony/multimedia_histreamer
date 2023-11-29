@@ -82,7 +82,10 @@ public:
     int32_t SetAudioRendererInfo(const int32_t contentType, const int32_t streamUsage,
                                  const int32_t rendererFlag) override;
     int32_t SetAudioInterruptMode(const int32_t interruptMode) override;
-    int32_t SetDecryptConfig(const sptr<DrmStandard::IMediaKeySessionService> &keySessionProxy, bool svp) override;
+#ifdef SUPPORT_DRM
+    int32_t SetDecryptConfig(const sptr<OHOS::DrmStandard::IMediaKeySessionService> &keySessionProxy,
+        bool svp) override;
+#endif
     int32_t SelectBitRate(uint32_t bitRate) override;
 
     // internal interfaces
