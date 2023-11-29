@@ -425,7 +425,7 @@ private:
             }
             T value;
             if (AnyCast(operand, value)) {
-                parcel.WriteInt32(static_cast<int32_t>(value));
+                WriteValueToParcel(value, parcel);
                 return true;
             }
             return false;
@@ -501,7 +501,7 @@ private:
             }
             T value;
             if (AnyCast(operand, value)) {
-                parcel.WriteInt32(static_cast<int32_t>(value));
+                WriteValueToParcel(value, parcel);
                 return true;
             }
             return false;

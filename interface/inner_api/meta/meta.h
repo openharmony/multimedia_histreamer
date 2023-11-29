@@ -277,6 +277,20 @@ public:
         map_[tag] = value;
     }
 
+    template <int N>
+    void SetData(const TagType &tag, char const (&value)[N])
+    {
+        std::string strValue = value;
+        map_[tag] = std::move(strValue);
+    }
+
+    template <int N>
+    void SetData(TagTypeCharSeq tag, char const (&value)[N])
+    {
+        std::string strValue = value;
+        map_[tag] = std::move(strValue);
+    }
+
     template <typename T>
     bool GetData(const TagType& tag, T &value) const
     {
@@ -339,7 +353,7 @@ private:
  * returns <b>False</b> otherwise.
  * @example OHOS::Media::SetMetaData(meta, "audio.aac.profile", value);
  */
-bool SetMetaData(Meta& meta, const TagType& tag, int32_t& value);
+bool SetMetaData(Meta& meta, const TagType& tag, int32_t value);
 
 /**
  * @brief GetMetaData only used for Application interface OH_AVFormat to get Enum value from Meta Object.
@@ -358,7 +372,7 @@ bool GetMetaData(const Meta& meta, const TagType& tag, int32_t& value);
  * returns <b>False</b> otherwise.
  * @example OHOS::Media::SetMetaData(meta, "audio.aac.profile", value);
  */
-bool SetMetaData(Meta& meta, const TagType& tag, int64_t& value);
+bool SetMetaData(Meta& meta, const TagType& tag, int64_t value);
 
 /**
  * @brief GetMetaData only used for Application interface OH_AVFormat to get Enum value from Meta Object.

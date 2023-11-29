@@ -91,7 +91,7 @@ static std::vector<TagType> g_metadataBoolVector = {
     Tag::VIDEO_IS_HDR_VIVID
 };
 
-bool SetMetaData(Meta& meta, const TagType& tag, int32_t& value)
+bool SetMetaData(Meta& meta, const TagType& tag, int32_t value)
 {
     auto iter = g_metadataGetterSetterMap.find(tag);
     if (iter == g_metadataGetterSetterMap.end()) {
@@ -120,7 +120,7 @@ bool GetMetaData(const Meta& meta, const TagType& tag, int32_t& value)
     return iter->second.second(meta, tag, value);
 }
 
-bool SetMetaData(Meta& meta, const TagType& tag, int64_t& value)
+bool SetMetaData(Meta& meta, const TagType& tag, int64_t value)
 {
     auto iter = g_metadataGetterSetterInt64Map.find(tag);
     if (iter == g_metadataGetterSetterInt64Map.end()) {
