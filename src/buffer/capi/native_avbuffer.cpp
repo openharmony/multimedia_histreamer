@@ -127,3 +127,14 @@ int32_t OH_AVBuffer_GetCapacity(OH_AVBuffer *buffer)
     FALSE_RETURN_V_MSG_E(buffer->buffer_->memory_ != nullptr, -1, "buffer's memory is nullptr!");
     return buffer->buffer_->memory_->GetCapacity();
 }
+
+OH_NativeBuffer *OH_AVBuffer_GetNativeBuffer(OH_AVBuffer *buffer)
+{
+    FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "input buffer is nullptr!");
+    FALSE_RETURN_V_MSG_E(buffer->magic_ == MFMagic::MFMAGIC_AVBUFFER, nullptr, "magic error!");
+    FALSE_RETURN_V_MSG_E(buffer->buffer_ != nullptr, nullptr, "buffer is nullptr!");
+    FALSE_RETURN_V_MSG_E(buffer->buffer_->memory_ != nullptr, nullptr, "buffer's memory is nullptr!");
+    sptr<SurfaceBuffer> surfaceBuffer = buffer->buffer_->memory_->GetSurfaceBuffer();
+    FALSE_RETURN_V_MSG_E(surfaceBuffer != nullptr, nullptr, "surfaceBuffer is nullptr!");
+    return surfaceBuffer->SurfaceBufferToNativeBufffer();
+}
