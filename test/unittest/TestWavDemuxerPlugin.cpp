@@ -98,7 +98,7 @@ HWTEST(TestWavDemuxerPlugin, find_wav_demuxer_plugins_get_allocator, TestSize.Le
 
 HWTEST(TestWavDemuxerPlugin, find_wav_demuxer_plugins_set_callback, TestSize.Level1)
 {
-    std::shared_ptr<WavDemuxerPlugin> wavDemuxerPlugin = AudioServerSinkPluginCreate("set callback");
+    std::shared_ptr<WavDemuxerPlugin> wavDemuxerPlugin = WavDemuxerPluginCreate("set callback");
     ASSERT_TRUE(wavDemuxerPlugin != nullptr);
     Callback* cb = new Callback();
     auto status = wavDemuxerPlugin->SetCallback(cb);
@@ -107,14 +107,14 @@ HWTEST(TestWavDemuxerPlugin, find_wav_demuxer_plugins_set_callback, TestSize.Lev
 
 HWTEST(TestWavDemuxerPlugin, find_wav_demuxer_plugins_get_track_count, TestSize.Level1)
 {
-    std::shared_ptr<WavDemuxerPlugin> wavDemuxerPlugin = AudioServerSinkPluginCreate("get track count");
+    std::shared_ptr<WavDemuxerPlugin> wavDemuxerPlugin = WavDemuxerPluginCreate("get track count");
     ASSERT_TRUE(wavDemuxerPlugin != nullptr);
     ASSERT_TRUE(wavDemuxerPlugin->GetTrackCount() == 0);
 }
 
 HWTEST(TestWavDemuxerPlugin, find_wav_demuxer_plugins_select_track, TestSize.Level1)
 {
-    std::shared_ptr<WavDemuxerPlugin> wavDemuxerPlugin = AudioServerSinkPluginCreate("select track");
+    std::shared_ptr<WavDemuxerPlugin> wavDemuxerPlugin = WavDemuxerPluginCreate("select track");
     ASSERT_TRUE(wavDemuxerPlugin != nullptr);
     auto selectStatus = wavDemuxerPlugin->SelectTrack(0);
     ASSERT_TRUE(selectStatus == Status::OK);
@@ -122,7 +122,7 @@ HWTEST(TestWavDemuxerPlugin, find_wav_demuxer_plugins_select_track, TestSize.Lev
 
 HWTEST(TestWavDemuxerPlugin, find_wav_demuxer_plugins_unselect_track, TestSize.Level1)
 {
-    std::shared_ptr<WavDemuxerPlugin> wavDemuxerPlugin = AudioServerSinkPluginCreate("unselect track");
+    std::shared_ptr<WavDemuxerPlugin> wavDemuxerPlugin = WavDemuxerPluginCreate("unselect track");
     ASSERT_TRUE(wavDemuxerPlugin != nullptr);
     auto unselectStatus = wavDemuxerPlugin->UnselectTrack(0);
     ASSERT_TRUE(unselectStatus == Status::OK);
@@ -130,7 +130,7 @@ HWTEST(TestWavDemuxerPlugin, find_wav_demuxer_plugins_unselect_track, TestSize.L
 
 HWTEST(TestWavDemuxerPlugin, find_wav_demuxer_plugins_get_select_track, TestSize.Level1)
 {
-    std::shared_ptr<WavDemuxerPlugin> wavDemuxerPlugin = AudioServerSinkPluginCreate("get select track");
+    std::shared_ptr<WavDemuxerPlugin> wavDemuxerPlugin = WavDemuxerPluginCreate("get select track");
     ASSERT_TRUE(wavDemuxerPlugin != nullptr);
     std::vector<int32_t> trackIds = new std::vector<int32_t>[1];
     auto selectStatus = wavDemuxerPlugin->GetSelectedTracks(trackIds);
