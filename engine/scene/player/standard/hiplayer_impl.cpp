@@ -477,12 +477,15 @@ int32_t HiPlayerImpl::GetVideoHeight()
     return videoHeight_;
 }
 
-int32_t HiPlayerImpl::SetDecryptConfig(const sptr<DrmStandard::IMediaKeySessionService> &keySessionProxy, bool svp)
+#ifdef SUPPORT_DRM
+int32_t HiPlayerImpl::SetDecryptConfig(const sptr<OHOS::DrmStandard::IMediaKeySessionService> &keySessionProxy,
+    bool svp)
 {
     (void)keySessionProxy;
     (void)svp;
     return TransErrorCode(ErrorCode::SUCCESS);
 }
+#endif
 
 void HiPlayerImpl::HandleErrorEvent(const Event& event)
 {

@@ -86,5 +86,10 @@ if (hst_is_lite_sys) {
       "graphic_2d:surface",
       "player_framework:media_format",
     ]
+
+    if (histreamer_enable_drm) {
+      defines = [ "SUPPORT_DRM" ]
+      external_deps += [ "drm_framework:drm_framework" ]
+    }
   }
 }
