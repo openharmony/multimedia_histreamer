@@ -28,6 +28,11 @@ constexpr int WATER_LINE = RING_BUFFER_SIZE / 30; //30  WATER_LINE:8192
 constexpr int RING_BUFFER_SIZE = 5 * 1024 * 1024;
 constexpr int WATER_LINE = 8192; //  WATER_LINE:8192
 #endif
+constexpr int MAX_HEADER_SIZE = 30 * 1024; // max header size
+constexpr int FIRST_BUFFERING_SIZE = 200 * 1024;
+constexpr int SECOND_BUFFERING_SIZE = 400 * 1024;
+constexpr int OTHER_BUFFERING_SIZE = 2 * 1024 * 1024;
+
 }
 
 HttpMediaDownloader::HttpMediaDownloader() noexcept
@@ -89,16 +94,22 @@ bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
 {
     FALSE_RETURN_V(buffer_ != nullptr, false);
     isEos = false;
-    while (buffer_->GetSize() == 0) {
-        isEos = downloadRequest_->IsEos();
-        bool isClosed = downloadRequest_->IsClosed();
-        if (isEos || isClosed) {
-            MEDIA_LOG_D("HttpMediaDownloader read return, isEos: " PUBLIC_LOG_D32 ", isClosed: "
-                PUBLIC_LOG_D32, isEos, isClosed);
-            realReadLength = 0;
-            return false;
+    if ((buffer_->GetSize() < wantReadLength) && !isSeeking_) {   
+        int threshold = 0;
+        if (bufferTimes_ == 0) {
+            threshold = FIRST_BUFFERING_SIZE;
+        } else if (bufferTimes_ == 1) {
+            threshold = SECOND_BUFFERING_SIZE;
+        } else {
+            threshold = OTHER_BUFFERING_SIZE;
         }
-        OSAL::SleepFor(5); // 5
+        bufferTimes_++;
+        while (buffer_->GetSize() <= threshold) {
+            OSAL::SleepFor(5); // 5
+            if (isSeeking_) {     
+                break;
+            }
+        }
     }
     if (buffer_->GetMediaOffset() + wantReadLength <= downloadRequest_->GetFileContentLength() &&
         (buffer_->GetSize() < wantReadLength)) {
@@ -111,6 +122,16 @@ bool HttpMediaDownloader::Read(unsigned char* buff, unsigned int wantReadLength,
     realReadLength = buffer_->ReadBuffer(buff, wantReadLength, 2); // wait 2 times
     MEDIA_LOG_D("Read: wantReadLength " PUBLIC_LOG_D32 ", realReadLength " PUBLIC_LOG_D32 ", isEos "
                 PUBLIC_LOG_D32, wantReadLength, realReadLength, isEos);
+    if ((haveReadSeeked_ < MAX_HEADER_SIZE) && isSeeking_) {
+        haveReadSeeked_ += realReadLength;
+    } else {
+        haveReadSeeked_ = 0;
+        isSeeking_ = false;
+    }    
+    if ((buffer_->GetSize() == 0) && downloadRequest_->IsEos() && !isSeeking_) {
+        isEos = downloadRequest_->IsEos();
+        return false;
+    }   
     return true;
 }
 
@@ -121,6 +142,7 @@ bool HttpMediaDownloader::SeekToPos(int64_t offset)
     if (buffer_->Seek(offset)) {
         return true;
     }
+    isSeeking_ = true;
     buffer_->SetActive(false); // First clear buffer, avoid no available buffer then task pause never exit.
     downloader_->Pause();
     buffer_->Clear();
