@@ -45,6 +45,6 @@ ohos_source_set("codec_filters") {
     external_deps = [
         "graphic_2d:surface",
         "ipc:ipc_single",
-     ]
+    ]
   }
 }
