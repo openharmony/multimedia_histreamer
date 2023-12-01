@@ -56,6 +56,9 @@ private:
     StatusCallbackFunc statusCallback_ {nullptr};
     bool aboveWaterline_ {false};
     bool startedPlayStatus_ {false};
+    int bufferTimes_ = 0;
+    bool isSeeking_ {false};
+    int haveReadSeeked_ = 0;
 };
 }
 }

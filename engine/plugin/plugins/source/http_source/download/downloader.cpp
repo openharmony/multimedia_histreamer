@@ -25,7 +25,7 @@ namespace Media {
 namespace Plugin {
 namespace HttpPlugin {
 namespace {
-constexpr int PER_REQUEST_SIZE = 48 * 1024;
+constexpr int PER_REQUEST_SIZE = 48 * 1024 * 10;
 constexpr unsigned int SLEEP_TIME = 5;    // Sleep 5ms
 constexpr size_t RETRY_TIMES = 200;  // Retry 200 times
 constexpr size_t REQUEST_QUEUE_SIZE = 50;
