@@ -33,8 +33,8 @@ ohos_source_set("demuxer_filter") {
   ]
   if (hst_is_standard_sys) {
     external_deps = [
-        "graphic_2d:surface",
-        "ipc:ipc_single",
+      "graphic_2d:surface",
+      "ipc:ipc_single",
     ]
   }
 }
