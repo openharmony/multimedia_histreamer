@@ -91,6 +91,7 @@ if (hst_is_lite_sys) {
       "graphic_2d:surface",
       "hilog:libhilog",
       "hitrace:hitrace_meter",
+      "ipc:ipc_single",
     ]
 
     if (defined(config_ohos_histreamer_stack_size) &&

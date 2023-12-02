@@ -89,6 +89,7 @@ if (hst_is_lite_sys) {
         "graphic_2d:surface",
         "graphic_2d:sync_fence",
         "hilog:libhilog",
+        "ipc:ipc_single",
       ]
     }
   }
@@ -253,6 +254,9 @@ ohos_source_set("histreamer_plugin_core") {
       "//drivers/peripheral/display/interfaces/include",
     ]
     deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
-    external_deps = [ "graphic_2d:surface" ]
+    external_deps = [
+      "graphic_2d:surface",
+      "ipc:ipc_single",
+    ]
   }
 }
