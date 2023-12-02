@@ -59,6 +59,8 @@ private:
     int bufferTimes_ = 0;
     bool isSeeking_ {false};
     int haveReadSeeked_ = 0;
+    int64_t haveRead_ = 0;
+    int64_t headerSize_ = 0;
 };
 }
 }
