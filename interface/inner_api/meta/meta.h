@@ -165,7 +165,6 @@ public:
         tagCharSeq == Tag::AUDIO_AAC_IS_ADTS or
         tagCharSeq == Tag::AUDIO_COMPRESSION_LEVEL or
         tagCharSeq == Tag::AUDIO_BITS_PER_CODED_SAMPLE or
-        tagCharSeq == Tag::MEDIA_TRACK_COUNT or
         tagCharSeq == Tag::REGULAR_TRACK_ID or
         tagCharSeq == Tag::VIDEO_SCALE_TYPE or 
         tagCharSeq == Tag::VIDEO_I_FRAME_INTERVAL or
@@ -211,18 +210,29 @@ public:
         tagCharSeq == Tag::MEDIA_LYRICS or
         tagCharSeq == Tag::MEDIA_CODEC_NAME, std::string, ValueType::STRING);
 
-    Meta& operator=(const Meta& other)
+    Meta &operator=(const Meta &other)
     {
         map_ = other.map_;
+        return *this;
+    }
+
+    Meta &operator=(Meta &&other)
+    {
+        swap(map_, other.map_);
         return *this;
     }
 
     Meta() {
     };
 
-    Meta(const Meta& other)
+    Meta(const Meta &other)
     {
         map_ = other.map_;
+    }
+
+    Meta(Meta &&other)
+    {
+        swap(map_, other.map_);
     }
 
     Any& operator[](const TagType& tag)

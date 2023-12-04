@@ -55,6 +55,7 @@ DEFINE_METADATA_SETTER_GETTER_FUNC(HEVCProfile, int32_t)
 DEFINE_METADATA_SETTER_GETTER_FUNC(HEVCLevel, int32_t)
 DEFINE_METADATA_SETTER_GETTER_FUNC(ChromaLocation, int32_t)
 DEFINE_METADATA_SETTER_GETTER_FUNC(FileType, int32_t)
+DEFINE_METADATA_SETTER_GETTER_FUNC(VideoEncodeBitrateMode, int32_t)
 
 DEFINE_METADATA_SETTER_GETTER_FUNC(AudioChannelLayout, int64_t)
 
@@ -76,7 +77,8 @@ static std::map<TagType, std::pair<MetaSetterFunction, MetaGetterFunction>> g_me
     DEFINE_METADATA_SETTER_GETTER(Tag::VIDEO_H265_PROFILE, HEVCProfile),
     DEFINE_METADATA_SETTER_GETTER(Tag::VIDEO_H265_LEVEL, HEVCLevel),
     DEFINE_METADATA_SETTER_GETTER(Tag::VIDEO_CHROMA_LOCATION, ChromaLocation),
-    DEFINE_METADATA_SETTER_GETTER(Tag::MEDIA_FILE_TYPE, FileType)
+    DEFINE_METADATA_SETTER_GETTER(Tag::MEDIA_FILE_TYPE, FileType),
+    DEFINE_METADATA_SETTER_GETTER(Tag::VIDEO_ENCODE_BITRATE_MODE, VideoEncodeBitrateMode)
 };
 
 using  MetaSetterInt64Function = std::function<bool(Meta&, const TagType&, int64_t&)>;
@@ -88,7 +90,11 @@ static std::map<TagType, std::pair<MetaSetterInt64Function, MetaGetterInt64Funct
 
 static std::vector<TagType> g_metadataBoolVector = {
     Tag::VIDEO_COLOR_RANGE,
-    Tag::VIDEO_IS_HDR_VIVID
+    Tag::VIDEO_REQUEST_I_FRAME,
+    Tag::VIDEO_IS_HDR_VIVID,
+    Tag::MEDIA_HAS_VIDEO,
+    Tag::MEDIA_HAS_AUDIO,
+    Tag::MEDIA_END_OF_STREAM
 };
 
 bool SetMetaData(Meta& meta, const TagType& tag, int32_t value)
@@ -159,6 +165,7 @@ static Any defaultHEVCProfile = HEVCProfile::HEVC_PROFILE_UNKNOW;
 static Any defaultHEVCLevel = HEVCLevel::HEVC_LEVEL_UNKNOW;
 static Any defaultChromaLocation = ChromaLocation::CHROMA_LOC_BOTTOM;
 static Any defaultFileType = FileType::UNKNOW;
+static Any defaultVideoEncodeBitrateMode = VideoEncodeBitrateMode::CBR;
 
 static Any defaultAudioChannelLayout = AudioChannelLayout::UNKNOWN_CHANNEL_LAYOUT;
 static Any defaultAudioAacProfile = AudioAacProfile::ELD;
@@ -179,7 +186,10 @@ static std::map<TagType, const Any &> g_metadataDefaultValueMap = {
     {Tag::VIDEO_H265_LEVEL, defaultHEVCLevel},
     {Tag::VIDEO_CHROMA_LOCATION, defaultChromaLocation},
     {Tag::MEDIA_FILE_TYPE, defaultFileType},
+    {Tag::VIDEO_ENCODE_BITRATE_MODE, defaultVideoEncodeBitrateMode},
+
     // Int32
+    {Tag::APP_UID, defaultInt32},
     {Tag::APP_PID, defaultInt32},
     {Tag::APP_TOKEN_ID, defaultInt32},
     {Tag::REQUIRED_IN_BUFFER_CNT, defaultInt32},
@@ -204,14 +214,17 @@ static std::map<TagType, const Any &> g_metadataDefaultValueMap = {
     {Tag::VIDEO_MAX_SURFACE_NUM, defaultInt32},
     {Tag::VIDEO_H264_LEVEL, defaultInt32},
     {Tag::MEDIA_TRACK_COUNT, defaultInt32},
-    {Tag::MEDIA_HAS_VIDEO, defaultInt32},
-    {Tag::MEDIA_HAS_AUDIO, defaultInt32},
     {Tag::AUDIO_AAC_IS_ADTS, defaultInt32},
     {Tag::AUDIO_COMPRESSION_LEVEL, defaultInt32},
     {Tag::AUDIO_BITS_PER_CODED_SAMPLE, defaultInt32},
-    {Tag::MEDIA_TRACK_COUNT, defaultInt32},
-    {Tag::MEDIA_HAS_VIDEO, defaultInt32},
-    {Tag::MEDIA_HAS_AUDIO, defaultInt32},
+    {Tag::REGULAR_TRACK_ID, defaultInt32},
+    {Tag::VIDEO_SCALE_TYPE, defaultInt32},
+    {Tag::VIDEO_I_FRAME_INTERVAL, defaultInt32},
+    {Tag::MEDIA_PROFILE, defaultInt32},
+    {Tag::VIDEO_ENCODE_QUALITY, defaultInt32},
+    {Tag::AUDIO_AAC_SBR, defaultInt32},
+    {Tag::AUDIO_FLAC_COMPLIANCE_LEVEL, defaultInt32},
+    {Tag::MEDIA_LEVEL, defaultInt32},
     // String
     {Tag::MIME_TYPE, defaultString},
     {Tag::MEDIA_FILE_URI, defaultString},
@@ -232,22 +245,27 @@ static std::map<TagType, const Any &> g_metadataDefaultValueMap = {
     {Tag::MEDIA_AUTHOR, defaultString},
     {Tag::MEDIA_COMPOSER, defaultString},
     {Tag::MEDIA_LYRICS, defaultString},
+    {Tag::MEDIA_CODEC_NAME, defaultString},
     // Double
     {Tag::VIDEO_CAPTURE_RATE, defaultDouble},
     {Tag::VIDEO_FRAME_RATE, defaultDouble},
     // Bool
     {Tag::VIDEO_COLOR_RANGE, defaultBool},
+    {Tag::VIDEO_REQUEST_I_FRAME, defaultBool},
     {Tag::VIDEO_IS_HDR_VIVID, defaultBool},
-    // UInt64
+    {Tag::MEDIA_HAS_VIDEO, defaultBool},
+    {Tag::MEDIA_HAS_AUDIO, defaultBool},
+    {Tag::MEDIA_END_OF_STREAM, defaultBool},
+    // Int64
     {Tag::MEDIA_FILE_SIZE, defaultUInt64},
     {Tag::MEDIA_POSITION, defaultUInt64},
-    // Int64
     {Tag::APP_FULL_TOKEN_ID, defaultInt64},
     {Tag::MEDIA_DURATION, defaultInt64},
     {Tag::MEDIA_BITRATE, defaultInt64},
     {Tag::MEDIA_START_TIME, defaultInt64},
     {Tag::USER_FRAME_PTS, defaultInt64},
     {Tag::USER_PUSH_DATA_TIME, defaultInt64},
+    {Tag::MEDIA_TIME_STAMP, defaultInt64},
     // AudioChannelLayout UINT64_T
     {Tag::AUDIO_CHANNEL_LAYOUT, defaultAudioChannelLayout},
     {Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, defaultAudioChannelLayout},
@@ -258,6 +276,8 @@ static std::map<TagType, const Any &> g_metadataDefaultValueMap = {
     // vector<uint8_t>
     {Tag::MEDIA_CODEC_CONFIG, defaultVectorUInt8},
     {Tag::MEDIA_COVER, defaultVectorUInt8},
+    {Tag::AUDIO_VORBIS_IDENTIFICATION_HEADER, defaultVectorUInt8},
+    {Tag::AUDIO_VORBIS_SETUP_HEADER, defaultVectorUInt8},
     // vector<Plugin::VideoBitStreamFormat>
     {Tag::VIDEO_BIT_STREAM_FORMAT, defaultVectorVideoBitStreamFormat}};
 

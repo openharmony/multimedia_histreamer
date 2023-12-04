@@ -23,6 +23,8 @@ bool Any::BaseTypesToParcel(const Any *operand, MessageParcel &parcel) noexcept
     ret &= parcel.WriteString(std::string(type));
     if (Any::IsSameTypeWith<int32_t>(*operand)) {
         ret &= parcel.WriteInt32(*AnyCast<int32_t>(operand));
+    } else if (Any::IsSameTypeWith<bool>(*operand)) {
+        ret &= parcel.WriteBool(*AnyCast<bool>(operand));
     } else if (Any::IsSameTypeWith<int64_t>(*operand)) {
         ret &= parcel.WriteInt64(*AnyCast<int64_t>(operand));
     } else if (Any::IsSameTypeWith<float>(*operand)) {
@@ -44,6 +46,10 @@ int Any::BaseTypesFromParcel(Any *operand, MessageParcel &parcel) noexcept
     std::string type = parcel.ReadString();
     if (MakeAny<int32_t>().SameTypeWith(std::string_view(type))) {
         Any tmp(parcel.ReadInt32());
+        operand->Swap(tmp);
+        return 0;
+    } else if (MakeAny<bool>().SameTypeWith(std::string_view(type))) {
+        Any tmp(parcel.ReadBool());
         operand->Swap(tmp);
         return 0;
     } else if (MakeAny<int64_t>().SameTypeWith(std::string_view(type))) {
