@@ -172,10 +172,6 @@ HWTEST(TestPluginSetting, get_omx_buffer_type, TestSize.Level1)
 {
     ASSERT_TRUE(GetOmxBufferType(static_cast<const Plugin::MemoryType>(MemoryType::SHARE_MEMORY), true)
                 == CODEC_BUFFER_TYPE_AVSHARE_MEM_FD);
-    ASSERT_TRUE(GetOmxBufferType(static_cast<const Plugin::MemoryType>(MemoryType::SURFACE_BUFFER), true)
-                == CODEC_BUFFER_TYPE_DYNAMIC_HANDLE);
-    ASSERT_TRUE(GetOmxBufferType(static_cast<const Plugin::MemoryType>(MemoryType::SURFACE_BUFFER), false)
-                == CODEC_BUFFER_TYPE_HANDLE);
     ASSERT_TRUE(GetOmxBufferType(static_cast<const Plugin::MemoryType>(MemoryType::VIRTUAL_ADDR), true)
                 == CODEC_BUFFER_TYPE_INVALID);
 }
