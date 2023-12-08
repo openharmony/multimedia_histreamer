@@ -28,17 +28,17 @@ public:
     ~AVHardwareMemory() override;
     MemoryType GetMemoryType() override;
     int32_t GetFileDescriptor() override;
-    int32_t SyncStart() override;
-    int32_t SyncEnd() override;
+    Status SyncStart() override;
+    Status SyncEnd() override;
     MemoryFlag GetMemoryFlag() override;
 
 private:
-    int32_t Init() override;
-    int32_t Init(MessageParcel &parcel) override;
+    Status Init() override;
+    Status Init(MessageParcel &parcel) override;
     bool WriteToMessageParcel(MessageParcel &parcel) override;
     bool ReadFromMessageParcel(MessageParcel &parcel) override;
     void Close() noexcept;
-    int32_t MapMemoryAddr();
+    Status MapMemoryAddr();
     std::mutex mutex_;
     int32_t fd_;
     bool isStartSync_;

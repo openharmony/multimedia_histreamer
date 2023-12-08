@@ -135,14 +135,14 @@ public:
     {
     }
 
-    Any(const Any& other) : functionTable_(other.functionTable_)
+    __attribute__((no_sanitize("cfi"))) Any(const Any &other) : functionTable_(other.functionTable_)
     {
         if (other.HasValue()) {
             functionTable_->copy(storage_, other.storage_);
         }
     }
 
-    Any(Any&& other) noexcept : functionTable_(other.functionTable_)
+    __attribute__((no_sanitize("cfi"))) Any(Any &&other) noexcept : functionTable_(other.functionTable_)
     {
         if (other.HasValue()) {
             functionTable_->move(storage_, other.storage_);
@@ -267,7 +267,7 @@ public:
     /**
      * Destroy the inner content if exists.
      */
-    void Reset() noexcept
+    void __attribute__((no_sanitize("cfi"))) Reset() noexcept
     {
         if (HasValue()) {
             functionTable_->destroy(storage_);
@@ -312,21 +312,21 @@ public:
         return functionTable_->type();
     }
 #else
-    std::string_view TypeName() const noexcept
+    std::string_view __attribute__((no_sanitize("cfi"))) TypeName() const noexcept
     {
         if (!HasValue()) {
             return "empty"; // no value
         }
         return functionTable_->type_name();
     }
-    bool ToParcel(MessageParcel &parcel) const noexcept
+    bool __attribute__((no_sanitize("cfi"))) ToParcel(MessageParcel &parcel) const noexcept
     {
         if (!HasValue()) {
             return false; // no value
         }
         return functionTable_->toParcel(this, parcel);
     }
-    bool FromParcel(MessageParcel &parcel) const noexcept
+    bool __attribute__((no_sanitize("cfi"))) FromParcel(MessageParcel &parcel) const noexcept
     {
         return functionTable_->fromParcel(const_cast<Any *>(this), parcel);
     }
@@ -341,7 +341,7 @@ public:
         return IsSameType(functionTable_->type(), otherInfo);
     }
 #else
-    bool SameTypeWith(std::string_view otherTypeName) const noexcept
+    bool __attribute__((no_sanitize("cfi"))) SameTypeWith(std::string_view otherTypeName) const noexcept
     {
         if (functionTable_ == nullptr) {
             return false;
@@ -350,7 +350,7 @@ public:
     }
 #endif
 
-    bool SameTypeWith(const Any& other) const noexcept
+    bool __attribute__((no_sanitize("cfi"))) SameTypeWith(const Any &other) const noexcept
     {
 #ifndef HST_ANY_WITH_NO_RTTI
         return IsSameType(functionTable_->type(), other.Type());
@@ -651,7 +651,7 @@ private:
     }
 
     template <typename DecayedValueType, typename... Args>
-    DecayedValueType& DoEmplace(Args&&... args)
+    DecayedValueType &__attribute__((no_sanitize("cfi"))) DoEmplace(Args &&...args)
     {
         functionTable_ = GetFunctionTable<DecayedValueType>();
         DecayedValueType* ptr = nullptr;
@@ -665,7 +665,7 @@ private:
         return *ptr;
     }
 
-    void MoveFrom(Any&& other) noexcept
+    void __attribute__((no_sanitize("cfi"))) MoveFrom(Any &&other) noexcept
     {
         if (other.HasValue()) {
             functionTable_ = other.functionTable_;

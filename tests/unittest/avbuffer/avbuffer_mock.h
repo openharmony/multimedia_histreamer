@@ -17,23 +17,23 @@
 #define AVBUFFER_MOCK_H
 
 #include <string>
-#include "avcodec_common.h"
 #include "avformat_mock.h"
-#include "native_avcodec_base.h"
+#include "native_avbuffer.h"
 #include "nocopyable.h"
 #include "surface.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 class AVBufferMock : public NoCopyable {
 public:
     virtual ~AVBufferMock() = default;
     virtual uint8_t *GetAddr() = 0;
     virtual int32_t GetCapacity() = 0;
-    virtual OH_AVBufferAttr GetBufferAttr() = 0;
-    virtual int32_t SetBufferAttr(OH_AVBufferAttr &attr) = 0;
+    virtual int32_t GetBufferAttr(OH_AVCodecBufferAttr &attr) = 0;
+    virtual int32_t SetBufferAttr(const OH_AVCodecBufferAttr &attr) = 0;
     virtual std::shared_ptr<FormatMock> GetParameter() = 0;
     virtual int32_t SetParameter(const std::shared_ptr<FormatMock> &format) = 0;
+    virtual sptr<SurfaceBuffer> GetNativeBuffer() = 0;
     virtual int32_t Destroy() = 0;
 };
 
@@ -45,6 +45,6 @@ private:
     AVBufferMockFactory() = delete;
     ~AVBufferMockFactory() = delete;
 };
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
 #endif // AVBUFFER_MOCK_H

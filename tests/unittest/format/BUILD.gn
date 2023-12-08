@@ -57,10 +57,12 @@ ohos_unittest("format_capi_unit_test") {
 
   cflags = avcodec_unittest_cflags
 
-  sources = [
-    "./avformat_unit_test.cpp",
-    "./capi/avformat_capi_mock.cpp",
-    "./capi/avformat_capi_mock_factory.cpp",
+  sources = [ "./avformat_unit_test.cpp" ]
+
+  defines = [
+    "HST_ANY_WITH_NO_RTTI",
+    "MEDIA_OHOS",
+    "AVFORMAT_CAPI_UNIT_TEST",
   ]
 
   public_deps = [ "../common:media_foundation_capi_unit_test" ]
@@ -77,11 +79,11 @@ ohos_unittest("format_inner_unit_test") {
 
   cflags = avcodec_unittest_cflags
 
-  sources = [
-    "./avformat_unit_test.cpp",
-    "./inner/avformat_inner_mock.cpp",
-    "./inner/avformat_inner_mock_factory.cpp",
-  ]
+  sources = [ "./avformat_unit_test.cpp" ]
 
+  defines = [
+    "HST_ANY_WITH_NO_RTTI",
+    "MEDIA_OHOS",
+  ]
   public_deps = [ "../common:media_foundation_inner_unit_test" ]
 }

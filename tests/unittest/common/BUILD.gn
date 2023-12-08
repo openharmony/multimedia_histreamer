@@ -21,12 +21,13 @@ config("media_foundation_capi_unit_test_config") {
     "./include",
     "../avbuffer",
     "../avbuffer/capi",
+    "../format",
+    "../format/capi",
     "$histreamer_root_dir/interface",
     "$histreamer_root_dir/interface/inner_api",
     "$histreamer_root_dir/interface/kits/c",
     "$histreamer_root_dir/interface/inner_api/buffer",
     "$histreamer_root_dir/interface/inner_api/meta",
-    "$histreamer_root_dir/src/buffer/avbuffer/capi",
     "$histreamer_root_dir/src/buffer/avbuffer/include",
     "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/surface",
     "$histreamer_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
@@ -60,6 +61,11 @@ config("media_foundation_capi_unit_test_config") {
   ]
 
   cflags_cc = cflags
+
+  defines = [
+    "HST_ANY_WITH_NO_RTTI",
+    "MEDIA_OHOS",
+  ]
 }
 
 ohos_static_library("media_foundation_capi_unit_test") {
@@ -72,16 +78,15 @@ ohos_static_library("media_foundation_capi_unit_test") {
   public_configs = [ ":media_foundation_capi_unit_test_config" ]
 
   sources = [
-    # "../avbuffer/capi/avbuffer_capi_mock.cpp",
-    # "../avbuffer/capi/avbuffer_capi_mock_factory.cpp",
-    # "../format/capi/avformat_capi_mock.cpp",
-    # "../format/capi/avformat_capi_mock_factory.cpp",
+    "../avbuffer/capi/avbuffer_capi_mock.cpp",
+    "../avbuffer/capi/avbuffer_capi_mock_factory.cpp",
+    "../format/capi/avformat_capi_mock.cpp",
+    "../format/capi/avformat_capi_mock_factory.cpp",
   ]
 
-  public_deps = [
+  deps = [
     "$histreamer_root_dir/src:media_foundation",
     "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/googletest:gtest",
   ]
 
   external_deps = [
@@ -109,11 +114,13 @@ config("media_foundation_inner_unit_test_config") {
     "./include",
     "../avbuffer",
     "../avbuffer/inner",
+    "../format",
+    "../format/inner",
     "$histreamer_root_dir/interface",
+    "$histreamer_root_dir/interface/kits/c",
     "$histreamer_root_dir/interface/inner_api",
     "$histreamer_root_dir/interface/inner_api/buffer",
     "$histreamer_root_dir/interface/inner_api/meta",
-    "$histreamer_root_dir/src/buffer/avbuffer/capi",
     "$histreamer_root_dir/src/buffer/avbuffer/include",
     "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/surface",
     "$histreamer_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
@@ -145,6 +152,11 @@ config("media_foundation_inner_unit_test_config") {
   ]
 
   cflags_cc = cflags
+
+  defines = [
+    "HST_ANY_WITH_NO_RTTI",
+    "MEDIA_OHOS",
+  ]
 }
 
 ohos_static_library("media_foundation_inner_unit_test") {
@@ -157,16 +169,15 @@ ohos_static_library("media_foundation_inner_unit_test") {
   public_configs = [ ":media_foundation_inner_unit_test_config" ]
 
   sources = [
-    # "../avbuffer/inner/avbuffer_inner_mock.cpp",
-    # "../avbuffer/inner/avbuffer_inner_mock_factory.cpp",
-    # "../format/inner/avformat_inner_mock.cpp",
-    # "../format/inner/avformat_inner_mock_factory.cpp",
+    "../avbuffer/inner/avbuffer_inner_mock.cpp",
+    "../avbuffer/inner/avbuffer_inner_mock_factory.cpp",
+    "../format/inner/avformat_inner_mock.cpp",
+    "../format/inner/avformat_inner_mock_factory.cpp",
   ]
 
-  public_deps = [
+  deps = [
     "$histreamer_root_dir/src:media_foundation",
     "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/googletest:gtest",
   ]
 
   external_deps = [

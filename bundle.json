@@ -109,10 +109,23 @@
                 "name": "//foundation/multimedia/histreamer/src:media_foundation",
                 "header": {
                   "header_files": [
+                    "buffer/avsharedmemory.h",
+                    "buffer/avsharedmemorybase.h",
                     "buffer/avallocator.h",
                     "buffer/avbuffer.h",
                     "buffer/avbuffer_common.h",
-                    "meta/meta.h"
+                    "meta/format.h",
+                    "meta/any.h",
+                    "meta/source_types.h",
+                    "meta/video_types.h",
+                    "meta/audio_types.h",
+                    "meta/media_types.h",
+                    "meta/meta.h",
+                    "meta/meta_key.h",
+                    "meta/mime_type.h",
+                    "cpp_ext/type_cast_ext.h",
+                    "common/status.h",
+                    "common/native_mfmagic.h"
                   ],
                   "header_base": "//foundation/multimedia/histreamer/interface/inner_api"
                 }

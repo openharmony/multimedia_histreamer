@@ -66,18 +66,17 @@ AVVirtualMemory::~AVVirtualMemory()
     base_ = nullptr;
 }
 
-int32_t AVVirtualMemory::Init()
+Status AVVirtualMemory::Init()
 {
     int32_t allocSize = align_ ? (capacity_ + align_ - 1) : capacity_;
     base_ = static_cast<uint8_t *>(allocator_->Alloc(allocSize));
-    FALSE_RETURN_V_MSG_E(base_ != nullptr, static_cast<int32_t>(Status::ERROR_NO_MEMORY),
-                         "Alloc AVVirtualMemory failed");
+    FALSE_RETURN_V_MSG_E(base_ != nullptr, Status::ERROR_NO_MEMORY, "Alloc AVVirtualMemory failed");
 
     uintptr_t addrBase = reinterpret_cast<uintptr_t>(base_);
     offset_ = static_cast<size_t>(AlignUp(addrBase, static_cast<uintptr_t>(offset_)) - addrBase);
 
     MEDIA_LOG_DD("enter init, instance: 0x%{public}06" PRIXPTR, FAKE_POINTER(this));
-    return static_cast<int32_t>(Status::OK);
+    return Status::OK;
 }
 
 MemoryType AVVirtualMemory::GetMemoryType()

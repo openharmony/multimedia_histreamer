@@ -17,6 +17,7 @@ group("media_foundation_unit_test") {
   if (hst_is_standard_sys) {
     deps = [
       "unittest/avbuffer:avbuffer_unit_test",
+      "unittest/format:format_unit_test",
       "unittest/meta:meta_unit_test",
     ]
   }

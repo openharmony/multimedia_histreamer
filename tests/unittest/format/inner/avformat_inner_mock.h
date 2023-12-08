@@ -17,10 +17,10 @@
 #define AVFORMAT_INNER_MOCK_H
 
 #include "avformat_mock.h"
-#include "format.h"
+#include "meta/format.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 class AVFormatInnerMock : public FormatMock {
 public:
     explicit AVFormatInnerMock(const Format &format) : format_(format) {}
@@ -38,7 +38,7 @@ public:
     bool GetDoubleValue(const std::string_view &key, double &value) override;
     bool GetBuffer(const std::string_view &key, uint8_t **addr, size_t &size) override;
     bool PutBuffer(const std::string_view &key, const uint8_t *addr, size_t size) override;
-    void InitTrackFormat() override {};
+    void InitTrackFormat() override{};
     void InitAudioTrackFormat(const std::string_view &mimeType, int32_t sampleRate, int32_t channelCount) override;
     void InitVideoTrackFormat(const std::string_view &mimeType, int32_t width, int32_t height) override;
     const char *DumpInfo() override;
@@ -48,6 +48,6 @@ private:
     Format format_;
     char *dumpInfo_ = nullptr;
 };
-}  // namespace MediaAVCodec
-}  // namespace OHOS
+} // namespace Media
+} // namespace OHOS
 #endif // AVFORMAT_NATIVE_MOCK_H

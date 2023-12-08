@@ -17,15 +17,10 @@
 #include "native_avformat.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
-AVFormatCapiMock::AVFormatCapiMock() : format_(nullptr)
-{
-}
+namespace Media {
+AVFormatCapiMock::AVFormatCapiMock() : format_(nullptr) {}
 
-AVFormatCapiMock::~AVFormatCapiMock()
-{
-    Destroy();
-}
+AVFormatCapiMock::~AVFormatCapiMock() {}
 
 bool AVFormatCapiMock::PutIntValue(const std::string_view &key, int32_t value)
 {
@@ -170,5 +165,5 @@ const char *AVFormatCapiMock::DumpInfo()
     }
     return nullptr;
 }
-}  // namespace MediaAVCodec
-}  // namespace OHOS
+} // namespace Media
+} // namespace OHOS

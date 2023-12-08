@@ -20,23 +20,24 @@
 #include "buffer/avbuffer.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 class AVBufferInnerMock : public AVBufferMock {
 public:
     explicit AVBufferInnerMock(const std::shared_ptr<AVBuffer> &buffer) : buffer_(buffer) {}
     ~AVBufferInnerMock() = default;
     uint8_t *GetAddr() override;
     int32_t GetCapacity() override;
-    OH_AVBufferAttr GetBufferAttr() override;
-    int32_t SetBufferAttr(OH_AVBufferAttr &attr) override;
+    int32_t GetBufferAttr(OH_AVCodecBufferAttr &attr) override;
+    int32_t SetBufferAttr(const OH_AVCodecBufferAttr &attr) override;
     std::shared_ptr<FormatMock> GetParameter() override;
     int32_t SetParameter(const std::shared_ptr<FormatMock> &format) override;
+    sptr<SurfaceBuffer> GetNativeBuffer() override;
     int32_t Destroy() override;
     std::shared_ptr<AVBuffer> &GetAVBuffer();
 
 private:
     std::shared_ptr<AVBuffer> buffer_;
 };
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
 #endif // AVBUFFER_NATIVE_MOCK_H

@@ -14,15 +14,15 @@
  */
 
 #include "avbuffer_capi_mock.h"
-#include <gtest/gtest.h>
 #include "avformat_capi_mock.h"
+#include "common/status.h"
 #include "native_avbuffer.h"
 #include "native_averrors.h"
 #include "surface_buffer.h"
 #include "unittest_log.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 uint8_t *AVBufferCapiMock::GetAddr()
 {
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, nullptr, "buffer_ is nullptr!");
@@ -35,13 +35,14 @@ int32_t AVBufferCapiMock::GetCapacity()
     return OH_AVBuffer_GetCapacity(buffer_);
 }
 
-OH_AVBufferAttr AVBufferCapiMock::GetBufferAttr()
+int32_t AVBufferCapiMock::GetBufferAttr(OH_AVCodecBufferAttr &attr)
 {
-    OH_AVBufferAttr attr;
-    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, attr, "buffer_ is nullptr!");
-    return OH_AVBuffer_GetBufferAttr(buffer_);
+    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN),
+                                      "buffer_ is nullptr!");
+    return static_cast<int32_t>(OH_AVBuffer_GetBufferAttr(buffer_, &attr));
 }
-int32_t AVBufferCapiMock::SetBufferAttr(OH_AVBufferAttr &attr)
+
+int32_t AVBufferCapiMock::SetBufferAttr(const OH_AVCodecBufferAttr &attr)
 {
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN),
                                       "buffer_ is nullptr!");
@@ -52,7 +53,7 @@ std::shared_ptr<FormatMock> AVBufferCapiMock::GetParameter()
 {
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, nullptr, "buffer_ is nullptr!");
     OH_AVFormat *format = OH_AVBuffer_GetParameter(buffer_);
-    EXPECT_NE(format, nullptr);
+    UNITTEST_CHECK_AND_RETURN_RET_LOG(format != nullptr, nullptr, "format is nullptr!");
     auto formatMock = std::make_shared<AVFormatCapiMock>(format);
     return formatMock;
 }
@@ -62,6 +63,14 @@ int32_t AVBufferCapiMock::SetParameter(const std::shared_ptr<FormatMock> &format
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN),
                                       "buffer_ is nullptr!");
     return OH_AVBuffer_SetParameter(buffer_, std::static_pointer_cast<AVFormatCapiMock>(format)->GetFormat());
+}
+
+sptr<SurfaceBuffer> AVBufferCapiMock::GetNativeBuffer()
+{
+    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, nullptr, "buffer_ is nullptr!");
+    OH_NativeBuffer *surfaceBuffer = OH_AVBuffer_GetNativeBuffer(buffer_);
+    UNITTEST_CHECK_AND_RETURN_RET_LOG(surfaceBuffer != nullptr, nullptr, "surfaceBuffer is nullptr!");
+    return sptr<SurfaceBuffer>(SurfaceBuffer::NativeBufferToSurfaceBuffer(surfaceBuffer));
 }
 
 int32_t AVBufferCapiMock::Destroy()
@@ -76,5 +85,5 @@ OH_AVBuffer *AVBufferCapiMock::GetAVBuffer()
 {
     return buffer_;
 }
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS

@@ -45,7 +45,7 @@ ENDIF (CMAKE_CL_64)
 ######################################################
 include_directories(
         ${TOP_DIR}/histreamer/src
-        ${TOP_DIR}/histreamer/src/buffer/capi/common
+        ${TOP_DIR}/histreamer/src/capi/common
         ${TOP_DIR}/histreamer/src/buffer/avbuffer/include
         ${TOP_DIR}/histreamer/src/buffer/avbuffer_queue/include
         ${TOP_DIR}/histreamer/interface

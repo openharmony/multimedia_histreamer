@@ -17,6 +17,7 @@
 #define AV_HARDWARE_ALLOCATOR_H
 
 #include "buffer/avallocator.h"
+#include "common/status.h"
 #include "dmabuf_alloc.h"
 
 namespace OHOS {
@@ -35,7 +36,7 @@ public:
 
 private:
     explicit AVHardwareAllocator();
-    int32_t MapMemoryAddr();
+    Status MapMemoryAddr();
 
     int32_t fd_;
     int32_t capacity_;
