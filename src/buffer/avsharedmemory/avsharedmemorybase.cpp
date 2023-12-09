@@ -81,11 +81,13 @@ int32_t AVSharedMemoryBase::Init(bool isMapVirAddr)
 {
     ON_SCOPE_EXIT(0) {
         MEDIA_LOG_E("create avsharedmemory failed, name = %{public}s, size = %{public}d, "
-                     "flags = 0x%{public}x, fd = %{public}d", name_.c_str(), capacity_, flags_, fd_);
+                    "flags = 0x%{public}x, fd = %{public}d",
+                    name_.c_str(), capacity_, flags_, fd_);
         Close();
     };
 
-    FALSE_RETURN_V_MSG_E(capacity_ > 0, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER), "size is invalid, size = %{public}d", capacity_);
+    FALSE_RETURN_V_MSG_E(capacity_ > 0, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
+                         "size is invalid, size = %{public}d", capacity_);
 
     bool isRemote = false;
     if (fd_ > 0) {
@@ -95,11 +97,14 @@ int32_t AVSharedMemoryBase::Init(bool isMapVirAddr)
         isRemote = true;
     } else {
         fd_ = AshmemCreate(name_.c_str(), static_cast<size_t>(capacity_));
-        FALSE_RETURN_V_MSG_E(fd_ > 0, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER), "fd is invalid, fd = %{public}d", fd_);
+        FALSE_RETURN_V_MSG_E(fd_ > 0, static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
+                             "fd is invalid, fd = %{public}d", fd_);
     }
     if (isMapVirAddr) {
         int32_t ret = MapMemory(isRemote);
-        FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER), "MapMemory failed, ret = %{plublic}d", ret);
+        FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK),
+                             static_cast<int32_t>(Status::ERROR_INVALID_PARAMETER),
+                             "MapMemory failed, ret = %{plublic}d", ret);
     }
     CANCEL_SCOPE_EXIT_GUARD(0);
     return static_cast<int32_t>(Status::OK);
@@ -118,7 +123,8 @@ int32_t AVSharedMemoryBase::MapMemory(bool isRemote)
         "AshmemSetProt failed, result = %{public}d", result);
 
     void *addr = ::mmap(nullptr, static_cast<size_t>(capacity_), static_cast<int>(prot), MAP_SHARED, fd_, 0);
-    FALSE_RETURN_V_MSG_E(addr != MAP_FAILED, static_cast<int32_t>(Status::ERROR_INVALID_OPERATION), "mmap failed, please check params");
+    FALSE_RETURN_V_MSG_E(addr != MAP_FAILED, static_cast<int32_t>(Status::ERROR_INVALID_OPERATION),
+                         "mmap failed, please check params");
 
     base_ = reinterpret_cast<uint8_t*>(addr);
 #endif

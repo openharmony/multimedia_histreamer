@@ -391,8 +391,8 @@ map<TagType, int64_t> testInt64Data = {
     {Tag::MEDIA_FILE_SIZE, 1234567890007},
     {Tag::MEDIA_POSITION, 1234567890008},
     {Tag::MEDIA_TIME_STAMP, 1234567890009},
-    {Tag::AUDIO_CHANNEL_LAYOUT,static_cast<int64_t>(Plugin::AudioChannelLayout::CH_10POINT2)},
-    {Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT,static_cast<int64_t>(Plugin::AudioChannelLayout::HOA_ORDER3_FUMA)}
+    {Tag::AUDIO_CHANNEL_LAYOUT, static_cast<int64_t>(Plugin::AudioChannelLayout::CH_10POINT2)},
+    {Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, static_cast<int64_t>(Plugin::AudioChannelLayout::HOA_ORDER3_FUMA)}
 };
 
 /**

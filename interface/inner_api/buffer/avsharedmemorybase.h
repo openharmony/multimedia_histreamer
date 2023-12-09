@@ -63,7 +63,7 @@ public:
      * @param isMapVirAddr the memory's map virtual address flag, the default value is equal to true.
      * @return Status::OK if success, otherwise the errcode.
      */
-    int32_t Init(bool isMapVirAddr = true); // TODO: status
+    int32_t Init(bool isMapVirAddr = true);
 
     /**
      * @brief Get the memory's fd, which only valid when the underlying memory

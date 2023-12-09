@@ -166,7 +166,7 @@ public:
         tagCharSeq == Tag::AUDIO_COMPRESSION_LEVEL or
         tagCharSeq == Tag::AUDIO_BITS_PER_CODED_SAMPLE or
         tagCharSeq == Tag::REGULAR_TRACK_ID or
-        tagCharSeq == Tag::VIDEO_SCALE_TYPE or 
+        tagCharSeq == Tag::VIDEO_SCALE_TYPE or
         tagCharSeq == Tag::VIDEO_I_FRAME_INTERVAL or
         tagCharSeq == Tag::MEDIA_PROFILE or
         tagCharSeq == Tag::VIDEO_ENCODE_QUALITY or

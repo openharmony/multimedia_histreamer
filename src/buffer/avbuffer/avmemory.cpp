@@ -63,7 +63,7 @@ std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(const std::string &name, std:
     mem->capacity_ = capacity;
     mem->align_ = align;
     Status ret = mem->Init();
-    FALSE_RETURN_V_MSG_E(ret == Status::OK, nullptr, "Init AVMemory failed, index = %{public}s", mem->name_.c_str());
+    FALSE_RETURN_V_MSG_E(ret == Status::OK, nullptr, "Init AVMemory failed, name = %{public}s", mem->name_.c_str());
     return mem;
 }
 

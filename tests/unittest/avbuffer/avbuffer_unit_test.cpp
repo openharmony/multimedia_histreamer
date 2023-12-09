@@ -51,7 +51,7 @@ void AVBufferInnerUnitTest::SetUp(void)
     if (inputBuffer_.size() < TEST_BUFFER_SIZE) {
         inputBuffer_.resize(TEST_BUFFER_SIZE);
         for (int32_t i = 0; i < TEST_BUFFER_SIZE; ++i) {
-            inputBuffer_[i] = rand() % 256; // 256: rand uint8_t range
+            inputBuffer_[i] = i % 256; // 256: uint8_t range
         }
     }
     vector<uint8_t> temp(TEST_BUFFER_SIZE, 0);

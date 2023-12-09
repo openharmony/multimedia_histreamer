@@ -86,12 +86,12 @@ HWTEST_F(AVFormatUnitTest, Format_Value_001, TestSize.Level1)
 
     EXPECT_TRUE(format_->PutIntValue(INT_TESTKEY, INT_VALUE));
     EXPECT_TRUE(format_->GetIntValue(INT_TESTKEY, getIntValue));
-    EXPECT_TRUE(INT_VALUE == getIntValue);
+    EXPECT_TRUE(getIntValue == INT_VALUE);
     EXPECT_FALSE(format_->GetLongValue(INT_TESTKEY, getLongValue));
 
     EXPECT_TRUE(format_->PutLongValue(LONG_TESTKEY, LONG_VALUE));
     EXPECT_TRUE(format_->GetLongValue(LONG_TESTKEY, getLongValue));
-    EXPECT_TRUE(LONG_VALUE == getLongValue);
+    EXPECT_TRUE(getLongValue == LONG_VALUE);
     EXPECT_FALSE(format_->GetIntValue(LONG_TESTKEY, getIntValue));
 
     EXPECT_TRUE(format_->PutFloatValue(floatKey, floatValue));
