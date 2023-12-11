@@ -84,12 +84,14 @@ using MapIt = std::map<TagType, Any>::const_iterator;
 class Meta {
 public:
     enum struct ValueType : int32_t {
+        INVALID_TYPE = 1,
         BOOL,
         UINT8_T,
         INT32_T,
         UINT32_T,
         INT64_T,
         UINT64_T,
+        FLOAT,
         DOUBLE,
         VECTOR_UINT8,
         VECTOR_UINT32,

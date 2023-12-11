@@ -93,7 +93,7 @@ if (hst_is_standard_sys) {
   histreamer_enable_recorder = true
   histreamer_enable_plugin_file_fd_sink = true
   histreamer_enable_plugin_std_audio_capture = true
-  histreamer_enable_plugin_std_stream_source = true
+  histreamer_enable_plugin_std_stream_source = false
   histreamer_enable_video = true
   histreamer_enable_plugin_std_video_surface_sink = true
   histreamer_enable_plugin_codec_adapter = true

@@ -82,9 +82,6 @@ if (hst_is_lite_sys) {
       "//foundation/multimedia/histreamer/engine/scene/player/standard/hiplayer_impl.cpp",
       "//foundation/multimedia/histreamer/engine/scene/player/standard/media_utils.cpp",
     ]
-    external_deps = [
-      "graphic_2d:surface",
-      "player_framework:media_format",
-    ]
+    external_deps = [ "graphic_2d:surface" ]
   }
 }

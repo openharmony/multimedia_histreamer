@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FORMAT_H
-#define FORMAT_H
+#ifndef OHOS_MEDIA_FORMAT_H
+#define OHOS_MEDIA_FORMAT_H
 
 #include <map>
 #include <memory>
@@ -23,6 +23,7 @@
 
 namespace OHOS {
 namespace Media {
+class Meta;
 enum FormatDataType : uint32_t {
     /* None */
     FORMAT_TYPE_NONE,
@@ -53,7 +54,6 @@ struct FormatData {
     size_t size = 0;
 };
 
-class Meta;
 class __attribute__((visibility("default"))) Format {
 public:
     Format();
@@ -132,6 +132,17 @@ public:
     bool PutBuffer(const std::string_view &key, const uint8_t *addr, size_t size);
 
     /**
+     * @brief Sets metadata of the format vector type.
+     *
+     * @param key Indicates the metadata key.
+     * @param value Indicates the metadata value, which is a format vector.
+     * @return Returns <b>true</b> if the format vector is successfully set; returns <b>false</b> otherwise.
+     * @since 10
+     * @version 1.0
+     */
+    bool PutFormatVector(const std::string_view &key, std::vector<Format> &value);
+
+    /**
      * @brief Obtains the metadata value of the integer type.
      *
      * @param key Indicates the metadata key.
@@ -201,6 +212,17 @@ public:
     bool GetBuffer(const std::string_view &key, uint8_t **addr, size_t &size) const;
 
     /**
+     * @brief Obtains the metadata value of the format vector type.
+     *
+     * @param key Indicates the metadata key.
+     * @param value Indicates the metadata value to obtain, which is a format vector.
+     * @return Returns <b>true</b> if the format vector is successfully obtained; returns <b>false</b> otherwise.
+     * @since 10
+     * @version 1.0
+     */
+    bool GetFormatVector(const std::string_view &key, std::vector<Format> &value) const;
+
+    /**
      * @brief Query whether the key exists in this Format.
      *
      * @param key Indicates the metadata key.
@@ -241,6 +263,22 @@ public:
     const FormatDataMap &GetFormatMap() const;
 
     /**
+     * @brief A trick to enable the comparision between the std::string and std::string_view for
+     * std::map, the trick called Transparent Comparator.
+     *
+     */
+    using FormatVectorMap = std::map<std::string, std::vector<Format>, std::less<>>;
+
+    /**
+     * @brief Obtains the metadata vector map.
+     *
+     * @return Returns the map object.
+     * @since 10
+     * @version 1.0
+     */
+    const FormatVectorMap &GetFormatVectorMap() const;
+
+    /**
      * @brief Convert the metadata map to string.
      *
      * @return Returns a converted string.
@@ -270,6 +308,7 @@ public:
 
 private:
     FormatDataMap formatMap_;
+    FormatVectorMap formatVecMap_;
     std::shared_ptr<Meta> meta_;
 };
 } // namespace Media

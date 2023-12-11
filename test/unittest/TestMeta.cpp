@@ -14,7 +14,10 @@
  */
 
 #include <gtest/gtest.h>
-#include "scene/player/standard/hiplayer_impl.h"
+#include "plugin/common/plugin_caps.h"
+#include "pipeline/core/compatible_check.h"
+#include "pipeline/core/type_define.h"
+#include "plugin_utils.h"
 #include "plugin/common/plugin_meta.h"
 
 #define private public

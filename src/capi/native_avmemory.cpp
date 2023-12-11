@@ -14,7 +14,7 @@
  */
 
 #include "native_avmemory.h"
-#include "avsharedmemorybase.h"
+#include "buffer/avsharedmemorybase.h"
 #include "common/log.h"
 #include "common/status.h"
 #include "common/native_mfmagic.h"

@@ -18,9 +18,6 @@
 
 #include <map>
 #include <memory>
-#ifndef OHOS_LITE
-#include "media_data_source.h"
-#endif
 #include "plugin/common/plugin_buffer.h"
 #include "plugin/common/plugin_types.h" // NOLINT: used it
 #include "data_stream.h"
@@ -50,10 +47,6 @@ public:
 
     explicit MediaSource(std::shared_ptr<DataConsumer> dataStream);
 
-#ifndef OHOS_LITE
-    explicit MediaSource(std::shared_ptr<IMediaDataSource> dataSrc);
-#endif
-
     MediaSource(std::string uri, std::map<std::string, std::string> header);
 
     /// Destructor
@@ -68,17 +61,11 @@ public:
     const std::map<std::string, std::string> &GetSourceHeader() const;
 
     std::shared_ptr<DataConsumer> GetDataConsumer() const;
-#ifndef OHOS_LITE
-    std::shared_ptr<IMediaDataSource> GetDataSrc() const;
-#endif
 private:
     std::string uri_ {};
     SourceType type_ {};
     std::map<std::string, std::string> header_ {};
     std::shared_ptr<DataConsumer> dataConsumer_ {};
-#ifndef OHOS_LITE
-    std::shared_ptr<IMediaDataSource> dataSrc_ {};
-#endif
 };
 } // namespace Plugin
 } // namespace Media

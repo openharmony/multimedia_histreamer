@@ -23,25 +23,19 @@
 namespace {
 using namespace OHOS::Media;
 using FormatDataMap = Format::FormatDataMap;
-#ifdef MEDIA_OHOS
-void RemoveKey(FormatDataMap &formatMap, const std::string_view &key)
+constexpr size_t BUFFER_SIZE_MAX = 1 * 1024 * 1024;
+
+void CopyFormatVectorMap(const Format::FormatVectorMap &from, Format::FormatVectorMap &to)
 {
-    auto iter = formatMap.find(key);
-    if (iter != formatMap.end()) {
-        if (iter->second.type == FORMAT_TYPE_ADDR && iter->second.addr != nullptr) {
-            free(iter->second.addr);
-            iter->second.addr = nullptr;
-        }
-        formatMap.erase(iter);
-    }
+    to = from;
 }
 
+#ifdef MEDIA_OHOS
 bool PutIntValueToFormatMap(FormatDataMap &formatMap, const std::string_view &key, int32_t value)
 {
     FormatData data;
     data.type = FORMAT_TYPE_INT32;
     data.val.int32Val = value;
-    RemoveKey(formatMap, key);
     auto ret = formatMap.insert(std::make_pair(key, data));
     return ret.second;
 }
@@ -51,7 +45,6 @@ bool PutLongValueToFormatMap(FormatDataMap &formatMap, const std::string_view &k
     FormatData data;
     data.type = FORMAT_TYPE_INT64;
     data.val.int64Val = value;
-    RemoveKey(formatMap, key);
     auto ret = formatMap.insert(std::make_pair(key, data));
     return ret.second;
 }
@@ -61,7 +54,6 @@ bool PutFloatValueToFormatMap(FormatDataMap &formatMap, const std::string_view &
     FormatData data;
     data.type = FORMAT_TYPE_FLOAT;
     data.val.floatVal = value;
-    RemoveKey(formatMap, key);
     auto ret = formatMap.insert(std::make_pair(key, data));
     return ret.second;
 }
@@ -71,7 +63,6 @@ bool PutDoubleValueToFormatMap(FormatDataMap &formatMap, const std::string_view 
     FormatData data;
     data.type = FORMAT_TYPE_DOUBLE;
     data.val.doubleVal = value;
-    RemoveKey(formatMap, key);
     auto ret = formatMap.insert(std::make_pair(key, data));
     return ret.second;
 }
@@ -81,7 +72,6 @@ bool PutStringValueToFormatMap(FormatDataMap &formatMap, const std::string_view 
     FormatData data;
     data.type = FORMAT_TYPE_STRING;
     data.stringVal = value;
-    RemoveKey(formatMap, key);
     auto ret = formatMap.insert(std::make_pair(key, data));
     return ret.second;
 }
@@ -89,14 +79,9 @@ bool PutStringValueToFormatMap(FormatDataMap &formatMap, const std::string_view 
 bool PutBufferToFormatMap(FormatDataMap &formatMap, const std::string_view &key, uint8_t *addr, size_t size)
 {
     FormatData data;
+    FALSE_RETURN_V_MSG_E(addr != nullptr, false, "PutBuffer error, addr is nullptr");
     data.type = FORMAT_TYPE_ADDR;
     data.addr = addr;
-    if (data.addr == nullptr) {
-        MEDIA_LOG_E("malloc addr failed. Key: %{public}s", key.data());
-        return false;
-    }
-    RemoveKey(formatMap, key);
-
     data.size = size;
     auto ret = formatMap.insert(std::make_pair(key, data));
     return ret.second;
@@ -123,11 +108,13 @@ Format::Format(const Format &rhs)
     }
     this->meta_ = std::make_shared<Meta>();
     *(this->meta_) = *(rhs.meta_);
+    CopyFormatVectorMap(rhs.formatVecMap_, formatVecMap_);
 }
 
 Format::Format(Format &&rhs) noexcept
 {
     this->meta_ = rhs.meta_;
+    std::swap(formatVecMap_, rhs.formatVecMap_);
 }
 
 Format &Format::operator=(const Format &rhs)
@@ -136,6 +123,7 @@ Format &Format::operator=(const Format &rhs)
         return *this;
     }
     *(this->meta_) = *(rhs.meta_);
+    CopyFormatVectorMap(rhs.formatVecMap_, this->formatVecMap_);
     return *this;
 }
 
@@ -145,6 +133,7 @@ Format &Format::operator=(Format &&rhs) noexcept
         return *this;
     }
     this->meta_ = rhs.meta_;
+    std::swap(this->formatVecMap_, rhs.formatVecMap_);
     return *this;
 }
 
@@ -178,17 +167,26 @@ bool Format::PutStringValue(const std::string_view &key, const std::string_view 
 
 bool Format::PutBuffer(const std::string_view &key, const uint8_t *addr, size_t size)
 {
-    if (addr == nullptr) {
-        MEDIA_LOG_E("put buffer error, addr is nullptr");
-        return false;
+    FALSE_RETURN_V_MSG_E(addr != nullptr, false, "PutBuffer error, addr is nullptr");
+    FALSE_RETURN_V_MSG_E(size <= BUFFER_SIZE_MAX, false, "PutBuffer input size failed. Key: " PUBLIC_LOG_S, key.data());
+
+    auto iter = meta_->Find(std::string(key));
+    if (iter == meta_->end()) {
+        std::vector<uint8_t> value(addr, addr + size);
+        meta_->SetData(std::string(key), std::move(value));
+        return true;
     }
-    constexpr size_t sizeMax = 1 * 1024 * 1024;
-    if (size > sizeMax) {
-        MEDIA_LOG_E("PutBuffer input size failed. Key: %{public}s", key.data());
-        return false;
+    Any *value = const_cast<Any *>(&(iter->second));
+    AnyCast<std::vector<uint8_t>>(value)->resize(size);
+    uint8_t *anyAddr = AnyCast<std::vector<uint8_t>>(value)->data();
+    auto error = memcpy_s(anyAddr, size, addr, size);
+    FALSE_RETURN_V_MSG_E(error == EOK, 0, "PutBuffer memcpy_s failed, error: %{public}s", strerror(error));
+
+    auto formatMapIter = formatMap_.find(key);
+    if (formatMapIter != formatMap_.end()) {
+        formatMap_.erase(formatMapIter);
+        PutBufferToFormatMap(formatMap_, key, anyAddr, size);
     }
-    std::vector<uint8_t> value(addr, addr + size);
-    meta_->SetData(std::string(key), value);
     return true;
 }
 
@@ -230,10 +228,32 @@ bool Format::GetBuffer(const std::string_view &key, uint8_t **addr, size_t &size
     return false;
 }
 
+bool Format::PutFormatVector(const std::string_view &key, std::vector<Format> &value)
+{
+    RemoveKey(key);
+    auto ret = formatVecMap_.insert(std::make_pair(key, value));
+    return ret.second;
+}
+
+bool Format::GetFormatVector(const std::string_view &key, std::vector<Format> &value) const
+{
+    auto iter = formatVecMap_.find(key);
+    if (iter == formatVecMap_.end()) {
+        MEDIA_LOG_E("GetFormatVector failed. Key: %{public}s", key.data());
+        return false;
+    }
+    value.assign(iter->second.begin(), iter->second.end());
+    return true;
+}
+
 bool Format::ContainKey(const std::string_view &key) const
 {
     auto iter = meta_->Find(std::string(key));
-    return iter != meta_->end();
+    if (iter != meta_->end()) {
+        return true;
+    }
+    auto vecMapIter = formatVecMap_.find(key);
+    return vecMapIter != formatVecMap_.end();
 }
 
 FormatDataType Format::GetValueType(const std::string_view &key) const
@@ -264,6 +284,11 @@ FormatDataType Format::GetValueType(const std::string_view &key) const
 void Format::RemoveKey(const std::string_view &key)
 {
     meta_->Remove(std::string(key));
+
+    auto vecMapIter = formatVecMap_.find(key);
+    if (vecMapIter != formatVecMap_.end()) {
+        formatVecMap_.erase(vecMapIter);
+    }
 }
 
 const Format::FormatDataMap &Format::GetFormatMap() const
@@ -306,6 +331,11 @@ const Format::FormatDataMap &Format::GetFormatMap() const
     swap(formatTemp, *formatMapRef);
 #endif
     return formatMap_;
+}
+
+const Format::FormatVectorMap &Format::GetFormatVectorMap() const
+{
+    return formatVecMap_;
 }
 
 std::string Format::Stringify() const

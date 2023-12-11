@@ -14,9 +14,9 @@
  */
 
 #include "gtest/gtest.h"
-#include "scene/player/standard/hiplayer_impl.h"
 #include "plugin/common/plugin_meta.h"
 #include "pipeline/filters/codec/codec_filter_factory.h"
+#include "pipeline/filters/codec/codec_mode.h"
 
 using namespace testing::ext;
 using namespace OHOS::Media::Pipeline;

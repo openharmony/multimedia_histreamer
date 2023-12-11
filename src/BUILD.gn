@@ -18,7 +18,7 @@ if (hst_is_standard_sys) {
   config("media_foundation_public_config") {
     include_dirs = [
       "$histreamer_root_dir/interface/kits/c",
-      "$histreamer_root_dir/interface/inner_api/buffer",
+      "$histreamer_root_dir/interface/inner_api",
       "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/surface",
     ]
   }

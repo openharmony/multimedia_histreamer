@@ -17,7 +17,6 @@
 #define HISTREAMER_PLUGIN_HDI_CODEC_MANAGER_H
 #include "codec_manager.h"
 #include <unordered_map>
-#include "avcodec_info.h"
 #include "codec_component_manager.h"
 #include "codec_callback_type_stub.h"
 #include "codec_omx_ext.h"

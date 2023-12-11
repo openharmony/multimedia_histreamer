@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef AVSHAREDMEMORYBASE_H
-#define AVSHAREDMEMORYBASE_H
+#ifndef OHOS_MEDIA_AV_SHARED_MEMORY_BASE_H
+#define OHOS_MEDIA_AV_SHARED_MEMORY_BASE_H
 
 #include <string>
 #include "buffer/avsharedmemory.h"
