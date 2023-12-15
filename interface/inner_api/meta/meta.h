@@ -103,6 +103,7 @@ public:
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::SRC_INPUT_TYPE, Plugin::SrcInputType, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::MEDIA_CODEC_CONFIG or
                            tagCharSeq == Tag::MEDIA_COVER or
+                           tagCharSeq == Tag::AUDIO_VIVID_METADATA or
                            tagCharSeq == Tag::AUDIO_VORBIS_IDENTIFICATION_HEADER or
                            tagCharSeq == Tag::AUDIO_VORBIS_SETUP_HEADER,
                            std::vector<uint8_t>, ValueType::VECTOR_UINT8);
@@ -174,6 +175,7 @@ public:
         tagCharSeq == Tag::VIDEO_ENCODE_QUALITY or
         tagCharSeq == Tag::AUDIO_AAC_SBR or
         tagCharSeq == Tag::AUDIO_FLAC_COMPLIANCE_LEVEL or
+        tagCharSeq == Tag::AUDIO_OBJECT_NUMBER or
         tagCharSeq == Tag::MEDIA_LEVEL, int32_t, ValueType::INT32_T);
 
     DEFINE_INSERT_GET_FUNC(
@@ -358,7 +360,7 @@ private:
 };
 
 /**
- * @brief SetMetaData only used for Application interface OH_AVFormat to set Enum value into Meta Object.
+ * @brief SetMetaData only used for Application interface OH_AVFormat to set enum/bool/int32_t value into Meta Object.
  * @implNote In order to set value(int32_t type) to Meta Object, should convert int32_t value to correct EnumType then
  * save to Any object. We use metadataGetterSetterMap to get the right setter function.
  * @return Returns operator status, <b>True</b> if Set Success.
@@ -368,7 +370,7 @@ private:
 bool SetMetaData(Meta& meta, const TagType& tag, int32_t value);
 
 /**
- * @brief GetMetaData only used for Application interface OH_AVFormat to get Enum value from Meta Object.
+ * @brief GetMetaData only used for Application interface OH_AVFormat to get enum/bool/int32_t value from Meta Object.
  * @implNote In order to get value(Enum type) from Meta Object, should use correct Enum type to get value from Any
  * object. We use metadataGetterSetterMap to get the right getter function.
  * @return Returns operator status, <b>True</b> if Get Success.
@@ -377,8 +379,8 @@ bool SetMetaData(Meta& meta, const TagType& tag, int32_t value);
  */
 bool GetMetaData(const Meta& meta, const TagType& tag, int32_t& value);
 /**
- * @brief SetMetaData only used for Application interface OH_AVFormat to set Enum value into Meta Object.
- * @implNote In order to set value(int64_t type) to Meta Object, should convert int32_t value to correct EnumType then
+ * @brief SetMetaData only used for Application interface OH_AVFormat to set enum/int64_t value into Meta Object.
+ * @implNote In order to set value(int64_t type) to Meta Object, should convert int64_t value to correct EnumType then
  * save to Any object. We use metadataGetterSetterMap to get the right setter function.
  * @return Returns operator status, <b>True</b> if Set Success.
  * returns <b>False</b> otherwise.
@@ -387,7 +389,7 @@ bool GetMetaData(const Meta& meta, const TagType& tag, int32_t& value);
 bool SetMetaData(Meta& meta, const TagType& tag, int64_t value);
 
 /**
- * @brief GetMetaData only used for Application interface OH_AVFormat to get Enum value from Meta Object.
+ * @brief GetMetaData only used for Application interface OH_AVFormat to get enum/int64_t value from Meta Object.
  * @implNote In order to get value(Enum type) from Meta Object, should use correct Enum type to get value from Any
  * object. We use metadataGetterSetterMap to get the right getter function.
  * @return Returns operator status, <b>True</b> if Get Success.

@@ -115,6 +115,8 @@ public:
     static constexpr const char AUDIO_AAC_LEVEL[] = "audio.aac.level";                 ///< acc level
     static constexpr const char AUDIO_AAC_STREAM_FORMAT[] = "audio.aac.stream.format"; ///< @see AudioAacStreamFormat
     static constexpr const char AUDIO_AAC_IS_ADTS[] = "aac_is_adts";                   ///< acc format is adts
+    static constexpr const char AUDIO_VIVID_METADATA[] = "audio.vivid.metadata";       ///< audio vivid metadata
+    static constexpr const char AUDIO_OBJECT_NUMBER[] = "audio.object.number";         ///< audio object number
     static constexpr const char AUDIO_AAC_SBR[] = "sbr";                               ///< Key for aac sbr
     static constexpr const char AUDIO_FLAC_COMPLIANCE_LEVEL[] = "compliance_level";    ///< Key for compliance level
     static constexpr const char AUDIO_VORBIS_IDENTIFICATION_HEADER[] =

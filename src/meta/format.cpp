@@ -36,7 +36,7 @@ bool PutIntValueToFormatMap(FormatDataMap &formatMap, const std::string_view &ke
     FormatData data;
     data.type = FORMAT_TYPE_INT32;
     data.val.int32Val = value;
-    auto ret = formatMap.insert(std::make_pair(key, data));
+    auto ret = formatMap.insert(std::make_pair(std::string(key), data));
     return ret.second;
 }
 
@@ -45,7 +45,7 @@ bool PutLongValueToFormatMap(FormatDataMap &formatMap, const std::string_view &k
     FormatData data;
     data.type = FORMAT_TYPE_INT64;
     data.val.int64Val = value;
-    auto ret = formatMap.insert(std::make_pair(key, data));
+    auto ret = formatMap.insert(std::make_pair(std::string(key), data));
     return ret.second;
 }
 
@@ -54,7 +54,7 @@ bool PutFloatValueToFormatMap(FormatDataMap &formatMap, const std::string_view &
     FormatData data;
     data.type = FORMAT_TYPE_FLOAT;
     data.val.floatVal = value;
-    auto ret = formatMap.insert(std::make_pair(key, data));
+    auto ret = formatMap.insert(std::make_pair(std::string(key), data));
     return ret.second;
 }
 
@@ -63,7 +63,7 @@ bool PutDoubleValueToFormatMap(FormatDataMap &formatMap, const std::string_view 
     FormatData data;
     data.type = FORMAT_TYPE_DOUBLE;
     data.val.doubleVal = value;
-    auto ret = formatMap.insert(std::make_pair(key, data));
+    auto ret = formatMap.insert(std::make_pair(std::string(key), data));
     return ret.second;
 }
 
@@ -72,7 +72,7 @@ bool PutStringValueToFormatMap(FormatDataMap &formatMap, const std::string_view 
     FormatData data;
     data.type = FORMAT_TYPE_STRING;
     data.stringVal = value;
-    auto ret = formatMap.insert(std::make_pair(key, data));
+    auto ret = formatMap.insert(std::make_pair(std::string(key), data));
     return ret.second;
 }
 
@@ -83,7 +83,7 @@ bool PutBufferToFormatMap(FormatDataMap &formatMap, const std::string_view &key,
     data.type = FORMAT_TYPE_ADDR;
     data.addr = addr;
     data.size = size;
-    auto ret = formatMap.insert(std::make_pair(key, data));
+    auto ret = formatMap.insert(std::make_pair(std::string(key), data));
     return ret.second;
 }
 #endif
@@ -177,8 +177,9 @@ bool Format::PutBuffer(const std::string_view &key, const uint8_t *addr, size_t 
         return true;
     }
     Any *value = const_cast<Any *>(&(iter->second));
-    AnyCast<std::vector<uint8_t>>(value)->resize(size);
-    uint8_t *anyAddr = AnyCast<std::vector<uint8_t>>(value)->data();
+    auto tmpVector = AnyCast<std::vector<uint8_t>>(value);
+    tmpVector->resize(size);
+    uint8_t *anyAddr = tmpVector->data();
     auto error = memcpy_s(anyAddr, size, addr, size);
     FALSE_RETURN_V_MSG_E(error == EOK, 0, "PutBuffer memcpy_s failed, error: %{public}s", strerror(error));
 
@@ -231,7 +232,7 @@ bool Format::GetBuffer(const std::string_view &key, uint8_t **addr, size_t &size
 bool Format::PutFormatVector(const std::string_view &key, std::vector<Format> &value)
 {
     RemoveKey(key);
-    auto ret = formatVecMap_.insert(std::make_pair(key, value));
+    auto ret = formatVecMap_.insert(std::make_pair(std::string(key), value));
     return ret.second;
 }
 

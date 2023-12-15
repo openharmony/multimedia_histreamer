@@ -38,7 +38,6 @@ public:
 
     void TearDown(void);
 
-private:
     std::shared_ptr<Meta> metaIn = nullptr;
     std::shared_ptr<Meta> metaOut = nullptr;
     std::shared_ptr<MessageParcel> parcel = nullptr;
@@ -92,7 +91,7 @@ HWTEST_F(MetaInnerUnitTest, SetGet_Double, TestSize.Level1)
     double valueIn = 1.59261111;
     metaIn->Set<Tag::VIDEO_FRAME_RATE>(valueIn);
     metaIn->Get<Tag::VIDEO_FRAME_RATE>(valueOut);
-    EXPECT_EQ(valueOut, valueIn);
+    ASSERT_DOUBLE_EQ(valueOut, valueIn);
 }
 
 /**
@@ -330,6 +329,7 @@ map<TagType, int32_t> testInt32Data = {
     {Tag::MEDIA_PROFILE, 13},
     {Tag::VIDEO_ENCODE_QUALITY, 112},
     {Tag::AUDIO_AAC_SBR, 111},
+    {Tag::AUDIO_OBJECT_NUMBER, 113},
     {Tag::AUDIO_FLAC_COMPLIANCE_LEVEL, 13},
     {Tag::MEDIA_LEVEL, 14},
     {Tag::SRC_INPUT_TYPE, static_cast<int32_t>(Plugin::SrcInputType::AUD_ES)},
@@ -338,12 +338,12 @@ map<TagType, int32_t> testInt32Data = {
     {Tag::MEDIA_TYPE, static_cast<int32_t>(Plugin::MediaType::AUDIO)},
     {Tag::VIDEO_H264_PROFILE, static_cast<int32_t>(Plugin::VideoH264Profile::BASELINE)},
     {Tag::VIDEO_ROTATION, static_cast<int32_t>(Plugin::VideoRotation::VIDEO_ROTATION_90)},
-    {Tag::VIDEO_COLOR_PRIMARIES, static_cast<int32_t>(Plugin::ColorPrimary::COLOR_PRIMARY_UNSPECIFIED)},
-    {Tag::VIDEO_COLOR_TRC, static_cast<int32_t>(Plugin::TransferCharacteristic::TRANSFER_CHARACTERISTIC_BT601)},
-    {Tag::VIDEO_COLOR_MATRIX_COEFF, static_cast<int32_t>(Plugin::MatrixCoefficient::MATRIX_COEFFICIENT_BT601_525)},
+    {Tag::VIDEO_COLOR_PRIMARIES, static_cast<int32_t>(Plugin::ColorPrimary::BT2020)},
+    {Tag::VIDEO_COLOR_TRC, static_cast<int32_t>(Plugin::TransferCharacteristic::BT1361)},
+    {Tag::VIDEO_COLOR_MATRIX_COEFF, static_cast<int32_t>(Plugin::MatrixCoefficient::BT2020_CL)},
     {Tag::VIDEO_H265_PROFILE, static_cast<int32_t>(Plugin::HEVCProfile::HEVC_PROFILE_MAIN_10_HDR10)},
     {Tag::VIDEO_H265_LEVEL, static_cast<int32_t>(Plugin::HEVCLevel::HEVC_LEVEL_41)},
-    {Tag::VIDEO_CHROMA_LOCATION, static_cast<int32_t>(Plugin::ChromaLocation::CHROMA_LOC_CENTER)},
+    {Tag::VIDEO_CHROMA_LOCATION, static_cast<int32_t>(Plugin::ChromaLocation::BOTTOM)},
     {Tag::MEDIA_FILE_TYPE, static_cast<int32_t>(Plugin::FileType::AMR)},
     {Tag::VIDEO_ENCODE_BITRATE_MODE, static_cast<int32_t>(Plugin::VideoEncodeBitrateMode::CBR)},
     // UINT8_T
@@ -440,7 +440,7 @@ HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_All_As_Double_Using_ParcelPackage, T
         double valueIn = item.second;
         double valueOut = 0.0;
         metaOut->GetData(item.first, valueOut);
-        EXPECT_EQ(valueOut, valueIn);
+        ASSERT_DOUBLE_EQ(valueOut, valueIn);
     }
 }
 
@@ -498,6 +498,7 @@ map<TagType, std::vector<uint8_t>> testVetcorInt8Data = {
     {Tag::MEDIA_COVER, vectorUint8MediaCover},
     {Tag::AUDIO_VORBIS_IDENTIFICATION_HEADER, vectorUint8MediaCover},
     {Tag::AUDIO_VORBIS_SETUP_HEADER, vectorUint8MediaCover},
+    {Tag::AUDIO_VIVID_METADATA, vectorUint8MediaCover},
 };
 
 /**
@@ -562,7 +563,7 @@ HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_All_As_Mix_Using_ParcelPackage, Test
         double valueInDouble = item.second;
         double valueOutDouble = 0.0;
         metaOut->GetData(item.first, valueOutDouble);
-        EXPECT_EQ(valueOutDouble, valueInDouble);
+        ASSERT_DOUBLE_EQ(valueOutDouble, valueInDouble);
     }
     for (auto item : testVetcorInt8Data) {
         std::vector<uint8_t> valueInVecInt8 = item.second;
@@ -616,7 +617,7 @@ HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_All_As_Mix_Using_AssignCopy, TestSiz
         double valueInDouble = item.second;
         double valueOutDouble = 0.0;
         metaCopy.GetData(item.first, valueOutDouble);
-        EXPECT_EQ(valueOutDouble, valueInDouble);
+        ASSERT_DOUBLE_EQ(valueOutDouble, valueInDouble);
     }
     for (auto item : testVetcorInt8Data) {
         std::vector<uint8_t> valueInVecInt8 = item.second;
@@ -670,7 +671,7 @@ HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_All_As_Mix_Using_SwapCopy, TestSize.
         double valueInDouble = item.second;
         double valueOutDouble = 0.0;
         metaCopy.GetData(item.first, valueOutDouble);
-        EXPECT_EQ(valueOutDouble, valueInDouble);
+        ASSERT_DOUBLE_EQ(valueOutDouble, valueInDouble);
     }
     for (auto item : testVetcorInt8Data) {
         std::vector<uint8_t> valueInVecInt8 = item.second;

@@ -31,6 +31,7 @@ ENDIF (UNIX AND NOT CYGWIN)
 ADD_DEFINITIONS(
         -D__STDC_FORMAT_MACROS
         -DHST_PLUGIN_PATH="./"
+        -DHST_ANY_WITH_NO_RTTI
 )
 if (WIN32)
 add_definitions( -DHST_PLUGIN_FILE_TAIL=".dll" )

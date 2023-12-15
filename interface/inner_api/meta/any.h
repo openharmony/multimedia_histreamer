@@ -16,6 +16,16 @@
 #ifndef HISTREAMER_PLUGIN_COMMON_ANY_H
 #define HISTREAMER_PLUGIN_COMMON_ANY_H
 
+#ifndef HST_ANY_WITH_RTTI
+#ifndef HST_ANY_WITH_NO_RTTI
+#define HST_ANY_WITH_NO_RTTI
+#endif
+#else
+#ifdef HST_ANY_WITH_NO_RTTI
+#undef HST_ANY_WITH_NO_RTTI
+#endif
+#endif
+
 #if defined(__clang__) || defined(__GNUC__)
 #define CPP_STANDARD __cplusplus
 #elif defined(_MSC_VER)
@@ -32,6 +42,7 @@
 #include "message_parcel.h"
 
 namespace {
+#if CPP_STANDARD < 201402L
 template <typename T>
 using decay_t = typename std::decay<T>::type;
 
@@ -46,6 +57,14 @@ using remove_cv_t = typename std::remove_cv<T>::type;
 
 template <typename T>
 using remove_reference_t = typename std::remove_reference<T>::type;
+#else
+using std::decay_t;
+using std::enable_if_t;
+using std::conditional_t;
+using std::remove_cv_t;
+using std::remove_reference_t;
+#endif
+
 constexpr size_t STACK_STORAGE_SIZE = 2 * sizeof(void*); // NOLINT: global var
 
 template <typename T>
@@ -202,7 +221,7 @@ public:
         uint32_t beginIndex = stringInfo.find_first_of('=') + 2; // 2 表示右移两位
 #ifdef MEDIA_OHOS
         uint32_t endIndex = stringInfo.find_last_of(']');
-        std::string_view typeName(charInfo + beginIndex, endIndex - beginIndex + 1);
+        std::string_view typeName(charInfo + beginIndex, endIndex - beginIndex);
 #else
         uint32_t endIndex = stringInfo.find_last_of(';');
         std::string_view typeName(charInfo + beginIndex, endIndex - beginIndex);

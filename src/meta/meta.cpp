@@ -17,6 +17,33 @@
 #include <functional>
 #include "common/log.h"
 
+/**
+ * Steps of Adding New Tag
+ *
+ * 1. In meta_key.h, Add a Tag.
+ * 2. In meta.h, Register Tag key Value mapping.
+ *    Example: DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::TAGNAME, TAGTYPE, ValueType::VALUETYPE)
+ * 3. In meta.cpp, Register default value to g_metadataDefaultValueMap ({Tag::TAGNAME, defaultTAGTYPE}).
+ * 4. In order to support Enum/Bool Value Getter Setter from AVFormat,
+ *    In meta.cpp, Register Tag key getter setter function mapping.
+ *    Example: DEFINE_METADATA_SETTER_GETTER_FUNC(SrcTAGNAME, int32_t/int64_t)
+ *    For Int32/Int64 Type, update g_metadataGetterSetterMap/g_metadataGetterSetterInt64Map.
+ *    For Bool Type, update g_metadataBoolVector.
+ * 5. Update meta_func_unit_test.cpp to add the testcase of new added Tag Type.
+ *
+ * Theory:
+ * App --> AVFormat(ndk) --> Meta --> Parcel(ipc) --> Meta
+ * AVFormat only support: int, int64(Long), float, double, string, buffer
+ * Parcel only support: bool, int8, int16, int32, int64, uint8, uint16, uint32, uint64, float, double, pointer, buffer
+ * Meta (based on any) support : all types in theory.
+ *
+ * Attention: Use AVFormat with Meta, with or without ipc, be care of the difference of supported types.
+ * Currently, The ToParcel/FromParcel function(In Any.h) supports single value convert to/from parcel.
+ * you can use meta's helper functions to handle the key and the correct value type:
+ *    GetDefaultAnyValue: get the specified key's default value, It can get the value type.
+ *    SetMetaData/GetMetaData: AVFormat use them to set/get enum/bool/int values,
+ *    It can convert the integer to/from enum/bool automatically.
+ **/
 namespace OHOS {
 namespace Media {
 using namespace Plugin;
@@ -158,16 +185,16 @@ static Any defaultVideoPixelFormat = VideoPixelFormat::UNKNOWN;
 static Any defaultMediaType = MediaType::UNKNOWN;
 static Any defaultVideoH264Profile = VideoH264Profile::UNKNOWN;
 static Any defaultVideoRotation = VideoRotation::VIDEO_ROTATION_0;
-static Any defaultColorPrimary = ColorPrimary::COLOR_PRIMARY_BT2020;
-static Any defaultTransferCharacteristic = TransferCharacteristic::TRANSFER_CHARACTERISTIC_BT1361;
-static Any defaultMatrixCoefficient = MatrixCoefficient::MATRIX_COEFFICIENT_BT2020_CL;
+static Any defaultColorPrimary = ColorPrimary::BT2020;
+static Any defaultTransferCharacteristic = TransferCharacteristic::BT1361;
+static Any defaultMatrixCoefficient = MatrixCoefficient::BT2020_CL;
 static Any defaultHEVCProfile = HEVCProfile::HEVC_PROFILE_UNKNOW;
 static Any defaultHEVCLevel = HEVCLevel::HEVC_LEVEL_UNKNOW;
-static Any defaultChromaLocation = ChromaLocation::CHROMA_LOC_BOTTOM;
+static Any defaultChromaLocation = ChromaLocation::BOTTOM;
 static Any defaultFileType = FileType::UNKNOW;
 static Any defaultVideoEncodeBitrateMode = VideoEncodeBitrateMode::CBR;
 
-static Any defaultAudioChannelLayout = AudioChannelLayout::UNKNOWN_CHANNEL_LAYOUT;
+static Any defaultAudioChannelLayout = AudioChannelLayout::UNKNOWN;
 static Any defaultAudioAacProfile = AudioAacProfile::ELD;
 static Any defaultAudioAacStreamFormat = AudioAacStreamFormat::ADIF;
 static Any defaultVectorUInt8 = std::vector<uint8_t>();
@@ -206,6 +233,7 @@ static std::map<TagType, const Any &> g_metadataDefaultValueMap = {
     {Tag::AUDIO_MPEG_VERSION, defaultInt32},
     {Tag::AUDIO_MPEG_LAYER, defaultInt32},
     {Tag::AUDIO_AAC_LEVEL, defaultInt32},
+    {Tag::AUDIO_OBJECT_NUMBER, defaultInt32},
     {Tag::AUDIO_MAX_INPUT_SIZE, defaultInt32},
     {Tag::AUDIO_MAX_OUTPUT_SIZE, defaultInt32},
     {Tag::VIDEO_WIDTH, defaultInt32},
@@ -275,6 +303,7 @@ static std::map<TagType, const Any &> g_metadataDefaultValueMap = {
     {Tag::AUDIO_AAC_STREAM_FORMAT, defaultAudioAacStreamFormat},
     // vector<uint8_t>
     {Tag::MEDIA_CODEC_CONFIG, defaultVectorUInt8},
+    {Tag::AUDIO_VIVID_METADATA, defaultVectorUInt8},
     {Tag::MEDIA_COVER, defaultVectorUInt8},
     {Tag::AUDIO_VORBIS_IDENTIFICATION_HEADER, defaultVectorUInt8},
     {Tag::AUDIO_VORBIS_SETUP_HEADER, defaultVectorUInt8},

@@ -37,7 +37,7 @@ public:
     static constexpr const char AUDIO_OPUS[] = "audio/opus";
     static constexpr const char AUDIO_FLAC[] = "audio/flac";
     static constexpr const char AUDIO_RAW[] = "audio/raw";
-    static constexpr const char AUDIO_AVS3DA[] = "audio/avs-3da";
+    static constexpr const char AUDIO_AVS3DA[] = "audio/av3a";
 
     static constexpr const char IMAGE_JPG[] = "image/jpeg";
     static constexpr const char IMAGE_PNG[] = "image/png";
