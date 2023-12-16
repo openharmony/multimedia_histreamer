@@ -54,8 +54,7 @@ public:
         FALSE_RETURN_W(nativeProducer_ != nullptr);
         FALSE_RETURN_W(nativeProducer_->nativeBufferQueue_ != nullptr);
         FALSE_RETURN_W(listener_ != nullptr && *listener_ != nullptr);
-        auto nativeBuffer =
-            nativeProducer_->nativeBufferQueue_->FindAndBindNativeBuffer(buffer);
+        auto nativeBuffer = nativeProducer_->nativeBufferQueue_->FindAndBindNativeBuffer(buffer);
         FALSE_RETURN_W(nativeBuffer != nullptr);
         (*listener_)(nativeProducer_, nativeBuffer, userData_);
     }

@@ -22,7 +22,8 @@ namespace OHOS {
 namespace Media {
 // ffrt::qos priority sorting:qos_utility < qos_default < qos_user_initiated <
 // qos_deadline_request < qos_user_interactive
-ffrt::qos ConvertPriorityType(TaskPriority priority) {
+ffrt::qos ConvertPriorityType(TaskPriority priority)
+{
     switch (priority) {
         case TaskPriority::LOW:
             return ffrt::qos_utility;
