@@ -120,9 +120,11 @@ public:
 
     FilterType GetFilterType();
 
-    virtual Status OnLinked(StreamType inType, const std::shared_ptr<Meta>& meta, const std::shared_ptr<FilterLinkCallback>& callback);
+    virtual Status OnLinked(StreamType inType, const std::shared_ptr<Meta>& meta,
+                            const std::shared_ptr<FilterLinkCallback>& callback);
 
-    virtual Status OnUpdated(StreamType inType, const std::shared_ptr<Meta>& meta, const std::shared_ptr<FilterLinkCallback>& callback);
+    virtual Status OnUpdated(StreamType inType, const std::shared_ptr<Meta>& meta,
+                             const std::shared_ptr<FilterLinkCallback>& callback);
 
     virtual Status OnUnLinked(StreamType inType, const std::shared_ptr<FilterLinkCallback>& callback);
 
@@ -136,7 +138,7 @@ protected:
     std::vector<StreamType> supportedInStreams_;
     std::vector<StreamType> supportedOutStreams_;
 
-    std::map<StreamType,std::vector<std::shared_ptr<Filter>>> nextFiltersMap_;
+    std::map<StreamType, std::vector<std::shared_ptr<Filter>>> nextFiltersMap_;
 
     std::shared_ptr<EventReceiver> receiver_;
 

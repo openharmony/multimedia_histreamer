@@ -23,30 +23,30 @@
 using namespace OHOS::Media;
 
 #define NATIVE_AV_BUFFER_QUEUE_CHECK(nativeBufferQueue, ret)                                       \
-    FALSE_RETURN_V(nativeBufferQueue != nullptr, ret);                                             \
-    FALSE_RETURN_V(nativeBufferQueue->magic_ == NATIVE_ABQ_OBJECT_MAGIC_QUEUE,  ret);              \
-    FALSE_RETURN_V(nativeBufferQueue->bufferQueue_ != nullptr, ret)
+    FALSE_RETURN_V((nativeBufferQueue) != nullptr, ret);                                             \
+    FALSE_RETURN_V((nativeBufferQueue)->magic_ == NATIVE_ABQ_OBJECT_MAGIC_QUEUE,  ret);              \
+    FALSE_RETURN_V((nativeBufferQueue)->bufferQueue_ != nullptr, ret)
 
 
 #define NATIVE_AV_BUFFER_QUEUE_PRODUCER_CHECK(bufferQueueProducer, ret)                             \
-    FALSE_RETURN_V(bufferQueueProducer != nullptr, ret);                                            \
-    FALSE_RETURN_V(bufferQueueProducer->magic_ == NATIVE_ABQ_OBJECT_MAGIC_PRODUCER,  ret);          \
-    NATIVE_AV_BUFFER_QUEUE_CHECK(bufferQueueProducer->nativeBufferQueue_, ret);                     \
-    FALSE_RETURN_V(bufferQueueProducer->producer_ != nullptr, ret)
+    FALSE_RETURN_V((bufferQueueProducer) != nullptr, ret);                                            \
+    FALSE_RETURN_V((bufferQueueProducer)->magic_ == NATIVE_ABQ_OBJECT_MAGIC_PRODUCER,  ret);          \
+    NATIVE_AV_BUFFER_QUEUE_CHECK((bufferQueueProducer)->nativeBufferQueue_, ret);                     \
+    FALSE_RETURN_V((bufferQueueProducer)->producer_ != nullptr, ret)
 
 #define NATIVE_AV_BUFFER_QUEUE_CONSUMER_CHECK(bufferQueueConsumer, ret)                             \
-    FALSE_RETURN_V(bufferQueueConsumer != nullptr, ret);                                            \
-    FALSE_RETURN_V(bufferQueueConsumer->magic_ == NATIVE_ABQ_OBJECT_MAGIC_CONSUMER, ret);           \
-    NATIVE_AV_BUFFER_QUEUE_CHECK(bufferQueueConsumer->nativeBufferQueue_, ret);                     \
-    FALSE_RETURN_V(bufferQueueConsumer->consumer_ != nullptr, ret)
+    FALSE_RETURN_V((bufferQueueConsumer) != nullptr, ret);                                            \
+    FALSE_RETURN_V((bufferQueueConsumer)->magic_ == NATIVE_ABQ_OBJECT_MAGIC_CONSUMER, ret);           \
+    NATIVE_AV_BUFFER_QUEUE_CHECK((bufferQueueConsumer)->nativeBufferQueue_, ret);                     \
+    FALSE_RETURN_V((bufferQueueConsumer)->consumer_ != nullptr, ret)
 
-class ProducerBufferFilledListener: public OHOS::IRemoteStub<IBrokerListener> {
+class ProducerBufferFilledListener : public OHOS::IRemoteStub<IBrokerListener> {
 public:
     explicit ProducerBufferFilledListener(
             OH_AVBufferQueueProducer* nativeProducer,
             OH_AVBufferQueueProducer_OnBufferFilled* listener,
-            void* userData):
-        nativeProducer_(nativeProducer), listener_(listener), userData_(userData) { }
+            void* userData)
+                :nativeProducer_(nativeProducer), listener_(listener), userData_(userData) { }
     ProducerBufferFilledListener(const ProducerBufferFilledListener&) = delete;
     ProducerBufferFilledListener operator=(const ProducerBufferFilledListener&) = delete;
     ~ProducerBufferFilledListener() override = default;
@@ -66,7 +66,7 @@ private:
     void* userData_;
 };
 
-class ConsumerBufferAvailableListener: public IConsumerListener {
+class ConsumerBufferAvailableListener : public IConsumerListener {
 public:
     ConsumerBufferAvailableListener(
             OH_AVBufferQueueConsumer* nativeConsumer,
@@ -76,7 +76,8 @@ public:
     ConsumerBufferAvailableListener(const ConsumerBufferAvailableListener&) = delete;
     ConsumerBufferAvailableListener operator=(const ConsumerBufferAvailableListener&) = delete;
 
-    void OnBufferAvailable() override {
+    void OnBufferAvailable() override
+    {
         FALSE_RETURN_W(nativeConsumer_ != nullptr);
         FALSE_RETURN_W(listener_ != nullptr && *listener_ != nullptr);
         (*listener_)(nativeConsumer_, userData_);
@@ -124,7 +125,8 @@ OH_AVBufferQueue::OH_AVBufferQueue(
     }
 }
 
-OH_AVBuffer* OH_AVBufferQueue::FindAndBindNativeBuffer(std::shared_ptr<AVBuffer>& buffer) {
+OH_AVBuffer* OH_AVBufferQueue::FindAndBindNativeBuffer(std::shared_ptr<AVBuffer>& buffer)
+{
     FALSE_RETURN_V(buffer != nullptr, nullptr);
 
     std::lock_guard<std::mutex> lockGuard(lock_);
@@ -253,7 +255,7 @@ OH_AVErrCode OH_AVBufferQueueProducer_ReturnBuffer(
     auto ret = bufferQueueProducer->producer_->ReturnBuffer(buffer->buffer_, available);
     auto unbind = bufferQueueProducer->nativeBufferQueue_->UnbindNativeBuffer(buffer);
     FALSE_LOG(unbind == OH_AVErrCode::AV_ERR_OK);
-    FALSE_RETURN_V_MSG(ret == Status::OK,OH_AVErrCode::AV_ERR_UNKNOWN,
+    FALSE_RETURN_V_MSG(ret == Status::OK, OH_AVErrCode::AV_ERR_UNKNOWN,
                        "ReturnBuffer failed ret = " PUBLIC_LOG_D32, ret);
 
     return OH_AVErrCode::AV_ERR_OK;

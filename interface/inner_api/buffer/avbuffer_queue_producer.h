@@ -23,7 +23,7 @@
 namespace OHOS {
 namespace Media {
 
-class AVBufferQueueProducer: public virtual IRemoteBroker {
+class AVBufferQueueProducer : public virtual IRemoteBroker {
 public:
     virtual uint32_t GetQueueSize() = 0;
     virtual Status SetQueueSize(uint32_t size) = 0;

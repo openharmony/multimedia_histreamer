@@ -63,7 +63,7 @@ void Task::Start()
     AutoLock lock(stateMutex_);
     runningState_ = RunningState::STARTED;
     if (!loop_) {
-        loop_ = std::make_unique<ffrt::thread>(name_.c_str(), ConvertPriorityType(priority_), [this]{ Run(); });
+        loop_ = std::make_unique<ffrt::thread>(name_.c_str(), ConvertPriorityType(priority_), [this] { Run(); });
     }
     if (!loop_) {
         MEDIA_LOG_E("task " PUBLIC_LOG_S " create failed", name_.c_str());

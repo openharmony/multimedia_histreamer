@@ -75,7 +75,6 @@ Status Pipeline::Pause()
         AutoLock lock(mutex_);
         for (auto it = filters_.begin(); it != filters_.end(); ++it) {
             if ((*it)->Pause() != Status::OK) {
-                // MEDIA_LOG_I("pause filter: " PUBLIC_LOG_S, (*it)->GetName().c_str());
             }
         }
         return Status::OK;
@@ -88,7 +87,6 @@ Status Pipeline::Resume()
     SubmitJobOnce([&] {
         AutoLock lock(mutex_);
         for (auto it = filters_.begin(); it != filters_.end(); ++it) {
-            // MEDIA_LOG_I("Resume filter: " PUBLIC_LOG_S, (*it)->GetName().c_str());
             auto rtv = (*it)->Resume();
             FALSE_RETURN_V(rtv == Status::OK, rtv);
         }
@@ -108,10 +106,7 @@ Status Pipeline::Stop()
                 MEDIA_LOG_E("Pipeline error: " PUBLIC_LOG_ZU, filters_.size());
                 continue;
             }
-            // MEDIA_LOG_I("Stop filter: " PUBLIC_LOG_S, (*it)->GetName().c_str());
-            // PROFILE_BEGIN();
             auto rtv = (*it)->Stop();
-            // PROFILE_END("Stop finished for %s", (*it)->GetName().c_str());
             FALSE_RETURN_V(rtv == Status::OK, rtv);
         }
         MEDIA_LOG_I("Stop finished, filter number: " PUBLIC_LOG_ZU, filters_.size());
@@ -122,11 +117,9 @@ Status Pipeline::Stop()
 
 Status Pipeline::Flush()
 {
-    // SYNC_TRACER();
     SubmitJobOnce([&] {
         AutoLock lock(mutex_);
         for (auto it = filters_.begin(); it != filters_.end(); ++it) {
-            // MEDIA_LOG_I("Flush for filter: " PUBLIC_LOG_S, (*it)->GetName().c_str());
             (*it)->Flush();
         }
         return Status::OK;
@@ -140,7 +133,6 @@ Status Pipeline::Release()
     SubmitJobOnce([&] {
         AutoLock lock(mutex_);
         for (auto it = filters_.begin(); it != filters_.end(); ++it) {
-            // MEDIA_LOG_I("Release for filter: " PUBLIC_LOG_S, (*it)->GetName().c_str());
             (*it)->Release();
         }
         filters_.clear();
@@ -182,7 +174,6 @@ Status Pipeline::RemoveHeadFilter(const std::shared_ptr<Filter>& filter)
         auto it = std::find_if(filters_.begin(), filters_.end(),
                                [&filter](const std::shared_ptr<Filter>& filterPtr) { return filterPtr == filter; });
         if (it != filters_.end()) {
-            // MEDIA_LOG_I("RemoveFilter " PUBLIC_LOG_S, (*it)->GetName().c_str());
             filters_.erase(it);
         }
         filter->Release();
@@ -193,7 +184,7 @@ Status Pipeline::RemoveHeadFilter(const std::shared_ptr<Filter>& filter)
 
 Status Pipeline::LinkFilters(const std::shared_ptr<Filter>& preFilter, const std::vector<std::shared_ptr<Filter>>& nextFilters, StreamType type)
 {
-    for(auto nextFilter : nextFilters) {
+    for (auto nextFilter : nextFilters) {
         preFilter->LinkNext(nextFilter, type);
     }
     return Status::OK;
@@ -201,7 +192,7 @@ Status Pipeline::LinkFilters(const std::shared_ptr<Filter>& preFilter, const std
 
 Status Pipeline::UpdateFilters(const std::shared_ptr<Filter>& preFilter, const std::vector<std::shared_ptr<Filter>>& nextFilters, StreamType type)
 {
-    for(auto nextFilter : nextFilters) {
+    for (auto nextFilter : nextFilters) {
         preFilter->UpdateNext(nextFilter, type);
     }
     return Status::OK;
@@ -209,7 +200,7 @@ Status Pipeline::UpdateFilters(const std::shared_ptr<Filter>& preFilter, const s
 
 Status Pipeline::UnLinkFilters(const std::shared_ptr<Filter>& preFilter, const std::vector<std::shared_ptr<Filter>>& nextFilters, StreamType type)
 {
-    for(auto nextFilter : nextFilters) {
+    for (auto nextFilter : nextFilters) {
         preFilter->UnLinkNext(nextFilter, type);
     }
     return Status::OK;

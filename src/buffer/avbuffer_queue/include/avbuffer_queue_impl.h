@@ -46,7 +46,7 @@ class AVBufferQueueProducerImpl;
 class AVBufferQueueConsumerImpl;
 
     // 当前调试版本，错误码统一用int32_t表示，0表示返回正确，非0表示返回错误。
-class AVBufferQueueImpl: public AVBufferQueue, public std::enable_shared_from_this<AVBufferQueueImpl> {
+class AVBufferQueueImpl : public AVBufferQueue, public std::enable_shared_from_this<AVBufferQueueImpl> {
 public:
     explicit AVBufferQueueImpl(const std::string &name);
     AVBufferQueueImpl(uint32_t size, MemoryType type, const std::string &name);
@@ -135,7 +135,7 @@ private:
     void DeleteCachedBufferById(uint64_t uniqueId_);
 };
 
-class AVBufferQueueSurfaceWrapper: public AVBufferQueueImpl {
+class AVBufferQueueSurfaceWrapper : public AVBufferQueueImpl {
 public:
     enum: uint8_t {
         PRODUCER_WRAPPER,

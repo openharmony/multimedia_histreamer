@@ -103,16 +103,14 @@ sptr<AVBufferQueueConsumer> AVBufferQueueImpl::GetConsumer()
     return consumer_.promote();
 }
 
-AVBufferQueueImpl::AVBufferQueueImpl(const std::string& name):
-        AVBufferQueue(), name_(name), size_(0), memoryType_(MemoryType::UNKNOWN_MEMORY)
-{
-}
+AVBufferQueueImpl::AVBufferQueueImpl(const std::string &name)
+    : AVBufferQueue(), name_(name), size_(0), memoryType_(MemoryType::UNKNOWN_MEMORY) {}
 
-AVBufferQueueImpl::AVBufferQueueImpl(uint32_t size, MemoryType type, const std::string& name):
-        AVBufferQueue(), name_(name), size_(size), memoryType_(type) {
-    if (size_ > AVBUFFER_QUEUE_MAX_QUEUE_SIZE) {
-        size_ = AVBUFFER_QUEUE_MAX_QUEUE_SIZE;
-    }
+AVBufferQueueImpl::AVBufferQueueImpl(uint32_t size, MemoryType type, const std::string &name)
+    : AVBufferQueue(), name_(name), size_(size), memoryType_(type) {
+  if (size_ > AVBUFFER_QUEUE_MAX_QUEUE_SIZE) {
+    size_ = AVBUFFER_QUEUE_MAX_QUEUE_SIZE;
+  }
 }
 
 uint32_t AVBufferQueueImpl::GetQueueSize()
@@ -256,13 +254,10 @@ void AVBufferQueueImpl::DeleteCachedBufferById(uint64_t uniqueId)
 Status AVBufferQueueImpl::CheckConfig(const AVBufferConfig& config)
 {
     FALSE_RETURN_V(config.memoryType != MemoryType::UNKNOWN_MEMORY, Status::ERROR_UNEXPECTED_MEMORY_TYPE);
-
     // memoryType_初始化之后将无法改变。
     FALSE_RETURN_V(memoryType_ == MemoryType::UNKNOWN_MEMORY || config.memoryType == memoryType_,
                    Status::ERROR_UNEXPECTED_MEMORY_TYPE);
-
     memoryType_ = config.memoryType;
-
     return Status::OK;
 }
 
@@ -270,10 +265,10 @@ bool AVBufferQueueImpl::wait_for(std::unique_lock<std::mutex>& lock, int32_t tim
 {
     MEDIA_LOG_D("wait for free buffer, timeout = %d", timeoutMs);
     if (timeoutMs > 0) {
-       return requestCondition.wait_for(
-           lock, std::chrono::milliseconds(timeoutMs), [this]() {
-                   return !freeBufferList_.empty() || (GetCachedBufferCount() < GetQueueSize());
-           });
+        return requestCondition.wait_for(
+            lock, std::chrono::milliseconds(timeoutMs), [this]() {
+                return !freeBufferList_.empty() || (GetCachedBufferCount() < GetQueueSize());
+            });
     } else if (timeoutMs < 0) {
         requestCondition.wait(lock);
     }
@@ -318,7 +313,8 @@ Status AVBufferQueueImpl::RequestBuffer(
     return Status::OK;
 }
 
-void AVBufferQueueImpl::InsertFreeBufferInOrder(uint64_t uniqueId) {
+void AVBufferQueueImpl::InsertFreeBufferInOrder(uint64_t uniqueId)
+{
     for (auto it = freeBufferList_.begin(); it != freeBufferList_.end(); it++) {
         if ((*it != uniqueId) &&
                 (cachedBufferMap_[*it].config.capacity >= cachedBufferMap_[uniqueId].config.capacity)) {

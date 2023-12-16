@@ -28,7 +28,7 @@ constexpr uint32_t AVBUFFER_QUEUE_MAX_QUEUE_SIZE = 32;
 class AVBufferQueueProducer;
 class AVBufferQueueConsumer;
 
-class IBrokerListener: public IRemoteBroker {
+class IBrokerListener : public IRemoteBroker {
 public:
     IBrokerListener() = default;
     ~IBrokerListener() noexcept override = default;
@@ -37,7 +37,7 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"Media.IAVBufferFilledListener")
 };
 
-class IProducerListener: public IRemoteBroker {
+class IProducerListener : public IRemoteBroker {
 public:
     IProducerListener() = default;
     ~IProducerListener() noexcept override = default;
@@ -46,7 +46,7 @@ public:
 };
 
 // consumer不具备跨进程能力
-class IConsumerListener: public RefBase {
+class IConsumerListener : public RefBase {
 public:
     IConsumerListener() = default;
     ~IConsumerListener() noexcept override = default;

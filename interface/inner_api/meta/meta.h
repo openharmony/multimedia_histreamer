@@ -130,16 +130,18 @@ public:
                            ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_MATRIX_COEFF, Plugin::MatrixCoefficient,
                            ValueType::INT32_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_ENCODE_BITRATE_MODE, Plugin::VideoEncodeBitrateMode, ValueType::INT32_T);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_ENCODE_BITRATE_MODE,
+        Plugin::VideoEncodeBitrateMode, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_RANGE or 
-                           tagCharSeq == Tag::VIDEO_REQUEST_I_FRAME or
-                           tagCharSeq == Tag::VIDEO_IS_HDR_VIVID or
-                           tagCharSeq == Tag::MEDIA_HAS_VIDEO or
-                           tagCharSeq == Tag::MEDIA_HAS_AUDIO or
-                           tagCharSeq == Tag::MEDIA_END_OF_STREAM, bool, ValueType::BOOL);
+        tagCharSeq == Tag::VIDEO_REQUEST_I_FRAME or
+        tagCharSeq == Tag::VIDEO_IS_HDR_VIVID or
+        tagCharSeq == Tag::MEDIA_HAS_VIDEO or
+        tagCharSeq == Tag::MEDIA_HAS_AUDIO or
+        tagCharSeq == Tag::MEDIA_END_OF_STREAM, bool, ValueType::BOOL);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_H265_PROFILE, Plugin::HEVCProfile, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_H265_LEVEL, Plugin::HEVCLevel, ValueType::INT32_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_CHROMA_LOCATION, Plugin::ChromaLocation, ValueType::INT32_T);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_CHROMA_LOCATION,
+        Plugin::ChromaLocation, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::APP_UID or
         tagCharSeq == Tag::APP_PID or
         tagCharSeq == Tag::APP_TOKEN_ID or

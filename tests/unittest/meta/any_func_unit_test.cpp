@@ -37,7 +37,6 @@ public:
     void SetUp(void);
 
     void TearDown(void);
-
 };
 
 void AnyInnerUnitTest::SetUpTestCase(void) {}
@@ -142,12 +141,12 @@ HWTEST_F(AnyInnerUnitTest, Any_Cast, TestSize.Level1)
     Any anyBool = true;
     bool valueOutbool = AnyCast<bool>(anyBool);
     EXPECT_EQ(valueOutbool, true);
-    Any anyFloat = (float)1.1;
+    Any anyFloat = static_cast<float>(1.1);
     float valueOutFloat = AnyCast<float>(anyFloat);
-    EXPECT_EQ(valueOutFloat, (float)1.1);
-    Any anyDouble = (double)1.2533;
+    EXPECT_EQ(valueOutFloat, static_cast<float>(1.1));
+    Any anyDouble = static_cast<double>(1.2533);
     double valueOutDouble = AnyCast<double>(anyDouble);
-    ASSERT_DOUBLE_EQ(valueOutDouble, (double)1.2533);
+    ASSERT_DOUBLE_EQ(valueOutDouble, static_cast<double>(1.2533));
     std::string str = "test string";
     Any anyString = str;
     std::string valueOutString = AnyCast<std::string>(anyString);
@@ -173,9 +172,6 @@ HWTEST_F(AnyInnerUnitTest, Any_IsSameTypeWith, TestSize.Level1)
 
     Any anyInt64 = (int64_t)125000000001111L;
     ASSERT_TRUE(Any::IsSameTypeWith<int64_t>(anyInt64));
-//    std::string_view strInt64_tTypeName = anyInt64.GetTypeName<int64_t>();
-//    std::string_view strInt64_t = std::string_view("long long");
-//    EXPECT_EQ(strInt64_tTypeName, strInt64_t);
 
     Any anyBool = true;
     ASSERT_TRUE(Any::IsSameTypeWith<bool>(anyBool));
@@ -198,9 +194,6 @@ HWTEST_F(AnyInnerUnitTest, Any_IsSameTypeWith, TestSize.Level1)
     std::string str = "test string";
     Any anyString = str;
     ASSERT_TRUE(Any::IsSameTypeWith<std::string>(anyString));
-//    std::string_view strStringTypeName = anyString.GetTypeName<std::string>();
-//    std::string_view strString = std::string_view("std::string");
-//    EXPECT_EQ(strStringTypeName, strString);
 
     std::vector<uint8_t> vecUint8{1, 2, 3};
     Any anyVecUInt8 = vecUint8;

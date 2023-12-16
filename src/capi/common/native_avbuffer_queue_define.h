@@ -75,8 +75,8 @@ struct OH_AVBufferQueueConsumer : public NativeAVBufferQueueMagic {
 struct OH_AVBufferQueueProducer : public NativeAVBufferQueueMagic {
     explicit OH_AVBufferQueueProducer(
             OHOS::sptr<OH_AVBufferQueue>& nativeBufferQueue,
-            OHOS::sptr<OHOS::Media::AVBufferQueueProducer>& producer):
-            NativeAVBufferQueueMagic(NATIVE_ABQ_OBJECT_MAGIC_PRODUCER),
+            OHOS::sptr<OHOS::Media::AVBufferQueueProducer>& producer)
+            : NativeAVBufferQueueMagic(NATIVE_ABQ_OBJECT_MAGIC_PRODUCER),
             nativeBufferQueue_(nativeBufferQueue),
             producer_(producer) { }
 

@@ -25,7 +25,7 @@ namespace Media {
     MessageParcel reply;                                                          \
     MessageOption option;                                                         \
     FALSE_RETURN_V(arguments.WriteInterfaceToken(GetDescriptor()),                \
-        Status::ERROR_IPC_WRITE_INTERFACE_TOKEN);
+        Status::ERROR_IPC_WRITE_INTERFACE_TOKEN)
 
 #define ABQ_IPC_SEND_REQUEST(command)                                             \
     do {                                                                          \
@@ -35,10 +35,10 @@ namespace Media {
     } while (0)
 
 
-class AVBufferQueueProducerProxyImpl: public AVBufferQueueProducerProxy {
+class AVBufferQueueProducerProxyImpl : public AVBufferQueueProducerProxy {
 public:
-    explicit AVBufferQueueProducerProxyImpl(const sptr<IRemoteObject>& object):
-            AVBufferQueueProducerProxy(object) { }
+    explicit AVBufferQueueProducerProxyImpl(const sptr<IRemoteObject>& object)
+        : AVBufferQueueProducerProxy(object) { }
     ~AVBufferQueueProducerProxyImpl() override = default;
     AVBufferQueueProducerProxyImpl(const AVBufferQueueProducerProxyImpl&) = delete;
     AVBufferQueueProducerProxyImpl operator=(const AVBufferQueueProducerProxyImpl&) = delete;
@@ -47,7 +47,7 @@ public:
     Status SetQueueSize(uint32_t size) override;
 
     Status RequestBuffer(std::shared_ptr<AVBuffer>& outBuffer,
-                          const AVBufferConfig& config, int32_t timeoutMs) override;
+        const AVBufferConfig& config, int32_t timeoutMs) override;
     Status PushBuffer(const std::shared_ptr<AVBuffer>& inBuffer, bool available) override;
     Status ReturnBuffer(const std::shared_ptr<AVBuffer>& inBuffer, bool available) override;
 
@@ -67,8 +67,8 @@ std::shared_ptr<AVBufferQueueProducerProxy> AVBufferQueueProducerProxy::Create(c
     return std::make_shared<AVBufferQueueProducerProxyImpl>(object);
 }
 
-AVBufferQueueProducerProxy::AVBufferQueueProducerProxy(const sptr<IRemoteObject>& object):
-        IRemoteProxy<AVBufferQueueProducer>(object) { }
+AVBufferQueueProducerProxy::AVBufferQueueProducerProxy(const sptr<IRemoteObject>& object)
+    : IRemoteProxy<AVBufferQueueProducer>(object) { }
 
 uint32_t AVBufferQueueProducerProxyImpl::GetQueueSize()
 {
@@ -83,7 +83,7 @@ uint32_t AVBufferQueueProducerProxyImpl::GetQueueSize()
 
 Status AVBufferQueueProducerProxyImpl::SetQueueSize(uint32_t size)
 {
-    ABQ_IPC_DEFINE_VARIABLES
+    ABQ_IPC_DEFINE_VARIABLES;
 
     arguments.WriteUint32(size);
 
@@ -93,9 +93,9 @@ Status AVBufferQueueProducerProxyImpl::SetQueueSize(uint32_t size)
 }
 
 Status AVBufferQueueProducerProxyImpl::RequestBuffer(std::shared_ptr<AVBuffer>& outBuffer,
-                      const AVBufferConfig& config, int32_t timeoutMs)
+                                                     const AVBufferConfig& config, int32_t timeoutMs)
 {
-    ABQ_IPC_DEFINE_VARIABLES
+    ABQ_IPC_DEFINE_VARIABLES;
 
     MarshallingConfig(arguments, config);
 
@@ -112,7 +112,7 @@ Status AVBufferQueueProducerProxyImpl::PushBuffer(const std::shared_ptr<AVBuffer
 {
     FALSE_RETURN_V(inBuffer != nullptr, Status::ERROR_NULL_POINT_BUFFER);
 
-    ABQ_IPC_DEFINE_VARIABLES
+    ABQ_IPC_DEFINE_VARIABLES;
 
     arguments.WriteUint64(inBuffer->GetUniqueId());
     arguments.WriteBool(available);
@@ -126,7 +126,7 @@ Status AVBufferQueueProducerProxyImpl::ReturnBuffer(const std::shared_ptr<AVBuff
 {
     FALSE_RETURN_V(inBuffer != nullptr, Status::ERROR_NULL_POINT_BUFFER);
 
-    ABQ_IPC_DEFINE_VARIABLES
+    ABQ_IPC_DEFINE_VARIABLES;
 
     arguments.WriteUint64(inBuffer->GetUniqueId());
     arguments.WriteBool(available);
@@ -140,7 +140,7 @@ Status AVBufferQueueProducerProxyImpl::AttachBuffer(std::shared_ptr<AVBuffer>& i
 {
     FALSE_RETURN_V(inBuffer != nullptr, Status::ERROR_NULL_POINT_BUFFER);
 
-    ABQ_IPC_DEFINE_VARIABLES
+    ABQ_IPC_DEFINE_VARIABLES;
 
     inBuffer->WriteToMessageParcel(arguments);
     arguments.WriteBool(isFilled);
@@ -154,7 +154,7 @@ Status AVBufferQueueProducerProxyImpl::DetachBuffer(const std::shared_ptr<AVBuff
 {
     FALSE_RETURN_V(outBuffer != nullptr, Status::ERROR_NULL_POINT_BUFFER);
 
-    ABQ_IPC_DEFINE_VARIABLES
+    ABQ_IPC_DEFINE_VARIABLES;
 
     arguments.WriteUint64(outBuffer->GetUniqueId());
 
@@ -165,7 +165,7 @@ Status AVBufferQueueProducerProxyImpl::DetachBuffer(const std::shared_ptr<AVBuff
 
 Status AVBufferQueueProducerProxyImpl::SetBufferFilledListener(sptr<IBrokerListener>& listener)
 {
-    ABQ_IPC_DEFINE_VARIABLES
+    ABQ_IPC_DEFINE_VARIABLES;
 
     arguments.WriteRemoteObject(listener->AsObject());
 
@@ -176,7 +176,7 @@ Status AVBufferQueueProducerProxyImpl::SetBufferFilledListener(sptr<IBrokerListe
 
 Status AVBufferQueueProducerProxyImpl::SetBufferAvailableListener(sptr<IProducerListener>& listener)
 {
-    ABQ_IPC_DEFINE_VARIABLES
+    ABQ_IPC_DEFINE_VARIABLES;
 
     arguments.WriteRemoteObject(listener->AsObject());
 

@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace Media {
 
-class AVBufferQueueProducerProxy: public IRemoteProxy<AVBufferQueueProducer> {
+class AVBufferQueueProducerProxy : public IRemoteProxy<AVBufferQueueProducer> {
 public:
     static std::shared_ptr<AVBufferQueueProducerProxy> Create(const sptr<IRemoteObject>& object);
 

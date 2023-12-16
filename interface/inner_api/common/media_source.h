@@ -50,8 +50,6 @@ public:
     /// Construct an a specified URI.
     explicit MediaSource(std::string uri);
 
-    //explicit MediaSource(std::shared_ptr<DataConsumer> dataStream);
-
 #ifndef OHOS_LITE
     explicit MediaSource(std::shared_ptr<IMediaDataSource> dataSrc);
 #endif

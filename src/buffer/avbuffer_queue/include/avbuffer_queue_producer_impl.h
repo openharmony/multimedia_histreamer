@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace Media {
 
-class AVBufferQueueProducerStub: public IRemoteStub<AVBufferQueueProducer> {
+class AVBufferQueueProducerStub : public IRemoteStub<AVBufferQueueProducer> {
 public:
     AVBufferQueueProducerStub();
     ~AVBufferQueueProducerStub() override = default;

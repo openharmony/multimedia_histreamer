@@ -16,23 +16,23 @@ import("//foundation/multimedia/histreamer/config.gni")
 
 config("histreamer_foundation_config") {
   include_dirs = [
-    "//foundation/multimedia/histreamer/interface/foundation",
-    "//foundation/multimedia/histreamer/foundation",
+    "$histreamer_root_dir/interface/foundation",
+    "$histreamer_root_dir/foundation",
   ]
   if (hst_is_lite_sys) {
     include_dirs += [
-      "//foundation/multimedia/media_utils_lite/interfaces/kits",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits",
+      "$hmultimedia_root_dir/media_utils_lite/interfaces/kits",
+      "$hiviewdfx_root_dir/hilog_lite/interfaces/native/innerkits",
     ]
   } else {
     include_dirs +=
-        [ "//base/hiviewdfx/hilog/interfaces/native/innerkits/include" ]
+        [ "$hiviewdfx_root_dir/hilog/interfaces/native/innerkits/include" ]
   }
 }
 
 if (hst_is_lite_sys) {
   source_set("histreamer_foundation") {
-    include_dirs = [ "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
+    include_dirs = [ "$hiviewdfx_root_dir/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
     sources = [
       "osal/filesystem/file_system.cpp",
       "osal/thread/condition_variable.cpp",
@@ -48,14 +48,14 @@ if (hst_is_lite_sys) {
     ]
     public_configs = [
       ":histreamer_foundation_config",
-      "//foundation/multimedia/histreamer:histreamer_presets",
+      "$histreamer_root_dir:histreamer_presets",
     ]
-    deps = [ "//foundation/multimedia/media_utils_lite:media_common" ]
+    deps = [ "$multimedia_root_dir/media_utils_lite:media_common" ]
     if (hst_is_mini_sys) {
-      deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_static" ]
+      deps += [ "$hiviewdfx_root_dir/hilog_lite/frameworks/featured:hilog_static" ]
       public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
     } else {
-      deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+      deps += [ "$hiviewdfx_root_dir/hilog_lite/frameworks/featured:hilog_shared" ]
       public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     }
 
@@ -68,7 +68,7 @@ if (hst_is_lite_sys) {
   ohos_source_set("histreamer_foundation") {
     subsystem_name = "multimedia"
     part_name = "histreamer"
-    include_dirs = [ "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
+    include_dirs = [ "$hiviewdfx_root_dir/hitrace/interfaces/native/innerkits/include/hitrace_meter" ]
     sources = [
       "osal/filesystem/file_system.cpp",
       "osal/thread/condition_variable.cpp",
@@ -84,10 +84,10 @@ if (hst_is_lite_sys) {
     ]
     public_configs = [
       ":histreamer_foundation_config",
-      "//foundation/multimedia/histreamer:histreamer_presets",
+      "$histreamer_root_dir:histreamer_presets",
     ]
     public_deps =
-        [ "//foundation/multimedia/histreamer/plugin:histreamer_plugin_intf" ]
+        [ "$histreamer_root_dir/plugin:histreamer_plugin_intf" ]
     deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     external_deps = [
       "graphic_2d:surface",

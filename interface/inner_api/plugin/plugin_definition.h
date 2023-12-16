@@ -168,7 +168,7 @@ struct PluginDefBase {
 
     virtual void AddExtensions(std::vector<std::string> ex) {
         auto iter = ex.begin();
-        while(iter != ex.end()){
+        while(iter != ex.end()) {
             extensions.emplace_back(*iter);
             iter++;
         }

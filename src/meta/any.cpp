@@ -83,7 +83,13 @@ bool Any::BaseTypesToParcel(const Any *operand, MessageParcel &parcel) noexcept
     return ret;
 }
 
-// returnValue : 0 -- success; 1 -- retry enum; 2 -- failed no retry
+enum class StatusCodeFromParcel {
+    SUCCESS = 0,
+    ENUM_RETRY = 1,
+    NO_RETRY = 2,
+};
+
+// returnValue : 0 -- success; 1 -- retry for enum type; 2 -- failed no retry
 int Any::BaseTypesFromParcel(Any *operand, MessageParcel &parcel) noexcept
 {
     Meta::ValueType type = static_cast<Meta::ValueType>(parcel.ReadInt32());
@@ -126,11 +132,11 @@ int Any::BaseTypesFromParcel(Any *operand, MessageParcel &parcel) noexcept
             break;
         }
         case Meta::ValueType::INVALID_TYPE:
-            return 1;
+            return static_cast<int>(StatusCodeFromParcel::ENUM_RETRY);
         default:
-            return 2;
+            return static_cast<int>(StatusCodeFromParcel::NO_RETRY);
     }
-    return 0;
+    return static_cast<int>(StatusCodeFromParcel::SUCCESS);
 }
 } // namespace Media
 } // namespace OHOS

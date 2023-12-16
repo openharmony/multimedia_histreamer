@@ -52,11 +52,14 @@ public:
 
     Status RemoveHeadFilter(const std::shared_ptr<Filter>& filter);
 
-    Status LinkFilters(const std::shared_ptr<Filter>& preFilter, const std::vector<std::shared_ptr<Filter>>& filters, StreamType type);
+    Status LinkFilters(const std::shared_ptr<Filter>& preFilter,
+                       const std::vector<std::shared_ptr<Filter>>& filters, StreamType type);
 
-    Status UpdateFilters(const std::shared_ptr<Filter>& preFilter, const std::vector<std::shared_ptr<Filter>>& filters, StreamType type);
+    Status UpdateFilters(const std::shared_ptr<Filter>& preFilter,
+                         const std::vector<std::shared_ptr<Filter>>& filters, StreamType type);
 
-    Status UnLinkFilters(const std::shared_ptr<Filter>& preFilter, const std::vector<std::shared_ptr<Filter>>& filters, StreamType type);
+    Status UnLinkFilters(const std::shared_ptr<Filter>& preFilter,
+                         const std::vector<std::shared_ptr<Filter>>& filters, StreamType type);
 
     void OnEvent(const Event& event) override;
 private:

@@ -22,8 +22,8 @@ namespace OHOS {
 namespace Media {
 
 AVBufferQueueSurfaceWrapper::AVBufferQueueSurfaceWrapper(
-        sptr<Surface>& surface, const std::string& name, uint8_t wrapperType):
-        AVBufferQueueImpl(surface->GetQueueSize(), MemoryType::UNKNOWN_MEMORY, name),
+    sptr<Surface> &surface, const std::string &name, uint8_t wrapperType)
+        : AVBufferQueueImpl(surface->GetQueueSize(), MemoryType::UNKNOWN_MEMORY,name),
         surface_(surface), wrapperType_(wrapperType)
 {
     for (uint32_t i = 0; i < surface->GetQueueSize(); i++) {
@@ -96,13 +96,7 @@ Status AVBufferQueueSurfaceWrapper::BindSurface(
     } else {
         buffer = cachedBufferMap_[freeBufferList_.front()];
         freeBufferList_.pop_front();
-
     }
-
-    // todo:需要AVBuffer实现对SurfaceBuffer的封装
-//    buffer->surfaceBuffer_ = surfaceBuffer;
-//    buffer->fence_ = fence;
-
     return Status::OK;
 }
 
@@ -111,10 +105,6 @@ Status AVBufferQueueSurfaceWrapper::UnbindSurface(uint64_t uniqueId, sptr<Surfac
 {
     std::lock_guard<std::mutex> lockGuard(queueMutex_);
     FALSE_RETURN_V(cachedBufferMap_.find(uniqueId) != cachedBufferMap_.end(), Status::ERROR_INVALID_BUFFER_ID);
-
-    // todo:需要AVBuffer实现对SurfaceBuffer的封装
-//    surfaceBuffer = cachedBufferMap_[uniqueId]->surfaceBuffer_;
-//    cachedBufferMap_[uniqueId]->surfaceBuffer_ = nullptr;
     freeBufferList_.emplace_back(uniqueId);
 
     return Status::OK;
@@ -135,10 +125,6 @@ Status AVBufferQueueSurfaceWrapper::RequestBuffer(
 
 Status AVBufferQueueSurfaceWrapper::CancelBuffer(uint64_t uniqueId)
 {
-    // todo:需要AVBuffer实现对SurfaceBuffer的封装
-//    NZERO_RETURN_V(surface_->CancelBuffer(cachedBufferMap_[uniqueId]->surfaceBuffer_),
-//                   Status::ERROR_SURFACE_INNER);
-
     sptr<SurfaceBuffer> surfaceBuffer = nullptr;
     int32_t fence;
     BufferFlushConfig config;
@@ -184,21 +170,13 @@ Status AVBufferQueueSurfaceWrapper::ReturnBuffer(uint64_t uniqueId, bool availab
 Status AVBufferQueueSurfaceWrapper::ReturnBuffer(const std::shared_ptr<AVBuffer>& buffer, bool available)
 {
     FALSE_RETURN_V(buffer != nullptr, Status::ERROR_NULL_POINT_BUFFER);
-
     return ReturnBuffer(buffer->GetUniqueId(), available);
 }
 
 Status AVBufferQueueSurfaceWrapper::AttachBuffer(std::shared_ptr<AVBuffer>& buffer, bool isFilled)
 {
     FALSE_RETURN_V(buffer != nullptr, Status::ERROR_NULL_POINT_BUFFER);
-
     FALSE_RETURN_V(!isFilled, Status::ERROR_INVALID_PARAMETER);
-
-    // todo:需要AVBuffer实现对SurfaceBuffer的封装
-//    FALSE_RETURN_V(buffer->surfaceBuffer_ != nullptr, Status::ERROR_NULL_SURFACE_BUFFER);
-
-//    NZERO_RETURN_V(surface_->AttachBuffer(buffer->surfaceBuffer_), Status::ERROR_SURFACE_INNER);
-
     return Status::OK;
 }
 
@@ -227,7 +205,7 @@ Status AVBufferQueueSurfaceWrapper::AcquireBuffer(std::shared_ptr<AVBuffer>& buf
 {
     sptr<SurfaceBuffer> surfaceBuffer = nullptr;
     int32_t fence;
-    int64_t timestamp; // todo:怎么赋值
+    int64_t timestamp;
     Rect range;
     NZERO_RETURN_V(surface_->AcquireBuffer(surfaceBuffer, fence, timestamp, range),
                    Status::ERROR_SURFACE_INNER);
@@ -243,16 +221,13 @@ Status AVBufferQueueSurfaceWrapper::ReleaseBuffer(uint64_t uniqueId)
     int32_t fence;
     BufferFlushConfig config;
     NOK_RETURN(UnbindSurface(uniqueId, surfaceBuffer, fence, config));
-
     NZERO_RETURN_V(surface_->ReleaseBuffer(surfaceBuffer, fence), Status::ERROR_SURFACE_INNER);
-
     return Status::OK;
 }
 
 Status AVBufferQueueSurfaceWrapper::ReleaseBuffer(const std::shared_ptr<AVBuffer>& buffer)
 {
     FALSE_RETURN_V(buffer != nullptr, Status::ERROR_NULL_POINT_BUFFER);
-
     return ReleaseBuffer(buffer->GetUniqueId());
 }
 
@@ -267,19 +242,15 @@ Status AVBufferQueueSurfaceWrapper::SetProducerListener(sptr<IProducerListener>&
 {
     std::lock_guard<std::mutex> lockGuard(producerListenerMutex_);
     producerListener_ = listener;
-
     return Status::OK;
 }
 
-class SurfaceConsumerListener: public IBufferConsumerListener
-{
+class SurfaceConsumerListener : public IBufferConsumerListener {
 public:
-    explicit SurfaceConsumerListener(std::function<void()> releaseBufferFunc):
-            onReleaseBufferFunc_(std::move(releaseBufferFunc)) { }
+  explicit SurfaceConsumerListener(std::function<void()> releaseBufferFunc)
+      : onReleaseBufferFunc_(std::move(releaseBufferFunc)) {}
 
-    void OnBufferAvailable() override {
-        onReleaseBufferFunc_();
-    }
+  void OnBufferAvailable() override { onReleaseBufferFunc_(); }
 
 private:
     std::function<void(void)> onReleaseBufferFunc_;

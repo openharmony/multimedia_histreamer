@@ -14,6 +14,8 @@
 import("//build/ohos.gni")
 declare_args() {
   histreamer_root_dir = "//foundation/multimedia/histreamer"
+  multimedia_root_dir = "//foundation/multimedia"
+  hiviewdfx_root_dir = "//base/hiviewdfx"
 
   # build histreamer plugin feature ability
   # only for small and std (mini device does not support dynamic libraries)

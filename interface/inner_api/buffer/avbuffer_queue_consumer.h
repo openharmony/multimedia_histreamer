@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace Media {
 
-class AVBufferQueueConsumer: public RefBase {
+class AVBufferQueueConsumer : public RefBase {
 public:
     ~AVBufferQueueConsumer() override = default;
     AVBufferQueueConsumer(const AVBufferQueueConsumer&) = delete;

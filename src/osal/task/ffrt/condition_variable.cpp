@@ -54,8 +54,7 @@ bool ConditionVariable::WaitFor(AutoLock& lock, int timeoutMs)
     auto status = cond_.wait_for(lock, std::chrono::milliseconds(timeoutMs));
     if (status == ffrt::cv_status::no_timeout) {
         return true;
-    }
-    else {
+    } else {
         return false;
     }
 }

@@ -59,7 +59,7 @@ void Thread::SetName(const std::string& name)
 
 bool Thread::CreateThread(const std::function<void()>& func)
 {
-    state_ = std::unique_ptr<State>(new State);
+    state_ = std::make_unique<State>();
     state_->func = func;
     state_->name = name_;
     pthread_attr_t attr;

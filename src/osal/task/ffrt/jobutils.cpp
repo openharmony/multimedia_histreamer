@@ -28,7 +28,7 @@ void SleepInJob(unsigned ms)
 
 void WaitForFinish(JobHandle handle)
 {
-    if(handle) {
+    if (handle) {
         ffrt::wait({handle});
         handle = nullptr;
     }

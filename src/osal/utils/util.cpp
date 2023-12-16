@@ -83,7 +83,6 @@ std::string AVStrError(int errnum)
 {
 #ifdef MEDIA_OHOS
     char errbuf[ERROR_MAX_STRING_SIZE] = {0};
-    // av_strerror(errnum, errbuf, ERROR_MAX_STRING_SIZE);
     return std::string(errbuf);
 #else
     return "AVStrError " + std::to_string(errnum);

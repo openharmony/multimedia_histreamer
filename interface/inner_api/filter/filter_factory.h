@@ -26,7 +26,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Pipeline{
+namespace Pipeline {
 using InstanceGenerator = std::function<std::shared_ptr<Filter>(const std::string&, const FilterType type)>;
 
 // TODO: name 有可能可以去掉，FilterType 作为key即可

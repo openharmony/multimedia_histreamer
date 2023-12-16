@@ -21,10 +21,10 @@
 namespace OHOS {
 namespace Media {
 
-class AVBufferQueueConsumerImpl: public AVBufferQueueConsumer {
+class AVBufferQueueConsumerImpl : public AVBufferQueueConsumer {
 public:
     explicit AVBufferQueueConsumerImpl(std::shared_ptr<AVBufferQueueImpl>& bufferQueue);
-     ~AVBufferQueueConsumerImpl() override = default;
+    ~AVBufferQueueConsumerImpl() override = default;
     AVBufferQueueConsumerImpl(const AVBufferQueueConsumerImpl&) = delete;
     AVBufferQueueConsumerImpl operator=(const AVBufferQueueConsumerImpl&) = delete;
 
