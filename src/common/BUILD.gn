@@ -52,10 +52,12 @@ if (hst_is_lite_sys) {
     ]
     deps = [ "$multimedia_root_dir/media_utils_lite:media_common" ]
     if (hst_is_mini_sys) {
-      deps += [ "$hiviewdfx_root_dir/hilog_lite/frameworks/featured:hilog_static" ]
+      deps +=
+          [ "$hiviewdfx_root_dir/hilog_lite/frameworks/featured:hilog_static" ]
       public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
     } else {
-      deps += [ "$hiviewdfx_root_dir/hilog_lite/frameworks/featured:hilog_shared" ]
+      deps +=
+          [ "$hiviewdfx_root_dir/hilog_lite/frameworks/featured:hilog_shared" ]
       public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     }
 
@@ -86,8 +88,7 @@ if (hst_is_lite_sys) {
       ":histreamer_foundation_config",
       "$histreamer_root_dir:histreamer_presets",
     ]
-    public_deps =
-        [ "$histreamer_root_dir/plugin:histreamer_plugin_intf" ]
+    public_deps = [ "$histreamer_root_dir/plugin:histreamer_plugin_intf" ]
     deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     external_deps = [
       "graphic_2d:surface",

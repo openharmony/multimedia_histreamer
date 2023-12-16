@@ -35,7 +35,7 @@ AVBufferQueueProducerStub::AVBufferQueueProducerStub()
 }
 
 int AVBufferQueueProducerStub::OnRemoteRequest(
-        uint32_t code, MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
+    uint32_t code, MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
 {
     auto it = stubFuncMap_.find(code);
     FALSE_RETURN_V(it != stubFuncMap_.end(), IPC_STUB_INVALID_DATA_ERR);
@@ -46,7 +46,7 @@ int AVBufferQueueProducerStub::OnRemoteRequest(
 }
 
 int32_t AVBufferQueueProducerStub::OnGetQueueSize(
-        MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
+    MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
 {
     auto size = GetQueueSize();
 
@@ -57,7 +57,7 @@ int32_t AVBufferQueueProducerStub::OnGetQueueSize(
 }
 
 int32_t AVBufferQueueProducerStub::OnSetQueueSize(
-        MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
+    MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
 {
     auto size = arguments.ReadUint32();
     auto ret = SetQueueSize(size);
@@ -68,7 +68,7 @@ int32_t AVBufferQueueProducerStub::OnSetQueueSize(
 }
 
 int32_t AVBufferQueueProducerStub::OnRequestBuffer(
-        MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
+    MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
 {
     std::shared_ptr<AVBuffer> buffer = nullptr;
     AVBufferConfig config;
@@ -86,7 +86,7 @@ int32_t AVBufferQueueProducerStub::OnRequestBuffer(
 }
 
 int32_t AVBufferQueueProducerStub::OnPushBuffer(
-        MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
+    MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
 {
     auto uniqueId = arguments.ReadUint64();
     auto available = arguments.ReadBool();
@@ -98,7 +98,7 @@ int32_t AVBufferQueueProducerStub::OnPushBuffer(
 }
 
 int32_t AVBufferQueueProducerStub::OnReturnBuffer(
-        MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
+    MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
 {
     auto uniqueId = arguments.ReadUint64();
     auto available = arguments.ReadBool();
@@ -110,7 +110,7 @@ int32_t AVBufferQueueProducerStub::OnReturnBuffer(
 }
 
 int32_t AVBufferQueueProducerStub::OnAttachBuffer(
-        MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
+    MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
 {
     auto buffer = AVBuffer::CreateAVBuffer();
     buffer->ReadFromMessageParcel(arguments);
@@ -123,7 +123,7 @@ int32_t AVBufferQueueProducerStub::OnAttachBuffer(
 }
 
 int32_t AVBufferQueueProducerStub::OnDetachBuffer(
-        MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
+    MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
 {
     auto uniqueId = arguments.ReadUint64();
 
@@ -134,7 +134,7 @@ int32_t AVBufferQueueProducerStub::OnDetachBuffer(
 }
 
 int32_t AVBufferQueueProducerStub::OnSetBufferFilledListener(
-        MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
+    MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
 {
     auto listenerObject = arguments.ReadRemoteObject();
     sptr<IBrokerListener> listener = iface_cast<IBrokerListener>(listenerObject);
@@ -146,7 +146,7 @@ int32_t AVBufferQueueProducerStub::OnSetBufferFilledListener(
 }
 
 int32_t AVBufferQueueProducerStub::OnSetBufferAvailableListener(
-        MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
+    MessageParcel& arguments, MessageParcel& reply, MessageOption& option)
 {
     auto listenerObject = arguments.ReadRemoteObject();
     sptr<IProducerListener> listener = iface_cast<IProducerListener>(listenerObject);

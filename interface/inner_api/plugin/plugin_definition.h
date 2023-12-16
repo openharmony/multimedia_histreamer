@@ -158,47 +158,57 @@ struct PluginDefBase {
 
     virtual ~PluginDefBase() {}
 
-    virtual void AddInCaps(Capability& capability) {
+    virtual void AddInCaps(Capability& capability)
+    {
         inCaps.emplace_back(capability);
     }
 
-    virtual void AddOutCaps(Capability& capability) {
+    virtual void AddOutCaps(Capability& capability)
+    {
         outCaps.emplace_back(capability);
     }
 
-    virtual void AddExtensions(std::vector<std::string> ex) {
+    virtual void AddExtensions(std::vector<std::string> ex)
+    {
         auto iter = ex.begin();
-        while(iter != ex.end()) {
+        while (iter != ex.end()) {
             extensions.emplace_back(*iter);
             iter++;
         }
     }
 
-    virtual std::vector<std::string> GetExtensions() const {
+    virtual std::vector<std::string> GetExtensions() const
+    {
         return extensions;
     }
 
-    virtual CapabilitySet GetInCaps() const {
+    virtual CapabilitySet GetInCaps() const
+    {
         return inCaps;
     }
 
-    virtual CapabilitySet GetOutCaps() const {
+    virtual CapabilitySet GetOutCaps() const
+    {
         return outCaps;
     }
 
-    virtual PluginCreatorFunc<PluginBase> GetCreator() const {
+    virtual PluginCreatorFunc<PluginBase> GetCreator() const
+    {
         return creator;
     }
 
-    virtual void SetCreator(PluginCreatorFunc<PluginBase> creatorFunc) {
+    virtual void SetCreator(PluginCreatorFunc<PluginBase> creatorFunc)
+    {
         creator = creatorFunc;
     }
 
-    virtual PluginSnifferFunc GetSniffer() const {
+    virtual PluginSnifferFunc GetSniffer() const
+    {
         return sniffer;
     }
 
-    virtual void SetSniffer(PluginSnifferFunc sniffFunc) {
+    virtual void SetSniffer(PluginSnifferFunc sniffFunc)
+    {
         sniffer = sniffFunc;
     }
 
@@ -294,7 +304,7 @@ using UnregisterFunc = void (*)();
  * @param unregisterFunc    Plugin deregister function，MUST NOT be NULL.
  */
 #define PLUGIN_DEFINITION(name, license, registerFunc, unregisterFunc)                                                 \
-    PLUGIN_EXPORT OHOS::Media::Status PLUGIN_PASTE(register_, name)(                                           \
+    PLUGIN_EXPORT OHOS::Media::Status PLUGIN_PASTE(register_, name)(                                                   \
         const std::shared_ptr<OHOS::Media::Plugin::PackageRegister>& pkgReg)                                           \
     {                                                                                                                  \
         pkgReg->AddPackage({PLUGIN_INTERFACE_VERSION, PLUGIN_STRINGIFY(name), license});                               \

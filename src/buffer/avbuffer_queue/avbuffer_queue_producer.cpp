@@ -20,7 +20,7 @@ namespace OHOS {
 namespace Media {
 
 AVBufferQueueProducerImpl::AVBufferQueueProducerImpl(std::shared_ptr<AVBufferQueueImpl>& bufferQueue)
-    : AVBufferQueueProducerStub(), bufferQueue_(bufferQueue) {  // 由内部调用保证bufferQueue_不可能为空
+    : AVBufferQueueProducerStub(), bufferQueue_(bufferQueue) {
 }
 
 uint32_t AVBufferQueueProducerImpl::GetQueueSize()
@@ -34,7 +34,7 @@ Status AVBufferQueueProducerImpl::SetQueueSize(uint32_t size)
 }
 
 Status AVBufferQueueProducerImpl::RequestBuffer(std::shared_ptr<AVBuffer>& buffer,
-                                                 const AVBufferConfig& config, int32_t timeoutMs)
+                                                const AVBufferConfig& config, int32_t timeoutMs)
 {
     return bufferQueue_->RequestBuffer(buffer, config, timeoutMs);
 }

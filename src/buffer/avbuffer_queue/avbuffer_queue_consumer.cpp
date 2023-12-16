@@ -19,7 +19,7 @@ namespace OHOS {
 namespace Media {
 
 AVBufferQueueConsumerImpl::AVBufferQueueConsumerImpl(std::shared_ptr<AVBufferQueueImpl>& bufferQueue)
-    : AVBufferQueueConsumer(), bufferQueue_(bufferQueue) {  // 由内部调用保证bufferQueue_不可能为空
+    : AVBufferQueueConsumer(), bufferQueue_(bufferQueue) {
 }
 
 uint32_t AVBufferQueueConsumerImpl::GetQueueSize()

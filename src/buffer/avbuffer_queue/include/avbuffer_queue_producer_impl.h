@@ -65,7 +65,7 @@ private:
     int32_t OnSetBufferAvailableListener(MessageParcel& arguments, MessageParcel& reply, MessageOption& option);
 };
 
-class AVBufferQueueProducerImpl: public AVBufferQueueProducerStub {
+class AVBufferQueueProducerImpl : public AVBufferQueueProducerStub {
 public:
     explicit AVBufferQueueProducerImpl(std::shared_ptr<AVBufferQueueImpl>& bufferQueue);
     ~AVBufferQueueProducerImpl() override = default;

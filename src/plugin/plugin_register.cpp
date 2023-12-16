@@ -28,7 +28,6 @@ namespace Plugin {
 
 PluginRegister::~PluginRegister()
 {
-//    UnregisterAllPlugins();
     registerData_->registerNames.clear();
     registerData_->registerTable.clear();
 }
@@ -47,18 +46,15 @@ Status PluginRegister::RegisterImpl::SetPackageDef(const PackageDef& def)
 Status PluginRegister::RegisterImpl::AddPlugin(const PluginDefBase& def)
 {
     if (!Verification(def)) {
-        // 插件定义参数校验不合法
         return Status::ERROR_INVALID_DATA;
     }
     if (!VersionMatched(def)) {
-        // 版本不匹配，不给注册
         return Status::ERROR_UNKNOWN;
     }
     if (registerData->IsPluginExist(def.pluginType, def.name)) {
         if (MoreAcceptable(registerData->registerTable[def.pluginType][def.name], def)) {
             registerData->registerTable[def.pluginType].erase(def.name);
         } else {
-            // 重复注册，且有更合适的版本存在
             return Status::ERROR_PLUGIN_ALREADY_EXISTS;
         }
     }
@@ -321,7 +317,6 @@ void PluginRegister::RegisterGenericPlugins(const std::vector<GenericPluginDef>&
 
 void PluginRegister::RegisterStaticPlugins()
 {
-//    RegisterPluginStatic(staticPluginRegister_);
 }
 
 void PluginRegister::RegisterDynamicPlugins()
@@ -370,7 +365,6 @@ void PluginRegister::RegisterPluginsFromPath(const char* libDirPath)
 
 void PluginRegister::UnregisterAllPlugins()
 {
-//    UnregisterPluginStatic();
 #ifdef DYNAMIC_PLUGINS
     for (auto& loader : registeredLoaders_) {
         EraseRegisteredPluginsByLoader(loader);

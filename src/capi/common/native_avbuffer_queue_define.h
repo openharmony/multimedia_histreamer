@@ -32,9 +32,9 @@ using NativeAVBufferQueueObjectMagic = enum NativeAVBufferQueueObjectMagic: uint
 };
 
 std::list<NativeAVBufferQueueObjectMagic> NativeAVBufferQueueObjectMagicList = {
-        NATIVE_ABQ_OBJECT_MAGIC_QUEUE,
-        NATIVE_ABQ_OBJECT_MAGIC_PRODUCER,
-        NATIVE_ABQ_OBJECT_MAGIC_CONSUMER,
+    NATIVE_ABQ_OBJECT_MAGIC_QUEUE,
+    NATIVE_ABQ_OBJECT_MAGIC_PRODUCER,
+    NATIVE_ABQ_OBJECT_MAGIC_CONSUMER,
 };
 
 struct NativeAVBufferQueueMagic : public OHOS::RefBase {
@@ -60,9 +60,9 @@ struct OH_AVBufferQueue: public NativeAVBufferQueueMagic {
 
 struct OH_AVBufferQueueConsumer : public NativeAVBufferQueueMagic {
     explicit OH_AVBufferQueueConsumer(
-            OHOS::sptr<OH_AVBufferQueue>& nativeBufferQueue,
-            OHOS::sptr<OHOS::Media::AVBufferQueueConsumer>& consumer):
-            NativeAVBufferQueueMagic(NATIVE_ABQ_OBJECT_MAGIC_CONSUMER),
+        OHOS::sptr<OH_AVBufferQueue>& nativeBufferQueue,
+        OHOS::sptr<OHOS::Media::AVBufferQueueConsumer>& consumer)
+            : NativeAVBufferQueueMagic(NATIVE_ABQ_OBJECT_MAGIC_CONSUMER),
             nativeBufferQueue_(nativeBufferQueue),
             consumer_(consumer) { }
 
@@ -74,8 +74,8 @@ struct OH_AVBufferQueueConsumer : public NativeAVBufferQueueMagic {
 
 struct OH_AVBufferQueueProducer : public NativeAVBufferQueueMagic {
     explicit OH_AVBufferQueueProducer(
-            OHOS::sptr<OH_AVBufferQueue>& nativeBufferQueue,
-            OHOS::sptr<OHOS::Media::AVBufferQueueProducer>& producer)
+        OHOS::sptr<OH_AVBufferQueue>& nativeBufferQueue,
+        OHOS::sptr<OHOS::Media::AVBufferQueueProducer>& producer)
             : NativeAVBufferQueueMagic(NATIVE_ABQ_OBJECT_MAGIC_PRODUCER),
             nativeBufferQueue_(nativeBufferQueue),
             producer_(producer) { }

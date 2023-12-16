@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Media {
 
 std::shared_ptr<AVBufferQueue> AVBufferQueue::Create(
-        uint32_t size, MemoryType type, const std::string& name)
+    uint32_t size, MemoryType type, const std::string& name)
 {
     MEDIA_LOG_D("AVBufferQueue::Create size = %u, type = %u, name = %s",
                 size, static_cast<uint32_t>(type), name.c_str());
@@ -31,7 +31,7 @@ std::shared_ptr<AVBufferQueue> AVBufferQueue::Create(
 }
 
 std::shared_ptr<AVBufferQueue> AVBufferQueue::CreateAsSurfaceProducer(
-        sptr<Surface>& surface, const std::string& name)
+    sptr<Surface>& surface, const std::string& name)
 {
     FALSE_RETURN_V(surface != nullptr, nullptr);
 
@@ -40,7 +40,7 @@ std::shared_ptr<AVBufferQueue> AVBufferQueue::CreateAsSurfaceProducer(
 }
 
 std::shared_ptr<AVBufferQueue> AVBufferQueue::CreateAsSurfaceConsumer(
-        sptr<Surface>& surface, const std::string& name)
+    sptr<Surface>& surface, const std::string& name)
 {
     FALSE_RETURN_V(surface != nullptr, nullptr);
 
@@ -107,10 +107,11 @@ AVBufferQueueImpl::AVBufferQueueImpl(const std::string &name)
     : AVBufferQueue(), name_(name), size_(0), memoryType_(MemoryType::UNKNOWN_MEMORY) {}
 
 AVBufferQueueImpl::AVBufferQueueImpl(uint32_t size, MemoryType type, const std::string &name)
-    : AVBufferQueue(), name_(name), size_(size), memoryType_(type) {
-  if (size_ > AVBUFFER_QUEUE_MAX_QUEUE_SIZE) {
-    size_ = AVBUFFER_QUEUE_MAX_QUEUE_SIZE;
-  }
+    : AVBufferQueue(), name_(name), size_(size), memoryType_(type)
+{
+    if (size_ > AVBUFFER_QUEUE_MAX_QUEUE_SIZE) {
+        size_ = AVBUFFER_QUEUE_MAX_QUEUE_SIZE;
+    }
 }
 
 uint32_t AVBufferQueueImpl::GetQueueSize()
@@ -276,7 +277,7 @@ bool AVBufferQueueImpl::wait_for(std::unique_lock<std::mutex>& lock, int32_t tim
 }
 
 Status AVBufferQueueImpl::RequestBuffer(
-        std::shared_ptr<AVBuffer>& buffer, const AVBufferConfig& config, int32_t timeoutMs)
+    std::shared_ptr<AVBuffer>& buffer, const AVBufferConfig& config, int32_t timeoutMs)
 {
     auto configCopy = config;
     if (config.memoryType == MemoryType::UNKNOWN_MEMORY) {
@@ -454,10 +455,10 @@ Status AVBufferQueueImpl::AttachBuffer(std::shared_ptr<AVBuffer>& buffer, bool i
         NOK_RETURN(CheckConfig(config));
 
         AVBufferElement ele = {
-                .config = config,
-                .state = AVBUFFER_STATE_ATTACHED,
-                .isDeleting = false,
-                .buffer = buffer
+            .config = config,
+            .state = AVBUFFER_STATE_ATTACHED,
+            .isDeleting = false,
+            .buffer = buffer
         };
 
         auto cachedCount = GetCachedBufferCount();

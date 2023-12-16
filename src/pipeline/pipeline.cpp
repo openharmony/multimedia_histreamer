@@ -182,24 +182,27 @@ Status Pipeline::RemoveHeadFilter(const std::shared_ptr<Filter>& filter)
     return Status::OK;
 }
 
-Status Pipeline::LinkFilters(const std::shared_ptr<Filter>& preFilter, const std::vector<std::shared_ptr<Filter>>& nextFilters, StreamType type)
-{
+Status Pipeline::LinkFilters(const std::shared_ptr<Filter> &preFilter,
+                             const std::vector<std::shared_ptr<Filter>> &nextFilters,
+                             StreamType type) {
     for (auto nextFilter : nextFilters) {
         preFilter->LinkNext(nextFilter, type);
     }
     return Status::OK;
 }
 
-Status Pipeline::UpdateFilters(const std::shared_ptr<Filter>& preFilter, const std::vector<std::shared_ptr<Filter>>& nextFilters, StreamType type)
-{
+Status Pipeline::UpdateFilters(const std::shared_ptr<Filter> &preFilter,
+                               const std::vector<std::shared_ptr<Filter>> &nextFilters,
+                               StreamType type) {
     for (auto nextFilter : nextFilters) {
         preFilter->UpdateNext(nextFilter, type);
     }
     return Status::OK;
 }
 
-Status Pipeline::UnLinkFilters(const std::shared_ptr<Filter>& preFilter, const std::vector<std::shared_ptr<Filter>>& nextFilters, StreamType type)
-{
+Status Pipeline::UnLinkFilters(const std::shared_ptr<Filter> &preFilter,
+                               const std::vector<std::shared_ptr<Filter>> &nextFilters,
+                               StreamType type) {
     for (auto nextFilter : nextFilters) {
         preFilter->UnLinkNext(nextFilter, type);
     }

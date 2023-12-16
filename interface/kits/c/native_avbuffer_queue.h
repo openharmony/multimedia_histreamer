@@ -27,10 +27,10 @@ typedef struct OH_AVBufferQueueConsumer OH_AVBufferQueueConsumer;
 typedef struct OH_AVBufferQueueProducer OH_AVBufferQueueProducer;
 
 typedef void (*OH_AVBufferQueueProducer_OnBufferFilled)(
-        OH_AVBufferQueueProducer* bufferQueue, OH_AVBuffer* buffer, void* userData);
+    OH_AVBufferQueueProducer* bufferQueue, OH_AVBuffer* buffer, void* userData);
 
 typedef void (*OH_AVBufferQueueConsumer_OnBufferAvailable)(
-        OH_AVBufferQueueConsumer* bufferQueue, void* userData);
+    OH_AVBufferQueueConsumer* bufferQueue, void* userData);
 
 /**
  * @brief Create an OH_AVBufferQueueConsumer instance.
@@ -82,7 +82,7 @@ OH_AVErrCode OH_AVBufferQueueProducer_Destroy(OH_AVBufferQueueProducer* bufferQu
  * @since 10
  */
 OH_AVErrCode OH_AVBufferQueueProducer_RequestBuffer(
-        OH_AVBufferQueueProducer* bufferQueue, OH_AVBuffer** buffer, int32_t bufferSize, int32_t timeoutMs);
+    OH_AVBufferQueueProducer* bufferQueue, OH_AVBuffer** buffer, int32_t bufferSize, int32_t timeoutMs);
 
 /**
  * @brief Push a buffer to buffer queue, which can modified by buffer filled listener.
@@ -96,7 +96,7 @@ OH_AVErrCode OH_AVBufferQueueProducer_RequestBuffer(
  * @since 10
  */
 OH_AVErrCode OH_AVBufferQueueProducer_PushBuffer(
-        OH_AVBufferQueueProducer* bufferQueue, const OH_AVBuffer* buffer, bool available);
+    OH_AVBufferQueueProducer* bufferQueue, const OH_AVBuffer* buffer, bool available);
 
 /**
  * @brief Return a buffer to buffer queue immediately, which cannot be modified,
@@ -109,7 +109,7 @@ OH_AVErrCode OH_AVBufferQueueProducer_PushBuffer(
  * @since 10
  */
 OH_AVErrCode OH_AVBufferQueueProducer_ReturnBuffer(
-        OH_AVBufferQueueProducer* bufferQueue, const OH_AVBuffer* buffer, bool available);
+    OH_AVBufferQueueProducer* bufferQueue, const OH_AVBuffer* buffer, bool available);
 
 /**
  * @brief Set buffer filled listener, when a buffer was produced, the listener will be called,
@@ -123,7 +123,7 @@ OH_AVErrCode OH_AVBufferQueueProducer_ReturnBuffer(
  * @since 10
  */
 OH_AVErrCode OH_AVBufferQueueProducer_SetBufferFilledListener(
-        OH_AVBufferQueueProducer* bufferQueue, OH_AVBufferQueueProducer_OnBufferFilled* listener, void* userData);
+    OH_AVBufferQueueProducer* bufferQueue, OH_AVBufferQueueProducer_OnBufferFilled* listener, void* userData);
 
 /**
  * @brief Acquire an available buffer from queue. Recommend to call it after
@@ -155,7 +155,7 @@ OH_AVErrCode OH_AVBufferQueueConsumer_ReleaseBuffer(OH_AVBufferQueueConsumer* bu
  * @since 10
  */
 OH_AVErrCode OH_AVBufferQueueConsumer_SetBufferAvailableListener(
-        OH_AVBufferQueueConsumer* bufferQueue, OH_AVBufferQueueConsumer_OnBufferAvailable* listener, void* userData);
+    OH_AVBufferQueueConsumer* bufferQueue, OH_AVBufferQueueConsumer_OnBufferAvailable* listener, void* userData);
 
 #ifdef __cplusplus
 }

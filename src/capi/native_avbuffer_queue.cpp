@@ -43,19 +43,19 @@ using namespace OHOS::Media;
 class ProducerBufferFilledListener : public OHOS::IRemoteStub<IBrokerListener> {
 public:
     explicit ProducerBufferFilledListener(
-            OH_AVBufferQueueProducer* nativeProducer,
-            OH_AVBufferQueueProducer_OnBufferFilled* listener,
-            void* userData)
-                :nativeProducer_(nativeProducer), listener_(listener), userData_(userData) { }
-    ProducerBufferFilledListener(const ProducerBufferFilledListener&) = delete;
-    ProducerBufferFilledListener operator=(const ProducerBufferFilledListener&) = delete;
+        OH_AVBufferQueueProducer *nativeProducer,
+        OH_AVBufferQueueProducer_OnBufferFilled *listener, void *userData)
+        : nativeProducer_(nativeProducer), listener_(listener), userData_(userData) { }
+    ProducerBufferFilledListener(const ProducerBufferFilledListener &) = delete;
+    ProducerBufferFilledListener operator=(const ProducerBufferFilledListener &) = delete;
     ~ProducerBufferFilledListener() override = default;
 
-    void OnBufferFilled(std::shared_ptr<AVBuffer>& buffer) override {
+    void OnBufferFilled(std::shared_ptr<AVBuffer> &buffer) override {
         FALSE_RETURN_W(nativeProducer_ != nullptr);
         FALSE_RETURN_W(nativeProducer_->nativeBufferQueue_ != nullptr);
         FALSE_RETURN_W(listener_ != nullptr && *listener_ != nullptr);
-        auto nativeBuffer = nativeProducer_->nativeBufferQueue_->FindAndBindNativeBuffer(buffer);
+        auto nativeBuffer =
+            nativeProducer_->nativeBufferQueue_->FindAndBindNativeBuffer(buffer);
         FALSE_RETURN_W(nativeBuffer != nullptr);
         (*listener_)(nativeProducer_, nativeBuffer, userData_);
     }
@@ -69,9 +69,9 @@ private:
 class ConsumerBufferAvailableListener : public IConsumerListener {
 public:
     ConsumerBufferAvailableListener(
-            OH_AVBufferQueueConsumer* nativeConsumer,
-            OH_AVBufferQueueConsumer_OnBufferAvailable* listener,
-            void* userData):
+        OH_AVBufferQueueConsumer* nativeConsumer,
+        OH_AVBufferQueueConsumer_OnBufferAvailable* listener,
+        void* userData):
         nativeConsumer_(nativeConsumer), listener_(listener), userData_(userData) { }
     ConsumerBufferAvailableListener(const ConsumerBufferAvailableListener&) = delete;
     ConsumerBufferAvailableListener operator=(const ConsumerBufferAvailableListener&) = delete;
@@ -94,7 +94,7 @@ static OH_AVErrCode NativeObjectAddRef(NativeAVBufferQueueMagic* magicObject)
     FALSE_RETURN_V(magicObject != nullptr, OH_AVErrCode::AV_ERR_INVALID_VAL);
 
     auto it = std::find(NativeAVBufferQueueObjectMagicList.begin(),
-                            NativeAVBufferQueueObjectMagicList.end(), magicObject->magic_);
+                        NativeAVBufferQueueObjectMagicList.end(), magicObject->magic_);
     FALSE_RETURN_V(it != NativeAVBufferQueueObjectMagicList.end(), OH_AVErrCode::AV_ERR_UNSUPPORT);
 
     magicObject->IncStrongRef(magicObject);
@@ -116,8 +116,8 @@ static OH_AVErrCode NativeObjectDelRef(NativeAVBufferQueueMagic* magicObject)
 }
 
 OH_AVBufferQueue::OH_AVBufferQueue(
-        std::shared_ptr<OHOS::Media::AVBufferQueue>& bufferQueue, uint32_t maxBufferCount):
-            NativeAVBufferQueueMagic(NATIVE_ABQ_OBJECT_MAGIC_QUEUE), bufferQueue_(bufferQueue)
+    std::shared_ptr<OHOS::Media::AVBufferQueue>& bufferQueue, uint32_t maxBufferCount):
+        NativeAVBufferQueueMagic(NATIVE_ABQ_OBJECT_MAGIC_QUEUE), bufferQueue_(bufferQueue)
 {
     for (int32_t i = 0; i < maxBufferCount; i++) {
         nativeBufferVector_.push_back(std::make_shared<OH_AVBuffer>(nullptr));
@@ -205,7 +205,7 @@ OH_AVErrCode OH_AVBufferQueueProducer_Destroy(OH_AVBufferQueueProducer* bufferQu
 }
 
 OH_AVErrCode OH_AVBufferQueueProducer_RequestBuffer(
-        OH_AVBufferQueueProducer* bufferQueueProducer, OH_AVBuffer** buffer, int32_t bufferSize, int32_t timeoutMs)
+    OH_AVBufferQueueProducer* bufferQueueProducer, OH_AVBuffer** buffer, int32_t bufferSize, int32_t timeoutMs)
 {
     NATIVE_AV_BUFFER_QUEUE_PRODUCER_CHECK(bufferQueueProducer, OH_AVErrCode::AV_ERR_INVALID_VAL);
 
@@ -230,7 +230,7 @@ OH_AVErrCode OH_AVBufferQueueProducer_RequestBuffer(
 }
 
 OH_AVErrCode OH_AVBufferQueueProducer_PushBuffer(
-        OH_AVBufferQueueProducer* bufferQueueProducer, const OH_AVBuffer* buffer, bool available)
+    OH_AVBufferQueueProducer* bufferQueueProducer, const OH_AVBuffer* buffer, bool available)
 {
     FALSE_RETURN_V(buffer != nullptr, OH_AVErrCode::AV_ERR_INVALID_VAL);
     FALSE_RETURN_V(buffer->buffer_ != nullptr, OH_AVErrCode::AV_ERR_INVALID_VAL);
@@ -246,7 +246,7 @@ OH_AVErrCode OH_AVBufferQueueProducer_PushBuffer(
 }
 
 OH_AVErrCode OH_AVBufferQueueProducer_ReturnBuffer(
-        OH_AVBufferQueueProducer* bufferQueueProducer, const OH_AVBuffer* buffer, bool available)
+    OH_AVBufferQueueProducer* bufferQueueProducer, const OH_AVBuffer* buffer, bool available)
 {
     FALSE_RETURN_V(buffer != nullptr, OH_AVErrCode::AV_ERR_INVALID_VAL);
     FALSE_RETURN_V(buffer->buffer_ != nullptr, OH_AVErrCode::AV_ERR_INVALID_VAL);
@@ -262,9 +262,9 @@ OH_AVErrCode OH_AVBufferQueueProducer_ReturnBuffer(
 }
 
 OH_AVErrCode OH_AVBufferQueueProducer_SetBufferFilledListener(
-        OH_AVBufferQueueProducer* bufferQueueProducer,
-        OH_AVBufferQueueProducer_OnBufferFilled* listener,
-        void* userData)
+    OH_AVBufferQueueProducer* bufferQueueProducer,
+    OH_AVBufferQueueProducer_OnBufferFilled* listener,
+    void* userData)
 {
     NATIVE_AV_BUFFER_QUEUE_PRODUCER_CHECK(bufferQueueProducer, OH_AVErrCode::AV_ERR_INVALID_VAL);
     FALSE_RETURN_V(listener != nullptr, OH_AVErrCode::AV_ERR_INVALID_VAL);
@@ -281,7 +281,7 @@ OH_AVErrCode OH_AVBufferQueueProducer_SetBufferFilledListener(
 }
 
 OH_AVErrCode OH_AVBufferQueueConsumer_AcquireBuffer(
-        OH_AVBufferQueueConsumer* bufferQueueConsumer, OH_AVBuffer** buffer)
+    OH_AVBufferQueueConsumer* bufferQueueConsumer, OH_AVBuffer** buffer)
 {
     NATIVE_AV_BUFFER_QUEUE_CONSUMER_CHECK(bufferQueueConsumer, OH_AVErrCode::AV_ERR_INVALID_VAL);
     std::shared_ptr<AVBuffer> localBuffer = nullptr;
@@ -297,7 +297,7 @@ OH_AVErrCode OH_AVBufferQueueConsumer_AcquireBuffer(
 }
 
 OH_AVErrCode OH_AVBufferQueueConsumer_ReleaseBuffer(
-        OH_AVBufferQueueConsumer* bufferQueueConsumer, const OH_AVBuffer* buffer)
+    OH_AVBufferQueueConsumer* bufferQueueConsumer, const OH_AVBuffer* buffer)
 {
     FALSE_RETURN_V(buffer != nullptr, OH_AVErrCode::AV_ERR_INVALID_VAL);
     FALSE_RETURN_V(buffer->buffer_ != nullptr, OH_AVErrCode::AV_ERR_INVALID_VAL);
@@ -311,9 +311,9 @@ OH_AVErrCode OH_AVBufferQueueConsumer_ReleaseBuffer(
 }
 
 OH_AVErrCode OH_AVBufferQueueConsumer_SetBufferAvailableListener(
-        OH_AVBufferQueueConsumer* bufferQueueConsumer,
-        OH_AVBufferQueueConsumer_OnBufferAvailable* listener,
-        void* userData)
+    OH_AVBufferQueueConsumer* bufferQueueConsumer,
+    OH_AVBufferQueueConsumer_OnBufferAvailable* listener,
+    void* userData)
 {
     NATIVE_AV_BUFFER_QUEUE_CONSUMER_CHECK(bufferQueueConsumer, OH_AVErrCode::AV_ERR_INVALID_VAL);
     OHOS::sptr<IConsumerListener> localListener = nullptr;

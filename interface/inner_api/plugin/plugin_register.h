@@ -119,7 +119,8 @@ private:
     std::vector<std::shared_ptr<PluginLoader>> registeredLoaders_;
     std::shared_ptr<RegisterImpl> staticPluginRegister_ = std::make_shared<RegisterImpl>(registerData_);
 public:
-    std::shared_ptr<RegisterImpl> GetStaticPluginRegister() {
+    std::shared_ptr<RegisterImpl> GetStaticPluginRegister()
+    {
         return staticPluginRegister_;
     }
 };

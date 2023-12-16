@@ -23,7 +23,7 @@ namespace Media {
 
 AVBufferQueueSurfaceWrapper::AVBufferQueueSurfaceWrapper(
     sptr<Surface> &surface, const std::string &name, uint8_t wrapperType)
-        : AVBufferQueueImpl(surface->GetQueueSize(), MemoryType::UNKNOWN_MEMORY,name),
+        : AVBufferQueueImpl(surface->GetQueueSize(), MemoryType::UNKNOWN_MEMORY, name),
         surface_(surface), wrapperType_(wrapperType)
 {
     for (uint32_t i = 0; i < surface->GetQueueSize(); i++) {
@@ -86,7 +86,7 @@ Status AVBufferQueueSurfaceWrapper::SetQueueSize(uint32_t size)
 }
 
 Status AVBufferQueueSurfaceWrapper::BindSurface(
-        std::shared_ptr<AVBuffer>& buffer, sptr<SurfaceBuffer>& surfaceBuffer, int32_t fence)
+    std::shared_ptr<AVBuffer>& buffer, sptr<SurfaceBuffer>& surfaceBuffer, int32_t fence)
 {
     std::lock_guard<std::mutex> lockGuard(queueMutex_);
     if (freeBufferList_.empty()) {
@@ -111,7 +111,7 @@ Status AVBufferQueueSurfaceWrapper::UnbindSurface(uint64_t uniqueId, sptr<Surfac
 }
 
 Status AVBufferQueueSurfaceWrapper::RequestBuffer(
-        std::shared_ptr<AVBuffer>& buffer, const AVBufferConfig& config, int32_t timeoutMs)
+    std::shared_ptr<AVBuffer>& buffer, const AVBufferConfig& config, int32_t timeoutMs)
 {
     sptr<SurfaceBuffer> surfaceBuffer = nullptr;
     int32_t fence;
@@ -247,10 +247,10 @@ Status AVBufferQueueSurfaceWrapper::SetProducerListener(sptr<IProducerListener>&
 
 class SurfaceConsumerListener : public IBufferConsumerListener {
 public:
-  explicit SurfaceConsumerListener(std::function<void()> releaseBufferFunc)
-      : onReleaseBufferFunc_(std::move(releaseBufferFunc)) {}
+    explicit SurfaceConsumerListener(std::function<void()> releaseBufferFunc)
+        : onReleaseBufferFunc_(std::move(releaseBufferFunc)) {}
 
-  void OnBufferAvailable() override { onReleaseBufferFunc_(); }
+    void OnBufferAvailable() override { onReleaseBufferFunc_(); }
 
 private:
     std::function<void(void)> onReleaseBufferFunc_;

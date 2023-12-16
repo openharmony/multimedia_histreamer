@@ -29,7 +29,6 @@ namespace Media {
 namespace Pipeline {
 using InstanceGenerator = std::function<std::shared_ptr<Filter>(const std::string&, const FilterType type)>;
 
-// TODO: name 有可能可以去掉，FilterType 作为key即可
 class FilterFactory {
 public:
     ~FilterFactory() = default;
@@ -63,10 +62,13 @@ private:
     void RegisterFilterPriv(const std::string& name, const FilterType type, const InstanceGenerator& generator)
     {
         if (generator == nullptr) {
-            auto result = generators.emplace(type,  [](const std::string& aliaName, const FilterType type) { return std::make_shared<T>(aliaName, type); });
-            if (!result.second) {
-                result.first->second = generator;
-            }
+          auto result = generators.emplace(
+              type, [](const std::string &aliaName, const FilterType type) {
+                  return std::make_shared<T>(aliaName, type);
+              });
+          if (!result.second) {
+            result.first->second = generator;
+          }
         } else {
             auto result = generators.emplace(type, generator);
             if (!result.second) {
