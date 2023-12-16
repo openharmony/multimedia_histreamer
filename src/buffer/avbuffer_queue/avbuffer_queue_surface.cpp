@@ -23,8 +23,8 @@ namespace Media {
 
 AVBufferQueueSurfaceWrapper::AVBufferQueueSurfaceWrapper(
     sptr<Surface> &surface, const std::string &name, uint8_t wrapperType)
-        : AVBufferQueueImpl(surface->GetQueueSize(), MemoryType::UNKNOWN_MEMORY, name),
-        surface_(surface), wrapperType_(wrapperType)
+    : AVBufferQueueImpl(surface->GetQueueSize(), MemoryType::UNKNOWN_MEMORY, name),
+      surface_(surface), wrapperType_(wrapperType)
 {
     for (uint32_t i = 0; i < surface->GetQueueSize(); i++) {
         auto buffer = AVBuffer::CreateAVBuffer();

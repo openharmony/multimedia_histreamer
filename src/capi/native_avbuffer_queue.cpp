@@ -50,7 +50,8 @@ public:
     ProducerBufferFilledListener operator=(const ProducerBufferFilledListener &) = delete;
     ~ProducerBufferFilledListener() override = default;
 
-    void OnBufferFilled(std::shared_ptr<AVBuffer> &buffer) override {
+    void OnBufferFilled(std::shared_ptr<AVBuffer> &buffer) override
+    {
         FALSE_RETURN_W(nativeProducer_ != nullptr);
         FALSE_RETURN_W(nativeProducer_->nativeBufferQueue_ != nullptr);
         FALSE_RETURN_W(listener_ != nullptr && *listener_ != nullptr);
@@ -70,8 +71,8 @@ public:
     ConsumerBufferAvailableListener(
         OH_AVBufferQueueConsumer* nativeConsumer,
         OH_AVBufferQueueConsumer_OnBufferAvailable* listener,
-        void* userData):
-        nativeConsumer_(nativeConsumer), listener_(listener), userData_(userData) { }
+        void* userData)
+        : nativeConsumer_(nativeConsumer), listener_(listener), userData_(userData) { }
     ConsumerBufferAvailableListener(const ConsumerBufferAvailableListener&) = delete;
     ConsumerBufferAvailableListener operator=(const ConsumerBufferAvailableListener&) = delete;
 

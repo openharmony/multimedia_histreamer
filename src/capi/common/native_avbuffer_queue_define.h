@@ -62,9 +62,9 @@ struct OH_AVBufferQueueConsumer : public NativeAVBufferQueueMagic {
     explicit OH_AVBufferQueueConsumer(
         OHOS::sptr<OH_AVBufferQueue>& nativeBufferQueue,
         OHOS::sptr<OHOS::Media::AVBufferQueueConsumer>& consumer)
-            : NativeAVBufferQueueMagic(NATIVE_ABQ_OBJECT_MAGIC_CONSUMER),
-            nativeBufferQueue_(nativeBufferQueue),
-            consumer_(consumer) { }
+        : NativeAVBufferQueueMagic(NATIVE_ABQ_OBJECT_MAGIC_CONSUMER),
+          nativeBufferQueue_(nativeBufferQueue),
+          consumer_(consumer) { }
 
     ~OH_AVBufferQueueConsumer() override { nativeBufferQueue_ = nullptr; }
 
@@ -76,9 +76,9 @@ struct OH_AVBufferQueueProducer : public NativeAVBufferQueueMagic {
     explicit OH_AVBufferQueueProducer(
         OHOS::sptr<OH_AVBufferQueue>& nativeBufferQueue,
         OHOS::sptr<OHOS::Media::AVBufferQueueProducer>& producer)
-            : NativeAVBufferQueueMagic(NATIVE_ABQ_OBJECT_MAGIC_PRODUCER),
-            nativeBufferQueue_(nativeBufferQueue),
-            producer_(producer) { }
+        : NativeAVBufferQueueMagic(NATIVE_ABQ_OBJECT_MAGIC_PRODUCER),
+          nativeBufferQueue_(nativeBufferQueue),
+          producer_(producer) { }
 
     ~OH_AVBufferQueueProducer() override { nativeBufferQueue_ = nullptr; }
 
