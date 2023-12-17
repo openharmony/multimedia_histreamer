@@ -31,7 +31,7 @@
 #include "common/log.h"
 
 #ifndef _WIN32
-mode_t umask(mode_t __mask);
+mode_t umask(mode_t mask);
 #endif
 
 namespace OHOS {
@@ -143,21 +143,6 @@ void FileSystem::RemoveFilesInDir(const std::string& path)
         }
         closedir(directory);
     }
-}
-
-std::string FileSystem::GetTmpFileName()
-{
-    char tempFileName[MAX_FILE_PATH] = "/tmp/hstTmp.XXXXXX";
-#ifdef _WIN32
-    char tempPath[MAX_FILE_PATH];
-    auto pathLength = GetTempPath(MAX_FILE_PATH, tempPath);
-    FALSE_RETURN_V_MSG_E(pathLength < MAX_FILE_PATH && pathLength > 0, tempFileName, "get temp path failed");
-    auto ret = GetTempFileName(tempPath, "hstTmp", 0, tempFileName);
-    FALSE_RETURN_V_MSG_E(ret != 0, tempFileName, "get temp file name failed");
-#else
-    mktemp(tempFileName);
-#endif
-    return tempFileName;
 }
 } // namespace Media
 } // namespace OHOS

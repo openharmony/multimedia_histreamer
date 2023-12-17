@@ -116,8 +116,8 @@ static OH_AVErrCode NativeObjectDelRef(NativeAVBufferQueueMagic* magicObject)
 }
 
 OH_AVBufferQueue::OH_AVBufferQueue(
-    std::shared_ptr<OHOS::Media::AVBufferQueue>& bufferQueue, uint32_t maxBufferCount):
-        NativeAVBufferQueueMagic(NATIVE_ABQ_OBJECT_MAGIC_QUEUE), bufferQueue_(bufferQueue)
+    std::shared_ptr<OHOS::Media::AVBufferQueue>& bufferQueue, uint32_t maxBufferCount)
+    : NativeAVBufferQueueMagic(NATIVE_ABQ_OBJECT_MAGIC_QUEUE), bufferQueue_(bufferQueue)
 {
     for (int32_t i = 0; i < maxBufferCount; i++) {
         nativeBufferVector_.push_back(std::make_shared<OH_AVBuffer>(nullptr));
