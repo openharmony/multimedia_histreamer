@@ -130,10 +130,7 @@ if (hst_is_standard_sys) {
 
     public_deps = []
 
-    deps = [
-      "//third_party/bounds_checking_function:libsec_static",
-      "//third_party/ffmpeg:libohosffmpeg",
-    ]
+    deps = [ "//third_party/bounds_checking_function:libsec_static" ]
 
     external_deps = [
       "c_utils:utils",
@@ -165,7 +162,6 @@ if (hst_is_standard_sys) {
       "$histreamer_root_dir/osal/base",
       "$histreamer_root_dir/interface/inner_api",
       "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
-      "//third_party/ffmpeg",
       "//third_party/bounds_checking_function/include",
       "$histreamer_root_dir/interface/inner_api",
       "//third_party/bounds_checking_function/include",
