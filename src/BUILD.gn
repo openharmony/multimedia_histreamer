@@ -130,7 +130,10 @@ if (hst_is_standard_sys) {
 
     public_deps = []
 
-    deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    deps = [
+      "//third_party/bounds_checking_function:libsec_static",
+      "//third_party/ffmpeg:libohosffmpeg",
+    ]
 
     external_deps = [
       "c_utils:utils",
