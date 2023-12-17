@@ -36,7 +36,6 @@ mode_t umask(mode_t mask);
 
 namespace OHOS {
 namespace Media {
-constexpr uint32_t MAX_FILE_PATH = 50;
 bool FileSystem::IsRegularFile(const std::string& path)
 {
     struct stat s {};
