@@ -143,7 +143,6 @@ if (hst_is_standard_sys) {
       "hitrace:hitrace_meter",
       "init:libbegetutil",
       "ipc:ipc_core",
-      "memory_utils:libdmabufheap",
     ]
     symlink_target_name = [ "libnative_media_core.so" ]
     innerapi_tags = [

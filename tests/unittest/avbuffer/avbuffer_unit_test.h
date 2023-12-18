@@ -22,6 +22,7 @@
 #include <vector>
 #include "av_hardware_allocator.h"
 #include "buffer/avbuffer.h"
+#include "dmabuf_alloc.h"
 #include "meta.h"
 #include "meta_key.h"
 #include "surface_buffer.h"

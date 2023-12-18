@@ -28,8 +28,6 @@ public:
     ~AVHardwareMemory() override;
     MemoryType GetMemoryType() override;
     int32_t GetFileDescriptor() override;
-    Status SyncStart() override;
-    Status SyncEnd() override;
     MemoryFlag GetMemoryFlag() override;
 
 private:

@@ -226,22 +226,6 @@ public:
      */
     virtual sptr<SurfaceBuffer> GetSurfaceBuffer();
 
-    /**
-     * @brief Start data synchronization, only used when the memory type is {@link HARDWARE_MEMORY}.
-     * @return  Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to
-     * {@link Status}
-     * @since 4.1
-     */
-    virtual Status SyncStart();
-
-    /**
-     * @brief End data synchronization, only used when the memory type is {@link HARDWARE_MEMORY}.
-     * @return  Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to
-     * {@link Status}
-     * @since 4.1
-     */
-    virtual Status SyncEnd();
-
 protected:
     explicit AVMemory();
     virtual Status Init();

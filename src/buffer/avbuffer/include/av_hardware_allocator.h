@@ -18,7 +18,6 @@
 
 #include "buffer/avallocator.h"
 #include "common/status.h"
-#include "dmabuf_alloc.h"
 
 namespace OHOS {
 namespace Media {

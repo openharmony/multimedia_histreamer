@@ -27,13 +27,6 @@
 #include "sys/mman.h"
 #endif
 
-namespace {
-const std::unordered_map<OHOS::Media::MemoryFlag, DmabufHeapBufferSyncType> FLAG_ADAPTER_MAP = {
-    {OHOS::Media::MemoryFlag::MEMORY_WRITE_ONLY, DmabufHeapBufferSyncType::DMA_BUF_HEAP_BUF_SYNC_WRITE},
-    {OHOS::Media::MemoryFlag::MEMORY_READ_ONLY, DmabufHeapBufferSyncType::DMA_BUF_HEAP_BUF_SYNC_READ},
-    {OHOS::Media::MemoryFlag::MEMORY_READ_WRITE, DmabufHeapBufferSyncType::DMA_BUF_HEAP_BUF_SYNC_RW}};
-} // namespace
-
 namespace OHOS {
 namespace Media {
 std::shared_ptr<AVAllocator> AVAllocatorFactory::CreateHardwareAllocator(int32_t fd, int32_t capacity,
@@ -220,34 +213,6 @@ MemoryFlag AVHardwareMemory::GetMemoryFlag()
 int32_t AVHardwareMemory::GetFileDescriptor()
 {
     return fd_;
-}
-
-Status AVHardwareMemory::SyncStart()
-{
-#ifdef MEDIA_OHOS
-    std::lock_guard<std::mutex> lock(mutex_);
-    FALSE_RETURN_V_MSG_E(!isStartSync_, Status::ERROR_INVALID_OPERATION, "Not ready to start syncing yet!");
-    isStartSync_ = true;
-    int32_t ret = DmabufHeapBufferSyncStart(fd_, FLAG_ADAPTER_MAP.at(memFlag_));
-    if (ret != 0) {
-        return Status::ERROR_INVALID_OPERATION;
-    }
-#endif
-    return Status::OK;
-}
-
-Status AVHardwareMemory::SyncEnd()
-{
-#ifdef MEDIA_OHOS
-    std::lock_guard<std::mutex> lock(mutex_);
-    FALSE_RETURN_V_MSG_E(isStartSync_, Status::ERROR_INVALID_OPERATION, "Haven't started syncing yet!");
-    isStartSync_ = false;
-    int32_t ret = DmabufHeapBufferSyncEnd(fd_, FLAG_ADAPTER_MAP.at(memFlag_));
-    if (ret != 0) {
-        return Status::ERROR_INVALID_OPERATION;
-    }
-#endif
-    return Status::OK;
 }
 } // namespace Media
 } // namespace OHOS

@@ -318,16 +318,5 @@ sptr<SurfaceBuffer> AVMemory::GetSurfaceBuffer()
 {
     return nullptr;
 }
-
-Status AVMemory::SyncStart()
-{
-    return Status::ERROR_UNIMPLEMENTED;
-}
-
-Status AVMemory::SyncEnd()
-{
-    return Status::ERROR_UNIMPLEMENTED;
-}
-
 } // namespace Media
 } // namespace OHOS
