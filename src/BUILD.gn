@@ -155,7 +155,7 @@ if (hst_is_standard_sys) {
       "ipc:ipc_core",
     ]
 
-    symlink_target_name = [ "libnative_media_core.so" ]
+    symlink_target_name = [ "../libnative_media_core.so" ]
 
     innerapi_tags = [
       "platformsdk",

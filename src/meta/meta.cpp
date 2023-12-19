@@ -253,6 +253,9 @@ static std::map<TagType, const Any &> g_metadataDefaultValueMap = {
     {Tag::AUDIO_AAC_SBR, defaultInt32},
     {Tag::AUDIO_FLAC_COMPLIANCE_LEVEL, defaultInt32},
     {Tag::MEDIA_LEVEL, defaultInt32},
+    {Tag::VIDEO_STRIDE, defaultInt32},
+    {Tag::VIDEO_DISPLAY_WIDTH, defaultInt32},
+    {Tag::VIDEO_DISPLAY_HEIGHT, defaultInt32},
     // String
     {Tag::MIME_TYPE, defaultString},
     {Tag::MEDIA_FILE_URI, defaultString},
@@ -274,6 +277,7 @@ static std::map<TagType, const Any &> g_metadataDefaultValueMap = {
     {Tag::MEDIA_COMPOSER, defaultString},
     {Tag::MEDIA_LYRICS, defaultString},
     {Tag::MEDIA_CODEC_NAME, defaultString},
+    {Tag::PROCESS_NAME, defaultString},
     // Double
     {Tag::VIDEO_CAPTURE_RATE, defaultDouble},
     {Tag::VIDEO_FRAME_RATE, defaultDouble},
@@ -284,6 +288,7 @@ static std::map<TagType, const Any &> g_metadataDefaultValueMap = {
     {Tag::MEDIA_HAS_VIDEO, defaultBool},
     {Tag::MEDIA_HAS_AUDIO, defaultBool},
     {Tag::MEDIA_END_OF_STREAM, defaultBool},
+    {Tag::VIDEO_FRAME_RATE_ADAPTIVE_MODE, defaultBool},
     // Int64
     {Tag::MEDIA_FILE_SIZE, defaultUInt64},
     {Tag::MEDIA_POSITION, defaultUInt64},

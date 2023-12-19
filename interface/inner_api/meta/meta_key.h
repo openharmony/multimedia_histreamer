@@ -49,6 +49,7 @@ public:
     static constexpr const char VIDEO_SCALE_TYPE[] = "scale_type"; ///< VideoScaleType, video scale type
     static constexpr const char INPUT_MEMORY_TYPE[] = "regular.input.memory.type";   ///< MemoryType
     static constexpr const char OUTPUT_MEMORY_TYPE[] = "regular.output.memory.type"; ///< MemoryType
+    static constexpr const char PROCESS_NAME[] = "process_name"; ///< string, process name
 
     /* -------------------- media tag -------------------- */
     static constexpr const char MIME_TYPE[] = "codec_mime";            ///< @see MimeType
@@ -138,6 +139,11 @@ public:
     static constexpr const char VIDEO_COLOR_MATRIX_COEFF[] = "matrix_coefficients";    ///< @see MatrixCoefficient
     static constexpr const char VIDEO_COLOR_RANGE[] = "range_flag";                    ///< bool, video color range
     static constexpr const char VIDEO_IS_HDR_VIVID[] = "video_is_hdr_vivid";           ///< bool, video is hdr vivid
+    static constexpr const char VIDEO_STRIDE[] = "stride";                             ///< int32_t, video stride
+    static constexpr const char VIDEO_DISPLAY_WIDTH[] = "display_width";               ///< int32_t, video display width
+    static constexpr const char VIDEO_DISPLAY_HEIGHT[] = "display_height";             ///< int32_t, video display height
+    static constexpr const char VIDEO_FRAME_RATE_ADAPTIVE_MODE[] =
+        "frame_rate_adaptive_mode"; ///< bool, video is framerate adaptive mode
     static constexpr const char VIDEO_DELAY[] = "video_delay";                         ///< video delay
     static constexpr const char VIDEO_I_FRAME_INTERVAL[] = "i_frame_interval"; ///< Key for the interval of key frame.
     static constexpr const char VIDEO_REQUEST_I_FRAME[] =

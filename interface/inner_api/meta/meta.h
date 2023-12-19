@@ -137,7 +137,8 @@ public:
         tagCharSeq == Tag::VIDEO_IS_HDR_VIVID or
         tagCharSeq == Tag::MEDIA_HAS_VIDEO or
         tagCharSeq == Tag::MEDIA_HAS_AUDIO or
-        tagCharSeq == Tag::MEDIA_END_OF_STREAM, bool, ValueType::BOOL);
+        tagCharSeq == Tag::MEDIA_END_OF_STREAM or
+        tagCharSeq == Tag::VIDEO_FRAME_RATE_ADAPTIVE_MODE, bool, ValueType::BOOL);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_H265_PROFILE, Plugin::HEVCProfile, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_H265_LEVEL, Plugin::HEVCLevel, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_CHROMA_LOCATION,
@@ -178,7 +179,10 @@ public:
         tagCharSeq == Tag::AUDIO_AAC_SBR or
         tagCharSeq == Tag::AUDIO_FLAC_COMPLIANCE_LEVEL or
         tagCharSeq == Tag::AUDIO_OBJECT_NUMBER or
-        tagCharSeq == Tag::MEDIA_LEVEL, int32_t, ValueType::INT32_T);
+        tagCharSeq == Tag::MEDIA_LEVEL or
+        tagCharSeq == Tag::VIDEO_STRIDE or
+        tagCharSeq == Tag::VIDEO_DISPLAY_WIDTH or
+        tagCharSeq == Tag::VIDEO_DISPLAY_HEIGHT, int32_t, ValueType::INT32_T);
 
     DEFINE_INSERT_GET_FUNC(
         tagCharSeq == Tag::APP_FULL_TOKEN_ID or
@@ -214,7 +218,8 @@ public:
         tagCharSeq == Tag::MEDIA_AUTHOR or
         tagCharSeq == Tag::MEDIA_COMPOSER or
         tagCharSeq == Tag::MEDIA_LYRICS or
-        tagCharSeq == Tag::MEDIA_CODEC_NAME, std::string, ValueType::STRING);
+        tagCharSeq == Tag::MEDIA_CODEC_NAME or
+        tagCharSeq == Tag::PROCESS_NAME, std::string, ValueType::STRING);
 
     Meta &operator=(const Meta &other)
     {

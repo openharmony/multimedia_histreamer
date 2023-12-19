@@ -332,6 +332,9 @@ map<TagType, int32_t> testInt32Data = {
     {Tag::AUDIO_OBJECT_NUMBER, 113},
     {Tag::AUDIO_FLAC_COMPLIANCE_LEVEL, 13},
     {Tag::MEDIA_LEVEL, 14},
+    {Tag::VIDEO_STRIDE, 17},
+    {Tag::VIDEO_DISPLAY_WIDTH, 19},
+    {Tag::VIDEO_DISPLAY_HEIGHT, 23},
     {Tag::SRC_INPUT_TYPE, static_cast<int32_t>(Plugin::SrcInputType::AUD_ES)},
     {Tag::AUDIO_SAMPLE_FORMAT, static_cast<int32_t>(Plugin::AudioSampleFormat::SAMPLE_S16LE)},
     {Tag::VIDEO_PIXEL_FORMAT, static_cast<int32_t>(Plugin::VideoPixelFormat::YUV411P)},
@@ -355,7 +358,8 @@ map<TagType, int32_t> testInt32Data = {
     {Tag::MEDIA_HAS_VIDEO, 1},
     {Tag::MEDIA_HAS_AUDIO, 0},
     {Tag::MEDIA_END_OF_STREAM, 1},
-    {Tag::VIDEO_IS_HDR_VIVID, 1}
+    {Tag::VIDEO_IS_HDR_VIVID, 1},
+    {Tag::VIDEO_FRAME_RATE_ADAPTIVE_MODE, 1}
 };
 
 /**
@@ -465,7 +469,8 @@ map<TagType, std::string> testStringData = {
     {Tag::MEDIA_AUTHOR, "String MEDIA_AUTHOR"},
     {Tag::MEDIA_COMPOSER, "String MEDIA_COMPOSER"},
     {Tag::MEDIA_LYRICS, "String MEDIA_LYRICS"},
-    {Tag::MEDIA_CODEC_NAME, "String MEDIA_CODEC_NAME"}
+    {Tag::MEDIA_CODEC_NAME, "String MEDIA_CODEC_NAME"},
+    {Tag::PROCESS_NAME, "String PROCESS_NAME"}
 };
 
 /**
