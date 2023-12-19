@@ -141,7 +141,7 @@ public:
     static constexpr const char VIDEO_IS_HDR_VIVID[] = "video_is_hdr_vivid";           ///< bool, video is hdr vivid
     static constexpr const char VIDEO_STRIDE[] = "stride";                             ///< int32_t, video stride
     static constexpr const char VIDEO_DISPLAY_WIDTH[] = "display_width";               ///< int32_t, video display width
-    static constexpr const char VIDEO_DISPLAY_HEIGHT[] = "display_height";             ///< int32_t, video display height
+    static constexpr const char VIDEO_DISPLAY_HEIGHT[] = "display_height"; ///< int32_t, video display height
     static constexpr const char VIDEO_FRAME_RATE_ADAPTIVE_MODE[] =
         "frame_rate_adaptive_mode"; ///< bool, video is framerate adaptive mode
     static constexpr const char VIDEO_DELAY[] = "video_delay";                         ///< video delay
