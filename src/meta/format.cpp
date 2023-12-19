@@ -178,10 +178,12 @@ bool Format::PutBuffer(const std::string_view &key, const uint8_t *addr, size_t 
     }
     Any *value = const_cast<Any *>(&(iter->second));
     auto tmpVector = AnyCast<std::vector<uint8_t>>(value);
+    FALSE_RETURN_V_MSG_E(tmpVector != nullptr, false, "Any value is invalid. Key: " PUBLIC_LOG_S, key.data());
+
     tmpVector->resize(size);
     uint8_t *anyAddr = tmpVector->data();
     auto error = memcpy_s(anyAddr, size, addr, size);
-    FALSE_RETURN_V_MSG_E(error == EOK, 0, "PutBuffer memcpy_s failed, error: %{public}s", strerror(error));
+    FALSE_RETURN_V_MSG_E(error == EOK, false, "PutBuffer memcpy_s failed, error: %{public}s", strerror(error));
 
     auto formatMapIter = formatMap_.find(key);
     if (formatMapIter != formatMap_.end()) {
