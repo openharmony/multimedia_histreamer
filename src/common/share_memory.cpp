@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 ShareMemory::ShareMemory(size_t capacity, std::shared_ptr<Allocator> allocator, size_t align)
     : Memory(capacity, std::move(allocator), align, MemoryType::SHARED_MEMORY, false)
 {
@@ -108,7 +108,7 @@ void ShareMemory::InitShareMemory(ShareMemType type)
             break;
     }
 }
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif

@@ -25,7 +25,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 enum class ErrorType {
     PLUGIN_ERROR,
     ALGO_ERROR,
@@ -223,7 +223,7 @@ struct PluginBase {
 protected:
     const std::string pluginName_;
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_INTF_PLUGIN_BASE_H

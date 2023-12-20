@@ -22,7 +22,7 @@
 #include "plugin_video_tags.h"
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 /**
  * @brief CapabilityBuilder is used for easily building of Capability.
  *

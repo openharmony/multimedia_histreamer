@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 ShareAllocator::ShareAllocator(ShareMemType shareMemType)
     : Allocator(MemoryType::SHARED_MEMORY), shareMemType_(shareMemType)
 {
@@ -42,7 +42,7 @@ ShareMemType ShareAllocator::GetShareMemType()
 {
     return shareMemType_;
 }
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif

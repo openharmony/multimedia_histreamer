@@ -57,10 +57,11 @@ namespace Media {
 #define DUMP_BUFFER2LOG(desc, buffer, offset)
 #endif
 
-void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugin::Buffer>& buffer);
+void DumpBufferToFile(const std::string& fileName, const std::shared_ptr<Plugins::Buffer>& buffer);
 void PrepareDumpDir();
 void EndDumpFile();
-void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugin::Buffer>& buffer, uint64_t offset, size_t dumpSize);
+void DumpBufferToLog(const char* desc, const std::shared_ptr<Plugins::Buffer>& buffer, uint64_t offset,
+    size_t dumpSize);
 } // Media
 } // OHOS
 #endif // HISTREAMER_PIPELINE_DUMP_BUFFER_H

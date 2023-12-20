@@ -24,7 +24,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 
 PluginRegister::~PluginRegister()
 {
@@ -409,6 +409,6 @@ bool PluginRegister::RegisterData::IsPluginExist(PluginType type, const std::str
     return (registerTable.find(type) != registerTable.end() &&
             registerTable[type].find(name) != registerTable[type].end());
 }
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS

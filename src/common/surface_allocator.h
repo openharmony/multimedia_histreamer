@@ -25,7 +25,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 class SurfaceAllocator : public Allocator {
 public:
     explicit SurfaceAllocator(sptr<Surface> surface = nullptr);
@@ -45,7 +45,7 @@ private:
     BufferRequestConfig requestConfig_;
     ScalingMode scalingMode_ {ScalingMode::SCALING_MODE_SCALE_TO_WINDOW};
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 

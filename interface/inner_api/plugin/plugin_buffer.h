@@ -28,7 +28,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 
 // Align value template
 template <typename T>
@@ -99,7 +99,7 @@ private:
     /// Data described by this buffer.
     std::vector<std::shared_ptr<Memory>> data {};
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_COMMON_BUFFER_H

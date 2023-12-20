@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 enum class VideoScaleType {
     VIDEO_SCALE_TYPE_FIT,
     VIDEO_SCALE_TYPE_FIT_CROP,
@@ -281,7 +281,7 @@ enum MPEG4Level : int32_t {
     MPEG4_LEVEL_4A = 6,
     MPEG4_LEVEL_5 = 7,
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // MEDIA_FOUNDATION_VIDEO_TYPES_H

@@ -27,7 +27,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 struct DataSource;
 using DemuxerPluginSnifferFunc = int (*)(const std::string& name, std::shared_ptr<DataSource> dataSource);
 struct PluginRegInfo {
@@ -124,7 +124,7 @@ public:
         return staticPluginRegister_;
     }
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_REGISTER_H

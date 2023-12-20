@@ -18,7 +18,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 MediaSource::MediaSource(std::string uri)
     : uri_(std::move(uri)), type_(SourceType::SOURCE_TYPE_URI)
 {
@@ -57,7 +57,7 @@ std::shared_ptr<IMediaDataSource> MediaSource::GetDataSrc() const
     return dataSrc_;
 }
 #endif
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 

@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 template <typename T>
 class AutoRegisterPlugin {
 public:

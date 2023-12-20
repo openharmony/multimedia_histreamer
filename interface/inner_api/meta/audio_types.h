@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 /**
  * @enum Audio AAC Profile。
  *
@@ -241,7 +241,7 @@ enum AACProfile : int32_t {
     AAC_PROFILE_LD = 5,
     AAC_PROFILE_MAIN = 6,
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // MEDIA_FOUNDATION_AUDIO_TYPES_H
