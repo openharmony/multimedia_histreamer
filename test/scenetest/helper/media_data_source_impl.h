@@ -15,7 +15,7 @@
 #ifndef HISTREAMER_MEDIA_DATA_SOURCE_IMPL_H
 #define HISTREAMER_MEDIA_DATA_SOURCE_IMPL_H
 
-#include "media_data_source.h"
+#include "common/media_data_source.h"
 #include "plugin/common/plugin_types.h"
 
 namespace OHOS {

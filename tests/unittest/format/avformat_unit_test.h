@@ -20,7 +20,7 @@
 #include "avformat_mock.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 class AVFormatUnitTest : public testing::Test {
 public:
     // SetUpTestCase: Called before all test cases
@@ -35,6 +35,6 @@ public:
 protected:
     std::shared_ptr<FormatMock> format_ = nullptr;
 };
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS
 #endif // FORMAT_UNIT_TEST_H

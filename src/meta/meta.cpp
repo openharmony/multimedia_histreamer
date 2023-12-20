@@ -17,6 +17,33 @@
 #include <functional>
 #include "common/log.h"
 
+/**
+ * Steps of Adding New Tag
+ *
+ * 1. In meta_key.h, Add a Tag.
+ * 2. In meta.h, Register Tag key Value mapping.
+ *    Example: DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::TAGNAME, TAGTYPE, ValueType::VALUETYPE)
+ * 3. In meta.cpp, Register default value to g_metadataDefaultValueMap ({Tag::TAGNAME, defaultTAGTYPE}).
+ * 4. In order to support Enum/Bool Value Getter Setter from AVFormat,
+ *    In meta.cpp, Register Tag key getter setter function mapping.
+ *    Example: DEFINE_METADATA_SETTER_GETTER_FUNC(SrcTAGNAME, int32_t/int64_t)
+ *    For Int32/Int64 Type, update g_metadataGetterSetterMap/g_metadataGetterSetterInt64Map.
+ *    For Bool Type, update g_metadataBoolVector.
+ * 5. Update meta_func_unit_test.cpp to add the testcase of new added Tag Type.
+ *
+ * Theory:
+ * App --> AVFormat(ndk) --> Meta --> Parcel(ipc) --> Meta
+ * AVFormat only support: int, int64(Long), float, double, string, buffer
+ * Parcel only support: bool, int8, int16, int32, int64, uint8, uint16, uint32, uint64, float, double, pointer, buffer
+ * Meta (based on any) support : all types in theory.
+ *
+ * Attention: Use AVFormat with Meta, with or without ipc, be care of the difference of supported types.
+ * Currently, The ToParcel/FromParcel function(In Any.h) supports single value convert to/from parcel.
+ * you can use meta's helper functions to handle the key and the correct value type:
+ *    GetDefaultAnyValue: get the specified key's default value, It can get the value type.
+ *    SetMetaData/GetMetaData: AVFormat use them to set/get enum/bool/int values,
+ *    It can convert the integer to/from enum/bool automatically.
+ **/
 namespace OHOS {
 namespace Media {
 using namespace Plugin;
@@ -55,6 +82,7 @@ DEFINE_METADATA_SETTER_GETTER_FUNC(HEVCProfile, int32_t)
 DEFINE_METADATA_SETTER_GETTER_FUNC(HEVCLevel, int32_t)
 DEFINE_METADATA_SETTER_GETTER_FUNC(ChromaLocation, int32_t)
 DEFINE_METADATA_SETTER_GETTER_FUNC(FileType, int32_t)
+DEFINE_METADATA_SETTER_GETTER_FUNC(VideoEncodeBitrateMode, int32_t)
 
 DEFINE_METADATA_SETTER_GETTER_FUNC(AudioChannelLayout, int64_t)
 
@@ -76,7 +104,8 @@ static std::map<TagType, std::pair<MetaSetterFunction, MetaGetterFunction>> g_me
     DEFINE_METADATA_SETTER_GETTER(Tag::VIDEO_H265_PROFILE, HEVCProfile),
     DEFINE_METADATA_SETTER_GETTER(Tag::VIDEO_H265_LEVEL, HEVCLevel),
     DEFINE_METADATA_SETTER_GETTER(Tag::VIDEO_CHROMA_LOCATION, ChromaLocation),
-    DEFINE_METADATA_SETTER_GETTER(Tag::MEDIA_FILE_TYPE, FileType)
+    DEFINE_METADATA_SETTER_GETTER(Tag::MEDIA_FILE_TYPE, FileType),
+    DEFINE_METADATA_SETTER_GETTER(Tag::VIDEO_ENCODE_BITRATE_MODE, VideoEncodeBitrateMode)
 };
 
 using  MetaSetterInt64Function = std::function<bool(Meta&, const TagType&, int64_t&)>;
@@ -86,12 +115,23 @@ static std::map<TagType, std::pair<MetaSetterInt64Function, MetaGetterInt64Funct
         DEFINE_METADATA_SETTER_GETTER(Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, AudioChannelLayout)
 };
 
+static std::vector<TagType> g_metadataBoolVector = {
+    Tag::VIDEO_COLOR_RANGE,
+    Tag::VIDEO_REQUEST_I_FRAME,
+    Tag::VIDEO_IS_HDR_VIVID,
+    Tag::MEDIA_HAS_VIDEO,
+    Tag::MEDIA_HAS_AUDIO,
+    Tag::MEDIA_END_OF_STREAM
+};
 
-
-bool SetMetaData(Meta& meta, const TagType& tag, int32_t& value)
+bool SetMetaData(Meta& meta, const TagType& tag, int32_t value)
 {
     auto iter = g_metadataGetterSetterMap.find(tag);
     if (iter == g_metadataGetterSetterMap.end()) {
+        if (std::find(g_metadataBoolVector.begin(), g_metadataBoolVector.end(), tag) != g_metadataBoolVector.end()) {
+            meta.SetData(tag, value != 0 ? true : false);
+            return true;
+        }
         meta.SetData(tag, value);
         return true;
     }
@@ -102,12 +142,18 @@ bool GetMetaData(const Meta& meta, const TagType& tag, int32_t& value)
 {
     auto iter = g_metadataGetterSetterMap.find(tag);
     if (iter == g_metadataGetterSetterMap.end()) {
+        if (std::find(g_metadataBoolVector.begin(), g_metadataBoolVector.end(), tag) != g_metadataBoolVector.end()) {
+            bool valueBool = false;
+            FALSE_RETURN_V(meta.GetData(tag, valueBool), false);
+            value = valueBool ? 1 : 0;
+            return true;
+        }
         return meta.GetData(tag, value);
     }
     return iter->second.second(meta, tag, value);
 }
 
-bool SetMetaData(Meta& meta, const TagType& tag, int64_t& value)
+bool SetMetaData(Meta& meta, const TagType& tag, int64_t value)
 {
     auto iter = g_metadataGetterSetterInt64Map.find(tag);
     if (iter == g_metadataGetterSetterInt64Map.end()) {
@@ -139,20 +185,21 @@ static Any defaultVideoPixelFormat = VideoPixelFormat::UNKNOWN;
 static Any defaultMediaType = MediaType::UNKNOWN;
 static Any defaultVideoH264Profile = VideoH264Profile::UNKNOWN;
 static Any defaultVideoRotation = VideoRotation::VIDEO_ROTATION_0;
-static Any defaultColorPrimary = ColorPrimary::COLOR_PRIMARY_BT2020;
-static Any defaultTransferCharacteristic = TransferCharacteristic::TRANSFER_CHARACTERISTIC_BT1361;
-static Any defaultMatrixCoefficient = MatrixCoefficient::MATRIX_COEFFICIENT_BT2020_CL;
+static Any defaultColorPrimary = ColorPrimary::BT2020;
+static Any defaultTransferCharacteristic = TransferCharacteristic::BT1361;
+static Any defaultMatrixCoefficient = MatrixCoefficient::BT2020_CL;
 static Any defaultHEVCProfile = HEVCProfile::HEVC_PROFILE_UNKNOW;
 static Any defaultHEVCLevel = HEVCLevel::HEVC_LEVEL_UNKNOW;
-static Any defaultChromaLocation = ChromaLocation::CHROMA_LOC_BOTTOM;
+static Any defaultChromaLocation = ChromaLocation::BOTTOM;
 static Any defaultFileType = FileType::UNKNOW;
+static Any defaultVideoEncodeBitrateMode = VideoEncodeBitrateMode::CBR;
 
-static Any defaultAudioChannelLayout = AudioChannelLayout::UNKNOWN_CHANNEL_LAYOUT;
+static Any defaultAudioChannelLayout = AudioChannelLayout::UNKNOWN;
 static Any defaultAudioAacProfile = AudioAacProfile::ELD;
 static Any defaultAudioAacStreamFormat = AudioAacStreamFormat::ADIF;
 static Any defaultVectorUInt8 = std::vector<uint8_t>();
 static Any defaultVectorVideoBitStreamFormat = std::vector<VideoBitStreamFormat>();
-static std::map<TagType,  const Any&> g_metadataDefaultValueMap = {
+static std::map<TagType, const Any &> g_metadataDefaultValueMap = {
     {Tag::SRC_INPUT_TYPE, defaultSrcInputType},
     {Tag::AUDIO_SAMPLE_FORMAT, defaultAudioSampleFormat},
     {Tag::VIDEO_PIXEL_FORMAT, defaultVideoPixelFormat},
@@ -166,7 +213,10 @@ static std::map<TagType,  const Any&> g_metadataDefaultValueMap = {
     {Tag::VIDEO_H265_LEVEL, defaultHEVCLevel},
     {Tag::VIDEO_CHROMA_LOCATION, defaultChromaLocation},
     {Tag::MEDIA_FILE_TYPE, defaultFileType},
-    //Int32
+    {Tag::VIDEO_ENCODE_BITRATE_MODE, defaultVideoEncodeBitrateMode},
+
+    // Int32
+    {Tag::APP_UID, defaultInt32},
     {Tag::APP_PID, defaultInt32},
     {Tag::APP_TOKEN_ID, defaultInt32},
     {Tag::REQUIRED_IN_BUFFER_CNT, defaultInt32},
@@ -183,6 +233,7 @@ static std::map<TagType,  const Any&> g_metadataDefaultValueMap = {
     {Tag::AUDIO_MPEG_VERSION, defaultInt32},
     {Tag::AUDIO_MPEG_LAYER, defaultInt32},
     {Tag::AUDIO_AAC_LEVEL, defaultInt32},
+    {Tag::AUDIO_OBJECT_NUMBER, defaultInt32},
     {Tag::AUDIO_MAX_INPUT_SIZE, defaultInt32},
     {Tag::AUDIO_MAX_OUTPUT_SIZE, defaultInt32},
     {Tag::VIDEO_WIDTH, defaultInt32},
@@ -191,15 +242,21 @@ static std::map<TagType,  const Any&> g_metadataDefaultValueMap = {
     {Tag::VIDEO_MAX_SURFACE_NUM, defaultInt32},
     {Tag::VIDEO_H264_LEVEL, defaultInt32},
     {Tag::MEDIA_TRACK_COUNT, defaultInt32},
-    {Tag::MEDIA_HAS_VIDEO, defaultInt32},
-    {Tag::MEDIA_HAS_AUDIO, defaultInt32},
     {Tag::AUDIO_AAC_IS_ADTS, defaultInt32},
     {Tag::AUDIO_COMPRESSION_LEVEL, defaultInt32},
-    {Tag::BITS_PER_CODED_SAMPLE, defaultInt32},
-    {Tag::MEDIA_TRACK_COUNT, defaultInt32},
-    {Tag::MEDIA_HAS_VIDEO, defaultInt32},
-    {Tag::MEDIA_HAS_AUDIO, defaultInt32},
-    //String
+    {Tag::AUDIO_BITS_PER_CODED_SAMPLE, defaultInt32},
+    {Tag::REGULAR_TRACK_ID, defaultInt32},
+    {Tag::VIDEO_SCALE_TYPE, defaultInt32},
+    {Tag::VIDEO_I_FRAME_INTERVAL, defaultInt32},
+    {Tag::MEDIA_PROFILE, defaultInt32},
+    {Tag::VIDEO_ENCODE_QUALITY, defaultInt32},
+    {Tag::AUDIO_AAC_SBR, defaultInt32},
+    {Tag::AUDIO_FLAC_COMPLIANCE_LEVEL, defaultInt32},
+    {Tag::MEDIA_LEVEL, defaultInt32},
+    {Tag::VIDEO_STRIDE, defaultInt32},
+    {Tag::VIDEO_DISPLAY_WIDTH, defaultInt32},
+    {Tag::VIDEO_DISPLAY_HEIGHT, defaultInt32},
+    // String
     {Tag::MIME_TYPE, defaultString},
     {Tag::MEDIA_FILE_URI, defaultString},
     {Tag::MEDIA_TITLE, defaultString},
@@ -219,35 +276,44 @@ static std::map<TagType,  const Any&> g_metadataDefaultValueMap = {
     {Tag::MEDIA_AUTHOR, defaultString},
     {Tag::MEDIA_COMPOSER, defaultString},
     {Tag::MEDIA_LYRICS, defaultString},
-    //Double
+    {Tag::MEDIA_CODEC_NAME, defaultString},
+    {Tag::PROCESS_NAME, defaultString},
+    // Double
     {Tag::VIDEO_CAPTURE_RATE, defaultDouble},
     {Tag::VIDEO_FRAME_RATE, defaultDouble},
-    //Bool
+    // Bool
     {Tag::VIDEO_COLOR_RANGE, defaultBool},
+    {Tag::VIDEO_REQUEST_I_FRAME, defaultBool},
     {Tag::VIDEO_IS_HDR_VIVID, defaultBool},
-    //UInt64
+    {Tag::MEDIA_HAS_VIDEO, defaultBool},
+    {Tag::MEDIA_HAS_AUDIO, defaultBool},
+    {Tag::MEDIA_END_OF_STREAM, defaultBool},
+    {Tag::VIDEO_FRAME_RATE_ADAPTIVE_MODE, defaultBool},
+    // Int64
     {Tag::MEDIA_FILE_SIZE, defaultUInt64},
     {Tag::MEDIA_POSITION, defaultUInt64},
-    //Int64
     {Tag::APP_FULL_TOKEN_ID, defaultInt64},
     {Tag::MEDIA_DURATION, defaultInt64},
     {Tag::MEDIA_BITRATE, defaultInt64},
     {Tag::MEDIA_START_TIME, defaultInt64},
     {Tag::USER_FRAME_PTS, defaultInt64},
     {Tag::USER_PUSH_DATA_TIME, defaultInt64},
-    //AudioChannelLayout UINT64_T
+    {Tag::MEDIA_TIME_STAMP, defaultInt64},
+    // AudioChannelLayout UINT64_T
     {Tag::AUDIO_CHANNEL_LAYOUT, defaultAudioChannelLayout},
     {Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, defaultAudioChannelLayout},
-    //AudioAacProfile UInt8
+    // AudioAacProfile UInt8
     {Tag::AUDIO_AAC_PROFILE, defaultAudioAacProfile},
-    //AudioAacStreamFormat UInt8
+    // AudioAacStreamFormat UInt8
     {Tag::AUDIO_AAC_STREAM_FORMAT, defaultAudioAacStreamFormat},
-    //vector<uint8_t>
+    // vector<uint8_t>
     {Tag::MEDIA_CODEC_CONFIG, defaultVectorUInt8},
+    {Tag::AUDIO_VIVID_METADATA, defaultVectorUInt8},
     {Tag::MEDIA_COVER, defaultVectorUInt8},
-    //vector<Plugin::VideoBitStreamFormat>
-    {Tag::VIDEO_BIT_STREAM_FORMAT, defaultVectorVideoBitStreamFormat}
-};
+    {Tag::AUDIO_VORBIS_IDENTIFICATION_HEADER, defaultVectorUInt8},
+    {Tag::AUDIO_VORBIS_SETUP_HEADER, defaultVectorUInt8},
+    // vector<Plugin::VideoBitStreamFormat>
+    {Tag::VIDEO_BIT_STREAM_FORMAT, defaultVectorVideoBitStreamFormat}};
 
 Any GetDefaultAnyValue(const TagType& tag)
 {

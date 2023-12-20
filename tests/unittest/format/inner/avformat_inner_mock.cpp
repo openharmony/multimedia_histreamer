@@ -14,11 +14,10 @@
  */
 
 #include "avformat_inner_mock.h"
+#include "meta/meta_key.h"
 #include "securec.h"
-#include "media_description.h"
-
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 bool AVFormatInnerMock::PutIntValue(const std::string_view &key, int32_t value)
 {
     return format_.PutIntValue(key, value);
@@ -93,19 +92,18 @@ bool AVFormatInnerMock::PutBuffer(const std::string_view &key, const uint8_t *ad
     return format_.PutBuffer(key, addr, size);
 }
 
-void AVFormatInnerMock::InitAudioTrackFormat(const std::string_view &mimeType,
-                                             int32_t sampleRate, int32_t channelCount)
+void AVFormatInnerMock::InitAudioTrackFormat(const std::string_view &mimeType, int32_t sampleRate, int32_t channelCount)
 {
-    format_.PutStringValue(MediaDescriptionKey::MD_KEY_CODEC_MIME, mimeType);
-    format_.PutIntValue(MediaDescriptionKey::MD_KEY_SAMPLE_RATE, sampleRate);
-    format_.PutIntValue(MediaDescriptionKey::MD_KEY_CHANNEL_COUNT, channelCount);
+    format_.PutStringValue(Tag::MIME_TYPE, mimeType);
+    format_.PutIntValue(Tag::AUDIO_SAMPLE_RATE, sampleRate);
+    format_.PutIntValue(Tag::AUDIO_CHANNEL_COUNT, channelCount);
 }
 
 void AVFormatInnerMock::InitVideoTrackFormat(const std::string_view &mimeType, int32_t width, int32_t height)
 {
-    format_.PutStringValue(MediaDescriptionKey::MD_KEY_CODEC_MIME, mimeType);
-    format_.PutIntValue(MediaDescriptionKey::MD_KEY_WIDTH, width);
-    format_.PutIntValue(MediaDescriptionKey::MD_KEY_HEIGHT, height);
+    format_.PutStringValue(Tag::MIME_TYPE, mimeType);
+    format_.PutIntValue(Tag::VIDEO_WIDTH, width);
+    format_.PutIntValue(Tag::VIDEO_HEIGHT, height);
 }
 
 const char *AVFormatInnerMock::DumpInfo()
@@ -130,5 +128,5 @@ const char *AVFormatInnerMock::DumpInfo()
     }
     return dumpInfo_;
 }
-}  // namespace MediaAVCodec
-}  // namespace OHOS
+} // namespace Media
+} // namespace OHOS

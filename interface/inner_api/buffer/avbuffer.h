@@ -19,7 +19,7 @@
 #include <memory>
 #include <string>
 #include "buffer/avallocator.h"
-#include "buffer/avbuffer_common.h"
+#include "common/status.h"
 
 namespace OHOS {
 namespace Media {
@@ -108,8 +108,8 @@ public:
 
 private:
     explicit AVBuffer();
-    int32_t Init(std::shared_ptr<AVAllocator> allocator, int32_t capacity = 0, int32_t align = 0);
-    int32_t Init(uint8_t *ptr, int32_t capacity, int32_t size = 0);
+    Status Init(std::shared_ptr<AVAllocator> allocator, int32_t capacity = 0, int32_t align = 0);
+    Status Init(uint8_t *ptr, int32_t capacity, int32_t size = 0);
 
     uint64_t uid_;
     AVBufferConfig config_;
@@ -155,10 +155,10 @@ public:
      * @param size The memory's used size. If the size is greater than the capacity, it will be set to equal the
      * capacity.
      * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to
-     * {@link AVCodecServiceErrCode}
+     * {@link Status}
      * @since 4.1
      */
-    virtual int32_t SetSize(int32_t size);
+    virtual Status SetSize(int32_t size);
 
     /**
      * @brief Get the memory's used size.
@@ -171,10 +171,10 @@ public:
      * @brief Set the memory's offset.
      * @param offset The memory's offset, bytes.
      * @return Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to
-     * {@link AVCodecServiceErrCode}
+     * {@link Status}
      * @since 4.1
      */
-    virtual int32_t SetOffset(int32_t offset);
+    virtual Status SetOffset(int32_t offset);
 
     /**
      * @brief Get the memory's file descriptor.
@@ -226,27 +226,11 @@ public:
      */
     virtual sptr<SurfaceBuffer> GetSurfaceBuffer();
 
-    /**
-     * @brief Start data synchronization, only used when the memory type is {@link HARDWARE_MEMORY}.
-     * @return  Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to
-     * {@link AVCodecServiceErrCode}
-     * @since 4.1
-     */
-    virtual int32_t SyncStart();
-
-    /**
-     * @brief End data synchronization, only used when the memory type is {@link HARDWARE_MEMORY}.
-     * @return  Returns Status::OK if the execution is successful, otherwise returns a specific error code, refer to
-     * {@link AVCodecServiceErrCode}
-     * @since 4.1
-     */
-    virtual int32_t SyncEnd();
-
 protected:
     explicit AVMemory();
-    virtual int32_t Init();
-    virtual int32_t Init(MessageParcel &parcel);
-    virtual int32_t InitSurfaceBuffer(MessageParcel &parcel);
+    virtual Status Init();
+    virtual Status Init(MessageParcel &parcel);
+    virtual Status InitSurfaceBuffer(MessageParcel &parcel);
     virtual bool WriteToMessageParcel(MessageParcel &parcel);
     virtual bool ReadFromMessageParcel(MessageParcel &parcel);
 

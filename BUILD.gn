@@ -47,15 +47,15 @@ config("histreamer_presets") {
 
 if (!hst_is_mini_sys) {
   # L1 & std shared and seprated
-  group("histreamer") {
-    deps = [
-      ":media_engine_histreamer",
-      "engine/plugin/plugins:histreamer_plugin_store",
-    ]
-  }
 
   # media_engine_histreamer lib for L1 & std
   if (hst_is_lite_sys) {
+    group("histreamer") {
+      deps = [
+        ":media_engine_histreamer",
+        "engine/plugin/plugins:histreamer_plugin_store",
+      ]
+    }
     import("//build/lite/config/component/lite_component.gni")
     lite_library("media_engine_histreamer") {
       target_type = "shared_library"
@@ -71,26 +71,11 @@ if (!hst_is_mini_sys) {
     group("media_foundation") {
     }
   } else {
+    group("histreamer") {
+      deps = [ "engine/plugin/plugins:histreamer_plugin_store" ]
+    }
     group("media_foundation") {
       deps = [ "src:media_foundation" ]
-    }
-    import("//build/ohos.gni")
-    ohos_shared_library("media_engine_histreamer") {
-      subsystem_name = "multimedia"
-      part_name = "histreamer"
-      sources = []
-      deps = [ "engine/scene:std_engine_factory" ]
-      external_deps = [
-        "hilog:libhilog",
-        "hitrace:hitrace_meter",
-      ]
-      sanitize = {
-        cfi = true
-        cfi_cross_dso = true
-        debug = false
-        integer_overflow = true
-      }
-      relative_install_dir = "media"
     }
   }
 } else {

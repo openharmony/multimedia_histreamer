@@ -37,14 +37,14 @@ public:
     static constexpr const char AUDIO_OPUS[] = "audio/opus";
     static constexpr const char AUDIO_FLAC[] = "audio/flac";
     static constexpr const char AUDIO_RAW[] = "audio/raw";
-    static constexpr const char AUDIO_AVS3DA[] = "audio/avs-3da";
+    static constexpr const char AUDIO_AVS3DA[] = "audio/av3a";
 
     static constexpr const char IMAGE_JPG[] = "image/jpeg";
     static constexpr const char IMAGE_PNG[] = "image/png";
     static constexpr const char IMAGE_BMP[] = "image/bmp";
 
-    static constexpr const char CONTAINER_MP4[] = "container/mp4";
-    static constexpr const char CONTAINER_M4A[] = "container/m4a";
+    static constexpr const char MEDIA_MP4[] = "media/mp4";
+    static constexpr const char MEDIA_M4A[] = "media/m4a";
 };
 } // namespace Plugin
 } // namespace Media

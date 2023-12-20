@@ -28,7 +28,7 @@ public:
     MemoryType GetMemoryType() override;
 
 private:
-    int32_t Init() override;
+    Status Init() override;
 };
 } // namespace Media
 } // namespace OHOS

@@ -84,12 +84,14 @@ using MapIt = std::map<TagType, Any>::const_iterator;
 class Meta {
 public:
     enum struct ValueType : int32_t {
+        INVALID_TYPE = 1,
         BOOL,
         UINT8_T,
         INT32_T,
         UINT32_T,
         INT64_T,
         UINT64_T,
+        FLOAT,
         DOUBLE,
         VECTOR_UINT8,
         VECTOR_UINT32,
@@ -100,7 +102,10 @@ public:
 
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::SRC_INPUT_TYPE, Plugin::SrcInputType, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::MEDIA_CODEC_CONFIG or
-                           tagCharSeq == Tag::MEDIA_COVER,
+                           tagCharSeq == Tag::MEDIA_COVER or
+                           tagCharSeq == Tag::AUDIO_VIVID_METADATA or
+                           tagCharSeq == Tag::AUDIO_VORBIS_IDENTIFICATION_HEADER or
+                           tagCharSeq == Tag::AUDIO_VORBIS_SETUP_HEADER,
                            std::vector<uint8_t>, ValueType::VECTOR_UINT8);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::AUDIO_CHANNEL_LAYOUT or
                            tagCharSeq == Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT,
@@ -125,11 +130,19 @@ public:
                            ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_MATRIX_COEFF, Plugin::MatrixCoefficient,
                            ValueType::INT32_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_RANGE, bool, ValueType::BOOL);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_IS_HDR_VIVID, bool, ValueType::BOOL);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_ENCODE_BITRATE_MODE,
+        Plugin::VideoEncodeBitrateMode, ValueType::INT32_T);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_RANGE or 
+        tagCharSeq == Tag::VIDEO_REQUEST_I_FRAME or
+        tagCharSeq == Tag::VIDEO_IS_HDR_VIVID or
+        tagCharSeq == Tag::MEDIA_HAS_VIDEO or
+        tagCharSeq == Tag::MEDIA_HAS_AUDIO or
+        tagCharSeq == Tag::MEDIA_END_OF_STREAM or
+        tagCharSeq == Tag::VIDEO_FRAME_RATE_ADAPTIVE_MODE, bool, ValueType::BOOL);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_H265_PROFILE, Plugin::HEVCProfile, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_H265_LEVEL, Plugin::HEVCLevel, ValueType::INT32_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_CHROMA_LOCATION, Plugin::ChromaLocation, ValueType::INT32_T);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_CHROMA_LOCATION,
+        Plugin::ChromaLocation, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::APP_UID or
         tagCharSeq == Tag::APP_PID or
         tagCharSeq == Tag::APP_TOKEN_ID or
@@ -155,14 +168,21 @@ public:
         tagCharSeq == Tag::VIDEO_MAX_SURFACE_NUM or
         tagCharSeq == Tag::VIDEO_H264_LEVEL or
         tagCharSeq == Tag::MEDIA_TRACK_COUNT or
-        tagCharSeq == Tag::MEDIA_HAS_VIDEO or
-        tagCharSeq == Tag::MEDIA_HAS_AUDIO or
         tagCharSeq == Tag::AUDIO_AAC_IS_ADTS or
         tagCharSeq == Tag::AUDIO_COMPRESSION_LEVEL or
-        tagCharSeq == Tag::BITS_PER_CODED_SAMPLE or
-        tagCharSeq == Tag::MEDIA_TRACK_COUNT or
-        tagCharSeq == Tag::MEDIA_HAS_VIDEO or
-        tagCharSeq == Tag::MEDIA_HAS_AUDIO, int32_t, ValueType::INT32_T);
+        tagCharSeq == Tag::AUDIO_BITS_PER_CODED_SAMPLE or
+        tagCharSeq == Tag::REGULAR_TRACK_ID or
+        tagCharSeq == Tag::VIDEO_SCALE_TYPE or
+        tagCharSeq == Tag::VIDEO_I_FRAME_INTERVAL or
+        tagCharSeq == Tag::MEDIA_PROFILE or
+        tagCharSeq == Tag::VIDEO_ENCODE_QUALITY or
+        tagCharSeq == Tag::AUDIO_AAC_SBR or
+        tagCharSeq == Tag::AUDIO_FLAC_COMPLIANCE_LEVEL or
+        tagCharSeq == Tag::AUDIO_OBJECT_NUMBER or
+        tagCharSeq == Tag::MEDIA_LEVEL or
+        tagCharSeq == Tag::VIDEO_STRIDE or
+        tagCharSeq == Tag::VIDEO_DISPLAY_WIDTH or
+        tagCharSeq == Tag::VIDEO_DISPLAY_HEIGHT, int32_t, ValueType::INT32_T);
 
     DEFINE_INSERT_GET_FUNC(
         tagCharSeq == Tag::APP_FULL_TOKEN_ID or
@@ -172,7 +192,8 @@ public:
         tagCharSeq == Tag::USER_FRAME_PTS or
         tagCharSeq == Tag::USER_PUSH_DATA_TIME or
         tagCharSeq == Tag::MEDIA_FILE_SIZE or
-        tagCharSeq == Tag::MEDIA_POSITION, int64_t, ValueType::INT64_T);
+        tagCharSeq == Tag::MEDIA_POSITION or
+        tagCharSeq == Tag::MEDIA_TIME_STAMP, int64_t, ValueType::INT64_T);
 
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_FRAME_RATE or
         tagCharSeq == Tag::VIDEO_CAPTURE_RATE, double, ValueType::DOUBLE);
@@ -196,20 +217,33 @@ public:
         tagCharSeq == Tag::USER_SHARED_MEMORY_FD or
         tagCharSeq == Tag::MEDIA_AUTHOR or
         tagCharSeq == Tag::MEDIA_COMPOSER or
-        tagCharSeq == Tag::MEDIA_LYRICS, std::string, ValueType::STRING);
+        tagCharSeq == Tag::MEDIA_LYRICS or
+        tagCharSeq == Tag::MEDIA_CODEC_NAME or
+        tagCharSeq == Tag::PROCESS_NAME, std::string, ValueType::STRING);
 
-    Meta& operator=(const Meta& other)
+    Meta &operator=(const Meta &other)
     {
         map_ = other.map_;
+        return *this;
+    }
+
+    Meta &operator=(Meta &&other)
+    {
+        swap(map_, other.map_);
         return *this;
     }
 
     Meta() {
     };
 
-    Meta(const Meta& other)
+    Meta(const Meta &other)
     {
         map_ = other.map_;
+    }
+
+    Meta(Meta &&other)
+    {
+        swap(map_, other.map_);
     }
 
     Any& operator[](const TagType& tag)
@@ -262,6 +296,20 @@ public:
     void SetData(TagTypeCharSeq tag, const T& value)
     {
         map_[tag] = value;
+    }
+
+    template <int N>
+    void SetData(const TagType &tag, char const (&value)[N])
+    {
+        std::string strValue = value;
+        map_[tag] = std::move(strValue);
+    }
+
+    template <int N>
+    void SetData(TagTypeCharSeq tag, char const (&value)[N])
+    {
+        std::string strValue = value;
+        map_[tag] = std::move(strValue);
     }
 
     template <typename T>
@@ -319,17 +367,17 @@ private:
 };
 
 /**
- * @brief SetMetaData only used for Application interface OH_AVFormat to set Enum value into Meta Object.
+ * @brief SetMetaData only used for Application interface OH_AVFormat to set enum/bool/int32_t value into Meta Object.
  * @implNote In order to set value(int32_t type) to Meta Object, should convert int32_t value to correct EnumType then
  * save to Any object. We use metadataGetterSetterMap to get the right setter function.
  * @return Returns operator status, <b>True</b> if Set Success.
  * returns <b>False</b> otherwise.
  * @example OHOS::Media::SetMetaData(meta, "audio.aac.profile", value);
  */
-bool SetMetaData(Meta& meta, const TagType& tag, int32_t& value);
+bool SetMetaData(Meta& meta, const TagType& tag, int32_t value);
 
 /**
- * @brief GetMetaData only used for Application interface OH_AVFormat to get Enum value from Meta Object.
+ * @brief GetMetaData only used for Application interface OH_AVFormat to get enum/bool/int32_t value from Meta Object.
  * @implNote In order to get value(Enum type) from Meta Object, should use correct Enum type to get value from Any
  * object. We use metadataGetterSetterMap to get the right getter function.
  * @return Returns operator status, <b>True</b> if Get Success.
@@ -338,17 +386,17 @@ bool SetMetaData(Meta& meta, const TagType& tag, int32_t& value);
  */
 bool GetMetaData(const Meta& meta, const TagType& tag, int32_t& value);
 /**
- * @brief SetMetaData only used for Application interface OH_AVFormat to set Enum value into Meta Object.
- * @implNote In order to set value(int64_t type) to Meta Object, should convert int32_t value to correct EnumType then
+ * @brief SetMetaData only used for Application interface OH_AVFormat to set enum/int64_t value into Meta Object.
+ * @implNote In order to set value(int64_t type) to Meta Object, should convert int64_t value to correct EnumType then
  * save to Any object. We use metadataGetterSetterMap to get the right setter function.
  * @return Returns operator status, <b>True</b> if Set Success.
  * returns <b>False</b> otherwise.
  * @example OHOS::Media::SetMetaData(meta, "audio.aac.profile", value);
  */
-bool SetMetaData(Meta& meta, const TagType& tag, int64_t& value);
+bool SetMetaData(Meta& meta, const TagType& tag, int64_t value);
 
 /**
- * @brief GetMetaData only used for Application interface OH_AVFormat to get Enum value from Meta Object.
+ * @brief GetMetaData only used for Application interface OH_AVFormat to get enum/int64_t value from Meta Object.
  * @implNote In order to get value(Enum type) from Meta Object, should use correct Enum type to get value from Any
  * object. We use metadataGetterSetterMap to get the right getter function.
  * @return Returns operator status, <b>True</b> if Get Success.

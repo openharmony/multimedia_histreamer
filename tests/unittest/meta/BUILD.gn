@@ -53,7 +53,10 @@ ohos_unittest("meta_inner_unit_test") {
     "MEDIA_OHOS",
   ]
 
-  sources = [ "./meta_func_unit_test.cpp" ]
+  sources = [
+    "./any_func_unit_test.cpp",
+    "./meta_func_unit_test.cpp",
+  ]
 
   cflags = meta_unittest_cflags
 

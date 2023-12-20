@@ -16,6 +16,16 @@
 #ifndef HISTREAMER_PLUGIN_COMMON_ANY_H
 #define HISTREAMER_PLUGIN_COMMON_ANY_H
 
+#ifndef HST_ANY_WITH_RTTI
+#ifndef HST_ANY_WITH_NO_RTTI
+#define HST_ANY_WITH_NO_RTTI
+#endif
+#else
+#ifdef HST_ANY_WITH_NO_RTTI
+#undef HST_ANY_WITH_NO_RTTI
+#endif
+#endif
+
 #if defined(__clang__) || defined(__GNUC__)
 #define CPP_STANDARD __cplusplus
 #elif defined(_MSC_VER)
@@ -32,6 +42,7 @@
 #include "message_parcel.h"
 
 namespace {
+#if CPP_STANDARD < 201402L
 template <typename T>
 using decay_t = typename std::decay<T>::type;
 
@@ -46,6 +57,14 @@ using remove_cv_t = typename std::remove_cv<T>::type;
 
 template <typename T>
 using remove_reference_t = typename std::remove_reference<T>::type;
+#else
+using std::decay_t;
+using std::enable_if_t;
+using std::conditional_t;
+using std::remove_cv_t;
+using std::remove_reference_t;
+#endif
+
 constexpr size_t STACK_STORAGE_SIZE = 2 * sizeof(void*); // NOLINT: global var
 
 template <typename T>
@@ -135,14 +154,14 @@ public:
     {
     }
 
-    Any(const Any& other) : functionTable_(other.functionTable_)
+    __attribute__((no_sanitize("cfi"))) Any(const Any &other) : functionTable_(other.functionTable_)
     {
         if (other.HasValue()) {
             functionTable_->copy(storage_, other.storage_);
         }
     }
 
-    Any(Any&& other) noexcept : functionTable_(other.functionTable_)
+    __attribute__((no_sanitize("cfi"))) Any(Any &&other) noexcept : functionTable_(other.functionTable_)
     {
         if (other.HasValue()) {
             functionTable_->move(storage_, other.storage_);
@@ -202,7 +221,7 @@ public:
         uint32_t beginIndex = stringInfo.find_first_of('=') + 2; // 2 表示右移两位
 #ifdef MEDIA_OHOS
         uint32_t endIndex = stringInfo.find_last_of(']');
-        std::string_view typeName(charInfo + beginIndex, endIndex - beginIndex + 1);
+        std::string_view typeName(charInfo + beginIndex, endIndex - beginIndex);
 #else
         uint32_t endIndex = stringInfo.find_last_of(';');
         std::string_view typeName(charInfo + beginIndex, endIndex - beginIndex);
@@ -267,7 +286,7 @@ public:
     /**
      * Destroy the inner content if exists.
      */
-    void Reset() noexcept
+    void __attribute__((no_sanitize("cfi"))) Reset() noexcept
     {
         if (HasValue()) {
             functionTable_->destroy(storage_);
@@ -312,21 +331,21 @@ public:
         return functionTable_->type();
     }
 #else
-    std::string_view TypeName() const noexcept
+    std::string_view __attribute__((no_sanitize("cfi"))) TypeName() const noexcept
     {
         if (!HasValue()) {
             return "empty"; // no value
         }
         return functionTable_->type_name();
     }
-    bool ToParcel(MessageParcel &parcel) const noexcept
+    bool __attribute__((no_sanitize("cfi"))) ToParcel(MessageParcel &parcel) const noexcept
     {
         if (!HasValue()) {
             return false; // no value
         }
         return functionTable_->toParcel(this, parcel);
     }
-    bool FromParcel(MessageParcel &parcel) const noexcept
+    bool __attribute__((no_sanitize("cfi"))) FromParcel(MessageParcel &parcel) const noexcept
     {
         return functionTable_->fromParcel(const_cast<Any *>(this), parcel);
     }
@@ -341,7 +360,7 @@ public:
         return IsSameType(functionTable_->type(), otherInfo);
     }
 #else
-    bool SameTypeWith(std::string_view otherTypeName) const noexcept
+    bool __attribute__((no_sanitize("cfi"))) SameTypeWith(std::string_view otherTypeName) const noexcept
     {
         if (functionTable_ == nullptr) {
             return false;
@@ -350,7 +369,7 @@ public:
     }
 #endif
 
-    bool SameTypeWith(const Any& other) const noexcept
+    bool __attribute__((no_sanitize("cfi"))) SameTypeWith(const Any &other) const noexcept
     {
 #ifndef HST_ANY_WITH_NO_RTTI
         return IsSameType(functionTable_->type(), other.Type());
@@ -425,7 +444,7 @@ private:
             }
             T value;
             if (AnyCast(operand, value)) {
-                parcel.WriteInt32(static_cast<int32_t>(value));
+                WriteValueToParcel(value, parcel);
                 return true;
             }
             return false;
@@ -501,7 +520,7 @@ private:
             }
             T value;
             if (AnyCast(operand, value)) {
-                parcel.WriteInt32(static_cast<int32_t>(value));
+                WriteValueToParcel(value, parcel);
                 return true;
             }
             return false;
@@ -651,7 +670,7 @@ private:
     }
 
     template <typename DecayedValueType, typename... Args>
-    DecayedValueType& DoEmplace(Args&&... args)
+    DecayedValueType &__attribute__((no_sanitize("cfi"))) DoEmplace(Args &&...args)
     {
         functionTable_ = GetFunctionTable<DecayedValueType>();
         DecayedValueType* ptr = nullptr;
@@ -665,7 +684,7 @@ private:
         return *ptr;
     }
 
-    void MoveFrom(Any&& other) noexcept
+    void __attribute__((no_sanitize("cfi"))) MoveFrom(Any &&other) noexcept
     {
         if (other.HasValue()) {
             functionTable_ = other.functionTable_;

@@ -15,13 +15,13 @@
 
 #include "avbuffer_inner_mock.h"
 #include "avformat_inner_mock.h"
-#include "media_description.h"
+#include "meta/meta.h"
 #include "native_averrors.h"
 #include "securec.h"
 #include "unittest_log.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 uint8_t *AVBufferInnerMock::GetAddr()
 {
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, nullptr, "buffer_ is nullptr!");
@@ -36,30 +36,33 @@ int32_t AVBufferInnerMock::GetCapacity()
     return buffer_->memory_->GetCapacity();
 }
 
-OH_AVBufferAttr AVBufferInnerMock::GetBufferAttr()
+int32_t AVBufferInnerMock::GetBufferAttr(OH_AVCodecBufferAttr &attr)
 {
-    OH_AVBufferAttr attr;
-    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, attr, "buffer_ is nullptr!");
+    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN),
+                                      "buffer_ is nullptr!");
     attr.pts = buffer_->pts_;
     attr.offset = buffer_->memory_->GetOffset();
     attr.size = buffer_->memory_->GetSize();
     attr.flags = static_cast<uint32_t>(buffer_->flag_);
-    return attr;
+    return static_cast<int32_t>(Status::OK);
 }
-int32_t AVBufferInnerMock::SetBufferAttr(OH_AVBufferAttr &attr)
+
+int32_t AVBufferInnerMock::SetBufferAttr(const OH_AVCodecBufferAttr &attr)
 {
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN),
                                       "buffer_ is nullptr!");
     buffer_->pts_ = attr.pts;
     buffer_->memory_->SetOffset(attr.offset);
-    buffer_->flag_ = static_cast<AVCodecBufferFlag>(attr.flags);
-    return buffer_->memory_->SetSize(attr.size);
+    buffer_->flag_ = attr.flags;
+    return static_cast<int32_t>(buffer_->memory_->SetSize(attr.size));
 }
 
 std::shared_ptr<FormatMock> AVBufferInnerMock::GetParameter()
 {
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, nullptr, "buffer_ is nullptr!");
-    auto formatMock = std::make_shared<AVFormatInnerMock>(*(buffer_->meta_));
+    Format format;
+    format.SetMeta(buffer_->meta_);
+    auto formatMock = std::make_shared<AVFormatInnerMock>(format);
     return formatMock;
 }
 
@@ -67,7 +70,8 @@ int32_t AVBufferInnerMock::SetParameter(const std::shared_ptr<FormatMock> &forma
 {
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN),
                                       "buffer_ is nullptr!");
-    *(buffer_->meta_) = std::static_pointer_cast<AVFormatInnerMock>(format)->GetFormat();
+    auto &formatAVCodec = std::static_pointer_cast<AVFormatInnerMock>(format)->GetFormat();
+    *(buffer_->meta_) = *(formatAVCodec.GetMeta());
     return static_cast<int32_t>(Status::OK);
 }
 
@@ -77,9 +81,16 @@ int32_t AVBufferInnerMock::Destroy()
     return static_cast<int32_t>(Status::OK);
 }
 
+sptr<SurfaceBuffer> AVBufferInnerMock::GetNativeBuffer()
+{
+    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_ != nullptr, nullptr, "buffer_ is nullptr!");
+    UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer_->memory_ != nullptr, nullptr, "buffer_->memory_ is nullptr!");
+    return buffer_->memory_->GetSurfaceBuffer();
+}
+
 std::shared_ptr<AVBuffer> &AVBufferInnerMock::GetAVBuffer()
 {
     return buffer_;
 }
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS

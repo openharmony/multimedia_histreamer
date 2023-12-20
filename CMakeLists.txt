@@ -25,5 +25,7 @@ set(TOP_DIR ${PROJECT_SOURCE_DIR})
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+message(STATUS "HISTREAMER")
 add_subdirectory(${DEV_TOP_DIR}/histreamer/engine engine.out)
 add_subdirectory(${DEV_TOP_DIR}/histreamer/test test.out)
+add_subdirectory(${DEV_TOP_DIR}/histreamer/tests tests.out)

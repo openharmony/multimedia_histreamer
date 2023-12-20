@@ -29,7 +29,7 @@ namespace Media {
 /**
  * @brief AVBuffer's allocator.
  */
-class AVAllocator {
+class __attribute__((visibility("default"))) AVAllocator {
 public:
     virtual ~AVAllocator() = default;
     /**

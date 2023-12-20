@@ -18,7 +18,10 @@ if (hst_is_standard_sys) {
   config("media_foundation_public_config") {
     include_dirs = [
       "$histreamer_root_dir/interface/kits/c",
+      "$histreamer_root_dir/interface/inner_api",
       "$histreamer_root_dir/interface/inner_api/buffer",
+      "$histreamer_root_dir/interface/inner_api/common",
+      "$histreamer_root_dir/interface/inner_api/meta",
       "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/surface",
     ]
   }
@@ -30,14 +33,17 @@ if (hst_is_standard_sys) {
     ]
 
     include_dirs = [
-      "$histreamer_root_dir/src/buffer/avbuffer/capi",
+      "$histreamer_root_dir/osal/base",
+      "$histreamer_root_dir/plugin",
       "$histreamer_root_dir/src/buffer/avbuffer/include",
-      "$histreamer_root_dir/src/buffer/capi/common",
-      "$histreamer_root_dir/interface/inner_api",
+      "$histreamer_root_dir/src/buffer/avbuffer_queue/include",
+      "$histreamer_root_dir/src/capi/common",
+      "$histreamer_root_dir/../../../base/hiviewdfx/hilog/interfaces/native/innerkits/include",
       "$histreamer_root_dir/../../graphic/graphic_2d/frameworks/surface/include",
       "$histreamer_root_dir/../../graphic/graphic_2d/utils/sync_fence/export",
       "$histreamer_root_dir/../../graphic/graphic_2d/interface/inner_api/common",
-      "$histreamer_root_dir/../../../commonlibrary/memory_utils/libdmabufheap/include",
+      "//third_party/bounds_checking_function/include",
+      "//third_party/ffmpeg",
     ]
 
     cflags = [
@@ -54,8 +60,16 @@ if (hst_is_standard_sys) {
 
   ohos_shared_library("media_foundation") {
     install_enable = true
+
     public_configs = [ ":media_foundation_public_config" ]
+
     configs = [ ":media_foundation_config" ]
+
+    defines = [
+      "HST_ANY_WITH_NO_RTTI",
+      "MEDIA_OHOS",
+      "DYNAMIC_PLUGINS",
+    ]
 
     sanitize = {
       cfi = true
@@ -63,6 +77,7 @@ if (hst_is_standard_sys) {
       debug = false
       integer_overflow = true
     }
+
     sources = [
       "$histreamer_root_dir/src/buffer/avbuffer/av_hardware_memory.cpp",
       "$histreamer_root_dir/src/buffer/avbuffer/av_shared_memory_ext.cpp",
@@ -72,29 +87,92 @@ if (hst_is_standard_sys) {
       "$histreamer_root_dir/src/buffer/avbuffer/avbuffer_common.cpp",
       "$histreamer_root_dir/src/buffer/avbuffer/avbuffer_utils.cpp",
       "$histreamer_root_dir/src/buffer/avbuffer/avmemory.cpp",
-      "$histreamer_root_dir/src/buffer/capi/native_avbuffer.cpp",
     ]
+
+    sources += [
+      "$histreamer_root_dir/src/buffer/avbuffer_queue/avbuffer_queue.cpp",
+      "$histreamer_root_dir/src/buffer/avbuffer_queue/avbuffer_queue_consumer.cpp",
+      "$histreamer_root_dir/src/buffer/avbuffer_queue/avbuffer_queue_producer.cpp",
+      "$histreamer_root_dir/src/buffer/avbuffer_queue/avbuffer_queue_producer_proxy.cpp",
+      "$histreamer_root_dir/src/buffer/avbuffer_queue/avbuffer_queue_producer_stub.cpp",
+      "$histreamer_root_dir/src/buffer/avbuffer_queue/avbuffer_queue_surface.cpp",
+    ]
+
+    sources += [
+      "$histreamer_root_dir/src/buffer/avsharedmemory/avsharedmemorybase.cpp",
+    ]
+
     sources += [
       "$histreamer_root_dir/src/meta/any.cpp",
+      "$histreamer_root_dir/src/meta/format.cpp",
+      "$histreamer_root_dir/src/meta/media_source.cpp",
       "$histreamer_root_dir/src/meta/meta.cpp",
     ]
-    public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
 
-    deps = []
+    sources += [
+      "$histreamer_root_dir/src/capi/native_avbuffer.cpp",
+      "$histreamer_root_dir/src/capi/native_avformat.cpp",
+      "$histreamer_root_dir/src/capi/native_avmemory.cpp",
+    ]
+
+    sources += [
+      "$histreamer_root_dir/src/osal/filesystem/file_system.cpp",
+      "$histreamer_root_dir/src/osal/task/pthread/autolock.cpp",
+      "$histreamer_root_dir/src/osal/task/pthread/condition_variable.cpp",
+      "$histreamer_root_dir/src/osal/task/pthread/jobutils.cpp",
+      "$histreamer_root_dir/src/osal/task/pthread/mutex.cpp",
+      "$histreamer_root_dir/src/osal/task/pthread/task.cpp",
+      "$histreamer_root_dir/src/osal/task/pthread/thread.cpp",
+      "$histreamer_root_dir/src/osal/utils/util.cpp",
+    ]
+
+    sources += [
+      "$histreamer_root_dir/src/filter/filter.cpp",
+      "$histreamer_root_dir/src/filter/filter_factory.cpp",
+      "$histreamer_root_dir/src/pipeline/pipeline.cpp",
+    ]
+
+    sources += [
+      "$histreamer_root_dir/src/plugin/plugin_buffer.cpp",
+      "$histreamer_root_dir/src/plugin/plugin_loader.cpp",
+      "$histreamer_root_dir/src/plugin/plugin_manager.cpp",
+      "$histreamer_root_dir/src/plugin/plugin_register.cpp",
+    ]
+
+    public_deps = []
+
+    deps = [
+      "//third_party/bounds_checking_function:libsec_static",
+      "//third_party/ffmpeg:libohosffmpeg",
+    ]
+
     external_deps = [
       "c_utils:utils",
       "graphic_2d:surface",
       "graphic_2d:sync_fence",
       "hilog:libhilog",
       "hitrace:hitrace_meter",
-      "init:libbegetutil",
       "ipc:ipc_core",
-      "memory_utils:libdmabufheap",
     ]
+
+    symlink_target_name = [ "../libnative_media_core.so" ]
+
     innerapi_tags = [
       "platformsdk",
       "sasdk",
     ]
+
+    if (target_cpu == "arm64") {
+      hst_plugin_path = "\"/system/lib64/media/media_plugins\""
+    } else {
+      hst_plugin_path = "\"/system/lib/media/media_plugins\""
+    }
+
+    defines += [
+      "HST_PLUGIN_PATH=${hst_plugin_path}",
+      "HST_PLUGIN_FILE_TAIL=\".z.so\"",
+    ]
+
     subsystem_name = "multimedia"
     part_name = "histreamer"
   }

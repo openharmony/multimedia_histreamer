@@ -88,6 +88,20 @@ enum AudioSampleFormat : int32_t {
     SAMPLE_S24P = 7,
     SAMPLE_S32P = 8,
     SAMPLE_F32P = 9,
+    SAMPLE_S8 = 10,
+    SAMPLE_S8P = 11,
+    SAMPLE_U16 = 12,
+    SAMPLE_U16P = 13,
+    SAMPLE_U24 = 14,
+    SAMPLE_U24P = 15,
+    SAMPLE_U32 = 16,
+    SAMPLE_U32P = 17,
+    SAMPLE_S64 = 18,
+    SAMPLE_U64 = 19,
+    SAMPLE_S64P = 20,
+    SAMPLE_U64P = 21,
+    SAMPLE_F64 = 22,
+    SAMPLE_F64P = 23,
     INVALID_WIDTH = -1
 };
 
@@ -152,7 +166,7 @@ enum AudioChannelSet : uint64_t {
 };
 
 enum AudioChannelLayout : int64_t {
-    UNKNOWN_CHANNEL_LAYOUT = 0,
+    UNKNOWN = 0,
     MONO = (AudioChannelSet::FRONT_CENTER),
     STEREO = (AudioChannelSet::FRONT_LEFT | AudioChannelSet::FRONT_RIGHT),
     CH_2POINT1 = (STEREO | AudioChannelSet::LOW_FREQUENCY),

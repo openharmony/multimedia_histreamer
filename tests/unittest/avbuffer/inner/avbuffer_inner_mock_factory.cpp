@@ -19,7 +19,7 @@
 #include "unittest_log.h"
 
 namespace OHOS {
-namespace MediaAVCodec {
+namespace Media {
 std::shared_ptr<AVBufferMock> AVBufferMockFactory::CreateAVBuffer(const int32_t &capacity)
 {
     auto allocator = AVAllocatorFactory::CreateSharedAllocator(MemoryFlag::MEMORY_READ_WRITE);
@@ -27,5 +27,5 @@ std::shared_ptr<AVBufferMock> AVBufferMockFactory::CreateAVBuffer(const int32_t 
     UNITTEST_CHECK_AND_RETURN_RET_LOG(buffer != nullptr, nullptr, "CreateAVBuffer is nullptr!");
     return std::make_shared<AVBufferInnerMock>(buffer);
 }
-} // namespace MediaAVCodec
+} // namespace Media
 } // namespace OHOS

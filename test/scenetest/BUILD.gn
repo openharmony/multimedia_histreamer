@@ -18,11 +18,13 @@ group("histreamer_scene_test") {
   testonly = true
   deps = []
   if (!hst_is_lite_sys) {
-    deps += [
-      "audio_player:histreamer_audio_player_test",
-      "audio_recorder:histreamer_audio_recorder_test",
-      "video_player:histreamer_video_player_test",
-      "video_recorder:histreamer_video_recorder_test",
-    ]
+    if (!hst_is_standard_sys) {
+      deps += [
+        "audio_player:histreamer_audio_player_test",
+        "audio_recorder:histreamer_audio_recorder_test",
+        "video_player:histreamer_video_player_test",
+        "video_recorder:histreamer_video_recorder_test",
+      ]
+    }
   }
 }

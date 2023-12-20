@@ -62,9 +62,8 @@ std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(const std::string &name, std:
     mem->allocator_ = allocator;
     mem->capacity_ = capacity;
     mem->align_ = align;
-    int32_t ret = mem->Init();
-    FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), nullptr, "Init AVMemory failed, index = %{public}s",
-                         mem->name_.c_str());
+    Status ret = mem->Init();
+    FALSE_RETURN_V_MSG_E(ret == Status::OK, nullptr, "Init AVMemory failed, name = %{public}s", mem->name_.c_str());
     return mem;
 }
 
@@ -85,8 +84,8 @@ std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(MessageParcel &parcel, bool i
 #ifdef MEDIA_OHOS
     if (isSurfaceBuffer) {
         auto mem = std::shared_ptr<AVMemory>(new AVSurfaceMemory());
-        int32_t ret = mem->InitSurfaceBuffer(parcel);
-        FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), nullptr, "Init AVSurfaceMemory failed");
+        Status ret = mem->InitSurfaceBuffer(parcel);
+        FALSE_RETURN_V_MSG_E(ret == Status::OK, nullptr, "Init AVSurfaceMemory failed");
         return mem;
     }
     MemoryType type = static_cast<MemoryType>(parcel.ReadUint8());
@@ -115,9 +114,8 @@ std::shared_ptr<AVMemory> AVMemory::CreateAVMemory(MessageParcel &parcel, bool i
     bool isReadParcel = mem->ReadCommonFromMessageParcel(parcel);
     FALSE_RETURN_V_MSG_E(isReadParcel == true, nullptr, "Read common memory info from parcel failed");
 
-    int32_t ret = mem->Init(parcel);
-    FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), nullptr, "Init AVMemory failed, name = %{public}s",
-                         mem->name_.c_str());
+    Status ret = mem->Init(parcel);
+    FALSE_RETURN_V_MSG_E(ret == Status::OK, nullptr, "Init AVMemory failed, name = %{public}s", mem->name_.c_str());
     return mem;
 #else
     return nullptr;
@@ -128,21 +126,21 @@ AVMemory::AVMemory() : name_("mem_null"), align_(0), offset_(0), size_(0), base_
 
 AVMemory::~AVMemory() {}
 
-int32_t AVMemory::Init()
+Status AVMemory::Init()
 {
-    return static_cast<int32_t>(Status::ERROR_UNIMPLEMENTED);
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
-int32_t AVMemory::Init(MessageParcel &parcel)
+Status AVMemory::Init(MessageParcel &parcel)
 {
     (void)parcel;
-    return static_cast<int32_t>(Status::ERROR_UNIMPLEMENTED);
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
-int32_t AVMemory::InitSurfaceBuffer(MessageParcel &parcel)
+Status AVMemory::InitSurfaceBuffer(MessageParcel &parcel)
 {
     (void)parcel;
-    return static_cast<int32_t>(Status::ERROR_UNIMPLEMENTED);
+    return Status::ERROR_UNIMPLEMENTED;
 }
 
 bool AVMemory::ReadFromMessageParcel(MessageParcel &parcel)
@@ -230,11 +228,11 @@ int32_t AVMemory::GetSize()
     return size_;
 }
 
-int32_t AVMemory::SetSize(int32_t size)
+Status AVMemory::SetSize(int32_t size)
 {
     size_ = std::max(0, size);
     size_ = std::min(capacity_, size_);
-    return static_cast<int32_t>(Status::OK);
+    return Status::OK;
 }
 
 int32_t AVMemory::GetOffset()
@@ -242,11 +240,11 @@ int32_t AVMemory::GetOffset()
     return offset_;
 }
 
-int32_t AVMemory::SetOffset(int32_t offset)
+Status AVMemory::SetOffset(int32_t offset)
 {
     offset_ = std::max(0, offset);
     offset_ = std::min(capacity_, offset_);
-    return static_cast<int32_t>(Status::OK);
+    return Status::OK;
 }
 
 uint8_t *AVMemory::GetAddr()
@@ -320,16 +318,5 @@ sptr<SurfaceBuffer> AVMemory::GetSurfaceBuffer()
 {
     return nullptr;
 }
-
-int32_t AVMemory::SyncStart()
-{
-    return static_cast<int32_t>(Status::ERROR_UNIMPLEMENTED);
-}
-
-int32_t AVMemory::SyncEnd()
-{
-    return static_cast<int32_t>(Status::ERROR_UNIMPLEMENTED);
-}
-
 } // namespace Media
 } // namespace OHOS

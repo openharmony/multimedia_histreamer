@@ -13,23 +13,13 @@
  * limitations under the License.
  */
 
-#include <dirent.h>
-#include <gtest/gtest.h>
-#include <memory>
-#include <string>
-#include <vector>
-#include "av_hardware_allocator.h"
 #include "av_hardware_memory.h"
 #include "av_shared_allocator.h"
 #include "av_shared_memory_ext.h"
 #include "av_surface_allocator.h"
 #include "av_surface_memory.h"
+#include "avbuffer_unit_test.h"
 #include "avbuffer_utils.h"
-#include "buffer/avbuffer.h"
-#include "meta.h"
-#include "meta_key.h"
-#include "surface_buffer.h"
-#include "surface_type.h"
 #include "unittest_log.h"
 
 using namespace std;
@@ -37,546 +27,9 @@ using namespace testing::ext;
 using namespace OHOS;
 using namespace OHOS::Media;
 
-#define INT_TESTKEY Tag::APP_PID
-#define LONG_TESTKEY Tag::MEDIA_DURATION
-#define DOUBLE_TESTKEY Tag::VIDEO_CAPTURE_RATE
-#define STRING_TESTKEY Tag::MEDIA_FILE_URI
-namespace {
-constexpr int32_t MEMSIZE = 1024 * 1024;
-constexpr int32_t POSITION_ONE = 1024 * 64;
-constexpr int32_t TEST_BUFFER_SIZE = 1048 * 1048 * 8;
-constexpr int32_t TEST_LOOP_DEPTH = 10;
-
-const int32_t INTVALUE = 141;
-const int64_t LONGVALUE = 115441;
-const double DOUBLEVALUE = 1.59261111;
-const std::string STRINGVALUE = "STRING_TESTVALUE";
-
-const int64_t DEFAULT_PTS = 33000;
-const int64_t DEFAULT_DTS = 100;
-const int64_t DEFAULT_DURATION = 1000;
-const uint32_t DEFAULT_FLAG = 1 << 0;
-
-const int32_t DEFAULT_PIXELSIZE = 4;
-const BufferRequestConfig DEFAULT_CONFIG = {
-    .width = 800,
-    .height = 600,
-    .strideAlignment = 0x8,
-    .format = GraphicPixelFormat::GRAPHIC_PIXEL_FMT_RGBA_8888,
-    .usage = BUFFER_USAGE_CPU_READ | BUFFER_USAGE_CPU_WRITE | BUFFER_USAGE_MEM_DMA,
-    .timeout = 0,
-};
-
-std::vector<uint8_t> g_in(TEST_BUFFER_SIZE);
-std::vector<uint8_t> g_out(TEST_BUFFER_SIZE);
-
-class HardwareHeapFactory {
-public:
-    static HardwareHeapFactory &GetInstance();
-    int32_t GetHardwareHeapFd();
-
-private:
-    HardwareHeapFactory();
-    ~HardwareHeapFactory();
-    int32_t dmaHeapFd_ = -1;
-};
-
-HardwareHeapFactory::HardwareHeapFactory()
-{
-    std::string rootDir = "/dev/dma_heap/";
-    DIR *dir = opendir(rootDir.c_str());
-    if (dir == nullptr) {
-        return;
-    }
-    struct dirent *ptr;
-    std::string heapName = "";
-    while ((ptr = readdir(dir)) != nullptr) {
-        std::string fileName = ptr->d_name;
-        std::string::size_type idx = fileName.find("system");
-        if (idx != std::string::npos) {
-            heapName = fileName;
-            break;
-        }
-    }
-    closedir(dir);
-    dmaHeapFd_ = DmabufHeapOpen(heapName.c_str());
-}
-
-HardwareHeapFactory::~HardwareHeapFactory()
-{
-    DmabufHeapClose(dmaHeapFd_);
-}
-
-HardwareHeapFactory &HardwareHeapFactory::GetInstance()
-{
-    static HardwareHeapFactory hwHeapInstance;
-    return hwHeapInstance;
-}
-
-int32_t HardwareHeapFactory::GetHardwareHeapFd()
-{
-    return dmaHeapFd_;
-}
-} // namespace
-
 namespace OHOS {
 namespace Media {
-namespace AVBufferFuncUT {
-class AVBufferInnerUnitTest : public testing::Test {
-public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp(void);
-    void TearDown(void);
-
-private:
-    void CreateLocalHardwareMem();
-    void CreateLocalSharedMem();
-    void CreateLocalSurfaceMem();
-    void CreateLocalVirtualMem();
-
-    void CreateLocalSurfaceMemByParcel();
-
-    void CreateLocalHardwareMemByConfig();
-    void CreateLocalSharedMemByConfig();
-    void CreateLocalSurfaceMemByConfig();
-    void CreateLocalVirtualMemByConfig();
-
-    void CreateRemoteHardwareMem();
-    void CreateRemoteSharedMem();
-    void CreateRemoteSurfaceMem();
-    void CreateRemoteSurfaceMemByParcel();
-    void CreateLocalNullMem();
-    void GetRemoteBuffer();
-
-    void CheckMetaSetAndGet();
-    void CheckMetaTransParcel();
-    void CheckAttrTrans();
-    void CheckMemTrans();
-    void CheckMemTransPos(int32_t pos);
-    void CheckMemTransOutOfRange(int32_t pos);
-    void CheckDataSize();
-    std::shared_ptr<AVAllocator> allocator_ = nullptr;
-    std::shared_ptr<AVBuffer> buffer_ = nullptr;
-    std::shared_ptr<AVBuffer> remoteBuffer_ = nullptr;
-    std::shared_ptr<Meta> meta_ = nullptr;
-    std::shared_ptr<MessageParcel> parcel_ = nullptr;
-    MemoryFlag memFlag_;
-    int32_t capacity_ = MEMSIZE;
-    int32_t align_ = 0;
-    int32_t dmaFd_ = -1;
-    AVBufferConfig config_;
-    std::vector<DmabufHeapBuffer> dmaBufferLst_;
-};
-
-void AVBufferInnerUnitTest::SetUpTestCase(void)
-{
-    std::cout << "[SetUpTestCase]: SetUp!!!" << std::endl;
-    for (int32_t i = 0; i < TEST_BUFFER_SIZE; ++i) {
-        g_in[i] = rand() % 256; // 256: rand uint8_t range
-    }
-}
-
-void AVBufferInnerUnitTest::TearDownTestCase(void)
-{
-    std::cout << "[TearDownTestCase]: over!!!" << std::endl;
-}
-
-void AVBufferInnerUnitTest::SetUp(void)
-{
-    std::cout << "[SetUp]: SetUp!!!";
-    meta_ = std::make_shared<Meta>();
-    const ::testing::TestInfo *testInfo_ = ::testing::UnitTest::GetInstance()->current_test_info();
-    std::string testName = testInfo_->name();
-    std::cout << testName << std::endl;
-    parcel_ = nullptr;
-}
-
-void AVBufferInnerUnitTest::TearDown(void)
-{
-    allocator_ = nullptr;
-    buffer_ = nullptr;
-    meta_ = nullptr;
-    parcel_ = nullptr;
-    for (auto &buffer:dmaBufferLst_) {
-        DmabufHeapBufferFree(&buffer);
-    }
-    std::vector<DmabufHeapBuffer> tmp;
-    swap(tmp, dmaBufferLst_);
-    std::cout << "[TearDown]: over!!!" << std::endl;
-}
-
-void AVBufferInnerUnitTest::CreateLocalHardwareMem()
-{
-    // create loacal
-    DmabufHeapBuffer dmaBuffer = {.size = capacity_, .heapFlags = 0};
-    int32_t dmaHeapFd = HardwareHeapFactory::GetInstance().GetHardwareHeapFd();
-    DmabufHeapBufferAlloc(dmaHeapFd, &dmaBuffer);
-    dmaBufferLst_.push_back(dmaBuffer);
-
-    allocator_ = AVAllocatorFactory::CreateHardwareAllocator(dmaBuffer.fd, capacity_, memFlag_);
-    ASSERT_NE(nullptr, allocator_);
-    remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(allocator_, capacity_, align_);
-    ASSERT_NE(nullptr, buffer_);
-    ASSERT_NE(nullptr, buffer_->memory_->GetAddr());
-}
-
-void AVBufferInnerUnitTest::CreateLocalHardwareMemByConfig()
-{
-    // create loacal
-    DmabufHeapBuffer dmaBuffer = {.size = capacity_, .heapFlags = 0};
-    int32_t dmaHeapFd = HardwareHeapFactory::GetInstance().GetHardwareHeapFd();
-    DmabufHeapBufferAlloc(dmaHeapFd, &dmaBuffer);
-    dmaBufferLst_.push_back(dmaBuffer);
-
-    config_.dmaFd = dmaBuffer.fd;
-    config_.size = capacity_;
-    config_.memoryFlag = memFlag_;
-    config_.memoryType = MemoryType::HARDWARE_MEMORY;
-    remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(config_);
-    ASSERT_NE(nullptr, buffer_);
-    ASSERT_NE(nullptr, buffer_->memory_->GetAddr());
-}
-
-void AVBufferInnerUnitTest::CreateRemoteHardwareMem()
-{
-    parcel_ = std::make_shared<MessageParcel>();
-    // create remote
-    CreateLocalHardwareMem();
-    buffer_ = nullptr;
-    ASSERT_FALSE((allocator_ == nullptr) || (remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
-    std::cout << "remote fd: " << remoteBuffer_->memory_->GetFileDescriptor() << "\n";
-}
-
-void AVBufferInnerUnitTest::CreateLocalSharedMem()
-{
-    // create loacal
-    allocator_ = AVAllocatorFactory::CreateSharedAllocator(memFlag_);
-    ASSERT_NE(nullptr, allocator_);
-    remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(allocator_, capacity_, align_);
-    ASSERT_NE(nullptr, buffer_);
-    ASSERT_NE(nullptr, buffer_->memory_->GetAddr());
-}
-
-void AVBufferInnerUnitTest::CreateLocalSharedMemByConfig()
-{
-    // create loacal
-    config_.align = align_;
-    config_.size = capacity_;
-    config_.memoryFlag = memFlag_;
-    config_.memoryType = MemoryType::SHARED_MEMORY;
-    remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(config_);
-    ASSERT_NE(nullptr, buffer_);
-    ASSERT_NE(nullptr, buffer_->memory_->GetAddr());
-}
-
-void AVBufferInnerUnitTest::CreateRemoteSharedMem()
-{
-    parcel_ = std::make_shared<MessageParcel>();
-    // create remote
-    CreateLocalSharedMem();
-    buffer_ = nullptr;
-    ASSERT_FALSE((allocator_ == nullptr) || (remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
-    std::cout << "remote fd: " << remoteBuffer_->memory_->GetFileDescriptor() << "\n";
-}
-
-void AVBufferInnerUnitTest::CreateLocalSurfaceMem()
-{
-    // create loacal
-    allocator_ = AVAllocatorFactory::CreateSurfaceAllocator(DEFAULT_CONFIG);
-    ASSERT_NE(nullptr, allocator_);
-    remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(allocator_, capacity_, align_);
-    ASSERT_NE(nullptr, buffer_);
-    ASSERT_NE(nullptr, buffer_->memory_->GetAddr());
-}
-
-void AVBufferInnerUnitTest::CreateLocalSurfaceMemByConfig()
-{
-    // create loacal
-    *(config_.surfaceBufferConfig) = DEFAULT_CONFIG;
-    config_.memoryType = MemoryType::SURFACE_MEMORY;
-    remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(config_);
-    ASSERT_NE(nullptr, buffer_);
-    ASSERT_NE(nullptr, buffer_->memory_->GetAddr());
-}
-
-void AVBufferInnerUnitTest::CreateRemoteSurfaceMem()
-{
-    parcel_ = std::make_shared<MessageParcel>();
-    // create remote
-    CreateLocalSurfaceMem();
-    buffer_ = nullptr;
-    ASSERT_FALSE((allocator_ == nullptr) || (remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
-    std::cout << "remote fd: " << remoteBuffer_->memory_->GetFileDescriptor() << "\n";
-}
-
-void AVBufferInnerUnitTest::CreateLocalSurfaceMemByParcel()
-{
-    MessageParcel parcel;
-    sptr<SurfaceBuffer> surfaceBuffer = SurfaceBuffer::Create();
-    (void)surfaceBuffer->Alloc(DEFAULT_CONFIG);
-    (void)surfaceBuffer->WriteToMessageParcel(parcel);
-    // create local
-    remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer();
-    ASSERT_NE(nullptr, buffer_);
-    ASSERT_TRUE(buffer_->ReadFromMessageParcel(parcel, true));
-    ASSERT_NE(nullptr, buffer_->memory_->GetAddr());
-}
-
-void AVBufferInnerUnitTest::CreateRemoteSurfaceMemByParcel()
-{
-    parcel_ = std::make_shared<MessageParcel>();
-    // create remote
-    CreateLocalSurfaceMemByParcel();
-    buffer_ = nullptr;
-    ASSERT_FALSE((remoteBuffer_ == nullptr) || (remoteBuffer_->memory_ == nullptr));
-    std::cout << "remote fd: " << remoteBuffer_->memory_->GetFileDescriptor() << "\n";
-}
-
-void AVBufferInnerUnitTest::CreateLocalVirtualMem()
-{
-    // create loacal
-    allocator_ = AVAllocatorFactory::CreateVirtualAllocator();
-    remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(allocator_, capacity_, align_);
-    ASSERT_NE(nullptr, buffer_);
-    ASSERT_NE(nullptr, buffer_->memory_->GetAddr());
-}
-
-void AVBufferInnerUnitTest::CreateLocalVirtualMemByConfig()
-{
-    // create loacal
-    config_.align = align_;
-    config_.size = capacity_;
-    config_.memoryType = MemoryType::VIRTUAL_MEMORY;
-    remoteBuffer_ = buffer_ = AVBuffer::CreateAVBuffer(config_);
-    ASSERT_NE(nullptr, buffer_);
-    ASSERT_NE(nullptr, buffer_->memory_->GetAddr());
-}
-
-void AVBufferInnerUnitTest::CreateLocalNullMem()
-{
-    parcel_ = std::make_shared<MessageParcel>();
-    // create remote
-    remoteBuffer_ = AVBuffer::CreateAVBuffer();
-    ASSERT_NE(nullptr, remoteBuffer_);
-}
-
-void AVBufferInnerUnitTest::GetRemoteBuffer()
-{
-    bool ret = remoteBuffer_->WriteToMessageParcel(*parcel_);
-    ASSERT_TRUE(ret);
-    // create loacal
-    buffer_ = AVBuffer::CreateAVBuffer();
-    ASSERT_NE(nullptr, buffer_);
-
-    ret = buffer_->ReadFromMessageParcel(*parcel_);
-    ASSERT_TRUE(ret);
-    if (buffer_->memory_ != nullptr) {
-        ASSERT_NE(nullptr, buffer_->memory_->GetAddr());
-        std::cout << "local fd: " << buffer_->memory_->GetFileDescriptor() << "\n";
-    }
-}
-
-void AVBufferInnerUnitTest::CheckMetaTransParcel()
-{
-    int32_t getIntValue = 0;
-    int64_t getLongValue = 0;
-    double getDoubleValue = 0.0;
-    std::string getStringValue = "";
-    MessageParcel parcel;
-    for (int32_t toIndex = 0; toIndex < TEST_LOOP_DEPTH; ++toIndex) {
-        ASSERT_TRUE(meta_->ToParcel(parcel));
-    }
-    for (int32_t fromIndex = 0; fromIndex < TEST_LOOP_DEPTH; ++fromIndex) {
-        ASSERT_TRUE(meta_->FromParcel(parcel));
-        meta_->GetData(INT_TESTKEY, getIntValue);
-        meta_->GetData(LONG_TESTKEY, getLongValue);
-        meta_->GetData(DOUBLE_TESTKEY, getDoubleValue);
-        meta_->GetData(STRING_TESTKEY, getStringValue);
-
-        EXPECT_EQ(getIntValue, INTVALUE);
-        EXPECT_EQ(getLongValue, LONGVALUE);
-        EXPECT_EQ(getDoubleValue, DOUBLEVALUE);
-        EXPECT_EQ(getStringValue, STRINGVALUE);
-    }
-}
-
-void AVBufferInnerUnitTest::CheckMetaSetAndGet()
-{
-    int32_t getIntValue = 0;
-    int64_t getLongValue = 0;
-    double getDoubleValue = 0.0;
-    std::string getStringValue = "";
-
-    remoteBuffer_->pts_ = DEFAULT_PTS;
-    remoteBuffer_->dts_ = DEFAULT_DTS;
-    remoteBuffer_->duration_ = DEFAULT_DURATION;
-    remoteBuffer_->flag_ = DEFAULT_FLAG;
-
-    meta_->SetData(INT_TESTKEY, INTVALUE);
-    meta_->SetData(LONG_TESTKEY, LONGVALUE);
-    meta_->SetData(DOUBLE_TESTKEY, DOUBLEVALUE);
-    meta_->SetData(STRING_TESTKEY, STRINGVALUE);
-    CheckMetaTransParcel();
-    remoteBuffer_->meta_ = meta_;
-
-    if (parcel_ != nullptr) {
-        GetRemoteBuffer();
-        ASSERT_EQ(remoteBuffer_->GetUniqueId(), buffer_->GetUniqueId());
-        ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
-    }
-    ASSERT_NE(nullptr, buffer_->meta_);
-    EXPECT_EQ(buffer_->pts_, DEFAULT_PTS);
-    EXPECT_EQ(buffer_->dts_, DEFAULT_DTS);
-    EXPECT_EQ(buffer_->duration_, DEFAULT_DURATION);
-    EXPECT_EQ(buffer_->flag_, DEFAULT_FLAG);
-
-    buffer_->meta_->GetData(INT_TESTKEY, getIntValue);
-    buffer_->meta_->GetData(LONG_TESTKEY, getLongValue);
-    buffer_->meta_->GetData(DOUBLE_TESTKEY, getDoubleValue);
-    buffer_->meta_->GetData(STRING_TESTKEY, getStringValue);
-
-    EXPECT_EQ(getIntValue, INTVALUE);
-    EXPECT_EQ(getLongValue, LONGVALUE);
-    EXPECT_EQ(getDoubleValue, DOUBLEVALUE);
-    EXPECT_EQ(getStringValue, STRINGVALUE);
-}
-
-void AVBufferInnerUnitTest::CheckAttrTrans()
-{
-    remoteBuffer_->pts_ = DEFAULT_PTS;
-    remoteBuffer_->dts_ = DEFAULT_DTS;
-    remoteBuffer_->duration_ = DEFAULT_DURATION;
-    remoteBuffer_->flag_ = DEFAULT_FLAG;
-
-    GetRemoteBuffer();
-    ASSERT_EQ(remoteBuffer_->GetUniqueId(), buffer_->GetUniqueId());
-    ASSERT_FALSE(buffer_ == nullptr);
-
-    EXPECT_EQ(buffer_->pts_, DEFAULT_PTS);
-    EXPECT_EQ(buffer_->dts_, DEFAULT_DTS);
-    EXPECT_EQ(buffer_->duration_, DEFAULT_DURATION);
-    EXPECT_EQ(buffer_->flag_, DEFAULT_FLAG);
-
-    for (int32_t i = 0; i < TEST_LOOP_DEPTH; i++) {
-        remoteBuffer_->pts_++;
-        remoteBuffer_->dts_++;
-        remoteBuffer_->duration_++;
-        remoteBuffer_->flag_++;
-
-        ASSERT_TRUE(remoteBuffer_->WriteToMessageParcel(*parcel_));
-        ASSERT_TRUE(remoteBuffer_->WriteToMessageParcel(*parcel_));
-        ASSERT_TRUE(buffer_->ReadFromMessageParcel(*parcel_));
-        ASSERT_TRUE(buffer_->ReadFromMessageParcel(*parcel_));
-
-        EXPECT_EQ(buffer_->pts_, remoteBuffer_->pts_);
-        EXPECT_EQ(buffer_->dts_, remoteBuffer_->dts_);
-        EXPECT_EQ(buffer_->duration_, remoteBuffer_->duration_);
-        EXPECT_EQ(buffer_->flag_, remoteBuffer_->flag_);
-    }
-}
-
-void AVBufferInnerUnitTest::CheckMemTrans()
-{
-    g_out.resize(TEST_BUFFER_SIZE, 0);
-    int32_t pos = capacity_ / 2;
-    int32_t length = capacity_ - pos;
-    auto error = memcpy_s(remoteBuffer_->memory_->GetAddr(), pos, g_in.data(), pos);
-    EXPECT_EQ(error, EOK);
-    remoteBuffer_->memory_->SetSize(pos);
-    EXPECT_EQ(remoteBuffer_->memory_->Write(g_in.data() + pos, length, -1), length);
-    EXPECT_EQ(remoteBuffer_->memory_->Read(g_out.data(), capacity_, 0), capacity_);
-    uint8_t *addr = remoteBuffer_->memory_->GetAddr();
-    ASSERT_NE(addr, nullptr);
-    EXPECT_EQ(remoteBuffer_->memory_->GetSize(), capacity_);
-    EXPECT_EQ(memcmp(g_in.data(), g_out.data(), capacity_), 0);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr), g_in.data(), capacity_), 0);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr), g_out.data(), capacity_), 0);
-    if (parcel_ != nullptr) {
-        GetRemoteBuffer();
-        ASSERT_EQ(remoteBuffer_->GetUniqueId(), buffer_->GetUniqueId());
-        ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
-    }
-    ASSERT_EQ(buffer_->memory_->GetSize(), capacity_);
-    addr = buffer_->memory_->GetAddr();
-    EXPECT_EQ(buffer_->memory_->Read(g_out.data(), capacity_, 0), capacity_);
-    EXPECT_EQ(memcmp(g_in.data(), g_out.data(), capacity_), 0);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr), g_in.data(), capacity_), 0);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr), g_out.data(), capacity_), 0);
-}
-
-void AVBufferInnerUnitTest::CheckMemTransPos(int32_t pos)
-{
-    g_out.resize(TEST_BUFFER_SIZE, 0);
-    capacity_ = remoteBuffer_->memory_->GetCapacity();
-    int32_t length = capacity_ - pos;
-    EXPECT_EQ(remoteBuffer_->memory_->Write(g_in.data() + pos, length, pos), length);
-    EXPECT_EQ(remoteBuffer_->memory_->Read(g_out.data() + pos, length, pos), length);
-    uint8_t *addr = remoteBuffer_->memory_->GetAddr();
-    ASSERT_NE(addr, nullptr);
-    EXPECT_EQ(remoteBuffer_->memory_->GetSize(), capacity_);
-    EXPECT_EQ(memcmp(g_in.data() + pos, g_out.data() + pos, length), 0);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr + pos), g_in.data() + pos, length), 0);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr + pos), g_out.data() + pos, length), 0);
-    if (parcel_ != nullptr) {
-        GetRemoteBuffer();
-        ASSERT_EQ(remoteBuffer_->GetUniqueId(), buffer_->GetUniqueId());
-        ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
-    }
-    ASSERT_EQ(buffer_->memory_->GetSize(), capacity_);
-    addr = buffer_->memory_->GetAddr();
-    EXPECT_EQ(buffer_->memory_->Read(g_out.data() + pos, length, pos), length);
-    EXPECT_EQ(memcmp(g_in.data() + pos, g_out.data() + pos, length), 0);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr + pos), g_in.data() + pos, length), 0);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr + pos), g_out.data() + pos, length), 0);
-}
-
-void AVBufferInnerUnitTest::CheckMemTransOutOfRange(int32_t pos)
-{
-    g_out.resize(TEST_BUFFER_SIZE, 0);
-    capacity_ = remoteBuffer_->memory_->GetCapacity();
-    int32_t length = capacity_ - pos;
-    EXPECT_EQ(remoteBuffer_->memory_->Write(g_in.data() + pos, length + 1, pos), length);
-    EXPECT_EQ(remoteBuffer_->memory_->Read(g_out.data() + pos, length + 1, pos), length);
-    uint8_t *addr = remoteBuffer_->memory_->GetAddr();
-    ASSERT_NE(addr, nullptr);
-    EXPECT_EQ(remoteBuffer_->memory_->GetSize(), capacity_);
-    EXPECT_EQ(memcmp(g_in.data() + pos, g_out.data() + pos, length), 0);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr + pos), g_in.data() + pos, length), 0);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr + pos), g_out.data() + pos, length), 0);
-    if (parcel_ != nullptr) {
-        GetRemoteBuffer();
-        ASSERT_EQ(remoteBuffer_->GetUniqueId(), buffer_->GetUniqueId());
-        ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
-    }
-    ASSERT_EQ(buffer_->memory_->GetSize(), capacity_);
-    addr = buffer_->memory_->GetAddr();
-    EXPECT_EQ(buffer_->memory_->Read(g_out.data() + pos, length + 1, pos), length);
-    EXPECT_EQ(memcmp(g_in.data() + pos, g_out.data() + pos, length), 0);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr + pos), g_in.data() + pos, length), 0);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr + pos), g_out.data() + pos, length), 0);
-}
-
-void AVBufferInnerUnitTest::CheckDataSize()
-{
-    EXPECT_EQ(static_cast<int32_t>(Status::OK), remoteBuffer_->memory_->SetSize(capacity_ - 1));
-    EXPECT_EQ(remoteBuffer_->memory_->GetSize(), capacity_ - 1);
-    EXPECT_EQ(static_cast<int32_t>(Status::OK), remoteBuffer_->memory_->SetSize(0));
-    EXPECT_EQ(remoteBuffer_->memory_->GetSize(), 0);
-    EXPECT_EQ(static_cast<int32_t>(Status::OK), remoteBuffer_->memory_->SetSize(1));
-    EXPECT_EQ(remoteBuffer_->memory_->GetSize(), 1);
-    EXPECT_EQ(static_cast<int32_t>(Status::OK), remoteBuffer_->memory_->SetSize(-1));
-    EXPECT_EQ(remoteBuffer_->memory_->GetSize(), 0);
-    EXPECT_EQ(static_cast<int32_t>(Status::OK), remoteBuffer_->memory_->SetSize(capacity_));
-    EXPECT_EQ(remoteBuffer_->memory_->GetSize(), capacity_);
-    if (parcel_ != nullptr) {
-        GetRemoteBuffer();
-        ASSERT_EQ(remoteBuffer_->GetUniqueId(), buffer_->GetUniqueId());
-        ASSERT_FALSE((buffer_ == nullptr) || (buffer_->memory_ == nullptr));
-    }
-    EXPECT_EQ(buffer_->memory_->GetSize(), capacity_);
-}
-
+namespace AVBufferUT {
 /**
  * @tc.name: AVBuffer_Config_001
  * @tc.desc: test AVBufferConfig
@@ -856,31 +309,6 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_CreateWithInvalid_004, TestSize.Level1)
 }
 
 /**
- * @tc.name: AVBuffer_CreateWithInvalid_005
- * @tc.desc: create xxxxx
- * @tc.type: FUNC
- */
-HWTEST_F(AVBufferInnerUnitTest, AVBuffer_CreateWithInvalid_005, TestSize.Level1)
-{
-    memFlag_ = MemoryFlag::MEMORY_READ_WRITE;
-    DmabufHeapBuffer dmaBuffer = {.size = capacity_, .heapFlags = 0};
-    int32_t dmaHeapFd = HardwareHeapFactory::GetInstance().GetHardwareHeapFd();
-    DmabufHeapBufferAlloc(dmaHeapFd, &dmaBuffer);
-
-    allocator_ = AVAllocatorFactory::CreateHardwareAllocator(0, capacity_, memFlag_);
-    buffer_ = AVBuffer::CreateAVBuffer(allocator_);
-    EXPECT_EQ(nullptr, buffer_);
-
-    allocator_ = AVAllocatorFactory::CreateHardwareAllocator(dmaBuffer.fd, -1, memFlag_);
-    buffer_ = AVBuffer::CreateAVBuffer(allocator_);
-    EXPECT_EQ(nullptr, buffer_);
-
-    allocator_ = AVAllocatorFactory::CreateHardwareAllocator(dmaBuffer.fd, 0, memFlag_);
-    buffer_ = AVBuffer::CreateAVBuffer(allocator_);
-    EXPECT_EQ(nullptr, buffer_);
-}
-
-/**
  * @tc.name: AVBuffer_Create_Local_SharedMemory_001
  * @tc.desc: create local shared memory
  * @tc.type: FUNC
@@ -889,7 +317,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SharedMemory_001, TestSize
 {
     memFlag_ = MemoryFlag::MEMORY_READ_WRITE;
     capacity_ = MEMSIZE;
-    align_ = 0;
+    align_ = 2; // test align
     CreateLocalSharedMem();
     ASSERT_FALSE((allocator_ == nullptr) || (buffer_ == nullptr) || (buffer_->memory_ == nullptr));
     int32_t offset = static_cast<size_t>(
@@ -2291,7 +1719,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_VirtualMemory_003, TestSiz
     // create loacal
     capacity_ = MEMSIZE;
     uint8_t *array = new uint8_t[capacity_];
-    auto error = memcpy_s(array, capacity_, g_in.data(), capacity_);
+    auto error = memcpy_s(array, capacity_, inputBuffer_.data(), capacity_);
     ASSERT_EQ(error, EOK);
     buffer_ = AVBuffer::CreateAVBuffer(array, capacity_, capacity_);
     ASSERT_NE(nullptr, buffer_);
@@ -2299,14 +1727,14 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_VirtualMemory_003, TestSiz
     ASSERT_NE(nullptr, buffer_->memory_->GetAddr());
     uint8_t *addr = buffer_->memory_->GetAddr();
     ASSERT_NE(addr, nullptr);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr), g_in.data(), capacity_), 0);
+    EXPECT_EQ(memcmp(static_cast<void *>(addr), inputBuffer_.data(), capacity_), 0);
     // write and read
-    g_out.resize(MEMSIZE, 0);
-    EXPECT_EQ(buffer_->memory_->Read(g_out.data(), capacity_, 0), capacity_);
+    outputBuffer_.resize(MEMSIZE, 0);
+    EXPECT_EQ(buffer_->memory_->Read(outputBuffer_.data(), capacity_, 0), capacity_);
     EXPECT_EQ(buffer_->memory_->GetSize(), capacity_);
-    EXPECT_EQ(memcmp(g_in.data(), g_out.data(), capacity_), 0);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr), g_in.data(), capacity_), 0);
-    EXPECT_EQ(memcmp(static_cast<void *>(addr), g_out.data(), capacity_), 0);
+    EXPECT_EQ(memcmp(inputBuffer_.data(), outputBuffer_.data(), capacity_), 0);
+    EXPECT_EQ(memcmp(static_cast<void *>(addr), inputBuffer_.data(), capacity_), 0);
+    EXPECT_EQ(memcmp(static_cast<void *>(addr), outputBuffer_.data(), capacity_), 0);
     delete[] array;
 }
 
@@ -2458,6 +1886,6 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_VirtualMemory_ReadFromMessageParcel_001
     CreateRemoteHardwareMem();
     CheckAttrTrans();
 }
-} // namespace AVBufferFuncUT
+} // namespace AVBufferUT
 } // namespace Media
 } // namespace OHOS

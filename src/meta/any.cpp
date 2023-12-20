@@ -13,63 +13,130 @@
  * limitations under the License.
  */
 #include "meta/any.h"
+#include "meta/meta.h"
+
+namespace {
+using namespace OHOS::Media;
+using BaseTypesMap = std::map<std::string, Meta::ValueType>;
+
+const BaseTypesMap &GetBaseTypesMap()
+{
+    static const BaseTypesMap baseTypeMap([]() {
+        BaseTypesMap typeMap;
+        Any defaultBool = (bool)true;
+        typeMap[std::string(defaultBool.TypeName())] = Meta::ValueType::BOOL;
+        Any defaultInt32 = (int32_t)0;
+        typeMap[std::string(defaultInt32.TypeName())] = Meta::ValueType::INT32_T;
+        Any defaultInt64 = (int64_t)0;
+        typeMap[std::string(defaultInt64.TypeName())] = Meta::ValueType::INT64_T;
+        Any defaultFoalt = (float)0.0;
+        typeMap[std::string(defaultFoalt.TypeName())] = Meta::ValueType::FLOAT;
+        Any defaultDouble = (double)0.0;
+        typeMap[std::string(defaultDouble.TypeName())] = Meta::ValueType::DOUBLE;
+        Any defaultString = std::string();
+        typeMap[std::string(defaultString.TypeName())] = Meta::ValueType::STRING;
+        Any defaultVecUint8 = std::vector<uint8_t>();
+        typeMap[std::string(defaultVecUint8.TypeName())] = Meta::ValueType::VECTOR_UINT8;
+        return typeMap;
+    }());
+    return baseTypeMap;
+}
+} // namespace
 
 namespace OHOS {
 namespace Media {
 bool Any::BaseTypesToParcel(const Any *operand, MessageParcel &parcel) noexcept
 {
-    bool ret = true;
-    const auto &type = operand->TypeName();
-    ret &= parcel.WriteString(std::string(type));
-    if (Any::IsSameTypeWith<int32_t>(*operand)) {
-        ret &= parcel.WriteInt32(*AnyCast<int32_t>(operand));
-    } else if (Any::IsSameTypeWith<int64_t>(*operand)) {
-        ret &= parcel.WriteInt64(*AnyCast<int64_t>(operand));
-    } else if (Any::IsSameTypeWith<float>(*operand)) {
-        ret &= parcel.WriteFloat(*AnyCast<float>(operand));
-    } else if (Any::IsSameTypeWith<double>(*operand)) {
-        ret &= parcel.WriteDouble(*AnyCast<double>(operand));
-    } else if (Any::IsSameTypeWith<std::string>(*operand)) {
-        ret &= parcel.WriteString(*AnyCast<std::string>(operand));
-    } else if (Any::IsSameTypeWith<std::vector<uint8_t>>(*operand)) {
-        ret &= parcel.WriteUInt8Vector(*AnyCast<std::vector<uint8_t>>(operand));
-    } else {
+    auto iter = GetBaseTypesMap().find(std::string(operand->TypeName()));
+    if (iter == GetBaseTypesMap().end()) {
+        parcel.WriteInt32(static_cast<int32_t>(Meta::ValueType::INVALID_TYPE));
         return false;
+    }
+    bool ret = parcel.WriteInt32(static_cast<int32_t>(iter->second));
+    switch (iter->second) {
+        case Meta::ValueType::BOOL:
+            ret &= parcel.WriteBool(*AnyCast<bool>(operand));
+            break;
+        case Meta::ValueType::INT32_T:
+            ret &= parcel.WriteInt32(*AnyCast<int32_t>(operand));
+            break;
+        case Meta::ValueType::INT64_T:
+            ret &= parcel.WriteInt64(*AnyCast<int64_t>(operand));
+            break;
+        case Meta::ValueType::FLOAT:
+            ret &= parcel.WriteFloat(*AnyCast<float>(operand));
+            break;
+        case Meta::ValueType::DOUBLE:
+            ret &= parcel.WriteDouble(*AnyCast<double>(operand));
+            break;
+        case Meta::ValueType::STRING:
+            ret &= parcel.WriteString(*AnyCast<std::string>(operand));
+            break;
+        case Meta::ValueType::VECTOR_UINT8:
+            ret &= parcel.WriteUInt8Vector(*AnyCast<std::vector<uint8_t>>(operand));
+            break;
+        default: {
+            parcel.WriteInt32(static_cast<int32_t>(Meta::ValueType::INVALID_TYPE));
+            return false;
+        }
     }
     return ret;
 }
-// returnValue : 0 -- success; 1 -- retry enum; 2 -- failed no retry
+
+enum class StatusCodeFromParcel {
+    SUCCESS = 0,
+    ENUM_RETRY = 1,
+    NO_RETRY = 2,
+};
+
+// returnValue : 0 -- success; 1 -- retry for enum type; 2 -- failed no retry
 int Any::BaseTypesFromParcel(Any *operand, MessageParcel &parcel) noexcept
 {
-    std::string type = parcel.ReadString();
-    if (MakeAny<int32_t>().SameTypeWith(std::string_view(type))) {
-        Any tmp(parcel.ReadInt32());
-        operand->Swap(tmp);
-        return 0;
-    } else if (MakeAny<int64_t>().SameTypeWith(std::string_view(type))) {
-        Any tmp(parcel.ReadInt64());
-        operand->Swap(tmp);
-        return 0;
-    } else if (MakeAny<float>().SameTypeWith(std::string_view(type))) {
-        Any tmp(parcel.ReadFloat());
-        operand->Swap(tmp);
-        return 0;
-    } else if (MakeAny<double>().SameTypeWith(std::string_view(type))) {
-        Any tmp(parcel.ReadDouble());
-        operand->Swap(tmp);
-        return 0;
-    } else if (MakeAny<std::string>().SameTypeWith(std::string_view(type))) {
-        Any tmp(parcel.ReadString());
-        operand->Swap(tmp);
-        return 0;
-    } else if (MakeAny<std::vector<uint8_t>>().SameTypeWith(std::string_view(type))) {
-        std::vector<uint8_t> val;
-        (void)parcel.ReadUInt8Vector(&val);
-        Any tmp(val);
-        operand->Swap(tmp);
-        return 0;
+    Meta::ValueType type = static_cast<Meta::ValueType>(parcel.ReadInt32());
+    switch (type) {
+        case Meta::ValueType::BOOL: {
+            Any tmp(parcel.ReadBool());
+            operand->Swap(tmp);
+            break;
+        }
+        case Meta::ValueType::INT32_T: {
+            Any tmp(parcel.ReadInt32());
+            operand->Swap(tmp);
+            break;
+        }
+        case Meta::ValueType::INT64_T: {
+            Any tmp(parcel.ReadInt64());
+            operand->Swap(tmp);
+            break;
+        }
+        case Meta::ValueType::FLOAT: {
+            Any tmp(parcel.ReadFloat());
+            operand->Swap(tmp);
+            break;
+        }
+        case Meta::ValueType::DOUBLE: {
+            Any tmp(parcel.ReadDouble());
+            operand->Swap(tmp);
+            break;
+        }
+        case Meta::ValueType::STRING: {
+            Any tmp(parcel.ReadString());
+            operand->Swap(tmp);
+            break;
+        }
+        case Meta::ValueType::VECTOR_UINT8: {
+            std::vector<uint8_t> val;
+            (void)parcel.ReadUInt8Vector(&val);
+            Any tmp(val);
+            operand->Swap(tmp);
+            break;
+        }
+        case Meta::ValueType::INVALID_TYPE:
+            return static_cast<int>(StatusCodeFromParcel::ENUM_RETRY);
+        default:
+            return static_cast<int>(StatusCodeFromParcel::NO_RETRY);
     }
-    return 1;
+    return static_cast<int>(StatusCodeFromParcel::SUCCESS);
 }
 } // namespace Media
 } // namespace OHOS

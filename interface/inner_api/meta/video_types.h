@@ -32,29 +32,31 @@ enum class VideoScaleType {
  * @since 1.0
  * @version 1.0
  */
-enum struct VideoPixelFormat : uint32_t {
-    UNKNOWN,
-    YUV410P,   ///< planar YUV 4:1:0, 1 Cr & Cb sample per 4x4 Y samples
-    YUV411P,   ///< planar YUV 4:1:1, 1 Cr & Cb sample per 4x1 Y samples
-    YUV420P,   ///< planar YUV 4:2:0, 1 Cr & Cb sample per 2x2 Y samples
-    NV12,      ///< semi-planar YUV 4:2:0, UVUV...
-    NV21,      ///< semi-planar YUV 4:2:0, VUVU...
-    YUYV422,   ///< packed YUV 4:2:2, Y0 Cb Y1 Cr
-    YUV422P,   ///< planar YUV 4:2:2, 1 Cr & Cb sample per 2x1 Y samples
-    YUV444P,   ///< planar YUV 4:4:4, 1 Cr & Cb sample per 1x1 Y samples
-    RGBA,      ///< packed RGBA 8:8:8:8, 32bpp, RGBARGBA...
-    ARGB,      ///< packed ARGB 8:8:8:8, 32bpp, ARGBARGB...
-    ABGR,      ///< packed ABGR 8:8:8:8, 32bpp, ABGRABGR...
-    BGRA,      ///< packed BGRA 8:8:8:8, 32bpp, BGRABGRA...
-    RGB24,     ///< packed RGB 8:8:8, RGBRGB...
-    BGR24,     ///< packed RGB 8:8:8, BGRBGR...
-    PAL8,      ///< 8 bit with AV_PIX_FMT_RGB32 palette
-    GRAY8,     ///< Y
-    MONOWHITE, ///< Y, 0 is white, 1 is black, in each byte pixels are ordered from the msb to the lsb
-    MONOBLACK, ///< Y, 0 is black, 1 is white, in each byte pixels are ordered from the msb to the lsb
-    YUVJ420P,  ///< planar YUV 4:2:0, 12bpp, full scale (JPEG)
-    YUVJ422P,  ///< planar YUV 4:2:2, 16bpp, full scale (JPEG)
-    YUVJ444P,  ///< planar YUV 4:4:4, 24bpp, full scale (JPEG)
+enum struct VideoPixelFormat : int32_t {
+    UNKNOWN = -1,
+    YUV420P = 0,        ///< planar YUV 4:2:0, 1 Cr & Cb sample per 2x2 Y samples
+    YUVI420 = 1,        ///< planar YUV 4:2:0, 1 Cr & Cb sample per 2x2 Y samples
+    NV12 = 2,           ///< semi-planar YUV 4:2:0, UVUV...
+    NV21 = 3,           ///< semi-planar YUV 4:2:0, VUVU...
+    SURFACE_FORMAT = 4, ///< format from surface
+    RGBA = 5,           ///< packed RGBA 8:8:8:8, 32bpp, RGBARGBA...
+    YUV410P,            ///< planar YUV 4:1:0, 1 Cr & Cb sample per 4x4 Y samples
+    YUV411P,            ///< planar YUV 4:1:1, 1 Cr & Cb sample per 4x1 Y samples
+    YUYV422,            ///< packed YUV 4:2:2, Y0 Cb Y1 Cr
+    YUV422P,            ///< planar YUV 4:2:2, 1 Cr & Cb sample per 2x1 Y samples
+    YUV444P,            ///< planar YUV 4:4:4, 1 Cr & Cb sample per 1x1 Y samples
+    ARGB,               ///< packed ARGB 8:8:8:8, 32bpp, ARGBARGB...
+    ABGR,               ///< packed ABGR 8:8:8:8, 32bpp, ABGRABGR...
+    BGRA,               ///< packed BGRA 8:8:8:8, 32bpp, BGRABGRA...
+    RGB24,              ///< packed RGB 8:8:8, RGBRGB...
+    BGR24,              ///< packed RGB 8:8:8, BGRBGR...
+    PAL8,               ///< 8 bit with AV_PIX_FMT_RGB32 palette
+    GRAY8,              ///< Y
+    MONOWHITE,          ///< Y, 0 is white, 1 is black, in each byte pixels are ordered from the msb to the lsb
+    MONOBLACK,          ///< Y, 0 is black, 1 is white, in each byte pixels are ordered from the msb to the lsb
+    YUVJ420P,           ///< planar YUV 4:2:0, 12bpp, full scale (JPEG)
+    YUVJ422P,           ///< planar YUV 4:2:2, 16bpp, full scale (JPEG)
+    YUVJ444P,           ///< planar YUV 4:4:4, 24bpp, full scale (JPEG)
 };
 
 /**
@@ -63,7 +65,7 @@ enum struct VideoPixelFormat : uint32_t {
  * @since 1.0
  * @version 1.0
  */
-enum struct VideoH264Profile : uint32_t {
+enum struct VideoH264Profile : int32_t {
     UNKNOWN,
     BASELINE,  ///< Baseline profile
     MAIN,      ///< Main profile
@@ -93,65 +95,65 @@ enum VideoEncodeBitrateMode : int32_t {
     CQ = 2, // constant quality mode.
 };
 
-enum ColorPrimary : int32_t {
-    COLOR_PRIMARY_BT709 = 1,
-    COLOR_PRIMARY_UNSPECIFIED = 2,
-    COLOR_PRIMARY_BT470_M = 4,
-    COLOR_PRIMARY_BT601_625 = 5,
-    COLOR_PRIMARY_BT601_525 = 6,
-    COLOR_PRIMARY_SMPTE_ST240 = 7,
-    COLOR_PRIMARY_GENERIC_FILM = 8,
-    COLOR_PRIMARY_BT2020 = 9,
-    COLOR_PRIMARY_SMPTE_ST428 = 10,
-    COLOR_PRIMARY_P3DCI = 11,
-    COLOR_PRIMARY_P3D65 = 12,
+enum class ColorPrimary : int32_t {
+    BT709 = 1,
+    UNSPECIFIED = 2,
+    BT470_M = 4,
+    BT601_625 = 5,
+    BT601_525 = 6,
+    SMPTE_ST240 = 7,
+    GENERIC_FILM = 8,
+    BT2020 = 9,
+    SMPTE_ST428 = 10,
+    P3DCI = 11,
+    P3D65 = 12,
 };
 
-enum TransferCharacteristic : int32_t {
-    TRANSFER_CHARACTERISTIC_BT709 = 1,
-    TRANSFER_CHARACTERISTIC_UNSPECIFIED = 2,
-    TRANSFER_CHARACTERISTIC_GAMMA_2_2 = 4,
-    TRANSFER_CHARACTERISTIC_GAMMA_2_8 = 5,
-    TRANSFER_CHARACTERISTIC_BT601 = 6,
-    TRANSFER_CHARACTERISTIC_SMPTE_ST240 = 7,
-    TRANSFER_CHARACTERISTIC_LINEAR = 8,
-    TRANSFER_CHARACTERISTIC_LOG = 9,
-    TRANSFER_CHARACTERISTIC_LOG_SQRT = 10,
-    TRANSFER_CHARACTERISTIC_IEC_61966_2_4 = 11,
-    TRANSFER_CHARACTERISTIC_BT1361 = 12,
-    TRANSFER_CHARACTERISTIC_IEC_61966_2_1 = 13,
-    TRANSFER_CHARACTERISTIC_BT2020_10BIT = 14,
-    TRANSFER_CHARACTERISTIC_BT2020_12BIT = 15,
-    TRANSFER_CHARACTERISTIC_PQ = 16,
-    TRANSFER_CHARACTERISTIC_SMPTE_ST428 = 17,
-    TRANSFER_CHARACTERISTIC_HLG = 18,
+enum class TransferCharacteristic : int32_t {
+    BT709 = 1,
+    UNSPECIFIED = 2,
+    GAMMA_2_2 = 4,
+    GAMMA_2_8 = 5,
+    BT601 = 6,
+    SMPTE_ST240 = 7,
+    LINEAR = 8,
+    LOG = 9,
+    LOG_SQRT = 10,
+    IEC_61966_2_4 = 11,
+    BT1361 = 12,
+    IEC_61966_2_1 = 13,
+    BT2020_10BIT = 14,
+    BT2020_12BIT = 15,
+    PQ = 16,
+    SMPTE_ST428 = 17,
+    HLG = 18,
 };
 
-enum MatrixCoefficient : int32_t {
-    MATRIX_COEFFICIENT_IDENTITY = 0,
-    MATRIX_COEFFICIENT_BT709 = 1,
-    MATRIX_COEFFICIENT_UNSPECIFIED = 2,
-    MATRIX_COEFFICIENT_FCC = 4,
-    MATRIX_COEFFICIENT_BT601_625 = 5,
-    MATRIX_COEFFICIENT_BT601_525 = 6,
-    MATRIX_COEFFICIENT_SMPTE_ST240 = 7,
-    MATRIX_COEFFICIENT_YCGCO = 8,
-    MATRIX_COEFFICIENT_BT2020_NCL = 9,
-    MATRIX_COEFFICIENT_BT2020_CL = 10,
-    MATRIX_COEFFICIENT_SMPTE_ST2085 = 11,
-    MATRIX_COEFFICIENT_CHROMATICITY_NCL = 12,
-    MATRIX_COEFFICIENT_CHROMATICITY_CL = 13,
-    MATRIX_COEFFICIENT_ICTCP = 14,
+enum class MatrixCoefficient : int32_t {
+    IDENTITY = 0,
+    BT709 = 1,
+    UNSPECIFIED = 2,
+    FCC = 4,
+    BT601_625 = 5,
+    BT601_525 = 6,
+    SMPTE_ST240 = 7,
+    YCGCO = 8,
+    BT2020_NCL = 9,
+    BT2020_CL = 10,
+    SMPTE_ST2085 = 11,
+    CHROMATICITY_NCL = 12,
+    CHROMATICITY_CL = 13,
+    ICTCP = 14,
 };
 
-enum ChromaLocation {
-    CHROMA_LOC_UNSPECIFIED = 0,
-    CHROMA_LOC_LEFT = 1, ///< MPEG-2/4 4:2:0, H.264 default for 4:2:0
-    CHROMA_LOC_CENTER = 2, ///< MPEG-1 4:2:0, JPEG 4:2:0, H.263 4:2:0
-    CHROMA_LOC_TOPLEFT = 3, ///< ITU-R 601, SMPTE 274M 296M S314M(DV 4:1:1), mpeg2 4:2:2
-    CHROMA_LOC_TOP = 4,
-    CHROMA_LOC_BOTTOMLEFT = 5,
-    CHROMA_LOC_BOTTOM = 6,
+enum class ChromaLocation {
+    UNSPECIFIED = 0,
+    LEFT = 1, ///< MPEG-2/4 4:2:0, H.264 default for 4:2:0
+    CENTER = 2, ///< MPEG-1 4:2:0, JPEG 4:2:0, H.263 4:2:0
+    TOPLEFT = 3, ///< ITU-R 601, SMPTE 274M 296M S314M(DV 4:1:1), mpeg2 4:2:2
+    TOP = 4,
+    BOTTOMLEFT = 5,
+    BOTTOM = 6,
 };
 
 enum VideoRotation : int32_t {

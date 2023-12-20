@@ -27,7 +27,7 @@
 
 namespace OHOS {
 namespace Media {
-AVBuffer::AVBuffer() : uid_(0) {}
+AVBuffer::AVBuffer() : pts_(0), dts_(0), duration_(0), flag_(0), meta_(nullptr), memory_(nullptr), uid_(0) {}
 std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(const AVBufferConfig &config)
 {
     std::shared_ptr<AVAllocator> allocator = nullptr;
@@ -114,8 +114,8 @@ std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(std::shared_ptr<AVAllocator> 
     auto buffer = std::shared_ptr<AVBuffer>(new AVBuffer());
     FALSE_RETURN_V_MSG_E(buffer != nullptr, nullptr, "Create AVBuffer failed, no memory");
 
-    int32_t ret = buffer->Init(allocator, capacity, align);
-    FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), nullptr, "Init AVBuffer failed");
+    Status ret = buffer->Init(allocator, capacity, align);
+    FALSE_RETURN_V_MSG_E(ret == Status::OK, nullptr, "Init AVBuffer failed");
 
     buffer->meta_ = std::make_shared<Meta>();
     FALSE_RETURN_V_MSG_E(buffer->meta_ != nullptr, nullptr, "Create meta_ failed, no memory");
@@ -134,8 +134,8 @@ std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer(uint8_t *ptr, int32_t capacit
     buffer->meta_ = std::make_shared<Meta>();
     FALSE_RETURN_V_MSG_E(buffer->meta_ != nullptr, nullptr, "Create meta_ failed, no memory");
 
-    int32_t ret = buffer->Init(ptr, capacity, size);
-    FALSE_RETURN_V_MSG_E(ret == static_cast<int32_t>(Status::OK), nullptr, "Init AVBuffer failed");
+    Status ret = buffer->Init(ptr, capacity, size);
+    FALSE_RETURN_V_MSG_E(ret == Status::OK, nullptr, "Init AVBuffer failed");
     return buffer;
 }
 
@@ -149,19 +149,19 @@ std::shared_ptr<AVBuffer> AVBuffer::CreateAVBuffer()
     return buffer;
 }
 
-int32_t AVBuffer::Init(std::shared_ptr<AVAllocator> allocator, int32_t capacity, int32_t align)
+Status AVBuffer::Init(std::shared_ptr<AVAllocator> allocator, int32_t capacity, int32_t align)
 {
     std::string uidName = std::to_string(GetUniqueId());
     memory_ = AVMemory::CreateAVMemory(uidName, allocator, capacity, align);
-    FALSE_RETURN_V_MSG_E(memory_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN), "Create memory failed");
-    return static_cast<int32_t>(Status::OK);
+    FALSE_RETURN_V_MSG_E(memory_ != nullptr, Status::ERROR_UNKNOWN, "Create memory failed");
+    return Status::OK;
 }
 
-int32_t AVBuffer::Init(uint8_t *ptr, int32_t capacity, int32_t size)
+Status AVBuffer::Init(uint8_t *ptr, int32_t capacity, int32_t size)
 {
     memory_ = AVMemory::CreateAVMemory(ptr, capacity, size);
-    FALSE_RETURN_V_MSG_E(memory_ != nullptr, static_cast<int32_t>(Status::ERROR_UNKNOWN), "Create memory failed");
-    return static_cast<int32_t>(Status::OK);
+    FALSE_RETURN_V_MSG_E(memory_ != nullptr, Status::ERROR_UNKNOWN, "Create memory failed");
+    return Status::OK;
 }
 
 uint64_t AVBuffer::GetUniqueId()
