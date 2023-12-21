@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Media {
 namespace Plugins {
 /**
- * @enum Audio AAC Profile。
+ * @enum Audio AAC Profile
  *
  * AAC mode type.  Note that the term profile is used with the MPEG-2
  * standard and the term object type and profile is used with MPEG-4
