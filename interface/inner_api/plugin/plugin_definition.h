@@ -25,7 +25,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 /**
  * @brief Macro definition, creating the version information.
  *
@@ -303,19 +303,19 @@ using UnregisterFunc = void (*)();
  * @param registerFunc      Plugin registration function, MUST NOT be NULL.
  * @param unregisterFunc    Plugin deregister function，MUST NOT be NULL.
  */
-#define PLUGIN_DEFINITION(name, license, registerFunc, unregisterFunc)                                                 \
-    PLUGIN_EXPORT OHOS::Media::Status PLUGIN_PASTE(register_, name)(                                                   \
-        const std::shared_ptr<OHOS::Media::Plugin::PackageRegister>& pkgReg)                                           \
-    {                                                                                                                  \
-        pkgReg->AddPackage({PLUGIN_INTERFACE_VERSION, PLUGIN_STRINGIFY(name), license});                               \
-        std::shared_ptr<OHOS::Media::Plugin::Register> pluginReg = pkgReg;                                             \
-        return registerFunc(pluginReg);                                                                                \
-    }                                                                                                                  \
-    PLUGIN_EXPORT void PLUGIN_PASTE(unregister_, name)()                                                               \
-    {                                                                                                                  \
-        unregisterFunc();                                                                                              \
+#define PLUGIN_DEFINITION(name, license, registerFunc, unregisterFunc)                                          \
+    PLUGIN_EXPORT OHOS::Media::Status PLUGIN_PASTE(register_, name)(                                            \
+        const std::shared_ptr<OHOS::Media::Plugins::PackageRegister>& pkgReg)                                   \
+    {                                                                                                           \
+        pkgReg->AddPackage({PLUGIN_INTERFACE_VERSION, PLUGIN_STRINGIFY(name), license});                        \
+        std::shared_ptr<OHOS::Media::Plugins::Register> pluginReg = pkgReg;                                     \
+        return registerFunc(pluginReg);                                                                         \
+    }                                                                                                           \
+    PLUGIN_EXPORT void PLUGIN_PASTE(unregister_, name)()                                                        \
+    {                                                                                                           \
+        unregisterFunc();                                                                                       \
     }
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_INTF_PLUGIN_DEFINITION_H

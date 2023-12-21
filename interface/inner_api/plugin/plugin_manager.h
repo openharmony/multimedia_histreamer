@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 class PluginManager {
 public:
     PluginManager(const PluginManager&) = delete;
@@ -78,7 +78,7 @@ private:
 private:
     std::shared_ptr<PluginRegister> pluginRegister_;
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_MANAGER_H

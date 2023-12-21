@@ -100,7 +100,7 @@ public:
 
     DECLARE_INFO_CLASS
 
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::SRC_INPUT_TYPE, Plugin::SrcInputType, ValueType::INT32_T);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::SRC_INPUT_TYPE, Plugins::SrcInputType, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::MEDIA_CODEC_CONFIG or
                            tagCharSeq == Tag::MEDIA_COVER or
                            tagCharSeq == Tag::AUDIO_VIVID_METADATA or
@@ -109,29 +109,29 @@ public:
                            std::vector<uint8_t>, ValueType::VECTOR_UINT8);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::AUDIO_CHANNEL_LAYOUT or
                            tagCharSeq == Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT,
-                           Plugin::AudioChannelLayout, ValueType::INT64_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::AUDIO_SAMPLE_FORMAT, Plugin::AudioSampleFormat,
+                           Plugins::AudioChannelLayout, ValueType::INT64_T);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::AUDIO_SAMPLE_FORMAT, Plugins::AudioSampleFormat,
                            ValueType::INT32_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::AUDIO_AAC_PROFILE, Plugin::AudioAacProfile, ValueType::UINT8_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::AUDIO_AAC_STREAM_FORMAT, Plugin::AudioAacStreamFormat,
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::AUDIO_AAC_PROFILE, Plugins::AudioAacProfile, ValueType::UINT8_T);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::AUDIO_AAC_STREAM_FORMAT, Plugins::AudioAacStreamFormat,
                            ValueType::UINT8_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_PIXEL_FORMAT, Plugin::VideoPixelFormat,
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_PIXEL_FORMAT, Plugins::VideoPixelFormat,
                            ValueType::INT32_T);
-//    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::MEDIA_SEEKABLE), Plugin::Seekable);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::MEDIA_TYPE, Plugin::MediaType, ValueType::INT32_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_BIT_STREAM_FORMAT, std::vector<Plugin::VideoBitStreamFormat>,
+//    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::MEDIA_SEEKABLE), Plugins::Seekable);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::MEDIA_TYPE, Plugins::MediaType, ValueType::INT32_T);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_BIT_STREAM_FORMAT, std::vector<Plugins::VideoBitStreamFormat>,
                            ValueType::VECTOR_UINT32);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_H264_PROFILE, Plugin::VideoH264Profile,
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_H264_PROFILE, Plugins::VideoH264Profile,
                            ValueType::INT32_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_ROTATION, Plugin::VideoRotation, ValueType::INT32_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_PRIMARIES, Plugin::ColorPrimary,
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_ROTATION, Plugins::VideoRotation, ValueType::INT32_T);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_PRIMARIES, Plugins::ColorPrimary,
                            ValueType::INT32_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_TRC, Plugin::TransferCharacteristic,
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_TRC, Plugins::TransferCharacteristic,
                            ValueType::INT32_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_MATRIX_COEFF, Plugin::MatrixCoefficient,
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_MATRIX_COEFF, Plugins::MatrixCoefficient,
                            ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_ENCODE_BITRATE_MODE,
-        Plugin::VideoEncodeBitrateMode, ValueType::INT32_T);
+        Plugins::VideoEncodeBitrateMode, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_COLOR_RANGE or 
         tagCharSeq == Tag::VIDEO_REQUEST_I_FRAME or
         tagCharSeq == Tag::VIDEO_IS_HDR_VIVID or
@@ -139,10 +139,10 @@ public:
         tagCharSeq == Tag::MEDIA_HAS_AUDIO or
         tagCharSeq == Tag::MEDIA_END_OF_STREAM or
         tagCharSeq == Tag::VIDEO_FRAME_RATE_ADAPTIVE_MODE, bool, ValueType::BOOL);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_H265_PROFILE, Plugin::HEVCProfile, ValueType::INT32_T);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_H265_LEVEL, Plugin::HEVCLevel, ValueType::INT32_T);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_H265_PROFILE, Plugins::HEVCProfile, ValueType::INT32_T);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_H265_LEVEL, Plugins::HEVCLevel, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_CHROMA_LOCATION,
-        Plugin::ChromaLocation, ValueType::INT32_T);
+        Plugins::ChromaLocation, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::APP_UID or
         tagCharSeq == Tag::APP_PID or
         tagCharSeq == Tag::APP_TOKEN_ID or
@@ -200,7 +200,7 @@ public:
 
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_FRAME_RATE or
         tagCharSeq == Tag::VIDEO_CAPTURE_RATE, double, ValueType::DOUBLE);
-    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::MEDIA_FILE_TYPE, Plugin::FileType, ValueType::INT32_T);
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::MEDIA_FILE_TYPE, Plugins::FileType, ValueType::INT32_T);
     DEFINE_INSERT_GET_FUNC(
         tagCharSeq == Tag::MIME_TYPE or
         tagCharSeq == Tag::MEDIA_FILE_URI or

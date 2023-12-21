@@ -24,7 +24,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 /// Indicates that the available capability type is an fixed value.
 template <typename T> using FixedCapability = T;
 
@@ -131,7 +131,7 @@ struct Capability {
 /// A collection of multiple capabilities
 using CapabilitySet = std::vector<Capability>;
 using ValueType = Any;
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_CAPS_H

@@ -508,12 +508,12 @@ void CheckFormatMap(Format::FormatDataMap &formatMap)
     iter = formatMap.find(INT_ENUM_TESTKEY);
     ASSERT_NE(iter, formatMap.end());
     EXPECT_EQ(iter->second.type, FORMAT_TYPE_INT32);
-    EXPECT_EQ(iter->second.val.int32Val, static_cast<int32_t>(Plugin::VideoRotation::VIDEO_ROTATION_90));
+    EXPECT_EQ(iter->second.val.int32Val, static_cast<int32_t>(Plugins::VideoRotation::VIDEO_ROTATION_90));
 
     iter = formatMap.find(LONG_ENUM_TESTKEY);
     ASSERT_NE(iter, formatMap.end());
     EXPECT_EQ(iter->second.type, FORMAT_TYPE_INT64);
-    EXPECT_EQ(iter->second.val.int64Val, static_cast<int64_t>(Plugin::AudioChannelLayout::STEREO));
+    EXPECT_EQ(iter->second.val.int64Val, static_cast<int64_t>(Plugins::AudioChannelLayout::STEREO));
 }
 /**
  * @tc.name: Format_GetFormatMap_001
@@ -537,8 +537,8 @@ HWTEST_F(AVFormatUnitTest, Format_GetFormatMap_001, TestSize.Level1)
     meta->SetData(DOUBLE_TESTKEY, DOUBLE_VALUE);
     meta->SetData(STRING_TESTKEY, STRING_VALUE);
     meta->SetData(BUFFER_TESTKEY, BUFFER_VALUE);
-    meta->SetData(INT_ENUM_TESTKEY, Plugin::VideoRotation::VIDEO_ROTATION_90);
-    meta->SetData(LONG_ENUM_TESTKEY, Plugin::AudioChannelLayout::STEREO);
+    meta->SetData(INT_ENUM_TESTKEY, Plugins::VideoRotation::VIDEO_ROTATION_90);
+    meta->SetData(LONG_ENUM_TESTKEY, Plugins::AudioChannelLayout::STEREO);
 
     format->SetMeta(meta);
     Format::FormatDataMap formatMap = format->GetFormatMap();
@@ -568,8 +568,8 @@ HWTEST_F(AVFormatUnitTest, Format_GetFormatMap_002, TestSize.Level1)
     meta->SetData(DOUBLE_TESTKEY, DOUBLE_VALUE);
     meta->SetData(STRING_TESTKEY, STRING_VALUE);
     meta->SetData(BUFFER_TESTKEY, BUFFER_VALUE);
-    meta->SetData(INT_ENUM_TESTKEY, Plugin::VideoRotation::VIDEO_ROTATION_90);
-    meta->SetData(LONG_ENUM_TESTKEY, Plugin::AudioChannelLayout::STEREO);
+    meta->SetData(INT_ENUM_TESTKEY, Plugins::VideoRotation::VIDEO_ROTATION_90);
+    meta->SetData(LONG_ENUM_TESTKEY, Plugins::AudioChannelLayout::STEREO);
 
     format->SetMeta(meta);
     meta = format->GetMeta();
@@ -625,8 +625,8 @@ HWTEST_F(AVFormatUnitTest, Format_GetValueType_001, TestSize.Level1)
     meta->SetData(DOUBLE_TESTKEY, DOUBLE_VALUE);
     meta->SetData(STRING_TESTKEY, STRING_VALUE);
     meta->SetData(BUFFER_TESTKEY, BUFFER_VALUE);
-    meta->SetData(INT_ENUM_TESTKEY, Plugin::VideoRotation::VIDEO_ROTATION_90);
-    meta->SetData(LONG_ENUM_TESTKEY, Plugin::AudioChannelLayout::STEREO);
+    meta->SetData(INT_ENUM_TESTKEY, Plugins::VideoRotation::VIDEO_ROTATION_90);
+    meta->SetData(LONG_ENUM_TESTKEY, Plugins::AudioChannelLayout::STEREO);
 
     format->SetMeta(std::move(meta));
     CheckValueType(format);
@@ -655,8 +655,8 @@ HWTEST_F(AVFormatUnitTest, Format_GetValueType_002, TestSize.Level1)
     meta->SetData(DOUBLE_TESTKEY, DOUBLE_VALUE);
     meta->SetData(STRING_TESTKEY, STRING_VALUE);
     meta->SetData(BUFFER_TESTKEY, BUFFER_VALUE);
-    meta->SetData(INT_ENUM_TESTKEY, Plugin::VideoRotation::VIDEO_ROTATION_90);
-    meta->SetData(LONG_ENUM_TESTKEY, Plugin::AudioChannelLayout::STEREO);
+    meta->SetData(INT_ENUM_TESTKEY, Plugins::VideoRotation::VIDEO_ROTATION_90);
+    meta->SetData(LONG_ENUM_TESTKEY, Plugins::AudioChannelLayout::STEREO);
 
     format->SetMeta(meta);
     meta = format->GetMeta();

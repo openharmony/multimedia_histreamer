@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 constexpr size_t MEM_INVALID_POSITION = -1;
 
 /**
@@ -158,7 +158,7 @@ private:
 
     friend class Buffer;
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_MEMORY_H

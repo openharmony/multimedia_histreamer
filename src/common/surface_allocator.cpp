@@ -24,7 +24,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 const std::unordered_map<VideoScaleType, ScalingMode> scaleTypeMap = {
     { VideoScaleType::VIDEO_SCALE_TYPE_FIT, ScalingMode::SCALING_MODE_SCALE_TO_WINDOW },
     { VideoScaleType::VIDEO_SCALE_TYPE_FIT_CROP, ScalingMode::SCALING_MODE_SCALE_CROP}
@@ -132,7 +132,7 @@ void SurfaceAllocator::UpdateSurfaceBufferScaleMode(sptr<SurfaceBuffer>& surface
         MEDIA_LOG_E("update surface buffer scaling mode fail, ret: " PUBLIC_LOG_U64, static_cast<uint64_t>(ret));
     }
 }
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif

@@ -18,7 +18,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 #define HST_TIME_NONE ((int64_t)-1)
 #define HST_TIME_BASE ((int64_t)1)
 #define HST_NSECOND HST_TIME_BASE

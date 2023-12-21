@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 /**
 * @brief Generic plugin definition.
 * It can be used to represent any user defined plugin (T), which must derived from PluginBase.
@@ -43,7 +43,7 @@ struct GenericPluginDef : public PluginDefBase {
         pluginType = PluginType::GENERIC_PLUGIN;  ///< Plugin type, MUST be GENERIC_PLUGIN.
     }
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif

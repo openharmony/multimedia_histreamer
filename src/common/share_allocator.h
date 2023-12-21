@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 /**
 * @brief Enumerate the shared memory types.
 */
@@ -46,7 +46,7 @@ public:
 private:
     ShareMemType shareMemType_;
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif

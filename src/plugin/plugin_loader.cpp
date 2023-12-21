@@ -27,7 +27,7 @@
 
 #include "common/log.h"
 
-using namespace OHOS::Media::Plugin;
+using namespace OHOS::Media::Plugins;
 
 std::shared_ptr<PluginLoader> PluginLoader::Create(const std::string& name, const std::string& path)
 {

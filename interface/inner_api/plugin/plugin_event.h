@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 enum struct PluginEventType : int32_t {
     CLIENT_ERROR,
     SERVER_ERROR,
@@ -50,7 +50,7 @@ struct PluginEvent {
     Any param;
     std::string description;
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_TYPES_H

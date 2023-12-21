@@ -230,7 +230,7 @@ HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_Int32_PlainInput, TestSize.Level1)
 HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_Enum_As_Int32, TestSize.Level1)
 {
     int32_t valueOut = 0;
-    int32_t valueIn = static_cast<int32_t>(Plugin::VideoRotation::VIDEO_ROTATION_90);
+    int32_t valueIn = static_cast<int32_t>(Plugins::VideoRotation::VIDEO_ROTATION_90);
     SetMetaData(*metaIn, Tag::VIDEO_ROTATION, valueIn);
     GetMetaData(*metaIn, Tag::VIDEO_ROTATION, valueOut);
     EXPECT_EQ(valueOut, valueIn);
@@ -262,8 +262,8 @@ HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_Int32_Using_Parcel, TestSize.Level1)
  */
 HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_Enum_As_Int32_Using_Parcel, TestSize.Level1)
 {
-    Plugin::VideoRotation valueOut;
-    int32_t valueIn = static_cast<int32_t>(Plugin::VideoRotation::VIDEO_ROTATION_90);
+    Plugins::VideoRotation valueOut;
+    int32_t valueIn = static_cast<int32_t>(Plugins::VideoRotation::VIDEO_ROTATION_90);
     SetMetaData(*metaIn, Tag::VIDEO_ROTATION, valueIn);
     ASSERT_TRUE(metaIn->ToParcel(*parcel));
     ASSERT_TRUE(metaOut->FromParcel(*parcel));
@@ -281,8 +281,8 @@ HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_Enum_As_Int32_Using_Parcel, TestSize
  */
 HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_Enum_As_Int64_Using_Parcel, TestSize.Level1)
 {
-    Plugin::AudioChannelLayout valueOut;
-    int64_t valueIn = static_cast<int64_t>(Plugin::AudioChannelLayout::HOA_ORDER1_FUMA);
+    Plugins::AudioChannelLayout valueOut;
+    int64_t valueIn = static_cast<int64_t>(Plugins::AudioChannelLayout::HOA_ORDER1_FUMA);
     SetMetaData(*metaIn, Tag::AUDIO_CHANNEL_LAYOUT, valueIn);
     ASSERT_TRUE(metaIn->ToParcel(*parcel));
     ASSERT_TRUE(metaOut->FromParcel(*parcel));
@@ -335,23 +335,23 @@ map<TagType, int32_t> testInt32Data = {
     {Tag::VIDEO_STRIDE, 17},
     {Tag::VIDEO_DISPLAY_WIDTH, 19},
     {Tag::VIDEO_DISPLAY_HEIGHT, 23},
-    {Tag::SRC_INPUT_TYPE, static_cast<int32_t>(Plugin::SrcInputType::AUD_ES)},
-    {Tag::AUDIO_SAMPLE_FORMAT, static_cast<int32_t>(Plugin::AudioSampleFormat::SAMPLE_S16LE)},
-    {Tag::VIDEO_PIXEL_FORMAT, static_cast<int32_t>(Plugin::VideoPixelFormat::YUV411P)},
-    {Tag::MEDIA_TYPE, static_cast<int32_t>(Plugin::MediaType::AUDIO)},
-    {Tag::VIDEO_H264_PROFILE, static_cast<int32_t>(Plugin::VideoH264Profile::BASELINE)},
-    {Tag::VIDEO_ROTATION, static_cast<int32_t>(Plugin::VideoRotation::VIDEO_ROTATION_90)},
-    {Tag::VIDEO_COLOR_PRIMARIES, static_cast<int32_t>(Plugin::ColorPrimary::BT2020)},
-    {Tag::VIDEO_COLOR_TRC, static_cast<int32_t>(Plugin::TransferCharacteristic::BT1361)},
-    {Tag::VIDEO_COLOR_MATRIX_COEFF, static_cast<int32_t>(Plugin::MatrixCoefficient::BT2020_CL)},
-    {Tag::VIDEO_H265_PROFILE, static_cast<int32_t>(Plugin::HEVCProfile::HEVC_PROFILE_MAIN_10_HDR10)},
-    {Tag::VIDEO_H265_LEVEL, static_cast<int32_t>(Plugin::HEVCLevel::HEVC_LEVEL_41)},
-    {Tag::VIDEO_CHROMA_LOCATION, static_cast<int32_t>(Plugin::ChromaLocation::BOTTOM)},
-    {Tag::MEDIA_FILE_TYPE, static_cast<int32_t>(Plugin::FileType::AMR)},
-    {Tag::VIDEO_ENCODE_BITRATE_MODE, static_cast<int32_t>(Plugin::VideoEncodeBitrateMode::CBR)},
+    {Tag::SRC_INPUT_TYPE, static_cast<int32_t>(Plugins::SrcInputType::AUD_ES)},
+    {Tag::AUDIO_SAMPLE_FORMAT, static_cast<int32_t>(Plugins::AudioSampleFormat::SAMPLE_S16LE)},
+    {Tag::VIDEO_PIXEL_FORMAT, static_cast<int32_t>(Plugins::VideoPixelFormat::YUV411P)},
+    {Tag::MEDIA_TYPE, static_cast<int32_t>(Plugins::MediaType::AUDIO)},
+    {Tag::VIDEO_H264_PROFILE, static_cast<int32_t>(Plugins::VideoH264Profile::BASELINE)},
+    {Tag::VIDEO_ROTATION, static_cast<int32_t>(Plugins::VideoRotation::VIDEO_ROTATION_90)},
+    {Tag::VIDEO_COLOR_PRIMARIES, static_cast<int32_t>(Plugins::ColorPrimary::BT2020)},
+    {Tag::VIDEO_COLOR_TRC, static_cast<int32_t>(Plugins::TransferCharacteristic::BT1361)},
+    {Tag::VIDEO_COLOR_MATRIX_COEFF, static_cast<int32_t>(Plugins::MatrixCoefficient::BT2020_CL)},
+    {Tag::VIDEO_H265_PROFILE, static_cast<int32_t>(Plugins::HEVCProfile::HEVC_PROFILE_MAIN_10_HDR10)},
+    {Tag::VIDEO_H265_LEVEL, static_cast<int32_t>(Plugins::HEVCLevel::HEVC_LEVEL_41)},
+    {Tag::VIDEO_CHROMA_LOCATION, static_cast<int32_t>(Plugins::ChromaLocation::BOTTOM)},
+    {Tag::MEDIA_FILE_TYPE, static_cast<int32_t>(Plugins::FileType::AMR)},
+    {Tag::VIDEO_ENCODE_BITRATE_MODE, static_cast<int32_t>(Plugins::VideoEncodeBitrateMode::CBR)},
     // UINT8_T
-    {Tag::AUDIO_AAC_PROFILE, static_cast<int32_t>(Plugin::AudioAacProfile::ELD)},
-    {Tag::AUDIO_AAC_STREAM_FORMAT, static_cast<int32_t>(Plugin::AudioAacStreamFormat::ADIF)},
+    {Tag::AUDIO_AAC_PROFILE, static_cast<int32_t>(Plugins::AudioAacProfile::ELD)},
+    {Tag::AUDIO_AAC_STREAM_FORMAT, static_cast<int32_t>(Plugins::AudioAacStreamFormat::ADIF)},
     // Bool
     {Tag::VIDEO_COLOR_RANGE, 1},
     {Tag::VIDEO_REQUEST_I_FRAME, 0},
@@ -395,8 +395,8 @@ map<TagType, int64_t> testInt64Data = {
     {Tag::MEDIA_FILE_SIZE, 1234567890007},
     {Tag::MEDIA_POSITION, 1234567890008},
     {Tag::MEDIA_TIME_STAMP, 1234567890009},
-    {Tag::AUDIO_CHANNEL_LAYOUT, static_cast<int64_t>(Plugin::AudioChannelLayout::CH_10POINT2)},
-    {Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, static_cast<int64_t>(Plugin::AudioChannelLayout::HOA_ORDER3_FUMA)}
+    {Tag::AUDIO_CHANNEL_LAYOUT, static_cast<int64_t>(Plugins::AudioChannelLayout::CH_10POINT2)},
+    {Tag::AUDIO_OUTPUT_CHANNEL_LAYOUT, static_cast<int64_t>(Plugins::AudioChannelLayout::HOA_ORDER3_FUMA)}
 };
 
 /**

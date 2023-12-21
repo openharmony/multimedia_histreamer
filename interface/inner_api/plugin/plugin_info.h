@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 /**
  * PluginInfo, which describes static information for a plugin, including basic plugin information,
  * such as the type, name, rank, and input and output capabilities.
@@ -99,10 +99,10 @@ struct MediaInfo {
  * Extra information about the plugin.
  * Describes the CodecMode supported by the Codec plugin.
  *
- * ValueType: enum Plugin::CodecMode
+ * ValueType: enum Plugins::CodecMode
  */
 #define PLUGIN_INFO_EXTRA_CODEC_MODE        "codec_mode" // NOLINT: macro constant
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_INFO_H

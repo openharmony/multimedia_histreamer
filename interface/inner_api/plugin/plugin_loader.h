@@ -21,7 +21,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 class PluginLoader {
 public:
     PluginLoader(const PluginLoader &) = delete;
@@ -46,7 +46,7 @@ private:
     RegisterFunc registerFunc_ {nullptr};
     UnregisterFunc unregisterFunc_ {nullptr};
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_LOADER_H
