@@ -421,6 +421,33 @@ HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_All_As_Int64_Using_ParcelPackage, Te
     }
 }
 
+map<TagType, float> testFloatData = {
+    // Float
+    {Tag::MEDIA_LATITUDE, 1.01f},
+    {Tag::MEDIA_LONGITUDE, 1.02f}
+};
+
+/**
+ * @tc.name: SetGet_MetaData_All_As_Float_Using_ParcelPackage
+ * @tc.desc: SetGet_MetaData_All_As_Float_Using_ParcelPackage
+ * @tc.type: FUNC
+ */
+HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_All_As_Float_Using_ParcelPackage, TestSize.Level1)
+{
+    for (auto item : testFloatData) {
+        float valueIn = item.second;
+        metaIn->SetData(item.first, valueIn);
+    }
+    ASSERT_TRUE(metaIn->ToParcel(*parcel));
+    ASSERT_TRUE(metaOut->FromParcel(*parcel));
+    for (auto item : testFloatData) {
+        float valueIn = item.second;
+        float valueOut = 0.0f;
+        metaOut->GetData(item.first, valueOut);
+        ASSERT_FLOAT_EQ(valueOut, valueIn);
+    }
+}
+
 map<TagType, double> testDoubleData = {
     // Double
     {Tag::VIDEO_FRAME_RATE, 1.01},
@@ -470,7 +497,8 @@ map<TagType, std::string> testStringData = {
     {Tag::MEDIA_COMPOSER, "String MEDIA_COMPOSER"},
     {Tag::MEDIA_LYRICS, "String MEDIA_LYRICS"},
     {Tag::MEDIA_CODEC_NAME, "String MEDIA_CODEC_NAME"},
-    {Tag::PROCESS_NAME, "String PROCESS_NAME"}
+    {Tag::PROCESS_NAME, "String PROCESS_NAME"},
+    {Tag::MEDIA_CREATION_TIME, "String MEDIA_CREATION_TIME"},
 };
 
 /**
@@ -538,6 +566,10 @@ HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_All_As_Mix_Using_ParcelPackage, Test
         std::vector<uint8_t> valueInVecInt8 = item.second;
         metaIn->SetData(item.first, valueInVecInt8);
     }
+    for (auto item : testFloatData) {
+        float valueInFloat = item.second;
+        metaIn->SetData(item.first, valueInFloat);
+    }
     for (auto item : testDoubleData) {
         double valueInDouble = item.second;
         metaIn->SetData(item.first, valueInDouble);
@@ -564,6 +596,12 @@ HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_All_As_Mix_Using_ParcelPackage, Test
         metaOut->GetData(item.first, valueOutStr);
         EXPECT_EQ(valueOutStr, valueInStr);
     }
+    for (auto item : testFloatData) {
+        float valueInFloat = item.second;
+        float valueOutFloat = 0.0f;
+        metaOut->GetData(item.first, valueOutFloat);
+        ASSERT_FLOAT_EQ(valueOutFloat, valueInFloat);
+    }
     for (auto item : testDoubleData) {
         double valueInDouble = item.second;
         double valueOutDouble = 0.0;
@@ -588,6 +626,10 @@ HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_All_As_Mix_Using_AssignCopy, TestSiz
     for (auto item : testVetcorInt8Data) {
         std::vector<uint8_t> valueInVecInt8 = item.second;
         metaIn->SetData(item.first, valueInVecInt8);
+    }
+    for (auto item : testFloatData) {
+        float valueInFloat = item.second;
+        metaIn->SetData(item.first, valueInFloat);
     }
     for (auto item : testDoubleData) {
         double valueInDouble = item.second;
@@ -618,6 +660,12 @@ HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_All_As_Mix_Using_AssignCopy, TestSiz
         metaCopy.GetData(item.first, valueOutStr);
         EXPECT_EQ(valueOutStr, valueInStr);
     }
+    for (auto item : testFloatData) {
+        float valueInFloat = item.second;
+        float valueOutFloat = 0.0f;
+        metaCopy.GetData(item.first, valueOutFloat);
+        ASSERT_FLOAT_EQ(valueOutFloat, valueInFloat);
+    }
     for (auto item : testDoubleData) {
         double valueInDouble = item.second;
         double valueOutDouble = 0.0;
@@ -642,6 +690,10 @@ HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_All_As_Mix_Using_SwapCopy, TestSize.
     for (auto item : testVetcorInt8Data) {
         std::vector<uint8_t> valueInVecInt8 = item.second;
         metaIn->SetData(item.first, valueInVecInt8);
+    }
+    for (auto item : testFloatData) {
+        float valueInFloat = item.second;
+        metaIn->SetData(item.first, valueInFloat);
     }
     for (auto item : testDoubleData) {
         double valueInDouble = item.second;
@@ -671,6 +723,12 @@ HWTEST_F(MetaInnerUnitTest, SetGet_MetaData_All_As_Mix_Using_SwapCopy, TestSize.
         std::string valueOutStr = "String Value";
         metaCopy.GetData(item.first, valueOutStr);
         EXPECT_EQ(valueOutStr, valueInStr);
+    }
+    for (auto item : testFloatData) {
+        float valueInFloat = item.second;
+        float valueOutFloat = 0.0f;
+        metaCopy.GetData(item.first, valueOutFloat);
+        ASSERT_FLOAT_EQ(valueOutFloat, valueInFloat);
     }
     for (auto item : testDoubleData) {
         double valueInDouble = item.second;
