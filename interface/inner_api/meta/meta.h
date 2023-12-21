@@ -195,6 +195,9 @@ public:
         tagCharSeq == Tag::MEDIA_POSITION or
         tagCharSeq == Tag::MEDIA_TIME_STAMP, int64_t, ValueType::INT64_T);
 
+    DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::MEDIA_LATITUDE or
+        tagCharSeq == Tag::MEDIA_LONGITUDE, float, ValueType::FLOAT);
+
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::VIDEO_FRAME_RATE or
         tagCharSeq == Tag::VIDEO_CAPTURE_RATE, double, ValueType::DOUBLE);
     DEFINE_INSERT_GET_FUNC(tagCharSeq == Tag::MEDIA_FILE_TYPE, Plugins::FileType, ValueType::INT32_T);
@@ -218,6 +221,7 @@ public:
         tagCharSeq == Tag::MEDIA_AUTHOR or
         tagCharSeq == Tag::MEDIA_COMPOSER or
         tagCharSeq == Tag::MEDIA_LYRICS or
+        tagCharSeq == Tag::MEDIA_CREATION_TIME or
         tagCharSeq == Tag::MEDIA_CODEC_NAME or
         tagCharSeq == Tag::PROCESS_NAME, std::string, ValueType::STRING);
 

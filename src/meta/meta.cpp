@@ -177,6 +177,7 @@ static Any defaultUInt8 = (uint8_t)0;
 static Any defaultInt32 = (int32_t)0;
 static Any defaultInt64 = (int64_t)0;
 static Any defaultUInt64 = (uint64_t)0;
+static Any defaultFloat = 0.0f;
 static Any defaultDouble = (double)0.0;
 static Any defaultBool = (bool) false;
 static Any defaultSrcInputType = SrcInputType::UNKNOWN;
@@ -278,6 +279,10 @@ static std::map<TagType, const Any &> g_metadataDefaultValueMap = {
     {Tag::MEDIA_LYRICS, defaultString},
     {Tag::MEDIA_CODEC_NAME, defaultString},
     {Tag::PROCESS_NAME, defaultString},
+    {Tag::MEDIA_CREATION_TIME, defaultString},
+    // Float
+    {Tag::MEDIA_LATITUDE, defaultFloat},
+    {Tag::MEDIA_LONGITUDE, defaultFloat},
     // Double
     {Tag::VIDEO_CAPTURE_RATE, defaultDouble},
     {Tag::VIDEO_FRAME_RATE, defaultDouble},
