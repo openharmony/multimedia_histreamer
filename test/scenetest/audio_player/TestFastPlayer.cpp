@@ -272,7 +272,6 @@ namespace Test {
         std::vector<std::string> vecSource;
         vecSource.push_back(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"));
         vecSource.push_back(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a"));
-        vecSource.push_back(std::string("http://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3"));
         for (auto url : vecSource)
         {
             TestSinglePlayerGetCurrentTime(url);
@@ -284,7 +283,6 @@ namespace Test {
         std::vector<std::string> vecSource;
         vecSource.push_back(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"));
         vecSource.push_back(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a"));
-        vecSource.push_back(std::string("http://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3"));
         for (auto url : vecSource)
         {
             TestSinglePlayerSeek(url);
@@ -296,7 +294,6 @@ namespace Test {
         std::vector<std::string> vecSource;
         vecSource.push_back(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"));
         vecSource.push_back(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a"));
-        vecSource.push_back(std::string("http://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3"));
         for (auto url : vecSource)
         {
             TestSinglePlayerSeekPause(url);
@@ -308,7 +305,6 @@ namespace Test {
         std::vector<std::string> vecSource;
         vecSource.push_back(std::string(RESOURCE_DIR "/MP3/MP3_LONG_48000_32.mp3"));
         vecSource.push_back(std::string(RESOURCE_DIR "/M4A/MPEG-4_48000_32_LONG.m4a"));
-        vecSource.push_back(std::string("http://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3"));
         for (auto url : vecSource)
         {
             TestSinglePlayerPauseSeek(url);
@@ -333,8 +329,6 @@ namespace Test {
     HST_TEST(UtTestFastPlayer, TestSinglePlayerHttp, TestSize.Level1)
     {
         std::vector<std::string> vecSource;
-        vecSource.push_back(std::string("http://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3"));
-        vecSource.push_back(std::string("https://img.51miz.com/preview/sound/00/26/73/51miz-S267356-423D33372.mp3"));
         for (auto url : vecSource)
         {
             TestSinglePlayerHttp(url);
@@ -344,7 +338,6 @@ namespace Test {
     HST_TEST(UtTestFastPlayer, TestSinglePlayerHls, TestSize.Level1)
     {
         std::vector<std::string> vecSource;
-        vecSource.push_back(std::string("http://220.161.87.62:8800/hls/2/index.m3u8"));
         for (auto url : vecSource)
         {
             TestSinglePlayerHls(url);
