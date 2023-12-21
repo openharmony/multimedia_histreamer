@@ -19,7 +19,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 PluginManager::PluginManager()
 {
     Init();
@@ -74,6 +74,6 @@ void PluginManager::RegisterGenericPlugins(const std::vector<GenericPluginDef>& 
 {
     pluginRegister_->RegisterGenericPlugins(vecPluginDef);
 }
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS

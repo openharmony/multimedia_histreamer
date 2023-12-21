@@ -18,7 +18,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 Memory::Memory(size_t capacity, std::shared_ptr<uint8_t> bufData, size_t align, MemoryType type)
     : memoryType(type), capacity(capacity), alignment(align),
       offset(0), size(0), allocator(nullptr), addr(std::move(bufData))
@@ -199,6 +199,6 @@ void Buffer::Reset()
     duration = 0;
     flag = 0;
 }
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS

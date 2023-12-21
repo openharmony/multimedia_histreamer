@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 const ValueType g_emptyString = std::string();
 const ValueType g_u8Def = (uint8_t)0;
 const ValueType g_u32Def = (uint32_t)0;
@@ -259,7 +259,7 @@ inline const char* GetTagTypeStrName(Tag tag)
     return std::get<2>(g_tagInfoMap.at(tag)); // secondary parameter 2
 }
 
-inline const Plugin::ValueType* GetTagDefValue(Tag tag)
+inline const Plugins::ValueType* GetTagDefValue(Tag tag)
 {
     if (!HasTagInfo(tag)) {
         return nullptr;

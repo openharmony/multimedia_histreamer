@@ -409,7 +409,7 @@ Status AVBufferQueueImpl::ReturnBuffer(uint64_t uniqueId, bool available)
             NOK_RETURN(CancelBuffer(uniqueId));
         } else {
             auto& config = cachedBufferMap_[uniqueId].buffer->GetConfig();
-            bool isEosBuffer = cachedBufferMap_[uniqueId].buffer->flag_ & (uint32_t)(Plugin::AVBufferFlag::EOS);
+            bool isEosBuffer = cachedBufferMap_[uniqueId].buffer->flag_ & (uint32_t)(Plugins::AVBufferFlag::EOS);
             if (!isEosBuffer) {
                 FALSE_RETURN_V(config.size > 0, Status::ERROR_INVALID_BUFFER_SIZE);
             }

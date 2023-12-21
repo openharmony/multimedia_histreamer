@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 /**
  * @enum source input type.
  *
@@ -35,7 +35,7 @@ enum struct SrcInputType : uint32_t {
     VID_SURFACE_RGB, ///< Video source input type of RGB video data
     VID_SURFACE_ES,  ///< Video source input type of Raw encoded data
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_COMMON_SOURCE_TAG_H

@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 /**
  * @enum Video Pixel Format.
  *
@@ -81,7 +81,7 @@ enum struct VideoBitStreamFormat : uint32_t {
     HEVC,  // H265 bit stream format
     ANNEXB, // H264, H265 bit stream format
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_COMMON_VIDEO_TAGS_H

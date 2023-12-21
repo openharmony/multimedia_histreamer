@@ -69,8 +69,8 @@ HWTEST_F(AnyInnerUnitTest, Any_Init, TestSize.Level1)
     int32_t valueOut = AnyCast<int32_t>(anyCopy);
     EXPECT_EQ(valueOut, valueIn);
 
-    Any anyInitValueType(Plugin::SrcInputType::AUD_MIC);
-    Plugin::SrcInputType valueOutSrcType = AnyCast<Plugin::SrcInputType>(anyInitValueType);
+    Any anyInitValueType(Plugins::SrcInputType::AUD_MIC);
+    Plugins::SrcInputType valueOutSrcType = AnyCast<Plugins::SrcInputType>(anyInitValueType);
     EXPECT_EQ(static_cast<int32_t>(valueOutSrcType), 1);
 }
 

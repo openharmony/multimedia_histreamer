@@ -18,7 +18,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 class MimeType {
 public:
     static constexpr const char VIDEO_H263[] = "video/h263";
@@ -46,7 +46,7 @@ public:
     static constexpr const char MEDIA_MP4[] = "media/mp4";
     static constexpr const char MEDIA_M4A[] = "media/m4a";
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // MEDIA_FOUNDATION_MIME_TYPE_H

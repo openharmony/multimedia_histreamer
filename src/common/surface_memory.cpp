@@ -24,7 +24,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 SurfaceMemory::SurfaceMemory(size_t capacity, std::shared_ptr<Allocator> allocator, size_t align)
     : Memory(capacity, std::move(allocator), align, MemoryType::SURFACE_MEMORY, false),
       fence_(-1),
@@ -123,7 +123,7 @@ uint8_t* SurfaceMemory::GetRealAddr() const
     }
     return nullptr;
 }
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif

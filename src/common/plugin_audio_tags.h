@@ -20,10 +20,10 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 
 
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif // HISTREAMER_PLUGIN_COMMON_AUDIO_TAGS_H

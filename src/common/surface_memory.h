@@ -27,7 +27,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 class SurfaceMemory : public Memory {
 public:
     ~SurfaceMemory();
@@ -68,7 +68,7 @@ private:
 
     friend class Buffer;
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 

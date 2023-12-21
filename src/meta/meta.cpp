@@ -46,7 +46,7 @@
  **/
 namespace OHOS {
 namespace Media {
-using namespace Plugin;
+using namespace Plugins;
 
 #define DEFINE_METADATA_SETTER_GETTER_FUNC(EnumTypeName, ExtTypeName)                       \
 static bool Set##EnumTypeName(Meta& meta, const TagType& tag, ExtTypeName& value)           \
@@ -312,7 +312,7 @@ static std::map<TagType, const Any &> g_metadataDefaultValueMap = {
     {Tag::MEDIA_COVER, defaultVectorUInt8},
     {Tag::AUDIO_VORBIS_IDENTIFICATION_HEADER, defaultVectorUInt8},
     {Tag::AUDIO_VORBIS_SETUP_HEADER, defaultVectorUInt8},
-    // vector<Plugin::VideoBitStreamFormat>
+    // vector<Plugins::VideoBitStreamFormat>
     {Tag::VIDEO_BIT_STREAM_FORMAT, defaultVectorVideoBitStreamFormat}};
 
 Any GetDefaultAnyValue(const TagType& tag)

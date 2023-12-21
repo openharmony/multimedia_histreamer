@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 class ShareMemory : public Memory {
 public:
     ~ShareMemory() override;
@@ -49,7 +49,7 @@ private:
 
     int fd_;
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 

@@ -25,7 +25,7 @@
 
 namespace OHOS {
 namespace Media {
-namespace Plugin {
+namespace Plugins {
 /// End of Stream Buffer Flag
 #define BUFFER_FLAG_EOS 0x00000001
 /// Video Key Frame Flag
@@ -80,7 +80,7 @@ private:
     std::shared_ptr<IMediaDataSource> dataSrc_ {};
 #endif
 };
-} // namespace Plugin
+} // namespace Plugins
 } // namespace Media
 } // namespace OHOS
 #endif
