@@ -221,7 +221,7 @@ public:
         tagCharSeq == Tag::MEDIA_AUTHOR or
         tagCharSeq == Tag::MEDIA_COMPOSER or
         tagCharSeq == Tag::MEDIA_LYRICS or
-		tagCharSeq == Tag::MEDIA_CREATION_TIME or
+        tagCharSeq == Tag::MEDIA_CREATION_TIME or
         tagCharSeq == Tag::MEDIA_CODEC_NAME or
         tagCharSeq == Tag::PROCESS_NAME, std::string, ValueType::STRING);
 
