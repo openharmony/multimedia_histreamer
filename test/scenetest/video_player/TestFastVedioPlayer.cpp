@@ -45,8 +45,6 @@ namespace Test {
         }
         std::vector<std::string> vecSource{std::string(RESOURCE_DIR "/MP4/MPEG2_MP3.mp4")};
     };
-
-    constexpr int64_t FILE_SIZE = 1894335;
     
     std::string FilePathToFd(std::string url, int32_t fileSize)
     {
