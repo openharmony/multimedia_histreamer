@@ -52,7 +52,7 @@ struct Capability {
      *
      * @param m mime string
      */
-    explicit Capability(std::string  m):mime(std::move(m)){}
+    explicit Capability(std::string m) : mime(std::move(m)) {}
 
     /**
      * @brief Append one fix key into KeyMap
