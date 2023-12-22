@@ -148,9 +148,9 @@ Status PluginRegister::RegisterImpl::InitSourceInfo(std::shared_ptr<PluginRegInf
 
     Any protocol;
     capSet[0].GetFixedValue<Any>(Tag::MEDIA_PROTOCOL_TYPE, protocol);
-    FALSE_RETURN_V_MSG_E(Any::IsSameTypeWith<ProtocolType>(protocol),
+    FALSE_RETURN_V_MSG_E(Any::IsSameTypeWith<std::vector<ProtocolType>>(protocol),
                          Status::ERROR_INVALID_PARAMETER, "protocol param type error");
-    auto type = AnyCast<ProtocolType>(protocol);
+    auto type = AnyCast<std::vector<ProtocolType>>(protocol);
     info->extra.insert({PLUGIN_INFO_EXTRA_PROTOCOL, type});
 
     Any input;
