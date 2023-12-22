@@ -127,6 +127,10 @@ public:
     static constexpr const char AUDIO_VORBIS_IDENTIFICATION_HEADER[] =
         "identification_header";                                              ///< Key for vorbis identification header
     static constexpr const char AUDIO_VORBIS_SETUP_HEADER[] = "setup_header"; ///< Key for vorbis setup header
+    static constexpr const char OH_MD_KEY_AUDIO_OBJECT_NUMBER[] =
+        "audio_object_number_key";                                            ///< Key for audio object number
+    static constexpr const char OH_MD_KEY_AUDIO_VIVID_METADATA[] =
+        "audio_vivid_metadata_key";                                           ///< Key for audio vivid metadata
 
     /* -------------------- video universal tag -------------------- */
     static constexpr const char VIDEO_WIDTH[] = "width";                               ///< video width

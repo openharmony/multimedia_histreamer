@@ -180,7 +180,7 @@ struct PluginBase {
      *  @retval OK: Plugin GetParameter succeeded.
      *  @retval ERROR_INVALID_PARAMETER: The plugin does not support this parameter.
      */
-    virtual Status GetParameter(std::shared_ptr<Meta> meta)
+    virtual Status GetParameter(std::shared_ptr<Meta> &meta)
     {
         (void)meta;
         return Status::ERROR_UNIMPLEMENTED;
@@ -199,7 +199,7 @@ struct PluginBase {
      *  @retval ERROR_INVALID_DATA: The value is not in the valid range.
      *  @retval ERROR_MISMATCHED_TYPE: The data type is mismatched.
      */
-    virtual Status SetParameter(std::shared_ptr<Meta> meta)
+    virtual Status SetParameter(const std::shared_ptr<Meta> &meta)
     {
         (void)meta;
         return Status::ERROR_UNIMPLEMENTED;
