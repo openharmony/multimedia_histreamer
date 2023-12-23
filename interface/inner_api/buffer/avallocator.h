@@ -16,6 +16,16 @@
 #ifndef AV_ALLOCATOR_H
 #define AV_ALLOCATOR_H
 
+#ifndef MEDIA_NO_OHOS
+#ifndef MEDIA_OHOS
+#define MEDIA_OHOS
+#endif
+#else
+#ifdef MEDIA_OHOS
+#undef MEDIA_OHOS
+#endif
+#endif
+
 #include <memory>
 #include <string>
 #include "refbase.h"
