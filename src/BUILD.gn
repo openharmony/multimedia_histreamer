@@ -123,6 +123,7 @@ if (hst_is_standard_sys) {
       "$histreamer_root_dir/src/osal/task/pthread/mutex.cpp",
       "$histreamer_root_dir/src/osal/task/pthread/task.cpp",
       "$histreamer_root_dir/src/osal/task/pthread/thread.cpp",
+      "$histreamer_root_dir/src/osal/utils/steady_clock.cpp",
       "$histreamer_root_dir/src/osal/utils/util.cpp",
     ]
 
