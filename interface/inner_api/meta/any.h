@@ -26,6 +26,16 @@
 #endif
 #endif
 
+#ifndef MEDIA_NO_OHOS
+#ifndef MEDIA_OHOS
+#define MEDIA_OHOS
+#endif
+#else
+#ifdef MEDIA_OHOS
+#undef MEDIA_OHOS
+#endif
+#endif
+
 #if defined(__clang__) || defined(__GNUC__)
 #define CPP_STANDARD __cplusplus
 #elif defined(_MSC_VER)
@@ -216,16 +226,19 @@ public:
     template<typename T>
     static constexpr std::string_view GetTypeName() noexcept
     {
+        std::string_view retType = "Unknown";
         const char* charInfo = __PRETTY_FUNCTION__ ;
         std::string_view stringInfo = charInfo;
         uint32_t beginIndex = stringInfo.find_first_of('=') + 2; // 2 表示右移两位
 #ifdef MEDIA_OHOS
         uint32_t endIndex = stringInfo.find_last_of(']');
-        std::string_view typeName(charInfo + beginIndex, endIndex - beginIndex);
 #else
         uint32_t endIndex = stringInfo.find_last_of(';');
-        std::string_view typeName(charInfo + beginIndex, endIndex - beginIndex);
 #endif
+        if (endIndex == std::string::npos){
+            return retType;
+        }
+        std::string_view typeName(charInfo + beginIndex, endIndex - beginIndex);
         return typeName;
     }
 
