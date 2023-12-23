@@ -235,7 +235,7 @@ public:
 #else
         uint32_t endIndex = stringInfo.find_last_of(';');
 #endif
-        if (endIndex == std::string::npos){
+        if (endIndex == std::string::npos) {
             return retType;
         }
         std::string_view typeName(charInfo + beginIndex, endIndex - beginIndex);
