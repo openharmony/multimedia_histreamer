@@ -17,6 +17,7 @@
 #define MEDIA_FOUNDATION_MEDIA_TYPES_H
 
 #include <cstdint>  // NOLINT: used it
+#include <string_view>
 #include <vector>
 
 namespace OHOS {
