@@ -16,6 +16,16 @@
 #ifndef HISTREAMER_FOUNDATION_OSAL_UTILS_UTIL_H
 #define HISTREAMER_FOUNDATION_OSAL_UTILS_UTIL_H
 
+#ifndef MEDIA_NO_OHOS
+#ifndef MEDIA_OHOS
+#define MEDIA_OHOS
+#endif
+#else
+#ifdef MEDIA_OHOS
+#undef MEDIA_OHOS
+#endif
+#endif
+
 #include <string>
 
 namespace OHOS {
