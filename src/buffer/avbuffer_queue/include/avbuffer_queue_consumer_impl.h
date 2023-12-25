@@ -30,6 +30,7 @@ public:
 
     uint32_t GetQueueSize() override;
     Status SetQueueSize(uint32_t size) override;
+    bool IsBufferInQueue(const std::shared_ptr<AVBuffer>& buffer) override;
 
     Status AcquireBuffer(std::shared_ptr<AVBuffer>& buffer) override;
     Status ReleaseBuffer(const std::shared_ptr<AVBuffer>& buffer) override;

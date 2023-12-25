@@ -26,8 +26,8 @@ namespace Media {
 
 class AVBufferQueue {
 public:
-    static std::shared_ptr<AVBufferQueue> Create(
-            uint32_t size, MemoryType type = MemoryType::UNKNOWN_MEMORY, const std::string& name = "");
+    static std::shared_ptr<AVBufferQueue> Create(uint32_t size, MemoryType type = MemoryType::UNKNOWN_MEMORY,
+        const std::string& name = "", bool disableAlloc = false);
     static std::shared_ptr<AVBufferQueue> CreateAsSurfaceProducer(
             sptr<Surface>& surface, const std::string& name = "");
     static std::shared_ptr<AVBufferQueue> CreateAsSurfaceConsumer(
@@ -49,6 +49,7 @@ public:
 
     virtual uint32_t GetQueueSize() = 0;
     virtual Status SetQueueSize(uint32_t size) = 0;
+    virtual bool IsBufferInQueue(const std::shared_ptr<AVBuffer>& buffer) = 0;
 };
 
 } // namespace Media

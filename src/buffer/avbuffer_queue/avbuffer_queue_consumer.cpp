@@ -32,6 +32,11 @@ Status AVBufferQueueConsumerImpl::SetQueueSize(uint32_t size)
     return bufferQueue_->SetQueueSize(size);
 }
 
+bool AVBufferQueueConsumerImpl::IsBufferInQueue(const std::shared_ptr<AVBuffer>& buffer)
+{
+    return bufferQueue_->IsBufferInQueue(buffer);
+}
+
 Status AVBufferQueueConsumerImpl::AcquireBuffer(std::shared_ptr<AVBuffer>& buffer)
 {
     return bufferQueue_->AcquireBuffer(buffer);

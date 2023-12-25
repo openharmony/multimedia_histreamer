@@ -28,6 +28,7 @@ public:
 
     virtual uint32_t GetQueueSize() = 0;
     virtual Status SetQueueSize(uint32_t size) = 0;
+    virtual bool IsBufferInQueue(const std::shared_ptr<AVBuffer>& buffer) = 0;
 
     virtual Status AcquireBuffer(std::shared_ptr<AVBuffer>& outBuffer) = 0;
     virtual Status ReleaseBuffer(const std::shared_ptr<AVBuffer>& inBuffer) = 0;
