@@ -54,6 +54,7 @@ enum struct Status : int32_t {
     ERROR_SERVER = -19,             ///< Http server error
     ERROR_DELAY_READY = -20,        ///< Delay ready event
     ERROR_INVALID_STATE = -21,
+    ERROR_AUDIO_INTERRUPT = -22,
     ERROR_INVALID_BUFFER_SIZE = 0xF001,
     ERROR_UNEXPECTED_MEMORY_TYPE = 0xF002,
     ERROR_CREATE_BUFFER = 0xF003,
