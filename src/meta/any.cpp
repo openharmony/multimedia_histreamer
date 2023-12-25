@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "common/log.h"
 #include "meta/any.h"
 #include "meta/meta.h"
 
@@ -137,6 +139,44 @@ int Any::BaseTypesFromParcel(Any *operand, MessageParcel &parcel) noexcept
             return static_cast<int>(StatusCodeFromParcel::NO_RETRY);
     }
     return static_cast<int>(StatusCodeFromParcel::SUCCESS);
+}
+
+/**
+ * Get TypeName From function info.
+ * Extract the Type name out of Function Info
+ * @param functionInfo Function Info
+ * @return Name of Type T ,Such as <b>bool int float double std::vector<unsigned char></b> etc.
+ * @example In windows with MEDIA_NO_OHOS define,
+ * FunctionInfo will be like <br>
+ * static constexpr std::string_view OHOS::Media::Any::GetTypeName()
+ * [with T = <b>bool</b>; std::string_view = std::basic_string_view<char>] <br>
+ * with MEDIA_OHOS define, FunctionInfo will be like <br>
+ * static std::string_view OHOS::Media::Any::GetTypeName() [T = <b>std::vector<unsigned char></b>]  <br>
+ * For EnumType , FunctionInfo will be like <br>
+ * static std::string_view OHOS::Media::Any::GetTypeName() [T = <b>OHOS::Media::Plugins::VideoEncodeBitrateMode</b>]
+ */
+std::string_view Any::GetTypeNameFromFunctionInfo(const char* functionInfo) noexcept
+{
+    std::string_view stringInfo = functionInfo;
+    std::string_view retType = "Unknown";
+    size_t beginIndex = stringInfo.find_first_of('=');
+    if (beginIndex == std::string::npos) {
+        MEDIA_LOG_E("GetTypeNameFromFunctionInfo failed. Function: " PUBLIC_LOG_S, stringInfo.data());
+        return retType;
+    } else {
+        beginIndex += 2; // 2 表示右移两位
+    }
+#ifdef MEDIA_OHOS
+    size_t endIndex = stringInfo.find_last_of(']');
+#else
+    size_t endIndex = stringInfo.find_last_of(';');
+#endif
+    if (endIndex == std::string::npos) {
+        MEDIA_LOG_E("GetTypeNameFromFunctionInfo find Type failed. Function: " PUBLIC_LOG_S, stringInfo.data());
+        return retType;
+    }
+    std::string_view typeNameRet(functionInfo + beginIndex, endIndex - beginIndex);
+    return typeNameRet;
 }
 } // namespace Media
 } // namespace OHOS
