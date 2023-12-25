@@ -23,11 +23,11 @@ namespace OHOS {
 namespace Media {
 
 std::shared_ptr<AVBufferQueue> AVBufferQueue::Create(
-    uint32_t size, MemoryType type, const std::string& name)
+    uint32_t size, MemoryType type, const std::string& name, bool disableAlloc)
 {
     MEDIA_LOG_D("AVBufferQueue::Create size = %u, type = %u, name = %s",
                 size, static_cast<uint32_t>(type), name.c_str());
-    return std::make_shared<AVBufferQueueImpl>(size, type, name);
+    return std::make_shared<AVBufferQueueImpl>(size, type, name, disableAlloc);
 }
 
 std::shared_ptr<AVBufferQueue> AVBufferQueue::CreateAsSurfaceProducer(
@@ -104,10 +104,10 @@ sptr<AVBufferQueueConsumer> AVBufferQueueImpl::GetConsumer()
 }
 
 AVBufferQueueImpl::AVBufferQueueImpl(const std::string &name)
-    : AVBufferQueue(), name_(name), size_(0), memoryType_(MemoryType::UNKNOWN_MEMORY) {}
+    : AVBufferQueue(), name_(name), size_(0), memoryType_(MemoryType::UNKNOWN_MEMORY), disableAlloc_(false) {}
 
-AVBufferQueueImpl::AVBufferQueueImpl(uint32_t size, MemoryType type, const std::string &name)
-    : AVBufferQueue(), name_(name), size_(size), memoryType_(type)
+AVBufferQueueImpl::AVBufferQueueImpl(uint32_t size, MemoryType type, const std::string &name, bool disableAlloc)
+    : AVBufferQueue(), name_(name), size_(size), memoryType_(type), disableAlloc_(disableAlloc)
 {
     if (size_ > AVBUFFER_QUEUE_MAX_QUEUE_SIZE) {
         size_ = AVBUFFER_QUEUE_MAX_QUEUE_SIZE;
@@ -121,12 +121,14 @@ uint32_t AVBufferQueueImpl::GetQueueSize()
 
 Status AVBufferQueueImpl::SetQueueSize(uint32_t size)
 {
-    FALSE_RETURN_V(size > 0 && size < AVBUFFER_QUEUE_MAX_QUEUE_SIZE && size != size_,
+    FALSE_RETURN_V(size > 0 && size <= AVBUFFER_QUEUE_MAX_QUEUE_SIZE && size != size_,
                    Status::ERROR_INVALID_BUFFER_SIZE);
 
     if (size > size_) {
         size_ = size;
-        requestCondition.notify_all();
+        if (!disableAlloc_) {
+            requestCondition.notify_all();
+        }
     } else {
         std::lock_guard<std::mutex> lockGuard(queueMutex_);
         DeleteBuffers(size_ - size);
@@ -134,6 +136,13 @@ Status AVBufferQueueImpl::SetQueueSize(uint32_t size)
     }
 
     return Status::OK;
+}
+
+bool AVBufferQueueImpl::IsBufferInQueue(const std::shared_ptr<AVBuffer>& buffer)
+{
+    FALSE_RETURN_V(buffer != nullptr, false);
+    auto uniqueId = buffer->GetUniqueId();
+    return cachedBufferMap_.find(uniqueId) != cachedBufferMap_.end();
 }
 
 uint32_t AVBufferQueueImpl::GetCachedBufferCount() const

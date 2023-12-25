@@ -49,7 +49,7 @@ class AVBufferQueueConsumerImpl;
 class AVBufferQueueImpl : public AVBufferQueue, public std::enable_shared_from_this<AVBufferQueueImpl> {
 public:
     explicit AVBufferQueueImpl(const std::string &name);
-    AVBufferQueueImpl(uint32_t size, MemoryType type, const std::string &name);
+    AVBufferQueueImpl(uint32_t size, MemoryType type, const std::string &name, bool disableAlloc = false);
     ~AVBufferQueueImpl() override = default;
     AVBufferQueueImpl(const AVBufferQueueImpl&) = delete;
     AVBufferQueueImpl operator=(const AVBufferQueueImpl&) = delete;
@@ -65,6 +65,7 @@ public:
 
     uint32_t GetQueueSize() override;
     Status SetQueueSize(uint32_t size) override;
+    bool IsBufferInQueue(const std::shared_ptr<AVBuffer>& buffer) override;
 
     virtual Status RequestBuffer(std::shared_ptr<AVBuffer>& buffer,
                           const AVBufferConfig& config, int32_t timeoutMs);
@@ -109,6 +110,7 @@ protected:
 private:
     uint32_t size_;
     MemoryType memoryType_;
+    bool disableAlloc_;
 
     std::map<uint64_t, AVBufferElement> cachedBufferMap_;
 
