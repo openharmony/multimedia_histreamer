@@ -145,16 +145,21 @@ int Any::BaseTypesFromParcel(Any *operand, MessageParcel &parcel) noexcept
  * Get TypeName From function info.
  * Extract the Type name out of Function Info
  * @param functionInfo Function Info
- * Example: In windows with MEDIA_NO_OHOS define,
- * functionInfo will be “static constexpr std::string_view OHOS::Media::Any::GetTypeName()
- * [with T = bool; std::string_view = std::basic_string_view<char>]”
- * @return Name of Type T
+ * @return Name of Type T ,Such as <b>bool int float double std::vector<unsigned char></b> etc.
+ * @example In windows with MEDIA_NO_OHOS define,
+ * FunctionInfo will be like <br>
+ * static constexpr std::string_view OHOS::Media::Any::GetTypeName()
+ * [with T = <b>bool</b>; std::string_view = std::basic_string_view<char>] <br>
+ * with MEDIA_OHOS define, FunctionInfo will be like <br>
+ * static std::string_view OHOS::Media::Any::GetTypeName() [T = <b>std::vector<unsigned char></b>]  <br>
+ * For EnumType , FunctionInfo will be like <br>
+ * static std::string_view OHOS::Media::Any::GetTypeName() [T = <b>OHOS::Media::Plugins::VideoEncodeBitrateMode</b>]
  */
 std::string_view Any::GetTypeNameFromFunctionInfo(const char* functionInfo) noexcept
 {
     std::string_view stringInfo = functionInfo;
     std::string_view retType = "Unknown";
-    uint32_t beginIndex = stringInfo.find_first_of('=');
+    size_t beginIndex = stringInfo.find_first_of('=');
     if (beginIndex == std::string::npos) {
         MEDIA_LOG_E("GetTypeNameFromFunctionInfo failed. Function: " PUBLIC_LOG_S, stringInfo.data());
         return retType;
@@ -162,9 +167,9 @@ std::string_view Any::GetTypeNameFromFunctionInfo(const char* functionInfo) noex
         beginIndex += 2; // 2 表示右移两位
     }
 #ifdef MEDIA_OHOS
-    uint32_t endIndex = stringInfo.find_last_of(']');
+    size_t endIndex = stringInfo.find_last_of(']');
 #else
-    uint32_t endIndex = stringInfo.find_last_of(';');
+    size_t endIndex = stringInfo.find_last_of(';');
 #endif
     if (endIndex == std::string::npos) {
         MEDIA_LOG_E("GetTypeNameFromFunctionInfo find Type failed. Function: " PUBLIC_LOG_S, stringInfo.data());
