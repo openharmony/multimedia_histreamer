@@ -37,6 +37,7 @@ file(GLOB_RECURSE FOUNDATION_SRCS
         )
 ADD_DEFINITIONS(
         -DHST_ANY_WITH_NO_RTTI
+        -DMEDIA_NO_OHOS
 )
 #message(STATUS "ut ----------------")
 #message(${FOUNDATION_SRCS})
