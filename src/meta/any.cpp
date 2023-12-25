@@ -145,11 +145,12 @@ int Any::BaseTypesFromParcel(Any *operand, MessageParcel &parcel) noexcept
  * Get TypeName From function info.
  * Extract the Type name out of Function Info
  * @param functionInfo Function Info
- * Example: static constexpr std::string_view OHOS::Media::Any::GetTypeName()
- * [with T = bool; std::string_view = std::basic_string_view<char>]
+ * Example: In windows with MEDIA_NO_OHOS define,
+ * functionInfo will be “static constexpr std::string_view OHOS::Media::Any::GetTypeName()
+ * [with T = bool; std::string_view = std::basic_string_view<char>]”
  * @return Name of Type T
  */
-std::string_view Any::GetTypeNameFromFunctionInfo(const char* &functionInfo) noexcept
+std::string_view Any::GetTypeNameFromFunctionInfo(const char* functionInfo) noexcept
 {
     std::string_view stringInfo = functionInfo;
     std::string_view retType = "Unknown";

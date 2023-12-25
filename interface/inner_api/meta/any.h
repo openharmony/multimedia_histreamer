@@ -418,7 +418,7 @@ private:
     // returnValue : 0 -- success; 1 -- retry enum; 2 -- failed no retry
     static int BaseTypesFromParcel(Any *operand, MessageParcel& parcel) noexcept;
 
-    static std::string_view GetTypeNameFromFunctionInfo(const char* &functionInfo) noexcept;
+    static std::string_view GetTypeNameFromFunctionInfo(const char* functionInfo) noexcept;
 
     template <typename T>
     struct TrivialStackFunctionTable {
