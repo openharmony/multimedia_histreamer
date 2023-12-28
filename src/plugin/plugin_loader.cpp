@@ -71,6 +71,8 @@ std::shared_ptr<PluginLoader> PluginLoader::CheckSymbol(void* handler, const std
         std::string unregisterFuncName = "unregister_" + name;
         RegisterFunc registerFunc = nullptr;
         UnregisterFunc unregisterFunc = nullptr;
+        MEDIA_LOG_I("check symbol, dlopen registerFuncName " PUBLIC_LOG_S
+            ", unregisterFuncName: " PUBLIC_LOG_S, registerFuncName.c_str(), unregisterFuncName.c_str());
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
         registerFunc = (RegisterFunc)(::GetProcAddress((HMODULE)handler, registerFuncName.c_str()));
         unregisterFunc = (UnregisterFunc)(::GetProcAddress((HMODULE)handler, unregisterFuncName.c_str()));
