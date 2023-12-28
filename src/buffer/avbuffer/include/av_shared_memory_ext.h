@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Media {
 class AVSharedMemoryExt : public AVMemory {
 public:
-    explicit AVSharedMemoryExt();
+    AVSharedMemoryExt();
     ~AVSharedMemoryExt() override;
     uint8_t *GetAddr() override;
     MemoryType GetMemoryType() override;

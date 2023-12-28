@@ -107,7 +107,7 @@ public:
     std::shared_ptr<AVMemory> memory_;
 
 private:
-    explicit AVBuffer();
+    AVBuffer();
     Status Init(std::shared_ptr<AVAllocator> allocator, int32_t capacity = 0, int32_t align = 0);
     Status Init(uint8_t *ptr, int32_t capacity, int32_t size = 0);
 
@@ -227,7 +227,7 @@ public:
     virtual sptr<SurfaceBuffer> GetSurfaceBuffer();
 
 protected:
-    explicit AVMemory();
+    AVMemory();
     virtual Status Init();
     virtual Status Init(MessageParcel &parcel);
     virtual Status InitSurfaceBuffer(MessageParcel &parcel);

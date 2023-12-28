@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Media {
 class AVHardwareMemory : public AVMemory {
 public:
-    explicit AVHardwareMemory();
+    AVHardwareMemory();
     ~AVHardwareMemory() override;
     MemoryType GetMemoryType() override;
     int32_t GetFileDescriptor() override;

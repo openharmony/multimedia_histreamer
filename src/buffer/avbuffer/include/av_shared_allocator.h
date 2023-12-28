@@ -35,7 +35,7 @@ public:
     MemoryFlag GetMemFlag();
 
 private:
-    explicit AVSharedAllocator();
+    AVSharedAllocator();
 
     MemoryFlag memFlag_;
 };

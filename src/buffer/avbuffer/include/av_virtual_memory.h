@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Media {
 class AVVirtualMemory : public AVMemory {
 public:
-    explicit AVVirtualMemory();
+    AVVirtualMemory();
     ~AVVirtualMemory() override;
     MemoryType GetMemoryType() override;
 
