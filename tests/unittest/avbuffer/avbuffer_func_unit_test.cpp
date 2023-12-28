@@ -32,7 +32,7 @@ namespace Media {
 namespace AVBufferUT {
 /**
  * @tc.name: AVBuffer_Config_001
- * @tc.desc: test AVBufferConfig
+ * @tc.desc: compare config structs of different type
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_001, TestSize.Level1)
@@ -46,7 +46,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_001, TestSize.Level1)
 
 /**
  * @tc.name: AVBuffer_Config_002
- * @tc.desc: test AVBufferConfig
+ * @tc.desc: compare config structs of dmabuffer
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_002, TestSize.Level1)
@@ -87,7 +87,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_002, TestSize.Level1)
 
 /**
  * @tc.name: AVBuffer_Config_003
- * @tc.desc: test AVBufferConfig
+ * @tc.desc: compare config structs of shared memory
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_003, TestSize.Level1)
@@ -134,7 +134,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_003, TestSize.Level1)
 
 /**
  * @tc.name: AVBuffer_Config_004
- * @tc.desc: test AVBufferConfig
+ * @tc.desc: compare config structs of surface memory
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_004, TestSize.Level1)
@@ -160,7 +160,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_004, TestSize.Level1)
 
 /**
  * @tc.name: AVBuffer_Config_005
- * @tc.desc: test AVBufferConfig
+ * @tc.desc: compare config structs of virual memory
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_005, TestSize.Level1)
@@ -207,7 +207,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_005, TestSize.Level1)
 
 /**
  * @tc.name: AVBuffer_Config_006
- * @tc.desc: test AVBufferConfig
+ * @tc.desc: marshalled and unmarshalled config struct
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Config_006, TestSize.Level1)
@@ -276,10 +276,10 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_CreateWithInvalid_002, TestSize.Level1)
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_CreateWithInvalid_003, TestSize.Level1)
 {
     allocator_ = AVAllocatorFactory::CreateVirtualAllocator();
-    buffer_ = AVBuffer::CreateAVBuffer(allocator_, -1, MemoryFlag::MEMORY_READ_ONLY);
+    buffer_ = AVBuffer::CreateAVBuffer(allocator_, -1);
     EXPECT_EQ(nullptr, buffer_);
 
-    buffer_ = AVBuffer::CreateAVBuffer(allocator_, 0, MemoryFlag::MEMORY_READ_ONLY);
+    buffer_ = AVBuffer::CreateAVBuffer(allocator_, 0);
     EXPECT_NE(nullptr, buffer_);
 }
 
@@ -310,7 +310,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_CreateWithInvalid_004, TestSize.Level1)
 
 /**
  * @tc.name: AVBuffer_Create_Local_SharedMemory_001
- * @tc.desc: create local shared memory
+ * @tc.desc: create local shared memory with allocator and align_ = 2
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SharedMemory_001, TestSize.Level1)
@@ -333,7 +333,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SharedMemory_001, TestSize
 
 /**
  * @tc.name: AVBuffer_Create_Local_SharedMemory_002
- * @tc.desc: create local shared memory and GetCapacity
+ * @tc.desc: create local shared memory with allocator
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SharedMemory_002, TestSize.Level1)
@@ -350,7 +350,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SharedMemory_002, TestSize
 
 /**
  * @tc.name: AVBuffer_Create_Local_SharedMemory_003
- * @tc.desc: create local shared memory and GetCapacity
+ * @tc.desc: create local shared memory with config
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SharedMemory_003, TestSize.Level1)
@@ -372,7 +372,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SharedMemory_003, TestSize
 
 /**
  * @tc.name: AVBuffer_SharedMemory_GetConfig_001
- * @tc.desc: create local shared memory and GetConfig
+ * @tc.desc: get avbuffer's config
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_GetConfig_001, TestSize.Level1)
@@ -391,7 +391,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_GetConfig_001, TestSize.Le
 
 /**
  * @tc.name: AVBuffer_Create_Remote_SharedMemory_001
- * @tc.desc: create remote shared memory
+ * @tc.desc: create avbuffer of shared memory by reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Remote_SharedMemory_001, TestSize.Level1)
@@ -416,7 +416,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Remote_SharedMemory_001, TestSiz
 
 /**
  * @tc.name: AVBuffer_SharedMemory_SetParams_001
- * @tc.desc: shared memory set params
+ * @tc.desc: set and get parameters
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_SetParams_001, TestSize.Level1)
@@ -431,7 +431,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_SetParams_001, TestSize.Le
 
 /**
  * @tc.name: AVBuffer_SharedMemory_SetParams_002
- * @tc.desc: shared memory set params
+ * @tc.desc: set and get parameters after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_SetParams_002, TestSize.Level1)
@@ -461,7 +461,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_WriteAndRead_001, TestSize
 
 /**
  * @tc.name: AVBuffer_SharedMemory_WriteAndRead_002
- * @tc.desc: shared memory write and read
+ * @tc.desc: shared memory write and read after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_WriteAndRead_002, TestSize.Level1)
@@ -476,7 +476,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_WriteAndRead_002, TestSize
 
 /**
  * @tc.name: AVBuffer_SharedMemory_WriteAndRead_003
- * @tc.desc: shared memory write and read
+ * @tc.desc: shared memory write and read with valid position after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_WriteAndRead_003, TestSize.Level1)
@@ -491,7 +491,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_WriteAndRead_003, TestSize
 
 /**
  * @tc.name: AVBuffer_SharedMemory_WriteAndRead_004
- * @tc.desc: shared memory write and read
+ * @tc.desc: shared memory write and read with invalid position after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_WriteAndRead_004, TestSize.Level1)
@@ -521,7 +521,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_GetCapacity_001, TestSize.
 
 /**
  * @tc.name: AVBuffer_SharedMemory_GetCapacity_002
- * @tc.desc: shared memory get capacity
+ * @tc.desc: shared memory get capacity after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_GetCapacity_002, TestSize.Level1)
@@ -554,7 +554,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_CheckDataSize_001, TestSiz
 
 /**
  * @tc.name: AVBuffer_SharedMemory_CheckDataSize_002
- * @tc.desc: shared memory check dataSize
+ * @tc.desc: shared memory check dataSize after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_CheckDataSize_002, TestSize.Level1)
@@ -584,7 +584,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_GetMemoryType_001, TestSiz
 
 /**
  * @tc.name: AVBuffer_SharedMemory_GetMemoryType_002
- * @tc.desc: shared memory get memory type
+ * @tc.desc: shared memory get memory type after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_GetMemoryType_002, TestSize.Level1)
@@ -617,7 +617,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_GetFileDescriptor_001, Tes
 
 /**
  * @tc.name: AVBuffer_SharedMemory_GetFileDescriptor_002
- * @tc.desc: shared memory get memory file descriptor
+ * @tc.desc: shared memory get memory file descriptor after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_GetFileDescriptor_002, TestSize.Level1)
@@ -653,7 +653,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_Reset_001, TestSize.Level1
 
 /**
  * @tc.name: AVBuffer_SharedMemory_Reset_002
- * @tc.desc: shared memory reset
+ * @tc.desc: shared memory reset after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_Reset_002, TestSize.Level1)
@@ -690,7 +690,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SharedMemory_ReadFromMessageParcel_001,
 
 /**
  * @tc.name: AVBuffer_Create_Local_SurfaceMemory_001
- * @tc.desc: create local surface memory
+ * @tc.desc: create avbuffer of surface memory with allocator
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SurfaceMemory_001, TestSize.Level1)
@@ -709,7 +709,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SurfaceMemory_001, TestSiz
 
 /**
  * @tc.name: AVBuffer_Create_Local_SurfaceMemory_002
- * @tc.desc: create local surface memory by parcel
+ * @tc.desc: create avbuffer of surface memory with parcel getting from SurfaceBuffer
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SurfaceMemory_002, TestSize.Level1)
@@ -726,7 +726,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SurfaceMemory_002, TestSiz
 
 /**
  * @tc.name: AVBuffer_Create_Local_SurfaceMemory_003
- * @tc.desc: create local surface memory
+ * @tc.desc: create avbuffer of surface memory with config struct
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SurfaceMemory_003, TestSize.Level1)
@@ -743,7 +743,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_SurfaceMemory_003, TestSiz
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_GetConfig_001
- * @tc.desc: create local surface memory and GetConfig
+ * @tc.desc: create local surface memory with allocator, and get config
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetConfig_001, TestSize.Level1)
@@ -761,7 +761,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetConfig_001, TestSize.L
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_GetConfig_002
- * @tc.desc: create local surface memory and GetConfig
+ * @tc.desc: create local surface memory with config struct, and get config
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetConfig_002, TestSize.Level1)
@@ -775,7 +775,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetConfig_002, TestSize.L
 
 /**
  * @tc.name: AVBuffer_Create_Remote_SurfaceMemory_001
- * @tc.desc: create remote surface memory
+ * @tc.desc: create avbuffer of surface memory by reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Remote_SurfaceMemory_001, TestSize.Level1)
@@ -795,7 +795,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Remote_SurfaceMemory_001, TestSi
 
 /**
  * @tc.name: AVBuffer_Create_Remote_SurfaceMemory_002
- * @tc.desc: create remote surface memory by parcel
+ * @tc.desc: create avbuffer of surface memory by reading parcel getting from SurfaceBuffer
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Remote_SurfaceMemory_002, TestSize.Level1)
@@ -815,7 +815,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Remote_SurfaceMemory_002, TestSi
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_SetParams_001
- * @tc.desc: surface memory set params
+ * @tc.desc: surface memory get and set params
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_001, TestSize.Level1)
@@ -829,7 +829,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_001, TestSize.L
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_SetParams_002
- * @tc.desc: surface memory set params
+ * @tc.desc: surface memory get and set params after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_002, TestSize.Level1)
@@ -843,7 +843,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_002, TestSize.L
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_SetParams_003
- * @tc.desc: surface memory set params
+ * @tc.desc: surface memory get and set params
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_003, TestSize.Level1)
@@ -857,7 +857,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_003, TestSize.L
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_SetParams_004
- * @tc.desc: surface memory set params
+ * @tc.desc: surface memory get and set params after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_SetParams_004, TestSize.Level1)
@@ -885,7 +885,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_001, TestSiz
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_WriteAndRead_002
- * @tc.desc: surface memory write and read
+ * @tc.desc: surface memory write and read after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_002, TestSize.Level1)
@@ -899,7 +899,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_002, TestSiz
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_WriteAndRead_003
- * @tc.desc: surface memory write and read
+ * @tc.desc: surface memory write and read with valid position after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_003, TestSize.Level1)
@@ -913,7 +913,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_003, TestSiz
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_WriteAndRead_004
- * @tc.desc: surface memory write and read
+ * @tc.desc: surface memory write and read with invalid position after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_004, TestSize.Level1)
@@ -927,7 +927,8 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_004, TestSiz
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_WriteAndRead_005
- * @tc.desc: surface memory write and read
+ * @tc.desc: 1. create surface memory with parcel getting from SurfaceBuffer
+ *           2. surface memory write and read
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_005, TestSize.Level1)
@@ -941,7 +942,8 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_005, TestSiz
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_WriteAndRead_006
- * @tc.desc: surface memory write and read
+ * @tc.desc: 1. create surface memory with parcel getting from SurfaceBuffer
+ *           2. surface memory write and read after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_006, TestSize.Level1)
@@ -955,7 +957,8 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_006, TestSiz
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_WriteAndRead_007
- * @tc.desc: surface memory write and read
+ * @tc.desc: 1. create surface memory with parcel getting from SurfaceBuffer
+ *           2. surface memory write and read with valid position after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_007, TestSize.Level1)
@@ -969,7 +972,8 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_007, TestSiz
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_WriteAndRead_008
- * @tc.desc: surface memory write and read
+ * @tc.desc: 1. create surface memory with parcel getting from SurfaceBuffer
+ *           2. surface memory write and read with invalid position after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_WriteAndRead_008, TestSize.Level1)
@@ -995,7 +999,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetCapacity_001, TestSize
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_GetCapacity_002
- * @tc.desc: surface memory get capacity
+ * @tc.desc: surface memory get capacity after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetCapacity_002, TestSize.Level1)
@@ -1010,7 +1014,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetCapacity_002, TestSize
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_GetCapacity_003
- * @tc.desc: surface memory get capacity
+ * @tc.desc: surface memory get capacity with parcel getting from SurfaceBuffer
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetCapacity_003, TestSize.Level1)
@@ -1022,7 +1026,8 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetCapacity_003, TestSize
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_GetCapacity_004
- * @tc.desc: surface memory get capacity
+ * @tc.desc: 1. create surface memory with parcel getting from SurfaceBuffer
+ *           2. surface memory get capacity after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetCapacity_004, TestSize.Level1)
@@ -1051,7 +1056,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_CheckDataSize_001, TestSi
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_CheckDataSize_002
- * @tc.desc: surface memory check dataSize
+ * @tc.desc: surface memory check dataSize after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_CheckDataSize_002, TestSize.Level1)
@@ -1065,7 +1070,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_CheckDataSize_002, TestSi
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_CheckDataSize_003
- * @tc.desc: surface memory check dataSize
+ * @tc.desc: surface memory check dataSize with parcel getting from SurfaceBuffer
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_CheckDataSize_003, TestSize.Level1)
@@ -1079,7 +1084,8 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_CheckDataSize_003, TestSi
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_CheckDataSize_004
- * @tc.desc: surface memory check dataSize
+ * @tc.desc: 1. create surface memory with parcel getting from SurfaceBuffer
+ *           2. surface memory check dataSize after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_CheckDataSize_004, TestSize.Level1)
@@ -1107,7 +1113,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetMemoryType_001, TestSi
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_GetMemoryType_002
- * @tc.desc: surface memory get memory type
+ * @tc.desc: surface memory get memory type after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetMemoryType_002, TestSize.Level1)
@@ -1124,7 +1130,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetMemoryType_002, TestSi
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_GetMemoryType_003
- * @tc.desc: surface memory get memory type
+ * @tc.desc: surface memory get memory type with parcel getting from SurfaceBuffer
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetMemoryType_003, TestSize.Level1)
@@ -1138,7 +1144,8 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetMemoryType_003, TestSi
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_GetMemoryType_004
- * @tc.desc: surface memory get memory type
+ * @tc.desc: 1. create surface memory with parcel getting from SurfaceBuffer
+ *           2. surface memory get memory type after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetMemoryType_004, TestSize.Level1)
@@ -1169,7 +1176,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetFileDescriptor_001, Te
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_GetFileDescriptor_002
- * @tc.desc: surface memory get memory file descriptor
+ * @tc.desc: surface memory get memory file descriptor after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetFileDescriptor_002, TestSize.Level1)
@@ -1186,7 +1193,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetFileDescriptor_002, Te
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_GetFileDescriptor_003
- * @tc.desc: surface memory get memory file descriptor
+ * @tc.desc: surface memory get memory file descriptor with parcel getting from SurfaceBuffer
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetFileDescriptor_003, TestSize.Level1)
@@ -1200,7 +1207,8 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetFileDescriptor_003, Te
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_GetFileDescriptor_004
- * @tc.desc: surface memory get memory file descriptor
+ * @tc.desc: 1. create surface memory with parcel getting from SurfaceBuffer
+ *           2. surface memory get memory file descriptor after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_GetFileDescriptor_004, TestSize.Level1)
@@ -1234,7 +1242,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_Reset_001, TestSize.Level
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_Reset_002
- * @tc.desc: surface memory reset
+ * @tc.desc: surface memory reset after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_Reset_002, TestSize.Level1)
@@ -1256,7 +1264,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_Reset_002, TestSize.Level
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_Reset_003
- * @tc.desc: surface memory reset
+ * @tc.desc: surface memory reset with parcel getting from SurfaceBuffer
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_Reset_003, TestSize.Level1)
@@ -1273,7 +1281,8 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_Reset_003, TestSize.Level
 
 /**
  * @tc.name: AVBuffer_SurfaceMemory_Reset_004
- * @tc.desc: surface memory reset
+ * @tc.desc: 1. create surface memory with parcel getting from SurfaceBuffer
+ *           2. surface memory reset after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_SurfaceMemory_Reset_004, TestSize.Level1)
@@ -1331,7 +1340,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_HardwareMemory_001, TestSi
 
 /**
  * @tc.name: AVBuffer_Create_Local_HardwareMemory_002
- * @tc.desc: create local hardware memory
+ * @tc.desc: create local hardware memory with config struct
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_HardwareMemory_002, TestSize.Level1)
@@ -1350,7 +1359,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_HardwareMemory_002, TestSi
 
 /**
  * @tc.name: AVBuffer_HardwareMemory_GetConfig_001
- * @tc.desc: create local hardware memory and GetConfig
+ * @tc.desc: create local hardware memory, and get config
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_GetConfig_001, TestSize.Level1)
@@ -1367,7 +1376,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_GetConfig_001, TestSize.
 
 /**
  * @tc.name: AVBuffer_Create_Remote_HardwareMemory_001
- * @tc.desc: create remote hardware memory
+ * @tc.desc: create remote hardware memory after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Remote_HardwareMemory_001, TestSize.Level1)
@@ -1407,7 +1416,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_SetParams_001, TestSize.
 
 /**
  * @tc.name: AVBuffer_HardwareMemory_SetParams_002
- * @tc.desc: hardware memory set params
+ * @tc.desc: hardware memory set params after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_SetParams_002, TestSize.Level1)
@@ -1437,7 +1446,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_WriteAndRead_001, TestSi
 
 /**
  * @tc.name: AVBuffer_HardwareMemory_WriteAndRead_002
- * @tc.desc: hardware memory write and read
+ * @tc.desc: hardware memory write and read after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_WriteAndRead_002, TestSize.Level1)
@@ -1452,7 +1461,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_WriteAndRead_002, TestSi
 
 /**
  * @tc.name: AVBuffer_HardwareMemory_WriteAndRead_003
- * @tc.desc: hardware memory write and read
+ * @tc.desc: hardware memory write and read with valid position after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_WriteAndRead_003, TestSize.Level1)
@@ -1467,7 +1476,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_WriteAndRead_003, TestSi
 
 /**
  * @tc.name: AVBuffer_HardwareMemory_WriteAndRead_004
- * @tc.desc: hardware memory write and read
+ * @tc.desc: hardware memory write and read with invalid position after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_WriteAndRead_004, TestSize.Level1)
@@ -1497,7 +1506,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_GetCapacity_001, TestSiz
 
 /**
  * @tc.name: AVBuffer_HardwareMemory_GetCapacity_002
- * @tc.desc: hardware memory get capacity
+ * @tc.desc: hardware memory get capacity after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_GetCapacity_002, TestSize.Level1)
@@ -1530,7 +1539,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_CheckDataSize_001, TestS
 
 /**
  * @tc.name: AVBuffer_HardwareMemory_CheckDataSize_002
- * @tc.desc: hardware memory check dataSize
+ * @tc.desc: hardware memory check dataSize after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_CheckDataSize_002, TestSize.Level1)
@@ -1560,7 +1569,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_GetMemoryType_001, TestS
 
 /**
  * @tc.name: AVBuffer_HardwareMemory_GetMemoryType_002
- * @tc.desc: hardware memory get memory type
+ * @tc.desc: hardware memory get memory type after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_GetMemoryType_002, TestSize.Level1)
@@ -1593,7 +1602,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_GetFileDescriptor_001, T
 
 /**
  * @tc.name: AVBuffer_HardwareMemory_GetFileDescriptor_002
- * @tc.desc: hardware memory get file descriptor
+ * @tc.desc: hardware memory get file descriptor after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_GetFileDescriptor_002, TestSize.Level1)
@@ -1629,7 +1638,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_Reset_001, TestSize.Leve
 
 /**
  * @tc.name: AVBuffer_HardwareMemory_Reset_002
- * @tc.desc: hardware memory reset
+ * @tc.desc: hardware memory reset after reading parcel
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_HardwareMemory_Reset_002, TestSize.Level1)
@@ -1685,7 +1694,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_VirtualMemory_001, TestSiz
 
 /**
  * @tc.name: AVBuffer_Create_Local_VirtualMemory_002
- * @tc.desc: create local virtual memory
+ * @tc.desc: create local virtual memory with no parameters
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_VirtualMemory_002, TestSize.Level1)
@@ -1711,7 +1720,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_VirtualMemory_002, TestSiz
 
 /**
  * @tc.name: AVBuffer_Create_Local_VirtualMemory_003
- * @tc.desc: create local virtual memory
+ * @tc.desc: create local virtual memory with pointer
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_VirtualMemory_003, TestSize.Level1)
@@ -1740,7 +1749,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_VirtualMemory_003, TestSiz
 
 /**
  * @tc.name: AVBuffer_Create_Local_VirtualMemory_004
- * @tc.desc: create local virtual memory
+ * @tc.desc: create local virtual memory with config struct
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_VirtualMemory_004, TestSize.Level1)
@@ -1759,7 +1768,7 @@ HWTEST_F(AVBufferInnerUnitTest, AVBuffer_Create_Local_VirtualMemory_004, TestSiz
 
 /**
  * @tc.name: AVBuffer_VirtualMemory_GetConfig_001
- * @tc.desc: create local virtual memory and GetConfig
+ * @tc.desc: create local virtual memory, and get config
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferInnerUnitTest, AVBuffer_VirtualMemory_GetConfig_001, TestSize.Level1)

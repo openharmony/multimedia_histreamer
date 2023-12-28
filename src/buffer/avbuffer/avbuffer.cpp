@@ -20,7 +20,6 @@
 #include "avbuffer_utils.h"
 #include "common/log.h"
 #include "common/status.h"
-#include "meta/meta.h"
 #include "surface_buffer.h"
 #include "surface_type.h"
 #include "unistd.h"

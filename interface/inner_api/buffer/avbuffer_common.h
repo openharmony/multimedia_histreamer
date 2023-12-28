@@ -28,6 +28,7 @@
 
 #include <memory>
 #include <string>
+#include "meta/meta.h"
 
 namespace OHOS {
 class SurfaceBuffer;
@@ -37,7 +38,6 @@ struct BufferRequestConfig;
 
 namespace OHOS {
 namespace Media {
-class Meta;
 class AVMemory;
 constexpr int32_t INVALID_POSITION = -1;
 
@@ -106,7 +106,7 @@ using AVBufferConfig = struct AVBufferConfig {
     int32_t size = 0;
     int32_t align = 0;
     MemoryType memoryType = MemoryType::UNKNOWN_MEMORY;
-    MemoryFlag memoryFlag = MemoryFlag::MEMORY_READ_ONLY;
+    MemoryFlag memoryFlag = MemoryFlag::MEMORY_READ_WRITE;
     std::unique_ptr<struct BufferRequestConfig> surfaceBufferConfig;
     int32_t dmaFd = -1;   // to create dma buffer
     int32_t capacity = 0; // get from buffer
