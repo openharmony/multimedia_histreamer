@@ -15,6 +15,17 @@
 
 #ifndef MEDIA_FOUNDATION_META_H
 #define MEDIA_FOUNDATION_META_H
+
+#ifndef MEDIA_NO_OHOS
+#ifndef MEDIA_OHOS
+#define MEDIA_OHOS
+#endif
+#else
+#ifdef MEDIA_OHOS
+#undef MEDIA_OHOS
+#endif
+#endif
+
 #include <map>
 #include "meta/meta_key.h"
 #include "meta/audio_types.h"

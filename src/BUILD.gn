@@ -102,6 +102,8 @@ if (hst_is_standard_sys) {
       "$histreamer_root_dir/src/buffer/avsharedmemory/avsharedmemorybase.cpp",
     ]
 
+    sources += [ "$histreamer_root_dir/src/common/avsharedmemorypool.cpp" ]
+
     sources += [
       "$histreamer_root_dir/src/meta/any.cpp",
       "$histreamer_root_dir/src/meta/format.cpp",
