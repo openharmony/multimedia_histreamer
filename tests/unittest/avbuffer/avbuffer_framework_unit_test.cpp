@@ -33,7 +33,7 @@ namespace Media {
 namespace AVBufferUT {
 /**
  * @tc.name: AVBuffer_Create_001
- * @tc.desc: create buffer
+ * @tc.desc: create func test
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_Create_001, TestSize.Level1)
@@ -47,7 +47,7 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_Create_001, TestSize.Level1)
 
 /**
  * @tc.name: AVBuffer_GetAddr_001
- * @tc.desc: buffer get memory addr
+ * @tc.desc: buffer get memory addr func test
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_GetAddr_001, TestSize.Level1)
@@ -59,14 +59,41 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_GetAddr_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AVBuffer_GetAddr_002
+ * @tc.desc: Repeatedly getting memory addr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_GetAddr_002, TestSize.Level1)
+{
+    for (int32_t i = 0; i < TEST_LOOP_DEPTH; ++i) {
+        EXPECT_NE(nullptr, buffer_->GetAddr());
+    }
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->Destroy());
+    buffer_ = nullptr;
+}
+
+/**
  * @tc.name: AVBuffer_GetCapacity_001
- * @tc.desc: buffer get capacity
+ * @tc.desc: buffer get capacity func test
  * @tc.type: FUNC
  */
 HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_GetCapacity_001, TestSize.Level1)
 {
     EXPECT_EQ(MEMSIZE, buffer_->GetCapacity());
 
+    EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->Destroy());
+    buffer_ = nullptr;
+}
+/**
+ * @tc.name: AVBuffer_GetCapacity_002
+ * @tc.desc: Repeatedly getting capacity
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_GetCapacity_002, TestSize.Level1)
+{
+    for (int32_t i = 0; i < TEST_LOOP_DEPTH; ++i) {
+        EXPECT_EQ(MEMSIZE, buffer_->GetCapacity());
+    }
     EXPECT_EQ(static_cast<int32_t>(Status::OK), buffer_->Destroy());
     buffer_ = nullptr;
 }
@@ -232,6 +259,20 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_Capi_Destroy_003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AVBuffer_Capi_Create_And_Destroy_001
+ * @tc.desc: Repeatedly creating and destroying buffers
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_Capi_Create_And_Destroy_001, TestSize.Level1)
+{
+    for (int32_t i = 0; i < TEST_LOOP_DEPTH; ++i) {
+        auto buffer = OH_AVBuffer_Create(MEMSIZE);
+        ASSERT_NE(buffer, nullptr);
+        EXPECT_EQ(OH_AVBuffer_Destroy(buffer), AV_ERR_OK);
+    }
+}
+
+/**
  * @tc.name: AVBuffer_Capi_SetAndGetBufferAttr_001
  * @tc.desc: Set buffer attr with memory is not nullptr
  * @tc.type: FUNC
@@ -278,6 +319,32 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_Capi_SetAndGetBufferAttr_002, TestS
     EXPECT_EQ(getAttr.offset, 0);
     EXPECT_EQ(getAttr.pts, DEFAULT_PTS);
     EXPECT_EQ(getAttr.flags, DEFAULT_FLAG);
+}
+
+/**
+ * @tc.name: AVBuffer_Capi_SetAndGetBufferAttr_003
+ * @tc.desc: Repeatedly setting and getting buffer attr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_Capi_SetAndGetBufferAttr_003, TestSize.Level1)
+{
+    auto buffer = OH_AVBuffer_Create(MEMSIZE);
+    ASSERT_NE(buffer, nullptr);
+    for (int32_t i = 0; i < TEST_LOOP_DEPTH; ++i) {
+        OH_AVCodecBufferAttr attr;
+        attr.size = MEMSIZE;
+        attr.offset = DEFAULT_OFFSET;
+        attr.pts = DEFAULT_PTS;
+        attr.flags = DEFAULT_FLAG;
+        EXPECT_EQ(OH_AVBuffer_SetBufferAttr(buffer, &attr), AV_ERR_OK);
+
+        OH_AVCodecBufferAttr getAttr;
+        EXPECT_EQ(AV_ERR_OK, OH_AVBuffer_GetBufferAttr(buffer, &getAttr));
+        EXPECT_EQ(getAttr.size, MEMSIZE);
+        EXPECT_EQ(getAttr.offset, DEFAULT_OFFSET);
+        EXPECT_EQ(getAttr.pts, DEFAULT_PTS);
+        EXPECT_EQ(getAttr.flags, DEFAULT_FLAG);
+    }
 }
 
 /**
@@ -613,6 +680,28 @@ HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_Capi_GetNativeBuffer_001, TestSize.
     auto nativeBuffer = OH_AVBuffer_GetNativeBuffer(buf);
     EXPECT_NE(nullptr, nativeBuffer);
     EXPECT_EQ(0, OH_NativeBuffer_Unreference(nativeBuffer));
+    delete buf;
+}
+
+/**
+ * @tc.name: AVBuffer_Capi_GetNativeBuffer_002
+ * @tc.desc: get native buffer repeat
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVBufferFrameworkUnitTest, AVBuffer_Capi_GetNativeBuffer_002, TestSize.Level1)
+{
+    auto allocator = AVAllocatorFactory::CreateSurfaceAllocator(DEFAULT_CONFIG);
+    ASSERT_NE(nullptr, allocator);
+    auto surfaceAVBuffer = AVBuffer::CreateAVBuffer(allocator, 0, 0);
+    ASSERT_NE(nullptr, surfaceAVBuffer);
+    ASSERT_NE(nullptr, surfaceAVBuffer->memory_->GetAddr());
+
+    struct OH_AVBuffer *buf = new (std::nothrow) OH_AVBuffer(surfaceAVBuffer);
+    for (int32_t i = 0; i < TEST_LOOP_DEPTH; ++i) {
+        auto nativeBuffer = OH_AVBuffer_GetNativeBuffer(buf);
+        EXPECT_NE(nullptr, nativeBuffer);
+        EXPECT_EQ(0, OH_NativeBuffer_Unreference(nativeBuffer));
+    }
     delete buf;
 }
 #endif

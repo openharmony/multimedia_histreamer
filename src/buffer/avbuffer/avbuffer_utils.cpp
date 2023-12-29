@@ -17,10 +17,6 @@
 #include <unordered_map>
 #include "buffer/avbuffer.h"
 #include "common/log.h"
-#include "cpp_ext/type_cast_ext.h"
-#include "meta/any.h"
-#include "meta/meta.h"
-#include "meta/meta_key.h"
 #include "surface_type.h"
 
 namespace {

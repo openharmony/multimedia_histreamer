@@ -33,7 +33,7 @@ public:
     MemoryType GetMemoryType() override;
 
 private:
-    explicit AVVirtualAllocator();
+    AVVirtualAllocator();
 };
 } // namespace Media
 } // namespace OHOS

@@ -34,7 +34,7 @@ public:
     MemoryType GetMemoryType() override;
 
 private:
-    explicit AVSurfaceAllocator();
+    AVSurfaceAllocator();
 
     BufferRequestConfig config_;
 };

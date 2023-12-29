@@ -18,6 +18,7 @@ ohos_ndk_headers("native_media_core_header") {
   dest_dir = "$ndk_headers_out_dir/multimedia/player_framework"
   sources = [
     "$histreamer_root_dir/interface/kits/c/native_avbuffer.h",
+    "$histreamer_root_dir/interface/kits/c/native_avbuffer_info.h",
     "$histreamer_root_dir/interface/kits/c/native_averrors.h",
     "$histreamer_root_dir/interface/kits/c/native_avformat.h",
     "$histreamer_root_dir/interface/kits/c/native_avmemory.h",
@@ -33,6 +34,7 @@ ohos_ndk_library("libnative_media_core") {
   system_capability = "SystemCapability.Multimedia.Media.Core"
   system_capability_headers = [
     "multimedia/player_framework/native_avbuffer.h",
+    "multimedia/player_framework/native_avbuffer_info.h",
     "multimedia/player_framework/native_averrors.h",
     "multimedia/player_framework/native_avformat.h",
     "multimedia/player_framework/native_avmemory.h",

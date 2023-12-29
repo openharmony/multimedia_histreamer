@@ -34,7 +34,7 @@ public:
     int32_t GetFileDescriptor();
 
 private:
-    explicit AVHardwareAllocator();
+    AVHardwareAllocator();
     Status MapMemoryAddr();
 
     int32_t fd_;

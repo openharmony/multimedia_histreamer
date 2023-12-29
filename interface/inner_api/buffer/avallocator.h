@@ -28,8 +28,8 @@
 
 #include <memory>
 #include <string>
-#include "refbase.h"
 #include "buffer/avbuffer_common.h"
+#include "refbase.h"
 
 namespace OHOS {
 struct BufferRequestConfig;
@@ -68,7 +68,7 @@ public:
     virtual bool Free(void *ptr) = 0;
 
 protected:
-    explicit AVAllocator(){};
+    AVAllocator(){};
 };
 
 class __attribute__((visibility("default"))) AVAllocatorFactory {

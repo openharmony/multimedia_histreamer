@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Media {
 class AVSurfaceMemory : public AVMemory {
 public:
-    explicit AVSurfaceMemory();
+    AVSurfaceMemory();
     ~AVSurfaceMemory() override;
     uint8_t *GetAddr() override;
     MemoryType GetMemoryType() override;
